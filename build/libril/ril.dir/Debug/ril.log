@@ -1,0 +1,13 @@
+﻿Build started 05/10/2014 12:32:04.
+     1>Project "C:\work\uoswork\visr\build\libril\ril.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:\work\uoswork\visr\src /I"C:\work\uoswork\visr\src\libril\($PROJECT_SOURCE_DIR)\libefl" /Zi /nologo /W3 /WX- /Od /Ob0 /D WIN32 /D _WINDOWS /D _DEBUG /D "CMAKE_INTDIR=\"Debug\"" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Fo"ril.dir\Debug\\" /Fd"ril.dir\Debug\vc120.pdb" /Gd /TP /errorReport:prompt C:\work\uoswork\visr\src\libril\communication_area.cpp
+         communication_area.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\Lib.exe /OUT:"C:\work\uoswork\visr\build\libril\Debug\ril.lib" /NOLOGO /MACHINE:X64 ril.dir\Debug\communication_area.obj
+         ril.vcxproj -> C:\work\uoswork\visr\build\libril\Debug\ril.lib
+     1>Done Building Project "C:\work\uoswork\visr\build\libril\ril.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.44

@@ -1,0 +1,14 @@
+﻿Build started 05/10/2014 10:24:33.
+     1>Project "C:\work\uoswork\visr\build\librrl\rrl.vcxproj" on node 4 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I"C:\work\uoswork\visr\src\($PROJECT_SOURCE_DIR)\libefl" /I"C:\work\uoswork\visr\src\($PROJECT_SOURCE_DIR)\libril" /I"C:\work\uoswork\visr\src\librrl\($PROJECT_SOURCE_DIR)\libril" /nologo /W1 /WX- /O2 /Ob2 /D NDEBUG /D "CMAKE_INTDIR=\"Release\"" /D _MBCS /Gm- /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"rrl.dir\Release\\" /Fd"rrl.dir\Release\vc120.pdb" /Gd /TP /errorReport:prompt  -std=c++11 C:\work\uoswork\visr\src\librrl\portaudio_interface.cpp
+     1>cl : Command line warning D9002: ignoring unknown option '-std=c++11'
+         portaudio_interface.cpp
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\Lib.exe /OUT:"C:\work\uoswork\visr\build\librrl\Release\rrl.lib" /NOLOGO /MACHINE:X64 rrl.dir\Release\portaudio_interface.obj
+         rrl.vcxproj -> C:\work\uoswork\visr\build\librrl\Release\rrl.lib
+     1>Done Building Project "C:\work\uoswork\visr\build\librrl\rrl.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.50

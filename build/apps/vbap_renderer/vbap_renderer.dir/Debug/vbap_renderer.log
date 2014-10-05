@@ -1,0 +1,10 @@
+﻿Build started 05/10/2014 12:32:05.
+     1>Project "C:\work\uoswork\visr\build\apps\vbap_renderer\vbap_renderer.vcxproj" on node 3 (Build target(s)).
+     1>Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\work\uoswork\visr\build\apps\vbap_renderer\Debug\vbap_renderer.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib ..\..\libefl\Debug\efl.lib ..\..\libril\Debug\ril.lib ..\..\librrl\Debug\rrl.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/work/uoswork/visr/build/apps/vbap_renderer/Debug/vbap_renderer.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/work/uoswork/visr/build/apps/vbap_renderer/Debug/vbap_renderer.lib" /MACHINE:X64  /machine:x64 /debug vbap_renderer.dir\Debug\main.obj
+         vbap_renderer.vcxproj -> C:\work\uoswork\visr\build\apps\vbap_renderer\Debug\vbap_renderer.exe
+     1>Done Building Project "C:\work\uoswork\visr\build\apps\vbap_renderer\vbap_renderer.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.19
