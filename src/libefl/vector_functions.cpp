@@ -4,14 +4,48 @@
 
 #include "alignment.hpp"
 
+#define _SCL_SECURE_NO_WARNINGS 1
+
 #include <algorithm>
-#include <ciso646> // should not be necessary for c++11, but MSVC needs it.
+#include <ciso646> // should not be necessary for c++11, but MSVC needs it somehow
 #include <functional>
 
 namespace visr
 {
 namespace efl
 {
+
+template <typename T>
+ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( dest, alignment ) ) return alignmentError;
+  std::fill( &dest[0], &dest[0] + numElements, static_cast<T>(0) );
+  return noError;
+}
+template ErrorCode vectorZero<float>( float * const, std::size_t, std::size_t );
+template ErrorCode vectorZero<double>( double * const, std::size_t, std::size_t );
+
+
+template <typename T>
+ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( dest, alignment ) ) return alignmentError;
+  std::fill( &dest[0], &dest[0] + numElements, value );
+  return noError;
+}
+template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
+
+template <typename T>
+ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( source, alignment ) ) return alignmentError;
+  if( not checkAlignment( dest, alignment ) ) return alignmentError;
+  std::copy( &source[0], &source[0] + numElements, &dest[0] );
+  return noError;
+}
+template ErrorCode vectorCopy<float>( float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorCopy<double>( double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,

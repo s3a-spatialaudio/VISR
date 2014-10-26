@@ -12,6 +12,15 @@ namespace visr
 namespace efl
 {
 
+template <typename T>
+ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+
+template <typename T>
+ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+
+template <typename T>
+ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,
          T const * const op2,

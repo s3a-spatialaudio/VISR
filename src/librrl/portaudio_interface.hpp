@@ -10,12 +10,22 @@ namespace visr
 namespace rrl
 {
 
+
+
 class PortaudioInterface: public ril::AudioInterface
 {
 public:
+  using Base = ril::AudioInterface;
+
   PortaudioInterface();
 
   ~PortaudioInterface( );
+
+  /*virtual*/ bool registerCallback( AudioCallback callback );
+
+  /*virtual*/ bool unregisterCallback( AudioCallback audioCallback );
+private:
+  Base::AudioCallback mCallback;
 };
 
 } // namespace rrl

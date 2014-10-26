@@ -1,4 +1,4 @@
-# Copyright Institute of Sound and Vibratioin Research - All rights reserved
+# Copyright Institute of Sound and Vibration Research - All rights reserved
 
 # Top-level build configuration for project VISceRal
 
@@ -20,6 +20,16 @@ if(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 endif()
 
+SET( CMAKE_CXX_FLAGS, "${PROJECT_SOURCE_DIR}" )
+
+
+MESSAGE( STATUS "FLAGS= ${CMAKE_CXX_FLAGS}" )
+MESSAGE( STATUS "PATH= ${CMAKE_MODULE_PATH}" )
+MESSAGE( STATUS "dir: ${CMAKE_SOURCE_DIR}" )
+
+# FIND_LIBRARY( portaudio REQUIRED )
+
+
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR} )
@@ -32,6 +42,9 @@ ADD_SUBDIRECTORY( libril )
 
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )
+
+# Rendering component library
+ADD_SUBDIRECTORY( librcl )
 
 # Hold applications in a separate subdirectory
 ADD_SUBDIRECTORY( apps )

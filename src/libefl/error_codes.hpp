@@ -15,7 +15,12 @@ enum ErrorCode
   arithmeticError = 2
   // to be continued
 };
-  
+
+/**
+ * Return a textual description of the error state.
+ */
+char const * errorMessage( const ErrorCode& error );
+
 } // namespace efl
 } // namespace visr
 

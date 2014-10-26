@@ -1,3 +1,6 @@
-# Copyright Institute of Sound and Vibratioin Research - All rights reserved
+# Copyright Institute of Sound and Vibration Research - All rights reserved
 
-ADD_LIBRARY( efl STATIC vector_functions.cpp )
+SET( SOURCES error_codes.cpp vector_functions.cpp )
+SET( HEADERS aligned_array.hpp alignment.hpp error_codes.hpp vector_functions.hpp )
+
+ADD_LIBRARY( efl STATIC ${SOURCES} ${HEADERS} )

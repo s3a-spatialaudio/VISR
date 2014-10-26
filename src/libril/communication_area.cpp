@@ -2,6 +2,8 @@
 
 #include "communication_area.hpp"
 
+#include <libefl/alignment.hpp>
+
 namespace visr
 {
 namespace ril
@@ -11,8 +13,8 @@ namespace ril
                                                     std::size_t alignmentElements /* = 0 */ )
    : mNumberOfSignals( numberOfSignals )
    , mSignalLength( signalLength )
-   , mSignalStride( signalLength ) // Not right yet.
-   , mStorage( alignmentElements, numberOfSignals*mSignalStride )
+   , mSignalStride( efl::nextAlignedSize( signalLength, alignmentElements ) )
+   , mStorage( numberOfSignals*mSignalStride, alignmentElements )
   {
   }
 
