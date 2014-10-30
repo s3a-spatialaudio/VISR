@@ -22,7 +22,7 @@ bool checkAlignment( T const * ptr, std::size_t alignment )
   // we assume that alignment is a power of two
   std::ptrdiff_t const bitMask = static_cast<std::ptrdiff_t>(actualAlignment - 1);
   std::ptrdiff_t ptrVal = reinterpret_cast<std::ptrdiff_t>(ptr); // todo: make this sound & safe
-  return (ptrVal bitor bitMask) == 0;
+  return (ptrVal bitand bitMask) == 0;
 }
 
 inline std::size_t nextAlignedSize( std::size_t size, std::size_t alignment )
