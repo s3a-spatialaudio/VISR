@@ -21,7 +21,6 @@ namespace rcl
 Add::Add( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
  , mOutput( "out", *this )
- , mAccumulator( 0 /*ril::cVectorAlignmentSamples*/ ) // test
 {
 }
 
@@ -35,7 +34,6 @@ Add::~Add()
 
 void Add::setup( std::size_t width, std::size_t numInputs )
 {
-  mAccumulator.resize( period() );
   mInputs.reserve( numInputs );
   mOutput.setWidth( width );
   for( std::size_t run( 0 ); run < numInputs; ++run )
@@ -57,7 +55,7 @@ void Add::setup( std::size_t width, std::size_t numInputs )
   {
     for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
     {
-      efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), ril::cVectorAlignmentBytes );
+      efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), ril::cVectorAlignmentSamples );
       if( res != efl::noError )
       {
         throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );
@@ -68,7 +66,7 @@ void Add::setup( std::size_t width, std::size_t numInputs )
   {
     for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
     {
-      efl::ErrorCode res = efl::vectorCopy( mInputs.at(0)->at( sigIdx ), mOutput[sigIdx], period( ), ril::cVectorAlignmentBytes );
+      efl::ErrorCode res = efl::vectorCopy( mInputs.at(0)->at( sigIdx ), mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
       if( res != efl::noError ) {
         throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );
       }
@@ -80,7 +78,7 @@ void Add::setup( std::size_t width, std::size_t numInputs )
     {
       efl::ErrorCode res = efl::vectorAdd( mInputs.at( 0 )->at( sigIdx ),
         mInputs.at( 1 )->at( sigIdx ),
-        mOutput[sigIdx], period( ), ril::cVectorAlignmentBytes );
+        mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
       if( res != efl::noError )
       {
         throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );
@@ -91,7 +89,7 @@ void Add::setup( std::size_t width, std::size_t numInputs )
       for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
       {
         efl::ErrorCode res = efl::vectorAddInplace( mInputs.at( inputIdx )->at( sigIdx ),
-          mOutput[sigIdx], period( ), ril::cVectorAlignmentBytes );
+          mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
         if( res != efl::noError )
         {
           throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );

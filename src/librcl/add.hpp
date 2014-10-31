@@ -3,8 +3,6 @@
 #ifndef VISR_LIBRCL_ADD_HPP_INCLUDED
 #define VISR_LIBRCL_ADD_HPP_INCLUDED
 
-#include <libefl/aligned_array.hpp>
-
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
 #include <libril/audio_output.hpp>
@@ -45,7 +43,6 @@ private:
    */
   std::vector<std::unique_ptr<ril::AudioInput> > mInputs;
 
-  efl::AlignedArray<ril::SampleType> mAccumulator;
 };
 
 } // namespace rcl
