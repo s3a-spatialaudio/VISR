@@ -24,5 +24,60 @@ endif()
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
+# Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
+INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
+
+
+############################################################
+# Define imported libraries
+
+add_library(portaudio SHARED IMPORTED)
+if(WIN32) # This includes 64-bit platforms!
+    set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.dll)
+    set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.dll)
+    set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.lib)
+    set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.lib)
+endif()
+## TODO: Provide locations for other Windows versions and other platforms (Linux/MacOS)
+
+
 # All actual software components to be built are contained in the src/ directorory
 ADD_SUBDIRECTORY( src )
+
+
+################################################################################
+## Support for building Doxygen documentation
+## Taken from here: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
+
+option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+IF(BUILD_DOCUMENTATION) 
+  FIND_PACKAGE(Doxygen)
+  IF(NOT DOXYGEN_FOUND)
+    MESSAGE(FATAL_ERROR
+      "Doxygen is needed to build the documentation.")
+  ENDIF()
+ 
+  SET( doxyfile_in          ${PROJECT_SOURCE_DIR}/doc/src/Doxyfile.in )
+  SET( doxyfile             ${PROJECT_SOURCE_DIR}/doc/Doxyfile )
+  SET( doxy_html_index_file ${PROJECT_SOURCE_DIR}/doc/html/index.html )
+  SET( doxy_output_root     ${PROJECT_SOURCE_DIR}/doc ) # Pasted into Doxyfile.in
+  SET( doxy_input           ${PROJECT_SOURCE_DIR}/src                   ) # Pasted into Doxyfile.in
+#  SET( doxy_extra_files     ${PROJECT_SOURCE_DIR}/doc/src/mainpage.dox    ) # Pasted into Doxyfile.in
+ 
+  CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
+ 
+  ADD_CUSTOM_COMMAND( OUTPUT ${doxy_html_index_file}
+                      COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+                      # The following should be ${doxyfile} only but it
+                      # will break the dependency.
+                      # The optimal solution would be creating a 
+                      # custom_command for ${doxyfile} generation
+                      # but I still have to figure out how...
+                      MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
+                      DEPENDS project_targets ${doxy_extra_files}
+                      COMMENT "Generating HTML documentation")
+ 
+  ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
+ 
+  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc )
+ENDIF()
