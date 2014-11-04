@@ -24,9 +24,15 @@
 #include <iterator>
 // #include <limits> // Cannot be used because MSVC does not support constexpr yet.
 #include <string>
-#include <valarray>
 
-#include <vector> // temporary check
+// Temporary solution to get rid of the annoying MSVC unsafe argument warnings when using STL algorithms on std::valarrays
+#define AUDIOPORT_USE_VECTOR_FOR_INDICES
+
+#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
+#include <vector>
+#else
+#include <valarray>
+#endif
 
 namespace visr
 {
@@ -127,10 +133,11 @@ protected:
 
   void assignCommunicationIndices( SignalIndexType const * const val, std::size_t vecLength )
   {
-    std::vector<SignalIndexType> dest;
-
-    //std::copy( val, val+vecLength, &mIndices[0] );
-    std::copy( val, val + vecLength, dest.begin() );
+#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
+    std::copy( val, val + vecLength, mIndices.begin( ) );
+#else
+    std::copy( val, val+vecLength, &mIndices[0] );
+#endif
   }
 
   template<typename IteratorType>
@@ -143,8 +150,8 @@ protected:
     {
       throw std::invalid_argument( "AudioPort: The length of the sequence passed to assignCommunicationIndices() must match the width of the port." );
     }
-    std::copy( begin, end, &mIndices[0] );
-//    std::copy( begin, end, mIndices.begin() ); // C++11 feature std::valarray<T>::begin(), but not featured either in VC 2013 and GCC 4.8 at this time.
+    // std::copy( begin, end, &mIndices[0] );
+    std::copy( begin, end, mIndices.begin() ); // C++11 feature std::valarray<T>::begin(), but not featured either in VC 2013 and GCC 4.8 at this time.
   }
 
   SampleType * * signalPointers() { return &mSignalPointers[0]; }
@@ -154,14 +161,22 @@ private:
 
   std::size_t mWidth;
 
-  std::valarray < SignalIndexType > mIndices;
+#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
+  std::vector< SignalIndexType > mIndices;
+#else
+  std::valarray< SignalIndexType > mIndices;
+#endif
 
   /**
    * Temporary container to hold the buffer addresses computed from the assigned indices.
-   * As the location and the calling sequence for recolving the signal pointers is not decided yet, it is unclear whether 
+   * As the location and the calling sequence for resolving the signal pointers is not decided yet, it is unclear whether 
    * this member is kept.
    */
-  mutable std::valarray < SampleType* > mSignalPointers;
+#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
+  mutable std::vector< SampleType* > mSignalPointers;
+#else
+  mutable std::valarray< SampleType* > mSignalPointers;
+#endif
 };
 
 } // namespace ril

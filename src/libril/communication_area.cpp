@@ -3,6 +3,7 @@
 #include "communication_area.hpp"
 
 #include <libefl/alignment.hpp>
+#include <libefl/vector_functions.hpp>
 
 namespace visr
 {
@@ -16,6 +17,11 @@ namespace ril
    , mSignalStride( efl::nextAlignedSize( signalLength, alignmentElements ) )
    , mStorage( numberOfSignals*mSignalStride, alignmentElements )
   {
+#if 1
+    // zero-initialize the content.
+    efl::vectorFill( static_cast<SampleType>(0), mStorage.data(), 
+                     numberOfSignals*mSignalStride, alignmentElements );
+#endif
   }
 
   template< typename SampleType>

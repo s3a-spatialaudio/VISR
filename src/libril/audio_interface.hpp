@@ -78,18 +78,16 @@ public:
   using CallbackResult = int;
 
   /**
-   * The type of the callback function that can be registered to be calles if sufficient data is available 
+   * The type of the callback function that can be registered to be called if sufficient data is available 
   */
   typedef void ( *AudioCallback )( void* /* userData */,
                                  ExternalSampleType const * const * /*captureBuffer*/,
                                  ExternalSampleType * const * /*playbackBuffer*/,
                                  CallbackResult& /*errorCode*/);
 
-  virtual bool registerCallback( AudioCallback callbackPtr) = 0;
-//  virtual bool registerCallback(  callbackPtr) = 0;
+  virtual bool registerCallback( AudioCallback callbackPtr, void* userData ) = 0;
 
-  //virtual bool unregisterCallback( AudioCallback callbackPtr ) = 0;
-
+  virtual bool unregisterCallback( AudioCallback callbackPtr ) = 0;
 
 };
 
