@@ -16,7 +16,7 @@ namespace ril
 using SampleType = float;
 
 /**
- * Desired alignement for contiguous vectors, given in byte.
+ * Desired alignment for contiguous vectors, given in byte.
  * The chosen value (64) follows the guidelines for modern Intel processors.
  * Adjust for other architectures as needed.
  */
