@@ -5,27 +5,139 @@
 
 #include <libril/audio_interface.hpp>
 
+#include <libril/communication_area.hpp>
+#include <libril/constants.hpp>
+
+#include <portaudio/portaudio.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace visr
 {
 namespace rrl
 {
 
-
-
 class PortaudioInterface: public ril::AudioInterface
 {
 public:
+  /**
+   * Structure to hold all configuration arguments for a PortAudioInterface instance.
+   */
+  struct Config
+  {
+  public:
+    /** Default contructor to initialise elements to defined values. */
+    Config()
+      : mNumberOfCaptureChannels( 0 )
+      , mNumberOfPlaybackChannels( 0 )
+      , mPeriodSize( 0 )
+      , mSampleRate( 0 )
+      , mSampleFormat( SampleFormat::float32Bit )
+      , mInterleaved( false )
+      , mHostApi( "" )
+    {}
+
+    std::size_t mNumberOfCaptureChannels;
+    std::size_t mNumberOfPlaybackChannels;
+
+    std::size_t mPeriodSize;
+
+    /**
+     * Todo: Consider moving this definition to a more general place.
+    */
+    using SamplingRateType = std::size_t;
+    SamplingRateType mSampleRate;
+
+    /**
+     * Enumeration for a type-independent sample format specification
+     * TODO: Move to a more general location (for use by all audio interfaces)
+     */
+    class SampleFormat
+    {
+    public:
+      enum Type
+      {
+        signedInt8Bit,
+        unsignedInt8Bit,
+        signedInt16Bit,
+        unsignedInt16Bit,
+        signedInt24Bit,
+        unsignedInt24Bit,
+        signedInt32Bit,
+        unsignedInt32Bit,
+        float32Bit
+      };
+    };
+    SampleFormat::Type mSampleFormat;
+
+    bool mInterleaved;
+
+    /**
+     * A string determining the host API to be used for portaudio.
+     * At the moment, admissible values are 'default' on all platforms 'DirectSound', 'MME', 'ASIO' 'SoundManager', 'CoreAudio', 'OSS', ALSA', AL',
+     * 'WDMKS', 'JACK''WASAPI'
+     */
+    std::string mHostApi;
+
+  };
+
   using Base = ril::AudioInterface;
 
-  PortaudioInterface();
+  explicit PortaudioInterface( Config const & config );
 
   ~PortaudioInterface( );
 
-  /*virtual*/ bool registerCallback( AudioCallback callback );
+  /* virtual */ void start();
+
+  /* virtual */ void stop();
+
+  /*virtual*/ bool registerCallback( AudioCallback callback, void* userData );
 
   /*virtual*/ bool unregisterCallback( AudioCallback audioCallback );
 private:
+  static int sEngineCallback( const void *input,
+                              void *output,
+                              unsigned long frameCount,
+                              const PaStreamCallbackTimeInfo *timeInfo,
+                              PaStreamCallbackFlags statusFlags,
+                              void *userData );
+
+  int engineCallbackFunction( const void *input,
+                              void *output,
+                              unsigned long frameCount,
+                              const PaStreamCallbackTimeInfo *timeInfo,
+                              PaStreamCallbackFlags statusFlags );
+
+  void writeCaptureBuffers( void const * input );
+
+  void readPlaybackBuffers( void * output );
+
+  std::size_t const mPeriodSize;
+  std::size_t const mNumCaptureChannels;
+  std::size_t const mNumPlaybackChannels;
+
+  Config::SampleFormat::Type mSampleFormat;
+
+  std::size_t mSampleRate;
+
+  bool const mInterleaved;
+
+  std::string const mHostApiName;
+
+  PaStream * mStream;
+
   Base::AudioCallback mCallback;
+
+  void* mCallbackUserData;
+
+  std::unique_ptr<ril::CommunicationArea<ril::SampleType> > mCommunicationBuffer;
+
+  std::vector< ril::SampleType const * > mCaptureSampleBuffers;
+
+  std::vector< ril::SampleType * > mPlaybackSampleBuffers;
+
 };
 
 } // namespace rrl
