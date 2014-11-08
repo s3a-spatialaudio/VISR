@@ -16,6 +16,11 @@ namespace ril
 using SampleType = float;
 
 /**
+ * The data type for determining the sampling frequency.
+ */  
+using SamplingFrequencyType = std::size_t;
+  
+/**
  * Desired alignment for contiguous vectors, given in byte.
  * The chosen value (64) follows the guidelines for modern Intel processors.
  * Adjust for other architectures as needed.
