@@ -16,3 +16,8 @@ ADD_SUBDIRECTORY( librcl )
 
 # Hold applications in a separate subdirectory
 ADD_SUBDIRECTORY( apps )
+
+# Subdirectory for Matlab Mex externals
+IF( BUILD_MATLAB_EXTERNALS )
+  ADD_SUBDIRECTORY( mex )
+ENDIF(BUILD_MATLAB_EXTERNALS)
