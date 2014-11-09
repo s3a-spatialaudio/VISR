@@ -36,29 +36,32 @@ MexWrapper( ril::AudioSignalFlow & flow,
 void process( );
 
 private:
+  /**
+   * Transfer a portion of the Matlab input signal to the input of the signal flow graph 
+   * (possibly converting the sample type)
+   */
+  template<mxClassID classId>
+  void transferInputSamples( std::size_t blockIdx );
+
+  /**
+  * Transfer the output of the signal flow graph to a segment of the Matlab output signal
+  * (possibly converting the sample type)
+  */
+  template<mxClassID classId>
+  void transferOutputSamples( std::size_t blockIdx );
+
   ril::AudioSignalFlow & mFlow;
 
-  /*
-  struct SignalDataType
-  {
-    enum Type
-    {
-      singleFloat,
-      doubleFloat
-    };
-  };
-  SignalDataType::Type 
-  */
   mxClassID const mSignalType;
 
   std::size_t mSignalLength;
   std::size_t mNumberOfBlocks;
 
-  double const * const mInputDouble;
-  double * mOutputDouble;
+  std::size_t mNumberOfCaptureSignals;
+  std::size_t mNumberOfPlaybackSignals;
 
-  float const * const mInputSingle;
-  float * mOutputSingle;
+  mxArray const * mInputMatrix;
+  mxArray * mOutputMatrix;
 
   std::size_t const mPeriodSize;
 
