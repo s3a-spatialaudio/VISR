@@ -16,22 +16,15 @@ namespace visr
 namespace ril
 {
 
-AudioSignalFlow::AudioSignalFlow()
-: mInitialised( false )
+AudioSignalFlow::AudioSignalFlow( std::size_t period, SamplingFrequencyType samplingFrequency )
+ : mInitialised( false )
+ , mPeriod( period )
+ , mSamplingFrequency( samplingFrequency )
 {
 }
 
 AudioSignalFlow::~AudioSignalFlow()
 {
-}
-
-void AudioSignalFlow::setPeriod( std::size_t periodLength )
-{
-  if( initialised() )
-  {
-    throw std::logic_error( "AudioSignalFlow::setPeriod() must be called only during initialisation." );
-  }
-  mPeriod = periodLength;
 }
 
 // todo: make this method protected?
@@ -43,8 +36,8 @@ void AudioSignalFlow::initCommArea( std::size_t numberOfSignals, std::size_t sig
 
 /*static*/ void 
 AudioSignalFlow::processFunction( void* userData,
-                                  AudioInterface::ExternalSampleType const * const * captureSamples,
-                                  AudioInterface::ExternalSampleType * const * playbackSamples,
+                                  SampleType const * const * captureSamples,
+                                  SampleType * const * playbackSamples,
                                   AudioInterface::CallbackResult& callbackResult )
 {
   AudioSignalFlow* flowObj = reinterpret_cast<AudioSignalFlow*>( userData );
@@ -56,7 +49,7 @@ AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
                                   SampleType * const * playbackSamples,
                                   AudioInterface::CallbackResult& callbackResult )
 {
-  // TODO: It needs to be checked beforehand that the widths of the inout and output samples match.
+  // TODO: It needs to be checked beforehand that the widths of the inout and output signal vectors match.
 
   // fill the capture part of the communication area.
   std::size_t const numCaptureChannels = numberOfCaptureChannels();
