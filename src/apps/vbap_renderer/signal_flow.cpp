@@ -1,4 +1,4 @@
-/* Copyright Institute for Sound and Vibration Research - All rights reserved */
+/* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "signal_flow.hpp"
 
@@ -12,9 +12,9 @@ namespace apps
 namespace vbap_renderer
 {
 
-
-SignalFlow::SignalFlow()
-: mSum( *this, "Add" )
+SignalFlow::SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
+ : AudioSignalFlow( period, samplingFrequency )
+ , mSum( *this, "Add" )
 {
 }
 

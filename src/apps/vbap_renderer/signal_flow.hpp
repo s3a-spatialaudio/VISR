@@ -1,4 +1,4 @@
-/* Copyright Institute for Sound and Vibration Research - All rights reserved */
+/* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #ifndef VISR_APPS_VBAP_RENDERER_VBAP_RENDER_FLOW_HPP_INCLUDED
 #define VISR_APPS_VBAP_RENDERER_VBAP_RENDER_FLOW_HPP_INCLUDED
@@ -19,7 +19,7 @@ namespace vbap_renderer
 class SignalFlow: public ril::AudioSignalFlow
 {
 public:
-  SignalFlow();
+  explicit SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~SignalFlow();
 
