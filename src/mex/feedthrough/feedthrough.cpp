@@ -37,7 +37,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
         "The parameter \"message\" mut be a matrix of type single or double" );
     }
 
-    bool const hasParameterArg = (nrhs == 3);
+    bool const hasParameterArg = (nrhs == 4);
 
     std::size_t const periodSizeParamIdx = hasParameterArg ? 2 : 1;
     std::size_t const samplingFreqParamIdx = hasParameterArg ? 3 : 2;
@@ -57,7 +57,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     }
 
     std::size_t const periodSize
-      = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[samplingFreqParamIdx] ));
+      = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[periodSizeParamIdx] ));
 
     ril::SamplingFrequencyType const samplingFrequency
       = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[samplingFreqParamIdx] ));

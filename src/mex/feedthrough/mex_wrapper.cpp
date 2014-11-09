@@ -3,10 +3,12 @@
 #include "mex_wrapper.hpp"
 
 #include <libefl/alignment.hpp>
+#include <libefl/vector_conversions.hpp>
 
 #include <libril/audio_signal_flow.hpp>
 #include <libril/communication_area.hpp>
 
+#include <cassert>
 #include <ciso646>
 
 namespace visr
@@ -19,15 +21,11 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
                         mxArray * & output,
                         mxArray const * messages /* = 0 */ )
  : mFlow( flow )
+ , mInputMatrix( input )
  , mSignalType( mxGetClassID( input ) )
- , mInputDouble( mxGetClassID( input ) == mxDOUBLE_CLASS ? mxGetPr( input ) : nullptr )
- , mOutputDouble( nullptr )
- , mInputSingle( mxGetClassID( input ) == mxSINGLE_CLASS ? static_cast<float const * const>(mxGetData( input )) : nullptr )
- , mOutputSingle( nullptr )
  , mPeriodSize( flow.period() )
 {
-  mxClassID const typeId = mxGetClassID( input );
-  if( (typeId != mxDOUBLE_CLASS) and( typeId != mxSINGLE_CLASS ) )
+  if( (mSignalType != mxDOUBLE_CLASS) and( mSignalType != mxSINGLE_CLASS ) )
   {
     throw std::invalid_argument( "The Matlab input array must be either a single- or double-precision float matrix." );
   } 
@@ -49,12 +47,16 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
   mSignalLength = inputSignalLength;
   mNumberOfBlocks = mSignalLength / mPeriodSize;
 
+  mNumberOfCaptureSignals = numGraphInputs;
+  mNumberOfPlaybackSignals = numGraphOutputs;
+
   // create output array
-  output = mxCreateNumericMatrix( inputSignalLength, numGraphOutputs, mSignalType, mxREAL );
-  if( !output )
+  mOutputMatrix = mxCreateNumericMatrix( numGraphOutputs, inputSignalLength, mSignalType, mxREAL );
+  if( !mOutputMatrix )
   {
     throw std::runtime_error( "Failed to allocate output signal matrix." );
   }
+  output = mOutputMatrix;
 
   mCommBuffer.reset( new ril::CommunicationArea < ril::SampleType>( numGraphInputs + numGraphOutputs,
     mPeriodSize, ril::cVectorAlignmentSamples ) );
@@ -69,7 +71,6 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
   {
     mOutputBufferPtrs[outIdx] = mCommBuffer->at( numGraphInputs + outIdx );
   }
-
 }
 
 MexWrapper::~MexWrapper( )
@@ -80,12 +81,113 @@ void MexWrapper::process( )
 {
   ril::AudioInterface::CallbackResult processResult;
   for( std::size_t blockIdx( 0 ); blockIdx < mNumberOfBlocks; ++blockIdx )
-  {
+  { 
+    // Transfer the input signal from the Matlab matrix to the capture buffers off the signal flow.
+    // TODO: Consider moving this switch code somewhere else.
+    switch( mSignalType )
+    {
+    case mxDOUBLE_CLASS:
+      transferInputSamples<mxDOUBLE_CLASS>( blockIdx );
+      break;
+    case mxSINGLE_CLASS:
+      transferInputSamples<mxSINGLE_CLASS>( blockIdx );
+      break;
+    default:
+      assert( false && "Must not happen, as the type has been checked beforehand." );
+    }
     ril::AudioSignalFlow::processFunction( &mFlow, &mInputBufferPtrs[0], &mOutputBufferPtrs[0],
         processResult );
-    if(processResult != 0 ) //todo: Lookup error codes
+    if( processResult != 0 ) //todo: Lookup error codes
+    {
+      throw std::runtime_error( "Error while processing the signal flow." );
+    }
+    // Transfer the processed output samples to the Matlab result matrix
+    // TODO: Consider moving this switch code somewhere else.
+    switch( mSignalType )
+    {
+    case mxDOUBLE_CLASS:
+      transferOutputSamples<mxDOUBLE_CLASS>( blockIdx );
+      break;
+    case mxSINGLE_CLASS:
+      transferOutputSamples<mxSINGLE_CLASS>( blockIdx );
+      break;
+    default:
+      assert( false && "Must not happen, as the type has been checked beforehand." );
+    }
   }
 }
+
+namespace // unnamed
+{
+  /**
+   * Template construct for compile-time translation between Matlab matrix class IDs and C++ data types.
+   * The templated declaration is deliberately defined, resulting in an intended compile error when instantiated
+   * with a mx class id for which no specialisation exist.
+   */
+  template< mxClassID classId >
+  struct ClassIdToType; // No definition for non-specialised template
+
+  /** Specialisation for class id mxDOUBLE_CLASS */
+  template<>
+  struct ClassIdToType<mxDOUBLE_CLASS>
+  {
+    using type = double;
+  };
+
+  /** Specialisation for class id mxDOUBLE_CLASS */
+  template<>
+  struct ClassIdToType<mxSINGLE_CLASS>
+  {
+    using type = float;
+  };
+
+/**
+ * Helper function to 
+ */
+// std::size_t get
+
+} // unnamed namespace
+
+template<mxClassID classId>
+void MexWrapper::transferInputSamples( std::size_t blockIdx )
+{
+  using MxSampleType = ClassIdToType<classId>::type;
+  MxSampleType const * baseInputPtr = static_cast<MxSampleType const *>( mxGetData( mInputMatrix ) );
+
+  std::size_t const inputStride = mNumberOfCaptureSignals;
+  for( std::size_t inChanIdx( 0 ); inChanIdx < mNumberOfCaptureSignals; ++inChanIdx )
+  {
+    MxSampleType const * firstInSample = baseInputPtr + blockIdx * mPeriodSize * mNumberOfCaptureSignals + inChanIdx;
+    // Note: Due to the interleaved input samples, no alignment guarantees can be made.
+    efl::vectorConvertInputStride( firstInSample, mInputBufferPtrs[inChanIdx], mPeriodSize, inputStride, 0 );
+  }
+}
+
+template<mxClassID classId>
+void MexWrapper::transferOutputSamples( std::size_t blockIdx )
+{
+  using MxSampleType = ClassIdToType<classId>::type;
+  MxSampleType * baseOutputPtr = static_cast<MxSampleType *>(mxGetData( mOutputMatrix ));
+
+  std::size_t const outputStride = mNumberOfPlaybackSignals;
+  for( std::size_t outChanIdx( 0 ); outChanIdx < mNumberOfPlaybackSignals; ++outChanIdx )
+  {
+    MxSampleType * firstOutSample = baseOutputPtr + blockIdx * mPeriodSize * mNumberOfPlaybackSignals + outChanIdx;
+    // Note: Due to the interleaved output samples, no alignment guarantees can be made.
+    efl::vectorConvertOutputStride( mOutputBufferPtrs[outChanIdx], firstOutSample, mPeriodSize, outputStride, 0 );
+  }
+}
+
+/**
+ * Explicit specialisations for the supported Matlab sample types
+ */
+//@{
+template void MexWrapper::transferInputSamples<mxSINGLE_CLASS>( std::size_t blockIdx );
+template void MexWrapper::transferInputSamples<mxDOUBLE_CLASS>( std::size_t blockIdx );
+template void MexWrapper::transferOutputSamples<mxSINGLE_CLASS>( std::size_t blockIdx );
+template void MexWrapper::transferOutputSamples<mxDOUBLE_CLASS>( std::size_t blockIdx );
+
+//@}
 
 } // namespace mex
 } // namespace visr
