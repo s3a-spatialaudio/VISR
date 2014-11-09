@@ -28,7 +28,7 @@ class AudioPort;
 class AudioSignalFlow
 {
 public:
-  AudioSignalFlow();
+  explicit AudioSignalFlow( std::size_t period, SamplingFrequencyType samplingFrequency );
 
   ~AudioSignalFlow();
 
@@ -39,8 +39,8 @@ public:
 
 
   static void  processFunction( void* /* userData */,
-                                AudioInterface::ExternalSampleType const * const * captureSamples,
-                                AudioInterface::ExternalSampleType * const * playbackSamples,
+                                SampleType const * const * captureSamples,
+                                SampleType * const * playbackSamples,
                                 AudioInterface::CallbackResult& callbackResult );
 
   /**
@@ -54,8 +54,6 @@ public:
   virtual void setup() = 0;
 
   std::size_t period() const { return mPeriod; }
-
-  void setPeriod( std::size_t periodLength );
 
   CommunicationArea<SampleType>& getCommArea() { return *mCommArea; }
 
@@ -189,7 +187,9 @@ private:
   /**
    * The number of samples processed in one iteration of the signal flow graph.
    */
-  std::size_t mPeriod;
+  std::size_t const mPeriod;
+
+  SamplingFrequencyType const mSamplingFrequency;
 
   /**
    * Type for collecion and lookup of all audio components contained in this signal flow.
