@@ -6,12 +6,16 @@
 //  Copyright (c) 2014 ISVR, Southampton University. All rights reserved.
 //
 
+
+#include "Vbap.h"
+
 #include <iostream>
 
 int main(int argc, const char * argv[])
 {
+    Vbap avbap;
 
-    // insert code here...
+    
     std::cout << "Hello, World!\n";
     return 0;
 }
