@@ -213,9 +213,15 @@ void PortaudioInterface::stop()
 {
   // Todo: do we need an internal state representation and checking?
   // Note: Consider whether PaAbortStream or Pa_CloseStream would make sense in some circumstances.
-  PaError const ret = Pa_StopStream( mStream );
-  if( ret != paNoError ) {
-    throw std::runtime_error( "PortaudioInterface: Opening of audio stream failed." );
+  PaError ret = Pa_StopStream( mStream );
+  if( ret != paNoError )
+  {
+    throw std::runtime_error( "PortaudioInterface: Stopping of audio stream failed." );
+  }
+  ret = Pa_CloseStream( mStream );
+  if( ret != paNoError )
+  {
+    throw std::runtime_error( "PortaudioInterface: Closing of audio stream failed." );
   }
 }
 
