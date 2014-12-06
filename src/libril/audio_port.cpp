@@ -12,12 +12,19 @@ namespace ril
 {
 
 /**
+ * It appears that Visual Studio 2013 does not support this standard-compliant behaviour
+ * for static const class members, i.e., it neither accepts nor compiles this explicit definition.
+ /**
  * Provide a definition for the static const class members which is required by functions that pass
  * these members a reference.
  * @note The initialisation value is still set in the class definition (in case the members are used as
  * compile-time constants)
+ * @note the support for constexpr (which is the better C++11 way to define such literal constants) 
+ * differs between compilers, therefore there is an additional switch.
  */
 //@{
+#ifndef _MSC_VER
+
 #if CPP_CONSTEXPR_SUPPORT
 constexpr
 #else
@@ -31,6 +38,8 @@ constexpr
 const  /*static*/
 #endif
 AudioPort::SignalIndexType AudioPort::cInvalidSignalIndex;
+
+#endif // _MSC_VER
 //@}
 
 AudioPort::AudioPort( AudioComponent& container )
