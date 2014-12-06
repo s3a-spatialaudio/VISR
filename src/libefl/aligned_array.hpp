@@ -25,9 +25,9 @@ namespace efl
  * A template class to provide memory that is aligned in memory.
  * Alignment is an important property for speed. The aligement is given as a number of elements.
  * This means that the pointer to the aligned memory is divisable by alignmentElements*sizeof(T) .
- * @tparam T The type of the array elements 
+ * @tparam ElementType The type of the array elements 
  */
-template< typename T >
+template< typename ElementType >
 class AlignedArray
 {
 public:
@@ -58,7 +58,7 @@ public:
    * Exchange the contents of this object with that of rhs.
    * Does not throw, thus enabling exception safety for classes using AlignedArray.
    */
-  void swap( AlignedArray<T>& rhs );
+  void swap( AlignedArray<ElementType>& rhs );
 
   /**
    * Return the size of the array (in elements).
@@ -77,29 +77,29 @@ public:
    * Return the alignment of the the data structure (measured in bytes)
    * as determined in the constructor.
    */
-  std::size_t alignmentBytes( ) const { return mAlignment * sizeof<T>; }
+  std::size_t alignmentBytes( ) const { return mAlignment * sizeof(ElementType); }
 
   /**
    * Return a writable pointer to the data elements.
    */
-  T* data() { return mAlignedStorage; }
+  ElementType* data() { return mAlignedStorage; }
 
   /**
    * Return a constant pointer to the data elements.
    */
-  T const * data( ) const { return mAlignedStorage; }
+  ElementType const * data( ) const { return mAlignedStorage; }
 
   /**
    * Indexed access, return a modifiable reference to the element addressed by index.
    * @param index Zero-offset index into the array
    */
-  T& operator[]( std::size_t index ) { return mAlignedStorage[index]; }
+  ElementType& operator[]( std::size_t index ) { return mAlignedStorage[index]; }
 
   /**
    * Indexed access, return a constant reference to the element addressed by index.
    * @param index Zero-offset index into the array
    */
-  T const & operator[]( std::size_t index ) const { return mAlignedStorage[index]; }
+  ElementType const & operator[]( std::size_t index ) const { return mAlignedStorage[index]; }
 
   /**
    * Indexed access, return a modifiable reference to the element addressed by index.
@@ -107,7 +107,7 @@ public:
    * @param index Zero-offset index into the array
    * @throw std::out_of_range if index exceeds the allocated length of the array.
    */
-  T& at( std::size_t index )
+  ElementType& at( std::size_t index )
   { 
     if( index >= mLength )
     {
@@ -122,7 +122,7 @@ public:
    * @param index Zero-offset index into the array
    * @throw std::out_of_range if index exceeds the allocated length of the array.
    */
-  T const & at( std::size_t index ) const
+  ElementType const & at( std::size_t index ) const
   {
     if( index >= mLength ) {
       throw std::out_of_range( "Array index exceeded" );
@@ -157,18 +157,18 @@ private:
    * The pointer to the allocated memory.
    * Depending on the implementation, this pointer might be unaligned.
    */
-  T* mRawStorage;
+  ElementType* mRawStorage;
 
   /**
    * The pointer to the aligned memory. This pointer points to a location 
    * within the memory chunk designated by mRawStorage, but might differ from that one.
    * This pointer has no ownership over the memory, i.e., it must be used for freeing ressources.
    */
-  T* mAlignedStorage;
+  ElementType* mAlignedStorage;
 };
 
-template< typename T>
-AlignedArray<T>::AlignedArray( std::size_t alignmentElements )
+template< typename ElementType>
+AlignedArray<ElementType>::AlignedArray( std::size_t alignmentElements )
  : mAlignment( alignmentElements )
  , mLength( 0 )
  , mRawStorage( nullptr )
@@ -176,8 +176,8 @@ AlignedArray<T>::AlignedArray( std::size_t alignmentElements )
 {
 }
 
-template< typename T>
-AlignedArray<T>::AlignedArray( std::size_t length, std::size_t alignmentElements )
+template< typename ElementType>
+AlignedArray<ElementType>::AlignedArray( std::size_t length, std::size_t alignmentElements )
  : mAlignment( alignmentElements )
 {
   if( length > 0 )
@@ -192,14 +192,14 @@ AlignedArray<T>::AlignedArray( std::size_t length, std::size_t alignmentElements
   }
 }
 
-template< typename T>
-AlignedArray<T>::~AlignedArray()
+template< typename ElementType>
+AlignedArray<ElementType>::~AlignedArray()
 {
   deallocate();
 }
 
-template< typename T>
-void AlignedArray<T>::resize( std::size_t newLength )
+template< typename ElementType>
+void AlignedArray<ElementType>::resize( std::size_t newLength )
 {
   deallocate();
   if( newLength > 0 )
@@ -208,8 +208,8 @@ void AlignedArray<T>::resize( std::size_t newLength )
   }
 }
 
-template< typename T>
-void AlignedArray<T>::swap( AlignedArray<T>& rhs )
+template< typename ElementType>
+void AlignedArray<ElementType>::swap( AlignedArray<ElementType>& rhs )
 {
   std::swap( mAlignment, rhs.mAlignment );
   std::swap( mLength, rhs.mLength );
@@ -236,18 +236,18 @@ static inline void *alignWorkaround( std::size_t alignment, std::size_t size,
 }
 #endif
 
-template< typename T>
-void AlignedArray<T>::allocate( std::size_t length )
+template< typename ElementType>
+void AlignedArray<ElementType>::allocate( std::size_t length )
 {
   const std::size_t worstCaseLengthElements( length + mAlignment - 1 );
-  mRawStorage = new T[worstCaseLengthElements];
+  mRawStorage = new ElementType[worstCaseLengthElements];
   void* retPtr = static_cast<void*>(mRawStorage);
-  std::size_t space = worstCaseLengthElements*sizeof(T);
+  std::size_t space = worstCaseLengthElements*sizeof(ElementType);
   // ignoring the return value is safe, because it is identical to the updated retPtr parameter.
 #ifdef __GLIBCXX__
-  alignWorkaround( mAlignment*sizeof(T), length*sizeof(T), retPtr, space );
+  alignWorkaround( mAlignment*sizeof(ElementType), length*sizeof(ElementType), retPtr, space );
 #else
-  std::align( mAlignment*sizeof(T), length*sizeof(T), retPtr, space );
+  std::align( mAlignment*sizeof(ElementType), length*sizeof(ElementType), retPtr, space );
 #endif
   if( retPtr == nullptr )
   {
@@ -255,11 +255,11 @@ void AlignedArray<T>::allocate( std::size_t length )
     throw std::bad_alloc();
   }
   // todo: should we check the updated 'space' parameter? 
-  mAlignedStorage = static_cast<T*>(retPtr);
+  mAlignedStorage = static_cast<ElementType*>(retPtr);
 }
 
-template< typename T>
-void AlignedArray<T>::deallocate()
+template< typename ElementType>
+void AlignedArray<ElementType>::deallocate()
 {
   delete[] mRawStorage;
   mRawStorage = nullptr;

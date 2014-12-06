@@ -26,7 +26,7 @@ class BasicMatrix
 {
 public:
   explicit BasicMatrix( std::size_t alignmentElements )
-   : m_stride( 0 )
+   : mStride( 0 )
    , mNumberOfRows( 0 )
    , mNumberOfColumns( 0 )
    , mData( alignmentElements )
@@ -34,7 +34,7 @@ public:
   }
 
   explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns, ::size_t alignmentElements )
-   : m_stride( nextAlignedSize( numberOfColumns, alignmentElements ) )
+   : mStride( nextAlignedSize( numberOfColumns, alignmentElements ) )
    , mNumberOfRows( numberOfRows )
    , mNumberOfColumns( numberOfColumns )
    , mData( mStride*mNumberOfRows, alignmentElements )
@@ -48,12 +48,12 @@ public:
     std::size_t newStride = nextAlignedSize( newNumberOfColumns, alignmentElements() );
     AlignedArray<ElementType> newData( newStride*newNumberOfRows, alignmentElements() );
     ErrorCode const res = vectorZero( newData.data( ), newStride*newNumberOfRows );
-    if( err != noError )
+    if( res != noError )
     {
       throw std::runtime_error( "Zeroing of matrix failed" );
     }
     // the rest of the function is non-throwing
-    m_stride = newStride;
+    mStride = newStride;
     mNumberOfRows = newNumberOfRows;
     mNumberOfColumns = newNumberOfColumns;
     mData.swap( newData );
@@ -62,12 +62,11 @@ public:
   void zeroFill()
   {
     ErrorCode const res = vectorZero( data(), stride()*numberOfRows() );
-    if( err != noError )
+    if( res != noError )
     {
       throw std::runtime_error( "Zeroing of matrix failed" );
     }
   }
-
 
   std::size_t alignmentElements() const { return mData.alignmentElements(); }
 
@@ -128,7 +127,7 @@ public:
   }
 
 private:
-  std::size_t m_stride;
+  std::size_t mStride;
 
   std::size_t mNumberOfRows;
   std::size_t mNumberOfColumns;
