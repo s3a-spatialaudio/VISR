@@ -11,6 +11,28 @@ namespace visr
 namespace ril
 {
 
+/**
+ * Provide a definition for the static const class members which is required by functions that pass
+ * these members a reference.
+ * @note The initialisation value is still set in the class definition (in case the members are used as
+ * compile-time constants)
+ */
+//@{
+#if CPP_CONSTEXPR_SUPPORT
+constexpr
+#else
+const /*static*/
+#endif
+std::size_t AudioPort::cInvalidWidth;
+
+#if CPP_CONSTEXPR_SUPPORT
+constexpr
+#else
+const  /*static*/
+#endif
+AudioPort::SignalIndexType AudioPort::cInvalidSignalIndex;
+//@}
+
 AudioPort::AudioPort( AudioComponent& container )
  : mParentComponent( container )
  , mWidth( cInvalidWidth )
@@ -25,8 +47,8 @@ AudioPort::AudioPort( AudioComponent& container, std::size_t width )
 }
 
 AudioPort::~AudioPort()
-{
-}
+{}
+
 
 void AudioPort::setWidth( std::size_t newWidth )
 {
@@ -34,7 +56,7 @@ void AudioPort::setWidth( std::size_t newWidth )
   {
     throw std::logic_error( "AudioPort::setWidth must not be called while the system is initialised." );
   }
-  mIndices.resize( newWidth, cInvalidSignalIndex );
+  mIndices.resize( newWidth, AudioPort::SignalIndexType(cInvalidSignalIndex) );
   mSignalPointers.resize( newWidth, nullptr );
   mWidth = newWidth;
 }
