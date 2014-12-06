@@ -36,9 +36,8 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" ON )
 
-find_package(Matlab REQUIRED)
-
 IF( BUILD_MATLAB_EXTERNALS )
+FIND_PACKAGE(Matlab REQUIRED)
 IF(MATLAB_FOUND)
     MESSAGE( STATUS "Matlab found." )
   ELSEIF( MATLAB_FOUND )
@@ -91,7 +90,7 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${doxyfile} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS project_targets ${doxy_extra_files}
+                      DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
                       COMMENT "Generating HTML documentation")
  
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
