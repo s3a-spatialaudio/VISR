@@ -10,6 +10,13 @@
 // Check how to make warning C4996 disappear
 #define _CRT_SECURE_NO_WARNINGS 1
 
+/**
+ * Define whether constexpr keyword is supported by the compiler.
+ * @note Maybe this constant should be set the build system.
+ * @todo Clean up after all compilers (i.e., MSVC) support constexpr correctly.
+ */
+#define CPP_CONSTEXPR_SUPPORT 0
+
 #include "constants.hpp"
 #ifdef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
 // TODO: Rethink whether we want this include here. 
@@ -18,11 +25,14 @@
 #endif
 
 #include <array>
-#include <climits> // to work around the current limitations of MSVC regarding constexpr
 #include <cstddef>
 #include <exception>
 #include <iterator>
-// #include <limits> // Cannot be used because MSVC does not support constexpr yet.
+#if CPP_CONSTEXPR_SUPPORT
+#include <limits>
+#else
+#include <climits> // to work around the current limitations of MSVC regarding constexpr
+#endif
 #include <string>
 
 // Temporary solution to get rid of the annoying MSVC unsafe argument warnings when using STL algorithms on std::valarrays
@@ -40,7 +50,8 @@ namespace ril
 {
 
 // Forward declaration(s)
-class AudioComponent; // Removed due to inclusion of header (see above)
+class AudioComponent;
+// Removed due to inclusion of header (see above)
 #ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
 class AudioSignalFlow;
 #endif
@@ -54,20 +65,26 @@ public:
   friend class AudioSignalFlow;
 
   /**
+   * The type of signal indices.
    * @todo move to a central, unique definition
    */
   using SignalIndexType = std::size_t;
 
-  // constexpr static std::size_t cInvalidWidth = std::numeric_limits<std::size_t>::max();
+#if CPP_CONSTEXPR_SUPPORT
+  constexpr static std::size_t cInvalidWidth = std::numeric_limits<std::size_t>::max();
+#else
   const static std::size_t cInvalidWidth = UINT_MAX;
+#endif
 
-  // constexpr static SignalIndexType cInvalidSignalIndex = std::numeric_limits<SignalIndexType>::max();
+#if CPP_CONSTEXPR_SUPPORT
+  constexpr static SignalIndexType cInvalidSignalIndex = std::numeric_limits<SignalIndexType>::max();
+#else
   const static SignalIndexType cInvalidSignalIndex = UINT_MAX;
+#endif
 
   explicit AudioPort( AudioComponent& container );
 
   explicit AudioPort( AudioComponent& container, std::size_t width );
-
 
   ~AudioPort();
 
