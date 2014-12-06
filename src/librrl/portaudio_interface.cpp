@@ -302,7 +302,11 @@ void PortaudioInterface::writeCaptureBuffers( void const * input )
   {
     ril::SampleType * outputPtr = mPlaybackSampleBuffers[channelIndex];
     const std::size_t inStride = (mInterleaved ? mNumCaptureChannels : 1);
-    float const * inputPtr = reinterpret_cast<float const *>(input) + (mInterleaved ? channelIndex : channelIndex * mPeriodSize );
+    // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
+    // pointer arrays to sample vectors.
+    float const * inputPtr = mInterleaved ?
+      reinterpret_cast<float const *>(input) + channelIndex :
+      reinterpret_cast<float const * const * >(input)[channelIndex];
     for( std::size_t sampleIdx( 0 ); sampleIdx < mPeriodSize; ++sampleIdx, ++outputPtr )
     {
       *outputPtr = *inputPtr;
@@ -322,16 +326,18 @@ void PortaudioInterface::readPlaybackBuffers( void * output )
   {
     ril::SampleType const * inputPtr = mCaptureSampleBuffers[channelIndex];
     const std::size_t outStride = (mInterleaved ? mNumPlaybackChannels : 1);
-    float * outputPtr = reinterpret_cast<float *>(output)+(mInterleaved ? channelIndex : channelIndex * mPeriodSize);
+    // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
+    // pointer arrays to sample vectors.
+    float * outputPtr = mInterleaved ?
+      reinterpret_cast<float *>(output) + channelIndex :
+      reinterpret_cast<float * const * >(output)[channelIndex];
     for( std::size_t sampleIdx( 0 ); sampleIdx < mPeriodSize; ++sampleIdx, ++inputPtr )
     {
       *outputPtr = *inputPtr;
       outputPtr += outStride;
     }
   }
-
 }
-
 
 } // namespace rrl
 } // namespace visr
