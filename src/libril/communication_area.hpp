@@ -24,7 +24,7 @@ public:
    * Constructor.
    * @param numberOfSignals
    * @param signalLength
-   * @param alignElements [optional]
+   * @param alignmentElements [optional]
    */
   explicit CommunicationArea( std::size_t numberOfSignals, std::size_t signalLength,
                               std::size_t alignmentElements /* = 0 */ );

@@ -10,6 +10,8 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 # The name of our top-level project.
 PROJECT( VISR CXX )
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
+
 # TBD: Switch between GNU compiler and clang on Linux platforms
 OPTION( SET_CLANG_COMPILER "Use the clang compiler on Linux platforms" OFF )
 
@@ -29,6 +31,21 @@ INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
+############################################################
+# Support for Building Matlab externals
+
+OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" ON )
+
+find_package(Matlab REQUIRED)
+
+IF( BUILD_MATLAB_EXTERNALS )
+IF(MATLAB_FOUND)
+    MESSAGE( STATUS "Matlab found." )
+  ELSEIF( MATLAB_FOUND )
+    MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
+ENDIF( MATLAB_FOUND )
+ENDIF( BUILD_MATLAB_EXTERNALS )
+
 ###########################################################
 # Define imported libraries
 
@@ -45,10 +62,9 @@ endif( WIN32 )
 # All actual software components to be built are contained in the src/ directorory
 ADD_SUBDIRECTORY( src )
 
-
 ################################################################################
 ## Support for building Doxygen documentation
-## Taken from here: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
+## Taken from: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
 IF(BUILD_DOCUMENTATION) 

@@ -34,9 +34,7 @@ int main( int argc, char const * const * argv )
 
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 
-    SignalFlow flow;
-
-    flow.setPeriod( periodSize );
+    SignalFlow flow( periodSize, samplingRate );
 
     std::cout << "Hello world. When I'm grown up, I wanna be a VBAP renderer" << std::endl;
 
