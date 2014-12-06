@@ -105,7 +105,7 @@ PortaudioInterface::PortaudioInterface( Config const & config )
   }
 
   PaError ret;
-  // Initialise the portaudio library. Multiple calls of this constructur should be no problem, since the number of initialize and deInitial
+  // Initialise the portaudio library. Multiple calls of this constructur should be no problem, since the number of initialize and deInitialize must match. 
   if( (ret = Pa_Initialize()) != paNoError )
   {
     throw std::runtime_error( "Initialisation of PortAudio library failed." );
@@ -124,17 +124,29 @@ PortaudioInterface::PortaudioInterface( Config const & config )
   bool const useDefaultHostApi( apiType == paInDevelopment );
 
   PaHostApiIndex const apiCount = Pa_GetHostApiCount( );
-
   PaHostApiIndex const hostApiIdx = useDefaultHostApi ?
     Pa_GetDefaultHostApi() : Pa_HostApiTypeIdToHostApiIndex( apiType );
+  if( hostApiIdx < 0 )
+  {
+    throw std::logic_error( std::string("PortAudioInterface: Error while retrieving the host API index: ")
+			    + Pa_GetErrorText( hostApiIdx ) );
+  }
+  // Check against logical errors (internal errors of the portaudio library?)
+  if( hostApiIdx >= apiCount )
+  {
+    throw std::logic_error( "PortAudioInterface: The returned API index exceeds the number of APIs" );
+  }
+  const PaHostApiInfo* apiInfo = Pa_GetHostApiInfo( hostApiIdx );
 
   // For the moment, use the default device for input and output.
-  PaDeviceIndex const inDeviceIdx = Pa_GetDefaultInputDevice();
+  // PaDeviceIndex const inDeviceIdx = Pa_GetDefaultInputDevice();
+  PaDeviceIndex const inDeviceIdx = apiInfo->defaultInputDevice;
   if( (mNumCaptureChannels > 0) && (inDeviceIdx == paNoDevice) )
   {
     throw std::invalid_argument( "No valid default input device found." );
   }
-  PaDeviceIndex const outDeviceIdx = Pa_GetDefaultOutputDevice( );
+  // PaDeviceIndex const outDeviceIdx = Pa_GetDefaultOutputDevice( );
+  PaDeviceIndex const outDeviceIdx = apiInfo->defaultOutputDevice;
   if( (mNumPlaybackChannels > 0) && (outDeviceIdx == paNoDevice) )
   {
     throw std::invalid_argument( "No valid default output device found." );
@@ -146,13 +158,13 @@ PortaudioInterface::PortaudioInterface( Config const & config )
   PaStreamParameters inputParameters, outputParameters;
   inputParameters.device = inDeviceIdx;
   inputParameters.channelCount = static_cast<int>(mNumCaptureChannels);
-  inputParameters.sampleFormat = mSampleFormat;
+  inputParameters.sampleFormat = cPaSampleFormat;
   inputParameters.suggestedLatency = Pa_GetDeviceInfo( inDeviceIdx )->defaultLowInputLatency;
   inputParameters.hostApiSpecificStreamInfo = nullptr;
 
   outputParameters.device = outDeviceIdx;
   outputParameters.channelCount = static_cast<int>(mNumPlaybackChannels);
-  outputParameters.sampleFormat = mSampleFormat;
+  outputParameters.sampleFormat = cPaSampleFormat;
   outputParameters.suggestedLatency = Pa_GetDeviceInfo( outDeviceIdx )->defaultLowInputLatency;
   outputParameters.hostApiSpecificStreamInfo = nullptr;
 
@@ -160,7 +172,7 @@ PortaudioInterface::PortaudioInterface( Config const & config )
                                                 static_cast<double>(mSampleRate) );
   if( ret != paFormatIsSupported )
   {
-    throw std::invalid_argument( "The chosen stream format is is not supported by the portaudio interface." );
+    throw std::invalid_argument( std::string("The chosen stream format is is not supported by the portaudio interface: ") + Pa_GetErrorText( ret ) );
   }
   ret = Pa_OpenStream( &mStream,
                        &inputParameters,
@@ -172,7 +184,8 @@ PortaudioInterface::PortaudioInterface( Config const & config )
                        this );
   if( ret != paNoError )
   {
-    throw std::runtime_error( "PortaudioInterface: Opening of audio stream failed.");
+    throw std::runtime_error( std::string("PortaudioInterface: Opening of audio stream failed: ") 
+			      + Pa_GetErrorText( ret ) );
   }
 }
 
@@ -263,7 +276,7 @@ PortaudioInterface::engineCallbackFunction( void const *input,
       return paAbort;
     }
     readPlaybackBuffers( output );
-    // Todo: Replace by sophisticated return value 
+    // TODO: Replace by sophisticated return value depending on the status of the called functions.
     return paContinue;
   }
   else
@@ -275,7 +288,7 @@ PortaudioInterface::engineCallbackFunction( void const *input,
 void PortaudioInterface::writeCaptureBuffers( void const * input )
 {
   static_assert( std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type." );
-  if( (mSampleFormat != Config::SampleFormat::float32Bit ) or mInterleaved  )
+  if( (mSampleFormat != Config::SampleFormat::float32Bit ) /*or mInterleaved*/  )
   {
     throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in non-interleaved mode." );
   }
@@ -295,7 +308,7 @@ void PortaudioInterface::writeCaptureBuffers( void const * input )
 void PortaudioInterface::readPlaybackBuffers( void * output )
 {
   static_assert(std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type.");
-  if( (mSampleFormat != Config::SampleFormat::float32Bit) or mInterleaved )
+  if( (mSampleFormat != Config::SampleFormat::float32Bit) /*or mInterleaved*/ )
   {
     throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in un-interleaved mode." );
   }
