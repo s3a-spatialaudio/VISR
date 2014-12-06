@@ -7,6 +7,7 @@
 #include <memory>
 #include <new>
 #include <stdexcept>
+#include <utility> // for std::swap
 
 // Workaround for the function std::align() missing in the GNU libstdc++ library
 // (GCC <= 4.9). See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57350
@@ -20,26 +21,92 @@ namespace visr
 namespace efl
 {
 
+/**
+ * A template class to provide memory that is aligned in memory.
+ * Alignment is an important property for speed. The aligement is given as a number of elements.
+ * This means that the pointer to the aligned memory is divisable by alignmentElements*sizeof(T) .
+ * @tparam T The type of the array elements 
+ */
 template< typename T >
 class AlignedArray
 {
 public:
+  /**
+   * Constructor, constructs an empty array and sets the alignment.
+   * Note that this array cannot be dereferenced, and data() returns a null pointer.
+   * @param alignmentElements The requested alignment of the array which will be used if the array is resized to a 
+   */
   explicit AlignedArray( std::size_t alignmentElements );
 
+  /**
+   * Constructor, create an array with a specified number of elements and the given alignment.
+   * @param length The requested length of the array, given as number of elements.
+   * @param alignmentElements The requested alignment of the array.
+   */
   explicit AlignedArray( std::size_t length, std::size_t alignmentElements );
 
   ~AlignedArray();
 
+  /**
+   * Change the number of elements in the array.
+   * The old content of the array is not retained, but the new content is initialized with arbitrary values.
+   * @param newLength The allocated length of the array (in bytes) 
+   */
   void resize( std::size_t newLength );
 
+  /**
+   * Exchange the contents of this object with that of rhs.
+   * Does not throw, thus enabling exception safety for classes using AlignedArray.
+   */
+  void swap( AlignedArray<T>& rhs );
+
+  /**
+   * Return the size of the array (in elements).
+   * This value may differ from the allocated length in order to ensure the 
+   * prescribed alignment.
+   */
+  void size() const { return mLength; }
+
+  /**
+   * Return the alignment of the the data structure (measured in number of elements)
+   * as determined in the constructor.
+   */
+  std::size_t alignmentElements() const { return mAlignment; }
+
+  /**
+   * Return the alignment of the the data structure (measured in bytes)
+   * as determined in the constructor.
+   */
+  std::size_t alignmentBytes( ) const { return mAlignment * sizeof<T>; }
+
+  /**
+   * Return a writable pointer to the data elements.
+   */
   T* data() { return mAlignedStorage; }
 
+  /**
+   * Return a constant pointer to the data elements.
+   */
   T const * data( ) const { return mAlignedStorage; }
 
+  /**
+   * Indexed access, return a modifiable reference to the element addressed by index.
+   * @param index Zero-offset index into the array
+   */
   T& operator[]( std::size_t index ) { return mAlignedStorage[index]; }
 
+  /**
+   * Indexed access, return a constant reference to the element addressed by index.
+   * @param index Zero-offset index into the array
+   */
   T const & operator[]( std::size_t index ) const { return mAlignedStorage[index]; }
 
+  /**
+   * Indexed access, return a modifiable reference to the element addressed by index.
+   * The function variant provides range checking.
+   * @param index Zero-offset index into the array
+   * @throw std::out_of_range if index exceeds the allocated length of the array.
+   */
   T& at( std::size_t index )
   { 
     if( index >= mLength )
@@ -49,6 +116,12 @@ public:
     return operator[]( index );
   }
 
+  /**
+   * Indexed access, return a constant reference to the element addressed by index.
+   * The function variant provides range checking.
+   * @param index Zero-offset index into the array
+   * @throw std::out_of_range if index exceeds the allocated length of the array.
+   */
   T const & at( std::size_t index ) const
   {
     if( index >= mLength ) {
@@ -58,31 +131,65 @@ public:
   }
 
 private:
+  /**
+   * Internal implementation method to allocate the data memory with the alignment passed in the constructor.
+   */
   void allocate( std::size_t length );
+
+  /**
+   * Internal implmenetation method to free the data memory.
+   * Used by the resize() and the destructor.
+   */
   void deallocate( );
 
+  /**
+   * The requested alignment of the array, given as the number of elements.
+   */
   const std::size_t mAlignment;
 
+  /**
+   * The requested size of the array. Due to the mechanism used to achieve alignment,
+   * the actual array might be larger than this length.
+   */
   std::size_t mLength;
 
+  /**
+   * The pointer to the allocated memory.
+   * Depending on the implementation, this pointer might be unaligned.
+   */
   T* mRawStorage;
+
+  /**
+   * The pointer to the aligned memory. This pointer points to a location 
+   * within the memory chunk designated by mRawStorage, but might differ from that one.
+   * This pointer has no ownership over the memory, i.e., it must be used for freeing ressources.
+   */
   T* mAlignedStorage;
 };
 
 template< typename T>
 AlignedArray<T>::AlignedArray( std::size_t alignmentElements )
-: mAlignment( alignmentElements )
-, mLength( 0 )
-, mRawStorage( nullptr )
-, mAlignedStorage( nullptr )
+ : mAlignment( alignmentElements )
+ , mLength( 0 )
+ , mRawStorage( nullptr )
+ , mAlignedStorage( nullptr )
 {
 }
 
 template< typename T>
 AlignedArray<T>::AlignedArray( std::size_t length, std::size_t alignmentElements )
-: mAlignment( alignmentElements )
+ : mAlignment( alignmentElements )
 {
-  allocate( length );
+  if( length > 0 )
+  {
+    allocate( length );
+  }
+  else
+  {
+    mLength = 0;
+    mRawStorage = nullptr;
+    mAlignedStorage = nullptr;
+  }
 }
 
 template< typename T>
@@ -95,7 +202,19 @@ template< typename T>
 void AlignedArray<T>::resize( std::size_t newLength )
 {
   deallocate();
-  allocate( newLength );
+  if( newLength > 0 )
+  {
+    allocate( newLength );
+  }
+}
+
+template< typename T>
+void AlignedArray<T>::swap( AlignedArray<T>& rhs )
+{
+  std::swap( mAlignment, rhs.mAlignment );
+  std::swap( mLength, rhs.mLength );
+  std::swap( mRawStorage, rhs.mRawStorage );
+  std::swap( mAlignedStorage, rhs.mAlignedStorage );
 }
 
 #ifdef __GLIBCXX__

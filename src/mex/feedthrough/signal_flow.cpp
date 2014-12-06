@@ -7,9 +7,9 @@
 
 namespace visr
 {
-namespace apps
+namespace mex
 {
-namespace vbap_renderer
+namespace feedthrough
 {
 
 SignalFlow::SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
@@ -44,21 +44,20 @@ SignalFlow::setup()
   initCommArea( 4, period( ), ril::cVectorAlignmentSamples );
 
   // connect the ports
-  // std::array<std::size_t, 2> const idxList1 = { 0, 1 };
-  assignCommunicationIndices( "Add", "in0", { 0, 1 } );
+  assignCommunicationIndices( "Add", "in0", { 0, 1} );
 
-  // std::array<std::size_t, 2> const idxList2 = { 1, 0 };
-  assignCommunicationIndices( std::string( "Add" ), std::string( "in1" ), { 1, 0 } );
+  assignCommunicationIndices( std::string( "Add" ), std::string( "in1" ), { 0, 1 } );
 
   std::vector<std::size_t> idxList3{ 2, 3 };
   assignCommunicationIndices( std::string( "Add" ), std::string( "out" ), idxList3.begin( ), idxList3.end( ) );
 
+  // Set the indices for communicating the signals from and to the outside world.
   assignCaptureIndices( {0, 1} );
   assignPlaybackIndices( {2, 3} );
 
   setInitialised( true );
 }
 
-} // namespace vbap_renderer
-} // namespace apps
+} // namespace feedthrough
+} // namespace mex
 } // namespace visr
