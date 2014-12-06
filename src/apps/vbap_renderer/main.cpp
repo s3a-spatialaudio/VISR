@@ -19,7 +19,7 @@ int main( int argc, char const * const * argv )
   const std::size_t numberOfLoudspeakers = 2;
 
   const std::size_t periodSize = 1024;
-  const std::size_t samplingRate = 44100;
+  const std::size_t samplingRate = 48000;
 
   try 
   {
@@ -45,17 +45,12 @@ int main( int argc, char const * const * argv )
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
 
+    // Rendering runs until <Return> is entered on the console.
     char c = std::getc( stdin );
 
     audioInterface.stop( );
 
-
-    // not needed if the graph is activated by the callback method.
-    flow.process();
-
-    // there should be a sleep/wait/whatever call to wait for the termination of rendering.
-
-    // Should there be an explicit stop() method for the sound interface?
+   // Should there be an explicit stop() method for the sound interface?
 
     audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
   }
