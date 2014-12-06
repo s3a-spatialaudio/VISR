@@ -300,7 +300,7 @@ void PortaudioInterface::writeCaptureBuffers( void const * input )
   }
   for( std::size_t channelIndex( 0 ); channelIndex < mNumCaptureChannels; ++channelIndex )
   {
-    ril::SampleType * outputPtr = mCommunicationBuffer->at( channelIndex );
+    ril::SampleType * outputPtr = mPlaybackSampleBuffers[channelIndex];
     const std::size_t inStride = (mInterleaved ? mNumCaptureChannels : 1);
     float const * inputPtr = reinterpret_cast<float const *>(input) + (mInterleaved ? channelIndex : channelIndex * mPeriodSize );
     for( std::size_t sampleIdx( 0 ); sampleIdx < mPeriodSize; ++sampleIdx, ++outputPtr )
@@ -320,7 +320,7 @@ void PortaudioInterface::readPlaybackBuffers( void * output )
   }
   for( std::size_t channelIndex( 0 ); channelIndex < mNumPlaybackChannels; ++channelIndex )
   {
-    ril::SampleType const * inputPtr = mCommunicationBuffer->at( mNumCaptureChannels + channelIndex );
+    ril::SampleType const * inputPtr = mCaptureSampleBuffers[channelIndex];
     const std::size_t outStride = (mInterleaved ? mNumPlaybackChannels : 1);
     float * outputPtr = reinterpret_cast<float *>(output)+(mInterleaved ? channelIndex : channelIndex * mPeriodSize);
     for( std::size_t sampleIdx( 0 ); sampleIdx < mPeriodSize; ++sampleIdx, ++inputPtr )
