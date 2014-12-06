@@ -27,19 +27,20 @@ INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 # Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
 
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-############################################################
+###########################################################
 # Define imported libraries
 
-add_library(portaudio SHARED IMPORTED)
 if(WIN32) # This includes 64-bit platforms!
-    set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.dll)
-    set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.dll)
-    set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.lib)
-    set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.lib)
-endif()
-## TODO: Provide locations for other Windows versions and other platforms (Linux/MacOS)
-
+  add_library(portaudio SHARED IMPORTED)
+  set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.dll)
+  set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.dll)
+  set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.lib)
+  set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.lib)
+else(WIN32)
+  find_package( Portaudio )
+endif( WIN32 )
 
 # All actual software components to be built are contained in the src/ directorory
 ADD_SUBDIRECTORY( src )
