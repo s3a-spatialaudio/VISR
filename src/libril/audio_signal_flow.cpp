@@ -73,7 +73,25 @@ AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
   }
 
   // TODO: use a sophisticated enumeration to signal error conditions
-  callbackResult = 0; // should mean 'no error'
+  callbackResult = 0; // Means 'no error'
+}
+
+std::size_t AudioSignalFlow::numberOfCaptureChannels() const
+{
+  if( !initialised() )
+  {
+    throw std::logic_error( "AudioComponent::captureWidth() must be called only after initalisation of the object is complete." );
+  }
+  return mCaptureIndices.size();
+}
+
+std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
+{
+  if( !initialised() )
+  {
+    throw std::logic_error( "AudioComponent::playbackWidth() must be called only after initalisation of the object is complete." );
+  }
+  return mPlaybackIndices.size();
 }
 
 void 
