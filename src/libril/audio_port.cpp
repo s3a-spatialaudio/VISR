@@ -11,9 +11,6 @@ namespace visr
 namespace ril
 {
 
-/**
- * It appears that Visual Studio 2013 does not support this standard-compliant behaviour
- * for static const class members, i.e., it neither accepts nor compiles this explicit definition.
  /**
  * Provide a definition for the static const class members which is required by functions that pass
  * these members a reference.
@@ -23,6 +20,11 @@ namespace ril
  * differs between compilers, therefore there is an additional switch.
  */
 //@{
+/**
+ * It appears that Visual Studio 2013 does not support this standard-compliant behaviour
+ * for static const class members, i.e., it neither accepts nor
+ * compiles this explicit definition.
+ */
 #ifndef _MSC_VER
 
 #if CPP_CONSTEXPR_SUPPORT

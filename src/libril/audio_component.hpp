@@ -21,18 +21,10 @@ class AudioPort;
 class AudioInput;
 class AudioOutput;
 
-#if 0
-// experimental stuff
-class PortDirection
-{
-  enum Type
-  {
-    In,
-    Out
-  };
-};
-#endif
-
+/**
+ *
+ *
+ */
 class AudioComponent
 {
 public:
@@ -42,9 +34,11 @@ public:
 
   explicit AudioComponent( AudioSignalFlow& container, char const * name );
 
+  /**
+   *
+   */
   ~AudioComponent();
-
-
+  
 
   /**
    *
@@ -54,6 +48,13 @@ public:
 
   //@}
 
+  /**
+   * Return the period of the containing signal processing graph,
+   * i.e., the number of samples processed in each invocation of the
+   * process function of the derived audio components.
+   * This methods can be called at any point of the lifetime of the
+   * derived component, i.e., for instance in the constructor.
+   */
   std::size_t period() const { return mContainingFlow.period(); }
 
   template< class PortType >
@@ -92,7 +93,11 @@ public:
   template< typename PortType >
   PortType* getPort( const char* portName) const;
 
+  /**
+   * 
+   */
   CommunicationArea<SampleType>& commArea( ) { return flow( ).getCommArea( ); }
+
   CommunicationArea<SampleType> const & commArea( ) const { return flow( ).getCommArea( ); }
 
 protected:
@@ -104,7 +109,7 @@ protected:
    * Methods to be called by derived audio component classes
    */
   //@{
-// @not needed, replaced by templatized versions.
+  // @not needed, replaced by templatized versions.
   void registerAudioInput( char const * name, AudioInput* port );
   void registerAudioOutput( char const * name, AudioOutput* port );
   //@}
@@ -114,6 +119,8 @@ private:
   using AudioOutputVector = PortVector<AudioOutput>;
 
   /**
+   * Register a port with a type and a unique name within the port.
+   * @param name The name of 
    * @throw In case of a non-unique or invalid port name
    */
   template< class PortType >
