@@ -28,10 +28,6 @@ Add::~Add()
 {
 }
 
-/*virtual*/ void Add::setup()
-{
-}
-
 void Add::setup( std::size_t width, std::size_t numInputs )
 {
   mInputs.reserve( numInputs );
