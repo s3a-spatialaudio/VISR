@@ -12,7 +12,8 @@ enum ErrorCode
 {
   noError = 0,
   alignmentError = 1,
-  arithmeticError = 2
+  arithmeticError = 2,
+  logicError = 3
   // to be continued
 };
 
