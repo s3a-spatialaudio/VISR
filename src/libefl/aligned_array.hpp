@@ -208,10 +208,19 @@ void AlignedArray<ElementType>::resize( std::size_t newLength )
   }
 }
 
+/**
+ * Swap the content with another AlignedArray object.
+ * This method has strong exception safety and does not involve memory allocation or vector copy operations.
+ * @param rhs The object to be swapped with.
+ * @throw std::logic_error If the objects do not have the same alignment.
+ */
 template< typename ElementType>
 void AlignedArray<ElementType>::swap( AlignedArray<ElementType>& rhs )
 {
-  std::swap( mAlignment, rhs.mAlignment );
+  if( mAlignment != rhs.mAlignment )
+  {
+    throw std::logic_error( "AlignedArray::swap(): objects to be swapped must have the same alignment." );
+  }
   std::swap( mLength, rhs.mLength );
   std::swap( mRawStorage, rhs.mRawStorage );
   std::swap( mAlignedStorage, rhs.mAlignedStorage );
