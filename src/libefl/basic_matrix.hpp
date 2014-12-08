@@ -8,6 +8,7 @@
 #include "error_codes.hpp"
 #include "vector_functions.hpp" // for vectorZero
 
+#include <algorithm>
 #include <ciso646> // should not be necessary in C++11, but MSVC requires it for whatever reason.
 #include <stdexcept>
 #include <utility> // for std::swap
@@ -33,21 +34,50 @@ public:
   {
   }
 
-  explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns, ::size_t alignmentElements )
+  explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns, std::size_t alignmentElements )
    : mStride( nextAlignedSize( numberOfColumns, alignmentElements ) )
    , mNumberOfRows( numberOfRows )
    , mNumberOfColumns( numberOfColumns )
    , mData( mStride*mNumberOfRows, alignmentElements )
   {
-     zeroFill();
+    zeroFill();
   }
 
+  explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns,
+                        std::initializer_list< std::initializer_list< ElementType > > const & initialValues,
+                        std::size_t alignmentElements )
+    : mStride( nextAlignedSize( numberOfColumns, alignmentElements ) )
+    , mNumberOfRows( numberOfRows )
+    , mNumberOfColumns( numberOfColumns )
+    , mData( mStride*mNumberOfRows, alignmentElements )
+  {
+    if( initialValues.size() != numberOfRows )
+    {
+      throw std::invalid_argument( "BasicMatrix constructor: The number of lists in the initializer list does not match the number of rows." );
+    }
+    std::size_t rowIdx( 0 );
+    for( auto rowIt = initialValues.begin(); rowIt != initialValues.end(); ++rowIt, ++rowIdx )
+    {
+      std::initializer_list< ElementType > const & colInitialiser = *rowIt;
+      if( colInitialiser.size() != numberOfColumns )
+      {
+        throw std::invalid_argument( "BasicMatrix constructor: The number of elements for each list within the initializer list must match the number of columns." );
+      }
+      std::copy( colInitialiser.begin(), colInitialiser.end(), row( rowIdx ) );
+    }
+  }
+
+  /**
+   * Reset the size of the matrix. All elements will be reset to zero.
+   * @param newNumberOfRow The new number of rows.
+   * @param newNumberOfColumns The new number of columns.
+   */
   void resize( std::size_t newNumberOfRows, std::size_t newNumberOfColumns )
   {
     // Ensure strong exception safety by doing the swap() trick
     std::size_t newStride = nextAlignedSize( newNumberOfColumns, alignmentElements() );
     AlignedArray<ElementType> newData( newStride*newNumberOfRows, alignmentElements() );
-    ErrorCode const res = vectorZero( newData.data( ), newStride*newNumberOfRows );
+    ErrorCode const res = vectorZero( newData.data(), newStride*newNumberOfRows );
     if( res != noError )
     {
       throw std::runtime_error( "Zeroing of matrix failed" );
@@ -65,6 +95,62 @@ public:
     if( res != noError )
     {
       throw std::runtime_error( "Zeroing of matrix failed" );
+    }
+  }
+
+  void fillValue( ElementType val )
+  {
+    ErrorCode const res = vectorFill( val, data(), stride()*numberOfRows() );
+    if( res != noError )
+    {
+      throw std::runtime_error( "Filling of matrix failed" );
+    }
+  }
+
+  /**
+   * Swap the contents with a matrix of a consistent layout.
+   * @param rhs The matrix to be swapped with.
+   * @throw std::logic_error if the matrix layouts, i.e., number of rows or columns,
+   * stride or alignment, are inconsistent.
+   */
+  void swap( BasicMatrix<ElementType> rhs )
+  {
+    if( (numberOfRows() != rhs.numberOfRows()) or( numberOfColumns() != rhs.numberOfColumns() )
+      or( stride() != rhs.stride() ) or( alignmentElements() != rhs.alignmentElements() ) )
+    {
+      throw std::logic_error( "BasicMatrix::swap(): Matrix layout must be consistent for swapping" );
+    }
+    mData.swap( rhs.mData );
+  }
+
+  /**
+   * Copy the content of matrix.
+   * @param rhs The matrix to be copied.
+   * @throw std::invalid_argument if the size of rhs does not match this matrix.
+   */
+  void copy( BasicMatrix<ElementType> const & rhs )
+  {
+    const std::size_t minAlignment = std::min( alignmentElements(), rhs.alignmentElements() );
+    if( (numberOfRows() != rhs.numberOfRows()) or( numberOfColumns() != rhs.numberOfColumns() ) )
+    {
+      throw std::invalid_argument( "BasicMatrix::copy(): Matrix size inconsistent." );
+    }
+    if( rhs.stride() == stride() )
+    {
+      if( vectorCopy( rhs.data( ), data( ), numberOfRows( ) * stride( ), minAlignment ) != noError )
+      {
+        throw std::runtime_error( "BasicMatrix::copy() failed: " );
+      }
+    }
+    else
+    {
+      for( std::size_t rowIdx( 0 ); rowIdx < numberOfRows(); ++rowIdx )
+      {
+        if( vectorCopy( rhs.row( rowIdx ), row( rowIdx ), numberOfColumns( ), minAlignment ) != noError )
+        {
+          throw std::runtime_error( "BasicMatrix::copy() failed: " );
+        }
+      }
     }
   }
 
