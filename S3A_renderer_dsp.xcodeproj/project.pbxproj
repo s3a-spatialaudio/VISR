@@ -7,27 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC924C921A2351590030B5F2 /* speakers.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = FC924C901A2344320030B5F2 /* speakers.txt */; };
+		FCB3E5191A1B59E70086403E /* LoudspeakerArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCB3E5171A1B59E70086403E /* LoudspeakerArray.cpp */; };
 		FCE75EAA1A11152A00A95851 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCE75EA91A11152A00A95851 /* main.cpp */; };
-		FCE75EAC1A11152A00A95851 /* S3A_renderer_core.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = FCE75EAB1A11152A00A95851 /* S3A_renderer_core.1 */; };
+		FCE75EB41A1116AC00A95851 /* Vbap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCE75EB21A1116AC00A95851 /* Vbap.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		FCE75EA41A11152A00A95851 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				FCE75EAC1A11152A00A95851 /* S3A_renderer_core.1 in CopyFiles */,
+				FC924C921A2351590030B5F2 /* speakers.txt in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		FCE75EA61A11152A00A95851 /* S3A_renderer_core */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = S3A_renderer_core; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC924C901A2344320030B5F2 /* speakers.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = speakers.txt; sourceTree = "<group>"; };
+		FC924C911A2345AB0030B5F2 /* speakers.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = speakers.txt; path = S3A_renderer_eg/speakers.txt; sourceTree = "<group>"; };
+		FCB3E5171A1B59E70086403E /* LoudspeakerArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoudspeakerArray.cpp; sourceTree = "<group>"; };
+		FCB3E5181A1B59E70086403E /* LoudspeakerArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoudspeakerArray.h; sourceTree = "<group>"; };
+		FCE75EA61A11152A00A95851 /* S3A_renderer_dsp */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = S3A_renderer_dsp; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCE75EA91A11152A00A95851 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		FCE75EAB1A11152A00A95851 /* S3A_renderer_core.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = S3A_renderer_core.1; sourceTree = "<group>"; };
+		FCE75EB21A1116AC00A95851 /* Vbap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vbap.cpp; sourceTree = "<group>"; };
+		FCE75EB31A1116AC00A95851 /* Vbap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vbap.h; sourceTree = "<group>"; };
+		FCE75EB81A1125AD00A95851 /* defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,34 +52,40 @@
 		FCE75E9D1A11152A00A95851 = {
 			isa = PBXGroup;
 			children = (
-				FCE75EA81A11152A00A95851 /* S3A_renderer_core */,
+				FCE75EB81A1125AD00A95851 /* defs.h */,
+				FCE75EB21A1116AC00A95851 /* Vbap.cpp */,
+				FCE75EB31A1116AC00A95851 /* Vbap.h */,
+				FCB3E5171A1B59E70086403E /* LoudspeakerArray.cpp */,
+				FCB3E5181A1B59E70086403E /* LoudspeakerArray.h */,
+				FCE75EA81A11152A00A95851 /* S3A_renderer_eg */,
 				FCE75EA71A11152A00A95851 /* Products */,
+				FC924C911A2345AB0030B5F2 /* speakers.txt */,
 			);
 			sourceTree = "<group>";
 		};
 		FCE75EA71A11152A00A95851 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FCE75EA61A11152A00A95851 /* S3A_renderer_core */,
+				FCE75EA61A11152A00A95851 /* S3A_renderer_dsp */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		FCE75EA81A11152A00A95851 /* S3A_renderer_core */ = {
+		FCE75EA81A11152A00A95851 /* S3A_renderer_eg */ = {
 			isa = PBXGroup;
 			children = (
+				FC924C901A2344320030B5F2 /* speakers.txt */,
 				FCE75EA91A11152A00A95851 /* main.cpp */,
-				FCE75EAB1A11152A00A95851 /* S3A_renderer_core.1 */,
 			);
-			path = S3A_renderer_core;
+			path = S3A_renderer_eg;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		FCE75EA51A11152A00A95851 /* S3A_renderer_core */ = {
+		FCE75EA51A11152A00A95851 /* S3A_renderer_dsp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FCE75EAF1A11152A00A95851 /* Build configuration list for PBXNativeTarget "S3A_renderer_core" */;
+			buildConfigurationList = FCE75EAF1A11152A00A95851 /* Build configuration list for PBXNativeTarget "S3A_renderer_dsp" */;
 			buildPhases = (
 				FCE75EA21A11152A00A95851 /* Sources */,
 				FCE75EA31A11152A00A95851 /* Frameworks */,
@@ -81,9 +95,9 @@
 			);
 			dependencies = (
 			);
-			name = S3A_renderer_core;
+			name = S3A_renderer_dsp;
 			productName = S3A_renderer_core;
-			productReference = FCE75EA61A11152A00A95851 /* S3A_renderer_core */;
+			productReference = FCE75EA61A11152A00A95851 /* S3A_renderer_dsp */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -92,10 +106,11 @@
 		FCE75E9E1A11152A00A95851 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = s3a;
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "ISVR, Southampton University";
 			};
-			buildConfigurationList = FCE75EA11A11152A00A95851 /* Build configuration list for PBXProject "S3A_renderer_core" */;
+			buildConfigurationList = FCE75EA11A11152A00A95851 /* Build configuration list for PBXProject "S3A_renderer_dsp" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -107,7 +122,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				FCE75EA51A11152A00A95851 /* S3A_renderer_core */,
+				FCE75EA51A11152A00A95851 /* S3A_renderer_dsp */,
 			);
 		};
 /* End PBXProject section */
@@ -118,6 +133,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCE75EAA1A11152A00A95851 /* main.cpp in Sources */,
+				FCE75EB41A1116AC00A95851 /* Vbap.cpp in Sources */,
+				FCB3E5191A1B59E70086403E /* LoudspeakerArray.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -184,21 +201,21 @@
 		FCE75EB01A11152A00A95851 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = S3A_renderer_dsp;
 			};
 			name = Debug;
 		};
 		FCE75EB11A11152A00A95851 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = S3A_renderer_dsp;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FCE75EA11A11152A00A95851 /* Build configuration list for PBXProject "S3A_renderer_core" */ = {
+		FCE75EA11A11152A00A95851 /* Build configuration list for PBXProject "S3A_renderer_dsp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FCE75EAD1A11152A00A95851 /* Debug */,
@@ -207,13 +224,14 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FCE75EAF1A11152A00A95851 /* Build configuration list for PBXNativeTarget "S3A_renderer_core" */ = {
+		FCE75EAF1A11152A00A95851 /* Build configuration list for PBXNativeTarget "S3A_renderer_dsp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FCE75EB01A11152A00A95851 /* Debug */,
 				FCE75EB11A11152A00A95851 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
