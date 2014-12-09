@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_APPS_VBAP_RENDERER_VBAP_RENDER_FLOW_HPP_INCLUDED
-#define VISR_APPS_VBAP_RENDERER_VBAP_RENDER_FLOW_HPP_INCLUDED
+#ifndef VISR_APPS_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
+#define VISR_APPS_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -13,7 +13,7 @@ namespace visr
 {
 namespace apps
 {
-namespace vbap_renderer
+namespace feedthrough
 {
 
 class SignalFlow: public ril::AudioSignalFlow
@@ -31,8 +31,8 @@ private:
   rcl::Add mSum;
 };
 
-} // namespace vbap_renderer
+} // namespace feedthrough
 } // namespace apps
 } // namespace visr
 
-#endif // #ifndef VISR_APPS_VBAP_RENDERER_VBAP_RENDER_FLOW_HPP_INCLUDED
+#endif // #ifndef VISR_APPS_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED

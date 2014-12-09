@@ -2,6 +2,6 @@
 
 # Common base directory for all applications.
 
-ADD_SUBDIRECTORY( vbap_renderer )
+ADD_SUBDIRECTORY( feedthrough )
 
 # To be continued.
