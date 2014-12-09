@@ -13,23 +13,23 @@
 int LoudspeakerArray::readFile(FILE *file)
 {
     //system("pwd");
-    int n,i,err,iSpk;
+    int n,i,err;
     char c;
-    Xyz pos;
-    // Triangle tri;
+    Afloat x,y,z;
+    int l1,l2,l3;
     
-    if (file==0) return -1;
+    if (file == 0) return -1;
 
     do {
         
         fscanf(file, "%c", &c);
-        if (c == 's') {
-            n = fscanf(file, "%d %f %f %f\n", &i, &pos[0],&pos[1],&pos[2]);
-            if (i <= MAX_NUM_SPEAKERS) setPosition(i-1, &pos);
+        if (c == 'l') {
+            n = fscanf(file, "%d %f %f %f\n", &i, &x, &y, &z);
+            if (i <= MAX_NUM_SPEAKERS) setPosition(i-1,x,y,z);
         }
         else if (c == 't') {
-            n = fscanf(file, "%d %d %d %d\n", &i, &tri[0],&tri[1],&tri[2]);
-            
+            n = fscanf(file, "%d %d %d %d\n", &i, &l1, &l2, &l3);
+            if (i <= MAX_NUM_LOUDSPEAKER_TRIPLETS) setTriplet(i-1, l1, l2, l3);
         }
         
         err = feof(file);

@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC13D19A1A3771B0009221FF /* XYZ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FC13D1981A3771B0009221FF /* XYZ.cpp */; };
 		FC924C921A2351590030B5F2 /* speakers.txt in CopyFiles */ = {isa = PBXBuildFile; fileRef = FC924C901A2344320030B5F2 /* speakers.txt */; };
 		FCB3E5191A1B59E70086403E /* LoudspeakerArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCB3E5171A1B59E70086403E /* LoudspeakerArray.cpp */; };
 		FCE75EAA1A11152A00A95851 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCE75EA91A11152A00A95851 /* main.cpp */; };
-		FCE75EB41A1116AC00A95851 /* Vbap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCE75EB21A1116AC00A95851 /* Vbap.cpp */; };
+		FCE75EB41A1116AC00A95851 /* VBAP-.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FCE75EB21A1116AC00A95851 /* VBAP-.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -27,14 +28,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FC13D1981A3771B0009221FF /* XYZ.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XYZ.cpp; sourceTree = "<group>"; };
+		FC13D1991A3771B0009221FF /* XYZ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XYZ.h; sourceTree = "<group>"; };
 		FC924C901A2344320030B5F2 /* speakers.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = speakers.txt; sourceTree = "<group>"; };
 		FC924C911A2345AB0030B5F2 /* speakers.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = speakers.txt; path = S3A_renderer_eg/speakers.txt; sourceTree = "<group>"; };
 		FCB3E5171A1B59E70086403E /* LoudspeakerArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoudspeakerArray.cpp; sourceTree = "<group>"; };
 		FCB3E5181A1B59E70086403E /* LoudspeakerArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoudspeakerArray.h; sourceTree = "<group>"; };
 		FCE75EA61A11152A00A95851 /* S3A_renderer_dsp */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = S3A_renderer_dsp; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCE75EA91A11152A00A95851 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		FCE75EB21A1116AC00A95851 /* Vbap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vbap.cpp; sourceTree = "<group>"; };
-		FCE75EB31A1116AC00A95851 /* Vbap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vbap.h; sourceTree = "<group>"; };
+		FCE75EB21A1116AC00A95851 /* VBAP-.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "VBAP-.cpp"; sourceTree = "<group>"; };
+		FCE75EB31A1116AC00A95851 /* VBAP-.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VBAP-.h"; sourceTree = "<group>"; };
 		FCE75EB81A1125AD00A95851 /* defs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = defs.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -53,8 +56,10 @@
 			isa = PBXGroup;
 			children = (
 				FCE75EB81A1125AD00A95851 /* defs.h */,
-				FCE75EB21A1116AC00A95851 /* Vbap.cpp */,
-				FCE75EB31A1116AC00A95851 /* Vbap.h */,
+				FCE75EB21A1116AC00A95851 /* VBAP-.cpp */,
+				FC13D1981A3771B0009221FF /* XYZ.cpp */,
+				FC13D1991A3771B0009221FF /* XYZ.h */,
+				FCE75EB31A1116AC00A95851 /* VBAP-.h */,
 				FCB3E5171A1B59E70086403E /* LoudspeakerArray.cpp */,
 				FCB3E5181A1B59E70086403E /* LoudspeakerArray.h */,
 				FCE75EA81A11152A00A95851 /* S3A_renderer_eg */,
@@ -133,8 +138,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCE75EAA1A11152A00A95851 /* main.cpp in Sources */,
-				FCE75EB41A1116AC00A95851 /* Vbap.cpp in Sources */,
+				FCE75EB41A1116AC00A95851 /* VBAP-.cpp in Sources */,
 				FCB3E5191A1B59E70086403E /* LoudspeakerArray.cpp in Sources */,
+				FC13D19A1A3771B0009221FF /* XYZ.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

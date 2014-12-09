@@ -15,7 +15,7 @@
 
 typedef float Afloat;
 
-typedef Afloat Xyz[3];  // cartesian vector
+//typedef Afloat Xyz[3];  // cartesian vector
 
 
 

@@ -16,9 +16,10 @@
 #include <stdio.h>
 
 #include "defs.h"
+#include "XYZ.h"
 
 #define MAX_NUM_SPEAKERS 128
-#define MAX_NUM_SPEAKER_TRIPLETS 256
+#define MAX_NUM_LOUDSPEAKER_TRIPLETS 256
 
 
 class LoudspeakerArray
@@ -32,18 +33,27 @@ public:
     int m_nSpeakers = 0;
     int m_nTriplets = 0;
     
-    Xyz m_position[MAX_NUM_SPEAKERS];
+    XYZ m_position[MAX_NUM_SPEAKERS];
     bool m_isDirectionMode = false;
-    int m_triplet[MAX_NUM_SPEAKER_TRIPLETS][3];
+    int m_triplet[MAX_NUM_LOUDSPEAKER_TRIPLETS][3];
     
     
     
     int readFile(FILE *file);
     
     
-//    int setPosition(int iSpk, Xyz *pos){ m_position[iSpk] = *pos; };
+    int setPosition(int iSpk, Afloat x, Afloat y, Afloat z){
+        m_position[iSpk].set(x, y, z);
+        return 0;
+    };
+    
 //    Xyz* getPosition(int iSpk){ return &m_position[iSpk]; };
-//    int setTriplet(int iTri, Xyz *pos);
+    int setTriplet(int iTri, int l1, int l2, int l3){
+        m_triplet[iTri][0] = l1;
+        m_triplet[iTri][1] = l2;
+        m_triplet[iTri][2] = l3;
+        return 0;
+    }
 //    int getTriplet(int iTri, Xyz *pos);
 
 };
