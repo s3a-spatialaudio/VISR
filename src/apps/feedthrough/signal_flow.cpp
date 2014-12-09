@@ -9,7 +9,7 @@ namespace visr
 {
 namespace apps
 {
-namespace vbap_renderer
+namespace feedthrough
 {
 
 SignalFlow::SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
@@ -59,6 +59,6 @@ SignalFlow::setup()
   setInitialised( true );
 }
 
-} // namespace vbap_renderer
+} // namespace feedthrough
 } // namespace apps
 } // namespace visr
