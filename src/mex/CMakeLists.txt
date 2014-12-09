@@ -2,3 +2,4 @@
 
 # Simple external to test the functionality of the mex interface
 ADD_SUBDIRECTORY( feedthrough )
+ADD_SUBDIRECTORY( gain_matrix )
