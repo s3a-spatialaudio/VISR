@@ -12,7 +12,7 @@
 int main( int argc, char const * const * argv )
 {
   using namespace visr;
-  using namespace visr::apps::vbap_renderer;
+  using namespace visr::apps::feedthrough;
 
   // define fixed parameters for rendering
   const std::size_t numberOfObjects = 2;
@@ -35,8 +35,6 @@ int main( int argc, char const * const * argv )
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     SignalFlow flow( periodSize, samplingRate );
-
-    std::cout << "Hello world. When I'm grown up, I wanna be a VBAP renderer" << std::endl;
 
     flow.setup();
 
