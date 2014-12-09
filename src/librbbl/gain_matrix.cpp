@@ -175,8 +175,8 @@ void GainMatrix<ElementType>::setGainsInternal( efl::BasicMatrix<ElementType> co
 }
 
 // explicit instantiations
-template GainMatrix<float>;
-template GainMatrix<double>;
+template class GainMatrix<float>;
+template class GainMatrix<double>;
 
 } // namespace rbbl
 } // namespace visr
