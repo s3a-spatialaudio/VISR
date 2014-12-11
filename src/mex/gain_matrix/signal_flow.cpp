@@ -2,7 +2,7 @@
 
 #include "signal_flow.hpp"
 
-#include <array>
+#include <algorithm>
 #include <vector>
 
 namespace visr
@@ -12,9 +12,29 @@ namespace mex
 namespace gain_matrix
 {
 
-SignalFlow::SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
+// create a helper function in an unnamed namespace
+  std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
+  {
+    if( endIdx < startIdx )
+    {
+      return std::vector<std::size_t>();
+    }
+    std::size_t const vecLength( endIdx - startIdx + 1 );
+    std::vector < std::size_t> ret( vecLength );
+    std::generate( ret.begin(), ret.end(), [&] { return startIdx++; } );
+    return ret;
+  }
+
+SignalFlow::SignalFlow( std::size_t numberOfInputs,
+  std::size_t numberOfOutputs,
+  std::size_t interpolationPeriod,
+  std::size_t period, ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
- , mSum( *this, "Add" )
+ , cNumberOfInputs( numberOfInputs )
+ , cNumberOfOutputs( numberOfOutputs )
+ , cInterpolationSteps( interpolationPeriod )
+ , mMatrix( *this, "GainMatrix" )
+ , mCounter( 0 )
 {
 }
 
@@ -25,35 +45,40 @@ SignalFlow::~SignalFlow( )
 /*virtual*/ void 
 SignalFlow::process()
 {
-  // TODO: implement me!
-  mSum.process();
+  if( ++mCounter % 32 == 0 )
+  {
+    mMatrix.setGains( mNewMtx );
+    mCounter = 0;
+  }
+  mMatrix.process();
 }
 
 /*virtual*/ void 
 SignalFlow::setup()
 {
   // Initialise and configure audio components
-  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
+  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
 
-  // Define and set the width of the input and output vectors of the graph
-
-  // Set up communication area 
-  // the required width of the communication area is determined by the number of capture inputs of the graph plus 
-  // the number of port outputs.
-  // Note: The alignment of the communication area should be fixed to this value with no user options.
-  initCommArea( 4, period( ), ril::cVectorAlignmentSamples );
+  initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
   // connect the ports
-  assignCommunicationIndices( "Add", "in0", { 0, 1} );
+  assignCommunicationIndices( "GainMatrix", "in", indexRange( 0, cNumberOfInputs-1 ) );
 
-  assignCommunicationIndices( std::string( "Add" ), std::string( "in1" ), { 0, 1 } );
-
-  std::vector<std::size_t> idxList3{ 2, 3 };
-  assignCommunicationIndices( std::string( "Add" ), std::string( "out" ), idxList3.begin( ), idxList3.end( ) );
+  assignCommunicationIndices( "GainMatrix", "out", indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
 
   // Set the indices for communicating the signals from and to the outside world.
-  assignCaptureIndices( {0, 1} );
-  assignPlaybackIndices( {2, 3} );
+  std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
+  std::vector<ril::AudioPort::SignalIndexType> playbackIndices = indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 );
+
+  assignCaptureIndices( &captureIndices[0], captureIndices.size() );
+  assignPlaybackIndices( &playbackIndices[0], playbackIndices.size( ) );
+
+  assignCaptureIndices( indexRange( 0, cNumberOfInputs - 1 ) );
+  assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
+
+  mNewMtx.resize( cNumberOfOutputs, cNumberOfInputs );
+  mNewMtx( 0, 0 ) = 0.5;
+  mNewMtx( 1, 1 ) = 0;
 
   // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );
