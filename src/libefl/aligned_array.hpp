@@ -132,6 +132,16 @@ public:
 
 private:
   /**
+   * Default constructor (disabled)
+   */
+  AlignedArray() = delete;
+
+  /**
+   * Disabled copy constructor.
+   */
+  AlignedArray( AlignedArray< ElementType > const & ) = delete;
+
+  /**
    * Internal implementation method to allocate the data memory with the alignment passed in the constructor.
    */
   void allocate( std::size_t length );
@@ -178,7 +188,7 @@ AlignedArray<ElementType>::AlignedArray( std::size_t alignmentElements )
 
 template< typename ElementType>
 AlignedArray<ElementType>::AlignedArray( std::size_t length, std::size_t alignmentElements )
- : mAlignment( alignmentElements )
+ : AlignedArray( alignmentElements )
 {
   if( length > 0 )
   {
@@ -265,6 +275,7 @@ void AlignedArray<ElementType>::allocate( std::size_t length )
   }
   // todo: should we check the updated 'space' parameter? 
   mAlignedStorage = static_cast<ElementType*>(retPtr);
+  mLength = length;
 }
 
 template< typename ElementType>
