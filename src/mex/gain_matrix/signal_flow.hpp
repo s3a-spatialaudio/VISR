@@ -5,9 +5,9 @@
 
 #include <libril/audio_signal_flow.hpp>
 
-#include <librcl/add.hpp>
+#include <librcl/gain_matrix.hpp>
 
-#include <librrl/portaudio_interface.hpp>
+#include <libefl/basic_matrix.hpp>
 
 namespace visr
 {
@@ -19,7 +19,10 @@ namespace gain_matrix
 class SignalFlow: public ril::AudioSignalFlow
 {
 public:
-  explicit SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+  explicit SignalFlow( std::size_t numberOfInputs, 
+                       std::size_t numberOfOutputs,
+                       std::size_t interpolationPeriod,
+                       std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~SignalFlow();
 
@@ -28,7 +31,20 @@ public:
   /*virtual*/ void setup( );
 
 private:
-  rcl::Add mSum;
+  const std::size_t cNumberOfInputs;
+
+  const std::size_t cNumberOfOutputs;
+
+  const std::size_t cInterpolationSteps;
+
+  rcl::GainMatrix mMatrix;
+
+  efl::BasicMatrix<ril::SampleType> mNewMtx;
+
+  /**
+   * Counter to trigger a switch of the gain matrix.
+   */
+  std::size_t mCounter;
 };
 
 } // namespace gain_matrix
