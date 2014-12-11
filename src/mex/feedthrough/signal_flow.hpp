@@ -7,8 +7,6 @@
 
 #include <librcl/add.hpp>
 
-#include <librrl/portaudio_interface.hpp>
-
 namespace visr
 {
 namespace mex
