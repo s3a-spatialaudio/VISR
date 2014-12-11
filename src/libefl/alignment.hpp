@@ -27,6 +27,10 @@ bool checkAlignment( T const * ptr, std::size_t alignment )
 
 inline std::size_t nextAlignedSize( std::size_t size, std::size_t alignment )
 {
+  if( alignment == 0 )
+  {
+    return size;
+  }
   std::size_t const rem = size % alignment;
   if( rem == 0 )
   {
