@@ -41,7 +41,8 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   }
   mNumberOfInputs = numberOfInputs;
   mNumberOfOutputs = numberOfOutputs;
-  mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ), interpolationSteps, initialGains ) );
+  mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ),
+                 interpolationSteps, initialGains, ril::cVectorAlignmentSamples ) );
 }
 
 void GainMatrix::process()
