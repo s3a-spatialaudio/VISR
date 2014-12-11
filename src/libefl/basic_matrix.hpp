@@ -26,7 +26,7 @@ template< typename ElementType >
 class BasicMatrix
 {
 public:
-  explicit BasicMatrix( std::size_t alignmentElements )
+  explicit BasicMatrix( std::size_t alignmentElements = 0 )
    : mStride( 0 )
    , mNumberOfRows( 0 )
    , mNumberOfColumns( 0 )
@@ -34,7 +34,7 @@ public:
   {
   }
 
-  explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns, std::size_t alignmentElements )
+  explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns, std::size_t alignmentElements = 0 )
    : mStride( nextAlignedSize( numberOfColumns, alignmentElements ) )
    , mNumberOfRows( numberOfRows )
    , mNumberOfColumns( numberOfColumns )
@@ -45,7 +45,7 @@ public:
 
   explicit BasicMatrix( std::size_t numberOfRows, std::size_t numberOfColumns,
                         std::initializer_list< std::initializer_list< ElementType > > const & initialValues,
-                        std::size_t alignmentElements )
+                        std::size_t alignmentElements = 0 )
     : mStride( nextAlignedSize( numberOfColumns, alignmentElements ) )
     , mNumberOfRows( numberOfRows )
     , mNumberOfColumns( numberOfColumns )
@@ -65,6 +65,10 @@ public:
       }
       std::copy( colInitialiser.begin(), colInitialiser.end(), row( rowIdx ) );
     }
+  }
+
+  ~BasicMatrix()
+  {
   }
 
   /**
@@ -113,7 +117,7 @@ public:
    * @throw std::logic_error if the matrix layouts, i.e., number of rows or columns,
    * stride or alignment, are inconsistent.
    */
-  void swap( BasicMatrix<ElementType> rhs )
+  void swap( BasicMatrix<ElementType>& rhs )
   {
     if( (numberOfRows() != rhs.numberOfRows()) or( numberOfColumns() != rhs.numberOfColumns() )
       or( stride() != rhs.stride() ) or( alignmentElements() != rhs.alignmentElements() ) )
@@ -213,6 +217,9 @@ public:
   }
 
 private:
+  //BasicMatrix( ) = delete;
+  //BasicMatrix( const BasicMatrix< ElementType>& ) = default;
+
   std::size_t mStride;
 
   std::size_t mNumberOfRows;
