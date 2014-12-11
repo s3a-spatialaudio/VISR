@@ -181,6 +181,17 @@ protected:
   }
 
   /**
+   * @tparam ContainerType.
+   */
+  template<typename ContainerType>
+  void assignCommunicationIndices( std::string const & componentName,
+    std::string const & portName,
+    ContainerType const& indexSequence )
+  {
+    assignCommunicationIndices( componentName, portName, std::begin( indexSequence ), std::end( indexSequence ) );
+  }
+
+  /**
   * Set the indices of a port of an AudioComponent from a brace-enclosed list
   * written directly into the source code.
   * Preferred method for hard-coded signal flows
@@ -214,6 +225,19 @@ protected:
   void assignCaptureIndices( AudioPort::SignalIndexType const * indexArrayPtr, std::size_t vecLength );
 
   void assignPlaybackIndices( AudioPort::SignalIndexType const * indexArrayPtr, std::size_t vecLength );
+
+  template< typename ContainerType >
+  void assignCaptureIndices( ContainerType const& indexSequence )
+  {
+    mCaptureIndices.assign( std::begin( indexSequence ), std::end( indexSequence ) );
+  }
+
+  template< typename ContainerType >
+  void assignPlaybackIndices( ContainerType const& indexSequence )
+  {
+    mPlaybackIndices.assign( std::begin( indexSequence ), std::end( indexSequence ) );
+  }
+
   //@}
 
   /**
