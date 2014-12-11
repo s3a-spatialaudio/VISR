@@ -20,8 +20,9 @@ GainMatrix<ElementType>::GainMatrix( std::size_t numberOfInputs,
  , mNextGains( numberOfOutputs, numberOfInputs, alignment )
  , mBlockSize( blockLength )
  , mInterpolationPeriods( interpolationSteps / blockLength ) // we check later whether it's without remainder
+ , mInterpolationCounter( 0 )
  , mRamp( (mInterpolationPeriods + 1)*blockLength, alignment )
- , mTempBuffer( mBlockSize )
+ , mTempBuffer( blockLength, alignment )
 {
   if( interpolationSteps % blockLength != 0 )
   {
@@ -41,7 +42,7 @@ GainMatrix<ElementType>::GainMatrix( std::size_t numberOfInputs,
       throw std::logic_error( "GainMatrix: Creation of interpolation ramp failed" );
     }
   }
-  efl::ErrorCode const res = efl::vectorFill( static_cast<ElementType>(0.0),
+  efl::ErrorCode const res = efl::vectorFill( static_cast<ElementType>(1.0),
                                               mRamp.data() + mInterpolationPeriods * mBlockSize,
                                               mBlockSize, alignment );
   if( res != efl::noError)
