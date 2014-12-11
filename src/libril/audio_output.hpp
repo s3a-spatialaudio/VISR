@@ -46,7 +46,7 @@ public:
     return operator[]( index );
   }
 
-  SampleType const * const * getVector( )
+  SampleType * const * getVector( )
   {
 #ifndef NDEBUG
     if( !initialised( ) ) {
