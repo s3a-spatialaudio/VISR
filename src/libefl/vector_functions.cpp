@@ -79,6 +79,7 @@ ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T end
   T const step = (endVal - startVal) / static_cast<T>(numSteps);
   std::size_t calcIdx( startInclusive ? 0 : 1 );
   std::generate( dest, dest + numElements, [&] { return startVal + static_cast<T>(calcIdx++) * step; } );
+  return noError;
 }
 // explicit instantiations
 template ErrorCode vectorRamp( float * const, std::size_t , float, float, bool, bool, std::size_t );
