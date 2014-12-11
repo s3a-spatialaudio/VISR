@@ -8,9 +8,12 @@
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
 
+// TODO: make it a forward declaration
 #include <librbbl/gain_matrix.hpp>
 
-// For some reason, the forward declaration causes a compile error on MSVC
+// For some reason, the forward declaration causes a compile error on MSVC,
+// so we include the header for the moment.
+// Also, I am not sure whether it makes sense to use a separate type as an alias to efl::BasicMatrix
 #include <libpml/matrix_parameter.hpp>
 
 #include <libefl/aligned_array.hpp>
@@ -21,14 +24,6 @@
 namespace visr
 {
 
-#if 0
-// Forward declarations
-namespace pml
-{
-template<typename ElementType>
-class MatrixParameter;
-} // namespace pml
-#endif
 namespace rcl
 {
 
@@ -81,12 +76,23 @@ public:
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,
               std::size_t interpolationSteps,
-              pml::MatrixParameter< ril::SampleType > const & initialMatrix );
+              efl::BasicMatrix< SampleType > const & initialGains );
 
-  void process();
+  void process( );
+
+  void setGains( efl::BasicMatrix< SampleType > const & newGains );
 
 private:
-  rbbl::GainMatrix< SampleType > mMatrix;
+  std::unique_ptr< rbbl::GainMatrix< SampleType > > mMatrix;
+
+  ril::AudioInput mInput;
+  ril::AudioOutput mOutput;
+
+  /**
+   * 
+   */
+  std::size_t mNumberOfInputs;
+  std::size_t mNumberOfOutputs;
 };
 
 } // namespace rcl
