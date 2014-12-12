@@ -45,10 +45,9 @@ SignalFlow::~SignalFlow( )
 /*virtual*/ void 
 SignalFlow::process()
 {
-  if( ++mCounter % 32 == 0 )
+  if( ++mCounter % 8 == 0 )
   {
-    mMatrix.setGains( mNewMtx );
-    mCounter = 0;
+    mMatrix.setGains( mCounter % 16 == 0 ? mNewMtx1 : mNewMtx2 );    
   }
   mMatrix.process();
 }
@@ -57,7 +56,7 @@ SignalFlow::process()
 SignalFlow::setup()
 {
   // Initialise and configure audio components
-  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
+  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 0.0f );
 
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
@@ -76,9 +75,15 @@ SignalFlow::setup()
   assignCaptureIndices( indexRange( 0, cNumberOfInputs - 1 ) );
   assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
 
-  mNewMtx.resize( cNumberOfOutputs, cNumberOfInputs );
-  mNewMtx( 0, 0 ) = 0.5;
-  mNewMtx( 1, 1 ) = 0;
+  mNewMtx1.resize( cNumberOfOutputs, cNumberOfInputs );
+  mNewMtx1( 0, 0 ) = 0.5f;
+  mNewMtx1( 1, 1 ) = 0.5f;
+
+  mNewMtx2.resize( cNumberOfOutputs, cNumberOfInputs );
+  mNewMtx2( 0, 1 ) = 0.4f;
+  mNewMtx2( 1, 0 ) = 0.4f;
+  mNewMtx2( 3, 0 ) = 0.5f;
+  mNewMtx2( 3, 1 ) = -0.2f;
 
   // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );
