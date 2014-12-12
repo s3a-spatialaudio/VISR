@@ -101,7 +101,7 @@ PortaudioInterface::PortaudioInterface( Config const & config )
   }
   for( std::size_t playbackIndex( 0 ); playbackIndex < mNumPlaybackChannels; ++playbackIndex )
   {
-    mPlaybackSampleBuffers[playbackIndex] = mCommunicationBuffer->at( playbackIndex );
+    mPlaybackSampleBuffers[playbackIndex] = mCommunicationBuffer->at( mNumCaptureChannels + playbackIndex );
   }
 
   PaError ret;
@@ -270,7 +270,7 @@ PortaudioInterface::engineCallbackFunction( void const *input,
 {
   if( mCallback )
   {
-    writeCaptureBuffers( input );
+    transferCaptureBuffers( input );
     CallbackResult res;
     try
     {
@@ -281,7 +281,7 @@ PortaudioInterface::engineCallbackFunction( void const *input,
       std::cerr << "Error during execution of audio callback: " << e.what() << std::endl;
       return paAbort;
     }
-    readPlaybackBuffers( output );
+    transferPlaybackBuffers( output );
     // TODO: Replace by sophisticated return value depending on the status of the called functions.
     return paContinue;
   }
@@ -291,16 +291,40 @@ PortaudioInterface::engineCallbackFunction( void const *input,
   }
 }
 
-void PortaudioInterface::writeCaptureBuffers( void const * input )
+void PortaudioInterface::transferPlaybackBuffers( void * output )
 {
   static_assert( std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type." );
   if( (mSampleFormat != Config::SampleFormat::float32Bit ) /*or mInterleaved*/  )
   {
     throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in non-interleaved mode." );
   }
+  for( std::size_t channelIndex( 0 ); channelIndex < mNumPlaybackChannels; ++channelIndex )
+  {
+    ril::SampleType const * inputPtr = mPlaybackSampleBuffers[channelIndex];
+    const std::size_t outStride = (mInterleaved ? mNumPlaybackChannels : 1);
+    // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
+    // pointer arrays to sample vectors.
+    float * outputPtr = mInterleaved ?
+      reinterpret_cast<float *>(output) + channelIndex :
+      reinterpret_cast<float * const * >(output)[channelIndex];
+    for( std::size_t sampleIdx( 0 ); sampleIdx < mPeriodSize; ++sampleIdx, ++inputPtr )
+    {
+      *outputPtr = *inputPtr;
+      outputPtr += outStride;
+    }
+  }
+}
+
+void PortaudioInterface::transferCaptureBuffers( void const * input )
+{
+  static_assert(std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type.");
+  if( (mSampleFormat != Config::SampleFormat::float32Bit) /*or mInterleaved*/ )
+  {
+    throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in un-interleaved mode." );
+  }
   for( std::size_t channelIndex( 0 ); channelIndex < mNumCaptureChannels; ++channelIndex )
   {
-    ril::SampleType * outputPtr = mPlaybackSampleBuffers[channelIndex];
+    ril::SampleType * outputPtr = mCaptureSampleBuffers[channelIndex];
     const std::size_t inStride = (mInterleaved ? mNumCaptureChannels : 1);
     // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
     // pointer arrays to sample vectors.
@@ -315,29 +339,6 @@ void PortaudioInterface::writeCaptureBuffers( void const * input )
   }
 }
 
-void PortaudioInterface::readPlaybackBuffers( void * output )
-{
-  static_assert(std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type.");
-  if( (mSampleFormat != Config::SampleFormat::float32Bit) /*or mInterleaved*/ )
-  {
-    throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in un-interleaved mode." );
-  }
-  for( std::size_t channelIndex( 0 ); channelIndex < mNumPlaybackChannels; ++channelIndex )
-  {
-    ril::SampleType const * inputPtr = mCaptureSampleBuffers[channelIndex];
-    const std::size_t outStride = (mInterleaved ? mNumPlaybackChannels : 1);
-    // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
-    // pointer arrays to sample vectors.
-    float * outputPtr = mInterleaved ?
-      reinterpret_cast<float *>(output) + channelIndex :
-      reinterpret_cast<float * const * >(output)[channelIndex];
-    for( std::size_t sampleIdx( 0 ); sampleIdx < mPeriodSize; ++sampleIdx, ++inputPtr )
-    {
-      *outputPtr = *inputPtr;
-      outputPtr += outStride;
-    }
-  }
-}
 
 } // namespace rrl
 } // namespace visr
