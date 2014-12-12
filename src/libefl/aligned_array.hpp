@@ -3,6 +3,8 @@
 #ifndef VISR_LIBEFL_ALIGNED_ARRAY_HPP_INCLUDED
 #define VISR_LIBEFL_ALIGNED_ARRAY_HPP_INCLUDED
 
+#include "alignment.hpp"
+
 #include <cstddef> // for std::size_t
 #include <memory>
 #include <new>
@@ -13,7 +15,7 @@
 // (GCC <= 4.9). See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57350
 // TODO: Remove as soon as feature has been implemented on all supported platforms
 #ifdef __GLIBCXX__
-#include <cstdint> // needed for the type std::uintptr_t used in the workarounf implementation
+#include <cstdint> // needed for the type std::uintptr_t used in the workaround implementation
 #endif
 
 namespace visr
@@ -25,7 +27,7 @@ namespace efl
  * A template class to provide memory that is aligned in memory.
  * Alignment is an important property for speed. The aligement is given as a number of elements.
  * This means that the pointer to the aligned memory is divisable by alignmentElements*sizeof(T) .
- * @tparam ElementType The type of the array elements 
+ * @tparam ElementType The type of the array elements
  */
 template< typename ElementType >
 class AlignedArray
@@ -34,14 +36,23 @@ public:
   /**
    * Constructor, constructs an empty array and sets the alignment.
    * Note that this array cannot be dereferenced, and data() returns a null pointer.
-   * @param alignmentElements The requested alignment of the array which will be used if the array is resized to a 
+   * @param alignmentElements The requested alignment of the array
+   * which will be used if the array is resized to a non-zero length.
+   * The alignment must be a one or an integral power of two. A value
+   * of zero is supported, but transformed to 2 internally.
+   * @throw std::invalid_argument If the alignment value is not an
+   * integer power of 2 (or 0 or 1)
    */
   explicit AlignedArray( std::size_t alignmentElements );
 
   /**
    * Constructor, create an array with a specified number of elements and the given alignment.
    * @param length The requested length of the array, given as number of elements.
-   * @param alignmentElements The requested alignment of the array.
+   * @param alignmentElements The requested alignment of the
+   * array. The alignment must be a one or an integral power of two. A
+   * value of zero is supported, but transformed to 2 internally.
+   * @throw std::invalid_argument If the alignment value is not an
+   * integer power of 2 (or 0 or 1)
    */
   explicit AlignedArray( std::size_t length, std::size_t alignmentElements );
 
@@ -50,7 +61,7 @@ public:
   /**
    * Change the number of elements in the array.
    * The old content of the array is not retained, but the new content is initialized with arbitrary values.
-   * @param newLength The allocated length of the array (in bytes) 
+   * @param newLength The allocated length of the array (in bytes)
    */
   void resize( std::size_t newLength );
 
@@ -62,7 +73,7 @@ public:
 
   /**
    * Return the size of the array (in elements).
-   * This value may differ from the allocated length in order to ensure the 
+   * This value may differ from the allocated length in order to ensure the
    * prescribed alignment.
    */
   void size() const { return mLength; }
@@ -108,7 +119,7 @@ public:
    * @throw std::out_of_range if index exceeds the allocated length of the array.
    */
   ElementType& at( std::size_t index )
-  { 
+  {
     if( index >= mLength )
     {
       throw std::out_of_range( "Array index exceeded" );
@@ -170,7 +181,7 @@ private:
   ElementType* mRawStorage;
 
   /**
-   * The pointer to the aligned memory. This pointer points to a location 
+   * The pointer to the aligned memory. This pointer points to a location
    * within the memory chunk designated by mRawStorage, but might differ from that one.
    * This pointer has no ownership over the memory, i.e., it must be used for freeing ressources.
    */
@@ -179,11 +190,15 @@ private:
 
 template< typename ElementType>
 AlignedArray<ElementType>::AlignedArray( std::size_t alignmentElements )
- : mAlignment( alignmentElements )
+  : mAlignment( alignmentElements == 0 ? 1 : alignmentElements )
  , mLength( 0 )
  , mRawStorage( nullptr )
  , mAlignedStorage( nullptr )
 {
+  if( !alignmentIsPowerOfTwo( mAlignment ) )
+  {
+    throw std::invalid_argument( "AlignedArray: alignment values must be integer powers of 2" );
+  }
 }
 
 template< typename ElementType>
@@ -273,7 +288,7 @@ void AlignedArray<ElementType>::allocate( std::size_t length )
     deallocate(); // Set the object into a defined, valid state.
     throw std::bad_alloc();
   }
-  // todo: should we check the updated 'space' parameter? 
+  // todo: should we check the updated 'space' parameter?
   mAlignedStorage = static_cast<ElementType*>(retPtr);
   mLength = length;
 }
