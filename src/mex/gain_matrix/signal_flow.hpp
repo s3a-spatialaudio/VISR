@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
-#define VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
+#ifndef VISR_MEX_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#define VISR_MEX_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -39,7 +39,9 @@ private:
 
   rcl::GainMatrix mMatrix;
 
-  efl::BasicMatrix<ril::SampleType> mNewMtx;
+  efl::BasicMatrix<ril::SampleType> mNewMtx1;
+
+  efl::BasicMatrix<ril::SampleType> mNewMtx2;
 
   /**
    * Counter to trigger a switch of the gain matrix.
@@ -51,4 +53,4 @@ private:
 } // namespace mex
 } // namespace visr
 
-#endif // #ifndef VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
+#endif // #ifndef VISR_MEX_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
