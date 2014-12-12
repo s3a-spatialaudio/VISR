@@ -88,6 +88,11 @@ template< typename ElementType >
 void GainMatrix<ElementType>::process( ElementType const * const * input, ElementType * const * output,
                                        efl::BasicMatrix<ElementType> const& newGains )
 {
+  if( (newGains.numberOfRows() != mPreviousGains.numberOfRows())
+       or (newGains.numberOfColumns() != mPreviousGains.numberOfColumns()) )
+  {
+    throw std::invalid_argument( "GainMatrix::process(): Dimension of new gain matrix does not match." );
+  }
   setGainsInternal( newGains );
   processAudio( input, output );
   // advance the interpolation counter
@@ -100,6 +105,11 @@ void GainMatrix<ElementType>::process( ElementType const * const * input, Elemen
 template< typename ElementType >
 void GainMatrix<ElementType>::setNewGains( efl::BasicMatrix<ElementType> const& newGains )
 {
+  if( (newGains.numberOfRows() != mPreviousGains.numberOfRows())
+       or (newGains.numberOfColumns() != mPreviousGains.numberOfColumns()) )
+  {
+    throw std::invalid_argument( "GainMatrix::setNewGains(): Dimension of new gain matrix does not match." );
+  }
   setGainsInternal( newGains );
 }
 
@@ -124,7 +134,7 @@ void GainMatrix<ElementType>::processAudio( ElementType const * const * input, E
     for( std::size_t inputIdx( 0 ); inputIdx < numInputs; ++inputIdx )
     {
       ElementType const oldGain = mPreviousGains( outputIdx, inputIdx );
-      res = efl::vectorFill( oldGain, mTempBuffer.data(), mBlockSize );
+      res = efl::vectorFill( oldGain, mTempBuffer.data(), mBlockSize, alignElements );
       if( res != efl::noError )
       {
         throw std::runtime_error( "GainMatrix::process(): Calculation of interpolation ramp failed." );
