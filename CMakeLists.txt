@@ -10,6 +10,9 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 # The name of our top-level project.
 PROJECT( VISR CXX )
 
+# Add support for unit tests
+INCLUDE( CTest )
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 # TBD: Switch between GNU compiler and clang on Linux platforms
