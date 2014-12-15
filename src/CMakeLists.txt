@@ -5,6 +5,9 @@
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
+# Panning library, compute a panning gains for a loudspeaker configuration 
+ADD_SUBDIRECTORY( libpanning )
+
 # Parameter message library
 ADD_SUBDIRECTORY( libpml )
 
