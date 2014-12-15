@@ -1,4 +1,4 @@
-# Copyright Institute of Sound and Vibratioin Research - All rights reserved
+# Copyright Institute of Sound and Vibration Research - All rights reserved
 
 INCLUDE_DIRECTORIES( "($PROJECT_SOURCE_DIR)/libril" )
 

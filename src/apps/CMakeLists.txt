@@ -1,4 +1,4 @@
-# Copyright Institute of Sound and Vibratioin Research - All rights reserved
+# Copyright Institute of Sound and Vibration Research - All rights reserved
 
 # Common base directory for all applications.
 
