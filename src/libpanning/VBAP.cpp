@@ -3,7 +3,7 @@
 //  l3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 10/11/2014.
-//  Copyright (c) 2014 ISVR, Southampton University. All rights reserved.
+//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
 #include "VBAP.h"
@@ -46,15 +46,22 @@ int VBAP::calcInvMatrices(){
 
 
 int VBAP::calcGains(){
+    
     int i,j,l1,l2,l3;
     Afloat* inv;
     Afloat g1,g2,g3,g,x,y,z;
     
     for(i = 0; i < m_nSources; i++) {
         
-        x = m_sourcePos[i].x - m_listenerPos.x;
-        y = m_sourcePos[i].y - m_listenerPos.y;
-        z = m_sourcePos[i].z - m_listenerPos.z;
+        x = (*m_sourcePos)[i].x;
+        y = (*m_sourcePos)[i].y;
+        z = (*m_sourcePos)[i].z;
+        
+        if (!(*m_sourcePos)[i].isAtInfinity) {
+            x -= m_listenerPos.x;
+            y -= m_listenerPos.y;
+            z -= m_listenerPos.z;
+        }
         
         for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
         
@@ -64,8 +71,8 @@ int VBAP::calcGains(){
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
-            if (g1 >= 0 && g2 >= 0 && g3 >= 0) { //* Slow triplet search
-                // g = g1+g2+g3; //* probably more appropriate.
+            if (g1 >= 0 && g2 >= 0 && g3 >= 0) { //! Slow triplet search
+                // g = g1+g2+g3; //! probably more appropriate.
                 g = sqrt(g1*g1+g2*g2+g3*g3);
                 g1 = g1 / g;
                 g2 = g2 / g;
@@ -76,6 +83,7 @@ int VBAP::calcGains(){
                 m_gain[i][l1] += g1;
                 m_gain[i][l2] += g2;
                 m_gain[i][l3] += g3;
+                break;
             }
         }
 

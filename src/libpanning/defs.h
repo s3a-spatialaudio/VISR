@@ -3,7 +3,7 @@
 //  S3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 10/11/2014.
-//  Copyright (c) 2014 ISVR, Southampton University. All rights reserved.
+//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
 #ifndef S3A_renderer_dsp_defs_h

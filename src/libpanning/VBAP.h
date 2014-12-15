@@ -3,7 +3,7 @@
 //  S3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 10/11/2014.
-//  Copyright (c) 2014 ISVR, Southampton University. All rights reserved.
+//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
 #ifndef __S3A_renderer_dsp__VBAP__
@@ -29,7 +29,7 @@ private:
     Afloat m_invMatrix[MAX_NUM_LOUDSPEAKER_TRIPLETS][9];
     Afloat m_gain[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS];
     XYZ m_listenerPos;
-    XYZ* m_sourcePos;
+    XYZ (*m_sourcePos)[MAX_NUM_SOURCES];
     int m_nSources;
     
     
@@ -40,14 +40,14 @@ public:
         return 0;
     }
     
-    int setListenerPos(Afloat x, Afloat y, Afloat z){
+    int setListenerPosition(Afloat x, Afloat y, Afloat z){
         m_listenerPos.set(x, y, z);
         return 0;
     }
     
     int calcInvMatrices();
     
-    int setSourcePos(XYZ* sp) {
+    int setSourcePositions(XYZ (*sp)[MAX_NUM_SOURCES]) {
         m_sourcePos = sp;
         return 0;
     }
@@ -63,8 +63,8 @@ public:
     
     int calcGains();
     
-    Afloat* getGains() {
-        return &(m_gain[0][0]);
+    Afloat (*getGains())[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS] {
+        return &m_gain;
     }
     
 };
