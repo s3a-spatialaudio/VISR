@@ -6,3 +6,6 @@ SET( SOURCES AllRAD.cpp LoudspeakerArray.cpp VBAP.cpp XYZ.cpp )
 SET( HEADERS AllRAD.h LoudspeakerArray.h VBAP.h XYZ.h)
 
 ADD_LIBRARY( panning STATIC ${SOURCES} ${HEADERS} )
+
+# Add the unit tests.
+ADD_SUBDIRECTORY( test )
