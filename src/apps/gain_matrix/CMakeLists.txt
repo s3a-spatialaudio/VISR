@@ -1,4 +1,4 @@
-# Copyright Institute of Sound and Vibratioin Research - All rights reserved
+# Copyright Institute of Sound and Vibration Research - All rights reserved
 
 ADD_EXECUTABLE( gain_matrix_app main.cpp signal_flow.cpp )
 
