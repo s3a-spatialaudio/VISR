@@ -9,26 +9,37 @@
 #ifndef __S3A_renderer_dsp__XYZ__
 #define __S3A_renderer_dsp__XYZ__
 
-#include <iostream>
-#include <math.h>
 #include "defs.h"
 
-class XYZ {
-private:
+#include <iostream>
+#include <cmath>
 
-public:
-    Afloat x, y, z;
-    bool isAtInfinity; // eg for source at infinity.
+class XYZ {
+ private:
+
+ public:
+ /**
+  * Default constructor.
+  */
+   XYZ()
+    : x( 0.0f )
+    , y( 0.0f )
+    , z( 0.0f )
+    , isAtInfinity( false )
+   {}
+
+  Afloat x, y, z;
+  bool isAtInfinity; // eg for source at infinity.
     
-    int set(Afloat X, Afloat Y, Afloat Z) {
-        x = X; y = Y; z =Z;
-        return 0;
-    };
+  int set(Afloat X, Afloat Y, Afloat Z, bool atInfinity = false) {
+    x = X; y = Y; z =Z;
+    isAtInfinity = false;
+    return 0;
+  };
     
-    Afloat getLength() {
-        return sqrt(x*x + y*y + z*z);
-    }
-    
+  Afloat getLength() const {
+    return std::sqrt(x*x + y*y + z*z);
+  }    
 };
 
 

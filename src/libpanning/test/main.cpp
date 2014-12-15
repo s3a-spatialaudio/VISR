@@ -7,11 +7,11 @@
 //
 
 
-#include "VBAP.h"
-#include "AllRAD.h"
+#include <libpanning/VBAP.h>
+#include <libpanning/AllRAD.h>
 
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 
 int main(int argc, const char * argv[])
 {
@@ -31,19 +31,21 @@ int main(int argc, const char * argv[])
     
     file = fopen("octahedron.txt","r");
     if (array.load(file) == -1) return -1;
+    fclose( file );
+    file = 0;
 
     vbap.setLoudspeakerArray(&array);
     vbap.calcInvMatrices();
     
     vbap.setNumSources(10);
-    sourcePos[0].set(1.0, 1.0, 1.0);
-    sourcePos[1].set(1.0, 0.0, 0.0);
-    sourcePos[2].set(0.0, 1.0, 0.0);
-    sourcePos[3].set(0.0, 0.0, 1.0);
-    sourcePos[4].set(-1.0, 0.0, 0.0);
-    sourcePos[5].set(0.0, -1.0, 0.0);
-    sourcePos[6].set(0.0, 0.0, -1.0);
-    sourcePos[7].set(-1.0, -1.0, -1.0);
+    sourcePos[0].set(1.0, 1.0, 1.0, false);
+    sourcePos[1].set(1.0, 0.0, 0.0, false);
+    sourcePos[2].set(0.0, 1.0, 0.0, false);
+    sourcePos[3].set(0.0, 0.0, 1.0, false);
+    sourcePos[4].set(-1.0, 0.0, 0.0, false);
+    sourcePos[5].set(0.0, -1.0, 0.0, false);
+    sourcePos[6].set(0.0, 0.0, -1.0, false);
+    sourcePos[7].set(-1.0, -1.0, -1.0, false);
     vbap.setSourcePositions(&sourcePos);
     
     vbap.setListenerPosition(0.0, 0.0, 0.0);
@@ -63,15 +65,23 @@ int main(int argc, const char * argv[])
     
     file = fopen("octahedron.txt","r");
     if (array.load(file) == -1) return -1;
-    
+    fclose( file );
+    file = 0;
+
     vbap.setLoudspeakerArray(&array);
     
     
     file = fopen("t-design_t=8_40point.txt","r");
+    
     if (allrad.loadRegArray(file) == -1) return -1;
+    fclose( file );
+    file = 0;
     
     file = fopen("decode_test1-8.txt","r");   //fopen("decode_order3_t8-40.txt","r");
+
     if (allrad.loadRegDecodeGains(file, 1, 8) == -1) return -1;
+    // fclose( file );
+    // file = 0;
 
     
     
