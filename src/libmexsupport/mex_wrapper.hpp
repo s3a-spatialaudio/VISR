@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_MEX_MEX_WRAPPER_HPP_INCLUDED
-#define VISR_MEX_MEX_WRAPPER_HPP_INCLUDED
+#ifndef VISR_MEXSUPPORT_MEX_WRAPPER_HPP_INCLUDED
+#define VISR_MEXSUPPORT_MEX_WRAPPER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
 
@@ -20,7 +20,7 @@ class AudioSignalFlow;
 template<typename SampleType> class CommunicationArea;
 }
 
-namespace mex
+namespace mexsupport
 {
 
 class MexWrapper
@@ -71,7 +71,7 @@ private:
   std::unique_ptr<ril::CommunicationArea< ril::SampleType > > mCommBuffer;
 };
 
-} // namespace mex
+} // namespace mexsupport
 } // namespace visr
 
-#endif // #ifndef VISR_MEX_MEX_WRAPPER_HPP_INCLUDED
+#endif // #ifndef VISR_MEXSUPPORT_MEX_WRAPPER_HPP_INCLUDED
