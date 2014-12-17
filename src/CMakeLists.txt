@@ -28,5 +28,9 @@ ADD_SUBDIRECTORY( apps )
 
 # Subdirectory for Matlab Mex externals
 IF( BUILD_MATLAB_EXTERNALS )
+  # Library containing general support classes and functions for Matlab Mex externals
+  ADD_SUBDIRECTORY( libmexsupport )
+
+  # Directory containing the Mex externals itself
   ADD_SUBDIRECTORY( mex )
 ENDIF(BUILD_MATLAB_EXTERNALS)

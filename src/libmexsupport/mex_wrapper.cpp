@@ -13,7 +13,7 @@
 
 namespace visr
 {
-namespace mex
+namespace mexsupport
 {
 
 MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
@@ -189,5 +189,5 @@ template void MexWrapper::transferOutputSamples<mxDOUBLE_CLASS>( std::size_t blo
 
 //@}
 
-} // namespace mex
+} // namespace mexsupport
 } // namespace visr
