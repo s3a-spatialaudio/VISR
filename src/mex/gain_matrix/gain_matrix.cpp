@@ -1,7 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All Rights reserved */
 
-#include "mex_wrapper.hpp"
 #include "signal_flow.hpp"
+
+#include <libmexsupport/mex_wrapper.hpp>
 
 #include <libril/constants.hpp>
 
@@ -92,8 +93,8 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     mex::gain_matrix::SignalFlow flow( cNumberOfInputs, cNumberOfOutputs, cInterpolationLength, periodSize, samplingFrequency );
     flow.setup();
 
-    mex::MexWrapper mexWrapper( flow, prhs[0], plhs[0],
-                                hasParameterArg ? prhs[1] : nullptr );
+    mexsupport::MexWrapper mexWrapper( flow, prhs[0], plhs[0],
+				       hasParameterArg ? prhs[1] : nullptr );
 
     mexWrapper.process();
 #endif
