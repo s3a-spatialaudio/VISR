@@ -19,7 +19,7 @@ DelayVector::DelayVector( ril::AudioSignalFlow& container, char const * name )
 void DelayVector::setup( std::size_t numberOfChannels, 
                          std::size_t interpolationSteps,
                          SampleType maximumDelaySeconds,
-                         SampleType initialDelaySeconds /* = static_cast<SampleType>(0.0) */,
+                         SampleType initialDelaySeconds /* = static_cast<SampleType>(1.0) */,
                          SampleType initialGainLinear /* = static_cast<SampleType>(0.0) */ )
 {
 }

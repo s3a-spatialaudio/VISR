@@ -58,13 +58,14 @@ public:
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
-              SampleType initialGainLinear = static_cast<SampleType>(0.0) );
+              SampleType initialGainLinear = static_cast<SampleType>(1.0) );
   /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfChannels The number of signals in the input signal.
-  * @param interpolationSteps The number of samples needed for the transition after a new gain is set.
+  * @param interpolationSteps The number of samples needed for the
+  * transition after a new delay and/or gain is set.
   * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
-  * immediate application of the new gain value.
+  * immediate application of the new delay/gain values.
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
   * @param initialDelaysSeconds The delays for all channels in
@@ -76,7 +77,7 @@ public:
   */
   void setup( std::size_t numberOfChannels,
               std::size_t interpolationSteps,
-              SampleType maximumDelay,
+              SampleType maximumDelaySeconds,
               efl::BasicMatrix< SampleType > const & initialDelaysSeconds,
               efl::BasicMatrix< SampleType > const & initialGainsLinear );
 
