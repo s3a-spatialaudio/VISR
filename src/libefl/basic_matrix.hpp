@@ -73,7 +73,7 @@ public:
 
   /**
    * Reset the size of the matrix. All elements will be reset to zero.
-   * @param newNumberOfRow The new number of rows.
+   * @param newNumberOfRows The new number of rows.
    * @param newNumberOfColumns The new number of columns.
    */
   void resize( std::size_t newNumberOfRows, std::size_t newNumberOfColumns )

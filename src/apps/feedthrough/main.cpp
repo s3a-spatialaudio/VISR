@@ -44,7 +44,7 @@ int main( int argc, char const * const * argv )
     audioInterface.start( );
 
     // Rendering runs until <Return> is entered on the console.
-    char c = std::getc( stdin );
+    std::getc( stdin );
 
     audioInterface.stop( );
 
