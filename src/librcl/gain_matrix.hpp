@@ -70,7 +70,7 @@ public:
   * @param interpolationSteps The number of samples needed for the transition after a new gain is set.
   * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
   * immediate application of the new gain value.
-  * @param initialMatrix The initial entries of the the gain matrix (linear scale). The row and column 
+  * @param initialGains The initial entries of the the gain matrix (linear scale). The row and column
   * numbers of the matrix must match the arguments numberOfOutputs and numberOfInputs, respectively.
   */
   void setup( std::size_t numberOfInputs,
