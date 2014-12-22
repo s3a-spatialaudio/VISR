@@ -26,7 +26,7 @@ ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numEle
  * Instantiated for element types float and double.
  * @tparam T The Sample type
  * @param dest The array to be filled
- * @param numelements The number of element of the ramp.
+ * @param numElements The number of element of the ramp.
  * @param startVal The start value of the ramp.
  * @param endVal  The end value of the ramp.
  * @param startInclusive Switch whether the first ramp value is startVal (true) or whether the ramp is constructed
