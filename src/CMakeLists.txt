@@ -5,6 +5,9 @@
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
+# Object model library.
+ADD_SUBDIRECTORY( libobjectmodel )
+
 # Panning library, compute a panning gains for a loudspeaker configuration 
 ADD_SUBDIRECTORY( libpanning )
 
