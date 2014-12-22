@@ -4,6 +4,7 @@
 #define VISR_OBJECTMODEL_AUDIO_OBJECT_HPP_INCLUDED
 
 #include <cstdint>
+#include <memory>
 
 namespace visr
 {
@@ -14,9 +15,6 @@ namespace objectmodel
 using ObjectId = unsigned int;
 
 using GroupId = unsigned int;
-
-enum class Colors : std::int8_t { RED = 1, GREEN = 2, BLUE = 3 };
-
 
 /**
  * A numeric id to uniquely describe object types.
@@ -48,6 +46,12 @@ public:
   void setObjectId( ObjectId newId );
 
   void setGroupId( ObjectId newId );
+
+  /**
+   * Must be implemented in every derived instantiated class.
+   */
+  virtual std::unique_ptr<AudioObject> clone() const = 0;
+
 protected:
 
 private:

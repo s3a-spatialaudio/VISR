@@ -7,6 +7,14 @@ namespace visr
 namespace objectmodel
 {
 
+AudioObject::AudioObject( ObjectId id )
+{
+}
+
+/*virtual*/ AudioObject::~AudioObject()
+{
+}
+
 void AudioObject::setObjectId( ObjectId newId )
 {
   mObjectId = newId;
