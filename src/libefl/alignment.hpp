@@ -7,7 +7,8 @@
 #include <ciso646> // for 'or' (should be obsolete in C++11, but MSVC 2013 still needs it)
 
 /**
- * @file A collection of utility functions for dealing with
+ * @file alignment.hpp
+ * A collection of utility functions for dealing with
  * memory-aligned sequences of memory.
  * @note Within this project, alignment is typically given as a number
  * of elements, as opposed to a number of bytes.
