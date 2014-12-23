@@ -14,13 +14,13 @@ namespace objectmodel
 {
 
 /**
- *
+ * A class representing a set of audio objects of potentially different types.
  */
 class ObjectVector
 {
 public:
   /**
-   * The type used to store the contents
+   * The type used to store the the different object types polymorphically.
    */
   using ObjectContainer = std::map< ObjectId, std::unique_ptr<AudioObject > >;
 
@@ -30,33 +30,73 @@ public:
   ObjectVector();
 
   /**
-   * Check: Explicitly define default copy constructor
+   * Explicitly defined default copy constructor.
+   * @todo Check whether copy construction is sensible for this object.
    */
   ObjectVector( ObjectVector const & rhs ) = default;
 
+  /**
+   * Explicitly defined default copy constructor, move constructor flavour.
+   * @todo Check whether copy construction is sensible for this object.
+   */
   ObjectVector( ObjectVector && rhs ) = default;
 
-
+  /**
+   * Explicit definition of default assignment operator.
+   */
   ObjectVector& operator=( ObjectVector const & rhs ) = default;
 
+  /**
+   * Explicit definition of default assignment operator, move constructor flavour.
+   */
   ObjectVector& operator=( ObjectVector && rhs ) = default;
 
   /**
-   *
+   * Destructor.
    */
   ~ObjectVector();
 
   /**
+   * Return the number of contained audio objects.
+   */
+  std::size_t size() const { return mObjects.size(); }
+
+  /**
+   * Return whether the object vector is empty.
+   */
+  bool empty() const { return mObjects.empty(); }
+
+  /**
    * Return a reference to an audio object in the vector.
-   * @param The object id of the object to retrieved
+   * @param id The object id of the object to retrieved
+   * @throw std::invalid_argument If no object with the given \p id exists in the vector.
+   */
+  AudioObject & at( ObjectId id );
+
+  /**
+   * Return a reference to an audio object in the vector (const version)
+   * @param id The object id of the object to retrieved
    * @throw std::invalid_argument If no object with the given \p id exists in the vector.
    */
   AudioObject const & at( ObjectId id ) const;
 
-  AudioObject & at( ObjectId id );
 
-
+  /**
+   * Add a new audio object to the vector, possibly replacing an existing one with the same id.
+   * The object is copied, and the ObjectVector takes ownership of the copy.
+   * @param id The object id of the audio object.
+   * @param obj The object to be inserted (copied).
+   */
   void set( ObjectId id, AudioObject const &  obj );
+
+  /**
+   * Add a new audio object to the vector, possibly replacing an existing one with the same id, move constructor flavour.
+   * The object is copied, and the ObjectVector takes ownership of the copy.
+   * @param id The object id of the audio object.
+   * @param obj The object to be inserted (copied).
+   */
+  void set( ObjectId id, AudioObject &&  obj );
+
 
 private:
   ObjectContainer mObjects;

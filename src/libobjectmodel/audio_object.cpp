@@ -8,6 +8,8 @@ namespace objectmodel
 {
 
 AudioObject::AudioObject( ObjectId id )
+ : mObjectId( id )
+ , mGroupId( 0 )
 {
 }
 
