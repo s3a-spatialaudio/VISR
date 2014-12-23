@@ -1,0 +1,14 @@
+/*!
+ @page Installatiob and build instructions
+
+
+ @section Handling of Third-Party Libraries.
+ In general, it is preferable to use the platforms package installation mechanisms to provide additional software components/libraries  
+  
+ @subsection Building and Finding Boost on Windows platforms (Visual Studio) 
+  * Download the Boost source distribution, e.g., boost_1_57_0.zip or boost_1_57_0.tar.bz2
+  * Open the command prompt for the Visual Studio version you are targeting
+  * Execute <b>VC/vcvarsall amd64</b> to switch the compiler toolchain to 64-bit mode 
+ 
+ 
+ */
