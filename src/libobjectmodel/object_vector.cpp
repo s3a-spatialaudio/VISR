@@ -18,7 +18,7 @@ ObjectVector::~ObjectVector()
 {
 }
 
-AudioObject const & ObjectVector::at( ObjectId id ) const
+Object const & ObjectVector::at( ObjectId id ) const
 {
   ObjectContainer::const_iterator findIt = mObjects.find( id );
   if( findIt == mObjects.end() )
@@ -28,7 +28,7 @@ AudioObject const & ObjectVector::at( ObjectId id ) const
   return *(findIt->second);
 }
 
-AudioObject & ObjectVector::at( ObjectId id )
+Object & ObjectVector::at( ObjectId id )
 {
   ObjectContainer::iterator findIt = mObjects.find( id );
   if( findIt == mObjects.end() )
@@ -38,7 +38,7 @@ AudioObject & ObjectVector::at( ObjectId id )
   return *(findIt->second);
 }
 
-void ObjectVector::set( ObjectId id, AudioObject const &  obj )
+void ObjectVector::set( ObjectId id, Object const &  obj )
 {
   ObjectContainer::iterator findIt = mObjects.find( id );
   if( findIt == mObjects.end() )

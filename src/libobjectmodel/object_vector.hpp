@@ -3,7 +3,7 @@
 #ifndef VISR_OBJECTMODEL_OBJECT_VECTOR_HPP_INCLUDED
 #define VISR_OBJECTMODEL_OBJECT_VECTOR_HPP_INCLUDED
 
-#include "audio_object.hpp"
+#include "object.hpp"
 
 #include <map>
 #include <memory>
@@ -22,7 +22,7 @@ public:
   /**
    * The type used to store the the different object types polymorphically.
    */
-  using ObjectContainer = std::map< ObjectId, std::unique_ptr<AudioObject > >;
+  using ObjectContainer = std::map< ObjectId, std::unique_ptr<Object > >;
 
   /**
    * Default constructor, creates an empty object vector
@@ -71,14 +71,14 @@ public:
    * @param id The object id of the object to retrieved
    * @throw std::invalid_argument If no object with the given \p id exists in the vector.
    */
-  AudioObject & at( ObjectId id );
+  Object & at( ObjectId id );
 
   /**
    * Return a reference to an audio object in the vector (const version)
    * @param id The object id of the object to retrieved
    * @throw std::invalid_argument If no object with the given \p id exists in the vector.
    */
-  AudioObject const & at( ObjectId id ) const;
+  Object const & at( ObjectId id ) const;
 
 
   /**
@@ -87,7 +87,7 @@ public:
    * @param id The object id of the audio object.
    * @param obj The object to be inserted (copied).
    */
-  void set( ObjectId id, AudioObject const &  obj );
+  void set( ObjectId id, Object const &  obj );
 
   /**
    * Add a new audio object to the vector, possibly replacing an existing one with the same id, move constructor flavour.
@@ -95,7 +95,7 @@ public:
    * @param id The object id of the audio object.
    * @param obj The object to be inserted (copied).
    */
-  void set( ObjectId id, AudioObject &&  obj );
+  void set( ObjectId id, Object &&  obj );
 
 
 private:

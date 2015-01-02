@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libobjectmodel/audio_object.hpp>
+#include <libobjectmodel/object.hpp>
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/point_source.hpp>
 
@@ -35,12 +35,12 @@ BOOST_AUTO_TEST_CASE( InstantiatePointSources )
   BOOST_CHECK( scene.size() == 2 );
 
   BOOST_CHECK_NO_THROW( scene.at( id1 ) );
-  AudioObject const & retrievedObj1 = scene.at( id1 );
+  Object const & retrievedObj1 = scene.at( id1 );
 
   BOOST_CHECK( s1.id() == retrievedObj1.id() );
 
   // attempt access to source with non-existing ID
-  BOOST_CHECK_THROW( AudioObject const & retrievedObjInvld = scene.at( 5 ), std::exception );
+  BOOST_CHECK_THROW( Object const & retrievedObjInvld = scene.at( 5 ), std::exception );
 
   PointSource s3( id1 );
 

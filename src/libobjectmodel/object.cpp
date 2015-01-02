@@ -1,34 +1,34 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "audio_object.hpp"
+#include "object.hpp"
 
 namespace visr
 {
 namespace objectmodel
 {
 
-AudioObject::AudioObject( )
+Object::Object( )
  : mObjectId(cInvalidObjectId )
  , mGroupId( cDefaultGroupId )
 {
 }
 
-AudioObject::AudioObject( ObjectId id )
+Object::Object( ObjectId id )
  : mObjectId( id )
  , mGroupId( cDefaultGroupId )
 {
 }
 
-/*virtual*/ AudioObject::~AudioObject()
+/*virtual*/ Object::~Object()
 {
 }
 
-void AudioObject::setObjectId( ObjectId newId )
+void Object::setObjectId( ObjectId newId )
 {
   mObjectId = newId;
 }
 
-void AudioObject::setGroupId( ObjectId newId )
+void Object::setGroupId( ObjectId newId )
 {
   mGroupId = newId;
 }

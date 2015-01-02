@@ -3,7 +3,7 @@
 #ifndef VISR_OBJECTMODEL_OBJECT_FACTORY_HPP_INCLUDED
 #define VISR_OBJECTMODEL_OBJECT_FACTORY_HPP_INCLUDED
 
-#include "audio_object.hpp"
+#include "object.hpp"
 #include "object_type.hpp"
 
 #include <boost/function.hpp>
@@ -19,7 +19,7 @@ namespace objectmodel
 class ObjectFactory
 {
 public:
-  static std::unique_ptr<AudioObject> create( ObjectTypeId typeId );
+  static std::unique_ptr<Object> create( ObjectTypeId typeId );
 
   template< class ObjectType >
   static void registerObjectType( ObjectTypeId typeId );
@@ -27,12 +27,11 @@ public:
 private:
   struct Creator
   {
-//    typedef boost::function< AudioObject* ()> CreateFunction;
-    using CreateFunction = boost::function< AudioObject* ()>;
+    using CreateFunction = boost::function< Object* ()>;
 
     explicit Creator( CreateFunction fcn );
 
-    AudioObject* create() const;
+    Object* create() const;
   private:
     CreateFunction mCreateFunction;
   };
@@ -46,7 +45,7 @@ private:
     {
     }
 
-    static AudioObject* construct()
+    static Object* construct()
     {
       return new ObjectType();
     }

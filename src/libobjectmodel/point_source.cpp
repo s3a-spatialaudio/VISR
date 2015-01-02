@@ -8,13 +8,13 @@ namespace objectmodel
 {
 
 PointSource::PointSource( )
- : AudioObject( )
+ : Object( )
   {
   }
 
 
 PointSource::PointSource( ObjectId id )
- : AudioObject( id )
+ : Object( id )
 {
 }
 
@@ -28,10 +28,10 @@ PointSource::type() const
   return ObjectTypeId::PointSource;
 }
 
-/*virtual*/ std::unique_ptr<AudioObject>
+/*virtual*/ std::unique_ptr<Object>
 PointSource::clone() const
 {
-  return std::unique_ptr<AudioObject>( new PointSource( *this ) );
+  return std::unique_ptr<Object>( new PointSource( *this ) );
 }
 
 } // namespace objectmodel

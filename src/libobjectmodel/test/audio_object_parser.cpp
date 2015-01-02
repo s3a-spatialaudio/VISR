@@ -1,8 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libobjectmodel/audio_object.hpp>
-#include <libobjectmodel/audio_object_parser.hpp>
+#include <libobjectmodel/object.hpp>
 #include <libobjectmodel/object_vector.hpp>
+#include <libobjectmodel/object_vector_parser.hpp>
 #include <libobjectmodel/point_source.hpp>
 
 #define BOOST_TEST_DYN_LINK
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( ParsePointSource )
 
   ObjectVector scene;
 
-  AudioObjectParser::fillObjectVector( msg, scene );
+  ObjectVectorParser::fillObjectVector( msg, scene );
 
 }
 
