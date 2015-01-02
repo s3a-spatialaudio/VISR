@@ -38,13 +38,13 @@ AudioObject & ObjectVector::at( ObjectId id )
   return *(findIt->second);
 }
 
-
 void ObjectVector::set( ObjectId id, AudioObject const &  obj )
 {
   ObjectContainer::iterator findIt = mObjects.find( id );
   if( findIt == mObjects.end() )
   {
     mObjects.insert( findIt, std::make_pair( id, obj.clone() ) );
+//    mObjects[id] = obj.clone();
   }
   else
   {

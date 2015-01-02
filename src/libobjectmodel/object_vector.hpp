@@ -33,23 +33,23 @@ public:
    * Explicitly defined default copy constructor.
    * @todo Check whether copy construction is sensible for this object.
    */
-  ObjectVector( ObjectVector const & rhs ) = default;
+  ObjectVector( ObjectVector const & rhs ) = delete;
 
   /**
    * Explicitly defined default copy constructor, move constructor flavour.
    * @todo Check whether copy construction is sensible for this object.
    */
-  ObjectVector( ObjectVector && rhs ) = default;
+//  ObjectVector( ObjectVector && rhs ) = default;
 
   /**
    * Explicit definition of default assignment operator.
    */
-  ObjectVector& operator=( ObjectVector const & rhs ) = default;
+  ObjectVector& operator=( ObjectVector const & rhs ) = delete;
 
   /**
    * Explicit definition of default assignment operator, move constructor flavour.
    */
-  ObjectVector& operator=( ObjectVector && rhs ) = default;
+//  ObjectVector& operator=( ObjectVector && rhs ) = default;
 
   /**
    * Destructor.

@@ -4,6 +4,7 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/point_source.hpp>
 
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #include <stdexcept>
@@ -18,8 +19,7 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( InstantiatePointSources )
 {
-  std::cout << "InstantiatePointSources started...." << std::endl;
-
+  // std::cout << "InstantiatePointSources started...." << std::endl;
 
   ObjectVector scene;
 
@@ -46,8 +46,6 @@ BOOST_AUTO_TEST_CASE( InstantiatePointSources )
 
   BOOST_CHECK_NO_THROW( scene.set( id1, s3 ) ); // Replacing object at existing ID is legal
   BOOST_CHECK( scene.size() == 2 ); // s3 replaces s1 at id1, size remains unchanged
-
-
 }
 
 } // namespace test

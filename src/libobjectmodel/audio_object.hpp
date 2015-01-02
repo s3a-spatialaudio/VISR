@@ -3,6 +3,8 @@
 #ifndef VISR_OBJECTMODEL_AUDIO_OBJECT_HPP_INCLUDED
 #define VISR_OBJECTMODEL_AUDIO_OBJECT_HPP_INCLUDED
 
+#include "object_type.hpp"
+
 #include <cstdint>
 #include <memory>
 
@@ -17,15 +19,9 @@ using ObjectId = unsigned int;
 using GroupId = unsigned int;
 
 /**
- * A numeric id to uniquely describe object types.
+ * Type use for level (gain, volume) settings, linear scale
  */
-enum class ObjectTypeId : std::uint8_t
-{
-  PointSource = 0, /**< Simple point-like source (monopole) */
-  PlaneWave = 1,
-  DiffuseSource = 2
-  // to be continued.
-};
+using LevelType = float;
 
 /**
  *
@@ -47,6 +43,10 @@ public:
 
   void setGroupId( ObjectId newId );
 
+  LevelType getLevel() const;
+
+  void setLevel( LevelType newLevel );
+
   /**
    * Must be implemented in every derived instantiated class.
    */
@@ -58,6 +58,8 @@ private:
   ObjectId mObjectId;
 
   GroupId mGroupId;
+
+  LevelType mLevel;
 };
 
 } // namespace objectmodel
