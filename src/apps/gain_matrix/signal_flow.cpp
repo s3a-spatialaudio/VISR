@@ -80,8 +80,8 @@ SignalFlow::setup()
   mNewMtx1( 1, 1 ) = 0.5;
 
   mNewMtx2.resize( cNumberOfOutputs, cNumberOfInputs );
-  mNewMtx2( 0, 1 ) = 0.1;
-  mNewMtx2( 1, 0 ) = 0.1;
+  mNewMtx2( 0, 1 ) = 0.1f;
+  mNewMtx2( 1, 0 ) = 0.1f;
 
 
   // should not be done here, but in AudioSignalFlow where this method is called.
