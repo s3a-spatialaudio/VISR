@@ -16,6 +16,8 @@ namespace objectmodel
 class PointSource: public AudioObject
 {
 public:
+  PointSource( );
+
   explicit PointSource( ObjectId id );
 
   virtual ~PointSource();

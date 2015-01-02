@@ -20,8 +20,8 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( ParsePointSource )
 {
-  std::string const msg = "{\"id\": 1,\n \"type\": \"point\",\n \"group\":, 0\n \"level\": 0.8,\n"
-      "\"position\": {\"x\": 2.4, \"y\": 1.2\n \"z\": -0.3 } }";
+  std::string const msg = "{\"id\": 1,\n \"type\": \"point\",\n \"group\": 0,\n \"level\": 0.8,\n"
+      "\"position\": {\"x\": 2.4, \"y\": 1.2,\n \"z\": -0.3 } }";
 
   ObjectVector scene;
 

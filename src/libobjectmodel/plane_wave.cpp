@@ -1,37 +1,37 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "point_source.hpp"
+#include "plane_wave.hpp"
 
 namespace visr
 {
 namespace objectmodel
 {
 
-PointSource::PointSource( )
+PlaneWave::PlaneWave( )
  : AudioObject( )
   {
   }
 
 
-PointSource::PointSource( ObjectId id )
+PlaneWave::PlaneWave( ObjectId id )
  : AudioObject( id )
 {
 }
 
-/*virtual*/ PointSource::~PointSource()
+/*virtual*/ PlaneWave::~PlaneWave()
 {
 }
 
 /*virtual*/ ObjectTypeId
-PointSource::type() const
+PlaneWave::type() const
 {
-  return ObjectTypeId::PointSource;
+  return ObjectTypeId::PlaneWave;
 }
 
 /*virtual*/ std::unique_ptr<AudioObject>
-PointSource::clone() const
+PlaneWave::clone() const
 {
-  return std::unique_ptr<AudioObject>( new PointSource( *this ) );
+  return std::unique_ptr<AudioObject>( new PlaneWave( *this ) );
 }
 
 } // namespace objectmodel
