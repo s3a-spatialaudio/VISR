@@ -4,6 +4,7 @@
 
 #include "object_type.hpp"
 #include "object_vector.hpp"
+#include "object_factory.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -34,7 +35,7 @@ fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
   }
   catch( std::exception const & ex )
   {
-    throw std::invalid_argument( std::string( "Error while paring a json object message: " ) + ex.what() );
+    throw std::invalid_argument( std::string( "Error while parsing a json object message: " ) + ex.what() );
   }
 
   try
@@ -50,10 +51,12 @@ fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 
     // TODO: either instantiate new object or cast existing object to matching type.
     // Proceed with type-dependent parsing in both cases.
+
+    std::unique_ptr< AudioObject > newObj( ObjectFactory::create(objTypeId) );
   }
   catch( std::exception const & ex )
   {
-    throw std::invalid_argument( std::string( "Error while paring the json message content: " ) + ex.what( ) );
+    throw std::invalid_argument( std::string( "Error while parsing the json message content: " ) + ex.what( ) );
   }
 
 }

@@ -7,9 +7,15 @@ namespace visr
 namespace objectmodel
 {
 
+AudioObject::AudioObject( )
+ : mObjectId(cInvalidObjectId )
+ , mGroupId( cDefaultGroupId )
+{
+}
+
 AudioObject::AudioObject( ObjectId id )
  : mObjectId( id )
- , mGroupId( 0 )
+ , mGroupId( cDefaultGroupId )
 {
 }
 

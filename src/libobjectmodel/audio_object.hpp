@@ -6,6 +6,7 @@
 #include "object_type.hpp"
 
 #include <cstdint>
+#include <limits>
 #include <memory>
 
 namespace visr
@@ -13,8 +14,9 @@ namespace visr
 namespace objectmodel
 {
 
-// move to header object_id.hpp later
+// move to header object_id.hpp later (or make it a member of AudioObject)
 using ObjectId = unsigned int;
+
 
 using GroupId = unsigned int;
 
@@ -29,6 +31,12 @@ using LevelType = float;
 class AudioObject
 {
 public:
+  static const ObjectId cInvalidObjectId = UINT_MAX; // std::numeric_limits<ObjectId>::max();
+
+  static const GroupId cDefaultGroupId = 0;
+
+  AudioObject();
+
   explicit AudioObject( ObjectId id );
 
   virtual ~AudioObject() = 0;
