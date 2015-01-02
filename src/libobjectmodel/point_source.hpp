@@ -16,6 +16,7 @@ namespace objectmodel
 class PointSource: public Object
 {
 public:
+
   PointSource( );
 
   explicit PointSource( ObjectId id );
@@ -26,9 +27,33 @@ public:
 
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
+  Coordinate x() const { return mXPos; }
+
+  Coordinate y( ) const { return mYPos; }
+
+  Coordinate z( ) const { return mZPos; }
+
+  void setX( Coordinate newX );
+
+  void setY( Coordinate newY );
+
+  void setZ( Coordinate newZ );
 protected:
 
 private:
+#if 1
+  Coordinate mXPos;
+
+  Coordinate mYPos;
+
+  Coordinate mZPos;
+#else
+  Coordinate mAzimuth;
+
+  Coordinate mElevation;
+
+  Coordinate mRadius;
+#endif
 };
 
 } // namespace objectmodel

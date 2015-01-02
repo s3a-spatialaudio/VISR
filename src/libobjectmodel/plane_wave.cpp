@@ -34,5 +34,20 @@ PlaneWave::clone() const
   return std::unique_ptr<Object>( new PlaneWave( *this ) );
 }
 
+void PlaneWave::setIncidenceAzimuth( Direction newAzimuth )
+{
+  mIncidenceAzimuth = newAzimuth;
+}
+
+void PlaneWave::setIncidenceElevation( Direction newElevation )
+{
+  mIncidenceElevation = newElevation;
+}
+
+void PlaneWave::setReferenceDistance( Coordinate newDistance )
+{
+  mReferenceDistance = newDistance;
+}
+
 } // namespace objectmodel
 } // namespace visr

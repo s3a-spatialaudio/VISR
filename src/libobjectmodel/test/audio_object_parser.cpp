@@ -20,7 +20,7 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( ParsePointSource )
 {
-  std::string const msg = "{\"id\": 1,\n \"type\": \"point\",\n \"group\": 0,\n \"level\": 0.8,\n"
+  std::string const msg = "{\"id\": 1,\n \"type\": \"point\",\n \"group\": 0,\n \"priority\": 3,\n \"level\": 0.8,\n"
       "\"position\": {\"x\": 2.4, \"y\": 1.2,\n \"z\": -0.3 } }";
 
   ObjectVector scene;
@@ -28,6 +28,17 @@ BOOST_AUTO_TEST_CASE( ParsePointSource )
   ObjectVectorParser::fillObjectVector( msg, scene );
 
 }
+
+BOOST_AUTO_TEST_CASE( ParsePlaneWave )
+{
+  std::string const msg = "{\"id\": 27,\n \"type\": \"plane\",\n \"group\":7,\n \"priority\": 3,\n \"level\": 0.325,\n"
+    "\"direction\": {\"az\": 0.5, \"el\": 0.9,\n \"refdist\": 0.75 } }";
+
+  ObjectVector scene;
+
+  ObjectVectorParser::fillObjectVector( msg, scene );
+}
+
 
 } // namespace test
 } // namespace objectmodel

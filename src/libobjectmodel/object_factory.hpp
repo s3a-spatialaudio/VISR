@@ -5,6 +5,7 @@
 
 #include "object.hpp"
 #include "object_type.hpp"
+#include "object_parser.hpp" // experimental support for dispatching to the correct parser.
 
 #include <boost/function.hpp>
 
@@ -21,7 +22,9 @@ class ObjectFactory
 public:
   static std::unique_ptr<Object> create( ObjectTypeId typeId );
 
-  template< class ObjectType >
+  static const ObjectParser & parser( ObjectTypeId typeId );
+
+  template< class ObjectType, class ParserType >
   static void registerObjectType( ObjectTypeId typeId );
 
 private:
@@ -29,19 +32,23 @@ private:
   {
     using CreateFunction = boost::function< Object* ()>;
 
-    explicit Creator( CreateFunction fcn );
+    explicit Creator( CreateFunction fcn, ObjectParser * parser );
 
     Object* create() const;
+
+    ObjectParser const & parser() const;
   private:
     CreateFunction mCreateFunction;
+
+    std::shared_ptr<ObjectParser> mParser;
   };
 
-  template< class ObjectType >
+  template< class ObjectType, class ParserType >
   class TCreator: public Creator
   {
   public:
-    TCreator()
-      : Creator( &TCreator<ObjectType>::construct )
+    TCreator( )
+      : Creator( &TCreator<ObjectType,ParserType>::construct, new ParserType() )
     {
     }
 
@@ -56,10 +63,10 @@ private:
   static CreatorTable & creatorTable();
 };
 
-template< class ObjectType >
-inline void ObjectFactory::registerObjectType( ObjectTypeId typeId )
+template< class ObjectType, class ParserType >
+void ObjectFactory::registerObjectType( ObjectTypeId typeId )
 {
-  creatorTable().insert( std::make_pair( typeId, TCreator<ObjectType>() ) );
+  creatorTable().insert( std::make_pair( typeId, TCreator<ObjectType, ParserType>() ) );
 }
 
 } // namespace objectmodel
