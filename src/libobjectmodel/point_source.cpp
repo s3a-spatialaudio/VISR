@@ -9,12 +9,18 @@ namespace objectmodel
 
 PointSource::PointSource( )
  : Object( )
-  {
-  }
+ , mXPos( static_cast<Coordinate>(0.0) )
+ , mYPos( static_cast<Coordinate>(0.0f) )
+ , mZPos( static_cast<Coordinate>(0.0f) )
+{
+}
 
 
 PointSource::PointSource( ObjectId id )
  : Object( id )
+ , mXPos( static_cast<Coordinate>(0.0) )
+ , mYPos( static_cast<Coordinate>(0.0f) )
+ , mZPos( static_cast<Coordinate>(0.0f) )
 {
 }
 
@@ -32,6 +38,21 @@ PointSource::type() const
 PointSource::clone() const
 {
   return std::unique_ptr<Object>( new PointSource( *this ) );
+}
+
+void PointSource::setX( Coordinate newX )
+{
+  mXPos = newX;
+}
+
+void PointSource::setY( Coordinate newY )
+{
+  mYPos = newY;
+}
+
+void PointSource::setZ( Coordinate newZ )
+{
+  mZPos = newZ;
 }
 
 } // namespace objectmodel

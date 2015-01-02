@@ -16,8 +16,10 @@ namespace objectmodel
 class PlaneWave: public Object
 {
 public:
+  using Direction = Coordinate;
+
   /**
-   * Default constructor, creates a source with invalid object id and defualt group id.
+   * Default constructor, creates a source with invalid object id and default group id.
    */
   PlaneWave();
 
@@ -29,9 +31,25 @@ public:
 
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
+  Direction incidenceAzimuth() const { return mIncidenceAzimuth; }
+
+  Direction incidenceElevation() const { return mIncidenceElevation; }
+
+  void setIncidenceAzimuth( Direction newAzimuth );
+
+  void setIncidenceElevation( Direction newElevation );
+
+  Coordinate referenceDistance() const { return mReferenceDistance; }
+
+  void setReferenceDistance( Coordinate newDistance );
 protected:
 
 private:
+  Direction mIncidenceAzimuth;
+
+  Direction mIncidenceElevation;
+
+  Coordinate mReferenceDistance;
 };
 
 } // namespace objectmodel

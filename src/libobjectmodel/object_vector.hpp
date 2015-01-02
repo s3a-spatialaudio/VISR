@@ -31,9 +31,15 @@ public:
 
   /**
    * Explicitly defined default copy constructor.
-   * @todo Check whether copy construction is sensible for this object.
+   * @todo Check whether copy construction is sensible for this type of object.
    */
   ObjectVector( ObjectVector const & rhs ) = delete;
+
+  /**
+   * Exchange the contents of this object with \p rhs.
+   * Invalidates all iterators into this and \p rhs
+   */
+  void swap( ObjectVector & rhs );
 
   /**
    * Explicitly defined default copy constructor, move constructor flavour.

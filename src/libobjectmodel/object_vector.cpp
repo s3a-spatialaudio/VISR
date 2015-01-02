@@ -18,6 +18,12 @@ ObjectVector::~ObjectVector()
 {
 }
 
+void ObjectVector::swap( ObjectVector & rhs )
+{
+  mObjects.swap( rhs.mObjects );
+}
+
+
 Object const & ObjectVector::at( ObjectId id ) const
 {
   ObjectContainer::const_iterator findIt = mObjects.find( id );
@@ -44,7 +50,6 @@ void ObjectVector::set( ObjectId id, Object const &  obj )
   if( findIt == mObjects.end() )
   {
     mObjects.insert( findIt, std::make_pair( id, obj.clone() ) );
-//    mObjects[id] = obj.clone();
   }
   else
   {

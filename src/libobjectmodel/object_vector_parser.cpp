@@ -2,9 +2,10 @@
 
 #include "object_vector_parser.hpp"
 
+#include "object_factory.hpp"
+#include "object_parser.hpp"
 #include "object_type.hpp"
 #include "object_vector.hpp"
-#include "object_factory.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -26,6 +27,10 @@ fillObjectVector( std::string const & message, ObjectVector & res )
 /*static*/ void ObjectVectorParser::
 fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 {
+  // Provide strong exception safety by adding the new elements to a new object 
+  // vector and swapping the vectors at the end of the function.
+  ObjectVector newVec;
+
   using ptree = boost::property_tree::ptree;
 
   ptree propTree;
@@ -45,20 +50,21 @@ fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 
     // might throw (if the string does not match a recognised object type
     ObjectTypeId const objTypeId = stringToObjectType( objTypeStr );
-    ObjectId const objId = propTree.get<ObjectId>( "id" );
-    GroupId const groupId = propTree.get<GroupId>( "group" );
-    LevelType const level = propTree.get<LevelType>( "level" );
 
-    // TODO: either instantiate new object or cast existing object to matching type.
-    // Proceed with type-dependent parsing in both cases.
-
+    // Instantiate an object of the correct type
     std::unique_ptr< Object > newObj( ObjectFactory::create(objTypeId) );
+
+    ObjectParser const & objParser = ObjectFactory::parser( objTypeId );
+
+    objParser.parse( propTree, *newObj );
+
+    newVec.set( newObj->id(), *newObj );
   }
   catch( std::exception const & ex )
   {
     throw std::invalid_argument( std::string( "Error while parsing the json message content: " ) + ex.what( ) );
   }
-
+  newVec.swap( res );
 }
 
 /*static*/ void ObjectVectorParser::

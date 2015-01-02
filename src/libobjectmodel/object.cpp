@@ -33,5 +33,25 @@ void Object::setGroupId( ObjectId newId )
   mGroupId = newId;
 }
 
+Object::Priority Object::priority() const
+{
+  return mPriority;
+}
+
+void Object::setPriority( Priority newPriority )
+{
+  mPriority = newPriority;
+}
+
+LevelType Object::getLevel() const
+{
+  return mLevel;
+}
+
+void Object::setLevel( LevelType newLevel )
+{
+  mLevel = newLevel;
+}
+
 } // namespace objectmodel
 } // namespace visr

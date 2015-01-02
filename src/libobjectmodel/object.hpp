@@ -31,6 +31,20 @@ using LevelType = float;
 class Object
 {
 public:
+  /**
+   * Data types.
+   */
+  //@{
+  /**
+   * Data type used by default for all data members such as positions or angles.
+   */
+  using Coordinate = float;
+  /**
+   * Priority. Low values denote high priority (0 is highest priority)
+   */
+  using Priority = unsigned char;
+  //@}
+
   static const ObjectId cInvalidObjectId = UINT_MAX; // std::numeric_limits<ObjectId>::max();
 
   static const GroupId cDefaultGroupId = 0;
@@ -55,6 +69,10 @@ public:
 
   void setLevel( LevelType newLevel );
 
+  Priority priority() const;
+
+  void setPriority( Priority newPriority );
+
   /**
    * Must be implemented in every derived instantiated class.
    */
@@ -68,6 +86,8 @@ private:
   GroupId mGroupId;
 
   LevelType mLevel;
+
+  Priority mPriority;
 };
 
 } // namespace objectmodel
