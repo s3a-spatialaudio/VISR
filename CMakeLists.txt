@@ -72,7 +72,7 @@ FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS unit_test_framework )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 
 # Actual software components (subprojects) to be built are
-# contained in the src/ directorory
+# contained in the src/ directory
 ADD_SUBDIRECTORY( src )
 
 ################################################################################
