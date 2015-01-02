@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_OBJECTMODEL_AUDIO_OBJECT_HPP_INCLUDED
-#define VISR_OBJECTMODEL_AUDIO_OBJECT_HPP_INCLUDED
+#ifndef VISR_OBJECTMODEL_OBJECT_HPP_INCLUDED
+#define VISR_OBJECTMODEL_OBJECT_HPP_INCLUDED
 
 #include "object_type.hpp"
 
@@ -28,18 +28,18 @@ using LevelType = float;
 /**
  *
  */
-class AudioObject
+class Object
 {
 public:
   static const ObjectId cInvalidObjectId = UINT_MAX; // std::numeric_limits<ObjectId>::max();
 
   static const GroupId cDefaultGroupId = 0;
 
-  AudioObject();
+  Object();
 
-  explicit AudioObject( ObjectId id );
+  explicit Object( ObjectId id );
 
-  virtual ~AudioObject() = 0;
+  virtual ~Object() = 0;
 
   virtual ObjectTypeId type() const = 0;
 
@@ -58,7 +58,7 @@ public:
   /**
    * Must be implemented in every derived instantiated class.
    */
-  virtual std::unique_ptr<AudioObject> clone() const = 0;
+  virtual std::unique_ptr<Object> clone() const = 0;
 
 protected:
 
@@ -76,4 +76,4 @@ private:
 
 
 
-#endif // VISR_OBJECTMODEL_AUDIO_OBJECT_HPP_INCLUDED
+#endif // VISR_OBJECTMODEL_OBJECT_HPP_INCLUDED

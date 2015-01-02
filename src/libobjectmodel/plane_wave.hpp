@@ -3,7 +3,7 @@
 #ifndef VISR_OBJECTMODEL_PLANE_WAVE_HPP_INCLUDED
 #define VISR_OBJECTMODEL_PLANE_WAVE_HPP_INCLUDED
 
-#include "audio_object.hpp"
+#include "object.hpp"
 
 namespace visr
 {
@@ -13,7 +13,7 @@ namespace objectmodel
 /**
  *
  */
-class PlaneWave: public AudioObject
+class PlaneWave: public Object
 {
 public:
   /**
@@ -27,7 +27,7 @@ public:
 
   /*virtual*/ ObjectTypeId type() const;
 
-  /*virtual*/ std::unique_ptr<AudioObject> clone() const;
+  /*virtual*/ std::unique_ptr<Object> clone() const;
 
 protected:
 

@@ -18,7 +18,7 @@ ObjectFactory::Creator::Creator( CreateFunction fcn )
 {
 }
 
-AudioObject* ObjectFactory::Creator::create() const
+Object* ObjectFactory::Creator::create() const
 {
   return mCreateFunction();
 }
@@ -31,7 +31,7 @@ ObjectFactory::creatorTable()
 }
 
 
-/*static*/ std::unique_ptr<AudioObject> 
+/*static*/ std::unique_ptr<Object> 
 ObjectFactory::create( ObjectTypeId typeId )
 {
   CreatorTable::const_iterator findIt = creatorTable().find( typeId );
@@ -39,9 +39,9 @@ ObjectFactory::create( ObjectTypeId typeId )
   {
     throw std::invalid_argument( "ObjectFactory: The specified object type is not registered." );
   }
-  AudioObject* obj = findIt->second.create();
+  Object* obj = findIt->second.create();
 
-  return std::unique_ptr<AudioObject>( obj );
+  return std::unique_ptr<Object>( obj );
 }
 struct InstantiateObjectFactory
 {

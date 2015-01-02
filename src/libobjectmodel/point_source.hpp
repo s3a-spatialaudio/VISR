@@ -3,7 +3,7 @@
 #ifndef VISR_OBJECTMODEL_POINT_SOURCE_HPP_INCLUDED
 #define VISR_OBJECTMODEL_POINT_SOURCE_HPP_INCLUDED
 
-#include "audio_object.hpp"
+#include "object.hpp"
 
 namespace visr
 {
@@ -13,7 +13,7 @@ namespace objectmodel
 /**
  *
  */
-class PointSource: public AudioObject
+class PointSource: public Object
 {
 public:
   PointSource( );
@@ -24,7 +24,7 @@ public:
 
   /*virtual*/ ObjectTypeId type() const;
 
-  /*virtual*/ std::unique_ptr<AudioObject> clone() const;
+  /*virtual*/ std::unique_ptr<Object> clone() const;
 
 protected:
 

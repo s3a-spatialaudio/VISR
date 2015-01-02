@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "audio_object_parser.hpp"
+#include "object_vector_parser.hpp"
 
 #include "object_type.hpp"
 #include "object_vector.hpp"
@@ -17,13 +17,13 @@ namespace visr
 namespace objectmodel
 {
 
-/*static*/ void AudioObjectParser::
+/*static*/ void ObjectVectorParser::
 fillObjectVector( std::string const & message, ObjectVector & res )
 {
   return fillObjectVector( std::istringstream( message ), res );
 }
 
-/*static*/ void AudioObjectParser::
+/*static*/ void ObjectVectorParser::
 fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 {
   using ptree = boost::property_tree::ptree;
@@ -52,7 +52,7 @@ fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
     // TODO: either instantiate new object or cast existing object to matching type.
     // Proceed with type-dependent parsing in both cases.
 
-    std::unique_ptr< AudioObject > newObj( ObjectFactory::create(objTypeId) );
+    std::unique_ptr< Object > newObj( ObjectFactory::create(objTypeId) );
   }
   catch( std::exception const & ex )
   {
@@ -61,19 +61,19 @@ fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 
 }
 
-/*static*/ void AudioObjectParser::
+/*static*/ void ObjectVectorParser::
 fillObjectVector( char const * message, ObjectVector & res )
 {
   return fillObjectVector( std::string(message), res );
 }
 
-/*static*/ void AudioObjectParser::
+/*static*/ void ObjectVectorParser::
 updateObjectVector( std::string const & message, ObjectVector & res )
 {
   return updateObjectVector( std::istringstream( message ), res );
 }
 
-/*static*/ void AudioObjectParser::
+/*static*/ void ObjectVectorParser::
 updateObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 {
   ObjectVector newVec;
@@ -81,7 +81,7 @@ updateObjectVector( std::basic_istream<char> & message, ObjectVector & res )
   // for fill and update
 }
 
-/*static*/ void AudioObjectParser::
+/*static*/ void ObjectVectorParser::
 updateObjectVector( char const * message, ObjectVector & res )
 {
   return updateObjectVector( std::string( message ), res );

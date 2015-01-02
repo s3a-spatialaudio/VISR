@@ -8,13 +8,13 @@ namespace objectmodel
 {
 
 PlaneWave::PlaneWave( )
- : AudioObject( )
+ : Object( )
   {
   }
 
 
 PlaneWave::PlaneWave( ObjectId id )
- : AudioObject( id )
+ : Object( id )
 {
 }
 
@@ -28,10 +28,10 @@ PlaneWave::type() const
   return ObjectTypeId::PlaneWave;
 }
 
-/*virtual*/ std::unique_ptr<AudioObject>
+/*virtual*/ std::unique_ptr<Object>
 PlaneWave::clone() const
 {
-  return std::unique_ptr<AudioObject>( new PlaneWave( *this ) );
+  return std::unique_ptr<Object>( new PlaneWave( *this ) );
 }
 
 } // namespace objectmodel
