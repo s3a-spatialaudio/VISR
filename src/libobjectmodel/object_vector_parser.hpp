@@ -3,7 +3,10 @@
 #ifndef VISR_OBJECTMODEL_OBJECT_VECTOR_PARSER_HPP_INCLUDED
 #define VISR_OBJECTMODEL_OBJECT_VECTOR_PARSER_HPP_INCLUDED
 
+#include <boost/property_tree/ptree_fwd.hpp>
+
 #include <iosfwd>
+#include <memory>
 #include <string>
 
 namespace visr
@@ -26,6 +29,13 @@ public:
   static void updateObjectVector( std::basic_istream<char> & message, ObjectVector & res );
 
   static void updateObjectVector( char const * message, ObjectVector & res );
+private:
+
+  /**
+   * @param
+   * @throw
+   */
+  static void parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res );
 };
 
 } // namespace objectmodel
