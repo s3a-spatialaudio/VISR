@@ -68,7 +68,7 @@ public:
 
   void setGroupId( ObjectId newId );
 
-  LevelType getLevel() const;
+  LevelType level() const;
 
   void setLevel( LevelType newLevel );
 
