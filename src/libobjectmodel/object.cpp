@@ -43,7 +43,7 @@ void Object::setPriority( Priority newPriority )
   mPriority = newPriority;
 }
 
-LevelType Object::getLevel() const
+LevelType Object::level() const
 {
   return mLevel;
 }
