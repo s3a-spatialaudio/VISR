@@ -25,10 +25,19 @@ public:
 
   explicit PlaneWave( ObjectId id );
 
+  /**
+   * Copy constructor, explicitly instantiated
+   */
+  PlaneWave( PlaneWave const & rhs ) = default;
+
   virtual ~PlaneWave();
 
   /*virtual*/ ObjectTypeId type() const;
 
+  /**
+   * Clone function simulating a virtual copy constructor.
+   * @note This method relies on the proper working of the copy constructor.
+   */
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
   Direction incidenceAzimuth() const { return mIncidenceAzimuth; }

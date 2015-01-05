@@ -25,6 +25,35 @@ public:
   using ObjectContainer = std::map< ObjectId, std::unique_ptr<Object > >;
 
   /**
+   * Provide a limited subset to the STL-type access functions of the underlying container type (map)
+   */
+  //@{
+  using iterator = ObjectContainer::iterator;
+  using const_iterator = ObjectContainer::const_iterator;
+
+  using key_type = ObjectContainer::key_type;
+  using mapped_type = ObjectContainer::mapped_type;
+  using value_type = ObjectContainer::value_type;
+
+  iterator begin() { return mObjects.begin(); }
+
+  iterator end() { return mObjects.end(); }
+
+  const_iterator begin() const { return mObjects.begin(); }
+
+  const_iterator end() const { return mObjects.end(); }
+
+  const_iterator find( ObjectId id ) const { return mObjects.find( id ); }
+
+  /**
+   * Return a non-const iterator to the element with key \p id
+   * @note In the object dereferenced by <return value> ->second, the id must not be changed, as it would destroy the integrity between the
+   * id in the key value and the id of the contained object.
+   */
+  iterator find( ObjectId id ) { return mObjects.find( id ); }
+  //@}
+
+  /**
    * Default constructor, creates an empty object vector
    */
   ObjectVector();
@@ -80,7 +109,7 @@ public:
   Object & at( ObjectId id );
 
   /**
-   * Return a reference to an audio object in the vector (const version)
+   * Return a reference to an audio object in the vector (constant version)
    * @param id The object id of the object to retrieved
    * @throw std::invalid_argument If no object with the given \p id exists in the vector.
    */
@@ -102,7 +131,6 @@ public:
    * @param obj The object to be inserted (copied).
    */
   void set( ObjectId id, Object &&  obj );
-
 
 private:
   ObjectContainer mObjects;
