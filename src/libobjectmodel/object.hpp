@@ -6,7 +6,7 @@
 #include "object_type.hpp"
 
 #include <cstdint>
-#include <limits>
+#include <climits>
 #include <memory>
 
 namespace visr
@@ -45,6 +45,9 @@ public:
   using Priority = unsigned char;
   //@}
 
+  /**
+   * @note The solution using numeric_limits::max() would be preferable, but cannot be used since MSVC does not support const_expr yet.
+   */
   static const ObjectId cInvalidObjectId = UINT_MAX; // std::numeric_limits<ObjectId>::max();
 
   static const GroupId cDefaultGroupId = 0;

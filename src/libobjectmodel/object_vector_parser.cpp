@@ -21,7 +21,8 @@ namespace objectmodel
 /*static*/ void ObjectVectorParser::
 fillObjectVector( std::string const & message, ObjectVector & res )
 {
-  return fillObjectVector( std::istringstream( message ), res );
+  std::istringstream streamObj( message );
+  fillObjectVector( streamObj, res );
 }
 
 /*static*/ void ObjectVectorParser::
@@ -70,13 +71,14 @@ fillObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 /*static*/ void ObjectVectorParser::
 fillObjectVector( char const * message, ObjectVector & res )
 {
-  return fillObjectVector( std::string(message), res );
+  fillObjectVector( std::string(message), res );
 }
 
 /*static*/ void ObjectVectorParser::
 updateObjectVector( std::string const & message, ObjectVector & res )
 {
-  return updateObjectVector( std::istringstream( message ), res );
+  std::istringstream streamObj( message );
+  updateObjectVector( streamObj, res );
 }
 
 /*static*/ void ObjectVectorParser::
@@ -90,7 +92,7 @@ updateObjectVector( std::basic_istream<char> & message, ObjectVector & res )
 /*static*/ void ObjectVectorParser::
 updateObjectVector( char const * message, ObjectVector & res )
 {
-  return updateObjectVector( std::string( message ), res );
+  updateObjectVector( std::string( message ), res );
 }
 
 } // namespace objectmodel
