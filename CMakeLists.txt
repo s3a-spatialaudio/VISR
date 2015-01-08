@@ -68,7 +68,7 @@ SET( VISR_BOOST_LIBRARIES unit_test_framework )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
-FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS unit_test_framework )
+FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS system thread unit_test_framework)
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 
 # Actual software components (subprojects) to be built are

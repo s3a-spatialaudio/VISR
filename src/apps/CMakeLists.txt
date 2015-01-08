@@ -4,4 +4,5 @@
 
 ADD_SUBDIRECTORY( feedthrough )
 ADD_SUBDIRECTORY( gain_matrix )
+ADD_SUBDIRECTORY( scene_decoder )
 # To be continued.
