@@ -44,7 +44,7 @@ void Add::setup( std::size_t width, std::size_t numInputs )
   }
 }
 
-/*virtual*/ void Add::process()
+void Add::process()
 {
   const auto numInputs = mInputs.size();
   if( numInputs == 0 ) // In this special case, the Add block works like a source of zeros
