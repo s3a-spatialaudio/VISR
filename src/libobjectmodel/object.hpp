@@ -5,9 +5,10 @@
 
 #include "object_type.hpp"
 
-#include <cstdint>
 #include <climits>
+#include <cstdint>
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -43,14 +44,25 @@ public:
    * Priority. Low values denote high priority (0 is highest priority)
    */
   using Priority = unsigned char;
+
+  /**
+   * Type used for the audio channels associated with an object.
+   */
+  using ChannelIndex = unsigned int;
   //@}
 
   /**
    * @note The solution using numeric_limits::max() would be preferable, but cannot be used since MSVC does not support const_expr yet.
    */
-  static const ObjectId cInvalidObjectId = UINT_MAX; // std::numeric_limits<ObjectId>::max();
+  static const ObjectId cInvalidObjectId = UINT_MAX; // should be std::numeric_limits<ObjectId>::max();
 
   static const GroupId cDefaultGroupId = 0;
+
+  /**
+   * Special value to denote an invalid or unassigned audio channel index.
+   * @todo Decide whether this type must be visible on the outside.
+   */
+  static const ChannelIndex cInvalidChannelIndex = UINT_MAX; // should be std::numeric_limits<ChannelIndex>::max();
 
   Object();
 
@@ -77,6 +89,38 @@ public:
   void setPriority( Priority newPriority );
 
   /**
+   * Support for channels assigned to an audio objects.
+   * The base class interface supports arbitrary channel numbers and layouts, but derived classes might offer
+   * only restricted channel layouts.
+   */
+  //@{
+  /**
+   * Return the number of audio channels of this object.
+   */
+  std::size_t numberOfChannels() const;
+
+  /**
+   * Return the audio channel index for a particular channel.
+   * @param index the array index within the array of channel indices.
+   * @throw std::invalid_argument If index exceeds the number of available audio channels
+   */
+  ChannelIndex channelIndex( std::size_t index ) const;
+
+  /**
+   * Change the number of channels for the audio object.
+   * This resets all entries to invalid channel indices (i.e., cInvalidChannelIndex values).
+   */
+  void resetNumberOfChannels( std::size_t numChannels );
+
+  /**
+   * Set the audio channel index for a particular
+   * @throw std::invalid_argument if index exceeds the number of channels for this object.
+   */
+  void setChannelIndex( std::size_t index, ChannelIndex channelIndex );
+  //@}
+
+  /**
+   * Clone function used to emulate 'virtual copy constructor' functionality.
    * Must be implemented in every derived instantiated class.
    */
   virtual std::unique_ptr<Object> clone() const = 0;
@@ -91,12 +135,11 @@ private:
   LevelType mLevel;
 
   Priority mPriority;
+
+  std::valarray<ChannelIndex> mChannelIndices;
 };
 
 } // namespace objectmodel
 } // namespace visr
-
-
-
 
 #endif // VISR_OBJECTMODEL_OBJECT_HPP_INCLUDED
