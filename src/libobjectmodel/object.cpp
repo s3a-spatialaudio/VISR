@@ -2,6 +2,8 @@
 
 #include "object.hpp"
 
+#include <stdexcept>
+
 namespace visr
 {
 namespace objectmodel
@@ -51,6 +53,36 @@ LevelType Object::level() const
 void Object::setLevel( LevelType newLevel )
 {
   mLevel = newLevel;
+}
+
+
+std::size_t Object::numberOfChannels() const
+{
+  return mChannelIndices.size();
+}
+
+Object::ChannelIndex Object::channelIndex( std::size_t index ) const
+{
+  if( index >= numberOfChannels() )
+  {
+    throw std::invalid_argument( "Object::channelIndex(): Argument exceeds number of channels.");
+  }
+  return mChannelIndices[ index ];
+}
+
+void Object::resetNumberOfChannels( std::size_t numChannels )
+{
+  std::valarray<ChannelIndex> newIndices( numChannels, cInvalidChannelIndex );
+  mChannelIndices.swap( newIndices );
+}
+
+void Object::setChannelIndex( std::size_t index, ChannelIndex channelIndex )
+{
+  if( index >= numberOfChannels() )
+  {
+    throw std::invalid_argument( "Object::channelIndex(): Argument exceeds number of channels.");
+  }
+  mChannelIndices[ index ] = channelIndex;
 }
 
 } // namespace objectmodel
