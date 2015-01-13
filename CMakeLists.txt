@@ -3,8 +3,8 @@
 # Top-level build configuration for project VISceRal
 
 # Arbitrarily set minimum version.
-# This specific version is used to avoid complaints about the cygwin platform not
-# defining WIN32 anymore.
+# This specific version is used to avoid complaints about the 
+# cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
 # The name of our top-level project.
@@ -61,7 +61,18 @@ else(WIN32)
   find_package( Portaudio )
 endif( WIN32 )
 
-# All actual software components to be built are contained in the src/ directorory
+## Boost support
+
+# Define the boost libraries that must be present.
+SET( VISR_BOOST_LIBRARIES unit_test_framework )
+
+# Note: The minimum boost requirement is arbitrarily chosen at the moment. 
+# Todo: Replace by a substantiated version requirement.
+FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS filesystem system thread unit_test_framework)
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
+
+# Actual software components (subprojects) to be built are
+# contained in the src/ directory
 ADD_SUBDIRECTORY( src )
 
 ################################################################################

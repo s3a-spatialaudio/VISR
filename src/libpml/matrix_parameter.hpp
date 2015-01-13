@@ -26,8 +26,8 @@ public:
 
   /**
    * Construct a parameter matrix with the given dimensions.
-   * The matrix is zero-initialized.
-   * @param numRows The number od matrix rows.
+   * The matrix is zero-initialised.
+   * @param numRows The number of matrix rows.
    * @param numColumns The number of columns.
    */
   explicit MatrixParameter( std::size_t numRows, std::size_t numColumns );
@@ -41,12 +41,20 @@ public:
    */
   void resize( std::size_t numRows, std::size_t numColumns );
 
+  /**
+   * Return the number of matrix columns.
+   */
   std::size_t numberOfColumns() const { return mData.mNumberOfColumns(); }
 
+  /**
+   * Return the number of matrix rows.
+   */
   std::size_t numberOfRows( ) const { return mData.mNumberOfRows( ); }
 
-
 private:
+  /**
+   * The internal matrix representation.
+   */
   efl::BasicMatrix<ElementType> mData;
 };
 

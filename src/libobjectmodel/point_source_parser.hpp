@@ -1,0 +1,27 @@
+/* Copyright Institute of Sound and Vibration Research - All rights reserved */
+
+#ifndef VISR_OBJECTMODEL_POINT_SOURCE_PARSER_HPP_INCLUDED
+#define VISR_OBJECTMODEL_POINT_SOURCE_PARSER_HPP_INCLUDED
+
+#include "object_parser.hpp"
+
+#include "object.hpp"
+
+namespace visr
+{
+namespace objectmodel
+{
+
+/**
+ *
+ */
+class PointSourceParser: public ObjectParser
+{
+public:
+  virtual void parse( boost::property_tree::ptree const & tree, Object & src ) const;
+};
+
+} // namespace objectmodel
+} // namespace visr
+
+#endif // VISR_OBJECTMODEL_POINT_SOURCE_PARSER_HPP_INCLUDED

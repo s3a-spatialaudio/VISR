@@ -35,8 +35,7 @@ private:
     int m_nSpkSources = 0;
     
     LoudspeakerArray m_regArray;
-    
-    int m_nSpks = 0;
+
     
 public:
     
