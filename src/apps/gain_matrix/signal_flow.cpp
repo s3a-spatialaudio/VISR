@@ -76,8 +76,8 @@ SignalFlow::setup()
   assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
 
   mNewMtx1.resize( cNumberOfOutputs, cNumberOfInputs );
-  mNewMtx1( 0, 0 ) = 0.5;
-  mNewMtx1( 1, 1 ) = 0.5;
+  mNewMtx1( 0, 0 ) = 0.5f;
+  mNewMtx1( 1, 1 ) = 0.5f;
 
   mNewMtx2.resize( cNumberOfOutputs, cNumberOfInputs );
   mNewMtx2( 0, 1 ) = 0.1f;
