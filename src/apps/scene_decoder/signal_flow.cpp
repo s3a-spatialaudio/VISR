@@ -38,6 +38,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , cInterpolationSteps( interpolationPeriod )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
+ , mGainCalculator( *this, "VbapGainCalculator" )
  , mMatrix( *this, "GainMatrix" )
 {
 }
@@ -51,7 +52,8 @@ SignalFlow::process()
 {
   mSceneReceiver.process( mSceneMessages );
   mSceneDecoder.process( mSceneMessages, mObjectVector );
-
+  mGainCalculator.process( mObjectVector, mGainParameters );
+  mMatrix.setGains( mGainParameters );
   mMatrix.process();
 }
 
@@ -59,9 +61,13 @@ SignalFlow::process()
 SignalFlow::setup()
 {
   // Initialise and configure audio components
-  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
+  std::string const lspConfigFile( "/home/af5u13/dev/eclipse-visr/src/libpanning/test/octahedron.txt" ); // todo: make this an option.
 
   mSceneReceiver.setup( 8888, rcl::UdpReceiver::Mode::Asynchronous );
+  mSceneDecoder.setup();
+  mGainCalculator.setup( cNumberOfInputs, cNumberOfOutputs, lspConfigFile );
+  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
+
 
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 

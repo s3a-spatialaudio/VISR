@@ -30,9 +30,8 @@ namespace rcl
 {
 
 /**
- * Audio component for adding an arbitrary number of input vectors.
- * The number of inputs is set by the 'numInputs' argument passed to the setup() method.
- * All input vectors must have the number of signals given by 'width' argument to setup().
+ * Component to decode audio objects from messages (typically received from a network).
+ * This component has neither audio inputs or outputs.
  */
 class SceneDecoder: public ril::AudioComponent
 {
