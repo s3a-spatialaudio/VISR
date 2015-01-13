@@ -1,14 +1,25 @@
-/*!
- @page Installation and build instructions
+/**
+ @page installation_build_instructions Installation and build instructions
 
+ @tableofcontents
 
- @section Handling of Third-Party Libraries.
+ @section handling_3rdparty_libs Handling of Third-Party Libraries
  In general, it is preferable to use the platforms package installation mechanisms to provide additional software components/libraries  
   
- @subsection Building and Finding Boost on Windows platforms (Visual Studio) 
+ @subsection boost_on_windows_ Building and Finding Boost on Windows platforms (Visual Studio) 
   * Download the Boost source distribution, e.g., boost_1_57_0.zip or boost_1_57_0.tar.bz2
   * Open the command prompt for the Visual Studio version you are targeting
   * Execute <b>VC/vcvarsall amd64</b> to switch the compiler toolchain to 64-bit mode 
  
- 
+ @subsection macos MacOS
+  * Install <tt>brew</tt> following the instructions on <a href ="http://brew.sh">http://brew.sh</a> (Paste command line at the bottom of web page to terminal window)
+  * Initialise brew: <tt>$ brew doctor</tt>
+  * Install boost and portaudio
+    - <tt>brew install pkgconfig</tt> (PkgConfig is not strictly required, but reduces the likelihood of problems while searching for other libraries).
+    - <tt>brew install boost</tt>
+    - <tt>brew install portaudio</tt>
+  * Install cmake (download from <a href="http://www.cmake.org/download/">http://www.cmake.org/download/</a>
+  * Setup Xcode and import git project from repository.
+
+
  */
