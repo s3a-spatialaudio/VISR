@@ -1,0 +1,28 @@
+
+% 5.1 loudspeaker array
+
+2 % 2D mode: only pairs given
+
+% positions
+
+% polars
+% id	azim.	elev.	distance
+
+p 1	30	0	1.0	% Left
+p 2	0	0	1.0	% Centre
+p 3	-30	0	1.0	% Right
+p 4	-110	0	1.0	% Surround right
+p 5	110	0	1.0	% Surround left
+
+
+
+% 2-tuplets
+% 	id1	id2
+
+t 1	1	2	
+t 2	2	3	
+t 3	3	4	
+t 4	4	5	
+t 5	5	1	
+
+
