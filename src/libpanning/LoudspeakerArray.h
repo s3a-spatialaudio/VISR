@@ -21,13 +21,15 @@
 #define MAX_NUM_SPEAKERS 128
 #define MAX_NUM_LOUDSPEAKER_TRIPLETS 256
 
+#define PI 3.1412659
 
 
 class LoudspeakerArray
 {
     
 private:
-
+    
+    bool m_is2D;
 
 public:
     
@@ -60,6 +62,8 @@ public:
     int* getTriplet(int iTri) { return &m_triplet[iTri][0]; }
     
     int getNumSpeakers() { return m_nSpeakers; };
+    
+    bool is2D() { return m_is2D; };
 
 };
 
