@@ -47,7 +47,7 @@ public:
 
   /**
    * Return a non-const iterator to the element with key \p id
-   * @note In the object dereferenced by <return value> ->second, the id must not be changed, as it would destroy the integrity between the
+   * @note In the object dereferenced by <tt>return value</tt>->second, the id must not be changed, as it would destroy the integrity between the
    * id in the key value and the id of the contained object.
    */
   iterator find( ObjectId id ) { return mObjects.find( id ); }
