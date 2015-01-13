@@ -4,6 +4,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include<iostream>
+
 namespace visr
 {
 namespace objectmodel
