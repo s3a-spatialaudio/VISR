@@ -31,9 +31,10 @@ namespace rcl
 {
 
 /**
- * Audio component for adding an arbitrary number of input vectors.
- * The number of inputs is set by the 'numInputs' argument passed to the setup() method.
- * All input vectors must have the number of signals given by 'width' argument to setup().
+ * A component to receive messages from a predefined UDP network port.
+ * The message can operate either synchronously (messages are collected from the network socket when the process() method is called)
+ * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
+ * messages are transmitted further only when the process() method is called for the next time.
  */
 class UdpReceiver: public ril::AudioComponent
 {
