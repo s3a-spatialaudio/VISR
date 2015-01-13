@@ -6,6 +6,7 @@
 #include <libril/audio_signal_flow.hpp>
 
 #include <librcl/gain_matrix.hpp>
+#include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/udp_receiver.hpp>
 
@@ -48,6 +49,8 @@ private:
   rcl::UdpReceiver mSceneReceiver;
   
   rcl::SceneDecoder mSceneDecoder;
+
+  rcl::PanningGainCalculator mGainCalculator;
 
   rcl::GainMatrix mMatrix;
 
