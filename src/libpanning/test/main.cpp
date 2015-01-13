@@ -23,7 +23,7 @@ int main(int argc, const char * argv[])
     XYZ sourcePos[MAX_NUM_SOURCES];
 
     FILE* file;
-    
+    int j,k;
     
     
     
@@ -35,6 +35,7 @@ int main(int argc, const char * argv[])
     file = 0;
 
     vbap.setLoudspeakerArray(&array);
+    vbap.setListenerPosition(0.0, 0.0, 0.0);
     vbap.calcInvMatrices();
     
     vbap.setNumSources(10);
@@ -47,15 +48,33 @@ int main(int argc, const char * argv[])
     sourcePos[6].set(0.0, 0.0, -1.0, false);
     sourcePos[7].set(-1.0, -1.0, -1.0, false);
     vbap.setSourcePositions(&sourcePos);
-    
-    vbap.setListenerPosition(0.0, 0.0, 0.0);
+
     vbap.calcGains();
     
-
     vbapGains = vbap.getGains();   // Check in watch window
     
     
+    // 5.1 test, 2D VBAP
     
+    file = fopen("5.1.txt","r");
+    if (array.load(file) == -1) return -1;
+    fclose( file );
+    file = 0;
+    
+    vbap.setLoudspeakerArray(&array);
+    vbap.setListenerPosition(0.0, 0.0, 0.0);
+    vbap.calcInvMatrices();
+    
+    vbap.setNumSources(4);
+    sourcePos[0].set(1.0, 0.0, 0.0, false);
+    sourcePos[1].set(0.0, 1.0, 0.0, false);
+    sourcePos[2].set(-1.0, 0.0, 0.0, false);
+    sourcePos[3].set(0.0, -1.0, 0.0, false);
+    vbap.setSourcePositions(&sourcePos);
+    
+    vbap.calcGains();
+    
+    vbapGains = vbap.getGains();   // Check in watch window
     
     
     // Useage / test AllRAD ambisonic decode
@@ -67,23 +86,19 @@ int main(int argc, const char * argv[])
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
-
     vbap.setLoudspeakerArray(&array);
     
     
     file = fopen("t-design_t=8_40point.txt","r");
-    
     if (allrad.loadRegArray(file) == -1) return -1;
     fclose( file );
     file = 0;
     
-    file = fopen("decode_test1-8.txt","r");   //fopen("decode_order3_t8-40.txt","r");
-
-    if (allrad.loadRegDecodeGains(file, 1, 8) == -1) return -1;
-    // fclose( file );
-    // file = 0;
-
     
+    file = fopen("decode_N8_P40_t-design_8_40.txt","r");
+    if (allrad.loadRegDecodeGains(file, 3, 40) == -1) return -1;
+    fclose( file );
+    file = 0;
     
     
     // Initially and every time listener moves:
@@ -91,7 +106,7 @@ int main(int argc, const char * argv[])
     vbap.setListenerPosition(0.0, 0.0, 0.0);
     vbap.calcInvMatrices();
     
-    // Load vbap with other sources and find gains
+    // Load vbap with other sources and find loudspeaker gains
     // ....
     // ....
     
@@ -103,7 +118,15 @@ int main(int argc, const char * argv[])
     allrad.calcDecodeGains(&vbap);
     decodeGains = allrad.getDecodeGains();
     
-
+    file = fopen("/Users/rdmg1u13/Dropbox/s3a/research/S3A_renderer/visr/src/libpanning/test/matlab/decodeB2VBAP.txt","w");
+    for(k=0; k<9; k++) {
+        for(j=0; j<vbap.getNumSpeakers(); j++) {
+            fprintf(file, "%f ", (*decodeGains)[k][j]);
+        }
+        fprintf(file,"\n");
+    }
+    fclose( file );
+    file = 0;
 
     
     // std::cout << "Hello, World!\n";

@@ -33,6 +33,7 @@ private:
     int m_nSources;
     
     
+    
 public:
     
     int setLoudspeakerArray(LoudspeakerArray* array){
@@ -60,6 +61,8 @@ public:
         m_nSources = n;
         return n;
     }
+    
+    int getNumSpeakers() { return m_array->m_nSpeakers; }
     
     int calcGains();
     

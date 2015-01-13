@@ -32,6 +32,34 @@ void AudioComponent::registerAudioOutput( char const * name, AudioOutput* port )
   registerAudioPort<AudioOutput>( name, port );
 }
 
+template<>
+AudioComponent::PortVector<AudioInput> const&
+AudioComponent::getPortList()  const
+{
+  return mInputsPorts;
+}
+
+template<>
+AudioComponent::PortVector<AudioOutput> const&
+AudioComponent::getPortList( )  const
+{
+  return mOutputPorts;
+}
+
+template<>
+AudioComponent::PortVector<AudioInput>&
+AudioComponent::getPortList( )
+{
+  return mInputsPorts;
+}
+
+template<>
+AudioComponent::PortVector<AudioOutput>&
+AudioComponent::getPortList( )
+{
+  return mOutputPorts;
+}
+    
 template< class PortType >
 void AudioComponent::registerAudioPort( char const * name, PortType* port )
 {
@@ -65,34 +93,6 @@ PortType* AudioComponent::getPort( const char* portName ) const
 // explicit instantiations
 template AudioInput* AudioComponent::getPort( const char* portName ) const;
 template AudioOutput* AudioComponent::getPort( const char* portName ) const;
-
-template<>
-AudioComponent::PortVector<AudioInput> const&
-AudioComponent::getPortList()  const
-{
-  return mInputsPorts;
-}
-
-template<>
-AudioComponent::PortVector<AudioOutput> const&
-AudioComponent::getPortList( )  const
-{
-  return mOutputPorts;
-}
-
-template<>
-AudioComponent::PortVector<AudioInput>&
-AudioComponent::getPortList( )
-{
-  return mInputsPorts;
-}
-
-template<>
-AudioComponent::PortVector<AudioOutput>&
-AudioComponent::getPortList( )
-{
-  return mOutputPorts;
-}
 
 template<class PortType>
 struct ComparePortDescriptor
