@@ -37,7 +37,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 ############################################################
 # Support for Building Matlab externals
 
-OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" ON )
+OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" OFF )
 
 IF( BUILD_MATLAB_EXTERNALS )
 FIND_PACKAGE(Matlab REQUIRED)
@@ -49,37 +49,50 @@ ENDIF( MATLAB_FOUND )
 ENDIF( BUILD_MATLAB_EXTERNALS )
 
 ###########################################################
-# Define imported libraries
+# Support for 3rd-party libraries.
 
-if(WIN32) # This includes 64-bit platforms!
-  add_library(portaudio SHARED IMPORTED)
-  set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.dll)
-  set_property(TARGET portaudio PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.dll)
-  set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_DEBUG ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/debug/portaudio_x64.lib)
-  set_property(TARGET portaudio PROPERTY IMPORTED_IMPLIB_RELEASE ${PROJECT_SOURCE_DIR}/3rd/lib/windows_x86_64_msvc13/portaudio/release/portaudio_x64.lib)
-else(WIN32)
-  find_package( Portaudio )
-endif( WIN32 )
+## Portaudio
+
+# For windows, we ship the includes and libraries.
+# TODO: Support system-specific library directories
+# TODO: Provide separate libraries for debug and release builds.
+IF( WIN32 ) # This includes 64-bit platforms!
+  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
+  # call instead of setting it globally.
+  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/portaudio )
+ENDIF( WIN32 )
+FIND_PACKAGE( Portaudio )
+INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
 ## Boost support
+# On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
+# should be found automatically.
+# Otherwise (in particulat for Windows platforms), an environment variable
+# BOOST_ROOT should hold the path to the boost root directory.
+
+# Avoid problems with the auto-link feature on Windows platforms
+ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES unit_test_framework )
+SET( VISR_BOOST_LIBRARIES filesystem system thread unit_test_framework )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
-FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS filesystem system thread unit_test_framework)
+FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 
+################################################################################
 # Actual software components (subprojects) to be built are
 # contained in the src/ directory
+# TODO: This is a quite hidden location for setting the subdirectories and subprojects.
+# Restructure the main build file in order to make this line more prominent.
 ADD_SUBDIRECTORY( src )
 
 ################################################################################
 ## Support for building Doxygen documentation
 ## Taken from: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
 
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" OFF)
+option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
 IF(BUILD_DOCUMENTATION) 
   FIND_PACKAGE(Doxygen)
   IF(NOT DOXYGEN_FOUND)
