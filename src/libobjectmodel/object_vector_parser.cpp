@@ -11,6 +11,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <ciso646>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -107,7 +108,7 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
   bool const found = findIt != res.end();
 
   // This implementation requires the construction of a new object even if a matching object is found, but provides exception,
-  // i.e., resets the original state of the object to be by modified, which is thus unchanged if the parser throws
+  // safety, i.e., resets the original state of the object to be by modified, which is thus unchanged if the parser throws
   std::unique_ptr< Object > newObj( (found and (findIt->second->type() == objTypeId))
                                    ? findIt->second->clone()
                                    : ObjectFactory::create(objTypeId) );
