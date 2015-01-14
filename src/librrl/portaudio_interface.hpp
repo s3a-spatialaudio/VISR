@@ -8,7 +8,7 @@
 #include <libril/communication_area.hpp>
 #include <libril/constants.hpp>
 
-#include <portaudio/portaudio.h>
+#include <portaudio.h>
 
 #include <memory>
 #include <string>
