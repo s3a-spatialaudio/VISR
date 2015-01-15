@@ -14,12 +14,16 @@ namespace objectmodel
  * The value is taken from their declaration within the class.
  */
 //@{
+
+/* Microsoft Visual Studio neither allows or requires this standard-compliant explicit definition. */
+#ifndef _MSC_VER
 /*static*/ const ObjectId Object::cInvalidObjectId;
     
 /*static*/ const GroupId Object::cDefaultGroupId;
     
 /*static*/ const Object::ChannelIndex Object::cInvalidChannelIndex;
-    
+
+#endif
 //@}
     
 Object::Object( )
