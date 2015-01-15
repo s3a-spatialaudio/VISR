@@ -3,8 +3,30 @@
  * This is the main documentation page for the VISR project.
  *
  * @section mainpage_project_status Project Status
+ * 
+ * The project supports three platforms
+ * * Linux (Ubunto Studio 13.04 LTS, 64 Bit)
+ * * MacOS (10.9.5)
+ * * Windows (Windows 76 64 Bit, Visual Studio 2013)
  *
  * @section mainpage_version_control Version Control
- *
- * @section mainpage_buiding_instructions Building Instructions
- */
+ *   * A GIT repository <a href="http://git-scm.com/">http://git-scm.com/</a>  is set up to host the project project.
+ *   * For an introduction to git, see the GIT book <a href="http://git-scm.com/book/en/v2"> http://git-scm.com/book/en/v2</a>
+ *   * At the moment, the GIT server location is <tt>ssh.soton.ac.uk/home/af5u13/repos/visr</tt>#
+ *   * As soon as the S3A storage space becomes available, the master reposiutory will be moved to this location (also on <tt>ssh.soton.ac.uk</tt>, enabling access to all team members.
+ * @section mainpage_build_instructions Installation and Build Instructions
+ * * For detailed instructions for setting up the development machines see @ref installation_build_instructions.
+ * * The project is built using the platform-independent build sytem CMake <a href="http://www.cmake.org/"> http://www.cmake.org/</a>
+ * * In most cases, it is preferable to use the graphical user interface <a href="http://www.cmake.org/cmake/help/v3.0/manual/cmake-gui.1.html">cmake-gui</a>:
+ *   -  Create a separate build directory (within or outside your working copy)
+ *   - Specify both the root of your working copy and the build directory.
+ *   - Run "Configure"
+ *   - After that, you are able to change the variables (e.g., enabling or disabling options in the group "BUILD".
+ *   - Rerun "Configure"
+ *   - Run "Generate" to generate build files for the target platform.
+ * * After that, the project can be built using the native build system for the platform, i.e.,
+  *   - GNU make on Linux
+  *   - Makefiles for Eclipse projetcs if Eclipse is used as IDE
+  *   - Visual Studio projects/solutions on Windows
+  *   - XCode projects on MacOS
+  */
