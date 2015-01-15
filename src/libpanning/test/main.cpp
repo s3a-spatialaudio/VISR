@@ -119,15 +119,16 @@ int main(int argc, const char * argv[])
     decodeGains = allrad.getDecodeGains();
     
     file = fopen("/Users/rdmg1u13/Dropbox/s3a/research/S3A_renderer/visr/src/libpanning/test/matlab/decodeB2VBAP.txt","w");
-    for(k=0; k<9; k++) {
-        for(j=0; j<vbap.getNumSpeakers(); j++) {
-            fprintf(file, "%f ", (*decodeGains)[k][j]);
+    if( file ) {
+        for(k=0; k<9; k++) {
+            for(j=0; j<vbap.getNumSpeakers(); j++) {
+                fprintf(file, "%f ", (*decodeGains)[k][j]);
+            }
+            fprintf(file,"\n");
         }
-        fprintf(file,"\n");
+        fclose( file );
+        file = 0;
     }
-    fclose( file );
-    file = 0;
-
     
     // std::cout << "Hello, World!\n";
     return 0;
