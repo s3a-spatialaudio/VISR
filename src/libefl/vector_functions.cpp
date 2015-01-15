@@ -137,6 +137,79 @@ ErrorCode vectorAddConstantInplace( T constantValue,
 template ErrorCode vectorAddConstantInplace<float>( float, float * const, std::size_t, std::size_t );
 template ErrorCode vectorAddConstantInplace<double>( double, double * const, std::size_t, std::size_t );
 
+template<typename T>
+ErrorCode vectorMultiply( T const * const factor1,
+                          T const * const factor2,
+                          T * const result,
+                          std::size_t numElements,
+                          std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
+  if( not checkAlignment( factor2, alignment ) ) return alignmentError;
+  if( not checkAlignment( result, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    result[idx] = factor1[idx] * factor2[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiply( float const * const, float const * const, float * const, std::size_t numElements, std::size_t alignment );
+template ErrorCode vectorMultiply( double const * const, double const * const, double * const, std::size_t numElements, std::size_t alignment );
+
+template<typename T>
+ErrorCode vectorMultiplyInplace( T const * const factor1,
+                                 T * const  factor2Result,
+                                 std::size_t numElements,
+                                 std::size_t alignment /* = 0 */ )
+{
+  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
+  if( not checkAlignment( factor2Result, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    factor2Result[idx] *= factor1[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiplyInplace( float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyInplace( double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorMultiplyConstant( T constantValue,
+                                  T const * const factor,
+                                  T * const result,
+                                  std::size_t numElements,
+                                  std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( factor, alignment ) ) return alignmentError;
+  if( not checkAlignment( result, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    result[idx] = constantValue * factor[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiplyConstant( float, float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyConstant( double, double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorMultiplyConstantInplace( T constantValue,
+                                         T * const factorResult,
+                                         std::size_t numElements,
+                                         std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( factorResult, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    factorResult[idx] *= constantValue;
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiplyConstantInplace( float, float * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyConstantInplace( double, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyAdd( T const * const factor1,
