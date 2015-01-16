@@ -130,6 +130,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     if( obj.numberOfChannels() != 1 )
     {
       std::cerr << "PanningGainCalculator: Only monaural object types are supported at the moment." << std::endl;
+      continue;
     }
 
     objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
@@ -165,6 +166,8 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       default:
         std::cerr << "PanningGainCalculator: Unsupported object type." << std::endl;
     }
+    mLevels[ channelId ] = obj.level();
+
   } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   mVbapCalculator.setSourcePositions( &mSourcePositions );
   if( mVbapCalculator.calcGains() != 0 )
@@ -172,14 +175,13 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     throw std::runtime_error( "PanningGainCalculator: Error calculating VBAP gains." );
   }
 
-  for( std::size_t srcIdx(0); srcIdx < mNumberOfObjects; ++srcIdx )
+  for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
-    Afloat const * const gainRow = (*mVbapCalculator.getGains())[ srcIdx ];
-    CoefficientType * const finalGains = gainMatrix.row( srcIdx );
-    // we cannot guarantee any alignment
-    if( efl::vectorMultiplyConstant( mLevels[srcIdx], gainRow, finalGains, mNumberOfLoudspeakers, 0 ) != efl::ErrorCode::noError )
+    Afloat const * const gainRow = (*mVbapCalculator.getGains())[ chIdx ];
+    objectmodel::LevelType const level = mLevels[ chIdx ];
+    for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
     {
-      throw std::runtime_error( "PanningGainCalculator: Error copying calculated gains to output matrix." );
+      gainMatrix( outIdx, chIdx ) = level * gainRow[ outIdx ];
     }
   }
 }
