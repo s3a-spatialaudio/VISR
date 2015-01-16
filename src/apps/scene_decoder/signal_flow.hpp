@@ -31,13 +31,15 @@ public:
   explicit SignalFlow( std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
                        std::size_t interpolationPeriod,
+                       std::string const & configFile,
+                       std::size_t udpPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~SignalFlow();
 
-  /*virtual*/ void process( );
+  /*virtual*/ void process();
 
-  /*virtual*/ void setup( );
+  /*virtual*/ void setup();
 
 private:
   const std::size_t cNumberOfInputs;
@@ -46,6 +48,10 @@ private:
 
   const std::size_t cInterpolationSteps;
 
+  const std::string mConfigFileName;
+  
+  const std::size_t mNetworkPort;
+  
   rcl::UdpReceiver mSceneReceiver;
   
   rcl::SceneDecoder mSceneDecoder;

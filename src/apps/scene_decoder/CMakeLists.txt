@@ -1,6 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-ADD_EXECUTABLE( scene_decoder_app main.cpp signal_flow.cpp )
+ADD_DEFINITIONS( -DSRC_DIRECTORY=${CURRENT_SOURCE_DIRECTORY} )
+
+ADD_EXECUTABLE( scene_decoder_app main.cpp signal_flow.cpp signal_flow.hpp )
 
 TARGET_LINK_LIBRARIES(scene_decoder_app pml)
 TARGET_LINK_LIBRARIES(scene_decoder_app rbbl)
