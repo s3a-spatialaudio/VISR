@@ -6,11 +6,12 @@
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
 
+#include <libobjectmodel/object.hpp> // needed basically for type definitions
+
 #include <libpanning/LoudspeakerArray.h>
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
-#include <memory> // for std::unique_ptr
 #include <vector>
 
 namespace visr
@@ -77,18 +78,23 @@ public:
 
   /**
    * Set the reference listener position.
-   * THe listener postions are used beginning with the next process() call.
+   * The listener positions are used beginning with the next process() call.
+   * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
+   * @throw std::runtime_error If the recalculation of the internal panning data fails.
    * @note input parameters are likely to be changed to some more sophisticated type (i.e., libpml)
    * @todo Consider extending the interface to multiple listener positions.
    */
   void setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z );
 
 private:
+  /**
+   * The number of audio objects handled by this object.
+   */
   std::size_t mNumberOfObjects;
 
   /**
    * The number of panning loudspeakers.
-   * @note This excludes any potential subwoofers (which are not handled by the panninf algorithm)
+   * @note This excludes any potential subwoofers (which are not handled by the panning algorithm)
    */
   std::size_t mNumberOfLoudspeakers;
 
@@ -97,11 +103,28 @@ private:
    * Change accordingly after the library has been adjusted.
    */
   //@{
+  
+  /**
+   * The loudspeaker array configurtion.
+   * @note This object must persist for the whole lifetime of the \p mVbapCalculator object.
+   */
   LoudspeakerArray mSpeakerArray;
+  
+  /**
+   * A vector to hold the source position data.
+   * @todo: replace this by a variable-sized vector;
+   */
+  XYZ mSourcePositions[MAX_NUM_SOURCES];
 
-  XYZ mListenerPosition;
-
+  /**
+   * The calculator object to generate the panning matrix coefficients.
+   */
   VBAP mVbapCalculator;
+  
+  /**
+   * The levels of the object channels in linear scale.
+   */
+  std::valarray<objectmodel::LevelType> mLevels;
   //@}
 };
 
