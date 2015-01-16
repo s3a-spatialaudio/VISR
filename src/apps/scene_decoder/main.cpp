@@ -4,6 +4,8 @@
 
 #include <librrl/portaudio_interface.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio> // for getc(), for testing purposes
@@ -32,13 +34,20 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "JACK";
 
+    boost::filesystem::path const decoderDir = "bla";
+    boost::filesystem::path const configFile ("decode_N8_P40_t-design_8_40.txt");
+    boost::filesystem::path const fullPath = decoderDir / configFile;
+    
+    std::size_t udpPort = 8888;
+    
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     const std::size_t cInterpolationLength = 4 * periodSize;
 
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers,
-                     cInterpolationLength, periodSize,
-                     samplingRate );
+                     cInterpolationLength,
+                     fullPath.string().c_str(), udpPort,
+                     periodSize, samplingRate );
     flow.setup();
 
     audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );

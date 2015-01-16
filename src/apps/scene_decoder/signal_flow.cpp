@@ -31,11 +31,16 @@ namespace
 SignalFlow::SignalFlow( std::size_t numberOfInputs,
   std::size_t numberOfOutputs,
   std::size_t interpolationPeriod,
-  std::size_t period, ril::SamplingFrequencyType samplingFrequency )
+  std::string const & configFile,
+  std::size_t udpPort,
+  std::size_t period,
+  ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
+ , mConfigFileName( configFile )
+ , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
  , mGainCalculator( *this, "VbapGainCalculator" )
@@ -57,17 +62,15 @@ SignalFlow::process()
   mMatrix.process();
 }
 
-/*virtual*/ void 
+/*virtual*/ void
 SignalFlow::setup()
 {
   // Initialise and configure audio components
-  std::string const lspConfigFile( "/home/af5u13/dev/eclipse-visr/src/libpanning/test/octahedron.txt" ); // todo: make this an option.
 
-  mSceneReceiver.setup( 8888, rcl::UdpReceiver::Mode::Asynchronous );
+  mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup();
-  mGainCalculator.setup( cNumberOfInputs, cNumberOfOutputs, lspConfigFile );
+  mGainCalculator.setup( cNumberOfInputs, cNumberOfOutputs, mConfigFileName );
   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
-
 
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
