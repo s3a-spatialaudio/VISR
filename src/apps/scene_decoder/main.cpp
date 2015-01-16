@@ -17,9 +17,8 @@ int main( int argc, char const * const * argv )
   using namespace visr::apps::scene_decoder;
 
   // define fixed parameters for rendering
-  const std::size_t numberOfObjects = 8;
-  const std::size_t numberOfLoudspeakers = 40;
-
+  const std::size_t numberOfObjects = 3;
+  const std::size_t numberOfLoudspeakers = 6;
   const std::size_t periodSize = 1024;
   const std::size_t samplingRate = 48000;
 
@@ -35,7 +34,7 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mHostApi = "JACK";
 
     boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
-    boost::filesystem::path const configFile( "t-design_t=8_40point.txt" );
+    boost::filesystem::path const configFile( "octahedron.txt" );
     boost::filesystem::path const fullPath = decoderDir / configFile;
     if( !exists( fullPath ) )
     {
@@ -48,7 +47,7 @@ int main( int argc, char const * const * argv )
     
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 
-    const std::size_t cInterpolationLength = 4 * periodSize;
+    const std::size_t cInterpolationLength = periodSize;
 
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers,
                      cInterpolationLength,
