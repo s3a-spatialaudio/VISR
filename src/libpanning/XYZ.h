@@ -27,13 +27,31 @@ class XYZ {
     , z( 0.0f )
     , isAtInfinity( false )
    {}
-
+  
+  /**
+   * Constructor with specified coordinates.
+   */
+  explicit XYZ( Afloat pX, Afloat pY, Afloat pZ, bool pInfinity = false )
+   : x( pX), y( pY ), z( pZ ), isAtInfinity( pInfinity )
+  {}
+  
+  /**
+   * Assignment operator. Uses default-constructed operator (no implementation required).
+   */
+  XYZ & operator=( XYZ const & rhs ) = default;
+  
+  /**
+   * Copy constructor.
+   * Uses automatically-generated default copy ctor, no implementation required.
+   */
+  XYZ( XYZ const & rhs ) = default;
+  
   Afloat x, y, z;
   bool isAtInfinity; // eg for source at infinity.
     
   int set(Afloat X, Afloat Y, Afloat Z, bool atInfinity = false) {
     x = X; y = Y; z =Z;
-    isAtInfinity = false;
+    isAtInfinity = atInfinity;
     return 0;
   };
     
