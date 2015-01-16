@@ -17,8 +17,8 @@ int main( int argc, char const * const * argv )
   using namespace visr::apps::scene_decoder;
 
   // define fixed parameters for rendering
-  const std::size_t numberOfObjects = 2;
-  const std::size_t numberOfLoudspeakers = 2;
+  const std::size_t numberOfObjects = 8;
+  const std::size_t numberOfLoudspeakers = 40;
 
   const std::size_t periodSize = 1024;
   const std::size_t samplingRate = 48000;
@@ -34,10 +34,16 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "JACK";
 
-    boost::filesystem::path const decoderDir = "bla";
-    boost::filesystem::path const configFile ("decode_N8_P40_t-design_8_40.txt");
+    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
+    boost::filesystem::path const configFile( "t-design_t=8_40point.txt" );
     boost::filesystem::path const fullPath = decoderDir / configFile;
-    
+    if( !exists( fullPath ) )
+    {
+      std::cerr << "The compiled-in configuration file \"" 
+                << fullPath.string().c_str() << "\" does not exist." << std::endl;
+      return EXIT_FAILURE;
+    }
+
     std::size_t udpPort = 8888;
     
     rrl::PortaudioInterface audioInterface( interfaceConfig );
