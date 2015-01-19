@@ -36,8 +36,8 @@ DenormalisedNumbers::State DenormalisedNumbers::setDenormHandling( State newStat
 
   ControlWord const oldCW = _mm_getcsr( );
 
-  bool const oldDAZ = (oldCW bitand cDenormsAreZeroMask);
-  bool const oldFTZ = (oldCW bitand cFlushToZeroMask);
+  bool const oldDAZ = (oldCW bitand cDenormsAreZeroMask) != 0;
+  bool const oldFTZ = (oldCW bitand cFlushToZeroMask) != 0;
 
   ControlWord newCW = oldCW bitand cCwMask;
   if( newState.denormalsAreZero )
