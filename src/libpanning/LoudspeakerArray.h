@@ -1,6 +1,5 @@
 //
 //  LoudspeakerArray.h
-//  S3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 18/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -29,7 +28,7 @@ class LoudspeakerArray
     
 private:
     
-    bool m_is2D;
+    bool m_is2D, m_isInfinite;
 
 public:
     
@@ -43,12 +42,12 @@ public:
     int load(FILE *file);
     
     
-    int setPosition(int iSpk, Afloat x, Afloat y, Afloat z) {
-        m_position[iSpk].set(x, y, z);
+    int setPosition(int iSpk, Afloat x, Afloat y, Afloat z, bool inf) {
+        m_position[iSpk].set(x, y, z, inf);
         return 0;
     };
     
-    XYZ* getPosition(int iSpk) { return &m_position[iSpk]; };
+    XYZ *getPosition(int iSpk) { return &m_position[iSpk]; };
     
     XYZ (*getPositions())[MAX_NUM_SPEAKERS] { return &m_position; };
     
@@ -64,6 +63,7 @@ public:
     int getNumSpeakers() { return m_nSpeakers; };
     
     bool is2D() { return m_is2D; };
+    bool isInfinite() { return m_isInfinite; };
 
 };
 

@@ -1,6 +1,5 @@
 //
 //  VBAP.h
-//  S3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 10/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.

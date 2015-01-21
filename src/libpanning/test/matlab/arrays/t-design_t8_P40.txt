@@ -1,3 +1,16 @@
+
+% Regular array, t-design 8th order 40 point
+% (will allow exact sampled decoding with 8th order ambisonics)
+
+
+i % Speakers are at infinity.
+
+
+% positions
+
+% cartesians
+% id	x			y			z
+
 c 1	.6025390440842870E+00	-.7942426564956050E+00	.7826431470854400E-01
 c 2	-.7942426564956030E+00	.7826431470854500E-01	.6025390440842890E+00
 c 3	-.6025390440842880E+00	.7942426564956040E+00	.7826431470854600E-01
