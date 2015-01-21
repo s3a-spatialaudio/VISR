@@ -2,6 +2,8 @@
 
 #include "signal_flow.hpp"
 
+#include <libefl/denormalised_number_handling.hpp>
+
 #include <librrl/portaudio_interface.hpp>
 
 #include <boost/filesystem.hpp>
@@ -16,8 +18,11 @@ int main( int argc, char const * const * argv )
   using namespace visr;
   using namespace visr::apps::scene_decoder;
 
+  efl::DenormalisedNumbers::State const oldDenormNumbersState
+    = efl::DenormalisedNumbers::setDenormHandling();
+
   // define fixed parameters for rendering
-  const std::size_t numberOfObjects = 3;
+  const std::size_t numberOfObjects = 64;
   const std::size_t numberOfLoudspeakers = 6;
   const std::size_t periodSize = 1024;
   const std::size_t samplingRate = 48000;
@@ -74,5 +79,8 @@ int main( int argc, char const * const * argv )
     std::cout << "Exception caught on top level: " << ex.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+ efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
+
   return EXIT_SUCCESS;
 }
