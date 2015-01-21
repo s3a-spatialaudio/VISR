@@ -29,7 +29,7 @@ int main(int argc, const char * argv[])
     
     // Useage / test VBAP with 8 sources around an octahedron array
     
-    file = fopen("octahedron.txt","r");
+    file = fopen("arrays/octahedron.txt","r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
@@ -57,7 +57,7 @@ int main(int argc, const char * argv[])
     
     // 5.1 test, 2D VBAP
     
-    file = fopen("5.1.txt","r");
+    file = fopen("arrays/5.1.txt","r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
@@ -83,17 +83,17 @@ int main(int argc, const char * argv[])
     
     // Initialization:
     
-    file = fopen("octahedron.txt","r");
+    file = fopen("arrays/octahedron.txt","r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     vbap.setLoudspeakerArray(&array);
     
-    file = fopen("t-design_t8_P40.txt","r");
+    file = fopen("arrays/t-design_t8_P40.txt","r");
     if (regArray.load(file) == -1) return -1;
     allrad.setRegArray(&regArray);
     fclose( file );
     
-    file = fopen("decode_N8_P40_t-design_t8_P40.txt","r");
+    file = fopen("arrays/decode_N8_P40_t-design_t8_P40.txt","r");
     if (allrad.loadRegDecodeGains(file, 8, 40) == -1) return -1;
     fclose( file );
     
