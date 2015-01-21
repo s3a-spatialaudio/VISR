@@ -118,7 +118,7 @@ int main(int argc, const char * argv[])
     
     // Write b-format2vbap gains for matlab testing:
     
-    file = fopen("decodeB2VBAP.txt","w");
+    file = fopen("testoutput/decodeB2VBAP.txt","w");
     if( file ) {
       for(k=0; k<9; k++) { // 9 harms - 2nd order only
         for(j=0; j<vbap.getNumSpeakers(); j++) {
