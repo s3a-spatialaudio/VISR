@@ -1,7 +1,10 @@
 
-
-
 % Octahedron loudspeaker array
+
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
 
 % positions
 

@@ -1,6 +1,5 @@
 //
 //  AllRAD.h
-//  S3A_renderer_dsp
 //
 //  Calculate HOA decode matrix by feeding regular HOA decode to external VBAP of virtual louspeakers.
 //  Suitable for fast update for listener tracking.
@@ -34,18 +33,16 @@ private:
     int m_nHarms = 0;
     int m_nSpkSources = 0;
     
-    LoudspeakerArray m_regArray;
+    LoudspeakerArray* m_regArray;
 
     
 public:
     
-    int loadRegArray(FILE* file){
-        return m_regArray.load(file);
-    }
+    int setRegArray(LoudspeakerArray* array) { m_regArray = array; return 0; };
     
     int loadRegDecodeGains(FILE* file, int nHarms, int nSpks);
     
-    int calcDecodeGains(VBAP* vbap); // Ensure calcInvMatrix is called on vbap first.
+    int calcDecodeGains(VBAP* vbap); // Ensure calcInvMatrices is called on vbap first.
     
     Afloat (*getDecodeGains())[MAX_NUM_HARMONICS][MAX_NUM_SPEAKERS] {
         return &m_decode;

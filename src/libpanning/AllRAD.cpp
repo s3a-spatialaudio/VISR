@@ -1,6 +1,5 @@
 //
 //  AllRAD.cpp
-//  S3A_renderer_dsp
 //
 //  Created by dylan on 12/12/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -44,9 +43,11 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
     
     //* This casting could cause failure if MAX_NUM_SOURCES < MAX_NUM_SPEAKERS
     vbap->setSourcePositions(
-    (XYZ (*)[MAX_NUM_SOURCES]) m_regArray.getPositions()  );
+    (XYZ (*)[MAX_NUM_SOURCES]) m_regArray->getPositions()  );
     
-    vbap->setNumSources(m_regArray.getNumSpeakers());
+    vbap->setNumSources(m_regArray->getNumSpeakers());
+    
+    //! set isAtInfinity flag for all regArray speakers
     
     vbap->calcGains();
     

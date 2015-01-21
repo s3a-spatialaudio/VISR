@@ -1,6 +1,12 @@
 
 % 5.1 loudspeaker array
 
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
+
+
 2 % 2D mode: only pairs given
 
 % positions

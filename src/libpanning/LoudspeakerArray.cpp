@@ -1,6 +1,5 @@
 //
 //  LoudspeakerArray.cpp
-//  S3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 18/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -24,15 +23,16 @@ int LoudspeakerArray::load(FILE *file)
     i = nSpk = nTri = 0;
     
     m_is2D = false;
+    m_isInfinite = false;
     
     if (file == 0) return -1;
 
     do {
         fscanf(file, "%c",&c);
-        if (c == 'c') {   // cartesians
+        if (c == 'c') {        // cartesians
             n = fscanf(file, "%d %f %f %f\n", &i, &x, &y, &z);
             if (i <= MAX_NUM_SPEAKERS) {
-                setPosition(i-1,x,y,z);
+                setPosition(i-1,x,y,z,m_isInfinite);
                 if (i > nSpk) nSpk = i;
             }
         }
@@ -45,7 +45,7 @@ int LoudspeakerArray::load(FILE *file)
                 x = xy*cos(az);
                 y = xy*sin(az);
                 z = r*sin(el);
-                setPosition(i-1,x,y,z);
+                setPosition(i-1,x,y,z,m_isInfinite);
                 if (i > nSpk) nSpk = i;
             }
         }
@@ -56,8 +56,11 @@ int LoudspeakerArray::load(FILE *file)
                 if (i > nTri) nTri = i;
             }
         }
-        else if (c == '2') {    // switch to 2D mode
+        else if (c == '2') {    // switch to '2D' mode
             m_is2D = true;
+        }
+        else if (c == 'i') {    // switch to 'infinite' mode
+            m_isInfinite = true;
         }
         else if (c == '%') {    // comment
             while(fgetc(file) != '\n');

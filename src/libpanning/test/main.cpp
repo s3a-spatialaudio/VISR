@@ -1,6 +1,6 @@
 //
 //  main.cpp
-//  S3A_renderer_dsp
+
 //
 //  Created by Dylan Menzies on 10/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -15,7 +15,7 @@
 
 int main(int argc, const char * argv[])
 {
-    LoudspeakerArray array;
+    LoudspeakerArray array, regArray;
     VBAP vbap;
     AllRAD allrad;
     Afloat (*vbapGains)[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS];
@@ -49,6 +49,7 @@ int main(int argc, const char * argv[])
     sourcePos[7].set(-1.0, -1.0, -1.0, false);
     vbap.setSourcePositions(&sourcePos);
 
+    
     vbap.calcGains();
     
     vbapGains = vbap.getGains();   // Check in watch window
@@ -85,20 +86,16 @@ int main(int argc, const char * argv[])
     file = fopen("octahedron.txt","r");
     if (array.load(file) == -1) return -1;
     fclose( file );
-    file = 0;
     vbap.setLoudspeakerArray(&array);
     
-    
-    file = fopen("t-design_t=8_40point.txt","r");
-    if (allrad.loadRegArray(file) == -1) return -1;
+    file = fopen("t-design_t8_P40.txt","r");
+    if (regArray.load(file) == -1) return -1;
+    allrad.setRegArray(&regArray);
     fclose( file );
-    file = 0;
     
-    
-    file = fopen("decode_N8_P40_t-design_8_40.txt","r");
-    if (allrad.loadRegDecodeGains(file, 3, 40) == -1) return -1;
+    file = fopen("decode_N8_P40_t-design_t8_P40.txt","r");
+    if (allrad.loadRegDecodeGains(file, 8, 40) == -1) return -1;
     fclose( file );
-    file = 0;
     
     
     // Initially and every time listener moves:
@@ -113,24 +110,24 @@ int main(int argc, const char * argv[])
     
     
     // Load vbap with reg-array-speaker-sources
-    // Calc vbap gains then calc AllRAD decode gains
+    // Calc vbap gains then calc AllRAD b-format decode gains
     
     allrad.calcDecodeGains(&vbap);
     decodeGains = allrad.getDecodeGains();
     
-    file = fopen("/Users/rdmg1u13/Dropbox/s3a/research/S3A_renderer/visr/src/libpanning/test/matlab/decodeB2VBAP.txt","w");
-    if( file ) {
-        for(k=0; k<9; k++) {
-            for(j=0; j<vbap.getNumSpeakers(); j++) {
-                fprintf(file, "%f ", (*decodeGains)[k][j]);
-            }
-            fprintf(file,"\n");
-        }
-        fclose( file );
-        file = 0;
-    }
     
-    // std::cout << "Hello, World!\n";
+    // Write b-format2vbap gains for matlab testing:
+    
+    file = fopen("decodeB2VBAP.txt","w");
+    if( file ) {
+      for(k=0; k<9; k++) { // 9 harms - 2nd order only
+        for(j=0; j<vbap.getNumSpeakers(); j++) {
+            fprintf(file, "%f ", (*decodeGains)[k][j]);
+        }
+        fprintf(file,"\n");
+      }
+      fclose( file );
+    }
     return 0;
 }
 

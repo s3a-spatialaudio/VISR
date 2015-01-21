@@ -1,6 +1,5 @@
 //
 //  VBAP.cpp
-//  s3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 10/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -22,7 +21,7 @@ int VBAP::calcInvMatrices(){
             
             l1 = m_array->m_position[m_array->m_triplet[i][0]];
             l2 = m_array->m_position[m_array->m_triplet[i][1]];
-            if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc to 2D
+            if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
             else l3 = m_array->m_position[m_array->m_triplet[i][2]];
         
             det = 1.0 / (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
@@ -59,7 +58,7 @@ int VBAP::calcGains(){
         y = (*m_sourcePos)[i].y;
         z = (*m_sourcePos)[i].z;
         
-        if (!(*m_sourcePos)[i].isAtInfinity) {
+        if (!(*m_sourcePos)[i].isInfinite) {
             x -= m_listenerPos.x;
             y -= m_listenerPos.y;
             z -= m_listenerPos.z;

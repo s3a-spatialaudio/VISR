@@ -1,0 +1,36 @@
+
+% 22.1 loudspeaker array
+% For the Audio Lab array, University of Southampton
+% Adapted from  ITU-R Rec. BS.2051-0
+% http://www.itu.int/rec/R-REC-BS.2051-0-201402-I
+
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
+
+% positions
+
+% cartesians
+% id	x	y	z
+
+c 1	1.0	0.0	0.0	% Front
+
+
+% polars
+%   n	azim.	elev.	distance
+% p 1	45	45	1.0
+
+
+
+% triangularisation for VBAP etc
+
+% 3-tuplets
+%	id1	id2	id3
+
+t 1	1	4	5
+
+
+
+
+
