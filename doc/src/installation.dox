@@ -3,6 +3,47 @@
  *
  * @tableofcontents
  *
+ * @section setup_environment_linux Linux Distribution and Build/Runtime Environment
+ * The recommended Linux distribution for the VISR is <a href=https://ubuntustudio.org/>Ubuntu Studio</a> 14.04 LTS. It can be obtained from the <a href=https://ubuntustudio.org/download/>download site</a>.
+ *
+ * @subsection package_installation Installation of Required Software and Libraries
+ * Additional software packages (applications and libraries) are installed using the <tt>apt</tt> packet management tools (e.g., <a href=https://wiki.debian.org/Apt>https://wiki.debian.org/Apt</a> or <a hfref=http://en.wikipedia.org/wiki/Advanced_Packaging_Tool>http://en.wikipedia.org/wiki/Advanced_Packaging_Tool</a>).
+ * * Search for package using a part of the name or the description: <tt>apt-cache search searchstring</tt>
+ * * Show information about a package  <tt>apt-cache show package</tt>
+ * * Install a software package <tt>sudo apt-get install package</tt>
+ *
+ * @subsection linux_required_software_packages Required Software Libraries
+ * The following software libraries must be installed to build and run the VISR
+ * * libboost-all-dev
+ * * portaudio19-dev
+ * * libsndfile1-dev
+ *
+ * NB: If compilation is not required, then the standard packages (without "dev") should be sufficient. However, this has not been tested yet. Moreover, there is no equivalent to boost-all-dev, so the required libraries would need to be specified manually together with their version. At the moment, these package names are <tt>libboost-system1.54.0</tt>, <tt>libboost-thread1.54.0</tt>, <tt>libboost-filesystem1.54.0</tt>.
+ * 
+ * For development and compilation of the project, the following packages are required:
+ * * git
+ * * cmake
+ * * cmake-gui (recommended)
+ * * g++
+ * * doxygen
+ * * graphviz
+ * * A decent editor or development environment. Choose your weapon: vi, vim, gvim, emacs, eclipse ...
+ *
+ * The following tools are recommended for audio development and testing:
+ * * audacity
+ * * qjackctl
+ * * jaaa
+ * * meterbridge
+ * 
+ * To build the soundscape renderer, the following development libraries need to be installed:
+ * * libfftw3-dev
+ * * libqt4-dev
+ * * libecasoundc-dev
+ * * libjack-jack2-dev (probably)
+ *
+ * The SoundScapeRenderer must be downaloaded from the <a href=http://spatialaudio.net/ssr/download/>SSR download page</a> and installed accoording to the <a href=http://ssr.rtfd.org/>User manual</a>.
+ * This possibly requires additional software (automake, gmake).
+ *
  * @section handling_3rdparty_libs Handling of Third-Party Libraries
  * In general, it is preferable to use the platforms package installation mechanisms to provide additional software components/libraries  
  *  
