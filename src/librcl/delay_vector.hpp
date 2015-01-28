@@ -103,7 +103,7 @@ public:
    * @param newDelays A  containing the new delay values for all
    * channels (in seconds). The matrix must have 1 row and
    * <b>numberOfChannels</b> columns.
-   * @param newDelays A matrix containing the new gain values for all
+   * @param newGains A matrix containing the new gain values for all
    * channels (in linear scale). The matrix must have 1 row and
    * <b>numberOfChannels</b> columns.
    * @throw std::invalid_argument If a matrix size is invalid

@@ -49,8 +49,15 @@
  *  
  * @subsection boost_on_windows_ Building and Finding Boost on Windows platforms (Visual Studio) 
  *  * Download the Boost source distribution, e.g., boost_1_57_0.zip or boost_1_57_0.tar.bz2
+ *  * Unpack the boost distribution
+ *  * The top-level directory within the unpacked archive is referred to as <tt>boost_root</tt> in the following
  *  * Open the command prompt for the Visual Studio version you are targeting
- *  * Execute <b>VC/vcvarsall amd64</b> to switch the compiler toolchain to 64-bit mode 
+ *  * Execute <tt>VC\\vcvarsall amd64</tt> to switch the compiler toolchain to 64-bit mode (if necessary, do cd VC; ..\\vcvarsall.sh amd64)
+ *  * Go to the boost_root directory
+ *  * Execute the bootstrap build function to build the build tools <tt>.\\bootstrap.bat</tt>
+ *  * Build boost: <tt>.\\b2 --address-model=64 --build-type=complete stage</tt> (this takes a while and consumes about 10 GB disk space).
+ *  * Add the following environment variable to Windows (Control Center->System->Advanced System settings->Environment Variables): <tt>BOOST_ROOT=boost_root</tt>.
+ *  * A subsequent configure run in CMake should yield "Boost version: 1.xx.x Found the following Boost libraries: ..." 
  * 
  * @subsection macos MacOS
  *  * Setup Xcode and import git project from repository.
