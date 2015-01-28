@@ -9,7 +9,7 @@
 #include <libril/constants.hpp>
 
 #include <libefl/aligned_array.hpp>
-#include <libefl/basic_matrix.hpp> // For the moment, use 1-row matrices as vectors
+#include <libefl/basic_vector.hpp>
 
 #include <cstddef> // for std::size_t
 
@@ -51,7 +51,7 @@ public:
    * object (in seconds)
    * @param initialDelaySeconds The initial delay value for all
    * channels (in seconds, default: 0.0)
-   * @param initialGainsLinear The initial delay value for all
+   * @param initialGainLinear The initial delay value for all
    * channels (in linear scale, default: 1.0)
    */
   void setup( std::size_t numberOfChannels, 
@@ -69,17 +69,16 @@ public:
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
   * @param initialDelaysSeconds The delays for all channels in
-  * seconds. The matrix must have exactly one row, and the number of
-  * columns must match the channel number of this object.
+  * seconds. The number of elements of this vector must match the channel number of this object.
   * @param initialGainsLinear The initial gain values for all
-  * channels, given in a linear scale.  The matrix must have exactly one row, and the number of
-  * columns must match the channel number of this object.
+  * channels, given in a linear scale.  The the number of
+  * elements in this vector must match the channel number of this object.
   */
   void setup( std::size_t numberOfChannels,
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
-              efl::BasicMatrix< SampleType > const & initialDelaysSeconds,
-              efl::BasicMatrix< SampleType > const & initialGainsLinear );
+              efl::BasicVector< SampleType > const & initialDelaysSeconds,
+              efl::BasicVector< SampleType > const & initialGainsLinear );
 
   /**
    * The process method applies the (interpolated) delay and gain
@@ -101,7 +100,7 @@ public:
    * transistion, which performs a transition to the new gains and
    * delays over an interval of <b>interpolationSteps</b> samples.
    * .
-   * @param newDelays A matrix containing the new delay values for all
+   * @param newDelays A  containing the new delay values for all
    * channels (in seconds). The matrix must have 1 row and
    * <b>numberOfChannels</b> columns.
    * @param newDelays A matrix containing the new gain values for all
@@ -111,8 +110,8 @@ public:
    * @throw std::invalid_argument If a delay value exceeds the maximum
    * delay setting.
    */
-  void setDelayAndGain( efl::BasicMatrix< SampleType > const & newDelays,
-                        efl::BasicMatrix< SampleType > const & newGains );
+  void setDelayAndGain( efl::BasicVector< SampleType > const & newDelays,
+                        efl::BasicVector< SampleType > const & newGains );
 
   /**
    * Set new values for the delays. This is a simplified version of
@@ -121,14 +120,30 @@ public:
    * setDelayAndGain(), except that the previous 'new gain value'
    * remains unaltered als the new 'new gain value'.
    * @see setDelayAndGain
-   * @param newDelays A matrix containing the new gain values for all
-   * channels (in linear scale). The matrix must have 1 row and
-   * <b>numberOfChannels</b> columns.
-   * @throw std::invalid_argument If a matrix size is invalid
+   * @param newDelays A vector containing the new delay values for all
+   * channels (in linear scale). The vector must have
+   * <b>numberOfChannels</b> elements.
+   * @throw std::invalid_argument If a vector size is invalid
    * @throw std::invalid_argument If a delay value exceeds the maximum
    * delay setting.
    */
-  void setDelay( efl::BasicMatrix< SampleType > const & newDelays );
+  void setDelay( efl::BasicVector< SampleType > const & newDelays );
+
+  /**
+  * Set new values for the gains. This is a simplified version of
+  * setGainAndDelay(), which leaves the delay values unaltered.
+  * The semantics of the transition are documented in
+  * setDelayAndGain(), except that the previous 'new delay value'
+  * remains unaltered als the new 'new delay value'.
+  * @see setDelayAndGain
+  * @param newGains A vector containing the new gain values for all
+  * channels (in linear scale). The vector must have
+  * <b>numberOfChannels</b> elements.
+  * @throw std::invalid_argument If a vector size is invalid
+  * @throw std::invalid_argument If a delay value exceeds the maximum
+  * delay setting.
+  */
+  void setGain( efl::BasicVector< SampleType > const & newGains );
 
 private:
   /**
