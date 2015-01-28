@@ -6,3 +6,6 @@ SET( SOURCES add.cpp delay_vector.cpp gain_matrix.cpp panning_gain_calculator.cp
 SET( HEADERS add.hpp  delay_vector.hpp gain_matrix.hpp panning_gain_calculator.hpp scene_decoder.hpp udp_receiver.hpp)
 
 ADD_LIBRARY( rcl STATIC ${SOURCES} ${HEADERS} )
+
+# Add the unit test directory.
+ADD_SUBDIRECTORY( test )
