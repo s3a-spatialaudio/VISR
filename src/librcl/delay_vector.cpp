@@ -27,8 +27,8 @@ void DelayVector::setup( std::size_t numberOfChannels,
  void DelayVector::setup( std::size_t numberOfChannels,
                           std::size_t interpolationSteps,
                           SampleType maximumDelaySeconds,
-                          efl::BasicMatrix< SampleType > const & initialDelaysSeconds,
-                          efl::BasicMatrix< SampleType > const & initialGainsLinear )
+                          efl::BasicVector< SampleType > const & initialDelaysSeconds,
+                          efl::BasicVector< SampleType > const & initialGainsLinear )
 {
 
 }
@@ -37,12 +37,16 @@ void DelayVector::process()
 {
 }
 
-void DelayVector::setDelayAndGain( efl::BasicMatrix< SampleType > const & newDelays,
-                                   efl::BasicMatrix< SampleType > const & newGains )
+void DelayVector::setDelayAndGain( efl::BasicVector< SampleType > const & newDelays,
+                                   efl::BasicVector< SampleType > const & newGains )
 {
 }
 
-void DelayVector::setDelay( efl::BasicMatrix< SampleType > const & newDelays )
+void DelayVector::setDelay( efl::BasicVector< SampleType > const & newDelays )
+{
+}
+
+void DelayVector::setGain( efl::BasicVector< SampleType > const & newGains )
 {
 }
 
