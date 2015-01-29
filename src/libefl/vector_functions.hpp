@@ -39,7 +39,6 @@ template <typename T>
 ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
                       bool startInclusive, bool endInclusive, std::size_t alignment = 0 );
 
-
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,
          T const * const op2,
@@ -65,6 +64,33 @@ ErrorCode vectorAddConstantInplace( T constantValue,
             T * const opResult,
             std::size_t numElements,
             std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubtract( T const * const subtrahend,
+  T const * const minuend,
+  T * const result,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubtractInplace( T const * const minuend,
+  T * const subtrahendResult,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubtractConstant( T constantMinuend,
+  T const * const subtrahend,
+  T * const result,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubConstantInplace( T constantMinuend,
+  T * const subtrahendResult,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
 
 /**
  * Multiply two vectors.
