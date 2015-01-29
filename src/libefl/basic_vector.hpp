@@ -32,8 +32,7 @@ public:
    * @param alignmentElements The alignment of the array, given as a multiple of the element size.
    */
   explicit BasicVector( std::size_t alignmentElements = 0 )
-   : mStride( 0 )
-   , mData( alignmentElements )
+   : mData( alignmentElements )
   {
   }
 
@@ -43,7 +42,7 @@ public:
    * @param size The number of elements.
    * @param alignmentElements The alignment of the array, given as a multiple of the element size.
    */
-  explicit BasicVector( std::size_t size, std::size_t alignmentElements = 0 )
+  explicit BasicVector( std::size_t size, std::size_t alignmentElements )
    : mData( size, alignmentElements )
   {
     zeroFill();
@@ -78,7 +77,7 @@ public:
   {
     // Ensure strong exception safety by doing the swap() trick
     AlignedArray<ElementType> newData( newSize, alignmentElements() );
-    ErrorCode const res = vectorZero( newData.data(), newSize() );
+    ErrorCode const res = vectorZero( newData.data(), newSize );
     if( res != noError )
     {
       throw std::runtime_error( "Zeroing of Vector failed" );
@@ -232,15 +231,11 @@ public:
 
 private:
   /**
-   * Disabled default constructor to prohibit default construction.
-   */
-  BasicVector( ) = delete;
-
-  /**
    * Disabled copy constructor to inhibit copy construction.
-   * Thus we avoid, for instance, copying of vector data if vectors are passed by value.
+   * Thus we avoid, for instance, copying of vector data if 
+   * someone tries to pass vectors by value.
    */
-  BasicVector( const BasicVector< ElementType>& ) = default;
+  BasicVector( const BasicVector< ElementType>& ) = delete;
 
   /**
    * The data structure encapsulating the aligned raw data.
