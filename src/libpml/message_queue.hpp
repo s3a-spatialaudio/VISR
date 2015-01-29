@@ -25,7 +25,7 @@ public:
   /**
    * Default constructor, creates an empty message queue.
    */
-  MessageQueue() {};
+  MessageQueue() {}
 
   /**
    * Remove all elements from the message queue.
