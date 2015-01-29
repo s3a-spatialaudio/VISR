@@ -76,7 +76,7 @@ public:
    * This value may differ from the allocated length in order to ensure the
    * prescribed alignment.
    */
-  void size() const { return mLength; }
+  std::size_t size() const { return mLength; }
 
   /**
    * Return the alignment of the the data structure (measured in number of elements)
