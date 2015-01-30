@@ -67,14 +67,18 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
 # should be found automatically.
-# Otherwise (in particulat for Windows platforms), an environment variable
+# Otherwise (in particular for Windows platforms), an environment variable
 # BOOST_ROOT should hold the path to the boost root directory.
+
+# For the moment, we support only dynamic linking of boost.
+# In this case, this line is required on Windows to prevent undefined symbols from boost::program_options
+ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
 
 # Avoid problems with the auto-link feature on Windows platforms
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES filesystem system thread unit_test_framework )
+SET( VISR_BOOST_LIBRARIES filesystem program_options system thread unit_test_framework )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
