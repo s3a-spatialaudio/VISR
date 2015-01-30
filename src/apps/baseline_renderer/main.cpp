@@ -88,23 +88,13 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = audioBackend;
 
-    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
-    boost::filesystem::path const configFile( "octahedron.txt" );
-    boost::filesystem::path const fullPath = decoderDir / configFile;
-    if( !exists( fullPath ) )
-    {
-      std::cerr << "The compiled-in configuration file \"" 
-                << fullPath.string().c_str() << "\" does not exist." << std::endl;
-      return EXIT_FAILURE;
-    }
-
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     const std::size_t cInterpolationLength = periodSize;
 
     SignalFlow flow( numberOfObjects, numberOfOutputChannels,
                      cInterpolationLength,
-                     fullPath.string().c_str(), sceneReceiverPort,
+                     arrayConfigFile.string().c_str(), sceneReceiverPort,
                      periodSize, samplingRate );
     flow.setup();
 
