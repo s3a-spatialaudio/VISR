@@ -4,11 +4,11 @@ ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
 ADD_EXECUTABLE( baseline_renderer main.cpp signal_flow.cpp signal_flow.hpp options.hpp options.cpp )
 
+TARGET_LINK_LIBRARIES(baseline_renderer rcl)
 TARGET_LINK_LIBRARIES(baseline_renderer objectmodel)
 TARGET_LINK_LIBRARIES(baseline_renderer panning)
 TARGET_LINK_LIBRARIES(baseline_renderer pml)
 TARGET_LINK_LIBRARIES(baseline_renderer rbbl)
-TARGET_LINK_LIBRARIES(baseline_renderer rcl)
 TARGET_LINK_LIBRARIES(baseline_renderer ril)
 TARGET_LINK_LIBRARIES(baseline_renderer rrl)
 TARGET_LINK_LIBRARIES(baseline_renderer efl)

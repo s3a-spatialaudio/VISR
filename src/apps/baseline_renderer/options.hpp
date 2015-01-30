@@ -35,10 +35,10 @@ public:
   bool hasOption( char const * optionName ) const;
 
   template< typename DataType >
-  inline DataType getOption( char const * optionName ) const;
+  DataType getOption( char const * optionName ) const;
 
   template< typename DataType >
-  inline DataType getDefaultedOption( char const * optionName, DataType const & defaultValue ) const;
+  DataType getDefaultedOption( char const * optionName, DataType const & defaultValue ) const;
 
   /**
    * Print the option description.
@@ -48,24 +48,10 @@ public:
 
 protected:
   template<typename DataType >
-  void registerOption( char const * optionName, char const * description )
-  {
-    mDescription.add_options()( optionName, boost::program_options::value<DataType>(), description );
-  }
-
-  template<>
-  void registerOption<bool>( char const * optionName, char const * description )
-  {
-    mDescription.add_options( )(optionName, boost::program_options::bool_switch(), description);
-  }
+  void registerOption( char const * optionName, char const * description );
 
   template<typename DataType >
-  void registerPositionalOption( char const * optionName, int position, char const * description )
-  {
-    registerOption< DataType >( optionName, description );
-    mPositionalDescription.add( optionName, position );
-  }
-
+  void registerPositionalOption( char const * optionName, int position, char const * description );
 
   boost::program_options::options_description mDescription;
   boost::program_options::positional_options_description mPositionalDescription;
@@ -74,13 +60,13 @@ protected:
 };
 
 template< typename DataType >
-DataType Options::getDefaultedOption( char const * optionName, DataType const & defaultValue) const
+inline DataType Options::getDefaultedOption( char const * optionName, DataType const & defaultValue) const
 {
   return hasOption( optionName ) ? getOption<DataType>( optionName ) : defaultValue;
 }
 
 template< typename DataType >
-DataType Options::getOption( char const * optionName ) const
+inline DataType Options::getOption( char const * optionName ) const
 {
   if( mVariablesMap.count( optionName ) != 1 )
   {
@@ -99,6 +85,25 @@ DataType Options::getOption( char const * optionName ) const
       + "\" of the command line option \"" + optionName
       + "\" could not be converted to the target type: " + ex.what( ) );
   }
+}
+
+template<typename DataType >
+inline void Options::registerOption( char const * optionName, char const * description )
+{
+  mDescription.add_options()( optionName, boost::program_options::value<DataType>(), description );
+}
+
+template<>
+inline void Options::registerOption<bool>( char const * optionName, char const * description )
+{
+  mDescription.add_options( )(optionName, boost::program_options::bool_switch(), description);
+}
+
+template<typename DataType >
+inline void Options::registerPositionalOption( char const * optionName, int position, char const * description )
+{
+  registerOption< DataType >( optionName, description );
+  mPositionalDescription.add( optionName, position );
 }
 
 } // namespace scene_decoder
