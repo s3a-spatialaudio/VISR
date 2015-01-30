@@ -104,7 +104,7 @@ void BiquadIirFilter::process()
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
       // mCurrentInput now contains w[n]
-#endif
+
       if( efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx ),
                                mCurrentInput.data( ),
                                mCurrentOutput.data(),
