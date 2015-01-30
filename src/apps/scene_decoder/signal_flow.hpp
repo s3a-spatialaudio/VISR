@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
-#define VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#ifndef VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
+#define VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -71,4 +71,4 @@ private:
 } // namespace apps
 } // namespace visr
 
-#endif // #ifndef VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#endif // #ifndef VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
