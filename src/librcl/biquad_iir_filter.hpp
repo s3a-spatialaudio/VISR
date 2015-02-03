@@ -22,7 +22,7 @@ namespace rcl
 {
 
 /**
- * A multichannel IIR filter consisting of a fixed, arbitrary number of biquads
+ * A multichannel IIR filter consisting of a fixed, arbitrary number of biquads per channel.
  * This class has one input port named "in" and one output port named "out".
  * The widths of the input and the output port are identical and is
  * set by the argument <b>numberOfChannels</b> in the setup() method.
@@ -42,106 +42,31 @@ public:
    * Setup method to initialise the object and set the parameters.
    * @param numberOfChannels The number of single audio waveforms in
    * the multichannel input and output waveforms. .
-   * @param interpolationSteps The number of samples needed for the
-   * transition after new delays and/or gains are set.
-   * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
-   * immediate application of the new settings.
-   * @param maximumDelaySeconds The maximal delay value supported by this
-   * object (in seconds)
-   * @param initialDelaySeconds The initial delay value for all
-   * channels (in seconds, default: 0.0)
-   * @param initialGainLinear The initial delay value for all
-   * channels (in linear scale, default: 1.0)
+   * @param numberOfBiquads The number of biquads per audio channel.
+   * @param initialBiquad The initial setting for the filter characteristics. All biquads in all channels are set 
+   * to this coefficient set. The default is a flat, direct-feedthrough filter
    */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameter<SampleType> const & defaultBiquad = pml::BiquadParameter< SampleType >() );
+              pml::BiquadParameter<SampleType> const & initialBiquad = pml::BiquadParameter< SampleType >() );
 
  /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfChannels The number of signals in the input signal.
-  * @param interpolationSteps The number of samples needed for the
-  * transition after a new delay and/or gain is set.
-  * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
-  * immediate application of the new delay/gain values.
-  * @param maximumDelaySeconds The maximal delay value supported by this
-  * object (in seconds)
-  * @param initialDelaysSeconds The delays for all channels in
-  * seconds. The number of elements of this vector must match the channel number of this object.
-  * @param initialGainsLinear The initial gain values for all
-  * channels, given in a linear scale.  The the number of
-  * elements in this vector must match the channel number of this object.
+  * @param numberOfBiquads The number of biquad sections for each channel.
+  * @param coeffs The initial biquad coefficients, which are set identically for all channels. 
+  * The number of biquad coefficient sets in this parameter must equal the \p numberOfBiquads parameter.
   */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
               pml::BiquadParameterList< SampleType > const & coeffs );
 
   /**
-   * The process method applies the (interpolated) delay and gain
+   * The process method applies the IIR filters to the audio channels.
    * values to the stream of input samples.
    */
   void process( );
 
-#if 0
-  /**
-   * Set new values for the delays and the gains.
-   * This method triggers a new fading process for a smooth transition
-   * between the current and the new gain and delay values.
-   * The semantics of the smooth transition are as follows:
-   * - If the component is currently not in a transistion process
-   * (i.e., at least <b>interpolationSteps</b> samples after the
-   * previous parameter change), a new transition process is started.
-   * - If component is currently within a transition process, a new
-   * transistion is started, and the current interpolated values for
-   * the gains and the delays are used as the start value of this new
-   * transistion, which performs a transition to the new gains and
-   * delays over an interval of <b>interpolationSteps</b> samples.
-   * .
-   * @param newDelays A  containing the new delay values for all
-   * channels (in seconds). The matrix must have 1 row and
-   * <b>numberOfChannels</b> columns.
-   * @param newGains A matrix containing the new gain values for all
-   * channels (in linear scale). The matrix must have 1 row and
-   * <b>numberOfChannels</b> columns.
-   * @throw std::invalid_argument If a matrix size is invalid
-   * @throw std::invalid_argument If a delay value exceeds the maximum
-   * delay setting.
-   */
-  void setDelayAndGain( efl::BasicVector< SampleType > const & newDelays,
-                        efl::BasicVector< SampleType > const & newGains );
-
-  /**
-   * Set new values for the delays. This is a simplified version of
-   * setGainAndDelay(), which leaves the gain values unaltered. 
-   * The semantics of the transition are documented in
-   * setDelayAndGain(), except that the previous 'new gain value'
-   * remains unaltered als the new 'new gain value'.
-   * @see setDelayAndGain
-   * @param newDelays A vector containing the new delay values for all
-   * channels (in linear scale). The vector must have
-   * <b>numberOfChannels</b> elements.
-   * @throw std::invalid_argument If a vector size is invalid
-   * @throw std::invalid_argument If a delay value exceeds the maximum
-   * delay setting.
-   */
-  void setDelay( efl::BasicVector< SampleType > const & newDelays );
-
-  /**
-  * Set new values for the gains. This is a simplified version of
-  * setGainAndDelay(), which leaves the delay values unaltered.
-  * The semantics of the transition are documented in
-  * setDelayAndGain(), except that the previous 'new delay value'
-  * remains unaltered als the new 'new delay value'.
-  * @see setDelayAndGain
-  * @param newGains A vector containing the new gain values for all
-  * channels (in linear scale). The vector must have
-  * <b>numberOfChannels</b> elements.
-  * @throw std::invalid_argument If a vector size is invalid
-  * @throw std::invalid_argument If a delay value exceeds the maximum
-  * delay setting.
-  */
-  void setGain( efl::BasicVector< SampleType > const & newGains );
-#endif
 private:
   /**
    * The audio input port for this component.
@@ -158,6 +83,9 @@ private:
    */
   std::size_t mNumberOfChannels;
 
+  /**
+   * The number of biquads per channel.
+   */
   std::size_t mNumberOfBiquadSections;
 
   /**
@@ -166,9 +94,11 @@ private:
   void setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
                         pml::BiquadParameter< SampleType > const & coeffs );
 
+  /**
+   * Internal method to allocate and initialise the data members.
+   */
   void setupDataMembers( std::size_t numberOfChannels,
                          std::size_t numberOfBiquads );
-
 
   /**
    * Matrix to store the IIR coefficients.
@@ -189,14 +119,13 @@ private:
   */
   efl::BasicMatrix<SampleType> mState;
 
-  efl::BasicMatrix<SampleType> mWn2;
-  efl::BasicMatrix<SampleType> mWn1;
-
-  efl::BasicVector<SampleType> mWn;
-
+  /**
+   * Internally used data arrays for intermediate results.
+   */
+  //@{
   efl::BasicVector<SampleType> mCurrentInput;
   efl::BasicVector<SampleType> mCurrentOutput;
-
+  //@}
 };
 
 } // namespace rcl
