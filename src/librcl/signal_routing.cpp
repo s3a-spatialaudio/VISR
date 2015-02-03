@@ -45,7 +45,6 @@ void SignalRouting::setup( std::size_t inputWidth,
 
 void SignalRouting::process()
 {
-  std::size_t const numInputs = mInput.width();
   std::size_t const numOutputs = mOutput.width();
   std::size_t const periodSize = period();
   for( std::size_t outIdx( 0 ); outIdx < numOutputs; ++outIdx )

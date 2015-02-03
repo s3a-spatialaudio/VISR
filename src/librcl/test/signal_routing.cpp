@@ -8,6 +8,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 
@@ -48,17 +49,25 @@ private:
 
 BOOST_AUTO_TEST_CASE( InstantiateSignalRoutingParameter )
 {
-  pml::SignalRoutingParameter::Entry defaultEntry;
-  pml::SignalRoutingParameter::Entry explEntry = { 0, 0 };
-  pml::SignalRoutingParameter::Entry copyEntry( explEntry );
+  pml::SignalRoutingParameter::Entry const explEntry = { 3, 7 };
+  BOOST_CHECK( explEntry.input == 3 );
+  BOOST_CHECK( explEntry.output == 7 );
 
-  pml::SignalRoutingParameter::Entry initEntry{ 2, 3 };
+  pml::SignalRoutingParameter::Entry copyEntry( explEntry );
+  BOOST_CHECK( copyEntry.input == explEntry.input );
+  BOOST_CHECK( copyEntry.output == explEntry.output );
+
 
   pml::SignalRoutingParameter const emptyParameter;
+  BOOST_CHECK( emptyParameter.size() == 0 );
+
   pml::SignalRoutingParameter const initParameter( { { 4, 3 }, { 4, 7 }, { 3, 8 } } );
+
+  BOOST_CHECK( initParameter.size() == 3 );
   pml::SignalRoutingParameter const initParameter2{ { 0, 0 }, pml::SignalRoutingParameter::Entry{ 2, 3 }, pml::SignalRoutingParameter::Entry{ 4, 7 } };
 
   pml::SignalRoutingParameter copyParameter = initParameter;
+  BOOST_CHECK( copyParameter.size() == initParameter.size() );
 }
 
 BOOST_AUTO_TEST_CASE( InstantiateSignalRouting )
@@ -74,6 +83,7 @@ BOOST_AUTO_TEST_CASE( parseSignalRoutingParameter )
   std::string const param1Encoded( "4=3, 4=7  , 3=8" );
   pml::SignalRoutingParameter toFill1;
   bool success = toFill1.parse( param1Encoded );
+  BOOST_CHECK( success );
   pml::SignalRoutingParameter const initParameterCheck( { { 4, 3 }, { 4, 7 }, { 3, 8 } } );
 }
 
