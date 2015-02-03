@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <ciso646>
 #include <cstdint>
+#include <climits>
 #include <initializer_list>
 #include <stdexcept>
 #include <set>
@@ -43,7 +44,7 @@ public:
   class CompareEntries
   {
   public:
-    bool operator()( Entry const & lhs, Entry const & rhs )
+    bool operator()( Entry const & lhs, Entry const & rhs ) const
     {
       return lhs.output < rhs.output;
     }
@@ -65,6 +66,10 @@ public:
   SignalRoutingParameter( const SignalRoutingParameter & rhs ) = default;
 
   void swap( SignalRoutingParameter& rhs );
+
+  bool empty() const { return mRoutings.empty(); }
+
+  std::size_t size() const { return mRoutings.size(); }
 
   SignalRoutingParameter & operator=(SignalRoutingParameter const & rhs) = default;
 
@@ -102,7 +107,6 @@ public:
   bool parse( std::string const & encoded );
 
 private:
-  using RoutingsType = std::set< Entry, CompareEntries >;
   RoutingsType mRoutings;
 };
 
