@@ -19,9 +19,6 @@ BiquadIirFilter::BiquadIirFilter( ril::AudioSignalFlow& container, char const * 
  , mOutput( "out", *this )
  , mCoefficients( ril::cVectorAlignmentSamples )
  , mState( ril::cVectorAlignmentSamples )
- , mWn2( ril::cVectorAlignmentSamples )
- , mWn1( ril::cVectorAlignmentSamples )
- , mWn( ril::cVectorAlignmentSamples )
  , mCurrentInput( ril::cVectorAlignmentSamples )
  , mCurrentOutput( ril::cVectorAlignmentSamples )
 {
@@ -179,9 +176,6 @@ void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
   // Note: the resize() operations for BasicMatrix and BasicVector zero all data members.
   mCoefficients.resize( numberOfBiquads * cCoeffsPerBiquad, numberOfChannels );
   mState.resize( numberOfBiquads * 2, numberOfChannels );
-  mWn2.resize( numberOfBiquads, numberOfChannels );
-  mWn1.resize( numberOfBiquads, numberOfChannels );
-  mWn.resize( numberOfChannels );
   mCurrentInput.resize( numberOfChannels );
   mCurrentOutput.resize(numberOfChannels );
 
