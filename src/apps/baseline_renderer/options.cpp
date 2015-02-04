@@ -27,6 +27,8 @@ Options::Options()
   registerOption<std::size_t>( "input-channels,i", "Number of input channels for audio object signal" );
   registerOption<std::size_t>( "output-channels,o", "Number of audio output channels" );
 
+  registerOption<std::string>( "output-routing", "Routing of logical renderer outputs to physical output channels");
+
   registerOption<std::size_t>( "scene-port,r", "UDP port for receiving object metadata" );
 }
 
