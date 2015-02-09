@@ -46,9 +46,6 @@ level = float( args.level )
 
 refdist = float( args.referencedistance )
 
-#  std::string const msg = "{\"objects\": [ {\"id\": 27,\n \"channels\": \"0\",\n\"type\": \"plane\",\n \"group\":7,\n \"priority\": 3,\n \"level\": 0.325,\n \"direction\": {\"az\": 0.5, \"el\": 0.9,\n \"refdist\": 0.75 } } ] }";
-
-
 msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"plane\", \"group\": %d, \"priority\": %d, \"level\": %f, \"direction\": {\"az\": %f, \"el\": %f, \"refdist\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, azimuth, elevation, refdist )
 
 udpSocket = socket.socket(socket.AF_INET, # Internet
