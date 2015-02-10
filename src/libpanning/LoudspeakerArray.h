@@ -38,12 +38,19 @@ public:
     XYZ m_position[MAX_NUM_SPEAKERS];
     int m_triplet[MAX_NUM_LOUDSPEAKER_TRIPLETS][3];
     
+    int m_channel[MAX_NUM_SPEAKERS];
+    
     
     int load(FILE *file);
     
     
-    int setPosition(int iSpk, Afloat x, Afloat y, Afloat z, bool inf) {
-        m_position[iSpk].set(x, y, z, inf);
+    int setPosition(int id, Afloat x, Afloat y, Afloat z, bool inf) {
+        m_position[id-1].set(x, y, z, inf);
+        return 0;
+    };
+    
+    int setChannel(int id, int chan) {
+        m_channel[id-1] = chan;
         return 0;
     };
     
