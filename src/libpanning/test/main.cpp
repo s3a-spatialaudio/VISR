@@ -9,6 +9,7 @@
 
 #include <libpanning/VBAP.h>
 #include <libpanning/AllRAD.h>
+#include <boost/filesystem.hpp>
 
 #include <iostream>
 #include <cstdio>
@@ -25,11 +26,13 @@ int main(int argc, const char * argv[])
     FILE* file;
     int j,k;
     
+    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
     
     
     // Useage / test VBAP with 8 sources around an octahedron array
     
-    file = fopen("arrays/octahedron.txt","r");
+    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
@@ -57,7 +60,9 @@ int main(int argc, const char * argv[])
     
     // 5.1 test, 2D VBAP
     
-    file = fopen("arrays/5.1.txt","r");
+    // file = fopen("arrays/5.1.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/5.1_audiolab.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
@@ -78,22 +83,29 @@ int main(int argc, const char * argv[])
     vbapGains = vbap.getGains();   // Check in watch window
     
     
-    // Useage / test AllRAD ambisonic decode
     
+    
+    // Useage / test AllRAD ambisonic decode
     
     // Initialization:
     
-    file = fopen("arrays/octahedron.txt","r");
+    // file = fopen("arrays/octahedron.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     vbap.setLoudspeakerArray(&array);
     
-    file = fopen("arrays/t-design_t8_P40.txt","r");
+    // file = fopen("arrays/t-design_t8_P40.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/t-design_t8_P40.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (regArray.load(file) == -1) return -1;
     allrad.setRegArray(&regArray);
     fclose( file );
     
-    file = fopen("arrays/decode_N8_P40_t-design_t8_P40.txt","r");
+    // file = fopen("arrays/decode_N8_P40_t-design_t8_P40.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/decode_N8_P40_t-design_t8_P40.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (allrad.loadRegDecodeGains(file, 8, 40) == -1) return -1;
     fclose( file );
     
@@ -118,7 +130,9 @@ int main(int argc, const char * argv[])
     
     // Write b-format2vbap gains for matlab testing:
     
-    file = fopen("testoutput/decodeB2VBAP.txt","w");
+    // file = fopen("testoutput/decodeB2VBAP.txt","w");
+    bfile = decoderDir / boost::filesystem::path("testoutput/decodeB2VBAP.txt");
+    file = fopen(bfile.string().c_str(),"w");
     if( file ) {
       for(k=0; k<9; k++) { // 9 harms - 2nd order only
         for(j=0; j<vbap.getNumSpeakers(); j++) {

@@ -13,7 +13,7 @@
 int LoudspeakerArray::load(FILE *file)
 {
     //system("pwd");
-    int n,i,err;
+    int n,i,err,chan;
     char c;
     Afloat xy, x,y,z;
     Afloat az,el,r;
@@ -30,14 +30,15 @@ int LoudspeakerArray::load(FILE *file)
     do {
         fscanf(file, "%c",&c);
         if (c == 'c') {        // cartesians
-            n = fscanf(file, "%d %f %f %f\n", &i, &x, &y, &z);
+            n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z);
             if (i <= MAX_NUM_SPEAKERS) {
-                setPosition(i-1,x,y,z,m_isInfinite);
+                setPosition(i,x,y,z,m_isInfinite);
+                setChannel(i,chan);
                 if (i > nSpk) nSpk = i;
             }
         }
         else if (c == 'p') {   // polars, using degrees
-            n = fscanf(file, "%d %f %f %f\n", &i, &az, &el, &r);
+            n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &az, &el, &r);
             if (i <= MAX_NUM_SPEAKERS) {
                 az *= PI/180;
                 el *= PI/180;
@@ -45,13 +46,15 @@ int LoudspeakerArray::load(FILE *file)
                 x = xy*cos(az);
                 y = xy*sin(az);
                 z = r*sin(el);
-                setPosition(i-1,x,y,z,m_isInfinite);
+                setPosition(i,x,y,z,m_isInfinite);
+                setChannel(i,chan);
                 if (i > nSpk) nSpk = i;
             }
         }
-        else if (c == 't') {    // triplet
+        else if (c == 't') {    // tuplet - triplet or duplet
             n = fscanf(file, "%d %d %d %d\n", &i, &l1, &l2, &l3);
-            if (i <= MAX_NUM_LOUDSPEAKER_TRIPLETS) {
+            if (i <= MAX_NUM_LOUDSPEAKER_TRIPLETS  && n >= 3) {
+                if (n == 3) l3 = 1;
                 setTriplet(i-1, l1-1, l2-1, l3-1);
                 if (i > nTri) nTri = i;
             }
