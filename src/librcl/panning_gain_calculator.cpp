@@ -36,13 +36,13 @@ namespace // unnamed namespace
 template< typename T >
 T degree2radian( T deg )
 {
-  return boost::math::constants::radian<T>() * deg;
+  return boost::math::constants::degree<T>() * deg;
 }
 
 template< typename T >
 T radian2degree( T rad )
 {
-  return boost::math::constants::degree<T>() * rad;
+  return boost::math::constants::radian<T>() * rad;
 }
 
 template< typename T >
