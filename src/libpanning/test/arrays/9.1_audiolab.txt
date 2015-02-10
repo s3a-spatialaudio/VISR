@@ -17,7 +17,7 @@
 % (0,0,0) is at the centre of the Audio Lab: 1.95m and 2.35m from the inside bounding surfaces of the frame, and 1.22m from the floor.
 % id	chan	x(m)	y(m)	z(m)
 
-c 1	18	1	1.76	-0.01	% Front Centre (Centre)
+c 1	18	2.08	0	0	% Front Centre (Centre)
 c 2	26	2.15	-1.22	0.01	% Front Centre Right (Right)
 c 3	21	-1.01	-1.69	0	% Back Right (Right surround)
 c 4   	25	-0.98	1.74	0	% Back Left (Left surround)
