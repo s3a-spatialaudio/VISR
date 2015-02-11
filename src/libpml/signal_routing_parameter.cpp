@@ -108,10 +108,10 @@ bool SignalRoutingParameter::parse( std::string const & encoded )
     pml::SignalRoutingParameter retValue;
   };
   ParseState state;
-
-  bool parseRet = qi::phrase_parse( first, last,
-                   ((qi::uint_[boost::bind( &ParseState::setInIdx, &state, ::_1 )] >> '=' >> qi::uint_[boost::bind(&ParseState::setOutIdx, &state, ::_1)]) % ','),
-                   qi::ascii::space );
+  // This parses a sequence of number pairs of the form 'x=y', where the pairs are separated by whitespace or a comma.
+  bool const parseRet = qi::phrase_parse( first, last,
+   ((qi::uint_[boost::bind( &ParseState::setInIdx, &state, ::_1 )] >> '=' >> qi::uint_[boost::bind(&ParseState::setOutIdx, &state, ::_1)]) % (','|qi::blank) ),
+   qi::ascii::space );
 
   if( (not parseRet) or( first != last ) )
   {
