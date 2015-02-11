@@ -31,7 +31,11 @@ private:
     bool m_is2D, m_isInfinite;
 
 public:
-    
+    /**
+     * Default contructor, initialises numbers of elements and channel indices to safe values.
+     */
+    LoudspeakerArray();
+
     int m_nSpeakers = 0;
     int m_nTriplets = 0;
     
