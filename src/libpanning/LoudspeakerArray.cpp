@@ -11,10 +11,10 @@
 #include <algorithm>
 
 LoudspeakerArray::LoudspeakerArray()
- : m_nSpeakers( 0 )
- , m_nTriplets( 0 )
- , m_is2D( false )
+ : m_is2D( false )
  , m_isInfinite( false )
+ , m_nSpeakers( 0 )
+ , m_nTriplets( 0 )
 {
   std::fill( m_channel, m_channel + MAX_NUM_SPEAKERS, -1 );
 }
@@ -39,7 +39,10 @@ int LoudspeakerArray::load(FILE *file)
     if (file == 0) return -1;
 
     do {
-        fscanf(file, "%c",&c);
+        n = fscanf(file, "%c",&c);
+        if( n != 1 ) {
+            return -1;
+        }
         if (c == 'c') {        // cartesians
             n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z);
             if( n != 5 )
