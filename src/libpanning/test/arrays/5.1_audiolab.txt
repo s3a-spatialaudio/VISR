@@ -23,7 +23,7 @@
 % id	chan	x(m)	y(m)	z(m)	
 
 c 1	19	2.17	1.36	0	% Left
-c 2	18	2.08	2.35	0	% Centre
+c 2	18	2.08	0	0	% Centre
 c 3	26	2.15	-1.22	0	% Right
 c 4	21	-1.01	-1.69	0	% Surround right
 c 5	25	-0.98	1.74	0	% Surround left
