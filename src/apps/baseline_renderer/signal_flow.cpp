@@ -29,7 +29,9 @@ namespace
 }
 
 SignalFlow::SignalFlow( std::size_t numberOfInputs,
+  std::size_t numberOfLoudspeakers,
   std::size_t numberOfOutputs,
+  pml::SignalRoutingParameter const & outputRouting,
   std::size_t interpolationPeriod,
   std::string const & configFile,
   std::size_t udpPort,
@@ -37,12 +39,15 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
  , cNumberOfInputs( numberOfInputs )
+ , cNumberOfLoudspeakers( numberOfLoudspeakers )
  , cNumberOfOutputs( numberOfOutputs )
+ , mOutputRoutings( outputRouting)
  , cInterpolationSteps( interpolationPeriod )
  , mConfigFileName( configFile )
  , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
+ , mOutputRouting( *this, "OutputSignalRouting" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mMatrix( *this, "GainMatrix" )
 {
@@ -60,6 +65,7 @@ SignalFlow::process()
   mGainCalculator.process( mObjectVector, mGainParameters );
   mMatrix.setGains( mGainParameters );
   mMatrix.process();
+  mOutputRouting.process();
 }
 
 /*virtual*/ void
@@ -69,29 +75,33 @@ SignalFlow::setup()
 
   mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup();
-  mGainCalculator.setup( cNumberOfInputs, cNumberOfOutputs, mConfigFileName );
-  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
+  mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, mConfigFileName );
+  mMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
+  mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
 
-  initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
+  initCommArea( cNumberOfInputs + cNumberOfLoudspeakers + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
   // connect the ports
-  assignCommunicationIndices( "GainMatrix", "in", indexRange( 0, cNumberOfInputs-1 ) );
-
-  assignCommunicationIndices( "GainMatrix", "out", indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
-
-  // Set the indices for communicating the signals from and to the outside world.
   std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
-  std::vector<ril::AudioPort::SignalIndexType> playbackIndices = indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 );
+
+
+  assignCommunicationIndices( "GainMatrix", "in", captureIndices );
+
+  std::size_t matrixOutStartIdx = cNumberOfInputs;
+  std::vector<std::size_t> const matrixOutRange = indexRange( matrixOutStartIdx, matrixOutStartIdx + cNumberOfLoudspeakers - 1 );
+  assignCommunicationIndices( "GainMatrix", "out", matrixOutRange );
+  assignCommunicationIndices( "OutputSignalRouting", "in", matrixOutRange );
+
+  std::size_t routingOutStartIdx = matrixOutStartIdx + cNumberOfLoudspeakers;
+  std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + cNumberOfOutputs - 1 );
+  assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size() );
-  assignPlaybackIndices( &playbackIndices[0], playbackIndices.size( ) );
+  assignPlaybackIndices( &routingOutRange[0], routingOutRange.size() );
 
-  assignCaptureIndices( indexRange( 0, cNumberOfInputs - 1 ) );
-  assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
+  mGainParameters.resize( cNumberOfLoudspeakers, cNumberOfInputs );
 
-  mGainParameters.resize( cNumberOfOutputs, cNumberOfInputs );
-
-  // should not be done here, but in AudioSignalFlow where this method is called.
+  // should not be done here, but in AudioSignalFlow where this method is called from.
   setInitialised( true );
 }
 

@@ -8,11 +8,13 @@
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
+#include <librcl/signal_routing.hpp>
 #include <librcl/udp_receiver.hpp>
 
 #include <libefl/basic_matrix.hpp>
 
 #include <libpml/message_queue.hpp>
+#include <libpml/signal_routing_parameter.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
 
@@ -28,8 +30,10 @@ namespace baseline_renderer
 class SignalFlow: public ril::AudioSignalFlow
 {
 public:
-  explicit SignalFlow( std::size_t numberOfInputs, 
+  explicit SignalFlow( std::size_t numberOfInputs,
+                       std::size_t numberOfLoudspeakers,
                        std::size_t numberOfOutputs,
+                       pml::SignalRoutingParameter const & outputRouting,
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
                        std::size_t udpPort,
@@ -44,7 +48,11 @@ public:
 private:
   const std::size_t cNumberOfInputs;
 
+  const std::size_t cNumberOfLoudspeakers;
+
   const std::size_t cNumberOfOutputs;
+
+  const pml::SignalRoutingParameter mOutputRoutings;
 
   const std::size_t cInterpolationSteps;
 
@@ -55,6 +63,8 @@ private:
   rcl::UdpReceiver mSceneReceiver;
   
   rcl::SceneDecoder mSceneDecoder;
+
+  rcl::SignalRouting mOutputRouting;
 
   rcl::PanningGainCalculator mGainCalculator;
 
