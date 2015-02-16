@@ -2,7 +2,11 @@
 
 #include "signal_flow.hpp"
 
+#include <libefl/denormalised_number_handling.hpp>
+
 #include <librrl/portaudio_interface.hpp>
+
+#include <boost/filesystem.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -14,10 +18,12 @@ int main( int argc, char const * const * argv )
   using namespace visr;
   using namespace visr::apps::scene_decoder;
 
-  // define fixed parameters for rendering
-  const std::size_t numberOfObjects = 2;
-  const std::size_t numberOfLoudspeakers = 2;
+  efl::DenormalisedNumbers::State const oldDenormNumbersState
+    = efl::DenormalisedNumbers::setDenormHandling();
 
+  // define fixed parameters for rendering
+  const std::size_t numberOfObjects = 64;
+  const std::size_t numberOfLoudspeakers = 6;
   const std::size_t periodSize = 1024;
   const std::size_t samplingRate = 48000;
 
@@ -32,13 +38,26 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "JACK";
 
+    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
+    boost::filesystem::path const configFile( "octahedron.txt" );
+    boost::filesystem::path const fullPath = decoderDir / configFile;
+    if( !exists( fullPath ) )
+    {
+      std::cerr << "The compiled-in configuration file \"" 
+                << fullPath.string().c_str() << "\" does not exist." << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    std::size_t udpPort = 8888;
+    
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 
-    const std::size_t cInterpolationLength = 4 * periodSize;
+    const std::size_t cInterpolationLength = periodSize;
 
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers,
-                     cInterpolationLength, periodSize,
-                     samplingRate );
+                     cInterpolationLength,
+                     fullPath.string().c_str(), udpPort,
+                     periodSize, samplingRate );
     flow.setup();
 
     audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
@@ -60,5 +79,8 @@ int main( int argc, char const * const * argv )
     std::cout << "Exception caught on top level: " << ex.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+ efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
+
   return EXIT_SUCCESS;
 }

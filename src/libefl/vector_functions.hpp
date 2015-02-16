@@ -39,7 +39,6 @@ template <typename T>
 ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
                       bool startInclusive, bool endInclusive, std::size_t alignment = 0 );
 
-
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,
          T const * const op2,
@@ -65,6 +64,93 @@ ErrorCode vectorAddConstantInplace( T constantValue,
             T * const opResult,
             std::size_t numElements,
             std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubtract( T const * const subtrahend,
+  T const * const minuend,
+  T * const result,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubtractInplace( T const * const minuend,
+  T * const subtrahendResult,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubtractConstant( T constantMinuend,
+  T const * const subtrahend,
+  T * const result,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+template<typename T>
+ErrorCode vectorSubConstantInplace( T constantMinuend,
+  T * const subtrahendResult,
+  std::size_t numElements,
+  std::size_t alignment = 0 );
+
+
+/**
+ * Multiply two vectors.
+ * @tparam T The element type of the operands.
+ * @param factor1 First vector to multiply.
+ * @param factor2 Second vector to multiply.
+ * @param[out] result The result of the operation.
+ * @param numElements The number of elements to be multiplied.
+ * @param alignment Assured alignment of all vector arguments (measured in elements).
+ */
+template<typename T>
+ErrorCode vectorMultiply( T const * const factor1,
+                          T const * const factor2,
+                          T * const result,
+                          std::size_t numElements,
+                          std::size_t alignment = 0 );
+
+/**
+ * Multiply two vectors inplace.
+ * @tparam T The element type of the operands.
+ * @param factor1 First vector to multiply.
+ * @param[in,out] factor2Result Second vector to multiply, holds also the result of the operation.
+ * @param numElements The number of elements to be multiplied.
+ * @param alignment Assured alignment of all vector arguments (measured in elements).
+ */
+template<typename T>
+ErrorCode vectorMultiplyInplace( T const * const factor1,
+                                 T const *  factor2Result,
+                                 std::size_t numElements,
+                                 std::size_t alignment = 0 );
+
+/**
+ * Multiply a vector with a constant.
+ * @tparam T The element type of the operands.
+ * @param constantValue The constant scaling factor.
+ * @param[in] factor Vector to multiply with.
+ * @param[out] result The result of the operation.
+ * @param numElements The number of elements to be multiplied.
+ * @param alignment Assured alignment of all vector arguments (measured in elements).
+ */
+template<typename T>
+ErrorCode vectorMultiplyConstant( T constantValue,
+                                  T const * const factor,
+                                  T * const result,
+                                  std::size_t numElements,
+                                  std::size_t alignment = 0 );
+
+/**
+ * Multiply a vector with a constant inplace.
+ * @tparam T The element type of the operands.
+ * @param constantValue The constant scaling factor.
+ * @param[in,out] factorResult Vector to multiply with, also holds the result.
+ * @param numElements The number of elements to be multiplied.
+ * @param alignment Assured alignment of all vector arguments (measured in elements).
+ */
+template<typename T>
+ErrorCode vectorMultiplyConstantInplace( T constantValue,
+                                         T * const factorResult,
+                                         std::size_t numElements,
+                                         std::size_t alignment = 0 );
 
 template<typename T>
 ErrorCode vectorMultiplyAdd( T const * const factor1,

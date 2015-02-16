@@ -36,6 +36,23 @@ ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, st
 template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
 
+
+template <typename T>
+ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
+  bool startInclusive, bool endInclusive, std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( dest, alignment ) ) return alignmentError;
+  if( numElements < 2 ) return logicError; // ramps with less than 2 elements make no sense.
+  std::size_t const numSteps = numElements + 1 - (startInclusive ? 1 : 0) - (endInclusive ? 1 : 0);
+  T const step = (endVal - startVal) / static_cast<T>(numSteps);
+  std::size_t calcIdx( startInclusive ? 0 : 1 );
+  std::generate( dest, dest + numElements, [&] { return startVal + static_cast<T>(calcIdx++) * step; } );
+  return noError;
+}
+// explicit instantiations
+template ErrorCode vectorRamp( float * const, std::size_t, float, float, bool, bool, std::size_t );
+template ErrorCode vectorRamp( double * const, std::size_t, double, double, bool, bool, std::size_t );
+
 template <typename T>
 ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
@@ -68,23 +85,6 @@ template ErrorCode vectorAdd<float>( float const * const, float const * const ,
 template ErrorCode vectorAdd<double>( double const * const, double const * const ,
           double * const, std::size_t, std::size_t );
 
-
-template <typename T>
-ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
-                      bool startInclusive, bool endInclusive, std::size_t alignment /*= 0*/ )
-{
-  if( not checkAlignment( dest, alignment ) ) return alignmentError;
-  if( numElements < 2 ) return logicError; // ramps with less than 2 elements make no sense.
-  std::size_t const numSteps = numElements + 1 - (startInclusive ? 1 : 0) - (endInclusive ? 1 : 0);
-  T const step = (endVal - startVal) / static_cast<T>(numSteps);
-  std::size_t calcIdx( startInclusive ? 0 : 1 );
-  std::generate( dest, dest + numElements, [&] { return startVal + static_cast<T>(calcIdx++) * step; } );
-  return noError;
-}
-// explicit instantiations
-template ErrorCode vectorRamp( float * const, std::size_t , float, float, bool, bool, std::size_t );
-template ErrorCode vectorRamp( double * const, std::size_t, double, double, bool, bool, std::size_t );
-
 template<typename T>
 ErrorCode vectorAddInplace( T const * const op1,
                             T * const op2Result,
@@ -93,7 +93,10 @@ ErrorCode vectorAddInplace( T const * const op1,
 {
   if (not checkAlignment(op1, alignment)) return alignmentError;
   if (not checkAlignment(op2Result, alignment)) return alignmentError;
-
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    op2Result[idx] += op1[idx];
+  }
   return noError;
 }
 /** Explicit instantiation for types float and double */
@@ -137,6 +140,145 @@ ErrorCode vectorAddConstantInplace( T constantValue,
 template ErrorCode vectorAddConstantInplace<float>( float, float * const, std::size_t, std::size_t );
 template ErrorCode vectorAddConstantInplace<double>( double, double * const, std::size_t, std::size_t );
 
+template<typename T>
+ErrorCode vectorSubtract( T const * const subtrahend,
+                          T const * const minuend,
+                          T * const result,
+                          std::size_t numElements,
+                          std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( subtrahend, alignment ) ) return alignmentError;
+  if( not checkAlignment( minuend, alignment ) ) return alignmentError;
+  if( not checkAlignment( result, alignment ) ) return alignmentError;
+
+  std::transform( subtrahend, subtrahend + numElements, minuend, result, [=]( T x, T y ) { return x + y; } );
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorSubtract( float const * const, float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorSubtract( double const * const, double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorSubtractInplace( T const * const minuend,
+                                 T * const subtrahendResult,
+                                 std::size_t numElements,
+                                 std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( minuend, alignment ) ) return alignmentError;
+  if( not checkAlignment( subtrahendResult, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    subtrahendResult[idx] -= minuend[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorSubtractInplace( float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorSubtractInplace( double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorSubtractConstant( T constantMinuend,
+                                  T const * const subtrahend,
+                                  T * const result,
+                                  std::size_t numElements,
+                                  std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( subtrahend, alignment ) ) return alignmentError;
+  if( not checkAlignment( result, alignment ) ) return alignmentError;
+  std::transform( subtrahend, subtrahend + numElements, result, [=]( T x ) { return x - constantMinuend; } );
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorSubtractConstant( float, float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorSubtractConstant( double, double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorSubConstantInplace( T constantMinuend,
+                                    T * const subtrahendResult,
+                                    std::size_t numElements,
+                                    std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( subtrahendResult, alignment ) ) return alignmentError;
+  std::for_each( subtrahendResult, subtrahendResult + numElements, [=]( T& x ) { x -= constantMinuend; } );
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorSubConstantInplace( float, float * const, std::size_t, std::size_t );
+template ErrorCode vectorSubConstantInplace( double, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorMultiply( T const * const factor1,
+                          T const * const factor2,
+                          T * const result,
+                          std::size_t numElements,
+                          std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
+  if( not checkAlignment( factor2, alignment ) ) return alignmentError;
+  if( not checkAlignment( result, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    result[idx] = factor1[idx] * factor2[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiply( float const * const, float const * const, float * const, std::size_t numElements, std::size_t alignment );
+template ErrorCode vectorMultiply( double const * const, double const * const, double * const, std::size_t numElements, std::size_t alignment );
+
+template<typename T>
+ErrorCode vectorMultiplyInplace( T const * const factor1,
+                                 T * const  factor2Result,
+                                 std::size_t numElements,
+                                 std::size_t alignment /* = 0 */ )
+{
+  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
+  if( not checkAlignment( factor2Result, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    factor2Result[idx] *= factor1[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiplyInplace( float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyInplace( double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorMultiplyConstant( T constantValue,
+                                  T const * const factor,
+                                  T * const result,
+                                  std::size_t numElements,
+                                  std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( factor, alignment ) ) return alignmentError;
+  if( not checkAlignment( result, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    result[idx] = constantValue * factor[idx];
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiplyConstant( float, float const * const, float * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyConstant( double, double const * const, double * const, std::size_t, std::size_t );
+
+template<typename T>
+ErrorCode vectorMultiplyConstantInplace( T constantValue,
+                                         T * const factorResult,
+                                         std::size_t numElements,
+                                         std::size_t alignment /*= 0*/ )
+{
+  if( not checkAlignment( factorResult, alignment ) ) return alignmentError;
+  for( std::size_t idx( 0 ); idx < numElements; ++idx )
+  {
+    factorResult[idx] *= constantValue;
+  }
+  return noError;
+}
+/** Explicit instantiation for types float and double */
+template ErrorCode vectorMultiplyConstantInplace( float, float * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyConstantInplace( double, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyAdd( T const * const factor1,

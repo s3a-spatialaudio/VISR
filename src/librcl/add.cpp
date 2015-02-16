@@ -46,10 +46,11 @@ void Add::setup( std::size_t width, std::size_t numInputs )
 
 void Add::process()
 {
-  const auto numInputs = mInputs.size();
+  const std::size_t numInputs = mInputs.size();
+  const std::size_t cWidth = mOutput.width();
   if( numInputs == 0 ) // In this special case, the Add block works like a source of zeros
   {
-    for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
+    for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
     {
       efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), ril::cVectorAlignmentSamples );
       if( res != efl::noError )
@@ -60,7 +61,7 @@ void Add::process()
   }
   else if( numInputs == 1 )
   {
-    for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
+    for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
     {
       efl::ErrorCode res = efl::vectorCopy( mInputs.at(0)->at( sigIdx ), mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
       if( res != efl::noError ) {
@@ -70,7 +71,7 @@ void Add::process()
   }
   else
   {
-    for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
+    for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
     {
       efl::ErrorCode res = efl::vectorAdd( mInputs.at( 0 )->at( sigIdx ),
         mInputs.at( 1 )->at( sigIdx ),
@@ -82,7 +83,7 @@ void Add::process()
     }
     for( std::size_t inputIdx( 2 ); inputIdx < numInputs; ++inputIdx )
     {
-      for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
+      for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
       {
         efl::ErrorCode res = efl::vectorAddInplace( mInputs.at( inputIdx )->at( sigIdx ),
           mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );

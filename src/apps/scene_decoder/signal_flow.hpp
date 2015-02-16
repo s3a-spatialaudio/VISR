@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
-#define VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#ifndef VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
+#define VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -31,13 +31,15 @@ public:
   explicit SignalFlow( std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
                        std::size_t interpolationPeriod,
+                       std::string const & configFile,
+                       std::size_t udpPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~SignalFlow();
 
-  /*virtual*/ void process( );
+  /*virtual*/ void process();
 
-  /*virtual*/ void setup( );
+  /*virtual*/ void setup();
 
 private:
   const std::size_t cNumberOfInputs;
@@ -46,6 +48,10 @@ private:
 
   const std::size_t cInterpolationSteps;
 
+  const std::string mConfigFileName;
+  
+  const std::size_t mNetworkPort;
+  
   rcl::UdpReceiver mSceneReceiver;
   
   rcl::SceneDecoder mSceneDecoder;
@@ -65,4 +71,4 @@ private:
 } // namespace apps
 } // namespace visr
 
-#endif // #ifndef VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#endif // #ifndef VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED

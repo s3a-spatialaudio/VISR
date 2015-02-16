@@ -79,13 +79,13 @@ private:
 
   Mode mMode;
 
+  std::unique_ptr<boost::asio::io_service> mIoService;
+
   std::unique_ptr<boost::asio::ip::udp::socket> mSocket;
 
   boost::asio::ip::udp::endpoint mRemoteEndpoint;
 
   boost::array<char, cMaxMessageLength> mReceiveBuffer;
-
-  std::unique_ptr<boost::asio::io_service> mIoService;
 
   std::unique_ptr<boost::asio::io_service::work> mIoServiceWork;
 
