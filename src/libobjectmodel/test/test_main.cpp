@@ -2,7 +2,7 @@
 
 
 /**
-* @file test_main.cpp
+* @file libobjectmodel/test/test_main.cpp
 * File to place global statements for the unit test suite.
 */
 

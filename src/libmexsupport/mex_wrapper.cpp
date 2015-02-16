@@ -21,8 +21,8 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
                         mxArray * & output,
                         mxArray const * messages /* = 0 */ )
  : mFlow( flow )
- , mInputMatrix( input )
  , mSignalType( mxGetClassID( input ) )
+ , mInputMatrix( input )
  , mPeriodSize( flow.period() )
 {
   if( (mSignalType != mxDOUBLE_CLASS) and( mSignalType != mxSINGLE_CLASS ) )
@@ -151,7 +151,7 @@ namespace // unnamed
 template<mxClassID classId>
 void MexWrapper::transferInputSamples( std::size_t blockIdx )
 {
-  using MxSampleType = ClassIdToType<classId>::type;
+  using MxSampleType = typename ClassIdToType<classId>::type;
   MxSampleType const * baseInputPtr = static_cast<MxSampleType const *>( mxGetData( mInputMatrix ) );
 
   std::size_t const inputStride = mNumberOfCaptureSignals;
@@ -166,7 +166,7 @@ void MexWrapper::transferInputSamples( std::size_t blockIdx )
 template<mxClassID classId>
 void MexWrapper::transferOutputSamples( std::size_t blockIdx )
 {
-  using MxSampleType = ClassIdToType<classId>::type;
+  using MxSampleType = typename ClassIdToType<classId>::type;
   MxSampleType * baseOutputPtr = static_cast<MxSampleType *>(mxGetData( mOutputMatrix ));
 
   std::size_t const outputStride = mNumberOfPlaybackSignals;

@@ -16,7 +16,7 @@ recvHost = sys.argv[1]
 recvPortStr = sys.argv[2]
 fileName = sys.argv[3]
 
-msg = "{ \"objects\":[{\"id\": 1, \"type\": \"point\", \"group\": 0, \"priority\": 3, \"level\": 0.8, \"position\": {\"x\": 2.4, \"y\": 1.2, \"z\": -0.3 } }, {\"id\": 5, \"type\": \"point\", \"group\": 1, \"priority\": 2, \"level\": 0.375, \"position\": {\"x\": 1.5, \"y\": -1.5, \"z\": 0 } }] }"
+msg = "{ \"objects\":[{\"id\": 1, \"channels\": 0,\n\"type\": \"point\", \"group\": 0, \"priority\": 3, \"level\": 0.8, \"position\": {\"x\": 2.4, \"y\": 1.2, \"z\": -0.3 } }, {\"id\": 5, \"channels\": 1,\n\"type\": \"point\", \"group\": 1, \"priority\": 2, \"level\": 0.375, \"position\": {\"x\": 1.5, \"y\": -1.5, \"z\": 0 } }] }"
 
 # print( msg )
 

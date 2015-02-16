@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( UpdateSceneSameIdSameType )
 BOOST_AUTO_TEST_CASE( UpdateSceneSameIdDifferentType )
 {
   std::string const msg = "{ \"objects\":[{\"id\": 27,\n \"channels\": \"0\",\n \"type\": \"point\",\n \"group\": 0,\n \"priority\": 3,\n \"level\": 0.8,\n"
-      "\"position\": {\"x\": 2.4, \"y\": 1.2,\n \"z\": -0.3 } }, {\"id\": 5,\n \"type\": \"point\",\n \"group\": 1,\n \"priority\": 2,\n \"level\": 0.375,\n"
+      "\"position\": {\"x\": 2.4, \"y\": 1.2,\n \"z\": -0.3 } }, {\"id\": 5,\n \"channels\": \"0\",\n \"type\": \"point\",\n \"group\": 1,\n \"priority\": 2,\n \"level\": 0.375,\n"
       "\"position\": {\"x\": 1.5, \"y\": -1.5,\n \"z\": 0 } }] }";
 
   ObjectVector scene;

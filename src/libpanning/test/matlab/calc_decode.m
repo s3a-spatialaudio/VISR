@@ -1,5 +1,6 @@
 
-% calc_decode.matrix
+% calc_decode.m
+%
 % Created by Dylan Menzies on 19/12/2014
 % Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 %
@@ -11,12 +12,13 @@
 
 
 clear;
+addpath("arrays");
 
 N = 8; % maximum order of spherical harmonic used.
-nACN = (N+1)^2;
+nACN = (N+1)^2;  % ACN = Ambisonic Channel Numbering
 
 % Decode matrix, D[ ACN index ] [ array direction index ]
-% ACN = Ambisonic Channel Numbering
+
 
 D = [];
 
@@ -26,18 +28,21 @@ D = [];
 
 X = [];
 
-filename = 't-design_t=8_40point.txt';
+filename = 't-design_t8_P40.txt';
 fid = fopen (filename, 'r');
 
-while  ~feof(fid)
+while ~feof(fid)
     [val, count] = fscanf(fid, '%c', 1);
 
-    if (val == 'l')
+    if (val == 'c')
         [val, count] = fscanf(fid, '%d %lf %lf %lf', Inf);
-        X = [X; val(2:4)'];   %* would better to write to an index position using val(1)
-    end
-           
-end
+        X = [X; val(2:4)'];   %! would better to write to an index position using val(1)
+    else
+        if (val =='%')
+             fgetl(fid);
+        endif
+    endif
+endwhile
            
 fclose (fid);
 
@@ -72,7 +77,7 @@ end
          
 % Write decode matrix
 
-filename = 'decode_N8_P40_t-design_8_40.txt';
+filename = 'arrays/decode_N8_P40_t-design_t8_P40.txt';
 fid = fopen (filename, 'w');
  
 for j = 1:nACN
@@ -85,10 +90,7 @@ end
           
 fclose (fid);
 
-         
-         
-         
-%s         
+
          
          
 
@@ -98,30 +100,33 @@ fclose (fid);
 % Orthogonality:
 D * D' *(4*pi / nPW);
 
-% Harmonic functions:
+% Harmonic function plot:
 onlypos = @(x) (sign(x)==1).*x +1;
 figure
 scatter3(X(:,1),X(:,2),X(:,3),onlypos(100*D(2,:)),'red')
 hold on
 scatter3(X(:,1),X(:,2),X(:,3),onlypos(-100*D(2,:)),'blue')
 hold off
+
+% Check figure plot axes orientation:
+% scatter3(X(:,1),X(:,2),X(:,3),100*X(:,1),'red')
+       
          
+% Save image / change view.
 % view(-37.5,30)  % default view (az,el)
 % saveas (1,"test.eps")
          
-         % To make movie using imagemagic on unix command line:
-         % convert -delay 10 -loop 0 scatter*.png animation.gif  (scatter1.png scatter2.png ..)
+% Save video in Octave : To make movie using imagemagic on unix command line:
+% convert -delay 10 -loop 0 scatter*.png animation.gif  (scatter1.png scatter2.png ..)
   
-% check figure plot axes:
-% scatter3(X(:,1),X(:,2),X(:,3),100*X(:,1),'red')
+
      
-  
-         
-s
+
          
          
          
-% Load back decoder gains: B-format to speaker array, calculated in visr.libpanning
+% Load back b-format2vbap gains calculated in visr.libpanning test:
+% B-format to speaker array.
  
 S = [];
  
@@ -140,29 +145,33 @@ fclose (fid);
         
          
          
-% Load speaker array coordinates.
-% Plot decode gains.
+% Load coordinates for an actual speaker array.
+% Plot b-format2vbap gains for individual harmonics.
          
 X = [];
 
 filename = 'octahedron.txt';
 fid = fopen (filename, 'r');
 
-do
+while ~feof(fid)
     [val, count] = fscanf(fid, '%c', 1);
 
-    if (val == 'l')
+    if (val == 'c')
          [val, count] = fscanf(fid, '%d %lf %lf %lf', Inf);
          X = [X; val(2:4)'];  
-    end
-
-until( feof(fid) )
+    else
+        if (val =='%')
+            fgetl(fid);
+        endif
+    endif
+endwhile
 
 fclose (fid);
 
 figure
-scatter3(X(:,1),X(:,2),X(:,3),10*S(1,:),'red')
+scatter3(X(:,1),X(:,2),X(:,3),onlypos(10*S(2,:)),'red')
 hold on
-scatter3(X(:,1),X(:,2),X(:,3),-10*S(1,:),'blue')
+scatter3(X(:,1),X(:,2),X(:,3),onlypos(-10*S(2,:)),'blue')
 hold off
+              
 

@@ -22,7 +22,7 @@ namespace objectmodel
   obj.resetNumberOfChannels( 1 );
   obj.setChannelIndex( 0, scalarChannelIndex );
   }
-  catch( std::exception const & ex )
+  catch( std::exception const & /*ex*/ )
   {
     std::cerr << "ObjectParser: Parsing of channel index failed (only single-channel objects are supported at the moment)";
   }

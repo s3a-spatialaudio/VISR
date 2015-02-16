@@ -23,8 +23,8 @@ namespace rcl
 
 /**
  * Audio component for adding an arbitrary number of input vectors.
- * The number of inputs is set by the 'numInputs' argument passed to the setup() method.
- * All input vectors must have the number of signals given by 'width' argument to setup().
+ * The number of inputs is set by the \p numInputs argument passed to the setup() method.
+ * All input vectors must have the same number of signals given by the \p width argument to setup().
  */
 class Add: public ril::AudioComponent
 {
@@ -43,8 +43,8 @@ public:
 
   /**
    * Method to initialise the component.
-   * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature off arguments.
-   * @param width The width of the input vectors, i.e., the number of simultaneous signals.
+   * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
+   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
    * @param numInputs The number of signal vectors to be added.
    */ 
   void setup( std::size_t width, std::size_t numInputs );

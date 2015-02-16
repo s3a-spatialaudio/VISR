@@ -9,6 +9,23 @@ namespace visr
 namespace objectmodel
 {
 
+/**
+ * Provide definition for the static const class members in order to allow their address to be taken.
+ * The value is taken from their declaration within the class.
+ */
+//@{
+
+/* Microsoft Visual Studio neither allows or requires this standard-compliant explicit definition. */
+#ifndef _MSC_VER
+/*static*/ const ObjectId Object::cInvalidObjectId;
+    
+/*static*/ const GroupId Object::cDefaultGroupId;
+    
+/*static*/ const Object::ChannelIndex Object::cInvalidChannelIndex;
+
+#endif
+//@}
+    
 Object::Object( )
  : mObjectId(cInvalidObjectId )
  , mGroupId( cDefaultGroupId )
@@ -72,7 +89,7 @@ Object::ChannelIndex Object::channelIndex( std::size_t index ) const
 
 void Object::resetNumberOfChannels( std::size_t numChannels )
 {
-  std::valarray<ChannelIndex> newIndices( numChannels, cInvalidChannelIndex );
+  std::valarray<ChannelIndex> newIndices( cInvalidChannelIndex, numChannels );
   mChannelIndices.swap( newIndices );
 }
 

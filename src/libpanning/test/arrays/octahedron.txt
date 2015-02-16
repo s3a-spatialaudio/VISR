@@ -1,0 +1,44 @@
+
+% Octahedron loudspeaker array
+
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
+
+% positions
+% id = identity for triangularisation
+% chan = output audio channel
+
+% cartesians
+% id	chan	x	y	z
+
+c 1	1	1.0	0.0	0.0	% Front
+c 2	2	0.0	1.0	0.0	% Left
+c 3	3	-1.0	0.0	0.0	% Back
+c 4	4	0.0	-1.0	0.0	% Right
+c 5	5	0.0	0.0	1.0	% Up
+c 6	6	0.0	0.0	-1.0	% Down
+
+% polars
+% id	chan	azim	elev	distance (m)
+%
+%p 1	1  	0	  0	2.00	   % Front Centre
+
+
+
+% 3-tuplets
+% n	id1	id2	id3
+
+t 1	1	4	5
+t 2	1	2	5
+t 3	2	3	5
+t 4	3	4	5
+t 5	4	3	6
+t 6	3	2	6
+t 7	2	1	6
+t 8	1	4	6
+
+
+
+

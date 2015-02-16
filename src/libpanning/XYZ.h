@@ -1,6 +1,5 @@
 //
 //  XYZ.h
-//  S3A_renderer_dsp
 //
 //  Created by Dylan Menzies on 09/12/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -25,15 +24,33 @@ class XYZ {
     : x( 0.0f )
     , y( 0.0f )
     , z( 0.0f )
-    , isAtInfinity( false )
+    , isInfinite( false )
    {}
-
+ 
+  /**
+   * Constructor with specified coordinates.
+   */
+  explicit XYZ( Afloat pX, Afloat pY, Afloat pZ, bool pInfinity = false )
+    : x( pX), y( pY ), z( pZ ), isInfinite( pInfinity )
+  {}
+ 
+  /**
+   * Assignment operator. Uses default-constructed operator (no implementation required).
+   */
+  XYZ & operator=( XYZ const & rhs ) = default;
+ 
+  /**
+   * Copy constructor.
+   * Uses automatically-generated default copy ctor, no implementation required.
+   */
+  XYZ( XYZ const & rhs ) = default;
+  
   Afloat x, y, z;
-  bool isAtInfinity; // eg for source at infinity.
+  bool isInfinite; // eg for source at infinity.
     
-  int set(Afloat X, Afloat Y, Afloat Z, bool atInfinity = false) {
+  int set(Afloat X, Afloat Y, Afloat Z, bool inf = false) {
     x = X; y = Y; z =Z;
-    isAtInfinity = false;
+    isInfinite = inf;
     return 0;
   };
     

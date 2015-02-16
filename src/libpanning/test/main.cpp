@@ -1,6 +1,6 @@
 //
 //  main.cpp
-//  S3A_renderer_dsp
+
 //
 //  Created by Dylan Menzies on 10/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
@@ -9,13 +9,14 @@
 
 #include <libpanning/VBAP.h>
 #include <libpanning/AllRAD.h>
+#include <boost/filesystem.hpp>
 
 #include <iostream>
 #include <cstdio>
 
 int main(int argc, const char * argv[])
 {
-    LoudspeakerArray array;
+    LoudspeakerArray array, regArray;
     VBAP vbap;
     AllRAD allrad;
     Afloat (*vbapGains)[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS];
@@ -25,11 +26,13 @@ int main(int argc, const char * argv[])
     FILE* file;
     int j,k;
     
+    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
     
     
     // Useage / test VBAP with 8 sources around an octahedron array
     
-    file = fopen("octahedron.txt","r");
+    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
@@ -49,6 +52,7 @@ int main(int argc, const char * argv[])
     sourcePos[7].set(-1.0, -1.0, -1.0, false);
     vbap.setSourcePositions(&sourcePos);
 
+    
     vbap.calcGains();
     
     vbapGains = vbap.getGains();   // Check in watch window
@@ -56,7 +60,9 @@ int main(int argc, const char * argv[])
     
     // 5.1 test, 2D VBAP
     
-    file = fopen("5.1.txt","r");
+    // file = fopen("arrays/5.1.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/5.1_audiolab.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     file = 0;
@@ -77,28 +83,31 @@ int main(int argc, const char * argv[])
     vbapGains = vbap.getGains();   // Check in watch window
     
     
-    // Useage / test AllRAD ambisonic decode
     
+    
+    // Useage / test AllRAD ambisonic decode
     
     // Initialization:
     
-    file = fopen("octahedron.txt","r");
+    // file = fopen("arrays/octahedron.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+    file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
-    file = 0;
     vbap.setLoudspeakerArray(&array);
     
-    
-    file = fopen("t-design_t=8_40point.txt","r");
-    if (allrad.loadRegArray(file) == -1) return -1;
+    // file = fopen("arrays/t-design_t8_P40.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/t-design_t8_P40.txt");
+    file = fopen(bfile.string().c_str(),"r");
+    if (regArray.load(file) == -1) return -1;
+    allrad.setRegArray(&regArray);
     fclose( file );
-    file = 0;
     
-    
-    file = fopen("decode_N8_P40_t-design_8_40.txt","r");
-    if (allrad.loadRegDecodeGains(file, 3, 40) == -1) return -1;
+    // file = fopen("arrays/decode_N8_P40_t-design_t8_P40.txt","r");
+    bfile = decoderDir / boost::filesystem::path("arrays/decode_N8_P40_t-design_t8_P40.txt");
+    file = fopen(bfile.string().c_str(),"r");
+    if (allrad.loadRegDecodeGains(file, 8, 40) == -1) return -1;
     fclose( file );
-    file = 0;
     
     
     // Initially and every time listener moves:
@@ -113,23 +122,26 @@ int main(int argc, const char * argv[])
     
     
     // Load vbap with reg-array-speaker-sources
-    // Calc vbap gains then calc AllRAD decode gains
+    // Calc vbap gains then calc AllRAD b-format decode gains
     
     allrad.calcDecodeGains(&vbap);
     decodeGains = allrad.getDecodeGains();
     
-    file = fopen("/Users/rdmg1u13/Dropbox/s3a/research/S3A_renderer/visr/src/libpanning/test/matlab/decodeB2VBAP.txt","w");
-    for(k=0; k<9; k++) {
+    
+    // Write b-format2vbap gains for matlab testing:
+    
+    // file = fopen("testoutput/decodeB2VBAP.txt","w");
+    bfile = decoderDir / boost::filesystem::path("testoutput/decodeB2VBAP.txt");
+    file = fopen(bfile.string().c_str(),"w");
+    if( file ) {
+      for(k=0; k<9; k++) { // 9 harms - 2nd order only
         for(j=0; j<vbap.getNumSpeakers(); j++) {
             fprintf(file, "%f ", (*decodeGains)[k][j]);
         }
         fprintf(file,"\n");
+      }
+      fclose( file );
     }
-    fclose( file );
-    file = 0;
-
-    
-    // std::cout << "Hello, World!\n";
     return 0;
 }
 

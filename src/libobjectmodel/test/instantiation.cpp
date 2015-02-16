@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( InstantiatePointSources )
   BOOST_CHECK( s1.id() == retrievedObj1.id() );
 
   // attempt access to source with non-existing ID
-  BOOST_CHECK_THROW( Object const & retrievedObjInvld = scene.at( 5 ), std::exception );
+  BOOST_CHECK_THROW( scene.at( 5 ), std::exception );
 
   PointSource s3( id1 );
 
