@@ -13,9 +13,15 @@
 //#include <iostream>
 #include <cstdio>
 
+#include <libril/audio_component.hpp>
+
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
 #include <libpanning/LoudspeakerArray.h>
+
+#include <libefl/basic_vector.hpp>
+
+#include <libpml/listener_position.hpp>
 
 namespace visr
 {
@@ -23,25 +29,43 @@ namespace visr
 	namespace rcl
 	{
 
-		class ListenerCompensation
+		class ListenerCompensation: public ril::AudioComponent
 		{
+		public:
+			using SampleType = ril::SampleType;
 		private:
-			LoudspeakerArray* m_array; //passing the address of the loudspeaker array
+			LoudspeakerArray m_array; //passing the address of the loudspeaker array
 			XYZ m_listenerPos; //position of the listener
-			Afloat m_GainComp[MAX_NUM_SPEAKERS]; // stores the compensation for the Gain
+			std::size_t mNumberOfLoudspeakers;
+			Afloat m_GainComp[MAX_NUM_SPEAKERS]; // stores the compensation for the GainREPLACE WITH SAMPLE TYPES
 			Afloat m_DelayComp[MAX_NUM_SPEAKERS];// stores the compensation for the Delay
 
 
 		public:
+			/**
+			* Constructor.
+			* @param container A reference to the containing AudioSignalFlow object.
+			* @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+			*/
+			explicit ListenerCompensation(ril::AudioSignalFlow& container, char const * name);
 
-			int setLoudspeakerArray(LoudspeakerArray* array){ // assigning the geometry
-				m_array = array;
-				return 0;
-			}
+			/**
+			* Disabled (deleted) copy constructor
+			*/
+			ListenerCompensation(ListenerCompensation const &) = delete;
 
 
-			int getNumSpeakers() {
-				return m_array->m_nSpeakers;
+			void setup(std::size_t numberOfLoudspeakers, std::string const & arrayConfig );
+
+			/**
+			* The process function.
+			* It takes a listener position as input and calculates a gain vector and a delay vector.
+			*/
+			void process(pml::ListenerPosition const & pos, efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays );
+
+
+			int getNumSpeakers()  const {
+				return m_array.m_nSpeakers;
 			}
 
 			int setListenerPosition(Afloat x, Afloat y, Afloat z){ //assigning the position of the listener
@@ -50,18 +74,8 @@ namespace visr
 			}
 
 			int calcGainComp(); // this function calculates the gain compensation
-			Afloat(*getGains())[MAX_NUM_SPEAKERS] {
-
-				return &m_GainComp;
-			}
 
 			int calcDelayComp(); // this function calculates the delay compensation
-			Afloat(*getDelays())[MAX_NUM_SPEAKERS] {
-
-				return &m_DelayComp;
-
-			}
-
 
 		};//class Listener Compensation
 
