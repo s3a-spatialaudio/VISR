@@ -2,11 +2,15 @@
 
 SET( APPLICATION_NAME rcl_test )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp )
+ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl objectmodel pml )
+ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp test_kinect_receiver.cpp )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl ril efl ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} panning rcl ril objectmodel pml efl)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_THREAD_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)
