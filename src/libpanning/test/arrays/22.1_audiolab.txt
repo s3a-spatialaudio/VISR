@@ -39,7 +39,7 @@ c 18 	2	1.73	1.72	1.14	% Top Front Left
 c 19 	3	0.01	0	1.06	% Top Centre	
 
 c 20 	31	2.14	0.04	-0.84	% Bottom Front Centre
-c 21	38	1.75	-1.68	-0.87	% Bottom Front Right
+c 21	37	1.75	-1.68	-0.87	% Bottom Front Right
 c 22  	29	1.78	1.73	-0.86	% Bottom Front Left
 
 
