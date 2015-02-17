@@ -86,6 +86,7 @@ int main( int argc, char const * const * argv )
     bool const hasOutputRoutingOption = cmdLineOptions.hasOption( "output-routing");
     if( hasOutputRoutingOption )
     {
+      // If an output routing is specified, it takes precedence over the output channel setting in the loudspeaker configuration file.
       std::string const outputRoutingString = cmdLineOptions.getOption<std::string>( "output-routing");
       if( not outputRouting.parse( outputRoutingString ) )
       {
@@ -94,14 +95,22 @@ int main( int argc, char const * const * argv )
     }
     else
     {
-      // If the output-routing parameter is not provided, create a simple 1:1 mapping between renderer outputs and physical output channels.
-      // If the number of render speakers exceeds the number of physical speakers, the surplus render channels will not be output.
-      // @todo: Consider making this an error (if there are more render channels than physical outputs, one must provide an explicit
-      // output routing.)
-      pml::SignalRoutingParameter::IndexType const maxChannel = std::min( numberOfLoudspeakers, numberOfOutputChannels );
-      for( pml::SignalRoutingParameter::IndexType channelIdx( 0 ); channelIdx < maxChannel; ++channelIdx )
+      // Create a routing based on the information contained in the array configuration file.
+      for( pml::SignalRoutingParameter::IndexType channelIdx( 0 ); channelIdx < numberOfLoudspeakers; ++channelIdx )
       {
-        outputRouting.addRouting( channelIdx, channelIdx );
+        // The channel ids in the array configuration file are apparently one-offset
+        int const arrayConfigChannel = loudspeakerArray.m_channel[ channelIdx ];
+        if( arrayConfigChannel <= 0 )
+        {
+          throw std::invalid_argument( "Invalid \"channel\" argument in array configuration file." );
+        }
+        // Subtract the offset of the logical channel numbers in the array config.
+        pml::SignalRoutingParameter::IndexType const outIdx = static_cast<pml::SignalRoutingParameter::IndexType>( arrayConfigChannel - 1 );
+        if( outIdx >= numberOfOutputChannels )
+        {
+          throw std::invalid_argument( "Argument \"channel\" in array configuration file exceeds number of output channels." );
+        }
+        outputRouting.addRouting( channelIdx, outIdx );
       }
     }
 
