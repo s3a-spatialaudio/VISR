@@ -22,6 +22,9 @@
 
 int main( int argc, char const * const * argv )
 {
+	// For the moment, use a fixed UDP port for the tracker (Kinect)
+	std::size_t kinectPort = 8888;
+
   using namespace visr;
   using namespace visr::apps::baseline_renderer_tracking;
 
@@ -80,7 +83,7 @@ int main( int argc, char const * const * argv )
 
     const std::string audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
 
-    const std::size_t  sceneReceiverPort = cmdLineOptions.getDefaultedOption<std::size_t>( "scene-port", 8888 );
+    const std::size_t  sceneReceiverPort = cmdLineOptions.getDefaultedOption<std::size_t>( "scene-port", 4242 );
 
     pml::SignalRoutingParameter outputRouting;
     bool const hasOutputRoutingOption = cmdLineOptions.hasOption( "output-routing");
@@ -130,7 +133,7 @@ int main( int argc, char const * const * argv )
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
                      outputRouting,
                      cInterpolationLength,
-                     arrayConfigFile.string().c_str(), sceneReceiverPort,
+					 arrayConfigFile.string().c_str(), sceneReceiverPort, kinectPort,
                      periodSize, samplingRate );
     flow.setup();
 

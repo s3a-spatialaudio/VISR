@@ -12,6 +12,7 @@
 #include <librcl/udp_receiver.hpp>
 
 #include <libefl/basic_matrix.hpp>
+#include <libefl/basic_vector.hpp>
 
 #include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
@@ -19,6 +20,11 @@
 #include <libobjectmodel/object_vector.hpp>
 
 #include <string>
+
+#include <librcl/listener_compensation.hpp>
+#include <librcl/delay_vector.hpp>
+#include <libpml/listener_position.hpp>
+
 
 namespace visr
 {
@@ -37,6 +43,7 @@ public:
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
                        std::size_t udpPort,
+					   std::size_t kinectPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~SignalFlow();
@@ -56,9 +63,9 @@ private:
 
   const std::size_t cInterpolationSteps;
 
-  const std::string mConfigFileName;
+  const std::string cConfigFileName;
   
-  const std::size_t mNetworkPort;
+  const std::size_t cNetworkPort;
   
   rcl::UdpReceiver mSceneReceiver;
   
@@ -75,12 +82,25 @@ private:
   objectmodel::ObjectVector mObjectVector;
 
   efl::BasicMatrix<ril::SampleType> mGainParameters;
+
+
   //Tracking 
 
+  rcl::ListenerCompensation mListenerCompensation;
 
+  pml::ListenerPosition mListenerPosition;
 
+  rcl::DelayVector  mSpeakerCompensation;
 
+  rcl::UdpReceiver mKinectReceiver;
 
+  pml::MessageQueue<std::string> mTrackingMessages;
+
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
+
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
+
+  std::size_t cTrackingUdpPort;
 };
 
 } // namespace baseline_renderer_tracking
