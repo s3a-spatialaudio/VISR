@@ -5,9 +5,13 @@
 
 #include "point_source.hpp"
 #include "plane_wave.hpp"
+#include "point_source_with_diffuseness.hpp"
+#include "diffuse_source.hpp"
 
 #include "point_source_parser.hpp"
 #include "plane_wave_parser.hpp"
+#include "point_source_with_diffuseness_parser.hpp"
+#include "diffuse_source_parser.hpp"
 
 #include <stdexcept>
 
@@ -15,7 +19,6 @@ namespace visr
 {
 namespace objectmodel
 {
-
 
 ObjectFactory::Creator::Creator( CreateFunction fcn, ObjectParser * parser )
  : mCreateFunction( fcn )
@@ -64,17 +67,24 @@ ObjectFactory::parser( ObjectTypeId typeId )
   return findIt->second.parser( );
 }
 
-
+/**
+ * A helper class with whole purpose is to register the different object types in the factory.
+ */
 struct InstantiateObjectFactory
 {
   InstantiateObjectFactory()
   {
     ObjectFactory::registerObjectType<PointSource, PointSourceParser>( ObjectTypeId::PointSource );
     ObjectFactory::registerObjectType<PlaneWave, PlaneWaveParser>( ObjectTypeId::PlaneWave );
+    ObjectFactory::registerObjectType<PointSourceWithDiffuseness, PointSourceWithDiffusenessParser>( ObjectTypeId::PointSourceWithDiffuseness );
+    ObjectFactory::registerObjectType<DiffuseSource, DiffuseSourceParser>( ObjectTypeId::DiffuseSource );
   }
 };
 
-InstantiateObjectFactory foo;
+/**
+ * Ob ject which is used to initialise the object factory.
+ */
+InstantiateObjectFactory const cInstantiationHelper;
 
 } // namespace objectmodel
 } // namespace visr

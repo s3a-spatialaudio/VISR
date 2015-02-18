@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_OBJECTMODEL_PLANE_WAVE_PARSER_HPP_INCLUDED
-#define VISR_OBJECTMODEL_PLANE_WAVE_PARSER_HPP_INCLUDED
+#ifndef VISR_OBJECTMODEL_DIFFUSE_SOURCE_PARSER_HPP_INCLUDED
+#define VISR_OBJECTMODEL_DIFFUSE_SOURCE_PARSER_HPP_INCLUDED
 
 #include "object_parser.hpp"
 
@@ -15,7 +15,7 @@ namespace objectmodel
 /**
  *
  */
-class PlaneWaveParser: public ObjectParser
+class DiffuseSourceParser: public ObjectParser
 {
 public:
   virtual void parse( boost::property_tree::ptree const & tree, Object & src ) const;
@@ -24,4 +24,4 @@ public:
 } // namespace objectmodel
 } // namespace visr
 
-#endif // VISR_OBJECTMODEL_PLANE_WAVE_PARSER_HPP_INCLUDED
+#endif // VISR_OBJECTMODEL_DIFFUSE_SOURCE_PARSER_HPP_INCLUDED
