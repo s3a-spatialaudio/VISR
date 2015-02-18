@@ -35,6 +35,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   std::size_t interpolationPeriod,
   std::string const & configFile,
   std::size_t udpPort,
+  std::size_t kinectPort,
   std::size_t period,
   ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
@@ -43,13 +44,21 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , cNumberOfOutputs( numberOfOutputs )
  , mOutputRoutings( outputRouting)
  , cInterpolationSteps( interpolationPeriod )
- , mConfigFileName( configFile )
- , mNetworkPort( udpPort )
+ , cConfigFileName( configFile )
+ , cNetworkPort( udpPort )
+ , cTrackingUdpPort( kinectPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
  , mOutputRouting( *this, "OutputSignalRouting" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mMatrix( *this, "GainMatrix" )
+ , mListenerCompensation(*this, "ListenerCompensation")
+ , mListenerPosition() // use default constructor
+ , mSpeakerCompensation(*this, "SpeakerCompensation")
+ , mKinectReceiver(*this, "KinectReceiver" )
+ , mTrackingMessages()
+ , mCompensationGains(ril::cVectorAlignmentSamples)
+ , mCompensationDelays(ril::cVectorAlignmentSamples)
 {
 }
 
@@ -62,11 +71,18 @@ SignalFlow::process()
 {
   mSceneReceiver.process( mSceneMessages );
   mSceneDecoder.process( mSceneMessages, mObjectVector );
-  mGainCalculator.process( mObjectVector, mGainParameters );
- 
+  mKinectReceiver.process(mTrackingMessages);
+  // TODO: use component to parse from mTrackingMessages to mListenerPosition
   
+  // mGainCalculator.setListenerPosition( mListenerPosition );
+  mGainCalculator.process( mObjectVector, mGainParameters );
+
+  mListenerCompensation.process(mListenerPosition, mCompensationGains, mCompensationDelays);
+ 
   mMatrix.setGains( mGainParameters );
   mMatrix.process();
+  mSpeakerCompensation.setDelayAndGain(mCompensationGains, mCompensationDelays);
+  mSpeakerCompensation.process();
   mOutputRouting.process();
 }
 
@@ -75,28 +91,41 @@ SignalFlow::setup()
 {
   // Initialise and configure audio components
 
-  mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
+  mSceneReceiver.setup( cNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup();
-  mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, mConfigFileName );
+  mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, cConfigFileName );
   mMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
   mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
+  mListenerCompensation.setup(cNumberOfLoudspeakers, cConfigFileName);
+  ril::SampleType cMaxDelay = 1.0f; // maximum delay (in seconds)
+  // We start with a initial gain of 0.0 to suppress transients on startup.
+  mSpeakerCompensation.setup(cNumberOfLoudspeakers, period(), cMaxDelay, 0.0f, 0.0f);
+  mKinectReceiver.setup(cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous);
 
-  initCommArea( cNumberOfInputs + cNumberOfLoudspeakers + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
+  initCommArea( cNumberOfInputs + 2*cNumberOfLoudspeakers + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
   // connect the ports
   std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
-
 
   assignCommunicationIndices( "GainMatrix", "in", captureIndices );
 
   std::size_t matrixOutStartIdx = cNumberOfInputs;
   std::vector<std::size_t> const matrixOutRange = indexRange( matrixOutStartIdx, matrixOutStartIdx + cNumberOfLoudspeakers - 1 );
   assignCommunicationIndices( "GainMatrix", "out", matrixOutRange );
-  assignCommunicationIndices( "OutputSignalRouting", "in", matrixOutRange );
+  assignCommunicationIndices( "SpeakerCompensation", "in", matrixOutRange );
 
-  std::size_t routingOutStartIdx = matrixOutStartIdx + cNumberOfLoudspeakers;
+  std::size_t compensationOutStartIdx = cNumberOfInputs + cNumberOfLoudspeakers;
+  std::vector<std::size_t> const compensationOutRange = indexRange(compensationOutStartIdx, compensationOutStartIdx + cNumberOfLoudspeakers - 1);
+  assignCommunicationIndices("SpeakerCompensation", "out", matrixOutRange);
+  assignCommunicationIndices("OutputSignalRouting", "in", matrixOutRange);
+
+  std::size_t routingOutStartIdx = matrixOutStartIdx + 2*cNumberOfLoudspeakers;
   std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + cNumberOfOutputs - 1 );
   assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
+
+  mCompensationGains.resize(cNumberOfLoudspeakers);
+
+  mCompensationDelays.resize(cNumberOfLoudspeakers);
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size() );
   assignPlaybackIndices( &routingOutRange[0], routingOutRange.size() );
