@@ -43,7 +43,7 @@ public:
                        pml::SignalRoutingParameter const & outputRouting,
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
-                       std::size_t udpPort,
+                       std::size_t sceneReceiverUdpPort,
                        std::size_t kinectPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
@@ -66,8 +66,10 @@ private:
 
   const std::string cConfigFileName;
   
-  const std::size_t cNetworkPort;
-  
+  const std::size_t cSceneReceiverUdpPort;
+    
+  const std::size_t cTrackingUdpPort;
+
   rcl::UdpReceiver mSceneReceiver;
   
   rcl::SceneDecoder mSceneDecoder;
@@ -102,8 +104,6 @@ private:
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
 
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
-
-  std::size_t cTrackingUdpPort;
 };
 
 } // namespace baseline_renderer_tracking
