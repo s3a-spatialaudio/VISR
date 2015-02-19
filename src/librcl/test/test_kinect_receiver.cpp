@@ -3,6 +3,7 @@
 #include <libpanning/LoudspeakerArray.h>
 #include <libefl/basic_vector.hpp>
 #include <librcl/listener_compensation.hpp>
+#include <librcl/position_decoder.hpp>
 #include <librcl/udp_receiver.hpp>
 #include <libril/audio_signal_flow.hpp>
 #include <libpml/message_queue.hpp>
@@ -51,6 +52,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   Flow flow( 256, 48000 );
   
   rcl::UdpReceiver kinect( flow, "Receiver");
+  rcl::PositionDecoder decoder( flow, "Decoder" );
   rcl::ListenerCompensation listenerComp( flow, "ListenerCompensation");
 
   pml::MessageQueue<std::string> posMessage; //output position for the Kinect
@@ -68,32 +70,16 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
 
 
   kinect.setup(kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous); //setup to listen from th, how to set up mode?
+  decoder.setup();
   listenerComp.setup(numSpeakers, arrayPath.string());
 
   while( true ) 
   { 
-
     kinect.process(posMessage);
-
-	// We parse all arriving messages and keep only the most recent.
-	while (!posMessage.empty())
-    {
-	  // put out the strings:
-      // std::cout << posMessage.nextElement() << std::endl;
-
-	  std::stringstream messageStream(posMessage.nextElement());
-	  pos.parse(messageStream);
-	  //std::cout << "Received position: " << pos << std::endl;
-
-      posMessage.popNextElement();//remove oldest message from queue
-    }
-	// We parsed all arriving messages and kept only the most recent.
-	
-	listenerComp.process(pos, gains, delays);
-	std::cout << "Gains: " << gains[0] << "Delays: " << delays[0] << std::endl;
-
-
-//    std::getc( stdin );
+    decoder.process( posMessage, pos );
+    std::cout << "Decoded position message: " << pos << std::endl;
+    listenerComp.process( pos, gains, delays );
+    std::cout << "Gains: " << gains[0] << "Delays: " << delays[0] << std::endl;
   }
 }
 
