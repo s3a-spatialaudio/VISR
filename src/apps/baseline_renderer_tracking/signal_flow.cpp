@@ -56,6 +56,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mListenerPosition() // use default constructor
  , mSpeakerCompensation(*this, "SpeakerCompensation")
  , mKinectReceiver(*this, "KinectReceiver" )
+ , mPositionDecoder( *this, "PositionDecoder" )
  , mTrackingMessages()
  , mCompensationGains(ril::cVectorAlignmentSamples)
  , mCompensationDelays(ril::cVectorAlignmentSamples)
@@ -72,9 +73,8 @@ SignalFlow::process()
   mSceneReceiver.process( mSceneMessages );
   mSceneDecoder.process( mSceneMessages, mObjectVector );
   mKinectReceiver.process(mTrackingMessages);
-  // TODO: use component to parse from mTrackingMessages to mListenerPosition
-  
-  // mGainCalculator.setListenerPosition( mListenerPosition );
+  mPositionDecoder.process( mTrackingMessages, mListenerPosition );
+  mGainCalculator.setListenerPosition( mListenerPosition );
   mGainCalculator.process( mObjectVector, mGainParameters );
 
   mListenerCompensation.process(mListenerPosition, mCompensationGains, mCompensationDelays);
@@ -101,6 +101,7 @@ SignalFlow::setup()
   // We start with a initial gain of 0.0 to suppress transients on startup.
   mSpeakerCompensation.setup(cNumberOfLoudspeakers, period(), cMaxDelay, 0.0f, 0.0f);
   mKinectReceiver.setup(cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous);
+  mPositionDecoder.setup();
 
   initCommArea( cNumberOfInputs + 2*cNumberOfLoudspeakers + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
