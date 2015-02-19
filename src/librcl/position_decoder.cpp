@@ -35,7 +35,6 @@ void PositionDecoder::process( pml::MessageQueue<std::string> & messages, pml::L
   pml::ListenerPosition foundPos;
   pml::ListenerPosition::IdType smallestFaceId = std::numeric_limits<unsigned int>::max();
   pml::ListenerPosition::TimeType latestTimeStamp = 0;
-  bool parseSuccess;
   while( !messages.empty() )
   {
     std::string const & nextMsg = messages.nextElement();

@@ -34,7 +34,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   pml::SignalRoutingParameter const & outputRouting,
   std::size_t interpolationPeriod,
   std::string const & configFile,
-  std::size_t udpPort,
+  std::size_t sceneReceiverPort,
   std::size_t kinectPort,
   std::size_t period,
   ril::SamplingFrequencyType samplingFrequency )
@@ -45,7 +45,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mOutputRoutings( outputRouting)
  , cInterpolationSteps( interpolationPeriod )
  , cConfigFileName( configFile )
- , cNetworkPort( udpPort )
+ , cSceneReceiverUdpPort( sceneReceiverPort )
  , cTrackingUdpPort( kinectPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
@@ -91,7 +91,7 @@ SignalFlow::setup()
 {
   // Initialise and configure audio components
 
-  mSceneReceiver.setup( cNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
+  mSceneReceiver.setup( cSceneReceiverUdpPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup();
   mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, cConfigFileName );
   mMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
