@@ -7,7 +7,6 @@
 #include <iosfwd>
 #include <istream>
 
-
 namespace visr
 {
 namespace pml
@@ -16,6 +15,9 @@ namespace pml
 class ListenerPosition
 {
 public:
+  using TimeType = std::uint64_t;
+  using IdType = unsigned int;
+
   class Quaternion
   {
   public:
@@ -32,14 +34,19 @@ public:
   float x() const { return mX; }
   float y() const { return mY; }
   float z() const { return mZ; }
-private:
-	float mX;
-	float mY;
-	float mZ;
 
-	std::uint64_t mTimeNS;
-		
-	unsigned int mFaceID;
+  TimeType timeNs() const { return mTimeNs; }
+
+  IdType faceID() const { return mFaceID; }
+
+private:
+  float mX;
+  float mY;
+  float mZ;
+
+  TimeType mTimeNs;
+
+  IdType mFaceID;
 };
 
 std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
