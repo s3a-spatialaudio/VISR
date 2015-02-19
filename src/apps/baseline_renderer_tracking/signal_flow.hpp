@@ -7,6 +7,7 @@
 
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
+#include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
 #include <librcl/udp_receiver.hpp>
@@ -43,7 +44,7 @@ public:
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
                        std::size_t udpPort,
-					   std::size_t kinectPort,
+                       std::size_t kinectPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~SignalFlow();
@@ -93,6 +94,8 @@ private:
   rcl::DelayVector  mSpeakerCompensation;
 
   rcl::UdpReceiver mKinectReceiver;
+
+  rcl::PositionDecoder mPositionDecoder;
 
   pml::MessageQueue<std::string> mTrackingMessages;
 
