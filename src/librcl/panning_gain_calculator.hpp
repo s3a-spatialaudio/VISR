@@ -25,6 +25,10 @@ namespace efl
 {
 template< typename SampleType > class BasicMatrix;
 }
+namespace pml
+{
+class ListenerPosition;
+}
 namespace ril
 {
 class AudioInput;
@@ -77,14 +81,26 @@ public:
   void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
 
   /**
-   * Set the reference listener position.
+   * Set the reference listener position. This overload accepts three cartesian coordinates.
    * The listener positions are used beginning with the next process() call.
    * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
+   * @param x The x coordinate [in meters]
+   * @param y The y coordinate [in meters]
+   * @param z The z coordinate [in meters]
    * @throw std::runtime_error If the recalculation of the internal panning data fails.
-   * @note input parameters are likely to be changed to some more sophisticated type (i.e., libpml)
    * @todo Consider extending the interface to multiple listener positions.
    */
   void setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z );
+
+  /**
+  * Set the reference listener position given as a ListenerPosition object.
+  * The listener positions are used beginning with the next process() call.
+  * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
+  * @param pos The listener position.
+  * @throw std::runtime_error If the recalculation of the internal panning data fails.
+  * @todo Consider extending the interface to multiple listener positions.
+  */
+  void setListenerPosition( pml::ListenerPosition const & pos );
 
 private:
   /**
