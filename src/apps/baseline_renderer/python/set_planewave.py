@@ -11,7 +11,7 @@ parser.add_argument( "objectid", help="The object id, an integer >= 0." )
 parser.add_argument( "direction", help="The direction of arrival of the plane wave, given in degrees as 'azimuth:elevation' 'azimuth' (which implies elevation=0)" )
 
 parser.add_argument( "-v", "--verbosity", action="count", default=0, help="Print the network message after sending." )
-parser.add_argument( "-r", "--receiver", default="localhost:8888", help="The destination network address, format: host:port, default: localhost:8888." )
+parser.add_argument( "-r", "--receiver", default="localhost:4242", help="The destination network address, format: host:port, default: localhost:4242." )
 parser.add_argument( "-l", "--level", default=1.0, help="Sound level of the source, linear scale 0..1.0, default: 1.0." )
 parser.add_argument( "-d", "--referencedistance", default="0.0", help="Reference distance [in meters], used to calculate the time delay of arrival (if the rendering algorithm supports this). Default: 0.0." )
 parser.add_argument( "-p", "--priority", default="0", help="Rendering priority, integer >= 0, default: 0." );
