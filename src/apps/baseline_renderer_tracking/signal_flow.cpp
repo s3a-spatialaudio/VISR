@@ -81,7 +81,7 @@ SignalFlow::process()
  
   mMatrix.setGains( mGainParameters );
   mMatrix.process();
-  mSpeakerCompensation.setDelayAndGain(mCompensationGains, mCompensationDelays);
+  mSpeakerCompensation.setDelayAndGain(mCompensationDelays, mCompensationGains);
   mSpeakerCompensation.process();
   mOutputRouting.process();
 }
@@ -117,8 +117,8 @@ SignalFlow::setup()
 
   std::size_t compensationOutStartIdx = cNumberOfInputs + cNumberOfLoudspeakers;
   std::vector<std::size_t> const compensationOutRange = indexRange(compensationOutStartIdx, compensationOutStartIdx + cNumberOfLoudspeakers - 1);
-  assignCommunicationIndices("SpeakerCompensation", "out", matrixOutRange);
-  assignCommunicationIndices("OutputSignalRouting", "in", matrixOutRange);
+  assignCommunicationIndices("SpeakerCompensation", "out", compensationOutRange);
+  assignCommunicationIndices("OutputSignalRouting", "in", compensationOutRange);
 
   std::size_t routingOutStartIdx = matrixOutStartIdx + 2*cNumberOfLoudspeakers;
   std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + cNumberOfOutputs - 1 );
