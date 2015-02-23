@@ -4,6 +4,10 @@
 #define VISR_LIBRCL_POSITION_DECODER_HPP_INCLUDED
 
 #include <libril/audio_component.hpp>
+#include <libpanning/LoudspeakerArray.h>
+#include <libefl/vector_functions.hpp>
+
+
 
 namespace visr
 {
@@ -36,6 +40,8 @@ public:
   PositionDecoder( PositionDecoder const & ) = delete;
 
 
+
+
   /**
    * Destructor.
    */
@@ -45,7 +51,7 @@ public:
    * Method to initialise the component.
    * At the moment, there are arguments to customize the component, but this might change in the future.
    */ 
-  void setup();
+  void setup(XYZ const &offsetKinect, float qw = 1.0f, float qx = 0.0f, float qy = 0.0f, float qz = 0.0f);
 
   /**
    * The process function. Decodes all messages contained in \p messages to a single pml::ListenerPosition object.
@@ -59,6 +65,15 @@ public:
   void process( pml::MessageQueue<std::string> & messages, pml::ListenerPosition & position );
 
 private:
+
+
+	float mQw;
+	float mQx,mQy,mQz;// for the Quaternion 
+	XYZ mOffsetKinect;
+
+
+	pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
+
 };
 
 } // namespace rcl

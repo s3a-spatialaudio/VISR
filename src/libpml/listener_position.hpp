@@ -29,6 +29,12 @@ public:
    */
   ListenerPosition();
 
+  ListenerPosition(float x, float y, float z)
+	  : mX(x)
+	  , mY(y)
+	  , mZ(z)
+  {}
+
   void parse( std::istream &  inputStream );
 
   float x() const { return mX; }
