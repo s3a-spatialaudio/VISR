@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
 
 
   kinect.setup(kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous); //setup to listen from th, how to set up mode?
-  decoder.setup(XYZ(-2.08f,0.0f,0.0f) );
+  decoder.setup(XYZ(+2.08f,0.0f,0.0f) );
   listenerComp.setup(numSpeakers, arrayPath.string());
 
   while( true ) 

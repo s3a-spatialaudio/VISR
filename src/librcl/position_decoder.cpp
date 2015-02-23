@@ -95,7 +95,7 @@ namespace visr
 			}
 #endif
 
-			return pml::ListenerPosition(pos.z() + mOffsetKinect.x, -pos.x() + mOffsetKinect.y, pos.y() + mOffsetKinect.z );
+			return pml::ListenerPosition(-pos.z() + mOffsetKinect.x, -pos.x() + mOffsetKinect.y, pos.y() + mOffsetKinect.z );
 		}
 
 
