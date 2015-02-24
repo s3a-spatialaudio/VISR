@@ -84,21 +84,29 @@ namespace visr
 		{
 			int i;
 			XYZ l1;
-			Afloat rad=0.0f, x=0.0f, y=0.0f, z=0.0f;
+			Afloat rad = 0.0f, max_rad = 0.0f, x = 0.0f, y = 0.0f, z = 0.0f;
 
 			//setting listener position
-			x -= m_listenerPos.x;
-			y -= m_listenerPos.y;
-			z -= m_listenerPos.z;
+			x = m_listenerPos.x;
+			y = m_listenerPos.y;
+			z = m_listenerPos.z;
 
 			for (i = 0; i < m_array.m_nSpeakers; i++) {
 
-				l1 = m_array.m_position[m_array.m_triplet[i][0]];//obtaining coordinates from loudspeaker i
+				//l1 = m_array.m_position[m_array.m_triplet[i][0]];//obtaining coordinates from loudspeaker i
+				l1 = m_array.m_position[i];
 
 				rad = std::sqrt(std::pow((l1.x - x), 2.0f) + std::pow((l1.y - y), 2.0f) + std::pow((l1.z - z), 2.0f));
-				
+
 				m_GainComp[i] = rad;
 
+				if (m_GainComp[i]>max_rad)
+					max_rad = m_GainComp[i];
+			}
+
+			for (i = 0; i < m_array.m_nSpeakers; i++) {
+
+				m_GainComp[i] = (m_GainComp[i]/max_rad);
 			}
 			return 0;
 
@@ -113,14 +121,16 @@ namespace visr
 
 
 				//setting listener position
-				x -= m_listenerPos.x;
-				y -= m_listenerPos.y;
-				z -= m_listenerPos.z;
+				x = m_listenerPos.x;
+				y = m_listenerPos.y;
+				z = m_listenerPos.z;
 
 
 				for (i = 0; i < m_array.m_nSpeakers; i++) {
 
-				l1 = m_array.m_position[m_array.m_triplet[i][0]];//obtaining coordinates from loudspeaker i
+			//	l1 = m_array.m_position[m_array.m_triplet[i][0]];//obtaining coordinates from loudspeaker i
+					l1 = m_array.m_position[i];
+
 			
 				rad = std::sqrt(std::pow((l1.x-x),2.0f) + std::pow((l1.y-y),2.0f) + std::pow((l1.z-z),2.0f));
 
