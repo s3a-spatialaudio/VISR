@@ -9,6 +9,7 @@
 #include <libril/constants.hpp>
 
 #include <libefl/aligned_array.hpp>
+#include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
 #include <cstddef> // for std::size_t
@@ -160,6 +161,41 @@ private:
    * The number of simultaneous audio channels.
    */
   std::size_t mNumberOfChannels;
+
+
+  /**
+   * The ring buffer.
+   */
+  efl::BasicMatrix< ril::SampleType > mRingBuffer;
+
+  /**
+   * The current write position in the ring buffer.
+   * @note This value is intentionally positive, because we use it for index calculations.
+   */
+  int mWriteIndex;
+
+  /**
+  * The total length of the ring buffer.
+  */
+  std::size_t mRingbufferLength;
+  /**
+  * The current gain value.
+  */
+  efl::BasicVector< ril::SampleType > mCurrentGains;
+  /**
+  * The current amount of delay.
+  */
+  efl::BasicVector< ril::SampleType > mCurrentDelays;
+  /**
+  * The future gain value.
+  */
+  efl::BasicVector< ril::SampleType > mNextGains;
+  /**
+  * The future amount of delay.
+  */
+  efl::BasicVector< ril::SampleType > mNextDelays;
+
+  float mSamplingFrequency;
 };
 
 } // namespace rcl

@@ -22,8 +22,11 @@
 
 int main( int argc, char const * const * argv )
 {
+	// For the moment, use a fixed UDP port for the tracker (Kinect)
+	std::size_t kinectPort = 8888;
+
   using namespace visr;
-  using namespace visr::apps::baseline_renderer;
+  using namespace visr::apps::baseline_renderer_tracking;
 
   try
   {
@@ -42,7 +45,7 @@ int main( int argc, char const * const * argv )
         return EXIT_SUCCESS;
       case Options::ParseResult::Version:
         // TODO: Implement retrieval of version information.
-        std::cout << "VISR S3A Baseline Renderer V0.1b" << std::endl;
+        std::cout << "VISR S3A Baseline Renderer w. Tracking V0.1b" << std::endl;
         return EXIT_SUCCESS;
       case Options::ParseResult::Success:
         break; // carry on
@@ -130,7 +133,7 @@ int main( int argc, char const * const * argv )
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
                      outputRouting,
                      cInterpolationLength,
-                     arrayConfigFile.string().c_str(), sceneReceiverPort,
+					 arrayConfigFile.string().c_str(), sceneReceiverPort, kinectPort,
                      periodSize, samplingRate );
     flow.setup();
 
