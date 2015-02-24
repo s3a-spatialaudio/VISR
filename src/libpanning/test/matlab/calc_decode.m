@@ -12,7 +12,7 @@
 
 
 clear;
-addpath("arrays");
+addpath('arrays');
 
 N = 8; % maximum order of spherical harmonic used.
 nACN = (N+1)^2;  % ACN = Ambisonic Channel Numbering
@@ -40,9 +40,9 @@ while ~feof(fid)
     else
         if (val =='%')
              fgetl(fid);
-        endif
-    endif
-endwhile
+        end
+    end
+end
            
 fclose (fid);
 
@@ -101,11 +101,11 @@ fclose (fid);
 D * D' *(4*pi / nPW);
 
 % Harmonic function plot:
-onlypos = @(x) (sign(x)==1).*x +1;
+onlyplus = @(x) (sign(x)==1).*x +1;
 figure
-scatter3(X(:,1),X(:,2),X(:,3),onlypos(100*D(2,:)),'red')
+scatter3(X(:,1),X(:,2),X(:,3),onlyplus(100*D(2,:)),'red')
 hold on
-scatter3(X(:,1),X(:,2),X(:,3),onlypos(-100*D(2,:)),'blue')
+scatter3(X(:,1),X(:,2),X(:,3),onlyplus(-100*D(2,:)),'blue')
 hold off
 
 % Check figure plot axes orientation:
@@ -162,16 +162,16 @@ while ~feof(fid)
     else
         if (val =='%')
             fgetl(fid);
-        endif
-    endif
-endwhile
+        end
+    end
+end
 
 fclose (fid);
 
 figure
-scatter3(X(:,1),X(:,2),X(:,3),onlypos(10*S(2,:)),'red')
+scatter3(X(:,1),X(:,2),X(:,3),onlyplus(10*S(2,:)),'red')
 hold on
-scatter3(X(:,1),X(:,2),X(:,3),onlypos(-10*S(2,:)),'blue')
+scatter3(X(:,1),X(:,2),X(:,3),onlyplus(-10*S(2,:)),'blue')
 hold off
               
 
