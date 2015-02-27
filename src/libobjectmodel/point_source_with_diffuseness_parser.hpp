@@ -19,6 +19,8 @@ class PointSourceWithDiffusenessParser: public PointSourceParser
 {
 public:
   virtual void parse( boost::property_tree::ptree const & tree, Object & src ) const;
+
+  virtual void write( Object const & obj, boost::property_tree::ptree & tree ) const;
 };
 
 } // namespace objectmodel
