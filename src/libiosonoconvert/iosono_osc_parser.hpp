@@ -5,9 +5,17 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
 
-#include <oscpkt.hh>
+// _CRT_SECURE_NO_WARNINGS
+//#include <oscpkt.hh>
+
+namespace oscpkt
+{
+class PacketReader;
+class Message;
+}
 
 namespace visr
 {
@@ -27,6 +35,7 @@ public:
   /**
    * Default constructor. Initialises the OSC reader.
    */
+  IosonoOscParser();
 
   void parse( char const * oscMessageData, std::size_t size,
               objectmodel::ObjectVector & parsedObjects );
@@ -37,12 +46,18 @@ public:
     VerticalPan
   };
 
+  enum class SourceType
+  {
+    PointSource,
+    PlaneWave
+  };
+
   struct Packet
   {
   public:
     Protocol protocol;
     int32_t channelNumber;
-    int32_t algorithmHint;
+    SourceType sourceType;
     float sourceAzimuth;
     float sourceElevationOrHeightPanning;
     float sourceRadius;
@@ -53,12 +68,18 @@ public:
     int32_t sourceOnScreen;
     float sourceSpreading;
     int32_t sourceTraitFlags;
-
   };
 
 private:
-  oscpkt::PacketReader mOscParser;
+  std::unique_ptr<oscpkt::PacketReader> mOscParser;
 
+  /**
+   * Reads the next packet stored in the parser and stores it in the \p packet parameter.
+   * @param[out] packet The data structure to store the parse object into.
+   */
+  bool parseObjectMessage( oscpkt::Message const * msg, Packet& packet );
+
+  void writeToObjectVector( Packet const & packet, objectmodel::ObjectVector & objVec );
 };
 
 } // namespace convertiosono
