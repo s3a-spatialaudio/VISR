@@ -5,6 +5,9 @@
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
+# Support for conversion from the IOSONO scene protocol
+ADD_SUBDIRECTORY( libiosonoconvert )
+
 # Object model library.
 ADD_SUBDIRECTORY( libobjectmodel )
 
