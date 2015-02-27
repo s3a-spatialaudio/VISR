@@ -1,0 +1,15 @@
+/**
+ * @namespace visr
+ * Global namespace for the VISR project.
+ */
+namespace visr
+{
+/**
+ * @namespace visr::objectmodel
+ * The documentation for the namespace objectmodel.
+ * Detailed description follows here.
+ */
+namespace objectmodel
+{
+}
+}
