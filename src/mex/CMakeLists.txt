@@ -4,3 +4,4 @@
 ADD_SUBDIRECTORY( biquad_iir_filter )
 ADD_SUBDIRECTORY( feedthrough )
 ADD_SUBDIRECTORY( gain_matrix )
+ADD_SUBDIRECTORY( delay_vector )

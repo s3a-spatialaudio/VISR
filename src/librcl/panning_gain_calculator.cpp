@@ -11,6 +11,8 @@
 #include <libobjectmodel/point_source.hpp>
 #include <libobjectmodel/plane_wave.hpp>
 
+#include <libpml/listener_position.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include <ciso646>
@@ -104,6 +106,11 @@ void PanningGainCalculator::setListenerPosition( CoefficientType x, CoefficientT
   {
     throw std::invalid_argument( "PanningGainCalculator::setup(): Calculation of inverse matrices failed." );
   }
+}
+
+void PanningGainCalculator::setListenerPosition( pml::ListenerPosition const & pos )
+{
+  setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
 
 void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix )

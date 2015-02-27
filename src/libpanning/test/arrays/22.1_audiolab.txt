@@ -31,15 +31,15 @@ c 10 	19	2.17	1.36	0	% Front Centre Left
 c 11 	11	2.17	0	1.11	% Top Front Centre
 c 12 	13	1.77	-1.68	1.15	% Top Front Right 
 c 13	12	0	-1.7	1.09	% Top Side Right
-c 15	6	-1.68	-1.73	1.13	% Top Back Right
-c 16 	8	-2.1	0	1.13	% Top Back Centre
-c 17 	10	-1.68	1.76	1.13	% Top Back Left
-c 18	9	0.01	1.77	1.1	% Top Side Left
+c 14	6	-1.68	-1.73	1.13	% Top Back Right
+c 15 	8	-2.1	0	1.13	% Top Back Centre
+c 16 	10	-1.68	1.76	1.13	% Top Back Left
+c 17	9	0.01	1.77	1.1	% Top Side Left
 c 18 	2	1.73	1.72	1.14	% Top Front Left
 c 19 	3	0.01	0	1.06	% Top Centre	
 
 c 20 	31	2.14	0.04	-0.84	% Bottom Front Centre
-c 21	38	1.75	-1.68	-0.87	% Bottom Front Right
+c 21	37	1.75	-1.68	-0.87	% Bottom Front Right
 c 22  	29	1.78	1.73	-0.86	% Bottom Front Left
 
 
