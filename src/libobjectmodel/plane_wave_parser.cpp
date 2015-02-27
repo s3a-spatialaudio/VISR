@@ -34,5 +34,17 @@ parse( boost::property_tree::ptree const & tree, Object & obj ) const
   }
 }
 
+/*virtual*/ void PlaneWaveParser::
+write( Object const & obj, boost::property_tree::ptree & tree ) const
+{
+  // note: cannot check for object type id since obj might be a subclass of PointSource
+  PlaneWave const& pwObj = dynamic_cast<PlaneWave const&>(obj);
+
+  ObjectParser::write( obj, tree );
+  tree.put<Object::Coordinate>( "direction.az", pwObj.incidenceAzimuth() );
+  tree.put<Object::Coordinate>( "direction.el", pwObj.incidenceElevation() );
+  tree.put<Object::Coordinate>( "direction.refdist", pwObj.referenceDistance( ) );
+}
+
 } // namespace objectmodel
 } // namespace visr

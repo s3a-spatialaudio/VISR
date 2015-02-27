@@ -28,5 +28,12 @@ parse( boost::property_tree::ptree const & tree, Object & obj ) const
   }
 }
 
+/*virtual*/ void DiffuseSourceParser
+::write( Object const & obj, boost::property_tree::ptree & tree ) const
+{
+  ObjectParser::write( obj, tree );
+  // Nothing else to be done.
+}
+
 } // namespace objectmodel
 } // namespace visr
