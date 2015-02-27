@@ -48,9 +48,12 @@ int VBAP::calcInvMatrices(){
 
 int VBAP::calcGains(){
     
-    int i,j,l1,l2,l3;
+    int i,j,jmin,l1,l2,l3;
     Afloat *inv;
-    Afloat g1,g2,g3,g,x,y,z;
+    Afloat g1,g2,g3,g,gmin,x,y,z;
+    
+    //! Slow triplet search
+    // Find triplet with highest minimum-gain-in-triplet
     
     for(i = 0; i < m_nSources; i++) {
         
@@ -72,22 +75,39 @@ int VBAP::calcGains(){
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
-            if (g1 >= 0 && g2 >= 0 && g3 >= 0) { //! Slow triplet search
-                g = sqrt(g1*g1+g2*g2+g3*g3);
-                // g = g1+g2+g3; //! probably more appropriate.
-                g1 = g1 / g;
-                g2 = g2 / g;
-                g3 = g3 / g;
-                l1 = m_array->m_triplet[j][0];
-                l2 = m_array->m_triplet[j][1];
-                l3 = m_array->m_triplet[j][2];
-                m_gain[i][l1] += g1;
-                m_gain[i][l2] += g2;
-                m_gain[i][l3] += g3;
-                break; // One triplet is enough.
+            
+            if (g1 >= 0 && g2 >= 0 && g3 >= 0)
+            {
+                jmin = j;
+                break;  // Should only be one triplet with all positive gains.
             }
+        
+            // Update gmin if lowest gain in triplet is higher than gmin.
+            if ((g1 > gmin && g2 > gmin && g3 > gmin) || j == 0) {
+                jmin = j;
+                gmin = g1;
+                if (g2 < gmin) { gmin = g2; }
+                if (g3 < gmin) { gmin = g3; }
+            }
+            
         }
-
+        
+        // Remove -ve gain, moves image inside triplet.
+        if (g1 < 0) g1 = 0;
+        if (g2 < 0) g2 = 0;
+        if (g3 < 0) g3 = 0;
+        
+        g = sqrt(g1*g1+g2*g2+g3*g3);
+        // g = g1+g2+g3; //! probably more appropriate for low freq sounds / close speakers.
+        g1 = g1 / g;
+        g2 = g2 / g;
+        g3 = g3 / g;
+        l1 = m_array->m_triplet[jmin][0];
+        l2 = m_array->m_triplet[jmin][1];
+        l3 = m_array->m_triplet[jmin][2];
+        m_gain[i][l1] += g1;
+        m_gain[i][l2] += g2;
+        m_gain[i][l3] += g3;
         
     }
     return 0;

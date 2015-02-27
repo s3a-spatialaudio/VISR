@@ -32,6 +32,7 @@ int main(int argc, const char * argv[])
     // Useage / test VBAP with 8 sources around an octahedron array
     
     boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+//    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/cube_audiolab.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
@@ -41,7 +42,10 @@ int main(int argc, const char * argv[])
     vbap.setListenerPosition(0.0, 0.0, 0.0);
     vbap.calcInvMatrices();
     
-    vbap.setNumSources(10);
+//  vbap.setNumSources(1);
+//  sourcePos[0].set(1.78, 1.73, -0.86, false);
+
+    vbap.setNumSources(8);
     sourcePos[0].set(1.0, 1.0, 1.0, false);
     sourcePos[1].set(1.0, 0.0, 0.0, false);
     sourcePos[2].set(0.0, 1.0, 0.0, false);
