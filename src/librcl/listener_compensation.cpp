@@ -132,7 +132,7 @@ namespace visr
 
 				for (i = 0; i < m_array.m_nSpeakers; i++) {
 
-				m_DelayComp[i] = abs(m_DelayComp[i]-max_rad)/c_0*44100;
+				m_DelayComp[i] = abs(m_DelayComp[i]-max_rad)/c_0;
 				}
 
 				return 0;
