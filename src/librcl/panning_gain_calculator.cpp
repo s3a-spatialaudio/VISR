@@ -3,6 +3,8 @@
 #include "panning_gain_calculator.hpp"
 
 #include <libefl/basic_matrix.hpp>
+#include <libefl/cartesian_spherical_conversion.hpp>
+#include <libefl/degree_radian_conversion.hpp>
 #include <libefl/vector_functions.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
@@ -17,45 +19,13 @@
 
 #include <ciso646>
 #include <cstdio>
-#include <tuple>
 
 // for math utility functions (see implementations in the unnamed namespace below)
-#include <boost/math/constants/constants.hpp>
-#include <cmath>
 
 namespace visr
 {
 namespace rcl
 {
-
-namespace // unnamed namespace
-{
-/**
- * Collection of mathematic utility functions
- * @todo Consider moving to a common location (math utility library?).
- */
-//@{
-template< typename T >
-T degree2radian( T deg )
-{
-  return boost::math::constants::degree<T>() * deg;
-}
-
-template< typename T >
-T radian2degree( T rad )
-{
-  return boost::math::constants::radian<T>() * rad;
-}
-
-template< typename T >
-std::tuple< T, T, T > spherical2cartesian( T az, T el, T radius )
-{
-  return std::make_tuple( std::cos(az)*std::cos( el ) * radius,
-                          std::sin(az)*std::cos( el ) * radius,
-                          std::sin( el ) * radius );
-};
-//@}
-} // unnamed namespace
 
 PanningGainCalculator::PanningGainCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
@@ -164,9 +134,9 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       {
         objectmodel::PlaneWave const & planeSrc = dynamic_cast<objectmodel::PlaneWave const &>(obj);
         objectmodel::Object::Coordinate xPos, yPos, zPos;
-        std::tie( xPos, yPos, zPos ) = spherical2cartesian( degree2radian(planeSrc.incidenceAzimuth()),
-                                                            degree2radian(planeSrc.incidenceElevation()),
-                                                            1.0f);
+        std::tie( xPos, yPos, zPos ) = efl::spherical2cartesian( efl::degree2radian(planeSrc.incidenceAzimuth()),
+                                                                 efl::degree2radian(planeSrc.incidenceElevation()),
+                                                                 1.0f);
         mSourcePositions[ channelId ].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */);
         break;
       }
