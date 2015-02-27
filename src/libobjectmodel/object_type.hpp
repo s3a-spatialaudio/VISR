@@ -25,7 +25,10 @@ enum class ObjectTypeId: ObjectTypeIntegerRepresentation
 {
   PointSource = 0,   /**< Simple point-like source (monopole) */
   PlaneWave = 1,     /**< Straight plane-wave source type */
-  DiffuseSource = 2  /**< Totally diffuse source type */
+  DiffuseSource = 2,  /**< Totally diffuse source type */
+  PointSourceWithDiffuseness = 3, /**< Point-source-like audio object with an addditional "diffuseness" attribute 
+                                  controlling the fraction of the source that is reproduced diffusely.*/
+  ExtendedSource = 4 /**< Source type with controllable extent, i.e. width and height.*/
   // to be continued.
 };
 
