@@ -10,7 +10,9 @@
 #include <libobjectmodel/object_vector.hpp>
 // Note: At the moment, all supported source types are translated directly in this file
 // TODO: For the future, consider moving this to another location.
+#include <libobjectmodel/diffuse_source.hpp>
 #include <libobjectmodel/point_source.hpp>
+#include <libobjectmodel/point_source_with_diffuseness.hpp>
 #include <libobjectmodel/plane_wave.hpp>
 
 #include <libpml/listener_position.hpp>
@@ -118,33 +120,41 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       continue;
     }
 
+    mLevels[channelId] = obj.level( );
+
     objectmodel::ObjectTypeId const ti = obj.type();
 
     // For the moment, we treat the two supported source type here.
     // @todo find a proper abstraction to handle many source types.
     switch( ti )
     {
-      case objectmodel::ObjectTypeId::PointSource:
-      {
-        objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
-        mSourcePositions[ channelId ].set( pointSrc.x(), pointSrc.y(), pointSrc.z() );
-        break;
-      }
-      case objectmodel::ObjectTypeId::PlaneWave:
-      {
-        objectmodel::PlaneWave const & planeSrc = dynamic_cast<objectmodel::PlaneWave const &>(obj);
-        objectmodel::Object::Coordinate xPos, yPos, zPos;
-        std::tie( xPos, yPos, zPos ) = efl::spherical2cartesian( efl::degree2radian(planeSrc.incidenceAzimuth()),
-                                                                 efl::degree2radian(planeSrc.incidenceElevation()),
-                                                                 1.0f);
-        mSourcePositions[ channelId ].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */);
-        break;
-      }
-      default:
-        std::cerr << "PanningGainCalculator: Unsupported object type." << std::endl;
+    case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
+    {
+      objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
+      mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
+      // Fall through intentionally
     }
-    mLevels[ channelId ] = obj.level();
-
+    case objectmodel::ObjectTypeId::PointSource:
+    {
+      objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
+      mSourcePositions[channelId].set( pointSrc.x(), pointSrc.y(), pointSrc.z() );
+      break;
+    }
+    case objectmodel::ObjectTypeId::PlaneWave:
+    {
+      objectmodel::PlaneWave const & planeSrc = dynamic_cast<objectmodel::PlaneWave const &>(obj);
+      objectmodel::Object::Coordinate xPos, yPos, zPos;
+      std::tie( xPos, yPos, zPos ) = efl::spherical2cartesian( efl::degree2radian( planeSrc.incidenceAzimuth() ),
+                                                               efl::degree2radian( planeSrc.incidenceElevation() ),
+                                                               1.0f);
+      mSourcePositions[ channelId ].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */);
+      break;
+    }
+    default:
+      // Ignore unknown source types by setting them to a zero level).
+      // That means that the VBAP gains will be calculated for the default position, but zeroed afterwards.
+      mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
+    }
   } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   mVbapCalculator.setSourcePositions( &mSourcePositions );
   if( mVbapCalculator.calcGains() != 0 )
