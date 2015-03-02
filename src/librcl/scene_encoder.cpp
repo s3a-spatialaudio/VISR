@@ -29,21 +29,9 @@ void SceneEncoder::setup( )
 
 void SceneEncoder::process( objectmodel::ObjectVector const & objects, pml::MessageQueue<std::string> & messages )
 {
-#if 0
-  while( !messages.empty() )
-  {
-    std::string const & nextMsg = messages.nextElement();
-    try
-    {
-      objectmodel::ObjectVectorParser::updateObjectVector( nextMsg, objects );
-    }
-    catch( std::exception const & ex )
-    {
-      std::cerr << "SceneEncoder: Error while decoding a scene metadata message: " << ex.what() << std::endl;
-    }
-    messages.popNextElement();
-  }
-#endif
+  std::stringstream msg;
+  objectmodel::ObjectVectorParser::encodeObjectVector( objects, msg );
+  messages.enqueue( msg.str() );
 }
 
 } // namespace rcl
