@@ -37,7 +37,7 @@ UdpSender::~UdpSender()
   }
 }
 
-void UdpSender::setup(std::string const & receiverAddress, std::size_t receiverPort,
+void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress, std::size_t receiverPort,
                       UdpSender::Mode mode, boost::asio::io_service* externalIoService /*= nullptr*/ )
 {
   using boost::asio::ip::udp;
@@ -73,16 +73,15 @@ void UdpSender::setup(std::string const & receiverAddress, std::size_t receiverP
 
   udp::resolver resolver( *mIoService );
   udp::resolver::query query( udp::v4( ), receiverAddress, std::to_string(receiverPort) );
-  udp::endpoint resolvedEndpoint = *resolver.resolve( query );
+  mRemoteEndpoint = *resolver.resolve( query );
+  std::cout << "Remote endpoint: " << mRemoteEndpoint.address().to_string() << ":" << mRemoteEndpoint.port() << std::endl;
+  if( mRemoteEndpoint.port() != static_cast<unsigned short>(receiverPort) )
+  {
+    throw std::logic_error("");
+  }
 
-  mSocket.reset( new udp::socket( *mIoService, resolvedEndpoint ) );
-
-  //mSocket->async_send_to( boost::asio::buffer(mReceiveBuffer),
-  //                             mRemoteEndpoint,
-  //                             boost::bind(&UdpSender::handleSentData, this,
-  //                                          boost::asio::placeholders::error,
-  //                                          boost::asio::placeholders::bytes_transferred)
-                             //);
+  udp::endpoint localEndpoint( udp::v4( ), static_cast<unsigned short>(sendPort) );
+  mSocket.reset( new udp::socket( *mIoService, localEndpoint) );
 
   if(  mMode == Mode::Asynchronous )
   {
@@ -100,7 +99,11 @@ void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
     {
       std::string const & nextMsg = msgQueue.nextElement( );
       // boost::system::error_code err;
-      mSocket->send( boost::asio::buffer(nextMsg.c_str(), nextMsg.size()) );
+      std::size_t bytesSent = mSocket->send_to( boost::asio::buffer(nextMsg.c_str(), nextMsg.size()), mRemoteEndpoint );
+      if( bytesSent != nextMsg.size() )
+      {
+        throw std::runtime_error( "Number of sent bytes differs from message size." );
+      }
       msgQueue.popNextElement( );
     }
     break;
@@ -108,20 +111,21 @@ void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
   case Mode::ExternalServiceObject:
     {
       boost::lock_guard<boost::mutex> lock( mMutex );
-      bool const inTransmission = mInternalMessageBuffer->empty();
+      bool const transmissionPending = not mInternalMessageBuffer->empty();
       while( !msgQueue.empty() )
       {
         std::string const & nextMsg = msgQueue.nextElement();
         mInternalMessageBuffer->enqueue( nextMsg );
         msgQueue.popNextElement();
       }
-      if( not mInternalMessageBuffer->empty() and not inTransmission )
+      if( not mInternalMessageBuffer->empty() and not transmissionPending )
       {
         std::string const & nextMsg = mInternalMessageBuffer->nextElement( );
-        mSocket->async_send( boost::asio::buffer( nextMsg.c_str(), nextMsg.size() ),
-                             boost::bind( &UdpSender::handleSentData, this,
-                                          boost::asio::placeholders::error,
-                                          boost::asio::placeholders::bytes_transferred ) );
+        mSocket->async_send_to( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
+                                mRemoteEndpoint,
+                                boost::bind( &UdpSender::handleSentData, this,
+                                boost::asio::placeholders::error,
+                                boost::asio::placeholders::bytes_transferred ) );
       }
     }
   }
@@ -130,16 +134,26 @@ void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
 void UdpSender::handleSentData( const boost::system::error_code& error,
                                 std::size_t numBytesTransferred )
 {
+  if( error != boost::system::errc::success )
+  {
+    throw std::runtime_error( "UdpSender: Asynchronous send operation resulted in an error." );
+  }
   boost::lock_guard<boost::mutex> lock( mMutex );
   assert( not mInternalMessageBuffer->empty() );
+  std::string const & currMsg = mInternalMessageBuffer->nextElement();
+  if( currMsg.size() != numBytesTransferred )
+  {
+    throw std::runtime_error( "UdpSender: Asynchronous send operation transmitted less bytes than the message length." );
+  }
   mInternalMessageBuffer->popNextElement();
   if( not mInternalMessageBuffer->empty() )
   {
     std::string const & nextMsg = mInternalMessageBuffer->nextElement();
-    mSocket->async_send( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
-                         boost::bind( &UdpSender::handleSentData, this,
-                                      boost::asio::placeholders::error,
-                                      boost::asio::placeholders::bytes_transferred ) );
+    mSocket->async_send_to( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
+                            mRemoteEndpoint,
+                            boost::bind( &UdpSender::handleSentData, this,
+                                         boost::asio::placeholders::error,
+                                          boost::asio::placeholders::bytes_transferred ) );
   }
 }
 

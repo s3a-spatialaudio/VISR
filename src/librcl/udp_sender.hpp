@@ -29,19 +29,18 @@ namespace rcl
 {
 
 /**
- * A component to receive messages from a predefined UDP network port.
- * The message can operate either synchronously (messages are collected from the network socket when the process() method is called)
- * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
- * messages are transmitted further only when the process() method is called for the next time.
+ * A component to send messages over UDP.
+ * The message can operate either synchronously (messages are sent when the process() method is called)
+ * or asynchronously (the messages queued for sending and then send non-blocking in an extra thread.
  */
 class UdpSender: public ril::AudioComponent
 {
 public:
   enum class Mode
   {
-    Synchronous,
-    Asynchronous,
-    ExternalServiceObject /**< Don't know how to implement it at the moment. */
+    Synchronous, /**< The messages are sent within the process() call, blocking the call*/
+    Asynchronous, /**< The messages are stored in a queue, and send non-blocking, asynchronously when the network stack is ready. */
+    ExternalServiceObject /**< Same as asynchronous, but using a boost::asio::io_service object provided externally. */
   };
 
   static std::size_t const cMaxMessageLength = 8192;
@@ -60,23 +59,29 @@ public:
 
   /**
    * Method to initialise the component.
+   * @param sendPort
    * @param receiverAddress
    * @param receiverPort
    * @param mode
    * @param externalIoService
    */ 
-  void setup( std::string const & receiverAddress, std::size_t receiverPort,
+  void setup( std::size_t sendPort, std::string const & receiverAddress, std::size_t receiverPort,
               Mode mode, boost::asio::io_service* externalIoService = nullptr );
 
   /**
-   * The process function. 
+   * The process function.
+   * @param msgQueue A list of messages to be sent. The container is empty on return.
    */
   void process( pml::MessageQueue<std::string> & msgQueue);
 
-  void handleSentData( const boost::system::error_code& error,
-                          std::size_t numBytesTransferred );
-
 private:
+  /**
+   * Callback function triggered by the ASIO library.
+   * @throw std::runtime_error if \p error is set or the number of transferred bytes differs from the expected value.
+   */
+  void handleSentData( const boost::system::error_code& error,
+                       std::size_t numBytesTransferred );
+
   Mode mMode;
 
   /**
