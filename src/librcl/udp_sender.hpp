@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
-#define VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
+#ifndef VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
+#define VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
@@ -34,12 +34,12 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public ril::AudioComponent
+class UdpSender: public ril::AudioComponent
 {
 public:
   enum class Mode
   {
-    Synchronous, /**< The data is received from the UDP port within the */
+    Synchronous,
     Asynchronous,
     ExternalServiceObject /**< Don't know how to implement it at the moment. */
   };
@@ -51,56 +51,57 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpReceiver( ril::AudioSignalFlow& container, char const * name );
+  explicit UdpSender( ril::AudioSignalFlow& container, char const * name );
 
   /**
    * Destructor.
    */
-  ~UdpReceiver();
+  ~UdpSender();
 
   /**
    * Method to initialise the component.
-   * @param port
+   * @param receiverAddress
+   * @param receiverPort
    * @param mode
+   * @param externalIoService
    */ 
-  void setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService = nullptr );
+  void setup( std::string const & receiverAddress, std::size_t receiverPort,
+              Mode mode, boost::asio::io_service* externalIoService = nullptr );
 
   /**
    * The process function. 
    */
   void process( pml::MessageQueue<std::string> & msgQueue);
 
-  void handleReceiveData( const boost::system::error_code& error,
+  void handleSentData( const boost::system::error_code& error,
                           std::size_t numBytesTransferred );
 
 private:
-
   Mode mMode;
 
   /**
-   * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.
-   */
+  * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.
+  */
   boost::asio::io_service* mIoService;
 
   /**
-   * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
-   * but not for ExternalServiceObject.
-   */
+  * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
+  * but not for ExternalServiceObject.
+  */
   std::unique_ptr<boost::asio::io_service> mIoServiceInstance;
-
 
   std::unique_ptr<boost::asio::ip::udp::socket> mSocket;
 
   boost::asio::ip::udp::endpoint mRemoteEndpoint;
 
-  boost::array<char, cMaxMessageLength> mReceiveBuffer;
+//  boost::array<char, cMaxMessageLength> mSendBufferBuffer;
 
   std::unique_ptr<boost::asio::io_service::work> mIoServiceWork;
 
   /**
-   * Internal queue of messages received asynchronously. They will be copied into the output
-   *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
-   */
+  * Internal queue of messages received asynchronously. They will be copied into the output
+  *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
+  */
   std::unique_ptr< pml::MessageQueue< std::string > > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
@@ -111,4 +112,4 @@ private:
 } // namespace rcl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
