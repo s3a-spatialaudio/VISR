@@ -2,6 +2,9 @@
 
 #include "iosono_osc_parser.hpp"
 
+#include <libefl/cartesian_spherical_conversion.hpp>
+#include <libefl/degree_radian_conversion.hpp>
+
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/object_factory.hpp>
 
@@ -10,7 +13,7 @@
 #include <libobjectmodel/point_source_with_diffuseness.hpp>
 #include <libobjectmodel/plane_wave.hpp>
 
-// avoid annoying warning about unsafe standard library functions.
+// avoid annoying warning about unsafe standard library functions in oscpkt.hh.
 #ifdef _MSC_VER 
 #pragma warning(disable: 4996)
 #endif
@@ -24,83 +27,43 @@ namespace visr
 namespace convertiosono
 {
 
-  IosonoOscParser::IosonoOscParser()
-  : mOscParser( new oscpkt::PacketReader() )
-  {
-  }
-
-  void IosonoOscParser::parse( char const * oscMessageData,
-                                 std::size_t size,
-                                 objectmodel::ObjectVector & parsedObjects )
-  {
-    mOscParser->init( oscMessageData, size );
-
-    oscpkt::Message* msg;
-    while( (msg = mOscParser->popMessage()) != nullptr )
-    {
-      Packet currentPacket;
-        bool parseResult = parseObjectMessage( msg, currentPacket );
-        if( !parseResult )
-        {
-          continue;
-        }
-        Protocol pType;
-        if( msg->match( "/iosono/renderer/version1/src" ) )
-        {
-          pType = Protocol::ThreeD;
-        }
-        else if( msg->match( "/iosono/renderer/verticalpan/v1/src" ) )
-        {
-          pType = Protocol::VerticalPan;
-        }
-        else
-        {
-          std::cerr << "IosonoOscParser: Received non-matching OSC packet." << std::endl;
-          continue;
-        }
-        int32_t channelNumber;
-        int32_t algorithmHint;
-        float sourceAzimuth;
-        float sourceElevationOrHeightPanning;
-        float sourceRadius;
-        float sourceVolume;
-        float sourceLfeVolume;
-        float sourceDelay;
-        int32_t sourceScaling;
-        int32_t sourceOnScreen;
-        float sourceSpreading;
-        int32_t sourceTraitFlags;
-
-        bool const decodeResult = msg->arg()
-          .popInt32( channelNumber )
-          .popInt32( algorithmHint )
-          .popFloat( sourceAzimuth )
-          .popFloat( sourceElevationOrHeightPanning )
-          .popFloat( sourceRadius )
-          .popFloat( sourceVolume )
-          .popFloat( sourceLfeVolume )
-          .popFloat( sourceDelay )
-          .popInt32( sourceScaling )
-          .popInt32( sourceOnScreen )
-          .popFloat( sourceSpreading )
-          .popInt32( sourceTraitFlags )
-          .isOkNoMoreArgs();
-        if( !decodeResult )
-        {
-          std::cerr << "IosonoOscParser: Parsing of OSC packet failed." << std::endl;
-          continue;
-        }
-
-      }
-    }
-
-bool IosonoOscParser::parseObjectMessage( oscpkt::Message const * msg, Packet& packet )
+IosonoOscParser::IosonoOscParser()
+ : IosonoOscParser( 30.0f )
 {
-  if( msg->match( "/iosono/renderer/version1/src" ) )
+}
+
+IosonoOscParser::IosonoOscParser( float panningElevationDegree )
+ : mOscParser( new oscpkt::PacketReader() )
+ , cPanningElevation( efl::degree2radian( panningElevationDegree ) )
+{
+}
+
+void IosonoOscParser::parse( char const * oscMessageData,
+                             std::size_t size,
+                             objectmodel::ObjectVector & parsedObjects )
+{
+  mOscParser->init( oscMessageData, size );
+
+  oscpkt::Message* msg;
+  while( (msg = mOscParser->popMessage()) != nullptr )
+  {
+    Packet currentPacket;
+    bool parseResult = parseObjectMessage( *msg, currentPacket );
+    if( !parseResult )
+    {
+      continue;
+    }
+    writeToObjectVector( currentPacket, parsedObjects );
+  }
+}
+
+bool IosonoOscParser::parseObjectMessage( oscpkt::Message const & msg, Packet& packet )
+{
+  if( msg.match( "/iosono/renderer/version1/src" ) )
   {
     packet.protocol = Protocol::ThreeD;
   }
-  else if( msg->match( "/iosono/renderer/verticalpan/v1/src" ) )
+  else if( msg.match( "/iosono/renderer/verticalpan/v1/src" ) )
   {
     packet.protocol = Protocol::VerticalPan;
   }
@@ -110,7 +73,7 @@ bool IosonoOscParser::parseObjectMessage( oscpkt::Message const * msg, Packet& p
     return false;
   }
   int32_t algorithmHint;
-  if( !msg->arg()
+  if( !msg.arg()
     .popInt32( packet.channelNumber )
     .popInt32( algorithmHint )
     .popFloat( packet.sourceAzimuth )
@@ -143,7 +106,7 @@ void IosonoOscParser::writeToObjectVector( Packet const & packet, objectmodel::O
   // diffuse source or diffuse pount source if the source spread is > 0.0
   if( packet.sourceSpreading >= 0.0f )
   {
-    if( packet.sourceSpreading == 1.0f )
+    if( packet.sourceSpreading >= 100.0f )
     {
       typeId = ObjectTypeId::DiffuseSource;
     }
@@ -175,13 +138,44 @@ void IosonoOscParser::writeToObjectVector( Packet const & packet, objectmodel::O
  
   switch( typeId )
   {
+  case ObjectTypeId::PointSourceWithDiffuseness:
+  {
+    PointSourceWithDiffuseness & psdObj = dynamic_cast<PointSourceWithDiffuseness &>(*newObj);
+    psdObj.setDiffuseness( 1.0f * static_cast<Object::Coordinate>(packet.sourceSpreading) );
+
+    // fall through intentionally
+  }
   case ObjectTypeId::PointSource:
   {
     PointSource & psObj = dynamic_cast<PointSource &>(*newObj);
+
+    Object::Coordinate const el = packet.protocol == Protocol::ThreeD
+      ? packet.sourceElevationOrHeightPanning
+      // In 'height panning mode', determine the object elevation by scaling the fixed elevation of the 
+      // elevated loudspeaker ring with the transmitted panning factor.
+      : packet.sourceElevationOrHeightPanning * cPanningElevation;
+    Object::Coordinate x, y, z;
+
+    std::tie( x, y, z ) = efl::spherical2cartesian( packet.sourceAzimuth, el,
+                                                    packet.sourceRadius );
+    psObj.setX( x );
+    psObj.setX( y );
+    psObj.setZ( z );
+  }
+  case ObjectTypeId::PlaneWave:
+  {
+    PlaneWave & pwObj = dynamic_cast<PlaneWave &>(*newObj);
+    pwObj.setIncidenceAzimuth( efl::radian2degree( packet.sourceAzimuth ) );
+    Object::Coordinate const el = packet.protocol == Protocol::ThreeD
+      ? packet.sourceElevationOrHeightPanning
+      // In 'height panning mode', determine the object elevation by scaling the fixed elevation of the 
+      // elevated loudspeaker ring with the transmitted panning factor.
+      : packet.sourceElevationOrHeightPanning * cPanningElevation;
+    pwObj.setIncidenceElevation( efl::radian2degree( el ) );
     break;
   }
-  default:
-    throw std::logic_error( "IosonoOscParser: Unknown source type set.");
+  //default:
+  //  throw std::logic_error( "IosonoOscParser: Unknown source type set.");
   }
 
   objVec.set( id, *newObj );
