@@ -29,6 +29,9 @@ public:
   static void updateObjectVector( std::basic_istream<char> & message, ObjectVector & res );
 
   static void updateObjectVector( char const * message, ObjectVector & res );
+
+  static void encodeObjectVector( ObjectVector const & objects,
+                                  std::basic_ostream<char> & message );
 private:
 
   /**
