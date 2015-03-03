@@ -34,5 +34,17 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
   }
 }
 
+/*virtual*/ void PointSourceParser::
+write( Object const & obj, boost::property_tree::ptree & tree ) const
+{
+  // note: cannot check for object type id since obj might be a subclass of PointSource
+  PointSource const& psObj = dynamic_cast<PointSource const&>(obj);
+
+  ObjectParser::write( obj, tree );
+  tree.put<PointSource::Coordinate>( "position.x", psObj.x() );
+  tree.put<PointSource::Coordinate>( "position.y", psObj.y() );
+  tree.put<PointSource::Coordinate>( "position.z", psObj.z() );
+}
+
 } // namespace objectmodel
 } // namespace visr
