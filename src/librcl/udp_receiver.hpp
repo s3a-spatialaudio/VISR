@@ -70,11 +70,10 @@ public:
    */
   void process( pml::MessageQueue<std::string> & msgQueue);
 
+private:
   void handleReceiveData( const boost::system::error_code& error,
                           std::size_t numBytesTransferred );
-
-private:
-
+  
   Mode mMode;
 
   /**
