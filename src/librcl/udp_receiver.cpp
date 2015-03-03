@@ -5,7 +5,6 @@
 #include <libpml/message_queue.hpp>
 
 #include <boost/asio/placeholders.hpp>
-//#include <boost/asio.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/lock_types.hpp>
 
