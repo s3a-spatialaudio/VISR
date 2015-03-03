@@ -19,6 +19,7 @@
 #endif
 #include <oscpkt.hh>
 
+#include <ciso646>
 #include <cstdint>
 #include <iostream>
 
@@ -38,6 +39,10 @@ IosonoOscParser::IosonoOscParser( float panningElevationDegree )
 {
 }
 
+IosonoOscParser::~IosonoOscParser()
+{
+}
+  
 void IosonoOscParser::parse( char const * oscMessageData,
                              std::size_t size,
                              objectmodel::ObjectVector & parsedObjects )
@@ -91,7 +96,7 @@ bool IosonoOscParser::parseObjectMessage( oscpkt::Message const & msg, Packet& p
     std::cerr << "IosonoOscParser: Parsing of OSC packet failed." << std::endl;
     return false;
   }
-  bool const isPW = ((algorithmHint && (1 << 0)) != 0);
+  bool const isPW = ((algorithmHint bitand (1 << 0)) != 0);
   packet.sourceType = isPW ? SourceType::PlaneWave : SourceType::PointSource;
   return true;
 }
@@ -115,12 +120,13 @@ void IosonoOscParser::writeToObjectVector( Packet const & packet, objectmodel::O
       typeId = ObjectTypeId::PointSourceWithDiffuseness;
     }
   }
-  else if( packet.sourceType == SourceType::PlaneWave )
+  else
   {
     typeId = packet.sourceType == SourceType::PlaneWave
      ? ObjectTypeId::PlaneWave
      : ObjectTypeId::PointSource;
   }
+
   std::unique_ptr<Object> newObj = ObjectFactory::create( typeId );
 
   if( packet.channelNumber < 0 )
@@ -174,8 +180,8 @@ void IosonoOscParser::writeToObjectVector( Packet const & packet, objectmodel::O
     pwObj.setIncidenceElevation( efl::radian2degree( el ) );
     break;
   }
-  //default:
-  //  throw std::logic_error( "IosonoOscParser: Unknown source type set.");
+  default:
+    assert( "IosonoOscParser: Unknown source type set.");
   }
 
   objVec.set( id, *newObj );

@@ -48,6 +48,9 @@ public:
    * the elevation panning ratio.
    */
   explicit IosonoOscParser( float panningElevationDegree );
+  
+  ~IosonoOscParser();
+  
 
   void parse( char const * oscMessageData, std::size_t size,
               objectmodel::ObjectVector & parsedObjects );
