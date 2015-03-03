@@ -73,9 +73,16 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 # Otherwise (in particular for Windows platforms), an environment variable
 # BOOST_ROOT should hold the path to the boost root directory.
 
+OPTION( Boost_USE_STATIC_LIBS OFF )
+
 # For the moment, we support only dynamic linking of boost.
 # In this case, this line is required on Windows to prevent undefined symbols from boost::program_options
-ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
+
+IF( NOT Boost_USE_STATIC_LIBS )
+  ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
+ELSE( NOT Boost_USE_STATIC_LIBS )
+  SET( Boost_USE_MULTITHREADED OFF )
+ENDIF( NOT Boost_USE_STATIC_LIBS )
 
 # Avoid problems with the auto-link feature on Windows platforms
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
