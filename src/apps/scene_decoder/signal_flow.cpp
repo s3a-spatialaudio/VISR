@@ -43,6 +43,8 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
+ , mSceneEncoder( *this, "SceneEncoder" )
+ , mSceneSender( *this, "SceneSender" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mMatrix( *this, "GainMatrix" )
 {
@@ -60,6 +62,8 @@ SignalFlow::process()
   mGainCalculator.process( mObjectVector, mGainParameters );
   mMatrix.setGains( mGainParameters );
   mMatrix.process();
+  mSceneEncoder.process( mObjectVector, mResendMessages );
+  mSceneSender.process( mResendMessages );
 }
 
 /*virtual*/ void
@@ -67,10 +71,13 @@ SignalFlow::setup()
 {
   // Initialise and configure audio components
 
-  mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
+  mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous );
   mSceneDecoder.setup();
   mGainCalculator.setup( cNumberOfInputs, cNumberOfOutputs, mConfigFileName );
   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
+
+  mSceneEncoder.setup();
+  mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
 
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 

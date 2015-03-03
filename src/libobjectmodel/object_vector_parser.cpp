@@ -13,6 +13,7 @@
 
 #include <ciso646>
 #include <memory>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -116,6 +117,26 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
   objParser.parse( subtree, *newObj );
 
   res.set( newObj->id(), *newObj );
+}
+
+/*static*/ void ObjectVectorParser::encodeObjectVector( ObjectVector const & objects,
+                                                        std::basic_ostream<char> & message )
+{
+  boost::property_tree::ptree vecTree;  // new empty tree;
+  boost::property_tree::ptree objListTree;
+  for( ObjectVector::const_iterator runIt( objects.begin()); runIt != objects.end(); ++runIt )
+  {
+    boost::property_tree::ptree objTree;
+    Object const & obj( *(runIt->second) );
+
+    // Create a parser for this type
+    ObjectParser const & objParser = ObjectFactory::parser( obj.type() );
+    objParser.write( obj, objTree );
+    objListTree.push_back( std::make_pair("",objTree) );
+  }
+  vecTree.put_child( "objects", objListTree );
+
+  boost::property_tree::write_json( message, vecTree, false /*no pretty priniting */ );
 }
 
 } // namespace objectmodel

@@ -4,7 +4,10 @@
 
 #include "alignment.hpp"
 
-#define _SCL_SECURE_NO_WARNINGS 1
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
 
 #include <algorithm>
 #include <ciso646> // should not be necessary for c++11, but MSVC needs it somehow

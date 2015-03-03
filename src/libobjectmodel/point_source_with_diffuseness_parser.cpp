@@ -21,7 +21,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     PointSourceWithDiffuseness & diffusePointSrc = dynamic_cast<PointSourceWithDiffuseness&>(src);
 
     // Parse all members inherited from the base class PointSource
-    this->PointSourceParser::parse( tree, diffusePointSrc );
+    PointSourceParser::parse( tree, diffusePointSrc );
 
     // parse point source-specific data members
     diffusePointSrc.setDiffuseness( tree.get<PointSource::Coordinate>( "diffuseness" ) );
@@ -31,6 +31,16 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
   {
     throw std::invalid_argument( std::string( "Error while parsing point source: object: ") + ex.what() );
   }
+}
+
+/*virtual*/ void PointSourceWithDiffusenessParser::
+write( Object const & obj, boost::property_tree::ptree & tree ) const
+{
+  // note: cannot check for object type id since obj might be a subclass of PointSource
+  PointSourceWithDiffuseness const& pswdObj = dynamic_cast<PointSourceWithDiffuseness const&>(obj);
+
+  ObjectParser::write( obj, tree );
+  tree.get<PointSource::Coordinate>( "diffuseness", pswdObj.diffuseness() );
 }
 
 } // namespace objectmodel
