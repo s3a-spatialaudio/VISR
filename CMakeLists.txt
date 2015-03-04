@@ -85,8 +85,6 @@ OPTION( Boost_USE_STATIC_LIBS OFF )
 
 IF( NOT Boost_USE_STATIC_LIBS )
   ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
-ELSE( NOT Boost_USE_STATIC_LIBS )
-  SET( Boost_USE_MULTITHREADED OFF )
 ENDIF( NOT Boost_USE_STATIC_LIBS )
 
 # Avoid problems with the auto-link feature on Windows platforms
