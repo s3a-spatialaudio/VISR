@@ -8,7 +8,7 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
 # The name of our top-level project.
-PROJECT( VISR CXX )
+PROJECT( VISR CXX C )
 
 # Add support for unit tests
 INCLUDE( CTest )
@@ -53,6 +53,11 @@ ENDIF( BUILD_MATLAB_EXTERNALS )
 
 ###########################################################
 # Support for 3rd-party libraries.
+
+# Threads are required wherever we link with boost_threads.
+# Note that the dependency is added automatically in most cases, so the 
+# omission will go unnoticed very often.
+FIND_PACKAGE(Threads REQUIRED)
 
 ## Portaudio
 
