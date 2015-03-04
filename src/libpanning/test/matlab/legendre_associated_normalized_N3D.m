@@ -1,7 +1,7 @@
 function cx = legendre_associated_normalized_N3D ( n, m, x )
 
 %% LEGENDRE_ASSOCIATED: normalized associated Legendre functions.
-% !! SN3D version : <|> normalized to 4 pi
+% With normalization for N3D
 %
 %  Discussion:
 %
@@ -100,10 +100,11 @@ function cx = legendre_associated_normalized_N3D ( n, m, x )
               / (     i - m     );
   end
 %
-%  Normalization.
+%  Normalization for N3D. (not including 2-delta(0,n)factor ).
 %
   for mm = m : n
     factor = sqrt ( ( ( 2 * mm + 1 ) * d_factorial ( mm - m ) ) ...
       / ( d_factorial ( mm + m ) ) );
+    factor = factor / sqrt(4*pi) * (-1)^m; % normalize for Y.Y = delta  ,   remove Condon-Shortley
     cx(mm+1) = cx(mm+1) * factor;
   end
