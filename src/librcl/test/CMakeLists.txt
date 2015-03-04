@@ -7,13 +7,11 @@ ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp test_kinect_receiver.cpp )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl panning ril objectmodel pml efl)
-# Dirty hack to enforce linking of -lpthread on Linux if Boost is linked statically.
-# (PortAudio adds a dependency to -lpthread)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${PORTAUDIO_LIBRARIES} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_THREAD_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)
