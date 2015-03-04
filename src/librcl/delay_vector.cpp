@@ -7,6 +7,14 @@
 #include <ciso646>
 #include <cmath>
 
+// #define DEBUG_DELAY_VECTOR 1
+
+#ifdef DEBUG_DELAY_VECTOR
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#endif
+
 namespace visr
 {
 namespace rcl
@@ -70,8 +78,6 @@ void DelayVector::setup( std::size_t numberOfChannels,
 	 {
 		 throw std::runtime_error("Error initialising the current gains");
 	 }
-
-#if 1
 	 if (efl::vectorCopy(mCurrentGains.data(), mNextGains.data(), numberOfChannels) != efl::noError)
 	 {
 		 throw std::runtime_error("Error initialising the current gains");
@@ -80,7 +86,6 @@ void DelayVector::setup( std::size_t numberOfChannels,
 	 {
 		 throw std::runtime_error("Error initialising the current gains");
 	 }
-#endif
  }
 
 void DelayVector::process()
@@ -142,6 +147,13 @@ void DelayVector::process()
 void DelayVector::setDelayAndGain( efl::BasicVector< SampleType > const & newDelays,
                                    efl::BasicVector< SampleType > const & newGains )
 {
+#ifdef DEBUG_DELAY_VECTOR
+  std::cout << "DelayVector Source Gain: ";
+  std::copy( newGains.data(), newGains.data()+mNumberOfChannels, std::ostream_iterator<float>(std::cout, " ") );
+  std::cout << "Delay [s]: ";
+  std::copy( newDelays.data(), newDelays.data()+mNumberOfChannels, std::ostream_iterator<float>(std::cout, " ") );
+  std::cout << std::endl;
+#endif // DEBUG_DELAY_VECTOR
 	setDelay(newDelays);
 	setGain(newGains);
 }
