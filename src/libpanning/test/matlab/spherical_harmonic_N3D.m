@@ -8,6 +8,8 @@ function [r] = spherical_harmonic_N3D ( l, m, theta, phi )
 %    The spherical harmonic function Y(L,M,THETA,PHI)(X) is the
 %    angular part of the solution to Laplace's equation in spherical
 %    coordinates.
+% THETA is angle from symmetry axis (z)
+% PHI is angle clockwise around axis
 %
 %    Y(L,M,THETA,PHI)(X) is related to the associated Legendre
 %    function as follows:
@@ -73,9 +75,9 @@ function [r] = spherical_harmonic_N3D ( l, m, theta, phi )
 
 
   if ( m > 0 )
-   r(1:l+1) = plm(1:l+1) * sqrt(2) * cos ( m * phi );
+   r(1:l+1) = plm(1:l+1) * sqrt(2) * cos ( m * phi );    % cos(m_abs * phi)
   elseif ( m < 0 )
-   r(1:l+1) = plm(1:l+1) * sqrt(2) * sin ( -m * phi );
+   r(1:l+1) = plm(1:l+1) * sqrt(2) * sin ( -m * phi );   % sin(m_abs * phi)
   else
    r(1:l+1) = plm(1:l+1);
   end

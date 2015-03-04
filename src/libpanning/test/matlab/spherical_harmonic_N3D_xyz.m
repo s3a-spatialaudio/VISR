@@ -87,24 +87,21 @@ z = z1;
 r = sqrt(x*x + y*y + z*z);
 
 m_abs = abs (m);
-plm(1:l+1) = legendre_associated_normalized_N3D ( l, m_abs, z ) / sqrt(4*pi);
+plm(1:l+1) = legendre_associated_normalized_N3D ( l, m_abs, z );
 
-r1  = sqrt(x*x + y*y);
+xy  = sqrt(x*x + y*y);
 
-if (r == 0)
+if (xy == 0)
   cm = 1;
   sm = 0;
 else
-  c  = x/r1;
-  s  = y/r1;
+  c  = x/xy;
+  s  = y/xy;
   csm  = (c+i*s)^m;
   cm = real(csm);
   sm = imag(csm);
 end
 
-
-
-% NB 
 
 if ( m > 0 )
   r(1:l+1) = plm(1:l+1) * sqrt(2) * cm;  %cos ( m * phi );
