@@ -20,6 +20,12 @@
 #include <iostream>
 #include <sstream>
 
+// avoid annoying warning about unsafe standard library functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
+
 int main( int argc, char const * const * argv )
 {
   using namespace visr;
@@ -56,7 +62,7 @@ int main( int argc, char const * const * argv )
       return EXIT_FAILURE;
     }
 
-    // Create an Loudspeak
+    // Create a loudspeaker array to retrieve the input and output channel numbers and to retrieve the channel routing.
     FILE * arrayConfigHandle = fopen( arrayConfigFile.string().c_str(), "r" );
     if( not arrayConfigHandle )
     {

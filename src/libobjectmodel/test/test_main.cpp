@@ -9,7 +9,11 @@
 
 #define BOOST_TEST_MODULE "ObjectModel"
 
+#ifdef BOOST_ALL_DYN_LINK
 #define BOOST_TEST_DYN_LINK
+#else
+#define BOOST_TEST_MAIN
+#endif 
 
 #include <boost/test/unit_test.hpp>
 

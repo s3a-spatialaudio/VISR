@@ -5,10 +5,10 @@
 #include <libpml/message_queue.hpp>
 
 #include <boost/asio/placeholders.hpp>
-//#include <boost/asio.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/lock_types.hpp>
 
+#include <ciso646>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -26,9 +26,9 @@ UdpReceiver::UdpReceiver( ril::AudioSignalFlow& container, char const * name )
 
 UdpReceiver::~UdpReceiver()
 {
-  if( mIoService.get() != nullptr )
+  if( mIoServiceInstance.get() != nullptr )
   {
-    mIoService->stop();
+    mIoServiceInstance->stop();
   }
   if( mServiceThread.get() != nullptr  )
   {
@@ -36,13 +36,30 @@ UdpReceiver::~UdpReceiver()
   }
 }
 
-void UdpReceiver::setup( std::size_t port, Mode mode )
+void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService /*= nullptr*/ )
 {
   using boost::asio::ip::udp;
-
   mMode = mode;
-  mIoService.reset( new boost::asio::io_service() );
-  if(  mMode == Mode::Synchronous )
+  if( mMode == Mode::ExternalServiceObject )
+  {
+    if( externalIoService == nullptr )
+    {
+      throw std::invalid_argument( "UdpReceiver: If mode == Mode::ExternalServiceObject, the \"externalServiceObject\" must not be zero." );
+    }
+    mIoServiceInstance.reset( );
+    mIoService = externalIoService;
+  }
+  else
+  {
+    if( externalIoService != nullptr )
+    {
+      throw std::invalid_argument( "UdpReceiver: A non-null externalIoService parameter must be given only if mode == Mode::ExternalServiceObject" );
+    }
+    mIoServiceInstance.reset( new boost::asio::io_service( ) );
+    mIoService = mIoServiceInstance.get();
+  }
+
+  if( (mMode == Mode::Synchronous) or (mMode == Mode::ExternalServiceObject) )
   {
     mIoServiceWork.reset();
   }
@@ -51,7 +68,7 @@ void UdpReceiver::setup( std::size_t port, Mode mode )
     mIoServiceWork.reset( new  boost::asio::io_service::work( *mIoService) );
   }
   mInternalMessageBuffer.reset( new pml::MessageQueue< std::string >() ) ;
-  mSocket.reset( new udp::socket( *mIoService,  udp::endpoint(udp::v4(), port )) );
+  mSocket.reset( new udp::socket( *mIoService,  udp::endpoint(udp::v4(), static_cast<unsigned short>(port) )) );
 
   mSocket->async_receive_from( boost::asio::buffer(mReceiveBuffer),
                                mRemoteEndpoint,
@@ -59,10 +76,9 @@ void UdpReceiver::setup( std::size_t port, Mode mode )
                                             boost::asio::placeholders::error,
                                             boost::asio::placeholders::bytes_transferred)
                              );
-
   if(  mMode == Mode::Asynchronous )
   {
-    mServiceThread.reset( new boost::thread( boost::bind( &boost::asio::io_service::run, mIoService.get() ) ));
+    mServiceThread.reset( new boost::thread( boost::bind( &boost::asio::io_service::run, mIoService ) ));
   }
 }
 
