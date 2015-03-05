@@ -22,8 +22,8 @@ int main( int argc, char const * const * argv )
     = efl::DenormalisedNumbers::setDenormHandling();
 
   // define fixed parameters for rendering
-  const std::size_t numberOfObjects = 64;
-  const std::size_t numberOfLoudspeakers = 6;
+  const std::size_t numberOfObjects = 2;
+  const std::size_t numberOfLoudspeakers = 2;
   const std::size_t periodSize = 1024;
   const std::size_t samplingRate = 48000;
 
@@ -36,10 +36,10 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mSampleRate = samplingRate;
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = "JACK";
+    interfaceConfig.mHostApi = "default";
 
-    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
-    boost::filesystem::path const configFile( "octahedron.txt" );
+    boost::filesystem::path const decoderDir( CMAKE_SOURCE_DIR );
+    boost::filesystem::path const configFile( "src/libpanning/test/arrays/stereo_audiolab.txt" );
     boost::filesystem::path const fullPath = decoderDir / configFile;
     if( !exists( fullPath ) )
     {

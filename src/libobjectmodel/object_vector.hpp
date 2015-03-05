@@ -131,6 +131,18 @@ public:
    * @param obj The object to be inserted (copied).
    */
   void set( ObjectId id, Object &&  obj );
+  
+  /**
+   * Erase an object with a given object id from the vector.
+   * @param id The id of the object to be deleted.
+   * @throw std::invalid_argument if no object with the given id exists.
+   */
+  void remove( ObjectId id );
+  
+  /**
+   * Erase all contained elements.
+   */
+  void clear();
 
 private:
   ObjectContainer mObjects;
