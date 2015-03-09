@@ -65,16 +65,15 @@ public:
    * The process function. 
    * It takes a vector of objects as input and calculates a vector of output gains. This variant is to enable the use of a GainMatrix component.
    * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
-   * @ param[out] The vector of diffusion gains for the audio channels. Must be a BasicMatrix with dimension 1 x numberOfChannelObjects.
+   * @ param[out] gainMatrix The vector of diffusion gains for the audio channels. Must be a BasicMatrix with dimension 1 x numberOfChannelObjects.
    */
   void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
 
   /**
-  /**
   * The process function.
   * It takes a vector of objects as input and calculates a vector of output gains.
   * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
-  * @ param[out] The vector of diffusion gains for the audio channels. Must be a vector of size numberOfChannelObjects.
+  * @ param[out] gainVector The vector of diffusion gains for the audio channels. Must be a vector of size numberOfChannelObjects.
   */
   void process( objectmodel::ObjectVector const & objects, efl::BasicVector<CoefficientType> & gainVector );
 
