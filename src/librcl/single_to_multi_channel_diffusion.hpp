@@ -37,7 +37,7 @@ public:
   /**
    * Setup method to initialise the object and set the parameters.
    * @param numberOfOutputs The number of signals in the output signal.
-   * @param gainAdjustment A vector of gains (linear scale) for the individual output channels. Must contain \p numberOfOutputs elements.
+   * @param gainAdjustments A vector of gains (linear scale) for the individual output channels. Must contain \p numberOfOutputs elements.
    * @todo Add and document any additional parameters needed by the diffusion algorithm.
    */
   void setup( std::size_t numberOfOutputs,
