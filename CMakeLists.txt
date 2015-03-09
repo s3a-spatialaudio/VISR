@@ -91,7 +91,7 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES filesystem program_options system thread unit_test_framework )
+SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
