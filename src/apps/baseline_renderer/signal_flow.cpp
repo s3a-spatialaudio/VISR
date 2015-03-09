@@ -49,8 +49,13 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mSceneDecoder( *this, "SceneDecoder" )
  , mOutputRouting( *this, "OutputSignalRouting" )
  , mGainCalculator( *this, "VbapGainCalculator" )
+ , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
  , mMatrix( *this, "GainMatrix" )
-{
+ , mDiffusePartMatrix( *this, "DiffusePartMatrix" )
+ , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
+ , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
+ , mDiffuseGains( ril::cVectorAlignmentSamples )
+ {
 }
 
 SignalFlow::~SignalFlow( )
@@ -63,8 +68,13 @@ SignalFlow::process()
   mSceneReceiver.process( mSceneMessages );
   mSceneDecoder.process( mSceneMessages, mObjectVector );
   mGainCalculator.process( mObjectVector, mGainParameters );
+  mDiffusionGainCalculator.process( mObjectVector, mDiffuseGains );
   mMatrix.setGains( mGainParameters );
   mMatrix.process();
+  mDiffusePartMatrix.setGains( mDiffuseGains );
+  mDiffusePartMatrix.process();
+  mDiffusePartDecorrelator.process();
+  mDirectDiffuseMix.process();
   mOutputRouting.process();
 }
 
@@ -77,24 +87,51 @@ SignalFlow::setup()
   mSceneDecoder.setup();
   mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, mConfigFileName );
   mMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
+
+  mDiffusionGainCalculator.setup( cNumberOfLoudspeakers );
+  mDiffusePartMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
+  mDiffusePartDecorrelator.setup( cNumberOfOutputs, 0.25f /* initial gain adjustment*/ );
+  mDirectDiffuseMix.setup( cNumberOfLoudspeakers, 2);
+
   mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
 
-  initCommArea( cNumberOfInputs + cNumberOfLoudspeakers + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
+  // Assignment of channel buffers                    #elements               Range
+  // capture -> mMatrix, capture->mDiffusePartMatrix  cNumberOfInputs         0..cNumberOfInputs - 1
+  // mMatrix -> mMixDirectDiffuse                     cNumberOfLoudspeakers   cNumberOfInputs..cNumberOfInputs+cNumberOfLoudspeakers-1
+  // mDirectDiffuseMix -> mOutputRouting              cNumberOfLoudspeakers   cNumberOfInputs+cNumberOfLoudspeakers..cNumberOfInputs+2*cNumberOfLoudspeakers-1
+  // mOutputRouting -> playback                       cNumberOfOutputs        cNumberOfInputs+2*cNumberOfLoudspeakers..cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs-1
+  // mDiffusePartMatrix -> mDiffusePartDecorrelator   1                       cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs..cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs
+  // mDiffusePartDecorrelator->mDirectDiffuseMix      cNumberOfLoudspeakers   cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs+1..cNumberOfInputs+3*cNumberOfLoudspeakers+cNumberOfOutputs
+
+  initCommArea( cNumberOfInputs + 3* cNumberOfLoudspeakers + cNumberOfOutputs + 1, period( ), ril::cVectorAlignmentSamples );
 
   // connect the ports
   std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
-
+  std::size_t const matrixOutStartIdx = cNumberOfInputs;
+  std::vector<std::size_t> const matrixOutRange = indexRange( matrixOutStartIdx, matrixOutStartIdx + cNumberOfLoudspeakers - 1 );
+  std::size_t const mixOutStartIdx = matrixOutStartIdx + cNumberOfLoudspeakers;
+  std::vector<std::size_t> const mixOutRange = indexRange( mixOutStartIdx, mixOutStartIdx + cNumberOfLoudspeakers - 1 );
+  std::size_t const routingOutStartIdx = mixOutStartIdx + cNumberOfLoudspeakers;
+  std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + cNumberOfOutputs - 1 );
+  std::size_t const diffuseMixerStartIdx = routingOutStartIdx + cNumberOfOutputs;
+  std::vector<std::size_t> const diffuseMixOutRange = indexRange( diffuseMixerStartIdx, diffuseMixerStartIdx );
+  std::size_t const decorrelatorStartIdx = diffuseMixerStartIdx + 1;
+  std::vector<std::size_t> const decorrelatorOutRange = indexRange( decorrelatorStartIdx, decorrelatorStartIdx + cNumberOfLoudspeakers - 1);
 
   assignCommunicationIndices( "GainMatrix", "in", captureIndices );
-
-  std::size_t matrixOutStartIdx = cNumberOfInputs;
-  std::vector<std::size_t> const matrixOutRange = indexRange( matrixOutStartIdx, matrixOutStartIdx + cNumberOfLoudspeakers - 1 );
   assignCommunicationIndices( "GainMatrix", "out", matrixOutRange );
-  assignCommunicationIndices( "OutputSignalRouting", "in", matrixOutRange );
-
-  std::size_t routingOutStartIdx = matrixOutStartIdx + cNumberOfLoudspeakers;
-  std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + cNumberOfOutputs - 1 );
+  assignCommunicationIndices( "DirectDiffuseMixer", "in1", matrixOutRange );
+  assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutRange );
+  assignCommunicationIndices( "OutputSignalRouting", "in", mixOutRange );
   assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
+
+  assignCommunicationIndices( "DiffusePartMatrix", "in", captureIndices );
+  assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixOutRange );
+  assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixOutRange );
+  assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutRange );
+  assignCommunicationIndices( "DirectDDiffuseMixer", "in2", decorrelatorOutRange );
+
+
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size() );
   assignPlaybackIndices( &routingOutRange[0], routingOutRange.size() );
