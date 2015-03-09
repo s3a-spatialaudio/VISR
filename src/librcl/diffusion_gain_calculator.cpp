@@ -37,7 +37,7 @@ void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
 
 void DiffusionGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainVector )
 {
-  if( (gainVector.numberOfRows() != mNumberOfObjectChannels) or( gainVector.numberOfColumns() != 1 ) )
+  if( (gainVector.numberOfRows() != 1 ) or( gainVector.numberOfColumns() != mNumberOfObjectChannels ) )
   {
     throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a 1 x numberOfObjectChannels matrix." );
   }

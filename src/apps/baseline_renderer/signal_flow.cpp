@@ -88,9 +88,9 @@ SignalFlow::setup()
   mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, mConfigFileName );
   mMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
 
-  mDiffusionGainCalculator.setup( cNumberOfLoudspeakers );
-  mDiffusePartMatrix.setup( cNumberOfInputs, cNumberOfLoudspeakers, cInterpolationSteps, 0.0f );
-  mDiffusePartDecorrelator.setup( cNumberOfOutputs, 0.25f /* initial gain adjustment*/ );
+  mDiffusionGainCalculator.setup( cNumberOfInputs );
+  mDiffusePartMatrix.setup( cNumberOfInputs, 1, cInterpolationSteps, 0.0f );
+  mDiffusePartDecorrelator.setup( cNumberOfLoudspeakers, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( cNumberOfLoudspeakers, 2);
 
   mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
@@ -105,7 +105,7 @@ SignalFlow::setup()
 
   initCommArea( cNumberOfInputs + 3* cNumberOfLoudspeakers + cNumberOfOutputs + 1, period( ), ril::cVectorAlignmentSamples );
 
-  // connect the ports
+  // Create the index vectors for connecting the ports.
   std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
   std::size_t const matrixOutStartIdx = cNumberOfInputs;
   std::vector<std::size_t> const matrixOutRange = indexRange( matrixOutStartIdx, matrixOutStartIdx + cNumberOfLoudspeakers - 1 );
@@ -118,9 +118,10 @@ SignalFlow::setup()
   std::size_t const decorrelatorStartIdx = diffuseMixerStartIdx + 1;
   std::vector<std::size_t> const decorrelatorOutRange = indexRange( decorrelatorStartIdx, decorrelatorStartIdx + cNumberOfLoudspeakers - 1);
 
+  // Connect the ports
   assignCommunicationIndices( "GainMatrix", "in", captureIndices );
   assignCommunicationIndices( "GainMatrix", "out", matrixOutRange );
-  assignCommunicationIndices( "DirectDiffuseMixer", "in1", matrixOutRange );
+  assignCommunicationIndices( "DirectDiffuseMixer", "in0", matrixOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutRange );
   assignCommunicationIndices( "OutputSignalRouting", "in", mixOutRange );
   assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
@@ -129,7 +130,7 @@ SignalFlow::setup()
   assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixOutRange );
   assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixOutRange );
   assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutRange );
-  assignCommunicationIndices( "DirectDDiffuseMixer", "in2", decorrelatorOutRange );
+  assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutRange );
 
 
 
@@ -137,6 +138,8 @@ SignalFlow::setup()
   assignPlaybackIndices( &routingOutRange[0], routingOutRange.size() );
 
   mGainParameters.resize( cNumberOfLoudspeakers, cNumberOfInputs );
+
+  mDiffuseGains.resize( 1, cNumberOfInputs );
 
   // should not be done here, but in AudioSignalFlow where this method is called from.
   setInitialised( true );

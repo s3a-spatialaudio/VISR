@@ -50,6 +50,8 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
 
   efl::BasicVector<SampleType> gainVec( mNumberOfOutputs, 1 );
   gainVec.fillValue( globalGainAdjustment );
+
+  setup( numberOfOutputs, gainVec );
 }
 
 void SingleToMultichannelDiffusion::process()
