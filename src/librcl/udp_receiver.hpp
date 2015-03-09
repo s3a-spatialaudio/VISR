@@ -39,9 +39,12 @@ class UdpReceiver: public ril::AudioComponent
 public:
   enum class Mode
   {
-    Synchronous, /**< The data is received from the UDP port within the */
-    Asynchronous,
-    ExternalServiceObject /**< Don't know how to implement it at the moment. */
+    Synchronous, /**< The data is received from the UDP port within
+                  * the process() method. */
+    Asynchronous, /** Network data is received asynchronously within a
+                      thread. */
+    ExternalServiceObject /**< Network data is received
+ asynchronously using an externally provided (for instance application-global) boost asio IO service object. */
   };
 
   static std::size_t const cMaxMessageLength = 8192;
@@ -60,8 +63,11 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param port
-   * @param mode
+   * @param port The UDP port number to receive data.
+   * @param mode The mode how data is received. See documantation of
+   * enumeration Mode.
+   * @param externalIoService An externally provided IO service
+   * object. Must be non-zero if and only if mode == ExternalServiceObject
    */ 
   void setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService = nullptr );
 
