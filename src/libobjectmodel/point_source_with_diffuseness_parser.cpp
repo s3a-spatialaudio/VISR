@@ -39,8 +39,8 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   // note: cannot check for object type id since obj might be a subclass of PointSource
   PointSourceWithDiffuseness const& pswdObj = dynamic_cast<PointSourceWithDiffuseness const&>(obj);
 
-  ObjectParser::write( obj, tree );
-  tree.get<PointSource::Coordinate>( "diffuseness", pswdObj.diffuseness() );
+  PointSourceParser::write( obj, tree );
+  tree.put<PointSource::Coordinate>( "diffuseness", pswdObj.diffuseness() );
 }
 
 } // namespace objectmodel
