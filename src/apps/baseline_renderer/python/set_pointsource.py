@@ -47,8 +47,6 @@ level = float( args.level )
 
 diffuseness = float( args.diffuseness )
 
-print( "Diffuseness: %f" % diffuseness )
-
 if (diffuseness == 0.0):
   msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"point\", \"group\": %d, \"priority\": %d, \"level\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, posX, posY, posZ )
 else:
