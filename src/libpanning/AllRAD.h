@@ -4,8 +4,8 @@
 //  Calculate HOA decode matrix by feeding regular HOA decode to external VBAP of virtual louspeakers.
 //  Suitable for fast update for listener tracking.
 //
-//  Created by dylan on 12/12/2014.
-//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
+//  Created by Dylan Menzies on 12/12/2014.
+//  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
 #ifndef __S3A_renderer_dsp__AllRAD__

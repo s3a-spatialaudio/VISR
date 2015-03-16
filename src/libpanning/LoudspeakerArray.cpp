@@ -2,7 +2,7 @@
 //  LoudspeakerArray.cpp
 //
 //  Created by Dylan Menzies on 18/11/2014.
-//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
+//  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
 //#include <stdlib.h>
@@ -22,7 +22,7 @@ LoudspeakerArray::LoudspeakerArray()
 int LoudspeakerArray::load(FILE *file)
 {
     //system("pwd");
-    int n,i,err,chan;
+    int n,i,chan;
     char c;
     Afloat xy, x,y,z;
     Afloat az,el,r;
@@ -39,10 +39,12 @@ int LoudspeakerArray::load(FILE *file)
     if (file == 0) return -1;
 
     do {
-        n = fscanf(file, "%c",&c);
-        if( n != 1 ) {
-            return -1;
-        }
+        c = fgetc(file);
+//        fscanf(file, "%c",&c);
+//        n = fscanf(file, "%c",&c);
+//        if( n != 1 ) {
+//            return -1;        // not needed - /n is ignored
+//        }
         if (c == 'c') {        // cartesians
             n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z);
             if( n != 5 )
@@ -92,12 +94,10 @@ int LoudspeakerArray::load(FILE *file)
             m_isInfinite = true;
         }
         else if (c == '%') {    // comment
-            while(fgetc(file) != '\n');
+            while(fgetc(file) != '\n' && !feof(file) );
         }
-        
-        err = feof(file);
 
-    } while (!err && i <= MAX_NUM_SPEAKERS);
+    } while (!feof(file));
     
     m_nSpeakers = nSpk;
     m_nTriplets = nTri;

@@ -2,7 +2,7 @@
 //  VBAP.cpp
 //
 //  Created by Dylan Menzies on 10/11/2014.
-//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
+//  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
 #include "VBAP.h"
@@ -50,10 +50,12 @@ int VBAP::calcGains(){
     
     int i,j,jmin,l1,l2,l3;
     Afloat *inv;
-    Afloat g1,g2,g3,g,gmin,x,y,z;
+    Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
     
     //! Slow triplet search
-    // Find triplet with highest minimum-gain-in-triplet
+    // Find triplet with highest minimum-gain-in-triplet (may be negative)
+    
+    jmin = -1; // indicate currently no triplet candidate.
     
     for(i = 0; i < m_nSources; i++) {
         
@@ -76,38 +78,65 @@ int VBAP::calcGains(){
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
             
-            if (g1 >= 0 && g2 >= 0 && g3 >= 0)
+            if (g1 >= 0 && g2 >= 0 && (m_array->is2D() || g3 >= 0))
             {
                 jmin = j;
-                break;  // Should only be one triplet with all positive gains.
+                g1min = g1; g2min = g2; g3min = g3;
+                break;  // should only be at most one triplet with all positive gains.
             }
         
             // Update gmin if lowest gain in triplet is higher than gmin.
-            if ((g1 > gmin && g2 > gmin && g3 > gmin) || j == 0) {
+            // Triplet must have at most 1 -ve gain.
+            //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
+            //! better geometric solution needed.
+            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&
+                 ( (g1 > gmin && g2 > gmin && g3 > gmin) || jmin == -1 )
+            ) {
                 jmin = j;
+                g1min = g1; g2min = g2; g3min = g3;
                 gmin = g1;
                 if (g2 < gmin) { gmin = g2; }
                 if (g3 < gmin) { gmin = g3; }
             }
-            
         }
         
-        // Remove -ve gain, moves image inside triplet.
+        if (jmin == -1) return -1; // failure to find best triplet. No gains set. See //! above
+    
+        // gains of triplet with highest minimum-gain-in-triplet
+        g1 = g1min; g2 = g2min; g3 = g3min;
+        
+        
+        // in 2D case g3 != 0 when source is out of 2D plane.
+        // Normalization causes fade with distance from plane unless g3 set to 0 first.
+        //if (m_array->is2D()) g3 = 0;
+        
+        
+        // Normalization
+        g = sqrt(g1*g1+g2*g2+g3*g3);
+        // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
+        
+        g1 = g1 / g;
+        g2 = g2 / g;
+        g3 = g3 / g;
+        
+        
+        
+        // Remove -ve gain if present, moves image to edge of triplet.
+        // after normalization: gains fade with distance from boundary edge.
+        // before normalization: gain fixed whether on or off a boundary edge.
         if (g1 < 0) g1 = 0;
         if (g2 < 0) g2 = 0;
         if (g3 < 0) g3 = 0;
         
-        g = sqrt(g1*g1+g2*g2+g3*g3);
-        // g = g1+g2+g3; //! probably more appropriate for low freq sounds / close speakers.
-        g1 = g1 / g;
-        g2 = g2 / g;
-        g3 = g3 / g;
+
+        
+        
         l1 = m_array->m_triplet[jmin][0];
         l2 = m_array->m_triplet[jmin][1];
         l3 = m_array->m_triplet[jmin][2];
-        m_gain[i][l1] += g1;
-        m_gain[i][l2] += g2;
-        m_gain[i][l3] += g3;
+        m_gain[i][l1] = g1;
+        m_gain[i][l2] = g2;
+        if (!m_array->is2D()) m_gain[i][l3] = g3;     // otherwise overwrites in 2D case
         
     }
     return 0;

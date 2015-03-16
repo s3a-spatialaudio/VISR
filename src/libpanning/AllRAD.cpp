@@ -1,8 +1,8 @@
 //
 //  AllRAD.cpp
 //
-//  Created by dylan on 12/12/2014.
-//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
+//  Created by Dylan Menzies on 12/12/2014.
+//  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
 #include "AllRAD.h"

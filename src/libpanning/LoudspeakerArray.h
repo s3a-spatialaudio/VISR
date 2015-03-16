@@ -2,7 +2,7 @@
 //  LoudspeakerArray.h
 //
 //  Created by Dylan Menzies on 18/11/2014.
-//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
+//  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
 

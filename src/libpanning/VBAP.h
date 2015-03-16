@@ -2,7 +2,7 @@
 //  VBAP.h
 //
 //  Created by Dylan Menzies on 10/11/2014.
-//  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
+//  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
 #ifndef __S3A_renderer_dsp__VBAP__
