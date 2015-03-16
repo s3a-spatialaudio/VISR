@@ -1,11 +1,9 @@
 //
 //  main.cpp
-
 //
 //  Created by Dylan Menzies on 10/11/2014.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
-
 
 #include <libpanning/VBAP.h>
 #include <libpanning/AllRAD.h>
@@ -16,6 +14,8 @@
 
 int main(int argc, const char * argv[])
 {
+    
+
     LoudspeakerArray array, regArray;
     VBAP vbap;
     AllRAD allrad;
@@ -31,10 +31,13 @@ int main(int argc, const char * argv[])
     
     // Useage / test VBAP with 8 sources around an octahedron array
     
-    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+//    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/9.1_audiolab.txt");
 //    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/cube_audiolab.txt");
     file = fopen(bfile.string().c_str(),"r");
-    if (array.load(file) == -1) return -1;
+    if (array.load(file) == -1) {
+       return -1; 
+    }
     fclose( file );
     file = 0;
 
@@ -46,7 +49,9 @@ int main(int argc, const char * argv[])
 //  sourcePos[0].set(1.78, 1.73, -0.86, false);
 
     vbap.setNumSources(8);
-    sourcePos[0].set(1.0, 1.0, 1.0, false);
+//    sourcePos[0].set(1.0, 1.0, 1.0, false);
+// sourcePos[0].set(1.0,	0.3,	-0.2, false); // for 9.1_audiolab.txt jumps between triplet 11 and 10 as z reduced
+    sourcePos[0].set(0.0,	1.0,	-0.9, false);
     sourcePos[1].set(1.0, 0.0, 0.0, false);
     sourcePos[2].set(0.0, 1.0, 0.0, false);
     sourcePos[3].set(0.0, 0.0, 1.0, false);
@@ -80,12 +85,17 @@ int main(int argc, const char * argv[])
     sourcePos[1].set(0.0, 1.0, 0.0, false);
     sourcePos[2].set(-1.0, 0.0, 0.0, false);
     sourcePos[3].set(0.0, -1.0, 0.0, false);
+//    sourcePos[0].set(1.0, 0.0, -5.0, false);
+//    sourcePos[1].set(0.0, 1.0, -5.0, false);
+//    sourcePos[2].set(-1.0, 0.0, -5.0, false);
+//    sourcePos[3].set(0.0, -10.0, -50.0, false);
+
+
     vbap.setSourcePositions(&sourcePos);
     
     vbap.calcGains();
     
     vbapGains = vbap.getGains();   // Check in watch window
-    
     
     
     
