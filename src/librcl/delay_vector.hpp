@@ -28,11 +28,23 @@ namespace rcl
  * This class has one input port named "in" and one output port named "out".
  * The widths of the input and the output port are identical and is
  * set by the argument <b>numberOfChannels</b> in the setup() method.
+ * @todo Implement flexible transition length (at the moment, the block length is always used
+ * @todo general cleanup (including more comprehensive range checks for the delay)
  */
 class DelayVector: public ril::AudioComponent
 {
   using SampleType = ril::SampleType;
 public:
+  /**
+   * Enumeration to denote the type of fractional-delay filtering used.
+   * TODO: Add more methods as appropriate.
+   */
+  enum class InterpolationType
+  {
+    NearestSample, /**< Round the delay value to the next integer sample value (zero order interpolation) */
+    Linear         /**< Perform linear interpolation */
+  };
+
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
@@ -58,6 +70,7 @@ public:
   void setup( std::size_t numberOfChannels, 
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
+              InterpolationType interpolationMethod,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
   /**
@@ -78,6 +91,7 @@ public:
   void setup( std::size_t numberOfChannels,
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
+              InterpolationType interpolationMethod,
               efl::BasicVector< SampleType > const & initialDelaysSeconds,
               efl::BasicVector< SampleType > const & initialGainsLinear );
 
@@ -147,6 +161,39 @@ public:
   void setGain( efl::BasicVector< SampleType > const & newGains );
 
 private:
+  /**
+   * Internal implementation method to apply zero-order delay filtering (round to nearest sample)
+   * to a vector of samples.
+   * @param startDelay The delay (in samples) for the first sample.
+   * @param endDelay The delay (in samples) for the sample following the last in the buffer.
+   * @param startGain The delay (linear scale) for the first sample.
+   * @param endGain The gain (linear scale) for the sample following the last in the buffer.
+   * @param numberOfSamples the number of samples to be processed.
+   */
+  void delayNearestSample( SampleType startDelay, SampleType endDelay,
+                           SampleType startGain, SampleType endGain,
+                           SampleType const * ringBuffer,
+                           SampleType * output, std::size_t numberOfSamples );
+
+  /**
+   * Internal implementation method to apply first-order delay filtering (linear interpolation)
+   * to a vector of samples.
+   * @param startDelay The delay (in samples) for the first sample.
+   * @param endDelay The delay (in samples) for the sample following the last in the buffer.
+   * @param startGain The delay (linear scale) for the first sample.
+   * @param endGain The gain (linear scale) for the sample following the last in the buffer.
+   * @param numberOfSamples the number of samples to be processed.
+   */
+  void delayLinearInterpolation( SampleType startDelay, SampleType endDelay,
+                                 SampleType startGain, SampleType endGain,
+                                 SampleType const * ringBuffer,
+                                 SampleType * output, std::size_t numberOfSamples );
+
+  /**
+   * The delay filtering method to be applied.
+   */
+  InterpolationType mInterpolationMethod;
+
   /**
    * The audio input port for this component.
    */

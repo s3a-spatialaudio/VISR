@@ -5,10 +5,13 @@
 
 #include <libril/audio_signal_flow.hpp>
 
+#include <librcl/add.hpp>
+#include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
+#include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
 #include <libefl/basic_matrix.hpp>
@@ -68,13 +71,23 @@ private:
 
   rcl::PanningGainCalculator mGainCalculator;
 
+  rcl::DiffusionGainCalculator mDiffusionGainCalculator;
+
   rcl::GainMatrix mMatrix;
+
+  rcl::GainMatrix mDiffusePartMatrix;
+
+  rcl::SingleToMultichannelDiffusion mDiffusePartDecorrelator;
+
+  rcl::Add mDirectDiffuseMix;
 
   pml::MessageQueue<std::string> mSceneMessages;
 
   objectmodel::ObjectVector mObjectVector;
 
   efl::BasicMatrix<ril::SampleType> mGainParameters;
+
+  efl::BasicMatrix<ril::SampleType> mDiffuseGains;
 };
 
 } // namespace scene_decoder

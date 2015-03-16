@@ -99,9 +99,11 @@ SignalFlow::setup()
   mListenerCompensation.setup(cNumberOfLoudspeakers, cConfigFileName);
   ril::SampleType cMaxDelay = 1.0f; // maximum delay (in seconds)
   // We start with a initial gain of 0.0 to suppress transients on startup.
-  mSpeakerCompensation.setup(cNumberOfLoudspeakers, period(), cMaxDelay, 0.0f, 0.0f);
+  mSpeakerCompensation.setup(cNumberOfLoudspeakers, period(), cMaxDelay,
+                             rcl::DelayVector::InterpolationType::Linear,
+                             0.0f, 0.0f);
   mKinectReceiver.setup(cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous);
-  mPositionDecoder.setup(XYZ(-2.08f, 0.0f, 0.0f) );
+  mPositionDecoder.setup(XYZ(+2.08f, 0.0f, 0.0f) );
 
   initCommArea( cNumberOfInputs + 2*cNumberOfLoudspeakers + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 

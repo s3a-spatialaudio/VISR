@@ -783,6 +783,11 @@ INPUT_ENCODING         = UTF-8
 # *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf,
 # *.qsf, *.as and *.js.
 
+
+# <af> Removed Matlab M-files from list below: *.m \
+# <af> Removed Python files from list below:  *.py \
+
+
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -809,12 +814,10 @@ FILE_PATTERNS          = *.c \
                          *.php5 \
                          *.phtml \
                          *.inc \
-                         *.m \
                          *.markdown \
                          *.md \
                          *.mm \
                          *.dox \
-                         *.py \
                          *.f90 \
                          *.f \
                          *.for \

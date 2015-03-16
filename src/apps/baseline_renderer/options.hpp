@@ -106,7 +106,7 @@ inline void Options::registerPositionalOption( char const * optionName, int posi
   mPositionalDescription.add( optionName, position );
 }
 
-} // namespace scene_decoder
+} // namespace baseline_renderer
 } // namespace apps
 } // namespace visr
 

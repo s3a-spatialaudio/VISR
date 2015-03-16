@@ -57,5 +57,20 @@ void ObjectVector::set( ObjectId id, Object const &  obj )
   }
 }
 
+void ObjectVector::remove( ObjectId id )
+{
+  ObjectContainer::iterator findIt = mObjects.find( id );
+  if( findIt == mObjects.end() )
+  {
+    throw std::invalid_argument( "An audio object with this id does not exist." );
+  }
+  mObjects.erase( findIt );
+}
+  
+void ObjectVector::clear()
+{
+  mObjects.clear();
+}
+  
 } // namespace objectmodel
 } // namespace visr
