@@ -36,6 +36,7 @@ DelayVector::DelayVector( ril::AudioSignalFlow& container, char const * name )
 void DelayVector::setup( std::size_t numberOfChannels, 
                          std::size_t interpolationSteps,
                          SampleType maximumDelaySeconds,
+                         InterpolationType interpolationMethod,
                          SampleType initialDelaySeconds /* = static_cast<SampleType>(1.0) */,
                          SampleType initialGainLinear /* = static_cast<SampleType>(0.0) */ )
 {
@@ -44,104 +45,105 @@ void DelayVector::setup( std::size_t numberOfChannels,
 	efl::vectorFill(initialDelaySeconds, delayVector.data(), numberOfChannels, ril::cVectorAlignmentSamples);
 	efl::vectorFill(initialGainLinear, gainVector.data(), numberOfChannels, ril::cVectorAlignmentSamples);
 
-	setup( numberOfChannels, interpolationSteps, maximumDelaySeconds, delayVector, gainVector );
+  setup( numberOfChannels, interpolationSteps, maximumDelaySeconds, interpolationMethod,
+         delayVector, gainVector );
 }
 
  void DelayVector::setup( std::size_t numberOfChannels,
                           std::size_t interpolationSteps,
                           SampleType maximumDelaySeconds,
+                          InterpolationType interpolationMethod,
                           efl::BasicVector< SampleType > const & initialDelaysSeconds,
                           efl::BasicVector< SampleType > const & initialGainsLinear )
 {
-	 mNumberOfChannels = numberOfChannels;
-	 mInput.setWidth(numberOfChannels);
-	 mOutput.setWidth(numberOfChannels);
+  mInterpolationMethod = interpolationMethod;
+  mNumberOfChannels = numberOfChannels;
+  mInput.setWidth(numberOfChannels);
+  mOutput.setWidth(numberOfChannels);
 
-	 mSamplingFrequency = 48000.0f; // TODO: implement query function for sampling frequency
+  mSamplingFrequency = 48000.0f; // TODO: implement query function for sampling frequency
 
-	 // TODO: set matrix and vector to actual sizes
+  // Additional delay required by the interpolation method
+  std::size_t const interpolationOrder = interpolationMethod == InterpolationType::NearestSample
+    ? 0 : 1;
 
-	 mRingbufferLength = static_cast<std::size_t>(std::ceil((maximumDelaySeconds * mSamplingFrequency)/period())) * period();
-	 mCurrentGains.resize(numberOfChannels);
-	 mCurrentDelays.resize(numberOfChannels);
-	 mNextGains.resize(numberOfChannels);
-	 mNextDelays.resize(numberOfChannels);
+  // Maximally admissible delay
+  std::size_t const maxDelaySamples = static_cast<std::size_t>(std::ceil( maximumDelaySeconds * mSamplingFrequency ) );
+  // The actual ringbuffer size is actually larger by one period (because the most recent period is written into before the data is read out)
+  // and the filter order, rounded to the next integer multiple of the period (in order to enable writing new data in one block and also 
+  // for nice alignment)
+  mRingbufferLength = static_cast<std::size_t>( std::ceil(static_cast<SampleType>(maxDelaySamples + interpolationOrder)/period())) * period();
+  mCurrentGains.resize(numberOfChannels);
+  mCurrentDelays.resize(numberOfChannels);
+  mNextGains.resize(numberOfChannels);
+  mNextDelays.resize(numberOfChannels);
 
-	 mRingBuffer.resize(numberOfChannels, mRingbufferLength ); // this also zeros the ring buffer
-	 mWriteIndex = 0;
+  mRingBuffer.resize(numberOfChannels, mRingbufferLength ); // this also zeros the ring buffer
+  mWriteIndex = 0;
 
-	 if (efl::vectorCopy(initialGainsLinear.data(), mCurrentGains.data(), numberOfChannels) != efl::noError) // Initialise the vector to value
-	 {
-		 throw std::runtime_error("Error initialising the current gains");
-	 }
-	 if (efl::vectorCopy(initialDelaysSeconds.data(), mCurrentDelays.data(), numberOfChannels) != efl::noError)
-	 {
-		 throw std::runtime_error("Error initialising the current gains");
-	 }
-	 if (efl::vectorCopy(mCurrentGains.data(), mNextGains.data(), numberOfChannels) != efl::noError)
-	 {
-		 throw std::runtime_error("Error initialising the current gains");
-	 }
-	 if (efl::vectorCopy(mCurrentDelays.data(), mNextDelays.data(), numberOfChannels) != efl::noError)
-	 {
-		 throw std::runtime_error("Error initialising the current gains");
-	 }
- }
+  if (efl::vectorCopy(initialGainsLinear.data(), mCurrentGains.data(), numberOfChannels) != efl::noError) // Initialise the vector to value
+  {
+    throw std::runtime_error("Error initialising the current gains");
+  }
+  if (efl::vectorCopy(initialDelaysSeconds.data(), mCurrentDelays.data(), numberOfChannels) != efl::noError)
+  {
+    throw std::runtime_error("Error initialising the current gains");
+  }
+  if (efl::vectorCopy(mCurrentGains.data(), mNextGains.data(), numberOfChannels) != efl::noError)
+  {
+    throw std::runtime_error("Error initialising the current gains");
+  }
+  if (efl::vectorCopy(mCurrentDelays.data(), mNextDelays.data(), numberOfChannels) != efl::noError)
+  {
+    throw std::runtime_error("Error initialising the current gains");
+  }
+}
 
 void DelayVector::process()
 {
-	std::size_t const blockLength = period();
-	std::size_t ids = 0;
+  std::size_t const blockLength = period();
 
-	//copy data from the input to the buffer
+  //copy data from the input to the buffer
 
-	// This should always hold, as the write index starts from zero and the buffer size is an integer multiple of the period.
-	// assert(mWriteIndex + blockLength <= mRingbufferLength );
-	if( not (mWriteIndex + blockLength <= mRingbufferLength) )
-	{
-		throw std::runtime_error("It really happened");
-	}
-	for ( std::size_t idc = 0; idc < mNumberOfChannels; ++idc)
-	{
-		efl::vectorCopy(mInput[idc], &mRingBuffer(idc, mWriteIndex), blockLength, ril::cVectorAlignmentSamples );
+  assert(mWriteIndex + blockLength <= mRingbufferLength );
+  for( std::size_t idc = 0; idc < mNumberOfChannels; ++idc )
+  {
+    efl::vectorCopy( mInput[idc], &mRingBuffer( idc, mWriteIndex ), blockLength, ril::cVectorAlignmentSamples );
+  }
+  // The write pointer is advanced at the end of process(), because the delay calculation is based on the prior position.
 
-	}
-	// The write pointer is advanced at the end of process(), because
+  for( std::size_t idc = 0; idc < mNumberOfChannels; ++idc )
+  {
+    switch( mInterpolationMethod )
+    {
+    case InterpolationType::NearestSample:
+      delayNearestSample( mCurrentDelays[idc] * mSamplingFrequency, mNextDelays[idc] * mSamplingFrequency,
+                          mCurrentGains[idc], mNextGains[idc],
+                          mRingBuffer.row( idc ),
+                          mOutput[idc], blockLength );
+      break;
+    case InterpolationType::Linear:
+      delayLinearInterpolation( mCurrentDelays[idc] * mSamplingFrequency, mNextDelays[idc] * mSamplingFrequency,
+                                mCurrentGains[idc], mNextGains[idc],
+                                mRingBuffer.row( idc ),
+                                mOutput[idc], blockLength );
+      break;
+    default:
+      assert( false and "Invalid enumeration value for interpolation method." );
+    }
+  }
+  mWriteIndex = (mWriteIndex + blockLength) % mRingbufferLength; //If the write pointer is greater than size of matrix send to the beginning
 
-	for ( std::size_t idc = 0; idc < mNumberOfChannels; ++idc)
-	{
-		for (ids = 0; ids < blockLength; ++ids)
-		{
-			SampleType const gain = mCurrentGains[idc] + static_cast<SampleType>(ids) / blockLength*(mNextGains[idc] - mCurrentGains[idc]);//calculating gain[n]
-#if 1
-			SampleType const currentDelaySamples = (mCurrentDelays[idc] + static_cast<SampleType>(ids) / blockLength*(mNextDelays[idc] - mCurrentDelays[idc])) * mSamplingFrequency;
-
-			int const idd = (mWriteIndex + ids - static_cast<int>(std::round(currentDelaySamples))) % mRingbufferLength;
-			if ((idd < 0) or(idd >= mRingbufferLength))
-			{
-				throw std::runtime_error("Index exceeds ringbuffer");
-			}
-
-			SampleType const delayedValue = mRingBuffer(idc, idd);
-			mOutput[idc][ids] = gain * delayedValue;
-#else
-			mOutput[idc][ids] = gain * mInput[idc][ids];
-#endif
-		}
-	}
-	mWriteIndex = (mWriteIndex + blockLength) % mRingbufferLength; //If the write pointer is greater than size of matrix send to the beginning
-
-
-	// At the moment, the interpolationSteps parameter is ignored, and gains and delays are always interpolated during one period.
-	// Therefore we copy the next to the current values here.
-	if (efl::vectorCopy(mNextDelays.data(), mCurrentDelays.data(), mNumberOfChannels) != efl::noError)
-	{
-		throw std::runtime_error("DelayVector::process(): Updating the current delays failed.");
-	}
-	if (efl::vectorCopy(mNextGains.data(), mCurrentGains.data(), mNumberOfChannels) != efl::noError)
-	{
-		throw std::runtime_error("DelayVector::process(): Updating the current gains failed.");
-	}
+  // At the moment, the interpolationSteps parameter is ignored, and gains and delays are always interpolated during one period.
+  // Therefore we copy the next to the current values here.
+  if( efl::vectorCopy( mNextDelays.data(), mCurrentDelays.data(), mNumberOfChannels ) != efl::noError )
+  {
+    throw std::runtime_error( "DelayVector::process(): Updating the current delays failed." );
+  }
+  if( efl::vectorCopy( mNextGains.data(), mCurrentGains.data(), mNumberOfChannels ) != efl::noError )
+  {
+    throw std::runtime_error( "DelayVector::process(): Updating the current gains failed." );
+  }
 }
 
 void DelayVector::setDelayAndGain( efl::BasicVector< SampleType > const & newDelays,
@@ -183,6 +185,55 @@ void DelayVector::setGain( efl::BasicVector< SampleType > const & newGains )
 		throw std::runtime_error("DelayVector::setGain(): Copying of the vector elements failed.");
 	}
 }
+
+void DelayVector::delayNearestSample( SampleType startDelay, SampleType endDelay,
+                                      SampleType startGain, SampleType endGain,
+                                      SampleType const * ringBuffer,
+                                      SampleType * output, std::size_t numberOfSamples )
+{
+  // Note: We deliberately use an int here because it is used in index calculations with wraparound.
+  for( int ids( 0 ); ids < numberOfSamples; ++ids )
+  {
+    SampleType const interpolationRatio = static_cast<SampleType>(ids) / numberOfSamples;
+
+    SampleType const gain = startGain + interpolationRatio*(endGain - startGain);
+    SampleType const delay = startDelay + interpolationRatio*(endDelay - startDelay);
+
+    int const sampleIndex = (mWriteIndex + ids - static_cast<int>( std::round( delay ))) % mRingbufferLength;
+    SampleType const delayedValue = ringBuffer[ sampleIndex ];
+    output[ids] = gain * delayedValue;
+  }
+}
+
+void DelayVector::delayLinearInterpolation( SampleType startDelay, SampleType endDelay,
+                                            SampleType startGain, SampleType endGain,
+                                            SampleType const * ringBuffer,
+                                            SampleType * output, std::size_t numberOfSamples )
+{
+  // Note: We deliberately use an int here because it is used in index calculations with wraparound.
+  for( int ids( 0 ); ids < numberOfSamples; ++ids )
+  {
+    SampleType const interpolationRatio = static_cast<SampleType>(ids) / numberOfSamples;
+
+    SampleType const gain = startGain + interpolationRatio*(endGain - startGain);
+    SampleType const delay = startDelay + interpolationRatio*(endDelay - startDelay);
+
+    SampleType integerDelay = std::floor( delay );
+    SampleType fractionalDelay = delay - integerDelay; // 0.0 <= fractionalDelay < 1.0
+    int delaySamples = static_cast<int>(integerDelay);
+
+    std::size_t const sampleIndex0 = (mWriteIndex + ids - delaySamples ) % mRingbufferLength;
+    // Note: there might be a wraparound between the two samples.
+    std::size_t const sampleIndex1 = (mWriteIndex + ids - delaySamples - 1) % mRingbufferLength;
+
+    SampleType const sample0 = ringBuffer[sampleIndex0];
+    SampleType const sample1 = ringBuffer[sampleIndex1];
+
+    SampleType const delayedValue = sample0 + fractionalDelay * (sample1 - sample0);
+    output[ids] = gain * delayedValue;
+  }
+}
+
 
 } // namespace rcl
 } // namespace visr
