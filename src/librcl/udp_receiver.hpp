@@ -3,8 +3,6 @@
 #ifndef VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 #define VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 
-// #include <libpml/message_queue.hpp>
-
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
 
@@ -41,9 +39,12 @@ class UdpReceiver: public ril::AudioComponent
 public:
   enum class Mode
   {
-    Synchronous,
-    Asynchronous,
-    ExternalServiceObject /**< Don't know how to implement it at the moment. */
+    Synchronous, /**< The data is received from the UDP port within
+                  * the process() method. */
+    Asynchronous, /** Network data is received asynchronously within a
+                      thread. */
+    ExternalServiceObject /**< Network data is received
+ asynchronously using an externally provided (for instance application-global) boost asio IO service object. */
   };
 
   static std::size_t const cMaxMessageLength = 8192;
@@ -62,24 +63,36 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param port
-   * @param mode
+   * @param port The UDP port number to receive data.
+   * @param mode The mode how data is received. See documantation of
+   * enumeration Mode.
+   * @param externalIoService An externally provided IO service
+   * object. Must be non-zero if and only if mode == ExternalServiceObject
    */ 
-  void setup( std::size_t port, Mode mode );
+  void setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService = nullptr );
 
   /**
    * The process function. 
    */
   void process( pml::MessageQueue<std::string> & msgQueue);
 
+private:
   void handleReceiveData( const boost::system::error_code& error,
                           std::size_t numBytesTransferred );
-
-private:
-
+  
   Mode mMode;
 
-  std::unique_ptr<boost::asio::io_service> mIoService;
+  /**
+   * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.
+   */
+  boost::asio::io_service* mIoService;
+
+  /**
+   * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
+   * but not for ExternalServiceObject.
+   */
+  std::unique_ptr<boost::asio::io_service> mIoServiceInstance;
+
 
   std::unique_ptr<boost::asio::ip::udp::socket> mSocket;
 

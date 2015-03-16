@@ -41,11 +41,12 @@ private:
 
   efl::BasicVector<ril::SampleType> mTestGains;
 
- // efl::BasicMatrix<ril::SampleType> mNewMtx2;
+  efl::BasicVector<ril::SampleType> mAlternateDelays;
 
   /**
    * Counter to trigger a switch of the gain matrix.
    */
+  std::size_t mCounter;
 };
 
 } // namespace delay_vector

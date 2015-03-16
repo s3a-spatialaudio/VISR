@@ -8,7 +8,9 @@
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
+#include <librcl/scene_encoder.hpp>
 #include <librcl/udp_receiver.hpp>
+#include <librcl/udp_sender.hpp>
 
 #include <libefl/basic_matrix.hpp>
 
@@ -56,6 +58,10 @@ private:
   
   rcl::SceneDecoder mSceneDecoder;
 
+  rcl::SceneEncoder mSceneEncoder;
+
+  rcl::UdpSender mSceneSender;
+
   rcl::PanningGainCalculator mGainCalculator;
 
   rcl::GainMatrix mMatrix;
@@ -65,6 +71,8 @@ private:
   objectmodel::ObjectVector mObjectVector;
 
   efl::BasicMatrix<ril::SampleType> mGainParameters;
+
+  pml::MessageQueue<std::string> mResendMessages;
 };
 
 } // namespace scene_decoder

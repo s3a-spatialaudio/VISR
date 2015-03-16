@@ -20,6 +20,12 @@
 #include <iostream>
 #include <sstream>
 
+// avoid annoying warning about unsafe standard library functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
+
 int main( int argc, char const * const * argv )
 {
   using namespace visr;
@@ -56,7 +62,7 @@ int main( int argc, char const * const * argv )
       return EXIT_FAILURE;
     }
 
-    // Create an Loudspeak
+    // Create a loudspeaker array to retrieve the input and output channel numbers and to retrieve the channel routing.
     FILE * arrayConfigHandle = fopen( arrayConfigFile.string().c_str(), "r" );
     if( not arrayConfigHandle )
     {
@@ -88,9 +94,25 @@ int main( int argc, char const * const * argv )
     {
       // If an output routing is specified, it takes precedence over the output channel setting in the loudspeaker configuration file.
       std::string const outputRoutingString = cmdLineOptions.getOption<std::string>( "output-routing");
-      if( not outputRouting.parse( outputRoutingString ) )
+      // Account for the one-offset parameter syntax provided to the
+      // user. I.e., subtract one both from the input and the output indices.
+      pml::SignalRoutingParameter origOutputRouting;
+      if( not origOutputRouting.parse( outputRoutingString ) )
       {
         throw( std::invalid_argument( "The command-line parameter \"output-routing\" is ill-formed." ) );
+      }
+      for( pml::SignalRoutingParameter::Entry const & entry: origOutputRouting )
+      {
+        if( (entry.input < 1) or (entry.input > numberOfLoudspeakers) )
+        {
+          throw std::invalid_argument( "The input indices of the --output-routing parameter must be in the range 1...numberOfLoudspeakers.");
+        }
+        if( (entry.output < 1) or (entry.output > numberOfOutputChannels) )
+        {
+          throw std::invalid_argument( "The output indices of the --output-routing parameter must be in the range 1...numberOfOutputChannels.");
+        }
+        
+        outputRouting.addRouting( entry.input-1, entry.output-1 );
       }
     }
     else

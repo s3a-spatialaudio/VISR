@@ -1,6 +1,6 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 ADD_EXECUTABLE( scene_decoder_app main.cpp signal_flow.cpp signal_flow.hpp )
 
@@ -16,3 +16,4 @@ TARGET_LINK_LIBRARIES(scene_decoder_app ${PORTAUDIO_LIBRARIES} )
 TARGET_LINK_LIBRARIES(scene_decoder_app ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(scene_decoder_app ${Boost_SYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(scene_decoder_app ${Boost_THREAD_LIBRARY} )
+TARGET_LINK_LIBRARIES(scene_decoder_app ${CMAKE_THREAD_LIBS_INIT} )

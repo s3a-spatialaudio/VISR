@@ -16,6 +16,7 @@ parser.add_argument( "-l", "--level", default=1.0, help="Sound level of the sour
 parser.add_argument( "-p", "--priority", default="0", help="Rendering priority, integer >= 0, default: 0." );
 parser.add_argument( "-c", "--channelid", default="-1", help="Channel id, denotes the audio channel for the source signal. Integer >=0. Default: -1 meaning that the object id is used as channel id.");
 parser.add_argument( "-g", "--groupid", default="0", help="Group id, integer >= 0." );
+parser.add_argument( "-d", "--diffuseness", default="0.0", help="Diffuseness, floating point value 0 <= d <= 1" );
 
 args = parser.parse_args()
 
@@ -44,8 +45,13 @@ priority = int(args.priority)
 
 level = float( args.level )
 
+diffuseness = float( args.diffuseness )
 
-msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"point\", \"group\": %d, \"priority\": %d, \"level\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, posX, posY, posZ )
+if (diffuseness == 0.0):
+  msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"point\", \"group\": %d, \"priority\": %d, \"level\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, posX, posY, posZ )
+else:
+  msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"pointdiffuse\", \"group\": %d, \"priority\": %d, \"level\": %f, \"diffuseness\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, diffuseness, posX, posY, posZ )
+
 
 udpSocket = socket.socket(socket.AF_INET, # Internet
                           socket.SOCK_DGRAM) # UDP

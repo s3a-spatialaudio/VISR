@@ -63,15 +63,15 @@ namespace visr
                 }
                 
                 in[0] = 1;  // delta input
-                in[1] = 1;
+                //in[1] = 1;
 
                 j = 0;
                 while(1) {
-//                    for(i = 0; i < FIR::nBlockSamples; i++) {
+//                    for(i = 0; i < FIR::nBlockSamples; i++) { // ramp input
 //                        in[i] = j++;
 //                    }
                     filter.process(&in, &out);
-                    in[0] = 0;
+                    in[0] = 0; in[1] = 0;
                 }
 
                 
