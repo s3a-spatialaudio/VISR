@@ -47,4 +47,4 @@ endif(WIN32)
 
 # <AF> What to do with the install?
 # install to /bin by default
-# install(TARGETS ${PROJECT_NAME} DESTINATION ../bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex )
