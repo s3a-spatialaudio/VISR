@@ -1,0 +1,57 @@
+
+% 9.1 loudspeaker array
+% For the University of Surrey array
+% Adapted from  ITU-R Rec. BS.2051-0
+% http://www.itu.int/rec/R-REC-BS.2051-0-201402-I
+
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
+
+% positions
+% id = identity for triangularisation
+% chan = output audio channel
+
+% id	chan	azim	elev	distance (m)
+
+c 1	18	0	0	1.80	% Front Centre (Centre)
+c 2	26	-30	0	1.80	% Front Centre Right (Right)
+c 3	21	-110	0	1.80	% Back Right (Right surround)
+c 4   	25	110	0	1.80	% Back Left (Left surround)
+c 5 	19	30	0	1.80	% Front Centre Left (Left)
+
+c 6 	27	-30	30	1.80	% Top Front Right 
+c 7 	6	-110	30	1.80	% Top Back Right
+c 8  	10	110	30	1.80	% Top Back Left
+c 9 	17	30	30	1.80	% Top Front Left
+
+
+
+
+
+% triangularisation for VBAP etc
+% clockwise means outwards-pointing triangle
+
+% 3-tuplets
+% n id1 id2 id3
+
+t 1 6 2 1
+t 2 6 3 2
+t 3 9 7 6 
+t 4 7 3 6
+t 5 8 4 3
+t 6 7 8 3
+t 7 9 5 4
+t 8 9 4 8
+t 9 8 7 9
+t 10 9 1 5
+t 11 6 1 9
+
+% optional lower cover
+t 12 2 3 5
+t 13 5 3 4
+
+
+
+
