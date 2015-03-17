@@ -15,31 +15,31 @@
 
 % id	chan	azim	elev	distance (m)
 
-c 1	18	0	0	1.80	% Front Centre
-c 2	26	-30	0	1.80	% Front Centre Right
-c 3	28	-60	0	1.80	% Front Right
-c 4	20	-90	0	1.80	% Side Right
-c 5	21	-135	0	1.80	% Back Right
-c 6  	15	180	0	1.80	% Back Centre
-c 7   	25	135	0	1.80	% Back Left
-c 8   	24	90	0	1.80	% Side Left 
-c 9   	16	60	0	1.80	% Front Left
-c 10 	19	30	0	1.80	% Front Centre Left
+p 1	18	0	0	1.80	% Front Centre
+p 2	26	-30	0	1.80	% Front Centre Right
+p 3	28	-60	0	1.80	% Front Right
+p 4	20	-90	0	1.80	% Side Right
+p 5	21	-135	0	1.80	% Back Right
+p 6  	15	180	0	1.80	% Back Centre
+p 7   	25	135	0	1.80	% Back Left
+p 8   	24	90	0	1.80	% Side Left 
+p 9   	16	60	0	1.80	% Front Left
+p 10 	19	30	0	1.80	% Front Centre Left
 
-c 11 	11	0	30	1.80	% Top Front Centre
-c 12 	13	-30	30	1.80	% Top Front Right 
-c 13	12	-90	30	1.80	% Top Side Right
-c 14	6	-135	30	1.80	% Top Back Right
-c 15 	8	180	30	1.80	% Top Back Centre
-c 16 	10	135	30	1.80	% Top Back Left
-c 17	9	90	30	1.80	% Top Side Left
-c 18 	2	30	30	1.80	% Top Front Left
+p 11 	11	0	30	1.80	% Top Front Centre
+p 12 	13	-30	30	1.80	% Top Front Right 
+p 13	12	-90	30	1.80	% Top Side Right
+p 14	6	-135	30	1.80	% Top Back Right
+p 15 	8	180	30	1.80	% Top Back Centre
+p 16 	10	135	30	1.80	% Top Back Left
+p 17	9	90	30	1.80	% Top Side Left
+p 18 	2	30	30	1.80	% Top Front Left
 
-c 19 	3	0	90	1.80	% Top Centre	
+p 19 	3	0	90	1.80	% Top Centre	
 
-c 20 	31	0	-30	1.80	% Bottom Front Centre
-c 21	37	-30	-30	1.80	% Bottom Front Right
-c 22  	29	30	-30	1.80	% Bottom Front Left
+p 20 	31	0	-30	1.80	% Bottom Front Centre
+p 21	37	-30	-30	1.80	% Bottom Front Right
+p 22  	29	30	-30	1.80	% Bottom Front Left
 
 
 
