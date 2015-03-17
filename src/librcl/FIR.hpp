@@ -8,7 +8,7 @@
 //  includes:
 //  - impulse response load
 //  - upsample - makes impulse longer with same number of multiplies, spectrum is shrunk and repeated.
-//  - create sparse white noise tristate impulse - efficient addition-only filters for fast spatial spreading.
+//  - create/run sparse white noise tristate FIR - efficient addition-only filters for fast spatial spreading with spectral variation. Suitable for per-object spreading with spectral variation.
 
 
 
@@ -22,20 +22,22 @@ typedef float Afloat;
 
 class FIR
 {
-
     
 public:
     
     static const int nBlockSamples = 128; //128 //2 test
     
     static const int maxnFIRs = 64;
-    static const int maxnFIRblocks = 32;
+    static const int maxnFIRblocks = 32; //32
     static const int maxnFIRsamples = nBlockSamples*maxnFIRblocks;
     static const int nBufferSamples = nBlockSamples*(maxnFIRblocks+1);
     
     FIR();
     
-    int setNumFIRs(int n) { m_nFIRs = n; return 0; };
+    int setNumFIRs(int n) {
+        if (n > maxnFIRs) return -1;
+        m_nFIRs = n; return 0;
+    };
     int setNumFIRsamples(int n) {
         if (n > maxnFIRsamples) return -1;
         m_nFIRsamples = n; return 0;
