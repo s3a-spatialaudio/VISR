@@ -1,27 +1,23 @@
 //
 //  test_FIR.cpp
-
 //
 //  Created by Dylan Menzies on 9/3/2015.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
 
-#include <librcl/biquad_iir_filter.hpp>
+#include <librcl/FIR.hpp>
 
-#include <libril/audio_signal_flow.hpp>
-#include <libpml/biquad_parameter.hpp>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-
 
 #include <boost/filesystem.hpp>
 
 #include <iostream>
 #include <cstdio>
 
-#include <librcl/FIR.hpp>
+
 
 
 
@@ -54,9 +50,10 @@ namespace visr
                 
                 filter.setNumFIRs(32); //32 //2 test
                 filter.setNumFIRsamples(63); //63 //3 test
-                filter.setUpsampleRatio(2); //2 // effectively lengthens filter without increase in time cost.
+                filter.setUpsampleRatio(1); //2 // lengthens filter without increase in time cost.
                 
                 filter.loadFIRs(file);
+                
                 
                 for(i = 0; i < FIR::nBlockSamples; i++) {
                     in[i] = 0;
@@ -71,7 +68,7 @@ namespace visr
 //                        in[i] = j++;
 //                    }
                     filter.process(&in, &out);
-                    in[0] = 0; in[1] = 0;
+                    in[0] = 0; in[1] = 0;  // delta input contd
                 }
 
                 

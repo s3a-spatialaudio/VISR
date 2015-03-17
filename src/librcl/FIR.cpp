@@ -67,7 +67,7 @@ int FIR::process(Afloat (*in)[nBlockSamples], Afloat (*out)[maxnFIRs][nBlockSamp
     
     // Set input
     for( i = 0; i < nBlockSamples; i++ ) {
-        m_inBuffer[i + m_iBuf] = (*in)[i];
+        m_inBuffer[m_iBuf + i] = (*in)[i];
     }
 
     // Calc output
@@ -92,6 +92,7 @@ int FIR::process(Afloat (*in)[nBlockSamples], Afloat (*out)[maxnFIRs][nBlockSamp
     }
 
     m_iBuf += nBlockSamples;
+    if (m_iBuf >= nBufferSamples) m_iBuf = 0;
     
     return 0;
 }
