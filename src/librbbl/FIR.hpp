@@ -1,5 +1,5 @@
 //
-//  FIR.h
+//  fir.hpp
 //
 //  Created by Dylan Menzies on 09/03/2015.
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
@@ -15,14 +15,18 @@
 #ifndef __VISR__FIR__
 #define __VISR__FIR__
 
-#include <stdio.h>
+#include <cstdio>
+
+namespace visr
+{
+namespace rbbl
+{
 
 typedef float Afloat;
 
 
 class FIR
 {
-    
 public:
     
     static const int nBlockSamples = 128; //128 //2 test
@@ -79,10 +83,7 @@ private:
 
 };
 
-
-
-
-
-
+} // namespace rbbl
+} // namespace visr
 
 #endif /* defined(__VISR__FIR__) */

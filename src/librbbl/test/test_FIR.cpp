@@ -6,8 +6,7 @@
 //
 
 
-#include <librcl/FIR.hpp>
-
+#include <librbbl/fir.hpp>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -17,19 +16,15 @@
 #include <iostream>
 #include <cstdio>
 
-
-
-
-
 #include <stdexcept>
 #include <string>
 
 namespace visr
 {
-    namespace rcl
-    {
-        namespace test
-        {
+namespace rbbl
+{
+namespace test
+{
         
             
             BOOST_AUTO_TEST_CASE( TestFIR )
@@ -76,13 +71,6 @@ namespace visr
                 file = 0;
             }
             
-        } // namespace test
-    } // namespace rcl
-} // namespce visr
-
-
-
-
-
-
-
+} // namespace test
+} // namespace rbbl
+} // namespace visr

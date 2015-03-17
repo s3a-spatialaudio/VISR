@@ -8,10 +8,14 @@
 //
 
 
+#include "fir.hpp"
+
 #include <random>
-#include "FIR.hpp"
 
-
+namespace visr
+{
+namespace rbbl
+{
 
 FIR::FIR(){
     int i;
@@ -96,3 +100,6 @@ int FIR::process(Afloat (*in)[nBlockSamples], Afloat (*out)[maxnFIRs][nBlockSamp
     
     return 0;
 }
+
+} // namespace rbbl
+} // namespace visr
