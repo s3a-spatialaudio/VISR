@@ -50,9 +50,11 @@ namespace visr
                 
                 filter.setNumFIRs(32); //32 //2 test
                 filter.setNumFIRsamples(63); //63 //3 test
-                filter.setUpsampleRatio(1); //2 // lengthens filter without increase in time cost.
+                filter.setUpsampleRatio(1); //2 // lengthens impulse without increase in time cost.
                 
-                filter.loadFIRs(file);
+                // filter.loadFIRs(file);
+                
+                filter.createWhiteTristateFIRs(0.1);  // 1.0
                 
                 
                 for(i = 0; i < FIR::nBlockSamples; i++) {

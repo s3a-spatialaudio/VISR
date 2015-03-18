@@ -67,8 +67,8 @@ private:
     //  tristate FIR
     int m_iBplus[maxnFIRs][maxnFIRsamples];   // index list
     int m_iBminus[maxnFIRs][maxnFIRsamples];
-    int m_nBplus = 0;
-    int m_nBminus = 0;
+    int m_nBplus[maxnFIRs];
+    int m_nBminus[maxnFIRs];
     
     Afloat m_gain[maxnFIRs];                        // for normalization etc.
     
