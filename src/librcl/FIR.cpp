@@ -43,17 +43,19 @@ int FIR::createWhiteTristateFIRs(Afloat density){
     std::uniform_int_distribution<int> rand01(0,1);
     
     int i,j;
-    m_nBplus = 0;
-    m_nBminus = 0;
+
     
     for( i = 0; i < m_nFIRs; i++ ) {
+        m_nBplus[i] = 0;
+        m_nBminus[i] = 0;
         for( j = 0; j < m_nFIRsamples; j++ ) {
             if (rand(gen) <= density) {
-                if (rand01(gen)) { m_B[i][j] = +1; m_iBplus[i][m_nBplus] = j; m_nBplus++; }   //! Better to ensure fixed number of non-zero samples per FIR
-                            else { m_B[i][j] = -1; m_iBminus[i][m_nBminus] = j; m_nBminus++; }
+                if (rand01(gen)) { m_B[i][j] = +1; m_iBplus[i][m_nBplus[i]] = j; m_nBplus[i]++; }   //! Better to ensure fixed number of non-zero samples per FIR
+                            else { m_B[i][j] = -1; m_iBminus[i][m_nBminus[i]] = j; m_nBminus[i]++; }
             }
             else m_B[i][j] = 0;
         }
+        m_gain[i] = 1/sqrt(m_nBplus[i] + m_nBminus[i]); // normalization
     }
     
     return 0;
