@@ -19,11 +19,11 @@
 
 % id	chan	azim	elev	distance (m)
 
-p 1	19	30	0	1.00	% Left
-p 2	18	0	0	1.00	% Centre
-p 3	26	-30	0	1.00	% Right
-p 4	21	-110	0	1.00	% Surround right
-p 5	25	110	0	1.00	% Surround left
+p 1	19	30	0	1.8	% Left
+p 2	18	0	0	1.8	% Centre
+p 3	26	-30	0	1.8	% Right
+p 4	21	-110	0	1.8	% Surround right
+p 5	25	110	0	1.8	% Surround left
 
 
 
