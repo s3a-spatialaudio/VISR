@@ -199,7 +199,9 @@ void DelayVector::delayNearestSample( SampleType startDelay, SampleType endDelay
     SampleType const gain = startGain + interpolationRatio*(endGain - startGain);
     SampleType const delay = startDelay + interpolationRatio*(endDelay - startDelay);
 
-    int const sampleIndex = (mWriteIndex + ids - static_cast<int>( std::round( delay ))) % mRingbufferLength;
+    // The 'mRingbufferLength + ' is to ensure that the first argument to '%' is always nonnegative in order to avoid any implementation-defined issues 
+    // of this operator.
+    int const sampleIndex = (mRingbufferLength + mWriteIndex + ids - static_cast<int>(std::round( delay ))) % mRingbufferLength;
     SampleType const delayedValue = ringBuffer[ sampleIndex ];
     output[ids] = gain * delayedValue;
   }
@@ -222,9 +224,11 @@ void DelayVector::delayLinearInterpolation( SampleType startDelay, SampleType en
     SampleType fractionalDelay = delay - integerDelay; // 0.0 <= fractionalDelay < 1.0
     int delaySamples = static_cast<int>(integerDelay);
 
-    std::size_t const sampleIndex0 = (mWriteIndex + ids - delaySamples ) % mRingbufferLength;
+    // The 'mRingbufferLength + ' is to ensure that the first argument to '%' is always nonnegative in order to avoid any implementation-defined issues 
+    // of this operator.
+    std::size_t const sampleIndex0 = (mRingbufferLength + mWriteIndex + ids - delaySamples) % mRingbufferLength;
     // Note: there might be a wraparound between the two samples.
-    std::size_t const sampleIndex1 = (mWriteIndex + ids - delaySamples - 1) % mRingbufferLength;
+    std::size_t const sampleIndex1 = (mRingbufferLength + mWriteIndex + ids - delaySamples - 1) % mRingbufferLength;
 
     SampleType const sample0 = ringBuffer[sampleIndex0];
     SampleType const sample1 = ringBuffer[sampleIndex1];
