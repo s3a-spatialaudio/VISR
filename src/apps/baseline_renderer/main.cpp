@@ -151,13 +151,14 @@ int main( int argc, char const * const * argv )
 
     const std::size_t cInterpolationLength = periodSize;
 
-    /** setup the filter matrix for the diffusion filters. */
+    /* Set up the filter matrix for the diffusion filters. */
     std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
     std::size_t const diffusionFiltersInFile = 64; // Fixed number of filters in file.
     // First create a filter matrix containing all filters from a initializer list that is compiled into the program.
-    efl::BasicMatrix<ril::SampleType> allDiffusionCoeffs( 64, diffusionFilterLength,
+    efl::BasicMatrix<ril::SampleType> allDiffusionCoeffs( diffusionFiltersInFile,
+                                                          diffusionFilterLength,
 #include "files/quasiAllpassFIR_f64_n63_initializer_list.txt"
-      , ril::cVectorAlignmentSamples );
+                                                          , ril::cVectorAlignmentSamples );
 
     // Create a second filter matrix that matches the number of required filters.
     efl::BasicMatrix<ril::SampleType> diffusionCoeffs( numberOfLoudspeakers, diffusionFilterLength, ril::cVectorAlignmentSamples );
