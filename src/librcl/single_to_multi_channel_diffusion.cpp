@@ -70,6 +70,8 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
 
   mFilterOutputs.resize( mNumberOfOutputs, rbbl::FIR::nBlockSamples );
   mOutputPointers.resize( mNumberOfOutputs );
+  std::size_t idx( 0 );
+  std::generate( mOutputPointers.begin(), mOutputPointers.end(), [&] { return mFilterOutputs.row(idx++); } );
 }
 
 /**
@@ -82,7 +84,7 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
                                            efl::BasicMatrix<SampleType> const & diffusionFilters,
                                            SampleType globalGainAdjustment /*= static_cast<SampleType>(1.0)*/ )
 {
-  efl::BasicVector<SampleType> gainVec( mNumberOfOutputs, 1 );
+  efl::BasicVector<SampleType> gainVec( numberOfOutputs, 1 );
   gainVec.fillValue( globalGainAdjustment );
 
   setup( numberOfOutputs, diffusionFilters, gainVec );
