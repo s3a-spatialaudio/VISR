@@ -60,10 +60,11 @@ namespace test
                 
                 filter.setNumFIRs(numOutputs); //32 //2 test
                 filter.setNumFIRsamples(63); //63 //3 test
-                filter.setUpsampleRatio(1); //2 // lengthens filter without increase in time cost.
+                filter.setUpsampleRatio(1); //2 // lengthens impulse without increase in time cost.
                 
                 BOOST_CHECK( filter.loadFIRs( file ) == 0 );
                 
+                // filter.createWhiteTristateFIRs(0.1);  // 1.0
                 
                 for(i = 0; i < FIR::nBlockSamples; i++) {
                     in[i] = 0;

@@ -69,6 +69,8 @@ int VBAP::calcGains(){
             z -= m_listenerPos.z;
         }
         
+        if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
+        
         for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
         
         for(j = 0; j < m_array->m_nTriplets; j++) {
