@@ -20,7 +20,7 @@
 #include <cstdio>
 
 // uncomment to include the tristate FIR stuff again which is not currently used in the filtering.
-//#define USE_TRISTATE_FIR
+#define USE_TRISTATE_FIR
 
 namespace visr
 {
@@ -104,9 +104,10 @@ private:
     //  tristate FIR
     int m_iBplus[maxnFIRs][maxnFIRsamples];   // index list
     int m_iBminus[maxnFIRs][maxnFIRsamples];
-    int m_nBplus = 0;
-    int m_nBminus = 0;
-#endif
+    int m_nBplus[maxnFIRs];
+    int m_nBminus[maxnFIRs];
+    
+    Afloat m_gain[maxnFIRs];                        // for normalization etc.
 
     Afloat m_inBuffer[nBufferSamples];          // circular input buffer
     int m_iBuf = 0;                             // buffer index to current block.
