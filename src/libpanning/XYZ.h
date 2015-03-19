@@ -57,6 +57,14 @@ class XYZ {
   Afloat getLength() const {
     return std::sqrt(x*x + y*y + z*z);
   }    
+
+  int normalise() {
+    Afloat l = getLength();
+    x /= l;
+    y /= l;
+    z /= l;
+    return 0;
+  }
 };
 
 
