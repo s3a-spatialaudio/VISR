@@ -8,14 +8,17 @@
 
 #include <librbbl/fir.hpp>
 
+#include <libefl/basic_matrix.hpp>
+
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #include <boost/filesystem.hpp>
 
+#include <algorithm>
 #include <iostream>
 #include <cstdio>
-
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -29,25 +32,37 @@ namespace test
             
             BOOST_AUTO_TEST_CASE( TestFIR )
             {
-                FIR filter;
-                
-                Afloat in[FIR::nBlockSamples], out[FIR::maxnFIRs][FIR::nBlockSamples];
-                
+                std::cout << "Size of FIR object: " << sizeof(FIR) << " bytes." << std::endl;
+                // Avoid stack overflow problems by allocating the object on the heap.
+                std::unique_ptr<FIR> filterPtr( new FIR() );
+                // provide a reference to ease the use of the filter object.
+                FIR & filter = *filterPtr;
+
+                FIR::Afloat in[FIR::nBlockSamples];
+
+                int const numOutputs = 32;
+
+                efl::BasicMatrix<FIR::Afloat> outMatrix( numOutputs, FIR::nBlockSamples );
+                // Create a pointer vector to the output signals
+                std::vector<FIR::Afloat*> outPtrs( numOutputs );
+                int idx( 0 );
+                std::generate( outPtrs.begin(), outPtrs.end(), [&] { return outMatrix.row(idx++); } );
                 int i,j;
                 
                 boost::filesystem::path const decoderDir(CMAKE_CURRENT_SOURCE_DIR);
                 
-                boost::filesystem::path bfile = decoderDir / boost::filesystem::path("FIR/quasiAllpassFIR_f32_n63.txt");
+                boost::filesystem::path bfile = decoderDir / boost::filesystem::path("fir/quasiAllpassFIR_f32_n63.txt");
 //                boost::filesystem::path bfile = decoderDir / boost::filesystem::path("FIR/test_f2_n3.txt");
                 
                 FILE *file = fopen(bfile.string().c_str(),"r");
+                BOOST_CHECK( file != nullptr );
             
                 
-                filter.setNumFIRs(32); //32 //2 test
+                filter.setNumFIRs(numOutputs); //32 //2 test
                 filter.setNumFIRsamples(63); //63 //3 test
                 filter.setUpsampleRatio(1); //2 // lengthens filter without increase in time cost.
                 
-                filter.loadFIRs(file);
+                BOOST_CHECK( filter.loadFIRs( file ) == 0 );
                 
                 
                 for(i = 0; i < FIR::nBlockSamples; i++) {
@@ -62,7 +77,7 @@ namespace test
 //                    for(i = 0; i < FIR::nBlockSamples; i++) { // ramp input
 //                        in[i] = j++;
 //                    }
-                    filter.process(&in, &out);
+                    filter.process( in, &outPtrs[0] );
                     in[0] = 0; in[1] = 0;  // delta input contd
                 }
 
