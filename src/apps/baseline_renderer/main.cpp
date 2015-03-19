@@ -4,6 +4,8 @@
 #include "options.hpp"
 
 #include <libefl/denormalised_number_handling.hpp>
+#include <libefl/basic_matrix.hpp>
+#include <libefl/vector_functions.hpp>
 
 #include <libpanning/LoudspeakerArray.h>
 
@@ -149,10 +151,27 @@ int main( int argc, char const * const * argv )
 
     const std::size_t cInterpolationLength = periodSize;
 
+    /** setup the filter matrix for the diffusion filters. */
+    std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
+    std::size_t const diffusionFiltersInFile = 64; // Fixed number of filters in file.
+    // First create a filter matrix containing all filters from a initializer list that is compiled into the program.
+    efl::BasicMatrix<ril::SampleType> allDiffusionCoeffs( 64, diffusionFilterLength,
+#include "files/quasiAllpassFIR_f64_n63_initializer_list.txt"
+      , ril::cVectorAlignmentSamples );
+
+    // Create a second filter matrix that matches the number of required filters.
+    efl::BasicMatrix<ril::SampleType> diffusionCoeffs( numberOfLoudspeakers, diffusionFilterLength, ril::cVectorAlignmentSamples );
+    for( std::size_t idx( 0 ); idx < diffusionCoeffs.numberOfRows( ); ++idx )
+    {
+      efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
+    }
+
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
                      outputRouting,
                      cInterpolationLength,
-                     arrayConfigFile.string().c_str(), sceneReceiverPort,
+                     arrayConfigFile.string().c_str(),
+                     diffusionCoeffs,
+                     sceneReceiverPort,
                      periodSize, samplingRate );
     flow.setup();
 

@@ -34,6 +34,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   pml::SignalRoutingParameter const & outputRouting,
   std::size_t interpolationPeriod,
   std::string const & configFile,
+  efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
   std::size_t udpPort,
   std::size_t period,
   ril::SamplingFrequencyType samplingFrequency )
@@ -41,9 +42,10 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfLoudspeakers( numberOfLoudspeakers )
  , cNumberOfOutputs( numberOfOutputs )
- , mOutputRoutings( outputRouting)
+ , mOutputRoutings( outputRouting )
  , cInterpolationSteps( interpolationPeriod )
  , mConfigFileName( configFile )
+ , mDiffusionFilters( diffusionFilters )
  , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
@@ -90,7 +92,7 @@ SignalFlow::setup()
 
   mDiffusionGainCalculator.setup( cNumberOfInputs );
   mDiffusePartMatrix.setup( cNumberOfInputs, 1, cInterpolationSteps, 0.0f );
-  mDiffusePartDecorrelator.setup( cNumberOfLoudspeakers, 0.25f /* initial gain adjustment*/ );
+  mDiffusePartDecorrelator.setup( cNumberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( cNumberOfLoudspeakers, 2);
 
   mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
