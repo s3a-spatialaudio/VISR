@@ -106,6 +106,7 @@ private:
     int m_iBminus[maxnFIRs][maxnFIRsamples];
     int m_nBplus[maxnFIRs];
     int m_nBminus[maxnFIRs];
+#endif
     
     Afloat m_gain[maxnFIRs];                        // for normalization etc.
 
