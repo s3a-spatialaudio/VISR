@@ -70,7 +70,8 @@ int main(int argc, const char * argv[])
     // 5.1 test, 2D VBAP
     
     // file = fopen("arrays/5.1.txt","r");
-    bfile = decoderDir / boost::filesystem::path("arrays/5.1_audiolab.txt");
+    bfile = decoderDir / boost::filesystem::path("arrays/stereo_audiolab.txt");
+    //bfile = decoderDir / boost::filesystem::path("arrays/5.1_audiolab.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
@@ -82,6 +83,7 @@ int main(int argc, const char * argv[])
     
     vbap.setNumSources(4);
     sourcePos[0].set(1.0, 0.0, 0.0, false);
+//    sourcePos[0].set(1.0, 0.0, 0.0, true);  // plane wave
     sourcePos[1].set(0.0, 1.0, 0.0, false);
     sourcePos[2].set(-1.0, 0.0, 0.0, false);
     sourcePos[3].set(0.0, -1.0, 0.0, false);
