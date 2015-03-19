@@ -10,6 +10,8 @@
 
 #include "fir.hpp"
 
+#include <libefl/basic_matrix.hpp>
+
 #include <random>
 
 namespace visr
@@ -17,11 +19,13 @@ namespace visr
 namespace rbbl
 {
 
-FIR::FIR(){
+  FIR::FIR()
+  : m_B( 1 ) // no special alignment for the moment.
+  , m_nUpsample( 1 ) // start with a sensible value (0 is not!)
+{
     int i;
     for(i = 0; i < nBufferSamples; i++) m_inBuffer[i] = 0;
 }
-
 
 int FIR::loadFIRs(FILE* file) {
    
@@ -32,14 +36,24 @@ int FIR::loadFIRs(FILE* file) {
             if (feof(file) == -1) {
                 return -1;
             }
-            fscanf(file, "%f", &(m_B[i][j]));
+            fscanf(file, "%f", &(m_B(i,j)));
         }
     }
     
     return 0;
 }
 
+void FIR::loadFIRs( efl::BasicMatrix<Afloat> const & filterCoeffs )
+{
+  if( (filterCoeffs.numberOfRows() != static_cast<std::size_t>(m_nFIRs))
+      or (filterCoeffs.numberOfColumns() != static_cast<std::size_t>(m_nFIRsamples)) )
+  {
+    throw std::invalid_argument( "FIR::loadFIRs: The dimension of the filterCoeffs parameter does not match the dimension of the filter.");
+  }
+  m_B.copy( filterCoeffs );
+}
 
+#ifdef USE_TRISTATE_FIR
 int FIR::createWhiteTristateFIRs(Afloat density){
     
     std::default_random_engine gen;
@@ -53,32 +67,32 @@ int FIR::createWhiteTristateFIRs(Afloat density){
     for( i = 0; i < m_nFIRs; i++ ) {
         for( j = 0; j < m_nFIRsamples; j++ ) {
             if (rand(gen) <= density) {
-                if (rand01(gen)) { m_B[i][j] = +1; m_iBplus[i][m_nBplus] = j; m_nBplus++; }   //! Better to ensure fixed number of non-zero samples per FIR
-                            else { m_B[i][j] = -1; m_iBminus[i][m_nBminus] = j; m_nBminus++; }
+                if (rand01(gen)) { m_B(i,j) = +1; m_iBplus[i][m_nBplus] = j; m_nBplus++; }   //! Better to ensure fixed number of non-zero samples per FIR
+                            else { m_B(i,j) = -1; m_iBminus[i][m_nBminus] = j; m_nBminus++; }
             }
-            else m_B[i][j] = 0;
+            else m_B(i,j) = 0;
         }
     }
     
     return 0;
 }
+#endif
 
 
-
-int FIR::process(Afloat (*in)[nBlockSamples], Afloat (*out)[maxnFIRs][nBlockSamples]) {
+int FIR::process( Afloat const * in, Afloat * const * out) {
     
     int i,j,k,iBuf;
     
     // Set input
     for( i = 0; i < nBlockSamples; i++ ) {
-        m_inBuffer[m_iBuf + i] = (*in)[i];
+        m_inBuffer[m_iBuf + i] = in[i];
     }
 
     // Calc output
     for( i = 0; i < nBlockSamples; i++ ) {
         
         for( j = 0; j < m_nFIRs; j++ ) {
-            (*out)[j][i] = 0;
+            out[j][i] = 0;
         }
 
         iBuf = m_iBuf + i;
@@ -86,7 +100,7 @@ int FIR::process(Afloat (*in)[nBlockSamples], Afloat (*out)[maxnFIRs][nBlockSamp
         for( j = 0; j < m_nFIRsamples; j++ ) {
             
             for( k = 0; k < m_nFIRs; k++ ) {
-                (*out)[k][i] += m_B[k][j] * m_inBuffer[iBuf];   // Convolve
+                out[k][i] += m_B(k,j) * m_inBuffer[iBuf];   // Convolve
             }
             
             iBuf -= m_nUpsample;
