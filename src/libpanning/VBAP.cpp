@@ -14,8 +14,8 @@ int VBAP::calcInvMatrices(){
     Afloat det;
     Afloat* inv;
     int i;
-    
-    
+ 
+//printf("calcInvMatrices()\n");   //!
         
     for (i = 0 ; i < m_array->m_nTriplets; i++) {
             
@@ -24,6 +24,21 @@ int VBAP::calcInvMatrices(){
             if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
             else l3 = m_array->m_position[m_array->m_triplet[i][2]];
         
+            // calc speaker positions relative to listener.
+            l1.x = l1.x - m_listenerPos.x;
+            l1.y = l1.y - m_listenerPos.y;
+            l1.z = l1.z - m_listenerPos.z;
+            l2.x = l2.x - m_listenerPos.x;
+            l2.y = l2.y - m_listenerPos.y;
+            l2.z = l2.z - m_listenerPos.z;
+            l3.x = l3.x - m_listenerPos.x;
+            l3.y = l3.y - m_listenerPos.y;
+            l3.z = l3.z - m_listenerPos.z;
+
+            l1.normalise();
+            l2.normalise();
+            l3.normalise();
+
             det = 1.0 / (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
                          - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
                          + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)));
@@ -68,6 +83,8 @@ int VBAP::calcGains(){
             y -= m_listenerPos.y;
             z -= m_listenerPos.z;
         }
+
+
         
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
@@ -79,7 +96,8 @@ int VBAP::calcGains(){
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
-            
+
+
             if (g1 >= 0 && g2 >= 0 && (m_array->is2D() || g3 >= 0))
             {
                 jmin = j;
@@ -101,13 +119,14 @@ int VBAP::calcGains(){
                 if (g3 < gmin) { gmin = g3; }
             }
         }
-        
+  
+
         if (jmin == -1) return -1; // failure to find best triplet. No gains set. See //! above
     
         // gains of triplet with highest minimum-gain-in-triplet
         g1 = g1min; g2 = g2min; g3 = g3min;
         
-        
+
         // in 2D case g3 != 0 when source is out of 2D plane.
         // Normalization causes fade with distance from plane unless g3 set to 0 first.
         //if (m_array->is2D()) g3 = 0;
@@ -130,16 +149,14 @@ int VBAP::calcGains(){
         if (g2 < 0) g2 = 0;
         if (g3 < 0) g3 = 0;
         
-
-        
-        
         l1 = m_array->m_triplet[jmin][0];
         l2 = m_array->m_triplet[jmin][1];
         l3 = m_array->m_triplet[jmin][2];
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
-        if (!m_array->is2D()) m_gain[i][l3] = g3;     // otherwise overwrites in 2D case
-        
+        if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
+ 
+        printf("%d %d  %f %f     %d %d  %f %f \n",i,jmin, x,y,  l1,l2,g1,g2);  //!
     }
     return 0;
 }
