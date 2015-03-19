@@ -8,11 +8,18 @@
 #include <libril/audio_output.hpp>
 
 #include <libefl/basic_vector.hpp>
+#include <libefl/basic_matrix.hpp>
 
 #include <cstddef> // for std::size_t
+#include <memory>
 
 namespace visr
 {
+// forward declarations
+namespace rbbl
+{
+class FIR;
+}
 
 namespace rcl
 {
@@ -34,6 +41,8 @@ public:
    */
   explicit SingleToMultichannelDiffusion( ril::AudioSignalFlow& container, char const * name );
     
+  ~SingleToMultichannelDiffusion();
+
   /**
    * Setup method to initialise the object and set the parameters.
    * @param numberOfOutputs The number of signals in the output signal.
@@ -41,6 +50,7 @@ public:
    * @todo Add and document any additional parameters needed by the diffusion algorithm.
    */
   void setup( std::size_t numberOfOutputs,
+              efl::BasicMatrix<SampleType> const & diffusionFilters,
               efl::BasicVector<SampleType> const & gainAdjustments ); // NOTE: This parameter must go at the end.
 
   /**
@@ -50,6 +60,7 @@ public:
   * @todo Add and document any additional parameters needed by the diffusion algorithm.
   */
   void setup( std::size_t numberOfOutputs,
+              efl::BasicMatrix<SampleType> const & diffusionFilters,
               SampleType globalGainAdjustment = static_cast<SampleType>(1.0) ); // NOTE: This parameter must go at the end.
 
 
@@ -80,6 +91,21 @@ private:
    * Gain adjustment levels (linear scale) for each output channel. 
    */
   efl::BasicVector<SampleType> mGainAdjustments;
+
+  /**
+   * An one-to-N FIR filter for diffusion.
+   */
+  std::unique_ptr<rbbl::FIR> mDiffusionFilter;
+
+  /**
+   * Output matrix for the results of the filtering operation.
+   */
+  efl::BasicMatrix<SampleType> mFilterOutputs;
+
+  /**
+   * Buffer to hold the pointers into the output buffers for the filtering.
+   */
+  std::vector<SampleType*> mOutputPointers;
 };
 
 } // namespace rcl

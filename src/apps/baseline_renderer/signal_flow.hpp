@@ -39,6 +39,7 @@ public:
                        pml::SignalRoutingParameter const & outputRouting,
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
+                       efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                        std::size_t udpPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
@@ -60,7 +61,9 @@ private:
   const std::size_t cInterpolationSteps;
 
   const std::string mConfigFileName;
-  
+
+  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
+
   const std::size_t mNetworkPort;
   
   rcl::UdpReceiver mSceneReceiver;
