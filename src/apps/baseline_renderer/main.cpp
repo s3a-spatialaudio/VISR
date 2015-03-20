@@ -90,6 +90,8 @@ int main( int argc, char const * const * argv )
 
     const std::size_t  sceneReceiverPort = cmdLineOptions.getDefaultedOption<std::size_t>( "scene-port", 4242 );
 
+    const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
+
     pml::SignalRoutingParameter outputRouting;
     bool const hasOutputRoutingOption = cmdLineOptions.hasOption( "output-routing");
     if( hasOutputRoutingOption )
@@ -138,6 +140,8 @@ int main( int argc, char const * const * argv )
       }
     }
 
+
+
     rrl::PortaudioInterface::Config interfaceConfig;
     interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
@@ -172,6 +176,7 @@ int main( int argc, char const * const * argv )
                      cInterpolationLength,
                      arrayConfigFile.string().c_str(),
                      diffusionCoeffs,
+                     trackingConfiguration,
                      sceneReceiverPort,
                      periodSize, samplingRate );
     flow.setup();
