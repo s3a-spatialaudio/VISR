@@ -19,8 +19,8 @@ namespace efl
 {
 
 /**
- * Basic numeric matrix type with comprehensive access functions, but little arithmetic functionaly.
- * Such functions should be added 
+ * Basic numeric matrix type with comprehensive access functions, but little arithmetic functionality.
+ * Such operations should be added as free functions.
  */
 template< typename ElementType >
 class BasicMatrix

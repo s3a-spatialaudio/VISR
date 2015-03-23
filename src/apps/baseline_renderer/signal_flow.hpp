@@ -6,9 +6,12 @@
 #include <libril/audio_signal_flow.hpp>
 
 #include <librcl/add.hpp>
+#include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/listener_compensation.hpp>
 #include <librcl/panning_gain_calculator.hpp>
+#include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
@@ -16,11 +19,13 @@
 
 #include <libefl/basic_matrix.hpp>
 
+#include <libpml/listener_position.hpp>
 #include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
 
+#include <memory>
 #include <string>
 
 namespace visr
@@ -33,12 +38,20 @@ namespace baseline_renderer
 class SignalFlow: public ril::AudioSignalFlow
 {
 public:
+  /**
+   * Constructor.
+   * @param numberOfInputs
+   *
+   * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
+   */
   explicit SignalFlow( std::size_t numberOfInputs,
                        std::size_t numberOfLoudspeakers,
                        std::size_t numberOfOutputs,
                        pml::SignalRoutingParameter const & outputRouting,
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
+                       efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                       std::string const & trackingConfiguration,
                        std::size_t udpPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
@@ -60,7 +73,11 @@ private:
   const std::size_t cInterpolationSteps;
 
   const std::string mConfigFileName;
-  
+
+  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
+
+  std::string const mTrackingConfiguration;
+
   const std::size_t mNetworkPort;
   
   rcl::UdpReceiver mSceneReceiver;
@@ -72,6 +89,8 @@ private:
   rcl::PanningGainCalculator mGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
+
+  bool mTrackingEnabled;
 
   rcl::GainMatrix mMatrix;
 
@@ -88,6 +107,28 @@ private:
   efl::BasicMatrix<ril::SampleType> mGainParameters;
 
   efl::BasicMatrix<ril::SampleType> mDiffuseGains;
+
+  /**
+   * Tracking-related members
+   */
+  //@{
+  std::unique_ptr<rcl::ListenerCompensation> mListenerCompensation;
+
+  std::unique_ptr<rcl::DelayVector>  mSpeakerCompensation;
+
+  std::unique_ptr<rcl::UdpReceiver> mTrackingReceiver;
+
+  std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
+
+  pml::ListenerPosition mListenerPosition;
+
+  pml::MessageQueue<std::string> mTrackingMessages;
+
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
+
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
+  //@}
+
 };
 
 } // namespace scene_decoder
