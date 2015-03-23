@@ -191,8 +191,11 @@ void DelayVector::delayNearestSample( SampleType startDelay, SampleType endDelay
                                       SampleType const * ringBuffer,
                                       SampleType * output, std::size_t numberOfSamples )
 {
+  // Avoid warning messages by providing a signed numberOfSamples variable
+  int const numSamplesInt = static_cast<int>(numberOfSamples);
+  
   // Note: We deliberately use an int here because it is used in index calculations with wraparound.
-  for( int ids( 0 ); ids < numberOfSamples; ++ids )
+  for( int ids( 0 ); ids < numSamplesInt; ++ids )
   {
     SampleType const interpolationRatio = static_cast<SampleType>(ids) / numberOfSamples;
 
@@ -212,8 +215,11 @@ void DelayVector::delayLinearInterpolation( SampleType startDelay, SampleType en
                                             SampleType const * ringBuffer,
                                             SampleType * output, std::size_t numberOfSamples )
 {
+  // Avoid warning messages by providing a signed numberOfSamples variable
+  int const numSamplesInt = static_cast<int>(numberOfSamples);
+  
   // Note: We deliberately use an int here because it is used in index calculations with wraparound.
-  for( int ids( 0 ); ids < numberOfSamples; ++ids )
+  for( int ids( 0 ); ids < numSamplesInt; ++ids )
   {
     SampleType const interpolationRatio = static_cast<SampleType>(ids) / numberOfSamples;
 
