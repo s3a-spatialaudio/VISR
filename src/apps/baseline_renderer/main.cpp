@@ -4,6 +4,8 @@
 #include "options.hpp"
 
 #include <libefl/denormalised_number_handling.hpp>
+#include <libefl/basic_matrix.hpp>
+#include <libefl/vector_functions.hpp>
 
 #include <libpanning/LoudspeakerArray.h>
 
@@ -88,6 +90,8 @@ int main( int argc, char const * const * argv )
 
     const std::size_t  sceneReceiverPort = cmdLineOptions.getDefaultedOption<std::size_t>( "scene-port", 4242 );
 
+    const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
+
     pml::SignalRoutingParameter outputRouting;
     bool const hasOutputRoutingOption = cmdLineOptions.hasOption( "output-routing");
     if( hasOutputRoutingOption )
@@ -136,6 +140,8 @@ int main( int argc, char const * const * argv )
       }
     }
 
+
+
     rrl::PortaudioInterface::Config interfaceConfig;
     interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
@@ -149,10 +155,29 @@ int main( int argc, char const * const * argv )
 
     const std::size_t cInterpolationLength = periodSize;
 
+    /* Set up the filter matrix for the diffusion filters. */
+    std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
+    std::size_t const diffusionFiltersInFile = 64; // Fixed number of filters in file.
+    // First create a filter matrix containing all filters from a initializer list that is compiled into the program.
+    efl::BasicMatrix<ril::SampleType> allDiffusionCoeffs( diffusionFiltersInFile,
+                                                          diffusionFilterLength,
+#include "files/quasiAllpassFIR_f64_n63_initializer_list.txt"
+                                                          , ril::cVectorAlignmentSamples );
+
+    // Create a second filter matrix that matches the number of required filters.
+    efl::BasicMatrix<ril::SampleType> diffusionCoeffs( numberOfLoudspeakers, diffusionFilterLength, ril::cVectorAlignmentSamples );
+    for( std::size_t idx( 0 ); idx < diffusionCoeffs.numberOfRows( ); ++idx )
+    {
+      efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
+    }
+
     SignalFlow flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
                      outputRouting,
                      cInterpolationLength,
-                     arrayConfigFile.string().c_str(), sceneReceiverPort,
+                     arrayConfigFile.string().c_str(),
+                     diffusionCoeffs,
+                     trackingConfiguration,
+                     sceneReceiverPort,
                      periodSize, samplingRate );
     flow.setup();
 
@@ -161,8 +186,14 @@ int main( int argc, char const * const * argv )
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
 
-    // Rendering runs until <Return> is entered on the console.
-    std::getc( stdin );
+    // Rendering runs until q<Return> is entered on the console.
+    std::cout << "SAW converter started. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+    char c;
+    do
+    {
+      c = std::getc( stdin );
+    }
+    while( c != 'q' );
 
     audioInterface.stop( );
 

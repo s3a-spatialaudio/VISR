@@ -2,6 +2,8 @@
 
 #include "signal_flow.hpp"
 
+#include <libpanning/XYZ.h>
+
 #include <algorithm>
 #include <vector>
 
@@ -34,6 +36,8 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   pml::SignalRoutingParameter const & outputRouting,
   std::size_t interpolationPeriod,
   std::string const & configFile,
+  efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+  std::string const & trackingConfiguration,
   std::size_t udpPort,
   std::size_t period,
   ril::SamplingFrequencyType samplingFrequency )
@@ -41,9 +45,11 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfLoudspeakers( numberOfLoudspeakers )
  , cNumberOfOutputs( numberOfOutputs )
- , mOutputRoutings( outputRouting)
+ , mOutputRoutings( outputRouting )
  , cInterpolationSteps( interpolationPeriod )
  , mConfigFileName( configFile )
+ , mDiffusionFilters( diffusionFilters )
+ , mTrackingConfiguration( trackingConfiguration )
  , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
@@ -55,6 +61,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
  , mDiffuseGains( ril::cVectorAlignmentSamples )
+
  {
 }
 
@@ -67,6 +74,13 @@ SignalFlow::process()
 {
   mSceneReceiver.process( mSceneMessages );
   mSceneDecoder.process( mSceneMessages, mObjectVector );
+  if( mTrackingEnabled )
+  {
+    mTrackingReceiver->process( mTrackingMessages );
+    mPositionDecoder->process( mTrackingMessages, mListenerPosition );
+    mGainCalculator.setListenerPosition( mListenerPosition );
+    mListenerCompensation->process( mListenerPosition, mCompensationGains, mCompensationDelays );
+  }
   mGainCalculator.process( mObjectVector, mGainParameters );
   mDiffusionGainCalculator.process( mObjectVector, mDiffuseGains );
   mMatrix.setGains( mGainParameters );
@@ -75,6 +89,11 @@ SignalFlow::process()
   mDiffusePartMatrix.process();
   mDiffusePartDecorrelator.process();
   mDirectDiffuseMix.process();
+  if( mTrackingEnabled )
+  {
+    mSpeakerCompensation->setDelayAndGain( mCompensationDelays, mCompensationGains );
+    mSpeakerCompensation->process( );
+  }
   mOutputRouting.process();
 }
 
@@ -83,6 +102,31 @@ SignalFlow::setup()
 {
   // Initialise and configure audio components
 
+  mTrackingEnabled = not mTrackingConfiguration.empty( );
+  if( mTrackingEnabled )
+  {
+    // Instantiate the objects.
+    mListenerCompensation.reset( new rcl::ListenerCompensation( *this, "TrackingListenerCompensation" ) );
+    mSpeakerCompensation.reset( new rcl::DelayVector( *this, "TrackingSpeakerCompensation" ) );
+    mTrackingReceiver.reset( new rcl::UdpReceiver( *this, "TrackingReceiver" ) );
+    mPositionDecoder.reset( new rcl::PositionDecoder( *this, "TrackingPositionDecoder" ) );
+
+    // for the very moment, do not parse any options, but use hard-coded option values.
+    ril::SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
+    unsigned short cTrackingUdpPort = 8888;
+    mListenerCompensation->setup( cNumberOfLoudspeakers, mConfigFileName );
+    // We start with a initial gain of 0.0 to suppress transients on startup.
+    mSpeakerCompensation->setup( cNumberOfLoudspeakers, period( ), cMaxDelay,
+                                 rcl::DelayVector::InterpolationType::Linear,
+                                 0.0f, 0.0f );
+    mTrackingReceiver->setup( cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous );
+    mPositionDecoder->setup( XYZ( +2.08f, 0.0f, 0.0f ) );
+
+    mCompensationGains.resize( cNumberOfLoudspeakers );
+    mCompensationDelays.resize( cNumberOfLoudspeakers );
+  }
+
+
   mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup();
   mGainCalculator.setup( cNumberOfInputs, cNumberOfLoudspeakers, mConfigFileName );
@@ -90,7 +134,7 @@ SignalFlow::setup()
 
   mDiffusionGainCalculator.setup( cNumberOfInputs );
   mDiffusePartMatrix.setup( cNumberOfInputs, 1, cInterpolationSteps, 0.0f );
-  mDiffusePartDecorrelator.setup( cNumberOfLoudspeakers, 0.25f /* initial gain adjustment*/ );
+  mDiffusePartDecorrelator.setup( cNumberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( cNumberOfLoudspeakers, 2);
 
   mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
@@ -102,8 +146,6 @@ SignalFlow::setup()
   // mOutputRouting -> playback                       cNumberOfOutputs        cNumberOfInputs+2*cNumberOfLoudspeakers..cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs-1
   // mDiffusePartMatrix -> mDiffusePartDecorrelator   1                       cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs..cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs
   // mDiffusePartDecorrelator->mDirectDiffuseMix      cNumberOfLoudspeakers   cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs+1..cNumberOfInputs+3*cNumberOfLoudspeakers+cNumberOfOutputs
-
-  initCommArea( cNumberOfInputs + 3* cNumberOfLoudspeakers + cNumberOfOutputs + 1, period( ), ril::cVectorAlignmentSamples );
 
   // Create the index vectors for connecting the ports.
   std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
@@ -118,12 +160,21 @@ SignalFlow::setup()
   std::size_t const decorrelatorStartIdx = diffuseMixerStartIdx + 1;
   std::vector<std::size_t> const decorrelatorOutRange = indexRange( decorrelatorStartIdx, decorrelatorStartIdx + cNumberOfLoudspeakers - 1);
 
+  // only used if tracking is enabled
+  std::size_t const trackingCompensationStartIdx = decorrelatorStartIdx + cNumberOfLoudspeakers;
+  std::vector<std::size_t> const trackingCompensationOutRange = mTrackingEnabled
+    ? indexRange( trackingCompensationStartIdx, trackingCompensationStartIdx + cNumberOfLoudspeakers - 1 ) : std::vector<std::size_t>( );
+
+  std::size_t const numTotalCommunicationChannels = mTrackingEnabled
+    ? trackingCompensationStartIdx + cNumberOfLoudspeakers : decorrelatorStartIdx + cNumberOfLoudspeakers;
+
+  initCommArea( numTotalCommunicationChannels, period( ), ril::cVectorAlignmentSamples );
+
   // Connect the ports
   assignCommunicationIndices( "GainMatrix", "in", captureIndices );
   assignCommunicationIndices( "GainMatrix", "out", matrixOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", matrixOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutRange );
-  assignCommunicationIndices( "OutputSignalRouting", "in", mixOutRange );
   assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
 
   assignCommunicationIndices( "DiffusePartMatrix", "in", captureIndices );
@@ -132,10 +183,19 @@ SignalFlow::setup()
   assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutRange );
 
-
+  if( mTrackingEnabled )
+  {
+    assignCommunicationIndices( "TrackingSpeakerCompensation", "in", mixOutRange );
+    assignCommunicationIndices( "TrackingSpeakerCompensation", "out", trackingCompensationOutRange );
+    assignCommunicationIndices( "OutputSignalRouting", "in", trackingCompensationOutRange );
+  }
+  else
+  {
+    assignCommunicationIndices( "OutputSignalRouting", "in", mixOutRange );
+  }
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size() );
-  assignPlaybackIndices( &routingOutRange[0], routingOutRange.size() );
+  assignPlaybackIndices( &routingOutRange[0], routingOutRange.size( ) );
 
   mGainParameters.resize( cNumberOfLoudspeakers, cNumberOfInputs );
 

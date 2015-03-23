@@ -159,7 +159,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
   mVbapCalculator.setSourcePositions( &mSourcePositions );
   if( mVbapCalculator.calcGains() != 0 )
   {
-    throw std::runtime_error( "PanningGainCalculator: Error calculating VBAP gains." );
+    std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
   }
 
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )

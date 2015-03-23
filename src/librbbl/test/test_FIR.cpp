@@ -9,6 +9,9 @@
 #include <librbbl/fir.hpp>
 
 #include <libefl/basic_matrix.hpp>
+#include <libefl/vector_functions.hpp>
+#include <libril/constants.hpp>
+
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -56,14 +59,32 @@ namespace test
                 
                 FILE *file = fopen(bfile.string().c_str(),"r");
                 BOOST_CHECK( file != nullptr );
-            
+
+                const std::size_t filterLength = 63;
                 
                 filter.setNumFIRs(numOutputs); //32 //2 test
-                filter.setNumFIRsamples(63); //63 //3 test
+                filter.setNumFIRsamples(filterLength); //63 //3 test
                 filter.setUpsampleRatio(1); //2 // lengthens impulse without increase in time cost.
-                
+
+// Define whether to load the filter set from a file or from a matrix (which is currently created from a compiled-in text file).
+#if 0
                 BOOST_CHECK( filter.loadFIRs( file ) == 0 );
-                
+#else
+                // create a filter matrix containing all filters
+                // from a initializer list that is compiled into the program.
+                efl::BasicMatrix<FIR::Afloat> allFirCoeffs( 64, filterLength,
+#include "fir/quasiAllpassFIR_f64_n63_initializer_list.txt"
+                 , ril::cVectorAlignmentSamples );
+
+                // Create a second filter matrix that matches the number of required filters.
+                efl::BasicMatrix<FIR::Afloat> firCoeffs( numOutputs, filterLength, ril::cVectorAlignmentSamples );
+                for( std::size_t idx( 0 ); idx < firCoeffs.numberOfRows(); ++idx )
+                {
+                  efl::vectorCopy( allFirCoeffs.row( idx ), firCoeffs.row( idx ), filterLength, ril::cVectorAlignmentSamples );
+                }
+
+                filter.loadFIRs( firCoeffs );
+#endif
                 // filter.createWhiteTristateFIRs(0.1);  // 1.0
                 
                 for(i = 0; i < FIR::nBlockSamples; i++) {
