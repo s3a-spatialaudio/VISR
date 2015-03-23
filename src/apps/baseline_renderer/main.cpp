@@ -186,8 +186,14 @@ int main( int argc, char const * const * argv )
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
 
-    // Rendering runs until <Return> is entered on the console.
-    std::getc( stdin );
+    // Rendering runs until q<Return> is entered on the console.
+    std::cout << "SAW converter started. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+    char c;
+    do
+    {
+      c = std::getc( stdin );
+    }
+    while( c != 'q' );
 
     audioInterface.stop( );
 
