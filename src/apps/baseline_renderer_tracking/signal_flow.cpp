@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <vector>
 
+// Uncomment to override the gain/delay compensation for individual
+// the loudspeaker signals.
+//#define DISABLE_SPEAKER_COMPENSATION
+
 namespace visr
 {
 namespace apps
@@ -81,7 +85,9 @@ SignalFlow::process()
  
   mMatrix.setGains( mGainParameters );
   mMatrix.process();
+#ifndef DISABLE_SPEAKER_COMPENSATION
   mSpeakerCompensation.setDelayAndGain(mCompensationDelays, mCompensationGains);
+#endif
   mSpeakerCompensation.process();
   mOutputRouting.process();
 }
@@ -134,6 +140,15 @@ SignalFlow::setup()
   assignPlaybackIndices( &routingOutRange[0], routingOutRange.size() );
 
   mGainParameters.resize( cNumberOfLoudspeakers, cNumberOfInputs );
+
+#ifdef DISABLE_SPEAKER_COMPENSATION
+  mCompensationDelays.fillValue( 0.0f );
+  mCompensationGains.fillValue( 1.0f );
+  // Set the values initially, because this method is not called
+  // anymore afterwards.
+  mSpeakerCompensation.setDelayAndGain(mCompensationDelays, mCompensationGains);
+#endif
+
 
   // should not be done here, but in AudioSignalFlow where this method is called from.
   setInitialised( true );
