@@ -52,6 +52,7 @@ public:
                        std::string const & configFile,
                        efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                        std::string const & trackingConfiguration,
+                       std::string const & outputGainConfiguration,
                        std::size_t udpPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
@@ -78,6 +79,8 @@ private:
 
   std::string const mTrackingConfiguration;
 
+  std::string const mOutputGainConfiguration;
+
   const std::size_t mNetworkPort;
   
   rcl::UdpReceiver mSceneReceiver;
@@ -85,6 +88,8 @@ private:
   rcl::SceneDecoder mSceneDecoder;
 
   rcl::SignalRouting mOutputRouting;
+
+  rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningGainCalculator mGainCalculator;
 
