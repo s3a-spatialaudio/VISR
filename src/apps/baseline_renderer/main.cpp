@@ -126,9 +126,14 @@ int main( int argc, char const * const * argv )
       {
         // The channel ids in the array configuration file are apparently one-offset
         int const arrayConfigChannel = loudspeakerArray.m_channel[ channelIdx ];
-        if( arrayConfigChannel <= 0 )
+        if( arrayConfigChannel < 0 )
         {
           throw std::invalid_argument( "Invalid \"channel\" argument in array configuration file." );
+        }
+        // special value to denote that the output isn't routed to physical output
+        if( arrayConfigChannel == 0 )
+        {
+          continue;
         }
         // Subtract the offset of the logical channel numbers in the array config.
         pml::SignalRoutingParameter::IndexType const outIdx = static_cast<pml::SignalRoutingParameter::IndexType>( arrayConfigChannel - 1 );
