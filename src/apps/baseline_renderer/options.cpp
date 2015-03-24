@@ -29,7 +29,9 @@ Options::Options()
 
   registerOption<std::string>( "output-routing", "Routing of logical renderer outputs to physical output channels. Overrides the channel configuration in the array configuration file.");
 
-  registerOption<std::string>( "tracking", "Enable adaptation of the panning using visual tracking. Accepts the position of thee tracker in the format \"{ \"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }\"." );
+  registerOption<std::string>( "output-gain,g", "Output gain and delay adjustment configuration. The number of output channels must be identical to the number of physical output channels" );
+
+  registerOption<std::string>( "tracking", "Enable adaptation of the panning using visual tracking. Accepts the position of the tracker in the format \"{ \"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }\"." );
 
   registerOption<std::size_t>( "scene-port,r", "UDP port for receiving object metadata" );
 }

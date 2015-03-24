@@ -139,7 +139,7 @@ int main( int argc, char const * const * argv )
         outputRouting.addRouting( channelIdx, outIdx );
       }
     }
-
+    std::string const & outputGainConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "output-gain", std::string( ) );
 
 
     rrl::PortaudioInterface::Config interfaceConfig;
@@ -150,8 +150,6 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = audioBackend;
-
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     const std::size_t cInterpolationLength = periodSize;
 
@@ -177,9 +175,12 @@ int main( int argc, char const * const * argv )
                      arrayConfigFile.string().c_str(),
                      diffusionCoeffs,
                      trackingConfiguration,
+                     outputGainConfiguration,
                      sceneReceiverPort,
                      periodSize, samplingRate );
     flow.setup();
+
+    rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 

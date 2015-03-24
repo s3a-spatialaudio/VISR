@@ -3,6 +3,9 @@
 #include "signal_flow.hpp"
 
 #include <libpanning/XYZ.h>
+#include <libpml/array_configuration.hpp>
+
+#include <boost/filesystem.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -38,6 +41,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   std::string const & configFile,
   efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
   std::string const & trackingConfiguration,
+  std::string const & outputGainConfiguration,
   std::size_t udpPort,
   std::size_t period,
   ril::SamplingFrequencyType samplingFrequency )
@@ -50,10 +54,12 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mConfigFileName( configFile )
  , mDiffusionFilters( diffusionFilters )
  , mTrackingConfiguration( trackingConfiguration )
+ , mOutputGainConfiguration( outputGainConfiguration )
  , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
  , mOutputRouting( *this, "OutputSignalRouting" )
+ , mOutputAdjustment( *this, "OutputAdjustment" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
  , mMatrix( *this, "GainMatrix" )
@@ -61,8 +67,7 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
  , mDiffuseGains( ril::cVectorAlignmentSamples )
-
- {
+{
 }
 
 SignalFlow::~SignalFlow( )
@@ -95,6 +100,7 @@ SignalFlow::process()
     mSpeakerCompensation->process( );
   }
   mOutputRouting.process();
+  mOutputAdjustment.process();
 }
 
 /*virtual*/ void
@@ -139,6 +145,31 @@ SignalFlow::setup()
 
   mOutputRouting.setup( cNumberOfLoudspeakers, cNumberOfOutputs, mOutputRoutings );
 
+  efl::BasicVector<ril::SampleType> outputGains( cNumberOfOutputs, ril::cVectorAlignmentSamples );
+  efl::BasicVector<ril::SampleType> outputDelays( cNumberOfOutputs, ril::cVectorAlignmentSamples );
+  outputGains.fillValue( static_cast<ril::SampleType>(1.0) );
+  outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
+
+  if( not mOutputGainConfiguration.empty() )
+  {
+    boost::filesystem::path const outputConfigPath( mOutputGainConfiguration );
+    if( not exists( outputConfigPath ) )
+    {
+      throw std::invalid_argument( "The output adjustment configuration file does not exist." );
+    }
+    pml::ArrayConfiguration outputConfig;
+    outputConfig.loadXml( outputConfigPath.string() );
+    if( outputConfig.numberOfSpeakers() != cNumberOfOutputs )
+    {
+      throw std::invalid_argument( "The number of channels in the output configuration file does not match the configured number of physical outputs." );
+    }
+    outputConfig.getGains<ril::SampleType>( outputGains );
+  }
+
+  mOutputAdjustment.setup( cNumberOfOutputs, period(), 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
+                           outputDelays, outputGains );
+
+  // TODO: Incorporate the speaker compensation chain and the output adjustment.
   // Assignment of channel buffers                    #elements               Range
   // capture -> mMatrix, capture->mDiffusePartMatrix  cNumberOfInputs         0..cNumberOfInputs - 1
   // mMatrix -> mMixDirectDiffuse                     cNumberOfLoudspeakers   cNumberOfInputs..cNumberOfInputs+cNumberOfLoudspeakers-1
@@ -155,7 +186,9 @@ SignalFlow::setup()
   std::vector<std::size_t> const mixOutRange = indexRange( mixOutStartIdx, mixOutStartIdx + cNumberOfLoudspeakers - 1 );
   std::size_t const routingOutStartIdx = mixOutStartIdx + cNumberOfLoudspeakers;
   std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + cNumberOfOutputs - 1 );
-  std::size_t const diffuseMixerStartIdx = routingOutStartIdx + cNumberOfOutputs;
+  std::size_t const outputAdjustStartIdx = routingOutStartIdx + cNumberOfOutputs;
+  std::vector<std::size_t> const outputAdjustOutRange = indexRange( outputAdjustStartIdx, outputAdjustStartIdx + cNumberOfOutputs - 1 );
+  std::size_t const diffuseMixerStartIdx = outputAdjustStartIdx + cNumberOfOutputs;
   std::vector<std::size_t> const diffuseMixOutRange = indexRange( diffuseMixerStartIdx, diffuseMixerStartIdx );
   std::size_t const decorrelatorStartIdx = diffuseMixerStartIdx + 1;
   std::vector<std::size_t> const decorrelatorOutRange = indexRange( decorrelatorStartIdx, decorrelatorStartIdx + cNumberOfLoudspeakers - 1);
@@ -176,7 +209,8 @@ SignalFlow::setup()
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", matrixOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutRange );
   assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
-
+  assignCommunicationIndices( "OutputAdjustment", "in", routingOutRange );
+  assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutRange );
   assignCommunicationIndices( "DiffusePartMatrix", "in", captureIndices );
   assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixOutRange );
   assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixOutRange );
@@ -195,7 +229,7 @@ SignalFlow::setup()
   }
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size() );
-  assignPlaybackIndices( &routingOutRange[0], routingOutRange.size( ) );
+  assignPlaybackIndices( &outputAdjustOutRange[0], outputAdjustOutRange.size( ) );
 
   mGainParameters.resize( cNumberOfLoudspeakers, cNumberOfInputs );
 
