@@ -17,6 +17,7 @@ LoudspeakerArray::LoudspeakerArray()
  , m_nTriplets( 0 )
 {
   std::fill( m_channel, m_channel + MAX_NUM_SPEAKERS, -1 );
+  std::fill( &m_triplet[0][0], &m_triplet[0][0] + MAX_NUM_LOUDSPEAKER_TRIPLETS*3, -1 );
 }
 
 int LoudspeakerArray::load(FILE *file)

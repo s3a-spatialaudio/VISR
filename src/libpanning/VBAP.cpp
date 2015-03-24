@@ -19,6 +19,8 @@ int VBAP::calcInvMatrices(){
         
     for (i = 0 ; i < m_array->m_nTriplets; i++) {
             
+	    if (m_array->m_triplet[i][0] == -1) continue; 
+
             l1 = m_array->m_position[m_array->m_triplet[i][0]];
             l2 = m_array->m_position[m_array->m_triplet[i][1]];
             if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
@@ -66,11 +68,13 @@ int VBAP::calcGains(){
     int i,j,jmin,l1,l2,l3;
     Afloat *inv;
     Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
+
     
     //! Slow triplet search
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
     
     jmin = -1; // indicate currently no triplet candidate.
+    gmin = g1min = g2min = g3min = 0.0;
     
     for(i = 0; i < m_nSources; i++) {
         
@@ -91,6 +95,9 @@ int VBAP::calcGains(){
         for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
         
         for(j = 0; j < m_array->m_nTriplets; j++) {
+
+            if (m_array->m_triplet[j][0] == -1) continue;  //  triplet unused
+
             inv = m_invMatrix[j];
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
@@ -110,7 +117,7 @@ int VBAP::calcGains(){
             //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
             //! better geometric solution needed.
             if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&
-                 ( (g1 > gmin && g2 > gmin && g3 > gmin) || jmin == -1 )
+                 ( jmin == -1 || (g1 > gmin && g2 > gmin && g3 > gmin)  )
             ) {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
