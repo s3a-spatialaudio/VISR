@@ -71,6 +71,21 @@ public:
       gains[outIdx] = static_cast<ValueType>(arrayIt->gainAdjustment);
     }
   }
+
+  template< typename ValueType >
+  void getDelays( efl::BasicVector<ValueType> & delays ) const
+  {
+    if( delays.size() != numberOfSpeakers() )
+    {
+      throw std::invalid_argument( "ArrayConfiguration::getDelays(): Size of outputMatrix does not match the array size." );
+    }
+    std::size_t outIdx( 0 );
+    for( ArrayType::const_iterator arrayIt( mArray.begin() ); arrayIt != mArray.end(); ++arrayIt, ++outIdx )
+    {
+      delays[outIdx] = static_cast<ValueType>(arrayIt->delayAdjustment);
+    }
+  }
+
 private:
   ArrayType mArray;
 };
