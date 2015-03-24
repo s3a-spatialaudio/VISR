@@ -28,7 +28,7 @@ c 7 	6	-1.68	-1.73	1.13	% Top Back Right
 c 8  	10	-1.68	1.76	1.13	% Top Back Left
 c 9 	17	2.18	1.36	1.14	% Top Front Left
 
-
+c 10	0	0.0	0.0	-10.0	% ‘Dead’ speaker, out-of-bounds fading	
 
 % polars
 % id	chan	azim	elev	distance (m)
@@ -59,4 +59,10 @@ t 11 6 1 9
 % optional lower cover
 %t 12 2 3 5
 %t 13 5 3 4
+
+t 50  1 2 10
+t 50  2 3 10
+t 50  3 4 10
+t 50  4 5 10
+t 50  5 1 10
 
