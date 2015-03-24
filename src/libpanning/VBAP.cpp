@@ -7,7 +7,7 @@
 
 #include "VBAP.h"
 
-
+#include <limits>
 
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
@@ -143,9 +143,12 @@ int VBAP::calcGains(){
         g = sqrt(g1*g1+g2*g2+g3*g3);
         // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
         
-        g1 = g1 / g;
-        g2 = g2 / g;
-        g3 = g3 / g;
+	if ( std::abs(g) > std::numeric_limits<Afloat>::epsilon() )
+	{
+          g1 = g1 / g;
+          g2 = g2 / g;
+          g3 = g3 / g;
+	}
         
         
         
