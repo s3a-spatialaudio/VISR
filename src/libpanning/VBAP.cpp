@@ -155,8 +155,9 @@ int VBAP::calcGains(){
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
         if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
- 
-        printf("%d %d  %f %f     %d %d  %f %f \n",i,jmin, x,y,  l1,l2,g1,g2);  //!
+#ifdef VBAP_DEBUG_MESSAGES 
+        printf("%d %d  %f %f     %d %d  %f %f \n",i,jmin, x,y,  l1,l2,g1,g2);
+#endif
     }
     return 0;
 }
