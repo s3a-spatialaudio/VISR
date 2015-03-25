@@ -8,7 +8,8 @@
 #ifndef __S3A_renderer_dsp__VBAP__
 #define __S3A_renderer_dsp__VBAP__
 
-
+// uncomment to enable debug output
+// #define VBAP_DEBUG_MESSAGES
 
 #include "defs.h"
 #include "LoudspeakerArray.h"
@@ -41,15 +42,13 @@ public:
     }
     
     int setListenerPosition(Afloat x, Afloat y, Afloat z){
-        
-//! test overide
-//x = 0.0f;
-//y = -1.0f; // -1.0f 1.36f
-//z = 1.0f; // -1.0f
-//printf("setListenerPosition %f  %f  %f\n", x,y,z);
-        
+
+#ifdef VBAP_DEBUG_MESSAGES
+      printf("setListenerPosition %f %f %f\n",x,y,z);
+#endif
+
         m_listenerPos.set(x, y, z);
-    
+
         return 0;
     }
     
