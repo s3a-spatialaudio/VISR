@@ -60,9 +60,12 @@ class XYZ {
 
   int normalise() {
     Afloat l = getLength();
-    x /= l;
-    y /= l;
-    z /= l;
+      if (l != 0.0f ) {
+          x /= l;
+          y /= l;
+          z /= l;
+      }
+
     return 0;
   }
 };
