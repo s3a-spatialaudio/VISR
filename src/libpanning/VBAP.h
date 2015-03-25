@@ -31,6 +31,7 @@ private:
     XYZ m_listenerPos;
     XYZ (*m_sourcePos)[MAX_NUM_SOURCES];
     int m_nSources;
+    Afloat m_maxGain = 10.0f;
     
     
     
@@ -67,6 +68,8 @@ public:
         m_nSources = n;
         return n;
     }
+    
+    int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
     
     int getNumSpeakers() { return m_array->m_nSpeakers; }
     

@@ -163,6 +163,14 @@ int VBAP::calcGains(){
         if (g2 < 0) g2 = 0;
         if (g3 < 0) g3 = 0;
         
+        // Apply gain limit
+        if (g1 > m_maxGain) g1 = m_maxGain;
+        if (g1 < -m_maxGain) g1 = -m_maxGain;
+        if (g2 > m_maxGain) g2 = m_maxGain;
+        if (g2 < -m_maxGain) g2 = -m_maxGain;
+        if (g3 > m_maxGain) g3 = m_maxGain;
+        if (g3 < -m_maxGain) g3 = -m_maxGain;
+        
         l1 = m_array->m_triplet[jmin][0];
         l2 = m_array->m_triplet[jmin][1];
         l3 = m_array->m_triplet[jmin][2];
@@ -171,7 +179,7 @@ int VBAP::calcGains(){
         if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
 
 #ifdef VBAP_DEBUG_MESSAGES 
-        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3);
+        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3;
 #endif
     }
     return 0;
