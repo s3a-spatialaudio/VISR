@@ -15,9 +15,11 @@ int VBAP::calcInvMatrices(){
     Afloat* inv;
     int i;
  
-//printf("calcInvMatrices()\n");   //!
+printf("calcInvMatrices()\n");   //!
         
     for (i = 0 ; i < m_array->m_nTriplets; i++) {
+    
+        if (m_array->m_triplet[i][0] == -1) continue;  //  triplet unused
             
             l1 = m_array->m_position[m_array->m_triplet[i][0]];
             l2 = m_array->m_position[m_array->m_triplet[i][1]];
@@ -84,21 +86,34 @@ int VBAP::calcGains(){
             z -= m_listenerPos.z;
         }
 
-
         
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
         for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
         
         for(j = 0; j < m_array->m_nTriplets; j++) {
+            
+            if (m_array->m_triplet[j][0] == -1) continue;
+            
             inv = m_invMatrix[j];
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
+            
+            
+            // Normalization
+            // normalization first makes negative gain comparisons more reasonable.
+            g = sqrt(g1*g1+g2*g2+g3*g3);
+            // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
+            if (g > 0) {
+                g1 = g1 / g;
+                g2 = g2 / g;
+                g3 = g3 / g;
+            }
 
-
-            if (g1 >= 0 && g2 >= 0 && (m_array->is2D() || g3 >= 0))
+            
+            if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || m_array->is2D() ) )  // inside triplet, or edge in 2D case.
             {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -109,8 +124,8 @@ int VBAP::calcGains(){
             // Triplet must have at most 1 -ve gain.
             //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
             //! better geometric solution needed.
-            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&
-                 ( (g1 > gmin && g2 > gmin && g3 > gmin) || jmin == -1 )
+            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1 ) &&  // at most one negative gain
+                 ( (g1 >= gmin && g2 >= gmin && g3 >= gmin) || jmin == -1 )
             ) {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -119,7 +134,6 @@ int VBAP::calcGains(){
                 if (g3 < gmin) { gmin = g3; }
             }
         }
-  
 
         if (jmin == -1) return -1; // failure to find best triplet. No gains set. See //! above
     
@@ -130,17 +144,6 @@ int VBAP::calcGains(){
         // in 2D case g3 != 0 when source is out of 2D plane.
         // Normalization causes fade with distance from plane unless g3 set to 0 first.
         //if (m_array->is2D()) g3 = 0;
-        
-        
-        // Normalization
-        g = sqrt(g1*g1+g2*g2+g3*g3);
-        // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
-        
-        g1 = g1 / g;
-        g2 = g2 / g;
-        g3 = g3 / g;
-        
-        
         
         // Remove -ve gain if present, moves image to edge of triplet.
         // after normalization: gains fade with distance from boundary edge.
@@ -156,7 +159,7 @@ int VBAP::calcGains(){
         m_gain[i][l2] = g2;
         if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
  
-        printf("%d %d  %f %f     %d %d  %f %f \n",i,jmin, x,y,  l1,l2,g1,g2);  //!
+//printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3);  //!
     }
     return 0;
 }

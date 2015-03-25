@@ -41,11 +41,15 @@ public:
     }
     
     int setListenerPosition(Afloat x, Afloat y, Afloat z){
+        
+//! test overide
+//x = 0.0f;
+//y = -1.0f; // -1.0f 1.36f
+//z = 1.0f; // -1.0f
+//printf("setListenerPosition %f  %f  %f\n", x,y,z);
+        
         m_listenerPos.set(x, y, z);
-
-	//printf("%f  %f  %f\n", x,y,z);
-//	m_listenerPos.set(0.0f, -1.36f, 0.0f);  //!
-//	m_listenerPos.set(0.0f, 1.36f, 0.0f);  //left //!
+    
         return 0;
     }
     
