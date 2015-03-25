@@ -126,9 +126,14 @@ int main( int argc, char const * const * argv )
       {
         // The channel ids in the array configuration file are apparently one-offset
         int const arrayConfigChannel = loudspeakerArray.m_channel[ channelIdx ];
-        if( arrayConfigChannel <= 0 )
+        if( arrayConfigChannel < 0 )
         {
           throw std::invalid_argument( "Invalid \"channel\" argument in array configuration file." );
+        }
+        // special value to denote that the output isn't routed to physical output
+        if( arrayConfigChannel == 0 )
+        {
+          continue;
         }
         // Subtract the offset of the logical channel numbers in the array config.
         pml::SignalRoutingParameter::IndexType const outIdx = static_cast<pml::SignalRoutingParameter::IndexType>( arrayConfigChannel - 1 );
@@ -139,7 +144,7 @@ int main( int argc, char const * const * argv )
         outputRouting.addRouting( channelIdx, outIdx );
       }
     }
-
+    std::string const & outputGainConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "output-gain", std::string( ) );
 
 
     rrl::PortaudioInterface::Config interfaceConfig;
@@ -150,8 +155,6 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = audioBackend;
-
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     const std::size_t cInterpolationLength = periodSize;
 
@@ -177,9 +180,12 @@ int main( int argc, char const * const * argv )
                      arrayConfigFile.string().c_str(),
                      diffusionCoeffs,
                      trackingConfiguration,
+                     outputGainConfiguration,
                      sceneReceiverPort,
                      periodSize, samplingRate );
     flow.setup();
+
+    rrl::PortaudioInterface audioInterface( interfaceConfig );
 
     audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
@@ -187,7 +193,7 @@ int main( int argc, char const * const * argv )
     audioInterface.start( );
 
     // Rendering runs until q<Return> is entered on the console.
-    std::cout << "SAW converter started. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+    std::cout << "S3A baseline renderer running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
     char c;
     do
     {

@@ -7,7 +7,7 @@
 
 #include "VBAP.h"
 
-
+#include <limits>
 
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
@@ -21,6 +21,8 @@ printf("calcInvMatrices()\n");   //!
     
         if (m_array->m_triplet[i][0] == -1) continue;  //  triplet unused
             
+	    if (m_array->m_triplet[i][0] == -1) continue; 
+
             l1 = m_array->m_position[m_array->m_triplet[i][0]];
             l2 = m_array->m_position[m_array->m_triplet[i][1]];
             if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
@@ -68,11 +70,13 @@ int VBAP::calcGains(){
     int i,j,jmin,l1,l2,l3;
     Afloat *inv;
     Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
+
     
     //! Slow triplet search
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
     
     jmin = -1; // indicate currently no triplet candidate.
+    gmin = g1min = g2min = g3min = 0.0;
     
     for(i = 0; i < m_nSources; i++) {
         
@@ -92,25 +96,15 @@ int VBAP::calcGains(){
         for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
         
         for(j = 0; j < m_array->m_nTriplets; j++) {
-            
-            if (m_array->m_triplet[j][0] == -1) continue;
-            
+
+            if (m_array->m_triplet[j][0] == -1) continue;  //  triplet unused
+
             inv = m_invMatrix[j];
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
             
-            
-            // Normalization
-            // normalization first makes negative gain comparisons more reasonable.
-            g = sqrt(g1*g1+g2*g2+g3*g3);
-            // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
-            if (g > 0) {
-                g1 = g1 / g;
-                g2 = g2 / g;
-                g3 = g3 / g;
-            }
 
             
             if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || m_array->is2D() ) )  // inside triplet, or edge in 2D case.
@@ -124,8 +118,11 @@ int VBAP::calcGains(){
             // Triplet must have at most 1 -ve gain.
             //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
             //! better geometric solution needed.
-            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1 ) &&  // at most one negative gain
-                 ( (g1 >= gmin && g2 >= gmin && g3 >= gmin) || jmin == -1 )
+            //! 'dead'-speakers provide a posssible solution.
+
+            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&   // at most one negative gain
+                 ( jmin == -1 || (g1 > gmin && g2 > gmin && g3 > gmin)  )
+
             ) {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -145,6 +142,20 @@ int VBAP::calcGains(){
         // Normalization causes fade with distance from plane unless g3 set to 0 first.
         //if (m_array->is2D()) g3 = 0;
         
+        
+        // Normalization
+        g = sqrt(g1*g1+g2*g2+g3*g3);
+        // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
+        
+        if ( std::abs(g) > std::numeric_limits<Afloat>::epsilon() )
+        {
+              g1 = g1 / g;
+              g2 = g2 / g;
+              g3 = g3 / g;
+        }
+        
+        
+        
         // Remove -ve gain if present, moves image to edge of triplet.
         // after normalization: gains fade with distance from boundary edge.
         // before normalization: gain fixed whether on or off a boundary edge.
@@ -158,8 +169,10 @@ int VBAP::calcGains(){
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
         if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
- 
-//printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3);  //!
+
+#ifdef VBAP_DEBUG_MESSAGES 
+        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3);
+#endif
     }
     return 0;
 }
