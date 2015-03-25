@@ -11,7 +11,7 @@
 
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
-    Afloat det;
+    Afloat det, temp;
     Afloat* inv;
     int i;
  
@@ -42,10 +42,13 @@ printf("calcInvMatrices()\n");   //!
             l1.normalise();
             l2.normalise();
             l3.normalise();
+        
+            temp = (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
+                    - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
+                    + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
 
-            det = 1.0 / (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
-                         - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
-                         + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)));
+            if (temp != 0.0f) det = 1.0 / temp;
+            else det = 1.0;
             
             inv = m_invMatrix[i];
             inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
