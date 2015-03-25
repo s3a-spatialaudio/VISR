@@ -1,5 +1,5 @@
 
-% 9.1 loudspeaker array
+% 9.1 loudspeaker array V2
 % For the Audio Lab array, University of Southampton
 % Adapted from  ITU-R Rec. BS.2051-0
 % http://www.itu.int/rec/R-REC-BS.2051-0-201402-I
@@ -27,6 +27,8 @@ c 6 	27	2.15	-1.28	1.17	% Top Front Right
 c 7 	6	-1.68	-1.73	1.13	% Top Back Right
 c 8  	10	-1.68	1.76	1.13	% Top Back Left
 c 9 	17	2.18	1.36	1.14	% Top Front Left
+
+c 40	40	0.0	0.0	-10.0	% ‘Dead’ speaker, out-of-bounds fading	
 
 
 
@@ -60,3 +62,11 @@ t 11 6 1 9
 %t 12 2 3 5
 %t 13 5 3 4
 
+
+% optional ‘dead’ speaker fade
+
+t 50  1 2 40
+t 50  2 3 40
+t 50  3 4 40
+t 50  4 5 40
+t 50  5 1 40
