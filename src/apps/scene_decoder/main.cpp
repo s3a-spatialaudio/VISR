@@ -39,7 +39,7 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mHostApi = "default";
 
     boost::filesystem::path const decoderDir( CMAKE_SOURCE_DIR );
-    boost::filesystem::path const configFile( "src/libpanning/test/arrays/stereo_audiolab.txt" );
+    boost::filesystem::path const configFile( "config/isvr/stereo_audiolab.txt" );
     boost::filesystem::path const fullPath = decoderDir / configFile;
     if( !exists( fullPath ) )
     {

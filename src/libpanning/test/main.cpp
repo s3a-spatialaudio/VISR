@@ -26,14 +26,14 @@ int main(int argc, const char * argv[])
     FILE* file;
     int j,k;
     
-    boost::filesystem::path const decoderDir( CMAKE_CURRENT_SOURCE_DIR );
-    
-    
+    boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config");
+    boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
+
     // Useage / test VBAP with 8 sources around an octahedron array
     
-//    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
-    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/9.1_audiolab.txt");
-//    boost::filesystem::path bfile = decoderDir / boost::filesystem::path("arrays/cube_audiolab.txt");
+//    boost::filesystem::path bfile = configDir / boost::filesystem::path("generic/octahedron.txt");
+    boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/9.1_audiolab.txt");
+//    boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/cube_audiolab.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) {
        return -1; 
@@ -70,8 +70,8 @@ int main(int argc, const char * argv[])
     // 5.1 test, 2D VBAP
     
     // file = fopen("arrays/5.1.txt","r");
-    bfile = decoderDir / boost::filesystem::path("arrays/stereo_audiolab.txt");
-    //bfile = decoderDir / boost::filesystem::path("arrays/5.1_audiolab.txt");
+    bfile = configDir / boost::filesystem::path("isvr/stereo_audiolab.txt");
+    //bfile = configDir / boost::filesystem::path("isvr/5.1_audiolab.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
@@ -106,21 +106,21 @@ int main(int argc, const char * argv[])
     // Initialization:
     
     // file = fopen("arrays/octahedron.txt","r");
-    bfile = decoderDir / boost::filesystem::path("arrays/octahedron.txt");
+    bfile = configDir / boost::filesystem::path("generic/octahedron.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (array.load(file) == -1) return -1;
     fclose( file );
     vbap.setLoudspeakerArray(&array);
     
     // file = fopen("arrays/t-design_t8_P40.txt","r");
-    bfile = decoderDir / boost::filesystem::path("arrays/t-design_t8_P40.txt");
+    bfile = configDir / boost::filesystem::path("generic/t-design_t8_P40.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (regArray.load(file) == -1) return -1;
     allrad.setRegArray(&regArray);
     fclose( file );
     
     // file = fopen("arrays/decode_N8_P40_t-design_t8_P40.txt","r");
-    bfile = decoderDir / boost::filesystem::path("arrays/decode_N8_P40_t-design_t8_P40.txt");
+    bfile = configDir / boost::filesystem::path("generic/decode_N8_P40_t-design_t8_P40.txt");
     file = fopen(bfile.string().c_str(),"r");
     if (allrad.loadRegDecodeGains(file, 8, 40) == -1) return -1;
     fclose( file );
@@ -147,7 +147,7 @@ int main(int argc, const char * argv[])
     // Write b-format2vbap gains for matlab testing:
     
     // file = fopen("testoutput/decodeB2VBAP.txt","w");
-    bfile = decoderDir / boost::filesystem::path("testoutput/decodeB2VBAP.txt");
+    bfile = sourceDir / boost::filesystem::path("testoutput/decodeB2VBAP.txt");
     file = fopen(bfile.string().c_str(),"w");
     if( file ) {
       for(k=0; k<9; k++) { // 9 harms - 2nd order only
