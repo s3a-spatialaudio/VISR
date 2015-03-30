@@ -1,6 +1,7 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 SET( APPLICATION_NAME panning_vbap_test )
 

@@ -12,7 +12,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 
 #include <iostream>
 #include <cstdio>
@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   std::size_t const numSpeakers = 2;
 
   boost::filesystem::path const basePath(CMAKE_SOURCE_DIR);
-  boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("src/libpanning/test/arrays/stereo_audiolab.txt");
-//  BOOST_CHECK_MESSAGE( boost::filesystem::exist(arrayPath), "The loudspeaker array file does not exist.");
+  boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("config/isvr/stereo_audiolab.txt");
+  BOOST_CHECK_MESSAGE( exists(arrayPath), "The loudspeaker array file does not exist.");
 
   pml::ListenerPosition pos;
   efl::BasicVector<rcl::ListenerCompensation::SampleType> gains(numSpeakers, ril::cVectorAlignmentSamples );

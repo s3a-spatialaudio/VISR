@@ -50,7 +50,7 @@ namespace test
                 std::vector<FIR::Afloat*> outPtrs( numOutputs );
                 int idx( 0 );
                 std::generate( outPtrs.begin(), outPtrs.end(), [&] { return outMatrix.row(idx++); } );
-                int i,j;
+                int i;
                 
                 boost::filesystem::path const decoderDir(CMAKE_CURRENT_SOURCE_DIR);
                 
@@ -94,8 +94,9 @@ namespace test
                 in[0] = 1;  // delta input
                 //in[1] = 1;
 
-                j = 0;
-                while(1) {
+                // int j = 0; // not used at the moment
+                // Do not run indefinitely, as this is a unit test.
+                for( int loopIdx(0); loopIdx < 1000; ++loopIdx ) {
 //                    for(i = 0; i < FIR::nBlockSamples; i++) { // ramp input
 //                        in[i] = j++;
 //                    }

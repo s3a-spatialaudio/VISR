@@ -39,7 +39,9 @@ BOOST_AUTO_TEST_CASE( testListenerCompensation )
   // 5.1 test, 2D Compensation
 
   boost::filesystem::path const basePath(CMAKE_SOURCE_DIR);
-  boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("src/libpanning/test/arrays/5.1.txt");
+  boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("config/isvr/stereo_audiolab.txt");
+  BOOST_CHECK_MESSAGE( exists(arrayPath), "The loudspeaker array file does not exist.");
+
   file = fopen( arrayPath.string().c_str(), "r");
   BOOST_CHECK( array.load(file) != -1);
   if (file != 0)
