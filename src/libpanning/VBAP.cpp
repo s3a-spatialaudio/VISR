@@ -11,13 +11,15 @@
 
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
-    Afloat det;
+    Afloat det, temp;
     Afloat* inv;
     int i;
  
-//printf("calcInvMatrices()\n");   //!
+printf("calcInvMatrices()\n");   //!
         
     for (i = 0 ; i < m_array->m_nTriplets; i++) {
+    
+        if (m_array->m_triplet[i][0] == -1) continue;  //  triplet unused
             
 	    if (m_array->m_triplet[i][0] == -1) continue; 
 
@@ -40,10 +42,13 @@ int VBAP::calcInvMatrices(){
             l1.normalise();
             l2.normalise();
             l3.normalise();
+        
+            temp = (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
+                    - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
+                    + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
 
-            det = 1.0 / (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
-                         - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
-                         + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)));
+            if (temp != 0.0f) det = 1.0 / temp;
+            else det = 1.0;
             
             inv = m_invMatrix[i];
             inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
@@ -88,7 +93,6 @@ int VBAP::calcGains(){
             z -= m_listenerPos.z;
         }
 
-
         
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
@@ -103,9 +107,10 @@ int VBAP::calcGains(){
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
             
+            
 
-
-            if (g1 >= 0 && g2 >= 0 && (m_array->is2D() || g3 >= 0))
+            
+            if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || m_array->is2D() ) )  // inside triplet, or edge in 2D case.
             {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -116,8 +121,11 @@ int VBAP::calcGains(){
             // Triplet must have at most 1 -ve gain.
             //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
             //! better geometric solution needed.
-            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&
+            //! 'dead'-speakers provide a posssible solution.
+
+            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&   // at most one negative gain
                  ( jmin == -1 || (g1 > gmin && g2 > gmin && g3 > gmin)  )
+
             ) {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -126,7 +134,6 @@ int VBAP::calcGains(){
                 if (g3 < gmin) { gmin = g3; }
             }
         }
-  
 
         if (jmin == -1) return -1; // failure to find best triplet. No gains set. See //! above
     
@@ -143,12 +150,12 @@ int VBAP::calcGains(){
         g = sqrt(g1*g1+g2*g2+g3*g3);
         // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
         
-	if ( std::abs(g) > std::numeric_limits<Afloat>::epsilon() )
-	{
-          g1 = g1 / g;
-          g2 = g2 / g;
-          g3 = g3 / g;
-	}
+        if ( std::abs(g) > std::numeric_limits<Afloat>::epsilon() )
+        {
+              g1 = g1 / g;
+              g2 = g2 / g;
+              g3 = g3 / g;
+        }
         
         
         
@@ -159,14 +166,23 @@ int VBAP::calcGains(){
         if (g2 < 0) g2 = 0;
         if (g3 < 0) g3 = 0;
         
+        // Apply gain limit
+        if (g1 > m_maxGain) g1 = m_maxGain;
+        if (g1 < -m_maxGain) g1 = -m_maxGain;
+        if (g2 > m_maxGain) g2 = m_maxGain;
+        if (g2 < -m_maxGain) g2 = -m_maxGain;
+        if (g3 > m_maxGain) g3 = m_maxGain;
+        if (g3 < -m_maxGain) g3 = -m_maxGain;
+        
         l1 = m_array->m_triplet[jmin][0];
         l2 = m_array->m_triplet[jmin][1];
         l3 = m_array->m_triplet[jmin][2];
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
         if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
+
 #ifdef VBAP_DEBUG_MESSAGES 
-        printf("%d %d  %f %f     %d %d  %f %f \n",i,jmin, x,y,  l1,l2,g1,g2);
+        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3;
 #endif
     }
     return 0;
