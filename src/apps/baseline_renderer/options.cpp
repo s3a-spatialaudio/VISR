@@ -31,7 +31,8 @@ Options::Options()
 
   registerOption<std::string>( "output-gain,g", "Output gain and delay adjustment configuration. The number of output channels must be identical to the number of physical output channels" );
 
-  registerOption<std::string>( "tracking", "Enable adaptation of the panning using visual tracking. Accepts the position of the tracker in the format \"{ \"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }\"." );
+  registerOption<std::string>( "tracking", "Enable adaptation of the panning using visual tracking. Accepts the position of the tracker in JSON format"
+    "\"{ \"port\": <UDP port number>, \"position\": {\"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }, \"rotation\": { \"rotX\": rX, \"rotY\": rY, \"rotZ\": rZ } }\" ." );
 
   registerOption<std::size_t>( "scene-port,r", "UDP port for receiving object metadata" );
 }
