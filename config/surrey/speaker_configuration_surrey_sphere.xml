@@ -1,0 +1,33 @@
+<arrayconfiguration>
+  <speaker id="01" gainDB=" -6.055669392" delay="0.0"/>
+  <speaker id="02" gainDB=" -6.309951360" delay="0.0"/>
+  <speaker id="03" gainDB=" -6.556344951" delay="0.0"/>
+  <speaker id="04" gainDB=" -2.979820619" delay="0.0"/>
+  <speaker id="05" gainDB=" -6.448911870" delay="0.0"/>
+  <speaker id="06" gainDB=" -7.647912996" delay="0.0"/>
+  <speaker id="07" gainDB=" -2.821941639" delay="0.0"/>
+  <speaker id="08" gainDB=" -6.096876978" delay="0.0"/>
+  <speaker id="09" gainDB=" -2.575235742" delay="0.0"/>
+  <speaker id="10" gainDB=" -6.213756080" delay="0.0"/>
+  <speaker id="11" gainDB=" -5.803802575" delay="0.0"/>
+  <speaker id="12" gainDB=" -6.443741332" delay="0.0"/>
+  <speaker id="13" gainDB=" -7.377857755" delay="0.0"/>
+  <speaker id="14" gainDB=" -9.383659708" delay="0.0"/>
+  <speaker id="15" gainDB=" -7.829960759" delay="0.0"/>
+  <speaker id="16" gainDB=" -6.589176501" delay="0.0"/>
+  <speaker id="17" gainDB=" -6.249700780" delay="0.0"/>
+  <speaker id="18" gainDB=" -8.586179281" delay="0.0"/>
+  <speaker id="19" gainDB=" -7.853818292" delay="0.0"/>
+  <speaker id="20" gainDB=" -8.301933701" delay="0.0"/>
+  <speaker id="21" gainDB=" -7.110996957" delay="0.0"/>
+  <speaker id="22" gainDB=" -6.853130842" delay="0.0"/>
+  <speaker id="23" gainDB=" -10.263334240" delay="0.0"/>
+  <speaker id="24" gainDB=" -10.263334240" delay="0.0"/>
+  <speaker id="25" gainDB=" -8.828495647" delay="0.0"/>
+  <speaker id="26" gainDB=" -7.066356624" delay="0.0"/>
+  <speaker id="27" gainDB=" -6.909953440" delay="0.0"/>
+  <speaker id="28" gainDB=" -7.353705729" delay="0.0"/>
+  <speaker id="29" gainDB=" -8.393503989" delay="0.0"/>
+  <speaker id="30" gainDB=" -10.057049746" delay="0.0"/>
+</arrayconfiguration>
+    
