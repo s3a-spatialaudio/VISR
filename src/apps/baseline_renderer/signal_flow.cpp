@@ -164,7 +164,11 @@ SignalFlow::setup()
       throw std::invalid_argument( "The number of channels in the output configuration file does not match the configured number of physical outputs." );
     }
     outputConfig.getGains<ril::SampleType>( outputGains );
-    outputConfig.getDelays<ril::SampleType>( outputDelays );
+    if( !mTrackingEnabled )
+    {
+      // use the static speaker compensation delays only if tracking is not enabled, because 
+      outputConfig.getDelays<ril::SampleType>( outputDelays );
+    }
   }
 
   mOutputAdjustment.setup( cNumberOfOutputs, period(), 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
