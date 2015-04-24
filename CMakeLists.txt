@@ -84,6 +84,15 @@ ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
+## FFTW
+OPTION( USE_FFTW "Use the FFTW library. Do not use for distribuution, because this makes the whole project GPL." OFF )
+IF( USE_FFTW )
+  IF( WIN32 ) # This includes 64-bit platforms!
+    SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
+  ENDIF( WIN32 )
+  FIND_PACKAGE( FFTW )
+ENDIF( USE_FFTW )
+
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
 # should be found automatically.
