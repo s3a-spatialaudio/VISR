@@ -7,7 +7,6 @@ SET( SOURCES fir.cpp  gain_matrix.cpp )
 SET( HEADERS fir.hpp fft_wrapper_base.hpp gain_matrix.hpp )
 
 IF( USE_FFTW )
-  MESSAGE( STATUS "RBBL: Include FFTW." )
   INCLUDE_DIRECTORIES( ${FFTW_INCLUDES} )
   LIST( APPEND SOURCES fftw_wrapper.cpp )
   LIST( APPEND HEADERS fftw_wrapper.hpp )
