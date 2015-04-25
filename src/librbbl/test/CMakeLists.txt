@@ -4,7 +4,7 @@ SET( APPLICATION_NAME rbbl_test )
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES test_main.cpp  test_FIR.cpp )
+SET( SOURCES circular_buffer.cpp test_main.cpp test_FIR.cpp )
 
 IF( USE_FFTW )
   LIST( APPEND SOURCES fftw_wrapper.cpp )
