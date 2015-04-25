@@ -44,6 +44,25 @@ BOOST_AUTO_TEST_CASE( FftwWrapperSingle )
   fft.inverseFft( output.data(), resultAfterInverse.data() );
 }
 
+BOOST_AUTO_TEST_CASE( FftwWrapperDouble )
+{
+  std::size_t dftSize = 1024;
+  std::size_t outputSize = 2 * (dftSize / 2 + dftSize % 2 + 1);
+
+  FftwWrapper<double> fft;
+  fft.init( dftSize, ril::cVectorAlignmentSamples );
+
+  efl::BasicVector<double> input( dftSize, ril::cVectorAlignmentSamples );
+  input[1] = 1.0f;
+
+  efl::BasicVector<double> output( outputSize, ril::cVectorAlignmentSamples );
+
+  fft.forwardFft( input.data( ), output.data( ) );
+
+  efl::BasicVector<double> resultAfterInverse( dftSize, ril::cVectorAlignmentSamples );
+
+  fft.inverseFft( output.data( ), resultAfterInverse.data( ) );
+}
 
 } // namespace test
 } // namespace rbbl

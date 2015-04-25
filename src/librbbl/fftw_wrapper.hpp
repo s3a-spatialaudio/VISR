@@ -1,4 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
+
 #ifndef VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
 #define VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
 
@@ -11,6 +12,10 @@ namespace visr
 namespace rbbl
 {
 
+/**
+ * FFT wrapper class encapsulating the FFTW library for real-to-complex transforms.
+ * @tparam DataType The floating-point element type for the transform. The class is specialized for type \p float and \p double.
+ */
 template< typename DataType >
 class FftwWrapper: public FftWrapperBase<DataType>
 {
