@@ -29,7 +29,6 @@ public:
     : mAllocatedLength( efl::nextAlignedSize( length, alignment ) )
     , mBuffer( numberOfChannels, 2 * mAllocatedLength, alignment )
   {
-    mBuffer.fillValue( -666.66f );
   }
 
   std::size_t allocatedSize() const

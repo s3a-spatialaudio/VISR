@@ -36,7 +36,7 @@ namespace delay_vector
     , mTestGains( 4, ril::cVectorAlignmentSamples )
     , mAlternateDelays( 4, ril::cVectorAlignmentSamples )
   {
-    mTestDelays.fillValue( 0.001f );
+    mTestDelays.fillValue( 0.00185737f );
     mTestGains.fillValue( 0.8f );
     mAlternateDelays.fillValue( 0.0001f );
   }
@@ -48,13 +48,13 @@ namespace delay_vector
   /*virtual*/ void
   SignalFlow::process()
   {
+#if 0
     if( ++mCounter % 8 == 0 )
     {
       mDelay.setDelay( mCounter % 16 == 0 ? mTestDelays : mAlternateDelays );
     }
-
     mDelay.setGain( mTestGains );
-
+#endif
     mDelay.process();
   }
 
@@ -63,8 +63,8 @@ namespace delay_vector
   {
     // Initialise and configure audio components
     mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-                 1.0f, rcl::DelayVector::InterpolationType::NearestSample,
-                 0.0f, 0.5f );
+                 0.02f, rcl::DelayVector::InterpolationType::Linear,
+                 0.0f, 1.0f );
 
     initCommArea( 2 * cNumberOfChannels, period(), ril::cVectorAlignmentSamples );
 
