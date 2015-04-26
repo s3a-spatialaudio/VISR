@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
-#define VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
+#ifndef VISR_LIBRBBL_CIRCULAR_BUFFER_HPP_INCLUDED
+#define VISR_LIBRBBL_CIRCULAR_BUFFER_HPP_INCLUDED
 
 #include <libefl/basic_matrix.hpp>
 
@@ -87,4 +87,4 @@ private:
 } // namespace rbbl
 } // namespace visr
   
-#endif // #ifndef VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRBBL_CIRCULAR_BUFFER_HPP_INCLUDED
