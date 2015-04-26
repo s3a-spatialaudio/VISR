@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <algorithm>
+#include <complex>
 #include <iostream>
 #include <cstdio>
 #include <memory>
@@ -35,13 +36,13 @@ BOOST_AUTO_TEST_CASE( FftwWrapperSingle )
   efl::BasicVector<float> input( dftSize, ril::cVectorAlignmentSamples );
   input[1] = 1.0f;
 
-  efl::BasicVector<float> output( outputSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<std::complex<float> > output( outputSize, ril::cVectorAlignmentSamples );
 
-  fft.forwardFft( input.data(), output.data() );
+  fft.forwardTransform( input.data(), output.data() );
 
   efl::BasicVector<float> resultAfterInverse( dftSize, ril::cVectorAlignmentSamples );
 
-  fft.inverseFft( output.data(), resultAfterInverse.data() );
+  fft.inverseTransform( output.data(), resultAfterInverse.data() );
 }
 
 BOOST_AUTO_TEST_CASE( FftwWrapperDouble )
@@ -55,13 +56,13 @@ BOOST_AUTO_TEST_CASE( FftwWrapperDouble )
   efl::BasicVector<double> input( dftSize, ril::cVectorAlignmentSamples );
   input[1] = 1.0f;
 
-  efl::BasicVector<double> output( outputSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<std::complex<double> > output( outputSize, ril::cVectorAlignmentSamples );
 
-  fft.forwardFft( input.data( ), output.data( ) );
+  fft.forwardTransform( input.data( ), output.data( ) );
 
   efl::BasicVector<double> resultAfterInverse( dftSize, ril::cVectorAlignmentSamples );
 
-  fft.inverseFft( output.data( ), resultAfterInverse.data( ) );
+  fft.inverseTransform( output.data( ), resultAfterInverse.data( ) );
 }
 
 } // namespace test

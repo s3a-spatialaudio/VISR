@@ -108,27 +108,27 @@ template void FftwWrapper<float>::init( std::size_t, std::size_t );
 template void FftwWrapper<double>::init( std::size_t, std::size_t );
 
 template<>
-void FftwWrapper<float>::forwardFft( float const * const in, float * out )
+void FftwWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
 {
   fftwf_execute_dft_r2c( mImpl->mFwdPlan, const_cast<float*>(in), reinterpret_cast<Impl::TransformDataType*>(out) );
 }
 
 template<>
-void FftwWrapper<float>::inverseFft( float const * const in, float * out )
+void FftwWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
 {
-  fftwf_execute_dft_c2r( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<float*>(in)), out );
+  fftwf_execute_dft_c2r( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<float>* >(in)), out );
 }
 
 template<>
-void FftwWrapper<double>::forwardFft( double const * const in, double * out )
+void FftwWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out )
 {
   fftw_execute_dft_r2c( mImpl->mFwdPlan, const_cast<double*>(in), reinterpret_cast<Impl::TransformDataType*>(out) );
 }
 
 template<>
-void FftwWrapper<double>::inverseFft( double const * const in, double * out )
+void FftwWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out )
 {
-  fftw_execute_dft_c2r( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<double*>(in)), out );
+  fftw_execute_dft_c2r( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<double>*>( in )), out );
 }
 
 // Provide explicit instantiations to force code generation for the templated methods.
