@@ -3,14 +3,20 @@
 #ifndef VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 #define VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 
+#define USE_CIRCULAR_BUFFER
+
 #include <libril/audio_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
 
-#include <libefl/aligned_array.hpp>
-#include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
+
+#ifdef USE_CIRCULAR_BUFFER
+#include <librbbl/circular_buffer.hpp>
+#else
+#include <libefl/basic_matrix.hpp>
+#endif
 
 #include <cstddef> // for std::size_t
 
@@ -209,7 +215,9 @@ private:
    */
   std::size_t mNumberOfChannels;
 
-
+#ifdef USE_CIRCULAR_BUFFER
+  std::unique_ptr<rbbl::CircularBuffer<SampleType> > mRingBuffer;
+#else
   /**
    * The ring buffer.
    */
@@ -225,6 +233,8 @@ private:
   * The total length of the ring buffer.
   */
   std::size_t mRingbufferLength;
+#endif
+
   /**
   * The current gain value.
   */
