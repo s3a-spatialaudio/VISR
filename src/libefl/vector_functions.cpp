@@ -32,6 +32,8 @@ ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t align
 }
 template ErrorCode vectorZero<float>( float * const, std::size_t, std::size_t );
 template ErrorCode vectorZero<double>( double * const, std::size_t, std::size_t );
+template ErrorCode vectorZero<std::complex<float> >( std::complex<float> * const, std::size_t, std::size_t );
+template ErrorCode vectorZero<std::complex<double> >( std::complex<double> * const, std::size_t, std::size_t );
 
 
 template <typename T>
