@@ -75,51 +75,32 @@ processOutput( SampleType * const * output, std::size_t alignment )
 {
   for( std::size_t chIdx( 0 ); chIdx < mNumberOfOutputs; ++chIdx )
   {
-    // get an iterator pair containing all routings for the current output.
-    // Not that this depends on the comparison function for the map keys.
-    RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, chIdx ) );
-    RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, chIdx+1 ) );
-    if( start == nextStart )
+    if( efl::vectorZero( mFrequencyDomainAccumulator.data(), mDftSize, alignment ) != efl::noError )
     {
-      efl::vectorZero( output[chIdx], blockLength( ), alignment );
+      throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Clearing FD accumulator failed." );
     }
-    else
+    // get an iterator pair containing all routings for the current output.
+    // Not that this depends on the comparison function for the map
+    // keys, which orders all routings for a given output cosecutively.
+    typename RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, chIdx ) );
+    typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, chIdx+1 ) );
+    for( typename RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
     {
-      if( efl::vectorZero( mFrequencyDomainAccumulator.data(), mDftSize, alignment ) != efl::noError )
+      for( std::size_t blockIdx( 0 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
       {
-        throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Clearing FD accumulator failed." );
-      }
-      for( RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
-      {
+        std::size_t const  outputIdx = routingIt->first.outputIdx;
+        std::size_t const  inputIdx = routingIt->first.inputIdx;
         for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
         {
-          std::size_t const  outputIdx = routingIt->first.outputIdx;
-          std::size_t const  inputIdx = routingIt->first.inputIdx;
-          for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
-          {
-            efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, 0 ), getFdFilterPartition( inputIdx, 0 ), mFrequencyDomainAccumulator.data(), mDftSize, mAlignment );
-          }
+          efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, 0 ), getFdFilterPartition( inputIdx, 0 ), mFrequencyDomainAccumulator.data(), mDftSize, mAlignment );
         }
-      }
-    }
+      } // Calculated convolution for a given filter.
+      // TODO: Scale an add to 
+    } // iterate through all routings for a given output port.
+    // TODO: Perform inverse transform, discard wraparound samples and assign to the
+    // output buffer.
   }
-#if 0
-  for( RoutingTable::value_type const & v : mRoutingTable )
-  {
-    std::size_t const  outputIdx = v.first.outputIdx;
-    std::size_t const  inputIdx = v.first.inputIdx;
-    
-    // Note: we need the internal alignment, not that of the output;
-    efl::vectorMultiply( getFdlBlock( inputIdx, 0 ), getFdFilterPartition( inputIdx, 0 ), mFrequencyDomainAccumulator.data(), mDftSize, mAlignment );
-    for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
-    {
-      efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, 0 ), getFdFilterPartition( inputIdx, 0 ), mFrequencyDomainAccumulator.data(), mDftSize, mAlignment );
-    }
-  }
-#endif
 }
-
-
 
 template< typename SampleType >
 /*static*/ std::size_t MultichannelConvolverUniform<SampleType>::
