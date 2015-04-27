@@ -140,11 +140,10 @@ void CircularBuffer<DataType>::write( DataType const * const * writeData,
 }
 
 template< typename DataType >
-void CircularBuffer<DataType>::write( efl::BasicMatrix<DataType> const & writeData,
-                                      std::size_t alignmentElements /*= 0*/ )
+void CircularBuffer<DataType>::write( efl::BasicMatrix<DataType> const & writeData )
 {
   // TODO: Check minimum alignment, also taking into account the the write head position and the stride.
-  std::size_t minAlignment = std::min<std::size_t>( alignmentElements, 1 ); // for now, use the worst-case alignment.
+  std::size_t minAlignment = std::min<std::size_t>( writeData.alignmentElements(), 1 ); // for now, use the worst-case alignment.
 
   if( writeData.numberOfRows() != numberOfChannels() )
   {

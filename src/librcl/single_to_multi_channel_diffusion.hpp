@@ -46,6 +46,7 @@ public:
   /**
    * Setup method to initialise the object and set the parameters.
    * @param numberOfOutputs The number of signals in the output signal.
+   * @param diffusionFilters A matrix of FIR coefficients, where each row corresponds to a single filter.
    * @param gainAdjustments A vector of gains (linear scale) for the individual output channels. Must contain \p numberOfOutputs elements.
    * @todo Add and document any additional parameters needed by the diffusion algorithm.
    */
@@ -56,6 +57,7 @@ public:
   /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfOutputs The number of signals in the output signal.
+  * @param diffusionFilters A matrix of FIR coefficients, where each row corresponds to a single filter.
   * @param globalGainAdjustment A gain adjustment (linear scale) set for all output channels.Defaults to 1.0.
   * @todo Add and document any additional parameters needed by the diffusion algorithm.
   */
