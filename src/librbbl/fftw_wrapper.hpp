@@ -21,6 +21,12 @@ template< typename DataType >
 class FftwWrapper: public FftWrapperBase<DataType>
 {
 public:
+  /**
+   * Typedef for the frequency-domain samples.
+   * Needs to be redeclared and marked as 'typename' by GCC.
+   */
+  using FrequencyDomainType = typename FftWrapperBase<DataType>::FrequencyDomainType;
+
   FftwWrapper();
 
   ~FftwWrapper();
