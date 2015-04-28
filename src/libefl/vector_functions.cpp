@@ -45,6 +45,8 @@ ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, st
 }
 template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
+template ErrorCode vectorFill<std::complex<float> >( std::complex<float> const, std::complex<float> * const, std::size_t, std::size_t );
+template ErrorCode vectorFill<std::complex<double> >( std::complex<double> const, std::complex<double> * const, std::size_t, std::size_t );
 
 
 template <typename T>
@@ -73,6 +75,8 @@ ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numEle
 }
 template ErrorCode vectorCopy<float>( float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorCopy<double>( double const * const, double * const, std::size_t, std::size_t );
+template ErrorCode vectorCopy<std::complex<float> >( std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template ErrorCode vectorCopy<std::complex<double> >( std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,
@@ -235,9 +239,11 @@ ErrorCode vectorMultiply( T const * const factor1,
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiply( float const * const, float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiply( double const * const, double const * const, double * const, std::size_t, std::size_t );
-//template ErrorCode vectorMultiply( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiply( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
+#if 1
+template ErrorCode vectorMultiply( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+#else
 template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, std::complex<float> const * const factor2, std::complex<float> * const result, std::size_t numElements, std::size_t alignment )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
@@ -287,6 +293,7 @@ template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, 
   }
   return noError;
 }
+#endif
 
 template<typename T>
 ErrorCode vectorMultiplyInplace( T const * const factor1,
@@ -363,6 +370,8 @@ ErrorCode vectorMultiplyAdd( T const * const factor1,
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyAdd( float const * const, float const * const, float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiplyAdd( double const * const, double const * const, double const * const, double * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyAdd( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyAdd( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyAddInplace( T const * const factor1,
@@ -383,6 +392,8 @@ ErrorCode vectorMultiplyAddInplace( T const * const factor1,
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyAddInplace( float const * const, float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiplyAddInplace( double const * const, double const * const, double * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyAddInplace( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyAddInplace( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyConstantAdd( T constFactor,
@@ -423,6 +434,8 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyConstantAddInplace( float, float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiplyConstantAddInplace( double, double const * const, double * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyConstantAddInplace( std::complex<float>, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template ErrorCode vectorMultiplyConstantAddInplace( std::complex<double>, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 } // namespace efl
 } // namespace visr
