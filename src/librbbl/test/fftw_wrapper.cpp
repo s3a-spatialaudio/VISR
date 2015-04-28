@@ -30,8 +30,7 @@ BOOST_AUTO_TEST_CASE( FftwWrapperSingle )
   std::size_t dftSize = 8;
   std::size_t outputSize = 2*(dftSize / 2 + dftSize%2 + 1);
 
-  FftwWrapper<float> fft;
-  fft.init( dftSize, ril::cVectorAlignmentSamples );
+  FftwWrapper<float> fft( dftSize, ril::cVectorAlignmentSamples );
 
   efl::BasicVector<float> input( dftSize, ril::cVectorAlignmentSamples );
   input[1] = 1.0f;
@@ -50,8 +49,7 @@ BOOST_AUTO_TEST_CASE( FftwWrapperDouble )
   std::size_t dftSize = 1024;
   std::size_t outputSize = 2 * (dftSize / 2 + dftSize % 2 + 1);
 
-  FftwWrapper<double> fft;
-  fft.init( dftSize, ril::cVectorAlignmentSamples );
+  FftwWrapper<double> fft( dftSize, ril::cVectorAlignmentSamples );
 
   efl::BasicVector<double> input( dftSize, ril::cVectorAlignmentSamples );
   input[1] = 1.0f;

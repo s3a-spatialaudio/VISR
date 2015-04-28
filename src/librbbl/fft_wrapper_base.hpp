@@ -19,11 +19,13 @@ public:
 
   virtual ~FftWrapperBase() {};
 
-  virtual void init( std::size_t fftSize, std::size_t alignment ) = 0;
-
   virtual void forwardTransform( DataType const * const in, FrequencyDomainType * out ) = 0;
 
   virtual void inverseTransform( FrequencyDomainType const * const in, DataType * out ) = 0;
+
+  virtual DataType forwardScalingFactor() const = 0;
+
+  virtual DataType inverseScalingFactor( ) const = 0;
 };
 
 } // namespace rbbl

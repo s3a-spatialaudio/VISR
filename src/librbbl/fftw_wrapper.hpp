@@ -27,15 +27,18 @@ public:
    */
   using FrequencyDomainType = typename FftWrapperBase<DataType>::FrequencyDomainType;
 
-  FftwWrapper();
+  FftwWrapper( std::size_t fftSize, std::size_t alignment );
 
   ~FftwWrapper();
-
-  /*virtual*/ void init( std::size_t fftSize, std::size_t alignment );
 
   /*virtual*/ void forwardTransform( DataType const * const in, FrequencyDomainType * out );
 
   /*virtual*/ void inverseTransform( FrequencyDomainType const * const in, DataType * out );
+
+  /*virtual*/ DataType forwardScalingFactor( ) const { return static_cast<DataType>(1.0); };
+
+  /*virtual*/ DataType inverseScalingFactor() const { return static_cast<DataType>(1.0); }
+
 private:
   /**
    * Internal implementation object to avoid FFTW dependencies in the header.
