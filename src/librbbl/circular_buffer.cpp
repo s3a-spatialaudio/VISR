@@ -201,7 +201,7 @@ void CircularBuffer<DataType>::getReadPointers( DelayIndexType delay, DataType c
   }
   for( std::size_t chIdx( 0 ); chIdx < mNumberOfChannels; ++chIdx )
   {
-    readPointers[chIdx] = (mBasePointer + chIdx * mStride + mAllocatedLength + mWriteHeadIndex -1) - delay;
+    readPointers[chIdx] = (mBasePointer + chIdx * mStride + mAllocatedLength + mWriteHeadIndex) - delay;
   }
 }
 
@@ -214,7 +214,7 @@ void CircularBuffer<DataType>::getReadPointers( DelayIndexType const * delay, Da
     {
       throw std::invalid_argument( "CircularBuffer::getReadPointers(): Delay value exceeds length of the delay line." );
     }
-    readPointers[chIdx] = (mBasePointer + chIdx * mStride + mAllocatedLength + mWriteHeadIndex -1) - delay[chIdx];
+    readPointers[chIdx] = (mBasePointer + chIdx * mStride + mAllocatedLength + mWriteHeadIndex) - delay[chIdx];
   }
 }
 
