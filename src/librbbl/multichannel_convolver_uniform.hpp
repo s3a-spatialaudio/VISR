@@ -15,8 +15,7 @@
 #include <initializer_list>
 #include <map>
 #include <memory>
-//#include <stdexcept>
-// #include <vector>
+#include <vector>
 
 namespace visr
 {
@@ -51,7 +50,7 @@ public:
                                          std::size_t maxFilterLength,
                                          std::size_t maxRoutingPoints,
                                          std::size_t maxFilterEntries,
-                                         std::initializer_list<RoutingEntry> const & initialRoutings,
+                                         std::vector<RoutingEntry> const & initialRoutings,
                                          efl::BasicMatrix<SampleType> const & initialFilters,
                                          std::size_t alignment = 0 );
 
