@@ -108,6 +108,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
       outputPointers[chIdx] = outputMatrix.row( chIdx );
     }
     plhs[0] = mxCreateDoubleMatrix( numberOfOutputs, inputSignalLength, mxREAL );
+    double * outputBasePtr = mxGetPr( plhs[0] );
 
     /*
       explicit MultichannelConvolverUniform( std::size_t numberOfInputs,
@@ -127,10 +128,17 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
                                                          maxRoutings,
                                                          maxFilters,
                                                          routingTable,
-                                                         filterMtx );
+                                                         filterMtx,
+                                                         defaultAlignment );
 
     for( std::size_t blockIdx( 0 ); blockIdx < numBlocks; ++blockIdx )
     {
+      fillInputBuffers( inputBasePtr, blockIdx*blockIdx, inputSignalLength, inputMatrix );
+
+      conv.process( &inputPointers[0], &outputPointers[0], defaultAlignment );
+
+      copyOutputBuffers( outputMatrix, outputBasePtr, blockIdx*blockIdx, inputSignalLength );
+
     }
   }
   catch( std::exception const & e )

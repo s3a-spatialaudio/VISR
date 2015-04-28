@@ -23,6 +23,7 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
                               efl::BasicMatrix<SampleType> const & initialFilters,
                               std::size_t alignment /*= 0*/ )
  : mAlignment( alignment )
+ , mComplexAlignment( alignment/2 )
  , mNumberOfInputs( numberOfInputs )
  , mNumberOfOutputs( numberOfOutputs )
  , mBlockLength( blockLength )
@@ -30,15 +31,20 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
  , mMaxFilterLength( maxFilterLength )
  , mNumberOfFilterPartitions( calculateNumberOfPartitions( maxFilterLength, blockLength ) )
  , mDftSize( calculateDftSize( blockLength ) )
- , mDftRepresentationSize( calculateDftRepresentationSizeRealValues( blockLength ) )
- , mDftRepresentationSizePadded( calculateDftRepresentationSizeRealValuesPadded( blockLength, alignment ) )
+ , mDftRepresentationSize( calculateDftRepresentationSize( blockLength ) )
+ , mDftRepresentationSizePadded( calculateDftRepresentationSizePadded( blockLength, mComplexAlignment ) )
  , mInputBuffers( numberOfInputs, mDftSize, alignment )
  , mFdlCycleOffset( 0 )
- , mInputFDL( numberOfInputs, mDftRepresentationSizePadded * mNumberOfFilterPartitions, alignment )
- , mFilterPartitionsFrequencyDomain( maxFilterEntries, mDftRepresentationSizePadded * mNumberOfFilterPartitions, alignment )
- , mFftRepresentation( new FftwWrapper<SampleType>() )
+ , mInputFDL( numberOfInputs, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
+ , mTimeDomainTransformBuffer( mDftSize, mAlignment )
+ , mFilterPartitionsFrequencyDomain( maxFilterEntries, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
+ , mFrequencyDomainAccumulator( mDftRepresentationSizePadded, mComplexAlignment )
+ , mFrequencyDomainSum( mDftRepresentationSizePadded, mComplexAlignment )
+ , mFftRepresentation( new FftwWrapper<SampleType>( mDftSize, 0 ) )
+ , mFilterScalingFactor( calculateFilterScalingFactor() )
 {
-  mFftRepresentation->init( mDftSize, 0 ); // At the moment, we cannot make particular assertions for the alignment of the input buffers due to the use of a ringbuffer.
+  initRoutingTable( initialRoutings );
+  initFilters( initialFilters );
 }
 
 template< typename SampleType >
@@ -73,7 +79,7 @@ template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::
 processOutput( SampleType * const * output, std::size_t alignment )
 {
-  for( std::size_t chIdx( 0 ); chIdx < mNumberOfOutputs; ++chIdx )
+  for( std::size_t outputIdx( 0 ); outputIdx < mNumberOfOutputs; ++outputIdx )
   {
     if( efl::vectorZero( mFrequencyDomainAccumulator.data(), mDftSize, alignment ) != efl::noError )
     {
@@ -82,23 +88,57 @@ processOutput( SampleType * const * output, std::size_t alignment )
     // get an iterator pair containing all routings for the current output.
     // Not that this depends on the comparison function for the map
     // keys, which orders all routings for a given output cosecutively.
-    typename RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, chIdx ) );
-    typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, chIdx+1 ) );
+    typename RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx ) );
+    typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx+1 ) );
     for( typename RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
     {
       for( std::size_t blockIdx( 0 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
       {
-        std::size_t const  outputIdx = routingIt->first.outputIdx;
         std::size_t const  inputIdx = routingIt->first.inputIdx;
+
+        if( efl::vectorMultiply( getFdlBlock( inputIdx, 0 ),
+          getFdFilterPartition( inputIdx, 0 ),
+          mFrequencyDomainAccumulator.data( ),
+          mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
+          mComplexAlignment ) != efl::noError )
+        {
+          throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+        }
         for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
         {
-          efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, 0 ), getFdFilterPartition( inputIdx, 0 ), mFrequencyDomainAccumulator.data(), mDftSize, mAlignment );
+          if( efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, blockIdx ),
+              getFdFilterPartition( inputIdx, blockIdx ),
+              mFrequencyDomainAccumulator.data(),
+              mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
+              mComplexAlignment ) != efl::noError )
+          {
+            throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+          }
         }
       } // Calculated convolution for a given filter.
-      // TODO: Scale an add to 
+      // Scale and add to the sum vector for this output.
+      SampleType const scaleFactor = routingIt->second.gainLinear;
+      // Note that there is no dedicated function for scaling a complex vector by a real-valued constant at the moment, so we use a complex-complex variant.
+      // (which is slightly inefficient)
+      // Another option would be to cast the complex vectors to real-valued ones, and to do a real-valued scale and add for 2 time the length.
+      if( efl::vectorMultiplyConstantAddInplace( static_cast<FrequencyDomainType>(scaleFactor),
+                                                 mFrequencyDomainAccumulator.data(),
+                                                 mFrequencyDomainSum.data(),
+                                                 mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
+                                                 mComplexAlignment ) != efl::noError )
+      {
+        throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+      }
     } // iterate through all routings for a given output port.
-    // TODO: Perform inverse transform, discard wraparound samples and assign to the
-    // output buffer.
+    // Perform the inverse transformation
+    // TODO: revise error hadling for the transform wrapper.
+    mFftRepresentation->inverseTransform( mFrequencyDomainSum.data(), mTimeDomainTransformBuffer.data() );
+    // discard the time-domain aliasing and copy the remaining samaples to the output
+    // TODO: Establish a computation for the guaranteed alignment (0 at the moment).
+    if( efl::vectorCopy( mTimeDomainTransformBuffer.data() + blockLength(), output[outputIdx], mDftSize - blockLength(), 0 ) != efl::noError )
+    {
+      throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Copying of output samples failed." );
+    }
   }
 }
 
@@ -118,18 +158,177 @@ calculateDftSize( std::size_t blockLength )
 
 template< typename SampleType >
 /*static*/ std::size_t MultichannelConvolverUniform<SampleType>::
-calculateDftRepresentationSizeRealValues( std::size_t blockLength )
+calculateDftRepresentationSize( std::size_t blockLength )
 {
-  return 2 * (blockLength+1);
+  std::size_t const dftSize = calculateDftSize( blockLength );
+  if( dftSize % 2 != 0 ) // Cannot happen with the current setting for the DFT size.
+  {
+    throw std::invalid_argument( "At the moment, the complex representation of the DFT values supports only real-valued DFT sizes." );
+  }
+  return dftSize/2+1;
 }
 
 template< typename SampleType >
 /*static*/ std::size_t MultichannelConvolverUniform<SampleType>::
-calculateDftRepresentationSizeRealValuesPadded( std::size_t blockLength, std::size_t alignment )
+calculateDftRepresentationSizePadded( std::size_t blockLength, std::size_t alignment )
 {
-  return efl::nextAlignedSize( calculateDftRepresentationSizeRealValues( blockLength ), alignment);
+  return efl::nextAlignedSize( calculateDftRepresentationSize( blockLength ), alignment);
 }
 
+template< typename SampleType >
+SampleType MultichannelConvolverUniform<SampleType>::calculateFilterScalingFactor() const
+{
+  if( not mFftRepresentation )
+  {
+    throw std::logic_error( "MultichannelConvolverUniform::calculateFilterScalingFactor(): The FFT implementation object has not been initialized." );
+  }
+  SampleType const fwdConst = mFftRepresentation->forwardScalingFactor();
+  SampleType const invConst = mFftRepresentation->inverseScalingFactor( );
+
+  return mDftSize / (fwdConst*invConst);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Manipulation of the routing table
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::clearRoutingTable( )
+{
+  mRoutingTable.clear();
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::initRoutingTable( std::vector<RoutingEntry> const & routings )
+{
+  clearRoutingTable();
+  if( routings.size() > maxNumberOfRoutingPoints() )
+  {
+    throw std::invalid_argument( "MultichannelConvolverUniform:initRoutingTable() exceeds the maximum admissible number of elements " );
+  }
+  for( RoutingEntry const & v : routings )
+  {
+    setRoutingEntry( v );
+  }
+  assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::setRoutingEntry( RoutingEntry const & routing )
+{
+  setRoutingEntry( routing.input, routing.output, routing.filterIndex, routing.gain );
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, SampleType gain )
+{
+  assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
+  if( inputIdx >= numberOfInputs() )
+  {
+    std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Input index exceeds the admissible range." );
+  }
+  if( outputIdx >= numberOfOutputs() )
+  {
+    std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Output index exceeds the admissible range." );
+  }
+  if( filterIdx >= maxNumberOfFilterEntries() )
+  {
+    std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
+  }
+
+  RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
+  if( findIt != mRoutingTable.end() )
+  {
+    findIt->second = RoutingValue( filterIdx, gain );
+  }
+  else
+  {
+    if( mRoutingTable.size( ) >= maxNumberOfRoutingPoints( ) )
+    {
+      std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
+    }
+    auto res = mRoutingTable.insert( std::make_pair( RoutingKey( inputIdx, outputIdx ), RoutingValue( filterIdx, gain ) ) );
+    if( !res.second )
+    {
+      throw std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Adding new routing point failed." );
+    }
+  }
+  assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
+}
+
+template< typename SampleType >
+bool MultichannelConvolverUniform<SampleType>::removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx )
+{
+  std::size_t numErased = mRoutingTable.erase( RoutingKey( inputIdx, outputIdx ) );
+  return (numErased > 0);
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::clearFilters()
+{
+  mFilterPartitionsFrequencyDomain.zeroFill();
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::initFilters( efl::BasicMatrix<SampleType> const & newFilters )
+{
+  clearFilters();
+  if( newFilters.numberOfRows() >= maxNumberOfFilterEntries() )
+  {
+    std::invalid_argument( "MultichannelConvolverUniform::initFilters( ): The initializer exceeds the maximum number of filter entries." );
+  }
+  if( newFilters.numberOfColumns( ) >= maxFilterLength() )
+  {
+    std::invalid_argument( "MultichannelConvolverUniform::initFilters( ): The initializer exceeds the maximum filter length." );
+  }
+  std::size_t const numFilters = newFilters.numberOfRows( );
+  std::size_t const filterLength = newFilters.numberOfColumns( );
+  for( std::size_t filterIdx( 0 ); filterIdx < numFilters; ++filterIdx )
+  {
+    setImpulseResponse( newFilters.row( filterIdx ), filterLength, filterIdx, newFilters.alignmentElements() );
+  }
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::
+transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment /*= 0*/ )
+{
+  if( irLength >= maxFilterLength() )
+  {
+    std::invalid_argument( "MultichannelConvolverUniform::transformImpulseResponse(): impulse response length exceeds maximum admissible values." );
+  }
+  for( std::size_t partitionIdx( 0 ); partitionIdx < mNumberOfFilterPartitions; ++partitionIdx )
+  {
+    mTimeDomainTransformBuffer.zeroFill( ); // This ensures correct results also if the the buffer is filled patially (i.e., less than than the admissible number of samples.
+    std::size_t const startIdx = partitionIdx * blockLength();
+    std::size_t const endIdx = std::min( (partitionIdx + 1) * blockLength(), irLength ); // STL-like 'one past end' index
+    if( endIdx > startIdx )
+    {
+      // The following multiply calls assumes that the blocklength is a multiple of the alignment.
+      // Multiply the the filter by the computed scaling constants to compendate for the FFT normalisation.
+      if( efl::vectorMultiplyConstant( mFilterScalingFactor, ir + startIdx, mTimeDomainTransformBuffer.data(), endIdx - startIdx, std::min( mAlignment, alignment ) ) != efl::noError )
+      {
+        std::runtime_error( "MultichannelConvolverUniform::transformImpulseResponse(): Error while copying data." );
+      }
+      FrequencyDomainType * blockResult = result + partitionIdx * mDftRepresentationSizePadded;
+      // TODO: check error reporting of the wrapper.
+      mFftRepresentation->forwardTransform( mTimeDomainTransformBuffer.data(), blockResult );
+    }
+  }
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::
+setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
+{
+  transformImpulseResponse( ir, filterLength, mFilterPartitionsFrequencyDomain.row( filterIdx ), std::min( mAlignment, alignment ) );
+}
+
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
+{
+  efl::vectorCopy( transformedFilter, mFilterPartitionsFrequencyDomain.row( filterIdx ), mFilterPartitionsFrequencyDomain.numberOfColumns(),
+                   std::min( alignment, mComplexAlignment ) );
+}
 
 // explicit instantiations
 template class MultichannelConvolverUniform<float>;
