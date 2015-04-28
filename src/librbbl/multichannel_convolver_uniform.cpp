@@ -34,9 +34,9 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
  , mDftRepresentationSize( calculateDftRepresentationSize( blockLength ) )
  , mDftRepresentationSizePadded( calculateDftRepresentationSizePadded( blockLength, mComplexAlignment ) )
  , mInputBuffers( numberOfInputs, mDftSize, alignment )
- , mFdlCycleOffset( 0 )
  , mInputFDL( numberOfInputs, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
- , mTimeDomainTransformBuffer( mDftSize, mAlignment )
+ , mFdlCycleOffset( 0 )
+ ,  mTimeDomainTransformBuffer( mDftSize, mAlignment )
  , mFilterPartitionsFrequencyDomain( maxFilterEntries, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
  , mFrequencyDomainAccumulator( mDftRepresentationSizePadded, mComplexAlignment )
  , mFrequencyDomainSum( mDftRepresentationSizePadded, mComplexAlignment )
@@ -235,7 +235,7 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
     std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
   }
 
-  RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
+  typename RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
   if( findIt != mRoutingTable.end() )
   {
     findIt->second = RoutingValue( filterIdx, gain );
