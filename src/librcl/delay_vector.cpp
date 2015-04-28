@@ -120,7 +120,7 @@ void DelayVector::process()
   {
     // Get a read pointer position relative to zero delay sample before the current block of data was written into the delay
     // the '-1' is due to the current definition of the zero delay, which is one behind the write index.
-    SampleType const * input = mRingBuffer->getReadPointer( idc, blockLength-1 );
+    SampleType const * input = mRingBuffer->getReadPointer( idc, blockLength );
     SampleType * output = mOutput[idc];
     switch( mInterpolationMethod )
     {

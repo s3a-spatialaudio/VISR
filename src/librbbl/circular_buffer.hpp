@@ -150,8 +150,8 @@ public:
                                    DelayIndexType delay ) const
   { 
     assert( channelIndex < numberOfChannels() );
-    assert( delay >= length() );
-    return (mBasePointer + channelIndex * mStride + mAllocatedLength + mWriteHeadIndex - 1) - delay;
+    assert( delay <= length() );
+    return (mBasePointer + channelIndex * mStride + mAllocatedLength + mWriteHeadIndex) - delay;
   }
 
 private:
