@@ -81,7 +81,7 @@ processOutput( SampleType * const * output, std::size_t alignment )
 {
   for( std::size_t outputIdx( 0 ); outputIdx < mNumberOfOutputs; ++outputIdx )
   {
-    if( efl::vectorZero( mFrequencyDomainAccumulator.data(), mDftSize, alignment ) != efl::noError )
+    if( efl::vectorZero( mFrequencyDomainSum.data(), mDftRepresentationSizePadded, mComplexAlignment ) != efl::noError )
     {
       throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Clearing FD accumulator failed." );
     }
@@ -92,28 +92,26 @@ processOutput( SampleType * const * output, std::size_t alignment )
     typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx+1 ) );
     for( typename RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
     {
-      for( std::size_t blockIdx( 0 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
-      {
-        std::size_t const  inputIdx = routingIt->first.inputIdx;
+      std::size_t const  inputIdx = routingIt->first.inputIdx;
+      std::size_t const  filterIdx = routingIt->second.filterIdx;
 
-        if( efl::vectorMultiply( getFdlBlock( inputIdx, 0 ),
-          getFdFilterPartition( inputIdx, 0 ),
-          mFrequencyDomainAccumulator.data( ),
-          mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
-          mComplexAlignment ) != efl::noError )
-        {
-          throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-        }
-        for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
-        {
-          if( efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, blockIdx ),
-              getFdFilterPartition( inputIdx, blockIdx ),
+      if( efl::vectorMultiply( getFdlBlock( inputIdx, 0 ),
+        getFdFilterPartition( filterIdx, 0 ),
+        mFrequencyDomainAccumulator.data( ),
+        mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
+        mComplexAlignment ) != efl::noError )
+      {
+        throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+      }
+      for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
+      {
+        if( efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, blockIdx ),
+              getFdFilterPartition( filterIdx, blockIdx ),
               mFrequencyDomainAccumulator.data(),
               mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
               mComplexAlignment ) != efl::noError )
-          {
-            throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-          }
+        {
+          throw std::runtime_error( "MultichannelConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
         }
       } // Calculated convolution for a given filter.
       // Scale and add to the sum vector for this output.
@@ -131,7 +129,7 @@ processOutput( SampleType * const * output, std::size_t alignment )
       }
     } // iterate through all routings for a given output port.
     // Perform the inverse transformation
-    // TODO: revise error hadling for the transform wrapper.
+    // TODO: revise error handling for the transform wrapper.
     mFftRepresentation->inverseTransform( mFrequencyDomainSum.data(), mTimeDomainTransformBuffer.data() );
     // discard the time-domain aliasing and copy the remaining samaples to the output
     // TODO: Establish a computation for the guaranteed alignment (0 at the moment).
@@ -185,7 +183,7 @@ SampleType MultichannelConvolverUniform<SampleType>::calculateFilterScalingFacto
   SampleType const fwdConst = mFftRepresentation->forwardScalingFactor();
   SampleType const invConst = mFftRepresentation->inverseScalingFactor( );
 
-  return mDftSize / (fwdConst*invConst);
+  return static_cast<SampleType>(1.0) / (fwdConst*invConst*static_cast<SampleType>(mDftSize));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

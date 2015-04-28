@@ -107,7 +107,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     {
       outputPointers[chIdx] = outputMatrix.row( chIdx );
     }
-    plhs[0] = mxCreateDoubleMatrix( numberOfOutputs, inputSignalLength, mxREAL );
+    plhs[0] = mxCreateDoubleMatrix( inputSignalLength, numberOfOutputs, mxREAL );
     double * outputBasePtr = mxGetPr( plhs[0] );
 
     /*
@@ -133,11 +133,11 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 
     for( std::size_t blockIdx( 0 ); blockIdx < numBlocks; ++blockIdx )
     {
-      fillInputBuffers( inputBasePtr, blockIdx*blockIdx, inputSignalLength, inputMatrix );
+      fillInputBuffers( inputBasePtr, blockIdx*blockLength, inputSignalLength, inputMatrix );
 
       conv.process( &inputPointers[0], &outputPointers[0], defaultAlignment );
 
-      copyOutputBuffers( outputMatrix, outputBasePtr, blockIdx*blockIdx, inputSignalLength );
+      copyOutputBuffers( outputMatrix, outputBasePtr, blockIdx*blockLength, inputSignalLength );
 
     }
   }

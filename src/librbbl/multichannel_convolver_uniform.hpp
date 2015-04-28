@@ -234,15 +234,22 @@ private:
   {
     bool operator()( RoutingKey const & lhs, RoutingKey const & rhs ) const
     {
-      return lhs.outputIdx < rhs.outputIdx ? lhs.inputIdx < rhs.inputIdx : false;
+      if( lhs.outputIdx == rhs.outputIdx )
+      {
+        return lhs.inputIdx < rhs.inputIdx;
+      }
+      else
+      {
+        return lhs.outputIdx < rhs.outputIdx;
+      }
     }
   };
 
   struct RoutingValue
   {
     RoutingValue( std::size_t idx, SampleType gain )
-    : filterIndex( idx ), gainLinear( gain ) {}
-    std::size_t filterIndex;
+    : filterIdx( idx ), gainLinear( gain ) {}
+    std::size_t filterIdx;
     SampleType gainLinear;
   };
   using RoutingTable = std::map<RoutingKey, RoutingValue, CompareRoutings>;
@@ -314,8 +321,8 @@ getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx )
 {
   assert( filterIdx < maxNumberOfFilterEntries() );
   assert( blockIdx < mNumberOfFilterPartitions );
-  std::size_t const columnIdx = (mFdlCycleOffset + blockIdx) * mDftRepresentationSizePadded;
-  return mInputFDL.row( filterIdx ) + columnIdx;
+  std::size_t const columnIdx = blockIdx * mDftRepresentationSizePadded;
+  return mFilterPartitionsFrequencyDomain.row( filterIdx ) + columnIdx;
 }
 
 template<typename SampleType>
@@ -324,8 +331,8 @@ MultichannelConvolverUniform<SampleType>::getFdFilterPartition( std::size_t filt
 {
   assert( filterIdx < maxNumberOfFilterEntries( ) );
   assert( blockIdx < mNumberOfFilterPartitions );
-  std::size_t const columnIdx = (mFdlCycleOffset + blockIdx) * mDftRepresentationSizePadded;
-  return mInputFDL.row( filterIdx ) + columnIdx;
+  std::size_t const columnIdx = blockIdx * mDftRepresentationSizePadded;
+  return mFilterPartitionsFrequencyDomain.row( filterIdx ) + columnIdx;
 }
 
 } // namespace rbbl
