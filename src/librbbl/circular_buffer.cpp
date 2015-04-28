@@ -176,7 +176,7 @@ DataType * CircularBuffer<DataType>::getFirstWritePointer()
 template< typename DataType >
 void CircularBuffer<DataType>::getWritePointers( DataType * * writePointers )
 {
-  for( std::size_t chIdx; chIdx < mNumberOfChannels; ++chIdx )
+  for( std::size_t chIdx(0); chIdx < mNumberOfChannels; ++chIdx )
   {
     writePointers[chIdx] = mBasePointer + chIdx * mStride + mWriteHeadIndex;
   }
