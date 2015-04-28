@@ -14,20 +14,6 @@ namespace visr
 namespace rbbl
 {
 
-template<typename DataType>
-FftwWrapper<DataType>::FftwWrapper()
-{
-}
-template FftwWrapper<float>::FftwWrapper();
-template FftwWrapper<double>::FftwWrapper();
-
-template<typename DataType>
-FftwWrapper<DataType>::~FftwWrapper()
-{
-}
-template FftwWrapper<float>::~FftwWrapper( );
-template FftwWrapper<double>::~FftwWrapper( );
-
 
 template<>
 class FftwWrapper<float>::Impl
@@ -42,12 +28,12 @@ public:
     std::size_t outputLength = 2 * (fftSize / 2 + fftSize % 2 + 1); // equivalent to ceil( fftSize/2+1 ), but without floating-point conversion.
     efl::AlignedArray<float> out( outputLength, alignElements );
 
-    mFwdPlan = fftwf_plan_dft_r2c_1d( static_cast<int>(fftSize), in.data( ), reinterpret_cast<TransformDataType*>(out.data( )), FFTW_PRESERVE_INPUT );
+    mFwdPlan = fftwf_plan_dft_r2c_1d( static_cast<int>(fftSize), in.data(), reinterpret_cast<TransformDataType*>(out.data()), FFTW_PRESERVE_INPUT );
     if( !mFwdPlan )
     {
       throw std::invalid_argument( "Initialisation of forward transform plan failed." );
     }
-    mInvPlan = fftwf_plan_dft_c2r_1d( static_cast<int>(fftSize), reinterpret_cast<TransformDataType*>(out.data( )), in.data( ), FFTW_PRESERVE_INPUT);
+    mInvPlan = fftwf_plan_dft_c2r_1d( static_cast<int>(fftSize), reinterpret_cast<TransformDataType*>(out.data()), in.data(), FFTW_PRESERVE_INPUT );
     if( !mInvPlan )
     {
       throw std::invalid_argument( "Initialisation of inverse transform plan failed." );
@@ -77,19 +63,19 @@ public:
     std::size_t outputLength = 2 * (fftSize / 2 + fftSize % 2 + 1); // equivalent to ceil( fftSize/2+1 ), but without floating-point conversion.
     efl::AlignedArray<double> out( outputLength, alignElements );
 
-    mFwdPlan = fftw_plan_dft_r2c_1d( static_cast<int>(fftSize), in.data( ), reinterpret_cast<TransformDataType*>(out.data( )), FFTW_PRESERVE_INPUT );
+    mFwdPlan = fftw_plan_dft_r2c_1d( static_cast<int>(fftSize), in.data(), reinterpret_cast<TransformDataType*>(out.data()), FFTW_PRESERVE_INPUT );
     if( !mFwdPlan )
     {
       throw std::invalid_argument( "Initialisation of forward transform plan failed." );
     }
-    mInvPlan = fftw_plan_dft_c2r_1d( static_cast<int>(fftSize), reinterpret_cast<TransformDataType*>(out.data( )), in.data( ), FFTW_PRESERVE_INPUT );
+    mInvPlan = fftw_plan_dft_c2r_1d( static_cast<int>(fftSize), reinterpret_cast<TransformDataType*>(out.data()), in.data(), FFTW_PRESERVE_INPUT );
     if( !mInvPlan )
     {
       throw std::invalid_argument( "Initialisation of inverse transform plan failed." );
     }
   }
 
-  ~Impl( )
+  ~Impl()
   {
     fftw_destroy_plan( mFwdPlan );
     fftw_destroy_plan( mInvPlan );
@@ -100,12 +86,26 @@ public:
 };
 
 template<typename DataType>
-void FftwWrapper<DataType>::init( std::size_t fftSize, std::size_t alignmentElements )
+FftwWrapper<DataType>::FftwWrapper( std::size_t fftSize, std::size_t alignmentElements )
+ : mImpl( new FftwWrapper<DataType>::Impl( fftSize, alignmentElements ) )
 {
-  mImpl.reset( new FftwWrapper<DataType>::Impl( fftSize, alignmentElements ) );
 }
-template void FftwWrapper<float>::init( std::size_t, std::size_t );
-template void FftwWrapper<double>::init( std::size_t, std::size_t );
+template FftwWrapper<float>::FftwWrapper( std::size_t, std::size_t );
+template FftwWrapper<double>::FftwWrapper( std::size_t, std::size_t );
+
+template<typename DataType>
+FftwWrapper<DataType>::~FftwWrapper()
+{
+}
+template FftwWrapper<float>::~FftwWrapper( );
+template FftwWrapper<double>::~FftwWrapper( );
+
+//template<typename DataType>
+//void FftwWrapper<DataType>::init( std::size_t fftSize, std::size_t alignmentElements )
+//{
+//}
+//template void FftwWrapper<float>::init( std::size_t, std::size_t );
+//template void FftwWrapper<double>::init( std::size_t, std::size_t );
 
 template<>
 void FftwWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
