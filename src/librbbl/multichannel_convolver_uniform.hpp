@@ -66,6 +66,8 @@ public:
 
   std::size_t maxNumberOfFilterEntries() const { return mFilterPartitionsFrequencyDomain.numberOfRows(); }
 
+  std::size_t maxFilterLength() const { return mMaxFilterLength; }
+
   std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
 
   void process( SampleType const * const * input,
@@ -77,15 +79,82 @@ private:
   void processOutput( SampleType * const * output, std::size_t alignment );
 
   /**
+   * Manipulation of the routing table.
+   */
+  //@{
+  /**
+   * Remove all entries from the routing table.
+   */
+  void clearRoutingTable();
+
+  /**
+   * Initialize the routing table from a set of entries.
+   * All pre-existing entries are cleared beforehand.
+   * @param routings A vector of routing entries
+   * @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
+   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
+   */
+  void initRoutingTable( std::vector<RoutingEntry> const & routings );
+
+  /**
+   * Add a new routing to the routing table.
+   * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
+   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
+   */
+  void setRoutingEntry( RoutingEntry const & routing );
+
+  /**
+  * Add a new routing to the routing table.
+  * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
+  * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
+  */
+  void setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, SampleType gain );
+
+  /**
+   * @return \p true if the entry was removes, \false if not (i.e., the entry did not exist).
+   */
+  bool removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx );
+
+  /**
+   * Query the currently active number of routings.
+   */
+  std::size_t numberOfRoutings() const { return mRoutingTable.size(); }
+  //@}
+
+  /**
+   * Helper functions to calculate the parameters of the partitioned convolution algorithm.
+   */
+  //@{
+  /**
    * Calculate the number of filter partitions for the nonuniformly partitioned convolution algorithm.
    */
   static std::size_t calculateNumberOfPartitions( std::size_t filterLength, std::size_t blockLength );
 
+  /**
+   * Return the size of the DFT, i.e., the number of real inputs samples passed to each forward FFT call.
+   */
   static std::size_t calculateDftSize( std::size_t blockLength );
 
-  static std::size_t calculateDftRepresentationSizeRealValues( std::size_t blockLength );
+  /**
+   * Return the number of complex values to represent the frequency-domain DFT representation.
+   */
+  static std::size_t calculateDftRepresentationSize( std::size_t blockLength );
 
-  static std::size_t calculateDftRepresentationSizeRealValuesPadded( std::size_t blockLength, std::size_t alignment );
+  /**
+  * Return the number of complex values to represent the frequency-domain DFT representation when padded to the requested alignment.
+  * @param blockLength The number of values consumed and produced in each process() call.
+  * @param alignment The alignment (in number of complex elements)
+  */
+  static std::size_t calculateDftRepresentationSizePadded( std::size_t blockLength, std::size_t alignment );
+
+  /**
+   * Calculate the scaling factor to be applied to the transformed input filters.
+   * This factor is necessary to account for the different normalisation strategies used in different FFT libraries 
+   * (i.e., whether normalization is done in the forward or the inverse transform, distributed between the two (unitary transform), or not at all.
+   * @throw std::logic_error If the Fft representation object has not been initialised.
+   */
+  SampleType calculateFilterScalingFactor() const;
+  //@}
 
   inline FrequencyDomainType * getFdlBlock( std::size_t inputIdx, std::size_t blockIdx );
 
@@ -96,11 +165,35 @@ private:
   inline FrequencyDomainType const * getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx ) const;
 
   /**
+   * Manipulation of the contained filter representation.
+   */
+  //@{
+  /**
+   * Reset all contained filters to zero.
+   */
+  void clearFilters();
+
+  void initFilters( efl::BasicMatrix<SampleType> const & newFilters );
+
+  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 );
+
+  void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
+
+  /**
+   * Assign an already transformed filter to a specific index of the the filter matrix.
+   * @param alignment The guaranteed alignment of the transformedFilter argument (as a multiple of the size of the complex data type FrequencyDomainType.
+   */
+  void setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment = 0 );
+  //@}
+
+  /**
    * The alignment used in all data members.
    * Also used for the representation of the FDL and the frequency-domain filter representation, which stores all partitions in a single matrix row, 
    * possibly using zero padding to enforce the required alignment for each partition.
    */
-  std::size_t mAlignment;
+  std::size_t const mAlignment;
+
+  std::size_t const mComplexAlignment;
 
   std::size_t const mNumberOfInputs;
 
@@ -131,23 +224,26 @@ private:
     }
     std::size_t inputIdx;
     std::size_t outputIdx;
-    //bool operator<(RoutingKey const & rhs)
-    //{
-    //  return outputIdx < rhs.outputIdx ? true : inputIdx < rhs.inputIdx;
-    //}
   };
+  /**
+   * Function object for ordering the routings within the routing table.
+   * By grouping the entries according to the output indices, the ordering is 
+   * specifically tailored to the execution of the process() function.
+   */
   struct CompareRoutings
   {
     bool operator()( RoutingKey const & lhs, RoutingKey const & rhs ) const
     {
-      return lhs.outputIdx < rhs.outputIdx ? true : lhs.inputIdx < rhs.inputIdx;
+      return lhs.outputIdx < rhs.outputIdx ? lhs.inputIdx < rhs.inputIdx : false;
     }
   };
 
   struct RoutingValue
   {
-    SampleType gainLinear;
+    RoutingValue( std::size_t idx, SampleType gain )
+    : filterIndex( idx ), gainLinear( gain ) {}
     std::size_t filterIndex;
+    SampleType gainLinear;
   };
   using RoutingTable = std::map<RoutingKey, RoutingValue, CompareRoutings>;
 
@@ -157,13 +253,33 @@ private:
 
   efl::BasicMatrix<std::complex<SampleType> > mInputFDL;
 
+  /**
+   * Temporary memory buffer for transforming filter partitions and holding the results of
+   * the inverse transformation.
+   */
+  mutable efl::BasicVector<SampleType> mTimeDomainTransformBuffer;
+
   std::size_t mFdlCycleOffset;
 
   efl::BasicMatrix<std::complex<SampleType> > mFilterPartitionsFrequencyDomain;
 
+  /**
+   * Temporarily used buffer to accumulate the results of a frequency-domain block convolution.
+   */
+  efl::BasicVector<std::complex<SampleType> > mFrequencyDomainAccumulator;
+
+  /**
+   * Temporarily used buffer to combine all contributions to an output.
+   */
+  efl::BasicVector<std::complex<SampleType> > mFrequencyDomainSum;
+
   std::unique_ptr<rbbl::FftWrapperBase<SampleType> > mFftRepresentation;
 
-  efl::BasicVector<std::complex<SampleType> > mFrequencyDomainAccumulator;
+  /**
+   * Scaling factor applied to the frequency-domain representation of the filters to compensate
+   * for the normalisation strategy of the FFT implementation in use.
+   */
+  SampleType const mFilterScalingFactor;
 };
 
 template<typename SampleType>
