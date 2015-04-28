@@ -252,14 +252,19 @@ private:
   rbbl::CircularBuffer<SampleType> mInputBuffers;
 
   efl::BasicMatrix<std::complex<SampleType> > mInputFDL;
-
+  
+  /**
+   * Cyclic counter denoting the current block offset of the zeroth 
+   * frequency-domain input block within the rows of \p mInputFDL.
+   */
+  std::size_t mFdlCycleOffset;
+  
   /**
    * Temporary memory buffer for transforming filter partitions and holding the results of
    * the inverse transformation.
    */
   mutable efl::BasicVector<SampleType> mTimeDomainTransformBuffer;
 
-  std::size_t mFdlCycleOffset;
 
   efl::BasicMatrix<std::complex<SampleType> > mFilterPartitionsFrequencyDomain;
 
