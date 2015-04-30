@@ -32,6 +32,7 @@ int LoudspeakerArray::load(FILE *file)
     i = nSpk = nTri = 0;
 
     std::fill( m_channel, m_channel + MAX_NUM_SPEAKERS, -1 );
+    std::fill( &m_triplet[0][0], &m_triplet[0][0] + MAX_NUM_LOUDSPEAKER_TRIPLETS*3, -1 );
 
     m_is2D = false;
     m_isInfinite = false;
@@ -40,11 +41,7 @@ int LoudspeakerArray::load(FILE *file)
 
     do {
         c = fgetc(file);
-//        fscanf(file, "%c",&c);
-//        n = fscanf(file, "%c",&c);
-//        if( n != 1 ) {
-//            return -1;        // not needed - /n is ignored
-//        }
+
         if (c == 'c') {        // cartesians
             n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z);
             if( n != 5 )
