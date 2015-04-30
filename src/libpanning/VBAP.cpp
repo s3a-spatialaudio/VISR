@@ -7,22 +7,24 @@
 
 #include "VBAP.h"
 
-
+#include <limits>
 
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
-    Afloat det;
+    Afloat det, temp;
     Afloat* inv;
     int i;
  
 #ifdef VBAP_DEBUG_MESSAGES
     printf("calcInvMatrices()\n");   //!
 #endif
-
+        
     for (i = 0 ; i < m_array->m_nTriplets; i++) {
-
+    
         if (m_array->m_triplet[i][0] == -1) continue;  //  triplet unused
             
+	    if (m_array->m_triplet[i][0] == -1) continue; 
+
             l1 = m_array->m_position[m_array->m_triplet[i][0]];
             l2 = m_array->m_position[m_array->m_triplet[i][1]];
             if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
@@ -42,10 +44,13 @@ int VBAP::calcInvMatrices(){
             l1.normalise();
             l2.normalise();
             l3.normalise();
+        
+            temp = (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
+                    - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
+                    + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
 
-            det = 1.0 / (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
-                         - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
-                         + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)));
+            if (temp != 0.0f) det = 1.0 / temp;
+            else det = 1.0;
             
             inv = m_invMatrix[i];
             inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
@@ -70,6 +75,7 @@ int VBAP::calcGains(){
     int i,j,jmin,l1,l2,l3;
     Afloat *inv;
     Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
+
     
     //! Slow triplet search
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
@@ -78,6 +84,7 @@ int VBAP::calcGains(){
 #ifdef VBAP_DEBUG_MESSAGES
     printf("setListenerPosition %f %f %f\n",m_listenerPos.x,m_listenerPos.y,m_listenerPos.z);
 #endif
+    gmin = g1min = g2min = g3min = 0.0;
     
     for(i = 0; i < m_nSources; i++) {
         
@@ -98,6 +105,8 @@ int VBAP::calcGains(){
         
         for(j = 0; j < m_array->m_nTriplets; j++) {
 
+            if (m_array->m_triplet[j][0] == -1) continue;  //  triplet unused
+
             inv = m_invMatrix[j];
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
@@ -114,8 +123,10 @@ int VBAP::calcGains(){
             // Triplet must have at most 1 -ve gain.
             //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
             //! better geometric solution needed.
-            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1 ) &&  // at most one negative gain
-                 ( (g1 >= gmin && g2 >= gmin && g3 >= gmin) || jmin == -1 )
+            //! 'dead'-speakers provide a posssible solution.
+
+            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&   // at most one negative gain
+                 ( jmin == -1 || (g1 > gmin && g2 > gmin && g3 > gmin)  )
             ) {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -154,15 +165,22 @@ int VBAP::calcGains(){
         if (g2 < 0) g2 = 0;
         if (g3 < 0) g3 = 0;
         
+        // Apply gain limit
+        if (g1 > m_maxGain) g1 = m_maxGain;
+        if (g1 < -m_maxGain) g1 = -m_maxGain;
+        if (g2 > m_maxGain) g2 = m_maxGain;
+        if (g2 < -m_maxGain) g2 = -m_maxGain;
+        if (g3 > m_maxGain) g3 = m_maxGain;
+        if (g3 < -m_maxGain) g3 = -m_maxGain;
+        
         l1 = m_array->m_triplet[jmin][0];
         l2 = m_array->m_triplet[jmin][1];
         l3 = m_array->m_triplet[jmin][2];
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
-        if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
- 
+        if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case 
 #ifdef VBAP_DEBUG_MESSAGES
-        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3, g1,g2,g3);  //!
+        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3, g1,g2,g3);
 #endif
     }
     return 0;
