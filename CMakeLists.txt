@@ -51,6 +51,18 @@ IF(MATLAB_FOUND)
 ENDIF( MATLAB_FOUND )
 ENDIF( BUILD_MATLAB_EXTERNALS )
 
+################################################################################
+# Support for Max/MSP externals
+IF( WIN32 OR APPLE )
+  OPTION( BUILD_MAX_MSP_EXTERNALS "Build externals for MAX/MSP" OFF )
+  IF( BUILD_MAX_MSP_EXTERNALS )
+#    FIND_PACKAGE( MaxSDK REQUIRED HINTS ENV MAX_SDK_ROOT)
+     SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ENV{MAX_SDK_ROOT} )
+    FIND_PACKAGE( MaxSDK REQUIRED)
+    MESSAGE( STATUS "MAX SDK found: " ${MAXSDK_MAINPATH} )
+  ENDIF(BUILD_MAX_MSP_EXTERNALS)
+ENDIF(  WIN32 OR APPLE )
+
 ###########################################################
 # Support for 3rd-party libraries.
 

@@ -2,8 +2,6 @@
 
 SET( APPLICATION_NAME rcl_test )
 
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
-
 ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp test_kinect_receiver.cpp )
