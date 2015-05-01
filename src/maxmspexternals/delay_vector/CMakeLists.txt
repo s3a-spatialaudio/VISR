@@ -12,7 +12,7 @@ ENDIF( APPLE )
 
 SET( EXTERNAL_NAME delay_vector )
 
-ADD_LIBRARY( delay_vector_max_external MODULE delay_vector.c )
+ADD_LIBRARY( delay_vector_max_external MODULE delay_vector.cpp )
 
 set_target_properties( delay_vector_max_external  PROPERTIES
     PREFIX ""
@@ -23,8 +23,8 @@ set_target_properties( delay_vector_max_external  PROPERTIES
 
 # Note: It is sufficient if we say 'extern "C"' within to revert the effects of the
 # C++ linking?
-SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES LINKER_LANGUAGE C)
-SET_PROPERTY( SOURCE delay_vector.c PROPERTY LANGUAGE C)
+#SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES LINKER_LANGUAGE C)
+#SET_PROPERTY( SOURCE delay_vector.c PROPERTY LANGUAGE C)
 
 IF( WIN32 )
   TARGET_LINK_LIBRARIES( delay_vector_max_external ${MAXSDK_CRT_LIBRARY} )

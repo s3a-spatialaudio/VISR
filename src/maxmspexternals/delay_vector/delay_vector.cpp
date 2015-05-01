@@ -11,6 +11,90 @@
 #include "z_dsp.h"
 #include "ext_obex.h"
 
+#include <cstddef>
+
+namespace visr
+{
+namespace maxmsp
+{
+
+
+class DelayVector
+{
+public:
+  static t_class *sStaticClassInstance;
+  
+  DelayVector();
+  
+  ~DelayVector();
+  
+  /**
+   * The interface required by max.
+   */
+  //@{
+  static void * newObject(t_symbol *s, short argc, t_atom *argv)
+  {
+    post("DelayVector: *delay_vector_new called.");
+  
+    int i;
+    float GAIN = 1.0;
+    float N_CHANNELS = 2.0; // Default number of channels
+    
+    // NOTE: This returns a POD-type object wirh no constructor called.
+    DelayVector *x = static_cast<DelayVector *>( object_alloc(sStaticClassInstance));
+  
+    atom_arg_getfloat(&N_CHANNELS, 0, argc, argv);
+    x->mNumberofChannels = N_CHANNELS;
+  
+    // Creating the inlets
+    dsp_setup(&x->mMaxObjProxy, (int)N_CHANNELS);
+  
+    // Creating the outlets
+    for (i = 0; i < (int)N_CHANNELS; i++)	{ outlet_new((t_object *)x, "signal"); }
+  
+    atom_arg_getfloat(&GAIN, 1, argc, argv);
+    x->mCurrentGain = static_cast<double>(GAIN);
+  
+    return x; // returning the pointer to the delay_vector obj
+  }
+  
+  static void dsp64( DelayVector *obj, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags)
+  {
+    obj->initDsp( dsp64, count, samplerate, maxvectorsize, flags );
+  }
+
+  static void perform64( DelayVector *x, t_object *dsp64, double **ins,
+                              long numins, double **outs, long numouts,
+                              long sampleframes, long flags, void *userparam);
+  static void free( DelayVector *x);
+
+  static void assist( DelayVector  *x, void *b, long msg, long arg, char *dst);
+  
+  static void getFloat( DelayVector *x, double f);
+  //@}
+  
+  /**
+   *
+   */
+  //@{
+  void create( t_symbol s, short argc, t_atom * argv );
+
+  void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
+
+  
+  //@}
+private:
+  std::size_t mNumberofChannels;
+  
+  double mCurrentGain;
+  
+  t_pxobject mMaxObjProxy;;
+};
+  
+}
+}
+
+
 extern "C"
 {
 
@@ -48,6 +132,12 @@ double const MAX_GAIN = 1.0f;
 // 5. Initialization routine MAIN
 int C74_EXPORT main()
 {
+#if 1
+  visr::maxmsp::DelayVector::sStaticClassInstance = class_new("delay_vector~",
+                                                reinterpret_cast<method>(&visr::maxmsp::DelayVector::newObject),
+                                                reinterpret_cast<method>(&visr::maxmsp::DelayVector::free),
+                                                sizeof(visr::maxmsp::DelayVector), 0, A_GIMME, 0);
+#else
 	delay_vector_class = class_new("delay_vector~", (method)delay_vector_new, (method)delay_vector_free, sizeof(t_delay_vector), 0, A_GIMME, 0);
 
 	// Binding of DSP method 64 bit
@@ -62,6 +152,7 @@ int C74_EXPORT main()
 	class_register(CLASS_BOX, delay_vector_class);
 
 	post("DelayVector: main() called.");
+#endif
 	return 0;
 }
 
@@ -75,7 +166,7 @@ void *delay_vector_new(t_symbol *s, short argc, t_atom *argv) {
     float GAIN = 1.0;
     float N_CHANNELS = 2.0; // Default number of channels
 
-	t_delay_vector *x = object_alloc(delay_vector_class);
+	t_delay_vector *x = static_cast<t_delay_vector *>( object_alloc(delay_vector_class));
 
     atom_arg_getfloat(&N_CHANNELS, 0, argc, argv);
     x->N_CHANNELS = N_CHANNELS;
