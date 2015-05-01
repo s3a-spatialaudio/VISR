@@ -6,6 +6,9 @@
 	Andreas Franck, University of Southampton
 */
 
+#undef WIN_VERSION
+#define MAC_VERSION 1
+
 #include "ext.h"							// standard Max include, always required
 #include "ext_obex.h"						// required for new style Max object
 
@@ -49,6 +52,9 @@ int C74_EXPORT main(void)
 	
 	class_register(CLASS_BOX, c);
 	convertin_class = c;
+  
+  post( "This is me, your convert_input~ external.");
+  
 	return 0;
 }
 
