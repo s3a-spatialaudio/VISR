@@ -3,6 +3,12 @@
 #ifndef VISR_EFL_BASIC_MATRIX_HPP_INCLUDED
 #define VISR_EFL_BASIC_MATRIX_HPP_INCLUDED
 
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
+
 #include "aligned_array.hpp"
 #include "alignment.hpp"
 #include "error_codes.hpp"
