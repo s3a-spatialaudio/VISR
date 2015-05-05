@@ -40,7 +40,7 @@ public:
     float GAIN = 1.0;
     float N_CHANNELS = 2.0; // Default number of channels
     
-    // NOTE: This returns a POD-type object wirh no constructor called.
+    // NOTE: This returns a POD-type object with no constructor called.
     DelayVector *x = static_cast<DelayVector *>( object_alloc(sStaticClassInstance));
   
     atom_arg_getfloat(&N_CHANNELS, 0, argc, argv);
@@ -67,6 +67,7 @@ public:
                               long numins, double **outs, long numouts,
                               long sampleframes, long flags, void *userparam);
   static void free( DelayVector *x);
+  
 
   static void assist( DelayVector  *x, void *b, long msg, long arg, char *dst);
   
@@ -91,6 +92,18 @@ private:
   t_pxobject mMaxObjProxy;;
 };
   
+
+/**
+ * Instantiation of the member variable.
+ */
+/*static*/ t_class* DelayVector::sStaticClassInstance;
+
+
+/*static*/ void DelayVector::free( DelayVector* x )
+{
+  // TODO: Implement me!
+}
+
 }
 }
 
