@@ -84,8 +84,18 @@ ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
+## Libsndfile
+# On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)
+IF( WIN32 ) # This includes 64-bit platforms!
+  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
+  # call instead of setting it globally.
+  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/sndfile )
+ENDIF( WIN32 )
+FIND_PACKAGE( sndfile REQUIRED )
+
+
 ## FFTW
-OPTION( USE_FFTW "Use the FFTW library. Do not use for distribuution, because this makes the whole project GPL." OFF )
+OPTION( USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
 IF( USE_FFTW )
   IF( WIN32 ) # This includes 64-bit platforms!
     SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
