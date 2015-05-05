@@ -1,5 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
 #include "panning_gain_calculator.hpp"
 
 #include <libefl/basic_matrix.hpp>
@@ -63,7 +68,7 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, std::size_t numb
     throw std::invalid_argument( "PanningGainCalculator::setup() The loudspeaker configuration file does not match to the given number of loudspeaker channels." );
   }
 
-  mVbapCalculator.setNumSources( mNumberOfObjects );
+  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
   mVbapCalculator.setLoudspeakerArray( &mSpeakerArray );
   // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
   setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
