@@ -8,7 +8,6 @@
 #pragma warning(disable: 4996)
 #endif
 
-
 #include "aligned_array.hpp"
 #include "alignment.hpp"
 #include "error_codes.hpp"
