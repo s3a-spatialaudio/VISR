@@ -5,7 +5,11 @@
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
-//#include <stdlib.h>
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
 #include "LoudspeakerArray.h"
 
 #include <algorithm>
@@ -42,11 +46,7 @@ int LoudspeakerArray::load(FILE *file)
 
     do {
         c = fgetc(file);
-//        fscanf(file, "%c",&c);
-//        n = fscanf(file, "%c",&c);
-//        if( n != 1 ) {
-//            return -1;        // not needed - /n is ignored
-//        }
+
         if (c == 'c') {        // cartesians
             n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z);
             if( n != 5 )

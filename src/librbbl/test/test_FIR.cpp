@@ -5,6 +5,10 @@
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
 
 #include <librbbl/fir.hpp>
 

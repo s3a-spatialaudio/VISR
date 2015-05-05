@@ -5,6 +5,11 @@
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
 #include <libpanning/VBAP.h>
 #include <libpanning/AllRAD.h>
 #include <boost/filesystem.hpp>
@@ -43,21 +48,21 @@ int main(int argc, const char * argv[])
 
     vbap.setLoudspeakerArray(&array);
     
-    vbap.setListenerPosition(0.0, 0.0, 0.0);
-//    vbap.setListenerPosition(-1.9, 0.0, -0.1);
-//    vbap.setListenerPosition(1.5, 0.0, 0.4);
-//    vbap.setListenerPosition(-1.9, 0.0, +0.05);
-//    vbap.setListenerPosition(0.0, -0.6, -0.2);
-//    vbap.setListenerPosition(0.0, -0.6, -0.2);  // hit triplet 39 with pw(-1,0,0)
-//    vbap.setListenerPosition(2.0, 0.0, 0.0);  // hit triplet 35 with pw(0,0,-1)
+    vbap.setListenerPosition(0.0f, 0.0f, 0.0f);
+//    vbap.setListenerPosition(-1.9f, 0.0f, -0.1f);
+//    vbap.setListenerPosition(1.5f, 0.0f, 0.4f);
+//    vbap.setListenerPosition(-1.9f, 0.0f, +0.05f);
+//    vbap.setListenerPosition(0.0f, -0.6f, -0.2f);
+//    vbap.setListenerPosition(0.0f, -0.6f, -0.2f);  // hit triplet 39 with pw(-1,0,0)
+//    vbap.setListenerPosition(2.0f, 0.0f, 0.0f);  // hit triplet 35 with pw(0,0,-1)
     vbap.calcInvMatrices();
     
     vbap.setNumSources(1);
-      sourcePos[0].set(2.08,	1.0, -5.0, true);
-//    sourcePos[0].set(-1.0,	0.0, 0.0, true);     // plane wave from front/back
-//    sourcePos[0].set(0.0, -1.0, 0.0, true);     // plane wave from left/right
-//    sourcePos[0].set(0.0, 0.0, -1.0, true);     // plane wave from below
-//    sourcePos[0].set(1.78, 1.73, -0.86, false);
+      sourcePos[0].set(2.08f,	1.0f, -5.0f, true);
+//    sourcePos[0].set(-1.0f,	0.0, 0.0f, true);     // plane wave from front/back
+//    sourcePos[0].set(0.0f, -1.0f, 0.0f, true);     // plane wave from left/right
+//    sourcePos[0].set(0.0f, 0.0f, -1.0f, true);     // plane wave from below
+//    sourcePos[0].set(1.78f, 1.73f, -0.86f, false);
     
     
 
@@ -65,13 +70,13 @@ int main(int argc, const char * argv[])
 //    sourcePos[0].set(1.0, 1.0, 1.0, false);
 //    sourcePos[0].set(1.0,	0.3, -0.2, false); // for 9.1_audiolab.txt jumps between triplet 11 and 10 as z reduced
 //    sourcePos[0].set(0.0, 1.0, -0.9, false);
-    sourcePos[1].set(1.0, 0.0, 0.0, false);
-    sourcePos[2].set(0.0, 1.0, 0.0, false);
-    sourcePos[3].set(0.0, 0.0, 1.0, false);
-    sourcePos[4].set(-1.0, 0.0, 0.0, false);
-    sourcePos[5].set(0.0, -1.0, 0.0, false);
-    sourcePos[6].set(0.0, 0.0, -1.0, false);
-    sourcePos[7].set(-1.0, -1.0, -1.0, false);
+    sourcePos[1].set(1.0f, 0.0f, 0.0f, false);
+    sourcePos[2].set(0.0f, 1.0f, 0.0f, false);
+    sourcePos[3].set(0.0f, 0.0f, 1.0f, false);
+    sourcePos[4].set(-1.0f, 0.0f, 0.0f, false);
+    sourcePos[5].set(0.0f, -1.0f, 0.0f, false);
+    sourcePos[6].set(0.0f, 0.0f, -1.0f, false);
+    sourcePos[7].set(-1.0f, -1.0f, -1.0f, false);
     vbap.setSourcePositions(&sourcePos);
 
     
