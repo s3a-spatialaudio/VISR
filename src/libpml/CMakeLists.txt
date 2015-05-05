@@ -5,5 +5,7 @@ SET( SOURCES array_configuration.cpp  biquad_parameter.cpp listener_position.cpp
 # Basically, this makes the headers show up in the Visual studio project.
 SET( HEADERS array_configuration.hpp biquad_parameter.hpp  listener_position.hpp matrix_parameter.hpp message_queue.hpp signal_routing_parameter.hpp )
 
+INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )
+
 ADD_LIBRARY( pml STATIC ${SOURCES} ${HEADERS} )
 
