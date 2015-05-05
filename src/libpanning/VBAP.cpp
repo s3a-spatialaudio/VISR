@@ -5,6 +5,11 @@
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
 #include "VBAP.h"
 
 #include <limits>
@@ -47,8 +52,8 @@ printf("calcInvMatrices()\n");   //!
                     - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
                     + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
 
-            if (temp != 0.0f) det = 1.0 / temp;
-            else det = 1.0;
+            if (temp != 0.0f) det = 1.0f / temp;
+            else det = 1.0f;
             
             inv = m_invMatrix[i];
             inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
