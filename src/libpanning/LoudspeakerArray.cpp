@@ -46,11 +46,7 @@ int LoudspeakerArray::load(FILE *file)
 
     do {
         c = fgetc(file);
-//        fscanf(file, "%c",&c);
-//        n = fscanf(file, "%c",&c);
-//        if( n != 1 ) {
-//            return -1;        // not needed - /n is ignored
-//        }
+
         if (c == 'c') {        // cartesians
             n = fscanf(file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z);
             if( n != 5 )
