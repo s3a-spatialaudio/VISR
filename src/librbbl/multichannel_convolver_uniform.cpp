@@ -270,13 +270,13 @@ template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::initFilters( efl::BasicMatrix<SampleType> const & newFilters )
 {
   clearFilters();
-  if( newFilters.numberOfRows() >= maxNumberOfFilterEntries() )
+  if( newFilters.numberOfRows() > maxNumberOfFilterEntries() )
   {
-    std::invalid_argument( "MultichannelConvolverUniform::initFilters( ): The initializer exceeds the maximum number of filter entries." );
+    throw std::invalid_argument( "MultichannelConvolverUniform::initFilters( ): The initializer exceeds the maximum number of filter entries." );
   }
-  if( newFilters.numberOfColumns( ) >= maxFilterLength() )
+  if( newFilters.numberOfColumns( ) > maxFilterLength() )
   {
-    std::invalid_argument( "MultichannelConvolverUniform::initFilters( ): The initializer exceeds the maximum filter length." );
+    throw std::invalid_argument( "MultichannelConvolverUniform::initFilters( ): The initializer exceeds the maximum filter length." );
   }
   std::size_t const numFilters = newFilters.numberOfRows( );
   std::size_t const filterLength = newFilters.numberOfColumns( );
