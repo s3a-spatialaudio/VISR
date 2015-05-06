@@ -102,6 +102,15 @@ IF( USE_FFTW )
   FIND_PACKAGE( FFTW )
 ENDIF( USE_FFTW )
 
+## FFTS (Fastest Fourier Transform in the south)
+# On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)
+IF( WIN32 ) # This includes 64-bit platforms!
+  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
+  # call instead of setting it globally.
+  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/ffts )
+ENDIF( WIN32 )
+FIND_PACKAGE( FFTS REQUIRED )
+
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
 # should be found automatically.
