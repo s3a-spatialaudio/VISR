@@ -37,6 +37,25 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 # Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
+#############################################################
+# Create a system string.
+SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
+IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
+  SET( VISR_SYSTEM_NAME MacOS )
+ENDIF( VISR_SYSTEM_NAME MATCHES "Darwin" )
+
+SET( VISR_SYSTEM_PROCESSOR STRING ${CMAKE_SYSTEM_PROCESSOR} )
+IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
+  SET( VISR_SYSTEM_PROCESSOR x86_64 )
+ENDIF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
+
+SET( VISR_PLATFORM_NAME_RAW ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} )
+STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME )
+
+MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
+MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
+MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
+
 ############################################################
 # Support for Building Matlab externals
 
@@ -57,7 +76,7 @@ IF( WIN32 OR APPLE )
   OPTION( BUILD_MAX_MSP_EXTERNALS "Build externals for MAX/MSP" OFF )
   IF( BUILD_MAX_MSP_EXTERNALS )
 #    FIND_PACKAGE( MaxSDK REQUIRED HINTS ENV MAX_SDK_ROOT)
-     SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ENV{MAX_SDK_ROOT} )
+     SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ENV{MAX_SDK_ROOT} )
     FIND_PACKAGE( MaxSDK REQUIRED)
     MESSAGE( STATUS "MAX SDK found: " ${MAXSDK_MAINPATH} )
   ENDIF(BUILD_MAX_MSP_EXTERNALS)
@@ -79,7 +98,7 @@ FIND_PACKAGE(Threads REQUIRED)
 IF( WIN32 ) # This includes 64-bit platforms!
   # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
   # call instead of setting it globally.
-  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/portaudio )
+  SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/portaudio )
 ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
@@ -89,19 +108,19 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 IF( WIN32 ) # This includes 64-bit platforms!
   # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
   # call instead of setting it globally.
-  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/sndfile )
+  SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/sndfile )
 ENDIF( WIN32 )
 FIND_PACKAGE( SndFile REQUIRED )
 
 ## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
-SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/kissfft )
+SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/kissfft )
 FIND_PACKAGE( KissFFT REQUIRED )
 
 ## FFTW
 OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
 IF( BUILD_USE_FFTW )
   IF( WIN32 ) # This includes 64-bit platforms!
-    SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
+    SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
   ENDIF( WIN32 )
   FIND_PACKAGE( FFTW REQUIRED )
 ENDIF( BUILD_USE_FFTW )
@@ -111,7 +130,7 @@ ENDIF( BUILD_USE_FFTW )
 IF( WIN32 ) # This includes 64-bit platforms!
   # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
   # call instead of setting it globally.
-  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/ffts )
+  SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/ffts )
 ENDIF( WIN32 )
 FIND_PACKAGE( FFTS REQUIRED )
 
