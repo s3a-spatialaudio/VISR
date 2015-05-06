@@ -93,6 +93,10 @@ IF( WIN32 ) # This includes 64-bit platforms!
 ENDIF( WIN32 )
 FIND_PACKAGE( SndFile REQUIRED )
 
+## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
+SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/kissfft )
+FIND_PACKAGE( KissFFT REQUIRED )
+
 ## FFTW
 OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
 IF( BUILD_USE_FFTW )
