@@ -88,11 +88,12 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
     std::string::const_iterator startIt = currLine.begin();
     std::string::const_iterator endIt = currLine.end( );
     bool parseRes = qi::phrase_parse( startIt, endIt,
-#if __GNUC__ <= 4 && __GNUC_MINOR__ < 9
+#if !defined(__APPLE_CC__) && __GNUC__ <= 4 && __GNUC_MINOR__ < 9
       // NOTE: the additional pair of parentheses around
       // qi::real_parser<ElementType>() is to prevent a GCC
       // parsing bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55535
       // which has been reported to be fixed in GCC 4.9
+      // Ironically, this workaround triggers an error in llvm/clang used in XCode, which also claimes to be __GNUC__.
       // TODO: Remove conditional code after minimum compiler
       // requirement is GCC >= 4.9. 
        ( *((qi::real_parser<ElementType>())[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
