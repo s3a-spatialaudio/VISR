@@ -7,7 +7,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_real.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
@@ -89,15 +88,19 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
     std::string::const_iterator startIt = currLine.begin();
     std::string::const_iterator endIt = currLine.end( );
     bool parseRes = qi::phrase_parse( startIt, endIt,
-#if 1
-      ( *(qi::real_parser<ElementType>()[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+#if __GNUC__ <= 4 && __GNUC_MINOR__ < 9
+      // NOTE: the additional pair of parentheses around
+      // qi::real_parser<ElementType>() is to prevent a GCC
+      // parsing bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55535
+      // which has been reported to be fixed in GCC 4.9
+      // TODO: Remove conditional code after minimum compiler
+      // requirement is GCC >= 4.9. 
+       ( *((qi::real_parser<ElementType>())[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+#else
+       ( *(qi::real_parser<ElementType>()[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+#endif
         % *(-qi::char_( ',' ) ))
         >> *(qi::char_( '%' ) >> *qi::char_) ),
-#else
-      (*(qi::real_parser<ElementType>( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
-      >> *(-qi::char_( ',' ) >> qi::real_parser<ElementType>( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]))
-      >> *(qi::char_( '%' ) >> *qi::char_)),
-#endif
       boost::spirit::ascii::space );
     if( !parseRes or (startIt != endIt ) )
     {
@@ -134,19 +137,29 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
 
 namespace // unnamed
 {
-  // Template function with specialisations for double and float to call the correct version of sf_read_<datatype>.
+  /**
+   * Template function for reading from a sndfile to a specific data
+   * format.
+   * Specialisations exist for double and float to call the correct
+   * version of sf_read_<datatype>.
+   * The template itself has no implementation, so instantiating it
+   * with a type other than float or double will cause a compilation
+   * error.
+   */
   template<typename ElementType>
+
+  /**
+   * Specialisation for float.
+   */
   sf_count_t read_samples( SNDFILE * file, efl::AlignedArray<ElementType> & result, std::size_t numElements );
-#if 0
-  {
-    assert( false && "The method is not specialised for this data type." );
-  }
-#endif
   template<> sf_count_t read_samples<float>( SNDFILE * file, efl::AlignedArray<float> & result, std::size_t numElements )
   {
     return sf_read_float( file, result.data(), static_cast<sf_count_t>(numElements) );
   }
 
+  /**
+   * Specialisation for double.
+   */
   template<> sf_count_t read_samples<double>( SNDFILE * file, efl::AlignedArray<double> & result, std::size_t numElements )
   {
     return sf_read_double( file, result.data( ), static_cast<sf_count_t>(numElements) );
