@@ -146,10 +146,17 @@ double const MAX_GAIN = 1.0f;
 int C74_EXPORT main()
 {
 #if 1
-  visr::maxmsp::DelayVector::sStaticClassInstance = class_new("delay_vector~",
-                                                reinterpret_cast<method>(&visr::maxmsp::DelayVector::newObject),
-                                                reinterpret_cast<method>(&visr::maxmsp::DelayVector::free),
-                                                sizeof(visr::maxmsp::DelayVector), 0, A_GIMME, 0);
+  post( "visr::maxmsp::DelayVector::main() called." )
+  
+  // Initialize
+  visr::maxmsp::DelayVector::sStaticClassInstance
+    = class_new("delay_vector~",
+                reinterpret_cast<method>(&visr::maxmsp::DelayVector::newObject),
+                reinterpret_cast<method>(&visr::maxmsp::DelayVector::free),
+                sizeof(visr::maxmsp::DelayVector), 0, A_GIMME, 0);
+  // The rest of the initialization can be done within a method o
+  
+  
 #else
 	delay_vector_class = class_new("delay_vector~", (method)delay_vector_new, (method)delay_vector_free, sizeof(t_delay_vector), 0, A_GIMME, 0);
 
