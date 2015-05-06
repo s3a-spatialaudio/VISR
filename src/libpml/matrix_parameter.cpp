@@ -27,13 +27,13 @@ namespace pml
 
 template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( std::size_t alignment /*= 0*/ )
-: BasicMatrix<ElementType>( alignment )
+  : efl::BasicMatrix<ElementType>( alignment )
 {
 }
 
 template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( std::size_t numRows, std::size_t numColumns, std::size_t alignment /*= 0*/ )
-: BasicMatrix<ElementType>( numRows, numColumns, alignment )
+  : efl::BasicMatrix<ElementType>( numRows, numColumns, alignment )
 {
 }
 
@@ -41,7 +41,7 @@ template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( std::size_t numRows, std::size_t numColumns,
                                                std::initializer_list<std::initializer_list<ElementType> > const & initMtx,
                                                std::size_t alignment /*= 0*/ )
-    : BasicMatrix< ElementType >( numRows, numColumns, initMtx, alignment )
+  : efl::BasicMatrix< ElementType >( numRows, numColumns, initMtx, alignment )
 {
 }
 
@@ -49,13 +49,13 @@ template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( MatrixParameter<ElementType> const & rhs )
 : MatrixParameter( rhs.numberOfRows(), rhs.numberOfColumns(), rhs.alignmentElements() )
 {
-  copy( rhs );
+  efl::BasicMatrix<ElementType>::copy( rhs );
 }
 
 template< typename ElementType >
 void MatrixParameter<ElementType>::resize( std::size_t numRows, std::size_t numColumns )
 {
-  BasicMatrix< ElementType >::resize( numRows, numColumns );
+  efl::BasicMatrix< ElementType >::resize( numRows, numColumns );
 }
 
 
@@ -136,11 +136,12 @@ namespace // unnamed
 {
   // Template function with specialisations for double and float to call the correct version of sf_read_<datatype>.
   template<typename ElementType>
-  sf_count_t read_samples( SNDFILE * file, efl::AlignedArray<ElementType> & result, std::size_t numElements )
+  sf_count_t read_samples( SNDFILE * file, efl::AlignedArray<ElementType> & result, std::size_t numElements );
+#if 0
   {
-    BOOST_STATIC_ASSERT_MSG( FALSE, "The message is not specialised for this data type." )
+    assert( false && "The method is not specialised for this data type." );
   }
-
+#endif
   template<> sf_count_t read_samples<float>( SNDFILE * file, efl::AlignedArray<float> & result, std::size_t numElements )
   {
     return sf_read_float( file, result.data(), static_cast<sf_count_t>(numElements) );

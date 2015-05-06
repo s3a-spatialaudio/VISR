@@ -91,8 +91,7 @@ IF( WIN32 ) # This includes 64-bit platforms!
   # call instead of setting it globally.
   SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/sndfile )
 ENDIF( WIN32 )
-FIND_PACKAGE( sndfile REQUIRED )
-
+FIND_PACKAGE( SndFile REQUIRED )
 
 ## FFTW
 OPTION( USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
