@@ -94,13 +94,13 @@ ENDIF( WIN32 )
 FIND_PACKAGE( SndFile REQUIRED )
 
 ## FFTW
-OPTION( USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
-IF( USE_FFTW )
+OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
+IF( BUILD_USE_FFTW )
   IF( WIN32 ) # This includes 64-bit platforms!
     SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
   ENDIF( WIN32 )
-  FIND_PACKAGE( FFTW )
-ENDIF( USE_FFTW )
+  FIND_PACKAGE( FFTW REQUIRED )
+ENDIF( BUILD_USE_FFTW )
 
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
