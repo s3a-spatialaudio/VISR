@@ -30,7 +30,7 @@ endif()
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 # Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
+# INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
@@ -48,13 +48,11 @@ SET( VISR_SYSTEM_PROCESSOR STRING ${CMAKE_SYSTEM_PROCESSOR} )
 IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
   SET( VISR_SYSTEM_PROCESSOR x86_64 )
 ENDIF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
-
-SET( VISR_PLATFORM_NAME_RAW ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} )
 STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME )
 
-MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
-MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
-MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
+# MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
+# MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
+# MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
 
 ############################################################
 # Support for Building Matlab externals
@@ -98,7 +96,9 @@ FIND_PACKAGE(Threads REQUIRED)
 IF( WIN32 ) # This includes 64-bit platforms!
   # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
   # call instead of setting it globally.
-  SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/portaudio )
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
+ 
 ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
@@ -108,30 +108,33 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 IF( WIN32 ) # This includes 64-bit platforms!
   # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
   # call instead of setting it globally.
-  SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/sndfile )
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/sndfile) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/sndfile) )
 ENDIF( WIN32 )
 FIND_PACKAGE( SndFile REQUIRED )
 
 ## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
-SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/kissfft )
+# This libbrary is provided by 3rd/ for all platforms, because it is no standard library (moreover, heavily tweaked to geet both float and double support)
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/kissfft) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/kissfft) )
 FIND_PACKAGE( KissFFT REQUIRED )
 
 ## FFTW
+# TODO: Consider moving this out of the source tree altogether (would require a root environment variable on Windows)
 OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
 IF( BUILD_USE_FFTW )
   IF( WIN32 ) # This includes 64-bit platforms!
-    SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/fftw) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/fftw) )
   ENDIF( WIN32 )
   FIND_PACKAGE( FFTW REQUIRED )
 ENDIF( BUILD_USE_FFTW )
 
 ## FFTS (Fastest Fourier Transform in the south)
-# On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)
-IF( WIN32 ) # This includes 64-bit platforms!
-  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
-  # call instead of setting it globally.
-  SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/ffts )
-ENDIF( WIN32 )
+# Because this is a non-standard library, we provide it for all platforms.
+# TODO: Consider making this library optional
+LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/ffts) )
+LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/ffts) )
 FIND_PACKAGE( FFTS REQUIRED )
 
 ## Boost support
