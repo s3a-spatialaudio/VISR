@@ -93,14 +93,18 @@ IF( WIN32 ) # This includes 64-bit platforms!
 ENDIF( WIN32 )
 FIND_PACKAGE( SndFile REQUIRED )
 
+## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
+SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/kissfft )
+FIND_PACKAGE( KissFFT REQUIRED )
+
 ## FFTW
-OPTION( USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
-IF( USE_FFTW )
+OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
+IF( BUILD_USE_FFTW )
   IF( WIN32 ) # This includes 64-bit platforms!
     SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/fftw )
   ENDIF( WIN32 )
-  FIND_PACKAGE( FFTW )
-ENDIF( USE_FFTW )
+  FIND_PACKAGE( FFTW REQUIRED )
+ENDIF( BUILD_USE_FFTW )
 
 ## FFTS (Fastest Fourier Transform in the south)
 # On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)

@@ -14,7 +14,6 @@ namespace visr
 namespace rbbl
 {
 
-
 template<>
 class FftwWrapper<float>::Impl
 {
@@ -99,13 +98,6 @@ FftwWrapper<DataType>::~FftwWrapper()
 }
 template FftwWrapper<float>::~FftwWrapper( );
 template FftwWrapper<double>::~FftwWrapper( );
-
-//template<typename DataType>
-//void FftwWrapper<DataType>::init( std::size_t fftSize, std::size_t alignmentElements )
-//{
-//}
-//template void FftwWrapper<float>::init( std::size_t, std::size_t );
-//template void FftwWrapper<double>::init( std::size_t, std::size_t );
 
 template<>
 void FftwWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
