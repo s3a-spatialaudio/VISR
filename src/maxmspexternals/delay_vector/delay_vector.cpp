@@ -19,7 +19,119 @@ namespace visr
 namespace maxmsp
 {
 
+/**
+ * Abstract base class for Max Externals
+ */
+class MaxExternalBase
+{
+public:
+  
+  MaxExternalBase();
+  
+  ~MaxExternalBase();
+  
+  virtual void applyFloat( double f ) {}
+  
+  virtual void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags) = 0;
+  
+  virtual void perform( t_object *dsp64, double **ins,
+                       long numins, double **outs, long numouts,
+                       long sampleframes, long flags, void *userparam) = 0;
+};
+  
+// Forward declaration
+template<class ExternalType> class ClassRegistrar;
 
+template<class ExternalClass>
+class MaxExternalWrapper
+{
+  template<class ExternalType>
+  friend class ClassRegistrar;
+public:
+private:
+  struct PlainObject
+  {
+  public:
+    /**
+     * MaxMSP proxy
+     */
+    t_pxobject mMaxProxy;
+    /**
+     * Plain C pointer to the object itself.
+     */
+    ExternalClass* mObject;
+  };
+
+  static void perform64( PlainObject *x, t_object *dsp64, double **ins,
+                        long numins, double **outs, long numouts,
+                        long sampleframes, long flags, void *userparam);
+  
+  static void free( PlainObject *x);
+  
+  static void assist( PlainObject  *x, void *b, long msg, long arg, char *dst);
+  
+  static void getFloat( PlainObject *x, double f);
+
+  
+private:
+  
+};
+
+
+template<class ExternalType>
+class ClassRegistrar
+{
+public:
+  explicit ClassRegistrar( char const * externalName );
+    
+private:
+  t_class * sStaticClassInstance;
+};
+  
+template<class ExternalType>
+ClassRegistrar<ExternalType>::ClassRegistrar( char const * externalName )
+{
+  sStaticClassInstance = class_new("ExternalType",
+              reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::newObject),
+              reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::free),
+              sizeof(MaxExternalWrapper<ExternalType>::PlainObject), 0, A_GIMME, 0);
+  // The rest of the initialization could be done within a method of DelayVector
+  
+  class_addmethod( sStaticClassInstance,
+                   reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::dsp64), "dsp64", A_CANT, 0);
+  
+  // Binding of methods
+  class_addmethod(sStaticClassInstance,
+                  reinterpret_cast<method>(&ExternalType::assist), "assist", A_CANT, 0);
+  class_addmethod(sStaticClassInstance,
+                  reinterpret_cast<method>(&ExternalType::getFloat),
+                  "float", A_FLOAT, 0);
+  
+  // Other calls
+  class_dspinit(sStaticClassInstance);
+  class_register(sStaticClassInstance);
+  post("ClassRegistrar: Finished registration of external.");
+}
+  
+  
+  class DelayVector2
+  {
+  public:
+    
+    DelayVector2();
+    
+    ~DelayVector2();
+    
+    /*virtual*/ void applyFloat( double f );
+    
+    /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
+    
+    
+    /*virtual*/ void perform( t_object *dsp64, double **ins,
+                         long numins, double **outs, long numouts,
+                         long sampleframes, long flags, void *userparam);
+  };
+  
 class DelayVector
 {
 public:
@@ -252,7 +364,12 @@ extern "C"
 // 5. Initialization routine MAIN
 int C74_EXPORT main()
 {
+  using namespace visr::maxmsp;
+  
   post( "visr::maxmsp::DelayVector::main() called." );
+  
+  ClassRegistrar<DelayVector2> myReg("delay_vector2~" );
+  
   
   // Initialize
   visr::maxmsp::DelayVector::sStaticClassInstance
