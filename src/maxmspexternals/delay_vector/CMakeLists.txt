@@ -16,16 +16,27 @@ ADD_LIBRARY( delay_vector_max_external MODULE delay_vector.cpp )
 
 set_target_properties( delay_vector_max_external  PROPERTIES
     PREFIX ""
-    SUFFIX ""
     OUTPUT_NAME ${EXTERNAL_NAME}
     LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/max"
 )
 
 # Note: It is sufficient if we say 'extern "C"' within to revert the effects of the
 # C++ linking?
-#SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES LINKER_LANGUAGE C)
-#SET_PROPERTY( SOURCE delay_vector.c PROPERTY LANGUAGE C)
+# SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES LINKER_LANGUAGE C)
+# SET_PROPERTY( SOURCE delay_vector.c PROPERTY LANGUAGE C)
 
+# <AF> TODO: Move this conditional logic to a centralised location!
+if(WIN32) # 32-bit and 64-bit Windows
+  if (CMAKE_CL_64)
+      SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES SUFFIX ~.mxe64)
+  else(CMAKE_CL_64)
+      SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES SUFFIX .mxe)
+  endif(CMAKE_CL_64)
+elseif(APPLE)
+  SET_TARGET_PROPERTIES( delay_vector_max_external PROPERTIES SUFFIX ~.mxo)
+endif(WIN32)
+
+TARGET_LINK_LIBRARIES( delay_vector_max_external maxsupport )
 IF( WIN32 )
   TARGET_LINK_LIBRARIES( delay_vector_max_external ${MAXSDK_CRT_LIBRARY} )
   TARGET_LINK_LIBRARIES( delay_vector_max_external ${MAXSDK_CRT_P_LIBRARY} )

@@ -23,6 +23,9 @@
 #endif
 #endif
 
+#include <maxmspexternals/libmaxsupport/external_base.hpp>
+#include <maxmspexternals/libmaxsupport/class_registrar.hpp>
+
 #include "ext.h"
 #include "z_dsp.h"
 #include "ext_obex.h"
@@ -33,10 +36,7 @@ namespace visr
 {
 namespace maxmsp
 {
-
-template<class ExternalClass>
-class MaxExternalWrapper;
-
+#if 0
 /**
  * Abstract base class for Max Externals
  */
@@ -102,7 +102,7 @@ private:
    * Instantiate an object of the wrappped type.
    * TODO: Maybe this method could go the registrar.
    */
-  static void * newObject( t_class classInstance, t_symbol *s, short argc, t_atom *argv );
+//  static void * newObject( t_class classInstance, t_symbol *s, short argc, t_atom *argv );
 
   static void dsp64( PlainObject *obj, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags );
 
@@ -118,7 +118,9 @@ private:
 
   PlainObject* mPlainStruct;
 };
+#endif
 
+#if 0
 template<class ExternalClass>
 /*static*/ void * MaxExternalWrapper<ExternalClass>::newObject( t_class classInstance, t_symbol* /*s*/, short argc, t_atom *argv )
 {
@@ -132,7 +134,9 @@ template<class ExternalClass>
   newPlainObj->mObject = new ExternalClass( newPlainObj->mMaxProxy, argc, argv );
   return newPlainObj; // returning the pointer to the plain C struct encapsulating the object.
 }
+#endif
 
+#if 0
 template<class ExternalClass>
 /*static*/ void MaxExternalWrapper<ExternalClass>::dsp64( PlainObject *obj, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
@@ -196,7 +200,7 @@ private:
   }
 #endif
 };
-  
+
 template<class ExternalType>
 ClassRegistrar<ExternalType>::ClassRegistrar( char const * externalName )
 {
@@ -236,8 +240,9 @@ template<class ExternalType>
   newPlainObj->mObject = new ExternalType( & newPlainObj->mMaxProxy, argc, argv );
   return newPlainObj; // returning the pointer to the plain C struct encapsulating the object.
 }
+#endif
   
-  class DelayVector2: public MaxExternalBase
+  class DelayVector2: public visr::maxmsp::ExternalBase
   {
   public:
     
@@ -264,7 +269,7 @@ template<class ExternalType>
   };
 
 DelayVector2::DelayVector2( t_pxobject * maxProxy, short argc, t_atom *argv )
- : MaxExternalBase( maxProxy )
+ : ExternalBase( maxProxy )
 {
   post( "DelayVector2::DelayVector2() constructor called." );
 
