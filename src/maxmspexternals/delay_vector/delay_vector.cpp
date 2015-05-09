@@ -37,13 +37,13 @@ namespace visr
 namespace maxmsp
 {
 
-class DelayVector2: public visr::maxmsp::ExternalBase
+class DelayVector: public visr::maxmsp::ExternalBase
 {
 public:
 
-  explicit DelayVector2( t_pxobject & maxProxy, short argc, t_atom *argv );
+  explicit DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv );
 
-  ~DelayVector2();
+  ~DelayVector();
 
   /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
 
@@ -62,16 +62,15 @@ private:
   float mGain;
 };
 
-DelayVector2::DelayVector2( t_pxobject & maxProxy, short argc, t_atom *argv )
+DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
  : ExternalBase( maxProxy )
 {
-  post( "DelayVector2::DelayVector2() constructor called." );
+  post( "DelayVector::DelayVector() constructor called." );
 
   float numChannels = 2.0; // Default number of channels
 
   atom_arg_getfloat( &numChannels, 0, argc, argv );
   mNumberOfChannels = static_cast<std::size_t>(numChannels);
-#if 1
   // Creating the inlets
   dsp_setup( getMaxProxy(), (int)mNumberOfChannels );
 
@@ -81,17 +80,16 @@ DelayVector2::DelayVector2( t_pxobject & maxProxy, short argc, t_atom *argv )
     // Again: Using plainObject->mMaxProxy would require a less nasty cast.
     outlet_new( reinterpret_cast<t_object *>(getMaxProxy()), "signal" );
   }
-#endif
   float gain = 1.0;
   atom_arg_getfloat( &gain, 1, argc, argv );
   mGain = gain;
 }
 
-DelayVector2::~DelayVector2()
+DelayVector::~DelayVector()
 {
 }
 
-/*virtual*/ void DelayVector2::getFloat( double f )
+/*virtual*/ void DelayVector::getFloat( double f )
 {
   int inlet = getMaxProxy()->z_in;
 #if 0 // whether to show debug messages at all
@@ -101,7 +99,7 @@ DelayVector2::~DelayVector2()
   // Use of C++ standard library functions causes problems if the library used for 
   // linking does not match the shared library used at runtime
   std::stringstream stream;
-  stream << "DelayVector2::applyFloat() called with inlet = " << inlet << ", f=" << f << "." <<std::endl;
+  stream << "DelayVector::applyFloat() called with inlet = " << inlet << ", f=" << f << "." <<std::endl;
   post( stream.str( ).c_str( ) );
 #endif
 #endif
@@ -121,16 +119,15 @@ DelayVector2::~DelayVector2()
   }
   break; // Do nothing! ()
   }
-
 }
 
-/*virtual*/ void DelayVector2::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
+/*virtual*/ void DelayVector::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
   // nothing to be done here (but this seems to be the first time I get to see the sample rate, count and maxvectorsize
+  // So maybe this might be a good point to actually allocate something.
 }
 
-
-/*virtual*/ void DelayVector2::perform( t_object *dsp64, double **ins,
+/*virtual*/ void DelayVector::perform( t_object *dsp64, double **ins,
                                         long numins, double **outs, long numouts,
                                         long sampleframes, long flags, void *userparam )
 {
@@ -156,7 +153,7 @@ DelayVector2::~DelayVector2()
   }
 }
 
-/*virtual*/ void DelayVector2::assist( void *b, long msg, long arg, char *dst )
+/*virtual*/ void DelayVector::assist( void *b, long msg, long arg, char *dst )
 {
   if( msg == ASSIST_INLET )
   {
@@ -181,28 +178,22 @@ DelayVector2::~DelayVector2()
   }
 }
 
-// Definition of static class member
-t_class * ClassRegistrar<DelayVector2>::sStaticClassInstance;
-
 } // namespace maxmsp
 } // namespace visr
 
 extern "C"
 {
-//****************************
-// 5. Initialization routine MAIN
+/****************************/
+// Initialization routine MAIN
 int C74_EXPORT main()
 {
-  using namespace visr::maxmsp;
-  
   post( "visr::maxmsp::DelayVector::main() called." );
-  
-  ClassRegistrar<DelayVector2> myReg("delay_vector~" );
 
-  post("DelayVector: main() finished.");
-  
-	return 0;
+  visr::maxmsp::ClassRegistrar<visr::maxmsp::DelayVector>( "delay_vector~" );
+
+  post("visr::maxmsp::DelayVector::main() finished.");
+
+  return 0;
 }
-
 
 } // extern "C"
