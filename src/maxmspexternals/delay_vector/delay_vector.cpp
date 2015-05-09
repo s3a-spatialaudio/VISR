@@ -7,6 +7,18 @@
 //
 //****************************
 // 1. Header files necessary for Max MSP
+
+//#ifdef __APPLE_CC__
+//#define MAC_VERSION
+//#else
+//#ifdef _MSC_VER
+//#ifndef WIN_VERSION 
+//#define WIN_VERSION
+//#endif
+//#undef MAC_VERSION
+//#endif
+//#endif
+
 #include "ext.h"
 #include "z_dsp.h"
 #include "ext_obex.h"
@@ -26,19 +38,37 @@ class MaxExternalBase
 {
 public:
   
-  MaxExternalBase();
+  explicit MaxExternalBase( t_pxobject & maxProxy );
   
   ~MaxExternalBase();
-  
-  virtual void applyFloat( double f ) {}
-  
+    
   virtual void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags) = 0;
   
   virtual void perform( t_object *dsp64, double **ins,
                        long numins, double **outs, long numouts,
                        long sampleframes, long flags, void *userparam) = 0;
+
+  virtual void getFloat( double f ) {}
+
+  virtual void assist( void *b, long msg, long arg, char *dst ) = 0;
+
+protected:
+  t_pxobject & getMaxProxy() { return mMaxProxy; }
+  t_pxobject const & getMaxProxy() const { return mMaxProxy; }
+
+private:
+  t_pxobject & mMaxProxy;
 };
   
+MaxExternalBase::MaxExternalBase( t_pxobject & maxProxy )
+: mMaxProxy( maxProxy )
+{
+}
+
+MaxExternalBase::~MaxExternalBase()
+{
+}
+
 // Forward declaration
 template<class ExternalType> class ClassRegistrar;
 
@@ -61,22 +91,76 @@ private:
      */
     ExternalClass* mObject;
   };
+private:
+  static void * newObject( t_symbol *s, short argc, t_atom *argv );
+
+  static void dsp64( PlainObject *obj, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags );
 
   static void perform64( PlainObject *x, t_object *dsp64, double **ins,
                         long numins, double **outs, long numouts,
-                        long sampleframes, long flags, void *userparam);
+                        long sampleframes, long flags, void *userparam );
   
-  static void free( PlainObject *x);
-  
-  static void assist( PlainObject  *x, void *b, long msg, long arg, char *dst);
-  
-  static void getFloat( PlainObject *x, double f);
+  static void free( PlainObject *x );
 
-  
-private:
-  
+  static void assist( PlainObject  *x, void *b, long msg, long arg, char *dst );
+
+  static void getFloat( PlainObject *x, double f );
+
+  PlainObject* mPlainStruct;
 };
 
+template<class ExternalClass>
+/*static*/ void * MaxExternalWrapper<ExternalClass>::newObject( t_symbol *s, short argc, t_atom *argv )
+{
+  post( "DelayVector: *delay_vector_new called." );
+  PlainObject* newPlainObj = new PlainObject(); //  = static_cast<PlainObject *>(object_alloc( sStaticClassInstance ));
+  if( !newPlainObj )
+  { 
+    post( "Creation of new object failed." );
+    return nullptr;
+  }
+  newPlainObj->mObject = new ExternalClass( newPlainObj->mMaxProxy, argc, argv );
+  return newPlainObj; // returning the pointer to the plain C struct encapsulating the object.
+}
+
+template<class ExternalClass>
+/*static*/ void MaxExternalWrapper<ExternalClass>::dsp64( PlainObject *obj, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
+{
+  post( "MaxExternalWrapper<ExternalClass>::dsp64 called." );
+  dsp_add64( dsp64, reinterpret_cast<t_object*>(obj), reinterpret_cast<t_perfroutine64>(&DelayVector::perform64), 0, NULL );
+}
+
+template<class ExternalClass>
+/*static*/ void MaxExternalWrapper<ExternalClass>::perform64( PlainObject *x, t_object *dsp64, double **ins,
+                                                              long numins, double **outs, long numouts,
+                                                              long sampleframes, long flags, void *userparam )
+{
+  x->mObject->perform( dsp64, ins, numins, outs, numout, sampleframes, flags, userparam );
+}
+
+template<class ExternalClass>
+/*static*/ void MaxExternalWrapper<ExternalClass>::free( PlainObject* obj )
+{
+  post( "MaxExternalWrapper<ExternalClass>::::free() called." );
+  /* We must call dsp_free() before freeing any dynamic memory
+  allocated for the external. This removes the object from the
+  Max/MSP DSP chain. */
+  // TODO: Why do we not call dsp_free for x->mMaxProxy (which has the same address), which would avoid the nasty C cast?
+  dsp_free( reinterpret_cast<t_pxobject *>(obj) );
+  delete obj->mObject;
+}
+
+template<class ExternalClass>
+/*static*/ void MaxExternalWrapper<ExternalClass>::assist( PlainObject* obj, void *b, long msg, long arg, char *dst )
+{
+  obj->mObject->assist( b, msg, arg, dst );
+}
+
+template<class ExternalClass>
+/*static*/ void MaxExternalWrapper<ExternalClass>::getFloat( PlainObject* obj, double f )
+{
+  obj->mObject->getFloat( f );
+}
 
 template<class ExternalType>
 class ClassRegistrar
@@ -85,44 +169,46 @@ public:
   explicit ClassRegistrar( char const * externalName );
     
 private:
-  t_class * sStaticClassInstance;
+  t_class *& staticClassInstance()
+  {
+    static t_class * sInstance = 0;
+    return sInstance;
+  }
 };
   
 template<class ExternalType>
 ClassRegistrar<ExternalType>::ClassRegistrar( char const * externalName )
 {
-  sStaticClassInstance = class_new("ExternalType",
+  staticClassInstance() = class_new("ExternalType",
               reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::newObject),
               reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::free),
               sizeof(MaxExternalWrapper<ExternalType>::PlainObject), 0, A_GIMME, 0);
   // The rest of the initialization could be done within a method of DelayVector
   
-  class_addmethod( sStaticClassInstance,
+  class_addmethod( staticClassInstance(),
                    reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::dsp64), "dsp64", A_CANT, 0);
   
   // Binding of methods
-  class_addmethod(sStaticClassInstance,
-                  reinterpret_cast<method>(&ExternalType::assist), "assist", A_CANT, 0);
-  class_addmethod(sStaticClassInstance,
-                  reinterpret_cast<method>(&ExternalType::getFloat),
+  class_addmethod(staticClassInstance(),
+                  reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::assist), "assist", A_CANT, 0);
+  class_addmethod(staticClassInstance(),
+                  reinterpret_cast<method>(&MaxExternalWrapper<ExternalType>::getFloat),
                   "float", A_FLOAT, 0);
   
   // Other calls
-  class_dspinit(sStaticClassInstance);
-  class_register(sStaticClassInstance);
+  class_dspinit(staticClassInstance() );
+  class_register( CLASS_BOX, staticClassInstance() );
   post("ClassRegistrar: Finished registration of external.");
 }
   
   
-  class DelayVector2
+  class DelayVector2: public MaxExternalBase
   {
   public:
     
-    DelayVector2();
+    explicit DelayVector2( t_pxobject & maxProxy, short argc, t_atom *argv );
     
     ~DelayVector2();
-    
-    /*virtual*/ void applyFloat( double f );
     
     /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
     
@@ -130,8 +216,110 @@ ClassRegistrar<ExternalType>::ClassRegistrar( char const * externalName )
     /*virtual*/ void perform( t_object *dsp64, double **ins,
                          long numins, double **outs, long numouts,
                          long sampleframes, long flags, void *userparam);
+
+    /*virtual*/ void assist( void *b, long msg, long arg, char *dst );
+
+
+    /*virtual*/ void getFloat( double f );
+
+  private:
+    std::size_t mNumberOfChannels;
+
+    float mGain;
   };
-  
+
+DelayVector2::DelayVector2( t_pxobject & maxProxy, short argc, t_atom *argv )
+ : MaxExternalBase( maxProxy )
+{
+  post( "DelayVector2::DelayVector2() constructor called." );
+
+  float numChannels = 2.0; // Default number of channels
+
+  atom_arg_getfloat( &numChannels, 0, argc, argv );
+  mNumberOfChannels = static_cast<std::size_t>(numChannels);
+#if 0
+  // Creating the inlets
+  dsp_setup( &plainObj->mMaxProxy, (int)mNumberOfChannels );
+
+  // Creating the outlets
+  for( std::size_t chIdx = 0; chIdx < mNumberOfChannels; ++chIdx )
+  {
+    // Again: Using plainObject->mMaxProxy would require a less nasty cast.
+    outlet_new( reinterpret_cast<t_object *>(plainObj), "signal" );
+  }
+#endif
+  float gain = 1.0;
+  atom_arg_getfloat( &gain, 1, argc, argv );
+  mGain = gain;
+}
+
+DelayVector2::~DelayVector2()
+{
+}
+
+/*virtual*/ void DelayVector2::getFloat( double f )
+{
+  int inlet = getMaxProxy().z_in;
+  std::stringstream stream;
+  stream << "DelayVector2::applyFloat() called with inlet = " << inlet << ", f=" << f << "." <<std::endl;
+  post( stream.str( ).c_str( ) );
+  switch( inlet )
+  {
+  case 0: // The number of channels. I need to move it to the INT function
+  mNumberOfChannels = (int)f;
+  break;
+  case 1:
+  if( f < 0.0 || f > 1.0 )
+  {
+    error( "delay_vector~: illegal gain: %f reset to 1", f );
+  }
+  else
+  {
+    mGain = static_cast<float>(f);
+  }
+  break; // Do nothing! ()
+  }
+
+}
+
+/*virtual*/ void DelayVector2::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
+{
+  // nothing to be done here (but this seems to be the first time I get to see the sample rate, count and maxvectorsize
+}
+
+
+/*virtual*/ void DelayVector2::perform( t_object *dsp64, double **ins,
+                                        long numins, double **outs, long numouts,
+                                        long sampleframes, long flags, void *userparam )
+{
+}
+
+/*virtual*/ void DelayVector2::assist( void *b, long msg, long arg, char *dst )
+{
+  if( msg == ASSIST_INLET )
+  {
+    switch( arg )
+    { // if there is more than one inlet or outlet, a switch is necessary
+    case 0: sprintf( dst, "(int/signal1 Input) Number of channels (TO BE IMPLEMENTED)" ); break;
+    case 1: sprintf( dst, "(float/signal2 Input) gain (between 0 and 1)" ); break;
+    default: sprintf( dst, "(signal %ld) Input", arg + 1 ); break;
+    }
+  }
+  else if( msg == ASSIST_OUTLET )
+  {
+#if 0
+    // switch doesn't make sense if there is no choice.
+    switch( arg )
+    {
+    default: sprintf( dst, "(signal %ld) Output", arg + 1 ); break;
+    }
+#else
+    sprintf( dst, "(signal %ld) Output", arg + 1 );
+#endif
+  }
+
+}
+
 class DelayVector
 {
 public:
@@ -342,10 +530,14 @@ void DelayVector::applyFloat( double f )
   }
   else if (msg==ASSIST_OUTLET)
   {
+#if 0
     switch (arg)
     {
       default: sprintf(dst,"(signal %ld) Output", arg + 1); break;
     }
+#else
+    sprintf( dst, "(signal %ld) Output", arg + 1 );
+#endif
   }
 }
 
@@ -368,8 +560,7 @@ int C74_EXPORT main()
   
   post( "visr::maxmsp::DelayVector::main() called." );
   
-  ClassRegistrar<DelayVector2> myReg("delay_vector2~" );
-  
+  // ClassRegistrar<DelayVector2> myReg("delay_vector2~" );
   
   // Initialize
   visr::maxmsp::DelayVector::sStaticClassInstance
