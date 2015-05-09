@@ -64,7 +64,7 @@ private:
 template<class ExternalType>
 ClassRegistrar<ExternalType>::ClassRegistrar( char const * externalName )
 {
-  staticClassInstance( ) = class_new( externalName,
+  staticClassInstance() = class_new( externalName,
     reinterpret_cast<method>(&ClassRegistrar<ExternalType>::newObject),
     reinterpret_cast<method>(&ExternalWrapper<ExternalType>::free),
     sizeof(ExternalWrapper<ExternalType>::PlainObject), 0, A_GIMME, 0 );

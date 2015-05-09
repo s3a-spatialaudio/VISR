@@ -7,7 +7,7 @@ namespace visr
 namespace maxmsp
 {
 
-ExternalBase::ExternalBase( t_pxobject * maxProxy )
+ExternalBase::ExternalBase( t_pxobject & maxProxy )
  : mMaxProxy( maxProxy )
 {
 }

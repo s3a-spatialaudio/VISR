@@ -47,7 +47,7 @@ private:
   * by the Max/MSP function object_alloc() (which probably places this member in the first portion 
   * of the allocated memory.
   */
-  t_pxobject* mMaxProxy;
+  t_pxobject mMaxProxy;
   
   /**
    * Plain C pointer to the object itself.
@@ -92,7 +92,7 @@ template<class ExternalClass>
   post( "ExternalWrapper<ExternalClass>::free() called." );
   /* We must call dsp_free() before freeing any dynamic memory
   allocated for the external. This removes the object from the Max/MSP DSP chain. */
-  dsp_free( obj->mMaxProxy );
+  dsp_free( &(obj->mMaxProxy) );
   delete obj->mObject;
 }
 

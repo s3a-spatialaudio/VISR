@@ -36,9 +36,9 @@ class ExternalBase
 public:
   /**
    * Constructor.
-   * Initializes the pointer to the Max proxy object associated with the external.
+   * Initializes the reference to the Max proxy object associated with the external.
    */
-  explicit ExternalBase( t_pxobject * maxProxy );
+  explicit ExternalBase( t_pxobject & maxProxy );
 
   /**
    * Destructor.
@@ -58,11 +58,11 @@ public:
   virtual void assist( void *b, long msg, long arg, char *dst ) = 0;
 
 protected:
-  t_pxobject * getMaxProxy() { return mMaxProxy; }
-  t_pxobject const * getMaxProxy() const { return mMaxProxy; }
+  t_pxobject * getMaxProxy() { return &mMaxProxy; }
+  t_pxobject const * getMaxProxy() const { return &mMaxProxy; }
 
 private:
-  t_pxobject * mMaxProxy;
+  t_pxobject& mMaxProxy;
 };
 
 } // namespace visr
