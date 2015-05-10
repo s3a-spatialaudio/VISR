@@ -26,6 +26,12 @@
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
+#include <libril/audio_signal_flow.hpp>
+
+#include <librcl/delay_vector.hpp>
+
+#include <libefl/basic_vector.hpp>
+
 #define MAXAPI_USE_MSCRT
 #include "ext.h"
 #include "z_dsp.h"
@@ -98,11 +104,13 @@ DelayVector::~DelayVector()
 #if 0
   post( "DelayVector::applyFloat() called with inlet= %d, gain= %f .", inlet, f );
 #else 
-  // Use of C++ standard library functions causes problems if the library used for 
-  // linking does not match the shared library used at runtime
-  std::stringstream stream;
-  stream << "DelayVector::applyFloat() called with inlet = " << inlet << ", f=" << f << "." <<std::endl;
-  post( stream.str( ).c_str( ) );
+  {
+    // Use of C++ standard library functions causes problems if the library used for 
+    // linking does not match the shared library used at runtime
+    std::stringstream stream;
+    stream << "DelayVector::applyFloat() called with inlet = " << inlet << ", f=" << f << "." << std::endl;
+    post( stream.str().c_str() );
+  }
 #endif
 #endif
   switch( inlet )
@@ -191,7 +199,7 @@ int C74_EXPORT main()
 {
   post( "visr::maxmsp::DelayVector::main() called." );
 
-  visr::maxmsp::ClassRegistrar<visr::maxmsp::DelayVector>( "delay_vector_old~" );
+  visr::maxmsp::ClassRegistrar<visr::maxmsp::DelayVector>( "delay_vector~" );
 
   post("visr::maxmsp::DelayVector::main() finished.");
 

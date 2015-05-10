@@ -36,14 +36,6 @@ public:
   static void * newObject( t_symbol *s, short argc, t_atom *argv );
 
 private:
-#if 1
-  static t_class * sStaticClassInstance;
-
-  static t_class *& staticClassInstance( )
-  {
-    return sStaticClassInstance;
-  }
-#else
   /**
    * A member function to encapsulate the static t_class pointer
    * which needs to exist for every external class.
@@ -53,12 +45,11 @@ private:
    * unloading the shared object or never) is not a problem. So https://isocpp.org/wiki/faq/ctors#construct-on-first-use-v2
    * is not an issue here.
    */
-  t_class *& staticClassInstance( )
+  static t_class *& staticClassInstance( )
   {
     static t_class * sInstance = 0;
     return sInstance;
   }
-#endif
 };
 
 template<class ExternalType>
@@ -86,8 +77,9 @@ template<class ExternalType>
 /*static*/ void * ClassRegistrar<ExternalType>::newObject( t_symbol *s, short argc, t_atom *argv )
 {
   post( "ClassRegistrar<ExternalType>::newObject() called." );
+  t_class * classInstance = staticClassInstance();
   ExternalWrapper<ExternalType>::PlainObject* newPlainObj
-      = static_cast<ExternalWrapper<ExternalType>::PlainObject *>(object_alloc( staticClassInstance() ));
+      = static_cast<ExternalWrapper<ExternalType>::PlainObject *>(object_alloc( classInstance ));
   if( !newPlainObj )
   {
     post( "Creation of new object failed." );
