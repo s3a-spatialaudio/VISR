@@ -1,6 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "signal_flow.hpp"
 #include "options.hpp"
 
 #include <libefl/denormalised_number_handling.hpp>
@@ -12,6 +11,8 @@
 #include <libpml/signal_routing_parameter.hpp>
 
 #include <librrl/portaudio_interface.hpp>
+
+#include <libsignalflows/baseline_renderer.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -174,7 +175,7 @@ int main( int argc, char const * const * argv )
       efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
     }
 
-    SignalFlow flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
+    signalflows::BaselineRenderer flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
                      outputRouting,
                      cInterpolationLength,
                      arrayConfigFile.string().c_str(),

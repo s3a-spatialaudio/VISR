@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_MEX_DELAY_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
-#define VISR_MEX_DELAY_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#ifndef VISR_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
+#define VISR_SIGNALFLOWS_DELAY_VECTOR_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -11,19 +11,17 @@
 
 namespace visr
 {
-namespace mex
-{
-namespace delay_vector
+namespace signalflows
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class DelayVector: public ril::AudioSignalFlow
 {
 public:
-	explicit SignalFlow(std::size_t cNumberOfChannels,
+  explicit DelayVector(std::size_t cNumberOfChannels,
                        std::size_t interpolationPeriod,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
-  ~SignalFlow();
+  ~DelayVector();
 
   /*virtual*/ void process( );
 
@@ -49,8 +47,7 @@ private:
   std::size_t mCounter;
 };
 
-} // namespace delay_vector
-} // namespace mex
+} // namespace signalflows
 } // namespace visr
 
-#endif // #ifndef VISR_MEX_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#endif // #ifndef VISR_SIGNALFLOWS_DELAY_VECTOR_HPP_INCLUDED

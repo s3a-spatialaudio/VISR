@@ -1,18 +1,17 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "signal_flow.hpp"
+#include "delay_vector.hpp"
 
 #include <algorithm>
 #include <vector>
 
 namespace visr
 {
-namespace mex
+namespace signalflows
 {
-namespace delay_vector
-{
-
-  // create a helper function in an unnamed namespace
+  namespace
+  {
+    // create a helper function in an unnamed namespace
   std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
   {
     if( endIdx < startIdx )
@@ -24,8 +23,9 @@ namespace delay_vector
     std::generate( ret.begin(), ret.end(), [&] { return startIdx++; } );
     return ret;
   }
-
-  SignalFlow::SignalFlow( std::size_t numberOfChannels,
+  } // unnamed namespace
+  
+  DelayVector::DelayVector( std::size_t numberOfChannels,
     std::size_t interpolationPeriod,
     std::size_t period, ril::SamplingFrequencyType samplingFrequency )
     : AudioSignalFlow( period, samplingFrequency )
@@ -41,12 +41,12 @@ namespace delay_vector
     mAlternateDelays.fillValue( 0.0001f );
   }
 
-  SignalFlow::~SignalFlow()
+  DelayVector::~DelayVector()
   {
   }
 
   /*virtual*/ void
-  SignalFlow::process()
+  DelayVector::process()
   {
     if( ++mCounter % 8 == 0 )
     {
@@ -59,7 +59,7 @@ namespace delay_vector
   }
 
   /*virtual*/ void
-  SignalFlow::setup()
+  DelayVector::setup()
   {
     // Initialise and configure audio components
     mDelay.setup( cNumberOfChannels, cInterpolationSteps,
@@ -90,5 +90,4 @@ namespace delay_vector
   }
 
 } // namespace delay_vector
-} // namespace mex
 } // namespace visr

@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All Rights reserved */
 
-#include "signal_flow.hpp"
+#include <libsignalflows/delay_vector.hpp>
 
 #include <libmexsupport/mex_wrapper.hpp>
 
@@ -69,7 +69,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 	const std::size_t cNumberOfChannels = 4;
 	const std::size_t cInterpolationLength = 4 * periodSize;
 
-	mex::delay_vector::SignalFlow flow(cNumberOfChannels, cInterpolationLength, periodSize, samplingFrequency);
+	signalflows::DelayVector flow(cNumberOfChannels, cInterpolationLength, periodSize, samplingFrequency);
     flow.setup();
 
     mexsupport::MexWrapper mexWrapper( flow, prhs[0], plhs[0],

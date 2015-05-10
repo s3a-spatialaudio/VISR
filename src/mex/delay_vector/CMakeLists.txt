@@ -9,10 +9,6 @@ set(HEADER_FILE signal_flow.hpp )
 
 set(PROJECT_NAME delay_vector_mex)
 
-set( ADDITIONAL_CPP_FILES signal_flow.cpp )
-
-
-
 # set up matlab libraries
 set(CPP_FILE_NAME ${CPP_FILE}.cpp)
 INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
@@ -26,9 +22,9 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} )
 
 # Add any extras dependencies
-target_link_libraries(${PROJECT_NAME} rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} signalflows rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
 
-# <AF> TODO: Move this conditional logic to a centralised loacation!
+# <AF> TODO: Move this conditional logic to a centralised location!
 # 32-bit or 64-bit mex
 if(WIN32)
   if (CMAKE_CL_64)
