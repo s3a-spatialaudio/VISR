@@ -6,8 +6,16 @@
 	Andreas Franck, University of Southampton
 */
 
-#undef WIN_VERSION
-#define MAC_VERSION 1
+#ifdef __APPLE_CC__
+#define MAC_VERSION
+#else
+#ifdef _MSC_VER
+#ifndef WIN_VERSION 
+#define WIN_VERSION
+#endif
+#undef MAC_VERSION
+#endif
+#endif
 
 #include "ext.h"							// standard Max include, always required
 #include "ext_obex.h"						// required for new style Max object
