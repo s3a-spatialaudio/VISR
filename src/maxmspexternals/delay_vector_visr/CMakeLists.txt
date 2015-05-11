@@ -37,13 +37,15 @@ endif(WIN32)
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
 IF( WIN32 )
   TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_LIBRARY} )
-# I need to exclude this library in combination with MAXAPI_USE_MSCRT defined in the source file in order to avoid crashes when C++ standard library functions are called.  
-#  TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_P_LIBRARY} )
+  # I need to exclude this library in combination with MAXAPI_USE_MSCRT
+  # defined in the source file in order to avoid crashes when C++
+  # standard library functions are called.  
+  # TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_P_LIBRARY} )
+  # Still required?
+  SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:MSVCRTD.lib" )
 ENDIF( WIN32 )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_AUDIO_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_API_LIBRARY} )
-# Still required?
-SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:MSVCRTD.lib" )
 
 # According to the current FindMaxSDK.cmake, there is no crt library for apple.
 # TODO: Verify and improve FindMaxSDK.cmake
