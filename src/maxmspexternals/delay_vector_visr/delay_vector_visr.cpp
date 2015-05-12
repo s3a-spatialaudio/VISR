@@ -1,12 +1,4 @@
-//
-//  delay_vector~.c
-//  delay_vector~
-//
-//  Created by Ferdinando Olivieri on 15/03/2015.
-//
-//
-//****************************
-// 1. Header files necessary for Max MSP
+/* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 /* Super-safe determination of the MAX define for setting the operating system. */
 #ifdef __APPLE_CC__
@@ -26,9 +18,7 @@
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
-#include <libril/audio_signal_flow.hpp>
-
-#include <librcl/delay_vector.hpp>
+#include <libsignalflows/delay_vector.hpp>
 
 #include <libefl/basic_vector.hpp>
 
@@ -38,7 +28,11 @@
 #include "ext_obex.h"
 
 #include <cstddef>
+#include <limits>
 #include <sstream>
+
+// Some loonie (Max?) obviously defines max , thus hiding the stl method of the same name.
+#undef max
 
 namespace visr
 {
@@ -65,9 +59,22 @@ public:
   /*virtual*/ void getFloat( double f );
 
 private:
+  /**
+   * The number of samples to be processed per call.
+   * The type is chosen to be compatible to the parameter passed by the calling Max/MSP functions.
+   */
+  long mPeriod;
   std::size_t mNumberOfChannels;
+  std::size_t mInterpolationSteps;
+  rcl::DelayVector::InterpolationType mInterpolationType;
 
-  float mGain;
+  ril::SampleType mInitialDelay;
+  ril::SampleType mInitialGain;
+
+  std::unique_ptr<signalflows::DelayVector> mFlow;
+
+  efl::BasicVector<ril::SampleType> mGains;
+  efl::BasicVector<ril::SampleType> mDelays;
 };
 
 DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
@@ -79,6 +86,7 @@ DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
 
   atom_arg_getfloat( &numChannels, 0, argc, argv );
   mNumberOfChannels = static_cast<std::size_t>(numChannels);
+
   // Creating the inlets
   dsp_setup( getMaxProxy(), (int)mNumberOfChannels );
 
@@ -88,9 +96,15 @@ DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
     // Again: Using plainObject->mMaxProxy would require a less nasty cast.
     outlet_new( reinterpret_cast<t_object *>(getMaxProxy()), "signal" );
   }
-  float gain = 1.0;
-  atom_arg_getfloat( &gain, 1, argc, argv );
-  mGain = gain;
+  float delay = 0.0f;
+  atom_arg_getfloat( &delay, 1, argc, argv );
+  float gain = 1.0f;
+  atom_arg_getfloat( &gain, 2, argc, argv );
+
+  mGains.resize( mNumberOfChannels );
+  mGains.fillValue( gain );
+  mDelays.resize( mNumberOfChannels );
+  mDelays.fillValue( delay );
 }
 
 DelayVector::~DelayVector()
@@ -101,9 +115,6 @@ DelayVector::~DelayVector()
 {
   int inlet = getMaxProxy()->z_in;
 #if 1 // whether to show debug messages at all
-#if 0
-  post( "DelayVector::applyFloat() called with inlet= %d, gain= %f .", inlet, f );
-#else 
   {
     // Use of C++ standard library functions causes problems if the library used for 
     // linking does not match the shared library used at runtime
@@ -112,29 +123,41 @@ DelayVector::~DelayVector()
     post( stream.str().c_str() );
   }
 #endif
-#endif
   switch( inlet )
   {
-  case 0: // The number of channels. I need to move it to the INT function
-  mNumberOfChannels = (int)f;
-  break;
+  case 0:
+    mDelays.fillValue( static_cast<ril::SampleType>(f) );
+    break;
   case 1:
-  if( f < 0.0 || f > 1.0 )
-  {
-    error( "delay_vector~: illegal gain: %f reset to 1", f );
-  }
-  else
-  {
-    mGain = static_cast<float>(f);
-  }
-  break; // Do nothing! ()
+    if( f < 0.0 || f > 1.0 )
+    {
+      error( "delay_vector~: illegal gain: %f reset to 1", f );
+    }
+    else
+    {
+      mGains.fillValue( static_cast<ril::SampleType>(f) );
+    }
+    break;
+  default:
+    post( "DelayVector:getFloat(): Received message for unsupported inlet %d.", inlet );
   }
 }
 
 /*virtual*/ void DelayVector::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
-  // nothing to be done here (but this seems to be the first time I get to see the sample rate, count and maxvectorsize
-  // So maybe this might be a good point to actually allocate something.
+  mPeriod = maxvectorsize; // I'm guessing here.
+  // Request the actual buffer size
+  if( maxvectorsize > std::numeric_limits<short>::max() )
+  {
+    error( "The maximum vector length is larger than the maximum value to be returned by the \"count\" variable." );
+  }
+  *count = static_cast<short>(mPeriod); // I'm guessing again;
+  mInterpolationSteps = mPeriod;
+
+  ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
+  mFlow.reset( new signalflows::DelayVector( mNumberOfChannels, mInterpolationSteps,
+                                             mInterpolationType, static_cast<std::size_t>(mPeriod),
+                                             samplingFrequency ) );
 }
 
 /*virtual*/ void DelayVector::perform( t_object *dsp64, double **ins,
@@ -143,23 +166,11 @@ DelayVector::~DelayVector()
 {
   if( numins != mNumberOfChannels )
   {
-    error( "DelayVector: Parameter \"numins\" does not match the number of predefined channels." );
+    error( "DelayVector::perform(): Parameter \"numins\" does not match the number of predefined channels." );
   }
-  double zin;
-
-  /* Perform the DSP loop */
-  for( std::size_t chIdx( 0 ); chIdx < mNumberOfChannels; ++chIdx )
+  if( sampleframes != mPeriod )
   {
-    double const * in = ins[chIdx];
-    double * out = outs[chIdx];
-
-    long n = sampleframes;
-
-    while( n-- )
-    {
-      zin = *in++;
-      *out++ = zin * mGain;
-    }
+    error( "DelayVector::perform( ): The number of requested samples %d  does not match the given block length." );
   }
 }
 

@@ -19,6 +19,7 @@ class DelayVector: public ril::AudioSignalFlow
 public:
   explicit DelayVector(std::size_t cNumberOfChannels,
                        std::size_t interpolationPeriod,
+                       rcl::DelayVector::InterpolationType interpolationMethod,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~DelayVector();
@@ -27,19 +28,18 @@ public:
 
   /*virtual*/ void setup( );
 
+  void setDelay( efl::BasicVector<ril::SampleType> const & newDelays );
+
+  void setGains( efl::BasicVector<ril::SampleType> const & newGains );
+
 private:
   const std::size_t cNumberOfChannels;
 
-  
   const std::size_t cInterpolationSteps;
 
+  rcl::DelayVector::InterpolationType const cInterpolationMethod;
+
   rcl::DelayVector mDelay;
-
-  efl::BasicVector<ril::SampleType> mTestDelays;
-
-  efl::BasicVector<ril::SampleType> mTestGains;
-
-  efl::BasicVector<ril::SampleType> mAlternateDelays;
 
   /**
    * Counter to trigger a switch of the gain matrix.

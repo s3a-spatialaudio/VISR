@@ -26,19 +26,15 @@ namespace signalflows
   } // unnamed namespace
   
   DelayVector::DelayVector( std::size_t numberOfChannels,
-    std::size_t interpolationPeriod,
-    std::size_t period, ril::SamplingFrequencyType samplingFrequency )
+    std::size_t interpolationPeriod
+    , rcl::DelayVector::InterpolationType interpolationMethod
+    , std::size_t period, ril::SamplingFrequencyType samplingFrequency )
     : AudioSignalFlow( period, samplingFrequency )
     , cNumberOfChannels( numberOfChannels )
     , cInterpolationSteps( interpolationPeriod )
+    , cInterpolationMethod( interpolationMethod )
     , mDelay( *this, "DelayVector" )
-    , mTestDelays( 4, ril::cVectorAlignmentSamples )
-    , mTestGains( 4, ril::cVectorAlignmentSamples )
-    , mAlternateDelays( 4, ril::cVectorAlignmentSamples )
   {
-    mTestDelays.fillValue( 0.001f );
-    mTestGains.fillValue( 0.8f );
-    mAlternateDelays.fillValue( 0.0001f );
   }
 
   DelayVector::~DelayVector()
@@ -48,13 +44,6 @@ namespace signalflows
   /*virtual*/ void
   DelayVector::process()
   {
-    if( ++mCounter % 8 == 0 )
-    {
-      mDelay.setDelay( mCounter % 16 == 0 ? mTestDelays : mAlternateDelays );
-    }
-
-    mDelay.setGain( mTestGains );
-
     mDelay.process();
   }
 
@@ -63,7 +52,7 @@ namespace signalflows
   {
     // Initialise and configure audio components
     mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-                 1.0f, rcl::DelayVector::InterpolationType::NearestSample,
+                 1.0f, cInterpolationMethod,
                  0.0f, 0.5f );
 
     initCommArea( 2 * cNumberOfChannels, period(), ril::cVectorAlignmentSamples );
@@ -88,6 +77,16 @@ namespace signalflows
     // should not be done here, but in AudioSignalFlow where this method is called.
     setInitialised( true );
   }
+
+void DelayVector::setDelay( efl::BasicVector<ril::SampleType> const & newDelays )
+{
+  mDelay.setDelay( newDelays );
+}
+
+void DelayVector::setGains( efl::BasicVector<ril::SampleType> const & newGains )
+{
+  mDelay.setGain( newGains );
+}
 
 } // namespace delay_vector
 } // namespace visr
