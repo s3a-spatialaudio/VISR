@@ -20,7 +20,7 @@
 #define MAX_NUM_SPEAKERS 128
 #define MAX_NUM_LOUDSPEAKER_TRIPLETS 256
 
-#define PI 3.1412659
+#define PI 3.1412659f
 
 
 class LoudspeakerArray

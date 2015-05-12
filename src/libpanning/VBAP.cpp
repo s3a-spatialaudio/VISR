@@ -5,6 +5,11 @@
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
+// avoid annoying warning about unsafe STL functions.
+#ifdef _MSC_VER 
+#pragma warning(disable: 4996)
+#endif
+
 #include "VBAP.h"
 
 #include <limits>
@@ -15,7 +20,9 @@ int VBAP::calcInvMatrices(){
     Afloat* inv;
     int i;
  
-printf("calcInvMatrices()\n");   //!
+#ifdef VBAP_DEBUG_MESSAGES
+    printf("calcInvMatrices()\n");   //!
+#endif
         
     for (i = 0 ; i < m_array->m_nTriplets; i++) {
     
@@ -47,8 +54,8 @@ printf("calcInvMatrices()\n");   //!
                     - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
                     + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
 
-            if (temp != 0.0f) det = 1.0 / temp;
-            else det = 1.0;
+            if (temp != 0.0f) det = 1.0f / temp;
+            else det = 1.0f;
             
             inv = m_invMatrix[i];
             inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
@@ -79,6 +86,9 @@ int VBAP::calcGains(){
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
     
     jmin = -1; // indicate currently no triplet candidate.
+#ifdef VBAP_DEBUG_MESSAGES
+    printf("setListenerPosition %f %f %f\n",m_listenerPos.x,m_listenerPos.y,m_listenerPos.z);
+#endif
     gmin = g1min = g2min = g3min = 0.0;
     
     for(i = 0; i < m_nSources; i++) {
@@ -93,7 +103,7 @@ int VBAP::calcGains(){
             z -= m_listenerPos.z;
         }
 
-        
+
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
         for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
@@ -106,10 +116,7 @@ int VBAP::calcGains(){
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
-            
-            
 
-            
             if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || m_array->is2D() ) )  // inside triplet, or edge in 2D case.
             {
                 jmin = j;
@@ -125,7 +132,6 @@ int VBAP::calcGains(){
 
             if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&   // at most one negative gain
                  ( jmin == -1 || (g1 > gmin && g2 > gmin && g3 > gmin)  )
-
             ) {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -145,20 +151,18 @@ int VBAP::calcGains(){
         // Normalization causes fade with distance from plane unless g3 set to 0 first.
         //if (m_array->is2D()) g3 = 0;
         
-        
+
         // Normalization
+        // normalization first makes negative gain comparisons more reasonable.
         g = sqrt(g1*g1+g2*g2+g3*g3);
         // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
-        
-        if ( std::abs(g) > std::numeric_limits<Afloat>::epsilon() )
-        {
-              g1 = g1 / g;
-              g2 = g2 / g;
-              g3 = g3 / g;
+        if (g > 0) {
+          g1 = g1 / g;
+          g2 = g2 / g;
+          g3 = g3 / g;
         }
-        
-        
-        
+
+
         // Remove -ve gain if present, moves image to edge of triplet.
         // after normalization: gains fade with distance from boundary edge.
         // before normalization: gain fixed whether on or off a boundary edge.
@@ -179,10 +183,9 @@ int VBAP::calcGains(){
         l3 = m_array->m_triplet[jmin][2];
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
-        if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case   
-
-#ifdef VBAP_DEBUG_MESSAGES 
-        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3,  g1,g2,g3;
+        if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case 
+#ifdef VBAP_DEBUG_MESSAGES
+        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3, g1,g2,g3);
 #endif
     }
     return 0;
