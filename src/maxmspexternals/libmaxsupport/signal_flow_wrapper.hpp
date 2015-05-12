@@ -21,6 +21,7 @@ template<typename SampleType> class CommunicationArea;
 namespace maxmsp
 {
 
+template<typename ExternalSampleType>
 class SignalFlowWrapper
 {
 public:
@@ -28,35 +29,27 @@ public:
 
   ~SignalFlowWrapper( );
 
-void process( );
-
+  void processBlock( ExternalSampleType const * const * inputSamples,
+                     ExternalSampleType * const * outputSamples );
 private:
   /**
    * Transfer a portion of the Matlab input signal to the input of the signal flow graph 
    * (possibly converting the sample type)
    */
-  template<typename InputType>
-  void transferInputSamples( std::size_t blockIdx );
+  void transferInputSamples( ExternalSampleType const * const * inputSamples );
 
   /**
   * Transfer the output of the signal flow graph to a segment of the Matlab output signal
   * (possibly converting the sample type)
   */
-  template<typename OutputType>
-  void transferOutputSamples( std::size_t blockIdx );
+  void transferOutputSamples( ExternalSampleType * const * outputSamples );
 
   ril::AudioSignalFlow & mFlow;
 
-  std::size_t mSignalLength;
-  std::size_t mNumberOfBlocks;
-
-  std::size_t mNumberOfCaptureSignals;
-  std::size_t mNumberOfPlaybackSignals;
-
-  mxArray const * mInputMatrix;
-  mxArray * mOutputMatrix;
-
   std::size_t const mPeriodSize;
+
+  std::size_t const mNumberOfCaptureSignals;
+  std::size_t const mNumberOfPlaybackSignals;
 
   std::vector<ril::SampleType *> mInputBufferPtrs;
   std::vector<ril::SampleType *> mOutputBufferPtrs;
