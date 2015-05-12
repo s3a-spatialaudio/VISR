@@ -58,7 +58,7 @@ ClassRegistrar<ExternalType>::ClassRegistrar( char const * externalName )
   staticClassInstance() = class_new( externalName,
     reinterpret_cast<method>(&ClassRegistrar<ExternalType>::newObject),
     reinterpret_cast<method>(&ExternalWrapper<ExternalType>::free),
-    sizeof(ExternalWrapper<ExternalType>::PlainObject), 0, A_GIMME, 0 );
+    sizeof(typename ExternalWrapper<ExternalType>::PlainObject), 0, A_GIMME, 0 );
 
   class_addmethod( staticClassInstance(),
       reinterpret_cast<method>(&ExternalWrapper<ExternalType>::dsp64), "dsp64", A_CANT, 0 );
@@ -78,8 +78,8 @@ template<class ExternalType>
 {
   post( "ClassRegistrar<ExternalType>::newObject() called." );
   t_class * classInstance = staticClassInstance();
-  ExternalWrapper<ExternalType>::PlainObject* newPlainObj
-      = static_cast<ExternalWrapper<ExternalType>::PlainObject *>(object_alloc( classInstance ));
+  typename ExternalWrapper<ExternalType>::PlainObject* newPlainObj
+      = static_cast<typename ExternalWrapper<ExternalType>::PlainObject *>(object_alloc( classInstance ));
   if( !newPlainObj )
   {
     post( "Creation of new object failed." );

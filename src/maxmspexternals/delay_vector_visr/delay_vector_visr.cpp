@@ -1,81 +1,38 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include "delay_vector_visr.hpp"
+
+#include <maxmspexternals/libmaxsupport/class_registrar.hpp>
+
 /* Super-safe determination of the MAX define for setting the operating system. */
 #ifdef __APPLE_CC__
-#ifndef MAC_VERSION 
+#ifndef MAC_VERSION
 #define MAC_VERSION
 #undef WIN_VERSION
 #endif
 #else
 #ifdef _MSC_VER
-#ifndef WIN_VERSION 
+#ifndef WIN_VERSION
 #define WIN_VERSION
 #endif
 #undef MAC_VERSION
 #endif
 #endif
 
-#include <maxmspexternals/libmaxsupport/external_base.hpp>
-#include <maxmspexternals/libmaxsupport/class_registrar.hpp>
-
-#include <libsignalflows/delay_vector.hpp>
-
-#include <libefl/basic_vector.hpp>
-
 #define MAXAPI_USE_MSCRT
 #include "ext.h"
 #include "z_dsp.h"
 #include "ext_obex.h"
 
-#include <cstddef>
-#include <limits>
 #include <sstream>
 
-// Some loonie (Max?) obviously defines max , thus hiding the stl method of the same name.
+// Some loony (Max?) obviously defines max, thus hiding any C++/STL functions of the same name.
 #undef max
 
 namespace visr
 {
 namespace maxmsp
 {
-
-class DelayVector: public visr::maxmsp::ExternalBase
-{
-public:
-
-  explicit DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv );
-
-  ~DelayVector();
-
-  /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
-
-  /*virtual*/ void perform( t_object *dsp64, double **ins,
-                            long numins, double **outs, long numouts,
-                            long sampleframes, long flags, void *userparam);
-
-  /*virtual*/ void assist( void *b, long msg, long arg, char *dst );
-
-
-  /*virtual*/ void getFloat( double f );
-
-private:
-  /**
-   * The number of samples to be processed per call.
-   * The type is chosen to be compatible to the parameter passed by the calling Max/MSP functions.
-   */
-  long mPeriod;
-  std::size_t mNumberOfChannels;
-  std::size_t mInterpolationSteps;
-  rcl::DelayVector::InterpolationType mInterpolationType;
-
-  ril::SampleType mInitialDelay;
-  ril::SampleType mInitialGain;
-
-  std::unique_ptr<signalflows::DelayVector> mFlow;
-
-  efl::BasicVector<ril::SampleType> mGains;
-  efl::BasicVector<ril::SampleType> mDelays;
-};
 
 DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
  : ExternalBase( maxProxy )
@@ -158,6 +115,7 @@ DelayVector::~DelayVector()
   mFlow.reset( new signalflows::DelayVector( mNumberOfChannels, mInterpolationSteps,
                                              mInterpolationType, static_cast<std::size_t>(mPeriod),
                                              samplingFrequency ) );
+  mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
 }
 
 /*virtual*/ void DelayVector::perform( t_object *dsp64, double **ins,
@@ -172,6 +130,7 @@ DelayVector::~DelayVector()
   {
     error( "DelayVector::perform( ): The number of requested samples %d  does not match the given block length." );
   }
+  mFlowWrapper->processBlock( ins, outs );
 }
 
 /*virtual*/ void DelayVector::assist( void *b, long msg, long arg, char *dst )
@@ -180,22 +139,14 @@ DelayVector::~DelayVector()
   {
     switch( arg )
     { // if there is more than one inlet or outlet, a switch is necessary
-    case 0: sprintf( dst, "(int/signal1 Input) Number of channels (TO BE IMPLEMENTED)" ); break;
-    case 1: sprintf( dst, "(float/signal2 Input) gain (between 0 and 1)" ); break;
+    case 0: sprintf( dst, "(float/signal1 Input) Scalar delay value (in seconds)." ); break;
+    case 1: sprintf( dst, "(float/signal2 Input) Scalar gain value (linear scale)" ); break;
     default: sprintf( dst, "(signal %ld) Input", arg + 1 ); break;
     }
   }
   else if( msg == ASSIST_OUTLET )
   {
-#if 0
-    // switch doesn't make sense if there is no choice.
-    switch( arg )
-    {
-    default: sprintf( dst, "(signal %ld) Output", arg + 1 ); break;
-    }
-#else
     sprintf( dst, "(signal %ld) Output", arg + 1 );
-#endif
   }
 }
 

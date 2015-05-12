@@ -10,13 +10,11 @@ ELSE( APPLE )
   ADD_DEFINITIONS( -DWIN_VERSION )
 ENDIF( APPLE )
 
-#SET( CMAKE_MODULE_LINKER_FLAGS ${CMAKE_MODULE_LINKER_FLAGS} "/VERBOSE:LIB" )
-
 SET( EXTERNAL_NAME delay_vector )
 
 SET( PROJECT_NAME delay_vector_visr_max_external )
 
-ADD_LIBRARY( ${PROJECT_NAME} MODULE delay_vector_visr.cpp )
+ADD_LIBRARY( ${PROJECT_NAME} MODULE delay_vector_visr.hpp delay_vector_visr.cpp )
 
 SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES
     PREFIX ""
@@ -49,5 +47,3 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_API_LIBRARY} )
 
 # According to the current FindMaxSDK.cmake, there is no crt library for apple.
 # TODO: Verify and improve FindMaxSDK.cmake
-
-# TARGET_LINK_LIBRARIES( ${PROJECT_NAME} "/VERBOSE:LIB" )
