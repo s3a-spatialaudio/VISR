@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
-#define VISR_SIGNALFLOWS_DELAY_VECTOR_HPP_INCLUDED
+#ifndef VISR_MAXMSP_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
+#define VISR_MAXMSP_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
