@@ -7,12 +7,6 @@
 # cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
-IF( APPLE )
-  SET( CMAKE_OSX_ARCHITECTURES "i386; x86_64" )
-  MESSAGE( STATUS ${CMAKE_OSX_ARCHITECTURES} )
-  MESSAGE( STATUS "CMAKE_OSX_SYSROOT: " ${CMAKE_OSX_SYSROOT} ) 
-ENDIF( APPLE )
-
 # The name of our top-level project.
 PROJECT( VISR CXX C )
 
