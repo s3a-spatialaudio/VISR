@@ -137,4 +137,4 @@ private:
 } // namespace signalflows
 } // namespace visr
 
-#endif VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
+#endif // VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
