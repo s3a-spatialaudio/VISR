@@ -43,7 +43,8 @@
 
 include(FindPackageHandleStandardArgs)
 
-set(IPP_ROOT /opt/intel/ipp CACHE PATH "Folder contains IPP")
+# set(IPP_ROOT /opt/intel/ipp CACHE PATH "Folder contains IPP")
+set( IPP_ROOT $ENV{IPP_ROOT} )
 
 # Find header file dir
 find_path(IPP_INCLUDE_DIR ipp.h
@@ -64,21 +65,34 @@ else()
     endif()
 endif()
 
-if(IPP_STATIC)
-    if(IPP_MULTI_THREADED)
-        set(IPP_LIBNAME_SUFFIX _t)
-    else()
-        set(IPP_LIBNAME_SUFFIX _l)
-    endif()
-else()
-    set(IPP_LIBNAME_SUFFIX "")
-endif()
+# Apparently, the library name scheme has changed at least for Windows.
+if( WIN32 )
+  set(IPP_LIBNAME_SUFFIX mt)
+else( WIN32 )
+  if(IPP_STATIC)
+      if(IPP_MULTI_THREADED)
+          set(IPP_LIBNAME_SUFFIX _t)
+      else()
+          set(IPP_LIBNAME_SUFFIX _l)
+      endif()
+  else()
+      set(IPP_LIBNAME_SUFFIX "")
+  endif()
+endif( WIN32 )
+
+set( IPP_LIBRARY_PATH ${IPP_ROOT}/lib/intel64/ )
 
 macro(find_ipp_library IPP_COMPONENT)
   string(TOLOWER ${IPP_COMPONENT} IPP_COMPONENT_LOWER)
 
+#  MESSAGE( STATUS "Looking for IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX} in ${IPP_LIBRARY_PATH}" )
+
+
   find_library(IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
-               PATHS ${IPP_ROOT}/lib/ia32/)
+               PATHS ${IPP_LIBRARY_PATH} )
+#  find_library(IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
+#               PATHS ${IPP_ROOT}/lib/intel64/ )
+
 endmacro()
 
 # IPP components

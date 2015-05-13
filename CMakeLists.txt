@@ -131,11 +131,11 @@ IF( BUILD_USE_FFTW )
 ENDIF( BUILD_USE_FFTW )
 
 # IPP
-OPTION( BUILD_USE_IPP "Use the Intel IPP for fast arithmetic functions and trasnforms" OFF )
-IF( BUILD_USE_FFTW )
+OPTION( BUILD_USE_IPP "Use the Intel IPP for fast arithmetic functions and trasnforms. Set the environment variable IPP_ROOT accordingly." OFF )
+IF( BUILD_USE_IPP )
   # Use the variable IPP_ROOT to point to the base directory of the library.
-  FIND_LIBRARY( IPP REQUIRED )
-ENDIF( BUILD_USE_FFTW )
+  FIND_PACKAGE( IPP REQUIRED )
+ENDIF( BUILD_USE_IPP )
 
 ## FFTS (Fastest Fourier Transform in the south)
 # Because this is a non-standard library, we provide it for all platforms.
