@@ -100,8 +100,7 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
 #else
        ( *(qi::real_parser<ElementType>()[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #endif
-        % *(-qi::char_( ',' ) ))
-        >> *(qi::char_( '%' ) >> *qi::char_) ),
+        % -qi::char_( ',' ) ) >> *(qi::char_( '%' ) >> *qi::char_) ),
       boost::spirit::ascii::space );
     if( !parseRes or (startIt != endIt ) )
     {
