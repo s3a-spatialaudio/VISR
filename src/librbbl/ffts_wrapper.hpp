@@ -31,9 +31,9 @@ public:
 
   ~FftsWrapper();
 
-  /*virtual*/ void forwardTransform( DataType const * const in, FrequencyDomainType * out );
+  /*virtual*/ efl::ErrorCode forwardTransform( DataType const * const in, FrequencyDomainType * out );
 
-  /*virtual*/ void inverseTransform( FrequencyDomainType const * const in, DataType * out );
+  /*virtual*/ efl::ErrorCode inverseTransform( FrequencyDomainType const * const in, DataType * out );
 
   /*virtual*/ DataType forwardScalingFactor( ) const { return static_cast<DataType>(1.0); };
 

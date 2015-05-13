@@ -100,32 +100,32 @@ template FftwWrapper<float>::~FftwWrapper( );
 template FftwWrapper<double>::~FftwWrapper( );
 
 template<>
-void FftwWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
+efl::ErrorCode FftwWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
 {
   fftwf_execute_dft_r2c( mImpl->mFwdPlan, const_cast<float*>(in), reinterpret_cast<Impl::TransformDataType*>(out) );
+  return efl::noError; // apparently, there is no error reporting apart from a SIGSEGV in case of misalignment
 }
 
 template<>
-void FftwWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
+efl::ErrorCode FftwWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
 {
   fftwf_execute_dft_c2r( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<float>* >(in)), out );
+  return efl::noError; // apparently, there is no error reporting apart from a SIGSEGV in case of misalignment
 }
 
 template<>
-void FftwWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out )
+efl::ErrorCode FftwWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out )
 {
   fftw_execute_dft_r2c( mImpl->mFwdPlan, const_cast<double*>(in), reinterpret_cast<Impl::TransformDataType*>(out) );
+  return efl::noError; // apparently, there is no error reporting apart from a SIGSEGV in case of misalignment
 }
 
 template<>
-void FftwWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out )
+efl::ErrorCode FftwWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out )
 {
   fftw_execute_dft_c2r( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<double>*>( in )), out );
+  return efl::noError; // apparently, there is no error reporting apart from a SIGSEGV in case of misalignment
 }
-
-// Provide explicit instantiations to force code generation for the templated methods.
-//template<> class FftwWrapper<float>;
-//template<> class FftwWrapper<double>;
 
 } // namespace rbbl
 } // namespace visr
