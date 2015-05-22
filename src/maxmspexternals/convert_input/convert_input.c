@@ -90,7 +90,7 @@ void *convertin_new(t_symbol *s, long argc, t_atom *argv) // initializes the obj
 	t_convertin *x = NULL;
 	long i;
 	
-	if (x = (t_convertin *)object_alloc(convertin_class)) {
+	if( (x = (t_convertin *)object_alloc(convertin_class)) != NULL ) {
 		object_post((t_object *)x, "a new %s object was instantiated: %p", s->s_name, x);
 		object_post((t_object *)x, "it has %ld arguments", argc);
 
