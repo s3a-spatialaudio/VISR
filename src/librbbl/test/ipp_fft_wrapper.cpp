@@ -28,7 +28,7 @@ namespace test
 BOOST_AUTO_TEST_CASE( IppFftWrapperSingle )
 {
   std::size_t dftSize = 8;
-  std::size_t outputSize = dftSize /*/ 2*/ + 1;
+  std::size_t outputSize = dftSize / 2 + 1;
 
   IppFftWrapper<float> fft( dftSize, ril::cVectorAlignmentSamples );
 
