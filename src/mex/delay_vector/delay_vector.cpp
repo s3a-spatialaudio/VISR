@@ -18,7 +18,7 @@
 
 static char const * usage()
 {
-  return "Usage: output = feedthrough( input [, parameterMessages], blockLength, samplingFrequency )";
+  return "Usage: output = delay_vector( input [, parameterMessages], blockLength, samplingFrequency )";
 }
 
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
@@ -81,7 +81,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     initialGains.fillValue( static_cast<ril::SampleType>(0.735) );
 
     flow.setDelay( initialDelays );
-    flow.setGains( initialGains );
+    flow.setGain( initialGains );
 
     mexsupport::MexWrapper mexWrapper( flow, prhs[0], plhs[0],
      hasParameterArg ? prhs[1] : nullptr );
