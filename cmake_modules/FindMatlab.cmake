@@ -20,14 +20,16 @@ ELSE("$ENV{MATLAB_ROOT}" STREQUAL "" )
         INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 
         FIND_LIBRARY( MATLAB_MEX_LIBRARY
+                      NO_CMAKE_SYSTEM_PATH
                       NAMES libmex mex
                       PATHS $ENV{MATLAB_ROOT}/bin $ENV{MATLAB_ROOT}/extern/lib 
-                      PATH_SUFFIXES glnxa64 glnx86 win64/microsoft win32/microsoft)
+                      PATH_SUFFIXES glnxa64 glnx86 maci64 win64/microsoft win32/microsoft )
 
         FIND_LIBRARY( MATLAB_MX_LIBRARY
+                      NO_CMAKE_SYSTEM_PATH
                       NAMES libmx mx
                       PATHS $ENV{MATLAB_ROOT}/bin $ENV{MATLAB_ROOT}/extern/lib 
-                      PATH_SUFFIXES glnxa64 glnx86 win64/microsoft win32/microsoft)
+                      PATH_SUFFIXES glnxa64 glnx86 maci64 win64/microsoft win32/microsoft)
 
     MESSAGE (STATUS "MATLAB_ROOT: $ENV{MATLAB_ROOT}")
 
@@ -50,14 +52,23 @@ if(WIN32)
   else(CMAKE_CL_64)
       SET( MATLAB_MEX_SUFFIX .mexw32)
   endif(CMAKE_CL_64)
-else(WIN32)
+elseif(APPLE)
+  MESSAGE( STATUS "APPLE!" )
+  if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+      SET( MATLAB_MEX_SUFFIX .mexmaci64 )
+  else(CMAKE_SIZEOF_VOID_P MATCHES "8")
+      MESSAGE( FATAL, "Only 64-bit MacOS is supported." )
+  endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
+else()
+  MESSAGE( STATUS "Linux!" )
   if (CMAKE_SIZEOF_VOID_P MATCHES "8")
       SET( MATLAB_MEX_SUFFIX .mexa64 )
   else(CMAKE_SIZEOF_VOID_P MATCHES "8")
       SET( MATLAB_MEX_SUFFIX .mexglx)
   endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
-endif(WIN32)
+endif()
 
+SET( MATLAB_MEX_SUFFIX ${MATLAB_SUFFIX_MEX} CACHE STRING "Matlab Mex file name extension" )
 
 MARK_AS_ADVANCED(
   MATLAB_LIBRARIES
