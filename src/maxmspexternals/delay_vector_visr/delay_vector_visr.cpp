@@ -84,6 +84,10 @@ DelayVector::~DelayVector()
   {
   case 0:
     mDelays.fillValue( static_cast<ril::SampleType>(f) );
+    if( mFlow ) // check whether the DSP part has already been initialised
+    {
+      mFlow->setDelay( mDelays );
+    }
     break;
   case 1:
     if( f < 0.0 || f > 1.0 )
@@ -93,6 +97,10 @@ DelayVector::~DelayVector()
     else
     {
       mGains.fillValue( static_cast<ril::SampleType>(f) );
+      if( mFlow ) // check whether the DSP part has already been initialised
+      {
+        mFlow->setGain( mGains );
+      }
     }
     break;
   default:
@@ -110,12 +118,23 @@ DelayVector::~DelayVector()
   }
   *count = static_cast<short>(mPeriod); // I'm guessing again;
   mInterpolationSteps = mPeriod;
+  // For the moment, use a fixed setting for the interpolation type.
+  mInterpolationType = rcl::DelayVector::InterpolationType::Linear;
 
-  ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
-  mFlow.reset( new signalflows::DelayVector( mNumberOfChannels, mInterpolationSteps,
-                                             mInterpolationType, static_cast<std::size_t>(mPeriod),
-                                             samplingFrequency ) );
-  mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
+  try
+  {
+    ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
+    mFlow.reset( new signalflows::DelayVector( mNumberOfChannels, mInterpolationSteps,
+                                              mInterpolationType, static_cast<std::size_t>(mPeriod),
+                                              samplingFrequency ) );
+    mFlow->setup();
+    mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
+  }
+  catch (std::exception const & e )
+  {
+    error( "Error while initialising the signal flow %s", e.what() );
+    return;
+  }
 }
 
 /*virtual*/ void DelayVector::perform( t_object *dsp64, double **ins,
@@ -130,7 +149,15 @@ DelayVector::~DelayVector()
   {
     error( "DelayVector::perform( ): The number of requested samples %d  does not match the given block length." );
   }
-  mFlowWrapper->processBlock( ins, outs );
+  try
+  {
+    mFlowWrapper->processBlock( ins, outs );
+  }
+  catch (std::exception const & e )
+  {
+    error( "Error while initialising the signal flow %s", e.what() );
+    return;
+  }
 }
 
 /*virtual*/ void DelayVector::assist( void *b, long msg, long arg, char *dst )
