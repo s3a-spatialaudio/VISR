@@ -75,6 +75,9 @@ template<class ExternalClass>
 /*static*/ void ExternalWrapper<ExternalClass>::dsp64( PlainObject *obj, t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
   post( "ExternalWrapper<ExternalClass>::dsp64 called." );
+  
+  obj->mObject->initDsp( dsp64, count, samplerate, maxvectorsize, flags );
+  
   dsp_add64( dsp64, reinterpret_cast<t_object*>(obj), reinterpret_cast<t_perfroutine64>(&ExternalWrapper<ExternalClass>::perform64), 0, NULL );
 }
 
