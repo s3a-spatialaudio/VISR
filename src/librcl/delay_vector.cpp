@@ -30,6 +30,7 @@ DelayVector::DelayVector( ril::AudioSignalFlow& container, char const * name )
  , mCurrentDelays(ril::cVectorAlignmentSamples)
  , mNextGains(ril::cVectorAlignmentSamples)
  , mNextDelays(ril::cVectorAlignmentSamples)
+ , cSamplingFrequency( static_cast<SampleType>( container.samplingFrequency() ) )
 {
 }
 
@@ -61,14 +62,12 @@ void DelayVector::setup( std::size_t numberOfChannels,
   mInput.setWidth(numberOfChannels);
   mOutput.setWidth(numberOfChannels);
 
-  mSamplingFrequency = 48000.0f; // TODO: implement query function for sampling frequency
-
   // Additional delay required by the interpolation method
   std::size_t const interpolationOrder = interpolationMethod == InterpolationType::NearestSample
     ? 0 : 1;
 
   // Maximally admissible delay
-  std::size_t const maxDelaySamples = static_cast<std::size_t>(std::ceil( maximumDelaySeconds * mSamplingFrequency ) );
+  std::size_t const maxDelaySamples = static_cast<std::size_t>(std::ceil( maximumDelaySeconds * cSamplingFrequency ) );
   // The actual ringbuffer size is actually larger by one period (because the most recent period is written into before the data is read out)
   // and the filter order, rounded to the next integer multiple of the period (in order to enable writing new data in one block and also 
   // for nice alignment)
@@ -117,13 +116,13 @@ void DelayVector::process()
     switch( mInterpolationMethod )
     {
     case InterpolationType::NearestSample:
-      delayNearestSample( mCurrentDelays[idc] * mSamplingFrequency, mNextDelays[idc] * mSamplingFrequency,
+      delayNearestSample( mCurrentDelays[idc] * cSamplingFrequency, mNextDelays[idc] * cSamplingFrequency,
                           mCurrentGains[idc], mNextGains[idc],
                           mRingBuffer.row( idc ),
                           mOutput[idc], blockLength );
       break;
     case InterpolationType::Linear:
-      delayLinearInterpolation( mCurrentDelays[idc] * mSamplingFrequency, mNextDelays[idc] * mSamplingFrequency,
+      delayLinearInterpolation( mCurrentDelays[idc] * cSamplingFrequency, mNextDelays[idc] * cSamplingFrequency,
                                 mCurrentGains[idc], mNextGains[idc],
                                 mRingBuffer.row( idc ),
                                 mOutput[idc], blockLength );
