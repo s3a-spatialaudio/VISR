@@ -30,7 +30,7 @@ public:
 
   void setDelay( efl::BasicVector<ril::SampleType> const & newDelays );
 
-  void setGains( efl::BasicVector<ril::SampleType> const & newGains );
+  void setGain( efl::BasicVector<ril::SampleType> const & newGains );
 
 private:
   const std::size_t cNumberOfChannels;

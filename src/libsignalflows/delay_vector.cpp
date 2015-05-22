@@ -83,7 +83,7 @@ void DelayVector::setDelay( efl::BasicVector<ril::SampleType> const & newDelays 
   mDelay.setDelay( newDelays );
 }
 
-void DelayVector::setGains( efl::BasicVector<ril::SampleType> const & newGains )
+void DelayVector::setGain( efl::BasicVector<ril::SampleType> const & newGains )
 {
   mDelay.setGain( newGains );
 }
