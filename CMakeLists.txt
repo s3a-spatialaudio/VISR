@@ -86,6 +86,12 @@ ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
+## Jack Audio Connection Kit (JACK)
+OPTION( BUILD_USE_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
+IF( BUILD_USE_JACK )
+  FIND_PACKAGE( Jack REQUIRED)
+ENDIF( BUILD_USE_JACK )
+
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
 # should be found automatically.
