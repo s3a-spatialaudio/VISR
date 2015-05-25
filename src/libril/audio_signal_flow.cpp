@@ -49,14 +49,20 @@ AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
                                   SampleType * const * playbackSamples,
                                   AudioInterface::CallbackResult& callbackResult )
 {
-  // TODO: It needs to be checked beforehand that the widths of the inout and output signal vectors match.
+  // TODO: It needs to be checked beforehand that the widths of the input and output signal vectors match.
 
   // fill the capture part of the communication area.
   std::size_t const numCaptureChannels = numberOfCaptureChannels();
   for( std::size_t captureIdx( 0 ); captureIdx < numCaptureChannels; ++captureIdx )
   {
     SampleType * const destPtr = mCommArea->at( mCaptureIndices[captureIdx] );
-    efl::vectorCopy( captureSamples[captureIdx], destPtr, mPeriod, cVectorAlignmentSamples );
+    // Note: We cannot assume an alignment as we don't know the alignment of the passed captureSamples.
+    // TODO: Add optional argument to the AudioCallback interface to signal the alignment of the input and output samples.
+    efl::ErrorCode const res = efl::vectorCopy( captureSamples[captureIdx], destPtr, mPeriod, 0 );
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
+    }
   }
 
   // call the process() method of the derived class to perform the specific processing.
@@ -69,7 +75,13 @@ AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
   for( std::size_t playbackIdx( 0 ); playbackIdx < numPlaybackChannels; ++playbackIdx )
   {
     SampleType const * const srcPtr = mCommArea->at( mPlaybackIndices[playbackIdx] );
-    efl::vectorCopy( srcPtr, playbackSamples[playbackIdx], mPeriod, cVectorAlignmentSamples );
+    // Note: We cannot assume an alignment as we don't know the alignment of the passed playbackSamples.
+    // TODO: Add optional argument to the AudioCallback interface to signal the alignment of the input and output samples.
+    efl::ErrorCode const res = efl::vectorCopy( srcPtr, playbackSamples[playbackIdx], mPeriod, 0 );
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
+    }
   }
 
   // TODO: use a sophisticated enumeration to signal error conditions
