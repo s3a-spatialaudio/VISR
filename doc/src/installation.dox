@@ -58,7 +58,20 @@
  *  * Build boost: <tt>.\\b2 --address-model=64 --build-type=complete stage</tt> (this takes a while and consumes about 10 GB disk space).
  *  * Add the following environment variable to Windows (Control Center->System->Advanced System settings->Environment Variables): <tt>BOOST_ROOT=boost_root</tt>.
  *  * A subsequent configure run in CMake should yield "Boost version: 1.xx.x Found the following Boost libraries: ..." 
- * 
+ *
+ *  @subsection windows_external_libraries External Libraries on Windows
+ *
+ * The following libraries must be provided externally
+ *
+ * @subsubsection FFT
+ * * Due to the GPL licence of the FFTW, this library it is not included in the source tree.
+ * * In order to use this library, activate the 'BUILD_USE_FFTW' option in CMake.
+ * * Download a binary distribution for Windows http://www.fftw.org/install/windows.html
+ * * Create the .lib files (stubs for linking the DLL) according to the instructions on the download page.
+ * * Create an environment variable FFTW_ROOT pointing to the base directory of the binary distribution.
+ * * TODO: Remove all code (and build support) for public releases.
+ *
+ *
  * @subsection macos MacOS
  *  * Setup Xcode and import git project from repository.
  *  * Install cmake (download from <a href="http://www.cmake.org/download/">http://www.cmake.org/download/</a>)

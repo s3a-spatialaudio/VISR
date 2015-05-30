@@ -120,12 +120,10 @@ FIND_PACKAGE( SndFile REQUIRED )
 FIND_PACKAGE( KissFFT REQUIRED )
 
 ## FFTW
-# TODO: Consider moving this out of the source tree altogether (would require a root environment variable on Windows)
 OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
 IF( BUILD_USE_FFTW )
-  IF( WIN32 ) # This includes 64-bit platforms!
-  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/fftw) )
-  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/fftw) )
+  IF( WIN32 ) # This includes 64-bit platforms.
+    LIST( APPEND CMAKE_PREFIX_PATH $ENV{FFTW_ROOT} )
   ENDIF( WIN32 )
   FIND_PACKAGE( FFTW REQUIRED )
 ENDIF( BUILD_USE_FFTW )
