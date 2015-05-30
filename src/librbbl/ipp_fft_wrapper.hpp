@@ -1,8 +1,8 @@
 
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
-#define VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
+#ifndef VISR_LIBRBBL_IPP_FFT_WRAPPER_HPP_INCLUDED
+#define VISR_LIBRBBL_IPP_FFT_WRAPPER_HPP_INCLUDED
 
 #include "fft_wrapper_base.hpp"
 
@@ -14,11 +14,11 @@ namespace rbbl
 {
 
 /**
- * FFT wrapper class encapsulating the FFTW library for real-to-complex transforms.
+ * FFT wrapper class encapsulating the IPP library functions for real-to-complex transforms.
  * @tparam DataType The floating-point element type for the transform. The class is specialized for type \p float and \p double.
  */
 template< typename DataType >
-class FftwWrapper: public FftWrapperBase<DataType>
+class IppFftWrapper: public FftWrapperBase<DataType>
 {
 public:
   /**
@@ -27,9 +27,9 @@ public:
    */
   using FrequencyDomainType = typename FftWrapperBase<DataType>::FrequencyDomainType;
 
-  FftwWrapper( std::size_t fftSize, std::size_t alignment );
+  IppFftWrapper( std::size_t fftSize, std::size_t alignment );
 
-  ~FftwWrapper();
+  ~IppFftWrapper();
 
   /*virtual*/ efl::ErrorCode forwardTransform( DataType const * const in, FrequencyDomainType * out );
 
@@ -41,7 +41,7 @@ public:
 
 private:
   /**
-   * Internal implementation object to avoid FFTW dependencies in the header.
+   * Internal implementation object to avoid IPP dependencies in the header.
    * Holds the FFTW plans and any other required data structures.
    */
   class Impl;
@@ -54,4 +54,4 @@ private:
 } // namespace rbbl
 } // namespace visr
   
-#endif // #ifndef VISR_LIBRBBL_FFTW_WRAPPER_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRBBL_IPP_FFT_WRAPPER_HPP_INCLUDED

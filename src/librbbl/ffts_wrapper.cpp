@@ -96,15 +96,17 @@ template FftsWrapper<float>::~FftsWrapper( );
 // template FftsWrapper<double>::~FftsWrapper( );
 
 template<>
-void FftsWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
+efl::ErrorCode FftsWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
 {
   ffts_execute( mImpl->mFwdPlan, in, out );
+  return efl::noError; // apparently, there is no error reporting
 }
 
 template<>
-void FftsWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
+efl::ErrorCode FftsWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
 {
   ffts_execute( mImpl->mInvPlan, in, out );
+  return efl::noError; // apparently, there is no error reporting apart from a SIGSEGV in case of misalignment
 }
 
 #if 0
