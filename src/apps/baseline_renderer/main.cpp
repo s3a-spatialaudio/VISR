@@ -1,5 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+// #define FEEDTHROUGH_NATIVE_JACK
+
 #include "options.hpp"
 
 #include <libefl/denormalised_number_handling.hpp>
@@ -10,7 +12,11 @@
 
 #include <libpml/signal_routing_parameter.hpp>
 
+#ifdef FEEDTHROUGH_NATIVE_JACK
+#include <librrl/jack_interface.hpp>
+#else
 #include <librrl/portaudio_interface.hpp>
+#endif
 
 #include <libsignalflows/baseline_renderer.hpp>
 
@@ -147,15 +153,24 @@ int main( int argc, char const * const * argv )
     }
     std::string const & outputGainConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "output-gain", std::string( ) );
 
-
+#ifdef FEEDTHROUGH_NATIVE_JACK
+    rrl::JackInterface::Config interfaceConfig;
+#else
     rrl::PortaudioInterface::Config interfaceConfig;
+#endif
     interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
     interfaceConfig.mPeriodSize = periodSize;
     interfaceConfig.mSampleRate = samplingRate;
+#ifdef FEEDTHROUGH_NATIVE_JACK
+    interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
+    interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels-1 );
+    interfaceConfig.mClientName = "BaselineRenderer";
+#else
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = audioBackend;
+    interfaceConfig.mHostApi = "default";
+#endif
 
     const std::size_t cInterpolationLength = periodSize;
 
@@ -186,7 +201,11 @@ int main( int argc, char const * const * argv )
                      periodSize, samplingRate );
     flow.setup();
 
+#ifdef FEEDTHROUGH_NATIVE_JACK
+    rrl::JackInterface audioInterface( interfaceConfig );
+#else
     rrl::PortaudioInterface audioInterface( interfaceConfig );
+#endif
 
     audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
