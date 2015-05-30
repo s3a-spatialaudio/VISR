@@ -57,6 +57,9 @@ set(_IPP_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 if(WIN32)
     set(CMAKE_FIND_LIBRARY_SUFFIXES .lib)
+elseif( APPLE )
+    # Use the static libraries for the moment.
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 else()
     if(IPP_STATIC)
         set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -80,10 +83,12 @@ else( WIN32 )
   endif()
 endif( WIN32 )
 
-if(WIN32)
-  set( IPP_LIBRARY_PATH ${IPP_ROOT}/lib/intel64/ )
-elseif(APPLE)
-  set( IPP_LIBRARY_PATH ${IPP_ROOT}/lib/ )
+# Platform-dependent naming scheme according to current IPP versions.
+# TODO: Adjust and generalise
+if( APPLE )
+  set( IPP_LIBRARY_PATH ${IPP_ROOT}/lib )
+elseif( WIN32 )
+  set( IPP_LIBRARY_PATH ${IPP_ROOT}/lib/intel64 )
 endif()
 
 macro(find_ipp_library IPP_COMPONENT)
@@ -94,9 +99,6 @@ macro(find_ipp_library IPP_COMPONENT)
 
   find_library(IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
                PATHS ${IPP_LIBRARY_PATH} )
-#  find_library(IPP_LIB_${IPP_COMPONENT} ipp${IPP_COMPONENT_LOWER}${IPP_LIBNAME_SUFFIX}
-#               PATHS ${IPP_ROOT}/lib/intel64/ )
-
 endmacro()
 
 # IPP components
