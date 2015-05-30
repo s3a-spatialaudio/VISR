@@ -2,7 +2,7 @@
 
 #include "signal_flow.hpp"
 
-#define FEEDTHROUGH_NATIVE_JACK
+// #define FEEDTHROUGH_NATIVE_JACK
 
 #ifdef FEEDTHROUGH_NATIVE_JACK
 #include <librrl/jack_interface.hpp>
