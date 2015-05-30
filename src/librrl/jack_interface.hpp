@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
-#define VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
+#ifndef VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
+#define VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 
 #include <libril/audio_interface.hpp>
 
@@ -17,7 +17,7 @@ namespace visr
 namespace rrl
 {
 
-class PortaudioInterface: public ril::AudioInterface
+class JackInterface: public ril::AudioInterface
 {
 public:
   /**
@@ -32,60 +32,41 @@ public:
       , mNumberOfPlaybackChannels( 0 )
       , mPeriodSize( 0 )
       , mSampleRate( 0 )
-      , mSampleFormat( SampleFormat::float32Bit )
-      , mInterleaved( false )
-      , mHostApi( "" )
+      , mClientName("")
+      , mServerName("")
     {}
+
+    void setCapturePortNames( std::string const baseName,
+			      std::size_t startIndex,
+			      std::size_t endIndex );
+
+    void setPlaybackPortNames( std::string const baseName,
+			       std::size_t startIndex,
+			       std::size_t endIndex );
 
     std::size_t mNumberOfCaptureChannels;
     std::size_t mNumberOfPlaybackChannels;
 
     std::size_t mPeriodSize;
 
-    /**
-     * Todo: Consider moving this definition to a more general place.
-    */
     using SamplingRateType = std::size_t;
     SamplingRateType mSampleRate;
 
-    /**
-     * Enumeration for a type-independent sample format specification
-     * TODO: Move to a more general location (for use by all audio interfaces)
-     */
-    class SampleFormat
-    {
-    public:
-      enum Type
-      {
-        signedInt8Bit,
-        unsignedInt8Bit,
-        signedInt16Bit,
-        unsignedInt16Bit,
-        signedInt24Bit,
-        unsignedInt24Bit,
-        signedInt32Bit,
-        unsignedInt32Bit,
-        float32Bit
-      };
-    };
-    SampleFormat::Type mSampleFormat;
+    std::string mClientName;
 
-    bool mInterleaved;
+    std::string mServerName;
 
-    /**
-     * A string determining the host API to be used for portaudio.
-     * At the moment, admissible values are 'default' on all platforms 'DirectSound', 'MME', 'ASIO' 'SoundManager', 'CoreAudio', 'OSS', ALSA', AL',
-     * 'WDMKS', 'JACK''WASAPI'
-     */
-    std::string mHostApi;
+    std::vector< std::string > mCapturePortNames;
+
+    std::vector< std::string > mPlaybackPortNames;
 
   };
 
   using Base = ril::AudioInterface;
 
-  explicit PortaudioInterface( Config const & config );
+  explicit JackInterface( Config const & config );
 
-  ~PortaudioInterface( );
+  ~JackInterface( );
 
   /* virtual */ void start();
 
@@ -109,4 +90,4 @@ private:
 } // namespace rrl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
