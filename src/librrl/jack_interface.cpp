@@ -181,7 +181,7 @@ JackInterface::Impl::~Impl()
 {
   stop();
   int const res = jack_client_close( mClient );
-  if( !res ) // Destructors mustn't throw
+  if( res != 0 ) // Destructors mustn't throw
   {
     std::cerr << "JackInterface: Error while closing Jack client." << std::endl;
   }
