@@ -31,13 +31,21 @@ class MultichannelConvolverUniform
 public:
   /**
    * The representation for the complex frequency-domain elements.
-   * Note: The used FFT libraries depend on the fact that arrays of this type can be casted into 
+   * Note: The used FFT libraries depend on the fact that arrays of this type
+   * can be cast into arrays of the corresponding real types with interleaved
+   * real and imaginary elements.
    * SampleType arrays with interleaved real and imaginary components.
    */
   using FrequencyDomainType = typename FftWrapperBase<SampleType>::FrequencyDomainType;
 
   struct RoutingEntry
   {
+  public:
+    RoutingEntry( std::size_t pInput, std::size_t pOutput, std::size_t pFilterIndex,
+		  SampleType pGain = static_cast<SampleType>( 0.0 ) )
+      : output( pOutput ), input( pInput ), gain( pGain ), filterIndex( pFilterIndex )
+    {}
+
     std::size_t output;
     std::size_t input;
     SampleType gain;
@@ -52,7 +60,8 @@ public:
                                          std::size_t maxFilterEntries,
                                          std::vector<RoutingEntry> const & initialRoutings,
                                          efl::BasicMatrix<SampleType> const & initialFilters,
-                                         std::size_t alignment = 0 );
+                                         std::size_t alignment = 0,
+					 char const * fftImplementation = "default" );
 
   ~MultichannelConvolverUniform();
 

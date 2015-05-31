@@ -2,7 +2,7 @@
 
 #include "multichannel_convolver_uniform.hpp"
 
-#include <librbbl/fftw_wrapper.hpp>
+#include <librbbl/fft_wrapper_factory.hpp>
 
 #include <complex>
 
@@ -11,7 +11,7 @@ namespace visr
 namespace rbbl
 {
 
-template< typename SampleType>
+template< typename SampleType >
 MultichannelConvolverUniform<SampleType>::
 MultichannelConvolverUniform( std::size_t numberOfInputs,
                               std::size_t numberOfOutputs,
@@ -21,7 +21,8 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
                               std::size_t maxFilterEntries,
                               std::vector<RoutingEntry> const & initialRoutings,
                               efl::BasicMatrix<SampleType> const & initialFilters,
-                              std::size_t alignment /*= 0*/ )
+			      std::size_t alignment /*= 0*/,
+			      char const * fftImplementation /*= "default"*/ )
  : mAlignment( alignment )
  , mComplexAlignment( alignment/2 )
  , mNumberOfInputs( numberOfInputs )
@@ -40,7 +41,7 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
  , mFilterPartitionsFrequencyDomain( maxFilterEntries, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
  , mFrequencyDomainAccumulator( mDftRepresentationSizePadded, mComplexAlignment )
  , mFrequencyDomainSum( mDftRepresentationSizePadded, mComplexAlignment )
- , mFftRepresentation( new FftwWrapper<SampleType>( mDftSize, 0 ) )
+ , mFftRepresentation( FftWrapperFactory<SampleType>::create( fftImplementation, mDftSize, alignment ) )
  , mFilterScalingFactor( calculateFilterScalingFactor() )
 {
   initRoutingTable( initialRoutings );
@@ -154,7 +155,7 @@ calculateDftSize( std::size_t blockLength )
   return 2 * blockLength;
 }
 
-template< typename SampleType >
+template< typename SampleType>
 /*static*/ std::size_t MultichannelConvolverUniform<SampleType>::
 calculateDftRepresentationSize( std::size_t blockLength )
 {
@@ -173,7 +174,7 @@ calculateDftRepresentationSizePadded( std::size_t blockLength, std::size_t align
   return efl::nextAlignedSize( calculateDftRepresentationSize( blockLength ), alignment);
 }
 
-template< typename SampleType >
+template< typename SampleType>
 SampleType MultichannelConvolverUniform<SampleType>::calculateFilterScalingFactor() const
 {
   if( not mFftRepresentation )
@@ -189,13 +190,13 @@ SampleType MultichannelConvolverUniform<SampleType>::calculateFilterScalingFacto
 ///////////////////////////////////////////////////////////////////////////////
 // Manipulation of the routing table
 
-template< typename SampleType >
+template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::clearRoutingTable( )
 {
   mRoutingTable.clear();
 }
 
-template< typename SampleType >
+template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::initRoutingTable( std::vector<RoutingEntry> const & routings )
 {
   clearRoutingTable();
@@ -210,13 +211,13 @@ void MultichannelConvolverUniform<SampleType>::initRoutingTable( std::vector<Rou
   assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
 }
 
-template< typename SampleType >
+template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::setRoutingEntry( RoutingEntry const & routing )
 {
   setRoutingEntry( routing.input, routing.output, routing.filterIndex, routing.gain );
 }
 
-template< typename SampleType >
+template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, SampleType gain )
 {
   assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
@@ -253,14 +254,14 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
   assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
 }
 
-template< typename SampleType >
+template< typename SampleType>
 bool MultichannelConvolverUniform<SampleType>::removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx )
 {
   std::size_t numErased = mRoutingTable.erase( RoutingKey( inputIdx, outputIdx ) );
   return (numErased > 0);
 }
 
-template< typename SampleType >
+template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::clearFilters()
 {
   mFilterPartitionsFrequencyDomain.zeroFill();
@@ -318,13 +319,16 @@ template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::
 setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
 {
-  transformImpulseResponse( ir, filterLength, mFilterPartitionsFrequencyDomain.row( filterIdx ), std::min( mAlignment, alignment ) );
+  transformImpulseResponse( ir, filterLength,
+			    mFilterPartitionsFrequencyDomain.row( filterIdx ),
+			    std::min( mAlignment, alignment ) );
 }
 
 template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
 {
-  efl::vectorCopy( transformedFilter, mFilterPartitionsFrequencyDomain.row( filterIdx ), mFilterPartitionsFrequencyDomain.numberOfColumns(),
+  efl::vectorCopy( transformedFilter, mFilterPartitionsFrequencyDomain.row( filterIdx ),
+		   mFilterPartitionsFrequencyDomain.numberOfColumns(),
                    std::min( alignment, mComplexAlignment ) );
 }
 
