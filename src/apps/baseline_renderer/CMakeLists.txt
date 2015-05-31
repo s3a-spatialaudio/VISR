@@ -2,8 +2,9 @@
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-ADD_EXECUTABLE( baseline_renderer main.cpp signal_flow.cpp signal_flow.hpp options.hpp options.cpp )
+ADD_EXECUTABLE( baseline_renderer main.cpp options.hpp options.cpp )
 
+TARGET_LINK_LIBRARIES(baseline_renderer signalflows)
 TARGET_LINK_LIBRARIES(baseline_renderer rcl)
 TARGET_LINK_LIBRARIES(baseline_renderer objectmodel)
 TARGET_LINK_LIBRARIES(baseline_renderer panning)
@@ -18,3 +19,7 @@ TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_SYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_THREAD_LIBRARY} )
 TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_PROGRAM_OPTIONS_LIBRARY} )
 TARGET_LINK_LIBRARIES(baseline_renderer ${CMAKE_THREAD_LIBS_INIT} )
+
+IF( BUILD_USE_JACK )
+  TARGET_LINK_LIBRARIES(baseline_renderer ${JACK_LIBRARY} )
+ENDIF( BUILD_USE_JACK )

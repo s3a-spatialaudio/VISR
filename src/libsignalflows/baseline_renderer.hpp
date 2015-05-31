@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_APPS_BASELINE_RENDERER_SIGNAL_FLOW_HPP_INCLUDED
-#define VISR_APPS_BASELINE_RENDERER_SIGNAL_FLOW_HPP_INCLUDED
+#ifndef VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
+#define VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -30,12 +30,10 @@
 
 namespace visr
 {
-namespace apps
-{
-namespace baseline_renderer
+namespace signalflows
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class BaselineRenderer: public ril::AudioSignalFlow
 {
 public:
   /**
@@ -44,7 +42,7 @@ public:
    *
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    */
-  explicit SignalFlow( std::size_t numberOfInputs,
+  explicit BaselineRenderer( std::size_t numberOfInputs,
                        std::size_t numberOfLoudspeakers,
                        std::size_t numberOfOutputs,
                        pml::SignalRoutingParameter const & outputRouting,
@@ -56,7 +54,7 @@ public:
                        std::size_t udpPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
-  ~SignalFlow();
+  ~BaselineRenderer();
 
   /*virtual*/ void process();
 
@@ -136,8 +134,7 @@ private:
 
 };
 
-} // namespace scene_decoder
-} // namespace apps
+} // namespace signalflows
 } // namespace visr
 
-#endif // #ifndef VISR_APPS_BASELINE_RENDERER_SIGNAL_FLOW_HPP_INCLUDED
+#endif // VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED

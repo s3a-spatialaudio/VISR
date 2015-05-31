@@ -6,6 +6,17 @@
 	Andreas Franck, University of Southampton
 */
 
+#ifdef __APPLE_CC__
+#define MAC_VERSION
+#else
+#ifdef _MSC_VER
+#ifndef WIN_VERSION 
+#define WIN_VERSION
+#endif
+#undef MAC_VERSION
+#endif
+#endif
+
 #include "ext.h"							// standard Max include, always required
 #include "ext_obex.h"						// required for new style Max object
 
@@ -49,6 +60,9 @@ int C74_EXPORT main(void)
 	
 	class_register(CLASS_BOX, c);
 	convertin_class = c;
+  
+  post( "This is me, your convert_input~ external.");
+  
 	return 0;
 }
 
@@ -76,7 +90,7 @@ void *convertin_new(t_symbol *s, long argc, t_atom *argv) // initializes the obj
 	t_convertin *x = NULL;
 	long i;
 	
-	if (x = (t_convertin *)object_alloc(convertin_class)) {
+	if( (x = (t_convertin *)object_alloc(convertin_class)) != NULL ) {
 		object_post((t_object *)x, "a new %s object was instantiated: %p", s->s_name, x);
 		object_post((t_object *)x, "it has %ld arguments", argc);
 

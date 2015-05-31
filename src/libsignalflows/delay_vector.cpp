@@ -1,15 +1,13 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "signal_flow.hpp"
+#include "delay_vector.hpp"
 
 #include <algorithm>
 #include <vector>
 
 namespace visr
 {
-namespace mex
-{
-namespace delay_vector
+namespace signalflows
 {
 
   // create a helper function in an unnamed namespace
@@ -25,41 +23,30 @@ namespace delay_vector
     return ret;
   }
 
-  SignalFlow::SignalFlow( std::size_t numberOfChannels,
-    std::size_t interpolationPeriod,
-    std::size_t period, ril::SamplingFrequencyType samplingFrequency )
+  DelayVector::DelayVector( std::size_t numberOfChannels,
+			    std::size_t interpolationPeriod,
+			    rcl::DelayVector::InterpolationType interpolationMethod,
+			    std::size_t period, ril::SamplingFrequencyType samplingFrequency )
     : AudioSignalFlow( period, samplingFrequency )
     , cNumberOfChannels( numberOfChannels )
     , cInterpolationSteps( interpolationPeriod )
+    , cInterpolationMethod( interpolationMethod )
     , mDelay( *this, "DelayVector" )
-    , mTestDelays( 4, ril::cVectorAlignmentSamples )
-    , mTestGains( 4, ril::cVectorAlignmentSamples )
-    , mAlternateDelays( 4, ril::cVectorAlignmentSamples )
   {
-    mTestDelays.fillValue( 0.00185737f );
-    mTestGains.fillValue( 0.8f );
-    mAlternateDelays.fillValue( 0.0001f );
   }
 
-  SignalFlow::~SignalFlow()
+  DelayVector::~DelayVector()
   {
   }
 
   /*virtual*/ void
-  SignalFlow::process()
+  DelayVector::process()
   {
-#if 0
-    if( ++mCounter % 8 == 0 )
-    {
-      mDelay.setDelay( mCounter % 16 == 0 ? mTestDelays : mAlternateDelays );
-    }
-    mDelay.setGain( mTestGains );
-#endif
     mDelay.process();
   }
 
   /*virtual*/ void
-  SignalFlow::setup()
+  DelayVector::setup()
   {
     // Initialise and configure audio components
     mDelay.setup( cNumberOfChannels, cInterpolationSteps,
@@ -89,6 +76,5 @@ namespace delay_vector
     setInitialised( true );
   }
 
-} // namespace delay_vector
-} // namespace mex
+} // namespace signalflows
 } // namespace visr

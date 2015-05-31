@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "signal_flow.hpp"
+#include "baseline_renderer.hpp"
 
 #include <libpanning/XYZ.h>
 #include <libpml/array_configuration.hpp>
@@ -12,9 +12,7 @@
 
 namespace visr
 {
-namespace apps
-{
-namespace baseline_renderer
+namespace signalflows
 {
 
 namespace
@@ -33,7 +31,7 @@ namespace
   }
 }
 
-SignalFlow::SignalFlow( std::size_t numberOfInputs,
+BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   std::size_t numberOfLoudspeakers,
   std::size_t numberOfOutputs,
   pml::SignalRoutingParameter const & outputRouting,
@@ -70,12 +68,12 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
 {
 }
 
-SignalFlow::~SignalFlow( )
+BaselineRenderer::~BaselineRenderer( )
 {
 }
  
 /*virtual*/ void 
-SignalFlow::process()
+BaselineRenderer::process()
 {
   mSceneReceiver.process( mSceneMessages );
   mSceneDecoder.process( mSceneMessages, mObjectVector );
@@ -104,7 +102,7 @@ SignalFlow::process()
 }
 
 /*virtual*/ void
-SignalFlow::setup()
+BaselineRenderer::setup()
 {
   // Initialise and configure audio components
 
@@ -244,6 +242,5 @@ SignalFlow::setup()
   setInitialised( true );
 }
 
-} // namespace scene_decoder
-} // namespace apps
+} // namespace signalflows
 } // namespace visr

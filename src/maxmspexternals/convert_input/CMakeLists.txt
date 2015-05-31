@@ -3,11 +3,23 @@
 INCLUDE_DIRECTORIES( ${MAXSDK_MSP_INCLUDE_DIR} )
 INCLUDE_DIRECTORIES( ${MAXSDK_MAX_INCLUDE_DIR} )
 
-ADD_DEFINITIONS( -DWIN_VERSION )
+IF( APPLE )
+  FIND_LIBRARY( CORE_SERVICE_FRAMEWORK NAMES CoreServices )
+  INCLUDE_DIRECTORIES( ${CORE_SERVICE_FRAMEWORK}/Versions/A/Frameworks/CarbonCore.framework/Versions/A/Headers )
+ELSE( APPLE )
+  ADD_DEFINITIONS( -DWIN_VERSION )
+ENDIF( APPLE )
 
 SET( EXTERNAL_NAME convert_input )
 
 ADD_LIBRARY( convert_input MODULE convert_input.c )
+
+set_target_properties( convert_input  PROPERTIES
+    PREFIX ""
+    SUFFIX ""
+    OUTPUT_NAME ${EXTERNAL_NAME}
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/max"
+)
 
 # Note: It is sufficient if we say 'extern "C"' within to revert the effects of the
 # C++ linking?

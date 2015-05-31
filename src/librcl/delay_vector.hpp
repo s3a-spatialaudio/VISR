@@ -255,7 +255,11 @@ private:
   */
   efl::BasicVector< ril::SampleType > mNextDelays;
 
-  float mSamplingFrequency;
+  /**
+   * The sampling frequency of the audio signal flow, converted to floating-point 
+   * for more convenient runtime calculations of the sample value.
+   */
+  SampleType const cSamplingFrequency;
 };
 
 } // namespace rcl

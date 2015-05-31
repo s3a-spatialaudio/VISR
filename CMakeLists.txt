@@ -78,6 +78,8 @@ IF( WIN32 OR APPLE )
     FIND_PACKAGE( MaxSDK REQUIRED)
     MESSAGE( STATUS "MAX SDK found: " ${MAXSDK_MAINPATH} )
   ENDIF(BUILD_MAX_MSP_EXTERNALS)
+
+  SET( MAXSDK_EXTERNAL_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/max )
 ENDIF(  WIN32 OR APPLE )
 
 ###########################################################
@@ -102,6 +104,12 @@ IF( WIN32 ) # This includes 64-bit platforms!
 ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
+
+## Jack Audio Connection Kit (JACK)
+OPTION( BUILD_USE_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
+IF( BUILD_USE_JACK )
+  FIND_PACKAGE( Jack REQUIRED)
+ENDIF( BUILD_USE_JACK )
 
 ## Libsndfile
 # On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)

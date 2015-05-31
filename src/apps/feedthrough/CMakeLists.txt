@@ -7,3 +7,7 @@ TARGET_LINK_LIBRARIES(feedthrough_app ril)
 TARGET_LINK_LIBRARIES(feedthrough_app rrl)
 TARGET_LINK_LIBRARIES(feedthrough_app efl)
 TARGET_LINK_LIBRARIES(feedthrough_app ${PORTAUDIO_LIBRARIES} )
+
+IF( BUILD_USE_JACK )
+  TARGET_LINK_LIBRARIES(feedthrough_app ${JACK_LIBRARY} )
+ENDIF( BUILD_USE_JACK )

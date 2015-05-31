@@ -104,6 +104,11 @@ public:
    * processed in earch iteration.
    */
   std::size_t period() const { return mPeriod; }
+  
+  /**
+   * Return the sampling frequency of the signal flow (in Hertz)
+   */
+  SamplingFrequencyType samplingFrequency() const { return mSamplingFrequency; }
 
   /**
    * Query the width of the capture port, i.e., the number of external

@@ -17,6 +17,9 @@ ADD_SUBDIRECTORY( libpanning )
 # Parameter message library
 ADD_SUBDIRECTORY( libpml )
 
+# Library for signal flows.
+ADD_SUBDIRECTORY( libsignalflows )
+
 # Rendering building block library
 ADD_SUBDIRECTORY( librbbl )
 

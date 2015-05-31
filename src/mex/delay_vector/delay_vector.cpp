@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All Rights reserved */
 
-#include "signal_flow.hpp"
+#include <libsignalflows/delay_vector.hpp>
 
 #include <libmexsupport/mex_wrapper.hpp>
 
@@ -18,7 +18,7 @@
 
 static char const * usage()
 {
-  return "Usage: output = feedthrough( input [, parameterMessages], blockLength, samplingFrequency )";
+  return "Usage: output = delay_vector( input [, parameterMessages], blockLength, samplingFrequency )";
 }
 
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
@@ -66,14 +66,25 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     ril::SamplingFrequencyType const samplingFrequency
       = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[samplingFreqParamIdx] ));
 
-	const std::size_t cNumberOfChannels = 4;
-	const std::size_t cInterpolationLength = 4 * periodSize;
+    const std::size_t cNumberOfChannels = 4;
+    const std::size_t cInterpolationLength = 4 * periodSize;
 
-	mex::delay_vector::SignalFlow flow(cNumberOfChannels, cInterpolationLength, periodSize, samplingFrequency);
+    const rcl::DelayVector::InterpolationType intType = rcl::DelayVector::InterpolationType::Linear;
+
+    signalflows::DelayVector flow( cNumberOfChannels, cInterpolationLength, intType, periodSize, samplingFrequency );
     flow.setup();
 
+    efl::BasicVector<ril::SampleType> initialDelays( cNumberOfChannels, ril::cVectorAlignmentSamples );
+    initialDelays.fillValue( static_cast<ril::SampleType>(0.0002) );
+
+    efl::BasicVector<ril::SampleType> initialGains( cNumberOfChannels, ril::cVectorAlignmentSamples );
+    initialGains.fillValue( static_cast<ril::SampleType>(0.735) );
+
+    flow.setDelay( initialDelays );
+    flow.setGain( initialGains );
+
     mexsupport::MexWrapper mexWrapper( flow, prhs[0], plhs[0],
-				       hasParameterArg ? prhs[1] : nullptr );
+     hasParameterArg ? prhs[1] : nullptr );
 
     mexWrapper.process();
   }

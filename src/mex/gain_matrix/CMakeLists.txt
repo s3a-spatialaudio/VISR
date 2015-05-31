@@ -19,27 +19,11 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} )
+# Also set the file extension according to the operating system.
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX ${MATLAB_MEX_SUFFIX} PREFIX "")
 
 # Add any extras dependencies
 target_link_libraries(${PROJECT_NAME} rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
-
-# <AF> TODO: Move this conditional logic to a centralised loacation!
-# 32-bit or 64-bit mex
-if(WIN32)
-  if (CMAKE_CL_64)
-      SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SUFFIX .mexw64)
-  else(CMAKE_CL_64)
-      SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SUFFIX .mexw32)
-  endif(CMAKE_CL_64)
-else(WIN32)
-  if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-      SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SUFFIX .mexa64 PREFIX "")
-  else(CMAKE_SIZEOF_VOID_P MATCHES "8")
-      SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SUFFIX .mexglx PREFIX "")
-  endif (CMAKE_SIZEOF_VOID_P MATCHES "8")
-endif(WIN32)
-# SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES SUFFIX ${MATLAB_SUFFIX_MEX} )
 
 # <AF> What to do with the install?
 # install to /bin by default
