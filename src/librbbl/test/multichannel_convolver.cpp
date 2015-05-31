@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_CASE( readFiltersFromWavFile )
     = pml::MatrixParameter<SampleType>::fromAudioFile( impulseWav.string( ), alignElements );
 
   std::size_t irChannels = impulses.numberOfRows();
-  std::size_t irLength = impulses.numberOfColumns();
 
 #if 0
+  std::size_t irLength = impulses.numberOfColumns();
   for( std::size_t rowIdx( 0 ); rowIdx < irChannels; ++rowIdx )
   {
     std::cout << "Filter " << rowIdx << ": ";
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( readFiltersFromWavFile )
 #endif
 
   std::vector< rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry > routings
-   = { { 0, 0, 1.0f, 0 }, { 1, 1, 0.5f, 1 } };
+    = { { 0, 0, 0, 1.0f }, { 1, 1, 1, 0.5f } };
 
   //explicit MultichannelConvolverUniform( std::size_t numberOfInputs,
   //  std::size_t numberOfOutputs,
@@ -77,10 +77,9 @@ BOOST_AUTO_TEST_CASE( readFiltersFromTextFile )
   pml::MatrixParameter<SampleType> const impulses
     = pml::MatrixParameter<SampleType>::fromTextFile( impulseTxt.string(), alignElements );
 
+#if 0
   std::size_t irChannels = impulses.numberOfRows();
   std::size_t irLength = impulses.numberOfColumns();
-
-#if 0
   for( std::size_t rowIdx( 0 ); rowIdx < irChannels; ++rowIdx )
   {
     std::cout << "Filter " << rowIdx << ": ";
