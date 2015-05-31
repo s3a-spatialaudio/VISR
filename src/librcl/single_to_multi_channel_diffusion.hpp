@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_SINGLE_TO_MULTI_CHANNEL_DIFFUSION_HPP_INCLUDED
 #define VISR_LIBRCL_SINGLE_TO_MULTI_CHANNEL_DIFFUSION_HPP_INCLUDED
 
+#define DIFFUSION_USE_FAST_CONVOLVER
+
 #include <libril/audio_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -15,10 +17,14 @@
 
 namespace visr
 {
-// forward declarations
 namespace rbbl
 {
+#ifdef DIFFUSION_USE_FAST_CONVOLVER
+template< typename SampleType >
+class MultichannelConvolverUniform;
+#else
 class FIR;
+#endif
 }
 
 namespace rcl
@@ -89,20 +95,26 @@ private:
    */
   std::size_t mNumberOfOutputs;
 
+#ifndef DIFFUSION_USE_FAST_CONVOLVER
   /**
    * Gain adjustment levels (linear scale) for each output channel. 
    */
   efl::BasicVector<SampleType> mGainAdjustments;
+#endif
 
   /**
    * An one-to-N FIR filter for diffusion.
    */
+#ifdef DIFFUSION_USE_FAST_CONVOLVER
+  std::unique_ptr<rbbl::MultichannelConvolverUniform<ril::SampleType> > mDiffusionFilter;
+#else
   std::unique_ptr<rbbl::FIR> mDiffusionFilter;
-
   /**
    * Output matrix for the results of the filtering operation.
+   * @note Only needed with the rbbl::FIR class.
    */
   efl::BasicMatrix<SampleType> mFilterOutputs;
+#endif
 
   /**
    * Buffer to hold the pointers into the output buffers for the filtering.
