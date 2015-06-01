@@ -19,7 +19,7 @@ std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntr
     throw std::invalid_argument( "The routing matrix must contain four columns [inputIndex, outputIndex, gain, filterIndex]." );
   }
   std::size_t const numRoutings = mxGetM( mtx );
-  std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry> table( numRoutings, rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry( { 0, 0, 0.f, 0 } ) );
+  typename std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry> table( numRoutings, typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry( { 0, 0, 0, 0.0f } ) );
   double const * basePtr = static_cast<double const *>(mxGetData( mtx ));
   for( std::size_t routingIdx( 0 ); routingIdx < numRoutings; ++routingIdx )
   {
