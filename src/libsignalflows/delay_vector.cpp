@@ -50,8 +50,8 @@ namespace signalflows
   {
     // Initialise and configure audio components
     mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-                 0.02f, rcl::DelayVector::InterpolationType::Linear,
-                 0.0f, 1.0f );
+		  0.02f, cInterpolationMethod,
+		  0.0f, 1.0f );
 
     initCommArea( 2 * cNumberOfChannels, period(), ril::cVectorAlignmentSamples );
 
@@ -74,6 +74,16 @@ namespace signalflows
 
     // should not be done here, but in AudioSignalFlow where this method is called.
     setInitialised( true );
+  }
+
+  void DelayVector::setDelay( efl::BasicVector<ril::SampleType> const & newDelays )
+  {
+    mDelay.setDelay( newDelays );
+  }
+
+  void DelayVector::setGain( efl::BasicVector<ril::SampleType> const & newGains )
+  {
+    mDelay.setGain( newGains );
   }
 
 } // namespace signalflows
