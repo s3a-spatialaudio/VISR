@@ -199,28 +199,26 @@ void DelayVector::setDelayAndGain( efl::BasicVector< SampleType > const & newDel
 
 void DelayVector::setDelay( efl::BasicVector< SampleType > const & newDelays )
 {
-	if (newDelays.size() != mNumberOfChannels)
-	{
-		throw std::invalid_argument("DelayVector::setDelay(): The number of elements in the argument does not match the number of channels.");
-	}
-	if (efl::vectorCopy(newDelays.data(), mNextDelays.data(), mNumberOfChannels) != efl::noError)
-	{
-		throw std::runtime_error("DelayVector::setDelay(): Copying of the vector elements failed.");
-	}
-
-	//copy set delays
+  if (newDelays.size() != mNumberOfChannels)
+  {
+    throw std::invalid_argument("DelayVector::setDelay(): The number of elements in the argument does not match the number of channels.");
+  }
+  if (efl::vectorCopy(newDelays.data(), mNextDelays.data(), mNumberOfChannels) != efl::noError)
+  {
+    throw std::runtime_error("DelayVector::setDelay(): Copying of the vector elements failed.");
+  }
 }
 
 void DelayVector::setGain( efl::BasicVector< SampleType > const & newGains )
 {
-	if (newGains.size() != mNumberOfChannels)
-	{
-		throw std::invalid_argument("DelayVector::setGain(): The number of elements in the argument does not match the number of channels.");
-	}
-	if (efl::vectorCopy(newGains.data(), mNextGains.data(), mNumberOfChannels) != efl::noError)
-	{
-		throw std::runtime_error("DelayVector::setGain(): Copying of the vector elements failed.");
-	}
+  if (newGains.size() != mNumberOfChannels)
+  {
+    throw std::invalid_argument("DelayVector::setGain(): The number of elements in the argument does not match the number of channels.");
+  }
+  if (efl::vectorCopy(newGains.data(), mNextGains.data(), mNumberOfChannels) != efl::noError)
+  {
+    throw std::runtime_error("DelayVector::setGain(): Copying of the vector elements failed.");
+  }
 }
 
 void DelayVector::delayNearestSample( SampleType startDelay, SampleType endDelay,
