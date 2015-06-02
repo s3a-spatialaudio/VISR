@@ -47,7 +47,7 @@ public:
  asynchronously using an externally provided (for instance application-global) boost asio IO service object. */
   };
 
-  static std::size_t const cMaxMessageLength = 8192;
+  static std::size_t const cMaxMessageLength = 65536;
 
   /**
    * Constructor.
