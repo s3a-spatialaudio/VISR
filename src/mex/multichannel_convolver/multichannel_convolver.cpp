@@ -1,8 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All Rights reserved */
 
-// #ifdef _MSC_VER 
+#ifdef _MSC_VER 
 #pragma warning(disable: 4996)
-// #endif
+#endif
 
 
 #include "utility_functions.hpp"

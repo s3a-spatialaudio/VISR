@@ -23,7 +23,6 @@ namespace
 
 std::pair< bool, std::size_t > getFftOrder( std::size_t fftSize )
 {
-  int exponent;
   std::size_t logVal = static_cast<std::size_t>(std::round(std::log2( static_cast<double>(fftSize ))));
   if( std::pow( 2, logVal ) != fftSize )
   {
@@ -45,8 +44,8 @@ std::pair< bool, std::size_t > getFftOrder( std::size_t fftSize )
     using TransformDataType = Ipp32f; // should be a typedef for 'float'
 
     Impl( std::size_t fftSize, std::size_t alignElements )
-      : mSpecBuffer( sizeof(OrigDataType)* alignElements )
-      , mWorkBuffer( sizeof(OrigDataType)* alignElements )
+      : mWorkBuffer( sizeof(OrigDataType)* alignElements )
+      , mSpecBuffer( sizeof(OrigDataType)* alignElements )
     {
       bool isPowerOfTwo = false;
       std::size_t fftOrder;
@@ -105,8 +104,8 @@ public:
   using TransformDataType = Ipp64f; // should be a typedef for 'double'
 
   Impl( std::size_t fftSize, std::size_t alignElements )
-    : mSpecBuffer( sizeof(OrigDataType) * alignElements )
-    , mWorkBuffer( sizeof(OrigDataType)* alignElements )
+    : mWorkBuffer( sizeof(OrigDataType) * alignElements )
+    , mSpecBuffer( sizeof(OrigDataType)* alignElements )
   {
     bool isPowerOfTwo = false;
     std::size_t fftOrder;
