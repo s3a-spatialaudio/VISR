@@ -115,6 +115,10 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 ## Jack Audio Connection Kit (JACK)
 OPTION( BUILD_USE_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
 IF( BUILD_USE_JACK )
+  # Preliminary support for testing the Jack library on Widows platforms.
+  IF( WIN32 )
+    SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{JACK_ROOT} )
+  ENDIF( WIN32 )
   FIND_PACKAGE( Jack REQUIRED)
 ENDIF( BUILD_USE_JACK )
 
