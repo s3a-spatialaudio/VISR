@@ -2,7 +2,7 @@
 
 // Enable native JACK interface instead of PortAudio
 // TODO: Make this selectable via a command line option.
-#define BASELINE_RENDERER_NATIVE_JACK
+// #define BASELINE_RENDERER_NATIVE_JACK
 
 #include "options.hpp"
 
