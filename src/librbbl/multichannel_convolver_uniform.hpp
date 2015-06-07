@@ -23,6 +23,7 @@ namespace rbbl
 {
 
 /**
+ * Generic class for MIMO convolution using a uniformly partioned fast convolution algorithm.
  * @tparam SampleType The floating-point type of the signal samples
  */
 template< typename SampleType >
@@ -38,11 +39,12 @@ public:
    */
   using FrequencyDomainType = typename FftWrapperBase<SampleType>::FrequencyDomainType;
 
+  /**/
   struct RoutingEntry
   {
   public:
     RoutingEntry( std::size_t pInput, std::size_t pOutput, std::size_t pFilterIndex,
-		  SampleType pGain = static_cast<SampleType>( 0.0 ) )
+                  SampleType pGain = static_cast<SampleType>( 0.0 ) )
       : output( pOutput ), input( pInput ), gain( pGain ), filterIndex( pFilterIndex )
     {}
 
@@ -61,7 +63,7 @@ public:
                                          std::vector<RoutingEntry> const & initialRoutings,
                                          efl::BasicMatrix<SampleType> const & initialFilters,
                                          std::size_t alignment = 0,
-					 char const * fftImplementation = "default" );
+                                         char const * fftImplementation = "default" );
 
   ~MultichannelConvolverUniform();
 
