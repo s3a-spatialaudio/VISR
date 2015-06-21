@@ -88,8 +88,8 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     std::size_t const maxFilters = static_cast<std::size_t>(maxFiltersRaw);
 
 
-    std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry> const routingTable =
-    visr::mex::multichannel_convolver::createRoutingTable<SampleType>( prhs[6] );
+    pml::FilterRoutingList const routingTable =
+    visr::mex::multichannel_convolver::createRoutingTable( prhs[6] );
 
     efl::BasicMatrix<SampleType> filterMtx( defaultAlignment );
     createFilterMatrix( prhs[7], filterMtx, filterLength );

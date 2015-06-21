@@ -20,8 +20,7 @@ namespace mex
 namespace multichannel_convolver
 {
 
-template <typename SampleType>
-std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry> createRoutingTable( mxArray const * mtx );
+pml::FilterRoutingList createRoutingTable( mxArray const * mtx );
 
 template<typename SampleType>
 void createFilterMatrix( mxArray const * array, efl::BasicMatrix<SampleType> & filters, std::size_t filterLength );
@@ -31,7 +30,6 @@ void fillInputBuffers( double const * baseInputPtr, std::size_t sampleIdx, std::
 
 template<typename SampleType>
 void copyOutputBuffers( efl::BasicMatrix<SampleType> const & outputMatrix, double * baseOutputPtr, std::size_t sampleIdx, std::size_t rowStride );
-
 
 } // namespace multichannel_convolver
 } // namespace mex

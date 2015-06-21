@@ -11,29 +11,24 @@ namespace mex
 namespace multichannel_convolver
 {
 
-template <typename SampleType>
-std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry> createRoutingTable( mxArray const * mtx )
+pml::FilterRoutingList createRoutingTable( mxArray const * mtx )
 {
   if( mxGetN( mtx ) != 4 )
   {
     throw std::invalid_argument( "The routing matrix must contain four columns [inputIndex, outputIndex, gain, filterIndex]." );
   }
   std::size_t const numRoutings = mxGetM( mtx );
-  typename std::vector<typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry> table( numRoutings, typename rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry( { 0, 0, 0, 0.0f } ) );
+  pml::FilterRoutingList table;
   double const * basePtr = static_cast<double const *>(mxGetData( mtx ));
   for( std::size_t routingIdx( 0 ); routingIdx < numRoutings; ++routingIdx )
   {
-    table[routingIdx].input = static_cast<std::size_t>(basePtr[routingIdx]);
-    table[routingIdx].output = static_cast<std::size_t>(basePtr[numRoutings + routingIdx]);
-    table[routingIdx].gain = static_cast<SampleType>(basePtr[2 * numRoutings + routingIdx]);
-    table[routingIdx].filterIndex = static_cast<std::size_t>(basePtr[3 * numRoutings + routingIdx]);
+    table.addRouting( static_cast<pml::FilterRoutingParameter::IndexType>(basePtr[routingIdx]),
+                      static_cast<pml::FilterRoutingParameter::IndexType>(basePtr[numRoutings + routingIdx]),
+                      static_cast<pml::FilterRoutingParameter::IndexType>(basePtr[3 * numRoutings + routingIdx]),
+                      static_cast<pml::FilterRoutingParameter::GainType>(basePtr[2 * numRoutings + routingIdx]) );
   }
   return table;
 }
-
-// explicit instantiations
-template std::vector<typename  rbbl::MultichannelConvolverUniform<float>::RoutingEntry> createRoutingTable<float>( mxArray const * mtx );
-template std::vector<typename  rbbl::MultichannelConvolverUniform<double>::RoutingEntry> createRoutingTable<double>( mxArray const * mtx );
 
 template<typename SampleType>
 void createFilterMatrix( mxArray const * array, efl::BasicMatrix<SampleType> & filters, std::size_t filterLength )
