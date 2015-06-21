@@ -24,6 +24,7 @@ class MatrixParameter: public efl::BasicMatrix<ElementType>
 public:
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
+   * @param alignment The alignment of the data, given in in multiples of the eleement size.
    */
   MatrixParameter( std::size_t alignment = 0 );
 
@@ -32,6 +33,7 @@ public:
    * The matrix is zero-initialised.
    * @param numRows The number of matrix rows.
    * @param numColumns The number of columns.
+   * @param alignment The alignment of the data, given in in multiples of the eleement size.
    */
   explicit MatrixParameter( std::size_t numRows, std::size_t numColumns, std::size_t alignment = 0 );
 
@@ -42,6 +44,7 @@ public:
   /**
    * Copy constructor.
    * Basically needed to enable the 'named constructor' functions below.
+   * @param rhs The object to be copied.
    */
   MatrixParameter( MatrixParameter<ElementType> const & rhs );
 

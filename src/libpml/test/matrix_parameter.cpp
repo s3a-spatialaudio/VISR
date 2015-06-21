@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( readFiltersFromWavFile )
   std::size_t const alignElements = 8;
 
   boost::filesystem::path const baseDir( CMAKE_CURRENT_SOURCE_DIR );
-  boost::filesystem::path const impulseWav = baseDir / boost::filesystem::path( "fir/quasiAllpassFIR_f32_n63.wav" );
+  boost::filesystem::path const impulseWav = baseDir / boost::filesystem::path( "../../librbbl/test/fir/quasiAllpassFIR_f32_n63.wav" );
   BOOST_CHECK( exists( impulseWav ) and not is_directory( impulseWav ) );
 
   pml::MatrixParameter<SampleType> const impulses
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( readFiltersFromTextFile )
   std::size_t const alignElements = 8;
 
   boost::filesystem::path const baseDir( CMAKE_CURRENT_SOURCE_DIR );
-  boost::filesystem::path const impulseTxt = baseDir / boost::filesystem::path( "fir/quasiAllpassFIR_f32_n63.txt" );
+  boost::filesystem::path const impulseTxt = baseDir / boost::filesystem::path( "../../librbbl/test/fir/quasiAllpassFIR_f32_n63.txt" );
   BOOST_CHECK( exists( impulseTxt ) and not is_directory( impulseTxt ) );
 
   pml::MatrixParameter<SampleType> const impulses

@@ -2,9 +2,9 @@
 
 #include "filter_routing_parameter.hpp"
 
-#include <boost/bind/bind.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_uint.hpp>
+#include <boost/optional.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include <algorithm>
 #include <ciso646>
@@ -14,13 +14,13 @@ namespace visr
 namespace pml
 {
 
-/**
- * Provide definition for the static const class member in order to allow their address to be taken.
- * The value is taken from their declaration within the class.
- * @note Microsoft Visual Studio neither allows or requires this standard-compliant explicit definition.
- */
 #ifndef _MSC_VER
-/*static*/ const FilterRoutingParameter::IndexType FilterRouting Parameter::cInvalidIndex;
+  /**
+  * Provide definition for the static const class member in order to allow their address to be taken.
+  * The value is taken from their declaration within the class.
+  * @note: Microsoft Visual Studio neither allows or requires this standard-compliant explicit definition.
+  */
+  /*static*/ const FilterRoutingParameter::IndexType FilterRoutingParameter::cInvalidIndex;
 #endif
 
 FilterRoutingList::FilterRoutingList( std::initializer_list<FilterRoutingParameter> const & entries )
@@ -48,10 +48,15 @@ void FilterRoutingList::addRouting( FilterRoutingParameter const & newEntry )
   {
     mRoutings.erase( findIt );
   }
-  mRoutings.insert( newEntry );
+  bool res( false );
+  std::tie(std::ignore, res ) = mRoutings.insert( newEntry );
+  if( not res )
+  {
+    throw std::logic_error( "FilterRoutingList::addRouting(): Error inserting element: " );
+  }
 }
 
-bool FilterRoutingList::removeEntry( FilterRoutingParameter const & entry )
+bool FilterRoutingList::removeRouting( FilterRoutingParameter const & entry )
 {
   RoutingsType::const_iterator const findIt = mRoutings.find( entry );
   if( findIt != mRoutings.end() )
@@ -62,7 +67,7 @@ bool FilterRoutingList::removeEntry( FilterRoutingParameter const & entry )
   return false;
 }
 
-bool FilterRoutingList::removeEntry( FilterRoutingParameter::IndexType inputIdx, FilterRoutingParameter::IndexType outputIdx )
+bool FilterRoutingList::removeRouting( FilterRoutingParameter::IndexType inputIdx, FilterRoutingParameter::IndexType outputIdx )
 {
   RoutingsType::const_iterator const findIt = mRoutings.find( FilterRoutingParameter( inputIdx, outputIdx, FilterRoutingParameter::cInvalidIndex ) );
   if( findIt != mRoutings.end() )
@@ -73,54 +78,39 @@ bool FilterRoutingList::removeEntry( FilterRoutingParameter::IndexType inputIdx,
   return false;
 }
 
-#if 0
-FilterRoutingParameter::IndexType FilterRoutingList::getOutput( IndexType inputIdx ) const
+void FilterRoutingList::parseJson( std::string const & encoded )
 {
-  RoutingsType::const_iterator findIt = std::find_if( mRoutings.begin(), mRoutings.end(),
-                                                     [&inputIdx]( const Entry & x ) { return x.input == inputIdx; } );
-  return (findIt == mRoutings.end()) ? cInvalidIndex : findIt->output;
+  std::stringstream strStr( encoded );
+  parseJson( strStr );
 }
-#endif
 
-// Parsing of string representations for signal routings
-
-#if 0
-bool FilterRoutingList::parse( std::string const & encoded )
+void FilterRoutingList::parseJson( std::istream & encoded )
 {
-  namespace qi = boost::spirit::qi;
+  FilterRoutingList newList;
 
-  std::string::const_iterator first = encoded.begin(); 
-  std::string::const_iterator last = encoded.end();
+  using ptree = boost::property_tree::ptree;
 
-  struct ParseState
+  ptree propTree;
+  try
   {
-  public:
-    void setInIdx( pml::FilterRouting Parameter::IndexType const inIdx )
-    {
-      mInIdx = inIdx;
-    }
-
-    void setOutIdx( pml::FilterRouting Parameter::IndexType const outIdx )
-    {
-      retValue.addRouting( mInIdx, outIdx );
-    }
-    pml::FilterRoutingParameter::IndexType mInIdx;
-    pml::FilterRoutingParameter retValue;
-  };
-  ParseState state;
-  // This parses a sequence of number pairs of the form 'x=y', where the pairs are separated by whitespace or a comma.
-  bool const parseRet = qi::phrase_parse( first, last,
-   ((qi::uint_[boost::bind( &ParseState::setInIdx, &state, ::_1 )] >> '=' >> qi::uint_[boost::bind(&ParseState::setOutIdx, &state, ::_1)]) % (','|qi::blank) ),
-   qi::ascii::space );
-
-  if( (not parseRet) or( first != last ) )
-  {
-    return false;
+    read_json( encoded, propTree );
   }
-  swap( state.retValue );
-  return true;
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "FilterRoutingList::parseJson(): Error while reading JSON data." ) );
+  }
+  for( auto v : propTree.get_child( "routings" ) )
+  {
+    ptree const & routingNode = v.second;
+    IndexType const inIdx = routingNode.get<IndexType>( "input" );
+    IndexType const outIdx = routingNode.get<IndexType>( "output" );
+    IndexType const filterIdx = routingNode.get<IndexType>( "filter" );
+    boost::optional<FilterRoutingParameter::GainType> const gain = routingNode.get_optional<FilterRoutingParameter::GainType>( "gain" );
+    newList.addRouting( inIdx, outIdx, filterIdx, gain ? *gain : static_cast<FilterRoutingParameter::GainType>(1.0) );
+  }
+
+  swap( newList );
 }
-#endif
 
 } // namespace pml
 } // namespace visr
