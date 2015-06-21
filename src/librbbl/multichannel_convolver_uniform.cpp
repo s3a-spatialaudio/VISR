@@ -19,10 +19,10 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
                               std::size_t maxFilterLength,
                               std::size_t maxRoutingPoints,
                               std::size_t maxFilterEntries,
-                              std::vector<RoutingEntry> const & initialRoutings,
+                              RoutingList const & initialRoutings,
                               efl::BasicMatrix<SampleType> const & initialFilters,
-			      std::size_t alignment /*= 0*/,
-			      char const * fftImplementation /*= "default"*/ )
+                              std::size_t alignment /*= 0*/,
+                              char const * fftImplementation /*= "default"*/ )
  : mAlignment( alignment )
  , mComplexAlignment( alignment/2 )
  , mNumberOfInputs( numberOfInputs )
@@ -197,7 +197,7 @@ void MultichannelConvolverUniform<SampleType>::clearRoutingTable( )
 }
 
 template< typename SampleType>
-void MultichannelConvolverUniform<SampleType>::initRoutingTable( std::vector<RoutingEntry> const & routings )
+void MultichannelConvolverUniform<SampleType>::initRoutingTable( RoutingList const & routings )
 {
   clearRoutingTable();
   if( routings.size() > maxNumberOfRoutingPoints() )
@@ -214,11 +214,14 @@ void MultichannelConvolverUniform<SampleType>::initRoutingTable( std::vector<Rou
 template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::setRoutingEntry( RoutingEntry const & routing )
 {
-  setRoutingEntry( routing.input, routing.output, routing.filterIndex, routing.gain );
+  setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, routing.gainLinear );
 }
 
 template< typename SampleType>
-void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, SampleType gain )
+void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx,
+                                                                std::size_t outputIdx,
+                                                                std::size_t filterIdx,
+                                                                RoutingEntry::GainType gain )
 {
   assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
   if( inputIdx >= numberOfInputs() )
@@ -237,7 +240,7 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
   typename RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
   if( findIt != mRoutingTable.end() )
   {
-    findIt->second = RoutingValue( filterIdx, gain );
+    findIt->second = RoutingValue( filterIdx, static_cast<SampleType>(gain) );
   }
   else
   {
@@ -245,7 +248,8 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
     {
       std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
     }
-    auto res = mRoutingTable.insert( std::make_pair( RoutingKey( inputIdx, outputIdx ), RoutingValue( filterIdx, gain ) ) );
+    auto res = mRoutingTable.insert( std::make_pair( RoutingKey( inputIdx, outputIdx ),
+      RoutingValue( filterIdx, static_cast<SampleType>(gain) ) ) );
     if( !res.second )
     {
       throw std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Adding new routing point failed." );
@@ -284,6 +288,15 @@ void MultichannelConvolverUniform<SampleType>::initFilters( efl::BasicMatrix<Sam
   for( std::size_t filterIdx( 0 ); filterIdx < numFilters; ++filterIdx )
   {
     setImpulseResponse( newFilters.row( filterIdx ), filterLength, filterIdx, newFilters.alignmentElements() );
+  }
+  for( std::size_t filterIdx( numFilters ); filterIdx < maxNumberOfFilterEntries(); ++filterIdx )
+  {
+    efl::ErrorCode const res = efl::vectorZero( mFilterPartitionsFrequencyDomain.row( filterIdx ),
+      mFilterPartitionsFrequencyDomain.numberOfColumns(), mComplexAlignment );
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "MultichannelConvolverUniform::initFilters( ): Zeroing the excess filters failed." );
+    }
   }
 }
 
@@ -328,7 +341,7 @@ template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
 {
   efl::vectorCopy( transformedFilter, mFilterPartitionsFrequencyDomain.row( filterIdx ),
-		   mFilterPartitionsFrequencyDomain.numberOfColumns(),
+                   mFilterPartitionsFrequencyDomain.numberOfColumns(),
                    std::min( alignment, mComplexAlignment ) );
 }
 
