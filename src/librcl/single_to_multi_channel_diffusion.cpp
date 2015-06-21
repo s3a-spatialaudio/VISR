@@ -54,13 +54,10 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
 
 #ifdef DIFFUSION_USE_FAST_CONVOLVER
   std::size_t const filterLength = diffusionFilters.numberOfColumns();
-  std::vector<rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry > routings;
-  routings.reserve( mNumberOfOutputs );
+  pml::FilterRoutingList routings;
   for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; ++outIdx )
   {
-    routings.push_back(
-     rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry( 0, outIdx, 0,
-								   gainAdjustments[ outIdx ] ) );
+    routings.addRouting( 0, outIdx, outIdx, gainAdjustments[ outIdx ] );
   }
   mDiffusionFilter.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
     1, // single input
