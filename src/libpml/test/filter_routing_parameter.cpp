@@ -35,7 +35,9 @@ BOOST_AUTO_TEST_CASE( FilterRoutingParameterInstantiation )
 
   FilterRoutingParameter const obj2( 1, 0, 0, 0.3 );
   
-  FilterRoutingParameter copyObj( obj1 );
+  FilterRoutingParameter const copyObj( obj1 );
+
+  BOOST_CHECK( obj1.filterIndex == copyObj.filterIndex );
 
   FilterRoutingList emptyList;
 

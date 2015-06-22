@@ -36,10 +36,10 @@ BOOST_AUTO_TEST_CASE( readFiltersFromWavFile )
   pml::MatrixParameter<SampleType> const impulses
     = pml::MatrixParameter<SampleType>::fromAudioFile( impulseWav.string( ), alignElements );
 
-  std::size_t irChannels = impulses.numberOfRows();
-
 #if 0
-  std::size_t irLength = impulses.numberOfColumns();
+  // This creates lots of output.
+  std::size_t const irChannels = impulses.numberOfRows();
+  std::size_t const irLength = impulses.numberOfColumns();
   for( std::size_t rowIdx( 0 ); rowIdx < irChannels; ++rowIdx )
   {
     std::cout << "Filter " << rowIdx << ": ";
