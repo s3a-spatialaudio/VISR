@@ -51,35 +51,18 @@ public:
                        efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                        std::string const & trackingConfiguration,
                        std::string const & outputGainConfiguration,
-                       std::size_t udpPort,
+                       std::size_t sceneReceiverPort,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~BaselineRenderer();
 
   /*virtual*/ void process();
 
-  /*virtual*/ void setup();
-
 private:
-  const std::size_t cNumberOfInputs;
-
-  const std::size_t cNumberOfLoudspeakers;
-
-  const std::size_t cNumberOfOutputs;
 
   const pml::SignalRoutingParameter mOutputRoutings;
 
-  const std::size_t cInterpolationSteps;
-
-  const std::string mConfigFileName;
-
   efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
-
-  std::string const mTrackingConfiguration;
-
-  std::string const mOutputGainConfiguration;
-
-  const std::size_t mNetworkPort;
   
   rcl::UdpReceiver mSceneReceiver;
   
@@ -131,7 +114,6 @@ private:
 
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
-
 };
 
 } // namespace signalflows
