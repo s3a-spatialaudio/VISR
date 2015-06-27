@@ -85,17 +85,13 @@ public:
   virtual void process() = 0;
 
   /**
-   * Method to initialise the signal flow graph.
-   * It must be implemented by the derived subclasses.
-   */
-  virtual void setup() = 0;
-
-  /**
    * Query methods.
    */
   //@{
   /**
    * Query whether the signal flow has been set up successfully.
+   * The corresponding data member must be set in the constructor or a specific initialisation method.
+   * @todo After removal of the setup method and performing the setup in the constructor, consider removal of this mechanism.
    */
   bool initialised() const { return mInitialised; }
 
