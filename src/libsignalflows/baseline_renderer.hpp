@@ -114,6 +114,16 @@ private:
 
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
+
+  /**
+   *
+   */
+  //@{
+  bool mSubwooferEnabled;
+
+  std::unique_ptr<rcl::GainMatrix> mSubwooferMix;
+  //@}
+
 };
 
 } // namespace signalflows

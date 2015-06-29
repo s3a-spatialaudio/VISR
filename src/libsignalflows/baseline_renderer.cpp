@@ -100,6 +100,10 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   outputGains.fillValue( static_cast<ril::SampleType>(1.0) );
   outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
 
+  std::size_t numberOfSubwoofers = 0;
+  std::vector<std::size_t> subwooferChannelIndices;
+  efl::BasicMatrix<ril::SampleType> subwooferGains;
+
   if( not outputGainConfiguration.empty( ) )
   {
     boost::filesystem::path const outputConfigPath( outputGainConfiguration );
@@ -109,20 +113,46 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     }
     pml::ArrayConfiguration outputConfig;
     outputConfig.loadXml( outputConfigPath.string( ) );
-    if( outputConfig.numberOfSpeakers( ) != numberOfOutputs )
+    if( (outputConfig.numberOfSpeakers() + outputConfig.numberOfSubwoofers()) != numberOfOutputs)
     {
-      throw std::invalid_argument( "The number of channels in the output configuration file does not match the configured number of physical outputs." );
+      throw std::invalid_argument( "The number of channels (loudspeakers + subwoofers) in the output configuration file does not match the configured number of physical outputs." );
     }
     outputConfig.getGains<ril::SampleType>( outputGains );
     if( !mTrackingEnabled )
     {
-      // use the static speaker compensation delays only if tracking is not enabled, because 
+      // use the static speaker compensation delays only if tracking is not enabled, because the tracking adaptation applies delays automatically.
       outputConfig.getDelays<ril::SampleType>( outputDelays );
+    }
+    else
+    {
+      outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
+    }
+    if( (numberOfSubwoofers = outputConfig.numberOfSubwoofers( )) > 0)
+    {
+      subwooferChannelIndices.resize( numberOfSubwoofers );
+      subwooferGains.resize( numberOfSubwoofers, numberOfLoudspeakers );
+      for( std::size_t subIdx( 0 ); subIdx < numberOfSubwoofers; ++subIdx )
+      {
+        pml::ArrayConfiguration::Subwoofer const & sub = outputConfig.getSubwoofer( subIdx );
+        subwooferChannelIndices[subIdx] = sub.channelIndex -1; // We are using them as raw zero-offset channel indices, while the input is one-offset.
+        ril::SampleType const subGain = static_cast<ril::SampleType>(sub.gain);
+        for( std::size_t spkIdx( 0 ); spkIdx < numberOfLoudspeakers; ++spkIdx )
+        {
+          subwooferGains( spkIdx, subIdx ) = subGain;
+        }
+      }
     }
   }
 
   mOutputAdjustment.setup( numberOfOutputs, period, 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
     outputDelays, outputGains );
+
+  mSubwooferEnabled = (numberOfSubwoofers > 0);
+  if( mSubwooferEnabled )
+  {
+    mSubwooferMix.reset( new rcl::GainMatrix( *this, "SubwooferMixer" ) );
+    mSubwooferMix->setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferGains );
+  }
 
   // TODO: Incorporate the speaker compensation chain and the output adjustment.
   // Assignment of channel buffers                    #elements               Range
@@ -148,6 +178,11 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   std::size_t const decorrelatorStartIdx = diffuseMixerStartIdx + 1;
   std::vector<std::size_t> const decorrelatorOutRange = indexRange( decorrelatorStartIdx, decorrelatorStartIdx + numberOfLoudspeakers - 1 );
 
+  // Only used if subwoofers are present
+  std::size_t const subwooferMixerStartIdx = decorrelatorStartIdx + numberOfLoudspeakers;
+  std::vector<std::size_t> const subwooferMixerOutRange = mSubwooferEnabled ? indexRange( subwooferMixerStartIdx, subwooferMixerStartIdx + numberOfSubwoofers - 1 )
+    : std::vector<std::size_t>(); // empty vector otherwise
+
   // only used if tracking is enabled
   std::size_t const trackingCompensationStartIdx = decorrelatorStartIdx + numberOfLoudspeakers;
   std::vector<std::size_t> const trackingCompensationOutRange = mTrackingEnabled
@@ -155,6 +190,14 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
 
   std::size_t const numTotalCommunicationChannels = mTrackingEnabled
     ? trackingCompensationStartIdx + numberOfLoudspeakers : decorrelatorStartIdx + numberOfLoudspeakers;
+
+  // As the channel indices for the playback port are com
+  std::vector<std::size_t> playbackChannelRange( outputAdjustOutRange );
+  if( mSubwooferEnabled )
+  {
+    playbackChannelRange.reserve( playbackChannelRange.size() + numberOfSubwoofers );
+    playbackChannelRange.insert( playbackChannelRange.end(), subwooferChannelIndices.begin(), subwooferChannelIndices.end() );
+  }
 
   initCommArea( numTotalCommunicationChannels, period, ril::cVectorAlignmentSamples );
 
@@ -172,6 +215,11 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutRange );
 
+  if( mSubwooferEnabled )
+  {
+    assignCommunicationIndices( "SubwooferMixer", "in", diffuseMixOutRange );
+  }
+
   if( mTrackingEnabled )
   {
     assignCommunicationIndices( "TrackingSpeakerCompensation", "in", mixOutRange );
@@ -184,7 +232,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   }
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size( ) );
-  assignPlaybackIndices( &outputAdjustOutRange[0], outputAdjustOutRange.size( ) );
+  assignPlaybackIndices( &playbackChannelRange[0], playbackChannelRange.size( ) );
 
   mGainParameters.resize( numberOfLoudspeakers, numberOfInputs );
 
@@ -218,6 +266,10 @@ BaselineRenderer::process()
   mDiffusePartMatrix.process();
   mDiffusePartDecorrelator.process();
   mDirectDiffuseMix.process();
+  if( mSubwooferEnabled )
+  {
+    mSubwooferMix->process();
+  }
   if( mTrackingEnabled )
   {
     mSpeakerCompensation->setDelayAndGain( mCompensationDelays, mCompensationGains );
