@@ -199,7 +199,6 @@ int main( int argc, char const * const * argv )
                      outputGainConfiguration,
                      sceneReceiverPort,
                      periodSize, samplingRate );
-    flow.setup();
 
 #ifdef FEEDTHROUGH_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );
