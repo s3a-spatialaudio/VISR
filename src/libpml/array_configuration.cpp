@@ -82,6 +82,32 @@ void ArrayConfiguration::loadXml( std::string const & filePath )
       throw std::invalid_argument( "ArrayConfiguration::loadXml(): Speaker indices must be adjacent." );
     }
   }
+
+  // parse the subwoofer configuration
+  const auto subTrees = treeRoot.equal_range( "subwoofer" );
+  for( ptree::const_assoc_iterator treeIt( subTrees.first ); treeIt != subTrees.second; ++treeIt )
+  {
+    ptree const childTree = treeIt->second;
+    std::size_t const channelIndex = childTree.get<std::size_t>( "<xmlattr>.channel" );
+    double const gain = childTree.get<double>( "<xmlattr>.gain" );
+
+    mSubwoofers.push_back( Subwoofer( channelIndex, gain ) );
+  }
+
+  std::vector<std::size_t> subwooferIndices;
+  std::transform( mSubwoofers.begin(), mSubwoofers.end(), std::back_inserter( subwooferIndices ), []( Subwoofer const & sub ) { return sub.channelIndex; } );
+  std::sort( subwooferIndices.begin(), subwooferIndices.end() );
+
+  std::vector<std::size_t> spkIndices;
+  std::transform( mArray.begin( ), mArray.end( ), std::back_inserter( spkIndices ), []( Speaker const & spk ) { return spk.id; } );
+  std::sort( spkIndices.begin( ), spkIndices.end( ) );
+
+  std::vector<std::size_t> clashIndices;
+  std::set_intersection( spkIndices.begin(), spkIndices.end(), subwooferIndices.begin(), subwooferIndices.end(), std::back_inserter( clashIndices ) );
+  if( not clashIndices.empty() )
+  {
+    throw std::invalid_argument( "ArrayConfiguration::loadXml(): The loudspeaker and subwoofer indices overlap." );
+  }
 }
 
 } // namespace pml
