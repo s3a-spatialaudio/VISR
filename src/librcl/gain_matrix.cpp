@@ -35,12 +35,14 @@ void GainMatrix::setup( std::size_t numberOfInputs,
                         std::size_t interpolationSteps,
                         efl::BasicMatrix< SampleType > const & initialGains )
 {
-  if( (initialGains.numberOfColumns() != numberOfOutputs) or( initialGains.numberOfRows() != numberOfOutputs ) )
+  if( (initialGains.numberOfColumns() != numberOfInputs) or( initialGains.numberOfRows() != numberOfOutputs ) )
   {
     throw std::logic_error( "GainMatrix::setup: The matrix of initial gains does not match the dimensions of this object." );
   }
   mNumberOfInputs = numberOfInputs;
   mNumberOfOutputs = numberOfOutputs;
+  mInput.setWidth( mNumberOfInputs );
+  mOutput.setWidth( mNumberOfOutputs );
   mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ),
                  interpolationSteps, initialGains, ril::cVectorAlignmentSamples ) );
 }
