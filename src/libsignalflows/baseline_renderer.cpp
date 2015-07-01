@@ -117,6 +117,9 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     {
       throw std::invalid_argument( "The number of channels (loudspeakers + subwoofers) in the output configuration file does not match the configured number of physical outputs." );
     }
+    outputGains.resize( outputConfig.numberOfSpeakers());
+    outputDelays.resize( outputConfig.numberOfSpeakers());
+
     outputConfig.getGains<ril::SampleType>( outputGains );
     if( !mTrackingEnabled )
     {
@@ -138,7 +141,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
         ril::SampleType const subGain = static_cast<ril::SampleType>(sub.gain);
         for( std::size_t spkIdx( 0 ); spkIdx < numberOfLoudspeakers; ++spkIdx )
         {
-          subwooferGains( spkIdx, subIdx ) = subGain;
+          subwooferGains( subIdx, spkIdx ) = subGain;
         }
       }
     }
@@ -184,14 +187,15 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     : std::vector<std::size_t>(); // empty vector otherwise
 
   // only used if tracking is enabled
-  std::size_t const trackingCompensationStartIdx = decorrelatorStartIdx + numberOfLoudspeakers;
+  std::size_t const trackingCompensationStartIdx = subwooferMixerStartIdx + numberOfSubwoofers;
   std::vector<std::size_t> const trackingCompensationOutRange = mTrackingEnabled
     ? indexRange( trackingCompensationStartIdx, trackingCompensationStartIdx + numberOfLoudspeakers - 1 ) : std::vector<std::size_t>( );
 
   std::size_t const numTotalCommunicationChannels = mTrackingEnabled
     ? trackingCompensationStartIdx + numberOfLoudspeakers : decorrelatorStartIdx + numberOfLoudspeakers;
 
-  // As the channel indices for the playback port are com
+  // As the channel indices for the playback port are combined
+  // from two output ports, we need to construct a separate range.
   std::vector<std::size_t> playbackChannelRange( outputAdjustOutRange );
   if( mSubwooferEnabled )
   {
@@ -217,7 +221,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
 
   if( mSubwooferEnabled )
   {
-    assignCommunicationIndices( "SubwooferMixer", "in", diffuseMixOutRange );
+    assignCommunicationIndices( "SubwooferMixer", "in", mixOutRange );
   }
 
   if( mTrackingEnabled )
