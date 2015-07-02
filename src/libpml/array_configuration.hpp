@@ -38,19 +38,6 @@ public:
     double delayAdjustment;
   };
 
-  struct Subwoofer
-  {
-  public:
-    explicit Subwoofer( std::size_t pChannelIndex, double pGain )
-    : channelIndex( pChannelIndex )
-    , gain( pGain )
-    {
-    }
-
-    std::size_t channelIndex;
-    double gain;
-  };
-
   struct CompareSpeakers
   {
     bool operator()(Speaker const & lhs, Speaker const & rhs) const
@@ -65,23 +52,11 @@ public:
 
   ~ArrayConfiguration();
 
-  using SubwooferList = std::vector<Subwoofer>;
+  using SubwooferList = std::vector<std::size_t>;
 
   std::size_t numberOfSubwoofers() const { return mSubwoofers.size(); }
 
-  /**
-   * Return the subwoofer description for a given subwoofer index.
-   * @param index The zero-offset index to the subwoofer. Must not exceeed the maximum admissible index (number of subwoofers -1)
-   * @throw std::invalid_argument If the \p index exceeds the maximum admissible index.
-   */
-  Subwoofer const & getSubwoofer( std::size_t index ) const
-  {
-    if( index >= numberOfSubwoofers() )
-    {
-      throw std::invalid_argument( "ArrayConfiguration::getSubwoofer(): Subwoofer index exceeds the admissible range." );
-    }
-    return mSubwoofers.at( index );
-  }
+  SubwooferList const & subwooferIndices() const { return mSubwoofers; }
 
   /**
    * @throw std::invalid_argument if the array file is inconsistent.

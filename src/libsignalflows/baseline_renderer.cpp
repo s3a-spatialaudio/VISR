@@ -102,7 +102,6 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
 
   std::size_t numberOfSubwoofers = 0;
   std::vector<std::size_t> subwooferChannelIndices;
-  efl::BasicMatrix<ril::SampleType> subwooferGains;
 
   if( not outputGainConfiguration.empty( ) )
   {
@@ -113,7 +112,9 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     }
     pml::ArrayConfiguration outputConfig;
     outputConfig.loadXml( outputConfigPath.string( ) );
-    if( (outputConfig.numberOfSpeakers() + outputConfig.numberOfSubwoofers()) != numberOfOutputs)
+    // Note: At the moment, the 'numberOfSpeakers' also includes the subwoofers.
+    // TODO: Rename them accordingly
+    if( (outputConfig.numberOfSpeakers()) != numberOfOutputs)
     {
       throw std::invalid_argument( "The number of channels (loudspeakers + subwoofers) in the output configuration file does not match the configured number of physical outputs." );
     }
@@ -130,21 +131,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     {
       outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
     }
-    if( (numberOfSubwoofers = outputConfig.numberOfSubwoofers( )) > 0)
-    {
-      subwooferChannelIndices.resize( numberOfSubwoofers );
-      subwooferGains.resize( numberOfSubwoofers, numberOfLoudspeakers );
-      for( std::size_t subIdx( 0 ); subIdx < numberOfSubwoofers; ++subIdx )
-      {
-        pml::ArrayConfiguration::Subwoofer const & sub = outputConfig.getSubwoofer( subIdx );
-        subwooferChannelIndices[subIdx] = sub.channelIndex -1; // We are using them as raw zero-offset channel indices, while the input is one-offset.
-        ril::SampleType const subGain = static_cast<ril::SampleType>(sub.gain);
-        for( std::size_t spkIdx( 0 ); spkIdx < numberOfLoudspeakers; ++spkIdx )
-        {
-          subwooferGains( subIdx, spkIdx ) = subGain;
-        }
-      }
-    }
+    subwooferChannelIndices = outputConfig.subwooferIndices();
   }
 
   mOutputAdjustment.setup( numberOfOutputs, period, 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
@@ -154,7 +141,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   if( mSubwooferEnabled )
   {
     mSubwooferMix.reset( new rcl::GainMatrix( *this, "SubwooferMixer" ) );
-    mSubwooferMix->setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferGains );
+    mSubwooferMix->setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, static_cast<ril::SampleType>(1.0) );
   }
 
   // TODO: Incorporate the speaker compensation chain and the output adjustment.
