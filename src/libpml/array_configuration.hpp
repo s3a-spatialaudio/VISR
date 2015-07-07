@@ -54,6 +54,14 @@ public:
 
   using SubwooferList = std::vector<std::size_t>;
 
+  /**
+   * Return the total number of output channels, i.e., the number. of
+   * loudspeakers and subwoofers combined.
+   */
+  std::size_t numberOfOutputs() const { return mArray.size(); }
+
+  std::size_t numberOfLoudspeakers() const { return mArray.size() - mSubwoofers.size(); }
+
   std::size_t numberOfSubwoofers() const { return mSubwoofers.size(); }
 
   SubwooferList const & subwooferIndices() const { return mSubwoofers; }
@@ -63,12 +71,12 @@ public:
    */
   void loadXml( std::string const & filePath );
 
-  std::size_t numberOfSpeakers() const { return mArray.size(); }
+//  std::size_t numberOfSpeakers() const { return mArray.size(); }
 
   template< typename ValueType >
   void getGains( efl::BasicVector<ValueType> & gains ) const
   {
-    if( gains.size() != numberOfSpeakers() )
+    if( gains.size() != numberOfOutputs() )
     {
       throw std::invalid_argument( "ArrayConfiguration::getGains(): Size of outputMatrix does not match the array size." );
     }
@@ -82,7 +90,7 @@ public:
   template< typename ValueType >
   void getDelays( efl::BasicVector<ValueType> & delays ) const
   {
-    if( delays.size() != numberOfSpeakers() )
+    if( delays.size() != numberOfOutputs() )
     {
       throw std::invalid_argument( "ArrayConfiguration::getDelays(): Size of outputMatrix does not match the array size." );
     }

@@ -93,14 +93,13 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
 
-  mOutputRouting.setup( numberOfLoudspeakers, numberOfOutputs, mOutputRoutings );
+  mOutputRouting.setup( numberOfLoudspeakers, numberOfOutputs, outputRouting );
 
   efl::BasicVector<ril::SampleType> outputGains( numberOfOutputs, ril::cVectorAlignmentSamples );
   efl::BasicVector<ril::SampleType> outputDelays( numberOfOutputs, ril::cVectorAlignmentSamples );
   outputGains.fillValue( static_cast<ril::SampleType>(1.0) );
   outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
 
-  std::size_t numberOfSubwoofers = 0;
   std::vector<std::size_t> subwooferChannelIndices;
 
   if( not outputGainConfiguration.empty( ) )
@@ -112,14 +111,12 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     }
     pml::ArrayConfiguration outputConfig;
     outputConfig.loadXml( outputConfigPath.string( ) );
-    // Note: At the moment, the 'numberOfSpeakers' also includes the subwoofers.
-    // TODO: Rename them accordingly
-    if( (outputConfig.numberOfSpeakers()) != numberOfOutputs)
+    if( (outputConfig.numberOfOutputs()) != numberOfOutputs)
     {
       throw std::invalid_argument( "The number of channels (loudspeakers + subwoofers) in the output configuration file does not match the configured number of physical outputs." );
     }
-    outputGains.resize( outputConfig.numberOfSpeakers());
-    outputDelays.resize( outputConfig.numberOfSpeakers());
+    outputGains.resize( outputConfig.numberOfOutputs());
+    outputDelays.resize( outputConfig.numberOfOutputs());
 
     outputConfig.getGains<ril::SampleType>( outputGains );
     if( !mTrackingEnabled )
@@ -137,11 +134,14 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   mOutputAdjustment.setup( numberOfOutputs, period, 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
     outputDelays, outputGains );
 
-  mSubwooferEnabled = (numberOfSubwoofers > 0);
+  std::size_t const numberOfSubwoofers = subwooferChannelIndices.size();
+  mSubwooferEnabled = not subwooferChannelIndices.empty();
   if( mSubwooferEnabled )
   {
     mSubwooferMix.reset( new rcl::GainMatrix( *this, "SubwooferMixer" ) );
-    mSubwooferMix->setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, static_cast<ril::SampleType>(1.0) );
+    // Note: Using numberOfOutputs to set the size of the subwoofer
+    // mixer input is an obvious hack.
+    mSubwooferMix->setup( numberOfOutputs, numberOfSubwoofers, 0/*interpolation steps*/, static_cast<ril::SampleType>(1.0) );
   }
 
   // TODO: Incorporate the speaker compensation chain and the output adjustment.
@@ -179,17 +179,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     ? indexRange( trackingCompensationStartIdx, trackingCompensationStartIdx + numberOfLoudspeakers - 1 ) : std::vector<std::size_t>( );
 
   std::size_t const numTotalCommunicationChannels = mTrackingEnabled
-    ? trackingCompensationStartIdx + numberOfLoudspeakers : decorrelatorStartIdx + numberOfLoudspeakers;
-
-  // As the channel indices for the playback port are combined
-  // from two output ports, we need to construct a separate range.
-  std::vector<std::size_t> playbackChannelRange( outputAdjustOutRange );
-  if( mSubwooferEnabled )
-  {
-    playbackChannelRange.reserve( playbackChannelRange.size() + numberOfSubwoofers );
-    playbackChannelRange.insert( playbackChannelRange.end(), subwooferChannelIndices.begin(), subwooferChannelIndices.end() );
-  }
-
+    ? trackingCompensationStartIdx + numberOfLoudspeakers : decorrelatorStartIdx + numberOfLoudspeakers + numberOfSubwoofers;
   initCommArea( numTotalCommunicationChannels, period, ril::cVectorAlignmentSamples );
 
   // Connect the ports
@@ -198,7 +188,6 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", matrixOutRange );
   assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutRange );
   assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
-  assignCommunicationIndices( "OutputAdjustment", "in", routingOutRange );
   assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutRange );
   assignCommunicationIndices( "DiffusePartMatrix", "in", captureIndices );
   assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixOutRange );
@@ -208,7 +197,25 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
 
   if( mSubwooferEnabled )
   {
-    assignCommunicationIndices( "SubwooferMixer", "in", mixOutRange );
+    // Note: the subwoofer signal mix is based on the real loudspeaker
+    // channels, not the logical speaker indices used in the VBAP renderer
+    assignCommunicationIndices( "SubwooferMixer", "in", routingOutRange );
+    assignCommunicationIndices( "SubwooferMixer", "out", subwooferMixerOutRange );
+
+    // As the channel indices for the playback port are combined
+    // from two output ports, we need to construct a separate range.
+
+    // @warning This is a brute hack, hard coding the
+    // mumberOfSubwoofer last outputs of the output routing inputs to
+    // the input of the output adjustment component.
+    std::vector<std::size_t> adjustInRange( &routingOutRange[0], &routingOutRange[numberOfLoudspeakers] );
+    adjustInRange.reserve( routingOutRange.size() + numberOfSubwoofers );
+    adjustInRange.insert( adjustInRange.end(), subwooferMixerOutRange.begin(), subwooferMixerOutRange.end() );
+    assignCommunicationIndices( "OutputAdjustment", "in", adjustInRange );
+  }
+  else
+  {
+    assignCommunicationIndices( "OutputAdjustment", "in", routingOutRange );
   }
 
   if( mTrackingEnabled )
@@ -223,7 +230,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   }
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size( ) );
-  assignPlaybackIndices( &playbackChannelRange[0], playbackChannelRange.size( ) );
+  assignPlaybackIndices(   &outputAdjustOutRange[0], outputAdjustOutRange.size( ) );
 
   mGainParameters.resize( numberOfLoudspeakers, numberOfInputs );
 

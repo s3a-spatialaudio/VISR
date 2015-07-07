@@ -60,8 +60,6 @@ public:
 
 private:
 
-  const pml::SignalRoutingParameter mOutputRoutings;
-
   efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
   
   rcl::UdpReceiver mSceneReceiver;
