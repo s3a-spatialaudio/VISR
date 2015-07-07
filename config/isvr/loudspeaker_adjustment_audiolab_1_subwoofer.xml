@@ -38,5 +38,5 @@
   <speaker id="37" gainDB="-4.90" delay="0.0044321"/>
   <speaker id="38" gainDB="-1.20" delay="0.0006877"/>
   <speaker id="39" gainDB="-2.10" delay="0.0002418"/>
-  <subwoofer id="40" gainDB="-6.0" delay="0.010000" />
+  <subwoofer id="40" gainDB="-6.0" delay="0.00000" />
 </arrayconfiguration>
