@@ -1,0 +1,29 @@
+% Positions
+% id = identity for triangularisation
+% chan = output audio channel
+%
+% cartesians
+% (0,0,0) is at the centre of the Audio Lab: 1.95m and 2.35m from the inside bounding surfaces of the frame, and 1.22m from the floor.
+% id	chan 	x(m)	y(m)	z(m)
+
+c 1 7 -0.00000000 1.99400000 0.00000000
+c 2 8 1.18600500 2.05422092 0.00000000
+c 3 6 -1.18600500 2.05422092 0.00000000
+c 4 12 2.31110822 -0.84117460 0.00000000
+c 5 16 -2.31110822 -0.84117460 0.00000000
+c 6 22 0.73168352 1.26731303 1.22791074
+c 7 20 -0.73168352 1.26731303 1.22791074
+c 8 25 1.37511521 -0.50050100 1.22791074
+c 9 29 -1.37511521 -0.50050100 1.22791074
+
+t 1 1 2 6
+t 2 1 3 7
+t 3 1 6 7
+t 4 2 4 6
+t 5 3 5 7
+t 6 4 5 8
+t 7 4 6 8
+t 8 5 7 9
+t 9 5 8 9
+t 10 6 7 8
+t 11 7 8 9
