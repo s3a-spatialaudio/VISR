@@ -1,0 +1,18 @@
+# speaker location definitions
+#
+# speakers [<format>]
+#
+# Where <format> is one of:
+#   'cart'    : channel x,y,z [gain-db]
+#   'azimuth' : channel azimuth,radius,height [gain-db]
+#   'polar'   : channel azimuth,elevation,distance [gain-db]
+#
+# All angles degrees, radius is distance on 0 elevation plane
+
+speakers polar
+ 7	 -30,   0, 2.37201	; M-030
+ 5	  30,   0, 2.37201	; M+030
+; dummy God speaker
+-1	   0,  90, 1.500	; T+000
+; dummy Devil speaker
+-1	   0, -90, 1.500	; D+000
