@@ -19,7 +19,10 @@
 
 // #include <iostream>
 
-
+namespace visr
+{
+namespace panning
+{
 
 class VBAP
 {
@@ -71,7 +74,7 @@ public:
     
     int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
     
-    int getNumSpeakers() { return m_array->m_nSpeakers; }
+    int getNumSpeakers() const { return m_array->getNumSpeakers(); }
     
     int calcGains();
     
@@ -81,8 +84,7 @@ public:
     
 };
 
-
-
-
+} // namespace panning
+} // namespace visr
 
 #endif /* defined(__S3A_renderer_dsp__VBAP__) */

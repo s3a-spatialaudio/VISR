@@ -22,6 +22,10 @@
 #include "LoudspeakerArray.h"
 #include "VBAP.h"
 
+namespace visr
+{
+namespace panning
+{
 
 class AllRAD {
 private:
@@ -50,5 +54,7 @@ public:
     
 };
 
+} // namespace panning
+} // namespace visr
 
 #endif /* defined(__S3A_renderer_dsp__AllRAD__) */

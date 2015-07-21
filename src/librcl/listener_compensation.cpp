@@ -104,7 +104,7 @@ void ListenerCompensation::process(pml::ListenerPosition const & pos,
 int ListenerCompensation::calcGainComp()
 {
   int i;
-  XYZ l1;
+  panning::XYZ l1;
   Afloat rad = 0.0f, max_rad = 0.0f, x = 0.0f, y = 0.0f, z = 0.0f;
 
   //setting listener position
@@ -112,7 +112,7 @@ int ListenerCompensation::calcGainComp()
   y = m_listenerPos.y;
   z = m_listenerPos.z;
 
-  for (i = 0; i < m_array.m_nSpeakers; i++) {
+  for (i = 0; i < m_array.getNumSpeakers(); i++) {
 
     l1 = m_array.m_position[i];
 
@@ -137,7 +137,7 @@ int ListenerCompensation::calcDelayComp()
 {
   int i;
   Afloat rad=0.0f, max_rad=0.0f, x=0.0f, y=0.0f, z=0.0f;
-  XYZ l1;
+  panning::XYZ l1;
 
 
   //setting listener position

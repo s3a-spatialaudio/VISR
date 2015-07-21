@@ -124,7 +124,7 @@ BaselineRenderer::setup()
                                  rcl::DelayVector::InterpolationType::Linear,
                                  0.0f, 0.0f );
     mTrackingReceiver->setup( cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous );
-    mPositionDecoder->setup( XYZ( +2.08f, 0.0f, 0.0f ) );
+    mPositionDecoder->setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
 
     mCompensationGains.resize( cNumberOfLoudspeakers );
     mCompensationDelays.resize( cNumberOfLoudspeakers );

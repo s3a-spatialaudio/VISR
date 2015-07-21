@@ -13,6 +13,11 @@
 #include <iostream>
 #include <cmath>
 
+namespace visr
+{
+namespace panning
+{
+
 class XYZ {
  private:
 
@@ -70,7 +75,7 @@ class XYZ {
   }
 };
 
-
-
+} // namespace panning
+} // namespace visr
 
 #endif /* defined(__S3A_renderer_dsp__XYZ__) */

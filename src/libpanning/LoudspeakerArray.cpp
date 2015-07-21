@@ -12,7 +12,17 @@
 
 #include "LoudspeakerArray.h"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 #include <algorithm>
+#include <cstdio>
+
+namespace visr
+{
+namespace panning
+{
+
 
 LoudspeakerArray::LoudspeakerArray()
  : m_is2D( false )
@@ -106,3 +116,11 @@ int LoudspeakerArray::load(FILE *file)
     
     return 0;
 }
+
+void LoudspeakerArray::loadXml( std::string const & filePath )
+{
+}
+
+} // namespace panning
+} // namespace visr
+

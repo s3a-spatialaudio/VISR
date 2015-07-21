@@ -34,8 +34,8 @@ class ListenerCompensation: public ril::AudioComponent
 public:
   using SampleType = ril::SampleType;
 private:
-  LoudspeakerArray m_array; //passing the address of the loudspeaker array
-  XYZ m_listenerPos; //position of the listener
+  panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
+  panning::XYZ m_listenerPos; //position of the listener
   std::size_t mNumberOfLoudspeakers;
   Afloat m_GainComp[MAX_NUM_SPEAKERS]; // stores the compensation for the GainREPLACE WITH SAMPLE TYPES
   Afloat m_DelayComp[MAX_NUM_SPEAKERS];// stores the compensation for the Delay
@@ -65,7 +65,7 @@ public:
 
 
   int getNumSpeakers()  const {
-    return m_array.m_nSpeakers;
+    return m_array.getNumSpeakers();
   }
 
   int setListenerPosition(Afloat x, Afloat y, Afloat z){ //assigning the position of the listener

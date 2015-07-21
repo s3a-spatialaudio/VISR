@@ -100,7 +100,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
 
   mLevels = 0.0f;
   // As not every source object in the VBAP calculator component might correspond to a real source, we have to set them to safe position beforehand.
-  XYZ defaultSource( 1.0f, 0.0f, 0.0f );
+  panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
   for( std::size_t srcIdx(0); srcIdx < mNumberOfObjects; ++srcIdx )
   {
     mSourcePositions[ srcIdx ] = defaultSource;

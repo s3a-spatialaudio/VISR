@@ -14,6 +14,11 @@
 
 #include <limits>
 
+namespace visr
+{
+namespace panning
+{
+
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
     Afloat det, temp;
@@ -190,3 +195,6 @@ int VBAP::calcGains(){
     }
     return 0;
 }
+
+} // namespace panning
+} // namespace visr

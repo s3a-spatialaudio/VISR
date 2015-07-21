@@ -69,44 +69,34 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   efl::BasicVector<rcl::ListenerCompensation::SampleType> delays(numSpeakers, ril::cVectorAlignmentSamples );
 
 
-  kinect.setup(kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous); //setup to listen from th, how to set up mode?
-  decoder.setup(XYZ(+2.08f,0.0f,0.0f) );
-  listenerComp.setup(numSpeakers, arrayPath.string());
+  kinect.setup( kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous ); //setup to listen from th, how to set up mode?
+  decoder.setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
+  listenerComp.setup( numSpeakers, arrayPath.string() );
 
-  while( true ) 
-  { 
-    kinect.process(posMessage);
+  while( true )
+  {
+    kinect.process( posMessage );
     decoder.process( posMessage, pos );
     std::cout << "Decoded position message: " << pos << std::endl;
     listenerComp.process( pos, gains, delays );
     std::cout << "Gains: " << gains[0] << "Delays: " << delays[0] << std::endl;
-	std::cout << "Gains: " << gains[1] << "Delays: " << delays[1] << std::endl;
-	//std::cout << "Gains: " << gains[2] << "Delays: " << delays[2] << std::endl;
-	//std::cout << "Gains: " << gains[3] << "Delays: " << delays[3] << std::endl;
-	//std::cout << "Gains: " << gains[4] << "Delays: " << delays[4] << std::endl;
-	//std::cout << "Gains: " << gains[5] << "Delays: " << delays[5] << std::endl;
-	//std::cout << "Gains: " << gains[6] << "Delays: " << delays[6] << std::endl;
-	//std::cout << "Gains: " << gains[7] << "Delays: " << delays[7] << std::endl;
-	//std::cout << "Gains: " << gains[8] << "Delays: " << delays[8] << std::endl;
-	//std::cout << "Gains: " << gains[9] << "Delays: " << delays[9] << std::endl;
-	//std::cout << "Gains: " << gains[10] << "Delays: " << delays[10] << std::endl;
-	//std::cout << "Gains: " << gains[11] << "Delays: " << delays[11] << std::endl;
-	//std::cout << "Gains: " << gains[12] << "Delays: " << delays[12] << std::endl;
-	//std::cout << "Gains: " << gains[13] << "Delays: " << delays[13] << std::endl;
-	//std::cout << "Gains: " << gains[14] << "Delays: " << delays[14] << std::endl;
-	//std::cout << "Gains: " << gains[15] << "Delays: " << delays[15] << std::endl;
-	//std::cout << "Gains: " << gains[16] << "Delays: " << delays[16] << std::endl;
-	//std::cout << "Gains: " << gains[17] << "Delays: " << delays[17] << std::endl;
-
-
-
-
-
-
-
-
-
-
+    std::cout << "Gains: " << gains[1] << "Delays: " << delays[1] << std::endl;
+    //std::cout << "Gains: " << gains[2] << "Delays: " << delays[2] << std::endl;
+    //std::cout << "Gains: " << gains[3] << "Delays: " << delays[3] << std::endl;
+    //std::cout << "Gains: " << gains[4] << "Delays: " << delays[4] << std::endl;
+    //std::cout << "Gains: " << gains[5] << "Delays: " << delays[5] << std::endl;
+    //std::cout << "Gains: " << gains[6] << "Delays: " << delays[6] << std::endl;
+    //std::cout << "Gains: " << gains[7] << "Delays: " << delays[7] << std::endl;
+    //std::cout << "Gains: " << gains[8] << "Delays: " << delays[8] << std::endl;
+    //std::cout << "Gains: " << gains[9] << "Delays: " << delays[9] << std::endl;
+    //std::cout << "Gains: " << gains[10] << "Delays: " << delays[10] << std::endl;
+    //std::cout << "Gains: " << gains[11] << "Delays: " << delays[11] << std::endl;
+    //std::cout << "Gains: " << gains[12] << "Delays: " << delays[12] << std::endl;
+    //std::cout << "Gains: " << gains[13] << "Delays: " << delays[13] << std::endl;
+    //std::cout << "Gains: " << gains[14] << "Delays: " << delays[14] << std::endl;
+    //std::cout << "Gains: " << gains[15] << "Delays: " << delays[15] << std::endl;
+    //std::cout << "Gains: " << gains[16] << "Delays: " << delays[16] << std::endl;
+    //std::cout << "Gains: " << gains[17] << "Delays: " << delays[17] << std::endl;
   }
 }
 

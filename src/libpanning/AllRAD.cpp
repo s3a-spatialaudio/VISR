@@ -12,6 +12,10 @@
 
 #include "AllRAD.h"
 
+namespace visr
+{
+namespace panning
+{
 
 int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
     
@@ -74,6 +78,5 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
     return 0;
 };
 
-
-
-
+} // namespace panning
+} // namespace visr
