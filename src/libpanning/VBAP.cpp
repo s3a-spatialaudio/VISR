@@ -29,13 +29,12 @@ int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
     Afloat det, temp;
     Afloat* inv;
-    int i;
  
 #ifdef VBAP_DEBUG_MESSAGES
     printf("calcInvMatrices()\n");   //!
 #endif
         
-    for (i = 0 ; i < m_array->getNumTriplets(); i++) {
+    for (std::size_t i = 0 ; i < m_array->getNumTriplets(); i++) {
 
       LoudspeakerArray::TripletType const & triplet = m_array->getTriplet( i );
       if( triplet[0] == -1 ) continue;  //  triplet unused
@@ -87,7 +86,7 @@ int VBAP::calcInvMatrices(){
 
 int VBAP::calcGains(){
 
-    int i,j,jmin,l1,l2,l3;
+    int jmin,l1,l2,l3;
     Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
 
 
@@ -99,8 +98,10 @@ int VBAP::calcGains(){
     printf("setListenerPosition %f %f %f\n",m_listenerPos.x,m_listenerPos.y,m_listenerPos.z);
 #endif
     gmin = g1min = g2min = g3min = 0.0;
+
+    m_gain.zeroFill();
     
-    for(i = 0; i < m_nSources; i++) {
+    for(std::size_t i = 0; i < m_nSources; i++) {
         
         x = m_sourcePos[i].x;
         y = m_sourcePos[i].y;
@@ -115,9 +116,7 @@ int VBAP::calcGains(){
 
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
-        m_gain.zeroFill();
-
-        for(j = 0; j < m_array->getNumTriplets(); j++) {
+        for(std::size_t j = 0; j < m_array->getNumTriplets(); j++) {
 
             if (m_array->getTriplet(j)[0] == -1) continue;  //  triplet unused
 

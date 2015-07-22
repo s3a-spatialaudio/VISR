@@ -48,7 +48,7 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, std::size_t numb
 {
   mNumberOfObjects = numberOfObjects;
   mNumberOfLoudspeakers = numberOfLoudspeakers;
-
+  mSourcePositions.resize( numberOfObjects );
   boost::filesystem::path const filePath = absolute( boost::filesystem::path(arrayConfigFile) );
 
   FILE* rawHandle = fopen( filePath.string().c_str(), "r" );
@@ -68,8 +68,8 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, std::size_t numb
     throw std::invalid_argument( "PanningGainCalculator::setup() The loudspeaker configuration file does not match to the given number of loudspeaker channels." );
   }
 
-  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
   mVbapCalculator.setLoudspeakerArray( &mSpeakerArray );
+  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
   // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
   setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
   mLevels.resize( mNumberOfObjects );
