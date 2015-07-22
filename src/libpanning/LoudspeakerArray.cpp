@@ -274,11 +274,11 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   boost::optional<std::string> const dimension = treeRoot.get_optional<std::string>( "<xmlattr>.dimension" );
   if( dimension )
   {
-    if( dimension.value() == "2" )
+    if( *dimension == "2" )
     {
       m_is2D = true;
     }
-    else if( dimension.value() == "3" )
+    else if( *dimension == "3" )
     {
       m_is2D = false;
     }
@@ -292,7 +292,7 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     m_is2D = false;
   }
   boost::optional<bool> const infinity = treeRoot.get_optional<bool>( "<xmlattr>.infinite" );
-  m_isInfinite = infinity ? infinity.value() : false;
+  m_isInfinite = infinity ? *infinity : false;
 
   const auto speakerNodes = treeRoot.equal_range( "loudspeaker" );
   const auto virtualSpeakerNodes = treeRoot.equal_range( "virtualspeaker" );
