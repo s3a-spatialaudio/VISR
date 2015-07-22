@@ -21,9 +21,6 @@
 #include <string>
 #include <vector>
 
-#define MAX_NUM_SPEAKERS 128
-#define MAX_NUM_LOUDSPEAKER_TRIPLETS 256
-
 namespace visr
 {
 namespace panning

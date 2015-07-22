@@ -22,6 +22,8 @@
 #include "LoudspeakerArray.h"
 #include "VBAP.h"
 
+#include <libefl/basic_matrix.hpp>
+
 namespace visr
 {
 namespace panning
@@ -31,15 +33,15 @@ class AllRAD {
 private:
     
     // Harmonic ordering is "Ambisonic Channel Numbering" (ACN) i = n^2 + n + m for Y_i = Y_{n m}
-    Afloat m_regDecode[MAX_NUM_HARMONICS][MAX_NUM_SPEAKERS];
-    Afloat m_decode[MAX_NUM_HARMONICS][MAX_NUM_SPEAKERS];
-    
+    efl::BasicMatrix<Afloat> m_regDecode;
+
+    efl::BasicMatrix<Afloat> m_decode;
+
     int m_nHarms = 0;
     int m_nSpkSources = 0;
     
     LoudspeakerArray* m_regArray;
 
-    
 public:
     
     int setRegArray(LoudspeakerArray* array) { m_regArray = array; return 0; };
@@ -48,8 +50,8 @@ public:
     
     int calcDecodeGains(VBAP* vbap); // Ensure calcInvMatrices is called on vbap first.
     
-    Afloat (*getDecodeGains())[MAX_NUM_HARMONICS][MAX_NUM_SPEAKERS] {
-        return &m_decode;
+    efl::BasicMatrix<Afloat> const & getDecodeGains() const {
+        return m_decode;
     }
     
 };

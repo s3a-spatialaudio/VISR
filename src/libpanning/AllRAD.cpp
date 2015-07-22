@@ -19,16 +19,17 @@ namespace panning
 
 int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
     
-    int i,j, nHarms;
-    
-    nHarms = (order+1)*(order+1);
-    
-    for( i = 0; i < nHarms; i++ ) {
-        for( j = 0; j < nSpks; j++ ) {
+    int const nHarms = (order+1)*(order+1);
+
+    m_regDecode.resize( nHarms, nSpks );
+    m_decode.resize( nHarms, nSpks );
+
+    for( int i = 0; i < nHarms; i++ ) {
+        for( int j = 0; j < nSpks; j++ ) {
             if (feof(file) == -1) {
                 return -1;
             }
-            fscanf(file, "%f", &(m_regDecode[i][j]));
+            fscanf(file, "%f", &(m_regDecode(i,j)));
         }
     }
     
@@ -44,15 +45,14 @@ int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
 
 int AllRAD::calcDecodeGains(VBAP* vbap){
     
-    Afloat (*vbapGain)[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS];
-    int i,j,k,nSpks;
+    int i, j, k;
+    std::size_t nSpks;
     Afloat sum;
     
     // In vbap first do externally: setListenerPosition, then calcInvMatrix.
     
     //* This casting could cause failure if MAX_NUM_SOURCES < MAX_NUM_SPEAKERS
-    vbap->setSourcePositions(
-    (XYZ (*)[MAX_NUM_SOURCES]) m_regArray->getPositions()  );
+    vbap->setSourcePositions( m_regArray->getPositions()  );
     
     vbap->setNumSources(m_regArray->getNumSpeakers());
     
@@ -60,7 +60,7 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
     
     vbap->calcGains();
     
-    vbapGain = vbap->getGains();
+    efl::BasicMatrix<Afloat> const & vbapGain = vbap->getGains( );
     
     nSpks = vbap->getNumSpeakers();
     
@@ -70,9 +70,9 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
         for( j = 0; j < nSpks; j++) {
             sum = 0;
             for( k = 0; k < m_nSpkSources; k++) {
-                sum += m_regDecode[i][k] * (*vbapGain)[k][j];
+                sum += m_regDecode( i, k ) * vbapGain( k, j );
             }
-            m_decode[i][j] = sum;
+            m_decode( i, j ) = sum;
         }
     }
     return 0;

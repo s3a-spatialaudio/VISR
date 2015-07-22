@@ -18,6 +18,12 @@ namespace visr
 {
 namespace panning
 {
+  
+VBAP::VBAP()
+ : m_array( 0 )
+ , m_nSources( 0 )
+{
+}
 
 int VBAP::calcInvMatrices(){
     XYZ l1, l2, l3;
@@ -61,7 +67,7 @@ int VBAP::calcInvMatrices(){
       if( temp != 0.0f ) det = 1.0f / temp;
       else det = 1.0f;
 
-      inv = m_invMatrix[i];
+      inv = m_invMatrix.row( i );
       inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
       inv[3] = ((l1.y * l3.z) - (l1.z * l3.y)) * -det;
       inv[6] = ((l1.y * l2.z) - (l1.z * l2.y)) * det;
@@ -80,15 +86,14 @@ int VBAP::calcInvMatrices(){
 
 
 int VBAP::calcGains(){
-    
+
     int i,j,jmin,l1,l2,l3;
-    Afloat *inv;
     Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
 
-    
+
     //! Slow triplet search
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
-    
+
     jmin = -1; // indicate currently no triplet candidate.
 #ifdef VBAP_DEBUG_MESSAGES
     printf("setListenerPosition %f %f %f\n",m_listenerPos.x,m_listenerPos.y,m_listenerPos.z);
@@ -97,11 +102,11 @@ int VBAP::calcGains(){
     
     for(i = 0; i < m_nSources; i++) {
         
-        x = (*m_sourcePos)[i].x;
-        y = (*m_sourcePos)[i].y;
-        z = (*m_sourcePos)[i].z;
+        x = m_sourcePos[i].x;
+        y = m_sourcePos[i].y;
+        z = m_sourcePos[i].z;
         
-        if (!(*m_sourcePos)[i].isInfinite) {
+        if (!m_sourcePos[i].isInfinite) {
             x -= m_listenerPos.x;
             y -= m_listenerPos.y;
             z -= m_listenerPos.z;
@@ -110,13 +115,13 @@ int VBAP::calcGains(){
 
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
-        for(j = 0; j < m_array->getNumSpeakers(); j++) m_gain[i][j] = 0;
-        
+        m_gain.zeroFill();
+
         for(j = 0; j < m_array->getNumTriplets(); j++) {
 
             if (m_array->getTriplet(j)[0] == -1) continue;  //  triplet unused
 
-            inv = m_invMatrix[j];
+            Afloat const * inv = m_invMatrix.row(j);
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
@@ -185,9 +190,9 @@ int VBAP::calcGains(){
         l1 = m_array->getTriplet(jmin)[0];
         l2 = m_array->getTriplet(jmin)[1];
         l3 = m_array->getTriplet(jmin)[2];
-        m_gain[i][l1] = g1;
-        m_gain[i][l2] = g2;
-        if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case 
+        m_gain(i, l1 ) = g1;
+        m_gain(i, l2 ) = g2;
+        if (!m_array->is2D()) m_gain(i,l3) = g3;     // l3 undefined in 2D case 
 #ifdef VBAP_DEBUG_MESSAGES
         printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3, g1,g2,g3);
 #endif
