@@ -16,17 +16,20 @@
 
 #include <iostream>
 #include <cstdio>
+#include <vector>
 
 int main(int argc, const char * argv[])
 {
+  using namespace visr;
   using namespace visr::panning;
 
   LoudspeakerArray array, regArray;
   VBAP vbap;
   AllRAD allrad;
-  Afloat( *vbapGains )[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS];
-  Afloat( *decodeGains )[MAX_NUM_HARMONICS][MAX_NUM_SPEAKERS];
-  XYZ sourcePos[MAX_NUM_SOURCES];
+
+  std::size_t numberOfSources = 8;
+
+  std::vector<XYZ> sourcePos( numberOfSources );
 
   FILE* file;
   int j, k;
@@ -39,6 +42,8 @@ int main(int argc, const char * argv[])
 //  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/cube_audiolab.txt");
 //  boost::filesystem::path bfile = configDir / boost::filesystem::path("generic/octahedron.txt");
 //  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/9.1_audiolab.txt");
+
+
   boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/22.1_audiolab.txt" );
 
   file = fopen( bfile.string().c_str(), "r" );
@@ -48,6 +53,10 @@ int main(int argc, const char * argv[])
   }
   fclose( file );
   file = 0;
+
+  // Alternatively, load the config file in XML format.
+  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/22.1_audiolab.xml" );
+  array.loadXml( configFileXml.string() );
 
   vbap.setLoudspeakerArray( &array );
 
@@ -60,16 +69,13 @@ int main(int argc, const char * argv[])
   //    vbap.setListenerPosition(2.0f, 0.0f, 0.0f);  // hit triplet 35 with pw(0,0,-1)
   vbap.calcInvMatrices();
 
-  vbap.setNumSources( 1 );
   sourcePos[0].set( 2.08f, 1.0f, -5.0f, true );
   //    sourcePos[0].set(-1.0f,	0.0, 0.0f, true);     // plane wave from front/back
   //    sourcePos[0].set(0.0f, -1.0f, 0.0f, true);     // plane wave from left/right
   //    sourcePos[0].set(0.0f, 0.0f, -1.0f, true);     // plane wave from below
   //    sourcePos[0].set(1.78f, 1.73f, -0.86f, false);
 
-
-
-  //    vbap.setNumSources(8);
+  //    vbap.setNumSources( numberOfSources );
   //    sourcePos[0].set(1.0, 1.0, 1.0, false);
   //    sourcePos[0].set(1.0,	0.3, -0.2, false); // for 9.1_audiolab.txt jumps between triplet 11 and 10 as z reduced
   //    sourcePos[0].set(0.0, 1.0, -0.9, false);
@@ -80,12 +86,13 @@ int main(int argc, const char * argv[])
   sourcePos[5].set( 0.0f, -1.0f, 0.0f, false );
   sourcePos[6].set( 0.0f, 0.0f, -1.0f, false );
   sourcePos[7].set( -1.0f, -1.0f, -1.0f, false );
-  vbap.setSourcePositions( &sourcePos );
 
+  vbap.setNumSources( 1 ); // This means that the output is computed only for the zeroeth source in the vector.
+  vbap.setSourcePositions( &sourcePos[0] );
 
   vbap.calcGains();
 
-  vbapGains = vbap.getGains();   // Check in watch window
+  efl::BasicMatrix<Afloat> const & vbapGains = vbap.getGains();   // Check in watch window
 
 
   // 5.1 test, 2D VBAP
@@ -113,12 +120,11 @@ int main(int argc, const char * argv[])
   //    sourcePos[2].set(-1.0, 0.0, -5.0, false);
   //    sourcePos[3].set(0.0, -10.0, -50.0, false);
 
-
-  vbap.setSourcePositions( &sourcePos );
+  vbap.setSourcePositions( &sourcePos[0] );
 
   vbap.calcGains();
 
-  vbapGains = vbap.getGains();   // Check in watch window
+  // Check the updated values of vbapGains in watch window
 
 
 
@@ -162,8 +168,7 @@ int main(int argc, const char * argv[])
   // Calc vbap gains then calc AllRAD b-format decode gains
 
   allrad.calcDecodeGains( &vbap );
-  decodeGains = allrad.getDecodeGains();
-
+  efl::BasicMatrix<Afloat> const & decodeGains = allrad.getDecodeGains();
 
   // Write b-format2vbap gains for matlab testing:
 
@@ -176,7 +181,7 @@ int main(int argc, const char * argv[])
     { // 9 harms - 2nd order only
       for( j = 0; j < vbap.getNumSpeakers(); j++ )
       {
-        fprintf( file, "%f ", (*decodeGains)[k][j] );
+        fprintf( file, "%f ", decodeGains(k, j) );
       }
       fprintf( file, "\n" );
     }
