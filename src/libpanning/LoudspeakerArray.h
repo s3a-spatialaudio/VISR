@@ -14,78 +14,98 @@
 #include "defs.h"
 #include "XYZ.h"
 
+#include <libefl/basic_matrix.hpp>
+#include <libefl/basic_vector.hpp>
+
+#include <array>
+#include <string>
+#include <vector>
+
 #define MAX_NUM_SPEAKERS 128
 #define MAX_NUM_LOUDSPEAKER_TRIPLETS 256
-
-#define PI 3.1412659f
 
 namespace visr
 {
 namespace panning
 {
 
-class LoudspeakerArray
-{
-
-private:
-
-  bool m_is2D, m_isInfinite;
-
-
-public:
-  /**
-   * Default contructor, initialises numbers of elements and channel indices to safe values.
-   */
-  LoudspeakerArray();
-
-  int m_nSpeakers = 0;
-  int m_nTriplets = 0;
-
-  XYZ m_position[MAX_NUM_SPEAKERS];
-  int m_triplet[MAX_NUM_LOUDSPEAKER_TRIPLETS][3];
-
-  int m_channel[MAX_NUM_SPEAKERS];
-
-
-  int load( FILE *file );
-
-  /**
-   *
-   */
-  void loadXml( std::string const & filePath );
-
-  int setPosition( int id, Afloat x, Afloat y, Afloat z, bool inf )
+  class LoudspeakerArray
   {
-    m_position[id - 1].set( x, y, z, inf );
-    return 0;
-  };
+  public:
+    /**
+     * Type for specifying loudspeaker indices in triplets.
+     * At the moment, we use 'int' to let negative numbers denote invalid/unused triplets.
+     */
+    using LoudspeakerIndexType = int;
 
-  int setChannel( int id, int chan )
-  {
-    m_channel[id - 1] = chan;
-    return 0;
-  };
+    using TripletType = std::array<LoudspeakerIndexType, 3>;
 
-  XYZ *getPosition( int iSpk ) { return &m_position[iSpk]; };
+    using ChannelIndex = int;
+  private:
 
-  XYZ( *getPositions() )[MAX_NUM_SPEAKERS] { return &m_position; };
+    bool m_is2D, m_isInfinite;
+
+    std::vector<XYZ> m_position;
+
+    std::vector< TripletType > m_triplet;
+
+    std::vector<ChannelIndex> m_channel;
+  public:
+    /**
+     * Default contructor, initialises numbers of elements and channel indices to safe values.
+     */
+    LoudspeakerArray();
+
+    int load( FILE *file );
+
+    /**
+     *
+     */
+    void loadXml( std::string const & filePath );
+
+    int setPosition( int id, Afloat x, Afloat y, Afloat z, bool inf )
+    {
+      m_position[id - 1].set( x, y, z, inf );
+      return 0;
+    };
+
+    int setChannel( int id, int chan )
+    {
+      m_channel[id - 1] = chan;
+      return 0;
+    };
+
+    /**
+     * TODO: Consider using references!
+     */
+    XYZ & getPosition( int iSpk ) { return m_position[iSpk]; };
+
+    XYZ const & getPosition( int iSpk ) const { return m_position[iSpk]; };
+
+    XYZ* getPositions() { return m_position.data(); };
+
+    XYZ const * getPositions() const { return m_position.data(); };
+
+    ChannelIndex channelIndex( std::size_t spkIndex ) const { return m_channel[spkIndex]; }
 
   int setTriplet( int iTri, int l1, int l2, int l3 )
   {
-    m_triplet[iTri][0] = l1;
-    m_triplet[iTri][1] = l2;
-    m_triplet[iTri][2] = l3;
+    m_triplet[ iTri ][ 0 ] = l1;
+    m_triplet[ iTri ][ 1 ] = l2;
+    m_triplet[ iTri ][ 2 ] = l3;
     return 0;
   }
 
-  int* getTriplet( int iTri ) { return &m_triplet[iTri][0]; }
+  TripletType & getTriplet( std::size_t iTri ) { return m_triplet[ iTri ]; }
 
-  int const * getTriplet( int iTri ) const { return &m_triplet[iTri][0]; }
+  TripletType const & getTriplet( std::size_t iTri ) const { return m_triplet[ iTri ]; }
 
-  int getNumSpeakers() const { return m_nSpeakers; };
+  std::size_t getNumSpeakers() const { return m_position.size(); };
 
-  bool is2D() { return m_is2D; };
-  bool isInfinite() { return m_isInfinite; };
+  std::size_t getNumTriplets( ) const { return m_triplet.size(); };
+
+  bool is2D() const { return m_is2D; };
+  bool isInfinite() const { return m_isInfinite; };
 
 };
 

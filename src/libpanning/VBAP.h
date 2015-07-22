@@ -74,7 +74,7 @@ public:
     
     int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
     
-    int getNumSpeakers() const { return m_array->getNumSpeakers(); }
+    std::size_t getNumSpeakers() const { return m_array->getNumSpeakers(); }
     
     int calcGains();
     

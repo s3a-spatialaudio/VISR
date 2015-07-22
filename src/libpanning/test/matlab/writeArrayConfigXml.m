@@ -8,7 +8,7 @@ function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isIn
 % TODO: Consider making this a configurable option.
 useCartesian = false;
 
-domNode = com.mathworks.xml.XMLUtils.createDocument('speakerConfiguration');
+domNode = com.mathworks.xml.XMLUtils.createDocument('panningConfiguration');
 
 rootNode = domNode.getDocumentElement;
 
@@ -24,7 +24,6 @@ else
 end
 rootNode.setAttribute( 'infinite', infiniteStr );
 rootNode.setAttribute( 'dimension', dimStr );
-
 
 numSpeakers = size( spkPos, 1 );
 numTriplets = size( triplets, 1 );
@@ -71,8 +70,8 @@ for tripletIdx = 1:numTriplets
     rootNode.appendChild( triplNode );
 end
 
-
-if isempty(fileName) % Use [] to suppress a file output
+if isempty(fileName) % Use [] to suppress a file output and write to the
+    % output argument instead.
     outputString = xmlwrite( domNode );
 else
     xmlwrite( fileName, domNode );

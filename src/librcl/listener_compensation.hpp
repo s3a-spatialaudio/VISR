@@ -64,7 +64,7 @@ public:
   void process(pml::ListenerPosition const & pos, efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays );
 
 
-  int getNumSpeakers()  const {
+  std::size_t getNumSpeakers()  const {
     return m_array.getNumSpeakers();
   }
 

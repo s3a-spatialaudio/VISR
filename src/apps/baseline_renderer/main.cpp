@@ -132,7 +132,7 @@ int main( int argc, char const * const * argv )
       for( pml::SignalRoutingParameter::IndexType channelIdx( 0 ); channelIdx < numberOfLoudspeakers; ++channelIdx )
       {
         // The channel ids in the array configuration file are apparently one-offset
-        int const arrayConfigChannel = loudspeakerArray.m_channel[ channelIdx ];
+        int const arrayConfigChannel = loudspeakerArray.channelIndex( channelIdx );
         if( arrayConfigChannel < 0 )
         {
           throw std::invalid_argument( "Invalid \"channel\" argument in array configuration file." );

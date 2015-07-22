@@ -29,49 +29,48 @@ int VBAP::calcInvMatrices(){
     printf("calcInvMatrices()\n");   //!
 #endif
         
-    for (i = 0 ; i < m_array->m_nTriplets; i++) {
-    
-        if (m_array->m_triplet[i][0] == -1) continue;  //  triplet unused
-            
-	    if (m_array->m_triplet[i][0] == -1) continue; 
+    for (i = 0 ; i < m_array->getNumTriplets(); i++) {
 
-            l1 = m_array->m_position[m_array->m_triplet[i][0]];
-            l2 = m_array->m_position[m_array->m_triplet[i][1]];
-            if (m_array->is2D()) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
-            else l3 = m_array->m_position[m_array->m_triplet[i][2]];
-        
-            // calc speaker positions relative to listener.
-            l1.x = l1.x - m_listenerPos.x;
-            l1.y = l1.y - m_listenerPos.y;
-            l1.z = l1.z - m_listenerPos.z;
-            l2.x = l2.x - m_listenerPos.x;
-            l2.y = l2.y - m_listenerPos.y;
-            l2.z = l2.z - m_listenerPos.z;
-            l3.x = l3.x - m_listenerPos.x;
-            l3.y = l3.y - m_listenerPos.y;
-            l3.z = l3.z - m_listenerPos.z;
+      LoudspeakerArray::TripletType const & triplet = m_array->getTriplet( i );
+      if( triplet[0] == -1 ) continue;  //  triplet unused
 
-            l1.normalise();
-            l2.normalise();
-            l3.normalise();
+      l1 = m_array->getPosition( triplet[0] );
+      l2 = m_array->getPosition( triplet[1] );
+      if( m_array->is2D() ) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
+      else l3 = m_array->getPosition( triplet[2] );
         
-            temp = (  l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
+      // calc speaker positions relative to listener.
+      l1.x = l1.x - m_listenerPos.x;
+      l1.y = l1.y - m_listenerPos.y;
+      l1.z = l1.z - m_listenerPos.z;
+      l2.x = l2.x - m_listenerPos.x;
+      l2.y = l2.y - m_listenerPos.y;
+      l2.z = l2.z - m_listenerPos.z;
+      l3.x = l3.x - m_listenerPos.x;
+      l3.y = l3.y - m_listenerPos.y;
+      l3.z = l3.z - m_listenerPos.z;
+
+      l1.normalise();
+      l2.normalise();
+      l3.normalise();
+
+      temp = (l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
                     - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
                     + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
 
-            if (temp != 0.0f) det = 1.0f / temp;
-            else det = 1.0f;
-            
-            inv = m_invMatrix[i];
-            inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
-            inv[3] = ((l1.y * l3.z) - (l1.z * l3.y)) * -det;
-            inv[6] = ((l1.y * l2.z) - (l1.z * l2.y)) * det;
-            inv[1] = ((l2.x * l3.z) - (l2.z * l3.x)) * -det;
-            inv[4] = ((l1.x * l3.z) - (l1.z * l3.x)) * det;
-            inv[7] = ((l1.x * l2.z) - (l1.z * l2.x)) * -det;
-            inv[2] = ((l2.x * l3.y) - (l2.y * l3.x)) * det;
-            inv[5] = ((l1.x * l3.y) - (l1.y * l3.x)) * -det;
-            inv[8] = ((l1.x * l2.y) - (l1.y * l2.x)) * det;
+      if( temp != 0.0f ) det = 1.0f / temp;
+      else det = 1.0f;
+
+      inv = m_invMatrix[i];
+      inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
+      inv[3] = ((l1.y * l3.z) - (l1.z * l3.y)) * -det;
+      inv[6] = ((l1.y * l2.z) - (l1.z * l2.y)) * det;
+      inv[1] = ((l2.x * l3.z) - (l2.z * l3.x)) * -det;
+      inv[4] = ((l1.x * l3.z) - (l1.z * l3.x)) * det;
+      inv[7] = ((l1.x * l2.z) - (l1.z * l2.x)) * -det;
+      inv[2] = ((l2.x * l3.y) - (l2.y * l3.x)) * det;
+      inv[5] = ((l1.x * l3.y) - (l1.y * l3.x)) * -det;
+      inv[8] = ((l1.x * l2.y) - (l1.y * l2.x)) * det;
     }
 
     return 0;
@@ -111,11 +110,11 @@ int VBAP::calcGains(){
 
         if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
         
-        for(j = 0; j < m_array->m_nSpeakers; j++) m_gain[i][j] = 0;
+        for(j = 0; j < m_array->getNumSpeakers(); j++) m_gain[i][j] = 0;
         
-        for(j = 0; j < m_array->m_nTriplets; j++) {
+        for(j = 0; j < m_array->getNumTriplets(); j++) {
 
-            if (m_array->m_triplet[j][0] == -1) continue;  //  triplet unused
+            if (m_array->getTriplet(j)[0] == -1) continue;  //  triplet unused
 
             inv = m_invMatrix[j];
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
@@ -183,9 +182,9 @@ int VBAP::calcGains(){
         if (g3 > m_maxGain) g3 = m_maxGain;
         if (g3 < -m_maxGain) g3 = -m_maxGain;
         
-        l1 = m_array->m_triplet[jmin][0];
-        l2 = m_array->m_triplet[jmin][1];
-        l3 = m_array->m_triplet[jmin][2];
+        l1 = m_array->getTriplet(jmin)[0];
+        l2 = m_array->getTriplet(jmin)[1];
+        l3 = m_array->getTriplet(jmin)[2];
         m_gain[i][l1] = g1;
         m_gain[i][l2] = g2;
         if (!m_array->is2D()) m_gain[i][l3] = g3;     // l3 undefined in 2D case 

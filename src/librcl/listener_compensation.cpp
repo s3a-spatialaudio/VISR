@@ -114,7 +114,7 @@ int ListenerCompensation::calcGainComp()
 
   for (i = 0; i < m_array.getNumSpeakers(); i++) {
 
-    l1 = m_array.m_position[i];
+    l1 = m_array.getPosition( i );
 
     rad = std::sqrt(std::pow((l1.x - x), 2.0f) + std::pow((l1.y - y), 2.0f) + std::pow((l1.z - z), 2.0f));
 
@@ -124,7 +124,7 @@ int ListenerCompensation::calcGainComp()
       max_rad = m_GainComp[i];
   }
 
-  for (i = 0; i < m_array.m_nSpeakers; i++) {
+  for (i = 0; i < m_array.getNumSpeakers(); i++) {
 
     m_GainComp[i] = (m_GainComp[i]/max_rad);
   }
@@ -139,18 +139,15 @@ int ListenerCompensation::calcDelayComp()
   Afloat rad=0.0f, max_rad=0.0f, x=0.0f, y=0.0f, z=0.0f;
   panning::XYZ l1;
 
-
   //setting listener position
   x = m_listenerPos.x;
   y = m_listenerPos.y;
   z = m_listenerPos.z;
 
+  for (i = 0; i < m_array.getNumSpeakers(); i++) {
 
-  for (i = 0; i < m_array.m_nSpeakers; i++) {
+    l1 = m_array.getPosition( i );
 
-    l1 = m_array.m_position[i];
-
-			
     rad = std::sqrt(std::pow((l1.x-x),2.0f) + std::pow((l1.y-y),2.0f) + std::pow((l1.z-z),2.0f));
 
     m_DelayComp[i] = rad;
@@ -159,7 +156,7 @@ int ListenerCompensation::calcDelayComp()
       max_rad = m_DelayComp[i];
   }
 
-  for (i = 0; i < m_array.m_nSpeakers; i++) {
+  for (i = 0; i < m_array.getNumSpeakers(); i++){
 
     m_DelayComp[i] = std::abs(m_DelayComp[i]-max_rad)/c_0;
   }
