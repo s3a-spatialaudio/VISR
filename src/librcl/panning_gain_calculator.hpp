@@ -130,7 +130,7 @@ private:
    * A vector to hold the source position data.
    * @todo: replace this by a variable-sized vector;
    */
-  panning::XYZ mSourcePositions[MAX_NUM_SOURCES];
+  std::vector<panning::XYZ> mSourcePositions;
 
   /**
    * The calculator object to generate the panning matrix coefficients.

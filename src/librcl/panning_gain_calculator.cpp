@@ -161,15 +161,16 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
     }
   } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-  mVbapCalculator.setSourcePositions( &mSourcePositions );
+  mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
   if( mVbapCalculator.calcGains() != 0 )
   {
     std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
   }
 
+  // TODO: Can be replaced by a vector multiplication.
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
-    Afloat const * const gainRow = (*mVbapCalculator.getGains())[ chIdx ];
+    Afloat const * const gainRow = mVbapCalculator.getGains().row( chIdx );
     objectmodel::LevelType const level = mLevels[ chIdx ];
     for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
     {

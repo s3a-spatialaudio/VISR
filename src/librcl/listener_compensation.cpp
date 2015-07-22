@@ -78,19 +78,14 @@ void ListenerCompensation::process(pml::ListenerPosition const & pos,
     throw std::invalid_argument("ListenerCompensation::process(): The size of the gain or delay vector does not match the number of loudspeaker channels.");
   }
   setListenerPosition(pos.x(), pos.y(), pos.z());
-  if( calcGainComp() != 0 )
+  if( calcGainComp( gains ) != 0 )
   {
     throw std::runtime_error("ListenerCompensation::process(): calcGainComp() failed.");
   }
-  if (calcDelayComp() != 0)
+  if (calcDelayComp( delays ) != 0)
   {
     throw std::runtime_error("ListenerCompensation::process(): calcDelayComp() failed.");
   }
-
-//		gains = m_GainComp; //copying the values from delays
-//		delays = m_DelayComp;
-  std::copy(&m_GainComp[0], &m_GainComp[0] + mNumberOfLoudspeakers, gains.data());
-  std::copy(&m_DelayComp[0], &m_DelayComp[0] + mNumberOfLoudspeakers, delays.data());
 
 #ifdef DEBUG_LISTENER_COMPENSATION
   std::cout << "DelayVector Source Gain: ";
@@ -101,7 +96,7 @@ void ListenerCompensation::process(pml::ListenerPosition const & pos,
 #endif // DEBUG_LISTENER_COMPENSATION
 }
 
-int ListenerCompensation::calcGainComp()
+int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )
 {
   int i;
   panning::XYZ l1;
@@ -118,22 +113,21 @@ int ListenerCompensation::calcGainComp()
 
     rad = std::sqrt(std::pow((l1.x - x), 2.0f) + std::pow((l1.y - y), 2.0f) + std::pow((l1.z - z), 2.0f));
 
-    m_GainComp[i] = rad;
+    gainComp[i] = rad;
 
-    if (m_GainComp[i]>max_rad)
-      max_rad = m_GainComp[i];
+    if ( gainComp[i]>max_rad)
+      max_rad = gainComp[i];
   }
 
   for (i = 0; i < m_array.getNumSpeakers(); i++) {
 
-    m_GainComp[i] = (m_GainComp[i]/max_rad);
+    gainComp[i] = (gainComp[i]/max_rad);
   }
   return 0;
-
 }
 
 
-int ListenerCompensation::calcDelayComp()
+int ListenerCompensation::calcDelayComp( efl::BasicVector<Afloat> & delayComp )
 {
   int i;
   Afloat rad=0.0f, max_rad=0.0f, x=0.0f, y=0.0f, z=0.0f;
@@ -150,15 +144,15 @@ int ListenerCompensation::calcDelayComp()
 
     rad = std::sqrt(std::pow((l1.x-x),2.0f) + std::pow((l1.y-y),2.0f) + std::pow((l1.z-z),2.0f));
 
-    m_DelayComp[i] = rad;
+    delayComp[i] = rad;
 
-    if (m_DelayComp[i]>max_rad)
-      max_rad = m_DelayComp[i];
+    if (delayComp[i]>max_rad)
+      max_rad = delayComp[i];
   }
 
   for (i = 0; i < m_array.getNumSpeakers(); i++){
 
-    m_DelayComp[i] = std::abs(m_DelayComp[i]-max_rad)/c_0;
+    delayComp[i] = std::abs(delayComp[i]-max_rad)/c_0;
   }
   return 0;
 }
