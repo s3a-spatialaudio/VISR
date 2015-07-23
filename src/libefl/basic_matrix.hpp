@@ -222,8 +222,7 @@ public:
   }
 
 private:
-  //BasicMatrix( ) = delete;
-  //BasicMatrix( const BasicMatrix< ElementType>& ) = default;
+  BasicMatrix( const BasicMatrix< ElementType>& ) = delete;
 
   std::size_t mStride;
 

@@ -124,18 +124,18 @@ private:
    * The loudspeaker array configurtion.
    * @note This object must persist for the whole lifetime of the \p mVbapCalculator object.
    */
-  LoudspeakerArray mSpeakerArray;
+  panning::LoudspeakerArray mSpeakerArray;
   
   /**
    * A vector to hold the source position data.
    * @todo: replace this by a variable-sized vector;
    */
-  XYZ mSourcePositions[MAX_NUM_SOURCES];
+  std::vector<panning::XYZ> mSourcePositions;
 
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  VBAP mVbapCalculator;
+  panning::VBAP mVbapCalculator;
   
   /**
    * The levels of the object channels in linear scale.

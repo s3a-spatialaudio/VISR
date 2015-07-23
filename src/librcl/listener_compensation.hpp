@@ -13,6 +13,8 @@
 //#include <iostream>
 #include <cstdio>
 
+#include <libefl/basic_matrix.hpp>
+
 #include <libril/audio_component.hpp>
 
 #include <libpanning/defs.h>
@@ -34,13 +36,9 @@ class ListenerCompensation: public ril::AudioComponent
 public:
   using SampleType = ril::SampleType;
 private:
-  LoudspeakerArray m_array; //passing the address of the loudspeaker array
-  XYZ m_listenerPos; //position of the listener
+  panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
+  panning::XYZ m_listenerPos; //position of the listener
   std::size_t mNumberOfLoudspeakers;
-  Afloat m_GainComp[MAX_NUM_SPEAKERS]; // stores the compensation for the GainREPLACE WITH SAMPLE TYPES
-  Afloat m_DelayComp[MAX_NUM_SPEAKERS];// stores the compensation for the Delay
-
-
 public:
   /**
    * Constructor.
@@ -64,8 +62,8 @@ public:
   void process(pml::ListenerPosition const & pos, efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays );
 
 
-  int getNumSpeakers()  const {
-    return m_array.m_nSpeakers;
+  std::size_t getNumSpeakers()  const {
+    return m_array.getNumSpeakers();
   }
 
   int setListenerPosition(Afloat x, Afloat y, Afloat z){ //assigning the position of the listener
@@ -73,9 +71,19 @@ public:
     return 0;
   }
 
-  int calcGainComp(); // this function calculates the gain compensation
+  /**
+   * Internal method to calculate the compensation gains.
+   * @param [out] gainComp The result vector for the calculated gains (linear scale). It must have the dimension 'numberOfLoudspeakers'.
+   * @return 0 in case of success.
+   */
+  int calcGainComp( efl::BasicVector<Afloat> & gainComp ); // this function calculates the gain compensation
 
-  int calcDelayComp(); // this function calculates the delay compensation
+  /**
+  * Internal method to calculate the compensation delays.
+  * @param [out] delayComp The result vector for the calculated delays (in seconds). It must have the dimension 'numberOfLoudspeakers'.
+  * @return 0 in case of success.
+  */
+  int calcDelayComp( efl::BasicVector<Afloat> & delayComp ); // this function calculates the delay compensation
 
 };//class Listener Compensation
 

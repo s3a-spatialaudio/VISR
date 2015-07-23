@@ -14,34 +14,41 @@
 #include "defs.h"
 #include "LoudspeakerArray.h"
 
-#define MAX_NUM_SOURCES 512
+#include <libefl/basic_matrix.hpp>
 
-
-// #include <iostream>
-
-
+namespace visr
+{
+namespace panning
+{
 
 class VBAP
 {
 private:
     
-    LoudspeakerArray* m_array;
-    Afloat m_invMatrix[MAX_NUM_LOUDSPEAKER_TRIPLETS][9];
-    Afloat m_gain[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS];
+    LoudspeakerArray const * m_array;
+    efl::BasicMatrix<Afloat> m_invMatrix;
+    efl::BasicMatrix<Afloat> m_gain;
     XYZ m_listenerPos;
-    XYZ (*m_sourcePos)[MAX_NUM_SOURCES];
-    int m_nSources;
+    XYZ const * m_sourcePos;
+    std::size_t m_nSources;
     Afloat m_maxGain = 10.0f;
     
     
     
 public:
-    
-    int setLoudspeakerArray(LoudspeakerArray* array){
+  /**
+   * Default constructor.
+   * Sets object to save values (no array, zero sources).
+   */
+  VBAP();
+
+    int setLoudspeakerArray(LoudspeakerArray const * array){
         m_array = array;
+        m_invMatrix.resize( array->getNumTriplets(), 9 );
+        m_gain.resize( m_nSources, array->getNumSpeakers( ) );
         return 0;
     }
-    
+
     int setListenerPosition(Afloat x, Afloat y, Afloat z){
 
 #ifdef VBAP_DEBUG_MESSAGES
@@ -55,34 +62,33 @@ public:
     
     int calcInvMatrices();
     
-    int setSourcePositions(XYZ (*sp)[MAX_NUM_SOURCES]) {
+    int setSourcePositions(XYZ const *sp ) {
         m_sourcePos = sp;
         return 0;
     }
     
-    int setNumSources(int n) {
-        if (n > MAX_NUM_SOURCES) {
-            m_sourcePos = 0;
-            return 0;
-        }
+    std::size_t setNumSources( std::size_t n) {
         m_nSources = n;
+	// Take care of the fact that the loudspeaker
+	// array might not been set yest.
+	std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
+        m_gain.resize( m_nSources, numSpeakers );
         return n;
     }
     
     int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
     
-    int getNumSpeakers() { return m_array->m_nSpeakers; }
+    std::size_t getNumSpeakers() const { return m_array->getNumSpeakers(); }
     
     int calcGains();
     
-    Afloat (*getGains())[MAX_NUM_SOURCES][MAX_NUM_SPEAKERS] {
-        return &m_gain;
+    efl::BasicMatrix<Afloat> const & getGains() const {
+       return m_gain;
     }
     
 };
 
-
-
-
+} // namespace panning
+} // namespace visr
 
 #endif /* defined(__S3A_renderer_dsp__VBAP__) */

@@ -48,7 +48,7 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, std::size_t numb
 {
   mNumberOfObjects = numberOfObjects;
   mNumberOfLoudspeakers = numberOfLoudspeakers;
-
+  mSourcePositions.resize( numberOfObjects );
   boost::filesystem::path const filePath = absolute( boost::filesystem::path(arrayConfigFile) );
 
   FILE* rawHandle = fopen( filePath.string().c_str(), "r" );
@@ -68,8 +68,8 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, std::size_t numb
     throw std::invalid_argument( "PanningGainCalculator::setup() The loudspeaker configuration file does not match to the given number of loudspeaker channels." );
   }
 
-  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
   mVbapCalculator.setLoudspeakerArray( &mSpeakerArray );
+  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
   // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
   setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
   mLevels.resize( mNumberOfObjects );
@@ -100,7 +100,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
 
   mLevels = 0.0f;
   // As not every source object in the VBAP calculator component might correspond to a real source, we have to set them to safe position beforehand.
-  XYZ defaultSource( 1.0f, 0.0f, 0.0f );
+  panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
   for( std::size_t srcIdx(0); srcIdx < mNumberOfObjects; ++srcIdx )
   {
     mSourcePositions[ srcIdx ] = defaultSource;
@@ -161,15 +161,16 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
     }
   } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-  mVbapCalculator.setSourcePositions( &mSourcePositions );
+  mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
   if( mVbapCalculator.calcGains() != 0 )
   {
     std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
   }
 
+  // TODO: Can be replaced by a vector multiplication.
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
-    Afloat const * const gainRow = (*mVbapCalculator.getGains())[ chIdx ];
+    Afloat const * const gainRow = mVbapCalculator.getGains().row( chIdx );
     objectmodel::LevelType const level = mLevels[ chIdx ];
     for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
     {

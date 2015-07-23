@@ -78,7 +78,7 @@ int main( int argc, char const * const * argv )
       std::cerr << "The specified loudspeaker array configuration file \""
           << arrayConfigFile.string( ).c_str( ) << "\" could not be opened." << std::endl;
     }
-    LoudspeakerArray loudspeakerArray;
+    panning::LoudspeakerArray loudspeakerArray;
     if( loudspeakerArray.load( arrayConfigHandle ) != 0 )
     {
       std::cerr << "Error while parsing the specified loudspeaker array configuration file \""
@@ -132,7 +132,7 @@ int main( int argc, char const * const * argv )
       for( pml::SignalRoutingParameter::IndexType channelIdx( 0 ); channelIdx < numberOfLoudspeakers; ++channelIdx )
       {
         // The channel ids in the array configuration file are apparently one-offset
-        int const arrayConfigChannel = loudspeakerArray.m_channel[ channelIdx ];
+        int const arrayConfigChannel = loudspeakerArray.channelIndex( channelIdx );
         if( arrayConfigChannel < 0 )
         {
           throw std::invalid_argument( "Invalid \"channel\" argument in array configuration file." );
