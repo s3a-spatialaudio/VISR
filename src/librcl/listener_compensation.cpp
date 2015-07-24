@@ -98,7 +98,6 @@ void ListenerCompensation::process(pml::ListenerPosition const & pos,
 
 int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )
 {
-  int i;
   panning::XYZ l1;
   Afloat rad = 0.0f, max_rad = 0.0f, x = 0.0f, y = 0.0f, z = 0.0f;
 
@@ -107,7 +106,7 @@ int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )
   y = m_listenerPos.y;
   z = m_listenerPos.z;
 
-  for (i = 0; i < m_array.getNumSpeakers(); i++) {
+  for (std::size_t i = 0; i < m_array.getNumSpeakers(); i++) {
 
     l1 = m_array.getPosition( i );
 
@@ -119,7 +118,7 @@ int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )
       max_rad = gainComp[i];
   }
 
-  for (i = 0; i < m_array.getNumSpeakers(); i++) {
+  for (std::size_t i = 0; i < m_array.getNumSpeakers(); i++) {
 
     gainComp[i] = (gainComp[i]/max_rad);
   }
@@ -129,7 +128,7 @@ int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )
 
 int ListenerCompensation::calcDelayComp( efl::BasicVector<Afloat> & delayComp )
 {
-  int i;
+  
   Afloat rad=0.0f, max_rad=0.0f, x=0.0f, y=0.0f, z=0.0f;
   panning::XYZ l1;
 
@@ -138,7 +137,7 @@ int ListenerCompensation::calcDelayComp( efl::BasicVector<Afloat> & delayComp )
   y = m_listenerPos.y;
   z = m_listenerPos.z;
 
-  for (i = 0; i < m_array.getNumSpeakers(); i++) {
+  for (std::size_t i = 0; i < m_array.getNumSpeakers(); i++) {
 
     l1 = m_array.getPosition( i );
 
@@ -150,7 +149,7 @@ int ListenerCompensation::calcDelayComp( efl::BasicVector<Afloat> & delayComp )
       max_rad = delayComp[i];
   }
 
-  for (i = 0; i < m_array.getNumSpeakers(); i++){
+  for ( std::size_t i = 0; i < m_array.getNumSpeakers(); i++){
 
     delayComp[i] = std::abs(delayComp[i]-max_rad)/c_0;
   }

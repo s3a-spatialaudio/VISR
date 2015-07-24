@@ -56,7 +56,7 @@ int LoudspeakerArray::load( FILE *file )
 
   struct SpkStruct
   {
-    int id;
+    LoudspeakerIndexType id;
     XYZ pos;
     ChannelIndex channel;
   };
@@ -68,7 +68,7 @@ int LoudspeakerArray::load( FILE *file )
     }
   };
   std::set<SpkStruct, CmpSpkStruct>  tmpSpeakers;
-  std::vector<std::array<LoudspeakerIndexType, 3> > tmpTriplets;
+  std::vector< TripletType > tmpTriplets;
 
   m_is2D = false;
   m_isInfinite = false;
@@ -86,13 +86,6 @@ int LoudspeakerArray::load( FILE *file )
       {
         return -1;
       }
-#if 0
-      if (i <= MAX_NUM_SPEAKERS) {
-        setPosition(i,x,y,z,m_isInfinite);
-        setChannel(i,chan);
-        if (i > nSpk) nSpk = i;
-      }
-#else
       SpkStruct newSpk;
       newSpk.id = i;
       newSpk.pos.set( x, y, z, m_isInfinite );
@@ -104,7 +97,6 @@ int LoudspeakerArray::load( FILE *file )
       {
         return -1; // Insertion failed, i.e., duplicated index
       }
-#endif
     }
     else if( c == 'p' )
     {   // polars, using degrees
@@ -113,19 +105,6 @@ int LoudspeakerArray::load( FILE *file )
       {
         return -1;
       }
-#if 0
-      if( i <= MAX_NUM_SPEAKERS ) {
-        az *= PI/180;
-        el *= PI/180;
-        xy = r*cos(el);
-        x = xy*cos(az);
-        y = xy*sin(az);
-        z = r*sin(el);
-        setPosition(i,x,y,z,m_isInfinite);
-        setChannel(i,chan);
-        if (i > nSpk) nSpk = i;
-      }
-#else
       std::tie( x, y, z ) = efl::spherical2cartesian( efl::degree2radian( az ),
                                                       efl::degree2radian( el ),
                                                       r );
@@ -140,7 +119,6 @@ int LoudspeakerArray::load( FILE *file )
       {
         return -1; // Insertion failed, i.e., duplicated index
       }
-#endif
     }
     else if( c == 't' )
     {    // tuplet - triplet or duplet
@@ -180,7 +158,7 @@ int LoudspeakerArray::load( FILE *file )
   std::size_t numSpeakers = tmpSpeakers.size();
   m_position.resize( numSpeakers );
   m_channel.resize( numSpeakers );
-  std::size_t spkIdx = 0; 
+  LoudspeakerIndexType spkIdx = 0;
   for( auto const & v : tmpSpeakers )
   {
     // Check that the (ordered) speakers are consecutively ordered from 1.
@@ -306,11 +284,16 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   const ChannelIndex cInvalidChannel = std::numeric_limits<ChannelIndex>::max();
   std::fill( m_channel.begin(), m_channel.end(), cInvalidChannel ); // assign special value to check afterwards if every speaker index has been assigned.
 
+  // The maximim admissible loudspeaker index as used in the file,
+  // i.e., one-offset.
+  LoudspeakerIndexType const maxSpeakerIndexOneOffset
+    = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
+
   for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt )
   {
     ptree const childTree = treeIt->second;
     int id = childTree.get<int>( "<xmlattr>.id" );
-    if( id < 1 or id > numTotalSpeakers )
+    if( id < 1 or id > maxSpeakerIndexOneOffset )
     {
       throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the numbeer of loudspeakers." );
     }
@@ -332,7 +315,7 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   {
     ptree const childTree = treeIt->second;
     int id = childTree.get<int>( "<xmlattr>.id" );
-    if( id < 1 or id > numTotalSpeakers )
+    if( id < 1 or id > maxSpeakerIndexOneOffset )
     {
       throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the number of loudspeakers." );
     }
@@ -351,6 +334,8 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   auto const  tripletNodes = treeRoot.equal_range( "triplet" );
   std::size_t const numTriplets = std::distance( tripletNodes.first, tripletNodes.second );
   m_triplet.reserve( numTriplets );
+  // The maximim admissible index in a triplet. These are zero-offset values
+  LoudspeakerIndexType const maxSpeakerIndex = maxSpeakerIndexOneOffset - 1;
   for( ptree::const_assoc_iterator tripletIt( tripletNodes.first ); tripletIt != tripletNodes.second; ++tripletIt )
   {
     ptree const childTree = tripletIt->second;
@@ -365,9 +350,9 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     {
       triplet[2] = childTree.get<LoudspeakerIndexType>( "<xmlattr>.l3" ) - 1;
     }
-    if( (triplet[0] < 0) or (triplet[0] >= numTotalSpeakers) 
-      or ( triplet[1] < 0 ) or( triplet[1] >= numTotalSpeakers )
-      or ( (not m_is2D) and ( (triplet[2] < 0 ) or( triplet[2] >= numTotalSpeakers )) ) )
+    if( (triplet[0] < 0) or (triplet[0] > maxSpeakerIndex ) 
+      or ( triplet[1] < 0 ) or( triplet[1] > maxSpeakerIndex )
+      or ( (not m_is2D) and ( (triplet[2] < 0 ) or( triplet[2] > maxSpeakerIndex )) ) )
     {
       throw std::invalid_argument( "LoudspeakerArray::loadXml(): Triplet references non-existing speaker index." );
     }
