@@ -20,7 +20,7 @@ namespace pml
 /**
  *
  */
-  class SignalRoutingParameter
+class SignalRoutingParameter
 {
 public:
   using IndexType = std::size_t;
