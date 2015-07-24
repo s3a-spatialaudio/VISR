@@ -14,8 +14,12 @@
 #include <libpanning/AllRAD.h>
 #include <boost/filesystem.hpp>
 
-#include <iostream>
+#include <algorithm>
 #include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <iterator>
+#include <stdexcept>
 #include <vector>
 
 int main(int argc, const char * argv[])
@@ -32,7 +36,6 @@ int main(int argc, const char * argv[])
   std::vector<XYZ> sourcePos( numberOfSources );
 
   FILE* file;
-  int j, k;
     
   boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
   boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
@@ -58,7 +61,15 @@ int main(int argc, const char * argv[])
   boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/22.1_audiolab.xml" );
   array.loadXml( configFileXml.string() );
 
-  vbap.setLoudspeakerArray( &array );
+  try
+  {
+    vbap.setLoudspeakerArray( &array );
+  }
+  catch( std::invalid_argument const & e )
+  {
+    std::cerr << "Error while loading XML array configuration." << std::endl;
+    return EXIT_FAILURE;
+  }
 
   vbap.setListenerPosition( 0.0f, 0.0f, 0.0f );
   //    vbap.setListenerPosition(-1.9f, 0.0f, -0.1f);
@@ -93,7 +104,15 @@ int main(int argc, const char * argv[])
   vbap.calcGains();
 
   efl::BasicMatrix<Afloat> const & vbapGains = vbap.getGains();   // Check in watch window
-
+  // Print the matrix.
+  std::size_t const numCols = vbapGains.numberOfColumns();
+  for( std::size_t rowIdx(0); rowIdx < vbapGains.numberOfRows(); ++rowIdx )
+  {
+    Afloat const * rowPtr = vbapGains.row( rowIdx );
+    std::cout << "VBAP gain for source #" << rowIdx << ": ";
+    std::copy( rowPtr, rowPtr+numCols, std::ostream_iterator<Afloat>( std::cout, ", " ) );
+    std::cout << std::endl;
+  }  
 
   // 5.1 test, 2D VBAP
 
@@ -177,9 +196,9 @@ int main(int argc, const char * argv[])
   file = fopen( bfile.string().c_str(), "w" );
   if( file )
   {
-    for( k = 0; k < 9; k++ )
+    for( int k = 0; k < 9; k++ )
     { // 9 harms - 2nd order only
-      for( j = 0; j < vbap.getNumSpeakers(); j++ )
+      for( std::size_t j = 0; j < vbap.getNumSpeakers(); j++ )
       {
         fprintf( file, "%f ", decodeGains(k, j) );
       }
@@ -189,4 +208,3 @@ int main(int argc, const char * argv[])
   }
   return 0;
 }
-

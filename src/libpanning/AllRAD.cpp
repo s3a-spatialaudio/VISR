@@ -45,8 +45,6 @@ int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
 
 int AllRAD::calcDecodeGains(VBAP* vbap){
     
-    int i, j, k;
-    std::size_t nSpks;
     Afloat sum;
     
     // In vbap first do externally: setListenerPosition, then calcInvMatrix.
@@ -62,14 +60,14 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
     
     efl::BasicMatrix<Afloat> const & vbapGain = vbap->getGains( );
     
-    nSpks = vbap->getNumSpeakers();
+    std::size_t const nSpks = vbap->getNumSpeakers();
     
     // Find decode gains by matrix multiplication
     
-    for( i = 0; i < m_nHarms; i++) {
-        for( j = 0; j < nSpks; j++) {
+    for( std::size_t i = 0; i < m_nHarms; i++) {
+      for( std::size_t j = 0; j < nSpks; j++) {
             sum = 0;
-            for( k = 0; k < m_nSpkSources; k++) {
+            for( std::size_t k = 0; k < m_nSpkSources; k++) {
                 sum += m_regDecode( i, k ) * vbapGain( k, j );
             }
             m_decode( i, j ) = sum;

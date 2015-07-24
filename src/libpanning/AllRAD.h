@@ -37,8 +37,8 @@ private:
 
     efl::BasicMatrix<Afloat> m_decode;
 
-    int m_nHarms = 0;
-    int m_nSpkSources = 0;
+    std::size_t m_nHarms = 0;
+    std::size_t m_nSpkSources = 0;
     
     LoudspeakerArray* m_regArray;
 
