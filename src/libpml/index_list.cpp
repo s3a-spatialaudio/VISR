@@ -33,73 +33,76 @@ IndexList::IndexList( std::string const & val )
   struct ParseState
   {
   public:
-    ParseState()
-      : mStatus( initial )
-    {
-    }
-    
-
-    void first( int const startIdx )
-    {
-      mStartIdx = startIdx;
-      mStatus = started;
-    }
-
-    void second( int const idx )
-    {
-      mStep = idx;
-      mStatus = stepEntered;
-    }
-
-    void third( int const endIdx )
-    {
-      mEndIdx = endIdx;
-      mStatus = thirdEntered;
-    }
-
     void finish()
     {
-      switch( mStatus )
+      switch( mStack.size() )
       {
-      case initial:
-        // should happen, but not technically illegal
+      case 0:
+        throw std::invalid_argument( "Internal parse error." );
+      case 1:
+        assert( mStack[0] >= 0 );
+        mContents.push_back( static_cast<IndexType>(mStack[0]) );
         break;
-      case started:
-        mContents.push_back( static_cast<IndexType>( mStartIdx ) );
+      case 2:
+      {
+        assert( mStack[0] >= 0 );
+        assert( mStack[1] >= mStack[0] );
+        IndexType val = static_cast<IndexType>(mStack[0]);
+        IndexType const endVal = static_cast<IndexType>(mStack[1]);
+        while( val <= endVal )
+        {
+          mContents.push_back( val++ );
+        }
+        break;
+      }
+      case 3:
+      {
+        assert( mStack[0] >= 0 );
+        assert( mStack[2] >= 0 );
+        int const start = mStack[0];
+        int const inc = mStack[1];
+        int const end = mStack[2];
+        int val = start;
+        assert( inc != 0 );
+        if( inc == 0 )
+        {
+          throw std::invalid_argument( "The increment mus not be zero." );
+        }
+        while( val <= end )
+        {
+          mContents.push_back( val++ );
+        }
+      }
       }
     }
-    int mStartIdx;
-    int mEndIdx;
-    int mStep;
-    enum CurrStatus
-    {
-      initial,
-      started,
-      stepEntered,
-      thirdEntered
-    };
-    CurrStatus mStatus;
 
+    void push( int val ) 
+    {
+      mStack.push_back( val );
+    }
+
+    std::vector<int> mStack;
     ContainerType mContents;
   };
   ParseState state;
 
-#if 0
-    auto atom = ( (qi::uint_[boost::bind( &ParseState::setStartIdx, &state, ::_1 )] ))[boost::bind( &ParseState::finish, &state)];
+//  auto atom = ( qi::uint_[boost::bind( &ParseState::first, &state, ::_1 )] )[boost::bind( &ParseState::finish, &state)];
+  //auto atom = (qi::uint_[boost::bind( &ParseState::first, &state, ::_1 )]
+  //  >> *( qi::char_(":") >> qi::uint_[boost::bind( &ParseState::second, &state, ::_1 )]) )[boost::bind( &ParseState::finish, &state )];
+//  auto atom = (qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_(":") )[boost::bind( &ParseState::finish, &state )];
 
   // This parses a sequence of number pairs of the form 'x=y', where the pairs are separated by whitespace or a comma.
-  bool const parseRet = qi::phrase_parse( first, last,
-   ((qi::uint_[boost::bind( &ParseState::setInIdx, &state, ::_1 )] >> '=' >> qi::uint_[boost::bind(&ParseState::setOutIdx, &state, ::_1)]) % (','|qi::blank) ),
-   qi::ascii::space );
+  bool const parseRet = qi::phrase_parse( first, last, 
+    (qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_( ":" ))[boost::bind( &ParseState::finish, &state )],
+    qi::ascii::space );
 
   if( (not parseRet) or( first != last ) )
   {
-    return false;
+    throw std::invalid_argument( "SignalList: Parsing of initialiser string failed." );
   }
-  swap( state.retValue );
-#endif
-}
 
+  mIndices.swap( state.mContents );
+}
 
 
 void IndexList::clear()
