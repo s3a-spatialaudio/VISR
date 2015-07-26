@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PML_INDEX_LIST_HPP_INCLUDED
-#define VISR_PML_INDEX_LIST_HPP_INCLUDED
+#ifndef VISR_PML_INDEX_SEQUENCE_HPP_INCLUDED
+#define VISR_PML_INDEX_SEQUENCE_HPP_INCLUDED
 
 #include <algorithm>
 #include <ciso646>
@@ -17,7 +17,7 @@ namespace pml
 /**
  *
  */
-class IndexList
+class IndexSequence
 {
 public:
   using IndexType = std::size_t;
@@ -27,11 +27,11 @@ public:
   /**
    * Default constructor, creates empty list.
    */
-  IndexList();
+  IndexSequence();
   
-  IndexList( std::initializer_list<IndexType> const & val );
+  IndexSequence( std::initializer_list<IndexType> const & val );
 
-  IndexList( std::string const & val );
+  IndexSequence( std::string const & val );
 
   std::size_t size() const 
   {
@@ -114,4 +114,4 @@ private:
 } // namespace visr
 
 
-#endif // VISR_PML_INDEX_LIST_HPP_INCLUDED
+#endif // VISR_PML_INDEX_SEQUENCE_HPP_INCLUDED

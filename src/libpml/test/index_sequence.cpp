@@ -1,7 +1,7 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
-#include <libpml/index_list.hpp>
+#include <libpml/index_sequence.hpp>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -21,15 +21,15 @@ namespace pml
 namespace test
 {
 
-BOOST_AUTO_TEST_CASE( initIndexListDefault )
+BOOST_AUTO_TEST_CASE( initIndexSequenceDefault )
 {
-  IndexList il1;
+  IndexSequence il1;
   BOOST_CHECK( il1.size() == 0 );
 }
 
-BOOST_AUTO_TEST_CASE( initIndexListFromInitializerList )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromInitializerList )
 {
-  IndexList il1( { 0, 1, 3, 7, 2 } );
+  IndexSequence il1( { 0, 1, 3, 7, 2 } );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );
@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_CASE( initIndexListFromInitializerList )
   BOOST_CHECK( il1[1] == 1 );
 }
 
-BOOST_AUTO_TEST_CASE( initIndexListFromStringSimple )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringSimple )
 {
   std::string const initString( "0,1,3,7,2" );
-  IndexList il1( initString );
+  IndexSequence il1( initString );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );
@@ -48,10 +48,10 @@ BOOST_AUTO_TEST_CASE( initIndexListFromStringSimple )
   BOOST_CHECK( il1[1] == 1 );
 }
 
-BOOST_AUTO_TEST_CASE( initIndexListFromStringRange1 )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringRange1 )
 {
   std::string const initString( "0:3,7" );
-  IndexList il1( initString );
+  IndexSequence il1( initString );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );
@@ -59,10 +59,10 @@ BOOST_AUTO_TEST_CASE( initIndexListFromStringRange1 )
   BOOST_CHECK( il1[1] == 1 );
 }
 
-BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStride )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringRangeStride )
 {
   std::string const initString( "0:2:7,2" );
-  IndexList il1( initString );
+  IndexSequence il1( initString );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );
@@ -70,18 +70,18 @@ BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStride )
   BOOST_CHECK( il1[3] == 6 );
 }
 
-BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStrideEmpty )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringRangeStrideEmpty )
 {
   std::string const initString( "5:3:4" );
-  IndexList il1( initString );
+  IndexSequence il1( initString );
   BOOST_CHECK( il1.size( ) == 0 );
 }
 
 
-BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStrideReversed )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringRangeStrideReversed )
 {
   std::string const initString( "2,7:-2:0" );
-  IndexList il1( initString );
+  IndexSequence il1( initString );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );
@@ -90,10 +90,10 @@ BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStrideReversed )
 }
 
 
-BOOST_AUTO_TEST_CASE( initIndexListFromStringWeirdWhiteSpace )
+BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringWeirdWhiteSpace )
 {
   std::string const initString( "    7 :    -2    : 0   ,   2         " );
-  IndexList il1( initString );
+  IndexSequence il1( initString );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );

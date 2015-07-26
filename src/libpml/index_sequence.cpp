@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "index_list.hpp"
+#include "index_sequence.hpp"
 
 #include <boost/bind/bind.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -13,16 +13,16 @@ namespace visr
 namespace pml
 {
 
-IndexList::IndexList()
+IndexSequence::IndexSequence()
 {
 }  
 
-IndexList::IndexList( std::initializer_list<IndexType> const & val )
+IndexSequence::IndexSequence( std::initializer_list<IndexType> const & val )
   : mIndices( val.begin(), val.end() )
 {
 }
  
-IndexList::IndexList( std::string const & val )
+IndexSequence::IndexSequence( std::string const & val )
 {
   namespace qi = boost::spirit::qi;
 
@@ -51,7 +51,7 @@ IndexList::IndexList( std::string const & val )
         int const val = mStack[0];
         if( val < 0 )
         {
-          throw("IndexList: Indices must be greater or equal than zero.");
+          throw("IndexSequence: Indices must be greater or equal than zero.");
         }
         mContents.push_back( static_cast<IndexType>(val) );
         break;
@@ -62,7 +62,7 @@ IndexList::IndexList( std::string const & val )
         int const end = mStack[1];
         if( start < 0 or end < 0 )
         {
-          throw("IndexList: The start and end values of a range must be greater or equal than zero.");
+          throw("IndexSequence: The start and end values of a range must be greater or equal than zero.");
         }
         IndexType val = static_cast<IndexType>(mStack[0]);
         while( val <= end )
@@ -78,11 +78,11 @@ IndexList::IndexList( std::string const & val )
         int const end = mStack[2];
         if( start < 0 or end < 0 )
         {
-          throw("IndexList: The start and end values of a range must be greater or equal than zero.");
+          throw("IndexSequence: The start and end values of a range must be greater or equal than zero.");
         }
         if( inc == 0 )
         {
-          throw("IndexList: The increment of a range must not be zero.");
+          throw("IndexSequence: The increment of a range must not be zero.");
         }
         int val = start;
         if( inc > 0 )
@@ -104,7 +104,7 @@ IndexList::IndexList( std::string const & val )
         break;
       }
       default:
-        throw std::invalid_argument( "IndexList: Sequence of more than three colon-separated values." );
+        throw std::invalid_argument( "IndexSequence: Sequence of more than three colon-separated values." );
       }
       mStack.clear();
     }
@@ -127,7 +127,7 @@ IndexList::IndexList( std::string const & val )
   mIndices.swap( state.mContents );
 }
 
-void IndexList::clear()
+void IndexSequence::clear()
 {
   mIndices.clear();
 }
