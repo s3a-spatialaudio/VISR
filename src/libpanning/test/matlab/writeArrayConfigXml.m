@@ -2,7 +2,9 @@
 % University of Southampton, United Kingdom
 % a.franck@soton.ac.uk
 
-function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices )
+function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig )
+
+subwooferConfigPresent = (nargin >= 7);
 
 % Whether to write Cartesian or polar coordinates.
 % TODO: Consider making this a configurable option.
@@ -68,6 +70,36 @@ for tripletIdx = 1:numTriplets
         triplNode.setAttribute( 'l3', num2str( triplets(tripletIdx,3) ) );
     end
     rootNode.appendChild( triplNode );
+end
+
+if subwooferConfigPresent
+    subChannels = subwooferConfig.channels;
+    numSubwoofers = length( subChannels );
+    
+    subIndices = subwooferConfig.assignedLoudspeakers;
+    if ~isvector( subIndices ) || (length( subIndices ) ~= numSubwoofers)
+        display( 'The number of subwoofer index lists must match the number of subwoofers.' );
+    end
+    if isfield( subwooferConfig, 'loudspeakerWeights' )
+        subGains = subwooferConfig.loudspeakerWeights;
+        if ~isvector( subGains ) || length( subGains ) ~= numSubwoofers
+            display( 'The number of subwoofer gain entries must match the number of subwooferss.' );
+        end
+    else
+        subGains = [];
+    end
+
+    for subIdx = 1:numSubwoofers
+        subNode = domNode.createElement( 'subwoofer' );
+        subNode.setAttribute( 'channel', num2str( subChannels(subIdx)) );
+        subNode.setAttribute( 'assignedLoudspeakers', subIndices{subIdx } );
+        if ~isempty( subGains )
+            % val = num2str(subGains{subIdx});
+            val = subGains{subIdx};
+            subNode.setAttribute( 'weights', val );
+        end
+        rootNode.appendChild( subNode );
+    end
 end
 
 if isempty(fileName) % Use [] to suppress a file output and write to the

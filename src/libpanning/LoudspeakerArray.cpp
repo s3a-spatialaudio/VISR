@@ -15,6 +15,9 @@
 #include <libefl/degree_radian_conversion.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>
 
+#include <libpml/index_sequence.hpp>
+#include <libpml/float_sequence.hpp>
+
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -45,6 +48,9 @@ LoudspeakerArray::LoudspeakerArray()
 
 int LoudspeakerArray::load( FILE *file )
 {
+  m_subwooferChannels.clear();
+  m_subwooferGains.resize( 0, 0 );
+
   int n, i, chan;
   char c;
   Afloat x, y, z;
@@ -127,17 +133,9 @@ int LoudspeakerArray::load( FILE *file )
       {
         return -1;
       }
-#if 0
-      if( i <= MAX_NUM_LOUDSPEAKER_TRIPLETS ) {
-        if (n == 3) l3 = 1;
-        setTriplet(i-1, l1-1, l2-1, l3-1);
-        if (i > nTri) nTri = i;
-      }
-#else
-      // The triplet index does not matter
-      std::array<LoudspeakerIndexType, 3> triplet = { l1, l2, l3 };
+      // The triplet index does not matter.
+      std::array<LoudspeakerIndexType, 3> triplet{ { l1, l2, l3 } };
       tmpTriplets.push_back( triplet );
-#endif
     }
     else if( c == '2' )
     {    // switch to '2D' mode
@@ -181,6 +179,7 @@ int LoudspeakerArray::load( FILE *file )
     dest[1] = src[1] - 1;
     dest[2] = src[2] - 1;
   }
+
   return 0;
 }
 
@@ -275,9 +274,9 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   const auto speakerNodes = treeRoot.equal_range( "loudspeaker" );
   const auto virtualSpeakerNodes = treeRoot.equal_range( "virtualspeaker" );
 
-  std::size_t const numNormalSpeakers = std::distance( speakerNodes.first, speakerNodes.second );
+  std::size_t const numRegularSpeakers = std::distance( speakerNodes.first, speakerNodes.second );
   std::size_t const numVirtualSpeakers = std::distance( virtualSpeakerNodes.first, virtualSpeakerNodes.second );
-  std::size_t const numTotalSpeakers = numNormalSpeakers + numVirtualSpeakers;
+  std::size_t const numTotalSpeakers = numRegularSpeakers + numVirtualSpeakers;
 
   m_position.resize( numTotalSpeakers );
   m_channel.resize( numTotalSpeakers );
@@ -328,11 +327,12 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     m_position[idZeroOffset] = parseCoordNode( childTree, m_isInfinite );
   }
   // The checks above (all speaker indices are between 1 and numTotalSpeakers && the indices are unique) are 
-  // sufficient to ensure that the spkeaker indices are consecutive.
+  // sufficient to ensure that the speaker indices are consecutive.
 
   // parse the triplet config
   auto const  tripletNodes = treeRoot.equal_range( "triplet" );
   std::size_t const numTriplets = std::distance( tripletNodes.first, tripletNodes.second );
+  m_triplet.clear();
   m_triplet.reserve( numTriplets );
   // The maximim admissible index in a triplet. These are zero-offset values
   LoudspeakerIndexType const maxSpeakerIndex = maxSpeakerIndexOneOffset - 1;
@@ -359,6 +359,47 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     m_triplet.push_back( triplet );
   }
   assert( m_triplet.size() == numTriplets );
+
+  // Subwoofer configuration
+  auto const  subwooferNodes = treeRoot.equal_range( "subwoofer" );
+  std::size_t const numSubwoofers = std::distance( subwooferNodes.first, subwooferNodes.second );
+  m_subwooferChannels.resize( numSubwoofers );
+  m_subwooferGains.resize( numSubwoofers, numRegularSpeakers );
+  std::size_t subIdx( 0 );
+  for( ptree::const_assoc_iterator subIt( subwooferNodes.first ); subIt != subwooferNodes.second; ++subIt, ++subIdx )
+  {
+    ptree const subNode = subIt->second;
+    ChannelIndex const subChannel = subNode.get<int>( "<xmlattr>.channel" );
+    m_subwooferChannels[subIdx] = subChannel;
+
+    std::string const speakerIndicesStr = subNode.get<std::string>( "<xmlattr>.assignedLoudspeakers" );
+    pml::IndexSequence const speakerIndices( speakerIndicesStr );
+    if( std::find_if( speakerIndices.begin(), speakerIndices.end(),
+      [&]( pml::IndexSequence::IndexType val ) { return (val < 1) or( val > numRegularSpeakers ); } ) != speakerIndices.end( ) )
+    {
+      throw std::invalid_argument( "A loudspeaker index exceeds the set of regular loudspeakers." );
+    }
+    boost::optional<std::string> const weightStr = subNode.get<std::string>( "<xmlattr>.weights" );
+    if( weightStr )
+    {
+      pml::FloatSequence<Afloat> speakerWeights( *weightStr );
+      if( speakerWeights.size() != speakerIndices.size() )
+      {
+        throw std::invalid_argument( "The loudspeaker index list and the weight vector must have the same length." );
+      }
+      for( std::size_t entryIdx( 0 ); entryIdx < speakerIndices.size(); ++entryIdx )
+      {
+        m_subwooferGains( subIdx, speakerIndices[entryIdx] - 1 ) = speakerWeights[entryIdx];
+      }
+    }
+    else // No weight vector given, assign ones to all channels indexed by the assignedLoudspeakers string.
+    {
+      for( std::size_t entryIdx( 0 ); entryIdx < speakerIndices.size( ); ++entryIdx )
+      {
+        m_subwooferGains( subIdx, speakerIndices[entryIdx] - 1 ) = 1.0f;
+      }
+    }
+  }
 }
 
 } // namespace panning

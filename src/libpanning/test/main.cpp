@@ -58,7 +58,7 @@ int main(int argc, const char * argv[])
   file = 0;
 
   // Alternatively, load the config file in XML format.
-  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/22.1_audiolab.xml" );
+  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/22.1_audiolab_subwoofers.xml" );
   array.loadXml( configFileXml.string() );
 
   try

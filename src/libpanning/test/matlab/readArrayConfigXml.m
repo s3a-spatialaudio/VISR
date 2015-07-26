@@ -39,7 +39,7 @@ numVirtualSpeakers = virtualSpeakerNodes.getLength();
 numTotalSpeakers = numSpeakers + numVirtualSpeakers;
 
 spkPos = zeros( numTotalSpeakers, 3 );
-channelIndices = zeros( 1, numSpeakers );
+channelIndices = zeros( 1, numTotalSpeakers );
 
 for spkIdx = 1:numSpeakers
     [ spkPos( spkIdx, : ), channelIndices(spkIdx) ] ...
@@ -49,6 +49,7 @@ end
 for spkIdx = 1:numVirtualSpeakers
     spkPos( numSpeakers+spkIdx, : ) ...
         = parseSpeaker( virtualSpeakerNodes.item( spkIdx-1), true );
+    channelIndices( numSpeakers+spkIdx ) = -1;
 end
 
 tripletNodes = configNode.getElementsByTagName( 'triplet' );
