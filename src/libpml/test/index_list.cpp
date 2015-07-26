@@ -39,13 +39,66 @@ BOOST_AUTO_TEST_CASE( initIndexListFromInitializerList )
 
 BOOST_AUTO_TEST_CASE( initIndexListFromStringSimple )
 {
-  std::string const initString( "0 1    3  7  2" );
+  std::string const initString( "0,1,3,7,2" );
   IndexList il1( initString );
   BOOST_CHECK( il1.size( ) == 5 );
 
   BOOST_CHECK_NO_THROW( il1.at( 4 ) );
 
   BOOST_CHECK( il1[1] == 1 );
+}
+
+BOOST_AUTO_TEST_CASE( initIndexListFromStringRange1 )
+{
+  std::string const initString( "0:3,7" );
+  IndexList il1( initString );
+  BOOST_CHECK( il1.size( ) == 5 );
+
+  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+
+  BOOST_CHECK( il1[1] == 1 );
+}
+
+BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStride )
+{
+  std::string const initString( "0:2:7,2" );
+  IndexList il1( initString );
+  BOOST_CHECK( il1.size( ) == 5 );
+
+  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+
+  BOOST_CHECK( il1[3] == 6 );
+}
+
+BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStrideEmpty )
+{
+  std::string const initString( "5:3:4" );
+  IndexList il1( initString );
+  BOOST_CHECK( il1.size( ) == 0 );
+}
+
+
+BOOST_AUTO_TEST_CASE( initIndexListFromStringRangeStrideReversed )
+{
+  std::string const initString( "2,7:-2:0" );
+  IndexList il1( initString );
+  BOOST_CHECK( il1.size( ) == 5 );
+
+  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+
+  BOOST_CHECK( il1[2] == 5 );
+}
+
+
+BOOST_AUTO_TEST_CASE( initIndexListFromStringWeirdWhiteSpace )
+{
+  std::string const initString( "    7 :    -2    : 0   ,   2         " );
+  IndexList il1( initString );
+  BOOST_CHECK( il1.size( ) == 5 );
+
+  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+
+  BOOST_CHECK( il1[1] == 5 );
 }
 
 } // namespace test

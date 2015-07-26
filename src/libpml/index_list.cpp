@@ -4,7 +4,6 @@
 
 #include <boost/bind/bind.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_uint.hpp>
 
 #include <algorithm>
 #include <ciso646>
@@ -30,9 +29,17 @@ IndexList::IndexList( std::string const & val )
   std::string::const_iterator first = val.begin(); 
   std::string::const_iterator last = val.end();
 
+  /**
+   * Internal object which is called by the spirit parser to hold the results of parsing.
+   */
   struct ParseState
   {
   public:
+    void push( int val )
+    {
+      mStack.push_back( val );
+    }
+
     void finish()
     {
       switch( mStack.size() )
@@ -40,16 +47,25 @@ IndexList::IndexList( std::string const & val )
       case 0:
         throw std::invalid_argument( "Internal parse error." );
       case 1:
-        assert( mStack[0] >= 0 );
-        mContents.push_back( static_cast<IndexType>(mStack[0]) );
+      {
+        int const val = mStack[0];
+        if( val < 0 )
+        {
+          throw("IndexList: Indices must be greater or equal than zero.");
+        }
+        mContents.push_back( static_cast<IndexType>(val) );
         break;
+      }
       case 2:
       {
-        assert( mStack[0] >= 0 );
-        assert( mStack[1] >= mStack[0] );
+        int const start = mStack[0];
+        int const end = mStack[1];
+        if( start < 0 or end < 0 )
+        {
+          throw("IndexList: The start and end values of a range must be greater or equal than zero.");
+        }
         IndexType val = static_cast<IndexType>(mStack[0]);
-        IndexType const endVal = static_cast<IndexType>(mStack[1]);
-        while( val <= endVal )
+        while( val <= end )
         {
           mContents.push_back( val++ );
         }
@@ -57,28 +73,40 @@ IndexList::IndexList( std::string const & val )
       }
       case 3:
       {
-        assert( mStack[0] >= 0 );
-        assert( mStack[2] >= 0 );
         int const start = mStack[0];
         int const inc = mStack[1];
         int const end = mStack[2];
-        int val = start;
-        assert( inc != 0 );
+        if( start < 0 or end < 0 )
+        {
+          throw("IndexList: The start and end values of a range must be greater or equal than zero.");
+        }
         if( inc == 0 )
         {
-          throw std::invalid_argument( "The increment mus not be zero." );
+          throw("IndexList: The increment of a range must not be zero.");
         }
-        while( val <= end )
+        int val = start;
+        if( inc > 0 )
         {
-          mContents.push_back( val++ );
+          while( val <= end )
+          {
+            mContents.push_back( val );
+            val += inc;
+          }
         }
+        else // inc < 0
+        {
+          while( val >= end )
+          {
+            mContents.push_back( val );
+            val += inc;
+          }
+        }
+        break;
       }
+      default:
+        throw std::invalid_argument( "IndexList: Sequence of more than three colon-separated values." );
       }
-    }
-
-    void push( int val ) 
-    {
-      mStack.push_back( val );
+      mStack.clear();
     }
 
     std::vector<int> mStack;
@@ -86,14 +114,9 @@ IndexList::IndexList( std::string const & val )
   };
   ParseState state;
 
-//  auto atom = ( qi::uint_[boost::bind( &ParseState::first, &state, ::_1 )] )[boost::bind( &ParseState::finish, &state)];
-  //auto atom = (qi::uint_[boost::bind( &ParseState::first, &state, ::_1 )]
-  //  >> *( qi::char_(":") >> qi::uint_[boost::bind( &ParseState::second, &state, ::_1 )]) )[boost::bind( &ParseState::finish, &state )];
-//  auto atom = (qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_(":") )[boost::bind( &ParseState::finish, &state )];
+  auto atom = ((qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_(":") )[boost::bind( &ParseState::finish, &state )] % (qi::char_(',')));
 
-  // This parses a sequence of number pairs of the form 'x=y', where the pairs are separated by whitespace or a comma.
-  bool const parseRet = qi::phrase_parse( first, last, 
-    (qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_( ":" ))[boost::bind( &ParseState::finish, &state )],
+  bool const parseRet = qi::phrase_parse( first, last, atom,
     qi::ascii::space );
 
   if( (not parseRet) or( first != last ) )
@@ -103,7 +126,6 @@ IndexList::IndexList( std::string const & val )
 
   mIndices.swap( state.mContents );
 }
-
 
 void IndexList::clear()
 {
