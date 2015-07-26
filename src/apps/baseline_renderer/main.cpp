@@ -1,6 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-// #define FEEDTHROUGH_NATIVE_JACK
+// Enable native JACK interface instead of PortAudio
+// TODO: Make this selectable via a command line option.
+// #define BASELINE_RENDERER_NATIVE_JACK
 
 #include "options.hpp"
 
@@ -12,7 +14,7 @@
 
 #include <libpml/signal_routing_parameter.hpp>
 
-#ifdef FEEDTHROUGH_NATIVE_JACK
+#ifdef BASELINE_RENDERER_NATIVE_JACK
 #include <librrl/jack_interface.hpp>
 #else
 #include <librrl/portaudio_interface.hpp>
@@ -153,7 +155,7 @@ int main( int argc, char const * const * argv )
     }
     std::string const & outputGainConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "output-gain", std::string( ) );
 
-#ifdef FEEDTHROUGH_NATIVE_JACK
+#ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;
 #else
     rrl::PortaudioInterface::Config interfaceConfig;
@@ -162,7 +164,7 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
     interfaceConfig.mPeriodSize = periodSize;
     interfaceConfig.mSampleRate = samplingRate;
-#ifdef FEEDTHROUGH_NATIVE_JACK
+#ifdef BASELINE_RENDERER_NATIVE_JACK
     interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
     interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels-1 );
     interfaceConfig.mClientName = "BaselineRenderer";
@@ -200,7 +202,7 @@ int main( int argc, char const * const * argv )
                      sceneReceiverPort,
                      periodSize, samplingRate );
 
-#ifdef FEEDTHROUGH_NATIVE_JACK
+#ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );
 #else
     rrl::PortaudioInterface audioInterface( interfaceConfig );

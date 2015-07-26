@@ -6,7 +6,11 @@
 
 #include <libefl/vector_functions.hpp>
 
+#ifdef DIFFUSION_USE_FAST_CONVOLVER
+#include <librbbl/multichannel_convolver_uniform.hpp>
+#else
 #include <librbbl/fir.hpp>
+#endif
 
 #include <cassert>
 
@@ -19,8 +23,10 @@ SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( ril::AudioSignalFl
  : AudioComponent( container, name )
  , mInput( "in", *this )
  , mOutput( "out", *this )
+#ifndef DIFFUSION_USE_FAST_CONVOLVER
  , mGainAdjustments( ril::cVectorAlignmentSamples )
  , mFilterOutputs( ril::cVectorAlignmentSamples )
+#endif
 {
 }
 
@@ -41,14 +47,33 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
   mInput.setWidth( 1 );
   mOutput.setWidth( mNumberOfOutputs );
 
+#ifndef DIFFUSION_USE_FAST_CONVOLVER
   mGainAdjustments.resize( mNumberOfOutputs );
   mGainAdjustments.copy( gainAdjustments );
+#endif
 
+#ifdef DIFFUSION_USE_FAST_CONVOLVER
+  std::size_t const filterLength = diffusionFilters.numberOfColumns();
+  pml::FilterRoutingList routings;
+  for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; ++outIdx )
+  {
+    routings.addRouting( 0, outIdx, outIdx, gainAdjustments[ outIdx ] );
+  }
+  mDiffusionFilter.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
+    1, // single input
+    mNumberOfOutputs,
+    period(),
+    filterLength,
+    routings.size(),
+    mNumberOfOutputs,
+    routings,
+    diffusionFilters,
+    ril::cVectorAlignmentSamples ) );
+#else
   if( period() % rbbl::FIR::nBlockSamples != 0 )
   {
     throw std::invalid_argument( "SingleToMultichannelDiffusion: The period is not an integer multiple of the hard-coded block size of the diffusion filter class." );
   }
-
   mDiffusionFilter.reset( new rbbl::FIR() );
   if( mDiffusionFilter->setNumFIRs( static_cast<int>(mNumberOfOutputs) ) != 0 )
   {
@@ -67,11 +92,14 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
     throw std::invalid_argument( "SingleToMultichannelDiffusion: Setting the filter length  failed." );
   }
   mDiffusionFilter->loadFIRs( diffusionFilters );
-
   mFilterOutputs.resize( mNumberOfOutputs, rbbl::FIR::nBlockSamples );
+#endif
+
   mOutputPointers.resize( mNumberOfOutputs );
+#ifndef DIFFUSION_USE_FAST_CONVOLVER
   std::size_t idx( 0 );
   std::generate( mOutputPointers.begin(), mOutputPointers.end(), [&] { return mFilterOutputs.row(idx++); } );
+#endif
 }
 
 /**
@@ -90,15 +118,18 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
   setup( numberOfOutputs, diffusionFilters, gainVec );
 }
 
+
 void SingleToMultichannelDiffusion::process()
 {
-  std::size_t const blockSize = period();
   SampleType const * const input = mInput[ 0 ];
   SampleType * const * outputVector = mOutput.getVector( );
 
+// Diffusion processing
 #if 1
-  // Diffusion processing
-
+#ifdef DIFFUSION_USE_FAST_CONVOLVER
+  mDiffusionFilter->process( &input, outputVector, ril::cVectorAlignmentSamples );
+#else //  DIFFUSION_USE_FAST_CONVOLVER
+  std::size_t const blockSize = period();
   // At the moment, the diffusion filter works with a fixed block size.
   assert( period() % rbbl::FIR::nBlockSamples == 0 ); // was checked in setup()
   for( std::size_t startSample( 0 ); startSample < blockSize; startSample += rbbl::FIR::nBlockSamples )
@@ -117,8 +148,9 @@ void SingleToMultichannelDiffusion::process()
       }
     }
   }
-#else
-  // Simply copy the input to all outputs.
+#endif // DIFFUSION_USE_FAST_CONVOLVER
+
+#else  // No diffusion procesing, simply copy the input to all outputs.
   for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; outIdx++ )
   {
     efl::ErrorCode opRes = efl::vectorMultiplyConstant( mGainAdjustments[outIdx], input, outputVector[outIdx],

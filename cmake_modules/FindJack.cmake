@@ -62,6 +62,7 @@ else (JACK_LIBRARIES AND JACK_INCLUDE_DIRS)
     NAMES
       jack/jack.h
     PATHS
+      $ENV{JACK_ROOT}/includes
       ${_JACK_INCLUDEDIR}
       /usr/include
       /usr/local/include
@@ -72,7 +73,10 @@ else (JACK_LIBRARIES AND JACK_INCLUDE_DIRS)
   find_library(JACK_LIBRARY
     NAMES
       jack
+      libjack64 # Name used in the windows distribution.
+      jack64    # Name used in the windows distribution.
     PATHS
+      $ENV{JACK_ROOT}/lib
       ${_JACK_LIBDIR}
       /usr/lib
       /usr/local/lib

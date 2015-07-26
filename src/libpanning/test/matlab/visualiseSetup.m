@@ -4,10 +4,16 @@
 
 % Example script to visualise VBAP triangulations.
 
+if false % Whether to read from the text config format (true) or the new
+% XML-based configuration format.
 % configFile = '../../../../config/isvr/22.1_audiolab.txt';
 configFile = '../../../../config/bbc/bs2051-9+10+3-speakers-s3a.txt';
 
 [spkPos, triplets, isInfinite, is2D, channelIndices] = readArrayConfigTxt( configFile );
+else
+configFileXml = '../../../../config/isvr/22.1_audiolab.xml';
+[spkPos, triplets, isInfinite, is2D, channelIndices] = readArrayConfigXml( configFileXml );
+end
 
 % The current file format allows unassigned triplets (all indices -1) as a
 % quick way to comment or alternate between tringulations.

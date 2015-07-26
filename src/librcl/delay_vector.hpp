@@ -3,14 +3,20 @@
 #ifndef VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 #define VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 
+#define USE_CIRCULAR_BUFFER
+
 #include <libril/audio_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
 
-#include <libefl/aligned_array.hpp>
-#include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
+
+#ifdef USE_CIRCULAR_BUFFER
+#include <librbbl/circular_buffer.hpp>
+#else
+#include <libefl/basic_matrix.hpp>
+#endif
 
 #include <cstddef> // for std::size_t
 
@@ -42,7 +48,8 @@ public:
   enum class InterpolationType
   {
     NearestSample, /**< Round the delay value to the next integer sample value (zero order interpolation) */
-    Linear         /**< Perform linear interpolation */
+    Linear,        /**< Perform linear interpolation */
+    CubicLagrange  /**< Apply 3rd-order Lagrange interpolation */
   };
 
   /**
@@ -62,6 +69,7 @@ public:
    * immediate application of the new settings.
    * @param maximumDelaySeconds The maximal delay value supported by this
    * object (in seconds)
+   * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
    * @param initialDelaySeconds The initial delay value for all
    * channels (in seconds, default: 0.0)
    * @param initialGainLinear The initial delay value for all
@@ -82,6 +90,7 @@ public:
   * immediate application of the new delay/gain values.
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
+  * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
   * @param initialDelaysSeconds The delays for all channels in
   * seconds. The number of elements of this vector must match the channel number of this object.
   * @param initialGainsLinear The initial gain values for all
@@ -209,7 +218,9 @@ private:
    */
   std::size_t mNumberOfChannels;
 
-
+#ifdef USE_CIRCULAR_BUFFER
+  std::unique_ptr<rbbl::CircularBuffer<SampleType> > mRingBuffer;
+#else
   /**
    * The ring buffer.
    */
@@ -225,6 +236,8 @@ private:
   * The total length of the ring buffer.
   */
   std::size_t mRingbufferLength;
+#endif
+
   /**
   * The current gain value.
   */
