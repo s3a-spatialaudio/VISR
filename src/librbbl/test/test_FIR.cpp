@@ -56,10 +56,10 @@ namespace test
                 std::generate( outPtrs.begin(), outPtrs.end(), [&] { return outMatrix.row(idx++); } );
                 int i;
                 
-                boost::filesystem::path const decoderDir(CMAKE_CURRENT_SOURCE_DIR);
+                boost::filesystem::path const baseDir(CMAKE_CURRENT_SOURCE_DIR);
                 
-                boost::filesystem::path bfile = decoderDir / boost::filesystem::path("fir/quasiAllpassFIR_f32_n63.txt");
-//                boost::filesystem::path bfile = decoderDir / boost::filesystem::path("FIR/test_f2_n3.txt");
+                boost::filesystem::path const bfile = baseDir / boost::filesystem::path("fir/quasiAllpassFIR_f32_n63.txt");
+//                boost::filesystem::path const bfile = baseDir / boost::filesystem::path("FIR/test_f2_n3.txt");
                 
                 FILE *file = fopen(bfile.string().c_str(),"r");
                 BOOST_CHECK( file != nullptr );
