@@ -30,12 +30,36 @@ endif()
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 # Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
+# INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
+
+#############################################################
+# Create a system string.
+SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
+IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
+  SET( VISR_SYSTEM_NAME MacOS )
+ENDIF( VISR_SYSTEM_NAME MATCHES "Darwin" )
+
+SET( VISR_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} )
+IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
+  SET( VISR_SYSTEM_PROCESSOR x86_64 )
+ENDIF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
+STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME )
+# FOr use as a C/C++ preprocessor definition, we must not use hyphens.
+STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_MACRO )
+
+
+# MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
+# MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
+# MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
+
+ADD_DEFINITIONS("-DVISR_SYSTEM_PROCESSOR_${VISR_SYSTEM_PROCESSOR}")
+ADD_DEFINITIONS("-DVISR_SYSTEM_NAME_${VISR_SYSTEM_NAME}")
+ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 
 ############################################################
 # Support for Building Matlab externals
@@ -56,8 +80,7 @@ ENDIF( BUILD_MATLAB_EXTERNALS )
 IF( WIN32 OR APPLE )
   OPTION( BUILD_MAX_MSP_EXTERNALS "Build externals for MAX/MSP" OFF )
   IF( BUILD_MAX_MSP_EXTERNALS )
-#    FIND_PACKAGE( MaxSDK REQUIRED HINTS ENV MAX_SDK_ROOT)
-     SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ENV{MAX_SDK_ROOT} )
+    SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{MAX_SDK_ROOT} )
     FIND_PACKAGE( MaxSDK REQUIRED)
     MESSAGE( STATUS "MAX SDK found: " ${MAXSDK_MAINPATH} )
   ENDIF(BUILD_MAX_MSP_EXTERNALS)
@@ -81,7 +104,9 @@ FIND_PACKAGE(Threads REQUIRED)
 IF( WIN32 ) # This includes 64-bit platforms!
   # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
   # call instead of setting it globally.
-  SET( CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SYSTEM_PREFIX_PATH} ${PROJECT_SOURCE_DIR}/3rd/portaudio )
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
+ 
 ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio )
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
@@ -89,8 +114,51 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 ## Jack Audio Connection Kit (JACK)
 OPTION( BUILD_USE_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
 IF( BUILD_USE_JACK )
+  # Preliminary support for testing the Jack library on Windows platforms.
+  IF( WIN32 )
+    SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{JACK_ROOT} )
+  ENDIF( WIN32 )
   FIND_PACKAGE( Jack REQUIRED)
 ENDIF( BUILD_USE_JACK )
+
+## Libsndfile
+# On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)
+IF( WIN32 ) # This includes 64-bit platforms!
+  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
+  # call instead of setting it globally.
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/sndfile) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/sndfile) )
+ENDIF( WIN32 )
+FIND_PACKAGE( SndFile REQUIRED )
+
+## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
+# This libbrary is provided by 3rd/ for all platforms, because it is no standard library (moreover, heavily tweaked to geet both float and double support)
+  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/kissfft) )
+  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/kissfft) )
+FIND_PACKAGE( KissFFT REQUIRED )
+
+## FFTW
+OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
+IF( BUILD_USE_FFTW )
+  IF( WIN32 ) # This includes 64-bit platforms.
+    LIST( APPEND CMAKE_PREFIX_PATH $ENV{FFTW_ROOT} )
+  ENDIF( WIN32 )
+  FIND_PACKAGE( FFTW REQUIRED )
+ENDIF( BUILD_USE_FFTW )
+
+# IPP
+OPTION( BUILD_USE_IPP "Use the Intel IPP for fast arithmetic functions and trasnforms. Set the environment variable IPP_ROOT accordingly." OFF )
+IF( BUILD_USE_IPP )
+  # Use the variable IPP_ROOT to point to the base directory of the library.
+  FIND_PACKAGE( IPP REQUIRED )
+ENDIF( BUILD_USE_IPP )
+
+## FFTS (Fastest Fourier Transform in the south)
+# Because this is a non-standard library, we provide it for all platforms.
+# TODO: Consider making this library optional
+LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/ffts) )
+LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/ffts) )
+FIND_PACKAGE( FFTS REQUIRED )
 
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
