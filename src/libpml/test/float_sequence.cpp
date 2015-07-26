@@ -55,33 +55,32 @@ BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringSimple )
   BOOST_CHECK_CLOSE( fs[1], 1.5f, 1e-5f );
 }
 
-#if 0
 BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRange1 )
 {
   std::string const initString( "0:3,7" );
-  FloatSequence il1( initString );
-  BOOST_CHECK( il1.size( ) == 5 );
+  FloatSequence<float> fs( initString );
+  BOOST_CHECK( fs.size( ) == 5 );
 
-  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+  BOOST_CHECK_NO_THROW( fs.at( 4 ) );
 
-  BOOST_CHECK( il1[1] == 1 );
+  BOOST_CHECK_CLOSE( fs[1], 1, std::numeric_limits<float>::epsilon() );
 }
 
 BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRangeStride )
 {
-  std::string const initString( "0:2:7,2" );
-  FloatSequence il1( initString );
-  BOOST_CHECK( il1.size( ) == 5 );
+  std::string const initString( "0.0:2:7.0,2.1375" );
+  FloatSequence<float> fs( initString );
+  BOOST_CHECK( fs.size( ) == 5 );
 
-  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+  BOOST_CHECK_NO_THROW( fs.at( 4 ) );
 
-  BOOST_CHECK( il1[3] == 6 );
+  BOOST_CHECK_CLOSE( fs[3], 6.0f, std::numeric_limits<float>::epsilon() );
 }
 
 BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRangeStrideEmpty )
 {
-  std::string const initString( "5:3:4" );
-  FloatSequence il1( initString );
+  std::string const initString( "5.27:-0.12:8.3" );
+  FloatSequence<float> il1( initString );
   BOOST_CHECK( il1.size( ) == 0 );
 }
 
@@ -89,26 +88,25 @@ BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRangeStrideEmpty )
 BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRangeStrideReversed )
 {
   std::string const initString( "2,7:-2:0" );
-  FloatSequence il1( initString );
-  BOOST_CHECK( il1.size( ) == 5 );
+  FloatSequence<float> fs( initString );
+  BOOST_CHECK( fs.size( ) == 5 );
 
-  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+  BOOST_CHECK_NO_THROW( fs.at( 4 ) );
 
-  BOOST_CHECK( il1[2] == 5 );
+  BOOST_CHECK( fs[2] == 5 );
 }
 
 
 BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringWeirdWhiteSpace )
 {
-  std::string const initString( "    7 :    -2    : 0   ,   2         " );
-  FloatSequence il1( initString );
-  BOOST_CHECK( il1.size( ) == 5 );
+  std::string const initString( "    7 :    -2    : 0   ,   2.13527         " );
+  FloatSequence<float> fs( initString );
+  BOOST_CHECK( fs.size( ) == 5 );
 
-  BOOST_CHECK_NO_THROW( il1.at( 4 ) );
+  BOOST_CHECK_NO_THROW( fs.at( 4 ) );
 
-  BOOST_CHECK( il1[1] == 5 );
+  BOOST_CHECK( fs[1] == 5 );
 }
-#endif
 
 } // namespace test
 } // namespace pml

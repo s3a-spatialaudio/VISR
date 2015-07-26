@@ -49,7 +49,7 @@ FloatSequence<ElementType>::FloatSequence( std::string const & val )
   public:
     void push( ElementType val )
     {
-      mContents.push_back( val );
+      mStack.push_back( val );
     }
 
     void finish()
