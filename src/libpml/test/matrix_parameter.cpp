@@ -19,7 +19,7 @@
 
 namespace visr
 {
-namespace rbbl
+namespace pml
 {
 namespace test
 {
@@ -95,5 +95,5 @@ BOOST_AUTO_TEST_CASE( readFiltersFromStrings )
 }
 
 } // namespace test
-} // namespace rbbl
+} // namespace pml
 } // namespace visr
