@@ -2,6 +2,10 @@
 
 #include "signal_flow.hpp"
 
+#include <libpanning/LoudspeakerArray.h>
+
+#include <boost/algorithm/string.hpp> // case-insensitive string compare
+
 #include <algorithm>
 #include <vector>
 
@@ -69,11 +73,29 @@ SignalFlow::process()
 /*virtual*/ void
 SignalFlow::setup()
 {
+  panning::LoudspeakerArray loudspeakerArray;
+  // As long as we have two different config formats, we decide based on the file extention.
+  std::string::size_type lastDotIdx = mConfigFileName.rfind( '.' );
+  std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : mConfigFileName.substr( lastDotIdx + 1 );
+  if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
+  {
+    loudspeakerArray.loadXml( mConfigFileName );
+  }
+  else
+  {
+    FILE* hFile = fopen( mConfigFileName.c_str( ), "r" );
+    if( loudspeakerArray.load( hFile ) < 0 )
+    {
+      throw std::invalid_argument( "Error while parsing the loudspeaker array configuration file \""
+        + mConfigFileName + "\"." );
+    }
+  }
+
   // Initialise and configure audio components
 
   mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous );
   mSceneDecoder.setup();
-  mGainCalculator.setup( cNumberOfInputs, cNumberOfOutputs, mConfigFileName );
+  mGainCalculator.setup( cNumberOfInputs, loudspeakerArray );
   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
 
   mSceneEncoder.setup();
