@@ -22,6 +22,7 @@
 
 #include <libsignalflows/baseline_renderer.hpp>
 
+#include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
 
 #include <algorithm>
@@ -65,31 +66,37 @@ int main( int argc, char const * const * argv )
         break; // carry on
     }
 
-    boost::filesystem::path const arrayConfigFile( cmdLineOptions.getOption<std::string>( "array-config" ) );
-    if( !exists( arrayConfigFile ) )
+    boost::filesystem::path const arrayConfigPath( cmdLineOptions.getOption<std::string>( "array-config" ) );
+    if( !exists( arrayConfigPath ) )
     {
       std::cerr << "The specified loudspeaker array configuration file \""
-          << arrayConfigFile.string( ).c_str( ) << "\" does not exist." << std::endl;
+          << arrayConfigPath.string() << "\" does not exist." << std::endl;
       return EXIT_FAILURE;
     }
-
-    // Create a loudspeaker array to retrieve the input and output channel numbers and to retrieve the channel routing.
-    FILE * arrayConfigHandle = fopen( arrayConfigFile.string().c_str(), "r" );
-    if( not arrayConfigHandle )
-    {
-      std::cerr << "The specified loudspeaker array configuration file \""
-          << arrayConfigFile.string( ).c_str( ) << "\" could not be opened." << std::endl;
-    }
+    std::string const arrayConfigFileName = arrayConfigPath.string();
     panning::LoudspeakerArray loudspeakerArray;
-    if( loudspeakerArray.load( arrayConfigHandle ) != 0 )
+    // As long as we have two different config formats, we decide based on the file extention.
+    std::string::size_type lastDotIdx = arrayConfigFileName.rfind( '.' );
+    std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : arrayConfigFileName.substr( lastDotIdx + 1 );
+    if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
     {
-      std::cerr << "Error while parsing the specified loudspeaker array configuration file \""
-          << arrayConfigFile.string( ).c_str( ) << "\"." << std::endl;
+      loudspeakerArray.loadXml( arrayConfigFileName );
     }
-    const std::size_t numberOfLoudspeakers = static_cast<std::size_t>(loudspeakerArray.getNumSpeakers());
+    else
+    {
+      FILE* hFile = fopen( arrayConfigFileName.c_str( ), "r" );
+      if( loudspeakerArray.load( hFile ) < 0 )
+      {
+        throw std::invalid_argument( "Error while parsing the loudspeaker array configuration file \""
+          + arrayConfigFileName + "\"." );
+      }
+    }
+
+    const std::size_t numberOfLoudspeakers = loudspeakerArray.getNumRegularSpeakers();
+    const std::size_t numberOfSpeakersAndSubs = numberOfLoudspeakers + loudspeakerArray.getNumSubwoofers( );
 
     const std::size_t numberOfOutputChannels
-    = cmdLineOptions.getDefaultedOption<std::size_t>( "output-channels", numberOfLoudspeakers );
+    = cmdLineOptions.getDefaultedOption<std::size_t>( "output-channels", numberOfSpeakersAndSubs );
 
     const std::size_t numberOfObjects = cmdLineOptions.getOption<std::size_t>( "input-channels" );
     const std::size_t periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
@@ -101,6 +108,7 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
+#if 0
     pml::SignalRoutingParameter outputRouting;
     bool const hasOutputRoutingOption = cmdLineOptions.hasOption( "output-routing");
     if( hasOutputRoutingOption )
@@ -154,6 +162,7 @@ int main( int argc, char const * const * argv )
       }
     }
     std::string const & outputGainConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "output-gain", std::string( ) );
+#endif
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;
@@ -192,15 +201,14 @@ int main( int argc, char const * const * argv )
       efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
     }
 
-    signalflows::BaselineRenderer flow( numberOfObjects, numberOfLoudspeakers, numberOfOutputChannels,
-                     outputRouting,
-                     cInterpolationLength,
-                     arrayConfigFile.string().c_str(),
-                     diffusionCoeffs,
-                     trackingConfiguration,
-                     outputGainConfiguration,
-                     sceneReceiverPort,
-                     periodSize, samplingRate );
+    signalflows::BaselineRenderer flow( loudspeakerArray,
+                                        numberOfObjects,
+                                        numberOfOutputChannels,
+                                        cInterpolationLength,
+                                        diffusionCoeffs,
+                                        trackingConfiguration,
+                                        sceneReceiverPort,
+                                        periodSize, samplingRate );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );

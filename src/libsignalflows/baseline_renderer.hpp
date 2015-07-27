@@ -13,7 +13,6 @@
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
-#include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
@@ -42,17 +41,14 @@ public:
    *
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    */
-  explicit BaselineRenderer( std::size_t numberOfInputs,
-                       std::size_t numberOfLoudspeakers,
-                       std::size_t numberOfOutputs,
-                       pml::SignalRoutingParameter const & outputRouting,
-                       std::size_t interpolationPeriod,
-                       std::string const & configFile,
-                       efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
-                       std::string const & trackingConfiguration,
-                       std::string const & outputGainConfiguration,
-                       std::size_t sceneReceiverPort,
-                       std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+  explicit BaselineRenderer( panning::LoudspeakerArray const & loudspeakerConfiguration,
+                             std::size_t numberOfInputs,
+                             std::size_t numberOfOutputs,
+                             std::size_t interpolationPeriod,
+                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                             std::string const & trackingConfiguration,
+                             std::size_t sceneReceiverPort,
+                             std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
   ~BaselineRenderer();
 
@@ -65,8 +61,6 @@ private:
   rcl::UdpReceiver mSceneReceiver;
   
   rcl::SceneDecoder mSceneDecoder;
-
-  rcl::SignalRouting mOutputRouting;
 
   rcl::DelayVector mOutputAdjustment;
 

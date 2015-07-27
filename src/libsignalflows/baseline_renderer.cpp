@@ -3,11 +3,14 @@
 #include "baseline_renderer.hpp"
 
 #include <libpanning/XYZ.h>
+#include <libpanning/LoudspeakerArray.h>
+
 #include <libpml/array_configuration.hpp>
 
 #include <boost/filesystem.hpp>
 
 #include <algorithm>
+#include <cstdio>
 #include <vector>
 
 namespace visr
@@ -31,23 +34,19 @@ namespace
   }
 }
 
-BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
-  std::size_t numberOfLoudspeakers,
-  std::size_t numberOfOutputs,
-  pml::SignalRoutingParameter const & outputRouting,
-  std::size_t interpolationPeriod,
-  std::string const & configFile,
-  efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
-  std::string const & trackingConfiguration,
-  std::string const & outputGainConfiguration,
-  std::size_t sceneReceiverPort,
-  std::size_t period,
-  ril::SamplingFrequencyType samplingFrequency )
+BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeakerConfiguration,
+                                    std::size_t numberOfInputs,
+                                    std::size_t numberOfOutputs,
+                                    std::size_t interpolationPeriod,
+                                    efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                                    std::string const & trackingConfiguration,
+                                    std::size_t sceneReceiverPort,
+                                    std::size_t period,
+                                    ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
  , mDiffusionFilters( diffusionFilters )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
- , mOutputRouting( *this, "OutputSignalRouting" )
  , mOutputAdjustment( *this, "OutputAdjustment" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
@@ -57,7 +56,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
  , mDiffuseGains( ril::cVectorAlignmentSamples )
 {
-  // Initialise and configure audio components
+  std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
 
   mTrackingEnabled = not trackingConfiguration.empty( );
   if( mTrackingEnabled )
@@ -71,7 +70,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     // for the very moment, do not parse any options, but use hard-coded option values.
     ril::SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
     unsigned short cTrackingUdpPort = 8888;
-    mListenerCompensation->setup( numberOfLoudspeakers, configFile );
+    mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mSpeakerCompensation->setup( numberOfLoudspeakers, period, cMaxDelay,
       rcl::DelayVector::InterpolationType::NearestSample,
@@ -85,7 +84,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
 
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup( );
-  mGainCalculator.setup( numberOfInputs, numberOfLoudspeakers, configFile );
+  mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
   mMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
 
   mDiffusionGainCalculator.setup( numberOfInputs );
@@ -93,15 +92,13 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
 
-  mOutputRouting.setup( numberOfLoudspeakers, numberOfOutputs, outputRouting );
-
   efl::BasicVector<ril::SampleType> outputGains( numberOfOutputs, ril::cVectorAlignmentSamples );
   efl::BasicVector<ril::SampleType> outputDelays( numberOfOutputs, ril::cVectorAlignmentSamples );
   outputGains.fillValue( static_cast<ril::SampleType>(1.0) );
   outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
 
   std::vector<std::size_t> subwooferChannelIndices;
-
+#if 0
   if( not outputGainConfiguration.empty( ) )
   {
     boost::filesystem::path const outputConfigPath( outputGainConfiguration );
@@ -130,6 +127,7 @@ BaselineRenderer::BaselineRenderer( std::size_t numberOfInputs,
     }
     subwooferChannelIndices = outputConfig.subwooferIndices();
   }
+#endif
 
   mOutputAdjustment.setup( numberOfOutputs, period, 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
     outputDelays, outputGains );
@@ -273,7 +271,6 @@ BaselineRenderer::process()
     mSpeakerCompensation->setDelayAndGain( mCompensationDelays, mCompensationGains );
     mSpeakerCompensation->process( );
   }
-  mOutputRouting.process();
   mOutputAdjustment.process();
 }
 
