@@ -13,6 +13,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp> // case-insensitive string compare
 
 #include <iostream>
 #include <cstdio>
@@ -46,8 +47,6 @@ public:
 
 BOOST_AUTO_TEST_CASE(testKinectReceiver)
 {
-  // TODO: Implement me                          
-                          
 
   Flow flow( 256, 48000 );
   
@@ -63,6 +62,24 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   boost::filesystem::path const basePath(CMAKE_SOURCE_DIR);
   boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("config/isvr/stereo_audiolab.txt");
   BOOST_CHECK_MESSAGE( exists(arrayPath), "The loudspeaker array file does not exist.");
+  std::string const arrayConfigFileName = arrayPath.string();
+  panning::LoudspeakerArray loudspeakerArray;
+  // As long as we have two different config formats, we decide based on the file extention.
+  std::string::size_type lastDotIdx = arrayConfigFileName.rfind( '.' );
+  std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : arrayConfigFileName.substr( lastDotIdx + 1 );
+  if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
+  {
+    loudspeakerArray.loadXml( arrayConfigFileName );
+  }
+  else
+  {
+    FILE* hFile = fopen( arrayConfigFileName.c_str( ), "r" );
+    if( loudspeakerArray.load( hFile ) < 0 )
+    {
+      throw std::invalid_argument( "Error while parsing the loudspeaker array configuration file \""
+        + arrayConfigFileName + "\"." );
+    }
+  }
 
   pml::ListenerPosition pos;
   efl::BasicVector<rcl::ListenerCompensation::SampleType> gains(numSpeakers, ril::cVectorAlignmentSamples );
@@ -71,7 +88,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
 
   kinect.setup( kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous ); //setup to listen from th, how to set up mode?
   decoder.setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
-  listenerComp.setup( numSpeakers, arrayPath.string() );
+  listenerComp.setup( loudspeakerArray );
 
   while( true )
   {

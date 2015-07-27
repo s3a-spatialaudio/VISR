@@ -53,7 +53,7 @@ public:
   ListenerCompensation(ListenerCompensation const &) = delete;
 
 
-  void setup(std::size_t numberOfLoudspeakers, std::string const & arrayConfig );
+  void setup( panning::LoudspeakerArray const & arrayConfig );
 
   /**
    * The process function.

@@ -72,7 +72,7 @@ public:
    * @param numberOfLoudspeakers
    * @param arrayConfigFile
    */ 
-  void setup( std::size_t numberOfObjects, std::size_t numberOfLoudspeakers, std::string const & arrayConfigFile );
+  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig );
 
   /**
    * The process function. 

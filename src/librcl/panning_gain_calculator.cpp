@@ -44,29 +44,12 @@ PanningGainCalculator::~PanningGainCalculator()
 {
 }
 
-void PanningGainCalculator::setup( std::size_t numberOfObjects, std::size_t numberOfLoudspeakers, std::string const & arrayConfigFile )
+void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig )
 {
+  mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
-  mNumberOfLoudspeakers = numberOfLoudspeakers;
+  mNumberOfLoudspeakers = mSpeakerArray.getNumRegularSpeakers();
   mSourcePositions.resize( numberOfObjects );
-  boost::filesystem::path const filePath = absolute( boost::filesystem::path(arrayConfigFile) );
-
-  FILE* rawHandle = fopen( filePath.string().c_str(), "r" );
-  if( rawHandle == 0 )
-  {
-    throw std::invalid_argument( std::string("PanningGainCalculator::setup(): Cannot open loudspeaker configuration file: ") + strerror(errno) + "." );
-  }
-  if( mSpeakerArray.load( rawHandle ) != 0 )
-  {
-    fclose( rawHandle );
-    throw std::invalid_argument( "PanningGainCalculator::setup(): Error parsing loudspeaker configuration file." );
-  }
-  fclose( rawHandle );
-
-  if( mNumberOfLoudspeakers != static_cast<std::size_t>(mSpeakerArray.getNumSpeakers() ) )
-  {
-    throw std::invalid_argument( "PanningGainCalculator::setup() The loudspeaker configuration file does not match to the given number of loudspeaker channels." );
-  }
 
   mVbapCalculator.setLoudspeakerArray( &mSpeakerArray );
   mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );

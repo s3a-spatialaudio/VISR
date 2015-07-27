@@ -45,29 +45,10 @@ ListenerCompensation::ListenerCompensation(ril::AudioSignalFlow& container, char
 {
 }
 
-void ListenerCompensation::setup(std::size_t numberOfLoudspeakers, std::string const & arrayConfig)
+void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig )
 {
-  mNumberOfLoudspeakers = numberOfLoudspeakers;
-
-  boost::filesystem::path const filePath = absolute(boost::filesystem::path(arrayConfig));
-
-  FILE* rawHandle = fopen(filePath.string().c_str(), "r");
-  if (rawHandle == 0)
-  {
-    throw std::invalid_argument(std::string("ListenerCompensation::setup(): Cannot open loudspeaker configuration file: ") + strerror(errno) + ".");
-  }
-  if (m_array.load(rawHandle) != 0)
-  {
-    fclose(rawHandle);
-    throw std::invalid_argument("ListenerCompensation::setup(): Error parsing loudspeaker configuration file.");
-  }
-  fclose(rawHandle);
-
-  if (mNumberOfLoudspeakers != static_cast<std::size_t>(m_array.getNumSpeakers()))
-  {
-    throw std::invalid_argument("ListenerCompensation::setup() The loudspeaker configuration file does not match to the given number of loudspeaker channels.");
-  }
-
+  m_array = arrayConfig;
+  mNumberOfLoudspeakers = m_array.getNumRegularSpeakers();
 }
 
 void ListenerCompensation::process(pml::ListenerPosition const & pos,
