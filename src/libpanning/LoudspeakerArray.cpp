@@ -55,16 +55,19 @@ LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & r
   m_channel = rhs.m_channel;
   m_subwooferChannels = rhs.m_subwooferChannels;
   m_subwooferGains.resize( rhs.m_subwooferGains.numberOfRows(), rhs.m_subwooferGains.numberOfColumns() );
-  m_gainAdjustment = rhs.m_gainAdjustment;
-  m_delayAdjustment = rhs.m_delayAdjustment;
+  m_gainAdjustment.assign( rhs.m_gainAdjustment );
+  m_delayAdjustment.assign( rhs.m_delayAdjustment );
   return *this;
 }
 
 int LoudspeakerArray::load( FILE *file )
 {
+  // These features are not supported by the text format.
   m_subwooferChannels.clear();
   m_subwooferGains.resize( 0, 0 );
-
+  m_gainAdjustment.resize( 0 );
+  m_delayAdjustment.resize( 0 );
+  
   int n, i, chan;
   char c;
   Afloat x, y, z;
@@ -278,7 +281,6 @@ void parseGainDelayAdjustments( boost::property_tree::ptree const & node, Afloat
 void LoudspeakerArray::loadXml( std::string const & filePath )
 {
   using namespace boost::property_tree;
-
   boost::filesystem::path path( filePath );
   if( not exists( path ) or is_directory( path ) )
   {
@@ -327,10 +329,10 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   std::size_t const numSubwoofers = std::distance( subwooferNodes.first, subwooferNodes.second );
 
   m_position.resize( numTotalSpeakers );
-  m_channel.resize( numTotalSpeakers );
+  m_channel.resize( numRegularSpeakers );
 
-  m_gainAdjustment.resize( numRegularSpeakers + numSubwoofers, 1.0f );
-  m_delayAdjustment.resize( numRegularSpeakers + numSubwoofers, 0.0f );
+  m_gainAdjustment.resize( numRegularSpeakers + numSubwoofers);
+  m_delayAdjustment.resize( numRegularSpeakers + numSubwoofers );
 
   const ChannelIndex cInvalidChannel = std::numeric_limits<ChannelIndex>::max();
   std::fill( m_channel.begin(), m_channel.end(), cInvalidChannel ); // assign special value to check afterwards if every speaker index has been assigned.
@@ -373,11 +375,6 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
       throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the number of loudspeakers." );
     }
     int idZeroOffset = id - 1;
-    if( m_channel[idZeroOffset] != cInvalidChannel )
-    {
-      throw std::invalid_argument( "LoudspeakerArray::loadXml(): Each speaker id must be used exactly once." );
-    }
-    m_channel[idZeroOffset] = - 1; // set channel id to the reserved value for virtual loudspeakers.
     m_position[idZeroOffset] = parseCoordNode( childTree, m_isInfinite );
   }
   // The checks above (all speaker indices are between 1 and numTotalSpeakers && the indices are unique) are 
@@ -421,7 +418,7 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   for( ptree::const_assoc_iterator subIt( subwooferNodes.first ); subIt != subwooferNodes.second; ++subIt, ++subIdx )
   {
     ptree const subNode = subIt->second;
-    ChannelIndex const subChannel = subNode.get<int>( "<xmlattr>.channel" );
+    ChannelIndex const subChannel = subNode.get<int>( "<xmlattr>.channel" ) - 1;
     m_subwooferChannels[subIdx] = subChannel;
 
     std::string const speakerIndicesStr = subNode.get<std::string>( "<xmlattr>.assignedLoudspeakers" );
