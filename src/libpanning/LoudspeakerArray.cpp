@@ -46,6 +46,20 @@ LoudspeakerArray::LoudspeakerArray()
 {
 }
 
+LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & rhs)
+{
+  m_is2D = rhs.m_is2D;
+  m_isInfinite = rhs.m_isInfinite;
+  m_position = rhs.m_position;
+  m_triplet = rhs.m_triplet;
+  m_channel = rhs.m_channel;
+  m_subwooferChannels = rhs.m_subwooferChannels;
+  m_subwooferGains.resize( rhs.m_subwooferGains.numberOfRows(), rhs.m_subwooferGains.numberOfColumns() );
+  m_gainAdjustment = rhs.m_gainAdjustment;
+  m_delayAdjustment = rhs.m_delayAdjustment;
+  return *this;
+}
+
 int LoudspeakerArray::load( FILE *file )
 {
   m_subwooferChannels.clear();
@@ -226,6 +240,38 @@ XYZ parseCoordNode( boost::property_tree::ptree const & node, bool isInfinite )
   return pos;
 }
 
+/**
+ * Local function to parse the gain and delay adjustment out of either a loudspeaker or a subwoofer node.
+ * @param node The XML element containing the attributes
+ * @param [out] gain The parsed gain value, linear scale.
+ * @param [out] delay The parsed delay value, in seconds.
+ * @throw std::invalid_argument if the parsing fails.
+ */
+void parseGainDelayAdjustments( boost::property_tree::ptree const & node, Afloat & gain, Afloat & delay )
+{
+  boost::optional<Afloat> const gainLinear = node.get_optional<Afloat>( "<xmlattr>.gain" );
+  boost::optional<Afloat> const gainDB = node.get_optional<Afloat>( "<xmlattr>.gainDB" );
+  if( gainLinear and gainDB )
+  {
+    throw std::invalid_argument( "ArrayConfiguration::loadXml(): The \"gain\" or \"gainDB\" attributes are mutually exclusive." );
+  }
+  else if( gainLinear )
+  {
+    gain = *gainLinear;
+    throw std::invalid_argument( "ArrayConfiguration::loadXml(): Each speaker node must contain exactly one \"gain\" or \"gainDB\" attribute." );
+  }
+  else if( gainDB )
+  {
+    gain = std::pow( 10.0f, *gainDB / 20.0f );
+  }
+  else
+  {
+    gain = 1.0f;
+  }
+  boost::optional<Afloat> const delayOpt = node.get_optional<Afloat>( "<xmlattr>.delay" );
+  delay  = delayOpt ? *delayOpt : 0.0f;
+}
+
 } // unnamed namespace
 
 
@@ -271,15 +317,21 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   boost::optional<bool> const infinity = treeRoot.get_optional<bool>( "<xmlattr>.infinite" );
   m_isInfinite = infinity ? *infinity : false;
 
-  const auto speakerNodes = treeRoot.equal_range( "loudspeaker" );
-  const auto virtualSpeakerNodes = treeRoot.equal_range( "virtualspeaker" );
+  auto const speakerNodes = treeRoot.equal_range( "loudspeaker" );
+  auto const virtualSpeakerNodes = treeRoot.equal_range( "virtualspeaker" );
+  auto const subwooferNodes = treeRoot.equal_range( "subwoofer" );
 
   std::size_t const numRegularSpeakers = std::distance( speakerNodes.first, speakerNodes.second );
   std::size_t const numVirtualSpeakers = std::distance( virtualSpeakerNodes.first, virtualSpeakerNodes.second );
   std::size_t const numTotalSpeakers = numRegularSpeakers + numVirtualSpeakers;
+  std::size_t const numSubwoofers = std::distance( subwooferNodes.first, subwooferNodes.second );
 
   m_position.resize( numTotalSpeakers );
   m_channel.resize( numTotalSpeakers );
+
+  m_gainAdjustment.resize( numRegularSpeakers + numSubwoofers, 1.0f );
+  m_delayAdjustment.resize( numRegularSpeakers + numSubwoofers, 0.0f );
+
   const ChannelIndex cInvalidChannel = std::numeric_limits<ChannelIndex>::max();
   std::fill( m_channel.begin(), m_channel.end(), cInvalidChannel ); // assign special value to check afterwards if every speaker index has been assigned.
 
@@ -308,8 +360,10 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     }
     m_channel[idZeroOffset] = chIdx - 1;
     m_position[idZeroOffset] = parseCoordNode( childTree, m_isInfinite );
+
+    parseGainDelayAdjustments( childTree, m_gainAdjustment[idZeroOffset], m_delayAdjustment[idZeroOffset] );
   }
-  // Same for the virtual speaker nodes, except there is no 'channel' field.
+  // Same for the virtual speaker nodes, except there is no 'channel' field and no gain/delay adjustments.
   for( ptree::const_assoc_iterator treeIt( virtualSpeakerNodes.first ); treeIt != virtualSpeakerNodes.second; ++treeIt )
   {
     ptree const childTree = treeIt->second;
@@ -361,8 +415,6 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   assert( m_triplet.size() == numTriplets );
 
   // Subwoofer configuration
-  auto const  subwooferNodes = treeRoot.equal_range( "subwoofer" );
-  std::size_t const numSubwoofers = std::distance( subwooferNodes.first, subwooferNodes.second );
   m_subwooferChannels.resize( numSubwoofers );
   m_subwooferGains.resize( numSubwoofers, numRegularSpeakers );
   std::size_t subIdx( 0 );
@@ -399,6 +451,8 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
         m_subwooferGains( subIdx, speakerIndices[entryIdx] - 1 ) = 1.0f;
       }
     }
+    parseGainDelayAdjustments( subNode, m_gainAdjustment[numRegularSpeakers+subIdx],
+      m_delayAdjustment[numRegularSpeakers + subIdx] );
   }
 }
 
