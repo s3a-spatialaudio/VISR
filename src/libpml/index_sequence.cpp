@@ -65,7 +65,7 @@ IndexSequence::IndexSequence( std::string const & val )
           throw("IndexSequence: The start and end values of a range must be greater or equal than zero.");
         }
         IndexType val = static_cast<IndexType>(mStack[0]);
-        while( val <= end )
+        while( val <= static_cast<IndexType>(end) )
         {
           mContents.push_back( val++ );
         }
