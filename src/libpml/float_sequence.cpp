@@ -66,9 +66,8 @@ FloatSequence<ElementType>::FloatSequence( std::string const & val )
       }
       case 2:
       {
-        ElementType const start = mStack[0];
-        ElementType const end = mStack[1];
         ElementType val = mStack[0];
+        ElementType const end = mStack[1];
         while( val <= end )
         {
           mContents.push_back( val++ );
@@ -115,8 +114,10 @@ FloatSequence<ElementType>::FloatSequence( std::string const & val )
   };
   ParseState state;
 
-  auto atom = ((qi::real_parser<ElementType>()[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_( ":" ))[boost::bind( &ParseState::finish, &state )] % (qi::char_( ',' )));
-
+  // TODO: find a workaround around this likely GCC compiler bug which
+  // prevents us from using the completely type-correct version.
+  // auto const atom = ((qi::real_parser<typename ElementType>()[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_( ":" ))[boost::bind( &ParseState::finish, &state )] % (qi::char_( ',' )));
+  auto const atom = ((qi::float_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_( ":" ))[boost::bind( &ParseState::finish, &state )] % (qi::char_( ',' )));
   bool const parseRet = qi::phrase_parse( first, last, atom,
     qi::ascii::space );
 
