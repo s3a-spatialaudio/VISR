@@ -67,7 +67,7 @@ int main(int argc, const char * argv[])
   }
   catch( std::invalid_argument const & e )
   {
-    std::cerr << "Error while loading XML array configuration." << std::endl;
+    std::cerr << "Error while loading XML array configuration: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 
