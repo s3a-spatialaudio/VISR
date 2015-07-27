@@ -3,7 +3,7 @@
 % a.franck@soton.ac.uk
 
 % Example script for writing a array configuration file including the
-% subwoofer.
+% subwoofers and gain/delay adjustments.
 
 
 %% First, load an existing pure array configuration
@@ -17,6 +17,7 @@ else
 configFileXml = '../../../../config/isvr/22.1_audiolab.xml';
 [spkPos, triplets, isInfinite, is2D, channelIndices] = readArrayConfigXml( configFileXml );
 end
+
 
 %% Provide a subwoofer configuration
 numSubs = 2;
@@ -47,9 +48,23 @@ subwooferConfig = struct( 'channels', subOutputChannels,...
     'assignedLoudspeakers', {subSpeakerIndices},...
     'loudspeakerWeights', {subSpeakerGains} );
 
+%% Configure the channel adjustments
+numTotalChannels = max(max(channelIndices), max(subOutputChannels));
+
+gainAdjustDB = zeros(1,numTotalChannels );
+delayAdjust = zeros(1,numTotalChannels );
+
+adjustmentFile = xlsread( '../../../../config/isvr/audiolab_gain_delay.xls');
+validCols = isfinite(adjustmentFile(:,1)) & (adjustmentFile(:,1) >= 1) & (adjustmentFile(:,1)<=numTotalChannels);
+validChannelIdx = adjustmentFile( validCols, 1 );
+gainAdjustDB( validChannelIdx ) = adjustmentFile( validCols, 24 );
+delayAdjust( validChannelIdx ) = 1e-3*adjustmentFile( validCols, 22 ); % ms -> s
+
+% TODO: Set any adjustments to the subwoofers manually.
+
 outputFileXml = '../../../../config/isvr/22.1_audiolab_subwoofers.xml';
 
 % function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig )
 
-writeArrayConfigXml( outputFileXml, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig );
+writeArrayConfigXml( outputFileXml, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig, gainAdjustDB, delayAdjust );
 

@@ -2,13 +2,16 @@
 % University of Southampton, United Kingdom
 % a.franck@soton.ac.uk
 
-function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig )
+function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig, gainAdjust, delayAdjust )
 
 subwooferConfigPresent = (nargin >= 7);
 
+gainAdjustPresent = (nargin >= 8);
+delayAdjustPresent = (nargin >= 9);
+
 % Whether to write Cartesian or polar coordinates.
 % TODO: Consider making this a configurable option.
-useCartesian = false;
+useCartesian = true;
 
 domNode = com.mathworks.xml.XMLUtils.createDocument('panningConfiguration');
 
@@ -40,7 +43,14 @@ for spkIdx = 1:numSpeakers
     end
     spkNode.setAttribute( 'id', num2str(spkIdx) );
     if ~isVirtual
-        spkNode.setAttribute( 'channel', num2str(channelIndices(spkIdx) ));
+        chIdx = channelIndices(spkIdx);
+        spkNode.setAttribute( 'channel', num2str( chIdx ));
+        if gainAdjustPresent
+            spkNode.setAttribute( 'gainDB', num2str(gainAdjust(chIdx)) );
+        end
+        if delayAdjustPresent
+            spkNode.setAttribute( 'delay', num2str(delayAdjust(chIdx)) );
+        end
     end
     if useCartesian
         coordNode = domNode.createElement( 'cart' );
@@ -56,20 +66,6 @@ for spkIdx = 1:numSpeakers
     end
     spkNode.appendChild( coordNode );
     rootNode.appendChild( spkNode );
-end
-
-for tripletIdx = 1:numTriplets
-    % Do not save 'unused triplets' as permitted by the txt config format.
-    if any( triplets(tripletIdx) < 1 )
-       continue; 
-    end 
-    triplNode = domNode.createElement( 'triplet' );
-    triplNode.setAttribute( 'l1', num2str( triplets(tripletIdx,1) ) );
-    triplNode.setAttribute( 'l2', num2str( triplets(tripletIdx,2) ) );
-    if ~is2D % Do not save 3rd vertex for a 2D setup
-        triplNode.setAttribute( 'l3', num2str( triplets(tripletIdx,3) ) );
-    end
-    rootNode.appendChild( triplNode );
 end
 
 if subwooferConfigPresent
@@ -91,7 +87,14 @@ if subwooferConfigPresent
 
     for subIdx = 1:numSubwoofers
         subNode = domNode.createElement( 'subwoofer' );
-        subNode.setAttribute( 'channel', num2str( subChannels(subIdx)) );
+        chIdx = subChannels(subIdx);
+        subNode.setAttribute( 'channel', num2str(chIdx) );
+        if gainAdjustPresent
+            subNode.setAttribute( 'gainDB', num2str(gainAdjust(chIdx)) );
+        end
+        if delayAdjustPresent
+            subNode.setAttribute( 'delay', num2str(delayAdjust(chIdx)) );
+        end
         subNode.setAttribute( 'assignedLoudspeakers', subIndices{subIdx } );
         if ~isempty( subGains )
             % val = num2str(subGains{subIdx});
@@ -100,6 +103,20 @@ if subwooferConfigPresent
         end
         rootNode.appendChild( subNode );
     end
+end
+
+for tripletIdx = 1:numTriplets
+    % Do not save 'unused triplets' as permitted by the txt config format.
+    if any( triplets(tripletIdx) < 1 )
+       continue;
+    end
+    triplNode = domNode.createElement( 'triplet' );
+    triplNode.setAttribute( 'l1', num2str( triplets(tripletIdx,1) ) );
+    triplNode.setAttribute( 'l2', num2str( triplets(tripletIdx,2) ) );
+    if ~is2D % Do not save 3rd vertex for a 2D setup
+        triplNode.setAttribute( 'l3', num2str( triplets(tripletIdx,3) ) );
+    end
+    rootNode.appendChild( triplNode );
 end
 
 if isempty(fileName) % Use [] to suppress a file output and write to the
