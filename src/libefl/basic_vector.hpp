@@ -87,6 +87,20 @@ public:
   }
 
   /**
+   * Explicit assignment function.
+   * Resizes the vector to the size of \p rhs and copies the content.
+   * @param rhs Vector to be copied.
+   */
+  void assign( const BasicVector<ElementType> & rhs)
+  {
+    if( rhs.size() != size() )
+    {
+      resize( rhs.size() );
+    }
+    copy( rhs );
+  }
+  
+  /**
    * Set the vector elements to the zero element of the data type template parameter.
    * @throw std::runtime_error If an arithmetic error occurs.
    */
@@ -182,7 +196,7 @@ public:
   {
     return mData[idx];
   }
-
+  
   /**
    * Index access to an element of the array. This version returns
    * a non-const reference that can be used to alter the value.
@@ -237,6 +251,13 @@ private:
    */
   BasicVector( const BasicVector< ElementType>& ) = delete;
 
+  /**
+   * Disabled assignment operator to discourage inadvertent assignment which
+   * trigger memory allocation.
+   */
+  BasicVector<ElementType> const &
+  operator=( BasicVector<ElementType> const & ) = delete;
+  
   /**
    * The data structure encapsulating the aligned raw data.
    */
