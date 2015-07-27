@@ -52,11 +52,15 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
  , mMatrix( *this, "GainMatrix" )
  , mDiffusePartMatrix( *this, "DiffusePartMatrix" )
+ , mSubwooferMix( *this, "SubwooferMixer" )
+ , mNullSource( *this, "NullSource" )
  , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
  , mDiffuseGains( ril::cVectorAlignmentSamples )
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
+  std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
+  std::size_t const numberOfOutputSignals = numberOfLoudspeakers + numberOfSubwoofers;
 
   mTrackingEnabled = not trackingConfiguration.empty( );
   if( mTrackingEnabled )
@@ -92,12 +96,13 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
 
-  efl::BasicVector<ril::SampleType> outputGains( numberOfOutputs, ril::cVectorAlignmentSamples );
-  efl::BasicVector<ril::SampleType> outputDelays( numberOfOutputs, ril::cVectorAlignmentSamples );
-  outputGains.fillValue( static_cast<ril::SampleType>(1.0) );
-  outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
+  efl::BasicVector<ril::SampleType> outputGains( numberOfOutputSignals, ril::cVectorAlignmentSamples );
+  efl::BasicVector<ril::SampleType> outputDelays( numberOfOutputSignals, ril::cVectorAlignmentSamples );
+  std::vector<ril::SampleType> const & configGains = loudspeakerConfiguration.getGainAdjustment(); 
+  std::vector<ril::SampleType> const & configDelays = loudspeakerConfiguration.getDelayAdjustment();
+  
 
-  std::vector<std::size_t> subwooferChannelIndices;
+
 #if 0
   if( not outputGainConfiguration.empty( ) )
   {
@@ -132,15 +137,10 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   mOutputAdjustment.setup( numberOfOutputs, period, 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
     outputDelays, outputGains );
 
-  std::size_t const numberOfSubwoofers = subwooferChannelIndices.size();
-  mSubwooferEnabled = not subwooferChannelIndices.empty();
-  if( mSubwooferEnabled )
-  {
-    mSubwooferMix.reset( new rcl::GainMatrix( *this, "SubwooferMixer" ) );
-    // Note: Using numberOfOutputs to set the size of the subwoofer
-    // mixer input is an obvious hack.
-    mSubwooferMix->setup( numberOfOutputs, numberOfSubwoofers, 0/*interpolation steps*/, static_cast<ril::SampleType>(1.0) );
-  }
+  // Note: This assumes that the type 'Afloat' used in libpanning is
+  // identical to ril::SampleType (at the moment, both are floats).
+  efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
+  mSubwooferMix.setup( numberOfOutputs, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
 
   // TODO: Incorporate the speaker compensation chain and the output adjustment.
   // Assignment of channel buffers                    #elements               Range
@@ -262,10 +262,7 @@ BaselineRenderer::process()
   mDiffusePartMatrix.process();
   mDiffusePartDecorrelator.process();
   mDirectDiffuseMix.process();
-  if( mSubwooferEnabled )
-  {
-    mSubwooferMix->process();
-  }
+  mSubwooferMix.process();
   if( mTrackingEnabled )
   {
     mSpeakerCompensation->setDelayAndGain( mCompensationDelays, mCompensationGains );
