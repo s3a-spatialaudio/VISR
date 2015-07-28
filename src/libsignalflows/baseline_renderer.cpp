@@ -153,7 +153,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
 
   // The playback indices "do" all the signal routing to the final output channels.
   // THe initial value means the all channels that are not assigned get their signal from the NullSource component.
-  std::vector<ril::AudioPort::SignalIndexType> playbackIndices( numberOfOutputs, nullSourceOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> playbackChannels( numberOfOutputs, nullSourceOutStartIdx );
   for( std::size_t lspIdx(0); lspIdx < numberOfLoudspeakers; ++lspIdx )
   {
     panning::LoudspeakerArray::ChannelIndex const outIdx = loudspeakerConfiguration.channelIndex( lspIdx );
@@ -165,7 +165,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
       throw std::invalid_argument( msg.str() );
     }
 
-    playbackIndices.at( outIdx ) = outputAdjustOutStartIdx + lspIdx;
+    playbackChannels.at( outIdx ) = outputAdjustOutStartIdx + lspIdx;
   }
   for( std::size_t subIdx(0); subIdx < numberOfSubwoofers; ++subIdx )
   {
@@ -177,7 +177,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
           << " for subwoofer " << subIdx << ", maximum admissible index: " << numberOfOutputs << ".";
       throw std::invalid_argument( msg.str() );
     }
-    playbackIndices.at( outIdx ) = subwooferMixerOutStartIdx + subIdx;
+    // The subwoofer channels are located behind the regular loudspeakers.
+    playbackChannels.at( outIdx ) = outputAdjustOutStartIdx + numberOfLoudspeakers + subIdx;
   }
   
   initCommArea( communicationChannelEndIndex, period, ril::cVectorAlignmentSamples );
@@ -240,7 +241,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
 //  }
 
   assignCaptureIndices( &captureChannels[0], captureChannels.size( ) );
-  assignPlaybackIndices(   &outputAdjustOutChannels[0], outputAdjustOutChannels.size( ) );
+  assignPlaybackIndices( &playbackChannels[0], playbackChannels.size( ) );
 
   mGainParameters.resize( numberOfLoudspeakers, numberOfInputs );
 
