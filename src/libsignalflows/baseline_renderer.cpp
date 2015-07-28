@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <sstream>
 #include <vector>
 
 namespace visr
@@ -99,6 +100,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
+  mNullSource.setup( 1/*width*/ );
 
   efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<ril::SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
@@ -151,16 +153,32 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
 
   // The playback indices "do" all the signal routing to the final output channels.
   // THe initial value means the all channels that are not assigned get their signal from the NullSource component.
-  std::vector<ril::AudioPort::SignalIndexType> playbackIndices( numberOfOutputSignals, nullSourceOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> playbackIndices( numberOfOutputs, nullSourceOutStartIdx );
   for( std::size_t lspIdx(0); lspIdx < numberOfLoudspeakers; ++lspIdx )
   {
-    playbackIndices[ loudspeakerConfiguration.channelIndex( lspIdx ) ] = outputAdjustOutStartIdx + lspIdx;
+    panning::LoudspeakerArray::ChannelIndex const outIdx = loudspeakerConfiguration.channelIndex( lspIdx );
+    if( outIdx < 0 or outIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs) )
+    {
+      std::stringstream msg;
+      msg << "Invalid channel index " << outIdx
+          << " for loudspeaker " << lspIdx << ", maximum admissible index: " << numberOfOutputs << ".";
+      throw std::invalid_argument( msg.str() );
+    }
+
+    playbackIndices.at( outIdx ) = outputAdjustOutStartIdx + lspIdx;
   }
   for( std::size_t subIdx(0); subIdx < numberOfSubwoofers; ++subIdx )
   {
-    playbackIndices[ loudspeakerConfiguration.getSubwooferChannel(subIdx) ] = subwooferMixerOutStartIdx + subIdx;
+    panning::LoudspeakerArray::ChannelIndex const outIdx = loudspeakerConfiguration.getSubwooferChannel( subIdx );
+    if( outIdx < 0 or outIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs) )
+    {
+      std::stringstream msg;
+      msg << "Invalid channel index " << outIdx
+          << " for subwoofer " << subIdx << ", maximum admissible index: " << numberOfOutputs << ".";
+      throw std::invalid_argument( msg.str() );
+    }
+    playbackIndices.at( outIdx ) = subwooferMixerOutStartIdx + subIdx;
   }
-
   
   initCommArea( communicationChannelEndIndex, period, ril::cVectorAlignmentSamples );
 
@@ -192,6 +210,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   assignCommunicationIndices( "SubwooferMixer", "out", subwooferMixerOutChannels );
   std::copy( subwooferMixerOutChannels.begin(), subwooferMixerOutChannels.end(), outputAdjustInChannels.begin() + numberOfLoudspeakers );
   
+  assignCommunicationIndices( "NullSource", "out", nullSourceOutChannels );
   assignCommunicationIndices( "OutputAdjustment", "in", outputAdjustInChannels );
   assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutChannels );
 
