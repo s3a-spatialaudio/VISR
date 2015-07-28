@@ -261,13 +261,12 @@ void parseGainDelayAdjustments( boost::property_tree::ptree const & node, Afloat
   else if( gainLinear )
   {
     gain = *gainLinear;
-    throw std::invalid_argument( "ArrayConfiguration::loadXml(): Each speaker node must contain exactly one \"gain\" or \"gainDB\" attribute." );
   }
   else if( gainDB )
   {
     gain = std::pow( 10.0f, *gainDB / 20.0f );
   }
-  else
+  else // no gain specified, use default value.
   {
     gain = 1.0f;
   }
@@ -428,7 +427,7 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     {
       throw std::invalid_argument( "A loudspeaker index exceeds the set of regular loudspeakers." );
     }
-    boost::optional<std::string> const weightStr = subNode.get<std::string>( "<xmlattr>.weights" );
+    boost::optional<std::string> const weightStr = subNode.get_optional<std::string>( "<xmlattr>.weights" );
     if( weightStr )
     {
       pml::FloatSequence<Afloat> speakerWeights( *weightStr );
