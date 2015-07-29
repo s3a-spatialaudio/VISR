@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <panningConfiguration dimension="3" infinite="false">
-   <loudspeaker channel="7" delay="0" gainDB="0" id="1">
+   <loudspeaker channel="8" delay="0" gainDB="0" id="1">
       <cart x="1.994" y="0" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="8" delay="0" gainDB="0" id="2">
+   <loudspeaker channel="9" delay="0" gainDB="0" id="2">
       <cart x="2.0542" y="-1.186" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="6" delay="0" gainDB="0" id="3">
+   <loudspeaker channel="7" delay="0" gainDB="0" id="3">
       <cart x="2.0542" y="1.186" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="11" delay="0" gainDB="0" id="4">
+   <loudspeaker channel="12" delay="0" gainDB="0" id="4">
       <cart x="1.3985e-16" y="-2.284" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="17" delay="0" gainDB="0" id="5">
+   <loudspeaker channel="18" delay="0" gainDB="0" id="5">
       <cart x="1.3985e-16" y="2.284" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="13" delay="0" gainDB="0" id="6">
+   <loudspeaker channel="14" delay="0" gainDB="0" id="6">
       <cart x="-2.1257" y="-2.1257" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="15" delay="0" gainDB="0" id="7">
+   <loudspeaker channel="16" delay="0" gainDB="0" id="7">
       <cart x="-2.1257" y="2.1257" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="23" delay="0" gainDB="0" id="8">
+   <loudspeaker channel="24" delay="0" gainDB="0" id="8">
       <cart x="1.0348" y="-1.0348" z="1.2279"/>
    </loudspeaker>
-   <loudspeaker channel="19" delay="0" gainDB="0" id="9">
+   <loudspeaker channel="20" delay="0" gainDB="0" id="9">
       <cart x="1.0348" y="1.0348" z="1.2279"/>
    </loudspeaker>
-   <loudspeaker channel="25" delay="0" gainDB="0" id="10">
+   <loudspeaker channel="26" delay="0" gainDB="0" id="10">
       <cart x="-0.5005" y="-1.3751" z="1.2279"/>
    </loudspeaker>
-   <loudspeaker channel="29" delay="0" gainDB="0" id="11">
+   <loudspeaker channel="30" delay="0" gainDB="0" id="11">
       <cart x="-0.5005" y="1.3751" z="1.2279"/>
    </loudspeaker>
    <virtualspeaker id="12">

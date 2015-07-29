@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <panningConfiguration dimension="2" infinite="false">
-   <loudspeaker channel="7" delay="0" gainDB="0" id="1">
+   <loudspeaker channel="8" delay="0" gainDB="0" id="1">
       <cart x="1.994" y="0" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="8" delay="0" gainDB="0" id="2">
+   <loudspeaker channel="9" delay="0" gainDB="0" id="2">
       <cart x="2.0542" y="-1.186" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="6" delay="0" gainDB="0" id="3">
+   <loudspeaker channel="7" delay="0" gainDB="0" id="3">
       <cart x="2.0542" y="1.186" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="12" delay="0" gainDB="0" id="4">
+   <loudspeaker channel="13" delay="0" gainDB="0" id="4">
       <cart x="-0.84117" y="-2.3111" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="16" delay="0" gainDB="0" id="5">
+   <loudspeaker channel="17" delay="0" gainDB="0" id="5">
       <cart x="-0.84117" y="2.3111" z="0"/>
    </loudspeaker>
    <virtualspeaker id="6">

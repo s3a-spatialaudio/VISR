@@ -128,12 +128,13 @@ for numConfig = 1:7
         [x, y, z] = sph2cart( degtorad(lspData(findIdx, 2 )), degtorad(lspData(findIdx, 3 )), lspData(findIdx, 4 ) );
         usedSpeakers( chIdx, : ) = [x y z];
         if( findIdx >= 0 )
-            finalChannelIndices( chIdx ) = channels( chIdx );
+            % The XMLformat expects the channel indices to be one-offset.
+            finalChannelIndices( chIdx ) = channels( chIdx ) +1;
             if channels( chIdx ) >= 0
                 channelToSpeakerIndex( channels( chIdx ) + 1 ) = chIdx;
             end
         else
-            finalChannelIndices( chIdx ) = Inf; % Special value to denote a virtual speaker
+            finalChannelIndices( chIdx ) = 0; % Special value to denote a virtual speaker
         end
     end
     
