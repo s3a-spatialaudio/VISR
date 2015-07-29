@@ -15,6 +15,7 @@
 #include "XYZ.h"
 
 #include <libefl/basic_matrix.hpp>
+#include <libefl/basic_vector.hpp>
 
 #include <array>
 #include <string>
@@ -158,14 +159,15 @@ namespace panning
      * The loudspeaker gains are ordered according to their zero-offset logical speaker numbers, followed by the subwoofers 
      * in their order of definition in the configuration file.
      */
-    std::vector<Afloat> const & getGainAdjustment() const { return m_gainAdjustment; }
+    efl::BasicVector<Afloat> const & getGainAdjustment() const
+    { return m_gainAdjustment; }
 
     /**
     * Return the delay adjustment vector (in seconds) holding the delays for all regular loudspeakers and subwoofers.
     * The loudspeaker delays are ordered according to their zero-offset logical speaker numbers, followed by the subwoofers
     * in their order of definition in the configuration file.
     */
-    std::vector<Afloat> const & getDelayAdjustment( ) const { return m_delayAdjustment; }
+    efl::BasicVector<Afloat> const & getDelayAdjustment( ) const { return m_delayAdjustment; }
 
     //@}
 
@@ -194,9 +196,9 @@ namespace panning
      * The gains are stored in order of their zero-offset logical loudspeaker index (not output signal index).
      * The subwoofer gains are after the regular speaker gains.
      */
-    std::vector<Afloat> m_gainAdjustment;
+    efl::BasicVector<Afloat> m_gainAdjustment;
     
-    std::vector<Afloat> m_delayAdjustment;
+    efl::BasicVector<Afloat> m_delayAdjustment;
   };
 
 } // namespace panning

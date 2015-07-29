@@ -180,7 +180,7 @@ int main( int argc, char const * const * argv )
 #else
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = "default";
+    interfaceConfig.mHostApi = audioBackend;
 #endif
 
     const std::size_t cInterpolationLength = periodSize;

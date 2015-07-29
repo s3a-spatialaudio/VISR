@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <sstream>
 #include <vector>
 
 namespace visr
@@ -21,13 +22,17 @@ namespace signalflows
 namespace
 {
 // create a helper function in an unnamed namespace
+  
+  /**
+   * @note Compared to other versions, `p endIdx is the 'past the end' value here.
+   */
   std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
   {
-    if( endIdx < startIdx )
+    if( endIdx <= startIdx )
     {
       return std::vector<std::size_t>();
     }
-    std::size_t const vecLength( endIdx - startIdx + 1 );
+    std::size_t const vecLength( endIdx - startIdx  );
     std::vector < std::size_t> ret( vecLength );
     std::generate( ret.begin(), ret.end(), [&] { return startIdx++; } );
     return ret;
@@ -50,12 +55,12 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mOutputAdjustment( *this, "OutputAdjustment" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
- , mMatrix( *this, "GainMatrix" )
+ , mMatrix( *this, "VbapGainMatrix" )
  , mDiffusePartMatrix( *this, "DiffusePartMatrix" )
- , mSubwooferMix( *this, "SubwooferMixer" )
- , mNullSource( *this, "NullSource" )
  , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
+ , mSubwooferMix( *this, "SubwooferMixer" )
+ , mNullSource( *this, "NullSource" )
  , mDiffuseGains( ril::cVectorAlignmentSamples )
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
@@ -95,52 +100,23 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
+  mNullSource.setup( 1/*width*/ );
 
-  efl::BasicVector<ril::SampleType> outputGains( numberOfOutputSignals, ril::cVectorAlignmentSamples );
-  efl::BasicVector<ril::SampleType> outputDelays( numberOfOutputSignals, ril::cVectorAlignmentSamples );
-  std::vector<ril::SampleType> const & configGains = loudspeakerConfiguration.getGainAdjustment(); 
-  std::vector<ril::SampleType> const & configDelays = loudspeakerConfiguration.getDelayAdjustment();
+  efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
+  efl::BasicVector<ril::SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
   
 
-
-#if 0
-  if( not outputGainConfiguration.empty( ) )
-  {
-    boost::filesystem::path const outputConfigPath( outputGainConfiguration );
-    if( not exists( outputConfigPath ) )
-    {
-      throw std::invalid_argument( "The output adjustment configuration file does not exist." );
-    }
-    pml::ArrayConfiguration outputConfig;
-    outputConfig.loadXml( outputConfigPath.string( ) );
-    if( (outputConfig.numberOfOutputs()) != numberOfOutputs)
-    {
-      throw std::invalid_argument( "The number of channels (loudspeakers + subwoofers) in the output configuration file does not match the configured number of physical outputs." );
-    }
-    outputGains.resize( outputConfig.numberOfOutputs());
-    outputDelays.resize( outputConfig.numberOfOutputs());
-
-    outputConfig.getGains<ril::SampleType>( outputGains );
-    if( !mTrackingEnabled )
-    {
-      // use the static speaker compensation delays only if tracking is not enabled, because the tracking adaptation applies delays automatically.
-      outputConfig.getDelays<ril::SampleType>( outputDelays );
-    }
-    else
-    {
-      outputDelays.fillValue( static_cast<ril::SampleType>(0.0) );
-    }
-    subwooferChannelIndices = outputConfig.subwooferIndices();
-  }
-#endif
-
-  mOutputAdjustment.setup( numberOfOutputs, period, 0.1f, rcl::DelayVector::InterpolationType::NearestSample,
+  Afloat const * const maxEl = std::max_element( outputDelays.data(),
+                                                outputDelays.data()+outputDelays.size() );
+  Afloat const maxDelay = std::ceil( *maxEl ); // Sufficient for nearestSample even if there is no particular compensation for the interpolation method's delay inside.
+  
+  mOutputAdjustment.setup( numberOfOutputSignals, period, maxDelay, rcl::DelayVector::InterpolationType::NearestSample,
     outputDelays, outputGains );
 
   // Note: This assumes that the type 'Afloat' used in libpanning is
   // identical to ril::SampleType (at the moment, both are floats).
   efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
-  mSubwooferMix.setup( numberOfOutputs, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
+  mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
 
   // TODO: Incorporate the speaker compensation chain and the output adjustment.
   // Assignment of channel buffers                    #elements               Range
@@ -152,83 +128,120 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   // mDiffusePartDecorrelator->mDirectDiffuseMix      cNumberOfLoudspeakers   cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs+1..cNumberOfInputs+3*cNumberOfLoudspeakers+cNumberOfOutputs
 
   // Create the index vectors for connecting the ports.
-  std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, numberOfInputs - 1 );
-  std::size_t const matrixOutStartIdx = numberOfInputs;
-  std::vector<std::size_t> const matrixOutRange = indexRange( matrixOutStartIdx, matrixOutStartIdx + numberOfLoudspeakers - 1 );
-  std::size_t const mixOutStartIdx = matrixOutStartIdx + numberOfLoudspeakers;
-  std::vector<std::size_t> const mixOutRange = indexRange( mixOutStartIdx, mixOutStartIdx + numberOfLoudspeakers - 1 );
-  std::size_t const routingOutStartIdx = mixOutStartIdx + numberOfLoudspeakers;
-  std::vector<std::size_t> const routingOutRange = indexRange( routingOutStartIdx, routingOutStartIdx + numberOfOutputs - 1 );
-  std::size_t const outputAdjustStartIdx = routingOutStartIdx + numberOfOutputs;
-  std::vector<std::size_t> const outputAdjustOutRange = indexRange( outputAdjustStartIdx, outputAdjustStartIdx + numberOfOutputs - 1 );
-  std::size_t const diffuseMixerStartIdx = outputAdjustStartIdx + numberOfOutputs;
-  std::vector<std::size_t> const diffuseMixOutRange = indexRange( diffuseMixerStartIdx, diffuseMixerStartIdx );
-  std::size_t const decorrelatorStartIdx = diffuseMixerStartIdx + 1;
-  std::vector<std::size_t> const decorrelatorOutRange = indexRange( decorrelatorStartIdx, decorrelatorStartIdx + numberOfLoudspeakers - 1 );
+  std::size_t const captureStartIdx = 0;
+  std::size_t const vbapMatrixOutStartIdx = captureStartIdx + numberOfInputs;
+  std::size_t const diffuseMixerOutStartIdx = vbapMatrixOutStartIdx + numberOfLoudspeakers;
+  std::size_t const decorrelatorOutStartIdx = diffuseMixerOutStartIdx + 1;
+  std::size_t const mixOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
+  std::size_t const trackingCompensationOutStartIdx = mixOutStartIdx + numberOfLoudspeakers;
+  std::size_t const subwooferMixerOutStartIdx = trackingCompensationOutStartIdx + (mTrackingEnabled ? numberOfLoudspeakers : 0 );
+  std::size_t const outputAdjustOutStartIdx = subwooferMixerOutStartIdx + numberOfSubwoofers;
+  std::size_t const nullSourceOutStartIdx = outputAdjustOutStartIdx + numberOfOutputSignals;
+  std::size_t const communicationChannelEndIndex = nullSourceOutStartIdx + 1; // One past end index. Also the number of total indices.
 
-  // Only used if subwoofers are present
-  std::size_t const subwooferMixerStartIdx = decorrelatorStartIdx + numberOfLoudspeakers;
-  std::vector<std::size_t> const subwooferMixerOutRange = mSubwooferEnabled ? indexRange( subwooferMixerStartIdx, subwooferMixerStartIdx + numberOfSubwoofers - 1 )
-    : std::vector<std::size_t>(); // empty vector otherwise
+  
+  
+  std::vector<ril::AudioPort::SignalIndexType> captureChannels = indexRange( captureStartIdx, vbapMatrixOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const vbapMatrixOutChannels = indexRange( vbapMatrixOutStartIdx, diffuseMixerOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const diffuseMixerOutChannels = indexRange( diffuseMixerOutStartIdx, decorrelatorOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const decorrelatorOutChannels = indexRange( decorrelatorOutStartIdx, mixOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const mixOutChannels = indexRange( mixOutStartIdx, trackingCompensationOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const trackingCompensationOutChannels = indexRange( trackingCompensationOutStartIdx, subwooferMixerOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const subwooferMixerOutChannels = indexRange( subwooferMixerOutStartIdx, outputAdjustOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const outputAdjustOutChannels = indexRange( outputAdjustOutStartIdx, nullSourceOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const nullSourceOutChannels = indexRange( nullSourceOutStartIdx, communicationChannelEndIndex );
 
-  // only used if tracking is enabled
-  std::size_t const trackingCompensationStartIdx = subwooferMixerStartIdx + numberOfSubwoofers;
-  std::vector<std::size_t> const trackingCompensationOutRange = mTrackingEnabled
-    ? indexRange( trackingCompensationStartIdx, trackingCompensationStartIdx + numberOfLoudspeakers - 1 ) : std::vector<std::size_t>( );
+  // The playback indices "do" all the signal routing to the final output channels.
+  // THe initial value means the all channels that are not assigned get their signal from the NullSource component.
+  std::vector<ril::AudioPort::SignalIndexType> playbackChannels( numberOfOutputs, nullSourceOutStartIdx );
+  for( std::size_t lspIdx(0); lspIdx < numberOfLoudspeakers; ++lspIdx )
+  {
+    panning::LoudspeakerArray::ChannelIndex const outIdx = loudspeakerConfiguration.channelIndex( lspIdx );
+    if( outIdx < 0 or outIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs) )
+    {
+      std::stringstream msg;
+      msg << "Invalid channel index " << outIdx
+          << " for loudspeaker " << lspIdx << ", maximum admissible index: " << numberOfOutputs << ".";
+      throw std::invalid_argument( msg.str() );
+    }
 
-  std::size_t const numTotalCommunicationChannels = mTrackingEnabled
-    ? trackingCompensationStartIdx + numberOfLoudspeakers : decorrelatorStartIdx + numberOfLoudspeakers + numberOfSubwoofers;
-  initCommArea( numTotalCommunicationChannels, period, ril::cVectorAlignmentSamples );
+    playbackChannels.at( outIdx ) = outputAdjustOutStartIdx + lspIdx;
+  }
+  for( std::size_t subIdx(0); subIdx < numberOfSubwoofers; ++subIdx )
+  {
+    panning::LoudspeakerArray::ChannelIndex const outIdx = loudspeakerConfiguration.getSubwooferChannel( subIdx );
+    if( outIdx < 0 or outIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs) )
+    {
+      std::stringstream msg;
+      msg << "Invalid channel index " << outIdx
+          << " for subwoofer " << subIdx << ", maximum admissible index: " << numberOfOutputs << ".";
+      throw std::invalid_argument( msg.str() );
+    }
+    // The subwoofer channels are located behind the regular loudspeakers.
+    playbackChannels.at( outIdx ) = outputAdjustOutStartIdx + numberOfLoudspeakers + subIdx;
+  }
+  
+  initCommArea( communicationChannelEndIndex, period, ril::cVectorAlignmentSamples );
 
   // Connect the ports
-  assignCommunicationIndices( "GainMatrix", "in", captureIndices );
-  assignCommunicationIndices( "GainMatrix", "out", matrixOutRange );
-  assignCommunicationIndices( "DirectDiffuseMixer", "in0", matrixOutRange );
-  assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutRange );
-  assignCommunicationIndices( "OutputSignalRouting", "out", routingOutRange );
-  assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutRange );
-  assignCommunicationIndices( "DiffusePartMatrix", "in", captureIndices );
-  assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixOutRange );
-  assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixOutRange );
-  assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutRange );
-  assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutRange );
-
-  if( mSubwooferEnabled )
-  {
-    // Note: the subwoofer signal mix is based on the real loudspeaker
-    // channels, not the logical speaker indices used in the VBAP renderer
-    assignCommunicationIndices( "SubwooferMixer", "in", routingOutRange );
-    assignCommunicationIndices( "SubwooferMixer", "out", subwooferMixerOutRange );
-
-    // As the channel indices for the playback port are combined
-    // from two output ports, we need to construct a separate range.
-
-    // @warning This is a brute hack, hard coding the
-    // mumberOfSubwoofer last outputs of the output routing inputs to
-    // the input of the output adjustment component.
-    std::vector<std::size_t> adjustInRange( &routingOutRange[0], &routingOutRange[numberOfLoudspeakers] );
-    adjustInRange.reserve( routingOutRange.size() + numberOfSubwoofers );
-    adjustInRange.insert( adjustInRange.end(), subwooferMixerOutRange.begin(), subwooferMixerOutRange.end() );
-    assignCommunicationIndices( "OutputAdjustment", "in", adjustInRange );
-  }
-  else
-  {
-    assignCommunicationIndices( "OutputAdjustment", "in", routingOutRange );
-  }
-
+  assignCommunicationIndices( "VbapGainMatrix", "in", captureChannels );
+  assignCommunicationIndices( "DiffusePartMatrix", "in", captureChannels );
+  assignCommunicationIndices( "VbapGainMatrix", "out", vbapMatrixOutChannels );
+  assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixerOutChannels );
+  assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixerOutChannels );
+  assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutChannels );
+  assignCommunicationIndices( "DirectDiffuseMixer", "in0", vbapMatrixOutChannels );
+  assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutChannels );
+  assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutChannels );
+  
+  std::vector<ril::AudioPort::SignalIndexType> outputAdjustInChannels( numberOfOutputSignals );
   if( mTrackingEnabled )
   {
-    assignCommunicationIndices( "TrackingSpeakerCompensation", "in", mixOutRange );
-    assignCommunicationIndices( "TrackingSpeakerCompensation", "out", trackingCompensationOutRange );
-    assignCommunicationIndices( "OutputSignalRouting", "in", trackingCompensationOutRange );
+    assignCommunicationIndices( "TrackingSpeakerCompensation", "in", mixOutChannels );
+    assignCommunicationIndices( "TrackingSpeakerCompensation", "out", trackingCompensationOutChannels );
+    assignCommunicationIndices( "SubwooferMixer", "in", trackingCompensationOutChannels );
+    
+    std::copy( trackingCompensationOutChannels.begin(), trackingCompensationOutChannels.end(), outputAdjustInChannels.begin()  );
   }
   else
   {
-    assignCommunicationIndices( "OutputSignalRouting", "in", mixOutRange );
+    assignCommunicationIndices( "SubwooferMixer", "in", mixOutChannels );
+    std::copy( mixOutChannels.begin(), mixOutChannels.end(), outputAdjustInChannels.begin()  );
   }
+  assignCommunicationIndices( "SubwooferMixer", "out", subwooferMixerOutChannels );
+  std::copy( subwooferMixerOutChannels.begin(), subwooferMixerOutChannels.end(), outputAdjustInChannels.begin() + numberOfLoudspeakers );
+  
+  assignCommunicationIndices( "NullSource", "out", nullSourceOutChannels );
+  assignCommunicationIndices( "OutputAdjustment", "in", outputAdjustInChannels );
+  assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutChannels );
 
-  assignCaptureIndices( &captureIndices[0], captureIndices.size( ) );
-  assignPlaybackIndices(   &outputAdjustOutRange[0], outputAdjustOutRange.size( ) );
+//    // Note: the subwoofer signal mix is based on the real loudspeaker
+//    // channels, not the logical speaker indices used in the VBAP renderer
+//    assignCommunicationIndices( "SubwooferMixer", "in", routingOutRange );
+//
+//    if(  )
+//    {
+//      assignCommunicationIndices( "SubwooferMixer", "out", subwooferMixerOutRange );
+//    }
+//
+//    // As the channel indices for the playback port are combined
+//    // from two output ports, we need to construct a separate range.
+//
+//    // @warning This is a brute hack, hard coding the
+//    // mumberOfSubwoofer last outputs of the output routing inputs to
+//    // the input of the output adjustment component.
+//    std::vector<std::size_t> adjustInRange( &routingOutRange[0], &routingOutRange[numberOfLoudspeakers] );
+//    adjustInRange.reserve( routingOutRange.size() + numberOfSubwoofers );
+//    adjustInRange.insert( adjustInRange.end(), subwooferMixerOutRange.begin(), subwooferMixerOutRange.end() );
+//    assignCommunicationIndices( "OutputAdjustment", "in", adjustInRange );
+//  }
+//  else
+//  {
+//    assignCommunicationIndices( "OutputAdjustment", "in", routingOutRange );
+//  }
+
+  assignCaptureIndices( &captureChannels[0], captureChannels.size( ) );
+  assignPlaybackIndices( &playbackChannels[0], playbackChannels.size( ) );
 
   mGainParameters.resize( numberOfLoudspeakers, numberOfInputs );
 
@@ -269,6 +282,7 @@ BaselineRenderer::process()
     mSpeakerCompensation->process( );
   }
   mOutputAdjustment.process();
+  mNullSource.process();
 }
 
 } // namespace signalflows
