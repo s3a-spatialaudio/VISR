@@ -27,9 +27,6 @@ c 1	19	2.17	1.36	0	% Left
 %c 2	26	2.15	-1.22	0	% Right
 c 2	26	2.17	-1.36	0	% Right		%! symmetric for test
 
-c 1	19	2.17	1.36	0	% Left
-c 2	26	2.17	-1.36	0	% Right 
- 
 % polars
 % id	chan	azim	elev	distance (m)
 %
