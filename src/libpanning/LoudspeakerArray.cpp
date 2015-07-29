@@ -55,6 +55,7 @@ LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & r
   m_channel = rhs.m_channel;
   m_subwooferChannels = rhs.m_subwooferChannels;
   m_subwooferGains.resize( rhs.m_subwooferGains.numberOfRows(), rhs.m_subwooferGains.numberOfColumns() );
+  m_subwooferGains.copy( rhs.m_subwooferGains );
   m_gainAdjustment.assign( rhs.m_gainAdjustment );
   m_delayAdjustment.assign( rhs.m_delayAdjustment );
   return *this;
