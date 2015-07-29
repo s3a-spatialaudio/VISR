@@ -15,17 +15,11 @@
    <loudspeaker channel="17" delay="0" gainDB="0" id="5">
       <cart x="-0.84117" y="2.3111" z="0"/>
    </loudspeaker>
-   <virtualspeaker id="6">
-      <cart x="7.3479e-17" y="0" z="-1.2"/>
-   </virtualspeaker>
    <subwoofer assignedLoudspeakers="1, 2, 3" channel="32" delay="0.001" gainDB="-3.5" weights="1.000000, 1.000000, 1.000000"/>
    <subwoofer assignedLoudspeakers="4, 5" channel="33" delay="0.00235" gainDB="-6.5" weights="1.000000, 1.000000"/>
    <triplet l1="1" l2="2"/>
    <triplet l1="1" l2="3"/>
-   <triplet l1="1" l2="4"/>
-   <triplet l1="1" l2="5"/>
-   <triplet l1="1" l2="6"/>
    <triplet l1="2" l2="4"/>
-   <triplet l1="3" l2="6"/>
+   <triplet l1="3" l2="5"/>
    <triplet l1="4" l2="5"/>
 </panningConfiguration>
