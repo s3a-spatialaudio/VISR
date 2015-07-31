@@ -33,14 +33,25 @@ namespace visr
 namespace signalflows
 {
 
+/**
+ * Audio signal graph object for the VISR baseline renderer.
+ */
 class BaselineRenderer: public ril::AudioSignalFlow
 {
 public:
   /**
-   * Constructor.
-   * @param numberOfInputs
-   *
+   * Constructor to create, initialise and interconnect all processing components.
+   * @param loudspeakerConfiguration The configuration of the reproduction array, including the routing to physical output channels,
+   * potentially virtual loudspeakers and subwoofer configuration.
+   * @param numberOfInputs The number of inputs, i.e., the number of audio object signals
+   * @param numberOfOutputs The number of output channels. This number can be higher than the number of loudspeakers plus the number of subwoofers if the
+   * routing to output channels contains gaps. The output channels between 0 and \p numbeOfOutputs to which no signal is routed are configured to output zeros.
+   * @param interpolationPeriod The interpolation period used in the VBAP gain matrix, i.e., the number of samples it takes to fade to a new gain value. Must be multiple of \p period.
+   * @param diffusionFilters A matrix of floating-point values containing the the FIR coefficients of the decorrelation filter that creates diffuse sound components.
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
+   * @param sceneReceiverPort The UDP port for receiving the scene data messages.
+   * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
+   * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
   explicit BaselineRenderer( panning::LoudspeakerArray const & loudspeakerConfiguration,
                              std::size_t numberOfInputs,
@@ -49,10 +60,14 @@ public:
                              efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
-                             std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+                             std::size_t period,
+                             ril::SamplingFrequencyType samplingFrequency );
 
   ~BaselineRenderer();
 
+  /**
+   * Process function that consumes and produces blocks of \p period() audio samples per input and output channel.
+   */
   /*virtual*/ void process();
 
 private:
@@ -71,7 +86,7 @@ private:
 
   bool mTrackingEnabled;
 
-  rcl::GainMatrix mMatrix;
+  rcl::GainMatrix mVbapMatrix;
 
   rcl::GainMatrix mDiffusePartMatrix;
 

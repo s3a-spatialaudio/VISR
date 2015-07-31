@@ -24,7 +24,11 @@ namespace
 // create a helper function in an unnamed namespace
   
   /**
-   * @note Compared to other versions, `p endIdx is the 'past the end' value here.
+   * Create a vector of unsigned integers ranging from \p start to \p end - 1.
+   * @param startIdx the start index of the sequence.
+   * @param endIdx The index value one past the end
+   * @note Compared to other versions of this function, \p endIdx is the 'past the end' value here, as common in C++ STL conventions.
+   * that is indexRange( n, n ) returns an empty vector.
    */
   std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
   {
@@ -55,7 +59,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mOutputAdjustment( *this, "OutputAdjustment" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
- , mMatrix( *this, "VbapGainMatrix" )
+ , mVbapMatrix( *this, "VbapGainMatrix" )
  , mDiffusePartMatrix( *this, "DiffusePartMatrix" )
  , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
@@ -94,18 +98,25 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup( );
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
-  mMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
+  mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
 
   mDiffusionGainCalculator.setup( numberOfInputs );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
-  mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, 0.25f /* initial gain adjustment*/ );
+
+  /**
+   * Adjust the level of the diffuse objects such that they are comparable to point sources.
+   * Here we assume that the decorrelated signals are ideally decorrelated. Note that this is not 
+   * the case with the current set of decorrelation filters.
+   * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source. 
+   */
+  ril::SampleType const diffusorGain = static_cast<ril::SampleType>(1.0) / std::sqrt( static_cast<ril::SampleType>(numberOfLoudspeakers) );
+  mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
   mNullSource.setup( 1/*width*/ );
 
   efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<ril::SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
   
-
   Afloat const * const maxEl = std::max_element( outputDelays.data(),
                                                 outputDelays.data()+outputDelays.size() );
   Afloat const maxDelay = std::ceil( *maxEl ); // Sufficient for nearestSample even if there is no particular compensation for the interpolation method's delay inside.
@@ -118,16 +129,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
   mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
 
-  // TODO: Incorporate the speaker compensation chain and the output adjustment.
-  // Assignment of channel buffers                    #elements               Range
-  // capture -> mMatrix, capture->mDiffusePartMatrix  cNumberOfInputs         0..cNumberOfInputs - 1
-  // mMatrix -> mMixDirectDiffuse                     cNumberOfLoudspeakers   cNumberOfInputs..cNumberOfInputs+cNumberOfLoudspeakers-1
-  // mDirectDiffuseMix -> mOutputRouting              cNumberOfLoudspeakers   cNumberOfInputs+cNumberOfLoudspeakers..cNumberOfInputs+2*cNumberOfLoudspeakers-1
-  // mOutputRouting -> playback                       cNumberOfOutputs        cNumberOfInputs+2*cNumberOfLoudspeakers..cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs-1
-  // mDiffusePartMatrix -> mDiffusePartDecorrelator   1                       cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs..cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs
-  // mDiffusePartDecorrelator->mDirectDiffuseMix      cNumberOfLoudspeakers   cNumberOfInputs+2*cNumberOfLoudspeakers+cNumberOfOutputs+1..cNumberOfInputs+3*cNumberOfLoudspeakers+cNumberOfOutputs
-
   // Create the index vectors for connecting the ports.
+  // First, create the start indices for all output vectors by adding the width of the previous vector.
   std::size_t const captureStartIdx = 0;
   std::size_t const vbapMatrixOutStartIdx = captureStartIdx + numberOfInputs;
   std::size_t const diffuseMixerOutStartIdx = vbapMatrixOutStartIdx + numberOfLoudspeakers;
@@ -139,8 +142,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::size_t const nullSourceOutStartIdx = outputAdjustOutStartIdx + numberOfOutputSignals;
   std::size_t const communicationChannelEndIndex = nullSourceOutStartIdx + 1; // One past end index. Also the number of total indices.
 
-  
-  
+  // Now, explicitly construct the index vectors.
   std::vector<ril::AudioPort::SignalIndexType> captureChannels = indexRange( captureStartIdx, vbapMatrixOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const vbapMatrixOutChannels = indexRange( vbapMatrixOutStartIdx, diffuseMixerOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const diffuseMixerOutChannels = indexRange( diffuseMixerOutStartIdx, decorrelatorOutStartIdx );
@@ -164,7 +166,6 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
           << " for loudspeaker " << lspIdx << ", maximum admissible index: " << numberOfOutputs << ".";
       throw std::invalid_argument( msg.str() );
     }
-
     playbackChannels.at( outIdx ) = outputAdjustOutStartIdx + lspIdx;
   }
   for( std::size_t subIdx(0); subIdx < numberOfSubwoofers; ++subIdx )
@@ -215,31 +216,6 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   assignCommunicationIndices( "OutputAdjustment", "in", outputAdjustInChannels );
   assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutChannels );
 
-//    // Note: the subwoofer signal mix is based on the real loudspeaker
-//    // channels, not the logical speaker indices used in the VBAP renderer
-//    assignCommunicationIndices( "SubwooferMixer", "in", routingOutRange );
-//
-//    if(  )
-//    {
-//      assignCommunicationIndices( "SubwooferMixer", "out", subwooferMixerOutRange );
-//    }
-//
-//    // As the channel indices for the playback port are combined
-//    // from two output ports, we need to construct a separate range.
-//
-//    // @warning This is a brute hack, hard coding the
-//    // mumberOfSubwoofer last outputs of the output routing inputs to
-//    // the input of the output adjustment component.
-//    std::vector<std::size_t> adjustInRange( &routingOutRange[0], &routingOutRange[numberOfLoudspeakers] );
-//    adjustInRange.reserve( routingOutRange.size() + numberOfSubwoofers );
-//    adjustInRange.insert( adjustInRange.end(), subwooferMixerOutRange.begin(), subwooferMixerOutRange.end() );
-//    assignCommunicationIndices( "OutputAdjustment", "in", adjustInRange );
-//  }
-//  else
-//  {
-//    assignCommunicationIndices( "OutputAdjustment", "in", routingOutRange );
-//  }
-
   assignCaptureIndices( &captureChannels[0], captureChannels.size( ) );
   assignPlaybackIndices( &playbackChannels[0], playbackChannels.size( ) );
 
@@ -269,8 +245,8 @@ BaselineRenderer::process()
   }
   mGainCalculator.process( mObjectVector, mGainParameters );
   mDiffusionGainCalculator.process( mObjectVector, mDiffuseGains );
-  mMatrix.setGains( mGainParameters );
-  mMatrix.process();
+  mVbapMatrix.setGains( mGainParameters );
+  mVbapMatrix.process();
   mDiffusePartMatrix.setGains( mDiffuseGains );
   mDiffusePartMatrix.process();
   mDiffusePartDecorrelator.process();
