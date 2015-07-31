@@ -451,6 +451,29 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     parseGainDelayAdjustments( subNode, m_gainAdjustment[numRegularSpeakers+subIdx],
       m_delayAdjustment[numRegularSpeakers + subIdx] );
   }
+  // Check the subwoofer and the subwoofer indices whether all indices are unique.
+  std::vector<ChannelIndex> spkIndicesSorted( m_channel );
+  std::vector<ChannelIndex> subIndicesSorted( m_subwooferChannels );
+  std::sort( spkIndicesSorted.begin(), spkIndicesSorted.end() );
+  std::sort( subIndicesSorted.begin( ), subIndicesSorted.end( ) );
+  if( std::adjacent_find( spkIndicesSorted.begin(), spkIndicesSorted.end() ) != spkIndicesSorted.end() )
+  {
+    // Technically, this isn't possible, as the implementation above allows only consecutive ranges 
+    // from 1...numRegularSpeakers.
+    throw std::invalid_argument( "LoudspeakerArray::loadXml(): Duplicated loudspeaker channel indices." );
+  }
+  if( std::adjacent_find( subIndicesSorted.begin( ), subIndicesSorted.end( ) ) != subIndicesSorted.end( ) )
+  {
+    throw std::invalid_argument( "LoudspeakerArray::loadXml(): Duplicated subwoofer channel indices." );
+  }
+  std::vector<ChannelIndex> collidingChannelIndices;
+  std::set_intersection( spkIndicesSorted.begin( ), spkIndicesSorted.end( ),
+                         subIndicesSorted.begin( ), subIndicesSorted.end( ),
+                         std::back_inserter(collidingChannelIndices) );
+  if( not collidingChannelIndices.empty() )
+  {
+    throw std::invalid_argument( "LoudspeakerArray::loadXml(): Loudspeaker and subwoofer channels indices are not exclusive." );
+  }
 }
 
 } // namespace panning
