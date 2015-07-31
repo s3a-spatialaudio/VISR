@@ -68,9 +68,8 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param numberOfObjects
-   * @param numberOfLoudspeakers
-   * @param arrayConfigFile
+   * @param numberOfObjects The number of VBAP objects to be processed.
+   * @param arrayConfig The array configuration object.
    */ 
   void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig );
 
@@ -121,8 +120,9 @@ private:
   //@{
   
   /**
-   * The loudspeaker array configurtion.
-   * @note This object must persist for the whole lifetime of the \p mVbapCalculator object.
+   * The loudspeaker array configuration.
+   * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
+   * we make a copy of the reference passed to setup method.
    */
   panning::LoudspeakerArray mSpeakerArray;
   
