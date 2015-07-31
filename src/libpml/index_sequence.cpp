@@ -114,7 +114,7 @@ IndexSequence::IndexSequence( std::string const & val )
   };
   ParseState state;
 
-  auto atom = ((qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_(":") )[boost::bind( &ParseState::finish, &state )] % (qi::char_(',')));
+  auto const atom = boost::proto::deep_copy( ((qi::int_[boost::bind( &ParseState::push, &state, ::_1 )] % qi::char_(":") )[boost::bind( &ParseState::finish, &state )] % (qi::char_(','))));
 
   bool const parseRet = qi::phrase_parse( first, last, atom,
     qi::ascii::space );
