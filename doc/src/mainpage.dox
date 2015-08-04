@@ -29,4 +29,8 @@
   *   - Makefiles for Eclipse projetcs if Eclipse is used as IDE
   *   - Visual Studio projects/solutions on Windows
   *   - XCode projects on MacOS
+  *
+  * @section mainpage_links_to_project_docu Application Documentation
+  *
+  * @ref baseline_renderer_usage "Baseline Renderer"
   */
