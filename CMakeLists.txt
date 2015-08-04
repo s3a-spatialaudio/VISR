@@ -206,10 +206,10 @@ IF(BUILD_DOCUMENTATION)
   ENDIF()
  
   SET( doxyfile_in          ${PROJECT_SOURCE_DIR}/doc/src/Doxyfile.in )
-  SET( doxyfile             ${PROJECT_SOURCE_DIR}/doc/Doxyfile )
-  SET( doxy_html_index_file ${PROJECT_SOURCE_DIR}/doc/html/index.html )
-  SET( doxy_output_root     ${PROJECT_SOURCE_DIR}/doc ) # Pasted into Doxyfile.in
-  SET( doxy_input           ${PROJECT_SOURCE_DIR}/src                   ) # Pasted into Doxyfile.in
+  SET( doxyfile             ${PROJECT_BINARY_DIR}/doc/Doxyfile )
+  SET( doxy_html_index_file ${PROJECT_BINARY_DIR}/doc/html/index.html )
+  SET( doxy_output_root     ${PROJECT_BINARY_DIR}/doc ) # Pasted into Doxyfile.in
+  SET( doxy_input           ${PROJECT_SOURCE_DIR}/src ) # Pasted into Doxyfile.in
 #  SET( doxy_extra_files     ${PROJECT_SOURCE_DIR}/doc/src/mainpage.dox    ) # Pasted into Doxyfile.in
  
   CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
