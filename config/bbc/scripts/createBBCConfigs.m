@@ -26,8 +26,8 @@ for numConfig = 1:7
                 [11 13 14 15 17   24 26 27 28 30   31] };
             subGains = { [1 1 1   0.5 1 1 1 1 1 0.5   0.5 1 1 1 0.5   0.5],...
                 [0.5 1 1 1 0.5   0.5 1 1 1 0.5   0.5] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             
             is2D = false;
             isInfinite = false;
@@ -39,8 +39,8 @@ for numConfig = 1:7
                 [11 13 15 17 25 29] };
             subGains = { [0.5 1 1 1 0.5 1 1],...
                 [0.5 1 1 0.5 1 1] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             is2D = false;
             isInfinite = false;
         case 3 % 4 + 5 + 0
@@ -51,8 +51,8 @@ for numConfig = 1:7
                 [12 16 25 29] };
             subGains = { [0.5 1 1 1 0.5 1 1 0.5 0.5],...
                 [0.5 0.5 0.5 0.5] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             is2D = false;
             isInfinite = false;
         case 4 % 2 + 5 + 0
@@ -63,8 +63,8 @@ for numConfig = 1:7
                 [12 16] };
             subGains = { [1 1 1 1 1],...
                 [1 1] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             is2D = false;
             isInfinite = false;
         case 5 % 0 + 5 + 0
@@ -78,8 +78,8 @@ for numConfig = 1:7
                 [12 16] };
             subGains = { [1 1 1],...
                 [1 1] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             is2D = true; % Normally, this is a planar setup, handled separately by the VISR renderer
             isInfinite = false;
             % The automatic triangulation probably fails.
@@ -93,8 +93,8 @@ for numConfig = 1:7
                 [7 6] };
             subGains = { [0.5 0.5],...
                 [0.5 0.5] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             is2D = true; % This is a planar setup, handled separately by the VISR renderer
             isInfinite = false;
             % The automatic triangulation most probably fails.
@@ -107,8 +107,8 @@ for numConfig = 1:7
                 [11 24 31 30 17 25 26 27 28 29 12 13 14 15 16 3 4] };
             subGains = { [0.5*ones(1,5) ones(1,15) ],...
                 [0.5*ones(1,5) ones(1,12)] };
-            subGainAdjustDB = [ -3.5, -6.5 ];
-            subDelayAdjust = [ 1e-3, 2.35e-3];
+            subGainAdjustDB = [ 0, 0 ];
+            subDelayAdjust = [ 0, 0 ];
             is2D = false;
             isInfinite = false;
     end
