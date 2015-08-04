@@ -88,7 +88,7 @@ if subwooferConfigPresent
     for subIdx = 1:numSubwoofers
         subNode = domNode.createElement( 'subwoofer' );
         chIdx = subChannels(subIdx);
-        subNode.setAttribute( 'channel', num2str(chIdx) );
+        subNode.setAttribute( 'channel', num2str(chIdx+1) );
         if gainAdjustPresent
             subNode.setAttribute( 'gainDB', num2str(gainAdjust(chIdx)) );
         end

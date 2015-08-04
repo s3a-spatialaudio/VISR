@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <panningConfiguration dimension="2" infinite="false">
-   <loudspeaker channel="9" delay="0" gainDB="0" id="2">
+   <loudspeaker channel="9" delay="0" gainDB="0" id="1">
       <cart x="2.0542" y="-1.186" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="7" delay="0" gainDB="0" id="3">
+   <loudspeaker channel="7" delay="0" gainDB="0" id="2">
       <cart x="2.0542" y="1.186" z="0"/>
    </loudspeaker>
-   <subwoofer assignedLoudspeakers="1, 2" channel="32" delay="0.001" gainDB="-3.5" weights="0.500000, 0.500000"/>
-   <subwoofer assignedLoudspeakers="1,2" channel="33" delay="0.00235" gainDB="-6.5" weights="0.500000, 0.500000"/>
+   <virtualspeaker id="3">
+      <cart x="-1.994" y="0" z="0"/>
+   </virtualspeaker>
+   <subwoofer assignedLoudspeakers="1:2" channel="33" delay="0" gainDB="0" weights="1.000000, 1.000000"/>
    <triplet l1="1" l2="2"/>
+   <triplet l1="1" l2="3"/>
+   <triplet l1="2" l2="3"/>
 </panningConfiguration>

@@ -24,8 +24,8 @@
    <virtualspeaker id="8">
       <cart x="7.3479e-17" y="0" z="-1.2"/>
    </virtualspeaker>
-   <subwoofer assignedLoudspeakers="1, 2, 3, 6, 7" channel="32" delay="0.001" gainDB="-3.5" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000"/>
-   <subwoofer assignedLoudspeakers="4, 5" channel="33" delay="0.00235" gainDB="-6.5" weights="1.000000, 1.000000"/>
+   <subwoofer assignedLoudspeakers="1, 2, 3, 6, 7" channel="33" delay="0" gainDB="0" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000"/>
+   <subwoofer assignedLoudspeakers="4, 5" channel="34" delay="0" gainDB="0" weights="1.000000, 1.000000"/>
    <triplet l1="1" l2="2" l3="8"/>
    <triplet l1="1" l2="3" l3="7"/>
    <triplet l1="1" l2="6" l3="2"/>
