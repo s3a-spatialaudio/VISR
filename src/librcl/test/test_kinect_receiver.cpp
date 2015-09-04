@@ -9,8 +9,6 @@
 #include <libpml/message_queue.hpp>
 #include <libpml/listener_position.hpp>
 
-
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp> // case-insensitive string compare

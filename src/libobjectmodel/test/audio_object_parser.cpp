@@ -5,7 +5,6 @@
 #include <libobjectmodel/object_vector_parser.hpp>
 #include <libobjectmodel/point_source.hpp>
 
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #include <stdexcept>

@@ -2,19 +2,11 @@
 
 
 /**
-* @file librcl/test/test_main.cpp
+* @file libefl/test/test_main.cpp
 * File to place global statements for the unit test suite.
 */
 
 
-#define BOOST_TEST_MODULE "Renderer Building Block Library Unit test suite"
+#define BOOST_TEST_MODULE "Elementary Function Library Unit Test Suite"
 
-#ifdef BOOST_ALL_DYN_LINK
-#define BOOST_TEST_DYN_LINK
-#else
-#define BOOST_TEST_MAIN
-#endif 
 #include <boost/test/unit_test.hpp>
-
-
-// Nothing more to do here for this linkage model.

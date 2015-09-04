@@ -5,7 +5,6 @@
 #include <libril/constants.hpp>
 #include <libpml/matrix_parameter.hpp>
 
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>

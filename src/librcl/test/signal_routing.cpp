@@ -5,7 +5,6 @@
 #include <libril/audio_signal_flow.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #include <algorithm>
