@@ -49,6 +49,11 @@ void GainMatrix::setup( std::size_t numberOfInputs,
 
 void GainMatrix::process()
 {
+  // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
+  if( mInput.width() == 0 or mOutput.width() == 0 )
+  {
+    return;
+  }
   SampleType const * const * inputVector = mInput.getVector();
   SampleType * const * outputVector = mOutput.getVector( );
 
