@@ -121,7 +121,7 @@ IndexSequence::IndexSequence( std::string const & val )
 
   if( (not parseRet) or( first != last ) )
   {
-    throw std::invalid_argument( "SignalList: Parsing of initialiser string failed." );
+    throw std::invalid_argument( "IndexSequence: Parsing of initialiser string failed." );
   }
 
   mIndices.swap( state.mContents );
