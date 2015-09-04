@@ -27,10 +27,6 @@ Options::Options()
   registerOption<std::size_t>( "input-channels,i", "Number of input channels for audio object signal" );
   registerOption<std::size_t>( "output-channels,o", "Number of audio output channels" );
 
-  registerOption<std::string>( "output-routing", "Routing of logical renderer outputs to physical output channels. Overrides the channel configuration in the array configuration file.");
-
-  registerOption<std::string>( "output-gain,g", "Output gain and delay adjustment configuration. The number of output channels must be identical to the number of physical output channels" );
-
   registerOption<std::string>( "tracking", "Enable adaptation of the panning using visual tracking. Accepts the position of the tracker in JSON format"
     "\"{ \"port\": <UDP port number>, \"position\": {\"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }, \"rotation\": { \"rotX\": rX, \"rotY\": rY, \"rotZ\": rZ } }\" ." );
 

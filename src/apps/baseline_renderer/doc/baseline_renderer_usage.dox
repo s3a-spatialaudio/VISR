@@ -108,7 +108,7 @@ Activates the listener-tracked VBAP reproduction, which adjust both the VBAP gai
 </panningConfiguration>
  * @endcode
  *
- * @subsection baseline_renderer_usage_xml_config_description.
+ * @subsection baseline_renderer_usage_xml_config_description Description
  * The root node of the XML file is \c &lt;panningConfiguration&gt;.
  * This element supports the folloring optional attributes:
  * - \c isInfinite Whether the loudspeakers are regardes as point sources located on the unit sphere (\b false) or as plane waves, corresponding to an infinite distance (\b true). Default: \b false.
