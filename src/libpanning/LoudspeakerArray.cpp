@@ -63,12 +63,6 @@ LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & r
 
 int LoudspeakerArray::load( FILE *file )
 {
-  // These features are not supported by the text format.
-  m_subwooferChannels.clear();
-  m_subwooferGains.resize( 0, 0 );
-  m_gainAdjustment.resize( 0 );
-  m_delayAdjustment.resize( 0 );
-  
   int n, i, chan;
   char c;
   Afloat x, y, z;
@@ -99,6 +93,8 @@ int LoudspeakerArray::load( FILE *file )
 
   if( file == 0 ) return -1;
 
+  std::size_t numRegularSpeakers = 0; // Counter that excludes virtual loudspeakers
+
   do
   {
     c = fgetc( file );
@@ -121,6 +117,10 @@ int LoudspeakerArray::load( FILE *file )
       {
         return -1; // Insertion failed, i.e., duplicated index
       }
+      if( chan > 0 )
+      {
+        ++numRegularSpeakers;
+      }
     }
     else if( c == 'p' )
     {   // polars, using degrees
@@ -142,6 +142,10 @@ int LoudspeakerArray::load( FILE *file )
       if( !insRet )
       {
         return -1; // Insertion failed, i.e., duplicated index
+      }
+      if( chan > 0 )
+      {
+        ++numRegularSpeakers;
       }
     }
     else if( c == 't' )
@@ -171,9 +175,18 @@ int LoudspeakerArray::load( FILE *file )
   }
   while( !feof( file ) );
 
-  std::size_t numSpeakers = tmpSpeakers.size();
+  std::size_t const numSpeakers = tmpSpeakers.size(); // including virtual speakers
   m_position.resize( numSpeakers );
-  m_channel.resize( numSpeakers );
+  m_channel.resize( numRegularSpeakers );
+  m_subwooferGains.resize( 0, numRegularSpeakers );
+  m_subwooferChannels.clear( );
+
+  // As the txt configuration file does not support these features, set them to neutral default values.
+  m_gainAdjustment.resize( numRegularSpeakers );
+  m_gainAdjustment.fillValue( 1.0f );
+  m_delayAdjustment.resize( numRegularSpeakers );
+  m_delayAdjustment.fillValue( 0.0f );
+
   LoudspeakerIndexType spkIdx = 0;
   for( auto const & v : tmpSpeakers )
   {
@@ -182,7 +195,10 @@ int LoudspeakerArray::load( FILE *file )
     {
       return -1;
     }
-    m_channel[spkIdx] = v.channel;
+    if( v.channel > 0 )
+    {
+      m_channel[spkIdx] = v.channel;
+    }
     m_position[spkIdx] = v.pos;
     ++spkIdx;
   }
