@@ -69,8 +69,7 @@
    <virtualspeaker id="23">
       <cart x="6.1232e-16" y="0" z="-10"/>
    </virtualspeaker>
-   <subwoofer assignedLoudspeakers="1:11" channel="40" delay="0" gainDB="0" weights="0.080000, 0.167852, 0.397852, 0.682148, 0.912148, 1.000000, 0.912148, 0.682148, 0.397852, 0.167852, 0.080000"/>
-   <subwoofer assignedLoudspeakers="12:22" channel="41" delay="0" gainDB="0" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000"/>
+   <subwoofer assignedLoudspeakers="1:22" channel="40" delay="0" gainDB="-60" />
    <triplet l1="1" l2="2" l3="20"/>
    <triplet l1="11" l2="2" l3="1"/>
    <triplet l1="19" l2="12" l3="11"/>
