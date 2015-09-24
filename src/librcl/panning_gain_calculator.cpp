@@ -96,7 +96,9 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     objectmodel::Object const & obj = *(objEntry.second);
     if( obj.numberOfChannels() != 1 )
     {
-      std::cerr << "PanningGainCalculator: Only monaural object types are supported at the moment." << std::endl;
+      // Panning is implemented only for single-channel objects.
+      // So we use this check as a first criterion to skip any sources of other types
+      // Other non-matching types will be skipped later on.
       continue;
     }
 
