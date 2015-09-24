@@ -23,7 +23,12 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     HoaSource & hoaSrc = dynamic_cast<HoaSource&>(src);
 
     // parse point source-specific data members
-    hoaSrc.setOrder( tree.get<HoaSource::Order>( "order" ) );
+    HoaSource::Order const order = tree.get<HoaSource::Order>( "order" );
+    if( (order + 1) * (order + 1) != hoaSrc.numberOfChannels() )
+    {
+      throw std::invalid_argument( "Number of channel signals differs from the value expected for thus HOA order." );
+    }
+    hoaSrc.setOrder( order );
   }
   // TODO: distinguish between boost property_tree parse errors and bad dynamic casts.
   catch( std::exception const & ex )
