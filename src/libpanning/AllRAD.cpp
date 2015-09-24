@@ -2,6 +2,7 @@
 //  AllRAD.cpp
 //
 //  Created by Dylan Menzies on 12/12/2014.
+// Modified: Andreas Franck 23/09/2015
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
@@ -12,10 +13,34 @@
 
 #include "AllRAD.h"
 
+#include <libefl/basic_matrix.hpp>
+
 namespace visr
 {
 namespace panning
 {
+
+AllRAD::AllRAD()
+ : m_regDecode( 0 )
+ , m_decode( 0 )
+ , m_nHarms( 0 )
+ , m_nSpkSources( 0 )
+    , m_regArray( 0 )
+{
+}
+
+AllRAD::AllRAD( LoudspeakerArray const * regularArray,
+                efl::BasicMatrix<Afloat> const & decodeCoeffs,
+                unsigned int hoaOrder )
+ // Note: No copy construction of BasicMatrix objects, so we copy afterwards.
+ : m_regDecode( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
+ , m_decode( (hoaOrder+1) * (hoaOrder+1), regularArray->getNumSpeakers(), decodeCoeffs.alignmentElements() )
+ , m_nHarms( (hoaOrder + 1) * (hoaOrder + 1) )
+ , m_nSpkSources( regularArray->getNumSpeakers( ) )
+ , m_regArray( regularArray )
+{
+  m_regDecode.copy( decodeCoeffs );
+}
 
 int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
     
@@ -45,16 +70,13 @@ int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
 
 int AllRAD::calcDecodeGains(VBAP* vbap){
     
-    Afloat sum;
-    
     // In vbap first do externally: setListenerPosition, then calcInvMatrix.
     
-    //* This casting could cause failure if MAX_NUM_SOURCES < MAX_NUM_SPEAKERS
     vbap->setSourcePositions( m_regArray->getPositions()  );
     
     vbap->setNumSources(m_regArray->getNumSpeakers());
     
-    //! set isAtInfinity flag for all regArray speakers
+    //! Make sure the isAtInfinity flag is set for all regArray speakers
     
     vbap->calcGains();
     
@@ -66,7 +88,7 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
     
     for( std::size_t i = 0; i < m_nHarms; i++) {
       for( std::size_t j = 0; j < nSpks; j++) {
-            sum = 0;
+            Afloat sum = 0.0f;
             for( std::size_t k = 0; k < m_nSpkSources; k++) {
                 sum += m_regDecode( i, k ) * vbapGain( k, j );
             }
