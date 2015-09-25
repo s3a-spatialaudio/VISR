@@ -42,7 +42,6 @@ void HoaAllRadGainCalculator::setup( panning::LoudspeakerArray const & regularAr
   mRealSpeakerArray = realArrayConfig;
 
   std::size_t const numRegularSpeakers = mRegularSpeakerArray.getNumSpeakers( );
-  std::size_t numRealSpeakers = mRealSpeakerArray.getNumSpeakers();
   std::size_t const numHarmonicSignals = decodeMatrix.numberOfRows();
   // Deduce the Ambisonics order from the number of harmonic signals
   std::size_t const hoaOrder = static_cast<std::size_t>(std::ceil( std::sqrt( numHarmonicSignals ) ))-1;
