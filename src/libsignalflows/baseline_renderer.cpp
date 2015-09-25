@@ -58,6 +58,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mSceneDecoder( *this, "SceneDecoder" )
  , mOutputAdjustment( *this, "OutputAdjustment" )
  , mGainCalculator( *this, "VbapGainCalculator" )
+ , mAllradGainCalculator( *this, "AllRadGainGalculator" )
  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
  , mVbapMatrix( *this, "VbapGainMatrix" )
  , mDiffusePartMatrix( *this, "DiffusePartMatrix" )
@@ -99,6 +100,26 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   mSceneDecoder.setup( );
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
+
+  //////////////////////////////////////////////////////////////////////////////////////
+  // Experimental HOA decoding stuff
+  boost::filesystem::path const regArrayPath( CMAKE_SOURCE_DIR "/src/libpanning/test/matlab/arrays/t-design_t8_P40.xml" );
+  boost::filesystem::path const regArrayDecodeMtxPath( CMAKE_SOURCE_DIR "/src/libpanning/test/matlab/arrays/decode_N8_P40_t-design_t8_P40.txt" );
+  if( not exists( regArrayPath ) or is_directory( regArrayPath ) )
+  {
+    throw std::invalid_argument( "Path to regular array does not exist." );
+  }
+  if( not exists( regArrayDecodeMtxPath ) or is_directory( regArrayDecodeMtxPath ) )
+  {
+    throw std::invalid_argument( "Path to HOA decoding matrix does not exist." );
+  }
+  pml::MatrixParameter<Afloat> allRadDecoderGains = pml::MatrixParameter<Afloat>::fromTextFile( regArrayDecodeMtxPath.string() );
+
+  panning::LoudspeakerArray allRadRegArray;
+  allRadRegArray.loadXml( regArrayPath.string() );
+  mAllradGainCalculator.setup( allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
+
+  //////////////////////////////////////////////////////////////////////////////////////
 
   mDiffusionGainCalculator.setup( numberOfInputs );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
@@ -244,6 +265,8 @@ BaselineRenderer::process()
     mListenerCompensation->process( mListenerPosition, mCompensationGains, mCompensationDelays );
   }
   mGainCalculator.process( mObjectVector, mGainParameters );
+  // Calculate the panning gains for HOA objects and place them into the panning gain matrix.
+  mAllradGainCalculator.process( mObjectVector, mGainParameters );
   mDiffusionGainCalculator.process( mObjectVector, mDiffuseGains );
   mVbapMatrix.setGains( mGainParameters );
   mVbapMatrix.process();
