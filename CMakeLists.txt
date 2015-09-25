@@ -13,6 +13,17 @@ PROJECT( VISR CXX C )
 # Add support for unit tests
 INCLUDE( CTest )
 
+# Package generation
+# TODO: Move this stuff to an external location
+# TODO: Add support for other systems (Windows installer, MacOS images)
+SET( CPACK_GENERATOR "DEB" )
+# SET( CPACK_DEBIAN_PACKAGE_DEPENDS "libportaudio19-dev (>19)" )
+SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Franck A.Franck@soton.ac.uk" )
+SET( CPACK_PACKAGE_NAME "VISR" )
+SET( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
+SET( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+INCLUDE( CPack )
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 # TBD: Switch between GNU compiler and clang on Linux platforms
