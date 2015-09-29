@@ -35,8 +35,8 @@ while ~feof(fid)
     [val, count] = fscanf(fid, '%c', 1);
 
     if (val == 'c')
-        [val, count] = fscanf(fid, '%d %lf %lf %lf', Inf);
-        X = [X; val(2:4)'];   %! would better to write to an index position using val(1)
+        [val, count] = fscanf(fid, '%d %d %lf %lf %lf', Inf);
+        X = [X; val(3:5)'];   %! would better to write to an index position using val(1)
     else
         if (val =='%')
              fgetl(fid);
