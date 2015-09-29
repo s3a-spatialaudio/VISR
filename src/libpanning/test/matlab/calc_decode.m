@@ -14,6 +14,11 @@
 clear;
 addpath('arrays');
 
+% Whether to use the XML array configuration format or the text-based
+% format
+useXML = false;
+
+
 N = 8; % maximum order of spherical harmonic used.
 nACN = (N+1)^2;  % ACN = Ambisonic Channel Numbering
 
@@ -26,36 +31,14 @@ D = [];
 
 % Load plane wave directions
 
-if true % Whether to load the text-based configuration or the XML format.
-X = [];
-
-filename = 't-design_t8_P40.txt';
-fid = fopen (filename, 'r');
-
-while ~feof(fid)
-    [val, count] = fscanf(fid, '%c', 1);
-
-    if (val == 'c')
-        [val, count] = fscanf(fid, '%d %d %lf %lf %lf', Inf);
-        if count ~= 5 
-            error( 'Coordinate line must contain 5 values "id channel x y z".' );
-        end
-        X = [X; val(3:5)'];   %! would better to write to an index position using val(1)
-    else
-        if (val =='%')
-             fgetl(fid);
-        end
-    end
-end
-           
-fclose (fid);
-
-nPW = val(1);
+filename = 't-design_t8_P40';
+if useXML
+    [X,~,~] = readArrayConfigXml( [filename '.xml'] );
 else
-    filename = 't-design_t8_P40.xml';
-    [X,~,~] = readArrayConfigXml( filename );
-    nPW = size( X, 1 );
+    [X,~,~] = readArrayConfigTxt( [filename '.txt'] );
 end
+    
+nPW = size( X, 1 );
 
 % Calculate decode matrix
 
@@ -154,26 +137,13 @@ fclose (fid);
          
 % Load coordinates for an actual speaker array.
 % Plot b-format2vbap gains for individual harmonics.
-         
-X = [];
 
-filename = 'octahedron.txt';
-fid = fopen (filename, 'r');
-
-while ~feof(fid)
-    [val, count] = fscanf(fid, '%c', 1);
-
-    if (val == 'c')
-         [val, count] = fscanf(fid, '%d %lf %lf %lf', Inf);
-         X = [X; val(2:4)'];  
-    else
-        if (val =='%')
-            fgetl(fid);
-        end
-    end
+filename = 'octahedron';
+if useXML
+    [X,~,~] = readArrayConfigXml( [filename '.xml'] );
+else
+    [X,~,~] = readArrayConfigTxt( [filename '.txt'] );
 end
-
-fclose (fid);
 
 figure
 scatter3(X(:,1),X(:,2),X(:,3),onlyplus(10*S(2,:)),'red')
