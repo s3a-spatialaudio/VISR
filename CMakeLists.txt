@@ -13,17 +13,6 @@ PROJECT( VISR CXX C )
 # Add support for unit tests
 INCLUDE( CTest )
 
-# Package generation
-# TODO: Move this stuff to an external location
-# TODO: Add support for other systems (Windows installer, MacOS images)
-SET( CPACK_GENERATOR "DEB" )
-# SET( CPACK_DEBIAN_PACKAGE_DEPENDS "libportaudio19-dev (>19)" )
-SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Franck A.Franck@soton.ac.uk" )
-SET( CPACK_PACKAGE_NAME "VISR" )
-SET( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
-SET( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-INCLUDE( CPack )
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 # TBD: Switch between GNU compiler and clang on Linux platforms
@@ -190,7 +179,8 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
+# In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
@@ -238,5 +228,52 @@ IF(BUILD_DOCUMENTATION)
  
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
  
-  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc )
+  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/visr/doc )
 ENDIF()
+
+# Package generation
+# TODO: Move this stuff to an external location
+# TODO: Add support for other systems (Windows installer, MacOS images)
+
+SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Franck A.Franck@soton.ac.uk" )
+SET( CPACK_PACKAGE_NAME "VISR" )
+
+IF( WIN32 )
+SET( CPACK_GENERATOR "NSIS" )
+SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+SET(CPACK_PACKAGE_VENDOR "ISVR")
+GET_FILENAME_COMPONENT( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
+INSTALL( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll DESTINATION bin )
+IF(BUILD_USE_FFTW)
+  GET_FILENAME_COMPONENT( FFTW_LIBRARY_DIR ${FFTW3_LIBRARY} DIRECTORY )
+  INSTALL( FILES ${FFTW_LIBRARY_DIR}/libfftw3-3.dll DESTINATION bin )
+  INSTALL( FILES ${FFTW_LIBRARY_DIR}/libfftw3f-3.dll DESTINATION bin )
+ENDIF(BUILD_USE_FFTW)
+# Boost
+IF( NOT Boost_USE_STATIC_LIBS )
+  GET_FILENAME_COMPONENT( BOOST_CHRONO_LIBRARY_BASENAME ${Boost_CHRONO_LIBRARY_RELEASE} NAME_WE )
+  GET_FILENAME_COMPONENT( BOOST_DATE_TIME_LIBRARY_BASENAME ${Boost_DATE_TIME_LIBRARY_RELEASE} NAME_WE )
+  GET_FILENAME_COMPONENT( BOOST_FILESYSTEM_LIBRARY_BASENAME ${Boost_FILESYSTEM_LIBRARY_RELEASE} NAME_WE )
+  GET_FILENAME_COMPONENT( BOOST_PROGRAM_OPTIONS_LIBRARY_BASENAME ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE} NAME_WE )
+  GET_FILENAME_COMPONENT( BOOST_SYSTEM_LIBRARY_BASENAME ${Boost_SYSTEM_LIBRARY_RELEASE} NAME_WE )
+  GET_FILENAME_COMPONENT( BOOST_THREAD_LIBRARY_BASENAME ${Boost_THREAD_LIBRARY_RELEASE} NAME_WE )
+  INSTALL( FILES ${Boost_LIBRARY_DIR}/${BOOST_CHRONO_LIBRARY_BASENAME}.dll DESTINATION bin )
+  INSTALL( FILES ${Boost_LIBRARY_DIR}/${BOOST_DATE_TIME_LIBRARY_BASENAME}.dll DESTINATION bin )
+  INSTALL( FILES ${Boost_LIBRARY_DIR}/${BOOST_FILESYSTEM_LIBRARY_BASENAME}.dll DESTINATION bin )
+  INSTALL( FILES ${Boost_LIBRARY_DIR}/${BOOST_PROGRAM_OPTIONS_LIBRARY_BASENAME}.dll DESTINATION bin )
+  INSTALL( FILES ${Boost_LIBRARY_DIR}/${BOOST_SYSTEM_LIBRARY_BASENAME}.dll DESTINATION bin )
+  INSTALL( FILES ${Boost_LIBRARY_DIR}/${BOOST_THREAD_LIBRARY_BASENAME}.dll DESTINATION bin )
+ENDIF( NOT Boost_USE_STATIC_LIBS )
+
+ELSEIF( WIN32 )
+# Linux
+SET( CPACK_GENERATOR "DEB" )
+SET( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
+SET( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+ENDIF(WIN32)
+
+INSTALL( DIRECTORY config DESTINATION share/visr )
+INSTALL( FILES ${CMAKE_SOURCE_DIR}/licence.txt DESTINATION share/visr )
+SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/licence.txt )
+
+INCLUDE( CPack )
