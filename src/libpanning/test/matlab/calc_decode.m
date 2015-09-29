@@ -26,6 +26,7 @@ D = [];
 
 % Load plane wave directions
 
+if true % Whether to load the text-based configuration or the XML format.
 X = [];
 
 filename = 't-design_t8_P40.txt';
@@ -36,6 +37,9 @@ while ~feof(fid)
 
     if (val == 'c')
         [val, count] = fscanf(fid, '%d %d %lf %lf %lf', Inf);
+        if count ~= 5 
+            error( 'Coordinate line must contain 5 values "id channel x y z".' );
+        end
         X = [X; val(3:5)'];   %! would better to write to an index position using val(1)
     else
         if (val =='%')
@@ -47,8 +51,11 @@ end
 fclose (fid);
 
 nPW = val(1);
-
-
+else
+    filename = 't-design_t8_P40.xml';
+    [X,~,~] = readArrayConfigXml( filename );
+    nPW = size( X, 1 );
+end
 
 % Calculate decode matrix
 
