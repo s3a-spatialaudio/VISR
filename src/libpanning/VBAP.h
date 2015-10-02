@@ -70,7 +70,7 @@ public:
     std::size_t setNumSources( std::size_t n) {
         m_nSources = n;
 	// Take care of the fact that the loudspeaker
-	// array might not been set yest.
+	// array might not been set yet.
 	std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
         m_gain.resize( m_nSources, numSpeakers );
         return n;

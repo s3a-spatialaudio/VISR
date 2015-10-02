@@ -34,7 +34,7 @@ AllRAD::AllRAD( LoudspeakerArray const * regularArray,
                 unsigned int hoaOrder )
  // Note: No copy construction of BasicMatrix objects, so we copy afterwards.
  : m_regDecode( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
- , m_decode( (hoaOrder+1) * (hoaOrder+1), regularArray->getNumSpeakers(), decodeCoeffs.alignmentElements() )
+ , m_decode( decodeCoeffs.alignmentElements() ) // The required size of this matrix is not known yet (see below)
  , m_nHarms( (hoaOrder + 1) * (hoaOrder + 1) )
  , m_nSpkSources( regularArray->getNumSpeakers( ) )
  , m_regArray( regularArray )
@@ -84,6 +84,13 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
     
     std::size_t const nSpks = vbap->getNumSpeakers();
     
+    // NOTE: The size of the final gain matrix depends on the VBAP
+    // configuration, which is not known beforehand. So the gain
+    // matrix has to be resized within this call.
+    // TODO: Change interface either to make the configuration known
+    // beforehand, or to pass a matrix of matching size.
+    m_decode.resize( m_nHarms, nSpks );
+
     // Find decode gains by matrix multiplication
     
     for( std::size_t i = 0; i < m_nHarms; i++) {

@@ -15,6 +15,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <cassert>
 #include <ciso646>
 #include <cmath>
 #include <cstdio>
@@ -98,7 +99,12 @@ void HoaAllRadGainCalculator::process( objectmodel::ObjectVector const & objects
   }
   // Do not reset the gain matrix, as we will write on top of the standard VBAP source gains.
 
-  efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();
+  efl::BasicMatrix<Afloat> const & decodeGains = mAllRadCalculator->getDecodeGains();
+  // NOTE: Currently, the gain matrix returned by the AllRAD object
+  // also contains the gains of the imaginary speakers.
+  // TODO: Reconsider the design of the VBAP objects to hide these
+  // speakers from the outside.
+  assert( decodeGains.numberOfRows() >= numRealSpeakers );
 
   // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
   // Any potential re-routing will be added later.
@@ -128,10 +134,9 @@ void HoaAllRadGainCalculator::process( objectmodel::ObjectVector const & objects
         {
           throw std::runtime_error( "Channel index exceeds maximum admissible value." );
         }
-        efl::ErrorCode const mpyRes = efl::vectorMultiplyConstant( srcLevel, vbapGains.row( sigIdx ), gainMatrix.row( chIdx ), numRealSpeakers );
-        if( mpyRes != efl::noError )
+        for( std::size_t spkIdx(0); spkIdx < numRealSpeakers; ++spkIdx )
         {
-          throw( std::logic_error( "HoaAllRadGainCalculator: Scaleing and setting VBAP gains failed.") );
+          gainMatrix(spkIdx, chIdx ) = srcLevel * decodeGains( sigIdx, spkIdx );
         }
       }
     }
