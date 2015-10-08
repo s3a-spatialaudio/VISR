@@ -1,9 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "point_source_reverb_parser.hpp"
+#include "point_source_with_reverb_parser.hpp"
 
-#include "point_source_reverb.hpp"
 #include "point_source_parser.hpp"
+#include "point_source_with_reverb.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 

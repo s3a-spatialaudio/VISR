@@ -3,17 +3,17 @@
 
 #include "object_factory.hpp"
 
+#include "diffuse_source.hpp"
 #include "point_source.hpp"
 #include "plane_wave.hpp"
 #include "point_source_with_diffuseness.hpp"
-#include "diffuse_source.hpp"
-#include "point_source_reverb.hpp"
+#include "point_source_with_reverb.hpp"
 
 #include "point_source_parser.hpp"
 #include "plane_wave_parser.hpp"
 #include "point_source_with_diffuseness_parser.hpp"
 #include "diffuse_source_parser.hpp"
-#include "point_source_reverb_parser.hpp" 
+#include "point_source_with_reverb_parser.hpp"
 
 #include <stdexcept>
 

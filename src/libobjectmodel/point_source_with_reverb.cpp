@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "point_source_reverb.hpp"
+#include "point_source_with_reverb.hpp"
 
 namespace visr
 {
