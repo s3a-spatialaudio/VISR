@@ -1,0 +1,42 @@
+{
+    "objects":
+    [
+
+	{
+	    "id": 0, 
+	    "channels": 0,  
+	    "type": "pointreverb",
+	    "group": 0,
+	    "priority": 0,
+	    "level": 0.53,
+	    "position":
+	    {
+		"x":1,
+		"y":1,
+		"z":1
+	    },
+	    "room":
+	    {
+		"ereflect":
+		{
+		    "delay": 0.1,
+		    "level": 0.1,
+		    "position":
+		    {
+			"x":1,
+			"y":1,
+			"z":0
+		    },
+		    "IIRpoles": "1.0 0.0",
+		    "IIRzeros": "1.0, 0.0"
+		},
+		"lreverb":
+		{
+		    "delay": 0.1,
+		    "level" : "0.0, -6.0",
+		    "decayconst" : "0.01, 0.5"
+		}
+	    }
+	}
+    ]
+}
