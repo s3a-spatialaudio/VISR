@@ -25,14 +25,16 @@ namespace objectmodel
 class PointSourceWithReverb: public PointSource
 {
 public:
-    static const std::size_t cNumberOfSubBands = 9;
-    
-    static const std::size_t cReflectionIirFilterLength = 12;
-    
-    class DiscreteReflection
-    {
-    public:
-        
+  static const std::size_t cNumberOfSubBands = 9;
+
+  static const std::size_t cReflectionIirFilterLength = 12;
+
+  using LateReverbCoeffs = std::array<ril::SampleType, cNumberOfSubBands >;
+
+  class DiscreteReflection
+  {
+  public:
+
         
     private:
         Coordinate mX;
@@ -57,9 +59,24 @@ public:
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
   ril::SampleType const lateReverbOnset() const { return mLateReverbOnset; }
-    
+
   void setLateReverbOnset( ril::SampleType onset ) { mLateReverbOnset = onset; }
-    
+
+  LateReverbCoeffs const & lateReverbDecayCoeffs() const { return mLateReverbDecay; }
+
+  LateReverbCoeffs const & lateReverbLevels() const { return mLateReverbLevels; }
+
+  void setLateReverbLevels( LateReverbCoeffs const & levels ) { mLateReverbLevels = levels; }
+
+  void setLateReverbLevels( ril::SampleType const * levels, std::size_t numValues );
+
+  void setLateReverbDecayCoeffs( LateReverbCoeffs const & decay ) { mLateReverbDecay = decay; }
+
+  void setLateReverbDecayCoeffs( ril::SampleType const * decay, std::size_t numValues );
+
+  std::size_t numberOfDiscreteReflections() const { return mDiscreteReflections.size(); };
+
+
 protected:
 
 private:
@@ -67,11 +84,9 @@ private:
     
     ril::SampleType mLateReverbOnset;
     
-    std::array<ril::SampleType, cNumberOfSubBands >  mLateDelayDecayCoeffs;
+    LateReverbCoeffs mLateReverbDecay;
     
-    std::array<ril::SampleType, cNumberOfSubBands >  mLateDelayLevels;
-  
-
+    LateReverbCoeffs mLateReverbLevels;
 };
 
 } // namespace objectmodel

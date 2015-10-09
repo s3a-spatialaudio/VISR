@@ -18,10 +18,10 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
   try
   {
     // note: cannot check for object type id since src might be a subclass of PointSource
-    PointSourceWithReverb & diffusePointSrc = dynamic_cast<PointSourceWithReverb&>(src);
+    PointSourceWithReverb & reverbPointSrc = dynamic_cast<PointSourceWithReverb&>(src);
 
     // Parse all members inherited from the base class PointSource
-    PointSourceParser::parse( tree, diffusePointSrc );
+    PointSourceParser::parse( tree, reverbPointSrc );
 
     // parse point source-specific data members
   }
