@@ -10,7 +10,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <ciso646>
-#include <istream>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <stdexcept>
