@@ -107,6 +107,8 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
+    const std::string reverbConfiguration;
+
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;
 #else
@@ -151,6 +153,7 @@ int main( int argc, char const * const * argv )
                                         diffusionCoeffs,
                                         trackingConfiguration,
                                         sceneReceiverPort,
+                                        reverbConfiguration,
                                         periodSize, samplingRate );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK

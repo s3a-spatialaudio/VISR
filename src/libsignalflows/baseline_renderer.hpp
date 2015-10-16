@@ -60,6 +60,7 @@ public:
                              efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
+                             std::string const & reverbConfig,
                              std::size_t period,
                              ril::SamplingFrequencyType samplingFrequency );
 

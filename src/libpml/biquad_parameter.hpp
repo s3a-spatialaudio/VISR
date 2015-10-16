@@ -168,6 +168,31 @@ private:
   std::vector< BiquadParameter< CoeffType > > mBiquads;
 };
 
+template<typename CoeffType>
+class BiquadParameterMatrix
+{
+public:
+  explicit BiquadParameterMatrix( std::size_t numberOfRows, std::size_t numberOfChannels );
+
+  ~BiquadParameterMatrix();
+
+  std::size_t numberOfRows() const { return mRows.size(); }
+  std::size_t numberOfColumns() const { return mRows.empty() ? 0 : mRows[0].size(); }
+
+  void resize( std::size_t numberOfRows, std::size_t numberOfChannels );
+
+  BiquadParameterList<CoeffType> const & operator[]( std::size_t rowIdx ) const { return mRows[rowIdx]; }
+  BiquadParameterList<CoeffType> & operator[]( std::size_t rowIdx ) { return mRows[rowIdx]; }
+
+  BiquadParameterList<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
+  BiquadParameterList<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
+
+private:
+  using ContainerType = std::vector< BiquadParameterList<CoeffType> >;
+
+  ContainerType mRows;
+};
+
 } // namespace pml
 } // namespace visr
 

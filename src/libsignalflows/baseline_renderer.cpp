@@ -50,8 +50,10 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
                                     efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                                     std::string const & trackingConfiguration,
                                     std::size_t sceneReceiverPort,
+                                    std::string const & reverbConfig,
                                     std::size_t period,
-                                    ril::SamplingFrequencyType samplingFrequency )
+                                    ril::SamplingFrequencyType samplingFrequency
+                                    )
  : AudioSignalFlow( period, samplingFrequency )
  , mDiffusionFilters( diffusionFilters )
  , mSceneReceiver( *this, "SceneReceiver" )
@@ -128,6 +130,9 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   // identical to ril::SampleType (at the moment, both are floats).
   efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
   mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
+
+
+
 
   // Create the index vectors for connecting the ports.
   // First, create the start indices for all output vectors by adding the width of the previous vector.
