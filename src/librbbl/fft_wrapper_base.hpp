@@ -21,9 +21,9 @@ public:
 
   virtual ~FftWrapperBase() {};
 
-  virtual efl::ErrorCode forwardTransform( DataType const * const in, FrequencyDomainType * out ) = 0;
+  virtual efl::ErrorCode forwardTransform( DataType const * const in, FrequencyDomainType * out ) const = 0;
 
-  virtual efl::ErrorCode inverseTransform( FrequencyDomainType const * const in, DataType * out ) = 0;
+  virtual efl::ErrorCode inverseTransform( FrequencyDomainType const * const in, DataType * out ) const = 0;
 
   virtual DataType forwardScalingFactor() const = 0;
 

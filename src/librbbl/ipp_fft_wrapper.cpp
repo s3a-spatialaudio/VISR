@@ -172,28 +172,28 @@ template IppFftWrapper<float>::~IppFftWrapper( );
 template IppFftWrapper<double>::~IppFftWrapper( );
 
 template<>
-efl::ErrorCode IppFftWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
+efl::ErrorCode IppFftWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out ) const
 {
   IppStatus const sts = ippsFFTFwd_RToCCS_32f( in, reinterpret_cast<Impl::TransformDataType*>(out), mImpl->mFftSpec, mImpl->mWorkBuffer.data( ) );
   return sts == ippStsNoErr ? efl::noError : efl::arithmeticError;
 }
 
 template<>
-efl::ErrorCode IppFftWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
+efl::ErrorCode IppFftWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out ) const
 {
   IppStatus const sts = ippsFFTInv_CCSToR_32f( reinterpret_cast<const Impl::TransformDataType*>(in), out, mImpl->mFftSpec, mImpl->mWorkBuffer.data( ) );
   return sts == ippStsNoErr ? efl::noError : efl::arithmeticError;
 }
 
 template<>
-efl::ErrorCode IppFftWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out )
+efl::ErrorCode IppFftWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out ) const
 {
   IppStatus const sts = ippsFFTFwd_RToCCS_64f( in, reinterpret_cast<Impl::TransformDataType*>(out), mImpl->mFftSpec, mImpl->mWorkBuffer.data( ) );
   return sts == ippStsNoErr ? efl::noError : efl::arithmeticError;
 }
 
 template<>
-efl::ErrorCode IppFftWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out )
+efl::ErrorCode IppFftWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out ) const
 {
   IppStatus const sts = ippsFFTInv_CCSToR_64f( reinterpret_cast<const Impl::TransformDataType*>(in), out, mImpl->mFftSpec, mImpl->mWorkBuffer.data( ) );
   return sts == ippStsNoErr ? efl::noError : efl::arithmeticError;
