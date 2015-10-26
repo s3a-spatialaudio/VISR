@@ -73,8 +73,8 @@ public:
                                          std::size_t maxFilterLength,
                                          std::size_t maxRoutingPoints,
                                          std::size_t maxFilterEntries,
-                                         RoutingList const & initialRoutings,
-                                         efl::BasicMatrix<SampleType> const & initialFilters,
+                                         RoutingList const & initialRoutings = RoutingList(),
+                                         efl::BasicMatrix<SampleType> const & initialFilters = efl::BasicMatrix<SampleType>(),
                                          std::size_t alignment = 0,
                                          char const * fftImplementation = "default" );
 
@@ -164,13 +164,15 @@ public:
    */
   void initFilters( efl::BasicMatrix<SampleType> const & newFilters );
 
-  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 );
-
   void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
+
+private:
 
   void processInput( SampleType const * const * input, std::size_t alignment );
 
   void processOutput( SampleType * const * output, std::size_t alignment );
+
+  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
 
   /**
    * Helper functions to calculate the parameters of the partitioned convolution algorithm.
