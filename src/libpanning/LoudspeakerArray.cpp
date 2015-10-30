@@ -415,10 +415,19 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     ptree const eqNode = treeRoot.get_child( "outputEqConfiguration" );
     numEqSections = eqNode.get<std::size_t>( "<xmlattr>.numberOfBiquads" );
     parseChannelLookup( treeRoot.get_child( "outputEqConfiguration" ), eqLookupTable, numEqSections );
+    mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers + numSubwoofers, numEqSections ) );
   }
-  mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
+  else
+  {
+    mOutputEqs.reset( ); // Make it a null ptr to flag 'no EQ config present'
+  }
+  // TODO: If we leave the instantiation here, the EQ configuration
+  // will always be present, albeit with zero biquad sections. However, the
+  // renderer should work in this case as well (and currently does).
+  // The current setting distinguished between the cases.
+  // mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
 
-  // The maximim admissible loudspeaker index as used in the file,
+  // The maximum admissible loudspeaker index as used in the file,
   // i.e., one-offset.
   LoudspeakerIndexType const maxSpeakerIndexOneOffset
     = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
@@ -429,7 +438,7 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     int id = childTree.get<int>( "<xmlattr>.id" );
     if( id < 1 or id > maxSpeakerIndexOneOffset )
     {
-      throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the numbeer of loudspeakers." );
+      throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the number of loudspeakers." );
     }
     int idZeroOffset = id - 1;
     if( m_channel[idZeroOffset] != cInvalidChannel )
