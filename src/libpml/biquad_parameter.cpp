@@ -124,7 +124,7 @@ template< typename CoeffType >
 /*static*/ BiquadParameterList<CoeffType>
 BiquadParameterList<CoeffType>::fromJson( boost::property_tree::ptree const & tree )
 {
-  typename BiquadParameterList<CoeffType> ret;
+  BiquadParameterList<CoeffType> ret;
   ret.loadJson( tree );
   return ret;
 }
@@ -133,7 +133,7 @@ template< typename CoeffType >
 /*static*/ BiquadParameterList<CoeffType>
 BiquadParameterList<CoeffType>::fromJson( std::basic_istream<char> & stream )
 {
-  typename BiquadParameterList<CoeffType> ret;
+  BiquadParameterList<CoeffType> ret;
   ret.loadJson( stream );
   return ret;
 }
@@ -142,7 +142,7 @@ template< typename CoeffType >
 /*static*/ BiquadParameterList<CoeffType>
 BiquadParameterList<CoeffType>::fromJson( std::string const & str )
 {
-  typename BiquadParameterList<CoeffType> ret;
+  BiquadParameterList<CoeffType> ret;
   ret.loadJson( str );
   return ret;
 
@@ -152,7 +152,7 @@ template< typename CoeffType >
 /*static*/ BiquadParameterList<CoeffType>
 BiquadParameterList<CoeffType>::fromXml( boost::property_tree::ptree const & tree )
 {
-  typename BiquadParameterList<CoeffType> ret;
+  BiquadParameterList<CoeffType> ret;
   ret.loadXml( tree );
   return ret;
 }
@@ -161,7 +161,7 @@ template< typename CoeffType >
 /*static*/ BiquadParameterList<CoeffType>
 BiquadParameterList<CoeffType>::fromXml( std::basic_istream<char> & stream )
 {
-  typename BiquadParameterList<CoeffType> ret;
+  BiquadParameterList<CoeffType> ret;
   ret.loadXml( stream );
   return ret;
 }
@@ -170,7 +170,7 @@ template< typename CoeffType >
 /*static*/ BiquadParameterList<CoeffType>
 BiquadParameterList<CoeffType>::fromXml( std::string const & str )
 {
-  typename BiquadParameterList<CoeffType> ret;
+  BiquadParameterList<CoeffType> ret;
   ret.loadXml( str );
   return ret;
 }
@@ -282,7 +282,7 @@ void BiquadParameterMatrix<CoeffType>::setFilter( std::size_t filterIdx, BiquadP
   {
     throw std::invalid_argument( "BiquadParameterMatrix::setFilter(): The number index exceeds maximum admissible value." );
   }
-  typename BiquadParameterList<CoeffType> & row = mRows[filterIdx];
+  BiquadParameterList<CoeffType> & row = mRows[filterIdx];
   std::copy( &newFilter[0], &newFilter[0] + newFilter.size(), &row[0] );
   std::fill_n( &row[0] + newFilter.size(), numberOfSections() - newFilter.size(), pml::BiquadParameter<CoeffType>() );
 }
