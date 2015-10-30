@@ -25,12 +25,71 @@ BiquadIirFilter::BiquadIirFilter( ril::AudioSignalFlow& container, char const * 
 }
 
 void BiquadIirFilter::setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
-                                        pml::BiquadParameter< SampleType > const & coeffs )
+                                       pml::BiquadParameter< SampleType > const & coeffs )
+{
+  if( channelIndex >= mNumberOfChannels )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The channel index exceeds the number of channels." );
+  }
+  if( biquadIndex >= mNumberOfBiquadSections )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The biquad index exceeds the number of biquad sections per channel." );
+  }
+  setCoefficientsInternal( channelIndex, biquadIndex, coeffs );
+}
+
+void BiquadIirFilter::setCoefficientsInternal( std::size_t channelIndex, std::size_t biquadIndex,
+                                               pml::BiquadParameter< SampleType > const & coeffs )
 {
   static const std::size_t cNumCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
   for( std::size_t coeffIdx( 0 ); coeffIdx < cNumCoeffs; ++coeffIdx )
   {
-    mCoefficients( biquadIndex*cNumCoeffs + coeffIdx, channelIndex ) = coeffs[coeffIdx]; 
+    mCoefficients( biquadIndex * cNumCoeffs + coeffIdx, channelIndex ) = coeffs[coeffIdx];
+  }
+}
+
+
+void BiquadIirFilter::setChannelCoefficients( std::size_t channelIndex,
+                                              pml::BiquadParameterList< SampleType > const & coeffs )
+{
+  if( channelIndex >= mNumberOfChannels )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The channel index exceeds the number of channels." );
+  }
+  if( coeffs.size() != mNumberOfBiquadSections )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The filter coefficient list does not match the number of biquad sections per channel." );
+  }
+  setChannelCoefficientsInternal( channelIndex, coeffs );
+}
+
+void BiquadIirFilter::setChannelCoefficientsInternal( std::size_t channelIndex,
+                                                      pml::BiquadParameterList< SampleType > const & coeffs )
+{
+  for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
+  {
+    setCoefficientsInternal( channelIndex, biquadIdx, coeffs[biquadIdx] );
+  }
+}
+
+void BiquadIirFilter::setCoefficientMatrix( pml::BiquadParameterMatrix< SampleType > const & coeffs )
+{
+  if( coeffs.numberOfFilters() != mNumberOfChannels )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The number of filters in the coefficient matrix does not match the number of channels of this component." );
+  }
+  if( coeffs.numberOfSections( ) != mNumberOfBiquadSections )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The number of biquad section in the coefficient matrix does not match the number of sections of this component." );
+  }
+  setCoefficientMatrixInternal( coeffs );
+}
+
+void BiquadIirFilter::setCoefficientMatrixInternal( pml::BiquadParameterMatrix< SampleType > const & coeffs )
+{
+  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
+  {
+    setChannelCoefficientsInternal( channelIdx, coeffs[channelIdx] );
   }
 }
 
@@ -43,7 +102,7 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
   {
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
     {
-      setCoefficients( channelIdx, biquadIdx, defaultBiquad );
+      setCoefficientsInternal( channelIdx, biquadIdx, defaultBiquad );
     }
   }
 }
@@ -54,16 +113,25 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 {
   if( coeffs.size() != numberOfBiquads )
   {
-    throw std::invalid_argument( "BiquadIirFilter: The length of the coefficient initialiser list does not match the number of biquads per channels." );
+    throw std::invalid_argument( "BiquadIirFilter: The length of the coefficient initialiser list does not match the number of biquads per channel." );
   }
   setupDataMembers( numberOfChannels, numberOfBiquads );
   for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
   {
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
-    {
-      setCoefficients( channelIdx, biquadIdx, coeffs[ biquadIdx ] );
-    }
+    setChannelCoefficientsInternal( channelIdx, coeffs );
   }
+}
+
+void BiquadIirFilter::setup( std::size_t numberOfChannels,
+                             std::size_t numberOfBiquads,
+                             pml::BiquadParameterMatrix< SampleType > const & coeffs )
+{
+  if( (coeffs.numberOfFilters() != numberOfChannels) or ( coeffs.numberOfSections() != numberOfBiquads ) )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The size of the coefficient matrix does not match the dimension numberOfChannels x numberOfBiquads." );
+  }
+  setupDataMembers( numberOfChannels, numberOfBiquads );
+  setCoefficientMatrixInternal( coeffs );
 }
 
 void BiquadIirFilter::process()
