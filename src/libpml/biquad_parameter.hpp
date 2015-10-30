@@ -3,9 +3,12 @@
 #ifndef VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
 #define VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
 
+#include <boost/property_tree/ptree_fwd.hpp>
+
 #include <algorithm>
 #include <array>
 #include <initializer_list>
+#include <iosfwd>
 #include <stdexcept>
 #include <vector>
 
@@ -38,6 +41,19 @@ public:
     mCoeffs.fill( static_cast<CoeffType>(0.0) );
   }
 
+  BiquadParameter( BiquadParameter<CoeffType> const & rhs ) = default;
+
+  /**
+   * Create a BiquadParameter object from a JSON representation.
+   */
+  static BiquadParameter fromJson( boost::property_tree::ptree const & tree );
+
+  static BiquadParameter fromJson( std::basic_istream<char> & stream );
+
+  static BiquadParameter fromXml( boost::property_tree::ptree const & tree );
+
+  static BiquadParameter fromXml( std::basic_istream<char> & stream );
+
   BiquadParameter( CoeffType b0, CoeffType b1, CoeffType b2,
                    CoeffType a1, CoeffType a2 )
   {
@@ -57,7 +73,7 @@ public:
     std::copy( coeffs.begin(), coeffs.end(), mCoeffs.begin() );
   }
 
-  BiquadParameter( const BiquadParameter & rhs ) = default;
+  // BiquadParameter( const BiquadParameter & rhs ) = default;
 
   BiquadParameter & operator=( BiquadParameter const & rhs )
   {
@@ -111,6 +127,14 @@ public:
   
   CoeffType& a2() { return mCoeffs[4]; }
 
+  void loadJson( boost::property_tree::ptree const & tree );
+
+  void loadJson( std::basic_istream<char> & );
+
+  void loadXml( boost::property_tree::ptree const & tree );
+
+  void loadXml( std::basic_istream<char> & );
+
 private:
   /**
    * The internal data representation.
@@ -127,6 +151,11 @@ public:
    */
   BiquadParameterList() = default;
 
+  explicit BiquadParameterList( const std::size_t initialSize )
+    : mBiquads( initialSize )
+  {
+  }
+
   /**
    * Default copy constructor (required for use within aSTL data structure as, for instance, in BiquadParameterList.
    */
@@ -136,6 +165,18 @@ public:
     : mBiquads( initList )
   {
   }
+
+  static BiquadParameterList fromJson( boost::property_tree::ptree const & tree );
+
+  static BiquadParameterList fromJson( std::basic_istream<char> & stream );
+
+  static BiquadParameterList fromJson( std::string const & str );
+
+  static BiquadParameterList fromXml( boost::property_tree::ptree const & tree );
+
+  static BiquadParameterList fromXml( std::basic_istream<char> & stream );
+
+  static BiquadParameterList fromXml( std::string const & str );
 
   /**
    * Assign the content from another BiquadParameterList with consistent size.
@@ -164,8 +205,52 @@ public:
   BiquadParameter<CoeffType> const & at( std::size_t idx ) const { return mBiquads.at( idx ); }
   BiquadParameter<CoeffType> & at( std::size_t idx ) { return mBiquads.at( idx ); }
 
+  void loadJson( boost::property_tree::ptree const & tree );
+
+  void loadJson( std::basic_istream<char> & stream );
+
+  void loadJson( std::string const & str );
+
+  void loadXml( boost::property_tree::ptree const & tree );
+
+  void loadXml( std::basic_istream<char> & stream );
+
+  void loadXml( std::string const & str );
 private:
   std::vector< BiquadParameter< CoeffType > > mBiquads;
+};
+
+template<typename CoeffType>
+class BiquadParameterMatrix
+{
+public:
+  explicit BiquadParameterMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );
+
+  ~BiquadParameterMatrix();
+
+  std::size_t numberOfFilters() const { return mRows.size(); }
+  std::size_t numberOfSections() const { return mRows.empty() ? 0 : mRows[0].size(); }
+
+  void resize( std::size_t numberOfFilters, std::size_t numberOfBiquads );
+
+  BiquadParameterList<CoeffType> const & operator[]( std::size_t rowIdx ) const { return mRows[rowIdx]; }
+  BiquadParameterList<CoeffType> & operator[]( std::size_t rowIdx ) { return mRows[rowIdx]; }
+
+  /**
+   * Set the biquad sections for a complete filter specification (a row in the matrix)
+   * If \p newFilter has fewer sections than the matrix, the rest is filled with default values.
+   * @throw std::out_of_range If \p filterIdx exceeds the number of biquad sections.
+   * @throw std::invalid_argument If \p nnewFilters has more elements than the column number of the matrix.
+   */
+  void setFilter( std::size_t filterIdx, BiquadParameterList<CoeffType> const & newFilter );
+
+  BiquadParameter<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
+  BiquadParameter<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
+
+private:
+  using ContainerType = std::vector< BiquadParameterList<CoeffType> >;
+
+  ContainerType mRows;
 };
 
 } // namespace pml

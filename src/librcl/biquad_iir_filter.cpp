@@ -150,22 +150,6 @@ void BiquadIirFilter::process()
   }
 }
 
-
-#if 0
-void BiquadIirFilter::setDelayAndGain( efl::BasicVector< SampleType > const & newDelays,
-                                   efl::BasicVector< SampleType > const & newGains )
-{
-}
-
-void BiquadIirFilter::setDelay( efl::BasicVector< SampleType > const & newDelays )
-{
-}
-
-void BiquadIirFilter::setGain( efl::BasicVector< SampleType > const & newGains )
-{
-}
-#endif
-
 void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
                                         std::size_t numberOfBiquads )
 {

@@ -62,6 +62,10 @@ public:
               pml::BiquadParameterList< SampleType > const & coeffs );
 
   /**
+   * 
+   */
+
+  /**
    * The process method applies the IIR filters to the audio channels.
    * values to the stream of input samples.
    */

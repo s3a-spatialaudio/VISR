@@ -17,12 +17,23 @@
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
+// TODO: Replace by forward declaration
+#include <libpml/biquad_parameter.hpp>
+
 #include <array>
 #include <string>
 #include <vector>
 
 namespace visr
 {
+
+// Forward declaration
+//namespace pml
+//{
+//template<typename CoeffType>
+//class BiquadParameterMatrix;
+//}
+
 namespace panning
 {
 
@@ -199,6 +210,8 @@ namespace panning
     efl::BasicVector<Afloat> m_gainAdjustment;
     
     efl::BasicVector<Afloat> m_delayAdjustment;
+
+    std::unique_ptr<pml::BiquadParameterMatrix<Afloat> > mOutputEqs;
   };
 
 } // namespace panning
