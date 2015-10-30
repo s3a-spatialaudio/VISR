@@ -189,6 +189,10 @@ int LoudspeakerArray::load( FILE *file )
   m_delayAdjustment.resize( numRegularSpeakers );
   m_delayAdjustment.fillValue( 0.0f );
 
+  // The plain text configuration does not support an equalisation configuration, so we reset the configuration data
+  // to an empty state..
+  mOutputEqs.reset();
+
   LoudspeakerIndexType spkIdx = 0;
   for( auto const & v : tmpSpeakers )
   {
@@ -561,6 +565,36 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   {
     throw std::invalid_argument( "LoudspeakerArray::loadXml(): Loudspeaker and subwoofer channels indices are not exclusive." );
   }
+}
+
+bool LoudspeakerArray::outputEqualisationPresent() const
+{
+  return bool( mOutputEqs ); // Operator bool checks whether pointer is assigned.
+}
+
+/**
+* Query the number of biquads per output channel.
+* Returns 0 if no equalisation configuration is present.
+*/
+std::size_t LoudspeakerArray::outputEqualisationNumberOfBiquads() const
+{
+  return outputEqualisationPresent() ? mOutputEqs->numberOfSections() : 0;
+}
+
+/**
+* Return a matrix containing the biquad parameters for all output sections.
+* The dimension of the matrix is
+* \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
+* @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
+*/
+pml::BiquadParameterMatrix<Afloat> const & 
+LoudspeakerArray::outputEqualisationBiquads() const
+{
+  if( not outputEqualisationPresent() )
+  {
+    throw std::logic_error( "LoudspeakerArray::::outputEqualisationBiquads(): No EQ configuration present." );
+  }
+  return *mOutputEqs;
 }
 
 } // namespace panning

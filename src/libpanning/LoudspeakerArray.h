@@ -182,6 +182,32 @@ namespace panning
 
     //@}
 
+    /**
+     * Optional support for equalization of ouput channels.
+     */
+    //@{
+
+    /**
+     * Query if the array configuration contained an output equalisation configuration.
+     * Technically, that means that the XML file contains a \b outputEqConfiguration section.
+     */
+    bool outputEqualisationPresent() const;
+
+    /**
+     * Query the number of biquads per output channel.
+     * Returns 0 if no equalisation configuration is present.
+     */
+    std::size_t outputEqualisationNumberOfBiquads() const;
+
+    /**
+     * Return a matrix containing the biquad parameters for all output sections.
+     * The dimension of the matrix is
+     * \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
+     * @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
+     */
+    pml::BiquadParameterMatrix<Afloat> const & outputEqualisationBiquads() const;
+    //@}
+
   private:
 
     bool m_is2D, m_isInfinite;
