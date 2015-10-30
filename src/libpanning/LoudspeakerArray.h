@@ -17,9 +17,6 @@
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
-// TODO: Replace by forward declaration
-#include <libpml/biquad_parameter.hpp>
-
 #include <array>
 #include <string>
 #include <vector>
@@ -28,11 +25,11 @@ namespace visr
 {
 
 // Forward declaration
-//namespace pml
-//{
-//template<typename CoeffType>
-//class BiquadParameterMatrix;
-//}
+namespace pml
+{
+template<typename CoeffType>
+class BiquadParameterMatrix;
+}
 
 namespace panning
 {
@@ -56,11 +53,18 @@ namespace panning
     LoudspeakerArray();
 
     /**
-     * Assignment
+     * Assignment operator
      * We need an explicitly defined asssignment operator because some members (BasicMatrix) 
      * intentionally do not have a copy constructor.
      */
     LoudspeakerArray const & operator=( LoudspeakerArray const & rhs );
+
+    /**
+     * Destructor.
+     * @note We need to provide a destructor implementation because we use
+     * a unique_ptr to the forward-declared class BiquadParameterMatrix.
+     */
+    ~LoudspeakerArray();
 
     int load( FILE *file );
 

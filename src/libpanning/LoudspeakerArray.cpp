@@ -63,6 +63,10 @@ LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & r
   return *this;
 }
 
+LoudspeakerArray::~LoudspeakerArray()
+{
+}
+
 int LoudspeakerArray::load( FILE *file )
 {
   int n, i, chan;
