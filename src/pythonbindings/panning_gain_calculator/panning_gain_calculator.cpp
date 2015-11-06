@@ -21,7 +21,8 @@ void hello()
 } // namespace namespace pythonbindings
 } // namespace visr
 
-BOOST_PYTHON_MODULE( helloNS )
+// NOTE: The python module name must match the file name.
+BOOST_PYTHON_MODULE( panning_gain_calculator )
 {
   using namespace boost::python;
   def( "hello", visr::pythonbindings::hello );
