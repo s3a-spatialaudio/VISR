@@ -179,12 +179,14 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
+SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework python )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
 FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
+
+FIND_PACKAGE( PythonLibs REQUIRED )
 
 ################################################################################
 # Actual software components (subprojects) to be built are
