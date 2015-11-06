@@ -88,6 +88,14 @@ IF( WIN32 OR APPLE )
   SET( MAXSDK_EXTERNAL_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/max )
 ENDIF(  WIN32 OR APPLE )
 
+################################################################################
+# Support for Python bindings of selected VISR functionality
+OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
+
+IF( BUILD_PYTHON_BINDINGS )
+  FIND_PACKAGE( PythonLibs REQUIRED )
+ENDIF( BUILD_PYTHON_BINDINGS )
+
 ###########################################################
 # Support for 3rd-party libraries.
 
@@ -179,14 +187,16 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework python )
+SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
+
+IF( BUILD_PYTHON_BINDINGS )
+  LIST( APPEND VISR_BOOST_LIBRARIES python ) 
+ENDIF( BUILD_PYTHON_BINDINGS )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
 FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
-
-FIND_PACKAGE( PythonLibs REQUIRED )
 
 ################################################################################
 # Actual software components (subprojects) to be built are
