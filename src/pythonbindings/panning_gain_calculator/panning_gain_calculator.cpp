@@ -1,7 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-// TODO: Distinguish between static and dynamic linkage (using CMAKE option Boost_USE_STATIC_LIBS)
+// Define macro to control the behaviour of boost::python in case the boost libraries are linked statically.
+#if BOOST_USE_STATIC_LIBS
 #define BOOST_PYTHON_STATIC_LIB
+#endif
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -15,6 +17,7 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <stdexcept>
@@ -32,6 +35,16 @@ public:
   explicit PanningGainCalculator( std::string arrayConfig);
 
   boost::python::list calculateGains(float x, float y, float z);
+
+  std::size_t numberOfLoudspeakers() const
+  {
+	return mVbapCalculator.getNumSpeakers();
+  }
+
+  std::size_t numberOfSources() const
+  {
+    return cNumberOfObjects;
+  }
 private:
   std::size_t cNumberOfObjects;
 
@@ -46,7 +59,7 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   : cNumberOfObjects( 1 )
   , mSourcePositions( cNumberOfObjects )
 {
-  std::cout << "PanningGainCalculator: constructor called." << std::endl;
+  // std::cout << "PanningGainCalculator: constructor called." << std::endl;
   boost::filesystem::path const configPath = boost::filesystem::path(arrayConfig);
   if (!exists(configPath))
   {
@@ -59,6 +72,7 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
     mVbapCalculator.setLoudspeakerArray( &mArray );
 	mVbapCalculator.setNumSources(cNumberOfObjects);
 	mVbapCalculator.setSourcePositions(&mSourcePositions[0]);
+	mVbapCalculator.calcInvMatrices();
   }
   catch (std::exception const & ex)
   {
@@ -66,23 +80,6 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   }
 }
 
-#if 0
-std::vector<Afloat> PanningGainCalculator::calculateGains( float x, float y, float z )
-{
-  mSourcePositions[0] = visr::panning::XYZ(x, y, z);
-  mVbapCalculator.calcGains();
-
-  efl::BasicMatrix<Afloat> const & gains = mVbapCalculator.getGains();
-
-  std::vector<Afloat> retGains(gains.numberOfRows());
-  for (std::size_t elIdx(0); elIdx < gains.numberOfRows(); ++elIdx)
-  {
-    retGains[elIdx] = gains(elIdx, 0);
-  }
-  return retGains;
-  // return boost::python::make_tuple(123, 23.75f, std::string("Bugger off!") );
-}
-#else
 boost::python::list PanningGainCalculator::calculateGains(float x, float y, float z)
 {
 	mSourcePositions[0] = visr::panning::XYZ(x, y, z);
@@ -90,21 +87,16 @@ boost::python::list PanningGainCalculator::calculateGains(float x, float y, floa
 
 	efl::BasicMatrix<Afloat> const & gains = mVbapCalculator.getGains();
 
+	std::copy(gains.row(0), gains.row(0) + gains.numberOfColumns(), std::ostream_iterator<Afloat>(std::cout, ", "));
+	std::cout << std::endl;
+
 	boost::python::list retVec;
 	for (std::size_t elIdx(0); elIdx < gains.numberOfColumns(); ++elIdx)
 	{
-      retVec.append(gains(elIdx, 0));
+      retVec.append(gains.at(0,elIdx));
 	}
 
 	return retVec;
-	// return boost::python::make_tuple(123, 23.75f, std::string("Bugger off!") );
-}
-#endif
-
-boost::python::tuple hello()
-{
-  std::cout << "Hello Python, this is C++ speaking." << std::endl;
-  return boost::python::make_tuple(123, 23.75f, std::string("Bugger off!"));
 }
  
 } // namespace namespace pythonbindings
@@ -115,9 +107,9 @@ BOOST_PYTHON_MODULE( panning_gain_calculator )
 {
   using namespace boost::python;
   using namespace visr::pythonbindings;
-//  boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
-  def( "hello", hello );
 
   class_<visr::pythonbindings::PanningGainCalculator, boost::noncopyable>("PanningGainCalculator", init<std::string>())
-	  .def("calculateGains", &PanningGainCalculator::calculateGains);
+	  .def("calculateGains", &PanningGainCalculator::calculateGains)
+	  .def("numberOfLoudspeakers", &PanningGainCalculator::numberOfLoudspeakers)
+      .def("numberOfSources", &PanningGainCalculator::numberOfSources);
 }

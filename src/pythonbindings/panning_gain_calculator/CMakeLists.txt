@@ -1,6 +1,6 @@
 # Compile a Python binding
 
-# Configure your project 
+# User configuration section
 set(CPP_FILE panning_gain_calculator)
 
 set(PROJECT_NAME panning_gain_calculator)
@@ -8,8 +8,19 @@ set(PROJECT_NAME panning_gain_calculator)
 # Add any project-specific CPP files here.
 set( ADDITIONAL_CPP_FILES )
 
+# Added any required additional libraries
+set( ADDITIONAL_LIBRARIES  panning pml efl ${Boost_FILESYSTEM_LIBRARY} )
 
+########################################################################
 # Internal logic, do not edit.
+
+# Trigger separate handling dependent on whether the boost libraries
+# are linked statically or dynamically
+IF( Boost_USE_STATIC_LIBS )
+  ADD_DEFINITIONS( -DBOOST_USE_STATIC_LIBS=1 )
+ELSEIF( Boost_USE_STATIC_LIBS )
+  ADD_DEFINITIONS( -DBOOST_USE_STATIC_LIBS=0 )
+ENDIF( Boost_USE_STATIC_LIBS )
 
 include_directories(${PYTHON_INCLUDE_DIR})
 
@@ -30,11 +41,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ${PYTHON_EXTERNAL_EXTENSION} )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
-
-# Add any extras dependencies
-target_link_libraries(${PROJECT_NAME} panning pml efl )
+target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBRARIES} )
+# Standard dependencies for boost::python projects
 target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
-target_link_libraries(${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
