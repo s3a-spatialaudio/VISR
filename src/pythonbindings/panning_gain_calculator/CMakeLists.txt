@@ -26,19 +26,20 @@ include_directories(${PYTHON_INCLUDE_DIR})
 
 set(CPP_FILE_NAME ${CPP_FILE}.cpp)
 
-# Set the filename extension of Python external modules.
+# Set the filename extension of Python external modules if it differs from the 
+# standard extensions for modules on this platform.
 # TODO: This might be moved to a central location
 if( WIN32 )
-  set( PYTHON_EXTERNAL_EXTENSION ".pyd" )
-ELSEIF( WIN32 )
-  set( PYTHON_EXTERNAL_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )  
-ENDIF( WIN32 )
+  set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
+endif( WIN32 )
 
 add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
-set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ${PYTHON_EXTERNAL_EXTENSION} )
+if( PYTHON_EXTERNAL_SUFFIX )
+  set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ${PYTHON_EXTERNAL_SUFFIX} )
+endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
 target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBRARIES} )

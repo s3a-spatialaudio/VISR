@@ -94,6 +94,9 @@ OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" O
 
 IF( BUILD_PYTHON_BINDINGS )
   FIND_PACKAGE( PythonLibs REQUIRED )
+  # Brute-force way make all the code position-independent if we use python bindings.
+  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
+  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
 ENDIF( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
