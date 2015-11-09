@@ -34,11 +34,12 @@ public:
   static const std::size_t cNumberOfCoeffs = 5;
 
   /**
-   * Default constructor, creates an empty message queue.
+   * Create an default object corresponding to a flat EQ.
    */
   BiquadParameter()
   {
     mCoeffs.fill( static_cast<CoeffType>(0.0) );
+    mCoeffs[0] = static_cast<CoeffType>(1.0);
   }
 
   BiquadParameter( BiquadParameter<CoeffType> const & rhs ) = default;
