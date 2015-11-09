@@ -3,7 +3,7 @@
 # User configuration section
 set(CPP_FILE panning_gain_calculator)
 
-set(PROJECT_NAME panning_gain_calculator)
+set(PROJECT_NAME panning_gain_calculator_python)
 
 # Add any project-specific CPP files here.
 set( ADDITIONAL_CPP_FILES )

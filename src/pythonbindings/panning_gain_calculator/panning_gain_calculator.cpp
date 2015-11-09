@@ -29,29 +29,51 @@ namespace visr
 namespace pythonbindings
 {
 
+/**
+ * Simple wrapper class to expose the requireed functionality
+ * of the VBAP object.
+ */
 class PanningGainCalculator
 {
 public:
+  /**
+   * Constructor.
+   * @param arrayConfig File path to the loudspeaker configuration file in XML format.
+   */
   explicit PanningGainCalculator( std::string arrayConfig);
 
+  /**
+   * Calculate the panning gains for the source position given Cartesian coordinates.
+   * @param x X coordinate in meter.
+   * @param y Y coordinate in meter.
+   * @param z Z coordinate in meter.
+   * @return Normalised panning gains as a Python list. The output is identical to the VBAP class, i.e., gains of imaginary speakers are returned as well.
+   */
   boost::python::list calculateGains(float x, float y, float z);
 
+  /**
+   * Return the number of loudspeakers, including imaginary ones.
+   */
   std::size_t numberOfLoudspeakers() const
   {
-	return mVbapCalculator.getNumSpeakers();
+    return mVbapCalculator.getNumSpeakers();
   }
 
+  /**
+   * Return the number of source objects, which is constant (1)
+   * at the time being.
+   */
   std::size_t numberOfSources() const
   {
     return cNumberOfObjects;
   }
 private:
   std::size_t cNumberOfObjects;
-
+  
   mutable std::vector<panning::XYZ> mSourcePositions;
-
+  
   panning::LoudspeakerArray mArray;
-
+  
   panning::VBAP mVbapCalculator;
 };
 
@@ -70,9 +92,9 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   {
     mArray.loadXml(configPath.string());
     mVbapCalculator.setLoudspeakerArray( &mArray );
-	mVbapCalculator.setNumSources(cNumberOfObjects);
-	mVbapCalculator.setSourcePositions(&mSourcePositions[0]);
-	mVbapCalculator.calcInvMatrices();
+    mVbapCalculator.setNumSources(cNumberOfObjects);
+    mVbapCalculator.setSourcePositions(&mSourcePositions[0]);
+    mVbapCalculator.calcInvMatrices();
   }
   catch (std::exception const & ex)
   {
@@ -82,34 +104,37 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
 
 boost::python::list PanningGainCalculator::calculateGains(float x, float y, float z)
 {
-	mSourcePositions[0] = visr::panning::XYZ(x, y, z);
-	mVbapCalculator.calcGains();
+  mSourcePositions[0] = visr::panning::XYZ(x, y, z);
+  mVbapCalculator.calcGains();
+  
+  efl::BasicMatrix<Afloat> const & gains = mVbapCalculator.getGains();
+# if 0
+  std::copy(gains.row(0), gains.row(0) + gains.numberOfColumns(), std::ostream_iterator<Afloat>(std::cout, ", "));
+  std::cout << std::endl;
+#endif
+  boost::python::list retVec;
+  for (std::size_t elIdx(0); elIdx < gains.numberOfColumns(); ++elIdx)
+  {
+    retVec.append(gains.at(0,elIdx));
+  }
 
-	efl::BasicMatrix<Afloat> const & gains = mVbapCalculator.getGains();
-
-	std::copy(gains.row(0), gains.row(0) + gains.numberOfColumns(), std::ostream_iterator<Afloat>(std::cout, ", "));
-	std::cout << std::endl;
-
-	boost::python::list retVec;
-	for (std::size_t elIdx(0); elIdx < gains.numberOfColumns(); ++elIdx)
-	{
-      retVec.append(gains.at(0,elIdx));
-	}
-
-	return retVec;
+  return retVec;
 }
  
 } // namespace namespace pythonbindings
 } // namespace visr
 
-// NOTE: The python module name must match the file name.
+/**
+ * Python module declaration to expose the class and its interface to Python.
+ * @note The python module name must match the file name.
+ */
 BOOST_PYTHON_MODULE( panning_gain_calculator )
 {
   using namespace boost::python;
   using namespace visr::pythonbindings;
 
   class_<visr::pythonbindings::PanningGainCalculator, boost::noncopyable>("PanningGainCalculator", init<std::string>())
-	  .def("calculateGains", &PanningGainCalculator::calculateGains)
-	  .def("numberOfLoudspeakers", &PanningGainCalculator::numberOfLoudspeakers)
-      .def("numberOfSources", &PanningGainCalculator::numberOfSources);
+    .def("calculateGains", &PanningGainCalculator::calculateGains)
+    .def("numberOfLoudspeakers", &PanningGainCalculator::numberOfLoudspeakers)
+    .def("numberOfSources", &PanningGainCalculator::numberOfSources);
 }
