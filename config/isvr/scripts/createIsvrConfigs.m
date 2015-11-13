@@ -13,7 +13,7 @@ numAllSpeakers = size( lspData, 1 );
 
 %% The configurations
 
-for numConfig = 1:1
+for numConfig = 1:2
     
     switch numConfig
         case 1 % 9 + 10 + 3
@@ -27,8 +27,21 @@ for numConfig = 1:1
             
             is2D = false;
             isInfinite = false;
+
+        case 2
+            configName = 'audiolab_39speakers_1subwoofer';
+            channels = 1:39;      % one-offset
+            subChannels = [ 39 ]; % zero-offset
+            subIndices = {0:38};  % zero-offset
+            subGains = {ones(size(channels))};
+            subGainAdjustDB = [ 0 ];
+            subDelayAdjust = [0 ];
+
+            is2D = false;
+            isInfinite = false;
     end
     
+
     usedSpeakers = zeros( length( channels), 3 );
     finalChannelIndices = zeros( length(channels), 1 );
     
