@@ -46,7 +46,7 @@ rotationMtx = [ cos(rotationAngle), 0, -sin(rotationAngle);...
                 0, 1, 0; ...
                 sin(rotationAngle), 0, cos(rotationAngle) ];
 
-% vertexCoordsCart = (vertexCoordsCartUnrotated.' * rotationMtx).';
+vertexCoordsCart = (vertexCoordsCartUnrotated.' * rotationMtx).';
       
 % [vertexAz, vertexEl, vertexRad] = cart2sph( vertexCoordsCart(1,:), vertexCoordsCart(2,:), vertexCoordsCart(3,:) );
 
