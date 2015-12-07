@@ -88,6 +88,17 @@ IF( WIN32 OR APPLE )
   SET( MAXSDK_EXTERNAL_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/max )
 ENDIF(  WIN32 OR APPLE )
 
+################################################################################
+# Support for Python bindings of selected VISR functionality
+OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
+
+IF( BUILD_PYTHON_BINDINGS )
+  FIND_PACKAGE( PythonLibs REQUIRED )
+  # Brute-force way make all the code position-independent if we use python bindings.
+  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
+  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
+ENDIF( BUILD_PYTHON_BINDINGS )
+
 ###########################################################
 # Support for 3rd-party libraries.
 
@@ -180,6 +191,10 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
 SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
+
+IF( BUILD_PYTHON_BINDINGS )
+  LIST( APPEND VISR_BOOST_LIBRARIES python ) 
+ENDIF( BUILD_PYTHON_BINDINGS )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.

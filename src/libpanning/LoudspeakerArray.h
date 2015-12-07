@@ -23,6 +23,14 @@
 
 namespace visr
 {
+
+// Forward declaration
+namespace pml
+{
+template<typename CoeffType>
+class BiquadParameterMatrix;
+}
+
 namespace panning
 {
 
@@ -45,11 +53,18 @@ namespace panning
     LoudspeakerArray();
 
     /**
-     * Assignment
+     * Assignment operator
      * We need an explicitly defined asssignment operator because some members (BasicMatrix) 
      * intentionally do not have a copy constructor.
      */
     LoudspeakerArray const & operator=( LoudspeakerArray const & rhs );
+
+    /**
+     * Destructor.
+     * @note We need to provide a destructor implementation because we use
+     * a unique_ptr to the forward-declared class BiquadParameterMatrix.
+     */
+    ~LoudspeakerArray();
 
     int load( FILE *file );
 
@@ -171,6 +186,32 @@ namespace panning
 
     //@}
 
+    /**
+     * Optional support for equalization of ouput channels.
+     */
+    //@{
+
+    /**
+     * Query if the array configuration contained an output equalisation configuration.
+     * Technically, that means that the XML file contains a \b outputEqConfiguration section.
+     */
+    bool outputEqualisationPresent() const;
+
+    /**
+     * Query the number of biquads per output channel.
+     * Returns 0 if no equalisation configuration is present.
+     */
+    std::size_t outputEqualisationNumberOfBiquads() const;
+
+    /**
+     * Return a matrix containing the biquad parameters for all output sections.
+     * The dimension of the matrix is
+     * \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
+     * @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
+     */
+    pml::BiquadParameterMatrix<Afloat> const & outputEqualisationBiquads() const;
+    //@}
+
   private:
 
     bool m_is2D, m_isInfinite;
@@ -199,6 +240,8 @@ namespace panning
     efl::BasicVector<Afloat> m_gainAdjustment;
     
     efl::BasicVector<Afloat> m_delayAdjustment;
+
+    std::unique_ptr<pml::BiquadParameterMatrix<Afloat> > mOutputEqs;
   };
 
 } // namespace panning

@@ -50,16 +50,26 @@ public:
               std::size_t numberOfBiquads,
               pml::BiquadParameter<SampleType> const & initialBiquad = pml::BiquadParameter< SampleType >() );
 
- /**
+  /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfChannels The number of signals in the input signal.
   * @param numberOfBiquads The number of biquad sections for each channel.
-  * @param coeffs The initial biquad coefficients, which are set identically for all channels. 
+  * @param coeffs The initial biquad coefficients, which are set identically for all channels.
   * The number of biquad coefficient sets in this parameter must equal the \p numberOfBiquads parameter.
   */
   void setup( std::size_t numberOfChannels,
+    std::size_t numberOfBiquads,
+    pml::BiquadParameterList< SampleType > const & coeffs );
+
+  /**
+  * Setup method to initialise the object and set the biquad filters individually for each filter channel and biquad section.
+  * @param numberOfChannels The number of signals in the input signal.
+  * @param numberOfBiquads The number of biquad sections for each channel.
+  * @param coeffs The initial biquad coefficients as a matrix of size \p numberOfChannels x \p numberOfBiquads
+  */
+  void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameterList< SampleType > const & coeffs );
+              pml::BiquadParameterMatrix< SampleType > const & coeffs );
 
   /**
    * The process method applies the IIR filters to the audio channels.
@@ -67,7 +77,73 @@ public:
    */
   void process( );
 
+  /**
+   * Support for runtime changes of the filter coefficients.
+   * @note At the moment, the coefficients are appplied instantaneously, with not precautions against transients or potential instabilities.
+   */
+  //@{
+  /**
+   * Set the IIR biquad coefficients for a specific biquad section of a becific filter channel.
+   * @param channelIndex The index of the filter channel.
+   * @param biquadIndex The index of the biquad section to be set.
+   * @param coeffs The set of biquad IIR coefficients.
+   * @throw std::out_of_range If \p channelIndex exceeds the number of filter channels.
+   * @throw std::out_of_range If \p biquadIndex exceeds the number of biquad sections of this component.
+   */
+  void setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
+                        pml::BiquadParameter< SampleType > const & coeffs );
+
+  /**
+  * Set the biquad coefficients for a filter channel.
+  * @param channelIndex The index of the filter channel.
+  * @param coeffs The biquad coefficients. The number of sections must match the configured number of biquads of the component.
+  * @throw std::out_of_range If \p channelIndex exceeds the number of filter channels.
+  * @throw std::invalid_argument If the number of biquads in \p coeffs does not match the number of biquad sections in this component.
+  */
+  void setChannelCoefficients( std::size_t channelIndex,
+                               pml::BiquadParameterList< SampleType > const & coeffs );
+
+  /**
+  * Set the biquad coefficients for a filter channel.
+  * @param coeffs The matrix of biquad coefficients, dimension \p numberOfChannels x \p numberOfBiquadSections
+  * @throw std::invalid_argument If the matrix dimension differs from \p numberOfChannels x \p numberOfBiquadSections
+  */
+  void setCoefficientMatrix( pml::BiquadParameterMatrix< SampleType > const & coeffs );
+
+  //@}
 private:
+  /**
+   * Internal method to allocate and initialise the data members.
+   * Contains the code common to all constructors.
+   */
+  void setupDataMembers( std::size_t numberOfChannels,
+                         std::size_t numberOfBiquads );
+
+  /**
+   * Internal method to set a single biquad section.
+   * No range checks.
+   * @see setCoefficients
+   */
+  void setCoefficientsInternal( std::size_t channelIndex, std::size_t biquadIndex,
+                                pml::BiquadParameter< SampleType > const & coeffs );
+
+  /**
+   * Internal method to set the biquad coefficients for a filter channel.
+   * No range checks performed.
+   * @param channelIndex The index of the filter channel.
+   * @param coeffs The biquad coefficients. The number of sections must match the configured number of biquads of the component.
+   * @see setChannelCoefficients
+   */
+  void setChannelCoefficientsInternal( std::size_t channelIndex,
+                                       pml::BiquadParameterList< SampleType > const & coeffs );
+
+  /**
+  * Internal method to set the complete coefficient matrix.
+  * No range checks performed.
+  * @see setCoefficientMatrix
+  */
+  void setCoefficientMatrixInternal( pml::BiquadParameterMatrix< SampleType > const & coeffs );
+
   /**
    * The audio input port for this component.
    */
@@ -87,18 +163,6 @@ private:
    * The number of biquads per channel.
    */
   std::size_t mNumberOfBiquadSections;
-
-  /**
-   * Internal function to set the IIR coefficients for a single biquad of a given channel.
-   */
-  void setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
-                        pml::BiquadParameter< SampleType > const & coeffs );
-
-  /**
-   * Internal method to allocate and initialise the data members.
-   */
-  void setupDataMembers( std::size_t numberOfChannels,
-                         std::size_t numberOfBiquads );
 
   /**
    * Matrix to store the IIR coefficients.

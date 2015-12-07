@@ -5,7 +5,9 @@
 #include <libpanning/XYZ.h>
 #include <libpanning/LoudspeakerArray.h>
 
-#include <libpml/array_configuration.hpp>
+#include <libpml/biquad_parameter.hpp>
+
+#include <librcl/biquad_iir_filter.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -97,6 +99,20 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
     mCompensationDelays.resize( numberOfLoudspeakers );
   }
 
+  bool const outputEqSupport = loudspeakerConfiguration.outputEqualisationPresent();
+  if( outputEqSupport )
+  {
+    std::size_t const outputEqSections = loudspeakerConfiguration.outputEqualisationNumberOfBiquads();
+    pml::BiquadParameterMatrix<Afloat> const & eqConfig = loudspeakerConfiguration.outputEqualisationBiquads();
+    if( numberOfOutputSignals != eqConfig.numberOfFilters() )
+    {
+      throw std::invalid_argument( "BaselineRenderer: Size of the output EQ configuration config differs from "
+        "the number of output signals (regular loudspeakers + subwoofers).");
+    }
+    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( *this, "OutputEqualisationFilter" ) );
+    mOutputEqualisationFilter->setup( numberOfOutputSignals, outputEqSections, eqConfig );
+  }
+
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup( );
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
@@ -143,7 +159,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::size_t const mixOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
   std::size_t const trackingCompensationOutStartIdx = mixOutStartIdx + numberOfLoudspeakers;
   std::size_t const subwooferMixerOutStartIdx = trackingCompensationOutStartIdx + (mTrackingEnabled ? numberOfLoudspeakers : 0 );
-  std::size_t const outputAdjustOutStartIdx = subwooferMixerOutStartIdx + numberOfSubwoofers;
+  std::size_t const outputEqualisationOutStartIdx = subwooferMixerOutStartIdx + numberOfSubwoofers;
+  std::size_t const outputAdjustOutStartIdx = outputEqualisationOutStartIdx + (outputEqSupport ? numberOfOutputSignals : 0);
   std::size_t const nullSourceOutStartIdx = outputAdjustOutStartIdx + numberOfOutputSignals;
   std::size_t const communicationChannelEndIndex = nullSourceOutStartIdx + 1; // One past end index. Also the number of total indices.
 
@@ -154,7 +171,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::vector<ril::AudioPort::SignalIndexType> const decorrelatorOutChannels = indexRange( decorrelatorOutStartIdx, mixOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const mixOutChannels = indexRange( mixOutStartIdx, trackingCompensationOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const trackingCompensationOutChannels = indexRange( trackingCompensationOutStartIdx, subwooferMixerOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const subwooferMixerOutChannels = indexRange( subwooferMixerOutStartIdx, outputAdjustOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const subwooferMixerOutChannels = indexRange( subwooferMixerOutStartIdx, outputEqualisationOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const outputEqualisationOutChannels = indexRange( outputEqualisationOutStartIdx, outputAdjustOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const outputAdjustOutChannels = indexRange( outputAdjustOutStartIdx, nullSourceOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const nullSourceOutChannels = indexRange( nullSourceOutStartIdx, communicationChannelEndIndex );
 
@@ -218,7 +236,17 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::copy( subwooferMixerOutChannels.begin(), subwooferMixerOutChannels.end(), outputAdjustInChannels.begin() + numberOfLoudspeakers );
   
   assignCommunicationIndices( "NullSource", "out", nullSourceOutChannels );
-  assignCommunicationIndices( "OutputAdjustment", "in", outputAdjustInChannels );
+
+  if( outputEqSupport )
+  {
+    assignCommunicationIndices( "OutputEqualisationFilter", "in", outputAdjustInChannels );
+    assignCommunicationIndices( "OutputEqualisationFilter", "out", outputEqualisationOutChannels );
+    assignCommunicationIndices( "OutputAdjustment", "in", outputEqualisationOutChannels );
+  }
+  else
+  {
+    assignCommunicationIndices( "OutputAdjustment", "in", outputAdjustInChannels );
+  }
   assignCommunicationIndices( "OutputAdjustment", "out", outputAdjustOutChannels );
 
   assignCaptureIndices( &captureChannels[0], captureChannels.size( ) );
@@ -261,6 +289,10 @@ BaselineRenderer::process()
   {
     mSpeakerCompensation->setDelayAndGain( mCompensationDelays, mCompensationGains );
     mSpeakerCompensation->process( );
+  }
+  if( mOutputEqualisationFilter )
+  {
+    mOutputEqualisationFilter->process();
   }
   mOutputAdjustment.process();
   mNullSource.process();
