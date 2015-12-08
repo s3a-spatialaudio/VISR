@@ -22,14 +22,21 @@ FloatSequence<ElementType>::FloatSequence()
 
 template< typename ElementType>
 FloatSequence<ElementType>::FloatSequence( ElementType val, std::size_t num /*= 1*/ )
-: mIndices( num, val ) // Relies on mIndices being a std::vector.
+: mValues( num, val ) // Relies on mValues being a std::vector.
+{
+}
+
+template< typename ElementType>
+FloatSequence<ElementType>::FloatSequence( ElementType const * const val, std::size_t numValues )
+ : mValues( val, val + numValues )
 {
 }
 
 
+
 template< typename ElementType>
 FloatSequence<ElementType>::FloatSequence( std::initializer_list<ElementType> const & val )
-  : mIndices( val.begin(), val.end() )
+  : mValues( val.begin(), val.end() )
 {
 }
  
@@ -126,13 +133,24 @@ FloatSequence<ElementType>::FloatSequence( std::string const & val )
     throw std::invalid_argument( "SignalList: Parsing of initialiser string failed." );
   }
 
-  mIndices.swap( state.mContents );
+  mValues.swap( state.mContents );
 }
 
 template< typename ElementType>
 void FloatSequence<ElementType>::clear( )
 {
-  mIndices.clear();
+  mValues.clear();
+}
+
+template< typename ElementType>
+std::string FloatSequence<ElementType>::toString( std::string const & separator /*= std::string( ", " )*/ ) const
+{
+  std::stringstream strStr;
+  // std::vector<ElementType> tmp;
+  std::copy( mValues.begin(), mValues.end(), std::ostream_iterator<ElementType>( strStr, separator.c_str() ) );
+  std::string const str( strStr.str() );
+  // Remove the trailing separator added by the ostream_iterator
+  return str.substr( 0, str.size() - separator.size() );
 }
 
 // Explicit instantiations
