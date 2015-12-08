@@ -237,8 +237,8 @@ public:
   BiquadParameterList<CoeffType> const & operator[]( std::size_t rowIdx ) const { return mRows[rowIdx]; }
   BiquadParameterList<CoeffType> & operator[]( std::size_t rowIdx ) { return mRows[rowIdx]; }
 
-  BiquadParameterList<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
-  BiquadParameterList<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
+  BiquadParameter<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
+  BiquadParameter<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
 
   /**
    * Set the biquad sections for a complete filter specification (a row in the matrix)
@@ -247,9 +247,6 @@ public:
    * @throw std::invalid_argument If \p nnewFilters has more elements than the column number of the matrix.
    */
   void setFilter( std::size_t filterIdx, BiquadParameterList<CoeffType> const & newFilter );
-
-  BiquadParameter<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
-  BiquadParameter<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
 
 private:
   using ContainerType = std::vector< BiquadParameterList<CoeffType> >;
