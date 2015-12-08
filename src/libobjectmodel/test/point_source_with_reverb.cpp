@@ -9,6 +9,9 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <ciso646>
 #include <fstream>
 #include <iostream>
@@ -24,7 +27,8 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( ParsePointSourceWithReverb )
 {
-  boost::filesystem::path const jsonFileName = boost::filesystem::path( CMAKE_CURRENT_SOURCE_DIR ) / boost::filesystem::path("/data/room_object_1.json" );
+  boost::filesystem::path const jsonFileName = boost::filesystem::path( CMAKE_CURRENT_SOURCE_DIR ) / boost::filesystem::path( "/data/room_object_1.json" );
+  // boost::filesystem::path const jsonFileName = boost::filesystem::path( CMAKE_CURRENT_SOURCE_DIR ) / boost::filesystem::path("/data/obj_vector_yan.json" );
   BOOST_CHECK( exists( jsonFileName ) and not is_directory( jsonFileName ) );
   std::ifstream jsonFileStr( jsonFileName.string().c_str() );
   BOOST_CHECK( jsonFileStr and not jsonFileStr.eof() );
@@ -34,10 +38,19 @@ BOOST_AUTO_TEST_CASE( ParsePointSourceWithReverb )
   std::string const msg = msgStr.str();
   ObjectVector scene;
 
-  ObjectVectorParser::fillObjectVector( msg, scene );
+  BOOST_CHECK_NO_THROW( ObjectVectorParser::fillObjectVector( msg, scene ));
 
+  std::cout << "Scene size: " << scene.size() << std::endl;
 
   BOOST_CHECK( scene.size() == 1 );
+
+  // TODO: Move to separate unit test.
+
+  std::stringstream outputMessage;
+
+  BOOST_CHECK_NO_THROW( ObjectVectorParser::encodeObjectVector( scene, outputMessage ) );
+
+  std::cout << outputMessage.str() << std::endl;
 }
 
 } // namespace test

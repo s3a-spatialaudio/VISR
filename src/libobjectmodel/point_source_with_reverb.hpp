@@ -20,73 +20,275 @@ namespace objectmodel
 {
 
 /**
- *
+ * Audio object representing a monopole point source with corresponding object-based reverberation.
+ * Derived from PointSource.
  */
 class PointSourceWithReverb: public PointSource
 {
 public:
+  /**
+   * Number of subbands for the late reverberation levels and decay constants.
+   */
   static const std::size_t cNumberOfSubBands = 9;
 
+  /**
+   * Number of numerator and denominator coefficients for the IIR filters representing
+   * the wall reflection filters of the early (discrete) reflections.
+   */
   static const std::size_t cReflectionIirFilterLength = 12;
 
+  /**
+   * Data type for holding the subband information (levels and decay coefficients) for the 
+   * generation of the late reerberation filters.
+   */
   using LateReverbCoeffs = std::array<ril::SampleType, cNumberOfSubBands >;
 
+  /**
+   * Internal class to represent a single discrete reflection (early reflections)
+   */
   class DiscreteReflection
   {
   public:
-
-        
-    private:
-        Coordinate mX;
-        Coordinate mY;
-        Coordinate mZ;
-        
-        ril::SampleType mDelay;
-        LevelType mLevel;
-
-        std::array<ril::SampleType, cReflectionIirFilterLength> mIirNumerator;
-        std::array<ril::SampleType, cReflectionIirFilterLength> mIirDenominator;
-    };
+    /**
+     * Data type for the numerator or denominator polynomial of the wall reflection filter.
+     */
+    using FilterCoeff = std::array<ril::SampleType, cReflectionIirFilterLength>;
     
+    /**
+     * Default constructor, zeros all members.
+     */
+    DiscreteReflection();
+
+    /**
+     * Copy constructor.
+     */
+    DiscreteReflection( DiscreteReflection const & );
+
+    /** Return the x coordinate of the early reflection. */
+    Coordinate positionX() const { return mX; }
+    /** Return the y coordinate of the early reflection. */
+    Coordinate positionY( ) const { return mY; }
+    /** Return the z coordinate of the early reflection. */
+    Coordinate positionZ( ) const { return mZ; }
+
+    /** Return the delay (in seconds) for the discrete reflection. */
+    ril::SampleType delay() const { return mDelay; }
+
+    /**
+     * Return the level (linear gain) of the discrete reflection.
+     * The final gain takes the object gain into account.
+     */
+    LevelType level() const { return mLevel; }
+
+    /**
+     * Return the numerator polynomial of the wall reflection filter. *
+     */
+    FilterCoeff const & reflectionNumerator() const { return mIirNumerator; }
+
+    /**
+     * Return the denominator polynomial of the wall reflection filter. *
+     */
+    FilterCoeff const & reflectionDenominator( ) const { return mIirDenominator; }
+
+    /**
+     * Set the position of the discrete reflection.
+     * @param x Cartesian x coordinate of the position
+     * @param y Cartesian y coordinate of the position
+     * @param z Cartesian z coordinate of the position
+     */
+    void setPosition( Coordinate x, Coordinate y, Coordinate z );
+
+    /**
+     * Set the delay value for the discrete reflection.
+     * @param newDelay New delay value (in seconds)
+     */
+    void setDelay( ril::SampleType newDelay );
+
+    /**
+      * Set the level of the discrete reflection.
+      * @param newLevel New level (linear scale)
+      */
+    void setLevel( LevelType newLevel );
+
+    /**
+     * Set the numerator polynomial of the wall reflection filter.
+     * @param numerator The ploynomial coefficients as a fixed-sized array.
+     */
+    void setReflectionNumerator( FilterCoeff const & numerator );
+    /**
+    * Set the denominator polynomial of the wall reflection filter.
+    * @param denominator The ploynomial coefficients as a fixed-sized array.
+    */
+    void setReflectionDenominator( FilterCoeff const & denominator );
+
+    /**
+     * Set the numerator coefficients of the wall reflections filters from an array.
+     * If the number of values is lower than the length of the polynomial, the remaining coefficients are set to zero.
+     * @param numerator Pointer to an array containing the numerator polynomials.
+     * @param numValues The number of coefficients in the array.
+     * @throw std::invalid_arguments If the number of values exceeds the length of the polynomial.
+     */
+    void setReflectionNumerator( ril::SampleType const * const numerator, std::size_t numValues );
+
+    /**
+    * Set the denominator coefficients of the wall reflections filters from an array.
+    * If the number of values is lower than the length of the polynomial, the remaining coefficients are set to zero.
+    * @param denominator Pointer to an array containing the numerator polynomials.
+    * @param numValues The number of coefficients in the array.
+    * @throw std::invalid_arguments If the number of values exceeds the length of the polynomial.
+    */
+    void setReflectionDenominator( ril::SampleType const * const denominator, std::size_t numValues );
+
+  private:
+    /** Cartesion x coordinate. */
+    Coordinate mX;
+    /** Cartesion y coordinate. */
+    Coordinate mY;
+    /** Cartesion z coordinate. */
+    Coordinate mZ;
+    
+    /**
+     * Delay value (in seconds)
+     */
+    ril::SampleType mDelay;
+
+    /**
+     * Discrete reflection level (linear scale).
+     */
+    LevelType mLevel;
+
+    /**
+     * IIR numerator polynomial of the wall reflection filter.
+     */
+    FilterCoeff mIirNumerator;
+
+    /**
+     * IIR denominator polynomial of the wall reflection filter.
+     */
+    FilterCoeff mIirDenominator;
+  };
+  
+  /**
+   * Default constructor.
+   * Construct a PointSourceWithReverb with all data members set to default values.
+   */
   PointSourceWithReverb( );
 
+  /**
+   * Construct a PointSourceWithReverb with a given object id and all data members set to default values.
+   */
   explicit PointSourceWithReverb( ObjectId id );
 
+  /**
+   * Destructor.
+   */
   virtual ~PointSourceWithReverb();
 
   /*virtual*/ ObjectTypeId type() const;
 
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
+  /**
+   * Retrieve the initial delay (closely related to mixing time) for the late reverberation tail in seconds.
+   */
   ril::SampleType const lateReverbOnset() const { return mLateReverbOnset; }
 
+  /**
+   * Set the onset time for the late reverberation part.
+   * @param onset Offset time in seconds.
+   */
   void setLateReverbOnset( ril::SampleType onset ) { mLateReverbOnset = onset; }
 
+  /**
+   * Return the late reverberation decay coefficients.
+   * Returned as an array of decay coefficients corresponding to the fixed subbands.
+   */
   LateReverbCoeffs const & lateReverbDecayCoeffs() const { return mLateReverbDecay; }
 
+  /**
+   * Return the late reverberation levels.
+   * Returned as an array of linear levels corresponding to the fixed subbands.
+   */
   LateReverbCoeffs const & lateReverbLevels() const { return mLateReverbLevels; }
 
+  /**
+   * Set the late reverberation levels.
+   * @param levels The levels (linear scale) corresponding to the fixed subbands as a fixed-size array.
+   */
   void setLateReverbLevels( LateReverbCoeffs const & levels ) { mLateReverbLevels = levels; }
 
+  /**
+   * Set the late reverberation levels from a vector.
+   * @param levels The levels (linear scale) corresponding to the fixed subbands.
+   * @param numValues The number of values contained in the \p levels array.
+   * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
+   */
   void setLateReverbLevels( ril::SampleType const * levels, std::size_t numValues );
 
+  /**
+  * Set the late reverberation decay coefficients.
+  * @param decay The decay coefficients corresponding to the fixed subbands as a fixed-size array.
+  */
   void setLateReverbDecayCoeffs( LateReverbCoeffs const & decay ) { mLateReverbDecay = decay; }
 
+  /**
+  * Set the late reverberation decay coefficients from a vector.
+  * @param decay The decay coefficients corresponding to the fixed subbands.
+  * @param numValues The number of values contained in the \p decay array.
+  * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
+  */
   void setLateReverbDecayCoeffs( ril::SampleType const * decay, std::size_t numValues );
 
+  /**
+    * Set the number of discrete reflection specifications.
+    * This method invalidates all previously set reflections.
+    * @param numReflections The new number of dicrete reflection specifications.
+    */
+  void setNumberOfDiscreteReflections( std::size_t numReflections );
+
+  /**
+   * Return the number of discrete reflection specifications.
+   */
   std::size_t numberOfDiscreteReflections() const { return mDiscreteReflections.size(); };
 
+  /**
+   * Return a discrete reflection specification with the given index (const version)
+   * @throw std::out_of_range If \p reflIdx exceeds the number of discrete reflections.
+   */
+  DiscreteReflection const & discreteReflection( std::size_t reflIdx ) const
+  {
+    return mDiscreteReflections.at( reflIdx );
+  }
 
-protected:
+  /**
+  * Return a discrete reflection specification with the given index.
+  * @throw std::out_of_range If \p reflIdx exceeds the number of discrete reflections.
+  */
+  DiscreteReflection & discreteReflection( std::size_t reflIdx )
+  {
+    return mDiscreteReflections.at( reflIdx );
+  }
 
 private:
-    std::vector<DiscreteReflection> mDiscreteReflections;
+  /**
+   * Data structure containing the discrete (early) reflections.
+   */
+  std::vector<DiscreteReflection> mDiscreteReflections;
+  
+  /**
+   * Onset delay (closeely related to mixing time) for the late reverberation tail.
+   */
+  ril::SampleType mLateReverbOnset;
+
+  /**
+   * Array holding the late reverberation decay coefficients for the fixed subbands.
+   */
+  LateReverbCoeffs mLateReverbDecay;
     
-    ril::SampleType mLateReverbOnset;
-    
-    LateReverbCoeffs mLateReverbDecay;
-    
-    LateReverbCoeffs mLateReverbLevels;
+  /**
+  * Array holding the late reverberation levels (linear scale) for the fixed subbands.
+  */
+  LateReverbCoeffs mLateReverbLevels;
 };
 
 } // namespace objectmodel
