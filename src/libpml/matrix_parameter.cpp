@@ -88,7 +88,7 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
     std::string::const_iterator startIt = currLine.begin();
     std::string::const_iterator endIt = currLine.end( );
     bool parseRes = qi::phrase_parse( startIt, endIt,
-#if !defined(__APPLE_CC__) && __GNUC__ <= 4 && __GNUC_MINOR__ < 9
+#if !defined(__clang__) && __GNUC__ <= 4 && __GNUC_MINOR__ < 9
       // NOTE: the additional pair of parentheses around
       // qi::real_parser<ElementType>() is to prevent a GCC
       // parsing bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55535
