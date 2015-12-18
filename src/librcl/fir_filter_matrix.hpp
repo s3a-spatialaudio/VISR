@@ -13,28 +13,26 @@
 
 #include <libpml/filter_routing_parameter.hpp>
 
-#include <librbbl/multichannel_convolver_uniform.hpp>
-
 #include <cstddef> // for std::size_t
 #include <memory>
 
 namespace visr
 {
-
+// forward declaration
+namespace rbbl
+{
+template< typename SampleType >
+class MultichannelConvolverUniform;
+}
+  
 namespace rcl
 {
-// forward declaration
-//namespace rbbl
-//{
-//template< typename SampleType >
-//class MultichannelConvolverUniform;
-//}
 
 /**
- * A multichannel IIR filter consisting of a fixed, arbitrary number of biquads per channel.
+ * A multiple input/multiple output FIR filter
  * This class has one input port named "in" and one output port named "out".
- * The widths of the input and the output port are identical and is
- * set by the argument <b>numberOfChannels</b> in the setup() method.
+ * The widths of the input and the output port are set by the parameters \p 
+ * numberOfInputs and \p numberOfOutputs in the setup() method.
  */
 class FirFilterMatrix: public ril::AudioComponent
 {
@@ -57,6 +55,16 @@ public:
    * @param numberOfInputs The number of input signals.
    * the multichannel input and output waveforms. .
    * @param numberOfOutputs The number of output signals.
+   * @param filterLength The maximum admissible FIR filter length.
+   * @param maxFilters The maximum number of filter specifications (single FIR filters) that can be stored within
+   * the component.
+   * @param maxRoutings The maximum number of routings (i.e., the maximum number of simultaneously convolved 
+   * signal/filter combinations supported by this filter.
+   * @param filters The initial FIR filters stored as matrix rows. The filters 0...filters.numberOfRows() are initialised
+   * to these FIR filters, the remaining filter specifications are set to zero. Default: empty matrix, i.e., 
+   * all filters are zero-initialised.
+   * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
+   * active initially.
    */
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,
@@ -77,7 +85,16 @@ public:
    */
   void clearRoutings();
 
-  void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, SampleType const gain );
+  /**
+   * Add a routing point in the filter matrix.
+   * If there is already an entry for the combination (\p inputIdx, \p outputIdx ), the existing rntry is replaced.
+   * @param inputIdx The input signal index for the routing.
+   * @param outputIdx The output signal index for this routing.
+   * @param filterIdx The filter index for this routing (pointing to an entry to the filter container of this component)
+   * @throw std::invalid_argument If \p inputIdx, \p outputIdx, or \p filterIdx exceed their respective admissible ranges
+   */
+  void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx,
+                   SampleType const gain = static_cast<SampleType>(1.0) );
 
   void addRouting( pml::FilterRoutingParameter const & routing );
 
