@@ -1,15 +1,13 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "signal_flow.hpp"
+#include "gain_matrix.hpp"
 
 #include <algorithm>
 #include <vector>
 
 namespace visr
 {
-namespace apps
-{
-namespace gain_matrix
+namespace signalflows
 {
 
 namespace // unnamed
@@ -28,11 +26,12 @@ namespace // unnamed
   }
 }
 
-SignalFlow::SignalFlow( std::size_t numberOfInputs,
-  std::size_t numberOfOutputs,
-  pml::MatrixParameter<ril::SampleType> const & initialMatrix,
-  std::size_t interpolationPeriod,
-  std::size_t period, ril::SamplingFrequencyType samplingFrequency )
+GainMatrix::GainMatrix( std::size_t numberOfInputs,
+			std::size_t numberOfOutputs,
+			efl::BasicMatrix<ril::SampleType> const & initialMatrix,
+			std::size_t interpolationPeriod,
+			std::size_t period,
+			ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
@@ -62,16 +61,15 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
   setInitialised( true );
 }
 
-SignalFlow::~SignalFlow( )
+GainMatrix::~GainMatrix( )
 {
 }
  
 /*virtual*/ void 
-SignalFlow::process()
+GainMatrix::process()
 {
   mMatrix.process();
 }
 
-} // namespace gain_matrix
-} // namespace apps
+} // namespace signalflows
 } // namespace visr

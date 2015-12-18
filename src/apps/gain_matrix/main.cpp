@@ -1,11 +1,12 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "options.hpp"
-#include "signal_flow.hpp"
 
 #include <libpml/matrix_parameter.hpp>
 
 #include <librrl/portaudio_interface.hpp>
+
+#include <libsignalflows/gain_matrix.hpp>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -98,7 +99,7 @@ int main( int argc, char const * const * argv )
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;
 
-    apps::gain_matrix::SignalFlow flow( numberOfInputs, numberOfOutputs,
+    visr::signalflows::GainMatrix flow( numberOfInputs, numberOfOutputs,
                                         *initialMtx,
                                         cInterpolationLength, periodSize,
                                         samplingRate );
