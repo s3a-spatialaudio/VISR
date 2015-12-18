@@ -3,6 +3,11 @@
 INCLUDE_DIRECTORIES( ${MAXSDK_MSP_INCLUDE_DIR} )
 INCLUDE_DIRECTORIES( ${MAXSDK_MAX_INCLUDE_DIR} )
 
+# Copyright Institute of Sound and Vibration Research - All rights reserved
+
+INCLUDE_DIRECTORIES( ${MAXSDK_MSP_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES( ${MAXSDK_MAX_INCLUDE_DIR} )
+
 IF( APPLE )
   FIND_LIBRARY( CORE_SERVICE_FRAMEWORK NAMES CoreServices )
   INCLUDE_DIRECTORIES( ${CORE_SERVICE_FRAMEWORK}/Versions/A/Frameworks/CarbonCore.framework/Versions/A/Headers )
@@ -12,25 +17,38 @@ ENDIF( APPLE )
 
 SET( EXTERNAL_NAME convert_input )
 
-ADD_LIBRARY( convert_input MODULE convert_input.c )
+SET( PROJECT_NAME convert_input_max_external )
 
-set_target_properties( convert_input  PROPERTIES
+ADD_LIBRARY( ${PROJECT_NAME} MODULE convert_input.c )
+
+SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES
     PREFIX ""
-    SUFFIX ""
     OUTPUT_NAME ${EXTERNAL_NAME}
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/max"
-)
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/max" )
 
-# Note: It is sufficient if we say 'extern "C"' within to revert the effects of the
-# C++ linking?
-SET_TARGET_PROPERTIES( convert_input PROPERTIES LINKER_LANGUAGE C)
-SET_PROPERTY( SOURCE convert_input.c PROPERTY LANGUAGE C)
+# <AF> TODO: Move this conditional logic to a centralised location!
+if(WIN32) # 32-bit and 64-bit Windows
+  if (CMAKE_CL_64)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe64)
+  else(CMAKE_CL_64)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe)
+  endif(CMAKE_CL_64)
+elseif(APPLE)
+  SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxo)
+endif(WIN32)
 
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport signalflows rcl ril rbbl efl )
 IF( WIN32 )
-  TARGET_LINK_LIBRARIES( convert_input ${MAXSDK_CRT_LIBRARY} )
-  TARGET_LINK_LIBRARIES( convert_input ${MAXSDK_CRT_P_LIBRARY} )
+  TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_LIBRARY} )
+  # I need to exclude this library in combination with MAXAPI_USE_MSCRT
+  # defined in the source file in order to avoid crashes when C++
+  # standard library functions are called.  
+  # TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_P_LIBRARY} )
+  # Still required?
+  SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:MSVCRTD.lib" )
 ENDIF( WIN32 )
-TARGET_LINK_LIBRARIES( convert_input ${MAXSDK_AUDIO_LIBRARY} )
-TARGET_LINK_LIBRARIES( convert_input ${MAXSDK_API_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_AUDIO_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_API_LIBRARY} )
+
 # According to the current FindMaxSDK.cmake, there is no crt library for apple.
 # TODO: Verify and improve FindMaxSDK.cmake
