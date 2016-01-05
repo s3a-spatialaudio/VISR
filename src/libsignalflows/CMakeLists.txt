@@ -6,3 +6,6 @@ SET( SOURCES baseline_renderer.cpp delay_vector.cpp )
 SET( HEADERS baseline_renderer.hpp delay_vector.hpp )
 
 ADD_LIBRARY( signalflows STATIC ${SOURCES} ${HEADERS} )
+
+# Add the unit test directory.
+ADD_SUBDIRECTORY( test )
