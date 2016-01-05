@@ -177,7 +177,7 @@ int C74_EXPORT main()
 {
   post( "visr::maxmsp::GainMatrix::main() called." );
 
-  visr::maxmsp::ClassRegistrar<visr::maxmsp::GainMatrix>( "delay_vector~" );
+  visr::maxmsp::ClassRegistrar<visr::maxmsp::GainMatrix>( "gain_matrix~" );
 
   post("visr::maxmsp::DelayVector::main() finished.");
 
