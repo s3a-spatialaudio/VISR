@@ -6,14 +6,19 @@
 #include <libril/audio_signal_flow.hpp>
 
 #include <librcl/add.hpp>
+#include <librcl/biquad_iir_filter.hpp>
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
+#include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/late_reverb_filter_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/position_decoder.hpp>
+#include <librcl/reverb_parameter_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
+#include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
@@ -30,12 +35,6 @@
 
 namespace visr
 {
-
-// Forward declarations
-namespace rcl
-{
-  class BiquadIirFilter;
-}
 
 namespace signalflows
 {
@@ -138,6 +137,51 @@ private:
 
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
+
+  /**
+   * Audio components and parameter data, and internal functions related to the object-based reverberation signal flow.
+   * @todo Consider moving this into a separate separate sub-signalflow (after this feature has been implemented).
+   */
+  //@{
+  /**
+   * @throw std::invalid_argument If there is an error in the configuration (e.g., an inconsistency or a missing file path)
+   */
+  void setupReverberationSignalFlow( std::string const & reverbConfig,
+                                     panning::LoudspeakerArray const & arrayConfig );
+
+  rcl::ReverbParameterCalculator mReverbParameterCalculator;
+
+  rcl::SignalRouting mReverbSignalRouting;
+
+  rcl::DelayVector mDiscreteReverbDelay;
+
+  rcl::BiquadIirFilter mDiscreteReverbReflFilters;
+
+  rcl::GainMatrix mDiscreteReverbPanningMatrix;
+
+  rcl::LateReverbFilterCalculator mLateReverbFilterCalculator;
+
+  rcl::FirFilterMatrix mLateReverbFilter;
+
+  rcl::FirFilterMatrix mLateDiffusionFilter;
+
+  pml::SignalRoutingParameter mReverbRoutingParameter;
+
+  efl::BasicVector<ril::SampleType> mDiscreteReverbDelayParameter;
+
+  efl::BasicVector<ril::SampleType> mDiscreteReverbGainParameter;
+
+  pml::BiquadParameterMatrix<ril::SampleType> mDiscreteReverbReflFilterParameter;
+
+  pml::MatrixParameter<ril::SampleType> mDiscreteReverbPanningGains;
+
+  rcl::LateReverbFilterCalculator::SubBandMessageQueue mLateReverbFilterSubBandLevels;
+
+  rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
+
+  //@}
+
+
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
 

@@ -70,6 +70,22 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mSubwooferMix( *this, "SubwooferMixer" )
  , mNullSource( *this, "NullSource" )
  , mDiffuseGains( ril::cVectorAlignmentSamples )
+ // Reverberation-related members
+ , mReverbParameterCalculator( *this, "ReverbParameterCalculator" )
+ , mReverbSignalRouting( *this, "ReverbSignalRouting" )
+ , mDiscreteReverbDelay( *this, "DiscreteReverbDelay" )
+ , mDiscreteReverbReflFilters( *this, "DiscreteReverbReflectionFilters" )
+ , mDiscreteReverbPanningMatrix( *this, "DiscreteReverbPanningMatrix" )
+ , mLateReverbFilterCalculator( *this, "LateReverbFilterCalculator" )
+ , mLateReverbFilter( *this, "LateReverbFilter" )
+ , mLateDiffusionFilter( *this, "LateDiffusionFilter" )
+ , mReverbRoutingParameter()
+ , mDiscreteReverbDelayParameter( ril::cVectorAlignmentSamples )
+ , mDiscreteReverbGainParameter( ril::cVectorAlignmentSamples )
+ , mDiscreteReverbReflFilterParameter( 0, 0 ) // initialise as empty
+ , mDiscreteReverbPanningGains()
+ , mLateReverbFilterSubBandLevels()
+ , mLateReverbFilterIRs( )
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
   std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
@@ -147,8 +163,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
   mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
 
-
-
+  setupReverberationSignalFlow( reverbConfig, loudspeakerConfiguration );
 
   // Create the index vectors for connecting the ports.
   // First, create the start indices for all output vectors by adding the width of the previous vector.
@@ -296,6 +311,12 @@ BaselineRenderer::process()
   }
   mOutputAdjustment.process();
   mNullSource.process();
+}
+
+void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbConfig,
+                                                     panning::LoudspeakerArray const & arrayConfig )
+{
+
 }
 
 } // namespace signalflows
