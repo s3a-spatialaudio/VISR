@@ -19,8 +19,6 @@
 #include <ciso646>
 #include <cstdio>
 
-// for math utility functions (see implementations in the unnamed namespace below)
-
 namespace visr
 {
 namespace rcl

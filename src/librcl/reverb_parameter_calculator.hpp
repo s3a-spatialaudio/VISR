@@ -12,8 +12,6 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
-#include <libpml/biquad_parameter.hpp>
-
 #include <vector>
 
 namespace visr
@@ -26,11 +24,11 @@ class ObjectVector;
 namespace efl
 {
 template< typename SampleType > class BasicMatrix;
+template< typename SampleType > class BasicVector;
 }
 namespace pml
 {
 template <typename CoeffType> class BiquadParameterMatrix;
-class ListenerPosition;
 class SignalRoutingParameter;
 }
 namespace ril
@@ -85,7 +83,7 @@ public:
 
   /**
    * The process function. 
-   * It takes a vector of objects as input and calculates a vector of output gains.
+   * The 
    */
   void process( objectmodel::ObjectVector const & objects,
                 pml::SignalRoutingParameter & signalRouting,
