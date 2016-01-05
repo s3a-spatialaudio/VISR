@@ -35,12 +35,12 @@ ReverbParameterCalculator::~ReverbParameterCalculator()
 }
 
 void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayConfig,
-  std::size_t numberOfObjects,
-  std::size_t numberOfDiscreteReflectionsPerSource,
-  std::size_t numBiquadSectionsReflectionFilters,
-  ril::SampleType lateReflectionLengthSeconds,
-  std::size_t numLateReflectionSubBandFilters,
-  efl::BasicMatrix<ril::SampleType> const & lateReflectionSubbandFilters )
+                                       std::size_t numberOfObjects,
+                                       std::size_t numberOfDiscreteReflectionsPerSource,
+                                       std::size_t numBiquadSectionsReflectionFilters,
+                                       ril::SampleType lateReflectionLengthSeconds,
+                                       std::size_t numLateReflectionSubBandFilters,
+                                       efl::BasicMatrix<ril::SampleType> & lateReverbFilters )
 {
 }
 
@@ -49,11 +49,12 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
 * It takes a vector of objects as input and calculates a vector of output gains.
 */
 void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objects,
-  pml::SignalRoutingParameter & signalRouting,
-  pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-  efl::BasicVector<ril::SampleType> & discreteReflGains,
-  efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-  efl::BasicMatrix<ril::SampleType> & lateReverbFilters )
+                                         pml::SignalRoutingParameter & signalRouting,
+                                         efl::BasicVector<ril::SampleType> & discreteReflGains,
+                                         efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                                         pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                                         efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                                         LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
 
 }

@@ -3,6 +3,9 @@
 #ifndef VISR_LIBRCL_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
 
+// Preliminary solution, dependencies between components are suboptimal
+#include "late_reverb_filter_calculator.hpp"
+
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
 
@@ -70,27 +73,27 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
-   */ 
+   * @param numberOfObjects The maximum number of reverb objects to be processed.
+   */
   void setup( panning::LoudspeakerArray const & arrayConfig,
               std::size_t numberOfObjects,
               std::size_t numberOfDiscreteReflectionsPerSource,
               std::size_t numBiquadSectionsReflectionFilters,
               ril::SampleType lateReflectionLengthSeconds,
               std::size_t numLateReflectionSubBandFilters,
-              efl::BasicMatrix<ril::SampleType> const & lateReflectionSubbandFilters );
+              efl::BasicMatrix<ril::SampleType> & lateReverbFilters );
 
   /**
    * The process function. 
-   * The 
    */
   void process( objectmodel::ObjectVector const & objects,
                 pml::SignalRoutingParameter & signalRouting,
-                pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                 efl::BasicVector<ril::SampleType> & discreteReflGains,
+                efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                 efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                efl::BasicMatrix<ril::SampleType> & lateReverbFilters );
+                LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 
 private:
   /**
