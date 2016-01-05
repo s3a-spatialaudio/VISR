@@ -179,6 +179,8 @@ private:
 
   rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
 
+  rcl::Add mReverbMix;
+
   //@}
 
 

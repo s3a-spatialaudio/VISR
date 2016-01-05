@@ -79,6 +79,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mLateReverbFilterCalculator( *this, "LateReverbFilterCalculator" )
  , mLateReverbFilter( *this, "LateReverbFilter" )
  , mLateDiffusionFilter( *this, "LateDiffusionFilter" )
+ , mReverbMix( *this, "ReverbMix" )
  , mReverbRoutingParameter()
  , mDiscreteReverbDelayParameter( ril::cVectorAlignmentSamples )
  , mDiscreteReverbGainParameter( ril::cVectorAlignmentSamples )
@@ -145,7 +146,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
    */
   ril::SampleType const diffusorGain = static_cast<ril::SampleType>(1.0) / std::sqrt( static_cast<ril::SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
-  mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
+  mDirectDiffuseMix.setup( numberOfLoudspeakers, 3 );
   mNullSource.setup( 1/*width*/ );
 
   efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
@@ -298,6 +299,34 @@ BaselineRenderer::process()
   mDiffusePartMatrix.setGains( mDiffuseGains );
   mDiffusePartMatrix.process();
   mDiffusePartDecorrelator.process();
+
+  // Reverberation stream
+  mReverbParameterCalculator.process( mObjectVector,
+                                      mReverbRoutingParameter,
+                                      mDiscreteReverbGainParameter,
+                                      mDiscreteReverbDelayParameter,
+                                      mDiscreteReverbReflFilterParameter,
+                                      mDiscreteReverbPanningGains,
+                                      mLateReverbFilterSubBandLevels );
+  mDiscreteReverbDelay.setDelayAndGain( mDiscreteReverbDelayParameter, mDiscreteReverbGainParameter );
+  mDiscreteReverbDelay.process();
+  mDiscreteReverbReflFilters.setCoefficientMatrix( mDiscreteReverbReflFilterParameter );
+  mDiscreteReverbReflFilters.process();
+  mDiscreteReverbPanningMatrix.setGains( mDiscreteReverbPanningGains );
+  mDiscreteReverbPanningMatrix.process();
+  mLateReverbFilterCalculator.process( mLateReverbFilterSubBandLevels, mLateReverbFilterIRs );
+  // TODO: Implement utility function/object/template to apply all messages in message queue to the target component
+  while( not mLateReverbFilterIRs.empty() )
+  {
+    rcl::LateReverbFilterCalculator::LateFilterMassageQueue::MessageType const & val = mLateReverbFilterIRs.nextElement();
+    mLateReverbFilter.setFilter( val.first, &val.second[0], val.second.size() );
+    mLateReverbFilterIRs.popNextElement( );
+  }
+  mLateReverbFilter.process();
+
+  mReverbMix.process();
+
+  // Commbine all streams again
   mDirectDiffuseMix.process();
   mSubwooferMix.process();
   if( mTrackingEnabled )
