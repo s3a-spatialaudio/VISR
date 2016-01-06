@@ -39,8 +39,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
                                        std::size_t numberOfDiscreteReflectionsPerSource,
                                        std::size_t numBiquadSectionsReflectionFilters,
                                        ril::SampleType lateReflectionLengthSeconds,
-                                       std::size_t numLateReflectionSubBandFilters,
-                                       efl::BasicMatrix<ril::SampleType> & lateReverbFilters )
+                                       std::size_t numLateReflectionSubBandFilters )
 {
 }
 

@@ -81,8 +81,7 @@ public:
               std::size_t numberOfDiscreteReflectionsPerSource,
               std::size_t numBiquadSectionsReflectionFilters,
               ril::SampleType lateReflectionLengthSeconds,
-              std::size_t numLateReflectionSubBandFilters,
-              efl::BasicMatrix<ril::SampleType> & lateReverbFilters );
+              std::size_t numLateReflectionSubBandFilters );
 
   /**
    * The process function. 
