@@ -4,10 +4,15 @@
 
 #include <libefl/basic_matrix.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <libpanning/LoudspeakerArray.h>
 
-#include <stdexcept>
+#include <boost/test/unit_test.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
+#include <ciso646>
 #include <iostream>
+#include <stdexcept>
 
 namespace visr
 {
@@ -20,21 +25,33 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
 {
   std::string const reverbConfig = "{ \"numReverbObjects\": 5 }";
 
+  boost::filesystem::path const arrayConfigFile( CMAKE_SOURCE_DIR "/config/isvr/22.1_audiolab_1subwoofer.xml" );
+  BOOST_CHECK( exists( arrayConfigFile ) and not is_directory( arrayConfigFile ) );
 
-  /*
-BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeakerConfiguration,
-                                    std::size_t numberOfInputs,
-                                    std::size_t numberOfOutputs,
-                                    std::size_t interpolationPeriod,
-                                    efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
-                                    std::string const & trackingConfiguration,
-                                    std::size_t sceneReceiverPort,
-                                    std::string const & reverbConfig,
-                                    std::size_t period,
-                                    ril::SamplingFrequencyType samplingFrequency
-                                    )
-  */
+  panning::LoudspeakerArray arrayConfig;
+  arrayConfig.loadXml( arrayConfigFile.string() );
 
+  std::size_t const numberOfInputs = 16;
+  std::size_t const numberOfOutputs = 40;
+  std::size_t const period = 128;
+  std::size_t const interpolationPeriod = 16 * period;
+  std::size_t const numRealLoudspeakers = arrayConfig.getNumRegularSpeakers();
+  std::size_t const diffusionFilterLength = 512;
+  efl::BasicMatrix<ril::SampleType> const diffusionFilters( numRealLoudspeakers, diffusionFilterLength );
+
+  std::string const trackingConfig( "" );
+
+  signalflows::BaselineRenderer( arrayConfig,
+                                 numberOfInputs,
+                                 numberOfOutputs,
+                                 interpolationPeriod,
+                                 diffusionFilters,
+                                 trackingConfig,
+                                 8888,
+                                 reverbConfig,
+                                 period,
+                                 48000
+                                 );
 }
 
 } // namespace test
