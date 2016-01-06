@@ -7,6 +7,7 @@
 #include <ciso646>
 #include <initializer_list>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 namespace visr
