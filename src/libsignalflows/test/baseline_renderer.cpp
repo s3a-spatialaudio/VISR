@@ -13,6 +13,8 @@
 #include <ciso646>
 #include <iostream>
 #include <stdexcept>
+#include <string>
+#include <sstream>
 
 namespace visr
 {
@@ -23,8 +25,6 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( InstantiateRenderer )
 {
-  std::string const reverbConfig = "{ \"numReverbObjects\": 5 }";
-
   boost::filesystem::path const arrayConfigFile( CMAKE_SOURCE_DIR "/config/isvr/22.1_audiolab_1subwoofer.xml" );
   BOOST_CHECK( exists( arrayConfigFile ) and not is_directory( arrayConfigFile ) );
 
@@ -41,6 +41,19 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
 
   std::string const trackingConfig( "" );
 
+  // Construct the reverb configuration
+  std::size_t const numReverbObjects = 5;
+  std::size_t const discreteReflectionsPerObject = 4;
+  double const lateFilterLengthSeconds = 0.05;
+  std::string const lateDiffusionFilters( CMAKE_SOURCE_DIR "/config/filters/random_phase_allpass_64ch_512taps.wav" );
+
+  std::stringstream reverbConfig;
+  reverbConfig << "{ \"numReverbObjects\": " << numReverbObjects
+               << ", \"discreteReflectionsPerObject\": " << discreteReflectionsPerObject
+               << ", \"lateReverbFilterLength\": " << lateFilterLengthSeconds
+               << ", \"lateReverbDecorrelationFilters\": \"" << lateDiffusionFilters
+               << "\" }";
+
   signalflows::BaselineRenderer( arrayConfig,
                                  numberOfInputs,
                                  numberOfOutputs,
@@ -48,7 +61,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                                  diffusionFilters,
                                  trackingConfig,
                                  8888,
-                                 reverbConfig,
+                                 reverbConfig.str(),
                                  period,
                                  48000
                                  );

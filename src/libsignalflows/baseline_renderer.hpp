@@ -121,6 +121,7 @@ private:
    * Tracking-related members
    */
   //@{
+
   std::unique_ptr<rcl::ListenerCompensation> mListenerCompensation;
 
   std::unique_ptr<rcl::DelayVector>  mSpeakerCompensation;
@@ -147,7 +148,15 @@ private:
    * @throw std::invalid_argument If there is an error in the configuration (e.g., an inconsistency or a missing file path)
    */
   void setupReverberationSignalFlow( std::string const & reverbConfig,
-                                     panning::LoudspeakerArray const & arrayConfig );
+                                     panning::LoudspeakerArray const & arrayConfig,
+                                     std::size_t numberOfInputs,
+                                     std::size_t interpolationSteps );
+
+  std::size_t mMaxNumReverbObjects;
+
+  ril::SampleType mLateReverbFilterLengthSeconds;
+
+  std::size_t mNumDiscreteReflectionsPerObject;
 
   rcl::ReverbParameterCalculator mReverbParameterCalculator;
 
@@ -165,6 +174,8 @@ private:
 
   rcl::FirFilterMatrix mLateDiffusionFilter;
 
+  rcl::Add mReverbMix;
+
   pml::SignalRoutingParameter mReverbRoutingParameter;
 
   efl::BasicVector<ril::SampleType> mDiscreteReverbDelayParameter;
@@ -178,8 +189,6 @@ private:
   rcl::LateReverbFilterCalculator::SubBandMessageQueue mLateReverbFilterSubBandLevels;
 
   rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
-
-  rcl::Add mReverbMix;
 
   //@}
 
