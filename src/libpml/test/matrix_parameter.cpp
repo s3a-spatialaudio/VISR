@@ -93,6 +93,28 @@ BOOST_AUTO_TEST_CASE( readFiltersFromStrings )
   }
 }
 
+BOOST_AUTO_TEST_CASE( readSemicolonSeparatedMatrix )
+{
+  using SampleType = double;
+  std::size_t const alignElements = 8;
+
+  std::string filterDef( " 0.0 0.75 -3.0e-3; 0.0, -1, +3.275 % comments are allowed ;    % Also lines with only comments\n 1.0, -0.5, 0.333" );
+
+  pml::MatrixParameter<SampleType> const impulses
+    = pml::MatrixParameter<SampleType>::fromString( filterDef, alignElements );
+
+  std::size_t irChannels = impulses.numberOfRows( );
+  std::size_t irLength = impulses.numberOfColumns( );
+
+  for( std::size_t rowIdx( 0 ); rowIdx < irChannels; ++rowIdx )
+  {
+    std::cout << "Filter " << rowIdx << ": ";
+    std::copy( impulses.row( rowIdx ), impulses.row( rowIdx ) + irLength, std::ostream_iterator<SampleType>( std::cout, ", " ) );
+    std::cout << std::endl;
+  }
+}
+
+
 } // namespace test
 } // namespace pml
 } // namespace visr
