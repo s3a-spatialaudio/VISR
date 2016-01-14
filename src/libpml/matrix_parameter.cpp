@@ -74,8 +74,8 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
   namespace phoenix = boost::phoenix;
 
   std::vector< std::vector<ElementType> > tmpStorage;
-  std::size_t minSize = 0;
-  std::size_t maxSize = std::numeric_limits<std::size_t>::max();
+  std::size_t minSize = std::numeric_limits<std::size_t>::max( );
+  std::size_t maxSize = 0;
   while( not stream.eof() )
   {
     if( not stream.good( ) )
@@ -84,38 +84,45 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
     }
     std::string currLine;
     std::getline( stream, currLine );
-    std::vector<ElementType> v;
-    std::string::const_iterator startIt = currLine.begin();
-    std::string::const_iterator endIt = currLine.end( );
-    bool parseRes = qi::phrase_parse( startIt, endIt,
-#if !defined(__APPLE_CC__) && __GNUC__ <= 4 && __GNUC_MINOR__ < 9
-      // NOTE: the additional pair of parentheses around
-      // qi::real_parser<ElementType>() is to prevent a GCC
-      // parsing bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55535
-      // which has been reported to be fixed in GCC 4.9
-      // Ironically, this workaround triggers an error in llvm/clang used in XCode, which also claimes to be __GNUC__.
-      // TODO: Remove conditional code after minimum compiler
-      // requirement is GCC >= 4.9. 
-       ( *((qi::real_parser<ElementType>())[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+    for( std::size_t strPos( 0 ); strPos != std::string::npos; /* strPos is updated in the loop.*/ )
+    {
+      std::size_t lineEndPos = currLine.find_first_of( std::string(";"), strPos );
+
+      std::vector<ElementType> v;
+      // Have to convert the indices returned by find_first_of into iterators
+      std::string::const_iterator startIt = currLine.begin() + strPos;
+      std::string::const_iterator endIt =
+        (lineEndPos == std::string::npos) ? currLine.end() : currLine.begin( ) + lineEndPos;
+      bool parseRes = qi::phrase_parse( startIt, endIt,
+#if !defined(__clang__) && __GNUC__ <= 4 && __GNUC_MINOR__ < 9
+        // NOTE: the additional pair of parentheses around
+        // qi::real_parser<ElementType>() is to prevent a GCC
+        // parsing bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55535
+        // which has been reported to be fixed in GCC 4.9
+        // Ironically, this workaround triggers an error in llvm/clang used in XCode, which also claimes to be __GNUC__.
+        // TODO: Remove conditional code after minimum compiler
+        // requirement is GCC >= 4.9. 
+        (*((qi::real_parser<ElementType>( ))[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #else
-       ( *(qi::real_parser<ElementType>()[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+        (*(qi::real_parser<ElementType>( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #endif
-        % -qi::char_( ',' ) ) >> *(qi::char_( '%' ) >> *qi::char_) ),
-      boost::spirit::ascii::space );
-    if( !parseRes or (startIt != endIt ) )
-    {
-      throw std::invalid_argument( "MatrixParameter::fromStream(): Error while parsing line." );
+        % -qi::char_( ',' )) >> *(qi::char_( '%' ) >> *qi::char_)),
+        boost::spirit::ascii::space);
+      if( !parseRes or( startIt != endIt ) )
+      {
+        throw std::invalid_argument( "MatrixParameter::fromStream(): Error while parsing line." );
+      }
+      std::size_t const numEl = v.size( );
+      if( numEl != 0 ) // ignore empty lines (might consist purely of comments)
+      {
+        tmpStorage.push_back( v );
+        minSize = std::min( minSize, numEl );
+        maxSize = std::max( maxSize, numEl );
+      }
+      strPos = (lineEndPos == std::string::npos) ? lineEndPos : lineEndPos + 1;
     }
-    std::size_t const numEl = v.size();
-    if( numEl == 0 )
-    {
-      continue; // ignore empty lines (might consist purely of comments)
-    }
-    tmpStorage.push_back( v );
-    minSize = std::max(minSize, numEl );
-    maxSize = std::min(maxSize, numEl );
   }
-  if( minSize != maxSize )
+  if( (not tmpStorage.empty()) and (minSize != maxSize) ) // Empty arrays are legal.
   {
     throw std::invalid_argument( "MatrixParameter::fromStream(): Matrix rows (text lines) have different numbers of elements." );
   }
