@@ -46,11 +46,13 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
   std::size_t const discreteReflectionsPerObject = 4;
   double const lateFilterLengthSeconds = 0.05;
   std::string const lateDiffusionFilters( CMAKE_SOURCE_DIR "/config/filters/random_phase_allpass_64ch_512taps.wav" );
+  double const maximumDiscreteReflectionDelay = 0.23456f;
 
   std::stringstream reverbConfig;
   reverbConfig << "{ \"numReverbObjects\": " << numReverbObjects
                << ", \"discreteReflectionsPerObject\": " << discreteReflectionsPerObject
                << ", \"lateReverbFilterLength\": " << lateFilterLengthSeconds
+               << ", \"maxDiscreteReflectionDelay\": " << maximumDiscreteReflectionDelay
                << ", \"lateReverbDecorrelationFilters\": \"" << lateDiffusionFilters
                << "\" }";
 
