@@ -1,10 +1,14 @@
-% Copyright (c) 2015, Andreas Franck, Institute of Sound and Vibration Research,
+% Copyright (c) 2015, Andreas Franck, 
+% Institute of Sound and Vibration Research,
 % University of Southampton, United Kingdom
 % a.franck@soton.ac.uk
 
 % Script to generate the BBC configuratons.
 
 % Ensure that $VISR/src/libpanning/test/matlab is in the path.
+% TODO: Add more configurations as required
+% TODO: Add subwoofer configs where necessary.
+% TODO: Add support for variable output channel indices.
 
 allSpeakerCoordsSpherical = [...
  0 0;...      
@@ -124,7 +128,6 @@ numAllSpeakers = size( allSpeakerCoordsSpherical, 1 );
 allSpeakersCart = [x, y, z];
 
 %% The configurations
-
 for numConfig = 1:1
     
     switch numConfig
@@ -133,103 +136,34 @@ for numConfig = 1:1
             % Note: all indices are one-offset 
             speakerIndices = [11 10 1 17 16 7 6 18,...
                 13 12 25 24 19 35 33 32 29 28 34 36 42 41];
+            % Add virtual speakers as a matrix where each row contains a
+            % Cartesian coordinate.
             virtualSpeakers = [0, 0, -1];
             channels = [1:3 5:9 11:24];
-            subChannels = [4 10];
-            leftSpeakers =  [11 17 7 13 25 33 29 42];
-            rightSpeakers = [10 16 6 12 24 32 28 41];
-            medianSpeakers = [1 18 19 35 34 36];
-            subIndices = { [leftSpeakers medianSpeakers], [rightSpeakers medianSpeakers] };
-            subGainsLeft = [ones(size(leftSpeakers)), 0.5*ones(size(rightSpeakers))];
-            subGainsRight = [ones(size(rightSpeakers)), 0.5*ones(size(rightSpeakers))];
-            subGains = { subGainsLeft, subGainsRight };
-            subGainAdjustDB = [ -20*log10(norm(subGainsLeft)), -20*log10(norm(subGainsRight))];
-            subDelayAdjust = [ 0, 0 ];
+            % Subwoofer support not implemented yet 
+%             subChannels = [];
+%             leftSpeakers =  [11 17 7 13 25 33 29 42];
+%             rightSpeakers = [10 16 6 12 24 32 28 41];
+%             medianSpeakers = [1 18 19 35 34 36];
+%             subIndices = { [leftSpeakers medianSpeakers], [rightSpeakers medianSpeakers] };
+%             subGainsLeft = [ones(size(leftSpeakers)), 0.5*ones(size(rightSpeakers))];
+%             subGainsRight = [ones(size(rightSpeakers)), 0.5*ones(size(rightSpeakers))];
+%             subGains = { subGainsLeft, subGainsRight };
+%             subGainAdjustDB = [ -20*log10(norm(subGainsLeft)), -20*log10(norm(subGainsRight))];
+%             subDelayAdjust = [ 0, 0 ];
             
-            is2D = false;
-            isInfinite = false;
-        case 2 % 4 + 9 + 0
-            configName = 'bs2051-4+9+0';
-            channels = [7 8 6 11 17 13 15 23 19 25 29 -1];
-            subChannels = [32 33];
-            subIndices = { [11 8 7 6 17 23 19],...
-                [11 13 15 17 25 29] };
-            subGains = { [0.5 1 1 1 0.5 1 1],...
-                [0.5 1 1 0.5 1 1] };
-            subGainAdjustDB = [ 0, 0 ];
-            subDelayAdjust = [ 0, 0 ];
-            is2D = false;
-            isInfinite = false;
-        case 3 % 4 + 5 + 0
-            configName = 'bs2051-4+5+0';
-            channels = [7 8 6 12 16 22 20 25 29 -1];
-            subChannels = [32 33];
-            subIndices = { [12 8 7 6 16 20 22 25 29],...
-                [12 16 25 29] };
-            subGains = { [0.5 1 1 1 0.5 1 1 0.5 0.5],...
-                [0.5 0.5 0.5 0.5] };
-            subGainAdjustDB = [ 0, 0 ];
-            subDelayAdjust = [ 0, 0 ];
-            is2D = false;
-            isInfinite = false;
-        case 4 % 2 + 5 + 0
-            configName = 'bs2051-2+5+0';
-            channels = [7 8 6 12 16 22 20 -1];
-            subChannels = [32 33];
-            subIndices = { [7 8 6 22 20],...
-                [12 16] };
-            subGains = { [1 1 1 1 1],...
-                [1 1] };
-            subGainAdjustDB = [ 0, 0 ];
-            subDelayAdjust = [ 0, 0 ];
-            is2D = false;
-            isInfinite = false;
-        case 5 % 0 + 5 + 0
-            % The automatic triangulation fails here, so we include a
-            % virtual loudspeaker here.
-            % The configuration has to be amended afterwards.
-            configName = 'bs2051-0+5+0';
-            channels = [7 8 6 12 16 -1];
-            subChannels = [32 33];
-            subIndices = { [7 8 6],...
-                [12 16] };
-            subGains = { [1 1 1],...
-                [1 1] };
-            subGainAdjustDB = [ 0, 0 ];
-            subDelayAdjust = [ 0, 0 ];
-            is2D = true; % Normally, this is a planar setup, handled separately by the VISR renderer
-            isInfinite = false;
-            % The automatic triangulation probably fails.
-        case 6 % 0 + 2 + 0 aka stereo
-            % Automatic approach does not work at all
-            continue;
-            configName = 'bs2051-0+2+0';
-            channels = [7 6];
-            subChannels = [32 33];
-            subIndices = { [7 6],...
-                [7 6] };
-            subGains = { [0.5 0.5],...
-                [0.5 0.5] };
-            subGainAdjustDB = [ 0, 0 ];
-            subDelayAdjust = [ 0, 0 ];
-            is2D = true; % This is a planar setup, handled separately by the VISR renderer
-            isInfinite = false;
-            % The automatic triangulation most probably fails.
-            
-        case 7 % full listening room
-            configName = 'bbc-listening-room-full';
-            channels = 0:31;
-            subChannels = [32 33];
-            subIndices = { [11 24 31 30 17 19 20 21 22 23 18 5 6 7 8 9 10 0 1 2],...
-                [11 24 31 30 17 25 26 27 28 29 12 13 14 15 16 3 4] };
-            subGains = { [0.5*ones(1,5) ones(1,15) ],...
-                [0.5*ones(1,5) ones(1,12)] };
-            subGainAdjustDB = [ 0, 0 ];
-            subDelayAdjust = [ 0, 0 ];
+            % Basic 'empty' subwoofer configuration 
+            subChannels = [];
+            subIndices = {  };
+            subGains = { };
+            subGainAdjustDB = [];
+            subDelayAdjust = [];
+
             is2D = false;
             isInfinite = false;
     end
-    
+            
+            
     numRegularSpeakers = length(speakerIndices);    
     numVirtualSpeakers = size(virtualSpeakers,1);
     usedSpeakers = [allSpeakersCart( speakerIndices,: ); virtualSpeakers];
@@ -250,8 +184,9 @@ for numConfig = 1:1
     axis equal;
     labels = allSpeakerLabels( speakerIndices );
     text(DT.Points(1:numRegularSpeakers,1), DT.Points(1:numRegularSpeakers,2), DT.Points(1:numRegularSpeakers,3), labels, 'horizontal','left', 'vertical','bottom', 'FontSize', 14);
-    figName = [configName '.png'];
-    print( 1, figName, '-dpng' );
+%   If the configuration is to be printed
+%     figName = ['../' configName '.png'];
+%     print( 1, figName, '-dpng' );
     
     %% Create the subwoofer configuration
     numSubs = length( subChannels );
@@ -272,19 +207,26 @@ for numConfig = 1:1
         'assignedLoudspeakers', {subSpeakerIndices},...
         'loudspeakerWeights', {subSpeakerGains} );
         
-    
     numTotalChannels = length(channels) + numSubs;
-    gainAdjustDB = zeros(1,numTotalChannels );
-    delayAdjust = zeros(1,numTotalChannels );    
     
-    % Todo: Set any adjustments to the gains and delays here.
     
-    % Set the already defined gains and delays for the loudspeakers
-    gainAdjustDB( subChannels ) = subGainAdjustDB;
-    delayAdjust( subChannels ) = subDelayAdjust;
+    % Gain/delay adjustments not used at the moment
+    gainDelayAdjust = false;
+    if gainDelayAdjust
+        gainAdjustDB = zeros(1,numTotalChannels );
+        delayAdjust = zeros(1,numTotalChannels );
+        % Todo: Set any adjustments to the gains and delays here.
+        
+        % Set the already defined gains and delays for the loudspeakers
+        gainAdjustDB( subChannels ) = subGainAdjustDB;
+        delayAdjust( subChannels ) = subDelayAdjust;
+    end
     
     outputFileXml = ['../'  configName '.xml'];
     
-    writeArrayConfigXml( outputFileXml, usedSpeakers, triplets, isInfinite, is2D, allChannels, subwooferConfig, gainAdjustDB, delayAdjust );
-    
+    if gainDelayAdjust
+        writeArrayConfigXml( outputFileXml, usedSpeakers, triplets, isInfinite, is2D, allChannels, subwooferConfig, gainAdjustDB, delayAdjust );
+    else
+        writeArrayConfigXml( outputFileXml, usedSpeakers, triplets, isInfinite, is2D, allChannels, subwooferConfig );
+    end
 end % configuration loop
