@@ -64,8 +64,11 @@ ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 ############################################################
 # Create universal binaries on MacOS
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  SET( OSX_UNIVERSAL ON )
-  SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" ON)
+  IF( BUILD_MACOS_UNIVERSAL_BINARIES )
+    SET( OSX_UNIVERSAL ON )
+    SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+  ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
