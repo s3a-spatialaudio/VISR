@@ -1,4 +1,6 @@
-
+% Copyright ISVR 2015 - All rights reserved
+% Author: Andreas Franck a.franck@soton.ac.uk
+% Script to generate loudspeaker configurations for the small ISVR sphere.
 
 % Measured distance
 radiusHubPlate = 2.793/2;
