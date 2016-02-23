@@ -81,14 +81,19 @@
  *  * Install cmake (download from <a href="http://www.cmake.org/download/">http://www.cmake.org/download/</a>)
  *  * Install <tt>brew</tt> following the instructions on <a href ="http://brew.sh">http://brew.sh</a> (Paste command line at the bottom of web page to terminal window)
  *  * Initialise brew: <tt>$ brew doctor</tt>
- *  * Install doxygen (download from <a href="http://www.stack.nl/~dimitri/doxygen/download.html" http://www.stack.nl/~dimitri/doxygen/download.html</a>
- *  * Install boost and portaudio
+ *  * <b>Note:</b> To support the build of VISR binaries as universal binaries, all installations via brew must be done with the <tt>--universal</tt>.
+ *    - If a package has already been istalled, uninstall it first and then reinstall with the option set.
+ *    - install with <tt>brew install [package options] --universal [package name]</tt> 
+ *    - To avoid building universal binaries, deselect the CMake option <tt>BUILD_MACOS_UNIVERSAL_BINARIES</tt>
+ *  * Install doxygen (download from <a href="http://www.stack.nl/~dimitri/doxygen/download.html"> http://www.stack.nl/~dimitri/doxygen/download.html</a>)
+ *  * Install boost and portaudio --universal
  *    - <tt>brew install pkgconfig</tt> (PkgConfig is not strictly required, but reduces the likelihood of problems while searching for other libraries).
- *    - <tt>brew install boost</tt>
- *    - <tt>brew install portaudio</tt>
- *  * When the python bindings are going to be used, install boost as follows (taken from <a href="http://www.pyimagesearch.com/2015/04/27/installing-boost-and-boost-python-on-osx-with-homebrew/" http://www.pyimagesearch.com/2015/04/27/installing-boost-and-boost-python-on-osx-with-homebrew/</a> 
+ *    - <tt>brew install boost --universal </tt>
+ *    - <tt>brew install portaudio --universal</tt>
+ *    - <tt>brew install libsndfile --universal</tt>
+ *  * When the python bindings are going to be used, install boost as follows (taken from <a href= http://www.pyimagesearch.com/2015/04/27/installing-boost-and-boost-python-on-osx-with-homebrew/> http://www.pyimagesearch.com/2015/04/27/installing-boost-and-boost-python-on-osx-with-homebrew/</a>)
  *    - If necessary, uninstall a previously instaled boost beforehand: <tt>brew uninstall boost</tt>
- *    - <tt>brew install python</tt>
- *    - <tt>brew install boost --with-python</tt>
- *    - <tt>brew install boost-python</tt>
+ *    - <tt>brew install python --universal</tt>
+ *    - <tt>brew install boost --universal --with-python</tt>
+ *    - <tt>brew install boost-python --universal</tt>
  */

@@ -1,76 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <panningConfiguration dimension="3" infinite="false">
-   <loudspeaker channel="1" delay="0" gainDB="0" id="1">
+   <loudspeaker channel="1" id="1">
       <polar az="60" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="2" delay="0" gainDB="0" id="2">
+   <loudspeaker channel="2" id="2">
       <polar az="-60" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="3" delay="0" gainDB="0" id="3">
+   <loudspeaker channel="3" id="3">
       <polar az="0" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="5" delay="0" gainDB="0" id="4">
+   <loudspeaker channel="5" id="4">
       <polar az="135" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="6" delay="0" gainDB="0" id="5">
+   <loudspeaker channel="6" id="5">
       <polar az="-135" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="7" delay="0" gainDB="0" id="6">
+   <loudspeaker channel="7" id="6">
       <polar az="30" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="8" delay="0" gainDB="0" id="7">
+   <loudspeaker channel="8" id="7">
       <polar az="-30" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="9" delay="0" gainDB="0" id="8">
+   <loudspeaker channel="9" id="8">
       <polar az="180" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="11" delay="0" gainDB="0" id="9">
+   <loudspeaker channel="11" id="9">
       <polar az="90" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="12" delay="0" gainDB="0" id="10">
+   <loudspeaker channel="12" id="10">
       <polar az="-90" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="13" delay="0" gainDB="0" id="11">
+   <loudspeaker channel="13" id="11">
       <polar az="45" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="14" delay="0" gainDB="0" id="12">
+   <loudspeaker channel="14" id="12">
       <polar az="-45" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="15" delay="0" gainDB="0" id="13">
+   <loudspeaker channel="15" id="13">
       <polar az="0" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="16" delay="0" gainDB="0" id="14">
+   <loudspeaker channel="16" id="14">
       <polar az="0" el="90" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="17" delay="0" gainDB="0" id="15">
+   <loudspeaker channel="17" id="15">
       <polar az="135" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="18" delay="0" gainDB="0" id="16">
+   <loudspeaker channel="18" id="16">
       <polar az="-135" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="19" delay="0" gainDB="0" id="17">
+   <loudspeaker channel="19" id="17">
       <polar az="90" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="20" delay="0" gainDB="0" id="18">
+   <loudspeaker channel="20" id="18">
       <polar az="-90" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="21" delay="0" gainDB="0" id="19">
+   <loudspeaker channel="21" id="19">
       <polar az="180" el="30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="22" delay="0" gainDB="0" id="20">
+   <loudspeaker channel="22" id="20">
       <polar az="0" el="-30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="23" delay="0" gainDB="0" id="21">
+   <loudspeaker channel="23" id="21">
       <polar az="45" el="-30" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="24" delay="0" gainDB="0" id="22">
+   <loudspeaker channel="24" id="22">
       <polar az="-45" el="-30" r="1"/>
    </loudspeaker>
    <virtualspeaker id="23">
       <polar az="0" el="-90" r="1"/>
    </virtualspeaker>
-   <subwoofer assignedLoudspeakers="1, 5, 7, 11, 13, 17, 19, 23, 3, 9, 15, 16, 21, 22" channel="5" delay="0" gainDB="-10" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000"/>
-   <subwoofer assignedLoudspeakers="2, 6, 8, 12, 14, 18, 20, 24, 3, 9, 15, 16, 21, 22" channel="11" delay="0" gainDB="-10" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000, 0.500000"/>
    <triplet l1="1" l2="6" l3="21"/>
    <triplet l1="1" l2="9" l3="17"/>
    <triplet l1="1" l2="11" l3="6"/>
