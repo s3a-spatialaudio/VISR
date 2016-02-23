@@ -71,9 +71,8 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     {
       PointSourceWithReverb::DiscreteReflection & refl = reverbPointSrc.discreteReflection( earlyIndex );
       ptree const earlyTree = treeIt->second;
-      PointSourceWithReverb::Coordinate const posX = earlyTree.get<PointSourceWithReverb::Coordinate>( "position.x" );
-      PointSourceWithReverb::Coordinate const posY = earlyTree.get<PointSourceWithReverb::Coordinate>( "position.y" );
-      PointSourceWithReverb::Coordinate const posZ = earlyTree.get<PointSourceWithReverb::Coordinate>( "position.z" );
+      PointSourceWithReverb::Coordinate posX, posY, posZ;
+      PointSourceParser::parsePosition( earlyTree.get_child( "position" ), posX, posY, posZ );
       refl.setPosition( posX, posY, posZ );
       refl.setDelay( earlyTree.get<ril::SampleType>( "delay" ) );
       refl.setDelay( earlyTree.get<LevelType>( "level" ) );
