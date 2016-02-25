@@ -65,20 +65,12 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     }
     ptree const & roomTree = tree.get_child( "room" );
 
-#if 1
     std::size_t earlyIndex( 0 );
     ptree const & ereflTree = roomTree.get_child( "ereflect" );
     std::size_t const numEarlyReflections = ereflTree.count( "" );
     reverbPointSrc.setNumberOfDiscreteReflections( numEarlyReflections );
     auto const earlyNodes = ereflTree.equal_range( "" );
     for( ptree::const_assoc_iterator treeIt( earlyNodes.first ); treeIt != earlyNodes.second; ++treeIt,++earlyIndex )
-#else
-    std::size_t const numEarlyReflections = roomTree.count( "ereflect" );
-    reverbPointSrc.setNumberOfDiscreteReflections( numEarlyReflections );
-    auto const earlyNodes = roomTree.equal_range( "ereflect" );
-    
-    for( ptree::const_assoc_iterator treeIt( earlyNodes.first ); treeIt != earlyNodes.second; ++treeIt,++earlyIndex )
-#endif
     {
       PointSourceWithReverb::DiscreteReflection & refl = reverbPointSrc.discreteReflection( earlyIndex );
       ptree const earlyTree = treeIt->second;
@@ -88,9 +80,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
       refl.setDelay( earlyTree.get<ril::SampleType>( "delay" ) );
       refl.setDelay( earlyTree.get<LevelType>( "level" ) );
 
-#if 1
       ptree const & biquadTree = earlyTree.get_child( "biquadsos" );
-#if 1
       pml::BiquadParameterList<ril::SampleType> biqList;
       biqList.loadJson( biquadTree );
       if( biqList.size() > PointSourceWithReverb::cNumDiscreteReflectionBiquads )
@@ -98,45 +88,6 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
         throw std::invalid_argument( "PointSourceWithReverbParser: The number of biquad sections for an early reflection exceeds the maximum admissible value." );
       }
       refl.setReflectionFilters( biqList );
-#else
-      std::size_t const numBiquadSections = biquadTree.count( "" );
-      auto const biquadNodes = biquadTree.equal_range( "" );
-      std::size_t biquadIdx( 0 );
-      if( numBiquadSections >= PointSourceWithReverb::cNumDiscreteReflectionBiquads )
-      {
-        throw std::out_of_range( "PointSourceWithReverbParser: The number of biquad sections for an early reflection exceeds the maximum admissible value." );
-      }
-      for( ptree::const_assoc_iterator biquadIt( biquadNodes.first ); biquadIt != biquadNodes.second; ++biquadIt,++biquadIdx )
-      {
-        std::string const coeffString = biquadIt->second.data();
-        pml::FloatSequence<ril::SampleType> const coeffs( coeffString );
-        if( coeffs.size() != 6 )
-        {
-          throw std::invalid_argument( "PointSourceWithReverbParser: Each biquad section must consist of six floating-point values." );
-        }
-        ril::SampleType a0 = coeffs[3];
-        if( not( std::isfinite( a0 ) and (std::abs( a0 ) >= std::numeric_limits<ril::SampleType>::epsilon()) ) )
-        {
-          throw std::out_of_range( "PointSourceWithReverbParser: The fourth coeeficient of a biquad section must be nonzero." );
-        }
-        pml::BiquadParameter<ril::SampleType> const biquadSection( coeffs[0] / a0, coeffs[1] / a0, coeffs[2] / a0,
-                                                                   coeffs[4] / a0, coeffs[5] / a0 );
-        refl.setReflectionFilter( biquadIdx, biquadSection );
-      }
-      for( ; biquadIdx < PointSourceWithReverb::cNumDiscreteReflectionBiquads; ++biquadIdx )
-      {
-        // fill remaining biquad parameters with 'flat' default value.
-        refl.setReflectionFilter( biquadIdx, pml::BiquadParameter<ril::SampleType>() );
-      }
-#endif
-#else
-      std::string const iirNumeratorString = earlyTree.get<std::string>( "IIRzeros" );
-      pml::FloatSequence<ril::SampleType> const iirNumerCoeffs( iirNumeratorString );
-      refl.setReflectionNumerator( iirNumerCoeffs.values(), iirNumerCoeffs.size() );
-      std::string const iirDenominatorString = earlyTree.get<std::string>( "IIRpoles" );
-      pml::FloatSequence<ril::SampleType> const iirDenomCoeffs( iirDenominatorString );
-      refl.setReflectionDenominator( iirDenomCoeffs.values( ), iirDenomCoeffs.size( ) );
-#endif
     }
     if( roomTree.count( "lreverb" ) != 1 )
     {
@@ -186,18 +137,8 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
     earlyTree.put<ril::SampleType>( "delay", refl.delay() );
     earlyTree.put<LevelType>( "level", refl.level() );
 
-#if 1
-    // TODO: Implement serialization!
-#else
-    PointSourceWithReverb::DiscreteReflection::FilterCoeff const & iirNum = refl.reflectionNumerator();
-    pml::FloatSequence<ril::SampleType> iirNumCoeffs( &iirNum[0], iirNum.size() );
-    std::string const iirNumStr( iirNumCoeffs.toString( ", " ) );
-    earlyTree.put<std::string>( "IIRzeros", iirNumStr );
-    PointSourceWithReverb::DiscreteReflection::FilterCoeff const & iirDen = refl.reflectionDenominator( );
-    pml::FloatSequence<ril::SampleType> iirDenCoeffs( &iirDen[0], iirDen.size( ) );
-    std::string const iirDenStr( iirDenCoeffs.toString( ", " ) );
-    earlyTree.put<std::string>( "IIRpoles", iirDenStr );
-#endif
+    // TODO: Implement serialization of biquad early reflection parameters!
+
     roomTree.add_child( "ereflect", earlyTree );
   }
   ptree lateTree;
