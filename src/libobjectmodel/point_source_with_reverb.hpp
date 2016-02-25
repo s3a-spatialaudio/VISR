@@ -9,6 +9,8 @@
 
 #include "point_source.hpp"
 
+#include <libpml/biquad_parameter.hpp>
+
 #include <libril/constants.hpp>
 
 #include <array>
@@ -32,10 +34,11 @@ public:
   static const std::size_t cNumberOfSubBands = 9;
 
   /**
-   * Number of numerator and denominator coefficients for the IIR filters representing
+   * Number of biquad sections for the IIR filters representing
    * the wall reflection filters of the early (discrete) reflections.
+   * @todo Consider making this a systeem-wide configuration option.
    */
-  static const std::size_t cReflectionIirFilterLength = 12;
+  static const std::size_t cNumDiscreteReflectionBiquads = 10;
 
   /**
    * Data type for holding the subband information (levels and decay coefficients) for the 
@@ -49,11 +52,6 @@ public:
   class DiscreteReflection
   {
   public:
-    /**
-     * Data type for the numerator or denominator polynomial of the wall reflection filter.
-     */
-    using FilterCoeff = std::array<ril::SampleType, cReflectionIirFilterLength>;
-    
     /**
      * Default constructor, zeros all members.
      */
@@ -81,14 +79,16 @@ public:
     LevelType level() const { return mLevel; }
 
     /**
-     * Return the numerator polynomial of the wall reflection filter. *
+     * Return the wall reflection coefficients for this discrete reflection.
      */
-    FilterCoeff const & reflectionNumerator() const { return mIirNumerator; }
+    pml::BiquadParameterList<ril::SampleType> const & reflectionFilters() const { return mDiscreteReflectionFilters; }
 
     /**
-     * Return the denominator polynomial of the wall reflection filter. *
+     * Return a specific biquad section of the wall reflection filter.
+     * @param biquadIdx The index of the biquad to be returned.
+     * @throw std::out_of_range If \p biquadIdx exceeds the number of biquads (\p cNumDiscreteReflectionBiquads)
      */
-    FilterCoeff const & reflectionDenominator( ) const { return mIirDenominator; }
+    pml::BiquadParameter<ril::SampleType> const & reflectionFilter( std::size_t biquadIdx ) const;
 
     /**
      * Set the position of the discrete reflection.
@@ -111,34 +111,20 @@ public:
     void setLevel( LevelType newLevel );
 
     /**
-     * Set the numerator polynomial of the wall reflection filter.
-     * @param numerator The ploynomial coefficients as a fixed-sized array.
+     * Set the wall reflection biquad filters for this reflections
+     * Resets all biquad sections not changed by this message to a default (flat) filter behaviour.
+     * @param newFilters a set of biquad parameter coefficients. It must contain at most cNumDiscreteReflectionBiquads entries.
+     * @throw std::invalid_argument If the size of \newFilters exceeds cNumDiscreteReflectionBiquads
      */
-    void setReflectionNumerator( FilterCoeff const & numerator );
-    /**
-    * Set the denominator polynomial of the wall reflection filter.
-    * @param denominator The ploynomial coefficients as a fixed-sized array.
-    */
-    void setReflectionDenominator( FilterCoeff const & denominator );
+    void setReflectionFilters( pml::BiquadParameterList<ril::SampleType> const & newFilters );
 
     /**
-     * Set the numerator coefficients of the wall reflections filters from an array.
-     * If the number of values is lower than the length of the polynomial, the remaining coefficients are set to zero.
-     * @param numerator Pointer to an array containing the numerator polynomials.
-     * @param numValues The number of coefficients in the array.
-     * @throw std::invalid_arguments If the number of values exceeds the length of the polynomial.
+     * Set a specific biquad of the wall reflection filter for this reflections
+     * @param biquadIdx The index (zero-offset) of the biquad to be set.
+     * @param newFilter The new biquad parameters
+     * @throw std::out_of_range If the index \p biquadIdx exceeds the range of available biquads (\p cNumDiscreteReflectionBiquads)
      */
-    void setReflectionNumerator( ril::SampleType const * const numerator, std::size_t numValues );
-
-    /**
-    * Set the denominator coefficients of the wall reflections filters from an array.
-    * If the number of values is lower than the length of the polynomial, the remaining coefficients are set to zero.
-    * @param denominator Pointer to an array containing the numerator polynomials.
-    * @param numValues The number of coefficients in the array.
-    * @throw std::invalid_arguments If the number of values exceeds the length of the polynomial.
-    */
-    void setReflectionDenominator( ril::SampleType const * const denominator, std::size_t numValues );
-
+    void setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<ril::SampleType> const & newFilter );
   private:
     /** Cartesion x coordinate. */
     Coordinate mX;
@@ -158,14 +144,9 @@ public:
     LevelType mLevel;
 
     /**
-     * IIR numerator polynomial of the wall reflection filter.
+     * A set of biquad IIR filters to model the frequency response of this discrete reflection.
      */
-    FilterCoeff mIirNumerator;
-
-    /**
-     * IIR denominator polynomial of the wall reflection filter.
-     */
-    FilterCoeff mIirDenominator;
+    pml::BiquadParameterList<ril::SampleType> mDiscreteReflectionFilters;
   };
   
   /**

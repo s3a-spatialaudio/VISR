@@ -3,6 +3,7 @@
 #include "point_source_with_reverb.hpp"
 
 #include <algorithm>
+#include <cassert>
 
 namespace visr
 {
@@ -68,12 +69,21 @@ PointSourceWithReverb::DiscreteReflection::DiscreteReflection()
  , mZ(0.0f)
  , mDelay( 0.0f )
  , mLevel( 0.0f )
+ , mDiscreteReflectionFilters( cNumDiscreteReflectionBiquads )
 {
-  mIirNumerator.fill( 0.0f );
-  mIirDenominator.fill( 0.0f );
 }
 
 PointSourceWithReverb::DiscreteReflection::DiscreteReflection( DiscreteReflection const & ) = default;
+
+pml::BiquadParameter<ril::SampleType> const & 
+PointSourceWithReverb::DiscreteReflection::reflectionFilter( std::size_t biquadIdx ) const
+{ 
+  if( biquadIdx >= cNumDiscreteReflectionBiquads )
+  {
+    throw std::out_of_range( "PointSourceWithReverb::DiscreteReflection::reflectionFilter(): Biquad index exceeds admissible range." );
+  }
+  return mDiscreteReflectionFilters[biquadIdx];
+}
 
 void PointSourceWithReverb::DiscreteReflection::setPosition( Coordinate x, Coordinate y, Coordinate z )
 {
@@ -92,38 +102,31 @@ void PointSourceWithReverb::DiscreteReflection::setLevel( LevelType newLevel )
   mLevel = newLevel;
 }
 
-void PointSourceWithReverb::DiscreteReflection::setReflectionNumerator( FilterCoeff const & numerator )
+void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( pml::BiquadParameterList<ril::SampleType> const & newFilters )
 {
-  mIirNumerator = numerator;
-}
-
-void PointSourceWithReverb::DiscreteReflection::setReflectionDenominator( FilterCoeff const & denominator )
-{
-  mIirDenominator = denominator;
-}
-
-void PointSourceWithReverb::DiscreteReflection::
-setReflectionNumerator( ril::SampleType const * const numerator, std::size_t numValues )
-{
-  if( numValues > mIirNumerator.size() )
+  assert( mDiscreteReflectionFilters.size() == cNumDiscreteReflectionBiquads );
+  if( newFilters.size() >= cNumDiscreteReflectionBiquads )
   {
-    throw std::invalid_argument( "DiscreteReflection::setReflectionNumerator(): argument length exceeds polynomial order." );
+    throw std::invalid_argument( "PointSourceWithReverb::DiscreteReflection::setReflectionFilters(): Size of new filter parameter exceeds the maximum number of biquads." );
   }
-  FilterCoeff::iterator firstZeroIt = std::copy( numerator, numerator + numValues, mIirNumerator.begin() );
-  std::fill( firstZeroIt, mIirNumerator.end(), 0.0f );
-}
-
-void PointSourceWithReverb::DiscreteReflection::
-setReflectionDenominator( ril::SampleType const * const denominator, std::size_t numValues )
-{
-  if( numValues > mIirDenominator.size( ) )
+  for( std::size_t idx( 0 ); idx < newFilters.size(); ++idx )
   {
-    throw std::invalid_argument( "DiscreteReflection::setReflectionDenominator(): argument length exceeds polynomial order." );
+    mDiscreteReflectionFilters[idx] = newFilters[idx];
   }
-  FilterCoeff::iterator firstZeroIt = std::copy( denominator, denominator + numValues, mIirDenominator.begin( ) );
-  std::fill( firstZeroIt, mIirDenominator.end( ), 0.0f );
+  for( std::size_t idx( newFilters.size() ); idx < mDiscreteReflectionFilters.size( ); ++idx )
+  {
+    mDiscreteReflectionFilters[idx] = pml::BiquadParameter<ril::SampleType>(); // fill remaining filters with flat default value.
+  }
 }
 
+void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<ril::SampleType> const & newFilter )
+{
+  if( biquadIdx >= mDiscreteReflectionFilters.size() )
+  {
+    throw std::out_of_range( "PointSourceWithReverb::DiscreteReflection::setReflectionFilter(): biquad index exceeds number of biquad filters." );
+  }
+  mDiscreteReflectionFilters.at( biquadIdx ) = newFilter;
+}
 
 } // namespace objectmodel
 } // namespace visr
