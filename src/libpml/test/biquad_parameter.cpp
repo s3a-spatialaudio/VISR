@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadDefault )
 
   BiquadParameter<CoeffType> const biq;
 
-  BOOST_CHECK_CLOSE( biq.b0(), 0.0f, std::numeric_limits<CoeffType>::epsilon() );
+  BOOST_CHECK_CLOSE( biq.b0(), 1.0f, std::numeric_limits<CoeffType>::epsilon() );
   BOOST_CHECK_CLOSE( biq.b1( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );
   BOOST_CHECK_CLOSE( biq.b2( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );
   BOOST_CHECK_CLOSE( biq.a1( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJson )
   using namespace visr::pml;
   using CoeffType = float;
 
-  std::string const jsonRepr = "{\"biquad\": { \"b0\":0.2713121e-4, \"b1\":0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\":-1.9792, \"a2\":0.9793 }}";
+  std::string const jsonRepr = "{ \"b0\":0.2713121e-4, \"b1\":0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\":-1.9792, \"a2\":0.9793 }";
   std::stringstream str( jsonRepr );
 
   BiquadParameter<CoeffType> const biq = BiquadParameter<CoeffType>::fromJson( str );
@@ -98,7 +98,32 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJson )
   BOOST_CHECK_CLOSE( biq.a2( ), a2, std::numeric_limits<CoeffType>::epsilon( ) );
 }
 
-BOOST_AUTO_TEST_CASE( InstantiateListFromJson )
+BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJsonNonStandardA0 )
+{
+  using namespace visr::pml;
+  using CoeffType = float;
+
+  std::string const jsonRepr = "{ \"b0\":0.2713121e-4, \"b1\":0.5426241e-4, \"b2\": 0.2713121e-4, \"a0\": 0.3333333, \"a1\":-1.9792, \"a2\":0.9793 }";
+  std::stringstream str( jsonRepr );
+
+  BiquadParameter<CoeffType> const biq = BiquadParameter<CoeffType>::fromJson( str );
+
+  CoeffType const a0 = 0.3333333;
+  CoeffType const b0 = 0.2713121e-4f;
+  CoeffType const b1 = 0.5426241e-4f;
+  CoeffType const b2 = 0.2713121e-4f;
+  CoeffType const a1 = -1.9792f;
+  CoeffType const a2 = 0.9793f;
+
+  // The parsed coefficients are normalised by a0.
+  BOOST_CHECK_CLOSE( biq.b0( ), b0 / a0, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( biq.b1( ), b1 / a0, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( biq.b2( ), b2 / a0, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( biq.a1( ), a1 / a0, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( biq.a2( ), a2 / a0, std::numeric_limits<CoeffType>::epsilon( ) );
+}
+
+BOOST_AUTO_TEST_CASE( InstantiateListFromXml )
 {
   using CoeffType = float;
 
@@ -136,6 +161,45 @@ BOOST_AUTO_TEST_CASE( InstantiateListFromJson )
   BOOST_CHECK_CLOSE( bi1.a2( ), a12, std::numeric_limits<CoeffType>::epsilon( ) );
 
 }
+
+BOOST_AUTO_TEST_CASE( InstantiateBiquadListFromJson )
+{
+  using CoeffType = float;
+
+  std::string const jsonStr( "["
+    "{ \"b0\": 0.2713121e-4, \"b1\": 0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\": -1.9792, \"a2\": 0.9793 }, "
+    "{ \"b0\": 0.2713121e-2, \"b1\": 0.5426241e-2, \"b2\": 0.2713121e-2, \"a1\": 1.9792, \"a2\": -0.9793 }"
+    "]"  );
+
+  visr::pml::BiquadParameterList<CoeffType> const biqList = visr::pml::BiquadParameterList<CoeffType>::fromJson( jsonStr );
+
+  BOOST_CHECK( biqList.size( ) == 2 );
+  visr::pml::BiquadParameter<CoeffType> const & bi0 = biqList[0];
+  visr::pml::BiquadParameter<CoeffType> const & bi1 = biqList[1];
+
+  CoeffType const b00 = 0.2713121e-4f;
+  CoeffType const b01 = 0.5426241e-4f;
+  CoeffType const b02 = 0.2713121e-4f;
+  CoeffType const a01 = -1.9792f;
+  CoeffType const a02 = 0.9793f;
+  CoeffType const b10 = 0.2713121e-2f;
+  CoeffType const b11 = 0.5426241e-2f;
+  CoeffType const b12 = 0.2713121e-2f;
+  CoeffType const a11 = 1.9792f;
+  CoeffType const a12 = -0.9793f;
+
+  BOOST_CHECK_CLOSE( bi0.b0( ), b00, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi0.b1( ), b01, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi0.b2( ), b02, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi0.a1( ), a01, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi0.a2( ), a02, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi1.b0( ), b10, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi1.b1( ), b11, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi1.b2( ), b12, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi1.a1( ), a11, std::numeric_limits<CoeffType>::epsilon( ) );
+  BOOST_CHECK_CLOSE( bi1.a2( ), a12, std::numeric_limits<CoeffType>::epsilon( ) );
+}
+
 
 } // namespace test
 } // namespace pml
