@@ -45,8 +45,9 @@ public:
   BiquadParameter( BiquadParameter<CoeffType> const & rhs ) = default;
 
   /**
-   * Create a BiquadParameter object from a JSON representation.
+   * Create a BiquadParameter objects from JSON and XML representations.
    */
+  //@{
   static BiquadParameter fromJson( boost::property_tree::ptree const & tree );
 
   static BiquadParameter fromJson( std::basic_istream<char> & stream );
@@ -54,6 +55,7 @@ public:
   static BiquadParameter fromXml( boost::property_tree::ptree const & tree );
 
   static BiquadParameter fromXml( std::basic_istream<char> & stream );
+  //@}
 
   BiquadParameter( CoeffType b0, CoeffType b1, CoeffType b2,
                    CoeffType a1, CoeffType a2 )
@@ -136,6 +138,23 @@ public:
 
   void loadXml( std::basic_istream<char> & );
 
+  /**
+   * 
+   */
+  //@{
+  void writeJson( boost::property_tree::ptree & tree ) const;
+
+  void writeJson( std::basic_ostream<char> & stream ) const;
+
+  void writeJson( std::string & str ) const;
+
+  void writeXml( boost::property_tree::ptree & tree ) const;
+
+  void writeXml ( std::basic_ostream<char> & stream ) const;
+
+  void writeXml ( std::string & str ) const;
+
+  //@}
 private:
   /**
    * The internal data representation.
@@ -217,6 +236,25 @@ public:
   void loadXml( std::basic_istream<char> & stream );
 
   void loadXml( std::string const & str );
+
+  /**
+  *
+  */
+  //@{
+  void writeJson( boost::property_tree::ptree & tree ) const;
+
+  void writeJson( std::basic_ostream<char> & stream ) const;
+
+  void writeJson( std::string & str ) const;
+
+  void writeXml( boost::property_tree::ptree & tree ) const;
+
+  void writeXml( std::basic_ostream<char> & stream ) const;
+
+  void writeXml( std::string & str ) const;
+  //@}
+
+
 private:
   std::vector< BiquadParameter< CoeffType > > mBiquads;
 };
