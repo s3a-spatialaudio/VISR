@@ -137,7 +137,9 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
     earlyTree.put<ril::SampleType>( "delay", refl.delay() );
     earlyTree.put<LevelType>( "level", refl.level() );
 
-    // TODO: Implement serialization of biquad early reflection parameters!
+    ptree biquadTree;
+    refl.reflectionFilters().writeJson( biquadTree );
+    earlyTree.add_child( "biquadsos", biquadTree );
 
     roomTree.add_child( "ereflect", earlyTree );
   }
