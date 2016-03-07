@@ -420,7 +420,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   boost::filesystem::path const lateReverbFilterPath( tree.get<std::string>( "lateReverbDecorrelationFilters" ));
   mNumDiscreteReflectionsPerObject = tree.get<std::size_t>( "discreteReflectionsPerObject" );
 
-  std::size_t numWallReflBiquads = (objectmodel::PointSourceWithReverb::cReflectionIirFilterLength+1) / 2; // this is ceil( # / 2)
+  std::size_t const numWallReflBiquads = objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads;
 
   boost::optional<ril::SampleType> discreteReflectionDelayOpt = tree.get_optional<ril::SampleType>( "maxDiscreteReflectionDelay" );
   ril::SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
