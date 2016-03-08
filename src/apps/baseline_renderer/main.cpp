@@ -24,6 +24,7 @@
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
+//  #include <boost/string/replace.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -107,7 +108,7 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
-    const std::string reverbConfiguration;
+    const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", std::string( ) );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;

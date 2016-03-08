@@ -100,10 +100,10 @@ inline void Options::registerOption<bool>( char const * optionName, char const *
 }
 
 template<typename DataType >
-inline void Options::registerPositionalOption( char const * optionName, int position, char const * description )
+inline void Options::registerPositionalOption( char const * optionName, int maxOccurrences, char const * description )
 {
   registerOption< DataType >( optionName, description );
-  mPositionalDescription.add( optionName, position );
+  mPositionalDescription.add( optionName, maxOccurrences );
 }
 
 } // namespace baseline_renderer

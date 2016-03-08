@@ -27,6 +27,7 @@ Options::Options()
   registerOption<std::size_t>( "input-channels,i", "Number of input channels for audio object signal" );
   registerOption<std::size_t>( "output-channels,o", "Number of audio output channels" );
 
+  registerOption<std::string>( "reverb-config", "JSON string to configure the object-based reverberation part, empty string (default) to disable reverb." );
   registerOption<std::string>( "tracking", "Enable adaptation of the panning using visual tracking. Accepts the position of the tracker in JSON format"
     "\"{ \"port\": <UDP port number>, \"position\": {\"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }, \"rotation\": { \"rotX\": rX, \"rotY\": rY, \"rotZ\": rZ } }\" ." );
 
@@ -41,7 +42,8 @@ Options::ParseResult Options::parse( int argc, char const * const * argv, std::o
 {
   try
   {
-    boost::program_options::store( boost::program_options::parse_command_line( argc, argv, mDescription ),
+    boost::program_options::store( boost::program_options::command_line_parser( argc, argv )
+      .options( mDescription ).positional( mPositionalDescription  ).run( ),
                                    mVariablesMap );
     notify( mVariablesMap );
   }
