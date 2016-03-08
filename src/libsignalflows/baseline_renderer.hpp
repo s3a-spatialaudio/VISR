@@ -56,6 +56,12 @@ public:
    * @param diffusionFilters A matrix of floating-point values containing the the FIR coefficients of the decorrelation filter that creates diffuse sound components.
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    * @param sceneReceiverPort The UDP port for receiving the scene data messages.
+   * @param reverbConfig A JSON message containing configuration options for the late reverberation part.
+   *        - numReverbObjects (integer) The maximum number of reverb objects (at a given time)
+   *        - lateReverbFilterLength (floating-point) The length of the late reverberation filter (in seconds)
+   *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
+   *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV) 
+   *          containing the filter coefficients for the decorrelation of the late part.
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */

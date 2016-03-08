@@ -282,6 +282,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   assignCommunicationIndices( "LateDiffusionFilter", "in", reverbLateFilterOutChannels );
   assignCommunicationIndices( "LateDiffusionFilter", "out", reverbLateDecorrOutChannels );
   assignCommunicationIndices( "ReverbMix", "in1", reverbLateDecorrOutChannels );
+  assignCommunicationIndices( "ReverbMix", "out", reverbMixOutChannels );
+
 
   // signal flow common to all object types (starting with summation of the different signal paths
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", vbapMatrixOutChannels );
