@@ -41,6 +41,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
                                        ril::SampleType lateReflectionLengthSeconds,
                                        std::size_t numLateReflectionSubBandFilters )
 {
+    mMaxNumberOfObjects=numberOfObjects;
 }
 
 /**
@@ -55,7 +56,49 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
                                          efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
                                          LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
+    
+    int numReverbObjectsFound=0;
+    
+    for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+    {
+        
+        objectmodel::Object const & obj = *(objEntry.second);
+        if( obj.numberOfChannels() != 1 )
+        {
+            std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
+            continue;
+        }
+        
+        objectmodel::ObjectTypeId const ti = obj.type();
+        // Process reverb objects, ignore others
+        switch( ti )
+        {
+            case objectmodel::ObjectTypeId::PointSourceWithReverb:
+            {
+                numReverbObjectsFound++;
+                if( numReverbObjectsFound > mMaxNumberOfObjects )
+                {
+                    std::cerr << "ReverbParameterCalculator: max number of reverb objects exceeded." << std::endl;
+                    break;
+                }
+                processInternal(objects);
+                break;
+            }
+            default:
+            {
+                
+            }
+            
+        }
 
+    } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+    
+} //process
+
+
+void ReverbParameterCalculator::processInternal(const objectmodel::ObjectVector & objects)
+{
+    std::cerr << "internal processing" << std::endl;
 }
 
 } // namespace rcl

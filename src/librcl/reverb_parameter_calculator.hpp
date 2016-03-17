@@ -115,6 +115,11 @@ private:
    */
   std::valarray<objectmodel::LevelType> mLevels;
   //@}
+    
+  /**
+   * Internal method to assign parameter values for a given object.
+   */
+  void processInternal( objectmodel::ObjectVector const & objects);
 };
 
 } // namespace rcl
