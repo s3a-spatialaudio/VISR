@@ -8,6 +8,7 @@
 #include "reverb_parameter_calculator.hpp"
 
 #include <libefl/basic_matrix.hpp>
+#include <libefl/vector_functions.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/point_source_with_reverb.hpp>
@@ -42,6 +43,28 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
                                        std::size_t numLateReflectionSubBandFilters )
 {
     mMaxNumberOfObjects=numberOfObjects;
+    mNumberOfDiscreteReflectionsPerSource = numberOfDiscreteReflectionsPerSource;
+    mNumberOfBiquadSectionsReflectionFilters = numBiquadSectionsReflectionFilters;
+    mLateReflectionLengthSeconds = lateReflectionLengthSeconds;
+    mNumberOfLateReflectionSubBandFilters = numLateReflectionSubBandFilters;
+
+    if( mNumberOfDiscreteReflectionsPerSource != objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads )
+    {
+      throw std::invalid_argument( "The number of biquad sections for the discrete reflections differs from the constant used in the object definition." );
+    }
+
+    mChannelLookup.clear();
+
+    // Configure the VBAP calculator
+    mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
+    mVbapCalculator.setNumSources( mNumberOfDiscreteReflectionsPerSource /* * mMaxNumberOfObjects */ );
+    mVbapCalculator.setLoudspeakerArray( &arrayConfig );
+    mVbapCalculator.setListenerPosition( 0.0f, 0.0f, 0.0f ); // Use a default listener position
+    if( mVbapCalculator.calcInvMatrices( ) != 0 )
+    {
+      throw std::invalid_argument( "ReverbParameterCalculator::setup(): Calculation of inverse matrices for VBAP calculatorfailed." );
+    }
+    mNumberOfPanningLoudspeakers = mVbapCalculator.getNumSpeakers();
 }
 
 /**
@@ -100,6 +123,97 @@ void ReverbParameterCalculator::processInternal(const objectmodel::ObjectVector 
 {
     std::cerr << "internal processing" << std::endl;
 }
+
+void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWithReverb const & rsao,
+                                                     std::size_t renderChannel,
+                                                     efl::BasicVector<ril::SampleType> & discreteReflGains,
+                                                     efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                                                     pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                                                     efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                                                     LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
+{
+  // TODO: Assign the biquad coefficients for the direct path.
+  // TODO: Implement signal processing blocks and communication parameters in signal flow first.
+
+  if( rsao.numberOfDiscreteReflections() > mNumberOfDiscreteReflectionsPerSource )
+  {
+    throw std::invalid_argument( "ReverbParameterCalculator::process(): Number of discrete reflections exceed maximum." );
+  }
+ 
+  // Define a starting index into the all parameter matrices 
+  std::size_t const startRow = renderChannel * mNumberOfDiscreteReflectionsPerSource;
+
+  // Assign the positions for the discrete reflections.
+  for( std::size_t srcIdx( 0 ); srcIdx < rsao.numberOfDiscreteReflections( ); ++srcIdx )
+  {
+    objectmodel::PointSourceWithReverb::DiscreteReflection const & discRefl = rsao.discreteReflection( srcIdx );
+    std::size_t matrixRow = startRow + srcIdx;
+
+    // Set the position for the VBAP calculator
+    mSourcePositions[srcIdx] = panning::XYZ( discRefl.positionX( ), discRefl.positionY( ), discRefl.positionZ( ) );
+
+    // Set the biquad filters
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    {
+      biquadCoeffs( matrixRow, biquadIdx ) = discRefl.reflectionFilter( biquadIdx );
+    }
+
+    // Set the gain and delay for each discrete reflection
+    discreteReflGains[matrixRow] = rsao.level() * discRefl.level();
+    discreteReflDelays[matrixRow] = discRefl.delay();
+  }
+
+  // Fill the remaining discrete reflections with neutral values.
+  static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
+  static const pml::BiquadParameter<ril::SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
+  for( std::size_t srcIdx( rsao.numberOfDiscreteReflections() ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
+  {
+    std::size_t const matrixRow = startRow + srcIdx;
+    mSourcePositions[srcIdx] = defaultPosition;
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    {
+      biquadCoeffs( matrixRow, biquadIdx ) = defaultBiquad;
+    }
+    discreteReflGains[matrixRow] = 0.0f;
+    discreteReflDelays[matrixRow] = 0.0f;
+
+    // Already zero the panning gains for unused reflections
+    // TODO: Control alignment via an option.
+    if( efl::vectorZero( discretePanningMatrix.row( matrixRow ), mNumberOfPanningLoudspeakers,
+                         0 /*Cannot make assumptions about alignment*/ ) != efl::noError )
+    {
+      throw std::runtime_error( "ReverbParameterCalculator: Error zeroing panning matrix for unused entries." );
+    }
+  }
+  std::fill( mSourcePositions.begin() + rsao.numberOfDiscreteReflections(), mSourcePositions.end(), defaultPosition );
+  if( mVbapCalculator.calcGains( ) != 0 )
+  {
+    std::cout << "ReverbParameterCalculator: Error calculating VBAP gains for discrete reflections." << std::endl;
+  }
+
+  for( std::size_t srcIdx( 0 ); srcIdx < rsao.numberOfDiscreteReflections(); ++srcIdx )
+  {
+    Afloat const * const gainRow = mVbapCalculator.getGains( ).row( srcIdx );
+    for( std::size_t lspIdx(0 ); lspIdx < mNumberOfPanningLoudspeakers; ++lspIdx )
+    discretePanningMatrix( lspIdx, srcIdx ) = gainRow[lspIdx];
+  }
+  // The unused rows are already zeroed.
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Late reflection part.
+
+
+}
+
+void ReverbParameterCalculator::clearSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+                                                   efl::BasicVector<ril::SampleType> & discreteReflGains,
+                                                   efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                                                   pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                                                   efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                                                   LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
+{
+}
+
 
 } // namespace rcl
 } // namespace visr

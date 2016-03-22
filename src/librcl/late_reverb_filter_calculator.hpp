@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
 
+#include <libobjectmodel/point_source_with_reverb.hpp>
+
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
 
@@ -26,12 +28,15 @@ class LateReverbFilterCalculator: public ril::AudioComponent
 {
 public:
   /**
-   * Type of the gain coefficients. We use the same type as
+   * Type of the gain coefficients. We use the same type as the audio samples (typically float, may
    */
   using CoefficientType = ril::SampleType;
 
   using SubBandMessageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
 
+  /**
+   * Message queue type for the late reverberation 
+   */
   using LateFilterMassageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
 
   /**
@@ -69,6 +74,52 @@ public:
                 LateFilterMassageQueue & lateFilters );
 
 private:
+  /**
+   * Create an impulse response for a single reverb object.
+   * @param obj The reverb object for which the late impulse response is calculated.
+   * @param objectIdx The object channel for which the impulse response is created. This index can be used to refer to statically created data (e.g., noise sequences)
+   * for particular objects.
+   * @param [out] ir Buffer to hold the computed impulse response
+   * @param irLength Length of the ir buffer.
+   * @param alignment Alignment of the output buffer (in number of elements)
+   */
+  void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
+                                 std::size_t objectIdx,
+                                 ril::SampleType * ir,
+                                 std::size_t irLength, std::size_t alignment = 0 );
+
+  /**
+   * Create a uniform white noise sequence with range [-1,1].
+   * @param numSamples Length of the noise sequence.
+   * @param [out] data Buffer to store the result.
+   * @param alignment Alignment of the \p data buffer (in number of elements)
+   */
+  static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t alignment = 0 );
+
+  /**
+   * Filter a sequence with a second-order IIR filter (biquad).
+   * @param numSamples Length of the input and output sequences.
+   * @param input the input sequence, length \p numSamples
+   * @param output Buffer for filtered data, must hold at least \p numSamples values.
+   * @param filter Biquad coefficients.
+   */
+  static void filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
+                              pml::BiquadParameter<ril::SampleType> const & filter );
+
+  /**
+   * Create an envelope.
+   * @ param numSamples Length of the envelope (total number of samples)
+   * @param [out] data The output buffer where the created envelope is stored.
+   * @param initialDelay Initial zero-valued part of the envelope.
+   * @param gain The gain (maximum level) of the envelope, linear scle.
+   * @param attackCoeff Parameter to describe the onset time (between end of initial delay and peak)
+   * @param decayCoeff Decay parameter for the exponential decay after the peak level.
+   * @param samplingFrequency The sampling frequency [Hz] as floating-point value.
+   */
+  static void createEnvelope( std::size_t numSamples, ril::SampleType* data,
+                              ril::SampleType initialDelay, ril::SampleType gain, ril::SampleType attackCoeff, ril::SampleType decayCoeff,
+                              ril::SampleType samplingFrequency );
+
   /**
    *
    */

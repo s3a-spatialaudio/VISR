@@ -59,6 +59,31 @@ void LateReverbFilterCalculator::calculateFIR( std::size_t objectIdx,
   // Do whatever needed to calculate the reverb filter
 }
 
+void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
+  std::size_t objectIdx,
+  ril::SampleType * ir,
+  std::size_t irLength, std::size_t alignment = 0 );
+
+/**
+* Create a uniform white noise sequence with range [-1,1].
+* @param numSamples Length of the noise sequence.
+* @param [out] data Buffer to store the result.
+* @param alignment Alignment of the \p data buffer (in number of elements)
+*/
+static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t alignment = 0 );
+
+/*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
+  pml::BiquadParameter<ril::SampleType> const & filter )
+{
+}
+
+
+/*static*/ void LateReverbFilterCalculator::createEnvelope( std::size_t numSamples, ril::SampleType* data,
+                                                            ril::SampleType initialDelay, ril::SampleType gain,
+                                                            ril::SampleType attackCoeff, ril::SampleType decayCoeff,
+                                                            ril::SampleType samplingFrequency )
+{
+}
 
 } // namespace rcl
 } // namespace visr

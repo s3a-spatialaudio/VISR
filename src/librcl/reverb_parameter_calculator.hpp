@@ -100,6 +100,13 @@ private:
    */
   std::size_t mMaxNumberOfObjects;
 
+  std::size_t mNumberOfDiscreteReflectionsPerSource;
+  std::size_t mNumberOfBiquadSectionsReflectionFilters;
+  ril::SampleType mLateReflectionLengthSeconds;
+  std::size_t mNumberOfLateReflectionSubBandFilters;
+
+  std::size_t mNumberOfPanningLoudspeakers;
+
   /**
    * A vector to hold the source position data.
    */
@@ -109,17 +116,37 @@ private:
    * The calculator object to generate the panning matrix coefficients.
    */
   panning::VBAP mVbapCalculator;
-  
+
+  /**
+   * Table to look up the logical channel number of a reverb object (given by its id)
+   */
+  std::vector<std::size_t> mChannelLookup;
+
   /**
    * The levels of the object channels in linear scale.
+   * @TODO: Do we need them?
    */
   std::valarray<objectmodel::LevelType> mLevels;
   //@}
-    
+
   /**
    * Internal method to assign parameter values for a given object.
    */
-  void processInternal( objectmodel::ObjectVector const & objects);
+  void processInternal( objectmodel::ObjectVector const & objects );
+
+  void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+                            efl::BasicVector<ril::SampleType> & discreteReflGains,
+                            efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                            pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                            efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                            LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
+
+  void clearSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+                          efl::BasicVector<ril::SampleType> & discreteReflGains,
+                          efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                          pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                          efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                          LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 };
 
 } // namespace rcl
