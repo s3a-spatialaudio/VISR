@@ -31,9 +31,6 @@ public:
 
   void setDiffuseness( Coordinate newDiffuseness );
 
-  void setY( Coordinate newY );
-
-  void setZ( Coordinate newZ );
 protected:
   Coordinate mDiffuseness;
 private:

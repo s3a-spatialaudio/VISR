@@ -62,6 +62,22 @@ ADD_DEFINITIONS("-DVISR_SYSTEM_NAME_${VISR_SYSTEM_NAME}")
 ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 
 ############################################################
+# Create universal binaries on MacOS
+IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" ON)
+  IF( BUILD_MACOS_UNIVERSAL_BINARIES )
+    SET( OSX_UNIVERSAL ON )
+    SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+  ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
+ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+############################################################
+# Set default visibility of shared library symbols to hidden (as on Windows platforms)
+# TODO: Test and fix this fature.
+SET( CMAKE_C_VISIBILITY_PRESET hidden )
+SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
+
+############################################################
 # Support for Building Matlab externals
 
 OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" OFF )
@@ -87,6 +103,17 @@ IF( WIN32 OR APPLE )
 
   SET( MAXSDK_EXTERNAL_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/max )
 ENDIF(  WIN32 OR APPLE )
+
+################################################################################
+# Support for Python bindings of selected VISR functionality
+OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
+
+IF( BUILD_PYTHON_BINDINGS )
+  FIND_PACKAGE( PythonLibs REQUIRED )
+  # Brute-force way make all the code position-independent if we use python bindings.
+  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
+  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
+ENDIF( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
 # Support for 3rd-party libraries.
@@ -181,6 +208,10 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 # Define the boost libraries that must be present.
 SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
 
+IF( BUILD_PYTHON_BINDINGS )
+  LIST( APPEND VISR_BOOST_LIBRARIES python ) 
+ENDIF( BUILD_PYTHON_BINDINGS )
+
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
 FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
@@ -227,5 +258,5 @@ IF(BUILD_DOCUMENTATION)
  
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
  
-  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc )
+  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc )
 ENDIF()

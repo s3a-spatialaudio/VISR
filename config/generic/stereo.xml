@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generic stero configuration with left and right speakers routed to channels 1 and 2. --> 
 <panningConfiguration dimension="2" infinite="false">
-   <loudspeaker channel="19" id="1">
+   <loudspeaker channel="1" delay="0" gainDB="0" id="1">
+      <polar az="-30" el="1" r="1"/>
+   </loudspeaker>
+   <loudspeaker channel="2" delay="0" gainDB="0" id="2">
       <polar az="30" el="0" r="1"/>
    </loudspeaker>
-   <loudspeaker channel="26" id="2">
-      <polar az="-30" el="0" r="1"/>
-   </loudspeaker>
+   <virtualspeaker id="3">
+      <polar az="180" el="0" r="1"/>
+   </virtualspeaker>
    <triplet l1="1" l2="2"/>
+   <triplet l1="1" l2="3"/>
+   <triplet l1="2" l2="3"/>
 </panningConfiguration>

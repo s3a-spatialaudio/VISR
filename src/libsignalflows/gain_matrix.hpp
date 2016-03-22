@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
-#define VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#ifndef VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED
+#define VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 
@@ -11,24 +11,21 @@
 
 namespace visr
 {
-namespace apps
-{
-namespace gain_matrix
+namespace signalflows
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class GainMatrix: public ril::AudioSignalFlow
 {
 public:
-  explicit SignalFlow( std::size_t numberOfInputs, 
+  explicit GainMatrix( std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
+                       efl::BasicMatrix<ril::SampleType> const & initialMatrix,
                        std::size_t interpolationPeriod,
                        std::size_t period, ril::SamplingFrequencyType samplingFrequency );
 
-  ~SignalFlow();
+  ~GainMatrix();
 
   /*virtual*/ void process( );
-
-  /*virtual*/ void setup( );
 
 private:
   const std::size_t cNumberOfInputs;
@@ -38,19 +35,9 @@ private:
   const std::size_t cInterpolationSteps;
 
   rcl::GainMatrix mMatrix;
-
-  efl::BasicMatrix<ril::SampleType> mNewMtx1;
-
-  efl::BasicMatrix<ril::SampleType> mNewMtx2;
-
-  /**
-   * Counter to trigger a switch of the gain matrix.
-   */
-  std::size_t mCounter;
 };
 
-} // namespace gain_matrix
-} // namespace apps
+} // namespace signalflows
 } // namespace visr
 
-#endif // #ifndef VISR_APPS_GAIN_MATRIX_SIGNAL_FLOW_HPP_INCLUDED
+#endif // #ifndef VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED

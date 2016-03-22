@@ -31,6 +31,13 @@
 
 namespace visr
 {
+
+// Forward declarations
+namespace rcl
+{
+  class BiquadIirFilter;
+}
+
 namespace signalflows
 {
 
@@ -133,6 +140,9 @@ private:
 
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
+
+  std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
+
 };
 
 } // namespace signalflows
