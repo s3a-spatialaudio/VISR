@@ -41,7 +41,7 @@ public:
   /**
    * Message queue type for the late reverberation 
    */
-  using LateFilterMassageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
+  using LateFilterMessageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
 
   /**
    * Constructor.

@@ -64,7 +64,7 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
 }
 
 void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
-  LateFilterMassageQueue & lateFilters )
+  LateFilterMessageQueue & lateFilters )
 {
   while( not subBandLevels.empty() )
   {
@@ -89,6 +89,18 @@ void LateReverbFilterCalculator::calculateFIR( std::size_t objectIdx,
                                                std::vector<ril::SampleType> & reverbFilter )
 {
   // Do whatever needed to calculate the reverb filter
+  
+  // for each subband...
+    // get a slightly too long noise sequence
+    //createWhiteNoiseSequence...
+  
+    // filter the sequence, take the middle samples, and store in the large noise matrix
+    //filterSequence()
+  
+    // multiply the sequence with the envelope
+  
+    
+
 }
 
 void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
@@ -104,20 +116,23 @@ void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
 */
 static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t /*alignment = 0*/ )
 {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
+
     
-    for (int n = 0; n < numSamples; ++n) {
-        data[n]=dis(gen);
-    }
+  for (int n = 0; n < numSamples; ++n) {
+    data[n]=dis(gen);
+  }
 }
 
 /*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
   pml::BiquadParameter<ril::SampleType> const & filter )
 {
+
     
-    
+
 }
 
 
@@ -133,6 +148,7 @@ static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* d
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
     
+
   for( std::size_t n = 0; n < initialDelaySamples; ++n )
   { // leading zeros for delay
         data[n]=0.0f;
@@ -145,6 +161,7 @@ static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* d
   { // exponential decay to end of envelope
     ril::SampleType const decay = gain * std::exp( decayCoeff*(n - attackCoeffSamples) );
     data[n] = decay;
+
   }
 }
 
