@@ -75,7 +75,7 @@ public:
    * For each entry, a impulse response is created and added to the \p lateFilters massage queue.
    */
   void process( SubBandMessageQueue & subBandLevels,
-                LateFilterMassageQueue & lateFilters );
+                LateFilterMessageQueue & lateFilters );
 
 private:
   /**
