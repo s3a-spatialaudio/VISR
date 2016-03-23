@@ -100,7 +100,13 @@ calculateImpulseResponse( std::size_t objectIdx,
 {
   // Do whatever needed to calculate the reverb filter
 
+  std::size_t numberOfEndSamples=20; // extra samples either end of noise to avoid end effects in convolution
+  std::vector<ril::SampleType> envelope (irLength) ;
+  
+  
   // for each subband...
+  for( std::size_t subBandIdx= 0; subBandIdx < mNumberOfSubBands; ++subBandIdx )
+  {
   // get a slightly too long noise sequence
   //createWhiteNoiseSequence...
 
@@ -108,6 +114,8 @@ calculateImpulseResponse( std::size_t objectIdx,
   //filterSequence()
 
   // multiply the sequence with the envelope
+  createEnvelope(irLength + numberOfEndSamples, envelope, lateParams.onsetDelay(), lateParams.levels()[subBandIdx], lateParams.decayCoeffs()[subBandIdx], lateParams.decayCoeffs()[subBandIdx], flow().samplingFrequency())
+  }
 }
 
 /**
