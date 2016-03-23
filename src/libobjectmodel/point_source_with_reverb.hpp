@@ -154,6 +154,7 @@ public:
    */
   class LateReverb
   {
+  public:
     /**
      * Default constructor
      */
