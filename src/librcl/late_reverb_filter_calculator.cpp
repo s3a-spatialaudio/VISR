@@ -6,8 +6,9 @@
 
 #include <libpml/message_queue.hpp>
 
-#include <ciso646>
+#include <array>
 
+#include <ciso646>
 #include <random>
 
 namespace visr
@@ -15,8 +16,35 @@ namespace visr
 namespace rcl
 {
 
+namespace
+{
+
+template<typename SampleType>
+efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
+                             pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> = { 0.0f, 0.0f } )
+{
+  // TODO: your code here.
+  for( std::size_t sampleIdx( 0 ); sampleIdx < numSamples; ++sampleIdx )
+  {
+
+  }
+
+  return efl::noError;
+}
+
+// Explicit instantiations
+template efl::ErrorCode filterBiquad( float const * const input, float * const output, std::size_t numSamples,
+  pml::BiquadParameter<float> const & iir, std::array<float, 2> );
+template efl::ErrorCode filterBiquad( double const * const input, double * const output, std::size_t numSamples,
+  pml::BiquadParameter<double> const & iir, std::array<double, 2> );
+
+
+} // unnamed namespace
+
 LateReverbFilterCalculator::LateReverbFilterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
+ , mAlignment( ril::cVectorAlignmentSamples )
+ , mSubBandNoiseSequences( mAlignment )
 {
 }
 
@@ -28,9 +56,11 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
                                         ril::SampleType lateReflectionLengthSeconds,
                                         std::size_t numLateReflectionSubBandLevels )
 {
-  mNumberOfFilters = numberOfObjects;
+  mNumberOfObjects = numberOfObjects;
   mNumberOfSubBands = numLateReflectionSubBandLevels;
   mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * flow().samplingFrequency() ) );
+
+  mSubBandNoiseSequences.resize( numberOfObjects * mNumberOfSubBands, mFilterLength );
 }
 
 void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
@@ -39,7 +69,7 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
   while( not subBandLevels.empty() )
   {
     SubBandMessageQueue::MessageType const & val = subBandLevels.nextElement();
-    if( val.first >= mNumberOfFilters )
+    if( val.first >= mNumberOfObjects )
     {
       throw std::out_of_range( "LateReverbFilterCalculator: Object index out of range." );
     }
@@ -76,7 +106,7 @@ static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* d
 {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-1, 1);
+    std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
     
     for (int n = 0; n < numSamples; ++n) {
         data[n]=dis(gen);
@@ -96,24 +126,26 @@ static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* d
                                                             ril::SampleType attackCoeff, ril::SampleType decayCoeff,
                                                             ril::SampleType samplingFrequency )
 {
+  // initialDelay in seconds sets leading zeros
+  // attackCoeff in seconds is the length of the onset ramp
+  // decayCoeff is the decay constant for the exponential (late) decay
+
+  std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
+  std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
     
-    // initialDelay in seconds sets leading zeros
-    // attackCoeff in seconds is the length of the onset ramp
-    // decayCoeff is the decay constant for the exponential (late) decay
-    std::size_t decay=0.0f;
-    std::size_t initialDelaySamples= roundf(initialDelay*samplingFrequency);
-    std::size_t attackCoeffSamples= roundf(attackCoeff*samplingFrequency);
-    
-    for (int n = 0; n < initialDelaySamples; ++n) { // leading zeros for delay
+  for( std::size_t n = 0; n < initialDelaySamples; ++n )
+  { // leading zeros for delay
         data[n]=0.0f;
-    }
-    for (int n = initialDelaySamples; n < attackCoeffSamples; ++n) { // linear increase up to max
-        data[n]=gain * ( (n - initialDelaySamples) / (attackCoeffSamples-initialDelaySamples) );
-    }
-    for (int n = attackCoeffSamples; n < numSamples; ++n) { // exponential decay to end of envelope
-        decay = gain * exp(decayCoeff*(n-attackCoeffSamples));
-        data[n]=decay;
-    }
+  }
+  for( std::size_t n = initialDelaySamples; n < attackCoeffSamples; ++n )
+  { // linear increase up to max
+    data[n] = gain * ((n - initialDelaySamples) / (attackCoeffSamples - initialDelaySamples));
+  }
+  for( std::size_t n = attackCoeffSamples; n < numSamples; ++n )
+  { // exponential decay to end of envelope
+    ril::SampleType const decay = gain * std::exp( decayCoeff*(n - attackCoeffSamples) );
+    data[n] = decay;
+  }
 }
 
 } // namespace rcl

@@ -5,11 +5,15 @@
 
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
+#include <libefl/basic_matrix.hpp>
+
 #include <libril/constants.hpp>
 #include <libril/audio_component.hpp>
 
 #include <vector>
 #include <utility> // for std::pair
+
+
 
 namespace visr
 {
@@ -68,7 +72,7 @@ public:
   /**
    * The process function. 
    * Iterates over all entries of the subBandLevels message queue and clears it.
-   * For each entry, an 
+   * For each entry, a impulse response is created and added to the \p lateFilters massage queue.
    */
   void process( SubBandMessageQueue & subBandLevels,
                 LateFilterMassageQueue & lateFilters );
@@ -123,11 +127,42 @@ private:
   /**
    *
    */
-  std::size_t mNumberOfFilters;
+  std::size_t mNumberOfObjects;
 
   std::size_t mNumberOfSubBands;
 
   std::size_t mFilterLength;
+
+  /**
+   * Subband filter length padded to the next multiple of the alignment to 
+   */
+  std::size_t mAlignedSubBandLength;
+
+  /**
+   * The alignment of the matrices and vectors used internally and of the generated impulse responses.
+   */
+  std::size_t const mAlignment;
+
+  efl::BasicMatrix<ril::SampleType> mSubBandNoiseSequences;
+
+  /**
+   * Access functions to the subband coefficients, non-const version.
+   * Returns a data buffer of length mFilterLength and alignment mAlignment.
+   */
+  ril::SampleType const * const subBandNoiseSequence( std::size_t objectIdx, std::size_t bandIdx ) const
+  {
+    return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
+  }
+
+  /**
+  * Access functions to the subband coefficients, non-const version.
+  * Returns a data buffer of length mFilterLength and alignment mAlignment.
+  */
+  ril::SampleType * const subBandNoiseSequence( std::size_t objectIdx, std::size_t bandIdx )
+  {
+    return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
+  }
+
 
   /**
    * Internal processing method to calculate a FIR filter from a subband level specification
