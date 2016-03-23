@@ -24,15 +24,15 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
                              pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
 {
   std::array<SampleType, 2> state( initialState);
-  std::array<SampleType, 3> inputBuffer( {0.0f, pastInputs[0], pastInputs[1]} );
+  std::array<SampleType, 3> inputBuffer( {{0.0f, pastInputs[0], pastInputs[1]}} );
   // TODO: your code here.
   for( std::size_t sampleIdx( 0 ); sampleIdx < numSamples; ++sampleIdx )
   {
     inputBuffer[0] = inputBuffer[1];
     inputBuffer[1] = inputBuffer[0];
     inputBuffer[2] = input[sampleIdx];
-    ril::SampleType const y = iir.b0()*inputBuffer[0] + iir.b0()*inputBuffer[0] + iir.b2() *inputBuffer[0] ;
-    state[0];
+    ril::SampleType const y = iir.b0()*inputBuffer[2] + iir.b1()*inputBuffer[1] + iir.b2 ()*inputBuffer[0] - iir.a1()*state[1] - iir.a2 ()*state[0];
+    output[sampleIdx]=y;
   }
 
   return efl::noError;
