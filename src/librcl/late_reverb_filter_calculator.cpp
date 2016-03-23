@@ -24,7 +24,7 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
                              pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
 {
   std::array<SampleType, 2> state( initialState);
-  std::array<SampleType, 3> inputBuffer( {{0.0f, pastInputs[0], pastInputs[1]}} );
+  std::array<SampleType, 3> inputBuffer = {0.0f, pastInputs[0], pastInputs[1]};
   // TODO: your code here.
   for( std::size_t sampleIdx( 0 ); sampleIdx < numSamples; ++sampleIdx )
   {
@@ -87,24 +87,6 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
 //    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
     subBandLevels.popNextElement();
   }
-}
-
-void LateReverbFilterCalculator::calculateFIR( std::size_t objectIdx,
-                                               std::vector<ril::SampleType> & reverbFilter )
-{
-  // Do whatever needed to calculate the reverb filter
-  
-  // for each subband...
-    // get a slightly too long noise sequence
-    //createWhiteNoiseSequence...
-  
-    // filter the sequence, take the middle samples, and store in the large noise matrix
-    //filterSequence()
-  
-    // multiply the sequence with the envelope
-  
-    
-
 }
 
 void LateReverbFilterCalculator::
