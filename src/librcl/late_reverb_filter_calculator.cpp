@@ -69,7 +69,34 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
   mNumberOfSubBands = numLateReflectionSubBandLevels;
   mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * flow().samplingFrequency() ) );
 
+  // Create a matrix to hold all bandpassed random sequences for all objects.
   mSubBandNoiseSequences.resize( numberOfObjects * mNumberOfSubBands, mFilterLength );
+
+  std::size_t const numberOfExtraSamples = efl::nextAlignedSize( 20, mAlignment); // extra samples at the beginning of the noise
+  // sequence to avoid any 'startup behaviour' of the IIR filter. The aligment magic is to allow us to use an aligned copy 
+  // operation to store the cropped result of the filtering.
+  std::size_t const noiseLength = mFilterLength + numberOfExtraSamples;
+  efl::BasicVector<ril::SampleType> noiseSequence( noiseLength, mAlignment );
+  efl::BasicVector<ril::SampleType> filteredSequence( noiseLength, mAlignment );
+
+  for( std::size_t objIdx( 0 ); objIdx < mNumberOfObjects; ++objIdx )
+  {
+    for( std::size_t bandIdx( 0 ); bandIdx < mNumberOfSubBands; ++bandIdx )
+    {
+      createWhiteNoiseSequence( noiseSequence.size(), noiseSequence.data(), mAlignment );
+
+      // TODO: Define the biquads to be used
+      // filterSequence( noiseSequence.size( ), noiseSequence.data( ),  );
+
+      // Copy the last mFilterLength samples to the right position in the matrix.
+      if( efl::vectorCopy( noiseSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
+          mAlignment ) != efl::noError )
+      {
+        throw std::runtime_error( "ReverbParameterCalculator::setup(): Copying of subband noise sequence failed." );
+      }
+
+    }
+  }
 }
 
 void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
@@ -98,23 +125,48 @@ calculateImpulseResponse( std::size_t objectIdx,
                           ril::SampleType * ir,
                           std::size_t irLength, std::size_t alignment /*= 0*/ )
 {
-  // Do whatever needed to calculate the reverb filter
+  std::size_t const finalAlignment = std::min( mAlignment, alignment );
+  if( irLength < mFilterLength )
+  {
+    throw std::runtime_error( "LateReverbFilterCalculator::calculateImpulseResponse(): the passed filter buffer is too short.");
+  }
+  // Could be a member allocated in setup.
+  efl::BasicVector<ril::SampleType> envelope( mFilterLength, mAlignment );
 
-  std::size_t numberOfEndSamples=20; // extra samples either end of noise to avoid end effects in convolution
-  std::vector<ril::SampleType> envelope (irLength) ;
-  
-  
-  // for each subband...
+  // Do whatever needed to calculate the reverb filter
+  // for each subband.
   for( std::size_t subBandIdx= 0; subBandIdx < mNumberOfSubBands; ++subBandIdx )
   {
-  // get a slightly too long noise sequence
-  //createWhiteNoiseSequence...
+    // Create an envelope.
+    createEnvelope( mFilterLength, envelope.data(), lateParams.onsetDelay(),
+                    lateParams.levels()[subBandIdx], lateParams.decayCoeffs()[subBandIdx],
+                    lateParams.decayCoeffs()[subBandIdx], flow().samplingFrequency() );
 
-  // filter the sequence, take the middle samples, and store in the large noise matrix
-  //filterSequence()
-
-  // multiply the sequence with the envelope
-  createEnvelope(irLength + numberOfEndSamples, envelope, lateParams.onsetDelay(), lateParams.levels()[subBandIdx], lateParams.decayCoeffs()[subBandIdx], lateParams.decayCoeffs()[subBandIdx], flow().samplingFrequency())
+    // multiply the sequence with the envelope and add them together
+    efl::ErrorCode res;
+    if( subBandIdx == 0 )
+    {
+      // Just a multiply for the zeroth subband filter to clear any previous content.
+      res = efl::vectorMultiply( subBandNoiseSequence( objectIdx, subBandIdx ), envelope.data(),
+                                 ir, mFilterLength, finalAlignment );
+    }
+    else
+    {
+      res = efl::vectorMultiplyAddInplace( subBandNoiseSequence( objectIdx, subBandIdx ), envelope.data( ),
+                                           ir, mFilterLength, finalAlignment );
+    }
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "ReverbParameterCalculator::calculateImpulseResponse(): Calculation of final envelope failed." );
+    }
+  }
+  // Zero any remaining zeros in the buffer
+  if( irLength > mFilterLength )
+  {
+    if( efl::vectorZero( ir + mFilterLength, irLength > mFilterLength, 0 /* no alignment spec possible */ ) != efl::noError )
+    {
+      throw std::runtime_error( "ReverbParameterCalculator::calculateImpulseResponse(): Zeroing of remaining ir taps failed." );
+    }
   }
 }
 
@@ -124,14 +176,14 @@ calculateImpulseResponse( std::size_t objectIdx,
 * @param [out] data Buffer to store the result.
 * @param alignment Alignment of the \p data buffer (in number of elements)
 */
-static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t /*alignment = 0*/ )
+/*static*/ void LateReverbFilterCalculator::createWhiteNoiseSequence( std::size_t numSamples,
+                                                                      ril::SampleType* data,
+                                                                      std::size_t /*alignment = 0*/ )
 {
-
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
 
-    
   for (int n = 0; n < numSamples; ++n) {
     data[n]=dis(gen);
   }
