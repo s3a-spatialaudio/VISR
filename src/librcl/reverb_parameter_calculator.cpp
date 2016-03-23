@@ -17,13 +17,17 @@
 
 #include <boost/filesystem.hpp>
 
+#include <algorithm>
 #include <ciso646>
-#include <cstdio>
+// #include <cstdio>
+#include <limits>
 
 namespace visr
 {
 namespace rcl
 {
+
+/*static*/ std::size_t const ReverbParameterCalculator::cUnusedChannelIdx = std::numeric_limits<std::size_t>::max( );
 
 ReverbParameterCalculator::ReverbParameterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
@@ -53,7 +57,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
       throw std::invalid_argument( "The number of biquad sections for the discrete reflections differs from the constant used in the object definition." );
     }
 
-    mChannelLookup.clear();
+    mChannelLookup.resize( mMaxNumberOfObjects, cUnusedChannelIdx );
 
     // Configure the VBAP calculator
     mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
@@ -79,43 +83,44 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
                                          efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
                                          LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
-    
-    int numReverbObjectsFound=0;
-    
-    for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-    {
-        
-        objectmodel::Object const & obj = *(objEntry.second);
-        if( obj.numberOfChannels() != 1 )
-        {
-            std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
-            continue;
-        }
-        
-        objectmodel::ObjectTypeId const ti = obj.type();
-        // Process reverb objects, ignore others
-        switch( ti )
-        {
-            case objectmodel::ObjectTypeId::PointSourceWithReverb:
-            {
-                numReverbObjectsFound++;
-                if( numReverbObjectsFound > mMaxNumberOfObjects )
-                {
-                    std::cerr << "ReverbParameterCalculator: max number of reverb objects exceeded." << std::endl;
-                    break;
-                }
-                processInternal(objects);
-                break;
-            }
-            default:
-            {
-                
-            }
-            
-        }
+  std::vector<objectmodel::ObjectId> foundReverbObjects;
 
-    } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-    
+  for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  {
+    objectmodel::Object const & obj = *(objEntry.second);
+    if( obj.numberOfChannels() != 1 )
+    {
+      std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
+      continue;
+    }
+
+    objectmodel::ObjectTypeId const ti = obj.type();
+    // Process reverb objects, ignore others
+    switch( ti )
+    {
+      case objectmodel::ObjectTypeId::PointSourceWithReverb:
+      {
+        foundReverbObjects.push_back( obj.id() );
+      }
+    }
+  } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+
+  // Check the list of found reverb objects against the existing entries.
+  if( foundReverbObjects.size() > mMaxNumberOfObjects )
+  {
+    throw std::runtime_error( "The number of reverb objects exceeds the maximum admissible number." );
+  }
+  // Sort the found objects to ease further handling.
+  std::sort( foundReverbObjects.begin(), foundReverbObjects.end() );
+
+  // For each found object, check whether it already exists in the lookup vector.
+  for( const std::size_t idx : foundReverbObjects )
+  {
+
+  }
+
+  // I
+
 } //process
 
 
@@ -212,6 +217,22 @@ void ReverbParameterCalculator::clearSingleObject( objectmodel::PointSourceWithR
                                                    efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
                                                    LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
+  // Define a starting index into the all parameter matrices 
+  std::size_t const startRow = renderChannel * mNumberOfDiscreteReflectionsPerSource;
+
+  static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
+  static const pml::BiquadParameter<ril::SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
+  std::fill( mSourcePositions.begin( ), mSourcePositions.end( ), defaultPosition );
+  for( std::size_t srcIdx( 0 ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
+  {
+    std::size_t const matrixRow = startRow + srcIdx;
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    {
+      biquadCoeffs( matrixRow, biquadIdx ) = defaultBiquad;
+    }
+    discreteReflGains[matrixRow] = 0.0f;
+    discreteReflDelays[matrixRow] = 0.0f;
+  }
 }
 
 
