@@ -194,7 +194,7 @@ private:
 
   rcl::LateReverbFilterCalculator::SubBandMessageQueue mLateReverbFilterSubBandLevels;
 
-  rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
+  rcl::LateReverbFilterCalculator::LateFilterMessageQueue mLateReverbFilterIRs;
 
   //@}
 

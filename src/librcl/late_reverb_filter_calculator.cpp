@@ -73,19 +73,17 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
     {
       throw std::out_of_range( "LateReverbFilterCalculator: Object index out of range." );
     }
-    if( val.second.size() != mNumberOfSubBands )
-    {
-      throw std::invalid_argument( "LateReverbFilterCalculator: The subband level specification has a wrong number of elements." );
-    }
     std::vector<ril::SampleType> newFilter( mFilterLength );
-    calculateFIR( val.first, val.second, newFilter );
-    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
+
+    // Check whether the values have changed.
+
+//    calculateFIR( val.first, val.second, newFilter );
+//    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
     subBandLevels.popNextElement();
   }
 }
 
 void LateReverbFilterCalculator::calculateFIR( std::size_t objectIdx,
-                                               std::vector<ril::SampleType> const & subBandLevels,
                                                std::vector<ril::SampleType> & reverbFilter )
 {
   // Do whatever needed to calculate the reverb filter
@@ -103,10 +101,23 @@ void LateReverbFilterCalculator::calculateFIR( std::size_t objectIdx,
 
 }
 
-void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
-  std::size_t objectIdx,
-  ril::SampleType * ir,
-  std::size_t irLength, std::size_t alignment = 0 );
+void LateReverbFilterCalculator::
+calculateImpulseResponse( std::size_t objectIdx,
+                          objectmodel::PointSourceWithReverb::LateReverb const & lateParams,
+                          ril::SampleType * ir,
+                          std::size_t irLength, std::size_t alignment /*= 0*/ )
+{
+  // Do whatever needed to calculate the reverb filter
+
+  // for each subband...
+  // get a slightly too long noise sequence
+  //createWhiteNoiseSequence...
+
+  // filter the sequence, take the middle samples, and store in the large noise matrix
+  //filterSequence()
+
+  // multiply the sequence with the envelope
+}
 
 /**
 * Create a uniform white noise sequence with range [-1,1].

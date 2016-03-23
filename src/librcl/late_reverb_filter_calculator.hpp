@@ -36,10 +36,10 @@ public:
    */
   using CoefficientType = ril::SampleType;
 
-  using SubBandMessageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
+  using SubBandMessageQueue = pml::MessageQueue< std::pair<std::size_t, objectmodel::PointSourceWithReverb::LateReverb > >;
 
   /**
-   * Message queue type for the late reverberation 
+   * Message queue type for the late reverberation
    */
   using LateFilterMessageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
 
@@ -75,20 +75,20 @@ public:
    * For each entry, a impulse response is created and added to the \p lateFilters massage queue.
    */
   void process( SubBandMessageQueue & subBandLevels,
-                LateFilterMassageQueue & lateFilters );
+                LateFilterMessageQueue & lateFilters );
 
 private:
   /**
    * Create an impulse response for a single reverb object.
-   * @param obj The reverb object for which the late impulse response is calculated.
    * @param objectIdx The object channel for which the impulse response is created. This index can be used to refer to statically created data (e.g., noise sequences)
    * for particular objects.
+   * @param lateParams The late reverb parameters to control the filter generation.
    * @param [out] ir Buffer to hold the computed impulse response
    * @param irLength Length of the ir buffer.
    * @param alignment Alignment of the output buffer (in number of elements)
    */
-  void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
-                                 std::size_t objectIdx,
+  void calculateImpulseResponse( std::size_t objectIdx,
+                                 objectmodel::PointSourceWithReverb::LateReverb const & lateParams,
                                  ril::SampleType * ir,
                                  std::size_t irLength, std::size_t alignment = 0 );
 
@@ -162,16 +162,6 @@ private:
   {
     return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
   }
-
-
-  /**
-   * Internal processing method to calculate a FIR filter from a subband level specification
-   * @param subBandLevels The sub band levels for a single object (i.e., one late reverb filter.)
-   * @note The length of the output argument reverbFilters must match the filter length determined in the constructor.
-   */
-  void calculateFIR( std::size_t objectIdx,
-                     std::vector<ril::SampleType> const & subBandLevels,
-                     std::vector<ril::SampleType> & reverbFilter );
 };
 
 } // namespace rcl
