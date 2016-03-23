@@ -31,7 +31,7 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
     inputBuffer[0] = inputBuffer[1];
     inputBuffer[1] = inputBuffer[0];
     inputBuffer[2] = input[sampleIdx];
-    ril::SampleType const y = iir.b0()*inputBuffer[2] + iir.b1()*inputBuffer[1] + iir.b2 ()*inputBuffer[0] - iir.a1()*state[1] - iir.a2 ()*state[0];
+    SampleType const y = iir.b0()*inputBuffer[2] + iir.b1()*inputBuffer[1] + iir.b2 ()*inputBuffer[0] - iir.a1()*state[1] - iir.a2 ()*state[0];
     output[sampleIdx]=y;
 
     state[0] = state[1];
