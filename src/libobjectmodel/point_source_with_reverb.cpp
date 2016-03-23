@@ -44,20 +44,12 @@ void PointSourceWithReverb::setNumberOfDiscreteReflections( std::size_t numRefle
 
 void PointSourceWithReverb::setLateReverbLevels( ril::SampleType const * levels, std::size_t numValues )
 {
-  if( numValues != PointSourceWithReverb::cNumberOfSubBands )
-  {
-    throw std::invalid_argument( "PointSourceWithReverb::setLateReverbLevels(): The number of elements does not match the fixed number of subbands." );
-  }
-  std::copy( levels, levels + numValues, mLateReverbLevels.begin() );
+  lateReverb().setLevels( levels, numValues );
 }
 
 void PointSourceWithReverb::setLateReverbDecayCoeffs( ril::SampleType const * decays, std::size_t numValues )
 {
-  if( numValues != PointSourceWithReverb::cNumberOfSubBands )
-  {
-    throw std::invalid_argument( "PointSourceWithReverb::setLateReverbDecayCoeffs(): The number of elements does not match the fixed number of subbands." );
-  }
-  std::copy( decays, decays + numValues, mLateReverbDecay.begin( ) );
+  lateReverb().setDecayCoeffs( decays, numValues );
 }
 
 /*****************************************************************************/
@@ -127,6 +119,34 @@ void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t
   }
   mDiscreteReflectionFilters.at( biquadIdx ) = newFilter;
 }
+
+/*****************************************************************************/
+/* PointSourceWithReverb::DiscreteReflection                                 */
+
+PointSourceWithReverb::LateReverb::LateReverb()
+: mOnsetDelay( static_cast<ril::SampleType>(0.0) )
+{
+}
+
+void PointSourceWithReverb::LateReverb::setLevels( ril::SampleType const * levels, std::size_t numValues )
+{
+  if( numValues != PointSourceWithReverb::cNumberOfSubBands )
+  {
+    throw std::invalid_argument( "PointSourceWithReverb::LateReverb::setLevels(): The number of elements does not match the fixed number of subbands." );
+  }
+  std::copy( levels, levels + numValues, mLevels.begin( ) );
+}
+
+void PointSourceWithReverb::LateReverb::setDecayCoeffs( ril::SampleType const * decays, std::size_t numValues )
+{
+  if( numValues != PointSourceWithReverb::cNumberOfSubBands )
+  {
+    throw std::invalid_argument( "PointSourceWithReverb::LateReverb::setDecayCoeffs(): The number of elements does not match the fixed number of subbands." );
+  }
+  std::copy( decays, decays + numValues, mDecayCoeffs.begin( ) );
+}
+
+
 
 } // namespace objectmodel
 } // namespace visr

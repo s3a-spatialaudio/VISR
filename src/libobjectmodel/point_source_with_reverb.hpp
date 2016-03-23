@@ -150,6 +150,93 @@ public:
   };
   
   /**
+   * Internal class to encapsulate the late reverberation-related parts of the reverb object.
+   */
+  class LateReverb
+  {
+    /**
+     * Default constructor
+     */
+    LateReverb();
+
+    /**
+     * Copy constructor, uses default implementation
+     */
+    LateReverb( LateReverb const & rhs ) = default;
+
+    /**
+    * Retrieve the initial delay (closely related to mixing time) for the late reverberation tail in seconds.
+    */
+    ril::SampleType const onsetDelay( ) const { return mOnsetDelay; }
+
+    /**
+    * Set the onset time for the late reverberation part.
+    * @param onset Offset time in seconds.
+    */
+    void setOnsetDelay( ril::SampleType onset ) { mOnsetDelay = onset; }
+
+    /**
+    * Return the late reverberation decay coefficients.
+    * Returned as an array of decay coefficients corresponding to the fixed subbands.
+    */
+    LateReverbCoeffs const & decayCoeffs( ) const { return mDecayCoeffs; }
+
+    /**
+    * Return the late reverberation levels.
+    * Returned as an array of linear levels corresponding to the fixed subbands.
+    */
+    LateReverbCoeffs const & levels( ) const { return mLevels; }
+
+    /**
+    * Set the late reverberation levels.
+    * @param levels The levels (linear scale) corresponding to the fixed subbands as a fixed-size array.
+    */
+    void setLevels( LateReverbCoeffs const & levels ) { mLevels = levels; }
+
+    /**
+    * Set the late reverberation levels from a vector.
+    * @param levels The levels (linear scale) corresponding to the fixed subbands.
+    * @param numValues The number of values contained in the \p levels array.
+    * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
+    */
+    void setLevels( ril::SampleType const * levels, std::size_t numValues );
+
+    /**
+    * Set the late reverberation decay coefficients.
+    * @param decay The decay coefficients corresponding to the fixed subbands as a fixed-size array.
+    */
+    void setDecayCoeffs( LateReverbCoeffs const & decay ) { mDecayCoeffs = decay; }
+
+    /**
+    * Set the late reverberation decay coefficients from a vector.
+    * @param decay The decay coefficients corresponding to the fixed subbands.
+    * @param numValues The number of values contained in the \p decay array.
+    * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
+    */
+    void setDecayCoeffs( ril::SampleType const * decay, std::size_t numValues );
+  private:
+    /**
+    * Onset delay (closely related to mixing time) for the late reverberation tail.
+    */
+    ril::SampleType mOnsetDelay;
+
+    /**
+    * Attack times for the subbands.
+    */
+    LateReverbCoeffs mAttackTimes;
+
+    /**
+    * Array holding the late reverberation decay coefficients for the fixed subbands.
+    */
+    LateReverbCoeffs mDecayCoeffs;
+
+    /**
+    * Array holding the late reverberation levels (linear scale) for the fixed subbands.
+    */
+    LateReverbCoeffs mLevels;
+  };
+
+  /**
    * Default constructor.
    * Construct a PointSourceWithReverb with all data members set to default values.
    */
@@ -170,33 +257,44 @@ public:
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
   /**
+  * Return a reference to the late reverb object (const version).
+  */
+  LateReverb const & lateReverb( ) const { return mLateReverb; }
+
+  /**
+   * Return a reference to the late reverb object (non-const version).
+   */
+  LateReverb & lateReverb( ) { return mLateReverb; }
+
+
+  /**
    * Retrieve the initial delay (closely related to mixing time) for the late reverberation tail in seconds.
    */
-  ril::SampleType const lateReverbOnset() const { return mLateReverbOnset; }
+  ril::SampleType const lateReverbOnset() const { return lateReverb().onsetDelay(); }
 
   /**
    * Set the onset time for the late reverberation part.
    * @param onset Offset time in seconds.
    */
-  void setLateReverbOnset( ril::SampleType onset ) { mLateReverbOnset = onset; }
+  void setLateReverbOnset( ril::SampleType onset ) { lateReverb().setOnsetDelay( onset ); }
 
   /**
    * Return the late reverberation decay coefficients.
    * Returned as an array of decay coefficients corresponding to the fixed subbands.
    */
-  LateReverbCoeffs const & lateReverbDecayCoeffs() const { return mLateReverbDecay; }
+  LateReverbCoeffs const & lateReverbDecayCoeffs() const { return lateReverb().decayCoeffs(); }
 
   /**
    * Return the late reverberation levels.
    * Returned as an array of linear levels corresponding to the fixed subbands.
    */
-  LateReverbCoeffs const & lateReverbLevels() const { return mLateReverbLevels; }
+  LateReverbCoeffs const & lateReverbLevels() const { return lateReverb().levels(); }
 
   /**
    * Set the late reverberation levels.
    * @param levels The levels (linear scale) corresponding to the fixed subbands as a fixed-size array.
    */
-  void setLateReverbLevels( LateReverbCoeffs const & levels ) { mLateReverbLevels = levels; }
+  void setLateReverbLevels( LateReverbCoeffs const & levels ) { lateReverb().setLevels( levels ); }
 
   /**
    * Set the late reverberation levels from a vector.
@@ -210,7 +308,7 @@ public:
   * Set the late reverberation decay coefficients.
   * @param decay The decay coefficients corresponding to the fixed subbands as a fixed-size array.
   */
-  void setLateReverbDecayCoeffs( LateReverbCoeffs const & decay ) { mLateReverbDecay = decay; }
+  void setLateReverbDecayCoeffs( LateReverbCoeffs const & decay ) { lateReverb().setDecayCoeffs( decay ); }
 
   /**
   * Set the late reverberation decay coefficients from a vector.
@@ -256,20 +354,7 @@ private:
    */
   std::vector<DiscreteReflection> mDiscreteReflections;
   
-  /**
-   * Onset delay (closeely related to mixing time) for the late reverberation tail.
-   */
-  ril::SampleType mLateReverbOnset;
-
-  /**
-   * Array holding the late reverberation decay coefficients for the fixed subbands.
-   */
-  LateReverbCoeffs mLateReverbDecay;
-    
-  /**
-  * Array holding the late reverberation levels (linear scale) for the fixed subbands.
-  */
-  LateReverbCoeffs mLateReverbLevels;
+  LateReverb mLateReverb;
 };
 
 } // namespace objectmodel
