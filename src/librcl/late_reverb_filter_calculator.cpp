@@ -8,6 +8,8 @@
 
 #include <ciso646>
 
+#include <random>
+
 namespace visr
 {
 namespace rcl
@@ -70,11 +72,22 @@ void calculateImpulseResponse( objectmodel::PointSourceWithReverb const & obj,
 * @param [out] data Buffer to store the result.
 * @param alignment Alignment of the \p data buffer (in number of elements)
 */
-static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t alignment = 0 );
+static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t /*alignment = 0*/ )
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-1, 1);
+    
+    for (int n = 0; n < numSamples; ++n) {
+        data[n]=dis(gen);
+    }
+}
 
 /*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
   pml::BiquadParameter<ril::SampleType> const & filter )
 {
+    
+    
 }
 
 
@@ -83,6 +96,24 @@ static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* d
                                                             ril::SampleType attackCoeff, ril::SampleType decayCoeff,
                                                             ril::SampleType samplingFrequency )
 {
+    
+    // initialDelay in seconds sets leading zeros
+    // attackCoeff in seconds is the length of the onset ramp
+    // decayCoeff is the decay constant for the exponential (late) decay
+    std::size_t decay=0.0f;
+    std::size_t initialDelaySamples= roundf(initialDelay*samplingFrequency);
+    std::size_t attackCoeffSamples= roundf(attackCoeff*samplingFrequency);
+    
+    for (int n = 0; n < initialDelaySamples; ++n) { // leading zeros for delay
+        data[n]=0.0f;
+    }
+    for (int n = initialDelaySamples; n < attackCoeffSamples; ++n) { // linear increase up to max
+        data[n]=gain * ( (n - initialDelaySamples) / (attackCoeffSamples-initialDelaySamples) );
+    }
+    for (int n = attackCoeffSamples; n < numSamples; ++n) { // exponential decay to end of envelope
+        decay = gain * exp(decayCoeff*(n-attackCoeffSamples));
+        data[n]=decay;
+    }
 }
 
 } // namespace rcl
