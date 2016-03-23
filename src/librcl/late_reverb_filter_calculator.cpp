@@ -21,12 +21,18 @@ namespace
 
 template<typename SampleType>
 efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
-                             pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> = { 0.0f, 0.0f } )
+                             pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
 {
+  std::array<SampleType, 2> state( initialState);
+  std::array<SampleType, 3> inputBuffer( {{0.0f, pastInputs[0], pastInputs[1]}} );
   // TODO: your code here.
   for( std::size_t sampleIdx( 0 ); sampleIdx < numSamples; ++sampleIdx )
   {
-
+    inputBuffer[0] = inputBuffer[1];
+    inputBuffer[1] = inputBuffer[0];
+    inputBuffer[2] = input[sampleIdx];
+    ril::SampleType const y = iir.b0()*inputBuffer[2] + iir.b1()*inputBuffer[1] + iir.b2 ()*inputBuffer[0] - iir.a1()*state[1] - iir.a2 ()*state[0];
+    output[sampleIdx]=y;
   }
 
   return efl::noError;
@@ -34,9 +40,9 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
 
 // Explicit instantiations
 template efl::ErrorCode filterBiquad( float const * const input, float * const output, std::size_t numSamples,
-  pml::BiquadParameter<float> const & iir, std::array<float, 2> );
+  pml::BiquadParameter<float> const & iir, std::array<float, 2> const &, std::array<float, 2> const & );
 template efl::ErrorCode filterBiquad( double const * const input, double * const output, std::size_t numSamples,
-  pml::BiquadParameter<double> const & iir, std::array<double, 2> );
+  pml::BiquadParameter<double> const & iir, std::array<double, 2> const &, std::array<double, 2> const &);
 
 
 } // unnamed namespace
