@@ -4,7 +4,7 @@
 #define VISR_LIBRCL_DIFFUSION_GAIN_CALCULATOR_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -29,7 +29,7 @@ namespace rcl
 /**
  * Audio component for extracting the diffuseness gain from an object vector.
  */
-class DiffusionGainCalculator: public ril::AudioComponent
+class DiffusionGainCalculator: public ril::AtomicComponent
 {
 public:
   /**

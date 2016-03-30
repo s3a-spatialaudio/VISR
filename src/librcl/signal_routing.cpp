@@ -11,7 +11,7 @@ namespace rcl
 
 
 SignalRouting::SignalRouting( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 {

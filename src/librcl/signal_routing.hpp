@@ -5,7 +5,7 @@
 
 #include <libpml/signal_routing_parameter.hpp>
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 
@@ -22,7 +22,7 @@ namespace rcl
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
-class SignalRouting: public ril::AudioComponent
+class SignalRouting: public ril::AtomicComponent
 {
 public:
   /**

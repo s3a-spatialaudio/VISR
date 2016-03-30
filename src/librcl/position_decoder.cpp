@@ -17,7 +17,7 @@ namespace rcl
 {
 
 PositionDecoder::PositionDecoder(ril::AudioSignalFlow& container, char const * name)
-: AudioComponent( container, name )
+: AtomicComponent( container, name )
 {
 }
 

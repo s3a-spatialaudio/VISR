@@ -21,7 +21,7 @@ namespace rcl
 {
 
 DiffusionGainCalculator::DiffusionGainCalculator( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
  , mNumberOfObjectChannels( 0 )
 {
 }

@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_POSITION_DECODER_HPP_INCLUDED
 #define VISR_LIBRCL_POSITION_DECODER_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libpanning/LoudspeakerArray.h>
 #include <libefl/vector_functions.hpp>
 
@@ -24,7 +24,7 @@ namespace rcl
  * Component to decode listener position data from messages (typically received from a network).
  * This component has neither audio inputs or outputs.
  */
-class PositionDecoder: public ril::AudioComponent
+class PositionDecoder: public ril::AtomicComponent
 {
 public:
   /**

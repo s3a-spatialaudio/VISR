@@ -17,7 +17,7 @@ class AudioOutput: public AudioPort
 {
 public:
   explicit AudioOutput( char const * portName,
-                        AudioComponent& container );
+                        Component& container );
 
   ~AudioOutput();
 

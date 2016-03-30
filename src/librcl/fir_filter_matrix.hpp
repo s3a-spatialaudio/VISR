@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_FIR_FILTER_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_FIR_FILTER_MATRIX_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
@@ -34,7 +34,7 @@ namespace rcl
  * The widths of the input and the output port are set by the parameters \p 
  * numberOfInputs and \p numberOfOutputs in the setup() method.
  */
-class FirFilterMatrix: public ril::AudioComponent
+class FirFilterMatrix: public ril::AtomicComponent
 {
   using SampleType = ril::SampleType;
 public:

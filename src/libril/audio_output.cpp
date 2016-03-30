@@ -2,7 +2,7 @@
 
 #include "audio_output.hpp"
 
-#include "audio_component.hpp"
+#include "component.hpp"
 
 namespace visr
 {
@@ -10,7 +10,7 @@ namespace ril
 {
 
 AudioOutput::AudioOutput( char const* portName,
-                          AudioComponent& container )
+                          Component& container )
  : AudioPort( container )
 {
   container.registerAudioOutput( portName, this );

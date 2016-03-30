@@ -4,7 +4,7 @@
 #define VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 
 #include <vector>
 #include <utility> // for std::pair
@@ -22,7 +22,7 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class LateReverbFilterCalculator: public ril::AudioComponent
+class LateReverbFilterCalculator: public ril::AtomicComponent
 {
 public:
   /**

@@ -20,7 +20,7 @@ namespace rcl
 {
 
 SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 #ifndef DIFFUSION_USE_FAST_CONVOLVER

@@ -7,7 +7,7 @@
 #include "late_reverb_filter_calculator.hpp"
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -45,7 +45,7 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class ReverbParameterCalculator: public ril::AudioComponent
+class ReverbParameterCalculator: public ril::AtomicComponent
 {
 public:
   /**

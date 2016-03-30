@@ -14,7 +14,7 @@ namespace rcl
 {
 
 LateReverbFilterCalculator::LateReverbFilterCalculator( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
 {
 }
 

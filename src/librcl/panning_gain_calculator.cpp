@@ -35,7 +35,7 @@ namespace rcl
 {
 
 PanningGainCalculator::PanningGainCalculator( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
  , mNumberOfObjects( 0 )
 {
 }

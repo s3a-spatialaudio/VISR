@@ -11,7 +11,7 @@ namespace rcl
 
 
 NullSource::NullSource( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
  , mOutput( "out", *this )
 {
 }

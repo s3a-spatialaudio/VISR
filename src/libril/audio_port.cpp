@@ -3,7 +3,7 @@
 #include "audio_port.hpp"
 
 #ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE // otherwise it's already included
-#include "audio_component.hpp"
+#include "component.hpp"
 #endif
 
 namespace visr
@@ -44,13 +44,13 @@ AudioPort::SignalIndexType AudioPort::cInvalidSignalIndex;
 #endif // _MSC_VER
 //@}
 
-AudioPort::AudioPort( AudioComponent& container )
+AudioPort::AudioPort( Component& container )
  : mParentComponent( container )
  , mWidth( cInvalidWidth )
 {
 }
 
-AudioPort::AudioPort( AudioComponent& container, std::size_t width )
+AudioPort::AudioPort( Component& container, std::size_t width )
  : mParentComponent( container )
  , mWidth( cInvalidWidth ) // need to set it to some value before calling setWidth
 {

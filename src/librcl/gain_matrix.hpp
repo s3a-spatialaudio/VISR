@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_GAIN_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_GAIN_MATRIX_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
@@ -37,7 +37,7 @@ namespace rcl
  * The width of these ports is determined by the arguments "numberOfInput" and "numberOfOutputs", respectively,
  * which are passed to the setup() method.
  */
-class GainMatrix: public ril::AudioComponent
+class GainMatrix: public ril::AtomicComponent
 {
   using SampleType = ril::SampleType;
 public:

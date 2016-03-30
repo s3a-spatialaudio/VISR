@@ -19,7 +19,7 @@ namespace rcl
 {
 
 UdpReceiver::UdpReceiver( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
  , mMode( Mode::Asynchronous)
 {
 }

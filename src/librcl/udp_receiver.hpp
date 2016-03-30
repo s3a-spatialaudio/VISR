@@ -4,7 +4,7 @@
 #define VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -34,7 +34,7 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public ril::AudioComponent
+class UdpReceiver: public ril::AtomicComponent
 {
 public:
   enum class Mode

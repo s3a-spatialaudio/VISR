@@ -4,8 +4,8 @@
 
 #include "audio_input.hpp"
 #include "audio_output.hpp"
-#include "audio_component.hpp"
 #include "communication_area.hpp"
+#include "component.hpp"
 
 #include <libefl/vector_functions.hpp>
 
@@ -92,7 +92,7 @@ std::size_t AudioSignalFlow::numberOfCaptureChannels() const
 {
   if( !initialised() )
   {
-    throw std::logic_error( "AudioComponent::captureWidth() must be called only after initalisation of the object is complete." );
+    throw std::logic_error( "AudioSignalFlow::captureWidth() must be called only after initalisation of the object is complete." );
   }
   return mCaptureIndices.size();
 }
@@ -101,16 +101,16 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
 {
   if( !initialised() )
   {
-    throw std::logic_error( "AudioComponent::playbackWidth() must be called only after initalisation of the object is complete." );
+    throw std::logic_error( "AudioSignalFLow::playbackWidth() must be called only after initalisation of the object is complete." );
   }
   return mPlaybackIndices.size();
 }
 
 void 
-AudioSignalFlow::registerComponent( AudioComponent * component, char const * componentName )
+AudioSignalFlow::registerComponent( Component * component, char const * componentName )
 {
   std::string const myName( componentName );
-  std::pair<std::string, AudioComponent*> myPair( myName, component );
+  std::pair<std::string, Component*> myPair( myName, component );
   std::pair<ComponentTable::iterator, bool> res = mComponents.insert( myPair );
   if( !res.second ) 
   {
@@ -136,7 +136,7 @@ AudioSignalFlow::findPort( std::string const & componentName,
   {
     throw std::invalid_argument( "No components with the given name exists." );
   }
-  AudioComponent * component = findIt->second;
+  Component * component = findIt->second;
   AudioInput * audioIn = component->getPort<AudioInput>(portName.c_str( ));
   if( audioIn )
   {

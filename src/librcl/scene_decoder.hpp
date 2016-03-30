@@ -4,7 +4,7 @@
 #define VISR_LIBRCL_SCENE_DECODER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
 #include <memory> // for std::unique_ptr
@@ -33,7 +33,7 @@ namespace rcl
  * Component to decode audio objects from messages (typically received from a network).
  * This component has neither audio inputs or outputs.
  */
-class SceneDecoder: public ril::AudioComponent
+class SceneDecoder: public ril::AtomicComponent
 {
 public:
   /**

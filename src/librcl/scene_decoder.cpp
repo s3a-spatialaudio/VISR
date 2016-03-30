@@ -15,7 +15,7 @@ namespace rcl
 {
 
 SceneDecoder::SceneDecoder( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ : AtomicComponent( container, name )
 {
 }
 

@@ -15,7 +15,7 @@
 
 #include <libefl/basic_matrix.hpp>
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
@@ -31,7 +31,7 @@ namespace visr
 namespace rcl
 {
 
-class ListenerCompensation: public ril::AudioComponent
+class ListenerCompensation: public ril::AtomicComponent
 {
 public:
   using SampleType = ril::SampleType;

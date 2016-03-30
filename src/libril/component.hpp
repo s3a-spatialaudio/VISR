@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_COMPONENT_HPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_COMPONENT_HPP_INCLUDED
+#ifndef VISR_LIBRIL_COMPONENT_HPP_INCLUDED
+#define VISR_LIBRIL_COMPONENT_HPP_INCLUDED
 
 // for ril::SampleType (might be made a template parameter or removed here later.)
 #include "constants.hpp"
@@ -29,20 +29,19 @@ class CommunicationArea;
  *
  *
  */
-class AudioComponent
+class Component
 {
 public:
   friend class AudioInput;
   friend class AudioOutput;
   friend class AudioSignalFlow;
 
-  explicit AudioComponent( AudioSignalFlow& container, char const * name );
+  explicit Component( AudioSignalFlow& container, char const * name );
 
   /**
    *
    */
-  ~AudioComponent();
-  
+  ~Component();
 
   /**
    * Check whether the component has been initialised. 
@@ -57,7 +56,7 @@ public:
   /**
    * Return the sampling frequency of the containing signal flow.
    */
-  ril::SamplingFrequencyType AudioComponent::samplingFrequency() const;
+  ril::SamplingFrequencyType samplingFrequency() const;
 
   /**
    * Return the period of the containing signal processing graph,
@@ -152,7 +151,7 @@ private:
   {
     explicit ComparePortDescriptor( std::string const& name ): mName( name ) {}
 
-    bool operator()( AudioComponent::PortDescriptor<PortType> const& lhs ) const
+    bool operator()( Component::PortDescriptor<PortType> const& lhs ) const
     {
       return lhs.mName == mName;
     }
@@ -178,13 +177,10 @@ private:
     return findIt;
   }
 
-
   AudioSignalFlow& mContainingFlow;
-
-  bool mInitialised;
 };
 
 } // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_COMPONENT_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRIL_COMPONENT_HPP_INCLUDED

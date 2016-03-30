@@ -4,7 +4,7 @@
 #define VISR_LIBRCL_ADD_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
 #include <memory> // for std::unique_ptr
@@ -26,7 +26,7 @@ namespace rcl
  * The number of inputs is set by the \p numInputs argument passed to the setup() method.
  * All input vectors must have the same number of signals given by the \p width argument to setup().
  */
-class Add: public ril::AudioComponent
+class Add: public ril::AtomicComponent
 {
 public:
   /**

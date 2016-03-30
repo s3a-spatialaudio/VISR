@@ -50,7 +50,7 @@ namespace ril
 {
 
 // Forward declaration(s)
-class AudioComponent;
+class Component;
 // Removed due to inclusion of header (see above)
 #ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
 class AudioSignalFlow;
@@ -82,9 +82,9 @@ public:
   const static SignalIndexType cInvalidSignalIndex = UINT_MAX;
 #endif
 
-  explicit AudioPort( AudioComponent& container );
+  explicit AudioPort( Component& container );
 
-  explicit AudioPort( AudioComponent& container, std::size_t width );
+  explicit AudioPort( Component& container, std::size_t width );
 
   ~AudioPort();
 
@@ -111,9 +111,9 @@ public:
   //@}
 
 protected:
-  AudioComponent & container() { return mParentComponent; }
+  Component & container() { return mParentComponent; }
 
-  AudioComponent const & container( ) const { return mParentComponent; }
+  Component const & container( ) const { return mParentComponent; }
 
   /**
    * @todo make 'em inline after breaking the (suspected) cyclic dependency.
@@ -174,7 +174,7 @@ protected:
   SampleType * * signalPointers() { return &mSignalPointers[0]; }
 private:
 
-  AudioComponent& mParentComponent;
+  Component& mParentComponent;
 
   std::size_t mWidth;
 

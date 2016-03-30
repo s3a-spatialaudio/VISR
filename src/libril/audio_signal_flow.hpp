@@ -22,7 +22,7 @@ namespace ril
 
 // Forward declarations
 template <typename T> class CommunicationArea;
-class AudioComponent;
+class Component;
 class AudioPort;
 
 /**
@@ -37,7 +37,7 @@ class AudioPort;
  */
 class AudioSignalFlow
 {
-  friend AudioComponent;
+  friend Component;
 public:
   /**
    * Constructor.
@@ -61,7 +61,7 @@ public:
    * The method must only only be called after the initialisation of the
    * class is complete.
    * @param userData An opaque pointer, must hold the 'this' pointer
-   * of the AudioComponent object
+   * of the AudioSignalFlow object
    * @param captureSamples A pointer array to arrays of input samples
    * to be processed. The pointer array must hold numberOfCaptureChannels()
    * elements, and each sample array must hold period() samples.
@@ -139,7 +139,7 @@ protected:
    * @throw std::invalid_argument If the component could not be
    * inserted, e.g., if a component with this name already exists.
    */
-  void registerComponent( AudioComponent * component, char const * componentName );
+  void registerComponent( Component * component, char const * componentName );
 
   /**
    * A set of methods to associate input and out components of
@@ -193,7 +193,7 @@ protected:
   }
 
   /**
-  * Set the indices of a port of an AudioComponent from a brace-enclosed list
+  * Set the indices of a port of an Component from a brace-enclosed list
   * written directly into the source code.
   * Preferred method for hard-coded signal flows
   */
@@ -292,10 +292,10 @@ private:
   /**
    * Type for collection and lookup of all audio components contained in this signal flow.
    */
-  using ComponentTable = std::map<std::string, AudioComponent*>;
+  using ComponentTable = std::map<std::string, Component*>;
 
   /**
-   * A table of all AudioComponent objects contained in this graph. 
+   * A table of all Component objects contained in this graph. 
    * @note: This member does assume the ownership of the components.
    */
   ComponentTable mComponents;

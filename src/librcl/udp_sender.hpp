@@ -4,7 +4,7 @@
 #define VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -33,7 +33,7 @@ namespace rcl
  * The message can operate either synchronously (messages are sent when the process() method is called)
  * or asynchronously (the messages queued for sending and then send non-blocking in an extra thread.
  */
-class UdpSender: public ril::AudioComponent
+class UdpSender: public ril::AtomicComponent
 {
 public:
   enum class Mode
