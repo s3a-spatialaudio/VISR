@@ -20,7 +20,7 @@
 #include "constants.hpp"
 #ifdef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
 // TODO: Rethink whether we want this include here. 
-// (needed due to inline inline implementations which directly call member functions of theit parent component
+// (needed due to inline inline implementations which directly call member functions of their parent component
 #include "audio_component.hpp"
 #endif
 

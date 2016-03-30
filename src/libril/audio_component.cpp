@@ -59,7 +59,18 @@ AudioComponent::getPortList( )
 {
   return mOutputPorts;
 }
-    
+ 
+std::size_t AudioComponent::period() const { return mContainingFlow.period(); }
+
+bool AudioComponent::initialised() const  { return mContainingFlow.initialised(); }
+
+ril::SamplingFrequencyType AudioComponent::samplingFrequency() const { return mContainingFlow.samplingFrequency(); }
+
+CommunicationArea<SampleType>& AudioComponent::commArea() { return flow().getCommArea(); }
+
+CommunicationArea<SampleType> const & AudioComponent::commArea() const { return flow().getCommArea(); }
+
+
 template< class PortType >
 void AudioComponent::registerAudioPort( char const * name, PortType* port )
 {
@@ -106,27 +117,6 @@ struct ComparePortDescriptor
 private:
   std::string const mName;
 };
-
-//template<class PortType>
-//typename PortVector<PortType>::iterator 
-//AudioComponent::findPortEntry( const char* portName )
-//{
-//  PortVector<PortType>& vec = getPortList<PortType>();
-//  typename PortVector<PortType>::iterator findIt
-//    = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor<PortType>( portName) );
-//  return findIt;
-//}
-
-//template<class PortType>
-//typename PortVector<PortType>::const_iterator 
-//AudioComponent::findPortEntry( const char* portName ) const
-//{
-//  PortVector<PortType> const & vec = getPortList<PortType>( );
-//  typename PortVector<PortType>::const_iterator findIt
-//    = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor<PortType>( portName ) );
-//  return findIt;
-//}
-
 
 } // namespace ril
 } // namespace visr

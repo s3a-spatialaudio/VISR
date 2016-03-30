@@ -3,7 +3,8 @@
 #ifndef VISR_LIBRIL_AUDIO_COMPONENT_HPP_INCLUDED
 #define VISR_LIBRIL_AUDIO_COMPONENT_HPP_INCLUDED
 
-#include "audio_signal_flow.hpp"
+// for ril::SampleType (might be made a template parameter or removed here later.)
+#include "constants.hpp"
 
 #include <algorithm> // due to temporary definition of findPortEntry() in header.
 #include <cstddef>
@@ -16,10 +17,13 @@ namespace ril
 {
 
 // Forward declaration(s)
-// class AudioSignalFlow;
+class AudioSignalFlow;
 class AudioPort;
 class AudioInput;
 class AudioOutput;
+
+template< typename SampleType>
+class CommunicationArea;
 
 /**
  *
@@ -41,12 +45,19 @@ public:
   
 
   /**
-   *
+   * Check whether the component has been initialised. 
+   * @Todo Remove or make sure that ist is not called frequently.
    */
   //@{
-  bool initialised( ) const { return mContainingFlow.initialised( ); }
-
+#if 1
+  bool initialised() const; //  { return mContainingFlow.initialised(); }
+#endif
   //@}
+
+  /**
+   * Return the sampling frequency of the containing signal flow.
+   */
+  ril::SamplingFrequencyType AudioComponent::samplingFrequency() const;
 
   /**
    * Return the period of the containing signal processing graph,
@@ -54,11 +65,9 @@ public:
    * process function of the derived audio components.
    * This methods can be called at any point of the lifetime of the
    * derived component, i.e., for instance in the constructor.
+   * @todo: Check whether this should be made inline again (adding the dependency to the runtime container (aka SignalFlow).
    */
-  std::size_t period() const { return mContainingFlow.period(); }
-
-  template< class PortType >
-  PortType* findPort( const char* name );
+  std::size_t period() const; // { return mContainingFlow.period(); }
 
   template< class PortType >
   PortType* findPort( std::string const& name ) { return findPort<PortType>( name.c_str() ); }
@@ -94,12 +103,15 @@ public:
   PortType* getPort( const char* portName) const;
 
   /**
-   * 
+   * Access the communication area.
+   * @todo Should be removed from the component interface.
+   * @todo find an inline way if needs to be accessed frequently.
    */
-  CommunicationArea<SampleType>& commArea( ) { return flow( ).getCommArea( ); }
+  //@{
+  CommunicationArea<SampleType>& commArea(); // { return flow().getCommArea(); }
 
-  CommunicationArea<SampleType> const & commArea( ) const { return flow( ).getCommArea( ); }
-
+  CommunicationArea<SampleType> const & commArea() const; // { return flow().getCommArea(); }
+  //@}
 protected:
 
   AudioSignalFlow& flow() { return mContainingFlow; }
