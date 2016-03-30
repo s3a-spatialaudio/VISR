@@ -28,7 +28,7 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
 {
   mNumberOfFilters = numberOfObjects;
   mNumberOfSubBands = numLateReflectionSubBandLevels;
-  mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * flow().samplingFrequency() ) );
+  mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) );
 }
 
 void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,

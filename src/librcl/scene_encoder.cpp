@@ -8,6 +8,7 @@
 #include <libpml/message_queue.hpp>
 
 #include <iostream>
+#include <sstream>
 
 namespace visr
 {

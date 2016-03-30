@@ -34,7 +34,7 @@ DelayVector::DelayVector( ril::AudioSignalFlow& container, char const * name )
  , mCurrentDelays(ril::cVectorAlignmentSamples)
  , mNextGains(ril::cVectorAlignmentSamples)
  , mNextDelays(ril::cVectorAlignmentSamples)
- , cSamplingFrequency( static_cast<SampleType>( container.samplingFrequency() ) )
+ , cSamplingFrequency( static_cast<SampleType>( samplingFrequency() ) )
 {
 }
 
