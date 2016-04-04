@@ -4,6 +4,7 @@
 
 #include <libefl/basic_vector.hpp>
 
+#include <libpml/biquad_parameter.hpp>
 #include <libpml/message_queue.hpp>
 
 #include <array>
@@ -19,6 +20,17 @@ namespace rcl
 namespace
 {
 
+/**
+ * Filter a signal with a second-order IIR filter given as biquad coefficients.
+ * @tparam SampleType The data type for the samples (a floating-point type)
+ * @param input The input sequence, must hold \p numSamples elements
+ * @param output Array to store the output signals, must provide space for at least \p numSamples values.
+ * @param numSamples The number of samples to process.
+ * @param pastInputs Two-element array storing the previus inputs $x[n-1]$ and $x[n-2]$ (in this descending order). Defaults to ${0.0, 0.0}$
+ * @param initialState Two-element array storing the initial state, i.e., the previous outputs$y[n-1]$ and $y[n-2]$ (in this descending order). Defaults to ${0.0, 0.0}$
+ * @todo Clean up and move to libefl.
+ * @todo Rethink data type and orientation of \p pastInputs and \p initialState.
+ */
 template<typename SampleType>
 efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
                              pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
@@ -47,6 +59,22 @@ template efl::ErrorCode filterBiquad( float const * const input, float * const o
 template efl::ErrorCode filterBiquad( double const * const input, double * const output, std::size_t numSamples,
   pml::BiquadParameter<double> const & iir, std::array<double, 2> const &, std::array<double, 2> const &);
 
+/**
+ * Hard-coded IIR coefficients for a fixed set of 9 octave bands: { 62.5 Hz, 125 Hz, 250 Hz, 500 Hz, 1 kHz, 2 kHz, 4 kHz, 8 kHz, 16 kHz }.
+ * Created using Matlab script generateBandpassCoefficients()
+ * TODO: Add biquad coefficient calculation library functions to the framework(based on RBJ's audio EQ cookbook formulas)
+ * and calculate the filters on the fly.
+ */
+static const pml::BiquadParameterList<ril::SampleType> cOctaveBandFilters={
+ { 0.000016684780519f,  0.000033369561037f,  0.000016684780519f, -1.994164939377186f, 0.994231678499260f },
+ { 0.005751740181735f,  0.000000000000000f, -0.005751740181735f, -1.988230335335583f, 0.988496519636531f },
+ { 0.011437753858235f,  0.000000000000000f, -0.011437753858235f, -1.976065915069578f, 0.977124492283531f },
+ { 0.022617292733236f,  0.000000000000000f, -0.022617292733236f, -1.950580111730489f, 0.954765414533529f },
+ { 0.044237741487938f,  0.000000000000000f, -0.044237741487938f, -1.895171159793622f, 0.911524517024123f },
+ { 0.084754185122791f,  0.000000000000000f, -0.084754185122791f, -1.768119139985760f, 0.830491629754419f },
+ { 0.156456676130944f,  0.000000000000000f, -0.156456676130944f, -1.461059895326733f, 0.687086647738111f },
+ { 0.272011461038663f,  0.000000000000000f, -0.272011461038663f, -0.727988538961337f, 0.455977077922675f },
+ { 0.137825787997573f, -0.275651575995145f,  0.137825787997573f,  0.551303151990290f, 0.102606303980581f } };
 
 } // unnamed namespace
 
@@ -79,14 +107,20 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
   efl::BasicVector<ril::SampleType> noiseSequence( noiseLength, mAlignment );
   efl::BasicVector<ril::SampleType> filteredSequence( noiseLength, mAlignment );
 
+  if( cOctaveBandFilters.size() != mNumberOfSubBands )
+  {
+    throw std::invalid_argument( "LateReverbFilterFilterCalculator: The number of subbands does not match the hard-coded IIR filter bank." );
+  }
+
   for( std::size_t objIdx( 0 ); objIdx < mNumberOfObjects; ++objIdx )
   {
     for( std::size_t bandIdx( 0 ); bandIdx < mNumberOfSubBands; ++bandIdx )
     {
       createWhiteNoiseSequence( noiseSequence.size(), noiseSequence.data(), mAlignment );
 
-      // TODO: Define the biquads to be used
-      // filterSequence( noiseSequence.size( ), noiseSequence.data( ),  );
+      // filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
+      // pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
+      filterSequence( noiseLength, noiseSequence.data( ), filteredSequence.data( ), cOctaveBandFilters.at(bandIdx ) );
 
       // Copy the last mFilterLength samples to the right position in the matrix.
       if( efl::vectorCopy( noiseSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
@@ -140,7 +174,7 @@ calculateImpulseResponse( std::size_t objectIdx,
     // Create an envelope.
     createEnvelope( mFilterLength, envelope.data(), lateParams.onsetDelay(),
                     lateParams.levels()[subBandIdx], lateParams.decayCoeffs()[subBandIdx],
-                    lateParams.decayCoeffs()[subBandIdx], flow().samplingFrequency() );
+                    lateParams.decayCoeffs()[subBandIdx], static_cast<ril::SampleType>(flow().samplingFrequency()) );
 
     // multiply the sequence with the envelope and add them together
     efl::ErrorCode res;
