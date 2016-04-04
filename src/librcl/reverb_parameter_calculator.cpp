@@ -52,7 +52,8 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
     mLateReflectionLengthSeconds = lateReflectionLengthSeconds;
     mNumberOfLateReflectionSubBandFilters = numLateReflectionSubBandFilters;
 
-    if( mNumberOfDiscreteReflectionsPerSource != objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads )
+    //if( mNumberOfDiscreteReflectionsPerSource != objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads )
+    if( mNumberOfBiquadSectionsReflectionFilters != objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads )
     {
       throw std::invalid_argument( "The number of biquad sections for the discrete reflections differs from the constant used in the object definition." );
     }
