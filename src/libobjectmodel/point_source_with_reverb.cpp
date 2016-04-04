@@ -42,16 +42,6 @@ void PointSourceWithReverb::setNumberOfDiscreteReflections( std::size_t numRefle
   mDiscreteReflections.resize( numReflections );
 }
 
-void PointSourceWithReverb::setLateReverbLevels( ril::SampleType const * levels, std::size_t numValues )
-{
-  lateReverb().setLevels( levels, numValues );
-}
-
-void PointSourceWithReverb::setLateReverbDecayCoeffs( ril::SampleType const * decays, std::size_t numValues )
-{
-  lateReverb().setDecayCoeffs( decays, numValues );
-}
-
 /*****************************************************************************/
 /* PointSourceWithReverb::DiscreteReflection                                 */
 
@@ -146,7 +136,14 @@ void PointSourceWithReverb::LateReverb::setDecayCoeffs( ril::SampleType const * 
   std::copy( decays, decays + numValues, mDecayCoeffs.begin( ) );
 }
 
-
+void PointSourceWithReverb::LateReverb::setAttackTimes( ril::SampleType const * attack, std::size_t numValues )
+{
+  if( numValues != PointSourceWithReverb::cNumberOfSubBands )
+  {
+    throw std::invalid_argument( "PointSourceWithReverb::LateReverb::setAttackTimes(): The number of elements does not match the fixed number of subbands." );
+  }
+  std::copy( attack, attack + numValues, mAttackTimes.begin( ) );
+}
 
 } // namespace objectmodel
 } // namespace visr
