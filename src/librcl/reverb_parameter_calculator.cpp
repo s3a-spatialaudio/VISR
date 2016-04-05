@@ -13,21 +13,22 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
-#include <libpml/listener_position.hpp>
+#include <libpml/signal_routing_parameter.hpp>
+
+#include <librbbl/object_channel_allocator.hpp>
 
 #include <boost/filesystem.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <ciso646>
-// #include <cstdio>
 #include <limits>
+#include <vector>
 
 namespace visr
 {
 namespace rcl
 {
-
-/*static*/ std::size_t const ReverbParameterCalculator::cUnusedChannelIdx = std::numeric_limits<std::size_t>::max( );
 
 ReverbParameterCalculator::ReverbParameterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
@@ -57,7 +58,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
       throw std::invalid_argument( "The number of biquad sections for the discrete reflections differs from the constant used in the object definition." );
     }
 
-    mChannelLookup.resize( mMaxNumberOfObjects, cUnusedChannelIdx );
+    mChannelAllocator.reset( new rbbl::ObjectChannelAllocator( mMaxNumberOfObjects ) );
 
     // Configure the VBAP calculator
     mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
@@ -84,7 +85,6 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
                                          LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
   std::vector<objectmodel::ObjectId> foundReverbObjects;
-
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
     objectmodel::Object const & obj = *(objEntry.second);
@@ -105,22 +105,28 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
     }
   } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )
 
+
   // Check the list of found reverb objects against the existing entries.
   if( foundReverbObjects.size() > mMaxNumberOfObjects )
   {
     throw std::runtime_error( "The number of reverb objects exceeds the maximum admissible number." );
   }
-  // Sort the found objects to ease further handling.
-  std::sort( foundReverbObjects.begin(), foundReverbObjects.end() );
-
-  // For each found object, check whether it already exists in the lookup vector.
-  for( const std::size_t idx : foundReverbObjects )
+  mChannelAllocator->setObjects( foundReverbObjects );
+  for( std::size_t chIdx( 0 ); chIdx < mMaxNumberOfObjects; ++chIdx )
   {
-
+    objectmodel::ObjectId const objId = mChannelAllocator->getObjectForChannel( chIdx );
+    if( objId == objectmodel::Object::cInvalidChannelIndex )
+    {
+      signalRouting.removeEntry( chIdx );
+      clearSingleObject( chIdx, discreteReflGains, discreteReflGains, biquadCoeffs, discretePanningMatrix, lateReflectionSubbandFilters );
+    }
+    else
+    {
+      objectmodel::PointSourceWithReverb const & rsao = dynamic_cast<objectmodel::PointSourceWithReverb const &>(objects.at( objId ));
+      signalRouting.addRouting( rsao.channelIndex(0), chIdx ); // This clear existing routings to this rendering channel.
+      processSingleObject( rsao, chIdx, discreteReflGains, discreteReflGains, biquadCoeffs, discretePanningMatrix, lateReflectionSubbandFilters );
+    }
   }
-
-  // I
-
 } //process
 
 
@@ -138,7 +144,6 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
                                                      LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
   // TODO: Assign the biquad coefficients for the direct path.
-  // TODO: Implement signal processing blocks and communication parameters in signal flow first.
 
   if( rsao.numberOfDiscreteReflections() > mNumberOfDiscreteReflectionsPerSource )
   {
@@ -210,7 +215,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
 
 }
 
-void ReverbParameterCalculator::clearSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
                                                    efl::BasicVector<ril::SampleType> & discreteReflGains,
                                                    efl::BasicVector<ril::SampleType> & discreteReflDelays,
                                                    pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
@@ -234,7 +239,6 @@ void ReverbParameterCalculator::clearSingleObject( objectmodel::PointSourceWithR
     discreteReflDelays[matrixRow] = 0.0f;
   }
 }
-
 
 } // namespace rcl
 } // namespace visr

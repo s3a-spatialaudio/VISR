@@ -34,6 +34,10 @@ namespace pml
 template <typename CoeffType> class BiquadParameterMatrix;
 class SignalRoutingParameter;
 }
+namespace rbbl
+{
+class ObjectChannelAllocator;
+}
 namespace ril
 {
 class AudioInput;
@@ -95,6 +99,8 @@ public:
                 LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 
 private:
+  std::unique_ptr<rbbl::ObjectChannelAllocator> mChannelAllocator;
+
   /**
    * The number of "objects with reverb" handled by this calculator object.
    */
@@ -117,27 +123,6 @@ private:
    */
   panning::VBAP mVbapCalculator;
 
-  using ChannelLookupTable = std::vector<std::size_t>;
-
-  /**
-   * Table to look up the logical channel number of a reverb object (given by its id)
-   * This is a fixed-size array with one element for each reverb channel.
-   */
-   ChannelLookupTable mChannelLookup;
-
-  /**
-   * Special value to denote an unused reverb object channel.
-   * @note with full C++11 compiler compatility (const_expr), we would initialise it here.
-   */
-  static std::size_t const cUnusedChannelIdx;
-
-  /**
-   * The levels of the object channels in linear scale.
-   * @TODO: Do we need them?
-   */
-  // std::valarray<objectmodel::LevelType> mLevels;
-  //@}
-
   /**
    * Internal method to assign parameter values for a given object.
    */
@@ -154,7 +139,7 @@ private:
    * Set the data members for given reverb object channel to safe, neutral values such that no sound is rendered.
    * Used if a render channels is unused.
    */
-  void clearSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+  void clearSingleObject( std::size_t renderChannel,
                           efl::BasicVector<ril::SampleType> & discreteReflGains,
                           efl::BasicVector<ril::SampleType> & discreteReflDelays,
                           pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
