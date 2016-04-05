@@ -14,9 +14,6 @@ namespace visr
 namespace rbbl
 {
 
-/*static*/ std::size_t const ObjectChannelAllocator::
-cUnusedChannelIdx = std::numeric_limits<std::size_t>::max();
-
 ObjectChannelAllocator::ObjectChannelAllocator( std::size_t numChannels )
  : mMaxChannels( numChannels )
  , mSortedIds( mMaxChannels )
@@ -31,8 +28,8 @@ ObjectChannelAllocator::ObjectChannelAllocator( std::size_t numChannels )
 
 std::size_t ObjectChannelAllocator::numberUsedChannels() const
 {
-  assert( mMaxChannels >= mUnusedChannels.size() );
-  return mMaxChannels - mUnusedChannels.size();
+  assert( mLookup.size( ) + mUnusedChannels.size( ) == mMaxChannels );
+  return mLookup.size();
 }
 
 void ObjectChannelAllocator::
@@ -50,35 +47,38 @@ setObjects( std::vector<objectmodel::ObjectId > const & objectIds )
   // In order not to exceed the maximum channel number at some intermediate stage, we need to make two passes through the two data structures.
 
   // First, remove any entry from the lookup map that is not in the current object vector
-  ObjectChannelLookup::iterator lookupIt( mLookup.begin() );
-  std::vector<objectmodel::ObjectId >::iterator idIt( mSortedIds.begin() );
-  while( (lookupIt != mLookup.end()) or( idIt != sortEnd ) )
+  std::vector<objectmodel::ObjectId >::iterator idIt( mSortedIds.begin( ) );
+  for( ObjectChannelLookup::iterator lookupIt( mLookup.begin()); lookupIt != mLookup.end(); )
   {
-    while( (lookupIt != mLookup.end( )) and (lookupIt->first < *idIt) )
+    // Already reached the end of the object vector?
+    if( (idIt == sortEnd) or (lookupIt->first < *idIt) )
     {
       std::size_t const channelId = lookupIt->second;
-      mLookup.erase( lookupIt );
+      lookupIt = mLookup.erase( lookupIt );
       releaseChannel( channelId );
+    }
+    else
+    {
+      ++idIt;
       ++lookupIt;
     }
-    ++idIt;
   }
 
-  // Scond pass
-  lookupIt = mLookup.begin( );
-  idIt = mSortedIds.begin( );
-  while( (lookupIt != mLookup.end()) or ( idIt != sortEnd ) )
+  // Second pass
+  ObjectChannelLookup::iterator lookupIt( mLookup.begin( ) );
+  for( std::vector<objectmodel::ObjectId >::iterator idIt( mSortedIds.begin( ) ); idIt != sortEnd; ++idIt )
   {
-    while( (idIt != sortEnd) and( *idIt < lookupIt->first ) )
+    if( (lookupIt == mLookup.end( )) or( *idIt < lookupIt->second ) )
     {
       std::size_t newChannelId = getUnusedChannel();
       bool insertRes;
-      std::tie( lookupIt, insertRes ) = mLookup.insert( std::make_pair( *idIt, newChannelId ) );
-      ++idIt;
+      std::tie( std::ignore, insertRes ) = mLookup.insert( std::make_pair( *idIt, newChannelId ) );
     }
-    ++lookupIt;
+    else
+    {
+      ++lookupIt;
+    }
   }
-
   assert( mLookup.size() == objectIds.size() );
 }
 

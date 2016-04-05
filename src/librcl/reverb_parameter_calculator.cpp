@@ -17,8 +17,6 @@
 
 #include <librbbl/object_channel_allocator.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <algorithm>
 #include <cassert>
 #include <ciso646>
