@@ -4,7 +4,8 @@ SET( APPLICATION_NAME rbbl_test )
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES circular_buffer.cpp  ffts_wrapper.cpp kiss_fft_wrapper.cpp test_main.cpp test_FIR.cpp multichannel_convolver.cpp )
+SET( SOURCES circular_buffer.cpp ffts_wrapper.cpp kiss_fft_wrapper.cpp test_main.cpp test_FIR.cpp multichannel_convolver.cpp 
+     object_channel_allocator.cpp)
 
 IF( BUILD_USE_FFTW )
   LIST( APPEND SOURCES fftw_wrapper.cpp)
