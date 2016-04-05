@@ -104,7 +104,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     std::for_each( lateLevels.begin(), lateLevels.end(), DB2Lin<LevelType>() );
     reverbPointSrc.setLateReverbLevels( lateLevels.values( ), lateLevels.size( ) );
     
-    std::string const lateAttacksString = lateTree.get<std::string>( "onsettime" );
+    std::string const lateAttacksString = lateTree.get<std::string>( "attacktime" );
     pml::FloatSequence<ril::SampleType> const lateAttacks( lateAttacksString );
     if( lateAttacks.size( ) != PointSourceWithReverb::cNumberOfSubBands )
     {
