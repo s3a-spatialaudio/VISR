@@ -16,8 +16,8 @@ namespace rbbl
 
 ObjectChannelAllocator::ObjectChannelAllocator( std::size_t numChannels )
  : mMaxChannels( numChannels )
- , mSortedIds( mMaxChannels )
  , mUnusedChannels( mMaxChannels )
+ , mSortedIds( mMaxChannels )
 {
   // Fill the unused channels stack in descending order
   for( std::size_t idx( 0 ); idx < mMaxChannels; ++idx )

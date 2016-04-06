@@ -98,8 +98,11 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
     switch( ti )
     {
       case objectmodel::ObjectTypeId::PointSourceWithReverb:
-      {
         foundReverbObjects.push_back( obj.id() );
+        break;
+      default: // Default handling to prevent compiler warnings about unhandled enumeration values
+      {
+        // Do nothing
       }
     }
   } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )

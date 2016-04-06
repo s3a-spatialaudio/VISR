@@ -134,11 +134,6 @@ private:
   std::size_t mFilterLength;
 
   /**
-   * Subband filter length padded to the next multiple of the alignment to 
-   */
-  std::size_t mAlignedSubBandLength;
-
-  /**
    * The alignment of the matrices and vectors used internally and of the generated impulse responses.
    */
   std::size_t const mAlignment;
