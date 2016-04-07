@@ -108,7 +108,11 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
-    const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", std::string( ) );
+    if( not cmdLineOptions.hasOption( "reverb-config" ) )
+    {
+      throw std::invalid_argument( "VISR renderer: Mandatory option \"reverb-config\" missing." );
+    }
+    const std::string reverbConfiguration= cmdLineOptions.getOption<std::string>( "reverb-config" );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;
