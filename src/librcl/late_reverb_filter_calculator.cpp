@@ -145,10 +145,10 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
     }
     std::vector<ril::SampleType> newFilter( mFilterLength );
 
-    // Check whether the values have changed.
-
-//    calculateFIR( val.first, val.second, newFilter );
-//    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
+    // As the check for parameter changes is done on the sending end, we do not need to do it here again
+    // Anyway, this will not change the impulse responses, as the calculation is deterministic.
+    calculateImpulseResponse( val.first, val.second, &newFilter[0], mFilterLength );
+    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
     subBandLevels.popNextElement();
   }
 }
