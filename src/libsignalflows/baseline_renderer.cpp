@@ -181,7 +181,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
 
   // reverberation-related part
   std::size_t const reverbRoutingOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
-  std::size_t const reverbDiscreteDelayOutStartIdx = reverbRoutingOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
+  std::size_t const reverbDiscreteDelayOutStartIdx = reverbRoutingOutStartIdx + mMaxNumReverbObjects;
   std::size_t const reverbDiscreteWallReflOutStartIdx = reverbDiscreteDelayOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
   std::size_t const reverbDiscretePanningOutStartIdx = reverbDiscreteWallReflOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
   std::size_t const reverbLateFilterOutStartIdx = reverbDiscretePanningOutStartIdx + numberOfLoudspeakers;
@@ -212,12 +212,12 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::vector<ril::AudioPort::SignalIndexType> const reverbMixOutChannels = indexRange( reverbMixOutStatIdx, mixOutStartIdx );
   // Construct the input channel indices for the mDiscreteReverbReflFilters, which distributes each of the
   // mMaxNumReverbObjects signals to mNumDiscreteReflectionsPerObject consecutive channels.
-  std::vector<ril::AudioPort::SignalIndexType> reverbDiscreteWallReflInChannels( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
+  std::vector<ril::AudioPort::SignalIndexType> reverbDiscreteReflDelayInChannels( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
   for( std::size_t objIdx( 0 ); objIdx < mMaxNumReverbObjects; ++objIdx )
   {
     for( std::size_t reflIdx( 0 ); reflIdx < mNumDiscreteReflectionsPerObject; ++reflIdx )
     {
-      reverbDiscreteWallReflInChannels[mNumDiscreteReflectionsPerObject*objIdx + reflIdx] = reverbDiscreteDelayOutChannels[objIdx];
+      reverbDiscreteReflDelayInChannels[mNumDiscreteReflectionsPerObject*objIdx + reflIdx] = reverbDiscreteDelayOutChannels[objIdx];
     }
   }
   // signal flow common to all object types
@@ -270,9 +270,9 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   // Reverb-specific signal path
   assignCommunicationIndices( "ReverbSignalRouting", "in", captureChannels );
   assignCommunicationIndices( "ReverbSignalRouting", "out", reverbRoutingOutChannels );
-  assignCommunicationIndices( "DiscreteReverbDelay", "in", reverbRoutingOutChannels );
+  assignCommunicationIndices( "DiscreteReverbDelay", "in", reverbDiscreteReflDelayInChannels );
   assignCommunicationIndices( "DiscreteReverbDelay", "out", reverbDiscreteDelayOutChannels );
-  assignCommunicationIndices( "DiscreteReverbReflectionFilters", "in", reverbDiscreteWallReflInChannels );
+  assignCommunicationIndices( "DiscreteReverbReflectionFilters", "in", reverbDiscreteDelayOutChannels );
   assignCommunicationIndices( "DiscreteReverbReflectionFilters", "out", reverbDiscreteWallReflOutChannels );
   assignCommunicationIndices( "DiscreteReverbPanningMatrix", "in", reverbDiscreteWallReflOutChannels );
   assignCommunicationIndices( "DiscreteReverbPanningMatrix", "out", reverbDiscretePanningOutChannels );
@@ -283,7 +283,6 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   assignCommunicationIndices( "LateDiffusionFilter", "out", reverbLateDecorrOutChannels );
   assignCommunicationIndices( "ReverbMix", "in1", reverbLateDecorrOutChannels );
   assignCommunicationIndices( "ReverbMix", "out", reverbMixOutChannels );
-
 
   // signal flow common to all object types (starting with summation of the different signal paths
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", vbapMatrixOutChannels );
