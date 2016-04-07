@@ -33,7 +33,7 @@ namespace
  */
 template<typename SampleType>
 efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
-                             pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
+                            pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { {0.0f, 0.0f} }, std::array<SampleType, 2> const & initialState = { {0.0f, 0.0f} } )
 {
   std::array<SampleType, 2> state( initialState);
   std::array<SampleType, 3> inputBuffer = { {0.0f, pastInputs[0], pastInputs[1]} };
