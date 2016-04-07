@@ -13,7 +13,8 @@
 
 #include <libril/constants.hpp>
 
-#include <array>
+#include <algorithm>
+#include <string>
 #include <vector>
 
 namespace visr
@@ -164,6 +165,18 @@ namespace objectmodel
        * Copy constructor, uses default implementation
        */
       LateReverb( LateReverb const & rhs ) = default;
+
+      /**
+       * Constructor with initial values.
+       * @param onsetDelay The inset time delay for the late reverb path (in seconds).
+       * @param levels The peak reverberation levels for the subbands.
+       * @param decayCoeffs The decay coefficients (time constants) governing the decay after the peak.
+       * @param attackTimes The attack (onset) times denoting the amount of time from the onset delay until the envelope reaches the peak value (in seconds).
+       */
+      explicit LateReverb( ril::SampleType onsetDelay,
+                           std::initializer_list<ril::SampleType> const levels = std::initializer_list<ril::SampleType>(),
+                           std::initializer_list<ril::SampleType> const decayCoeffs = std::initializer_list<ril::SampleType>(),
+                           std::initializer_list<ril::SampleType> const attackTimes = std::initializer_list<ril::SampleType>() );
 
       /**
       * Retrieve the initial delay (closely related to mixing time) for the late reverberation tail in seconds.

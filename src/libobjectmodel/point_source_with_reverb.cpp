@@ -111,11 +111,52 @@ void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t
 }
 
 /*****************************************************************************/
-/* PointSourceWithReverb::DiscreteReflection                                 */
+/* PointSourceWithReverb::LateReverb                                         */
+
 
 PointSourceWithReverb::LateReverb::LateReverb()
-: mOnsetDelay( static_cast<ril::SampleType>(0.0) )
+ : mOnsetDelay( static_cast<ril::SampleType>(0.0) )
 {
+
+}
+
+namespace // unnamed
+{
+
+/** Local helper function to initialise the coefficient vectors (avoid code duplication). */
+  void initializeCoeffVector( const char * coeffName, PointSourceWithReverb::LateReverbCoeffs & coeff, std::initializer_list<ril::SampleType> const initVal,
+                           ril::SampleType defaultValue )
+{
+  if( initVal.size() == 0 )
+  {
+    std::fill( coeff.begin(), coeff.end(), defaultValue );
+  }
+  if( initVal.size() == 1 )
+  {
+    std::fill( coeff.begin(), coeff.end(), *(initVal.begin()) );
+  }
+  else if( coeff.size() == initVal.size() )
+  {
+    std::copy( initVal.begin(), initVal.end(), coeff.begin() );
+  }
+  else
+  {
+    throw std::invalid_argument( std::string("PointSourceWithReverb::LateReverb: If provided, the parameter \"")
+                                + coeffName + "\" must be empty match the fixed number of subbands." );
+  }
+}
+
+} // unnamed namespace
+
+PointSourceWithReverb::LateReverb::LateReverb( ril::SampleType onsetDelay,
+                                               std::initializer_list<ril::SampleType> const levels /*= std::initializer_list<ril::SampleType>()*/,
+                                               std::initializer_list<ril::SampleType> const decayCoeffs /*= std::initializer_list<ril::SampleType>()*/,
+                                               std::initializer_list<ril::SampleType> const attackTimes /*= std::initializer_list<ril::SampleType>()*/ )
+  : mOnsetDelay(onsetDelay)
+{
+  initializeCoeffVector( "levels", mLevels, levels, static_cast<ril::SampleType>(0.0f) );
+  initializeCoeffVector( "decayCoeffs", mDecayCoeffs, decayCoeffs, static_cast<ril::SampleType>(0.0f) );
+  initializeCoeffVector( "atackTimes", mAttackTimes, attackTimes, static_cast<ril::SampleType>(0.0f) );
 }
 
 void PointSourceWithReverb::LateReverb::setLevels( ril::SampleType const * levels, std::size_t numValues )
