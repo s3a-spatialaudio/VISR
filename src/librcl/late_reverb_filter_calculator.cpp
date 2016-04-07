@@ -227,7 +227,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   pml::BiquadParameter<ril::SampleType> const & filter )
 {
 
-    
+  filterBiquad(input, output, numSamples, filter);
 
 }
 
