@@ -243,23 +243,27 @@ calculateImpulseResponse( std::size_t objectIdx,
 
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
-    
+  
+  if( initialDelaySamples >= numSamples || initialDelaySamples+attackCoeffSamples >= numSamples )
+  {
+    throw std::invalid_argument( "The late reverberation envelope exceeds the maximum number of samples" );
+  }
 
   for( std::size_t n = 0; n < initialDelaySamples; ++n )
   { // leading zeros for delay
         data[n]=0.0f;
   }
-  for( std::size_t n = initialDelaySamples; n < attackCoeffSamples; ++n )
+  for( std::size_t n = initialDelaySamples; n < attackCoeffSamples + initialDelaySamples; ++n )
   { // linear increase up to max
-    data[n] = gain * ((n - initialDelaySamples) / (attackCoeffSamples - initialDelaySamples));
+    data[n] = gain * ((n - initialDelaySamples) / (attackCoeffSamples));
   }
-  for( std::size_t n = attackCoeffSamples; n < numSamples; ++n )
+  for( std::size_t n = attackCoeffSamples + initialDelaySamples; n < numSamples; ++n )
   { // exponential decay to end of envelope
-    ril::SampleType const decay = gain * std::exp( decayCoeff*(n - attackCoeffSamples) );
+    ril::SampleType const decay = gain * std::exp( decayCoeff*(n - attackCoeffSamples - initialDelaySamples) );
     data[n] = decay;
 
   }
 }
-
+  
 } // namespace rcl
 } // namespace visr
