@@ -125,7 +125,7 @@ private:
                               ril::SampleType samplingFrequency );
 
   /**
-   *
+   * The number of reverb objects that can be rendered with this object.
    */
   std::size_t mNumberOfObjects;
 

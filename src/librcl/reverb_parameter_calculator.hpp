@@ -53,11 +53,6 @@ class ReverbParameterCalculator: public ril::AudioComponent
 {
 public:
   /**
-   * Type of the gain coefficients. We use the same type as
-   */
-  using CoefficientType = ril::SampleType;
-
-  /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
@@ -128,9 +123,22 @@ private:
   panning::VBAP mVbapCalculator;
 
   /**
-   * Internal method to assign parameter values for a given object.
+   * An object holding sensible default values for the late reverb part that
+   * result in a zero-valued late reverb tail.
    */
-  void processInternal( objectmodel::ObjectVector const & objects );
+  static const objectmodel::PointSourceWithReverb::LateReverb cDefaultLateReverbParameter;
+
+  /**
+   * A table holding the previous states of the reverb parameters for the reverb channel.
+   * Used to detect changes in the that trigger an retransmission to the LateReverbFilterCalculator component.
+   */
+  std::vector<objectmodel::PointSourceWithReverb::LateReverb> mPreviousLateReverbs;
+
+  /**
+   * A floating-point limit to compare LateReverb parameters,
+   * Two parameters are considered equal if the difference between all corresponding floating-point values is less or equal this value.
+   */
+  ril::SampleType const cLateReverbParameterComparisonLimit;
 
   void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
                             efl::BasicVector<ril::SampleType> & discreteReflGains,

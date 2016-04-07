@@ -13,6 +13,7 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
+#include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 
 #include <librbbl/object_channel_allocator.hpp>
@@ -20,7 +21,9 @@
 #include <algorithm>
 #include <cassert>
 #include <ciso646>
+#include <cmath>
 #include <limits>
+#include <numeric>
 #include <vector>
 
 namespace visr
@@ -28,9 +31,51 @@ namespace visr
 namespace rcl
 {
 
+
+namespace
+{
+
+/**
+ * Local helper function to find the maximum difference between corresponding elements of
+ * two sequences of equal length
+ */
+bool maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs const & lhs,
+              objectmodel::PointSourceWithReverb::LateReverbCoeffs const & rhs )
+{
+  return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f,
+                            [](ril::SampleType v1, ril::SampleType v2) { return std::abs( v1 -v2 ); },
+                            [](ril::SampleType v1, ril::SampleType v2) { return std::max( v1, v2 ); } );
+}
+
+/**
+ * Local helper function to compare two LateReverb objects up to a given tolerance value.
+ */
+bool equal( objectmodel::PointSourceWithReverb::LateReverb const & lhs,
+            objectmodel::PointSourceWithReverb::LateReverb const & rhs,
+            ril::SampleType limit )
+{
+  return (std::abs( lhs.onsetDelay() - rhs.onsetDelay() ) <= limit )
+   and (maxDiff( lhs.levels(), rhs.levels()) <= limit )
+   and (maxDiff( lhs.decayCoeffs(), rhs.decayCoeffs()) <= limit )
+   and (maxDiff( lhs.attackTimes(), rhs.attackTimes()) <= limit );
+}
+
+} // unnamed namespace
+
+/*static*/ const objectmodel::PointSourceWithReverb::LateReverb
+ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0.0f });
+
+  /**
+   * A table holding the previous states of the reverb parameters for the reverb channel.
+   * Used to detect changes in the that trigger an retransmission to the LateReverbFilterCalculator component.
+   */
+  std::vector<objectmodel::PointSourceWithReverb::LateReverb> mPreviousLateReverbs;
+
+
 ReverbParameterCalculator::ReverbParameterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
  , mMaxNumberOfObjects( 0 )
+ , cLateReverbParameterComparisonLimit( std::numeric_limits<ril::SampleType>::epsilon() )
 {
 }
 
@@ -69,6 +114,10 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
       throw std::invalid_argument( "ReverbParameterCalculator::setup(): Calculation of inverse matrices for VBAP calculatorfailed." );
     }
     mNumberOfPanningLoudspeakers = mVbapCalculator.getNumSpeakers();
+
+    mPreviousLateReverbs.resize( mMaxNumberOfObjects, cDefaultLateReverbParameter );
+    // Set one member to an invalid value to trigger sending of late reverb messages on the first call to process();
+    std::for_each(mPreviousLateReverbs.begin(), mPreviousLateReverbs.end(), []( objectmodel::PointSourceWithReverb::LateReverb & v ) { v.setOnsetDelay( -1.0f); } );
 }
 
 /**
@@ -130,12 +179,6 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
     }
   }
 } //process
-
-
-void ReverbParameterCalculator::processInternal(const objectmodel::ObjectVector & objects)
-{
-    std::cerr << "internal processing" << std::endl;
-}
 
 void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWithReverb const & rsao,
                                                      std::size_t renderChannel,
@@ -213,8 +256,11 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Late reflection part.
-
-
+  if( not equal( mPreviousLateReverbs[renderChannel], rsao.lateReverb(), cLateReverbParameterComparisonLimit ))
+  {
+    mPreviousLateReverbs[renderChannel] = rsao.lateReverb();
+    lateReflectionSubbandFilters.enqueue( std::make_pair( renderChannel, mPreviousLateReverbs[renderChannel] ));
+  }
 }
 
 void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
@@ -240,6 +286,13 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
     discreteReflGains[matrixRow] = 0.0f;
     discreteReflDelays[matrixRow] = 0.0f;
   }
+  // Late reflection part
+  if( not equal( mPreviousLateReverbs[renderChannel], cDefaultLateReverbParameter, cLateReverbParameterComparisonLimit ))
+  {
+    mPreviousLateReverbs[renderChannel] = cDefaultLateReverbParameter;
+    lateReflectionSubbandFilters.enqueue( std::make_pair( renderChannel, mPreviousLateReverbs[renderChannel] ));
+  }
+
 }
 
 } // namespace rcl
