@@ -181,8 +181,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
 
   // reverberation-related part
   std::size_t const reverbRoutingOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
-  std::size_t const reverbDiscreteDelayOutStartIdx = reverbRoutingOutStartIdx + mMaxNumReverbObjects;
-  std::size_t const reverbDiscreteWallReflOutStartIdx = reverbDiscreteDelayOutStartIdx + mMaxNumReverbObjects;
+  std::size_t const reverbDiscreteDelayOutStartIdx = reverbRoutingOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
+  std::size_t const reverbDiscreteWallReflOutStartIdx = reverbDiscreteDelayOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
   std::size_t const reverbDiscretePanningOutStartIdx = reverbDiscreteWallReflOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
   std::size_t const reverbLateFilterOutStartIdx = reverbDiscretePanningOutStartIdx + numberOfLoudspeakers;
   std::size_t const reverbLateDecorrOutStartIdx = reverbLateFilterOutStartIdx + 1;
@@ -456,7 +456,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                                     numWallReflBiquads,
                                     mLateReverbFilterLengthSeconds,
                                     objectmodel::PointSourceWithReverb::cNumberOfSubBands );
-  mDiscreteReverbDelay.setup( mMaxNumReverbObjects,
+  mDiscreteReverbDelay.setup( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject,
                               interpolationSteps,
                               maxDiscreteReflectionDelay,
                               rcl::DelayVector::InterpolationType::Linear, 0.0f, 0.0f );
@@ -490,8 +490,8 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
 
   // Set up the parameter data members
   // Nothing to do for mReverbRoutingParameter
-  mDiscreteReverbDelayParameter.resize( mMaxNumReverbObjects );
-  mDiscreteReverbGainParameter.resize( mMaxNumReverbObjects );
+  mDiscreteReverbDelayParameter.resize( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
+  mDiscreteReverbGainParameter.resize( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
   mDiscreteReverbReflFilterParameter.resize( mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject, numWallReflBiquads );
   mDiscreteReverbPanningGains.resize( arrayConfig.getNumRegularSpeakers(), mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject ); // TODO: Check orientation
   // Nothing to do for mLateReverbFilterSubBandLevels and mLateReverbFilterIRs;
