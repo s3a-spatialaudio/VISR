@@ -114,7 +114,7 @@ namespace objectmodel
        * Set the wall reflection biquad filters for this reflections
        * Resets all biquad sections not changed by this message to a default (flat) filter behaviour.
        * @param newFilters a set of biquad parameter coefficients. It must contain at most cNumDiscreteReflectionBiquads entries.
-       * @throw std::invalid_argument If the size of \newFilters exceeds cNumDiscreteReflectionBiquads
+       * @throw std::invalid_argument If the size of \p newFilters exceeds cNumDiscreteReflectionBiquads
        */
       void setReflectionFilters( pml::BiquadParameterList<ril::SampleType> const & newFilters );
 
@@ -230,7 +230,7 @@ namespace objectmodel
 
       /**
        * Set the attack times for the late reverberation decay coefficients.
-       * @param decay The decay coefficients corresponding to the fixed subbands.
+       * @param attack The attack corresponding to the fixed subbands.
        * @param numValues The number of values contained in the \p decay array.
        * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
        */
@@ -354,7 +354,7 @@ namespace objectmodel
 
     /**
      * Set the attack times for the late reverberation decay coefficients.
-     * @param decay The decay coefficients corresponding to the fixed subbands.
+     * @param attack The attick times corresponding to the fixed subbands.
      * @param numValues The number of values contained in the \p decay array.
      * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
      */

@@ -79,6 +79,10 @@ public:
    * Method to initialise the component.
    * @param arrayConfig The array configuration object.
    * @param numberOfObjects The maximum number of reverb objects to be processed.
+   * @param numberOfDiscreteReflectionsPerSource The number of discrete reflections rendered per source.
+   * @param numBiquadSectionsReflectionFilters The number of biquad sections per reflection of the wall reflection filters.
+   * @param lateReflectionLengthSeconds The length of the late impulse response representing the late reverberation tail (in seconds).
+   * @param numLateReflectionSubBandFilters The number of subbands used in the computation of the late reverb tail. At the moment, this must match a hard-coded limit (9).
    */
   void setup( panning::LoudspeakerArray const & arrayConfig,
               std::size_t numberOfObjects,
