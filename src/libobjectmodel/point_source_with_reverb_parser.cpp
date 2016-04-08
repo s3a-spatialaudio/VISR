@@ -82,7 +82,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
       PointSourceParser::parsePosition( earlyTree.get_child( "position" ), posX, posY, posZ );
       refl.setPosition( posX, posY, posZ );
       refl.setDelay( earlyTree.get<ril::SampleType>( "delay" ) );
-      refl.setDelay( earlyTree.get<LevelType>( "level" ) );
+      refl.setLevel( earlyTree.get<LevelType>( "level" ) );
 
       ptree const & biquadTree = earlyTree.get_child( "biquadsos" );
       pml::BiquadParameterList<ril::SampleType> biqList;
