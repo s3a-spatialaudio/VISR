@@ -251,8 +251,9 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   for( std::size_t srcIdx( 0 ); srcIdx < rsao.numberOfDiscreteReflections(); ++srcIdx )
   {
     Afloat const * const gainRow = mVbapCalculator.getGains( ).row( srcIdx );
+    std::size_t const matrixIdx = startRow + srcIdx;
     for( std::size_t lspIdx(0 ); lspIdx < mNumberOfPanningLoudspeakers; ++lspIdx )
-    discretePanningMatrix( lspIdx, srcIdx ) = gainRow[lspIdx];
+    discretePanningMatrix( lspIdx, matrixIdx ) = gainRow[lspIdx];
   }
   // The unused rows are already zeroed.
 
