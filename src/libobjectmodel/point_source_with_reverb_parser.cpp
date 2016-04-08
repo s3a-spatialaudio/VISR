@@ -19,6 +19,9 @@ namespace visr
 namespace objectmodel
 {
 
+// Functions are not required here, move them to another location if
+// they are useful.
+#if 0
 /**
  * Unnamed namespace containing functions and function objects for dB<->linear conversion.
  * @todo Consider moving to a library for public use.
@@ -44,6 +47,7 @@ struct Lin2dB
 };
 
 }
+#endif
 
 
 /*virtual*/ void PointSourceWithReverbParser::
@@ -101,7 +105,6 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     {
       throw std::invalid_argument( "The number of elements in the \"lreverb.late\" attribute must match the fixed number of subbands." );
     }
-    std::for_each( lateLevels.begin(), lateLevels.end(), DB2Lin<LevelType>() );
     reverbPointSrc.setLateReverbLevels( lateLevels.values( ), lateLevels.size( ) );
     
     std::string const lateAttacksString = lateTree.get<std::string>( "attacktime" );
@@ -156,7 +159,6 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   lateTree.put<ril::SampleType>( "delay", pswdObj.lateReverbOnset() );
   PointSourceWithReverb::LateReverbCoeffs const & lateLevels = pswdObj.lateReverbLevels( );
   pml::FloatSequence<ril::SampleType> lateLevelCoeffs( &lateLevels[0], lateLevels.size( ) );
-  std::for_each( lateLevelCoeffs.begin( ), lateLevelCoeffs.end( ), Lin2dB<LevelType>( ) );
   std::string const lateLevelStr( lateLevelCoeffs.toString( ", " ) );
   lateTree.put<std::string>( "levels", lateLevelStr );
 
