@@ -5,6 +5,7 @@
 
 #include <libobjectmodel/object.hpp>
 
+#include <exception>
 #include <map>
 #include <vector>
 
