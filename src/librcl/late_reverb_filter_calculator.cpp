@@ -173,7 +173,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   {
     // Create an envelope.
     createEnvelope( mFilterLength, envelope.data(), lateParams.onsetDelay(),
-                    lateParams.levels()[subBandIdx], lateParams.decayCoeffs()[subBandIdx],
+                    lateParams.levels()[subBandIdx], lateParams.attackTimes()[subBandIdx],
                     lateParams.decayCoeffs()[subBandIdx], static_cast<ril::SampleType>(flow().samplingFrequency()) );
 
     // multiply the sequence with the envelope and add them together
@@ -243,7 +243,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
-  std::size_t decayCoeffSamples = static_cast<std::size_t>(std::round( decayCoeff*samplingFrequency ));
+  ril::SampleType decayCoeffSamples = decayCoeff*samplingFrequency;
   
   if( initialDelaySamples >= numSamples || initialDelaySamples+attackCoeffSamples >= numSamples )
   {
