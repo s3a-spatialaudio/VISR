@@ -381,6 +381,7 @@ BaselineRenderer::process()
     mLateReverbFilterIRs.popNextElement( );
   }
   mLateReverbFilter.process();
+  mLateDiffusionFilter.process();
 
   mReverbMix.process();
 
