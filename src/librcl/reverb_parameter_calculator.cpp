@@ -42,9 +42,10 @@ namespace
 bool maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs const & lhs,
               objectmodel::PointSourceWithReverb::LateReverbCoeffs const & rhs )
 {
-  return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f,
-                            [](ril::SampleType v1, ril::SampleType v2) { return std::abs( v1 -v2 ); },
-                            [](ril::SampleType v1, ril::SampleType v2) { return std::max( v1, v2 ); } );
+  ril::SampleType const res = std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f,
+                            [](ril::SampleType v1, ril::SampleType v2) { return std::max( v1, v2 ); },
+                            [](ril::SampleType v1, ril::SampleType v2) { return std::abs( v1 - v2 ); } );
+  return res;
 }
 
 /**
@@ -107,6 +108,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
     // Configure the VBAP calculator
     mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
     mVbapCalculator.setNumSources( mNumberOfDiscreteReflectionsPerSource /* * mMaxNumberOfObjects */ );
+    mVbapCalculator.setSourcePositions(&mSourcePositions[0] );
     mVbapCalculator.setLoudspeakerArray( &arrayConfig );
     mVbapCalculator.setListenerPosition( 0.0f, 0.0f, 0.0f ); // Use a default listener position
     if( mVbapCalculator.calcInvMatrices( ) != 0 )
