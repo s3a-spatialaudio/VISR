@@ -243,6 +243,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
+  std::size_t decayCoeffSamples = static_cast<std::size_t>(std::round( decayCoeff*samplingFrequency ));
   
   if( initialDelaySamples >= numSamples || initialDelaySamples+attackCoeffSamples >= numSamples )
   {
@@ -259,7 +260,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   }
   for( std::size_t n = attackCoeffSamples + initialDelaySamples; n < numSamples; ++n )
   { // exponential decay to end of envelope
-    ril::SampleType const decay = gain * std::exp( decayCoeff*(n - attackCoeffSamples - initialDelaySamples) );
+    ril::SampleType const decay = gain * std::exp( decayCoeffSamples*(n - attackCoeffSamples - initialDelaySamples) );
     data[n] = decay;
 
   }
