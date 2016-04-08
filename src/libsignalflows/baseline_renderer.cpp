@@ -364,6 +364,8 @@ BaselineRenderer::process()
                                       mDiscreteReverbReflFilterParameter,
                                       mDiscreteReverbPanningGains,
                                       mLateReverbFilterSubBandLevels );
+  mReverbSignalRouting.setRouting( mReverbRoutingParameter );
+  mReverbSignalRouting.process();
   mDiscreteReverbDelay.setDelayAndGain( mDiscreteReverbDelayParameter, mDiscreteReverbGainParameter );
   mDiscreteReverbDelay.process();
   mDiscreteReverbReflFilters.setCoefficientMatrix( mDiscreteReverbReflFilterParameter );
