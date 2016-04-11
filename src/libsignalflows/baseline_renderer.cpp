@@ -217,7 +217,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   {
     for( std::size_t reflIdx( 0 ); reflIdx < mNumDiscreteReflectionsPerObject; ++reflIdx )
     {
-      reverbDiscreteReflDelayInChannels[mNumDiscreteReflectionsPerObject*objIdx + reflIdx] = reverbDiscreteDelayOutChannels[objIdx];
+      reverbDiscreteReflDelayInChannels[mNumDiscreteReflectionsPerObject*objIdx + reflIdx] = reverbRoutingOutChannels[objIdx];
     }
   }
   // signal flow common to all object types
