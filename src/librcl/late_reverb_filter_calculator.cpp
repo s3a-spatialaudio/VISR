@@ -256,7 +256,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   }
   for( std::size_t n = initialDelaySamples; n < attackCoeffSamples + initialDelaySamples; ++n )
   { // linear increase up to max
-    data[n] = gain * ((n - initialDelaySamples) / (attackCoeffSamples));
+    data[n] = gain * (static_cast<ril::SampleType>(n - initialDelaySamples) / static_cast<ril::SampleType>(attackCoeffSamples));
   }
   for( std::size_t n = attackCoeffSamples + initialDelaySamples; n < numSamples; ++n )
   { // exponential decay to end of envelope
