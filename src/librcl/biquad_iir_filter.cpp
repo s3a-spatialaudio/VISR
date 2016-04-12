@@ -136,6 +136,8 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::process()
 {
+  ril::SampleType const * const * inputVec = mInput.getVector();
+
   static const std::size_t cNumBiquadCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
   std::size_t const blockSamples = period( );
   for( std::size_t sampleIdx( 0 ); sampleIdx < blockSamples; ++sampleIdx )
@@ -143,7 +145,7 @@ void BiquadIirFilter::process()
     // read the current input sample.
     for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
     {
-      mCurrentInput[channelIdx] = mInput[channelIdx][sampleIdx];
+      mCurrentInput[channelIdx] = inputVec[channelIdx][sampleIdx];
     }
 
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
