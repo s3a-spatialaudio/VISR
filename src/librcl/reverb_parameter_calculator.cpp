@@ -39,8 +39,8 @@ namespace
  * Local helper function to find the maximum difference between corresponding elements of
  * two sequences of equal length
  */
-bool maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs const & lhs,
-              objectmodel::PointSourceWithReverb::LateReverbCoeffs const & rhs )
+ril::SampleType maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs const & lhs,
+                         objectmodel::PointSourceWithReverb::LateReverbCoeffs const & rhs )
 {
   ril::SampleType const res = std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f,
                             [](ril::SampleType v1, ril::SampleType v2) { return std::max( v1, v2 ); },
