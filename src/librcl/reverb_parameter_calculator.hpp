@@ -95,6 +95,8 @@ public:
                 efl::BasicVector<ril::SampleType> & discreteReflDelays,
                 pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                 efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                efl::BasicVector<ril::SampleType> & lateReverbGains,
+                efl::BasicVector<ril::SampleType> & lateReverbDelays,
                 LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 
 private:
@@ -145,6 +147,8 @@ private:
                             efl::BasicVector<ril::SampleType> & discreteReflDelays,
                             pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                             efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                            efl::BasicVector<ril::SampleType> & lateReverbGains,
+                            efl::BasicVector<ril::SampleType> & lateReverbDelays,
                             LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 
   /**
@@ -156,6 +160,8 @@ private:
                           efl::BasicVector<ril::SampleType> & discreteReflDelays,
                           pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                           efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                          efl::BasicVector<ril::SampleType> & lateReverbGains,
+                          efl::BasicVector<ril::SampleType> & lateReverbDelays,
                           LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 };
 

@@ -132,6 +132,8 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
                                          efl::BasicVector<ril::SampleType> & discreteReflDelays,
                                          pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                                          efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                                         efl::BasicVector<ril::SampleType> & lateReverbGains,
+                                         efl::BasicVector<ril::SampleType> & lateReverbDelays,
                                          LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
   std::vector<objectmodel::ObjectId> foundReverbObjects;
@@ -171,13 +173,15 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
     if( objId == objectmodel::Object::cInvalidChannelIndex )
     {
       signalRouting.removeEntry( chIdx );
-      clearSingleObject( chIdx, discreteReflGains, discreteReflGains, biquadCoeffs, discretePanningMatrix, lateReflectionSubbandFilters );
+      clearSingleObject( chIdx, discreteReflGains, discreteReflDelays, biquadCoeffs, discretePanningMatrix,
+                         lateReverbGains, lateReverbDelays, lateReflectionSubbandFilters );
     }
     else
     {
       objectmodel::PointSourceWithReverb const & rsao = dynamic_cast<objectmodel::PointSourceWithReverb const &>(objects.at( objId ));
       signalRouting.addRouting( rsao.channelIndex(0), chIdx ); // This clear existing routings to this rendering channel.
-      processSingleObject( rsao, chIdx, discreteReflGains, discreteReflGains, biquadCoeffs, discretePanningMatrix, lateReflectionSubbandFilters );
+      processSingleObject( rsao, chIdx, discreteReflGains, discreteReflDelays, biquadCoeffs, discretePanningMatrix, 
+                           lateReverbGains, lateReverbDelays, lateReflectionSubbandFilters );
     }
   }
 } //process
@@ -188,6 +192,8 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
                                                      efl::BasicVector<ril::SampleType> & discreteReflDelays,
                                                      pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                                                      efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                                                     efl::BasicVector<ril::SampleType> & lateReverbGains,
+                                                     efl::BasicVector<ril::SampleType> & lateReverbDelays,
                                                      LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
   // TODO: Assign the biquad coefficients for the direct path.
@@ -259,6 +265,8 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Late reflection part.
+  lateReverbDelays[renderChannel] = 0.0f; // Unused for now.  We might apply the frequency-independent offset delay here.
+  lateReverbGains[renderChannel] = rsao.level(); // Adjust to the object level.
   if( not equal( mPreviousLateReverbs[renderChannel], rsao.lateReverb(), cLateReverbParameterComparisonLimit ))
   {
     mPreviousLateReverbs[renderChannel] = rsao.lateReverb();
@@ -271,6 +279,8 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
                                                    efl::BasicVector<ril::SampleType> & discreteReflDelays,
                                                    pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
                                                    efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                                                   efl::BasicVector<ril::SampleType> & lateReverbGains,
+                                                   efl::BasicVector<ril::SampleType> & lateReverbDelays,
                                                    LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
 {
   // Define a starting index into the all parameter matrices 
@@ -290,6 +300,9 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
     discreteReflDelays[matrixRow] = 0.0f;
   }
   // Late reflection part
+  lateReverbDelays[renderChannel] = 0.0f;
+  lateReverbGains[renderChannel] = 0.0f;  
+
   if( not equal( mPreviousLateReverbs[renderChannel], cDefaultLateReverbParameter, cLateReverbParameterComparisonLimit ))
   {
     mPreviousLateReverbs[renderChannel] = cDefaultLateReverbParameter;
