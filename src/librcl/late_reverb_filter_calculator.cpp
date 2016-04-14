@@ -123,7 +123,7 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
       filterSequence( noiseLength, noiseSequence.data( ), filteredSequence.data( ), cOctaveBandFilters.at(bandIdx ) );
 
       // Copy the last mFilterLength samples to the right position in the matrix.
-      if( efl::vectorCopy( noiseSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
+      if( efl::vectorCopy( filteredSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
           mAlignment ) != efl::noError )
       {
         throw std::runtime_error( "ReverbParameterCalculator::setup(): Copying of subband noise sequence failed." );
