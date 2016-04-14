@@ -250,7 +250,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
-  ril::SampleType decayCoeffSamples = decayCoeff*samplingFrequency;
+  ril::SampleType decayCoeffSamples = decayCoeff/static_cast<ril::SampleType>(samplingFrequency);
   
   if( initialDelaySamples >= numSamples || initialDelaySamples+attackCoeffSamples >= numSamples )
   {
