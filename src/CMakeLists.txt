@@ -2,6 +2,9 @@
 
 # Build configuration for the top-level src/ directory
 
+# Common functionalties for realtime applications built
+ADD_SUBDIRECTORY( libapputilities )
+
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
