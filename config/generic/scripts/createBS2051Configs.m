@@ -3,7 +3,7 @@
 % University of Southampton, United Kingdom
 % a.franck@soton.ac.uk
 
-% Script to generate the BBC configuratons.
+% Script to generate generic BS-2051 loudspeaker configurations.
 
 % Ensure that $VISR/src/libpanning/test/matlab is in the path.
 % TODO: Add more configurations as required
@@ -128,12 +128,12 @@ numAllSpeakers = size( allSpeakerCoordsSpherical, 1 );
 allSpeakersCart = [x, y, z];
 
 %% The configurations
-for numConfig = 1:2
+for numConfig = 1:3
     
     switch numConfig
         case 1 % 9 + 10 + 3
             configName = 'bs2051-9+10+3';
-            % Note: all indices are one-offset 
+            % Note: all indices are one-offset
             speakerIndices = [11 10 1 17 16 7 6 18,...
                 13 12 25 24 19 35 33 32 29 28 34 36 42 41];
             % Add virtual speakers as a matrix where each row contains a
@@ -152,7 +152,7 @@ for numConfig = 1:2
 %             subGainAdjustDB = [ -20*log10(norm(subGainsLeft)), -20*log10(norm(subGainsRight))];
 %             subDelayAdjust = [ 0, 0 ];
             
-            % Basic 'empty' subwoofer configuration 
+            % Basic 'empty' subwoofer configuration
             subChannels = [];
             subIndices = {  };
             subGains = { };
@@ -191,9 +191,30 @@ for numConfig = 1:2
 
             is2D = true;
             isInfinite = false;
+            
+            
+        case 3 % Stereo
+            configName = 'bs2051-0+2+0';
+            % Note: all indices are one-offset
+            speakerIndices = [6 7];
+            % Add virtual speakers as a matrix where each row contains a
+            % Cartesian coordinate.
+            % For stereo, a virtual loudspeaker is needed at the back,
+            % since otherwise the gap exceeds 180 degree, which does not
+            % allow a nonnegative solution outside the stereo span.
+            virtualSpeakers = [-1, 0, 0];
+            channels = [1:2];
+            % Basic 'empty' subwoofer configuration
+            subChannels = [];
+            subIndices = {  };
+            subGains = { };
+            subGainAdjustDB = [];
+            subDelayAdjust = [];
+
+            is2D = true;
+            isInfinite = false;
     end
-            
-            
+
     numRegularSpeakers = length(speakerIndices);    
     numVirtualSpeakers = size(virtualSpeakers,1);
     usedSpeakers = [allSpeakersCart( speakerIndices,: ); virtualSpeakers];
