@@ -1,7 +1,11 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-ADD_EXECUTABLE( convolver_matrix_app main.cpp )
+SET( SOURCES main.cpp init_filter_matrix.cpp options.cpp )
+SET( HEADERS init_filter_matrix.hpp options.hpp )
 
+ADD_EXECUTABLE( convolver_matrix_app ${SOURCES} ${HEADERS} )
+
+TARGET_LINK_LIBRARIES(convolver_matrix_app apputilities)
 TARGET_LINK_LIBRARIES(convolver_matrix_app signalflows)
 TARGET_LINK_LIBRARIES(convolver_matrix_app rbbl)
 TARGET_LINK_LIBRARIES(convolver_matrix_app rcl)
@@ -20,3 +24,7 @@ ENDIF( BUILD_USE_FFTW )
 IF( BUILD_USE_IPP )
   TARGET_LINK_LIBRARIES(convolver_matrix_app  ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 ENDIF( BUILD_USE_IPP )
+TARGET_LINK_LIBRARIES(convolver_matrix_app ${SNDFILE_LIBRARY} )
+TARGET_LINK_LIBRARIES(convolver_matrix_app ${Boost_FILESYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES(convolver_matrix_app ${Boost_SYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES(convolver_matrix_app ${Boost_PROGRAM_OPTIONS_LIBRARY} )
