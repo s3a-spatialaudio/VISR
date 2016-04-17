@@ -99,6 +99,21 @@ public:
   FilterRoutingList( const FilterRoutingList & rhs ) = default;
 
   /**
+   * Construct an object from an JSON initialiser string following the 'named constructor' idiom.
+   * @param initString A string containing a JSON array of filter routing points
+   * @see parseJson
+   */
+  static FilterRoutingList const fromJson( std::string const & initString );
+
+  /**
+   * Construct an object from a JSON string provided in an istream object.
+   * This function represents a named constructor.
+   * @param initStream An input stream containing a JSON array with FilterReoutingParameter elements.
+   * @see parseJson
+   */
+  static FilterRoutingList const fromJson( std::istream & initStream );
+
+  /**
    * Function object used for ordering the entries in the internal data structure holding the entries.
    */
   class CompareEntries
