@@ -32,6 +32,7 @@ public:
                        std::size_t maxRoutings,
                        efl::BasicMatrix<ril::SampleType> const & initialFilters,
                        pml::FilterRoutingList const & initialRoutings,
+                       char const * fftImplementation,
                        std::size_t period,
                        ril::SamplingFrequencyType samplingFrequency );
 

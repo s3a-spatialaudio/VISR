@@ -41,27 +41,22 @@ ConvolverMatrix::ConvolverMatrix( std::size_t numberOfInputs,
                                   std::size_t maxRoutings,
                                   efl::BasicMatrix<ril::SampleType> const & initialFilters,
                                   pml::FilterRoutingList const & initialRoutings,
+                                  char const * fftImplementation,
                                   std::size_t period,
                                   ril::SamplingFrequencyType samplingFrequency )
  : AudioSignalFlow( period, samplingFrequency )
  , mConvolver( *this, "Convolver" )
 {
   mConvolver.setup( numberOfInputs, numberOfOutputs, filterLength, 
-                    maxFilters, maxRoutings, initialFilters, initialRoutings );
+                    maxFilters, maxRoutings, initialFilters, initialRoutings, fftImplementation );
 
   initCommArea( numberOfInputs + numberOfOutputs, period, ril::cVectorAlignmentSamples );
 
   // connect the ports
-  assignCommunicationIndices( "Convolver", "in", indexRange( 0, numberOfInputs - 1 ) );
-  assignCommunicationIndices( "Convolver", "out", indexRange( numberOfInputs, numberOfInputs + numberOfOutputs - 1 ) );
+  assignCommunicationIndices( "Convolver", "in", indexRange( 0, numberOfInputs ) );
+  assignCommunicationIndices( "Convolver", "out", indexRange( numberOfInputs, numberOfInputs + numberOfOutputs ) );
 
   // Set the indices for communicating the signals from and to the outside world.
-  std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, numberOfInputs );
-  std::vector<ril::AudioPort::SignalIndexType> playbackIndices = indexRange( numberOfInputs, numberOfInputs + numberOfOutputs );
-
-  assignCaptureIndices( &captureIndices[0], captureIndices.size( ) );
-  assignPlaybackIndices( &playbackIndices[0], playbackIndices.size( ) );
-
   assignCaptureIndices( indexRange( 0, numberOfInputs ) );
   assignPlaybackIndices( indexRange( numberOfInputs, numberOfInputs + numberOfOutputs ) );
 
