@@ -5,11 +5,6 @@
 
 #include <libapputilities/options.hpp>
 
-#include <boost/program_options.hpp>
-
-#include <iosfwd>
-#include <string>
-
 namespace visr
 {
 namespace apps
@@ -25,7 +20,7 @@ public:
   ~Options();
 };
 
-} // namespace scene_decoder
+} // namespace baseline_renderer
 } // namespace apps
 } // namespace visr
 
