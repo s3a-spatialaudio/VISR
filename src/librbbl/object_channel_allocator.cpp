@@ -50,35 +50,49 @@ setObjects( std::vector<objectmodel::ObjectId > const & objectIds )
   std::vector<objectmodel::ObjectId >::iterator idIt( mSortedIds.begin( ) );
   for( ObjectChannelLookup::iterator lookupIt( mLookup.begin()); lookupIt != mLookup.end(); )
   {
-    // Already reached the end of the object vector?
-    if( (idIt == sortEnd) or (lookupIt->first < *idIt) )
+    if( idIt == sortEnd )
     {
       std::size_t const channelId = lookupIt->second;
-      lookupIt = mLookup.erase( lookupIt );
+      lookupIt = mLookup.erase( lookupIt ); // This sets lookupIt to the next element.
       releaseChannel( channelId );
     }
-    else
+    else if( *idIt < lookupIt->first )
+    {
+      ++idIt;
+    }
+    else if( *idIt == lookupIt->first )
     {
       ++idIt;
       ++lookupIt;
     }
+    else // *idIt == lookupIt->first
+    {
+      std::size_t const channelId = lookupIt->second;
+      lookupIt = mLookup.erase( lookupIt ); // This sets lookupIt to the next element.
+      releaseChannel( channelId );
+    }
   }
-
-  // Second pass
+  assert( mLookup.size() + mUnusedChannels.size() == mMaxChannels );
+  // Second pass: 
   ObjectChannelLookup::iterator lookupIt( mLookup.begin( ) );
   for( std::vector<objectmodel::ObjectId >::iterator idIt( mSortedIds.begin( ) ); idIt != sortEnd; ++idIt )
   {
-    if( (lookupIt == mLookup.end( )) or( *idIt < lookupIt->second ) )
+    if( (lookupIt == mLookup.end( )) or( *idIt < lookupIt->first ) )
     {
       std::size_t newChannelId = getUnusedChannel();
       bool insertRes;
       std::tie( std::ignore, insertRes ) = mLookup.insert( std::make_pair( *idIt, newChannelId ) );
+      if( not insertRes )
+      {
+        throw std::logic_error( "Tried to insert a duplicate channel ID." );
+      }
     }
     else
     {
       ++lookupIt;
     }
   }
+  assert( mLookup.size( ) + mUnusedChannels.size( ) == mMaxChannels );
   assert( mLookup.size() == objectIds.size() );
 }
 
