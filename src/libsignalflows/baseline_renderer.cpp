@@ -2,6 +2,8 @@
 
 #include "baseline_renderer.hpp"
 
+#include <libefl/vector_functions.hpp>
+
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
 #include <libpanning/XYZ.h>
@@ -440,6 +442,16 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   boost::optional<ril::SampleType> discreteReflectionDelayOpt = tree.get_optional<ril::SampleType>( "maxDiscreteReflectionDelay" );
   ril::SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
 
+  // Optional argument for the gain of the decorrelation filter for
+  // the late reverb tail. 
+  // The default value is 1/sqrt(#loudspeakers)
+  boost::optional<ril::SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<ril::SampleType>( "lateReverbDecorrelationGain" );
+  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( arrayConfig.getNumRegularSpeakers() );
+  ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
+    ? std::pow( 10.0, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
+    : defaultLateDecorrelatorGain;
+  
+
   if( not exists( lateReverbFilterPath ) )
   {
     throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
@@ -454,10 +466,14 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   efl::BasicMatrix<ril::SampleType> lateDecorrelationFilters( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength, ril::cVectorAlignmentSamples );
   for( std::size_t rowIdx( 0 ); rowIdx < arrayConfig.getNumRegularSpeakers(); ++rowIdx )
   {
-    if( efl::vectorCopy( allLateDecorrelationFilters.row( rowIdx ),
-                         lateDecorrelationFilters.row( rowIdx ), lateDecorrelationFilterLength, ril::cVectorAlignmentSamples ) != efl::noError )
+    // Multiply the raw unit-magnitude filters by the scaling gain.
+    if( efl::vectorMultiplyConstant( lateReverbDecorrelatorGain,
+                                     allLateDecorrelationFilters.row( rowIdx ),
+                                     lateDecorrelationFilters.row( rowIdx ),
+                                     lateDecorrelationFilterLength,
+                                     ril::cVectorAlignmentSamples ) != efl::noError )
     {
-      throw std::runtime_error( "Copying of late decorrelation filter rows failed." );
+      throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
     }
   }
 
