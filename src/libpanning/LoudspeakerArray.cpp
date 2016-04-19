@@ -15,6 +15,7 @@
 #include <libefl/degree_radian_conversion.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>
 
+#include <libpml/biquad_parameter.hpp>
 #include <libpml/index_sequence.hpp>
 #include <libpml/float_sequence.hpp>
 
@@ -29,6 +30,7 @@
 #include <ciso646>
 #include <cstdio>
 #include <iterator>
+#include <map>
 #include <set>
 #include <tuple>
 
@@ -59,6 +61,10 @@ LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & r
   m_gainAdjustment.assign( rhs.m_gainAdjustment );
   m_delayAdjustment.assign( rhs.m_delayAdjustment );
   return *this;
+}
+
+LoudspeakerArray::~LoudspeakerArray()
+{
 }
 
 int LoudspeakerArray::load( FILE *file )
@@ -187,6 +193,10 @@ int LoudspeakerArray::load( FILE *file )
   m_delayAdjustment.resize( numRegularSpeakers );
   m_delayAdjustment.fillValue( 0.0f );
 
+  // The plain text configuration does not support an equalisation configuration, so we reset the configuration data
+  // to an empty state..
+  mOutputEqs.reset();
+
   LoudspeakerIndexType spkIdx = 0;
   for( auto const & v : tmpSpeakers )
   {
@@ -291,6 +301,49 @@ void parseGainDelayAdjustments( boost::property_tree::ptree const & node, Afloat
   delay  = delayOpt ? *delayOpt : 0.0f;
 }
 
+using ChannelEqLookupTable = std::map<std::string, pml::BiquadParameterList<Afloat> >;
+
+/**
+ * Local function to parse the optional node "outputEqConfiguration"
+ * @param tree
+ */
+void parseChannelLookup( boost::property_tree::ptree const & tree, ChannelEqLookupTable & table, std::size_t numEqSections )
+{
+  using boost::property_tree::ptree;
+  table.clear();
+  auto const filterSpecNodes = tree.equal_range( "filterSpec" );
+  for( ptree::const_assoc_iterator nodeIt( filterSpecNodes.first ); nodeIt != filterSpecNodes.second; ++nodeIt )
+  {
+    ptree const nodeTree = nodeIt->second;
+    std::string const specName = nodeTree.get<std::string>( "<xmlattr>.name" );
+    pml::BiquadParameterList<Afloat> biqList = pml::BiquadParameterList<Afloat>::fromXml( nodeTree );
+
+    bool insertRes;
+    std::tie( std::ignore, insertRes ) = table.insert( std::make_pair( specName, biqList ) );
+  }
+}
+
+void parseEqFilter( boost::property_tree::ptree const & tree,
+                    ChannelEqLookupTable const & table,
+                    std::size_t channelIndex,
+                    pml::BiquadParameterMatrix<Afloat> & eqMatrix )
+{
+  boost::optional<std::string> const eqId = tree.get_optional<std::string>( "<xmlattr>.eq" );
+  if( eqId )
+  {
+    ChannelEqLookupTable::const_iterator findEq = table.find( *eqId );
+    if( findEq == table.end( ) )
+    {
+      throw std::invalid_argument( "LoudspeakerArray::loadXml(): ." );
+    }
+    eqMatrix.setFilter( channelIndex, findEq->second );
+  }
+  else
+  {
+    eqMatrix.setFilter( channelIndex, pml::BiquadParameterList<Afloat>( ) );
+  }
+}
+
 } // unnamed namespace
 
 
@@ -353,7 +406,32 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   const ChannelIndex cInvalidChannel = std::numeric_limits<ChannelIndex>::max();
   std::fill( m_channel.begin(), m_channel.end(), cInvalidChannel ); // assign special value to check afterwards if every speaker index has been assigned.
 
-  // The maximim admissible loudspeaker index as used in the file,
+  std::size_t const numEqConfigs = treeRoot.count("outputEqConfiguration");
+  if( numEqConfigs >= 2 )
+  {
+    throw std::invalid_argument( "LoudspeakerArray::loadXml(): Either zero or one \"outputEqConfiguration\" nodes are admissible." );
+  }
+  bool const eqConfigPresent = (numEqConfigs == 1);
+  ChannelEqLookupTable eqLookupTable;
+  std::size_t numEqSections = 0;
+  if( eqConfigPresent )
+  {
+    ptree const eqNode = treeRoot.get_child( "outputEqConfiguration" );
+    numEqSections = eqNode.get<std::size_t>( "<xmlattr>.numberOfBiquads" );
+    parseChannelLookup( treeRoot.get_child( "outputEqConfiguration" ), eqLookupTable, numEqSections );
+    mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers + numSubwoofers, numEqSections ) );
+  }
+  else
+  {
+    mOutputEqs.reset( ); // Make it a null ptr to flag 'no EQ config present'
+  }
+  // TODO: If we leave the instantiation here, the EQ configuration
+  // will always be present, albeit with zero biquad sections. However, the
+  // renderer should work in this case as well (and currently does).
+  // The current setting distinguished between the cases.
+  // mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
+
+  // The maximum admissible loudspeaker index as used in the file,
   // i.e., one-offset.
   LoudspeakerIndexType const maxSpeakerIndexOneOffset
     = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
@@ -364,7 +442,7 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     int id = childTree.get<int>( "<xmlattr>.id" );
     if( id < 1 or id > maxSpeakerIndexOneOffset )
     {
-      throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the numbeer of loudspeakers." );
+      throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the number of loudspeakers." );
     }
     int idZeroOffset = id - 1;
     if( m_channel[idZeroOffset] != cInvalidChannel )
@@ -380,6 +458,11 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     m_position[idZeroOffset] = parseCoordNode( childTree, m_isInfinite );
 
     parseGainDelayAdjustments( childTree, m_gainAdjustment[idZeroOffset], m_delayAdjustment[idZeroOffset] );
+
+    if( eqConfigPresent )
+    {
+      parseEqFilter( childTree, eqLookupTable, idZeroOffset, *mOutputEqs );
+    }
   }
   // Same for the virtual speaker nodes, except there is no 'channel' field and no gain/delay adjustments.
   for( ptree::const_assoc_iterator treeIt( virtualSpeakerNodes.first ); treeIt != virtualSpeakerNodes.second; ++treeIt )
@@ -466,6 +549,11 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
     }
     parseGainDelayAdjustments( subNode, m_gainAdjustment[numRegularSpeakers+subIdx],
       m_delayAdjustment[numRegularSpeakers + subIdx] );
+
+    if( eqConfigPresent )
+    {
+      parseEqFilter( subNode, eqLookupTable, numRegularSpeakers + subIdx, *mOutputEqs );
+    }
   }
   // Check the subwoofer and the subwoofer indices whether all indices are unique.
   std::vector<ChannelIndex> spkIndicesSorted( m_channel );
@@ -490,6 +578,36 @@ void LoudspeakerArray::loadXml( std::string const & filePath )
   {
     throw std::invalid_argument( "LoudspeakerArray::loadXml(): Loudspeaker and subwoofer channels indices are not exclusive." );
   }
+}
+
+bool LoudspeakerArray::outputEqualisationPresent() const
+{
+  return bool( mOutputEqs ); // Operator bool checks whether pointer is assigned.
+}
+
+/**
+* Query the number of biquads per output channel.
+* Returns 0 if no equalisation configuration is present.
+*/
+std::size_t LoudspeakerArray::outputEqualisationNumberOfBiquads() const
+{
+  return outputEqualisationPresent() ? mOutputEqs->numberOfSections() : 0;
+}
+
+/**
+* Return a matrix containing the biquad parameters for all output sections.
+* The dimension of the matrix is
+* \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
+* @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
+*/
+pml::BiquadParameterMatrix<Afloat> const & 
+LoudspeakerArray::outputEqualisationBiquads() const
+{
+  if( not outputEqualisationPresent() )
+  {
+    throw std::logic_error( "LoudspeakerArray::::outputEqualisationBiquads(): No EQ configuration present." );
+  }
+  return *mOutputEqs;
 }
 
 } // namespace panning
