@@ -42,7 +42,8 @@ FilterRoutingList::FilterRoutingList( std::initializer_list<FilterRoutingParamet
 
 /*static*/ FilterRoutingList const FilterRoutingList::fromJson( std::string const & initString )
 {
-  return FilterRoutingList::fromJson( std::stringstream( initString ) );
+  std::stringstream stream( initString );
+  return FilterRoutingList::fromJson( stream );
 }
 
 /*static*/ FilterRoutingList const FilterRoutingList::fromJson( std::istream & initStream )
