@@ -38,7 +38,7 @@ template<typename SampleType>
 {
   std::string res;
   CreatorTable const & table = creatorTable();
-  for( CreatorTable::const_iterator tblIt( table.begin() ); tblIt != table.end(); /*Increment is in loop */ )
+  for( typename CreatorTable::const_iterator tblIt( table.begin() ); tblIt != table.end(); /*Increment is in loop */ )
   {
     res.append( tblIt->first );
     if( ++tblIt == table.end() )
