@@ -8,7 +8,6 @@
 #include <libpml/message_queue.hpp>
 
 #include <array>
-
 #include <ciso646>
 #include <random>
 
@@ -41,7 +40,7 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
   for( std::size_t sampleIdx( 0 ); sampleIdx < numSamples; ++sampleIdx )
   {
     inputBuffer[0] = inputBuffer[1];
-    inputBuffer[1] = inputBuffer[0];
+    inputBuffer[1] = inputBuffer[2];
     inputBuffer[2] = input[sampleIdx];
     SampleType const y = iir.b0()*inputBuffer[2] + iir.b1()*inputBuffer[1] + iir.b2 ()*inputBuffer[0] - iir.a1()*state[1] - iir.a2 ()*state[0];
     output[sampleIdx]=y;
@@ -123,12 +122,11 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
       filterSequence( noiseLength, noiseSequence.data( ), filteredSequence.data( ), cOctaveBandFilters.at(bandIdx ) );
 
       // Copy the last mFilterLength samples to the right position in the matrix.
-      if( efl::vectorCopy( noiseSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
+      if( efl::vectorCopy( filteredSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
           mAlignment ) != efl::noError )
       {
         throw std::runtime_error( "ReverbParameterCalculator::setup(): Copying of subband noise sequence failed." );
       }
-
     }
   }
 }
@@ -212,7 +210,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 */
 /*static*/ void LateReverbFilterCalculator::createWhiteNoiseSequence( std::size_t numSamples,
                                                                       ril::SampleType* data,
-                                                                      std::size_t /*alignment = 0*/ )
+                                                                      std::size_t alignment )
 {
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -243,7 +241,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
-  ril::SampleType decayCoeffSamples = decayCoeff*samplingFrequency;
+  ril::SampleType decayCoeffSamples = decayCoeff/static_cast<ril::SampleType>(samplingFrequency);
   
   if( initialDelaySamples >= numSamples || initialDelaySamples+attackCoeffSamples >= numSamples )
   {
