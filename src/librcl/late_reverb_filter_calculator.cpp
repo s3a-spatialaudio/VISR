@@ -9,6 +9,7 @@
 
 #include <array>
 #include <ciso646>
+#include <iostream>
 #include <random>
 
 namespace visr
@@ -157,48 +158,55 @@ calculateImpulseResponse( std::size_t objectIdx,
                           ril::SampleType * ir,
                           std::size_t irLength, std::size_t alignment /*= 0*/ )
 {
-  std::size_t const finalAlignment = std::min( mAlignment, alignment );
-  if( irLength < mFilterLength )
+  try
   {
-    throw std::runtime_error( "LateReverbFilterCalculator::calculateImpulseResponse(): the passed filter buffer is too short.");
-  }
-  // Could be a member allocated in setup.
-  efl::BasicVector<ril::SampleType> envelope( mFilterLength, mAlignment );
+    std::size_t const finalAlignment = std::min( mAlignment, alignment );
+    if( irLength < mFilterLength )
+    {
+      throw std::runtime_error( "LateReverbFilterCalculator::calculateImpulseResponse(): the passed filter buffer is too short.");
+    }
+    // Could be a member allocated in setup.
+    efl::BasicVector<ril::SampleType> envelope( mFilterLength, mAlignment );
 
-  // Do whatever needed to calculate the reverb filter
-  // for each subband.
-  for( std::size_t subBandIdx= 0; subBandIdx < mNumberOfSubBands; ++subBandIdx )
-  {
-    // Create an envelope.
-    createEnvelope( mFilterLength, envelope.data(), lateParams.onsetDelay(),
-                    lateParams.levels()[subBandIdx], lateParams.attackTimes()[subBandIdx],
-                    lateParams.decayCoeffs()[subBandIdx], static_cast<ril::SampleType>(flow().samplingFrequency()) );
+    // Do whatever needed to calculate the reverb filter
+    // for each subband.
+    for( std::size_t subBandIdx= 0; subBandIdx < mNumberOfSubBands; ++subBandIdx )
+    {
+      // Create an envelope.
+      createEnvelope( mFilterLength, envelope.data(), lateParams.onsetDelay(),
+                      lateParams.levels()[subBandIdx], lateParams.attackTimes()[subBandIdx],
+                      lateParams.decayCoeffs()[subBandIdx], static_cast<ril::SampleType>(flow().samplingFrequency()) );
 
-    // multiply the sequence with the envelope and add them together
-    efl::ErrorCode res;
-    if( subBandIdx == 0 )
-    {
-      // Just a multiply for the zeroth subband filter to clear any previous content.
-      res = efl::vectorMultiply( subBandNoiseSequence( objectIdx, subBandIdx ), envelope.data(),
-                                 ir, mFilterLength, finalAlignment );
+      // multiply the sequence with the envelope and add them together
+      efl::ErrorCode res;
+      if( subBandIdx == 0 )
+      {
+        // Just a multiply for the zeroth subband filter to clear any previous content.
+        res = efl::vectorMultiply( subBandNoiseSequence( objectIdx, subBandIdx ), envelope.data(),
+                                   ir, mFilterLength, finalAlignment );
+      }
+      else
+      {
+        res = efl::vectorMultiplyAddInplace( subBandNoiseSequence( objectIdx, subBandIdx ), envelope.data( ),
+                                             ir, mFilterLength, finalAlignment );
+      }
+      if( res != efl::noError )
+      {
+        throw std::runtime_error( "ReverbParameterCalculator::calculateImpulseResponse(): Calculation of final envelope failed." );
+      }
     }
-    else
+    // Zero any remaining zeros in the buffer
+    if( irLength > mFilterLength )
     {
-      res = efl::vectorMultiplyAddInplace( subBandNoiseSequence( objectIdx, subBandIdx ), envelope.data( ),
-                                           ir, mFilterLength, finalAlignment );
-    }
-    if( res != efl::noError )
-    {
-      throw std::runtime_error( "ReverbParameterCalculator::calculateImpulseResponse(): Calculation of final envelope failed." );
+      if( efl::vectorZero( ir + mFilterLength, irLength > mFilterLength, 0 /* no alignment spec possible */ ) != efl::noError )
+      {
+        throw std::runtime_error( "ReverbParameterCalculator::calculateImpulseResponse(): Zeroing of remaining ir taps failed." );
+      }
     }
   }
-  // Zero any remaining zeros in the buffer
-  if( irLength > mFilterLength )
+  catch( std::exception const & ex )
   {
-    if( efl::vectorZero( ir + mFilterLength, irLength > mFilterLength, 0 /* no alignment spec possible */ ) != efl::noError )
-    {
-      throw std::runtime_error( "ReverbParameterCalculator::calculateImpulseResponse(): Zeroing of remaining ir taps failed." );
-    }
+    std::cerr << "Error while calculating late reverberation impulse response: " << ex.what() << ", skipping calculation." << std::endl;
   }
 }
 
@@ -260,7 +268,6 @@ calculateImpulseResponse( std::size_t objectIdx,
   { // exponential decay to end of envelope
     ril::SampleType const decay = gain * std::exp( decayCoeffSamples*(n - attackCoeffSamples - initialDelaySamples) );
     data[n] = decay;
-
   }
 }
   

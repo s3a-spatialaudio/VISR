@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <random>
 
 namespace visr
@@ -173,8 +174,7 @@ BOOST_AUTO_TEST_CASE( RepeatedRandomAllocation )
   std::size_t const numTrials = 20000;
 
   std::size_t const numChannels = 32;
-  objectmodel::ObjectId const maxObjectId = numChannels;
-  std::size_t numObjectsPerTrial = 64; // max. number of objects before removal of duplicates.
+  objectmodel::ObjectId const maxObjectId = 64;
 
   ObjectChannelAllocator objAlloc( numChannels );
 
@@ -188,25 +188,23 @@ BOOST_AUTO_TEST_CASE( RepeatedRandomAllocation )
   std::random_device rd;
   std::mt19937 gen( rd( ) );
 
-  std::uniform_int_distribution<std::size_t> lenGen( 0, maxObjectId );
-  std::uniform_int_distribution<objectmodel::ObjectId> idGen( 0, maxObjectId );
+  std::uniform_int_distribution<std::size_t> lenGen( 0, numChannels );
 
+  using IdVec = std::vector<objectmodel::ObjectId>;
+  IdVec allIds(maxObjectId+1);
+  std::iota( allIds.begin(), allIds.end(), 0 ); // fill with values 0,1,...,maxObjectId
 
   for( std::size_t trialIdx(0); trialIdx < numTrials; ++trialIdx )
   {
     previousLookup.swap( currentLookup );
 
-    using IdVec = std::vector<objectmodel::ObjectId>;
-    std::size_t vecLen = lenGen( gen );
-    IdVec rawIds( vecLen );
     // Generate a sequence of random length with random, unique entries.
-    std::generate( rawIds.begin(), rawIds.end(), [&]() { return idGen( gen ); } );
-    std::sort( rawIds.begin(), rawIds.end() );
-    IdVec::const_iterator endUniqueIt = std::unique( rawIds.begin(), rawIds.end() );
-    rawIds.erase( endUniqueIt, rawIds.end() );
+    shuffle( allIds.begin(), allIds.end(), gen );
+    std::size_t vecLen = lenGen( gen );
+    IdVec currentObjectIds( allIds.begin(), allIds.begin()+vecLen );
 
-    BOOST_CHECK_NO_THROW( objAlloc.setObjects( rawIds ) );
-    BOOST_CHECK( objAlloc.numberUsedChannels( ) == rawIds.size( ) );
+    BOOST_CHECK_NO_THROW( objAlloc.setObjects( currentObjectIds ) );
+    BOOST_CHECK( objAlloc.numberUsedChannels( ) == currentObjectIds.size( ) );
 
     currentLookup.clear();
     for( std::size_t chIdx( 0 ); chIdx < objAlloc.maxChannels(); ++chIdx )
