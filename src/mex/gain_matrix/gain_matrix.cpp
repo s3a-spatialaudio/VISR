@@ -65,27 +65,6 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 
     ril::SamplingFrequencyType const samplingFrequency
       = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[samplingFreqParamIdx] ));
-#if 0
-    // create an empty matrix
-    efl::BasicMatrix<float> m1( ril::cVectorAlignmentSamples );
-
-    // create a zero-initialised matrix of size 3x5
-    efl::BasicMatrix<float> m2( 3, 5, ril::cVectorAlignmentSamples );
-
-    // create a matrix from an initialiser list.
-    efl::BasicMatrix<float> m3( 3, 5, {{ 0, 1, 2, 3, 4 }, { 5, 6, 7, 8, 9 }, { 10, 11, 12, 13, 14 } }, ril::cVectorAlignmentSamples );
-
-    m1.resize( 3, 5 );
-
-    m1.fillValue( 27.42f );
-
-    m1.copy( m3 );
-
-    m2.swap(m1);
-
-    rbbl::GainMatrix<float> g1( 3, 5, periodSize, 4096, 0.0, ril::cVectorAlignmentSamples );
-
-#else
     const std::size_t cNumberOfInputs = 2;
     const std::size_t cNumberOfOutputs = 8;
     const std::size_t cInterpolationLength = 4 * periodSize;
@@ -94,10 +73,9 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     flow.setup();
 
     mexsupport::MexWrapper mexWrapper( flow, prhs[0], plhs[0],
-				       hasParameterArg ? prhs[1] : nullptr );
+                                       hasParameterArg ? prhs[1] : nullptr );
 
     mexWrapper.process();
-#endif
   }
   catch( std::exception const & e )
   {

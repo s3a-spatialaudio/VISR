@@ -43,7 +43,7 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
   for( std::size_t sampleIdx( 0 ); sampleIdx < numSamples; ++sampleIdx )
   {
     inputBuffer[0] = inputBuffer[1];
-    inputBuffer[1] = inputBuffer[0];
+    inputBuffer[1] = inputBuffer[2];
     inputBuffer[2] = input[sampleIdx];
     SampleType const y = iir.b0()*inputBuffer[2] + iir.b1()*inputBuffer[1] + iir.b2 ()*inputBuffer[0] - iir.a1()*state[1] - iir.a2 ()*state[0];
     output[sampleIdx]=y;
@@ -130,7 +130,6 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
       {
         throw std::runtime_error( "ReverbParameterCalculator::setup(): Copying of subband noise sequence failed." );
       }
-
     }
   }
 }
@@ -229,7 +228,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 */
 /*static*/ void LateReverbFilterCalculator::createWhiteNoiseSequence( std::size_t numSamples,
                                                                       ril::SampleType* data,
-                                                                      std::size_t /*alignment = 0*/ )
+                                                                      std::size_t alignment )
 {
   std::random_device rd;
   std::mt19937 gen(rd());
