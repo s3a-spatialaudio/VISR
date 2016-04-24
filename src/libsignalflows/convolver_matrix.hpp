@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_SIGNALFLOWS_CONVOLVER_MATRIX_HPP_INCLUDED
-#define VISR_SIGNALFLOWS_CONVOLVER_MATRIX_HPP_INCLUDED
+#ifndef VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED
+#define VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED
 
 #include <libril/audio_signal_flow.hpp>
 #include <libril/constants.hpp>
@@ -22,10 +22,10 @@ class FilterRoutingList;
 namespace signalflows
 {
 
-class ConvolverMatrix: public ril::AudioSignalFlow
+class MatrixConvolver: public ril::AudioSignalFlow
 {
 public:
-  explicit ConvolverMatrix( std::size_t numberOfInputs, 
+  explicit MatrixConvolver( std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
                        std::size_t filterLength,
                        std::size_t maxFilters,
@@ -36,7 +36,7 @@ public:
                        std::size_t period,
                        ril::SamplingFrequencyType samplingFrequency );
 
-  ~ConvolverMatrix();
+  ~MatrixConvolver();
 
   /*virtual*/ void process( );
 
@@ -47,4 +47,4 @@ private:
 } // namespace signalflows
 } // namespace visr
 
-#endif // #ifndef VISR_SIGNALFLOWS_CONVOLVER_MATRIX_HPP_INCLUDED
+#endif // #ifndef VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED

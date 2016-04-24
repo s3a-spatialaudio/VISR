@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_APPS_CONVOLVER_MATRIX_INIT_FILTER_MATRIX_HPP_INCLUDED
-#define VISR_APPS_CONVOLVER_MATRIX_INIT_FILTER_MATRIX_HPP_INCLUDED
+#ifndef VISR_APPS_MATRIX_CONVOLVER_INIT_FILTER_MATRIX_HPP_INCLUDED
+#define VISR_APPS_MATRIX_CONVOLVER_INIT_FILTER_MATRIX_HPP_INCLUDED
 
 #include <string>
 #include <vector>
@@ -21,7 +21,7 @@ class IndexSequence;
 
 namespace apps
 {
-namespace convolver_matrix
+namespace matrix_convolver
 {
 
 /**
@@ -46,8 +46,8 @@ void initFilterMatrix( std::string const & filterList,
                        pml::IndexSequence const & indexOffsets,
                        efl::BasicMatrix<DataType> & matrix );
 
-} // namespace convolver_matrix
+} // namespace matrix_convolver
 } // namespace apps
 } // namespace visr
 
-#endif // #ifndef VISR_APPS_CONVOLVER_MATRIX_INIT_FILTER_MATRIX_HPP_INCLUDED
+#endif // #ifndef VISR_APPS_MATRIX_CONVOLVER_INIT_FILTER_MATRIX_HPP_INCLUDED

@@ -11,7 +11,7 @@ namespace visr
 {
 namespace apps
 {
-namespace convolver_matrix
+namespace matrix_convolver
 {
 
 Options::Options()
@@ -50,6 +50,6 @@ Options::~Options()
 {
 }
 
-} // namespace convolver_matrix
+} // namespace matrix_convolver
 } // namespace apps
 } // namespace visr

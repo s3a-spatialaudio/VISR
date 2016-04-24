@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "convolver_matrix.hpp"
+#include "matrix_convolver.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -34,7 +34,7 @@ namespace
   }
 }
 
-ConvolverMatrix::ConvolverMatrix( std::size_t numberOfInputs,
+MatrixConvolver::ConvolverMatrix( std::size_t numberOfInputs,
                                   std::size_t numberOfOutputs,
                                   std::size_t filterLength,
                                   std::size_t maxFilters,
@@ -64,12 +64,12 @@ ConvolverMatrix::ConvolverMatrix( std::size_t numberOfInputs,
   setInitialised( true );
 }
 
-ConvolverMatrix::~ConvolverMatrix( )
+MatrixConvolver::~ConvolverMatrix( )
 {
 }
  
 /*virtual*/ void 
-ConvolverMatrix::process()
+MatrixConvolver::process()
 {
   // At the moment, there are no runtime parameter changes.
   mConvolver.process();

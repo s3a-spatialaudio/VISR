@@ -21,7 +21,7 @@ namespace visr
 {
 namespace apps
 {
-namespace convolver_matrix
+namespace matrix_convolver
 {
 namespace // unnamed
 {
@@ -61,7 +61,7 @@ void initFilterMatrix( std::string const & filterList,
   {
     if( indexOffsets.size() != numFilterFiles )
     {
-      throw std::invalid_argument( "ConvolverMatrix::initFilter(): If the parameter \"filterFileIndexOffsets\" is provided, "
+      throw std::invalid_argument( "MatrixConvolver::initFilter(): If the parameter \"filterFileIndexOffsets\" is provided, "
         "it must match the number of filter files." );
     }
   }
@@ -70,7 +70,7 @@ void initFilterMatrix( std::string const & filterList,
     if( maxFilterLength == std::numeric_limits<std::size_t>::max()
       or maxFilterEntries == std::numeric_limits<std::size_t>::max() )
     {
-      throw std::invalid_argument( "ConvolverMatrix::initFilter(): If no filter files are provided, the parameters "
+      throw std::invalid_argument( "MatrixConvolver::initFilter(): If no filter files are provided, the parameters "
         "\"maxFilterLength\" and \"maxFilters\" must be provided." );
     }
     matrix.resize( maxFilterEntries, maxFilterLength );
@@ -89,7 +89,7 @@ void initFilterMatrix( std::string const & filterList,
     boost::filesystem::path const filePath = absolute( boost::filesystem::path( filterNames[fileIdx] ) );
     if( not exists( filePath ) )
     {
-      throw std::invalid_argument( std::string( "ConvolverMatrix::initFilter(): The file \"" ) + filePath.string()
+      throw std::invalid_argument( std::string( "MatrixConvolver::initFilter(): The file \"" ) + filePath.string()
         + std::string( "\" does not exist.") );
     }
     pml::MatrixParameter<DataType> const mat
@@ -114,7 +114,7 @@ void initFilterMatrix( std::string const & filterList,
   if( maxFilterLength != std::numeric_limits<std::size_t>::max() // special value? 
     and( maxFilterFileLength > maxFilterLength ) )
   {
-    throw std::invalid_argument( "ConvolverMatrix::initFilter(): A provided impulse response exceeds the length specified by the \"maxFilterLength\" parameter." );
+    throw std::invalid_argument( "MatrixConvolver::initFilter(): A provided impulse response exceeds the length specified by the \"maxFilterLength\" parameter." );
   }
   std::size_t const filterLength = (maxFilterLength != std::numeric_limits<std::size_t>::max())
     ? maxFilterLength : maxFilterFileLength;
@@ -133,14 +133,14 @@ void initFilterMatrix( std::string const & filterList,
   {
     if( startIndex[orderByStartIndex[runIdx] - 1] > endIndex[orderByStartIndex[runIdx]] ) // "==" is legal due to the one-past-end convention of endIndex
     {
-      throw std::invalid_argument( "ConvolverMatrix::initFilter(): The index ranges of the filters overlap." );
+      throw std::invalid_argument( "MatrixConvolver::initFilter(): The index ranges of the filters overlap." );
     }
   }
   std::size_t const maxUsedIndex = endIndex.back(); // one past end
   if( maxFilterEntries != std::numeric_limits<std::size_t>::max( ) // special value? 
     and( maxUsedIndex > maxFilterEntries ) )
   {
-    throw std::invalid_argument( "ConvolverMatrix::initFilter(): The maximum filter index exceeds the value specified by the \"max-filters\" parameter." );
+    throw std::invalid_argument( "MatrixConvolver::initFilter(): The maximum filter index exceeds the value specified by the \"max-filters\" parameter." );
   }
   std::size_t const numFilterEntries = (maxFilterEntries != std::numeric_limits<std::size_t>::max())
     ? maxFilterEntries : maxUsedIndex;
@@ -159,7 +159,7 @@ void initFilterMatrix( std::string const & filterList,
       if( efl::vectorCopy( mat.row( irIdx ), matrix.row( matrixIdx ),
                            mat.numberOfColumns(), matrix.alignmentElements() ) != efl::noError )
       {
-        throw std::invalid_argument( "ConvolverMatrix::initFilter(): Error while copying impulse response" );
+        throw std::invalid_argument( "MatrixConvolver::initFilter(): Error while copying impulse response" );
       }
     }
   }
@@ -172,6 +172,6 @@ template void initFilterMatrix<double>( std::string const&, std::size_t, std::si
                                         pml::IndexSequence const &, efl::BasicMatrix<double> & );
 
 
-} // namespace convolver_matrix
+} // namespace matrix_convolver
 } // namespace apps
 } // namespace visr

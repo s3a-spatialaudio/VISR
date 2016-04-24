@@ -9,7 +9,7 @@
 
 #include <librbbl/fft_wrapper_factory.hpp>
 
-#include <libsignalflows/convolver_matrix.hpp>
+#include <libsignalflows/matrix_convolver.hpp>
 
 #ifdef VISR_JACK_SUPPORT
 #include <librrl/jack_interface.hpp>
@@ -27,7 +27,7 @@
 int main( int argc, char const * const * argv )
 {
   using namespace visr;
-  using namespace visr::apps::convolver_matrix;
+  using namespace visr::apps::matrix_convolver;
 
   efl::DenormalisedNumbers::State const oldDenormNumbersState
     = efl::DenormalisedNumbers::setDenormHandling( );
@@ -93,7 +93,7 @@ int main( int argc, char const * const * argv )
 
   std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
 
-  signalflows::ConvolverMatrix flow( numberOfInputChannels, numberOfOutputChannels,
+  signalflows::MatrixConvolver flow( numberOfInputChannels, numberOfOutputChannels,
                                      initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
                                      initialFilters, routings,
                                      fftLibrary.c_str(),
