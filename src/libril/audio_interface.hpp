@@ -89,6 +89,18 @@ public:
 
   virtual bool unregisterCallback( AudioCallback callbackPtr ) = 0;
 
+  /**
+   * Start the audio interface, i.e., reacting to callbacks and passing them to the registered callback
+   * handlers.
+   * Pure virtual method, must be implemented in all concrete derived classes.
+   */
+  virtual void start() = 0;
+
+  /**
+   * Stop the audio interface, i.e., calling the registered callback functions anymore.
+   * Pure virtual method, must be implemented in all concrete derived classes.
+   */
+  virtual void stop() = 0;
 };
 
 }
