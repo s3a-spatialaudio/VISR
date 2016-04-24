@@ -1,5 +1,11 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+# Preliminary solution: communicate to main.cpp that Jack support is enabled.
+# TODO: Replace by factory mechanism to select audio interface.
+IF( BUILD_USE_JACK )
+  ADD_DEFINITIONS( "-DVISR_JACK_SUPPORT" )
+ENDIF( BUILD_USE_JACK )
+
 SET( SOURCES main.cpp init_filter_matrix.cpp options.cpp )
 SET( HEADERS init_filter_matrix.hpp options.hpp )
 
@@ -14,6 +20,10 @@ TARGET_LINK_LIBRARIES(convolver_matrix_app ril)
 TARGET_LINK_LIBRARIES(convolver_matrix_app rrl)
 TARGET_LINK_LIBRARIES(convolver_matrix_app efl)
 TARGET_LINK_LIBRARIES(convolver_matrix_app ${PORTAUDIO_LIBRARIES} )
+
+IF( BUILD_USE_JACK )
+  TARGET_LINK_LIBRARIES(convolver_matrix_app ${JACK_LIBRARY} )
+ENDIF( BUILD_USE_JACK )
 
 TARGET_LINK_LIBRARIES(convolver_matrix_app ${FFTS_LIBRARY} )
 TARGET_LINK_LIBRARIES(convolver_matrix_app ${KISSFFT_LIBRARY} )

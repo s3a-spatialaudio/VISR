@@ -1,9 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-// Enable native JACK interface instead of PortAudio
-// TODO: Make this selectable via a command line option.
-// #define CONVOLVER_MATRIX_NATIVE_JACK
-
 #include "options.hpp"
 #include "init_filter_matrix.hpp"
 
@@ -15,16 +11,17 @@
 
 #include <libsignalflows/convolver_matrix.hpp>
 
-#ifdef CONVOLVER_MATRIX_NATIVE_JACK
+#ifdef VISR_JACK_SUPPORT
 #include <librrl/jack_interface.hpp>
-#else
-#include <librrl/portaudio_interface.hpp>
 #endif
+#include <librrl/portaudio_interface.hpp>
 
-// #include <cstddef>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <cstdlib>
 #include <cstdio> // for getc(), for testing purposes
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 int main( int argc, char const * const * argv )
@@ -90,63 +87,85 @@ int main( int argc, char const * const * argv )
 
   // The final values for the number and length of filter slots are determined by the logic of the initialisation function.
   std::size_t const maxFilters = initialFilters.numberOfRows();
-  std::size_t const maxFilterLength = initialFilters.numberOfColumns();
 
   std::size_t const periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
   ril::SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<ril::SamplingFrequencyType>( "sampling-frequency", 48000 );
 
   std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
 
+  signalflows::ConvolverMatrix flow( numberOfInputChannels, numberOfOutputChannels,
+                                     initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
+                                     initialFilters, routings,
+                                     fftLibrary.c_str(),
+                                     periodSize, samplingFrequency );
+
+  // Selection of audio interface:
+  // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
+  // back to PortAudio in all other cases.
+  // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
+  bool const useNativeJack =
+#ifdef VISR_JACK_SUPPORT
+      boost::iequals(audioBackend, "JACK" );
+#else
+     false;
+#endif
+
+   std::unique_ptr<visr::ril::AudioInterface> audioInterface;
+
   try 
   {
-#ifdef CONVOLVER_MATRIX_NATIVE_JACK
-    rrl::JackInterface::Config interfaceConfig;
-#else
-    rrl::PortaudioInterface::Config interfaceConfig;
+#ifdef VISR_JACK_SUPPORT
+    if( useNativeJack )
+    {
+      rrl::JackInterface::Config interfaceConfig;
+      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
+      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
+      interfaceConfig.mPeriodSize = periodSize;
+      interfaceConfig.mSampleRate = samplingFrequency;
+      interfaceConfig.setCapturePortNames( "input_", 0, numberOfInputChannels - 1 );
+      interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels - 1 );
+      interfaceConfig.mClientName = "MatrixConvolver";
+      audioInterface.reset( new rrl::JackInterface( interfaceConfig ));
+    }
+    else
 #endif
-    interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingFrequency;
-#ifdef CONVOLVER_MATRIX_NATIVE_JACK
-    interfaceConfig.setCapturePortNames( "input_", 0, numberOfInputChannels - 1 );
-    interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels - 1 );
-    interfaceConfig.mClientName = "ConvolverMatrix";
-#else
-    interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = audioBackend;
-#endif
+    {
+      rrl::PortaudioInterface::Config interfaceConfig;
+      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
+      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
+      interfaceConfig.mPeriodSize = periodSize;
+      interfaceConfig.mSampleRate = samplingFrequency;
+      interfaceConfig.mInterleaved = false;
+      interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+      interfaceConfig.mHostApi = audioBackend;
+      audioInterface.reset( new rrl::PortaudioInterface( interfaceConfig ) );
+    }
 
-     signalflows::ConvolverMatrix flow( numberOfInputChannels, numberOfOutputChannels,
-                                        initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
-                                        initialFilters, routings,
-                                        fftLibrary.c_str(),
-                                        periodSize, samplingFrequency );
-
-#ifdef CONVOLVER_MATRIX_NATIVE_JACK
-     rrl::JackInterface audioInterface( interfaceConfig );
-#else
-     rrl::PortaudioInterface audioInterface( interfaceConfig );
-#endif
-
-    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    audioInterface->registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
-    audioInterface.start( );
+    audioInterface->start( );
 
-    // Rendering runs until <Return> is entered on the console.
-    std::getc( stdin );
+    // Rendering runs until q<Return> is entered on the console.
+    std::cout << "S3A matrix convolver running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+    char c;
+    do
+    {
+      c = std::getc( stdin );
+    }
+    while( c != 'q' );
 
-    audioInterface.stop( );
+    audioInterface->stop( );
 
    // Should there be an explicit stop() method for the sound interface?
+    audioInterface->unregisterCallback( &ril::AudioSignalFlow::processFunction );
 
-    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }
   catch( std::exception const & ex )
   {
     std::cout << "Exception caught on top level: " << ex.what() << std::endl;
+    efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
