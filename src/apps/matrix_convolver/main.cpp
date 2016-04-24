@@ -103,11 +103,8 @@ int main( int argc, char const * const * argv )
   // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
   // back to PortAudio in all other cases.
   // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
-  bool const useNativeJack =
 #ifdef VISR_JACK_SUPPORT
-      boost::iequals(audioBackend, "JACK" );
-#else
-     false;
+  bool const useNativeJack = boost::iequals(audioBackend, "JACK" );
 #endif
 
    std::unique_ptr<visr::ril::AudioInterface> audioInterface;

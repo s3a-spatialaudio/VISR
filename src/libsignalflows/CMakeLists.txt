@@ -1,8 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( SOURCES baseline_renderer.cpp matrix_convolver.cpp delay_vector.cpp gain_matrix.cpp )
+SET( SOURCES baseline_renderer.cpp delay_vector.cpp gain_matrix.cpp matrix_convolver.cpp)
 
 # Basically, this makes the headers show up in the Visual studio project.
-SET( HEADERS baseline_renderer.hpp matrix_convolver.hpp delay_vector.hpp gain_matrix.hpp )
+SET( HEADERS baseline_renderer.hpp delay_vector.hpp gain_matrix.hpp matrix_convolver.hpp )
 
 ADD_LIBRARY( signalflows STATIC ${SOURCES} ${HEADERS} )

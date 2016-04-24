@@ -34,7 +34,7 @@ namespace
   }
 }
 
-MatrixConvolver::ConvolverMatrix( std::size_t numberOfInputs,
+MatrixConvolver::MatrixConvolver( std::size_t numberOfInputs,
                                   std::size_t numberOfOutputs,
                                   std::size_t filterLength,
                                   std::size_t maxFilters,
@@ -64,7 +64,7 @@ MatrixConvolver::ConvolverMatrix( std::size_t numberOfInputs,
   setInitialised( true );
 }
 
-MatrixConvolver::~ConvolverMatrix( )
+MatrixConvolver::~MatrixConvolver( )
 {
 }
  

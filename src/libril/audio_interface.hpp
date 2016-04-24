@@ -72,7 +72,7 @@ public:
   //@}
 
   /** 
-   * Status returned by the callback initialed by the audio interface
+   * Status returned by the callback initialised by the audio interface
    * Maybe we replace this by an enumeration later 
    */
   using CallbackResult = int;

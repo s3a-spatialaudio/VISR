@@ -11,6 +11,8 @@ SET( HEADERS init_filter_matrix.hpp options.hpp )
 
 ADD_EXECUTABLE( matrix_convolver_app ${SOURCES} ${HEADERS} )
 
+SET_TARGET_PROPERTIES( matrix_convolver_app PROPERTIES OUTPUT_NAME matrix_convolver )
+
 TARGET_LINK_LIBRARIES(matrix_convolver_app apputilities)
 TARGET_LINK_LIBRARIES(matrix_convolver_app signalflows)
 TARGET_LINK_LIBRARIES(matrix_convolver_app rcl)
