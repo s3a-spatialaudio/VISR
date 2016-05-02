@@ -7,9 +7,9 @@
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>
 
+#include <ciso646>
 #include <cstdint>
 #include <fstream>
-//#include <ostream>
 #include <stdexcept>
 #include <string>
 
