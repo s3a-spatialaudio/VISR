@@ -1,22 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#define USE_INTEL_INTRINSICS 0
+
 #include "vector_functions.hpp"
 
-#include "alignment.hpp"
-
-#include <complex>
-
-// avoid annoying warning about unsafe STL functions.
-#ifdef _MSC_VER 
-#pragma warning(disable: 4996)
-#endif
-
-// for intel platforms: TODO: Lookup correct file name for Linux and MacOS!
-#include <immintrin.h>
-
-#include <algorithm>
-#include <ciso646> // should not be necessary for c++11, but MSVC needs it somehow
-#include <functional>
+// Directly include the template definitions to avoid an additional call.
+#include "vector_functions_reference_impl.hpp"
 
 namespace visr
 {
@@ -26,9 +15,7 @@ namespace efl
 template <typename T>
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( dest, alignment ) ) return alignmentError;
-  std::fill( &dest[0], &dest[0] + numElements, static_cast<T>(0) );
-  return noError;
+  return reference::vectorZero<T>( dest, numElements, alignment );
 }
 template ErrorCode vectorZero<float>( float * const, std::size_t, std::size_t );
 template ErrorCode vectorZero<double>( double * const, std::size_t, std::size_t );
@@ -39,9 +26,7 @@ template ErrorCode vectorZero<std::complex<double> >( std::complex<double> * con
 template <typename T>
 ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( dest, alignment ) ) return alignmentError;
-  std::fill( &dest[0], &dest[0] + numElements, value );
-  return noError;
+  return reference::vectorFill<T>( value, dest, numElements, alignment );
 }
 template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
@@ -53,13 +38,8 @@ template <typename T>
 ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
   bool startInclusive, bool endInclusive, std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( dest, alignment ) ) return alignmentError;
-  if( numElements < 2 ) return logicError; // ramps with less than 2 elements make no sense.
-  std::size_t const numSteps = numElements + 1 - (startInclusive ? 1 : 0) - (endInclusive ? 1 : 0);
-  T const step = (endVal - startVal) / static_cast<T>(numSteps);
-  std::size_t calcIdx( startInclusive ? 0 : 1 );
-  std::generate( dest, dest + numElements, [&] { return startVal + static_cast<T>(calcIdx++) * step; } );
-  return noError;
+  return reference::vectorRamp<T>( dest, numElements, startVal, endVal,
+				 startInclusive, endInclusive, alignment );
 }
 // explicit instantiations
 template ErrorCode vectorRamp( float * const, std::size_t, float, float, bool, bool, std::size_t );
@@ -68,10 +48,7 @@ template ErrorCode vectorRamp( double * const, std::size_t, double, double, bool
 template <typename T>
 ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( source, alignment ) ) return alignmentError;
-  if( not checkAlignment( dest, alignment ) ) return alignmentError;
-  std::copy( &source[0], &source[0] + numElements, &dest[0] );
-  return noError;
+  return reference::vectorCopy<T>( source, dest, numElements, alignment );
 }
 template ErrorCode vectorCopy<float>( float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorCopy<double>( double const * const, double * const, std::size_t, std::size_t );
@@ -80,18 +57,12 @@ template ErrorCode vectorCopy<std::complex<double> >( std::complex<double> const
 
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,
-         T const * const op2,
-         T * const result,
-         std::size_t numElements,
-         std::size_t alignment /*= 0*/ )
+		     T const * const op2,
+		     T * const result,
+		     std::size_t numElements,
+		     std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( op1, alignment ) ) return alignmentError;
-  if( not checkAlignment( op2, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-  std::transform( op1, op1+numElements, op2, result, [&](T const & a, T const& b){return a+b;} ); // c++11 way, using a lambda function
-  // std::transform( op1, op1+numElements, op2, result, std::plus<T>() ); // c++0x way, using standard function object
-
-  return noError;
+  return reference::vectorAdd<T>( op1, op2, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorAdd<float>( float const * const, float const * const ,
@@ -105,13 +76,7 @@ ErrorCode vectorAddInplace( T const * const op1,
                             std::size_t numElements,
                             std::size_t alignment /*= 0*/ )
 {
-  if (not checkAlignment(op1, alignment)) return alignmentError;
-  if (not checkAlignment(op2Result, alignment)) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    op2Result[idx] += op1[idx];
-  }
-  return noError;
+  return reference::vectorAddInplace<T>( op1, op2Result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorAddInplace<float>( float const * const,
@@ -126,12 +91,7 @@ ErrorCode vectorAddConstant( T constantValue,
            std::size_t numElements,
            std::size_t alignment /*= 0*/ )
 {
-  if (not checkAlignment(op, alignment)) return alignmentError;
-  if (not checkAlignment(result, alignment)) return alignmentError;
-
-  std::transform(op, op + numElements, result, [=](T const & x){return x + constantValue; });
-
-  return noError;
+  return reference::vectorAddConstant<T>( constantValue, op, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorAddConstant<float>( float, float const * const,
@@ -145,10 +105,7 @@ ErrorCode vectorAddConstantInplace( T constantValue,
             std::size_t numElements,
             std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( opResult, alignment ) ) return alignmentError;
-  std::for_each( opResult, opResult + numElements,
-     [=](T const & x){return x + constantValue;} );
-  return noError;
+  return reference::vectorAddConstantInplace<T>( constantValue, opResult, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorAddConstantInplace<float>( float, float * const, std::size_t, std::size_t );
@@ -161,12 +118,7 @@ ErrorCode vectorSubtract( T const * const subtrahend,
                           std::size_t numElements,
                           std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( subtrahend, alignment ) ) return alignmentError;
-  if( not checkAlignment( minuend, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-
-  std::transform( subtrahend, subtrahend + numElements, minuend, result, [=]( T x, T y ) { return x + y; } );
-  return noError;
+  return reference::vectorSubtract<T>( subtrahend, minuend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorSubtract( float const * const, float const * const, float * const, std::size_t, std::size_t );
@@ -178,13 +130,7 @@ ErrorCode vectorSubtractInplace( T const * const minuend,
                                  std::size_t numElements,
                                  std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( minuend, alignment ) ) return alignmentError;
-  if( not checkAlignment( subtrahendResult, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    subtrahendResult[idx] -= minuend[idx];
-  }
-  return noError;
+  return reference::vectorSubtractInplace<T>( minuend, subtrahendResult, numElements, alignment); 
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorSubtractInplace( float const * const, float * const, std::size_t, std::size_t );
@@ -197,10 +143,7 @@ ErrorCode vectorSubtractConstant( T constantMinuend,
                                   std::size_t numElements,
                                   std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( subtrahend, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-  std::transform( subtrahend, subtrahend + numElements, result, [=]( T x ) { return x - constantMinuend; } );
-  return noError;
+  return reference::vectorSubtractConstant<T>( constantMinuend, subtrahend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorSubtractConstant( float, float const * const, float * const, std::size_t, std::size_t );
@@ -212,9 +155,7 @@ ErrorCode vectorSubConstantInplace( T constantMinuend,
                                     std::size_t numElements,
                                     std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( subtrahendResult, alignment ) ) return alignmentError;
-  std::for_each( subtrahendResult, subtrahendResult + numElements, [=]( T& x ) { x -= constantMinuend; } );
-  return noError;
+  return reference::vectorSubConstantInplace<T>( constantMinuend, subtrahendResult, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorSubConstantInplace( float, float * const, std::size_t, std::size_t );
@@ -227,23 +168,14 @@ ErrorCode vectorMultiply( T const * const factor1,
                           std::size_t numElements,
                           std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
-  if( not checkAlignment( factor2, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    result[idx] = factor1[idx] * factor2[idx];
-  }
-  return noError;
+  return reference::vectorMultiply<T>( factor1, factor2, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiply( float const * const, float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiply( double const * const, double const * const, double * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiply( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
-#if 1
-template ErrorCode vectorMultiply( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
-#else
+#if USE_INTEL_INTRINSICS
 template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, std::complex<float> const * const factor2, std::complex<float> * const result, std::size_t numElements, std::size_t alignment )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
@@ -293,6 +225,8 @@ template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, 
   }
   return noError;
 }
+#else
+template ErrorCode vectorMultiply( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 #endif
 
 template<typename T>
@@ -301,13 +235,7 @@ ErrorCode vectorMultiplyInplace( T const * const factor1,
                                  std::size_t numElements,
                                  std::size_t alignment /* = 0 */ )
 {
-  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
-  if( not checkAlignment( factor2Result, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    factor2Result[idx] *= factor1[idx];
-  }
-  return noError;
+  return reference:: vectorMultiplyInplace<T>( factor1, factor2Result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyInplace( float const * const, float * const, std::size_t, std::size_t );
@@ -320,13 +248,7 @@ ErrorCode vectorMultiplyConstant( T constantValue,
                                   std::size_t numElements,
                                   std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factor, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    result[idx] = constantValue * factor[idx];
-  }
-  return noError;
+  return reference:: vectorMultiplyConstant<T>( constantValue, factor, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyConstant( float, float const * const, float * const, std::size_t, std::size_t );
@@ -334,16 +256,11 @@ template ErrorCode vectorMultiplyConstant( double, double const * const, double 
 
 template<typename T>
 ErrorCode vectorMultiplyConstantInplace( T constantValue,
-                                         T * const factorResult,
-                                         std::size_t numElements,
-                                         std::size_t alignment /*= 0*/ )
+					 T * const factorResult,
+					 std::size_t numElements,
+					 std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factorResult, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    factorResult[idx] *= constantValue;
-  }
-  return noError;
+  return reference::vectorMultiplyConstantInplace<T>( constantValue, factorResult, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyConstantInplace( float, float * const, std::size_t, std::size_t );
@@ -351,21 +268,13 @@ template ErrorCode vectorMultiplyConstantInplace( double, double * const, std::s
 
 template<typename T>
 ErrorCode vectorMultiplyAdd( T const * const factor1,
-  T const * const factor2,
-  T const * const addend,
-  T * const result,
-  std::size_t numElements,
-  std::size_t alignment /*= 0*/ )
+			     T const * const factor2,
+			     T const * const addend,
+			     T * const result,
+			     std::size_t numElements,
+			     std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
-  if( not checkAlignment( factor2, alignment ) ) return alignmentError;
-  if( not checkAlignment( addend, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    result[idx] = addend[idx] + factor1[idx] * factor2[idx];
-  }
-  return noError;
+  return reference::vectorMultiplyAdd<T>( factor1, factor2, addend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyAdd( float const * const, float const * const, float const * const, float * const, std::size_t, std::size_t );
@@ -375,19 +284,12 @@ template ErrorCode vectorMultiplyAdd( std::complex<double> const * const, std::c
 
 template<typename T>
 ErrorCode vectorMultiplyAddInplace( T const * const factor1,
-  T const * const factor2,
-  T * const accumulator,
-  std::size_t numElements,
-  std::size_t alignment /*= 0*/ )
+				    T const * const factor2,
+				    T * const accumulator,
+				    std::size_t numElements,
+				    std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factor1, alignment ) ) return alignmentError;
-  if( not checkAlignment( factor2, alignment ) ) return alignmentError;
-  if( not checkAlignment( accumulator, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    accumulator[idx] += factor1[idx] * factor2[idx];
-  }
-  return noError;
+  return reference::vectorMultiplyAddInplace<T>( factor1, factor2, accumulator, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyAddInplace( float const * const, float const * const, float * const, std::size_t, std::size_t );
@@ -397,20 +299,13 @@ template ErrorCode vectorMultiplyAddInplace( std::complex<double> const * const,
 
 template<typename T>
 ErrorCode vectorMultiplyConstantAdd( T constFactor,
-  T const * const factor,
-  T const * const addend,
-  T * const result,
-  std::size_t numElements,
-  std::size_t alignment /*= 0*/ )
+				     T const * const factor,
+				     T const * const addend,
+				     T * const result,
+				     std::size_t numElements,
+				     std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factor, alignment ) ) return alignmentError;
-  if( not checkAlignment( addend, alignment ) ) return alignmentError;
-  if( not checkAlignment( result, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    result[idx] = addend[idx] + constFactor * factor[idx];
-  }
-  return noError;
+  return reference::vectorMultiplyConstantAdd<T>( constFactor, factor, addend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyConstantAdd( float, float const * const, float const * const, float * const, std::size_t, std::size_t );
@@ -423,19 +318,111 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   std::size_t numElements,
   std::size_t alignment /*= 0*/ )
 {
-  if( not checkAlignment( factor, alignment ) ) return alignmentError;
-  if( not checkAlignment( accumulator, alignment ) ) return alignmentError;
-  for( std::size_t idx( 0 ); idx < numElements; ++idx )
-  {
-    accumulator[idx] += constFactor * factor[idx];
-  }
-  return noError;
+  return reference::vectorMultiplyConstantAddInplace<T>( constFactor, factor, accumulator, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
 template ErrorCode vectorMultiplyConstantAddInplace( float, float const * const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiplyConstantAddInplace( double, double const * const, double * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyConstantAddInplace( std::complex<float>, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 template ErrorCode vectorMultiplyConstantAddInplace( std::complex<double>, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
+
+#ifndef USE_INTEL_INTRINSICS
+template ErrorCode vectorMultiplyConstantAddInplace( std::complex<float>, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+#else
+template<>
+ErrorCode vectorMultiplyConstantAddInplace<std::complex<float> >( std::complex<float> constFactor,
+								  std::complex<float> const * const factor,
+								  std::complex<float> * const accumulator,
+								  std::size_t numElements,
+								  std::size_t alignment /*= 0*/ )
+{
+  float const * x = reinterpret_cast<float const *>(factor);
+  float * y = reinterpret_cast<float *>(accumulator);
+  std::size_t cnt = numElements;
+
+  if( cnt >= 4)
+  {
+    float const * cPtr = reinterpret_cast<float const *>(&constFactor);
+    __m256 cReal = _mm256_broadcast_ss( cPtr );
+    __m256 cImag = _mm256_broadcast_ss( cPtr+1 );
+    if( alignment >= 4 )
+    {
+      while( cnt >= 4 )
+      {
+        __m256 ab = _mm256_load_ps( x );
+        __m256 acbc = _mm256_mul_ps( cReal, ab );
+        __m256 ba = _mm256_shuffle_ps( ab, ab, 0xB1 );
+        __m256 acc = _mm256_load_ps( y );
+        __m256 bdad = _mm256_mul_ps( cImag, ba );
+        __m256 res = _mm256_addsub_ps( acbc, bdad );
+        __m256 fullRes = _mm256_add_ps( res, acc );
+        _mm256_store_ps( y, fullRes );
+        x += 8;
+        y += 8;
+        cnt -= 4;
+      }
+    }
+    else // Same, but with unaligned load/stores
+    {
+      while( cnt >= 4 )
+      {
+        __m256 ab = _mm256_loadu_ps( x );
+        __m256 acbc = _mm256_mul_ps( cReal, ab );
+        __m256 ba = _mm256_shuffle_ps( ab, ab, 0xB1 );
+        __m256 acc = _mm256_loadu_ps( y );
+        __m256 bdad = _mm256_mul_ps( cImag, ba );
+        __m256 res = _mm256_addsub_ps( acbc, bdad );
+        __m256 fullRes = _mm256_add_ps( res, acc );
+        _mm256_storeu_ps( y, fullRes );
+        x += 8;
+        y += 8;
+        cnt -= 4;
+      }
+    }
+  }
+  if( alignment >= 2 ) // Otherwise fall through to the scalar case.
+  {
+    __m128 cReal = _mm_set_ps1( constFactor.real() );
+    __m128 cImag = _mm_set_ps1( constFactor.imag() );
+    while( cnt >= 2 )
+    {
+      __m128 ab = _mm_load_ps( x );
+      __m128 acbc = _mm_mul_ps( cReal, ab );
+      __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
+      __m128 acc = _mm_load_ps( y );
+      __m128 bdad = _mm_mul_ps( cImag, ba );
+      __m128 res = _mm_addsub_ps( acbc, bdad );
+      res = _mm_add_ps( res, acc );
+      _mm_store_ps( y, res );
+      x += 4;
+      y += 4;
+      cnt -= 2;
+    }
+  }
+  if( cnt > 0)
+  {
+    __m128 cReal = _mm_set_ps1( constFactor.real() );
+    __m128 cImag = _mm_set_ps1( constFactor.imag() );
+    while( cnt > 0 ) // no alignment or remaining samples
+    {
+      __m64 const * xL = reinterpret_cast<__m64 const*>(x);
+      __m64 * yL = reinterpret_cast<__m64*>(y);
+
+      __m128 ab = _mm_loadl_pi( cReal, xL ); // cReal is a dummy, we don't use the upper half of the register.
+      __m128 acbc = _mm_mul_ps( cReal, ab );
+      __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
+      __m128 acc = _mm_loadl_pi( cReal, yL );
+      __m128 bdad = _mm_mul_ps( cImag, ba );
+      __m128 res = _mm_addsub_ps( acbc, bdad );
+      res = _mm_add_ps( res, acc );
+      _mm_storel_pi( yL, res );
+      x += 2;
+      y += 2;
+      --cnt;
+    }
+  }
+  return ErrorCode::noError;
+}
+#endif
 
 } // namespace efl
 } // namespace visr

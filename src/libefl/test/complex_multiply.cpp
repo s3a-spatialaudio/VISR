@@ -45,6 +45,28 @@ BOOST_AUTO_TEST_CASE( complexMultiply1 )
 
 }
 
+BOOST_AUTO_TEST_CASE( complexMultiplyConstant )
+{
+  const std::size_t alignment = 4;
+
+  std::size_t vecSize = 23;
+  efl::AlignedArray < std::complex<float> > a( vecSize, alignment );
+  std::complex<float> const c = { 0.385f, -0.75f};
+
+  efl::AlignedArray < std::complex<float> > result( vecSize, alignment );
+
+  for( std::size_t runIdx( 0 ); runIdx < vecSize; ++runIdx )
+  {
+    a[runIdx] = std::complex<float>( static_cast<float>(runIdx), -static_cast<float>(runIdx) );
+  }
+
+  efl::ErrorCode const res = efl::vectorMultiplyConstantAddInplace( c, a.data(), result.data(), vecSize, alignment );
+  BOOST_CHECK( res == efl::noError );
+
+  efl::AlignedArray < std::complex<float> > reference( vecSize, alignment );
+  std::transform( a.data( ), a.data( ) + vecSize, reference.data( ), [=]( std::complex<float> const & x ) { return x * c; } );
+}
+
 } // namespace test
 } // namespace rbbl
 } // namespace visr
