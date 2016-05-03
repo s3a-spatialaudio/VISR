@@ -4,6 +4,8 @@
 
 #include "vector_functions.hpp"
 
+#include <immintrin.h>
+
 // Directly include the template definitions to avoid an additional call.
 #include "vector_functions_reference_impl.hpp"
 
