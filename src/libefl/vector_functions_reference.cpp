@@ -12,15 +12,16 @@ namespace visr
 {
 namespace efl
 {
-namespace reference
-{
+  namespace reference
+  {
 
 #define FLOAT_TYPES (float)(double)
 #define NUMERIC_TYPES (float)(double)(std::complex<float>)(std::complex<double>)
 
 // using NumericTypesList = boost::mpl::vector<BOOST_PP_SEQ_ENUM(NUMERIC_TYPES)>;
 
-// #define EXPLICIT_INSTANTIATION_FOR_TYPE_LIST( functionName , d, types ) \
+#define EXPLICIT_INSTANTIATION_FOR_TYPE_LIST( functionName, d, typeList ) \
+  BOOST_PP_CAT( template ErrorCode, functionName);
 //   #define __FUNCTION_MACRO__( r, d, __type__ ) template ErrorCode  functionName; \
 //   BOOST_PP_SEQ_FOR_EACH( __FUNCTION_MACRO__, _, types )
 //   #undef __FUNCTION_MACRO__
@@ -28,6 +29,11 @@ namespace reference
 //Here we should use our API macro
 #define EXPLICIT_INSTANTIATION_VECTOR_ZERO(r, d, __type__) \
   template ErrorCode vectorZero<__type__>( __type__ * const, std::size_t, std::size_t );
+
+#define EXPLICIT_INSTANTIATION_FUNCTION(r, d, __type__) \
+  template ErrorCode vectorZero<__type__>( __type__ * const, std::size_t, std::size_t );
+
+
 
 // class Foo {
 // public:
