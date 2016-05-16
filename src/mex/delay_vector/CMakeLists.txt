@@ -25,6 +25,9 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX 
 # Add any extras dependencies
 target_link_libraries(${PROJECT_NAME} signalflows rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
 
+# Put directly into the mex/ subdirectory
+set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/mex" )
+
 # <AF> What to do with the install?
 # install to /bin by default
 install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex )

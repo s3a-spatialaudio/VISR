@@ -2,6 +2,7 @@
 
 #include "signal_flow.hpp"
 
+#include <libmexsupport/export_symbol.hpp>
 #include <libmexsupport/mex_wrapper.hpp>
 
 // Access the default subband number
@@ -21,6 +22,7 @@ static char const * usage()
   return "Usage: output = late_reverb_filter_calculator( objectVector, lateReverbLength [, numberOfSubbands] )";
 }
 
+VISR_MEXSUPPORT_EXPORT_SYMBOL
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 {
   using namespace visr;
