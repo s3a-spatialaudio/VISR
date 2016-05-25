@@ -91,10 +91,12 @@ LateReverbFilterCalculator::~LateReverbFilterCalculator()
 
 void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
                                         ril::SampleType lateReflectionLengthSeconds,
-                                        std::size_t numLateReflectionSubBandLevels )
+                                        std::size_t numLateReflectionSubBandLevels,
+                                        std::size_t maxUpdatesPerPeriod /* = 0 */ )
 {
   mNumberOfObjects = numberOfObjects;
   mNumberOfSubBands = numLateReflectionSubBandLevels;
+  mMaxUpdatesPerIteration = maxUpdatesPerPeriod == 0 ? mNumberOfObjects : maxUpdatesPerPeriod;
   mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * flow().samplingFrequency() ) );
 
   // Create a matrix to hold all bandpassed random sequences for all objects.
@@ -135,6 +137,7 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
 void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
   LateFilterMessageQueue & lateFilters )
 {
+  std::size_t objCnt = 0;
   while( not subBandLevels.empty() )
   {
     SubBandMessageQueue::MessageType const & val = subBandLevels.nextElement();
@@ -149,6 +152,11 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
     calculateImpulseResponse( val.first, val.second, &newFilter[0], mFilterLength );
     lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
     subBandLevels.popNextElement();
+    ++objCnt;
+    if( objCnt >= mMaxUpdatesPerIteration )
+    {
+      break;
+    }
   }
 }
 

@@ -442,6 +442,9 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   boost::optional<ril::SampleType> discreteReflectionDelayOpt = tree.get_optional<ril::SampleType>( "maxDiscreteReflectionDelay" );
   ril::SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
 
+  // The maximum number of late filter recalculations per period.
+  std::size_t const cLateFilterUpdatesPerPeriod( tree.get<std::size_t>( "lateReverbFilterUpdatesPerPeriod", 1 ));
+
   // Optional argument for the gain of the decorrelation filter for
   // the late reverb tail. 
   // The default value is 1/sqrt(#loudspeakers)
@@ -493,7 +496,9 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   mDiscreteReverbPanningMatrix.setup( mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject,
                                       arrayConfig.getNumRegularSpeakers(),
                                       interpolationSteps );
-  mLateReverbFilterCalculator.setup( mMaxNumReverbObjects, mLateReverbFilterLengthSeconds, objectmodel::PointSourceWithReverb::cNumberOfSubBands );
+  mLateReverbFilterCalculator.setup( mMaxNumReverbObjects, mLateReverbFilterLengthSeconds,
+                                     objectmodel::PointSourceWithReverb::cNumberOfSubBands,
+                                     cLateFilterUpdatesPerPeriod );
 
   // TODO: Add configuration parameters for maximum delay of the late reverb onset delay.
   mLateReverbGainDelay.setup( mMaxNumReverbObjects,
