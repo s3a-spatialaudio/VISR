@@ -4,9 +4,6 @@
 
 #include <boost/preprocessor/seq/for_each.hpp>
 #include <boost/preprocessor/seq/enum.hpp>
-// #include <boost/mpl/vector.hpp>
-// For testing
-#include <iostream>
 
 namespace visr
 {
@@ -32,26 +29,8 @@ namespace efl
 
 #define EXPLICIT_INSTANTIATION_FUNCTION(r, d, __type__) \
   template ErrorCode vectorZero<__type__>( __type__ * const, std::size_t, std::size_t );
-
-
-
-// class Foo {
-// public:
-//   template<class T> void read(T& value) { std::cout << value; }
-// };
-
-// #define EXPLICIT_INSTANTIATION(r, d, __type__) \
-//   template void Foo::read<__type__>(__type__&);
-
-// BOOST_PP_SEQ_FOR_EACH(EXPLICIT_INSTANTIATION, _, FLOAT_TYPES)
-
 BOOST_PP_SEQ_FOR_EACH(EXPLICIT_INSTANTIATION_VECTOR_ZERO, _, NUMERIC_TYPES)
 
-
-// template ErrorCode vectorZero<float>( float * const, std::size_t, std::size_t );
-// template ErrorCode vectorZero<double>( double * const, std::size_t, std::size_t );
-// template ErrorCode vectorZero<std::complex<float> >( std::complex<float> * const, std::size_t, std::size_t );
-// template ErrorCode vectorZero<std::complex<double> >( std::complex<double> * const, std::size_t, std::size_t );
 
 template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
