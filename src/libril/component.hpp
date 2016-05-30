@@ -41,11 +41,17 @@ public:
   /**
    *
    */
-  ~Component();
+  virtual ~Component();
+
+  /**
+   * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
+   * functionality) or a composite consisting of an interconnection of atomic (or further composite) components.
+   */
+  virtual bool isComposite() = 0;
 
   /**
    * Check whether the component has been initialised. 
-   * @Todo Remove or make sure that ist is not called frequently.
+   * @todo Remove or make sure that ist is not called frequently.
    */
   //@{
 #if 1

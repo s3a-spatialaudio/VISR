@@ -27,6 +27,13 @@ public:
    * Destructor
    */
   ~CompositeComponent();
+
+  /**
+   * Query whether this component is composite.
+   * @return true
+   */
+  virtual bool isComposite();
+
 };
 
 } // namespace ril

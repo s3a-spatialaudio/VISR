@@ -16,5 +16,10 @@ AtomicComponent::~AtomicComponent()
 {
 }
 
+bool AtomicComponent::isComposite()
+{
+  return false;
+}
+
 } // namespace ril
 } // namespace visr

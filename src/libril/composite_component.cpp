@@ -16,5 +16,10 @@ CompositeComponent::~CompositeComponent()
 {
 }
 
+bool CompositeComponent::isComposite()
+{
+  return true;
+}
+
 } // namespace ril
 } // namespace visr

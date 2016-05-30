@@ -5,6 +5,7 @@
 
 #include "audio_interface.hpp"
 #include "audio_port.hpp"
+#include "composite_component.hpp"
 #include "constants.hpp"
 
 #include <array>

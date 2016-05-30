@@ -28,6 +28,12 @@ public:
    *
    */
   ~AtomicComponent();
+
+  /**
+  * Query whether this component is composite.
+  * @return false
+  */
+  virtual bool isComposite();
  };
 
 } // namespace ril
