@@ -25,6 +25,10 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX 
 # Add any extras dependencies
 target_link_libraries(${PROJECT_NAME} signalflows rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
 
+IF( BUILD_USE_IPP )
+  TARGET_LINK_LIBRARIES(${APPLICATION_NAME} ${IPP_LIB_S} ${IPP_LIB_CORE} )
+ENDIF( BUILD_USE_IPP )
+
 # <AF> What to do with the install?
 # install to /bin by default
 install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex )

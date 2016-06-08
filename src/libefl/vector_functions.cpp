@@ -8,6 +8,11 @@
 #include <immintrin.h>
 #endif
 
+#include <intrin.h>
+
+#include <iostream>
+
+
 // Directly include the template definitions to avoid an additional call.
 #include "vector_functions_reference_impl.hpp"
 
@@ -15,6 +20,16 @@ namespace visr
 {
 namespace efl
 {
+
+void getCpuId()
+{
+  int id[4];
+  const int functionId = 0x01;
+
+  __cpuid( id, functionId );
+
+  std::cout << "CPU features: " << id << std::endl;
+}
 
 template <typename T>
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )

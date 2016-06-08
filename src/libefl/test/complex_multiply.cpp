@@ -24,6 +24,8 @@ BOOST_AUTO_TEST_CASE( complexMultiply1 )
 {
   const std::size_t alignment = 0;
 
+  efl::getCpuId();
+
   std::size_t vecSize = 27;
   efl::AlignedArray < std::complex<float> > a( vecSize, alignment );
   efl::AlignedArray < std::complex<float> > b( vecSize, alignment );
