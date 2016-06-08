@@ -29,13 +29,13 @@ public:
   //@}
   SampleType * operator[]( std::size_t index )
   {
-#ifndef NDEBUG
+#if 0 // #ifndef NDEBUG
     if( !initialised( ) ) {
       throw std::logic_error( "Element access forbidden while the flow is not initialised" );
     }
 #endif
     const SignalIndexType commIndex = indices( )[index];
-    return commArea( )[commIndex];
+	return mAudioBasePtr + commIndex * mAudioChannelStride;
   }
 
   SampleType * at( std::size_t index )
@@ -48,22 +48,19 @@ public:
 
   SampleType * const * getVector( )
   {
-#ifndef NDEBUG
+#if 0 // #ifndef NDEBUG
     if( !initialised( ) ) {
       throw std::logic_error( "Element access forbidden while the flow is not initialised" );
     }
 #endif
     SampleType * * ptrArray = signalPointers( );
-    CommunicationArea<SampleType> & area = commArea( );
-    for( std::size_t runIndex( 0 ); runIndex < width( ); ++runIndex ) {
-      SampleType * tempPtr = area.at( indices( )[runIndex] );
-
+    for( std::size_t runIndex( 0 ); runIndex < width( ); ++runIndex )
+	{
       // TODO: sort out the const_cast issue later on!
-      ptrArray[runIndex] = const_cast<visr::ril::SampleType*>(tempPtr);
+      ptrArray[runIndex] = const_cast<visr::ril::SampleType*>(operator[](runIndex));
     }
     return ptrArray;
   }
-
 private:
 };
 

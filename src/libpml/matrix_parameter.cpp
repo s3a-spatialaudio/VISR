@@ -2,6 +2,8 @@
 
 #include "matrix_parameter.hpp"
 
+#include <libril/constants.hpp>
+
 #include <sndfile.h>
 
 #include <boost/filesystem/path.hpp>
@@ -41,6 +43,12 @@ MatrixParameter<ElementType>::MatrixParameter( std::size_t numRows, std::size_t 
                                                std::initializer_list<std::initializer_list<ElementType> > const & initMtx,
                                                std::size_t alignment /*= 0*/ )
   : efl::BasicMatrix< ElementType >( numRows, numColumns, initMtx, alignment )
+{
+}
+
+template< typename ElementType >
+MatrixParameter<ElementType>::MatrixParameter(MatrixParameterConfig const & config)
+ : MatrixParameter<ElementType>( config.numberOfRows(), config.numberOfColumns(), ril::cVectorAlignmentSamples )
 {
 }
 

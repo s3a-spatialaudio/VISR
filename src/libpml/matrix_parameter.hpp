@@ -3,7 +3,12 @@
 #ifndef VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED
 #define VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED
 
+#include "matrix_parameter_config.hpp"
+
 #include <libefl/basic_matrix.hpp>
+
+#include <libril/parameter_type.hpp>
+#include <libril/typed_parameter_base.hpp>
 
 #include <initializer_list>
 #include <istream>
@@ -19,7 +24,8 @@ namespace pml
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType>
-class MatrixParameter: public efl::BasicMatrix<ElementType>
+class MatrixParameter: public efl::BasicMatrix<ElementType>,
+	                   public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterType::MatrixFloat >
 {
 public:
   /**
@@ -27,6 +33,8 @@ public:
    * @param alignment The alignment of the data, given in in multiples of the eleement size.
    */
   MatrixParameter( std::size_t alignment = 0 );
+
+  explicit MatrixParameter(MatrixParameterConfig const & config);
 
   /**
    * Construct a parameter matrix with the given dimensions.

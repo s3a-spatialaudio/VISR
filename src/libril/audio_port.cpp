@@ -60,25 +60,29 @@ AudioPort::AudioPort( Component& container, std::size_t width )
 AudioPort::~AudioPort()
 {}
 
-
 void AudioPort::setWidth( std::size_t newWidth )
 {
+#if 0
   if( initialised() )
   {
     throw std::logic_error( "AudioPort::setWidth must not be called while the system is initialised." );
   }
+#endif
   mIndices.resize( newWidth, AudioPort::SignalIndexType(cInvalidSignalIndex) );
   mSignalPointers.resize( newWidth, nullptr );
   mWidth = newWidth;
 }
 
+#if 0
 #ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
 bool AudioPort::initialised( ) const
 {
   return mParentComponent.initialised( );
 }
+#endif
 
-CommunicationArea<SampleType> & 
+#if 0
+CommunicationArea<SampleType> &
 AudioPort::commArea( )
 {
   return container( ).commArea( );
@@ -89,6 +93,8 @@ AudioPort::commArea( ) const
 {
   return container( ).commArea( );
 }
+#endif
+
 #endif
 
 } // namespace ril
