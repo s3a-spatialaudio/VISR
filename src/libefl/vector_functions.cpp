@@ -4,7 +4,9 @@
 
 #include "vector_functions.hpp"
 
+#ifdef USE_INTEL_INTRINSICS
 #include <immintrin.h>
+#endif
 
 // Directly include the template definitions to avoid an additional call.
 #include "vector_functions_reference_impl.hpp"
@@ -487,7 +489,12 @@ ErrorCode vectorMultiplyAddInplace<float>( float const * const factor1,
       pf2 += 8;
       __m256 acc = _mm256_load_ps( y );
       cnt -= 8;
+#ifdef __FMA__
       acc = _mm256_fmadd_ps( a, b, acc );
+#else
+      __m256 res = _mm256_mul_ps( a, b );
+      acc = _mm256_add_ps( res, acc );
+#endif
       _mm256_store_ps( y, acc );
       y += 8;
     }
@@ -502,7 +509,12 @@ ErrorCode vectorMultiplyAddInplace<float>( float const * const factor1,
       pf2 += 8;
       __m256 acc = _mm256_loadu_ps( y );
       cnt -= 8;
+#ifdef __FMA__
       acc = _mm256_fmadd_ps( a, b, acc );
+#else
+      __m256 res = _mm256_mul_ps( a, b );
+      acc = _mm256_add_ps( res, acc );
+#endif
       _mm256_storeu_ps( y, acc );
       y += 8;
     }
@@ -519,7 +531,12 @@ ErrorCode vectorMultiplyAddInplace<float>( float const * const factor1,
     pf2 += 4;
     __m128 acc = _mm_loadu_ps( y );
     cnt -= 4;
+#ifdef __FMA__
     acc = _mm_fmadd_ps( a, b, acc );
+#else
+    __m128 mulRes = _mm_mul_ps( a, b );
+    acc = _mm_add_ps( mulRes, acc );
+#endif
     _mm_storeu_ps( y, acc );
     y += 4;
   }
@@ -531,7 +548,12 @@ ErrorCode vectorMultiplyAddInplace<float>( float const * const factor1,
     ++pf2;
     __m128 acc = _mm_load_ss( y );
     --cnt;
+#ifdef __FMA__
     acc = _mm_fmadd_ss( a, b, acc );
+#else
+    __m128 mulRes = _mm_mul_ss( a, b );
+    acc = _mm_add_ss( mulRes, acc );
+#endif
     _mm_store_ss( y, acc );
     ++y;
   }
@@ -568,7 +590,12 @@ ErrorCode vectorMultiplyAddInplace<double>( double const * const factor1,
       pf2 += 4;
       __m256d acc = _mm256_load_pd( y );
       cnt -= 4;
+#ifdef __FMA__
       acc = _mm256_fmadd_pd( a, b, acc );
+#else
+      __m256d mulRes = _mm256_mul_pd( a, b );
+      acc = _mm256_mul_pd( mulRes, acc );
+#endif
       _mm256_store_pd( y, acc );
       y += 4;
     }
@@ -583,7 +610,12 @@ ErrorCode vectorMultiplyAddInplace<double>( double const * const factor1,
       pf2 += 8;
       __m256d acc = _mm256_loadu_pd( y );
       cnt -= 8;
+#ifdef __FMA__
       acc = _mm256_fmadd_pd( a, b, acc );
+#else
+      __m256d mulRes = _mm256_mul_pd( a, b );
+      acc = _mm256_mul_pd( mulRes, acc );
+#endif
       _mm256_storeu_pd( y, acc );
       y += 8;
     }
@@ -601,7 +633,12 @@ ErrorCode vectorMultiplyAddInplace<double>( double const * const factor1,
     pf2 += 2;
     __m128d acc = _mm_loadu_pd( y );
     cnt -= 2;
+#ifdef __FMA__
     acc = _mm_fmadd_pd( a, b, acc );
+#else
+    __m128d mulRes = _mm_mul_pd( a, b );
+    acc = _mm_mul_pd( mulRes, acc );
+#endif
     _mm_storeu_pd( y, acc );
     y += 2;
   }
@@ -613,7 +650,12 @@ ErrorCode vectorMultiplyAddInplace<double>( double const * const factor1,
     ++pf2;
     __m128d acc = _mm_load_sd( y );
     --cnt;
+#ifdef __FMA__
     acc = _mm_fmadd_sd( a, b, acc );
+#else
+    __m128d mulRes = _mm_mul_sd( a, b );
+    acc = _mm_mul_sd( mulRes, acc );
+#endif    
     _mm_store_sd( y, acc );
     ++y;
   }
@@ -672,7 +714,12 @@ ErrorCode vectorMultiplyConstantAddInplace< float >( float constFactor,
         x += 8;
         __m256 acc = _mm256_load_ps( y );
         cnt -= 8;
+#ifdef __FMA__
         acc = _mm256_fmadd_ps( a, c, acc ); // Note: this requires FMA
+#else
+        __m256 mulRes = _mm256_mul_ps( a, c );
+        acc = _mm256_add_ps( mulRes, acc );
+#endif
         _mm256_store_ps( y, acc );
         y += 8;
       }
@@ -685,7 +732,12 @@ ErrorCode vectorMultiplyConstantAddInplace< float >( float constFactor,
         x += 8;
         __m256 acc = _mm256_loadu_ps( y );
         cnt -= 8;
+#ifdef __FMA__
         acc = _mm256_fmadd_ps( a, c, acc ); // Note: this requires FMA
+#else
+        __m256 mulRes = _mm256_mul_ps( a, c );
+        acc = _mm256_add_ps( mulRes, acc );
+#endif
         _mm256_storeu_ps( y, acc );
         y += 8;
       }
@@ -705,7 +757,12 @@ ErrorCode vectorMultiplyConstantAddInplace< float >( float constFactor,
     x += 4;
     __m128 acc = _mm_loadu_ps( y );
     cnt -= 4;
-    acc = _mm_fmadd_ps( a, c, acc ); // Note: this requires FMA
+#ifdef __FMA__
+        acc = _mm_fmadd_ps( a, c, acc ); // Note: this requires FMA
+#else
+        __m128 mulRes = _mm_mul_ps( a, c );
+        acc = _mm_add_ps( mulRes, acc );
+#endif
     _mm_store_ps( y, acc );
     y += 4;
   }
@@ -715,7 +772,12 @@ ErrorCode vectorMultiplyConstantAddInplace< float >( float constFactor,
     ++x;
     __m128 acc = _mm_load_ss( y );
     --cnt;
-    acc = _mm_fmadd_ps( a, c, acc );
+#ifdef __FMA__
+    acc = _mm_fmadd_ss( a, c, acc ); // Note: this requires FMA
+#else
+    __m128 mulRes = _mm_mul_ss( a, c );
+    acc = _mm_add_ss( mulRes, acc );
+#endif
     _mm_store_ss( y, acc );
     ++y;
   }
