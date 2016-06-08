@@ -44,7 +44,8 @@ class PanningGainCalculator: public ril::AtomicComponent
 {
 public:
   /**
-   * Type of the gain coefficients. We use the same type as
+   * Type of the gain coefficients. We use the same type as the samples in the signal flow graph
+   * @todo maybe this should become a template parameter.
    */
   using CoefficientType = ril::SampleType;
 
