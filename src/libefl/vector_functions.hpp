@@ -12,6 +12,8 @@ namespace visr
 namespace efl
 {
 
+void getCpuId();
+
 template <typename T>
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
