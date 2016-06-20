@@ -53,6 +53,13 @@ MatrixParameter<ElementType>::MatrixParameter(MatrixParameterConfig const & conf
 }
 
 template< typename ElementType >
+MatrixParameter<ElementType>::MatrixParameter(ril::ParameterConfigBase const & config)
+ : MatrixParameter( dynamic_cast<MatrixParameter<ElementType> const &>(config) )
+{
+  // Todo: handle exceptions
+}
+
+template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( MatrixParameter<ElementType> const & rhs )
 : MatrixParameter( rhs.numberOfRows(), rhs.numberOfColumns(), rhs.alignmentElements() )
 {

@@ -34,6 +34,8 @@ public:
    */
   MatrixParameter( std::size_t alignment = 0 );
 
+  explicit MatrixParameter(ril::ParameterConfigBase const & config);
+
   explicit MatrixParameter(MatrixParameterConfig const & config);
 
   /**

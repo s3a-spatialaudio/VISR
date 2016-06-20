@@ -11,6 +11,7 @@ namespace ril
 enum class ParameterType
 {
   MatrixFloat,
+  MatrixDouble,
   VectorFloat,
   BiquadMatrixFloat
 };
