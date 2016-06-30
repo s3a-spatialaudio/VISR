@@ -135,7 +135,7 @@ int main( int argc, char const * const * argv )
 
     // Assume a fixed length for the interpolation period.
     // Ideally, this roughly matches the update rate of the scene sender.
-    const std::size_t cInterpolationLength = 2048;
+    const std::size_t cInterpolationLength = std::max( 2048ul, periodSize );
 
     /* Set up the filter matrix for the diffusion filters. */
     std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
