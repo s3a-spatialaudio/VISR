@@ -54,7 +54,7 @@ private:
     static ParameterBase* construct( ParameterConfigBase const & config )
     {
       ParameterBase* obj = new ConcreteParameterType( config );
-	  return obj;
+      return obj;
     }
   };
 

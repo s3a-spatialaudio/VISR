@@ -27,6 +27,7 @@
 #include <libpml/listener_position.hpp>
 #include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
+#include <libpml/string_parameter.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
 
@@ -115,7 +116,7 @@ private:
    */
   rcl::NullSource mNullSource;
 
-  pml::MessageQueue<std::string> mSceneMessages;
+  pml::MessageQueue<pml::StringParameter> mSceneMessages;
 
   objectmodel::ObjectVector mObjectVector;
 
@@ -138,7 +139,7 @@ private:
 
   pml::ListenerPosition mListenerPosition;
 
-  pml::MessageQueue<std::string> mTrackingMessages;
+  pml::MessageQueue<pml::StringParameter> mTrackingMessages;
 
   efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
 

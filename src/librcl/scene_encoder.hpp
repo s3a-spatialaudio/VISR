@@ -7,6 +7,8 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
+#include <libpml/string_parameter.hpp>
+
 #include <memory> // for std::unique_ptr
 #include <vector>
 
@@ -65,7 +67,7 @@ public:
    * @param objects The object vector containing the objects to be encoded.
    * @param messages The messages queue where the encoded data is going to.
    */
-  void process( objectmodel::ObjectVector const & objects, pml::MessageQueue<std::string> & messages );
+  void process( objectmodel::ObjectVector const & objects, pml::MessageQueue<pml::StringParameter> & messages );
 
 private:
 };

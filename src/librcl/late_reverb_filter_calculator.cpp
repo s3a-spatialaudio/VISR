@@ -36,6 +36,7 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
 {
   while( not subBandLevels.empty() )
   {
+#if 0
     SubBandMessageQueue::MessageType const & val = subBandLevels.nextElement();
     if( val.first >= mNumberOfFilters )
     {
@@ -49,6 +50,7 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
     calculateFIR( val.first, val.second, newFilter );
     lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
     subBandLevels.popNextElement();
+#endif
   }
 }
 

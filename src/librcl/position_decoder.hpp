@@ -4,6 +4,8 @@
 #define VISR_LIBRCL_POSITION_DECODER_HPP_INCLUDED
 
 #include <libril/atomic_component.hpp>
+#include <libril/parameter_type.hpp>
+
 #include <libpanning/LoudspeakerArray.h>
 #include <libefl/vector_functions.hpp>
 
@@ -15,6 +17,7 @@ namespace pml
 {
 template< typename MessageType > class MessageQueue;
 class ListenerPosition;
+class StringParameter;
 }
 
 namespace rcl
@@ -62,7 +65,7 @@ public:
    * @param messages The message queue containing JSON messages. The message queue will be emptied during the function call.
    * @param position The position object where the content of the parsed messages is written to.
    */
-  void process( pml::MessageQueue<std::string> & messages, pml::ListenerPosition & position );
+  void process( pml::MessageQueue<pml::StringParameter> & messages, pml::ListenerPosition & position );
 
 private:
 

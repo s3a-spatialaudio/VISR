@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   rcl::PositionDecoder decoder( flow, "Decoder" );
   rcl::ListenerCompensation listenerComp( flow, "ListenerCompensation");
 
-  pml::MessageQueue<std::string> posMessage; //output position for the Kinect
+  pml::MessageQueue<pml::StringParameter> posMessage; //output position for the Kinect
   const std::size_t kinectNetworkPort=8888;
 
   std::size_t const numSpeakers = 2;

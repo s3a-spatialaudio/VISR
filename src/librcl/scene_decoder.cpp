@@ -6,6 +6,7 @@
 #include <libobjectmodel/object_vector_parser.hpp>
 
 #include <libpml/message_queue.hpp>
+#include <libpml/string_parameter.hpp>
 
 #include <iostream>
 
@@ -27,7 +28,7 @@ void SceneDecoder::setup( )
 {
 }
 
-void SceneDecoder::process( pml::MessageQueue<std::string> & messages, objectmodel::ObjectVector & objects )
+void SceneDecoder::process( pml::MessageQueue<pml::StringParameter> & messages, objectmodel::ObjectVector & objects )
 {
   while( !messages.empty() )
   {

@@ -18,14 +18,14 @@ class CommunicationProtocolBase
 {
 public:
 
-  CommunicationProtocolBase() {}
+  CommunicationProtocolBase();
 
   /**
    *
    */
-  virtual ~CommunicationProtocolBase() {}
+  virtual ~CommunicationProtocolBase();
 
-  virtual ParameterType type() = 0;
+  virtual ParameterType type() const = 0;
 
 };
 

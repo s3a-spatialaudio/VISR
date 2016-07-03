@@ -6,6 +6,10 @@
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 
+#include <libril/parameter_type.hpp>
+
+#include <libpml/string_parameter.hpp>
+
 #include <vector>
 #include <utility> // for std::pair
 
@@ -13,7 +17,7 @@ namespace visr
 {
 namespace pml
 {
-template <typename ElementType> class MessageQueue;
+template< typename ElementType > class MessageQueue;
 }
 
 namespace rcl
@@ -30,9 +34,9 @@ public:
    */
   using CoefficientType = ril::SampleType;
 
-  using SubBandMessageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
+  using SubBandMessageQueue = pml::MessageQueue< pml::StringParameter >;
 
-  using LateFilterMassageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;
+  using LateFilterMassageQueue = pml::MessageQueue< pml::StringParameter >;
 
   /**
    * Constructor.

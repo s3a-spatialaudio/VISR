@@ -17,10 +17,14 @@ namespace objectmodel
 {
 class ObjectVector;
 }
+
+// Forward declarations
 namespace pml
 {
 template< typename MessageType > class MessageQueue;
+class StringParameter;
 }
+
 namespace ril
 {
 class AudioInput;
@@ -62,7 +66,7 @@ public:
   /**
    * The process function. 
    */
-  void process( pml::MessageQueue<std::string> & messages, objectmodel::ObjectVector & objects );
+  void process( pml::MessageQueue<pml::StringParameter> & messages, objectmodel::ObjectVector & objects );
 
 private:
 };

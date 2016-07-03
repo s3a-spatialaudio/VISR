@@ -3,6 +3,7 @@
 #include "udp_sender.hpp"
 
 #include <libpml/message_queue.hpp>
+#include <libpml/string_parameter.hpp>
 
 #include <boost/asio/placeholders.hpp>
 //#include <boost/asio.hpp>
@@ -69,7 +70,7 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   {
     mIoServiceWork.reset( new  boost::asio::io_service::work( *mIoService ) );
   }
-  mInternalMessageBuffer.reset( new pml::MessageQueue< std::string >( ) );
+  mInternalMessageBuffer.reset( new pml::MessageQueue< pml::StringParameter >( ) );
 
   udp::resolver resolver( *mIoService );
   udp::resolver::query query( udp::v4( ), receiverAddress, std::to_string(receiverPort) );
@@ -89,7 +90,7 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   }
 }
 
-void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
+void UdpSender::process( pml::MessageQueue<pml::StringParameter> & msgQueue )
 {
   switch( mMode )
   {
@@ -97,7 +98,7 @@ void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
     // we don't operate an internal message queue in this mode.
     while( !msgQueue.empty( ) )
     {
-      std::string const & nextMsg = msgQueue.nextElement( );
+      pml::StringParameter const & nextMsg = msgQueue.nextElement( );
       // boost::system::error_code err;
       std::size_t bytesSent = mSocket->send_to( boost::asio::buffer(nextMsg.c_str(), nextMsg.size()), mRemoteEndpoint );
       if( bytesSent != nextMsg.size() )
@@ -115,7 +116,7 @@ void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
       while( !msgQueue.empty() )
       {
         std::string const & nextMsg = msgQueue.nextElement();
-        mInternalMessageBuffer->enqueue( nextMsg );
+        mInternalMessageBuffer->enqueue( pml::StringParameter( nextMsg ) );
         msgQueue.popNextElement();
       }
       if( not mInternalMessageBuffer->empty() and not transmissionPending )

@@ -28,11 +28,11 @@ void SceneEncoder::setup( )
 {
 }
 
-void SceneEncoder::process( objectmodel::ObjectVector const & objects, pml::MessageQueue<std::string> & messages )
+void SceneEncoder::process( objectmodel::ObjectVector const & objects, pml::MessageQueue<pml::StringParameter> & messages )
 {
   std::stringstream msg;
   objectmodel::ObjectVectorParser::encodeObjectVector( objects, msg );
-  messages.enqueue( msg.str() );
+  messages.enqueue( pml::StringParameter(msg.str()) );
 }
 
 } // namespace rcl

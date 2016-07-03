@@ -66,13 +66,13 @@ private:
 
   rcl::GainMatrix mMatrix;
 
-  pml::MessageQueue<std::string> mSceneMessages;
+  pml::MessageQueue<pml::StringParameter> mSceneMessages;
 
   objectmodel::ObjectVector mObjectVector;
 
   efl::BasicMatrix<ril::SampleType> mGainParameters;
 
-  pml::MessageQueue<std::string> mResendMessages;
+  pml::MessageQueue<pml::StringParameter> mResendMessages;
 };
 
 } // namespace scene_decoder

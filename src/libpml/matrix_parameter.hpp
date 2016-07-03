@@ -23,11 +23,13 @@ namespace pml
  * The template class is explicitly instantiated for the element types float and double.
  * @tparam ElementType The data type of the elements of the matrix.
  */
-template<typename ElementType>
+template<typename ElementType >
 class MatrixParameter: public efl::BasicMatrix<ElementType>,
-	                   public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterType::MatrixFloat >
+  public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterToId<MatrixParameter<ElementType> >::id >
 {
 public:
+  ril::ParameterType foo;
+
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
    * @param alignment The alignment of the data, given in in multiples of the eleement size.
@@ -96,6 +98,40 @@ private:
 };
 
 } // namespace pml
+
+namespace ril
+{
+
+template<>
+struct ParameterToId< pml::MatrixParameter<double> >
+{
+  public:
+    static const ParameterType id = ParameterType::MatrixDouble;
+};
+
+template<>
+struct ParameterToId< pml::MatrixParameter<float> >
+{
+public:
+  static const ParameterType id = ParameterType::MatrixFloat;
+};
+
+template<>
+struct IdToParameter<ParameterType::MatrixFloat>
+{
+  using Type = pml::MatrixParameter<float>;
+};
+
+template<>
+struct IdToParameter<ParameterType::MatrixDouble>
+{
+public:
+  using Type = pml::MatrixParameter<double>;
+};
+
+
+} // namespace ril
+
 } // namespace visr
 
 

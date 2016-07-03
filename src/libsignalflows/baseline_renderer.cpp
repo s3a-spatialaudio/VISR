@@ -372,13 +372,15 @@ BaselineRenderer::process()
   mDiscreteReverbPanningMatrix.setGains( mDiscreteReverbPanningGains );
   mDiscreteReverbPanningMatrix.process();
   mLateReverbFilterCalculator.process( mLateReverbFilterSubBandLevels, mLateReverbFilterIRs );
-  // TODO: Implement utility function/object/template to apply all messages in message queue to the target component
+#if 0
+// TODO: Implement utility function/object/template to apply all messages in message queue to the target component
   while( not mLateReverbFilterIRs.empty() )
   {
     rcl::LateReverbFilterCalculator::LateFilterMassageQueue::MessageType const & val = mLateReverbFilterIRs.nextElement();
     mLateReverbFilter.setFilter( val.first, &val.second[0], val.second.size() );
     mLateReverbFilterIRs.popNextElement( );
   }
+#endif
   mLateReverbFilter.process();
 
   mReverbMix.process();

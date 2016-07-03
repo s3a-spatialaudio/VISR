@@ -47,14 +47,14 @@ MatrixParameter<ElementType>::MatrixParameter( std::size_t numRows, std::size_t 
 }
 
 template< typename ElementType >
-MatrixParameter<ElementType>::MatrixParameter(MatrixParameterConfig const & config)
- : MatrixParameter<ElementType>( config.numberOfRows(), config.numberOfColumns(), ril::cVectorAlignmentSamples )
+MatrixParameter<ElementType>::MatrixParameter( MatrixParameterConfig const & config )
+: MatrixParameter<ElementType>( config.numberOfRows( ), config.numberOfColumns( ), ril::cVectorAlignmentSamples )
 {
 }
 
 template< typename ElementType >
-MatrixParameter<ElementType>::MatrixParameter(ril::ParameterConfigBase const & config)
- : MatrixParameter( dynamic_cast<MatrixParameter<ElementType> const &>(config) )
+MatrixParameter<ElementType>::MatrixParameter( ril::ParameterConfigBase const & config )
+: MatrixParameter( dynamic_cast<MatrixParameter<ElementType> const &>(config) )
 {
   // Todo: handle exceptions
 }

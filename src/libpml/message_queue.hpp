@@ -3,6 +3,8 @@
 #ifndef VISR_PML_MESSAGE_QUEUE_HPP_INCLUDED
 #define VISR_PML_MESSAGE_QUEUE_HPP_INCLUDED
 
+#include <libril/communication_protocol_base.hpp>
+
 #include <deque>
 #include <stdexcept>
 
@@ -19,13 +21,16 @@ namespace pml
  * to the same instances are appropriately secured against race conditions.
  */
 template< typename MessageTypeT >
-class MessageQueue
+class MessageQueue: public ril::CommunicationProtocolBase
 {
 public:
   /**
    * Make the message type available to code using this template.
    */
   using MessageType = MessageTypeT;
+
+  ril::ParameterType type() const override { return ril::ParameterToId<MessageTypeT>::id; }
+
   /**
    * Default constructor, creates an empty message queue.
    */
@@ -81,7 +86,7 @@ private:
   /**
    * The internal data representation.
    */
-  std::deque<MessageType> mQueue;
+  std::deque<MessageTypeT> mQueue;
 };
 
 } // namespace pml

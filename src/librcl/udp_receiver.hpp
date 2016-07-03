@@ -6,6 +6,8 @@
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 
+#include <libpml/string_parameter.hpp>
+
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/thread/thread.hpp>
@@ -74,7 +76,7 @@ public:
   /**
    * The process function. 
    */
-  void process( pml::MessageQueue<std::string> & msgQueue);
+  void process( pml::MessageQueue<pml::StringParameter> & msgQueue);
 
 private:
   void handleReceiveData( const boost::system::error_code& error,
@@ -106,7 +108,7 @@ private:
    * Internal queue of messages received asynchronously. They will be copied into the output
    *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
    */
-  std::unique_ptr< pml::MessageQueue< std::string > > mInternalMessageBuffer;
+  std::unique_ptr< pml::MessageQueue< pml::StringParameter > > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
 

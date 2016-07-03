@@ -13,8 +13,19 @@ enum class ParameterType
   MatrixFloat,
   MatrixDouble,
   VectorFloat,
-  BiquadMatrixFloat
+  BiquadMatrixFloat,
+  ObjectVector,
+  String // TODO: We need a proper string type 
 };
+
+/**
+ * Metaprogramming construct to translate a type to its corresponding ID.
+ */
+template< typename Parameter >
+struct ParameterToId {};
+
+template< ParameterType Id >
+struct IdToParameter;
 
 } // namespace ril
 } // namespace visr

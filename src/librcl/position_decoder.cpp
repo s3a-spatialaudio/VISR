@@ -4,7 +4,9 @@
 
 #include <libpml/message_queue.hpp>
 #include <libpml/listener_position.hpp>
+#include <libpml/string_parameter.hpp>
 
+#include <libril/parameter_type.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -37,7 +39,7 @@ void PositionDecoder::setup( panning::XYZ const &offsetKinect, float qw /*=1.0f*
 }
 
 
-void PositionDecoder::process( pml::MessageQueue<std::string> & messages, pml::ListenerPosition & position )
+void PositionDecoder::process( pml::MessageQueue<pml::StringParameter> & messages, pml::ListenerPosition & position )
 {
   pml::ListenerPosition newPos;
   pml::ListenerPosition foundPos;
