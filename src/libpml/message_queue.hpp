@@ -28,7 +28,16 @@ class MessageQueue: public ril::CommunicationProtocolBase
 {
 public:
 
+  /**
+   * Make the message type available to code using this template.
+   */
   using MessageType = MessageTypeT;
+
+
+  /**
+   * Provide alias for parameter configuration class type for the contained parameter values.
+   */
+  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
 
   class Input
   {
@@ -36,7 +45,7 @@ public:
     /**
      * Default constructor.
      */
-    inline Input() {}
+    Input() {}
 
     void enqueue( MessageType const & val )
     {
@@ -89,14 +98,6 @@ public:
   private:
     MessageQueue * mParent;
   };
-
-
-  /**
-   * Make the message type available to code using this template.
-   */
-  using MessageType = MessageTypeT;
-
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
 
   explicit MessageQueue( ril::ParameterConfigBase const & config );
 
