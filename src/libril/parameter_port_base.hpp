@@ -49,11 +49,11 @@ public:
    */
   virtual ~ParameterPortBase();
 
-  virtual ParameterType parameterType() = 0;
+  virtual ParameterType parameterType() const = 0;
 
-  virtual CommunicationProtocolType protocolType() = 0;
+  virtual CommunicationProtocolType protocolType() const = 0;
 
-  virtual ParameterConfigBase const & parameterConfig() = 0;
+  virtual ParameterConfigBase const & parameterConfig() const = 0;
 
 private:
   Direction const mDirection;

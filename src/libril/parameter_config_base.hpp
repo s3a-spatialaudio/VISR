@@ -10,9 +10,6 @@ namespace visr
 namespace ril
 {
 
-// Forward declarations
-// class ParameterConfig;
-
 /**
  *
  *
@@ -20,8 +17,6 @@ namespace ril
 class ParameterConfigBase
 {
 public:
-  // using ParameterType = Type;
-
   ParameterConfigBase()
   {}
 

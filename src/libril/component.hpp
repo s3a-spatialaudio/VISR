@@ -121,8 +121,8 @@ public:
   ParameterPortContainer::iterator parameterPortBegin( );
   ParameterPortContainer::iterator parameterPortEnd( );
 
-  void registerPort( ParameterPortBase *, std::string const & name );
-  bool unregisterPort( std::string const & name );
+  void registerParameterPort( ParameterPortBase *, std::string const & name );
+  bool unregisterParameterPort( std::string const & name );
 
   /**
    * @throw invalid_argument

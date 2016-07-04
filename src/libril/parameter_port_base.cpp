@@ -17,6 +17,7 @@ ParameterPortBase::ParameterPortBase( Component & parent,
   : mDirection( direction )
   , mKind( kind )
 {
+  parent.registerParameterPort( this, name );
 }
 
 ParameterPortBase::~ParameterPortBase( ) 

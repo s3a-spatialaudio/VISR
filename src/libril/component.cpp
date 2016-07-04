@@ -146,7 +146,7 @@ Component::parameterPortEnd( )
   return mParameterPorts.end( );
 }
 
-void Component::registerPort( ParameterPortBase * port, std::string const & name )
+void Component::registerParameterPort( ParameterPortBase * port, std::string const & name )
 {
   auto const insertResult = mParameterPorts.insert( std::make_pair( name, port ) );
   if( not insertResult.second )
@@ -155,7 +155,7 @@ void Component::registerPort( ParameterPortBase * port, std::string const & name
   }
 }
 
-bool Component::unregisterPort( std::string const & name )
+bool Component::unregisterParameterPort( std::string const & name )
 {
   ParameterPortContainer::iterator findIt = mParameterPorts.find( name );
   if( findIt == parameterPortEnd() )

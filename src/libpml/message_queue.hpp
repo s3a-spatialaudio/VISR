@@ -4,9 +4,13 @@
 #define VISR_PML_MESSAGE_QUEUE_HPP_INCLUDED
 
 #include <libril/communication_protocol_base.hpp>
+#include <libril/communication_protocol_type.hpp>
 
 #include <libril/parameter_type.hpp>
 #include <libril/parameter_config_base.hpp>
+
+// Temporary hack
+#include <libpml/string_parameter.hpp>
 
 #include <deque>
 #include <stdexcept>
@@ -39,13 +43,23 @@ public:
    */
   using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
 
-  class Input
+  class Output
   {
   public:
     /**
      * Default constructor.
      */
-    Input() {}
+    Output() {}
+
+    bool empty( ) const
+    {
+      return mParent->empty( );
+    }
+
+    std::size_t size( ) const
+    {
+      return mParent->numberOfElements( );
+    }
 
     void enqueue( MessageType const & val )
     {
@@ -59,13 +73,13 @@ public:
     MessageQueue * mParent;
   };
 
-  class Output
+  class Input
   {
   public:
     /**
     * Default constructor.
     */
-    inline Output() {}
+    inline Input() {}
 
     bool empty() const
     {
@@ -184,10 +198,27 @@ inline MessageQueue< MessageTypeT >::MessageQueue( )
 {
 }
 
-
-
 } // namespace pml
 } // namespace visr
 
+DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueue, visr::ril::CommunicationProtocolType::MessageQueue );
+
+//namespace visr
+//{
+//namespace ril
+//{
+//template< typename ParameterClass >
+//struct CommunicationProtocolToId< pml::MessageQueue, ParameterClass >
+//{
+//public:
+//  static const CommunicationProtocolType id = CommunicationProtocolType::MessageQueue;
+//};
+//
+//template<typename ParameterClass >
+//struct IdToCommunicationProtocol<ril::CommunicationProtocolType::MessageQueue, ParameterClass>
+//{
+//public:
+//  using ConfigType = pml::MessageQueue<ParameterClass>;
+//};
 
 #endif // VISR_PML_MESSAGE_QUEUE_HPP_INCLUDED
