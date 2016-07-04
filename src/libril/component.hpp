@@ -8,6 +8,7 @@
 
 #include <algorithm> // due to temporary definition of findPortEntry() in header.
 #include <cstddef>
+#include <map> // for parameter port subsystem
 #include <string>
 #include <vector>
 
@@ -21,6 +22,7 @@ class AudioSignalFlow;
 class AudioPort;
 class AudioInput;
 class AudioOutput;
+class ParameterPortBase; // for parameter port subsystem
 
 template< typename SampleType>
 class CommunicationArea;
@@ -108,6 +110,34 @@ public:
   PortType* getPort( const char* portName) const;
 
   /**
+   * Parameter port support
+   */
+  //@{
+  using ParameterPortContainer = std::map< std::string, ParameterPortBase*>;
+
+  ParameterPortContainer::const_iterator parameterPortBegin() const;
+  ParameterPortContainer::const_iterator parameterPortEnd( ) const;
+
+  ParameterPortContainer::iterator parameterPortBegin( );
+  ParameterPortContainer::iterator parameterPortEnd( );
+
+  void registerPort( ParameterPortBase *, std::string const & name );
+  bool unregisterPort( std::string const & name );
+
+  /**
+   * @throw invalid_argument
+   */
+  ParameterPortBase& findParameterPort( std::string const & name );
+
+  /**
+  * @throw invalid_argument
+  */
+  ParameterPortBase const& findParameterPort( std::string const & name ) const;
+
+
+  //@}
+
+  /**
    * Access the communication area.
    * @todo Should be removed from the component interface.
    * @todo find an inline way if needs to be accessed frequently.
@@ -184,6 +214,14 @@ private:
   }
 
   AudioSignalFlow& mContainingFlow;
+
+  /**
+   * Parameter port subsystem
+   */
+  //@{
+  ParameterPortContainer mParameterPorts;
+
+  //@}
 };
 
 } // namespace ril

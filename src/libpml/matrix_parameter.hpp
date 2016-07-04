@@ -98,7 +98,14 @@ private:
 };
 
 } // namespace pml
+} // namespace visr
 
+#if 1
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<float>, visr::ril::ParameterType::MatrixFloat, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<double>, visr::ril::ParameterType::MatrixDouble, visr::pml::MatrixParameterConfig )
+#else
+namespace visr
+{
 namespace ril
 {
 
@@ -129,10 +136,9 @@ public:
   using Type = pml::MatrixParameter<double>;
 };
 
-
 } // namespace ril
-
 } // namespace visr
+#endif
 
 
 #endif // VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED

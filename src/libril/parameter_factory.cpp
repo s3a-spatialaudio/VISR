@@ -44,14 +44,16 @@ ParameterFactory::create(ParameterType const & type, ParameterConfigBase const &
   return std::unique_ptr<ParameterBase>( findIt->second.create( config ) );
 }
 
-struct InstantiateParameterCreators
+static struct InstantiateParameterCreators
 {
   InstantiateParameterCreators()
   {
-	ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloat );
-	ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDouble);
+    ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloat ); 
+    ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDouble);
   }
-};
+} foo;
+
+// static InstantiateParameterCreators const sFactoryInit;
 
 } // namespace ril
 } // namespace visr

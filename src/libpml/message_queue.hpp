@@ -5,6 +5,9 @@
 
 #include <libril/communication_protocol_base.hpp>
 
+#include <libril/parameter_type.hpp>
+#include <libril/parameter_config_base.hpp>
+
 #include <deque>
 #include <stdexcept>
 
@@ -24,17 +27,87 @@ template< typename MessageTypeT >
 class MessageQueue: public ril::CommunicationProtocolBase
 {
 public:
+
+  using MessageType = MessageTypeT;
+
+  class Input
+  {
+  public:
+    /**
+     * Default constructor.
+     */
+    inline Input() {}
+
+    void enqueue( MessageType const & val )
+    {
+      mParent->enqueue( val );
+    }
+
+    /**
+     * This whould not be accessible from the component.
+     */
+  private:
+    MessageQueue * mParent;
+  };
+
+  class Output
+  {
+  public:
+    /**
+    * Default constructor.
+    */
+    inline Output() {}
+
+    bool empty() const
+    {
+      return mParent->empty();
+    }
+
+    std::size_t size() const
+    {
+      return mParent->numberOfElements();
+    }
+
+    MessageType const & front() const
+    {
+      return mParent->nextElement();
+    }
+
+    void pop()
+    {
+      mParent->popNextElement();
+    }
+
+    void clear()
+    {
+      mParent->clear();
+    }
+
+    /**
+    * This whould not be accessible from the component.
+    */
+  private:
+    MessageQueue * mParent;
+  };
+
+
   /**
    * Make the message type available to code using this template.
    */
   using MessageType = MessageTypeT;
+
+  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
+
+  explicit MessageQueue( ril::ParameterConfigBase const & config );
+
+  explicit MessageQueue( ParameterConfigType const & config );
 
   ril::ParameterType type() const override { return ril::ParameterToId<MessageTypeT>::id; }
 
   /**
    * Default constructor, creates an empty message queue.
    */
-  MessageQueue() {}
+  MessageQueue();
 
   /**
    * Remove all elements from the message queue.
@@ -87,7 +160,30 @@ private:
    * The internal data representation.
    */
   std::deque<MessageTypeT> mQueue;
+
+  ParameterConfigType const mConfig;
 };
+
+template< typename MessageTypeT >
+inline MessageQueue< MessageTypeT >::MessageQueue( ril::ParameterConfigBase const & config )
+: MessageQueue( dynamic_cast<ParameterConfigType const &>(config) )
+{
+}
+
+template< typename MessageTypeT >
+inline MessageQueue< MessageTypeT >::MessageQueue( ParameterConfigType const & config )
+  : mConfig( config )
+{
+}
+
+
+template< typename MessageTypeT >
+inline MessageQueue< MessageTypeT >::MessageQueue( )
+  : mConfig( 0 )
+{
+}
+
+
 
 } // namespace pml
 } // namespace visr

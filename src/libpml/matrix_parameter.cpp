@@ -54,7 +54,7 @@ MatrixParameter<ElementType>::MatrixParameter( MatrixParameterConfig const & con
 
 template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( ril::ParameterConfigBase const & config )
-: MatrixParameter( dynamic_cast<MatrixParameter<ElementType> const &>(config) )
+: MatrixParameter( dynamic_cast<MatrixParameterConfig const &>(config) )
 {
   // Todo: handle exceptions
 }

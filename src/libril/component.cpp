@@ -6,6 +6,10 @@
 #include "audio_output.hpp"
 #include "audio_signal_flow.hpp"
 
+#include <ciso646>
+#include <exception>
+#include <utility>
+
 namespace visr
 {
 namespace ril
@@ -116,6 +120,73 @@ struct ComparePortDescriptor
 private:
   std::string const mName;
 };
+
+// Parameter port related stuff
+Component::ParameterPortContainer::const_iterator 
+Component::parameterPortBegin() const
+{
+  return mParameterPorts.begin();
+}
+
+Component::ParameterPortContainer::const_iterator 
+Component::parameterPortEnd() const
+{
+  return mParameterPorts.end();
+}
+
+Component::ParameterPortContainer::iterator
+Component::parameterPortBegin( )
+{
+  return mParameterPorts.begin( );
+}
+
+Component::ParameterPortContainer::iterator
+Component::parameterPortEnd( )
+{
+  return mParameterPorts.end( );
+}
+
+void Component::registerPort( ParameterPortBase * port, std::string const & name )
+{
+  auto const insertResult = mParameterPorts.insert( std::make_pair( name, port ) );
+  if( not insertResult.second )
+  {
+    throw std::invalid_argument( "Parameter port name already used" );
+  }
+}
+
+bool Component::unregisterPort( std::string const & name )
+{
+  ParameterPortContainer::iterator findIt = mParameterPorts.find( name );
+  if( findIt == parameterPortEnd() )
+  {
+    return false;
+  }
+  mParameterPorts.erase( findIt );
+  return true;
+}
+
+ParameterPortBase & 
+Component::findParameterPort( std::string const & name )
+{
+  ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
+  if( findIt == mParameterPorts.end( ) )
+  {
+    throw std::invalid_argument( "No parameter port with this name exists." );
+  }
+  return *(findIt->second);
+}
+
+ParameterPortBase const & 
+Component::findParameterPort( std::string const & name ) const
+{
+  ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
+  if( findIt == mParameterPorts.end() )
+  {
+    throw std::invalid_argument( "No parameter port with this name exists." );
+  }
+  return *(findIt->second);
+}
 
 } // namespace ril
 } // namespace visr

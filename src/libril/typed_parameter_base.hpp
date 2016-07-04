@@ -18,11 +18,11 @@ class ParameterConfig;
  *
  *
  */
-template<class ParameterConfig, ParameterType Type >
+template<class ParameterConfigT, ParameterType TypeT >
 class TypedParameterBase: public ParameterBase
 {
 public:
-//  typedef ParameterType Type;
+  using ParameterConfigType = ParameterConfigT;
 
   TypedParameterBase()
    : ParameterBase()
@@ -35,11 +35,16 @@ public:
 
   virtual ParameterType type() override
   {
-	return Type;
+    return TypeT;
   }
 };
 
 } // namespace ril
 } // namespace visr
+
+// TODO: Check whether we can provide the lookup template specializations
+// ParameterToId, IdToParameter, and ParameterToConfigType for all types here.
+// Problem: We do not see the derived type here, only the base of the actual parameter type.
+// TODO: Is this a place for the Coriously Recurring Template Pattern?
 
 #endif // #ifndef VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
