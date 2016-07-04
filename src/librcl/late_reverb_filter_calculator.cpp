@@ -7,6 +7,7 @@
 #include <libpml/message_queue.hpp>
 
 #include <ciso646>
+#include <cmath>
 
 namespace visr
 {
