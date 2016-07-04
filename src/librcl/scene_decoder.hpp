@@ -7,6 +7,10 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
+#include <libril/parameter_input_port.hpp>
+#include <libpml/string_parameter.hpp>
+#include <libpml/message_queue.hpp>
+
 #include <memory> // for std::unique_ptr
 #include <vector>
 
@@ -16,13 +20,6 @@ namespace visr
 namespace objectmodel
 {
 class ObjectVector;
-}
-
-// Forward declarations
-namespace pml
-{
-template< typename MessageType > class MessageQueue;
-class StringParameter;
 }
 
 namespace ril
@@ -69,6 +66,7 @@ public:
   void process( pml::MessageQueue<pml::StringParameter> & messages, objectmodel::ObjectVector & objects );
 
 private:
+  ril::ParameterInputPort< pml::MessageQueue, pml::StringParameter > mDatagramInput;
 };
 
 } // namespace rcl
