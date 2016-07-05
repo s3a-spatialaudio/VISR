@@ -4,7 +4,7 @@
 #define VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
 
 #include "parameter_type.hpp"
-#include "Communication_protocol_type.hpp"
+#include "communication_protocol_type.hpp"
  
 #include <string>
 
