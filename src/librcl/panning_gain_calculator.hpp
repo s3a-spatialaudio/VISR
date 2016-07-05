@@ -3,14 +3,22 @@
 #ifndef VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
 
-#include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/constants.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
 #include <libpanning/LoudspeakerArray.h>
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
+
+#include <libpml/matrix_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/shared_data_protocol.hpp>
+
 
 #include <vector>
 
@@ -143,6 +151,18 @@ private:
    */
   std::valarray<objectmodel::LevelType> mLevels;
   //@}
+
+  /**
+   * Data type of the parmaeter ports for outgoing matrix data.
+   */
+  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >; 
+  using ListenerPositionPort = ril::ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition >;
+  using ObjectPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::ObjectVector >;
+
+  std::unique_ptr< ObjectPort > mObjectVectorInput;
+  std::unique_ptr< ListenerPositionPort > mListenerPositionInput;
+
+  std::unique_ptr< MatrixPort > mGainOutput;
 };
 
 } // namespace rcl

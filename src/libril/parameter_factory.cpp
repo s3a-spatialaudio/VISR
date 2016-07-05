@@ -3,8 +3,10 @@
 #include "parameter_factory.hpp"
 
 // evil hack: Dependency to libpml
-// #include <libpml/matrix_parameter_config.hpp>
+#include <libpml/listener_position.hpp>
 #include <libpml/matrix_parameter.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/string_parameter.hpp>
 
 #include <stdexcept>
 
@@ -48,8 +50,11 @@ static struct InstantiateParameterCreators
 {
   InstantiateParameterCreators()
   {
-    ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloat ); 
+    ParameterFactory::registerParameterType< pml::ListenerPosition>( ril::ParameterType::ListenerPosition );
+    ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloat );
     ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDouble);
+    ParameterFactory::registerParameterType< pml::ObjectVector >( ril::ParameterType::ObjectVector );
+    ParameterFactory::registerParameterType< pml::StringParameter >( ril::ParameterType::String );
   }
 } foo;
 

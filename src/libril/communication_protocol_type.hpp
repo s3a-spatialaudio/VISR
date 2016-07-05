@@ -10,7 +10,7 @@ namespace ril
 
 enum class CommunicationProtocolType
 {
-  SharedMemory,
+  SharedData,
   DoubleBuffer,
   MessageQueue
   // To be continued.

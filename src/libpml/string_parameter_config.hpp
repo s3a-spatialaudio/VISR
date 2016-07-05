@@ -17,9 +17,6 @@ namespace pml
 
 
 /**
- * A type for passing matrixes between processing components.
- * The template class is explicitly instantiated for the element types float and double.
- * @tparam ElementType The data type of the elements of the matrix.
  */
 class StringParameterConfig: public ril::ParameterConfigBase
 {

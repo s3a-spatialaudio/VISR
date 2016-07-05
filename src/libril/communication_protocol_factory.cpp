@@ -7,7 +7,7 @@
 
 // evil hack: Dependency to libpml
 // TODO: add first concrete communication protocol class.
-#include <libpml/message_queue.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <libpml/string_parameter.hpp>
 #include <libpml/matrix_parameter.hpp>
@@ -57,7 +57,7 @@ static struct InstantiateCommunicationProtocolCreators
   // todo: Add instantiations
   InstantiateCommunicationProtocolCreators()
   {
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueue< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::MatrixFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::MatrixFloat );
   }
 } // ; InstantiateCommunicationProtocolCreators const
 cInstantiateCommunicationProtocolCreators;

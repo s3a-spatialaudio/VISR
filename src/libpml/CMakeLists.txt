@@ -12,6 +12,7 @@ SET( SOURCES
  matrix_parameter_config.cpp
  message_queue.cpp
  message_queue_protocol.cpp
+ object_vector.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
@@ -31,6 +32,7 @@ SET( HEADERS
  matrix_parameter_config.hpp
  message_queue.hpp
  message_queue_protocol.hpp
+ object_vector.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
  string_parameter.hpp

@@ -14,6 +14,7 @@ enum class ParameterType
   MatrixDouble,
   VectorFloat,
   BiquadMatrixFloat,
+  ListenerPosition,
   ObjectVector,
   String // TODO: We need a proper string type 
 };

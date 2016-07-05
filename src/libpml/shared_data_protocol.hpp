@@ -37,6 +37,22 @@ public:
    */
   using MessageType = MessageTypeT;
 
+  class Input
+  {
+  public:
+    /**
+    * Default constructor.
+    */
+    Input( ) {}
+
+    MessageType data( ) const
+    {
+      return mParent->data( );
+    }
+  private:
+    SharedDataProtocol * mParent;
+  };
+
 
   /**
    * Provide alias for parameter configuration class type for the contained parameter values.
@@ -51,19 +67,9 @@ public:
      */
     Output() {}
 
-    bool empty( ) const
+    MessageType & data()
     {
-      return mParent->empty( );
-    }
-
-    std::size_t size( ) const
-    {
-      return mParent->numberOfElements( );
-    }
-
-    void enqueue( MessageType const & val )
-    {
-      mParent->enqueue( val );
+      return mParent->data( );
     }
 
     /**
@@ -73,105 +79,35 @@ public:
     SharedDataProtocol * mParent;
   };
 
-  class Input
-  {
-  public:
-    /**
-    * Default constructor.
-    */
-    inline Input() {}
-
-    bool empty() const
-    {
-      return mParent->empty();
-    }
-
-    std::size_t size() const
-    {
-      return mParent->numberOfElements();
-    }
-
-    MessageType const & front() const
-    {
-      return mParent->nextElement();
-    }
-
-    void pop()
-    {
-      mParent->popNextElement();
-    }
-
-    void clear()
-    {
-      mParent->clear();
-    }
-
-    /**
-    * This whould not be accessible from the component.
-    */
-  private:
-    SharedDataProtocol * mParent;
-  };
-
   explicit SharedDataProtocol( ril::ParameterConfigBase const & config );
 
   explicit SharedDataProtocol( ParameterConfigType const & config );
 
-  ril::ParameterType type() const override { return ril::ParameterToId<MessageTypeT>::id; }
+  ril::ParameterType type() const override { return ril::ParameterToId<MessageType>::id; }
 
-  /**
-   * Remove all elements from the message queue.
-   */
-  void clear() { mQueue.clear(); }
-
-  /**
-   * Return whether the list is empty, i.e., contains zero elements.
-   */
-  bool empty() const { return mQueue.empty(); }
-
-  /**
-   * Return the number of elements currently contained in the list.
-   */
-  std::size_t numberOfElements() const { return mQueue.size(); }
-
-  void enqueue( MessageType const & val ) { mQueue.push_front( val ); }
-
-  void enqueue( MessageType && val ) { mQueue.push_front( val ); }
-
-  /**
-   * Return the next element in the FIFO queue.
-   * @return A reference to the next element.
-   * @throw logic_error If the queue is empty
-   */
-  MessageType const& nextElement() const
+  MessageType & data()
   {
-    if( empty() )
-    {
-      throw std::logic_error( "Calling nextElement() on an empty message queue." );
-    }
-    return mQueue.back();
+    return mData;
   }
 
-  /**
-   * Remove the next output element from the list.
-   * @throw std::logic_error If the queue is empty prior to this call.
-   */
-  void popNextElement()
+  MessageType const & data( ) const
   {
-    if( empty() )
-    {
-      throw std::logic_error( "Calling nextElement() on an empty message queue." );
-    }
-    mQueue.pop_back();
+    return mData;
+  }
+
+  void setData( MessageType const & newData )
+  {
+    // TODO: Check compatibility
+    // call assign operator
   }
 
 private:
+  ParameterConfigType const mConfig;
+
   /**
    * The internal data representation.
    */
-  std::deque<MessageTypeT> mQueue;
-
-  ParameterConfigType const mConfig;
+  MessageTypeT mData;
 };
 
 template< typename MessageTypeT >
@@ -183,6 +119,7 @@ inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ril::ParameterCon
 template< typename MessageTypeT >
 inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ParameterConfigType const & config )
   : mConfig( config )
+  , mData( config )
 {
 }
 

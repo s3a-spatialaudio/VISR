@@ -9,7 +9,8 @@
 
 #include <libril/parameter_input_port.hpp>
 #include <libpml/string_parameter.hpp>
-#include <libpml/message_queue.hpp>
+#include <libpml/message_queue.hpp> // to be obsoleted
+#include <libpml/message_queue_protocol.hpp>
 
 #include <memory> // for std::unique_ptr
 #include <vector>
@@ -66,7 +67,7 @@ public:
   void process( pml::MessageQueue<pml::StringParameter> & messages, objectmodel::ObjectVector & objects );
 
 private:
-  ril::ParameterInputPort< pml::MessageQueue, pml::StringParameter > mDatagramInput;
+  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
 };
 
 } // namespace rcl

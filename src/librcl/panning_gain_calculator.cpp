@@ -57,6 +57,13 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
+
+  // Initialise the parameter ports
+  mObjectVectorInput.reset( new ObjectPort( *this, "objects", ril::ParameterPortBase::Kind::Concrete, pml::EmptyParameterConfig( ) ) );
+  mListenerPositionInput.reset( new ListenerPositionPort( *this, "listenerPosition", ril::ParameterPortBase::Kind::Concrete, pml::EmptyParameterConfig( ) ) );
+
+  pml::MatrixParameterConfig const outputMatrixConfig( mNumberOfLoudspeakers, mNumberOfObjects );
+  mGainOutput.reset( new MatrixPort( *this, "gains", ril::ParameterPortBase::Kind::Concrete, outputMatrixConfig ) );
 }
 
 void PanningGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
