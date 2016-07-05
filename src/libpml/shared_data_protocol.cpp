@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "message_queue.hpp"
+#include "shared_data_protocol.hpp"
 
 #include "matrix_parameter.hpp"
 #include "string_parameter.hpp"
@@ -13,9 +13,9 @@ namespace pml
 {
 
 // explicit instantiation
-template class MessageQueue<StringParameter>;
-template class MessageQueue<MatrixParameter<float> >;
-template class MessageQueue<MatrixParameter<double> >;
+template class SharedDataProtocol<StringParameter>;
+template class SharedDataProtocol<MatrixParameter<float> >;
+template class SharedDataProtocol<MatrixParameter<double> >;
 
 } // namespace pml
 } // namespace visr
