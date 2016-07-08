@@ -100,45 +100,7 @@ private:
 } // namespace pml
 } // namespace visr
 
-#if 1
 DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<float>, visr::ril::ParameterType::MatrixFloat, visr::pml::MatrixParameterConfig )
 DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<double>, visr::ril::ParameterType::MatrixDouble, visr::pml::MatrixParameterConfig )
-#else
-namespace visr
-{
-namespace ril
-{
-
-template<>
-struct ParameterToId< pml::MatrixParameter<double> >
-{
-  public:
-    static const ParameterType id = ParameterType::MatrixDouble;
-};
-
-template<>
-struct ParameterToId< pml::MatrixParameter<float> >
-{
-public:
-  static const ParameterType id = ParameterType::MatrixFloat;
-};
-
-template<>
-struct IdToParameter<ParameterType::MatrixFloat>
-{
-  using Type = pml::MatrixParameter<float>;
-};
-
-template<>
-struct IdToParameter<ParameterType::MatrixDouble>
-{
-public:
-  using Type = pml::MatrixParameter<double>;
-};
-
-} // namespace ril
-} // namespace visr
-#endif
-
 
 #endif // VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED

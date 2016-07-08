@@ -43,14 +43,16 @@ public:
     /**
     * Default constructor.
     */
-    Input( ) {}
+    Input( ) 
+    : mProtocol(nullptr)
+    {}
 
     MessageType data( ) const
     {
-      return mParent->data( );
+      return mProtocol ->data( );
     }
-  private:
-    SharedDataProtocol * mParent;
+  protected:  // hack to allow access by concrete port type
+    SharedDataProtocol * mProtocol ;
   };
 
 
@@ -65,25 +67,29 @@ public:
     /**
      * Default constructor.
      */
-    Output() {}
+    Output()
+    : mProtocol(nullptr)
+    {}
 
     MessageType & data()
     {
-      return mParent->data( );
+      return mProtocol ->data( );
     }
 
     /**
      * This whould not be accessible from the component.
      */
-  private:
-    SharedDataProtocol * mParent;
+  protected:  // hack to allow access by concrete port type
+    SharedDataProtocol * mProtocol ;
   };
 
   explicit SharedDataProtocol( ril::ParameterConfigBase const & config );
 
   explicit SharedDataProtocol( ParameterConfigType const & config );
 
-  ril::ParameterType type() const override { return ril::ParameterToId<MessageType>::id; }
+  ril::ParameterType parameterType( ) const override { return ril::ParameterToId<MessageType>::id; }
+
+  virtual ril::CommunicationProtocolType protocolType( ) const override { return ril::CommunicationProtocolType::SharedData; }
 
   MessageType & data()
   {

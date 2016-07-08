@@ -3,6 +3,11 @@
 #ifndef VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED
 #define VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED
 
+#include "empty_parameter_config.hpp"
+
+#include <libril/parameter_type.hpp>
+#include <libril/typed_parameter_base.hpp>
+
 #include <algorithm>
 #include <ciso646>
 #include <cstdint>
@@ -18,9 +23,9 @@ namespace pml
 {
 
 /**
- *
+ * @note Not sure whether we should introduce parameters to limit 
  */
-class SignalRoutingParameter
+class SignalRoutingParameter: public ril::TypedParameterBase < pml::EmptyParameterConfig, ril::ParameterType::SignalRouting >
 {
 public:
   using IndexType = std::size_t;
@@ -113,5 +118,6 @@ private:
 } // namespace pml
 } // namespace visr
 
+DEFINE_PARAMETER_TYPE( visr::pml::SignalRoutingParameter, visr::ril::ParameterType::SignalRouting, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED

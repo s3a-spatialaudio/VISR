@@ -3,6 +3,10 @@
 #ifndef VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
 #define VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
 
+#include "matrix_parameter_config.hpp" // might be a forward declaration
+
+#include <libril/typed_parameter_base.hpp>
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 #include <algorithm>
@@ -260,12 +264,16 @@ private:
 };
 
 template<typename CoeffType>
-class BiquadParameterMatrix
+class BiquadParameterMatrix: public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterToId< BiquadParameterMatrix<CoeffType> >::id >
 {
 public:
+  explicit BiquadParameterMatrix( MatrixParameterConfig const & config );
+
+  explicit BiquadParameterMatrix( ril::ParameterConfigBase const & config );
+
   explicit BiquadParameterMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );
 
-  ~BiquadParameterMatrix();
+  virtual ~BiquadParameterMatrix() override;
 
   std::size_t numberOfFilters() const { return mRows.size(); }
   std::size_t numberOfSections() const { return mRows.empty() ? 0 : mRows[0].size(); }
@@ -295,5 +303,7 @@ private:
 } // namespace pml
 } // namespace visr
 
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<float>, visr::ril::ParameterType::BiquadMatrixFloat, visr::pml::MatrixParameterConfig );
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<double>, visr::ril::ParameterType::BiquadMatrixDouble, visr::pml::MatrixParameterConfig );
 
 #endif // VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED

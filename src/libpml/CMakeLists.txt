@@ -7,6 +7,7 @@ SET( SOURCES
  filter_routing_parameter.cpp
  float_sequence.cpp
  index_sequence.cpp
+ indexed_value_parameter.cpp
  listener_position.cpp
  matrix_parameter.cpp
  matrix_parameter_config.cpp
@@ -17,6 +18,8 @@ SET( SOURCES
  signal_routing_parameter.cpp
  string_parameter.cpp
  string_parameter_config.cpp
+ vector_parameter.cpp
+ vector_parameter_config.cpp
 )
 
 # Basically, this makes the headers show up in the Visual studio project.
@@ -27,6 +30,7 @@ SET( HEADERS
  filter_routing_parameter.hpp
  float_sequence.hpp
  index_sequence.hpp
+ indexed_value_parameter.hpp
  listener_position.hpp
  matrix_parameter.hpp
  matrix_parameter_config.hpp
@@ -37,6 +41,8 @@ SET( HEADERS
  signal_routing_parameter.hpp
  string_parameter.hpp
  string_parameter_config.hpp
+ vector_parameter.hpp
+ vector_parameter_config.hpp
 )
 
 INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )

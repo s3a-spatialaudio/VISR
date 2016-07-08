@@ -20,9 +20,7 @@ namespace visr
   {
 
     /**
-     * A type for passing matrixes between processing components.
-     * The template class is explicitly instantiated for the element types float and double.
-     * @tparam ElementType The data type of the elements of the matrix.
+     * A type for passing strings between processing components.
      */
     class StringParameter: public std::string,
                            public ril::TypedParameterBase<StringParameterConfig, ril::ParameterType::String >
@@ -51,25 +49,6 @@ namespace visr
 } // namespace pml
 } // namespace visr
 
-#if 1
 DEFINE_PARAMETER_TYPE( visr::pml::StringParameter, visr::ril::ParameterType::String, visr::pml::StringParameterConfig )
-#else
-template<>
-struct ParameterToId< pml::StringParameter >
-{
-public:
-  static const ParameterType id = ParameterType::MatrixDouble;
-};
-
-template<>
-struct IdToParameter< ParameterType::String >
-{
-public:
-  using Type = pml::StringParameter;
-};
-#endif
-
-
-
 
 #endif // VISR_PML_STRING_PARAMETER_HPP_INCLUDED

@@ -1,16 +1,13 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PML_MESSAGE_QUEUE_PROTOCOLHPP_INCLUDED
-#define VISR_PML_MESSAGE_QUEUE_PROTOCOLHPP_INCLUDED
+#ifndef VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED
+#define VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED
 
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_type.hpp>
 
 #include <libril/parameter_type.hpp>
 #include <libril/parameter_config_base.hpp>
-
-// Temporary hack
-#include <libpml/string_parameter.hpp>
 
 #include <deque>
 #include <stdexcept>
@@ -49,28 +46,30 @@ public:
     /**
      * Default constructor.
      */
-    Output() {}
+    Output()
+      : mProtocol( nullptr )
+    {}
 
     bool empty( ) const
     {
-      return mParent->empty( );
+      return mProtocol->empty( );
     }
 
     std::size_t size( ) const
     {
-      return mParent->numberOfElements( );
+      return mProtocol ->numberOfElements( );
     }
 
     void enqueue( MessageType const & val )
     {
-      mParent->enqueue( val );
+      mProtocol ->enqueue( val );
     }
 
     /**
      * This whould not be accessible from the component.
      */
-  private:
-    MessageQueueProtocol * mParent;
+  protected: // hack to allow access by concrete port type
+    MessageQueueProtocol * mProtocol;
   };
 
   class Input
@@ -79,45 +78,46 @@ public:
     /**
     * Default constructor.
     */
-    inline Input() {}
+    Input()
+      : mProtocol( nullptr )
+    {}
 
     bool empty() const
     {
-      return mParent->empty();
+      return mProtocol ->empty();
     }
 
     std::size_t size() const
     {
-      return mParent->numberOfElements();
+      return mProtocol ->numberOfElements();
     }
 
     MessageType const & front() const
     {
-      return mParent->nextElement();
+      return mProtocol ->nextElement();
     }
 
     void pop()
     {
-      mParent->popNextElement();
+      mProtocol ->popNextElement();
     }
 
     void clear()
     {
-      mParent->clear();
+      mProtocol ->clear();
     }
 
-    /**
-    * This whould not be accessible from the component.
-    */
-  private:
-    MessageQueueProtocol * mParent;
+  protected: // hack to allow access by concrete port type
+    MessageQueueProtocol * mProtocol;
   };
 
   explicit MessageQueueProtocol( ril::ParameterConfigBase const & config );
 
   explicit MessageQueueProtocol( ParameterConfigType const & config );
 
-  ril::ParameterType type() const override { return ril::ParameterToId<MessageTypeT>::id; }
+  ril::ParameterType parameterType() const override { return ril::ParameterToId<MessageTypeT>::id; }
+
+  virtual ril::CommunicationProtocolType protocolType() const override { return ril::CommunicationProtocolType::MessageQueue; }
 
   /**
    * Remove all elements from the message queue.
@@ -191,4 +191,4 @@ inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ParameterConf
 
 DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueueProtocol, visr::ril::CommunicationProtocolType::MessageQueue );
 
-#endif // VISR_PML_MESSAGE_QUEUE_PROTOCOLHPP_INCLUDED
+#endif // VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED

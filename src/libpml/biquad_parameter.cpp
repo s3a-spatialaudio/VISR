@@ -357,6 +357,19 @@ void BiquadParameterList<CoeffType>::writeXml( std::string & str ) const
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename CoeffType>
+BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( MatrixParameterConfig const & config )
+  : BiquadParameterMatrix( config.numberOfRows(), config.numberOfColumns() )
+{
+}
+
+template<typename CoeffType>
+BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( ril::ParameterConfigBase const & config )
+  : BiquadParameterMatrix( dynamic_cast<MatrixParameterConfig const &>( config ) )
+{
+}
+
 template<typename CoeffType>
 BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads )
 {
