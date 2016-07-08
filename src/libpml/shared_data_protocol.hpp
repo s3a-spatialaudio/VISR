@@ -142,6 +142,6 @@ inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ParameterConfigTy
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::SharedDataProtocol, visr::ril::CommunicationProtocolType::SharedData );
+DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::SharedDataProtocol, visr::ril::CommunicationProtocolType::SharedData )
 
 #endif // VISR_PML_SHARED_DATA_PROTOCOL_HPP_INCLUDED

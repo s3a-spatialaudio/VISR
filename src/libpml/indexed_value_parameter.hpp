@@ -106,8 +106,8 @@ using IndexedStringType = visr::pml::IndexedValueParameter<std::size_t, std::str
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::IndexedStringType , visr::ril::ParameterType::IndexedString, visr::pml::EmptyParameterConfig );
-DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorFloatType, visr::ril::ParameterType::IndexedVectorFloat, visr::pml::EmptyParameterConfig );
-DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorDoubleType, visr::ril::ParameterType::IndexedVectorDouble, visr::pml::EmptyParameterConfig );
+DEFINE_PARAMETER_TYPE( visr::pml::IndexedStringType , visr::ril::ParameterType::IndexedString, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorFloatType, visr::ril::ParameterType::IndexedVectorFloat, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorDoubleType, visr::ril::ParameterType::IndexedVectorDouble, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_INDEXED_STRING_PARAMETER_HPP_INCLUDED

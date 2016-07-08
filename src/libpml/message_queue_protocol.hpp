@@ -199,6 +199,6 @@ inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ParameterConf
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueueProtocol, visr::ril::CommunicationProtocolType::MessageQueue );
+DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueueProtocol, visr::ril::CommunicationProtocolType::MessageQueue )
 
 #endif // VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED

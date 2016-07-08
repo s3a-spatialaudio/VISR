@@ -303,7 +303,7 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<float>, visr::ril::ParameterType::BiquadMatrixFloat, visr::pml::MatrixParameterConfig );
-DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<double>, visr::ril::ParameterType::BiquadMatrixDouble, visr::pml::MatrixParameterConfig );
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<float>, visr::ril::ParameterType::BiquadMatrixFloat, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<double>, visr::ril::ParameterType::BiquadMatrixDouble, visr::pml::MatrixParameterConfig )
 
 #endif // VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
