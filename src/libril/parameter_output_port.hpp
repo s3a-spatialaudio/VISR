@@ -28,8 +28,8 @@ public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
   explicit ParameterOutputPort( Component & parent,
-                              std::string const & name,
-                              ParameterConfigType const & paramConfig );
+                                std::string const & name,
+                                ParameterConfigType const & paramConfig );
 
   /**
    *
@@ -60,7 +60,7 @@ protected:
     {
       throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
     }
-    mProtocol= typedProtocol;
+    this->setProtocol( typedProtocol );
   }
 private:
   ParameterConfigType const mConfig;
