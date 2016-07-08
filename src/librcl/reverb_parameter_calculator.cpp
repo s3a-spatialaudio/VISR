@@ -76,8 +76,8 @@ ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0
 ReverbParameterCalculator::ReverbParameterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mMaxNumberOfObjects( 0 )
- , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig() )
  , cLateReverbParameterComparisonLimit( std::numeric_limits<ril::SampleType>::epsilon( ) )
+ , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig() )
 {
 }
 
