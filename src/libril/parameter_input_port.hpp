@@ -8,6 +8,7 @@
 #include "communication_protocol_type.hpp"
 #include "parameter_type.hpp"
 
+#include <ciso646>
 #include <string>
 
 namespace visr
@@ -28,7 +29,6 @@ public:
 
   explicit ParameterInputPort( Component & parent,
                               std::string const & name,
-                              Kind kind,
                               ParameterConfigType const & paramConfig );
 
   /**
@@ -50,7 +50,18 @@ public:
   {
     return mConfig;
   }
-
+protected:
+  void setProtocol( ril::CommunicationProtocolBase * protocol ) override
+  {
+    ProtocolT< ParameterT >* typedProtocol
+      = dynamic_cast< ProtocolT< ParameterT > * >(protocol);
+    if( not typedProtocol )
+    {
+      throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
+    }
+    mProtocol = typedProtocol;
+  }
+private:
   ParameterConfigType const mConfig;
 };
 
@@ -58,9 +69,8 @@ template< template<class> class ProtocolT, class ParameterT >
 inline ParameterInputPort<ProtocolT, ParameterT >::
 ParameterInputPort( Component & parent,
                            std::string const & name,
-                           Kind kind,
                            ParameterConfigType const & paramConfig )
-  : ParameterPortBase( parent, name, ParameterPortBase::Direction::Input, kind )
+  : ParameterPortBase( parent, name, ParameterPortBase::Direction::Input )
   , mConfig( paramConfig )
 {
 }

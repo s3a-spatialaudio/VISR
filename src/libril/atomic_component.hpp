@@ -24,6 +24,8 @@ class AtomicComponent: public Component
 public:
   explicit AtomicComponent( AudioSignalFlow& container, char const * name );
 
+  virtual void process() = 0;
+
   /**
    *
    */

@@ -7,6 +7,7 @@
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/object_vector.hpp>
 #include <libpml/string_parameter.hpp>
+#include <libpml/vector_parameter.hpp>
 
 #include <stdexcept>
 
@@ -55,6 +56,10 @@ static struct InstantiateParameterCreators
     ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDouble);
     ParameterFactory::registerParameterType< pml::ObjectVector >( ril::ParameterType::ObjectVector );
     ParameterFactory::registerParameterType< pml::StringParameter >( ril::ParameterType::String );
+    ParameterFactory::registerParameterType< pml::VectorParameter<float> >( ril::ParameterType::VectorFloat );
+    ParameterFactory::registerParameterType< pml::VectorParameter<double> >( ril::ParameterType::VectorDouble );
+    // TODO: Move to libpml (preferable decentralize instantiation into the different implementation files)
+    // TODO: Fill in all missing newly created types.
   }
 } foo;
 

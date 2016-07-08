@@ -12,11 +12,17 @@ enum class ParameterType
 {
   MatrixFloat,
   MatrixDouble,
-  VectorFloat,
   BiquadMatrixFloat,
+  BiquadMatrixDouble,
+  IndexedString, /**< Combination of an index and a string. */
+  IndexedVectorFloat,
+  IndexedVectorDouble,
   ListenerPosition,
   ObjectVector,
-  String // TODO: We need a proper string type 
+  SignalRouting,
+  String, // TODO: We need a proper string type
+  VectorFloat,
+  VectorDouble
 };
 
 /**

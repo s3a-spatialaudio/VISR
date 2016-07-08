@@ -16,7 +16,7 @@ namespace ril
 // Forward declarations
 class Component;
 enum class ParameterType;
-// enum class CommunicationProtocolType;
+class CommunicationProtocolBase;
 class ParameterConfigBase;
 
 /**
@@ -41,8 +41,7 @@ public:
 
   explicit ParameterPortBase( Component & parent,
                               std::string const & name,
-                              Direction direction,
-                              Kind kind );
+                              Direction direction );
 
   /**
    *
@@ -55,10 +54,20 @@ public:
 
   virtual ParameterConfigBase const & parameterConfig() const = 0;
 
+  void connectProtocol( ril::CommunicationProtocolBase * protocol );
+
+protected:
+  /**
+   * Type-specific method to check and set the connected protocol.
+   * @todo Reconsider interface.
+   * @throw std::invalid_argument if the protovol type does not match the concrete port type.
+   * At the moment, we use RTTI as the final check.
+   */
+  virtual void setProtocol( ril::CommunicationProtocolBase * protocol ) = 0;
 private:
   Direction const mDirection;
 
-  Kind const mKind;
+  // Kind const mKind;
 };
 
 } // namespace ril

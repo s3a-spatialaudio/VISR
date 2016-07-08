@@ -8,9 +8,12 @@
 // evil hack: Dependency to libpml
 // TODO: add first concrete communication protocol class.
 #include <libpml/message_queue_protocol.hpp>
+#include <libpml/shared_data_protocol.hpp>
 
-#include <libpml/string_parameter.hpp>
 #include <libpml/matrix_parameter.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/string_parameter.hpp>
+#include <libpml/vector_parameter.hpp>
 
 #include <stdexcept>
 
@@ -58,6 +61,14 @@ static struct InstantiateCommunicationProtocolCreators
   InstantiateCommunicationProtocolCreators()
   {
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::MatrixFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::MatrixDouble );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::StringParameter > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::String );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::MatrixFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::MatrixDouble );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::ObjectVector> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::ObjectVector );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::StringParameter> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::String );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorDouble );
   }
 } // ; InstantiateCommunicationProtocolCreators const
 cInstantiateCommunicationProtocolCreators;

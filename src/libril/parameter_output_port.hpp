@@ -8,6 +8,7 @@
 #include "communication_protocol_type.hpp"
 #include "parameter_type.hpp"
 
+#include <ciso646>
 #include <string>
 
 namespace visr
@@ -21,14 +22,13 @@ namespace ril
  */
 template< template<class> class ProtocolT, class ParameterT >
 class ParameterOutputPort: public ParameterPortBase, // Maybe make this protected or private
-                          public ProtocolT<ParameterT>::Input
+                          public ProtocolT<ParameterT>::Output
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
   explicit ParameterOutputPort( Component & parent,
                               std::string const & name,
-                              Kind kind,
                               ParameterConfigType const & paramConfig );
 
   /**
@@ -51,16 +51,27 @@ public:
     return mConfig;
   }
 
+protected:
+  void setProtocol( ril::CommunicationProtocolBase * protocol ) override
+  {
+    ProtocolT<ParameterT> * typedProtocol
+      = dynamic_cast< ProtocolT<ParameterT> * >(protocol);
+    if( not typedProtocol )
+    {
+      throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
+    }
+    mProtocol= typedProtocol;
+  }
+private:
   ParameterConfigType const mConfig;
 };
 
 template< template<class> class ProtocolT, class ParameterT >
 inline ParameterOutputPort<ProtocolT, ParameterT >::
 ParameterOutputPort( Component & parent,
-                           std::string const & name,
-                           Kind kind,
-                           ParameterConfigType const & paramConfig )
-  : ParameterPortBase( parent, name, ParameterPortBase::Direction::Output, kind )
+                     std::string const & name,
+                     ParameterConfigType const & paramConfig )
+  : ParameterPortBase( parent, name, ParameterPortBase::Direction::Output )
   , mConfig( paramConfig )
 {
 }

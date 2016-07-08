@@ -10,6 +10,9 @@ namespace visr
 namespace ril
 {
 
+// Forward declarations
+enum class CommunicationProtocolType;
+
 /**
  *
  *
@@ -25,8 +28,9 @@ public:
    */
   virtual ~CommunicationProtocolBase();
 
-  virtual ParameterType type() const = 0;
+  virtual CommunicationProtocolType protocolType() const = 0;
 
+  virtual ParameterType parameterType() const = 0;
 };
 
 } // namespace ril
