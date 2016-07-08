@@ -5,8 +5,11 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/parameter_output_port.hpp>
 
+#include <libpml/message_queue.hpp> // TODO: Replace by other data structure.
 #include <libpml/string_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -17,16 +20,6 @@
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
-namespace pml
-{
-template<typename MessageType> class MessageQueue;
-}
-
 namespace rcl
 {
 
@@ -76,7 +69,7 @@ public:
   /**
    * The process function. 
    */
-  void process( pml::MessageQueue<pml::StringParameter> & msgQueue);
+  void process() override;
 
 private:
   void handleReceiveData( const boost::system::error_code& error,
@@ -113,6 +106,8 @@ private:
   std::unique_ptr< boost::thread > mServiceThread;
 
   boost::mutex mMutex;
+
+  ril::ParameterOutputPort<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

@@ -11,15 +11,18 @@
 #endif
 
 #include "listener_compensation.hpp"
-#include <cmath>
-#include <algorithm>
 
 #include <cstdio>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
 
+#include <libpml/vector_parameter_config.hpp>
+
 #include <boost/filesystem.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 // Uncomment to get debug output
 // #define DEBUG_LISTENER_COMPENSATION 1
@@ -49,15 +52,27 @@ void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig 
 {
   m_array = arrayConfig;
   mNumberOfLoudspeakers = m_array.getNumRegularSpeakers();
+
+  pml::VectorParameterConfig const vectorConfig( mNumberOfLoudspeakers );
+
+  mPositionInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition >
+    ( *this, "positionInput", pml::EmptyParameterConfig() ) );
+  mGainOutput.reset( new ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( *this, "gainOutput", vectorConfig) );
+  mDelayOutput.reset( new ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( *this, "delayOutput", vectorConfig ) );
 }
 
-void ListenerCompensation::process(pml::ListenerPosition const & pos,
-                                   efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays)
+void ListenerCompensation::process()
 {
+  pml::ListenerPosition const & pos( mPositionInput->data());
+  efl::BasicVector<SampleType> & gains( mGainOutput->data());
+  efl::BasicVector<SampleType> & delays( mDelayOutput->data());
+
   if (gains.size() != mNumberOfLoudspeakers or delays.size() != mNumberOfLoudspeakers)
   {
     throw std::invalid_argument("ListenerCompensation::process(): The size of the gain or delay vector does not match the number of loudspeaker channels.");
   }
+
+  // At the moment, the gains are computed in every cycle.
   setListenerPosition(pos.x(), pos.y(), pos.z());
   if( calcGainComp( gains ) != 0 )
   {

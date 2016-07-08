@@ -27,6 +27,7 @@ namespace rcl
 ReverbParameterCalculator::ReverbParameterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mMaxNumberOfObjects( 0 )
+ , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig() )
 {
 }
 
@@ -41,58 +42,49 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
                                        ril::SampleType lateReflectionLengthSeconds,
                                        std::size_t numLateReflectionSubBandFilters )
 {
-    mMaxNumberOfObjects=numberOfObjects;
+  mMaxNumberOfObjects=numberOfObjects;
+
 }
 
 /**
 * The process function.
 * It takes a vector of objects as input and calculates a vector of output gains.
 */
-void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objects,
-                                         pml::SignalRoutingParameter & signalRouting,
-                                         efl::BasicVector<ril::SampleType> & discreteReflGains,
-                                         efl::BasicVector<ril::SampleType> & discreteReflDelays,
-                                         pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-                                         efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                                         LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
+void ReverbParameterCalculator::process()
 {
-    
-    int numReverbObjectsFound=0;
-    
-    for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-    {
-        
-        objectmodel::Object const & obj = *(objEntry.second);
-        if( obj.numberOfChannels() != 1 )
-        {
-            std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
-            continue;
-        }
-        
-        objectmodel::ObjectTypeId const ti = obj.type();
-        // Process reverb objects, ignore others
-        switch( ti )
-        {
-            case objectmodel::ObjectTypeId::PointSourceWithReverb:
-            {
-                numReverbObjectsFound++;
-                if( numReverbObjectsFound > mMaxNumberOfObjects )
-                {
-                    std::cerr << "ReverbParameterCalculator: max number of reverb objects exceeded." << std::endl;
-                    break;
-                }
-                processInternal(objects);
-                break;
-            }
-            default:
-            {
-                
-            }
-            
-        }
+  int numReverbObjectsFound = 0;
+  pml::ObjectVector const & objects = mObjectInput.data();
+  for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  {
 
-    } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-    
+    objectmodel::Object const & obj = *(objEntry.second);
+    if( obj.numberOfChannels() != 1 )
+    {
+      std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
+      continue;
+    }
+
+    objectmodel::ObjectTypeId const ti = obj.type();
+    // Process reverb objects, ignore others
+    switch( ti )
+    {
+    case objectmodel::ObjectTypeId::PointSourceWithReverb:
+    {
+      ++numReverbObjectsFound;
+      if( numReverbObjectsFound > mMaxNumberOfObjects )
+      {
+        std::cerr << "ReverbParameterCalculator: max number of reverb objects exceeded." << std::endl;
+        break;
+      }
+      processInternal( objects );
+      break;
+    }
+    default:
+    {
+    }
+
+    }
+  } //for( objectmodel::ObjectVector::value_type const & objEntry : objects )
 } //process
 
 

@@ -3,8 +3,13 @@
 #ifndef VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 #define VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 
-#include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/constants.hpp>
+#include <libril/parameter_input_port.hpp>
+
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/message_queue.hpp>
+#include <libpml/string_parameter.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -15,18 +20,6 @@
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
-
-namespace pml
-{
-template<typename MessageType> class MessageQueue;
-class StringParameter;
-}
-
 namespace rcl
 {
 
@@ -74,7 +67,7 @@ public:
    * The process function.
    * @param msgQueue A list of messages to be sent. The container is empty on return.
    */
-  void process( pml::MessageQueue<pml::StringParameter> & msgQueue);
+  void process() override;
 
 private:
   /**
@@ -114,6 +107,8 @@ private:
   std::unique_ptr< boost::thread > mServiceThread;
 
   boost::mutex mMutex;
+
+  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
 };
 
 } // namespace rcl

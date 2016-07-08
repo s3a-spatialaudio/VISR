@@ -3,22 +3,19 @@
 #ifndef VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
 
-#include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/constants.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
-#include <libril/parameter_type.hpp>
-
-#include <libpml/string_parameter.hpp>
+#include <libpml/indexed_value_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <vector>
 #include <utility> // for std::pair
 
 namespace visr
 {
-namespace pml
-{
-template< typename ElementType > class MessageQueue;
-}
 
 namespace rcl
 {
@@ -34,9 +31,9 @@ public:
    */
   using CoefficientType = ril::SampleType;
 
-  using SubBandMessageQueue = pml::MessageQueue< pml::StringParameter >;
+  //using SubBandMessageQueue = pml::MessageQueue< pml::StringParameter >;
 
-  using LateFilterMassageQueue = pml::MessageQueue< pml::StringParameter >;
+  //using LateFilterMassageQueue = pml::MessageQueue< pml::StringParameter >;
 
   /**
    * Constructor.
@@ -69,8 +66,7 @@ public:
    * Iterates over all entries of the subBandLevels message queue and clears it.
    * For each entry, an 
    */
-  void process( SubBandMessageQueue & subBandLevels,
-                LateFilterMassageQueue & lateFilters );
+  void process();
 
 private:
   /**
@@ -90,6 +86,9 @@ private:
   void calculateFIR( std::size_t objectIdx,
                      std::vector<ril::SampleType> const & subBandLevels,
                      std::vector<ril::SampleType> & reverbFilter );
+
+  ril::ParameterInputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> > > mSubbandInput;
+  ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> > > mFilterOutput;
 };
 
 } // namespace rcl

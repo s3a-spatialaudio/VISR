@@ -5,9 +5,10 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/object_vector_parser.hpp>
 
-#include <libpml/message_queue.hpp>
+#include <libpml/empty_parameter_config.hpp>
+#include <libpml/string_parameter_config.hpp>
 
-#include <iostream>
+#include <ciso646>
 #include <sstream>
 
 namespace visr
@@ -17,6 +18,8 @@ namespace rcl
 
 SceneEncoder::SceneEncoder( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
+ , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig( ) )
+ , mDatagramOutput( *this, "messageOutput", pml::StringParameterConfig( 32768 ) )
 {
 }
 
@@ -28,11 +31,11 @@ void SceneEncoder::setup( )
 {
 }
 
-void SceneEncoder::process( objectmodel::ObjectVector const & objects, pml::MessageQueue<pml::StringParameter> & messages )
+void SceneEncoder::process()
 {
   std::stringstream msg;
-  objectmodel::ObjectVectorParser::encodeObjectVector( objects, msg );
-  messages.enqueue( pml::StringParameter(msg.str()) );
+  objectmodel::ObjectVectorParser::encodeObjectVector( mObjectInput.data(), msg );
+  mDatagramOutput.enqueue( pml::StringParameter( msg.str( ) ) );
 }
 
 } // namespace rcl

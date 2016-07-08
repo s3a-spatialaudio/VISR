@@ -2,8 +2,7 @@
 
 #include "udp_sender.hpp"
 
-#include <libpml/message_queue.hpp>
-#include <libpml/string_parameter.hpp>
+#include <libpml/string_parameter_config.hpp>
 
 #include <boost/asio/placeholders.hpp>
 //#include <boost/asio.hpp>
@@ -23,6 +22,7 @@ namespace rcl
 UdpSender::UdpSender( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mMode( Mode::Asynchronous)
+ , mMessageInput( *this, "messageInput", pml::StringParameterConfig(32768) )
 {
 }
 
@@ -90,22 +90,22 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   }
 }
 
-void UdpSender::process( pml::MessageQueue<pml::StringParameter> & msgQueue )
+void UdpSender::process()
 {
   switch( mMode )
   {
   case Mode::Synchronous:
     // we don't operate an internal message queue in this mode.
-    while( !msgQueue.empty( ) )
+    while( !mMessageInput.empty() )
     {
-      pml::StringParameter const & nextMsg = msgQueue.nextElement( );
+      pml::StringParameter const & nextMsg = mMessageInput.front( );
       // boost::system::error_code err;
       std::size_t bytesSent = mSocket->send_to( boost::asio::buffer(nextMsg.c_str(), nextMsg.size()), mRemoteEndpoint );
       if( bytesSent != nextMsg.size() )
       {
         throw std::runtime_error( "Number of sent bytes differs from message size." );
       }
-      msgQueue.popNextElement( );
+      mMessageInput.pop( );
     }
     break;
   case Mode::Asynchronous:
@@ -113,11 +113,11 @@ void UdpSender::process( pml::MessageQueue<pml::StringParameter> & msgQueue )
     {
       boost::lock_guard<boost::mutex> lock( mMutex );
       bool const transmissionPending = not mInternalMessageBuffer->empty();
-      while( !msgQueue.empty() )
+      while( !mMessageInput.empty() )
       {
-        std::string const & nextMsg = msgQueue.nextElement();
+        std::string const & nextMsg = mMessageInput.front();
         mInternalMessageBuffer->enqueue( pml::StringParameter( nextMsg ) );
-        msgQueue.popNextElement();
+        mMessageInput.pop();
       }
       if( not mInternalMessageBuffer->empty() and not transmissionPending )
       {

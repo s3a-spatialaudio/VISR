@@ -14,7 +14,8 @@ namespace rcl
 
 SceneDecoder::SceneDecoder( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
- , mDatagramInput( *this, "datagramInput", ril::ParameterPortBase::Kind::Concrete, pml::StringParameterConfig( 255 ) )
+ , mDatagramInput( *this, "datagramInput", pml::StringParameterConfig( 255 ) )
+ , mObjectVectorOutput( *this, "objectVectorOutput", pml::EmptyParameterConfig() )
 {
 }
 
@@ -26,8 +27,9 @@ void SceneDecoder::setup( )
 {
 }
 
-void SceneDecoder::process( pml::MessageQueue<pml::StringParameter> & messages, objectmodel::ObjectVector & objects )
+void SceneDecoder::process()
 {
+  objectmodel::ObjectVector & objects = mObjectVectorOutput.data();
   while( not mDatagramInput.empty() )
   {
     std::string const & nextMsg = mDatagramInput.front();

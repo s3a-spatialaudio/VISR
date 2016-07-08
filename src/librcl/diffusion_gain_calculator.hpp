@@ -5,24 +5,20 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
+#include <libpml/vector_parameter.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/shared_data_protocol.hpp>
+
+#include <memory>
 #include <vector>
 
 namespace visr
 {
-// forward declarations
-namespace objectmodel
-{
-class ObjectVector;
-}
-namespace efl
-{
-template< typename SampleType > class BasicMatrix;
-template< typename SampleType > class BasicVector;
-}
-
 namespace rcl
 {
 
@@ -62,20 +58,12 @@ public:
   void setup( std::size_t numberOfObjectChannels );
 
   /**
-   * The process function. 
-   * It takes a vector of objects as input and calculates a vector of output gains. This variant is to enable the use of a GainMatrix component.
-   * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
-   * @param[out] gainMatrix The vector of diffusion gains for the audio channels. Must be a BasicMatrix with dimension 1 x numberOfChannelObjects.
-   */
-  void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
-
-  /**
   * The process function.
   * It takes a vector of objects as input and calculates a vector of output gains.
   * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
   * @param[out] gainVector The vector of diffusion gains for the audio channels. Must be a vector of size numberOfChannelObjects.
   */
-  void process( objectmodel::ObjectVector const & objects, efl::BasicVector<CoefficientType> & gainVector );
+  void process();
 
 private:
   /**
@@ -87,6 +75,9 @@ private:
    * Internal implementation method for the common part of both process() function.
    */
   void processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains );
+
+  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectVectorInput;
+  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::VectorParameter<CoefficientType > > > mGainOutput;
 
 };
 

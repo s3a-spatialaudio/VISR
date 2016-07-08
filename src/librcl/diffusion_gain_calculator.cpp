@@ -21,8 +21,9 @@ namespace rcl
 {
 
 DiffusionGainCalculator::DiffusionGainCalculator( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
- , mNumberOfObjectChannels( 0 )
+  : AtomicComponent( container, name )
+  , mNumberOfObjectChannels( 0 )
+  , mObjectVectorInput( *this, "objectInput", pml::EmptyParameterConfig() )
 {
 }
 
@@ -35,21 +36,13 @@ void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
   mNumberOfObjectChannels = numberOfObjectChannels;
 }
 
-void DiffusionGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainVector )
+void DiffusionGainCalculator::process()
 {
-  if( (gainVector.numberOfRows() != 1 ) or( gainVector.numberOfColumns() != mNumberOfObjectChannels ) )
-  {
-    throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a 1 x numberOfObjectChannels matrix." );
-  }
-  gainVector.zeroFill();
-  processInternal( objects, gainVector.row( 0 ) );
-}
-
-void DiffusionGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicVector<CoefficientType> & gainVector )
-{
+  objectmodel::ObjectVector const & objects = mObjectVectorInput.data();
+  pml::VectorParameter<CoefficientType> & gainVector = mGainOutput->data();
   if( (gainVector.size() != mNumberOfObjectChannels) )
   {
-    throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a vectoor with numberOfObjectChannels elements." );
+    throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a vector with numberOfObjectChannels elements." );
   }
   gainVector.zeroFill( );
   processInternal( objects, gainVector.data( ) );

@@ -37,6 +37,8 @@ namespace rcl
 PanningGainCalculator::PanningGainCalculator( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mNumberOfObjects( 0 )
+ , mObjectVectorInput( *this, "objects", pml::EmptyParameterConfig( ) )
+ , mListenerPositionInput( *this, "listenerPosition", pml::EmptyParameterConfig( ) )
 {
 }
 
@@ -58,12 +60,8 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
 
-  // Initialise the parameter ports
-  mObjectVectorInput.reset( new ObjectPort( *this, "objects", ril::ParameterPortBase::Kind::Concrete, pml::EmptyParameterConfig( ) ) );
-  mListenerPositionInput.reset( new ListenerPositionPort( *this, "listenerPosition", ril::ParameterPortBase::Kind::Concrete, pml::EmptyParameterConfig( ) ) );
+  mGainOutput.reset( new MatrixPort( *this, "gains", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
 
-  pml::MatrixParameterConfig const outputMatrixConfig( mNumberOfLoudspeakers, mNumberOfObjects );
-  mGainOutput.reset( new MatrixPort( *this, "gains", ril::ParameterPortBase::Kind::Concrete, outputMatrixConfig ) );
 }
 
 void PanningGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
@@ -80,8 +78,18 @@ void PanningGainCalculator::setListenerPosition( pml::ListenerPosition const & p
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
 
-void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix )
+void PanningGainCalculator::process()
 {
+  while( not mListenerPositionInput.empty() )
+  {
+    setListenerPosition( mListenerPositionInput.front() );
+    mListenerPositionInput.pop();
+  }
+
+  objectmodel::ObjectVector const & objects = mObjectVectorInput.data();
+
+  pml::MatrixParameter<CoefficientType> & gainMatrix = mGainOutput->data();
+
   if( (gainMatrix.numberOfRows() != mNumberOfLoudspeakers) or (gainMatrix.numberOfColumns() != mNumberOfObjects) )
   {
     throw std::invalid_argument( "PanningGainCalculator::process(): The size of the gain matrix does not match the object/loudspeaker configuration." );

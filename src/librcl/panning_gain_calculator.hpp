@@ -14,34 +14,17 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
+#include <libpml/listener_position.hpp>
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/object_vector.hpp>
 #include <libpml/shared_data_protocol.hpp>
 
-
+#include <memory>
 #include <vector>
 
 namespace visr
 {
-// forward declarations
-namespace objectmodel
-{
-class ObjectVector;
-}
-namespace efl
-{
-template< typename SampleType > class BasicMatrix;
-}
-namespace pml
-{
-class ListenerPosition;
-}
-namespace ril
-{
-class AudioInput;
-}
-
 namespace rcl
 {
 
@@ -86,18 +69,20 @@ public:
    * The process function. 
    * It takes a vector of objects as input and calculates a vector of output gains.
    */
-  void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
+  void process();
 
+
+private:
   /**
-   * Set the reference listener position. This overload accepts three cartesian coordinates.
-   * The listener positions are used beginning with the next process() call.
-   * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
-   * @param x The x coordinate [in meters]
-   * @param y The y coordinate [in meters]
-   * @param z The z coordinate [in meters]
-   * @throw std::runtime_error If the recalculation of the internal panning data fails.
-   * @todo Consider extending the interface to multiple listener positions.
-   */
+  * Set the reference listener position. This overload accepts three cartesian coordinates.
+  * The listener positions are used beginning with the next process() call.
+  * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
+  * @param x The x coordinate [in meters]
+  * @param y The y coordinate [in meters]
+  * @param z The z coordinate [in meters]
+  * @throw std::runtime_error If the recalculation of the internal panning data fails.
+  * @todo Consider extending the interface to multiple listener positions.
+  */
   void setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z );
 
   /**
@@ -110,7 +95,6 @@ public:
   */
   void setListenerPosition( pml::ListenerPosition const & pos );
 
-private:
   /**
    * The number of audio objects handled by this object.
    */
@@ -156,13 +140,16 @@ private:
    * Data type of the parmaeter ports for outgoing matrix data.
    */
   using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >; 
-  using ListenerPositionPort = ril::ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition >;
+  using ListenerPositionPort = ril::ParameterInputPort<pml::MessageQueueProtocol, pml::ListenerPosition >;
   using ObjectPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::ObjectVector >;
 
-  std::unique_ptr< ObjectPort > mObjectVectorInput;
-  std::unique_ptr< ListenerPositionPort > mListenerPositionInput;
+  ObjectPort mObjectVectorInput;
+  ListenerPositionPort mListenerPositionInput;
 
-  std::unique_ptr< MatrixPort > mGainOutput;
+  /**
+   * Needs to be instantiated as a pointer, because the ParameterConfig data is not known until the setup() method.
+   */
+  std::unique_ptr<MatrixPort> mGainOutput;
 };
 
 } // namespace rcl

@@ -5,20 +5,23 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_type.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
-#include <libpanning/LoudspeakerArray.h>
-#include <libefl/vector_functions.hpp>
+#include <libpml/listener_position.hpp>
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/shared_data_protocol.hpp>
+#include <libpml/string_parameter.hpp>
 
-
+#include <libpanning/XYZ.h>
 
 namespace visr
 {
-namespace pml
-{
-template< typename MessageType > class MessageQueue;
-class ListenerPosition;
-class StringParameter;
-}
+//namespace pml
+//{
+//class ListenerPosition;
+//class StringParameter;
+//}
 
 namespace rcl
 {
@@ -65,7 +68,7 @@ public:
    * @param messages The message queue containing JSON messages. The message queue will be emptied during the function call.
    * @param position The position object where the content of the parsed messages is written to.
    */
-  void process( pml::MessageQueue<pml::StringParameter> & messages, pml::ListenerPosition & position );
+  void process();
 
 private:
 
@@ -77,6 +80,8 @@ private:
 
   pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
 
+  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ListenerPosition > mPositionOutput;
 };
 
 } // namespace rcl

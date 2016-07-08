@@ -21,6 +21,7 @@ namespace rcl
 UdpReceiver::UdpReceiver( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mMode( Mode::Asynchronous)
+ , mDatagramOutput( *this, "messageOutput", pml::StringParameterConfig(255) )
 {
 }
 
@@ -82,7 +83,7 @@ void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* e
   }
 }
 
-void UdpReceiver::process( pml::MessageQueue<pml::StringParameter> & msgQueue )
+void UdpReceiver::process()
 {
   if(  mMode == Mode::Synchronous )
   {
@@ -92,7 +93,7 @@ void UdpReceiver::process( pml::MessageQueue<pml::StringParameter> & msgQueue )
   while( !mInternalMessageBuffer->empty() )
   {
     std::string const & nextMsg = mInternalMessageBuffer->nextElement();
-    msgQueue.enqueue( pml::StringParameter( nextMsg ) );
+    mDatagramOutput.enqueue( pml::StringParameter( nextMsg ) );
     mInternalMessageBuffer->popNextElement();
   }
 }

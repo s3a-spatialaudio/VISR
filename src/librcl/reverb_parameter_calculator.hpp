@@ -6,8 +6,16 @@
 // Preliminary solution, dependencies between components are suboptimal
 #include "late_reverb_filter_calculator.hpp"
 
-#include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/constants.hpp>
+
+#include <libpml/biquad_parameter.hpp>
+#include <libpml/matrix_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/shared_data_protocol.hpp>
+#include <libpml/signal_routing_parameter.hpp>
+#include <libpml/vector_parameter.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -24,20 +32,20 @@ namespace objectmodel
 {
 class ObjectVector;
 }
-namespace efl
-{
-template< typename SampleType > class BasicMatrix;
-template< typename SampleType > class BasicVector;
-}
-namespace pml
-{
-template <typename CoeffType> class BiquadParameterMatrix;
-class SignalRoutingParameter;
-}
-namespace ril
-{
-class AudioInput;
-}
+//namespace efl
+//{
+//template< typename SampleType > class BasicMatrix;
+//template< typename SampleType > class BasicVector;
+//}
+//namespace pml
+//{
+//template <typename CoeffType> class BiquadParameterMatrix;
+//class SignalRoutingParameter;
+//}
+//namespace ril
+//{
+//class AudioInput;
+//}
 
 namespace rcl
 {
@@ -86,13 +94,14 @@ public:
   /**
    * The process function. 
    */
-  void process( objectmodel::ObjectVector const & objects,
-                pml::SignalRoutingParameter & signalRouting,
-                efl::BasicVector<ril::SampleType> & discreteReflGains,
-                efl::BasicVector<ril::SampleType> & discreteReflDelays,
-                pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-                efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
+  void process() override;
+  //objectmodel::ObjectVector const & objects,
+  //              pml::SignalRoutingParameter & signalRouting,
+  //              efl::BasicVector<ril::SampleType> & discreteReflGains,
+  //              efl::BasicVector<ril::SampleType> & discreteReflDelays,
+  //              pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+  //              efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+  //              LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 
 private:
   /**
@@ -120,6 +129,20 @@ private:
    * Internal method to assign parameter values for a given object.
    */
   void processInternal( objectmodel::ObjectVector const & objects);
+
+  //objectmodel::ObjectVector const & objects,
+  //                                         pml::SignalRoutingParameter & signalRouting,
+  //                                         efl::BasicVector<ril::SampleType> & discreteReflGains,
+  //                                         efl::BasicVector<ril::SampleType> & discreteReflDelays,
+  //                                         pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+  //                                         efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+  //                                         LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
+  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
+  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mDiscreteReflectionGainOutput;
+  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<ril::SampleType> > > mDiscreteReflectionFilterCoeffOutput;
+  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<ril::SampleType> > > mDiscretePanningGains;
+  std::unique_ptr<ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<ril::SampleType> > > >
+    mLateSubbandOutput;
 };
 
 } // namespace rcl

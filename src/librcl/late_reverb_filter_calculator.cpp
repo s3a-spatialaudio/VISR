@@ -16,6 +16,8 @@ namespace rcl
 
 LateReverbFilterCalculator::LateReverbFilterCalculator( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
+ , mSubbandInput( *this, "subbandInput", pml::EmptyParameterConfig() )
+ , mFilterOutput( *this, "lateFilterOutput", pml::EmptyParameterConfig( ) )
 {
 }
 
@@ -32,26 +34,24 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
   mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) );
 }
 
-void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
-  LateFilterMassageQueue & lateFilters )
+void LateReverbFilterCalculator::process()
 {
-  while( not subBandLevels.empty() )
+  while( not mSubbandInput.empty() )
   {
-#if 0
-    SubBandMessageQueue::MessageType const & val = subBandLevels.nextElement();
-    if( val.first >= mNumberOfFilters )
+    pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> > const & val = mSubbandInput.front( );
+    std::size_t const idx = val.index();
+    if( idx >= mNumberOfFilters )
     {
       throw std::out_of_range( "LateReverbFilterCalculator: Object index out of range." );
     }
-    if( val.second.size() != mNumberOfSubBands )
+    if( val.value().size() != mNumberOfSubBands )
     {
       throw std::invalid_argument( "LateReverbFilterCalculator: The subband level specification has a wrong number of elements." );
     }
     std::vector<ril::SampleType> newFilter( mFilterLength );
-    calculateFIR( val.first, val.second, newFilter );
-    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
-    subBandLevels.popNextElement();
-#endif
+    calculateFIR( val.first, val.value(), newFilter );
+    mFilterOutput.enqueue( pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> >(  ) );
+    mSubbandInput.pop();
   }
 }
 
