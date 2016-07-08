@@ -8,6 +8,8 @@
 #include <libril/audio_output.hpp>
 
 #include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
+
 #include <libpml/string_parameter.hpp>
 #include <libpml/object_vector.hpp>
 #include <libpml/message_queue_protocol.hpp>
@@ -69,7 +71,7 @@ public:
 
 private:
   ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectVectorOutput;
+  ril::ParameterOutputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectVectorOutput;
 };
 
 } // namespace rcl

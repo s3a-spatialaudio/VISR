@@ -17,12 +17,6 @@
 
 namespace visr
 {
-//namespace pml
-//{
-//class ListenerPosition;
-//class StringParameter;
-//}
-
 namespace rcl
 {
 
@@ -81,7 +75,7 @@ private:
   pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
 
   ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ListenerPosition > mPositionOutput;
+  ril::ParameterOutputPort< pml::SharedDataProtocol, pml::ListenerPosition > mPositionOutput;
 };
 
 } // namespace rcl
