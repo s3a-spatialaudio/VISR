@@ -10,6 +10,8 @@
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
+#include <libmexsupport/export_symbol.hpp>
+
 #include <librbbl/multichannel_convolver_uniform.hpp>
 
 #include <mex.h> 
@@ -24,6 +26,7 @@ static char const * usage()
   return "Usage: output = multichannel_convolver( input, numberOfOutputs, blockLength, filterLength, maxRoutings, maxFilters. routings, filters )";
 }
 
+VISR_MEXSUPPORT_EXPORT_SYMBOL
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 {
   using namespace visr;

@@ -177,26 +177,19 @@ private:
 
   rcl::LateReverbFilterCalculator mLateReverbFilterCalculator;
 
+  /**
+   * Overall gain and delay for the source signals going into the late
+   * reverberation part.
+   * This is used to apply the object level, but should also apply the
+   * onset delay.
+   */
+  rcl::DelayVector mLateReverbGainDelay;
+
   rcl::FirFilterMatrix mLateReverbFilter;
 
   rcl::FirFilterMatrix mLateDiffusionFilter;
 
   rcl::Add mReverbMix;
-
-  //pml::SignalRoutingParameter mReverbRoutingParameter;
-
-  //efl::BasicVector<ril::SampleType> mDiscreteReverbDelayParameter;
-
-  //efl::BasicVector<ril::SampleType> mDiscreteReverbGainParameter;
-
-  //pml::BiquadParameterMatrix<ril::SampleType> mDiscreteReverbReflFilterParameter;
-
-  //pml::MatrixParameter<ril::SampleType> mDiscreteReverbPanningGains;
-
-  //rcl::LateReverbFilterCalculator::SubBandMessageQueue mLateReverbFilterSubBandLevels;
-
-  //rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
-
   //@}
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;

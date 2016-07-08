@@ -29,6 +29,7 @@ protected:
    * This is separated into a method because derived classes potentially need this functionality in other places.
    * @param posTree The property tree containing the coordinates (typically named "position")
    * @param x [out] Reference to hold the parsed x coordinate.
+   * @param y [out] Reference to hold the parsed y coordinate.
    * @param z [out] Reference to hold the parsed z coordinate.
    * @todo Consider making this a more general facility.
    */

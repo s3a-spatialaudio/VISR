@@ -2,6 +2,8 @@
 
 #include "baseline_renderer.hpp"
 
+#include <libefl/vector_functions.hpp>
+
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
 #include <libpanning/XYZ.h>
@@ -83,6 +85,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mDiscreteReverbReflFilters( *this, "DiscreteReverbReflectionFilters" )
  , mDiscreteReverbPanningMatrix( *this, "DiscreteReverbPanningMatrix" )
  , mLateReverbFilterCalculator( *this, "LateReverbFilterCalculator" )
+ , mLateReverbGainDelay( *this, "LateReverbGainDelay" )
  , mLateReverbFilter( *this, "LateReverbFilter" )
  , mLateDiffusionFilter( *this, "LateDiffusionFilter" )
  , mReverbMix( *this, "ReverbMix" )
@@ -92,6 +95,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mDiscreteReverbGainParameter( ril::cVectorAlignmentSamples )
  , mDiscreteReverbReflFilterParameter( 0, 0 ) // initialise as empty
  , mDiscreteReverbPanningGains()
+ , mLateReverbGainParameter( ril::cVectorAlignmentSamples )
+ , mLateReverbDelayParameter( ril::cVectorAlignmentSamples )
  , mLateReverbFilterSubBandLevels()
  , mLateReverbFilterIRs( )
 #endif
@@ -181,9 +186,10 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   // reverberation-related part
   std::size_t const reverbRoutingOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
   std::size_t const reverbDiscreteDelayOutStartIdx = reverbRoutingOutStartIdx + mMaxNumReverbObjects;
-  std::size_t const reverbDiscreteWallReflOutStartIdx = reverbDiscreteDelayOutStartIdx + mMaxNumReverbObjects;
+  std::size_t const reverbDiscreteWallReflOutStartIdx = reverbDiscreteDelayOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
   std::size_t const reverbDiscretePanningOutStartIdx = reverbDiscreteWallReflOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
-  std::size_t const reverbLateFilterOutStartIdx = reverbDiscretePanningOutStartIdx + numberOfLoudspeakers;
+  std::size_t const reverbLateGainDelayOutStartIdx = reverbDiscretePanningOutStartIdx + numberOfLoudspeakers;
+  std::size_t const reverbLateFilterOutStartIdx = reverbLateGainDelayOutStartIdx + mMaxNumReverbObjects;
   std::size_t const reverbLateDecorrOutStartIdx = reverbLateFilterOutStartIdx + 1;
   std::size_t const reverbMixOutStatIdx = reverbLateDecorrOutStartIdx + numberOfLoudspeakers;
 
@@ -205,18 +211,19 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::vector<ril::AudioPort::SignalIndexType> const reverbRoutingOutChannels = indexRange( reverbRoutingOutStartIdx, reverbDiscreteDelayOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const reverbDiscreteDelayOutChannels = indexRange( reverbDiscreteDelayOutStartIdx, reverbDiscreteWallReflOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const reverbDiscreteWallReflOutChannels = indexRange( reverbDiscreteWallReflOutStartIdx, reverbDiscretePanningOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbDiscretePanningOutChannels = indexRange( reverbDiscretePanningOutStartIdx, reverbLateFilterOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const reverbDiscretePanningOutChannels = indexRange( reverbDiscretePanningOutStartIdx, reverbLateGainDelayOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> const reverbGainDelayOutChannels = indexRange( reverbLateGainDelayOutStartIdx, reverbLateFilterOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const reverbLateFilterOutChannels = indexRange( reverbLateFilterOutStartIdx, reverbLateDecorrOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const reverbLateDecorrOutChannels = indexRange( reverbLateDecorrOutStartIdx, reverbMixOutStatIdx );
   std::vector<ril::AudioPort::SignalIndexType> const reverbMixOutChannels = indexRange( reverbMixOutStatIdx, mixOutStartIdx );
   // Construct the input channel indices for the mDiscreteReverbReflFilters, which distributes each of the
   // mMaxNumReverbObjects signals to mNumDiscreteReflectionsPerObject consecutive channels.
-  std::vector<ril::AudioPort::SignalIndexType> reverbDiscreteWallReflInChannels( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
+  std::vector<ril::AudioPort::SignalIndexType> reverbDiscreteReflDelayInChannels( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
   for( std::size_t objIdx( 0 ); objIdx < mMaxNumReverbObjects; ++objIdx )
   {
     for( std::size_t reflIdx( 0 ); reflIdx < mNumDiscreteReflectionsPerObject; ++reflIdx )
     {
-      reverbDiscreteWallReflInChannels[mNumDiscreteReflectionsPerObject*objIdx + reflIdx] = reverbDiscreteDelayOutChannels[objIdx];
+      reverbDiscreteReflDelayInChannels[mNumDiscreteReflectionsPerObject*objIdx + reflIdx] = reverbRoutingOutChannels[objIdx];
     }
   }
   // signal flow common to all object types
@@ -269,20 +276,21 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   // Reverb-specific signal path
   assignCommunicationIndices( "ReverbSignalRouting", "in", captureChannels );
   assignCommunicationIndices( "ReverbSignalRouting", "out", reverbRoutingOutChannels );
-  assignCommunicationIndices( "DiscreteReverbDelay", "in", reverbRoutingOutChannels );
+  assignCommunicationIndices( "DiscreteReverbDelay", "in", reverbDiscreteReflDelayInChannels );
   assignCommunicationIndices( "DiscreteReverbDelay", "out", reverbDiscreteDelayOutChannels );
-  assignCommunicationIndices( "DiscreteReverbReflectionFilters", "in", reverbDiscreteWallReflInChannels );
+  assignCommunicationIndices( "DiscreteReverbReflectionFilters", "in", reverbDiscreteDelayOutChannels );
   assignCommunicationIndices( "DiscreteReverbReflectionFilters", "out", reverbDiscreteWallReflOutChannels );
   assignCommunicationIndices( "DiscreteReverbPanningMatrix", "in", reverbDiscreteWallReflOutChannels );
   assignCommunicationIndices( "DiscreteReverbPanningMatrix", "out", reverbDiscretePanningOutChannels );
   assignCommunicationIndices( "ReverbMix", "in0", reverbDiscretePanningOutChannels );
-  assignCommunicationIndices( "LateReverbFilter", "in", reverbRoutingOutChannels );
+  assignCommunicationIndices( "LateReverbGainDelay", "in", reverbRoutingOutChannels );
+  assignCommunicationIndices( "LateReverbGainDelay", "out", reverbGainDelayOutChannels );
+  assignCommunicationIndices( "LateReverbFilter", "in", reverbGainDelayOutChannels );
   assignCommunicationIndices( "LateReverbFilter", "out", reverbLateFilterOutChannels );
   assignCommunicationIndices( "LateDiffusionFilter", "in", reverbLateFilterOutChannels );
   assignCommunicationIndices( "LateDiffusionFilter", "out", reverbLateDecorrOutChannels );
   assignCommunicationIndices( "ReverbMix", "in1", reverbLateDecorrOutChannels );
   assignCommunicationIndices( "ReverbMix", "out", reverbMixOutChannels );
-
 
   // signal flow common to all object types (starting with summation of the different signal paths
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", vbapMatrixOutChannels );
@@ -355,7 +363,9 @@ BaselineRenderer::process()
   mDiscreteReverbReflFilters.process();
   mDiscreteReverbPanningMatrix.process();
   mLateReverbFilterCalculator.process( );
+  mLateReverbGainDelay.process();
   mLateReverbFilter.process();
+  mLateDiffusionFilter.process();
 
   mReverbMix.process();
 
@@ -402,6 +412,16 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   boost::optional<ril::SampleType> discreteReflectionDelayOpt = tree.get_optional<ril::SampleType>( "maxDiscreteReflectionDelay" );
   ril::SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
 
+  // Optional argument for the gain of the decorrelation filter for
+  // the late reverb tail. 
+  // The default value is 1/sqrt(#loudspeakers)
+  boost::optional<ril::SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<ril::SampleType>( "lateReverbDecorrelationGain" );
+  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( arrayConfig.getNumRegularSpeakers() );
+  ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
+    ? std::pow( 10.0, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
+    : defaultLateDecorrelatorGain;
+  
+
   if( not exists( lateReverbFilterPath ) )
   {
     throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
@@ -416,10 +436,14 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   efl::BasicMatrix<ril::SampleType> lateDecorrelationFilters( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength, ril::cVectorAlignmentSamples );
   for( std::size_t rowIdx( 0 ); rowIdx < arrayConfig.getNumRegularSpeakers(); ++rowIdx )
   {
-    if( efl::vectorCopy( allLateDecorrelationFilters.row( rowIdx ),
-                         lateDecorrelationFilters.row( rowIdx ), lateDecorrelationFilterLength, ril::cVectorAlignmentSamples ) != efl::noError )
+    // Multiply the raw unit-magnitude filters by the scaling gain.
+    if( efl::vectorMultiplyConstant( lateReverbDecorrelatorGain,
+                                     allLateDecorrelationFilters.row( rowIdx ),
+                                     lateDecorrelationFilters.row( rowIdx ),
+                                     lateDecorrelationFilterLength,
+                                     ril::cVectorAlignmentSamples ) != efl::noError )
     {
-      throw std::runtime_error( "Copying of late decorrelation filter rows failed." );
+      throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
     }
   }
 
@@ -431,7 +455,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                                     numWallReflBiquads,
                                     mLateReverbFilterLengthSeconds,
                                     objectmodel::PointSourceWithReverb::cNumberOfSubBands );
-  mDiscreteReverbDelay.setup( mMaxNumReverbObjects,
+  mDiscreteReverbDelay.setup( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject,
                               interpolationSteps,
                               maxDiscreteReflectionDelay,
                               rcl::DelayVector::InterpolationType::Linear, 0.0f, 0.0f );
@@ -440,6 +464,12 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                                       arrayConfig.getNumRegularSpeakers(),
                                       interpolationSteps );
   mLateReverbFilterCalculator.setup( mMaxNumReverbObjects, mLateReverbFilterLengthSeconds, objectmodel::PointSourceWithReverb::cNumberOfSubBands );
+
+  // TODO: Add configuration parameters for maximum delay of the late reverb onset delay.
+  mLateReverbGainDelay.setup( mMaxNumReverbObjects,
+                              interpolationSteps,
+                              maxDiscreteReflectionDelay, // For the moment, use the same max. delay as for discretes.
+                              rcl::DelayVector::InterpolationType::Linear, 0.0f, 0.0f );
 
   // Create a routing for #reverbObjects signals, each filtered with an individual filter, and summed into a single
   pml::FilterRoutingList lateReverbRouting;

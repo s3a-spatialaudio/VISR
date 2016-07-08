@@ -27,25 +27,11 @@
 
 namespace visr
 {
-// forward declarations
-namespace objectmodel
+// Forward declarations
+namespace rbbl
 {
-class ObjectVector;
+  class ObjectChannelAllocator;
 }
-//namespace efl
-//{
-//template< typename SampleType > class BasicMatrix;
-//template< typename SampleType > class BasicVector;
-//}
-//namespace pml
-//{
-//template <typename CoeffType> class BiquadParameterMatrix;
-//class SignalRoutingParameter;
-//}
-//namespace ril
-//{
-//class AudioInput;
-//}
 
 namespace rcl
 {
@@ -56,11 +42,6 @@ namespace rcl
 class ReverbParameterCalculator: public ril::AtomicComponent
 {
 public:
-  /**
-   * Type of the gain coefficients. We use the same type as
-   */
-  using CoefficientType = ril::SampleType;
-
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
@@ -83,6 +64,10 @@ public:
    * Method to initialise the component.
    * @param arrayConfig The array configuration object.
    * @param numberOfObjects The maximum number of reverb objects to be processed.
+   * @param numberOfDiscreteReflectionsPerSource The number of discrete reflections rendered per source.
+   * @param numBiquadSectionsReflectionFilters The number of biquad sections per reflection of the wall reflection filters.
+   * @param lateReflectionLengthSeconds The length of the late impulse response representing the late reverberation tail (in seconds).
+   * @param numLateReflectionSubBandFilters The number of subbands used in the computation of the late reverb tail. At the moment, this must match a hard-coded limit (9).
    */
   void setup( panning::LoudspeakerArray const & arrayConfig,
               std::size_t numberOfObjects,
@@ -95,19 +80,21 @@ public:
    * The process function. 
    */
   void process() override;
-  //objectmodel::ObjectVector const & objects,
-  //              pml::SignalRoutingParameter & signalRouting,
-  //              efl::BasicVector<ril::SampleType> & discreteReflGains,
-  //              efl::BasicVector<ril::SampleType> & discreteReflDelays,
-  //              pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-  //              efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-  //              LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters );
 
 private:
+  std::unique_ptr<rbbl::ObjectChannelAllocator> mChannelAllocator;
+
   /**
    * The number of "objects with reverb" handled by this calculator object.
    */
   std::size_t mMaxNumberOfObjects;
+
+  std::size_t mNumberOfDiscreteReflectionsPerSource;
+  std::size_t mNumberOfBiquadSectionsReflectionFilters;
+  ril::SampleType mLateReflectionLengthSeconds;
+  std::size_t mNumberOfLateReflectionSubBandFilters;
+
+  std::size_t mNumberOfPanningLoudspeakers;
 
   /**
    * A vector to hold the source position data.
@@ -118,29 +105,55 @@ private:
    * The calculator object to generate the panning matrix coefficients.
    */
   panning::VBAP mVbapCalculator;
-  
-  /**
-   * The levels of the object channels in linear scale.
-   */
-  std::valarray<objectmodel::LevelType> mLevels;
-  //@}
-    
-  /**
-   * Internal method to assign parameter values for a given object.
-   */
-  void processInternal( objectmodel::ObjectVector const & objects);
 
-  //objectmodel::ObjectVector const & objects,
-  //                                         pml::SignalRoutingParameter & signalRouting,
-  //                                         efl::BasicVector<ril::SampleType> & discreteReflGains,
-  //                                         efl::BasicVector<ril::SampleType> & discreteReflDelays,
-  //                                         pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-  //                                         efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-  //                                         LateReverbFilterCalculator::SubBandMessageQueue & lateReflectionSubbandFilters )
+  /**
+   * An object holding sensible default values for the late reverb part that
+   * result in a zero-valued late reverb tail.
+   */
+  static const objectmodel::PointSourceWithReverb::LateReverb cDefaultLateReverbParameter;
+
+  /**
+   * A table holding the previous states of the reverb parameters for the reverb channel.
+   * Used to detect changes in the that trigger an retransmission to the LateReverbFilterCalculator component.
+   */
+  std::vector<objectmodel::PointSourceWithReverb::LateReverb> mPreviousLateReverbs;
+
+  /**
+   * A floating-point limit to compare LateReverb parameters,
+   * Two parameters are considered equal if the difference between all corresponding floating-point values is less or equal this value.
+   */
+  ril::SampleType const cLateReverbParameterComparisonLimit;
+
+  void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+                            efl::BasicVector<ril::SampleType> & discreteReflGains,
+                            efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                            pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                            efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                            efl::BasicVector<ril::SampleType> & lateReverbGains,
+                            efl::BasicVector<ril::SampleType> & lateReverbDelays );
+
+  // void processInternal( objectmodel::ObjectVector const & objects );
+
+/**
+* Set the data members for given reverb object channel to safe, neutral values such that no sound is rendered.
+* Used if a render channels is unused.
+*/
+  void clearSingleObject( std::size_t renderChannel,
+                          efl::BasicVector<ril::SampleType> & discreteReflGains,
+                          efl::BasicVector<ril::SampleType> & discreteReflDelays,
+                          pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
+                          efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
+                          efl::BasicVector<ril::SampleType> & lateReverbGains,
+                          efl::BasicVector<ril::SampleType> & lateReverbDelays );
+
   ril::ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
+  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::SignalRoutingParameter > > mSignalRoutingOutput;
   std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mDiscreteReflectionGainOutput;
+  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mDiscreteReflectionDelayOutput;
   std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<ril::SampleType> > > mDiscreteReflectionFilterCoeffOutput;
   std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<ril::SampleType> > > mDiscretePanningGains;
+  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mLateReflectionGainOutput;
+  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mLateReflectionDelayOutput;
   std::unique_ptr<ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<ril::SampleType> > > >
     mLateSubbandOutput;
 };

@@ -91,6 +91,7 @@ public:
    * @param inputIdx The input signal index for the routing.
    * @param outputIdx The output signal index for this routing.
    * @param filterIdx The filter index for this routing (pointing to an entry to the filter container of this component)
+   * @param gain An optional, frequency-independent gain for this routing. Optional argument, defaults to 1.0.
    * @throw std::invalid_argument If \p inputIdx, \p outputIdx, or \p filterIdx exceed their respective admissible ranges
    */
   void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx,

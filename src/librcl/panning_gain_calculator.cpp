@@ -138,6 +138,7 @@ void PanningGainCalculator::process()
       // Fall through intentionally
     }
     case objectmodel::ObjectTypeId::PointSource:
+    case objectmodel::ObjectTypeId::PointSourceWithReverb: // TODO: This shows that the current model is not extensible, because it does not consider type hierarchies
     {
       objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
       mSourcePositions[channelId].set( pointSrc.x(), pointSrc.y(), pointSrc.z() );
