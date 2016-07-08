@@ -47,12 +47,17 @@ public:
     : mProtocol(nullptr)
     {}
 
-    MessageType data( ) const
+    MessageType const & data( ) const
     {
-      return mProtocol ->data( );
+      return mProtocol->data( );
     }
-  protected:  // hack to allow access by concrete port type
-    SharedDataProtocol * mProtocol ;
+  protected:
+    void setProtocolInstance( SharedDataProtocol * protocol )
+    {
+      mProtocol = protocol;
+    }
+  private:
+    SharedDataProtocol * mProtocol;
   };
 
 
@@ -79,8 +84,13 @@ public:
     /**
      * This whould not be accessible from the component.
      */
-  protected:  // hack to allow access by concrete port type
-    SharedDataProtocol * mProtocol ;
+  protected:
+    void setProtocolInstance( SharedDataProtocol * protocol )
+    {
+      mProtocol = protocol;
+    }
+  private:
+    SharedDataProtocol * mProtocol;
   };
 
   explicit SharedDataProtocol( ril::ParameterConfigBase const & config );

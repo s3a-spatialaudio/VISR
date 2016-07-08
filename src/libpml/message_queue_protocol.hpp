@@ -68,7 +68,12 @@ public:
     /**
      * This whould not be accessible from the component.
      */
-  protected: // hack to allow access by concrete port type
+  protected:
+    void setProtocolInstance( MessageQueueProtocol * protocol )
+    {
+      mProtocol = protocol;
+    }
+  private:
     MessageQueueProtocol * mProtocol;
   };
 
@@ -107,7 +112,12 @@ public:
       mProtocol ->clear();
     }
 
-  protected: // hack to allow access by concrete port type
+  protected:
+    void setProtocolInstance( MessageQueueProtocol * protocol )
+    {
+      mProtocol = protocol;
+    }
+  private:
     MessageQueueProtocol * mProtocol;
   };
 
