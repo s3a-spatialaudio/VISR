@@ -12,6 +12,17 @@ ObjectVector::ObjectVector( ril::ParameterConfigBase const & config )
 {
 }
 
+ObjectVector::ObjectVector( const ObjectVector & rhs )
+{
+  assign( rhs );
+}
+
+ObjectVector & ObjectVector::operator=(const ObjectVector & rhs)
+{
+  assign( rhs );
+  return *this;
+}
+
 ObjectVector::ObjectVector( EmptyParameterConfig const & /*config*/ )
 {
   // Nothing to do.

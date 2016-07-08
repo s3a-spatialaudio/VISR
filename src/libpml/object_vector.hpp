@@ -28,6 +28,17 @@ public:
 
   explicit ObjectVector( EmptyParameterConfig const & config );
 
+  /**
+   * Copy constructor.
+   * In contrast to the base class objectmodel::ObjectVector, we allow copy construction to enable use of objectVectors in communication protocols which require copying.
+   */
+  ObjectVector( const ObjectVector & rhs );
+
+  /**
+   * Assignment operator.
+   */
+  ObjectVector & operator=(const ObjectVector & rhs);
+
   virtual ~ObjectVector() override;
 };
 
