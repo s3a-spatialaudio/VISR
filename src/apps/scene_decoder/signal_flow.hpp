@@ -12,12 +12,6 @@
 #include <librcl/udp_receiver.hpp>
 #include <librcl/udp_sender.hpp>
 
-#include <libefl/basic_matrix.hpp>
-
-#include <libpml/message_queue.hpp>
-
-#include <libobjectmodel/object_vector.hpp>
-
 #include <string>
 
 namespace visr
@@ -65,14 +59,6 @@ private:
   rcl::PanningGainCalculator mGainCalculator;
 
   rcl::GainMatrix mMatrix;
-
-  pml::MessageQueue<pml::StringParameter> mSceneMessages;
-
-  objectmodel::ObjectVector mObjectVector;
-
-  efl::BasicMatrix<ril::SampleType> mGainParameters;
-
-  pml::MessageQueue<pml::StringParameter> mResendMessages;
 };
 
 } // namespace scene_decoder

@@ -116,13 +116,13 @@ private:
    */
   rcl::NullSource mNullSource;
 
-  pml::MessageQueue<pml::StringParameter> mSceneMessages;
+  //pml::MessageQueue<pml::StringParameter> mSceneMessages;
 
-  objectmodel::ObjectVector mObjectVector;
+  //objectmodel::ObjectVector mObjectVector;
 
-  efl::BasicMatrix<ril::SampleType> mGainParameters;
+  //efl::BasicMatrix<ril::SampleType> mGainParameters;
 
-  efl::BasicMatrix<ril::SampleType> mDiffuseGains;
+  //efl::BasicMatrix<ril::SampleType> mDiffuseGains;
 
   /**
    * Tracking-related members
@@ -139,11 +139,11 @@ private:
 
   pml::ListenerPosition mListenerPosition;
 
-  pml::MessageQueue<pml::StringParameter> mTrackingMessages;
+  //pml::MessageQueue<pml::StringParameter> mTrackingMessages;
 
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
+  //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
 
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
+  //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
 
   /**
@@ -183,26 +183,23 @@ private:
 
   rcl::Add mReverbMix;
 
-  pml::SignalRoutingParameter mReverbRoutingParameter;
+  //pml::SignalRoutingParameter mReverbRoutingParameter;
 
-  efl::BasicVector<ril::SampleType> mDiscreteReverbDelayParameter;
+  //efl::BasicVector<ril::SampleType> mDiscreteReverbDelayParameter;
 
-  efl::BasicVector<ril::SampleType> mDiscreteReverbGainParameter;
+  //efl::BasicVector<ril::SampleType> mDiscreteReverbGainParameter;
 
-  pml::BiquadParameterMatrix<ril::SampleType> mDiscreteReverbReflFilterParameter;
+  //pml::BiquadParameterMatrix<ril::SampleType> mDiscreteReverbReflFilterParameter;
 
-  pml::MatrixParameter<ril::SampleType> mDiscreteReverbPanningGains;
+  //pml::MatrixParameter<ril::SampleType> mDiscreteReverbPanningGains;
 
-  rcl::LateReverbFilterCalculator::SubBandMessageQueue mLateReverbFilterSubBandLevels;
+  //rcl::LateReverbFilterCalculator::SubBandMessageQueue mLateReverbFilterSubBandLevels;
 
-  rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
+  //rcl::LateReverbFilterCalculator::LateFilterMassageQueue mLateReverbFilterIRs;
 
   //@}
 
-
-
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
-
 };
 
 } // namespace signalflows

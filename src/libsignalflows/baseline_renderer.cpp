@@ -75,7 +75,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
  , mSubwooferMix( *this, "SubwooferMixer" )
  , mNullSource( *this, "NullSource" )
- , mDiffuseGains( ril::cVectorAlignmentSamples )
+// , mDiffuseGains( ril::cVectorAlignmentSamples )
  // Reverberation-related members
  , mReverbParameterCalculator( *this, "ReverbParameterCalculator" )
  , mReverbSignalRouting( *this, "ReverbSignalRouting" )
@@ -86,6 +86,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mLateReverbFilter( *this, "LateReverbFilter" )
  , mLateDiffusionFilter( *this, "LateDiffusionFilter" )
  , mReverbMix( *this, "ReverbMix" )
+#if 0
  , mReverbRoutingParameter()
  , mDiscreteReverbDelayParameter( ril::cVectorAlignmentSamples )
  , mDiscreteReverbGainParameter( ril::cVectorAlignmentSamples )
@@ -93,6 +94,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mDiscreteReverbPanningGains()
  , mLateReverbFilterSubBandLevels()
  , mLateReverbFilterIRs( )
+#endif
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
   std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
@@ -117,9 +119,6 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
       0.0f, 0.0f );
     mTrackingReceiver->setup( cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous );
     mPositionDecoder->setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
-
-    mCompensationGains.resize( numberOfLoudspeakers );
-    mCompensationDelays.resize( numberOfLoudspeakers );
   }
 
   bool const outputEqSupport = loudspeakerConfiguration.outputEqualisationPresent();
@@ -325,10 +324,6 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   assignCaptureIndices( &captureChannels[0], captureChannels.size( ) );
   assignPlaybackIndices( &playbackChannels[0], playbackChannels.size( ) );
 
-  mGainParameters.resize( numberOfLoudspeakers, numberOfInputs );
-
-  mDiffuseGains.resize( 1, numberOfInputs );
-
   // should not be done here, but in AudioSignalFlow where this method is called from.
   setInitialised( true );
 }
@@ -340,47 +335,26 @@ BaselineRenderer::~BaselineRenderer( )
 /*virtual*/ void 
 BaselineRenderer::process()
 {
-  mSceneReceiver.process( mSceneMessages );
-  mSceneDecoder.process( mSceneMessages, mObjectVector );
+  mSceneReceiver.process();
+  mSceneDecoder.process();
   if( mTrackingEnabled )
   {
-    mTrackingReceiver->process( mTrackingMessages );
-    mPositionDecoder->process( mTrackingMessages, mListenerPosition );
-    mGainCalculator.setListenerPosition( mListenerPosition );
-    mListenerCompensation->process( mListenerPosition, mCompensationGains, mCompensationDelays );
+    mTrackingReceiver->process( );
+    mPositionDecoder->process();
+    mListenerCompensation->process();
   }
-  mGainCalculator.process( mObjectVector, mGainParameters );
-  mDiffusionGainCalculator.process( mObjectVector, mDiffuseGains );
-  mVbapMatrix.setGains( mGainParameters );
+  mGainCalculator.process();
+  mDiffusionGainCalculator.process();
   mVbapMatrix.process();
-  mDiffusePartMatrix.setGains( mDiffuseGains );
   mDiffusePartMatrix.process();
   mDiffusePartDecorrelator.process();
 
   // Reverberation stream
-  mReverbParameterCalculator.process( mObjectVector,
-                                      mReverbRoutingParameter,
-                                      mDiscreteReverbGainParameter,
-                                      mDiscreteReverbDelayParameter,
-                                      mDiscreteReverbReflFilterParameter,
-                                      mDiscreteReverbPanningGains,
-                                      mLateReverbFilterSubBandLevels );
-  mDiscreteReverbDelay.setDelayAndGain( mDiscreteReverbDelayParameter, mDiscreteReverbGainParameter );
+  mReverbParameterCalculator.process();
   mDiscreteReverbDelay.process();
-  mDiscreteReverbReflFilters.setCoefficientMatrix( mDiscreteReverbReflFilterParameter );
   mDiscreteReverbReflFilters.process();
-  mDiscreteReverbPanningMatrix.setGains( mDiscreteReverbPanningGains );
   mDiscreteReverbPanningMatrix.process();
-  mLateReverbFilterCalculator.process( mLateReverbFilterSubBandLevels, mLateReverbFilterIRs );
-#if 0
-// TODO: Implement utility function/object/template to apply all messages in message queue to the target component
-  while( not mLateReverbFilterIRs.empty() )
-  {
-    rcl::LateReverbFilterCalculator::LateFilterMassageQueue::MessageType const & val = mLateReverbFilterIRs.nextElement();
-    mLateReverbFilter.setFilter( val.first, &val.second[0], val.second.size() );
-    mLateReverbFilterIRs.popNextElement( );
-  }
-#endif
+  mLateReverbFilterCalculator.process( );
   mLateReverbFilter.process();
 
   mReverbMix.process();
@@ -390,7 +364,6 @@ BaselineRenderer::process()
   mSubwooferMix.process();
   if( mTrackingEnabled )
   {
-    mSpeakerCompensation->setDelayAndGain( mCompensationDelays, mCompensationGains );
     mSpeakerCompensation->process( );
   }
   if( mOutputEqualisationFilter )
@@ -489,14 +462,6 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                               arrayConfig.getNumRegularSpeakers( ), arrayConfig.getNumRegularSpeakers( ),
                               lateDecorrelationFilters, lateDecorrelationRouting );
   mReverbMix.setup( arrayConfig.getNumRegularSpeakers(), 2 );
-
-  // Set up the parameter data members
-  // Nothing to do for mReverbRoutingParameter
-  mDiscreteReverbDelayParameter.resize( mMaxNumReverbObjects );
-  mDiscreteReverbGainParameter.resize( mMaxNumReverbObjects );
-  mDiscreteReverbReflFilterParameter.resize( mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject, numWallReflBiquads );
-  mDiscreteReverbPanningGains.resize( arrayConfig.getNumRegularSpeakers(), mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject ); // TODO: Check orientation
-  // Nothing to do for mLateReverbFilterSubBandLevels and mLateReverbFilterIRs;
 }
 
 } // namespace signalflows

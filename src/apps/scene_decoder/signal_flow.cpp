@@ -61,13 +61,12 @@ SignalFlow::~SignalFlow( )
 /*virtual*/ void 
 SignalFlow::process()
 {
-  mSceneReceiver.process( mSceneMessages );
-  mSceneDecoder.process( mSceneMessages, mObjectVector );
-  mGainCalculator.process( mObjectVector, mGainParameters );
-  mMatrix.setGains( mGainParameters );
+  mSceneReceiver.process();
+  mSceneDecoder.process();
+  mGainCalculator.process();
   mMatrix.process();
-  mSceneEncoder.process( mObjectVector, mResendMessages );
-  mSceneSender.process( mResendMessages );
+  mSceneEncoder.process();
+  mSceneSender.process();
 }
 
 /*virtual*/ void
@@ -117,8 +116,6 @@ SignalFlow::setup()
 
   assignCaptureIndices( indexRange( 0, cNumberOfInputs - 1 ) );
   assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
-
-  mGainParameters.resize( cNumberOfOutputs, cNumberOfInputs );
 
   // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );
