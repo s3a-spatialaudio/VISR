@@ -125,14 +125,14 @@ public:
   bool unregisterParameterPort( std::string const & name );
 
   /**
-   * @throw invalid_argument
+   * @return pointer to port, nullptr in case the port is not found.
    */
-  ParameterPortBase& findParameterPort( std::string const & name );
+  ParameterPortBase* findParameterPort( std::string const & name );
 
   /**
-  * @throw invalid_argument
+  * @return pointer to port, nullptr in case the port is not found.
   */
-  ParameterPortBase const& findParameterPort( std::string const & name ) const;
+  ParameterPortBase const * findParameterPort( std::string const & name ) const;
 
 
   //@}
