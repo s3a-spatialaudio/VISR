@@ -8,6 +8,7 @@ TARGET_LINK_LIBRARIES(gain_matrix_app rbbl)
 TARGET_LINK_LIBRARIES(gain_matrix_app ril)
 TARGET_LINK_LIBRARIES(gain_matrix_app rrl)
 TARGET_LINK_LIBRARIES(gain_matrix_app pml)
+TARGET_LINK_LIBRARIES(gain_matrix_app objectmodel) # newly pulled-in dependency of libpml
 TARGET_LINK_LIBRARIES(gain_matrix_app efl)
 TARGET_LINK_LIBRARIES(gain_matrix_app ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(gain_matrix_app ${Boost_PROGRAM_OPTIONS_LIBRARY} )
