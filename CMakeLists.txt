@@ -25,6 +25,11 @@ if(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 endif()
 
+IF(WIN32)
+  ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
+  ADD_DEFINITIONS( "-D_WIN32_WINNT=0x0601" )
+ENDIF(WIN32)
+
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
