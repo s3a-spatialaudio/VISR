@@ -193,7 +193,7 @@ operator<(ParameterPortDescriptor const & rhs) const
   {
     return true;
   }
-  else if( component() < rhs.component() )
+  else if( rhs.component() < component() )
   {
     return false;
   }
