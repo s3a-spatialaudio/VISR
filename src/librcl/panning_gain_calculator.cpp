@@ -37,7 +37,7 @@ namespace rcl
 PanningGainCalculator::PanningGainCalculator( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mNumberOfObjects( 0 )
- , mObjectVectorInput( *this, "objects", pml::EmptyParameterConfig( ) )
+ , mObjectVectorInput( *this, "objectVectorInput", pml::EmptyParameterConfig( ) )
  , mListenerPositionInput( *this, "listenerPosition", pml::EmptyParameterConfig( ) )
 {
 }
@@ -60,7 +60,7 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
 
-  mGainOutput.reset( new MatrixPort( *this, "gains", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
+  mGainOutput.reset( new MatrixPort( *this, "gainOutput", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
 
 }
 
