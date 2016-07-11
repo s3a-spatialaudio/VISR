@@ -47,8 +47,8 @@ SignalFlow::SignalFlow( std::size_t numberOfInputs,
  , mNetworkPort( udpPort )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
- , mSceneEncoder( *this, "SceneEncoder" )
- , mSceneSender( *this, "SceneSender" )
+ //, mSceneEncoder( *this, "SceneEncoder" )
+ //, mSceneSender( *this, "SceneSender" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mMatrix( *this, "GainMatrix" )
 {
@@ -65,8 +65,8 @@ SignalFlow::process()
   mSceneDecoder.process();
   mGainCalculator.process();
   mMatrix.process();
-  mSceneEncoder.process();
-  mSceneSender.process();
+  //mSceneEncoder.process();
+  //mSceneSender.process();
 }
 
 /*virtual*/ void
@@ -97,25 +97,27 @@ SignalFlow::setup()
   mGainCalculator.setup( cNumberOfInputs, loudspeakerArray );
   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
 
-  mSceneEncoder.setup();
-  mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
+  //mSceneEncoder.setup();
+  //mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
 
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
-
-  // connect the ports
-  assignCommunicationIndices( "GainMatrix", "in", indexRange( 0, cNumberOfInputs-1 ) );
-
-  assignCommunicationIndices( "GainMatrix", "out", indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
 
   // Set the indices for communicating the signals from and to the outside world.
   std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
   std::vector<ril::AudioPort::SignalIndexType> playbackIndices = indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 );
 
+  // connect the ports
+  assignCommunicationIndices( "GainMatrix", "in", captureIndices );
+  assignCommunicationIndices( "GainMatrix", "out", playbackIndices );
+
   assignCaptureIndices( &captureIndices[0], captureIndices.size() );
   assignPlaybackIndices( &playbackIndices[0], playbackIndices.size( ) );
 
-  assignCaptureIndices( indexRange( 0, cNumberOfInputs - 1 ) );
-  assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
+  connectParameterPorts( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+  connectParameterPorts( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
+  connectParameterPorts( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
+
+  initialiseParameterInfrastructure();
 
   // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );

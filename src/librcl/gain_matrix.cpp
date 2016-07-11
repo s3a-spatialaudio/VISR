@@ -53,7 +53,7 @@ void GainMatrix::setup( std::size_t numberOfInputs,
 
 void GainMatrix::process()
 {
-  // TODO: Adapt logic to resetthe gain matrix only after it has been actually changed. 
+  // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
   mMatrix->setNewGains( mGainInput->data() );
 
   // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
@@ -66,11 +66,6 @@ void GainMatrix::process()
 
   mMatrix->process( inputVector, outputVector );
 }
-
-//void GainMatrix::setGains( efl::BasicMatrix< SampleType > const & newGains )
-//{
-//  mMatrix->setNewGains( newGains );
-//}
 
 } // namespace rcl
 } // namespace visr

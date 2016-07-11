@@ -6,6 +6,7 @@
 #include "audio_interface.hpp"
 #include "audio_port.hpp"
 #include "constants.hpp"
+#include "communication_area.hpp" // TODO: Remove dependency again
 
 #include <array>
 #include <initializer_list>
@@ -162,8 +163,12 @@ protected:
                                    std::array<AudioPort::SignalIndexType, vecLength > const & indexVector )
   {
     // throws an exception if component port does not exist.
+#if 0
     AudioPort & port = findPort( componentName, portName );
     port.assignCommunicationIndices( indexVector );
+#else
+    assignCommunicationIndices( componentName, portName, indexVector.begin(), indexVector.end() );
+#endif
   }
 
   void assignCommunicationIndices( std::string const & componentName,
@@ -172,8 +177,12 @@ protected:
                                    std::size_t vecLength )
   {
     // throws an exception if component port does not exist.
+#if 0
     AudioPort & port = findPort( componentName, portName );
     port.assignCommunicationIndices( val, vecLength );
+#else
+    assignCommunicationIndices( componentName, portName, val, val+vecLength );
+#endif
   }
 
   template<typename IteratorType>
@@ -183,6 +192,8 @@ protected:
   {
     AudioPort & port = findPort( componentName, portName ); // throws an exception if component port does not exist.
     port.assignCommunicationIndices( begin, end );
+    port.setAudioBasePointer( mCommArea->data() );
+    port.setAudioChannelStride( mCommArea->signalStride() );
   }
 
   /**

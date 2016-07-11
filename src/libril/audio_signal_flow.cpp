@@ -129,7 +129,12 @@ AudioSignalFlow::assignCommunicationIndices( std::string const & componentName,
                                              std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
 {
   AudioPort & port = findPort( componentName, portName ); // throws an exception if component or port does not exist.
+#if 0
   port.assignCommunicationIndices( indexVector.begin( ), indexVector.end( ) );
+  port.setAudioBasePointer( mCommArea->data() );
+#else
+  assignCommunicationIndices( componentName, portName, indexVector.begin(), indexVector.end() );
+#endif
 }
 
 AudioPort & 
@@ -266,13 +271,13 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
       throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified send parameter port \"" )
         + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" does not exist." );
     }
-    ComponentTable::iterator const receiveComponentIt = mComponents.find( connectionDescriptor.first.component() );
+    ComponentTable::iterator const receiveComponentIt = mComponents.find( connectionDescriptor.second.component() );
     if( receiveComponentIt == mComponents.end() )
     {
       throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified receiveer component \"" )
         + connectionDescriptor.first.component() + "\" of a parameter connection does not exist." );
     }
-    ParameterPortBase * receivePort = receiveComponentIt->second->findParameterPort( connectionDescriptor.first.port() );
+    ParameterPortBase * receivePort = receiveComponentIt->second->findParameterPort( connectionDescriptor.second.port() );
     if( not receivePort )
     {
       throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified receive parameter port \"" )

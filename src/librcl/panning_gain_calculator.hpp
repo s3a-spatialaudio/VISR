@@ -63,7 +63,8 @@ public:
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
    */ 
-  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig );
+  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig,
+              bool adaptiveListenerPosition=false );
 
   /**
    * The process function. 
@@ -144,7 +145,8 @@ private:
   using ObjectPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::ObjectVector >;
 
   ObjectPort mObjectVectorInput;
-  ListenerPositionPort mListenerPositionInput;
+
+  std::unique_ptr<ListenerPositionPort> mListenerPositionInput;
 
   /**
    * Needs to be instantiated as a pointer, because the ParameterConfig data is not known until the setup() method.

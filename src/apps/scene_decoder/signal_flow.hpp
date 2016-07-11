@@ -8,9 +8,9 @@
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
-#include <librcl/scene_encoder.hpp>
+// #include <librcl/scene_encoder.hpp>
 #include <librcl/udp_receiver.hpp>
-#include <librcl/udp_sender.hpp>
+// #include <librcl/udp_sender.hpp>
 
 #include <string>
 
@@ -52,9 +52,9 @@ private:
   
   rcl::SceneDecoder mSceneDecoder;
 
-  rcl::SceneEncoder mSceneEncoder;
+  //rcl::SceneEncoder mSceneEncoder;
 
-  rcl::UdpSender mSceneSender;
+  //rcl::UdpSender mSceneSender;
 
   rcl::PanningGainCalculator mGainCalculator;
 

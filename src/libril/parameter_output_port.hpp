@@ -60,7 +60,7 @@ protected:
     {
       throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
     }
-    this->setProtocol( typedProtocol );
+    this->setProtocolInstance( typedProtocol );
   }
 private:
   ParameterConfigType const mConfig;
