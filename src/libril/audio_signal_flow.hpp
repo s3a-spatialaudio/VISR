@@ -266,12 +266,10 @@ protected:
                      std::size_t alignmentElements = cVectorAlignmentSamples );
 
   /**
-  * Parameter infrastructure
-  */
+    * Parameter infrastructure
+    */
   //@{
   void initialiseParameterInfrastructure();
-
-  using CommunicationProtocolContainer = std::vector<std::unique_ptr<CommunicationProtocolBase> >;
 
   std::size_t numberCommunicationProtocols() const;
 
