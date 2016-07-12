@@ -26,7 +26,7 @@ bool EmptyParameterConfig::compare(ril::ParameterConfigBase const & rhs) const
   // maybe move this to the base class.
   if (std::type_index(typeid(rhs)) != std::type_index(typeid(EmptyParameterConfig)))
   {
-	throw std::invalid_argument("Called compare() for incompatible parameter config types");
+    throw std::invalid_argument( "Called compare() for incompatible parameter config types" );
   }
   return compare(static_cast<EmptyParameterConfig const &>(rhs));
 }

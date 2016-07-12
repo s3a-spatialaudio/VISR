@@ -4,11 +4,16 @@
 
 #include "audio_input.hpp"
 #include "audio_output.hpp"
+#include "atomic_component.hpp"
 #include "communication_area.hpp"
-#include "component.hpp"
+#include "communication_protocol_base.hpp"
+#include "communication_protocol_factory.hpp"
+#include "communication_protocol_type.hpp"
+#include "parameter_port_base.hpp"
 
 #include <libefl/vector_functions.hpp>
 
+#include <ciso646>
 #include <utility> // for std::pair and std::make_pair
 
 namespace visr
@@ -107,10 +112,10 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
 }
 
 void 
-AudioSignalFlow::registerComponent( Component * component, char const * componentName )
+AudioSignalFlow::registerComponent( AtomicComponent * component, char const * componentName )
 {
   std::string const myName( componentName );
-  std::pair<std::string, Component*> myPair( myName, component );
+  std::pair<std::string, AtomicComponent*> myPair( myName, component );
   std::pair<ComponentTable::iterator, bool> res = mComponents.insert( myPair );
   if( !res.second ) 
   {
@@ -123,8 +128,13 @@ AudioSignalFlow::assignCommunicationIndices( std::string const & componentName,
                                              std::string const & portName,
                                              std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
 {
+#if 0
   AudioPort & port = findPort( componentName, portName ); // throws an exception if component or port does not exist.
   port.assignCommunicationIndices( indexVector.begin( ), indexVector.end( ) );
+  port.setAudioBasePointer( mCommArea->data() );
+#else
+  assignCommunicationIndices( componentName, portName, indexVector.begin(), indexVector.end() );
+#endif
 }
 
 AudioPort & 
@@ -169,6 +179,167 @@ void AudioSignalFlow::assignCaptureIndices( std::initializer_list<AudioPort::Sig
 void AudioSignalFlow::assignPlaybackIndices( std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
 {
   mPlaybackIndices.assign( indexVector );
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Parameter infrastructure
+
+AudioSignalFlow::ParameterPortDescriptor::
+ParameterPortDescriptor(std::string const & pComponent, std::string const & pPort)
+ : mComponent( pComponent)
+ , mPort(pPort)
+{
+}
+
+bool AudioSignalFlow::ParameterPortDescriptor::
+operator<(ParameterPortDescriptor const & rhs) const
+{
+  if (component() < rhs.component())
+  {
+    return true;
+  }
+  else if( rhs.component() < component() )
+  {
+    return false;
+  }
+  else return port() < rhs.port();
+}
+
+// Not used in the current code.
+#if 0
+AudioSignalFlow::ParameterConnection::
+ParameterConnection( ParameterPortDescriptor const & pSender,
+                     ParameterPortDescriptor const & pReceiver)
+ : mSender(pSender)
+ , mReceiver(pReceiver)
+{
+}
+
+AudioSignalFlow::ParameterConnection::
+ParameterConnection( std::string const & pSendComponent,
+                     std::string const & pSendPort,
+                     std::string const & pReceiveComponent,
+                     std::string const & pReceivePort)
+ : ParameterConnection( ParameterPortDescriptor( pSendComponent, pSendPort ),
+	                    ParameterPortDescriptor( pReceiveComponent, pReceivePort) )
+{
+}
+
+bool AudioSignalFlow::ParameterConnection::operator<(ParameterConnection const & rhs) const
+{
+  if(sender() < rhs.sender() )
+  {
+	return true;
+  }
+  else if(rhs.sender() < sender() )
+  {
+	  return false;
+  }
+  return receiver() < rhs.receiver();
+}
+#endif
+
+void AudioSignalFlow::
+connectParameterPorts( std::string const & sendComponent,
+                       std::string const & sendPort,
+                       std::string const & receiveComponent,
+                       std::string const & receivePort)
+{
+  ParameterPortDescriptor const sendDescriptor( sendComponent, sendPort );
+  ParameterPortDescriptor const receiveDescriptor( receiveComponent, receivePort);
+  mParameterConnectionTable.insert(std::make_pair(sendDescriptor, receiveDescriptor) );
+}
+
+
+void AudioSignalFlow::initialiseParameterInfrastructure()
+{
+  mCommunicationProtocols.clear();
+
+  // TODO: This should check whether the contained component is composite, and in this case iterate over the parameter connection table
+  for( ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable )
+  {
+    // Note: In case of hierarchical models, we would need to construct the full name here.
+    ComponentTable::iterator const sendComponentIt= mComponents.find( connectionDescriptor.first.component() );
+    if( sendComponentIt == mComponents.end() )
+    {
+      throw std::logic_error( std::string("AudioSignalFlow::initialiseParameterInfrastructure(): The specified sender component \"")
+        + connectionDescriptor.first.component() + "\" of a parameter connection does not exist." );
+    }
+    ParameterPortBase * sendPort = sendComponentIt->second->findParameterPort( connectionDescriptor.first.port() );
+    if( not sendPort )
+    {
+      throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified send parameter port \"" )
+        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" does not exist." );
+    }
+    ComponentTable::iterator const receiveComponentIt = mComponents.find( connectionDescriptor.second.component() );
+    if( receiveComponentIt == mComponents.end() )
+    {
+      throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified receiveer component \"" )
+        + connectionDescriptor.first.component() + "\" of a parameter connection does not exist." );
+    }
+    ParameterPortBase * receivePort = receiveComponentIt->second->findParameterPort( connectionDescriptor.second.port() );
+    if( not receivePort )
+    {
+      throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified receive parameter port \"" )
+        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" does not exist." );
+    }
+    // Check connection for protocol and type compatibility
+    ril::CommunicationProtocolType const sendProtocolType = sendPort->protocolType();
+    ril::CommunicationProtocolType const receiveProtocolType = receivePort->protocolType();
+    if( sendProtocolType != receiveProtocolType )
+    {
+      throw std::invalid_argument( std::string("AudioSignalFlow::initialiseParameterInfrastructure(): The communication protocols of the connected parameter ports \"")
+        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" and \""
+        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\" do not match." );
+    }
+    ril::ParameterType const sendParameterType = sendPort->parameterType();
+    ril::ParameterType const receiveParameterType = receivePort->parameterType();
+    if( sendParameterType != receiveParameterType )
+    {
+      throw std::invalid_argument( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \"" )
+        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" and \""
+        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\" do not match." );
+    }
+    ril::ParameterConfigBase const & sendParameterConfig = sendPort->parameterConfig();
+    ril::ParameterConfigBase const & receiveParameterConfig = receivePort->parameterConfig();
+    if( not sendParameterConfig.compare( receiveParameterConfig ) )
+    {
+      throw std::invalid_argument( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \"" )
+        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" and \""
+        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\" are not compatible." );
+    }
+    std::unique_ptr<CommunicationProtocolBase> protocolInstance = CommunicationProtocolFactory::create( sendProtocolType, sendParameterType, sendParameterConfig );
+    if( not protocolInstance )
+    {
+      throw std::invalid_argument( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): Could not instantiate protocol object for parameter connection \"" )
+        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" -> \""
+        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\"." );
+    }
+    sendPort->connectProtocol( protocolInstance.get() );
+    receivePort->connectProtocol( protocolInstance.get() );
+
+    // Add the newly created protocol object to the flow's container for such objects, thus passing responsibility for deleting this object at the end of its lifetime.
+    mCommunicationProtocols.push_back( std::move(protocolInstance) );
+  }
+
+  // Check whether all parameter ports are connected.
+  // TODO: Consider to move that into a separate method.
+  for( ComponentTable::value_type & comp : mComponents )
+  {
+    for( Component::ParameterPortContainer::const_iterator portIt( comp.second->parameterPortBegin()); portIt != comp.second->parameterPortEnd(); ++portIt )
+    {
+      ParameterPortBase * port = portIt->second;
+      // TODO: Add checks to retrieve the connected protocol.
+      //if( not port->connected() )
+      //{
+      //}
+    }
+  }
+}
+
+std::size_t AudioSignalFlow::numberCommunicationProtocols() const
+{
+  return mCommunicationProtocols.size();
 }
 
 } // namespace ril

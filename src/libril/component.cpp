@@ -18,7 +18,6 @@ namespace ril
 Component::Component( AudioSignalFlow& container, char const * componentName )
  : mContainingFlow( container )
 {
-  mContainingFlow.registerComponent( this, componentName );
 }
 
 Component::~Component()
@@ -166,7 +165,7 @@ bool Component::unregisterParameterPort( std::string const & name )
   return true;
 }
 
-ParameterPortBase & 
+ParameterPortBase *
 Component::findParameterPort( std::string const & name )
 {
   ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
@@ -174,18 +173,19 @@ Component::findParameterPort( std::string const & name )
   {
     throw std::invalid_argument( "No parameter port with this name exists." );
   }
-  return *(findIt->second);
+  return findIt->second;
 }
 
-ParameterPortBase const & 
+ParameterPortBase const *
 Component::findParameterPort( std::string const & name ) const
 {
   ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
   if( findIt == mParameterPorts.end() )
   {
-    throw std::invalid_argument( "No parameter port with this name exists." );
+//    throw std::invalid_argument( "No parameter port with this name exists." );
+    return nullptr;
   }
-  return *(findIt->second);
+  return findIt->second;
 }
 
 } // namespace ril

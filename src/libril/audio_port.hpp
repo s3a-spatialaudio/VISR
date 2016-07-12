@@ -183,7 +183,10 @@ protected:
     {
       throw std::invalid_argument( "AudioPort: The length of the sequence passed to assignCommunicationIndices() must match the width of the port." );
     }
-    std::copy( begin, end, &mIndices[0] );
+    if( numElements > 0 ) // MSVC triggers an debug assertion for &mIndices[0] if the size is zero.
+    {
+      std::copy( begin, end, &mIndices[0] );
+    }
     // std::copy( begin, end, mIndices.begin() ); // C++11 feature std::valarray<T>::begin(), but not featured either in VC 2013 and GCC 4.8 at this time.
   }
 

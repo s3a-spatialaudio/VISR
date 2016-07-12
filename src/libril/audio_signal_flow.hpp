@@ -5,13 +5,14 @@
 
 #include "audio_interface.hpp"
 #include "audio_port.hpp"
-#include "composite_component.hpp"
 #include "constants.hpp"
+#include "communication_area.hpp" // TODO: Remove dependency again
 
 #include <array>
 #include <initializer_list>
 #include <map>
 #include <memory>
+#include <set>
 #include <stdexcept>
 #include <sstream>
 #include <valarray>
@@ -23,8 +24,10 @@ namespace ril
 
 // Forward declarations
 template <typename T> class CommunicationArea;
-class Component;
+class AtomicComponent;
 class AudioPort;
+class ParameterPortBase;
+class CommunicationProtocolBase;
 
 /**
  * Base class for signal flows, i.e., graphs of connected audio
@@ -38,7 +41,8 @@ class AudioPort;
  */
 class AudioSignalFlow
 {
-  friend Component;
+  friend class AtomicComponent; // Required for registerComponent(), remove after restructuring.
+  friend class Component; // Access commArea, remove after restructuring. 
 public:
   /**
    * Constructor.
@@ -140,7 +144,7 @@ protected:
    * @throw std::invalid_argument If the component could not be
    * inserted, e.g., if a component with this name already exists.
    */
-  void registerComponent( Component * component, char const * componentName );
+  void registerComponent( AtomicComponent * component, char const * componentName );
 
   /**
    * A set of methods to associate input and out components of
@@ -159,8 +163,12 @@ protected:
                                    std::array<AudioPort::SignalIndexType, vecLength > const & indexVector )
   {
     // throws an exception if component port does not exist.
+#if 0
     AudioPort & port = findPort( componentName, portName );
     port.assignCommunicationIndices( indexVector );
+#else
+    assignCommunicationIndices( componentName, portName, indexVector.begin(), indexVector.end() );
+#endif
   }
 
   void assignCommunicationIndices( std::string const & componentName,
@@ -169,8 +177,12 @@ protected:
                                    std::size_t vecLength )
   {
     // throws an exception if component port does not exist.
+#if 0
     AudioPort & port = findPort( componentName, portName );
     port.assignCommunicationIndices( val, vecLength );
+#else
+    assignCommunicationIndices( componentName, portName, val, val+vecLength );
+#endif
   }
 
   template<typename IteratorType>
@@ -180,6 +192,8 @@ protected:
   {
     AudioPort & port = findPort( componentName, portName ); // throws an exception if component port does not exist.
     port.assignCommunicationIndices( begin, end );
+    port.setAudioBasePointer( mCommArea->data() );
+    port.setAudioChannelStride( mCommArea->signalStride() );
   }
 
   /**
@@ -251,6 +265,25 @@ protected:
   void initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
                      std::size_t alignmentElements = cVectorAlignmentSamples );
 
+  /**
+    * Parameter infrastructure
+    */
+  //@{
+  void initialiseParameterInfrastructure();
+
+  std::size_t numberCommunicationProtocols() const;
+
+
+protected:
+  /**
+   * Register a parameter connection during setup.
+   * @todo This should go into CompositeComponent.
+   */
+  void connectParameterPorts( std::string const & sendComponent,
+                              std::string const & sendPort,
+                              std::string const & receiveComponent,
+                              std::string const & receivePort );
+  //@}
 private:
   CommunicationArea<SampleType>& getCommArea() { return *mCommArea; }
 
@@ -292,8 +325,9 @@ private:
 
   /**
    * Type for collection and lookup of all audio components contained in this signal flow.
+   * @note At this level the signal flow is flat, i.e., only atomic components are important.
    */
-  using ComponentTable = std::map<std::string, Component*>;
+  using ComponentTable = std::map<std::string, AtomicComponent*>;
 
   /**
    * A table of all Component objects contained in this graph. 
@@ -309,6 +343,72 @@ private:
 
   std::vector<AudioPort::SignalIndexType> mCaptureIndices;
   std::vector<AudioPort::SignalIndexType> mPlaybackIndices;
+
+  /**
+   * Parameter infrastructure
+   */
+  //@{
+
+  struct ParameterPortDescriptor
+  {
+  public:
+  ParameterPortDescriptor() = default;
+
+  explicit ParameterPortDescriptor(std::string const & pComponent, std::string const & pPort);
+
+  bool operator<(ParameterPortDescriptor const & rhs) const;
+
+  std::string const & component() const { return mComponent; }
+  std::string const & port() const { return mPort; }
+
+  private:
+  std::string mComponent;
+  std::string mPort;
+  };
+
+// Not used in the current code.
+#if 0
+  /**
+   * Store data from definition in derived class until initialisation of runtime structures.
+   * @todo This should move into CompositeComponent.
+   */
+  struct ParameterConnection
+  {
+  public:
+  /**
+   * Default constructor, required for use in standard containers.
+   * Creates a struct with empty strings for all members.
+   */
+    ParameterConnection() = default;
+
+  ParameterConnection( ParameterPortDescriptor const & pSender,
+                     ParameterPortDescriptor const & pReceiver );
+
+  ParameterConnection( std::string const & pSendComponent,
+                       std::string const & pSendPort,
+                       std::string const & pReceiveComponent,
+                       std::string const & pReceivePort);
+
+  bool operator<(ParameterConnection const & rhs) const;
+
+  ParameterPortDescriptor const & sender() const { return mSender; }
+  ParameterPortDescriptor const & receiver() const { return mReceiver; }
+  private:
+    ParameterPortDescriptor const mSender;
+  ParameterPortDescriptor const mReceiver;
+  };
+#endif
+
+  using ParameterConnectionTable = std::multimap<ParameterPortDescriptor, ParameterPortDescriptor >;
+
+  ParameterConnectionTable mParameterConnectionTable;
+
+  std::vector<ParameterPortBase*> mParameterPorts;
+
+  using CommunicationProtocolContainer = std::vector<std::unique_ptr<CommunicationProtocolBase> >;
+
+  CommunicationProtocolContainer mCommunicationProtocols;
+  //@}
 };
 
 } // namespace ril

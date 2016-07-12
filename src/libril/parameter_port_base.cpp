@@ -24,7 +24,7 @@ ParameterPortBase::ParameterPortBase( Component & parent,
 
 ParameterPortBase::~ParameterPortBase( ) 
 {
-  // todo: we need the component to unregister ourself.
+  // todo: we need a reference to the containing component to unregister ourselves.
 }
 
 void ParameterPortBase::connectProtocol( ril::CommunicationProtocolBase * protocol )
@@ -38,6 +38,9 @@ void ParameterPortBase::connectProtocol( ril::CommunicationProtocolBase * protoc
     throw std::logic_error( "ParameterPortBase::connectProtocol(): parameter types of port and communication protocol object do not match." );
   }
   // TODO: Shall we check the parameter configuration? This would mean we have to check them in the protocol.
+
+  // Call the specific registration function of the derived port type.
+  setProtocol( protocol );
 }
 
 } // namespace ril

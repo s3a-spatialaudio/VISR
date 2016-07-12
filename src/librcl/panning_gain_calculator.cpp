@@ -37,8 +37,7 @@ namespace rcl
 PanningGainCalculator::PanningGainCalculator( ril::AudioSignalFlow& container, char const * name )
  : AtomicComponent( container, name )
  , mNumberOfObjects( 0 )
- , mObjectVectorInput( *this, "objects", pml::EmptyParameterConfig( ) )
- , mListenerPositionInput( *this, "listenerPosition", pml::EmptyParameterConfig( ) )
+ , mObjectVectorInput( *this, "objectVectorInput", pml::EmptyParameterConfig( ) )
 {
 }
 
@@ -46,7 +45,8 @@ PanningGainCalculator::~PanningGainCalculator()
 {
 }
 
-void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig )
+void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig,
+                                   bool adaptiveListenerPosition /*= false*/ )
 {
   mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
@@ -60,8 +60,12 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
 
-  mGainOutput.reset( new MatrixPort( *this, "gains", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
+  mGainOutput.reset( new MatrixPort( *this, "gainOutput", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
 
+  if( adaptiveListenerPosition )
+  {
+    mListenerPositionInput.reset( new ListenerPositionPort( *this, "listenerPosition", pml::EmptyParameterConfig() ) );
+  }
 }
 
 void PanningGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
@@ -80,10 +84,13 @@ void PanningGainCalculator::setListenerPosition( pml::ListenerPosition const & p
 
 void PanningGainCalculator::process()
 {
-  while( not mListenerPositionInput.empty() )
+  if( mListenerPositionInput )
   {
-    setListenerPosition( mListenerPositionInput.front() );
-    mListenerPositionInput.pop();
+    while( not mListenerPositionInput->empty() )
+    {
+      setListenerPosition( mListenerPositionInput->front() );
+      mListenerPositionInput->pop();
+    }
   }
 
   objectmodel::ObjectVector const & objects = mObjectVectorInput.data();

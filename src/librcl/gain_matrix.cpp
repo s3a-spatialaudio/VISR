@@ -28,6 +28,8 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mInput.setWidth( mNumberOfInputs );
   mOutput.setWidth( mNumberOfOutputs );
   mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period(), interpolationSteps, initialGain, ril::cVectorAlignmentSamples ) );
+  mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( *this, "gainInput",
+    pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
 }
 
 void GainMatrix::setup( std::size_t numberOfInputs,
@@ -45,10 +47,15 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mOutput.setWidth( mNumberOfOutputs );
   mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ),
                  interpolationSteps, initialGains, ril::cVectorAlignmentSamples ) );
+  mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( *this, "gainInput",
+                    pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
 }
 
 void GainMatrix::process()
 {
+  // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
+  mMatrix->setNewGains( mGainInput->data() );
+
   // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
   if( mInput.width() == 0 or mOutput.width() == 0 )
   {
@@ -58,11 +65,6 @@ void GainMatrix::process()
   SampleType * const * outputVector = mOutput.getVector( );
 
   mMatrix->process( inputVector, outputVector );
-}
-
-void GainMatrix::setGains( efl::BasicMatrix< SampleType > const & newGains )
-{
-  mMatrix->setNewGains( newGains );
 }
 
 } // namespace rcl

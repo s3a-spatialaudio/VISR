@@ -416,9 +416,9 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   // the late reverb tail. 
   // The default value is 1/sqrt(#loudspeakers)
   boost::optional<ril::SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<ril::SampleType>( "lateReverbDecorrelationGain" );
-  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( arrayConfig.getNumRegularSpeakers() );
+  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( static_cast<ril::SampleType>(arrayConfig.getNumRegularSpeakers()) );
   ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
-    ? std::pow( 10.0, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
+    ? std::pow( 10.0f, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
     : defaultLateDecorrelatorGain;
   
 
@@ -492,6 +492,41 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                               arrayConfig.getNumRegularSpeakers( ), arrayConfig.getNumRegularSpeakers( ),
                               lateDecorrelationFilters, lateDecorrelationRouting );
   mReverbMix.setup( arrayConfig.getNumRegularSpeakers(), 2 );
+
+  // Set the parameter connections.
+  //  , mSceneReceiver( *this, "SceneReceiver" )
+ //, mSceneDecoder( *this, "SceneDecoder" )
+ //  , mOutputAdjustment( *this, "OutputAdjustment" )
+ //  , mGainCalculator( *this, "VbapGainCalculator" )
+ //  , mDiffusionGainCalculator( *this, "DiffusionCalculator" )
+ //  , mVbapMatrix( *this, "VbapGainMatrix" )
+ //  , mDiffusePartMatrix( *this, "DiffusePartMatrix" )
+ //  , mDiffusePartDecorrelator( *this, "DiffusePartDecorrelator" )
+ //  , mDirectDiffuseMix( *this, "DirectDiffuseMixer" )
+ //  , mSubwooferMix( *this, "SubwooferMixer" )
+ //  , mNullSource( *this, "NullSource" )
+ //  , mReverbParameterCalculator( *this, "ReverbParameterCalculator" )
+ //  , mReverbSignalRouting( *this, "ReverbSignalRouting" )
+ //  , mDiscreteReverbDelay( *this, "DiscreteReverbDelay" )
+ //  , mDiscreteReverbReflFilters( *this, "DiscreteReverbReflectionFilters" )
+ //  , mDiscreteReverbPanningMatrix( *this, "DiscreteReverbPanningMatrix" )
+ //  , mLateReverbFilterCalculator( *this, "LateReverbFilterCalculator" )
+ //  , mLateReverbGainDelay( *this, "LateReverbGainDelay" )
+ //  , mLateReverbFilter( *this, "LateReverbFilter" )
+ //  , mLateDiffusionFilter( *this, "LateDiffusionFilter" )
+ //  , mReverbMix( *this, "ReverbMix" )
+ // TODO: Take care of listener adaptation 
+  //mListenerCompensation.reset( new rcl::ListenerCompensation( *this, "TrackingListenerCompensation" ) );
+  //mSpeakerCompensation.reset( new rcl::DelayVector( *this, "TrackingSpeakerCompensation" ) );
+  //mTrackingReceiver.reset( new rcl::UdpReceiver( *this, "TrackingReceiver" ) );
+  //mPositionDecoder.reset( new rcl::PositionDecoder( *this, "TrackingPositionDecoder" ) );
+
+  connectParameterPorts( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+  connectParameterPorts( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput"  );
+  connectParameterPorts( "VbapGainCalculator", "gainOutput", "VbapGainMatrix", "gainInput" );
+
+  // TODO: THis should be moved to the surrounding logic after the restructuring is complete.
+  initialiseParameterInfrastructure();
 }
 
 } // namespace signalflows
