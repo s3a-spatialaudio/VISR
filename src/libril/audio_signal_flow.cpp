@@ -128,8 +128,8 @@ AudioSignalFlow::assignCommunicationIndices( std::string const & componentName,
                                              std::string const & portName,
                                              std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
 {
-  AudioPort & port = findPort( componentName, portName ); // throws an exception if component or port does not exist.
 #if 0
+  AudioPort & port = findPort( componentName, portName ); // throws an exception if component or port does not exist.
   port.assignCommunicationIndices( indexVector.begin( ), indexVector.end( ) );
   port.setAudioBasePointer( mCommArea->data() );
 #else
