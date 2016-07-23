@@ -315,8 +315,10 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
         + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" -> \""
         + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\"." );
     }
-    sendPort->connectProtocol( protocolInstance.get() );
-    receivePort->connectProtocol( protocolInstance.get() );
+    //sendPort->connectProtocol( protocolInstance.get() );
+    //receivePort->connectProtocol( protocolInstance.get() );
+    protocolInstance->connectInput( receivePort );
+    protocolInstance->connectOutput( sendPort );
 
     // Add the newly created protocol object to the flow's container for such objects, thus passing responsibility for deleting this object at the end of its lifetime.
     mCommunicationProtocols.push_back( std::move(protocolInstance) );

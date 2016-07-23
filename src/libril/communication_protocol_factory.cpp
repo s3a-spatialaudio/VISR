@@ -7,6 +7,7 @@
 
 // evil hack: Dependency to libpml
 // TODO: add first concrete communication protocol class.
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/shared_data_protocol.hpp>
 
@@ -69,6 +70,12 @@ static struct InstantiateCommunicationProtocolCreators
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::StringParameter> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::String );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorFloat );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorDouble );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::MatrixFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::MatrixDouble );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::ObjectVector> >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::ObjectVector );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::StringParameter> >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::String );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<float> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::VectorFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::VectorDouble );
   }
 } // ; InstantiateCommunicationProtocolCreators const
 cInstantiateCommunicationProtocolCreators;

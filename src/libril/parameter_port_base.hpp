@@ -54,7 +54,7 @@ public:
 
   virtual ParameterConfigBase const & parameterConfig() const = 0;
 
-  void connectProtocol( ril::CommunicationProtocolBase * protocol );
+  // void connectProtocol( ril::CommunicationProtocolBase * protocol );
 
 protected:
   /**

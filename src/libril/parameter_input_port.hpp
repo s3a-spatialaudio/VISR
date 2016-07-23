@@ -21,7 +21,7 @@ namespace ril
  *
  */
 template< template<class> class ProtocolT, class ParameterT >
-class ParameterInputPort: public ParameterPortBase, // Maybe make this protected or private
+class ParameterInputPort: // public ParameterPortBase, // Maybe make this protected or private
                           public ProtocolT<ParameterT>::Input
 {
 public:
@@ -70,7 +70,7 @@ inline ParameterInputPort<ProtocolT, ParameterT >::
 ParameterInputPort( Component & parent,
                            std::string const & name,
                            ParameterConfigType const & paramConfig )
-  : ParameterPortBase( parent, name, ParameterPortBase::Direction::Input )
+  : ProtocolT<ParameterT>::Input( parent, name )
   , mConfig( paramConfig )
 {
 }
