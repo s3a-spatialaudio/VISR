@@ -14,17 +14,21 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
-#include <libpml/listener_position.hpp>
-#include <libpml/matrix_parameter.hpp>
-#include <libpml/message_queue_protocol.hpp>
-#include <libpml/object_vector.hpp>
-#include <libpml/shared_data_protocol.hpp>
-
 #include <memory>
 #include <vector>
 
 namespace visr
 {
+
+namespace pml
+{
+class ListenerPosition;
+class ObjectVector;
+template< typename ElementType > class MatrixParameter;
+template< class ParameterType > class SharedDataProtocol;
+template< class ParameterType > class DoubleBufferingProtocol;
+}
+
 namespace rcl
 {
 
@@ -53,7 +57,7 @@ public:
   PanningGainCalculator( PanningGainCalculator const & ) = delete;
 
 
-  /**
+  /**`
    * Destructor.
    */
   ~PanningGainCalculator();
@@ -140,11 +144,11 @@ private:
   /**
    * Data type of the parmaeter ports for outgoing matrix data.
    */
-  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >; 
-  using ListenerPositionPort = ril::ParameterInputPort<pml::MessageQueueProtocol, pml::ListenerPosition >;
-  using ObjectPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::ObjectVector >;
+  using ListenerPositionPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+  using ObjectPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
+  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
 
-  ObjectPort mObjectVectorInput;
+  std::unique_ptr<ObjectPort> mObjectVectorInput;
 
   std::unique_ptr<ListenerPositionPort> mListenerPositionInput;
 

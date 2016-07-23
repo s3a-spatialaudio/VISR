@@ -77,6 +77,7 @@ void PositionDecoder::process()
   if( smallestFaceId != std::numeric_limits<unsigned int>::max() )
   {
     mPositionOutput.data() = translatePosition( foundPos );
+    mPositionOutput.swapBuffers();
   }
 }
 

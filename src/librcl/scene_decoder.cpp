@@ -36,6 +36,7 @@ void SceneDecoder::process()
     try
     {
       objectmodel::ObjectVectorParser::updateObjectVector( nextMsg, objects );
+      mObjectVectorOutput.swapBuffers();
     }
     catch( std::exception const & ex )
     {
