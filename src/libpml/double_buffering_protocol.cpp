@@ -21,16 +21,5 @@ template class DoubleBufferingProtocol<StringParameter>;
 template class DoubleBufferingProtocol<MatrixParameter<float> >;
 template class DoubleBufferingProtocol<MatrixParameter<double> >;
 
-template< template<class> class ProtocolTypeT, class ParameterTypeT >
-struct RegisterProtocolHelper
-{
-  RegisterProtocolHelper( ril::CommunicationProtocolType protocolType, ril::ParameterType parameterType )
-  {
-    ril::CommunicationProtocolFactory::registerCommunicationProtocolType< ProtocolTypeT< ParameterTypeT > >( protocolType, parameterType );
-  }
-};
-
-RegisterProtocolHelper< DoubleBufferingProtocol, ListenerPosition > doubleBufferListeningPosition( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::ListenerPosition );
-
 } // namespace pml
 } // namespace visr
