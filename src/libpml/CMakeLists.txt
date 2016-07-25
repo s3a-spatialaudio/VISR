@@ -15,6 +15,7 @@ SET( SOURCES
  message_queue.cpp
  message_queue_protocol.cpp
  object_vector.cpp
+ communication_protocol_instantiation.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
