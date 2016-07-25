@@ -5,6 +5,8 @@
 
 #include "component.hpp"
 
+#include <set>
+
 namespace visr
 {
 namespace ril
@@ -17,9 +19,6 @@ namespace ril
 class CompositeComponent: public Component
 {
 public:
-  friend class AudioInput;
-  friend class AudioOutput;
-  friend class AudioSignalFlow;
 
   explicit CompositeComponent( AudioSignalFlow& container, char const * name );
 
@@ -32,8 +31,32 @@ public:
    * Query whether this component is composite.
    * @return true
    */
-  virtual bool isComposite();
+  virtual bool isComposite() override;
 
+  struct CompareComponents
+  {
+  public:
+    bool operator()(Component const * lhs, Component const * rhs)
+    {
+      return lhs->name() < rhs->name();
+    }
+  };
+
+  using ComponentTable = std::set < Component const *, CompareComponents >;
+
+  std::size_t numberOfComponents() const;
+
+  ComponentTable::const_iterator componentBegin() const;
+
+  ComponentTable::const_iterator componentEnd( ) const;
+
+
+
+protected:
+  void registerChildComponent( Component const * child );
+
+private:
+  ComponentTable mComponents;
 };
 
 } // namespace ril

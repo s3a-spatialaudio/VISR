@@ -40,10 +40,14 @@ public:
 
   explicit Component( AudioSignalFlow& container, char const * name );
 
+  explicit Component( AudioSignalFlow& container, std::string const & componentName );
+
   /**
    *
    */
   virtual ~Component();
+
+  std::string const & name() const { return mName; }
 
   /**
    * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
@@ -77,37 +81,36 @@ public:
   std::size_t period() const; // { return mContainingFlow.period(); }
 
   template< class PortType >
-  PortType* findPort( std::string const& name ) { return findPort<PortType>( name.c_str() ); }
+  PortType* findAudioPort( std::string const& name ) { return findPort<PortType>( name.c_str() ); }
 
-  template< typename PortType>
-  struct PortDescriptor
+  struct AudioPortDescriptor
   {
   public:
-    explicit PortDescriptor( const char* name, PortType* port )
+    explicit AudioPortDescriptor( const char* name, AudioPort* port )
       : mName( name ), mPort( port ) {}
 
     std::string mName;
-    PortType* mPort;
+    AudioPort* mPort;
   };
 
-  template< typename PortType> using PortVector = std::vector<PortDescriptor<PortType> >;
+  using AudioPortVector = std::vector<AudioPortDescriptor >;
 
   /**
    * Allow access to the port lists 
    */
   //@{
-  template< typename PortType >
-  typename PortVector<PortType>::const_iterator portBegin() const { return getPortList<PortType>().begin(); }
+  AudioPortVector::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
 
-  template< typename PortType >
-  typename PortVector<PortType>::const_iterator portEnd( ) const { return getPortList<PortType>( ).end( ); }
+  AudioPortVector::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
   //@}
 
   /** 
    * Return a pointer to the port object spefied by the name.
    */
-  template< typename PortType >
-  PortType* getPort( const char* portName) const;
+  AudioPort const * getAudioPort( const char* portName) const;
+
+  AudioPort * getAudioPort( const char* portName );
+
 
   /**
    * Parameter port support
@@ -152,42 +155,26 @@ protected:
   AudioSignalFlow& flow() { return mContainingFlow; }
   AudioSignalFlow const & flow( ) const { return mContainingFlow; }
 
-  /**
-   * Methods to be called by derived audio component classes
-   */
-  //@{
-  // @not needed, replaced by templatized versions.
-  void registerAudioInput( char const * name, AudioInput* port );
-  void registerAudioOutput( char const * name, AudioOutput* port );
-  //@}
 private:
-
-  using AudioInputVector = PortVector<AudioInput>;
-  using AudioOutputVector = PortVector<AudioOutput>;
 
   /**
    * Register a port with a type and a unique name within the port.
    * @param name The name of 
    * @throw In case of a non-unique or invalid port name
    */
-  template< class PortType >
-  void registerAudioPort( char const * name, PortType* port );
+  void registerAudioPort( char const * name, AudioPort* port );
 
-  AudioInputVector mInputsPorts;
-  AudioOutputVector mOutputPorts;
+  AudioPortVector mAudioPorts;
 
-  template<class PortType>
-  PortVector<PortType> const& getPortList( )  const;
+  AudioPortVector const& getAudioPortList( ) const;
 
-  template<class PortType>
-  PortVector<PortType>& getPortList( );
+  AudioPortVector& getAudioPortList( );
 
-  template<class PortType>
   struct ComparePortDescriptor
   {
     explicit ComparePortDescriptor( std::string const& name ): mName( name ) {}
 
-    bool operator()( Component::PortDescriptor<PortType> const& lhs ) const
+    bool operator()( AudioPortDescriptor const& lhs ) const
     {
       return lhs.mName == mName;
     }
@@ -195,21 +182,18 @@ private:
     std::string const mName;
   };
 
-  template<class PortType>
-  typename PortVector<PortType>::iterator findPortEntry( const char* portName )
+  AudioPortVector::iterator findAudioPortEntry( const char* portName )
   {
-    PortVector<PortType> & vec = getPortList<PortType>( );
-    typename PortVector<PortType>::iterator findIt
-      = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor<PortType>( portName ) );
+    AudioPortVector::iterator findIt
+      = std::find_if( mAudioPorts.begin(), mAudioPorts.end(), ComparePortDescriptor( portName ) );
     return findIt;
   }
 
-  template<class PortType>
-  typename PortVector<PortType>::const_iterator findPortEntry( const char* portName ) const
+  AudioPortVector::const_iterator findAudioPortEntry( const char* portName ) const
   {
-    PortVector<PortType> const & vec = getPortList<PortType>( );
-    typename PortVector<PortType>::const_iterator findIt
-      = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor<PortType>( portName ) );
+    AudioPortVector const & vec = getAudioPortList( );
+    AudioPortVector::const_iterator findIt
+      = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor( portName ) );
     return findIt;
   }
 
@@ -222,6 +206,8 @@ private:
   ParameterPortContainer mParameterPorts;
 
   //@}
+
+  std::string const mName;
 };
 
 } // namespace ril

@@ -147,15 +147,10 @@ AudioSignalFlow::findPort( std::string const & componentName,
     throw std::invalid_argument( "No components with the given name exists." );
   }
   Component * component = findIt->second;
-  AudioInput * audioIn = component->getPort<AudioInput>(portName.c_str( ));
-  if( audioIn )
+  AudioPort * audioPort = component->getAudioPort(portName.c_str( ));
+  if( audioPort )
   {
-    return *audioIn;
-  }
-  AudioOutput * audioOut = component->getPort<AudioOutput>( portName.c_str( ) );
-  if( audioOut ) 
-  {
-    return *audioOut;
+    return *audioPort;
   }
   throw std::invalid_argument( "Port with that name does not exist." );
 }
@@ -183,61 +178,6 @@ void AudioSignalFlow::assignPlaybackIndices( std::initializer_list<AudioPort::Si
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Parameter infrastructure
-
-AudioSignalFlow::ParameterPortDescriptor::
-ParameterPortDescriptor(std::string const & pComponent, std::string const & pPort)
- : mComponent( pComponent)
- , mPort(pPort)
-{
-}
-
-bool AudioSignalFlow::ParameterPortDescriptor::
-operator<(ParameterPortDescriptor const & rhs) const
-{
-  if (component() < rhs.component())
-  {
-    return true;
-  }
-  else if( rhs.component() < component() )
-  {
-    return false;
-  }
-  else return port() < rhs.port();
-}
-
-// Not used in the current code.
-#if 0
-AudioSignalFlow::ParameterConnection::
-ParameterConnection( ParameterPortDescriptor const & pSender,
-                     ParameterPortDescriptor const & pReceiver)
- : mSender(pSender)
- , mReceiver(pReceiver)
-{
-}
-
-AudioSignalFlow::ParameterConnection::
-ParameterConnection( std::string const & pSendComponent,
-                     std::string const & pSendPort,
-                     std::string const & pReceiveComponent,
-                     std::string const & pReceivePort)
- : ParameterConnection( ParameterPortDescriptor( pSendComponent, pSendPort ),
-	                    ParameterPortDescriptor( pReceiveComponent, pReceivePort) )
-{
-}
-
-bool AudioSignalFlow::ParameterConnection::operator<(ParameterConnection const & rhs) const
-{
-  if(sender() < rhs.sender() )
-  {
-	return true;
-  }
-  else if(rhs.sender() < sender() )
-  {
-	  return false;
-  }
-  return receiver() < rhs.receiver();
-}
-#endif
 
 void AudioSignalFlow::
 connectParameterPorts( std::string const & sendComponent,

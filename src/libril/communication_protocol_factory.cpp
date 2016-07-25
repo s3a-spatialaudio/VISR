@@ -79,6 +79,6 @@ static struct InstantiateCommunicationProtocolCreators
   }
 } // ; InstantiateCommunicationProtocolCreators const
 cInstantiateCommunicationProtocolCreators;
-  
+
 } // namespace ril
 } // namespace visr
