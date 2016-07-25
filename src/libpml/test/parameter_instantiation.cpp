@@ -25,7 +25,9 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( instantiateFloatMatrix )
 {
-  MatrixParameterConfig const cfg(2, 3);
+  std::size_t numRowsInit = 2;
+  std::size_t numColumnsInit = 3;
+  MatrixParameterConfig const cfg( numRowsInit, numColumnsInit );
 
   std::unique_ptr<ril::ParameterBase> param = ril::ParameterFactory::create(ril::ParameterType::MatrixDouble, cfg);
 
@@ -33,6 +35,9 @@ BOOST_AUTO_TEST_CASE( instantiateFloatMatrix )
 
   std::size_t const numRows = mtxParam.numberOfRows();
   std::size_t const numColumns = mtxParam.numberOfColumns( );
+
+  BOOST_CHECK( numRows == numRowsInit );
+  BOOST_CHECK( numColumns == numColumnsInit );
 }
 
 
