@@ -46,8 +46,8 @@ BOOST_AUTO_TEST_CASE( instantiateAudioChannelIndexVector )
   BOOST_CHECK( vecFromSlice[4] == 6 );
 
   ril::AudioChannelIndexVector const vecFromMultipleSlices( { AudioChannelSlice( 10, 5, -1 ), AudioChannelSlice( 0, 5, 1 ) } );
-  BOOST_CHECK( vecFromMultipleSlices.size( ) == 5 );
-  BOOST_CHECK( vecFromMultipleSlices[4] == 6 );
+  BOOST_CHECK( vecFromMultipleSlices.size( ) == 10 );
+  BOOST_CHECK( vecFromMultipleSlices[6] == 1 );
 
 }
 

@@ -38,7 +38,7 @@ void ParameterPortBase::connectProtocol( ril::CommunicationProtocolBase * protoc
   {
     throw std::logic_error( "ParameterPortBase::connectProtocol(): parameter types of port and communication protocol object do not match." );
   }
-  // TODO: Shall we check the parameter configuration? This would mean we have to check them in the protocol.
+  // TODO: Shall we check the parameter configuration? This would mean we have to store them in the protocol.
 
   // Call the specific registration function of the derived port type.
   setProtocol( protocol );

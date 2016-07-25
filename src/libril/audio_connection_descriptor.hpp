@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace visr

@@ -2,6 +2,7 @@
 
 #include "audio_connection_descriptor.hpp"
 
+#include <numeric>
 #include <ciso646>
 #include <limits>
 
@@ -76,6 +77,7 @@ AudioChannelSlice::IndexType AudioChannelSlice::at( IndexType idx ) const
   {
     throw std::out_of_range( "AudioChannelSlice: Index range contains values below zero." );
   }
+  return operator[](idx);
 }
 
 AudioChannelSlice::IndexType AudioChannelSlice::operator[]( IndexType idx ) const
@@ -126,10 +128,19 @@ AudioChannelIndexVector::AudioChannelIndexVector( std::initializer_list<IndexTyp
 AudioChannelIndexVector::AudioChannelIndexVector( AudioChannelSlice const & slice )
 {
   mIndices.reserve( slice.size() );
+  slice.writeIndices( std::back_inserter(mIndices) );
 }
 
 AudioChannelIndexVector::AudioChannelIndexVector( std::initializer_list<AudioChannelSlice> const & slices )
 {
+  std::size_t numIndices =
+  std::accumulate( slices.begin(), slices.end(), 0, [](std::size_t const & rhs, AudioChannelSlice const & lhs ){ return lhs.size() + rhs; } );
+  mIndices.reserve( numIndices );
+  auto insertIt = std::back_inserter(mIndices);
+  for( AudioChannelSlice const & v : slices )
+  {
+    v.writeIndices( insertIt );
+  }
 }
 
 

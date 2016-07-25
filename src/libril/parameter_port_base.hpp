@@ -54,8 +54,14 @@ public:
 
   virtual ParameterConfigBase const & parameterConfig() const = 0;
 
-  // void connectProtocol( ril::CommunicationProtocolBase * protocol );
+#if 0
+  /**
+   * @note Done elsewhere at th moment. 
+   */
+  void connectProtocol( ril::CommunicationProtocolBase * protocol );
+#endif
 
+  Direction direction() const { return mDirection; }
 protected:
   /**
    * Type-specific method to check and set the connected protocol.

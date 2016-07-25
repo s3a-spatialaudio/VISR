@@ -80,9 +80,6 @@ public:
    */
   std::size_t period() const; // { return mContainingFlow.period(); }
 
-  template< class PortType >
-  PortType* findAudioPort( std::string const& name ) { return findPort<PortType>( name.c_str() ); }
-
   struct AudioPortDescriptor
   {
   public:
@@ -105,10 +102,13 @@ public:
   //@}
 
   /** 
-   * Return a pointer to the port object spefied by the name.
+   * Return a pointer to the port object speficied by name, const version.
    */
   AudioPort const * getAudioPort( const char* portName) const;
 
+  /**
+   * Return a pointer to the port object speficied by name, nonconst version.
+   */
   AudioPort * getAudioPort( const char* portName );
 
 
