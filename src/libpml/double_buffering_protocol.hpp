@@ -240,7 +240,7 @@ inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectInput( ril::Param
   {
     throw std::invalid_argument( "DoubleBufferingProtocol::connectInput(): port argument has wrong type." );
   }
-  std::vector<Input*>::iterator findIt = std::find( mInputs.begin( ), mInputs.end( ), typedPort );
+  typename std::vector<Input*>::iterator findIt = std::find( mInputs.begin( ), mInputs.end( ), typedPort );
   if( findIt == mInputs.end( ) )
   {
     return false;
