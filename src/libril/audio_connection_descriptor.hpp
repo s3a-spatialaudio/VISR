@@ -103,7 +103,6 @@ public:
     return mIndices[idx];
   }
 
-
   IndexType at( std::size_t idx ) const
   {
     if( idx > mIndices.size() )
@@ -149,12 +148,16 @@ public:
   AudioConnection() = default;
 
   AudioConnection( AudioPortDescriptor const & pSender,
-                   AudioPortDescriptor const & pReceiver );
+                   AudioChannelIndexVector const & pSendIndices,
+                   AudioPortDescriptor const & pReceiver,
+                   AudioChannelIndexVector const & pReceiveIndices );
 
   AudioConnection( std::string const & pSendComponent,
-                       std::string const & pSendPort,
-                       std::string const & pReceiveComponent,
-                       std::string const & pReceivePort );
+                   std::string const & pSendPort,
+                   AudioChannelIndexVector const & pSendIndices,
+                   std::string const & pReceiveComponent,
+                   std::string const & pReceivePort,
+                   AudioChannelIndexVector const & pReceiveIndices );
 
   bool operator<(AudioConnection const & rhs) const;
 
@@ -163,6 +166,8 @@ public:
 private:
   AudioPortDescriptor const mSender;
   AudioPortDescriptor const mReceiver;
+  AudioChannelIndexVector const mSendIndices;
+  AudioChannelIndexVector const mReceiveIndices;
 };
 
 using AudioConnectionTable = std::set< AudioConnection >;

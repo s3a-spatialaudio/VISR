@@ -134,7 +134,8 @@ AudioChannelIndexVector::AudioChannelIndexVector( AudioChannelSlice const & slic
 AudioChannelIndexVector::AudioChannelIndexVector( std::initializer_list<AudioChannelSlice> const & slices )
 {
   std::size_t numIndices =
-  std::accumulate( slices.begin(), slices.end(), 0, [](std::size_t const & rhs, AudioChannelSlice const & lhs ){ return lhs.size() + rhs; } );
+  std::accumulate( slices.begin(), slices.end(), static_cast<std::size_t>(0),
+                   [](std::size_t const & rhs, AudioChannelSlice const & lhs ){ return lhs.size() + rhs; } );
   mIndices.reserve( numIndices );
   auto insertIt = std::back_inserter(mIndices);
   for( AudioChannelSlice const & v : slices )
@@ -149,7 +150,9 @@ AudioChannelIndexVector::AudioChannelIndexVector( std::initializer_list<AudioCha
 
 AudioConnection::
 AudioConnection( AudioPortDescriptor const & pSender,
-                     AudioPortDescriptor const & pReceiver)
+                 AudioChannelIndexVector const & pSendIndices,
+                 AudioPortDescriptor const & pReceiver,
+                 AudioChannelIndexVector const & pReceiceIndices )
  : mSender(pSender)
  , mReceiver(pReceiver)
 {
@@ -158,10 +161,14 @@ AudioConnection( AudioPortDescriptor const & pSender,
 AudioConnection::
 AudioConnection( std::string const & pSendComponent,
                      std::string const & pSendPort,
+                     AudioChannelIndexVector const & pSendIndices,
                      std::string const & pReceiveComponent,
-                     std::string const & pReceivePort)
+                     std::string const & pReceivePort,
+                     AudioChannelIndexVector const & pReceiveIndices )
  : AudioConnection( AudioPortDescriptor( pSendComponent, pSendPort ),
-                        AudioPortDescriptor( pReceiveComponent, pReceivePort) )
+                    pSendIndices,
+                    AudioPortDescriptor( pReceiveComponent, pReceivePort),
+                    pReceiveIndices )
 {
 }
 
