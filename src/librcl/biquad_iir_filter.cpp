@@ -13,8 +13,10 @@ namespace visr
 namespace rcl
 {
 
-BiquadIirFilter::BiquadIirFilter( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+  BiquadIirFilter::BiquadIirFilter( ril::SignalFlowContext& context,
+                                    char const * name,
+                                    ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
  , mCoefficients( ril::cVectorAlignmentSamples )

@@ -19,8 +19,10 @@ namespace visr
 namespace rcl
 {
 
-UdpSender::UdpSender( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+  UdpSender::UdpSender( ril::SignalFlowContext& context,
+                        char const * name,
+                        ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
  , mMessageInput( *this, "messageInput", pml::StringParameterConfig(32768) )
 {

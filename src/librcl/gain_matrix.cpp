@@ -11,8 +11,10 @@ namespace visr
 namespace rcl
 {
 
-GainMatrix::GainMatrix( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+  GainMatrix::GainMatrix( ril::SignalFlowContext& context,
+                          char const * name,
+                          ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 {

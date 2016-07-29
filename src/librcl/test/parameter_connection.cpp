@@ -7,6 +7,8 @@
 
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_factory.hpp>
+#include <libril/signal_flow_context.hpp>
+
 
 //#include <libpml/message_queue.hpp>
 //#include <libpml/listener_position.hpp>
@@ -33,29 +35,13 @@ namespace test
 namespace // unnamed
 {
 
-class Flow: public ril::AudioSignalFlow
-{
-public:
-  explicit Flow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
-    : ril::AudioSignalFlow( period, samplingFrequency )
-  {
-  }
-
-  /*virtual*/ void setup()
-  {
-  }
-  /*virtual*/ void process()
-  {
-  }                            
-};
-
 } // unnamed namespace
 
 BOOST_AUTO_TEST_CASE( ParameterConnection )
 {
-  Flow flow( 256, 48000 );
+  ril::SignalFlowContext context( 256, 48000 );
 
-  rcl::SceneDecoder decoder( flow, "decoder" );
+  rcl::SceneDecoder decoder( context, "decoder", nullptr );
   decoder.setup( );
 
   for( ril::Component::ParameterPortContainer::const_iterator paramPortIt = decoder.parameterPortBegin();

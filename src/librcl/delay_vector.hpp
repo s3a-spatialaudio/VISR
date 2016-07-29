@@ -57,7 +57,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit DelayVector( ril::AudioSignalFlow& container, char const * name );
+  explicit DelayVector( ril::SignalFlowContext& context,
+                        char const * name,
+                        ril::CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.

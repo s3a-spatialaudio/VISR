@@ -79,8 +79,10 @@ static const pml::BiquadParameterList<ril::SampleType> cOctaveBandFilters={
 
 } // unnamed namespace
 
-LateReverbFilterCalculator::LateReverbFilterCalculator( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+LateReverbFilterCalculator::LateReverbFilterCalculator( ril::SignalFlowContext& context,
+                                                        char const * name,
+                                                        ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mAlignment( ril::cVectorAlignmentSamples )
  , mSubBandNoiseSequences( mAlignment )
  , mSubbandInput( *this, "subbandInput", pml::EmptyParameterConfig( ) )

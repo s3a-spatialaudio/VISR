@@ -73,8 +73,10 @@ ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0
   std::vector<objectmodel::PointSourceWithReverb::LateReverb> mPreviousLateReverbs;
 
 
-ReverbParameterCalculator::ReverbParameterCalculator( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+  ReverbParameterCalculator::ReverbParameterCalculator( ril::SignalFlowContext& context,
+                                                        char const * name,
+                                                        ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mMaxNumberOfObjects( 0 )
  , cLateReverbParameterComparisonLimit( std::numeric_limits<ril::SampleType>::epsilon( ) )
  , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig() )
