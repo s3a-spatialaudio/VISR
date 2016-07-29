@@ -22,7 +22,9 @@ namespace ril
 class AtomicComponent: public Component
 {
 public:
-  explicit AtomicComponent( AudioSignalFlow& container, char const * name );
+  explicit AtomicComponent( SignalFlowContext& context,
+                            char const * name,
+                            CompositeComponent * parent = nullptr );
 
   virtual void process() = 0;
 

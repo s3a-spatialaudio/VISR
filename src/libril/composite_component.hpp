@@ -5,12 +5,17 @@
 
 #include "component.hpp"
 
+#include "audio_connection_descriptor.hpp"
+#include "parameter_connection_descriptor.hpp"
+
 #include <set>
 
 namespace visr
 {
 namespace ril
 {
+// Forward declaration
+class SignalFlowContext;
 
 /**
  *
@@ -20,7 +25,9 @@ class CompositeComponent: public Component
 {
 public:
 
-  explicit CompositeComponent( AudioSignalFlow& container, char const * name );
+  explicit CompositeComponent( SignalFlowContext& context,
+                               char const * name,
+                               CompositeComponent * parent = nullptr );
 
   /**
    * Destructor
@@ -50,13 +57,32 @@ public:
 
   ComponentTable::const_iterator componentEnd( ) const;
 
+  AudioConnectionTable::const_iterator audioConnectionBegin() const;
+  AudioConnectionTable::const_iterator audioConnectionEnd( ) const;
 
+  void registerChildComponent( Component const * child );
 
 protected:
-  void registerChildComponent( Component const * child );
+
+  void registerParameterConnection( std::string const & sendComponent,
+                                    std::string const & sendPort,
+                                    std::string const & receiveComponent,
+                                    std::string const & receivePort );
+
+  void registerAudioConnection( std::string const & sendComponent,
+                                std::string const & sendPort,
+                                AudioChannelIndexVector const & sendIndices,
+                                std::string const & receiveComponent,
+                                std::string const & receivePort,
+                                AudioChannelIndexVector const & receiveIndices );
 
 private:
   ComponentTable mComponents;
+
+  ParameterConnectionTable mParameterConnections;
+
+  AudioConnectionTable mAudioConnections;
+
 };
 
 } // namespace ril

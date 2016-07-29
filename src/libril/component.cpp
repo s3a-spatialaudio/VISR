@@ -2,9 +2,12 @@
 
 #include "component.hpp"
 
-#include "audio_input.hpp"
-#include "audio_output.hpp"
+#include "audio_port.hpp"
+//#include "audio_input.hpp"
+//#include "audio_output.hpp"
 #include "audio_signal_flow.hpp"
+#include "composite_component.hpp"
+#include "signal_flow_context.hpp"
 
 #include <ciso646>
 #include <exception>
@@ -17,14 +20,23 @@ namespace ril
 class AudioPort;
 
 
-Component::Component( AudioSignalFlow& container, char const * componentName )
- : mContainingFlow( container )
+Component::Component( SignalFlowContext& context,
+                      char const * componentName,
+                      CompositeComponent * parent)
+ : mContext( context )
  , mName( componentName )
+ , mParent( parent )
 {
+  if( parent != nullptr )
+  {
+    parent->registerChildComponent( this );
+  }
 }
 
-Component::Component( AudioSignalFlow& container, std::string const & componentName )
-: Component( container, componentName.c_str() )
+Component::Component( SignalFlowContext& context,
+                      std::string const & componentName,
+                      CompositeComponent * parent)
+: Component( context, componentName.c_str(), parent )
 {
 }
 
@@ -55,15 +67,11 @@ Component::getAudioPortList( )
   return mAudioPorts;
 }
  
-std::size_t Component::period() const { return mContainingFlow.period(); }
+std::size_t Component::period() const { return mContext.period(); }
 
-bool Component::initialised() const  { return mContainingFlow.initialised(); }
+// bool Component::initialised() const  { return mContext.initialised(); }
 
-ril::SamplingFrequencyType Component::samplingFrequency() const { return mContainingFlow.samplingFrequency(); }
-
-CommunicationArea<SampleType>& Component::commArea() { return flow().getCommArea(); }
-
-CommunicationArea<SampleType> const & Component::commArea() const { return flow().getCommArea(); }
+ril::SamplingFrequencyType Component::samplingFrequency() const { return mContext.samplingFrequency(); }
 
 void Component::registerAudioPort( char const * name, AudioPort* port )
 {

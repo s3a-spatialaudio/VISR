@@ -18,14 +18,12 @@ namespace ril
 {
 
 // Forward declaration(s)
-class AudioSignalFlow;
 class AudioPort;
+class CompositeComponent;
 class AudioInput;
 class AudioOutput;
 class ParameterPortBase; // for parameter port subsystem
-
-template< typename SampleType>
-class CommunicationArea;
+class SignalFlowContext;
 
 /**
  *
@@ -36,11 +34,14 @@ class Component
 public:
   friend class AudioInput;
   friend class AudioOutput;
-  friend class AudioSignalFlow;
 
-  explicit Component( AudioSignalFlow& container, char const * name );
+  explicit Component( SignalFlowContext& context,
+                      char const * name,
+                      CompositeComponent * parent );
 
-  explicit Component( AudioSignalFlow& container, std::string const & componentName );
+  explicit Component( SignalFlowContext& context,
+                      std::string const & componentName,
+                      CompositeComponent * parent);
 
   /**
    *
@@ -54,16 +55,6 @@ public:
    * functionality) or a composite consisting of an interconnection of atomic (or further composite) components.
    */
   virtual bool isComposite() = 0;
-
-  /**
-   * Check whether the component has been initialised. 
-   * @todo Remove or make sure that ist is not called frequently.
-   */
-  //@{
-#if 1
-  bool initialised() const; //  { return mContainingFlow.initialised(); }
-#endif
-  //@}
 
   /**
    * Return the sampling frequency of the containing signal flow.
@@ -137,23 +128,12 @@ public:
   */
   ParameterPortBase const * findParameterPort( std::string const & name ) const;
 
+  bool isTopLevel() const { return mParent != nullptr; }
 
-  //@}
-
-  /**
-   * Access the communication area.
-   * @todo Should be removed from the component interface.
-   * @todo find an inline way if needs to be accessed frequently.
-   */
-  //@{
-  CommunicationArea<SampleType>& commArea(); // { return flow().getCommArea(); }
-
-  CommunicationArea<SampleType> const & commArea() const; // { return flow().getCommArea(); }
-  //@}
 protected:
 
-  AudioSignalFlow& flow() { return mContainingFlow; }
-  AudioSignalFlow const & flow( ) const { return mContainingFlow; }
+  SignalFlowContext & context() { return mContext; }
+  SignalFlowContext const & context( ) const { return mContext; }
 
 private:
 
@@ -197,7 +177,12 @@ private:
     return findIt;
   }
 
-  AudioSignalFlow& mContainingFlow;
+  SignalFlowContext & mContext;
+
+  /**
+   
+   */
+  CompositeComponent * mParent;
 
   /**
    * Parameter port subsystem

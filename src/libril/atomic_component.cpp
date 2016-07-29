@@ -3,15 +3,18 @@
 #include "atomic_component.hpp"
 #include "audio_signal_flow.hpp"
 
+#include <ciso646>
+
 namespace visr
 {
 namespace ril
 {
 
-AtomicComponent::AtomicComponent( AudioSignalFlow& container, char const * componentName )
- : Component( container, componentName )
+AtomicComponent::AtomicComponent( SignalFlowContext& context,
+                                  char const * name,
+                                  CompositeComponent * parent /*= nullptr */ )
+ : Component( context, name, parent )
 {
-  flow().registerComponent(this, componentName);
 }
 
 AtomicComponent::~AtomicComponent()
