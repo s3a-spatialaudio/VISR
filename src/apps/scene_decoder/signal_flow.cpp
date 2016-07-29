@@ -32,25 +32,26 @@ namespace
   }
 }
 
-SignalFlow::SignalFlow( std::size_t numberOfInputs,
-  std::size_t numberOfOutputs,
-  std::size_t interpolationPeriod,
-  std::string const & configFile,
-  std::size_t udpPort,
-  std::size_t period,
-  ril::SamplingFrequencyType samplingFrequency )
- : AudioSignalFlow( period, samplingFrequency )
+SignalFlow::SignalFlow( ril::SignalFlowContext & context,
+                        char const * name,
+                        ril::CompositeComponent * parent,
+                        std::size_t numberOfInputs,
+                        std::size_t numberOfOutputs,
+                        std::size_t interpolationPeriod,
+                        std::string const & configFile,
+                        std::size_t udpPort )
+ : ril::CompositeComponent( context, name, parent )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
  , mConfigFileName( configFile )
  , mNetworkPort( udpPort )
- , mSceneReceiver( *this, "SceneReceiver" )
- , mSceneDecoder( *this, "SceneDecoder" )
- //, mSceneEncoder( *this, "SceneEncoder" )
- //, mSceneSender( *this, "SceneSender" )
- , mGainCalculator( *this, "VbapGainCalculator" )
- , mMatrix( *this, "GainMatrix" )
+ , mSceneReceiver( context, "SceneReceiver", this )
+ , mSceneDecoder( context, "SceneDecoder", this )
+ , mSceneEncoder( context, "SceneEncoder", this )
+ , mSceneSender( context, "SceneSender", this )
+ , mGainCalculator( context, "VbapGainCalculator", this )
+ , mMatrix( context, "GainMatrix", this )
 {
 }
 
@@ -97,9 +98,10 @@ SignalFlow::setup()
   mGainCalculator.setup( cNumberOfInputs, loudspeakerArray );
   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
 
-  //mSceneEncoder.setup();
-  //mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
+  mSceneEncoder.setup();
+  mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
 
+#if 0
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
 
   // Set the indices for communicating the signals from and to the outside world.
@@ -121,6 +123,7 @@ SignalFlow::setup()
 
   // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );
+#endif
 }
 
 } // namespace scene_decoder

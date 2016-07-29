@@ -12,34 +12,40 @@ namespace signalflows
 
 namespace // unnamed
 {
-  // create a helper function in an unnamed namespace
-  std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
+  // Helper function to create contiguous ranges.
+  ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
   {
-    if( endIdx < startIdx )
-    {
-      return std::vector<std::size_t>();
-    }
-    std::size_t const vecLength( endIdx - startIdx + 1 );
-    std::vector < std::size_t> ret( vecLength );
-    std::generate( ret.begin(), ret.end(), [&] { return startIdx++; } );
-    return ret;
+    std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
+    return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
   }
 }
 
-GainMatrix::GainMatrix( std::size_t numberOfInputs,
-			std::size_t numberOfOutputs,
-			efl::BasicMatrix<ril::SampleType> const & initialMatrix,
-			std::size_t interpolationPeriod,
-			std::size_t period,
-			ril::SamplingFrequencyType samplingFrequency )
- : AudioSignalFlow( period, samplingFrequency )
+GainMatrix::GainMatrix( ril::SignalFlowContext & context,
+                        const char * name,
+                        ril::CompositeComponent * parent, 
+                        std::size_t numberOfInputs,
+                        std::size_t numberOfOutputs,
+                        efl::BasicMatrix<ril::SampleType> const & initialMatrix,
+                        std::size_t interpolationPeriod )
+ : ril::CompositeComponent( context, name, parent )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
- , mMatrix( *this, "GainMatrix" )
+ , mMatrix( context, "GainMatrix", this )
+ , mInput( "input", *this )
+ , mOutput( "output", *this )
 {
   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, initialMatrix );
+#if 1
+  mInput.setWidth( cNumberOfInputs );
+  mOutput.setWidth( cNumberOfOutputs );
 
+  registerAudioConnection( "", "input", indexRange( 0, cNumberOfInputs ),
+                           "GainMatrix", "input", indexRange( 0, cNumberOfInputs ) );
+  registerAudioConnection( "GainMatrix", "output", indexRange( 0, cNumberOfOutputs ),
+                           "", "output", indexRange( 0, cNumberOfOutputs ) );
+
+#else
   initCommArea( cNumberOfInputs + cNumberOfOutputs, period, ril::cVectorAlignmentSamples );
 
   // connect the ports
@@ -59,6 +65,7 @@ GainMatrix::GainMatrix( std::size_t numberOfInputs,
 
   // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );
+#endif
 }
 
 GainMatrix::~GainMatrix( )

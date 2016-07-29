@@ -3,14 +3,14 @@
 #ifndef VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/composite_component.hpp>
 
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
-// #include <librcl/scene_encoder.hpp>
+#include <librcl/scene_encoder.hpp>
 #include <librcl/udp_receiver.hpp>
-// #include <librcl/udp_sender.hpp>
+#include <librcl/udp_sender.hpp>
 
 #include <string>
 
@@ -21,15 +21,17 @@ namespace apps
 namespace scene_decoder
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class SignalFlow: public ril::CompositeComponent
 {
 public:
-  explicit SignalFlow( std::size_t numberOfInputs, 
+  explicit SignalFlow( ril::SignalFlowContext & context,
+                       char const * name,
+                       ril::CompositeComponent * parent,
+                       std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
                        std::size_t interpolationPeriod,
                        std::string const & configFile,
-                       std::size_t udpPort,
-                       std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+                       std::size_t udpPort );
 
   ~SignalFlow();
 
@@ -52,9 +54,9 @@ private:
   
   rcl::SceneDecoder mSceneDecoder;
 
-  //rcl::SceneEncoder mSceneEncoder;
+  rcl::SceneEncoder mSceneEncoder;
 
-  //rcl::UdpSender mSceneSender;
+  rcl::UdpSender mSceneSender;
 
   rcl::PanningGainCalculator mGainCalculator;
 
