@@ -4,6 +4,8 @@
 
 #include <libpml/matrix_parameter.hpp>
 
+#include <libril/signal_flow_context.hpp>
+
 #include <librrl/portaudio_interface.hpp>
 
 #include <libsignalflows/gain_matrix.hpp>
@@ -99,12 +101,14 @@ int main( int argc, char const * const * argv )
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;
 
-    visr::signalflows::GainMatrix flow( numberOfInputs, numberOfOutputs,
-                                        *initialMtx,
-                                        cInterpolationLength, periodSize,
-                                        samplingRate );
+    ril::SignalFlowContext context( periodSize, samplingRate );
 
-    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    visr::signalflows::GainMatrix flow( context, "", nullptr,
+                                        numberOfInputs, numberOfOutputs,
+                                        *initialMtx,
+                                        cInterpolationLength );
+
+    // audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -114,9 +118,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface.stop( );
 
-   // Should there be an explicit stop() method for the sound interface?
-
-    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    // audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {
