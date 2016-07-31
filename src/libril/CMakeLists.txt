@@ -6,7 +6,6 @@ audio_connection_descriptor.cpp
 audio_input.cpp
 audio_output.cpp
 audio_port.cpp
-audio_signal_flow.cpp
 communication_area.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp
@@ -25,7 +24,6 @@ audio_connection_descriptor.hpp
 audio_input.hpp 
 audio_output.hpp 
 audio_port.hpp 
-audio_signal_flow.hpp 
 communication_area.hpp 
 communication_protocol_base.hpp 
 communication_protocol_type.hpp 
@@ -40,7 +38,8 @@ parameter_input_port.hpp
 parameter_factory.hpp 
 parameter_output_port.hpp
 parameter_port_base.hpp
-parameter_type.hpp 
+parameter_type.hpp
+processable_interface.hpp
 signal_flow_context.hpp
 typed_parameter_base.hpp 
 )

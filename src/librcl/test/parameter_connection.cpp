@@ -3,7 +3,6 @@
 #include <librcl/scene_decoder.hpp>
 
 #include <librcl/panning_gain_calculator.hpp>
-#include <libril/audio_signal_flow.hpp>
 
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_factory.hpp>

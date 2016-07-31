@@ -2,14 +2,15 @@
 
 #include "audio_signal_flow.hpp"
 
-#include "audio_input.hpp"
-#include "audio_output.hpp"
-#include "atomic_component.hpp"
-#include "communication_area.hpp"
-#include "communication_protocol_base.hpp"
-#include "communication_protocol_factory.hpp"
-#include "communication_protocol_type.hpp"
-#include "parameter_port_base.hpp"
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/communication_area.hpp>
+#include <libril/communication_protocol_base.hpp>
+#include <libril/communication_protocol_factory.hpp>
+#include <libril/communication_protocol_type.hpp>
+#include <libril/parameter_port_base.hpp>
 
 #include <libefl/vector_functions.hpp>
 
@@ -18,13 +19,12 @@
 
 namespace visr
 {
-namespace ril
+namespace rrl
 {
 
-AudioSignalFlow::AudioSignalFlow( std::size_t period, SamplingFrequencyType samplingFrequency )
- : mInitialised( false )
- , mPeriod( period )
- , mSamplingFrequency( samplingFrequency )
+AudioSignalFlow::AudioSignalFlow( ril::Component & flow )
+ : mFlow( flow )
+ , mInitialised( false )
 {
 }
 
@@ -36,13 +36,13 @@ AudioSignalFlow::~AudioSignalFlow()
 void AudioSignalFlow::initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
                                     std::size_t alignmentElements /* = cVectorAlignmentSamples */ )
 {
-  mCommArea.reset( new CommunicationArea<SampleType>( numberOfSignals, signalLength, alignmentElements ) );
+  mCommArea.reset( new ril::CommunicationArea<ril::SampleType>( numberOfSignals, signalLength, alignmentElements ) );
 }
 
 /*static*/ void 
 AudioSignalFlow::processFunction( void* userData,
-                                  SampleType const * const * captureSamples,
-                                  SampleType * const * playbackSamples,
+                                  ril::SampleType const * const * captureSamples,
+                                  ril::SampleType * const * playbackSamples,
                                   AudioInterface::CallbackResult& callbackResult )
 {
   AudioSignalFlow* flowObj = reinterpret_cast<AudioSignalFlow*>( userData );
@@ -50,8 +50,8 @@ AudioSignalFlow::processFunction( void* userData,
 }
 
 void 
-AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
-                                  SampleType * const * playbackSamples,
+AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples,
+                                  ril::SampleType * const * playbackSamples,
                                   AudioInterface::CallbackResult& callbackResult )
 {
   // TODO: It needs to be checked beforehand that the widths of the input and output signal vectors match.
@@ -60,10 +60,10 @@ AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
   std::size_t const numCaptureChannels = numberOfCaptureChannels();
   for( std::size_t captureIdx( 0 ); captureIdx < numCaptureChannels; ++captureIdx )
   {
-    SampleType * const destPtr = mCommArea->at( mCaptureIndices[captureIdx] );
+    ril::SampleType * const destPtr = mCommArea->at( mCaptureIndices[captureIdx] );
     // Note: We cannot assume an alignment as we don't know the alignment of the passed captureSamples.
     // TODO: Add optional argument to the AudioCallback interface to signal the alignment of the input and output samples.
-    efl::ErrorCode const res = efl::vectorCopy( captureSamples[captureIdx], destPtr, mPeriod, 0 );
+    efl::ErrorCode const res = efl::vectorCopy( captureSamples[captureIdx], destPtr, mFlow.period(), 0 );
     if( res != efl::noError )
     {
       throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
@@ -79,10 +79,10 @@ AudioSignalFlow::processInternal( SampleType const * const * captureSamples,
   std::size_t const numPlaybackChannels = numberOfPlaybackChannels( );
   for( std::size_t playbackIdx( 0 ); playbackIdx < numPlaybackChannels; ++playbackIdx )
   {
-    SampleType const * const srcPtr = mCommArea->at( mPlaybackIndices[playbackIdx] );
+    ril::SampleType const * const srcPtr = mCommArea->at( mPlaybackIndices[playbackIdx] );
     // Note: We cannot assume an alignment as we don't know the alignment of the passed playbackSamples.
     // TODO: Add optional argument to the AudioCallback interface to signal the alignment of the input and output samples.
-    efl::ErrorCode const res = efl::vectorCopy( srcPtr, playbackSamples[playbackIdx], mPeriod, 0 );
+    efl::ErrorCode const res = efl::vectorCopy( srcPtr, playbackSamples[playbackIdx], mFlow.period(), 0 );
     if( res != efl::noError )
     {
       throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
@@ -111,83 +111,31 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
   return mPlaybackIndices.size();
 }
 
-void 
-AudioSignalFlow::registerComponent( AtomicComponent * component, char const * componentName )
+bool AudioSignalFlow::initialise( std::ostream & messages )
 {
-  std::string const myName( componentName );
-  std::pair<std::string, AtomicComponent*> myPair( myName, component );
-  std::pair<ComponentTable::iterator, bool> res = mComponents.insert( myPair );
-  if( !res.second ) 
-  {
-    throw std::invalid_argument( "A component with the given name already exists." );
+  if( not mFlow.isTopLevel() )
+  { 
+    messages << "the component is not a top-level element of a flow.";
+    return false;
   }
-}
-
-void 
-AudioSignalFlow::assignCommunicationIndices( std::string const & componentName,
-                                             std::string const & portName,
-                                             std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
-{
-#if 0
-  AudioPort & port = findPort( componentName, portName ); // throws an exception if component or port does not exist.
-  port.assignCommunicationIndices( indexVector.begin( ), indexVector.end( ) );
-  port.setAudioBasePointer( mCommArea->data() );
-#else
-  assignCommunicationIndices( componentName, portName, indexVector.begin(), indexVector.end() );
-#endif
-}
-
-AudioPort & 
-AudioSignalFlow::findPort( std::string const & componentName,
-                           std::string const & portName )
-{
-  ComponentTable::iterator findIt = mComponents.find( componentName );
-  if( findIt == mComponents.end() )
+  if( not mFlow.isComposite() )
   {
-    throw std::invalid_argument( "No components with the given name exists." );
+    ril::AtomicComponent& atom = static_cast<ril::AtomicComponent&>(mFlow);
+    mProcessingSchedule.push_back( std::move( &atom ) );
   }
-  Component * component = findIt->second;
-  AudioPort * audioPort = component->getAudioPort(portName.c_str( ));
-  if( audioPort )
+  else
   {
-    return *audioPort;
+    ril::CompositeComponent & topLevel = dynamic_cast<ril::CompositeComponent&>(mFlow);
+    // for( ril::CompositeComponent::Co)
+
+
   }
-  throw std::invalid_argument( "Port with that name does not exist." );
+  return true;
 }
 
-void AudioSignalFlow::assignCaptureIndices( AudioPort::SignalIndexType const * indexArrayPtr, std::size_t vecLength )
+bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
 {
-  // todo: check allowed indices
-  mCaptureIndices.assign( indexArrayPtr, indexArrayPtr + vecLength );
-}
-
-void AudioSignalFlow::assignPlaybackIndices( AudioPort::SignalIndexType const * indexArrayPtr, std::size_t vecLength )
-{
-  mPlaybackIndices.assign( indexArrayPtr, indexArrayPtr + vecLength );
-}
-
-void AudioSignalFlow::assignCaptureIndices( std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
-{
-  mCaptureIndices.assign( indexVector );
-}
-
-void AudioSignalFlow::assignPlaybackIndices( std::initializer_list<AudioPort::SignalIndexType> const & indexVector )
-{
-  mPlaybackIndices.assign( indexVector );
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Parameter infrastructure
-
-void AudioSignalFlow::
-connectParameterPorts( std::string const & sendComponent,
-                       std::string const & sendPort,
-                       std::string const & receiveComponent,
-                       std::string const & receivePort)
-{
-  ParameterPortDescriptor const sendDescriptor( sendComponent, sendPort );
-  ParameterPortDescriptor const receiveDescriptor( receiveComponent, receivePort);
-  mParameterConnectionTable.insert(std::make_pair(sendDescriptor, receiveDescriptor) );
+  return true;
 }
 
 
@@ -195,8 +143,9 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
 {
   mCommunicationProtocols.clear();
 
+#if 0
   // TODO: This should check whether the contained component is composite, and in this case iterate over the parameter connection table
-  for( ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable )
+  for( ril::ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable )
   {
     // Note: In case of hierarchical models, we would need to construct the full name here.
     ComponentTable::iterator const sendComponentIt= mComponents.find( connectionDescriptor.first.component() );
@@ -263,7 +212,9 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
     // Add the newly created protocol object to the flow's container for such objects, thus passing responsibility for deleting this object at the end of its lifetime.
     mCommunicationProtocols.push_back( std::move(protocolInstance) );
   }
+#endif
 
+#if 0
   // Check whether all parameter ports are connected.
   // TODO: Consider to move that into a separate method.
   for( ComponentTable::value_type & comp : mComponents )
@@ -277,6 +228,7 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
       //}
     }
   }
+#endif
 }
 
 std::size_t AudioSignalFlow::numberCommunicationProtocols() const
@@ -284,5 +236,5 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
   return mCommunicationProtocols.size();
 }
 
-} // namespace ril
+} // namespace rrl
 } // namespace visr

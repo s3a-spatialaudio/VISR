@@ -10,7 +10,7 @@
 #include <librrl/portaudio_interface.hpp>
 #endif
 
-#include <libril/audio_signal_flow.hpp>
+#include <librrl/audio_signal_flow.hpp>
 #include <libril/signal_flow_context.hpp>
 
 #include <cstddef>
