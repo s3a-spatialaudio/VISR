@@ -4,6 +4,7 @@ SET( APPLICATION_NAME ril_test )
 
 SET( SOURCES
 audio_connection_descriptor.cpp
+component_names.cpp
 test_main.cpp
 )
 
