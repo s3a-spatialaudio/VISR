@@ -3,9 +3,6 @@
 #include "component.hpp"
 
 #include "audio_port.hpp"
-//#include "audio_input.hpp"
-//#include "audio_output.hpp"
-#include "audio_signal_flow.hpp"
 #include "composite_component.hpp"
 #include "signal_flow_context.hpp"
 
@@ -19,6 +16,7 @@ namespace ril
 {
 class AudioPort;
 
+/*static*/ const std::string Component::cNameSeparator = "::";
 
 Component::Component( SignalFlowContext& context,
                       char const * componentName,
@@ -42,17 +40,23 @@ Component::Component( SignalFlowContext& context,
 
 Component::~Component()
 {
+  if( not isTopLevel() )
+  {
+    mParent->unregisterChildComponent( this );
+  }
 }
 
-//void Component::registerAudioInput( char const * name, AudioInput* port )
-//{
-//  registerAudioPort<AudioInput>( name, port );
-//}
-//
-//void Component::registerAudioOutput( char const * name, AudioOutput* port )
-//{
-//  registerAudioPort<AudioOutput>( name, port );
-//}
+std::string Component::fullName() const
+{
+  if( isTopLevel() or mParent->isTopLevel() )
+  {
+    return name();
+  }
+  else
+  {
+    return mParent->fullName() + cNameSeparator + name();
+  }
+}
 
 Component::AudioPortVector const&
 Component::getAudioPortList()  const

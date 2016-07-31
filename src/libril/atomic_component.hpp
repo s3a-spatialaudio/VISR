@@ -4,6 +4,7 @@
 #define VISR_LIBRIL_ATOMIC_COMPONENT_HPP_INCLUDED
 
 #include "component.hpp"
+#include "processable_interface.hpp"
 
 #include <algorithm> // due to temporary definition of findPortEntry() in header.
 #include <cstddef>
@@ -19,14 +20,15 @@ namespace ril
  *
  *
  */
-class AtomicComponent: public Component
+class AtomicComponent: public Component,
+                       public ProcessableInterface
 {
 public:
   explicit AtomicComponent( SignalFlowContext& context,
                             char const * name,
                             CompositeComponent * parent = nullptr );
 
-  virtual void process() = 0;
+  virtual void process() override = 0;
 
   /**
    *

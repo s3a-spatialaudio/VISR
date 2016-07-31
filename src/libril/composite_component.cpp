@@ -2,6 +2,8 @@
 
 #include "composite_component.hpp"
 
+#include <iostream>
+
 namespace visr
 {
 namespace ril
@@ -12,7 +14,6 @@ CompositeComponent::CompositeComponent( SignalFlowContext& context,
                                          CompositeComponent * parent /*= nullptr*/ )
  : Component( context, name, parent )
 {
-  parent->registerChildComponent( this );
 }
 
 CompositeComponent::~CompositeComponent()
@@ -33,6 +34,20 @@ void CompositeComponent::registerChildComponent( Component const * child )
   }
   mComponents.insert( findComp, child ); // insert with iterator as hint.
 }
+
+void CompositeComponent::unregisterChildComponent( Component const * child )
+{
+  ComponentTable::iterator findComp = mComponents.find( child );
+  if( findComp != mComponents.end( ) )
+  {
+    mComponents.erase( findComp );
+  }
+  else
+  {
+    std::cout << "CompositeComponent::unregisterChildComponent(): Child \"" << child->name() << "\" not found." << std::endl;
+  }
+}
+
 
 void CompositeComponent::registerParameterConnection( std::string const & sendComponent,
                                                       std::string const & sendPort,

@@ -36,19 +36,26 @@ public:
   friend class AudioOutput;
 
   explicit Component( SignalFlowContext& context,
-                      char const * name,
+                      char const * componentName,
                       CompositeComponent * parent );
 
   explicit Component( SignalFlowContext& context,
                       std::string const & componentName,
                       CompositeComponent * parent);
 
+  static const std::string cNameSeparator;
+
   /**
    *
    */
   virtual ~Component();
 
+  /**
+   * Return the 'local' name.
+   */
   std::string const & name() const { return mName; }
+
+  std::string fullName() const;
 
   /**
    * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
@@ -128,7 +135,7 @@ public:
   */
   ParameterPortBase const * findParameterPort( std::string const & name ) const;
 
-  bool isTopLevel() const { return mParent != nullptr; }
+  bool isTopLevel() const { return mParent == nullptr; }
 
 protected:
 

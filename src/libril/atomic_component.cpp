@@ -1,7 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "atomic_component.hpp"
-#include "audio_signal_flow.hpp"
 
 #include <ciso646>
 

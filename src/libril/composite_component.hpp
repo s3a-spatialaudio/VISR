@@ -62,6 +62,8 @@ public:
 
   void registerChildComponent( Component const * child );
 
+  void unregisterChildComponent( Component const * child );
+
 protected:
 
   void registerParameterConnection( std::string const & sendComponent,
