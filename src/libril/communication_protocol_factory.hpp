@@ -82,11 +82,37 @@ template< class ConcreteCommunicationProtocolType >
 void CommunicationProtocolFactory::registerCommunicationProtocolType( CommunicationProtocolType const & protocolType,
                                                                       ParameterType const & paramType )
 {
-  // using ParameterClass = pml::MatrixParameter<float>; // IdToParameter<paramType>::Type;
-  
   std::pair<CommunicationProtocolType, ParameterType> const key = std::make_pair( protocolType, paramType );
   creatorTable( ).insert( std::make_pair( key, TCreator<ConcreteCommunicationProtocolType>() ) );
 }
+
+template< class ConcreteCommunicationProtocolType, CommunicationProtocolType protocolType, ParameterType parameterType >
+class CommunicationProtocolRegistrar
+{
+private:
+  /**
+   * Private constructor to prevent instantiation.
+   */
+  CommunicationProtocolRegistrar()
+  {
+    (void)&sRegistrar;
+  }
+
+  class Registrar
+  {
+  public:
+    Registrar()
+    {
+      CommunicationProtocolFactory::registerCommunicationProtocolType<ConcreteCommunicationProtocolType>( protocolType, parameterType );
+    }
+  };
+
+  static Registrar sRegistrar;
+};
+
+template< class ConcreteCommunicationProtocolType, CommunicationProtocolType protocolType, ParameterType parameterType >
+typename CommunicationProtocolRegistrar<ConcreteCommunicationProtocolType, protocolType, parameterType >::Registrar
+CommunicationProtocolRegistrar<ConcreteCommunicationProtocolType, protocolType, parameterType >::sRegistrar;
 
 } // namespace ril
 } // namespace visr

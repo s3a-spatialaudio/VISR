@@ -10,8 +10,10 @@ namespace rcl
 {
 
 
-SignalRouting::SignalRouting( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+  SignalRouting::SignalRouting( ril::SignalFlowContext& context,
+                                char const * name,
+                                ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 {

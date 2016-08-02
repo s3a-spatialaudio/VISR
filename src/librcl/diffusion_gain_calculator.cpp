@@ -20,8 +20,10 @@ namespace visr
 namespace rcl
 {
 
-DiffusionGainCalculator::DiffusionGainCalculator( ril::AudioSignalFlow& container, char const * name )
-  : AtomicComponent( container, name )
+  DiffusionGainCalculator::DiffusionGainCalculator( ril::SignalFlowContext& context,
+                                                    char const * name,
+                                                    ril::CompositeComponent * parent /*= nullptr*/ )
+  : AtomicComponent( context, name, parent )
   , mNumberOfObjectChannels( 0 )
   , mObjectVectorInput( *this, "objectInput", pml::EmptyParameterConfig() )
 {

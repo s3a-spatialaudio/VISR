@@ -6,6 +6,8 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
+#include <libril/signal_flow_context.hpp>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -56,16 +58,17 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                << ", \"lateReverbDecorrelationFilters\": \"" << lateDiffusionFilters
                << "\" }";
 
-  signalflows::BaselineRenderer( arrayConfig,
+  ril::SignalFlowContext context( period, 48000 );
+
+  signalflows::BaselineRenderer( context, "", nullptr,
+                                 arrayConfig,
                                  numberOfInputs,
                                  numberOfOutputs,
                                  interpolationPeriod,
                                  diffusionFilters,
                                  trackingConfig,
                                  8888,
-                                 reverbConfig.str(),
-                                 period,
-                                 48000
+                                 reverbConfig.str()
                                  );
 }
 

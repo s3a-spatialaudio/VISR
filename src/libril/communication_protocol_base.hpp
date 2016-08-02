@@ -12,6 +12,7 @@ namespace ril
 
 // Forward declarations
 enum class CommunicationProtocolType;
+class ParameterPortBase;
 
 /**
  *
@@ -31,6 +32,14 @@ public:
   virtual CommunicationProtocolType protocolType() const = 0;
 
   virtual ParameterType parameterType() const = 0;
+
+  virtual void connectInput( ParameterPortBase* port ) = 0;
+
+  virtual void connectOutput( ParameterPortBase* port ) = 0;
+
+  virtual bool disconnectInput( ParameterPortBase* port ) = 0;
+
+  virtual bool disconnectOutput( ParameterPortBase* port ) = 0;
 };
 
 } // namespace ril

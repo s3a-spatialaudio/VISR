@@ -14,17 +14,21 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
-#include <libpml/listener_position.hpp>
-#include <libpml/matrix_parameter.hpp>
-#include <libpml/message_queue_protocol.hpp>
-#include <libpml/object_vector.hpp>
-#include <libpml/shared_data_protocol.hpp>
-
 #include <memory>
 #include <vector>
 
 namespace visr
 {
+
+namespace pml
+{
+class ListenerPosition;
+class ObjectVector;
+template< typename ElementType > class MatrixParameter;
+template< class ParameterType > class SharedDataProtocol;
+template< class ParameterType > class DoubleBufferingProtocol;
+}
+
 namespace rcl
 {
 
@@ -45,7 +49,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PanningGainCalculator( ril::AudioSignalFlow& container, char const * name );
+  explicit PanningGainCalculator( ril::SignalFlowContext& context,
+                                  char const * name,
+                                  ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -53,7 +59,7 @@ public:
   PanningGainCalculator( PanningGainCalculator const & ) = delete;
 
 
-  /**
+  /**`
    * Destructor.
    */
   ~PanningGainCalculator();
@@ -63,7 +69,8 @@ public:
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
    */ 
-  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig );
+  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig,
+              bool adaptiveListenerPosition=false );
 
   /**
    * The process function. 
@@ -139,12 +146,13 @@ private:
   /**
    * Data type of the parmaeter ports for outgoing matrix data.
    */
-  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >; 
-  using ListenerPositionPort = ril::ParameterInputPort<pml::MessageQueueProtocol, pml::ListenerPosition >;
-  using ObjectPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::ObjectVector >;
+  using ListenerPositionPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+  using ObjectPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
+  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
 
-  ObjectPort mObjectVectorInput;
-  ListenerPositionPort mListenerPositionInput;
+  std::unique_ptr<ObjectPort> mObjectVectorInput;
+
+  std::unique_ptr<ListenerPositionPort> mListenerPositionInput;
 
   /**
    * Needs to be instantiated as a pointer, because the ParameterConfig data is not known until the setup() method.

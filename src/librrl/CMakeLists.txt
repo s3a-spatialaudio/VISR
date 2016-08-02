@@ -1,8 +1,15 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( SOURCES portaudio_interface.cpp )
+SET( SOURCES
+audio_signal_flow.cpp
+portaudio_interface.cpp
+)
 
-SET( HEADERS portaudio_interface.hpp )
+SET( HEADERS
+audio_interface.hpp
+audio_signal_flow.hpp
+portaudio_interface.hpp
+)
 
 IF( BUILD_USE_JACK )
   INCLUDE_DIRECTORIES( ${JACK_INCLUDE_DIR} ) 

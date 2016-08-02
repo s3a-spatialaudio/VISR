@@ -13,7 +13,7 @@ AudioInput::AudioInput( char const * portName,
                         Component& container )
  : AudioPort( container )
 {
-  container.registerAudioInput( portName, this );
+  container.registerAudioPort( portName, this );
 }
 
 AudioInput::~AudioInput()

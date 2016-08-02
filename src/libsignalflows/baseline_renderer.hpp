@@ -3,7 +3,9 @@
 #ifndef VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
@@ -43,7 +45,7 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class BaselineRenderer: public ril::AudioSignalFlow
+class BaselineRenderer: public ril::CompositeComponent
 {
 public:
   /**
@@ -66,16 +68,17 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit BaselineRenderer( panning::LoudspeakerArray const & loudspeakerConfiguration,
+  explicit BaselineRenderer( ril::SignalFlowContext & context,
+                             char const * name,
+                             ril::CompositeComponent * parent,
+                             panning::LoudspeakerArray const & loudspeakerConfiguration,
                              std::size_t numberOfInputs,
                              std::size_t numberOfOutputs,
                              std::size_t interpolationPeriod,
                              efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
-                             std::string const & reverbConfig,
-                             std::size_t period,
-                             ril::SamplingFrequencyType samplingFrequency );
+                             std::string const & reverbConfig );
 
   ~BaselineRenderer();
 
@@ -137,7 +140,7 @@ private:
 
   std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
 
-  pml::ListenerPosition mListenerPosition;
+  // pml::ListenerPosition mListenerPosition;
 
   //pml::MessageQueue<pml::StringParameter> mTrackingMessages;
 
@@ -164,7 +167,7 @@ private:
   ril::SampleType mLateReverbFilterLengthSeconds;
 
   std::size_t mNumDiscreteReflectionsPerObject;
-
+   
   rcl::ReverbParameterCalculator mReverbParameterCalculator;
 
   rcl::SignalRouting mReverbSignalRouting;
@@ -193,6 +196,9 @@ private:
   //@}
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
+
+  ril::AudioInput mInput;
+  ril::AudioOutput mOutput;
 };
 
 } // namespace signalflows

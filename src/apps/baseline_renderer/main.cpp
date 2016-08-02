@@ -14,6 +14,8 @@
 
 #include <libpml/signal_routing_parameter.hpp>
 
+#include <libril/signal_flow_context.hpp>
+
 #ifdef BASELINE_RENDERER_NATIVE_JACK
 #include <librrl/jack_interface.hpp>
 #else
@@ -153,15 +155,18 @@ int main( int argc, char const * const * argv )
       efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
     }
 
-    signalflows::BaselineRenderer flow( loudspeakerArray,
+    ril::SignalFlowContext context( periodSize, samplingRate );
+
+    signalflows::BaselineRenderer flow( context,
+                                        "", nullptr,
+                                        loudspeakerArray,
                                         numberOfObjects,
                                         numberOfOutputChannels,
                                         cInterpolationLength,
                                         diffusionCoeffs,
                                         trackingConfiguration,
                                         sceneReceiverPort,
-                                        reverbConfiguration,
-                                        periodSize, samplingRate );
+                                        reverbConfiguration );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );
@@ -169,7 +174,7 @@ int main( int argc, char const * const * argv )
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
-    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+//    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -187,7 +192,7 @@ int main( int argc, char const * const * argv )
 
    // Should there be an explicit stop() method for the sound interface?
 
-    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+//    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

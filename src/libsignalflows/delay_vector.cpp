@@ -2,6 +2,8 @@
 
 #include "delay_vector.hpp"
 
+#include <libril/audio_connection_descriptor.hpp>
+
 #include <algorithm>
 #include <vector>
 
@@ -14,29 +16,28 @@ namespace
 {
 
 // create a helper function in an unnamed namespace
-std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
+ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
 {
-  if( endIdx < startIdx )
-  {
-    return std::vector<std::size_t>();
-  }
-  std::size_t const vecLength( endIdx - startIdx + 1 );
-  std::vector < std::size_t> ret( vecLength );
-  std::generate( ret.begin(), ret.end(), [&] { return startIdx++; } );
-  return ret;
+  std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
+  return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
 }
+
 } // unnamed namespace
 
   
-DelayVector::DelayVector( std::size_t numberOfChannels,
-			  std::size_t interpolationPeriod,
-			  rcl::DelayVector::InterpolationType interpolationMethod,
-			  std::size_t period, ril::SamplingFrequencyType samplingFrequency )
-  : AudioSignalFlow( period, samplingFrequency )
+DelayVector::DelayVector( ril::SignalFlowContext & context,
+                          const char * name,
+                          ril::CompositeComponent * parent, 
+                          std::size_t numberOfChannels,
+                          std::size_t interpolationPeriod,
+                          rcl::DelayVector::InterpolationType interpolationMethod )
+  : ril::CompositeComponent( context, "", parent )
   , cNumberOfChannels( numberOfChannels )
   , cInterpolationSteps( interpolationPeriod )
   , cInterpolationMethod( interpolationMethod )
-  , mDelay( *this, "DelayVector" )
+  , mDelay( context, "DelayVector", this )
+  , mInput( "input", *this )
+  , mOutput( "output", *this )
 {
 }
 
@@ -55,9 +56,19 @@ DelayVector::setup()
 {
   // Initialise and configure audio components
   mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-		0.02f, cInterpolationMethod,
-		0.0f, 1.0f );
+                0.02f, cInterpolationMethod,
+                0.0f, 1.0f );
 
+#if 1
+  mInput.setWidth( cNumberOfChannels );
+  mOutput.setWidth( cNumberOfChannels );
+
+  registerAudioConnection( "", "input", indexRange( 0, cNumberOfChannels ),
+    "GainMatrix", "input", indexRange( 0, cNumberOfChannels ) );
+  registerAudioConnection( "GainMatrix", "output", indexRange( 0, cNumberOfChannels ),
+    "", "output", indexRange( 0, cNumberOfChannels ) );
+
+#else
   initCommArea( 2 * cNumberOfChannels, period(), ril::cVectorAlignmentSamples );
 
   // connect the ports
@@ -74,11 +85,10 @@ DelayVector::setup()
 
   assignCaptureIndices( indexRange( 0, cNumberOfChannels - 1 ) );
   assignPlaybackIndices( indexRange( cNumberOfChannels, cNumberOfChannels + cNumberOfChannels - 1 ) );
-  
-  mCounter = 0;
 
     // should not be done here, but in AudioSignalFlow where this method is called.
   setInitialised( true );
+#endif
 }
 
 void DelayVector::setDelay( efl::BasicVector<ril::SampleType> const & newDelays )

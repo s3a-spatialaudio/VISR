@@ -3,8 +3,10 @@
 #ifndef VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
-
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+#include <libril/composite_component.hpp>
+ 
 #include <librcl/gain_matrix.hpp>
 
 #include <libefl/basic_matrix.hpp>
@@ -14,14 +16,16 @@ namespace visr
 namespace signalflows
 {
 
-class GainMatrix: public ril::AudioSignalFlow
+class GainMatrix: public ril::CompositeComponent
 {
 public:
-  explicit GainMatrix( std::size_t numberOfInputs, 
+  explicit GainMatrix( ril::SignalFlowContext & context,
+                       const char * name,
+                       ril::CompositeComponent * parent,
+                       std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
                        efl::BasicMatrix<ril::SampleType> const & initialMatrix,
-                       std::size_t interpolationPeriod,
-                       std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+                       std::size_t interpolationPeriod );
 
   ~GainMatrix();
 
@@ -35,6 +39,10 @@ private:
   const std::size_t cInterpolationSteps;
 
   rcl::GainMatrix mMatrix;
+
+  ril::AudioInput mInput;
+
+  ril::AudioOutput mOutput;
 };
 
 } // namespace signalflows

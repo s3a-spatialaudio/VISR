@@ -60,6 +60,9 @@ public:
    */
   MatrixParameter( MatrixParameter<ElementType> const & rhs );
 
+  MatrixParameter& operator=( MatrixParameter<ElementType> const & rhs );
+
+
   /**
    * Named constructors to create and initialise matrices from various representations. 
    */

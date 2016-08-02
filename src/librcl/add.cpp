@@ -18,8 +18,10 @@ namespace rcl
 {
 
 
-Add::Add( ril::AudioSignalFlow& container, char const * name )
- : AtomicComponent( container, name )
+Add::Add( ril::SignalFlowContext& context,
+          char const * name,
+          ril::CompositeComponent * parent )
+ : AtomicComponent( context, name, parent )
  , mOutput( "out", *this )
 {
 }

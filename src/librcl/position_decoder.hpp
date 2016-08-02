@@ -10,7 +10,7 @@
 
 #include <libpml/listener_position.hpp>
 #include <libpml/message_queue_protocol.hpp>
-#include <libpml/shared_data_protocol.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/string_parameter.hpp>
 
 #include <libpanning/XYZ.h>
@@ -32,7 +32,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PositionDecoder( ril::AudioSignalFlow& container, char const * name );
+  explicit PositionDecoder( ril::SignalFlowContext& context,
+                            char const * name,
+                            ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -75,7 +77,7 @@ private:
   pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
 
   ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ril::ParameterOutputPort< pml::SharedDataProtocol, pml::ListenerPosition > mPositionOutput;
+  ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionOutput;
 };
 
 } // namespace rcl

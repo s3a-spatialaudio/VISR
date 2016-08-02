@@ -10,6 +10,9 @@
 #include <librrl/portaudio_interface.hpp>
 #endif
 
+#include <librrl/audio_signal_flow.hpp>
+#include <libril/signal_flow_context.hpp>
+
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio> // for getc(), for testing purposes
@@ -53,11 +56,11 @@ int main( int argc, char const * const * argv )
 #else
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
-    SignalFlow flow( periodSize, samplingRate );
 
-    flow.setup();
+    ril::SignalFlowContext context( periodSize, samplingRate );
+    Feedthrough flow( context, "feedthrough" );
 
-    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+//    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -67,9 +70,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface.stop( );
 
-   // Should there be an explicit stop() method for the sound interface?
-
-    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    // audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {

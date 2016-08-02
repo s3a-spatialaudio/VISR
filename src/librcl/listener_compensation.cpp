@@ -41,8 +41,10 @@ namespace visr
 {
 namespace rcl
 {
-ListenerCompensation::ListenerCompensation(ril::AudioSignalFlow& container, char const * name)//constructor
-  : ril::AtomicComponent(container, name)
+  ListenerCompensation::ListenerCompensation( ril::SignalFlowContext& context,
+                                              char const * name,
+                                              ril::CompositeComponent * parent /*= nullptr*/ )//constructor
+  : ril::AtomicComponent( context, name, parent )
   , m_listenerPos( 0.0f, 0.0f, 0.0f )
   , mNumberOfLoudspeakers( 0 )
 {

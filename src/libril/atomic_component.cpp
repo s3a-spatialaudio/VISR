@@ -2,13 +2,17 @@
 
 #include "atomic_component.hpp"
 
+#include <ciso646>
+
 namespace visr
 {
 namespace ril
 {
 
-AtomicComponent::AtomicComponent( AudioSignalFlow& container, char const * componentName )
- : Component( container, componentName )
+AtomicComponent::AtomicComponent( SignalFlowContext& context,
+                                  char const * name,
+                                  CompositeComponent * parent /*= nullptr */ )
+ : Component( context, name, parent )
 {
 }
 

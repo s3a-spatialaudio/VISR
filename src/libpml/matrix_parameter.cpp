@@ -67,6 +67,15 @@ MatrixParameter<ElementType>::MatrixParameter( MatrixParameter<ElementType> cons
 }
 
 template< typename ElementType >
+MatrixParameter<ElementType>& MatrixParameter<ElementType>::operator=(MatrixParameter<ElementType> const & rhs)
+{
+  // TODO: Check compatible dimensions
+  efl::BasicMatrix<ElementType>::copy( rhs );
+  return *this;
+}
+
+
+template< typename ElementType >
 void MatrixParameter<ElementType>::resize( std::size_t numRows, std::size_t numColumns )
 {
   efl::BasicMatrix< ElementType >::resize( numRows, numColumns );

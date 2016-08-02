@@ -3,6 +3,7 @@
 SET( SOURCES
  array_configuration.cpp
  biquad_parameter.cpp
+ double_buffering_protocol.cpp
  empty_parameter_config.cpp
  filter_routing_parameter.cpp
  float_sequence.cpp
@@ -14,6 +15,7 @@ SET( SOURCES
  message_queue.cpp
  message_queue_protocol.cpp
  object_vector.cpp
+ communication_protocol_instantiation.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
@@ -26,6 +28,7 @@ SET( SOURCES
 SET( HEADERS
  array_configuration.hpp
  biquad_parameter.hpp
+ double_buffering_protocol.hpp
  empty_parameter_config.hpp
  filter_routing_parameter.hpp
  float_sequence.hpp

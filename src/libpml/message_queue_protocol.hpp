@@ -6,9 +6,11 @@
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_type.hpp>
 
+#include <libril/parameter_port_base.hpp>
 #include <libril/parameter_type.hpp>
 #include <libril/parameter_config_base.hpp>
 
+#include <ciso646>
 #include <deque>
 #include <stdexcept>
 
@@ -40,14 +42,15 @@ public:
    */
   using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
 
-  class Output
+  class Output: public ril::ParameterPortBase
   {
   public:
     /**
      * Default constructor.
      */
-    Output()
-      : mProtocol( nullptr )
+    explicit Output( ril::Component & parent, std::string const & name )
+     : ParameterPortBase( parent, name, ParameterPortBase::Direction::Output )
+     , mProtocol( nullptr )
     {}
 
     bool empty( ) const
@@ -65,10 +68,6 @@ public:
       mProtocol ->enqueue( val );
     }
 
-    /**
-     * This whould not be accessible from the component.
-     */
-  protected:
     void setProtocolInstance( MessageQueueProtocol * protocol )
     {
       mProtocol = protocol;
@@ -77,14 +76,15 @@ public:
     MessageQueueProtocol * mProtocol;
   };
 
-  class Input
+  class Input: public ril::ParameterPortBase
   {
   public:
     /**
     * Default constructor.
     */
-    Input()
-      : mProtocol( nullptr )
+    explicit Input( ril::Component & parent, std::string const & name )
+     : ParameterPortBase( parent, name, ParameterPortBase::Direction::Input )
+     , mProtocol( nullptr )
     {}
 
     bool empty() const
@@ -112,7 +112,6 @@ public:
       mProtocol ->clear();
     }
 
-  protected:
     void setProtocolInstance( MessageQueueProtocol * protocol )
     {
       mProtocol = protocol;
@@ -175,6 +174,14 @@ public:
     mQueue.pop_back();
   }
 
+  void connectInput( ril::ParameterPortBase* port ) override;
+
+  void connectOutput( ril::ParameterPortBase* port ) override;
+
+  bool disconnectInput( ril::ParameterPortBase* port ) override;
+
+  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+
 private:
   /**
    * The internal data representation.
@@ -182,6 +189,9 @@ private:
   std::deque<MessageTypeT> mQueue;
 
   ParameterConfigType const mConfig;
+
+  Input * mInput;
+  Output* mOutput;
 };
 
 template< typename MessageTypeT >
@@ -193,8 +203,79 @@ inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ril::Paramete
 template< typename MessageTypeT >
 inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ParameterConfigType const & config )
   : mConfig( config )
+  , mInput( nullptr )
+  , mOutput( nullptr )
 {
 }
+
+template< typename MessageTypeT >
+inline void MessageQueueProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
+{
+  MessageQueueProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Input *>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+  }
+  if( mInput )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): input port already set." );
+  }
+  mInput = typedPort;
+  mInput->setProtocolInstance( this );
+}
+
+template< typename MessageTypeT >
+inline void MessageQueueProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
+{
+  MessageQueueProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Output *>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectOutput(): port argument has wrong type." );
+  }
+  if( mOutput )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectOutput(): output port already set." );
+  }
+  mOutput = typedPort;
+  mOutput->setProtocolInstance( this );
+}
+
+template< typename MessageTypeT >
+inline bool MessageQueueProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
+{
+  MessageQueueProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Input *>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+  }
+  if( typedPort != mInput )
+  {
+    // Trying to disconnect a port that is not the previously connected input." );
+    return false;
+  }
+  mInput->setProtocolInstance( nullptr );
+  mInput = nullptr;
+  return true;
+}
+
+template< typename MessageTypeT >
+inline bool MessageQueueProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
+{
+  MessageQueueProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Output *>(port);
+  if( not typedPort )
+  {
+    std::invalid_argument( "MessageQueueProtocol::disconnectOutput(): port argument has wrong type." );
+  }
+  if( typedPort != mOutput )
+  {
+    // Trying to disconnect a port that is not the previously connected output." );
+    return false;
+  }
+  mOutput->setProtocolInstance( nullptr );
+  mOutput = nullptr;
+  return true;
+}
+
 
 } // namespace pml
 } // namespace visr

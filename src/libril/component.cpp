@@ -2,9 +2,9 @@
 
 #include "component.hpp"
 
-#include "audio_input.hpp"
-#include "audio_output.hpp"
-#include "audio_signal_flow.hpp"
+#include "audio_port.hpp"
+#include "composite_component.hpp"
+#include "signal_flow_context.hpp"
 
 #include <ciso646>
 #include <exception>
@@ -14,106 +14,124 @@ namespace visr
 {
 namespace ril
 {
+class AudioPort;
 
-Component::Component( AudioSignalFlow& container, char const * componentName )
- : mContainingFlow( container )
+/*static*/ const std::string Component::cNameSeparator = "::";
+
+Component::Component( SignalFlowContext& context,
+                      char const * componentName,
+                      CompositeComponent * parent)
+ : mContext( context )
+ , mName( componentName )
+ , mParent( parent )
 {
-  mContainingFlow.registerComponent( this, componentName );
+  if( parent != nullptr )
+  {
+    parent->registerChildComponent( this );
+  }
+}
+
+Component::Component( SignalFlowContext& context,
+                      std::string const & componentName,
+                      CompositeComponent * parent)
+: Component( context, componentName.c_str(), parent )
+{
 }
 
 Component::~Component()
 {
+  if( not isTopLevel() )
+  {
+    mParent->unregisterChildComponent( this );
+  }
 }
 
-void Component::registerAudioInput( char const * name, AudioInput* port )
+std::string Component::fullName() const
 {
-  registerAudioPort<AudioInput>( name, port );
+  if( isTopLevel() or mParent->isTopLevel() )
+  {
+    return name();
+  }
+  else
+  {
+    return mParent->fullName() + cNameSeparator + name();
+  }
 }
 
-void Component::registerAudioOutput( char const * name, AudioOutput* port )
+Component::AudioPortVector const&
+Component::getAudioPortList()  const
 {
-  registerAudioPort<AudioOutput>( name, port );
+  return mAudioPorts;
 }
 
-template<>
-Component::PortVector<AudioInput> const&
-Component::getPortList()  const
-{
-  return mInputsPorts;
-}
 
-template<>
-Component::PortVector<AudioOutput> const&
-Component::getPortList( )  const
+Component::AudioPortVector&
+Component::getAudioPortList( )
 {
-  return mOutputPorts;
-}
-
-template<>
-Component::PortVector<AudioInput>&
-Component::getPortList( )
-{
-  return mInputsPorts;
-}
-
-template<>
-Component::PortVector<AudioOutput>&
-Component::getPortList( )
-{
-  return mOutputPorts;
+  return mAudioPorts;
 }
  
-std::size_t Component::period() const { return mContainingFlow.period(); }
+std::size_t Component::period() const { return mContext.period(); }
 
-bool Component::initialised() const  { return mContainingFlow.initialised(); }
+// bool Component::initialised() const  { return mContext.initialised(); }
 
-ril::SamplingFrequencyType Component::samplingFrequency() const { return mContainingFlow.samplingFrequency(); }
+ril::SamplingFrequencyType Component::samplingFrequency() const { return mContext.samplingFrequency(); }
 
-CommunicationArea<SampleType>& Component::commArea() { return flow().getCommArea(); }
-
-CommunicationArea<SampleType> const & Component::commArea() const { return flow().getCommArea(); }
-
-
-template< class PortType >
-void Component::registerAudioPort( char const * name, PortType* port )
+void Component::registerAudioPort( char const * name, AudioPort* port )
 {
   // Note: It is kind of error-prone to get the port list and the iterator through two different function calls.
-  PortVector<PortType>& vec = getPortList < PortType >();
+  AudioPortVector& vec = getAudioPortList();
   // Check whether a port with that name already exists.
-  typename PortVector<PortType>::const_iterator findIt = findPortEntry<PortType>( name );
+  AudioPortVector::const_iterator findIt = findAudioPortEntry( name );
   if( findIt != vec.end() )
   {
     throw std::invalid_argument( "Component::registerAudioPort(): port with given name already exists" );
   }
-  vec.push_back( PortDescriptor<PortType>( name, port ) );
+  vec.push_back( AudioPortDescriptor( name, port ) );
 }
-// explicit instantiations
-template void Component::registerAudioPort( char const * name, AudioInput* port );
-template void Component::registerAudioPort( char const * name, AudioOutput* port );
 
-
-template< typename PortType >
-PortType* Component::getPort( const char* portName ) const
+AudioPort const * Component::getAudioPort( const char* portName ) const
 {
-  // Note: It is kind of error-prone to get the port list and the iterator through two different function calls.
-  const PortVector<PortType>& vec = getPortList < PortType >( );
-  typename PortVector<PortType>::const_iterator findIt = findPortEntry<PortType>( portName );
-  if( findIt == vec.end( ) )
+  AudioPortVector::const_iterator findIt = findAudioPortEntry( portName );
+  if( findIt == audioPortEnd() )
   {
     return nullptr;
   }
   return findIt->mPort;
 }
-// explicit instantiations
-template AudioInput* Component::getPort( const char* portName ) const;
-template AudioOutput* Component::getPort( const char* portName ) const;
 
-template<class PortType>
+AudioPort * Component::getAudioPort( const char* portName )
+{
+  AudioPortVector::iterator findIt = findAudioPortEntry( portName );
+  if( findIt == audioPortEnd( ) )
+  {
+    return nullptr;
+  }
+  return findIt->mPort;
+}
+
+
+//template< typename PortType >
+//PortType* Component::getAudioPort( const char* portName ) const
+//{
+//  // Note: It is kind of error-prone to get the port list and the iterator through two different function calls.
+//  const AudioPortVector<PortType>& vec = getAudioPortList < PortType >( );
+//  typename AudioPortVector<PortType>::const_iterator findIt = findAudioPortEntry<PortType>( portName );
+//  if( findIt == vec.end( ) )
+//  {
+//    return nullptr;
+//  }
+//  return findIt->mPort;
+//}
+// explicit instantiations
+//template AudioInput* Component::getAudioPort( const char* portName ) const;
+//template AudioOutput* Component::getAudioPort( const char* portName ) const;
+
 struct ComparePortDescriptor
 {
   explicit ComparePortDescriptor( std::string const& name ) : mName( name ) {}
 
-  bool operator()( Component::PortDescriptor<PortType> const& lhs ) const
+  bool operator()( Component::AudioPortDescriptor const& lhs ) const
   {
     return lhs.mName == mName;
   }
@@ -166,7 +184,7 @@ bool Component::unregisterParameterPort( std::string const & name )
   return true;
 }
 
-ParameterPortBase & 
+ParameterPortBase *
 Component::findParameterPort( std::string const & name )
 {
   ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
@@ -174,18 +192,19 @@ Component::findParameterPort( std::string const & name )
   {
     throw std::invalid_argument( "No parameter port with this name exists." );
   }
-  return *(findIt->second);
+  return findIt->second;
 }
 
-ParameterPortBase const & 
+ParameterPortBase const *
 Component::findParameterPort( std::string const & name ) const
 {
   ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
   if( findIt == mParameterPorts.end() )
   {
-    throw std::invalid_argument( "No parameter port with this name exists." );
+//    throw std::invalid_argument( "No parameter port with this name exists." );
+    return nullptr;
   }
-  return *(findIt->second);
+  return findIt->second;
 }
 
 } // namespace ril

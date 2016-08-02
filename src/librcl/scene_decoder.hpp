@@ -13,7 +13,7 @@
 #include <libpml/string_parameter.hpp>
 #include <libpml/object_vector.hpp>
 #include <libpml/message_queue_protocol.hpp>
-#include <libpml/shared_data_protocol.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 
 #include <memory> // for std::unique_ptr
 #include <vector>
@@ -46,7 +46,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SceneDecoder( ril::AudioSignalFlow& container, char const * name );
+  explicit SceneDecoder( ril::SignalFlowContext& context,
+                         char const * name,
+                         ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -71,7 +73,7 @@ public:
 
 private:
   ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ril::ParameterOutputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectVectorOutput;
+  ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorOutput;
 };
 
 } // namespace rcl

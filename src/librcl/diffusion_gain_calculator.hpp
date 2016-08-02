@@ -38,7 +38,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit DiffusionGainCalculator( ril::AudioSignalFlow& container, char const * name );
+  explicit DiffusionGainCalculator( ril::SignalFlowContext& context,
+                                    char const * name,
+                                    ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor

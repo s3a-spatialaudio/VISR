@@ -3,11 +3,11 @@
 #include "parameter_port_base.hpp"
 
 #include "component.hpp"
-#include "communication_protocol_base.hpp"
-#include "communication_protocol_type.hpp"
-#include "parameter_config_base.hpp"
+//#include "communication_protocol_base.hpp"
+//#include "communication_protocol_type.hpp"
+//#include "parameter_config_base.hpp"
 
-#include <ciso646>
+// #include <ciso646>
 
 namespace visr
 {
@@ -24,9 +24,10 @@ ParameterPortBase::ParameterPortBase( Component & parent,
 
 ParameterPortBase::~ParameterPortBase( ) 
 {
-  // todo: we need the component to unregister ourself.
+  // todo: we need a reference to the containing component to unregister ourselves.
 }
 
+#if 0
 void ParameterPortBase::connectProtocol( ril::CommunicationProtocolBase * protocol )
 {
   if( protocol->protocolType() != protocolType() )
@@ -37,8 +38,12 @@ void ParameterPortBase::connectProtocol( ril::CommunicationProtocolBase * protoc
   {
     throw std::logic_error( "ParameterPortBase::connectProtocol(): parameter types of port and communication protocol object do not match." );
   }
-  // TODO: Shall we check the parameter configuration? This would mean we have to check them in the protocol.
+  // TODO: Shall we check the parameter configuration? This would mean we have to store them in the protocol.
+
+  // Call the specific registration function of the derived port type.
+  setProtocol( protocol );
 }
+#endif
 
 } // namespace ril
 } // namespace visr
