@@ -16,9 +16,9 @@ Feedthrough::Feedthrough( ril::SignalFlowContext & context,
                           char const * name,
                           ril::CompositeComponent * parent )
  : CompositeComponent( context, name, parent )
- , mSum( context, "Add", this )
  , mInput( "input", *this )
  , mOutput( "output", *this )
+ , mSum( context, "Add", this )
 {
   mInput.setWidth( 2 );
   mOutput.setWidth( 2 );
