@@ -2,8 +2,9 @@
 
 #include "audio_connection_descriptor.hpp"
 
-#include <numeric>
 #include <ciso646>
+#include <stdexcept>
+#include <numeric>
 #include <limits>
 
 namespace visr
@@ -144,6 +145,14 @@ AudioChannelIndexVector::AudioChannelIndexVector( std::initializer_list<AudioCha
   }
 }
 
+AudioChannelIndexVector::IndexType AudioChannelIndexVector::at( std::size_t idx ) const
+{
+  if( idx > mIndices.size() )
+  {
+    throw std::out_of_range( "AudioChannelIndexVector::at(): Index exceeds index vector length." );
+  }
+  return  operator[]( idx );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

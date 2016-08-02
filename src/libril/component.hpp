@@ -187,11 +187,6 @@ private:
   SignalFlowContext & mContext;
 
   /**
-   
-   */
-  CompositeComponent * mParent;
-
-  /**
    * Parameter port subsystem
    */
   //@{
@@ -200,6 +195,14 @@ private:
   //@}
 
   std::string const mName;
+
+  /**
+   * The direct parent component if this component is part of a
+   * superordinate signal flow graph, and nullptr if this is the
+   * top-level component.
+   */
+  CompositeComponent * mParent;
+
 };
 
 } // namespace ril

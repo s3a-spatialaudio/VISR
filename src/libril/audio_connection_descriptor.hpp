@@ -103,14 +103,7 @@ public:
     return mIndices[idx];
   }
 
-  IndexType at( std::size_t idx ) const
-  {
-    if( idx > mIndices.size() )
-    {
-      throw std::out_of_range( "AudioChannelIndexVector::at(): Index exceeds index vector length." );
-    }
-    return  operator[]( idx );
-  }
+  IndexType at( std::size_t idx ) const;  
 
 private:
 
