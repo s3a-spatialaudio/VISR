@@ -4,6 +4,7 @@ ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
 ADD_EXECUTABLE( baseline_renderer main.cpp options.hpp options.cpp )
 
+TARGET_LINK_LIBRARIES(baseline_renderer apputilities )
 TARGET_LINK_LIBRARIES(baseline_renderer signalflows)
 TARGET_LINK_LIBRARIES(baseline_renderer rcl)
 TARGET_LINK_LIBRARIES(baseline_renderer objectmodel)
@@ -33,3 +34,5 @@ ENDIF( BUILD_USE_FFTW )
 IF( BUILD_USE_IPP )
   TARGET_LINK_LIBRARIES(baseline_renderer  ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 ENDIF( BUILD_USE_IPP )
+
+INSTALL( TARGETS baseline_renderer DESTINATION bin )

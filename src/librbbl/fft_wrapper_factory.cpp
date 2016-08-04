@@ -28,9 +28,26 @@ FftWrapperFactory<SampleType>::Creator::Creator( CreateFunction fcn )
 template<typename SampleType> 
 std::unique_ptr<FftWrapperBase< SampleType> >
 FftWrapperFactory<SampleType>::Creator::create( std::size_t fftSize,
-						std::size_t alignElements ) const
+                                                std::size_t alignElements ) const
 {
   return std::unique_ptr<FftWrapperBase< SampleType> >( mCreateFunction( fftSize, alignElements ) );
+}
+
+template<typename SampleType>
+/*static*/ std::string FftWrapperFactory<SampleType>::listImplementations()
+{
+  std::string res;
+  CreatorTable const & table = creatorTable();
+  for( typename CreatorTable::const_iterator tblIt( table.begin() ); tblIt != table.end(); /*Increment is in loop */ )
+  {
+    res.append( tblIt->first );
+    if( ++tblIt == table.end() )
+    {
+      break;
+    }
+    res.append( ", " );
+  }
+  return res;
 }
 
 template<typename SampleType> 
