@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadDefault )
 
   BiquadParameter<CoeffType> const biq;
 
-  BOOST_CHECK_CLOSE( biq.b0(), 0.0f, std::numeric_limits<CoeffType>::epsilon() );
+  BOOST_CHECK_CLOSE( biq.b0( ), 1.0f, std::numeric_limits<CoeffType>::epsilon() );
   BOOST_CHECK_CLOSE( biq.b1( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );
   BOOST_CHECK_CLOSE( biq.b2( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );
   BOOST_CHECK_CLOSE( biq.a1( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );

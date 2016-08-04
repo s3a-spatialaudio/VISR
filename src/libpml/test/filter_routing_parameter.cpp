@@ -2,12 +2,7 @@
 
 #include <libpml/filter_routing_parameter.hpp>
 
-#include <libefl/basic_matrix.hpp>
-#include <libril/constants.hpp>
-
 #include <boost/test/unit_test.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #include <ciso646>
 #include <algorithm>
@@ -64,13 +59,46 @@ BOOST_AUTO_TEST_CASE( FilterRoutingParameterInstantiation )
 
 BOOST_AUTO_TEST_CASE( FilterRoutingParameterFromJson )
 {
-  std::string const jsonString = "{ \"routings\": [ { \"input\": 0, \"output\": 12, \"filter\": 8, \"gain\": 0.375 },{ \"input\": 3, \"output\": 1, \"filter\": 5} ] }";
+  std::string const jsonString = "[ { \"input\": 0, \"output\": 12, \"filter\": 8, \"gain\": 0.375 },{ \"input\": 3, \"output\": 1, \"filter\": 5} ]";
 
   FilterRoutingList list1;
 
   BOOST_CHECK_NO_THROW( list1.parseJson( jsonString ) );
 
   BOOST_CHECK( list1.size() == 2 );
+}
+
+BOOST_AUTO_TEST_CASE( FilterRoutingParameterFromJsonMultiInput )
+{
+  std::string const initStr( "[ { \"input\": \"0:2:10\", \"output\": 12, \"filter\": 8, \"gain\": 0.375 } ]" );
+
+  FilterRoutingList list;
+
+  BOOST_CHECK_NO_THROW( list.parseJson( initStr ) );
+
+  BOOST_CHECK( list.size( ) == 6 );
+}
+
+BOOST_AUTO_TEST_CASE( FilterRoutingParameterFromJsonMultiInOut )
+{
+  std::string const initStr( "[ { \"input\": \"0:2:10\", \"output\": \"12,11,10,9,8,7\", \"filter\": 8, \"gain\": 0.375 } ]" );
+
+  FilterRoutingList list;
+
+  BOOST_CHECK_NO_THROW( list.parseJson( initStr ) );
+
+  BOOST_CHECK( list.size( ) == 6 );
+}
+
+BOOST_AUTO_TEST_CASE( FilterRoutingParameterFromJsonMultiInOutFilterGain )
+{
+  std::string const initStr( "[ { \"input\": \"0:2\", \"output\": \"7:-1:5\", \"filter\": \"3,8,2\", \"gain\": \"0.1, 0.25, 0.825\" } ]" );
+
+  FilterRoutingList list;
+
+  BOOST_CHECK_NO_THROW( list.parseJson( initStr ) );
+
+  BOOST_CHECK( list.size( ) == 3 );
 }
 
 } // namespace test
