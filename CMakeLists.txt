@@ -53,9 +53,9 @@ STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME 
 STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_MACRO )
 
 
-# MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
-# MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
-# MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
+MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
+MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
+MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
 
 ADD_DEFINITIONS("-DVISR_SYSTEM_PROCESSOR_${VISR_SYSTEM_PROCESSOR}")
 ADD_DEFINITIONS("-DVISR_SYSTEM_NAME_${VISR_SYSTEM_NAME}")
@@ -210,7 +210,8 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
+# In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
 
 IF( BUILD_PYTHON_BINDINGS )
   LIST( APPEND VISR_BOOST_LIBRARIES python ) 
@@ -264,3 +265,6 @@ IF(BUILD_DOCUMENTATION)
  
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc )
 ENDIF()
+
+# Instructions for packaging are held in a separate file.
+INCLUDE( PackageConfig )
