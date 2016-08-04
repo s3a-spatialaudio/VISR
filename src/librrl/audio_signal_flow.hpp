@@ -137,8 +137,18 @@ private:
 
   bool initialiseAudioConnections( std::ostream & messages );
 
+  /**
+   * Can be static or nonmember functions
+   */
+  //@{
+  bool checkFlow( ril::Component const & comp, bool locally, std::ostream & messages );
 
+  bool checkCompositeLocal( ril::CompositeComponent const & composite , std::ostream & messages );
 
+  bool checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages );
+
+  bool checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages );
+  //@}
 
   /**
    * Register a component within the graph.

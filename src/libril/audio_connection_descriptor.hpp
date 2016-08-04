@@ -3,6 +3,7 @@
 #ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTORHPP_INCLUDED
 #define VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTORHPP_INCLUDED
 
+#include <ciso646>
 #include <cstddef>
 #include <initializer_list>
 #include <set>
@@ -13,6 +14,8 @@ namespace visr
 {
 namespace ril
 {
+class AudioPort;
+class Component;
 
 class AudioChannelSlice
 {
@@ -110,22 +113,30 @@ private:
   std::vector<IndexType> mIndices;
 };
 
+#if 0
 struct AudioPortDescriptor
 {
 public:
-  AudioPortDescriptor() = default;
+  AudioPortDescriptor()
+   : mComponent( nullptr )
+   , mPort( nullptr )
+  {
+  }
 
-  explicit AudioPortDescriptor( std::string const & pComponent, std::string const & pPort );
+  explicit AudioPortDescriptor( Component * pComponent, AudioPort * pPort );
 
   bool operator<(AudioPortDescriptor const & rhs) const;
 
-  std::string const & component() const { return mComponent; }
-  std::string const & port() const { return mPort; }
+  bool valid() const { return mComponent and mPort; }
+
+  Component const & component() const { return *mComponent; }
+  AudioPort const & port() const { return *mPort; }
 
 private:
-  std::string mComponent;
-  std::string mPort;
+  Component* mComponent;
+  AudioPort* mPort;
 };
+#endif
 
 /**
  * Store data from definition in derived class until initialisation of runtime structures.
@@ -138,27 +149,35 @@ public:
    * Default constructor, required for use in standard containers.
    * Creates a struct with empty strings for all members.
    */
-  AudioConnection() = default;
+  AudioConnection()
+   : mSender( nullptr )
+   , mReceiver( nullptr )
+  {
+  }
 
-  AudioConnection( AudioPortDescriptor const & pSender,
+  AudioConnection( AudioPort * pSender,
                    AudioChannelIndexVector const & pSendIndices,
-                   AudioPortDescriptor const & pReceiver,
+                   AudioPort * pReceiver,
                    AudioChannelIndexVector const & pReceiveIndices );
-
+#if 0
   AudioConnection( std::string const & pSendComponent,
                    std::string const & pSendPort,
                    AudioChannelIndexVector const & pSendIndices,
                    std::string const & pReceiveComponent,
                    std::string const & pReceivePort,
                    AudioChannelIndexVector const & pReceiveIndices );
-
+#endif
   bool operator<(AudioConnection const & rhs) const;
 
-  AudioPortDescriptor const & sender() const { return mSender; }
-  AudioPortDescriptor const & receiver() const { return mReceiver; }
+  AudioPort * sender() const { return mSender; }
+  AudioPort * receiver() const { return mReceiver; }
+
+  AudioChannelIndexVector const & sendIndices() const { return mSendIndices; }
+  AudioChannelIndexVector const & receiveIndices( ) const { return mReceiveIndices; }
+
 private:
-  AudioPortDescriptor const mSender;
-  AudioPortDescriptor const mReceiver;
+  AudioPort * mSender;
+  AudioPort * mReceiver;
   AudioChannelIndexVector const mSendIndices;
   AudioChannelIndexVector const mReceiveIndices;
 };

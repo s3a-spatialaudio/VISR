@@ -44,15 +44,17 @@ AudioPort::SignalIndexType AudioPort::cInvalidSignalIndex;
 #endif // _MSC_VER
 //@}
 
-AudioPort::AudioPort( Component& container )
+AudioPort::AudioPort( Direction direction, Component& container )
  : mParentComponent( container )
  , mWidth( cInvalidWidth )
+ , mDirection( direction )
 {
 }
 
-AudioPort::AudioPort( Component& container, std::size_t width )
+AudioPort::AudioPort( Direction direction, Component& container, std::size_t width )
  : mParentComponent( container )
  , mWidth( cInvalidWidth ) // need to set it to some value before calling setWidth
+ , mDirection( direction )
 {
   setWidth( width );
 }

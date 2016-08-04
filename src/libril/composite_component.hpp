@@ -38,7 +38,7 @@ public:
    * Query whether this component is composite.
    * @return true
    */
-  virtual bool isComposite() override;
+  virtual bool isComposite() const override;
 
   struct CompareComponents
   {
@@ -49,7 +49,8 @@ public:
     }
   };
 
-  using ComponentTable = std::set < Component const *, CompareComponents >;
+  // using ComponentTable = std::set < Component const *, CompareComponents >;
+  using ComponentTable = std::map<std::string, Component * >;
 
   std::size_t numberOfComponents() const;
 
@@ -57,12 +58,24 @@ public:
 
   ComponentTable::const_iterator componentEnd( ) const;
 
+  /**
+   * Return the (non-owning) pointer to a contained component or nullptr if the component cannot be found.
+   * @return 
+   * @param componentName the local (nonhierarchical) name of the component. 
+   * If the name is empty or "this", return the name of the parent component.
+   */
+  Component * findComponent( std::string const & componentName ) ;
+
+  Component const * findComponent( std::string const & componentName ) const;
+
+  AudioPort * findAudioPort( std::string const & componentName, std::string const & portName );
+
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
   AudioConnectionTable::const_iterator audioConnectionEnd( ) const;
 
-  void registerChildComponent( Component const * child );
+  void registerChildComponent( Component * child );
 
-  void unregisterChildComponent( Component const * child );
+  void unregisterChildComponent( Component * child );
 
 protected:
 
@@ -76,6 +89,11 @@ protected:
                                 AudioChannelIndexVector const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
+                                AudioChannelIndexVector const & receiveIndices );
+
+  void registerAudioConnection( AudioPort & sender,
+                                AudioChannelIndexVector const & sendIndices,
+                                AudioPort & receiver,
                                 AudioChannelIndexVector const & receiveIndices );
 
 private:

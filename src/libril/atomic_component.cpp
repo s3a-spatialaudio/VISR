@@ -20,7 +20,7 @@ AtomicComponent::~AtomicComponent()
 {
 }
 
-bool AtomicComponent::isComposite()
+bool AtomicComponent::isComposite() const
 {
   return false;
 }

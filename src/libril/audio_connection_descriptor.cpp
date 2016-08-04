@@ -87,9 +87,9 @@ AudioChannelSlice::IndexType AudioChannelSlice::operator[]( IndexType idx ) cons
   return static_cast<IndexType>(mStart + mStride * static_cast<StrideType>(idx));
 }
 
-
+#if 0
 AudioPortDescriptor::
-AudioPortDescriptor(std::string const & pComponent, std::string const & pPort)
+AudioPortDescriptor( Component * pComponent, AudioPort * pPort )
  : mComponent( pComponent)
  , mPort(pPort)
 {
@@ -98,16 +98,17 @@ AudioPortDescriptor(std::string const & pComponent, std::string const & pPort)
 bool AudioPortDescriptor::
 operator<(AudioPortDescriptor const & rhs) const
 {
-  if (component() < rhs.component())
+  if (mComponent < rhs.mComponent)
   {
     return true;
   }
-  else if( rhs.component() < component() )
+  else if( rhs.mComponent < mComponent )
   {
     return false;
   }
-  else return port() < rhs.port();
+  else return mPort < rhs.mPort;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 AudioChannelIndexVector::AudioChannelIndexVector()
@@ -158,15 +159,16 @@ AudioChannelIndexVector::IndexType AudioChannelIndexVector::at( std::size_t idx 
 
 
 AudioConnection::
-AudioConnection( AudioPortDescriptor const & pSender,
+AudioConnection( AudioPort * pSender,
                  AudioChannelIndexVector const & pSendIndices,
-                 AudioPortDescriptor const & pReceiver,
+                 AudioPort * pReceiver,
                  AudioChannelIndexVector const & pReceiceIndices )
  : mSender(pSender)
  , mReceiver(pReceiver)
 {
 }
 
+#if 0
 AudioConnection::
 AudioConnection( std::string const & pSendComponent,
                      std::string const & pSendPort,
@@ -180,6 +182,7 @@ AudioConnection( std::string const & pSendComponent,
                     pReceiveIndices )
 {
 }
+#endif
 
 bool AudioConnection::operator<(AudioConnection const & rhs) const
 {

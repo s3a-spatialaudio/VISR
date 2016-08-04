@@ -61,7 +61,11 @@ class AudioSignalFlow;
 class AudioPort
 {
 public:
-  friend class AudioSignalFlow;
+  enum class Direction
+  {
+    Input,
+    Output
+  };
 
   /**
    * The type of signal indices.
@@ -81,9 +85,9 @@ public:
   const static SignalIndexType cInvalidSignalIndex = UINT_MAX;
 #endif
 
-  explicit AudioPort( Component& container );
+  explicit AudioPort( Direction direction, Component& container );
 
-  explicit AudioPort( Component& container, std::size_t width );
+  explicit AudioPort( Direction direction, Component& container, std::size_t width );
 
   ~AudioPort();
 
@@ -111,6 +115,8 @@ public:
   std::size_t width() const { return mWidth; }
 
   //@}
+
+  Direction direction() const { return mDirection; }
 
   void setAudioChannelStride(std::size_t stride)
   {
@@ -213,6 +219,7 @@ private:
 #else
   mutable std::valarray< SampleType* > mSignalPointers;
 #endif
+  Direction const mDirection;
 };
 
 } // namespace ril

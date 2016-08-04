@@ -2,6 +2,7 @@
 
 #include "audio_signal_flow.hpp"
 
+#include <libril/audio_connection_descriptor.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/atomic_component.hpp>
@@ -235,6 +236,142 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 {
   return mCommunicationProtocols.size();
 }
+
+
+bool AudioSignalFlow::checkFlow( ril::Component const & comp, bool locally, std::ostream & messages )
+{
+  if( not comp.isComposite() )
+  {
+    return true;
+  }
+  ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>( comp );
+  // First, check the connections level by level
+  if( locally )
+  {
+    bool const localResult = checkCompositeLocal( composite, messages );
+    bool overallResult = localResult;
+    for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin( ) );
+      compIt != composite.componentEnd( ); ++compIt )
+    {
+      bool const compRes = checkFlow( *(compIt->second), locally, messages );
+      overallResult = overallResult and compRes;
+    }
+    return overallResult;
+  }
+  else
+  {
+    // No idea how to check hierarchically without flattening the graph.
+    // Maybe we remove that option.
+    return true;
+  }
+}
+
+bool AudioSignalFlow::checkCompositeLocal( ril::CompositeComponent const & composite, std::ostream & messages )
+{
+  bool const audioCheck = checkCompositeLocalAudio( composite, messages );
+  bool const paramCheck = checkCompositeLocalParameters( composite, messages );
+  return audioCheck and paramCheck;
+}
+
+namespace // unnamed
+{
+
+struct AudioSignalDescriptor
+{
+public:
+  using SignalIndexType = std::size_t;
+
+  AudioSignalDescriptor()
+    : mPort( nullptr )
+    , mIndex( cInvalidIndex )
+  {
+  }
+
+  explicit AudioSignalDescriptor( ril::AudioPort const * port, SignalIndexType index )
+    : mPort( nullptr )
+    , mIndex()
+  {
+  }
+
+  /**
+   * 'less than operator', used for ordering in a map.
+   */
+  bool operator<(AudioSignalDescriptor const & rhs)
+  {
+    if( mPort < rhs.mPort )
+    {
+      return true;
+    }
+    else if( mPort == rhs.mPort )
+    {
+      return mIndex < rhs.mIndex;
+    }
+    return false;
+  }
+
+  ril::AudioPort const* mPort;
+  SignalIndexType mIndex;
+
+  // with proper C++11 support, this could be instantiated in place (using the constexpr mechanism)
+  static SignalIndexType const cInvalidIndex;
+};
+
+AudioSignalDescriptor::SignalIndexType const AudioSignalDescriptor::
+cInvalidIndex = std::numeric_limits<AudioSignalDescriptor::SignalIndexType>::max();
+
+using SignalConnectionMap = std::multimap< AudioSignalDescriptor, AudioSignalDescriptor >;
+
+}
+
+bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages )
+{
+  using PortTable = std::set<ril::AudioPort const*>;
+  PortTable sendPorts;
+  PortTable receivePorts;
+
+  // First add the external ports of 'composite'. From the localviewpoint of this component, the directions are 
+  // reversed, i.e. inputs are senders and outputs are receivers.
+  for( ril::Component::AudioPortVector::const_iterator extPortIt = composite.audioPortBegin();
+       extPortIt != composite.audioPortEnd(); ++extPortIt )
+  {
+    if( extPortIt->mPort->direction() == ril::AudioPort::Direction::Input )
+    {
+      sendPorts.insert( extPortIt->mPort );
+    }
+    else
+    {
+      receivePorts.insert( extPortIt->mPort );
+    }
+  }
+  // Add the ports of the contained components (without descending into the hierarchy)
+  for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin();
+       compIt != composite.componentEnd(); ++compIt )
+  {
+    ril::Component const & containedComponent = *(compIt->second);
+    for( ril::Component::AudioPortVector::const_iterator intPortIt = containedComponent.audioPortBegin( );
+      intPortIt != containedComponent.audioPortEnd( ); ++intPortIt )
+    {
+      if( intPortIt->mPort->direction( ) == ril::AudioPort::Direction::Input )
+      {
+        sendPorts.insert( intPortIt->mPort );
+      }
+      else
+      {
+        receivePorts.insert( intPortIt->mPort );
+      }
+    }
+  }
+  // Now populate the connections map
+  for( ril::CompositeComponent::audioConnectionBegin() )
+
+  return true;
+}
+
+bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages )
+{
+  return true;
+}
+
 
 } // namespace rrl
 } // namespace visr

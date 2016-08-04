@@ -3,10 +3,8 @@
 #ifndef VISR_LIBRIL_COMPONENT_HPP_INCLUDED
 #define VISR_LIBRIL_COMPONENT_HPP_INCLUDED
 
-// for ril::SampleType (might be made a template parameter or removed here later.)
-#include "constants.hpp"
+#include <libril/constants.hpp>
 
-#include <algorithm> // due to temporary definition of findPortEntry() in header.
 #include <cstddef>
 #include <map> // for parameter port subsystem
 #include <string>
@@ -61,7 +59,7 @@ public:
    * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
    * functionality) or a composite consisting of an interconnection of atomic (or further composite) components.
    */
-  virtual bool isComposite() = 0;
+  virtual bool isComposite() const = 0;
 
   /**
    * Return the sampling frequency of the containing signal flow.
@@ -83,6 +81,11 @@ public:
   public:
     explicit AudioPortDescriptor( const char* name, AudioPort* port )
       : mName( name ), mPort( port ) {}
+
+    explicit AudioPortDescriptor( std::string const & name, AudioPort* port )
+      : mName( name ), mPort( port )
+    {
+    }
 
     std::string mName;
     AudioPort* mPort;
@@ -135,6 +138,17 @@ public:
   */
   ParameterPortBase const * findParameterPort( std::string const & name ) const;
 
+
+  /**
+  * @return pointer to port, nullptr in case the port is not found.
+  */
+  AudioPort* findAudioPort( std::string const & name );
+
+  /**
+  * @return pointer to port, nullptr in case the port is not found.
+  */
+  AudioPort const * findAudioPort( std::string const & name ) const;
+
   bool isTopLevel() const { return mParent == nullptr; }
 
 protected:
@@ -169,20 +183,9 @@ private:
     std::string const mName;
   };
 
-  AudioPortVector::iterator findAudioPortEntry( const char* portName )
-  {
-    AudioPortVector::iterator findIt
-      = std::find_if( mAudioPorts.begin(), mAudioPorts.end(), ComparePortDescriptor( portName ) );
-    return findIt;
-  }
+  AudioPortVector::iterator findAudioPortEntry( std::string const & portName );
 
-  AudioPortVector::const_iterator findAudioPortEntry( const char* portName ) const
-  {
-    AudioPortVector const & vec = getAudioPortList( );
-    AudioPortVector::const_iterator findIt
-      = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor( portName ) );
-    return findIt;
-  }
+  AudioPortVector::const_iterator findAudioPortEntry( std::string const & portName ) const;
 
   SignalFlowContext & mContext;
 

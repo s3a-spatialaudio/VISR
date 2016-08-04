@@ -11,7 +11,7 @@ namespace ril
 
 AudioOutput::AudioOutput( char const* portName,
                           Component& container )
- : AudioPort( container )
+ : AudioPort( Direction::Output, container )
 {
   container.registerAudioPort( portName, this );
 }

@@ -90,7 +90,23 @@ void Component::registerAudioPort( char const * name, AudioPort* port )
   vec.push_back( AudioPortDescriptor( name, port ) );
 }
 
-AudioPort const * Component::getAudioPort( const char* portName ) const
+
+Component::AudioPortVector::iterator Component::findAudioPortEntry( std::string const & portName )
+{
+  AudioPortVector::iterator findIt
+    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), ComparePortDescriptor( portName ) );
+  return findIt;
+}
+
+Component::AudioPortVector::const_iterator Component::findAudioPortEntry( std::string const & portName ) const
+{
+  AudioPortVector const & vec = getAudioPortList( );
+  AudioPortVector::const_iterator findIt
+    = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor( portName ) );
+  return findIt;
+}
+
+AudioPort const * Component::findAudioPort( std::string const & portName ) const
 {
   AudioPortVector::const_iterator findIt = findAudioPortEntry( portName );
   if( findIt == audioPortEnd() )
@@ -100,7 +116,7 @@ AudioPort const * Component::getAudioPort( const char* portName ) const
   return findIt->mPort;
 }
 
-AudioPort * Component::getAudioPort( const char* portName )
+AudioPort * Component::findAudioPort( std::string const & portName )
 {
   AudioPortVector::iterator findIt = findAudioPortEntry( portName );
   if( findIt == audioPortEnd( ) )

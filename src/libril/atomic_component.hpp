@@ -39,7 +39,7 @@ public:
   * Query whether this component is composite.
   * @return false
   */
-  virtual bool isComposite();
+  virtual bool isComposite() const override;
  };
 
 } // namespace ril
