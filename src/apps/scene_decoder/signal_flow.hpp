@@ -5,6 +5,9 @@
 
 #include <libril/composite_component.hpp>
 
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
@@ -47,11 +50,15 @@ private:
   const std::size_t cInterpolationSteps;
 
   const std::string mConfigFileName;
-  
+
   const std::size_t mNetworkPort;
-  
+
+  ril::AudioInput mInput;
+
+  ril::AudioOutput mOutput;
+
   rcl::UdpReceiver mSceneReceiver;
-  
+
   rcl::SceneDecoder mSceneDecoder;
 
   rcl::SceneEncoder mSceneEncoder;

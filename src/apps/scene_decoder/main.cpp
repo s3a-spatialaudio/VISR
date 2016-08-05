@@ -6,6 +6,7 @@
 
 #include <libril/signal_flow_context.hpp>
 
+#include <librrl/audio_signal_flow.hpp>
 #include <librrl/portaudio_interface.hpp>
 
 #include <boost/filesystem.hpp>
@@ -56,13 +57,16 @@ int main( int argc, char const * const * argv )
 
     const std::size_t cInterpolationLength = periodSize;
 
-    ril::SignalFlowContext context( samplingRate, periodSize );
+    ril::SignalFlowContext context( periodSize, samplingRate );
 
-    SignalFlow flow( context, "SceneDecoder", nullptr,
+    SignalFlow graph( context, "SceneDecoder", nullptr,
                      numberOfObjects, numberOfLoudspeakers,
                      cInterpolationLength,
                      fullPath.string().c_str(), udpPort );
-    flow.setup();
+    graph.setup();
+
+    rrl::AudioSignalFlow flow( graph );
+
 
     // audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
 
