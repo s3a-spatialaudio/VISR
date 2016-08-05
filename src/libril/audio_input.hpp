@@ -4,9 +4,6 @@
 #define VISR_LIBRIL_AUDIO_INPUT_HPP_INCLUDED
 
 #include "audio_port.hpp"
-// not sure whether we want to expose the CommunicationArea mechanism to the ports 
-// (and thus to the user code in the derived audio components)
-#include "communication_area.hpp" 
 
 namespace visr
 {

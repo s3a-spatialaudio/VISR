@@ -5,8 +5,6 @@
 
 #include "audio_port.hpp"
 
-#include "communication_area.hpp"
-
 namespace visr
 {
 namespace ril

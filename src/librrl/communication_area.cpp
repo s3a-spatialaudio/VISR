@@ -7,7 +7,7 @@
 
 namespace visr
 {
-namespace ril
+namespace rrl
 {
   template<typename SampleType>
   CommunicationArea<SampleType>::CommunicationArea( std::size_t numberOfSignals, std::size_t signalLength,
@@ -33,5 +33,5 @@ namespace ril
   template class CommunicationArea<float>;
   template class CommunicationArea<double>;
 
-} // namespace ril
+} // namespace rrl
 } // namespace visr

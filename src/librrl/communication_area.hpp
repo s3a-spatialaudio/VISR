@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_RIL_COMMUNICATION_AREA_HPP_INCLUDED
-#define VISR_RIL_COMMUNICATION_AREA_HPP_INCLUDED
+#ifndef VISR_RRL_COMMUNICATION_AREA_HPP_INCLUDED
+#define VISR_RRL_COMMUNICATION_AREA_HPP_INCLUDED
 
 #include <libefl/aligned_array.hpp>
 
@@ -10,7 +10,7 @@
 
 namespace visr
 {
-namespace ril
+namespace rrl
 {
 
 /**
@@ -77,7 +77,7 @@ private:
 
 };
 
-} // namespace ril
+} // namespace rrl
 } // namespace visr
 
-#endif // VISR_RIL_COMMUNICATION_AREA_HPP_INCLUDED
+#endif // VISR_RRL_COMMUNICATION_AREA_HPP_INCLUDED

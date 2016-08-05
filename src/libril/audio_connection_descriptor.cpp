@@ -162,9 +162,11 @@ AudioConnection::
 AudioConnection( AudioPort * pSender,
                  AudioChannelIndexVector const & pSendIndices,
                  AudioPort * pReceiver,
-                 AudioChannelIndexVector const & pReceiceIndices )
+                 AudioChannelIndexVector const & pReceiveIndices )
  : mSender(pSender)
  , mReceiver(pReceiver)
+ , mSendIndices( pSendIndices )
+ , mReceiveIndices( pReceiveIndices )
 {
 }
 

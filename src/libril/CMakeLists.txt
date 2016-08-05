@@ -6,7 +6,6 @@ audio_connection_descriptor.cpp
 audio_input.cpp
 audio_output.cpp
 audio_port.cpp
-communication_area.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp
 component.cpp
@@ -24,7 +23,6 @@ audio_connection_descriptor.hpp
 audio_input.hpp 
 audio_output.hpp 
 audio_port.hpp 
-communication_area.hpp 
 communication_protocol_base.hpp 
 communication_protocol_type.hpp 
 communication_protocol_factory.hpp 

@@ -30,8 +30,7 @@ class SignalFlowContext;
 class Component
 {
 public:
-  friend class AudioInput;
-  friend class AudioOutput;
+  friend class AudioPort; // For registering/ unregistering
 
   explicit Component( SignalFlowContext& context,
                       char const * componentName,
@@ -76,6 +75,7 @@ public:
    */
   std::size_t period() const; // { return mContainingFlow.period(); }
 
+#if 0
   struct AudioPortDescriptor
   {
   public:
@@ -90,8 +90,9 @@ public:
     std::string mName;
     AudioPort* mPort;
   };
+#endif
 
-  using AudioPortVector = std::vector<AudioPortDescriptor >;
+  using AudioPortVector = std::vector<AudioPort*>;
 
   /**
    * Allow access to the port lists 
@@ -163,25 +164,14 @@ private:
    * @param name The name of 
    * @throw In case of a non-unique or invalid port name
    */
-  void registerAudioPort( char const * name, AudioPort* port );
+  void registerAudioPort( AudioPort* port );
+  void unregisterAudioPort( AudioPort* port );
 
   AudioPortVector mAudioPorts;
 
-  AudioPortVector const& getAudioPortList( ) const;
+  AudioPortVector const & getAudioPortList( ) const;
 
   AudioPortVector& getAudioPortList( );
-
-  struct ComparePortDescriptor
-  {
-    explicit ComparePortDescriptor( std::string const& name ): mName( name ) {}
-
-    bool operator()( AudioPortDescriptor const& lhs ) const
-    {
-      return lhs.mName == mName;
-    }
-  private:
-    std::string const mName;
-  };
 
   AudioPortVector::iterator findAudioPortEntry( std::string const & portName );
 

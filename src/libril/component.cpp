@@ -8,6 +8,7 @@
 
 #include <ciso646>
 #include <exception>
+#include <iostream>
 #include <utility>
 
 namespace visr
@@ -77,32 +78,54 @@ std::size_t Component::period() const { return mContext.period(); }
 
 ril::SamplingFrequencyType Component::samplingFrequency() const { return mContext.samplingFrequency(); }
 
-void Component::registerAudioPort( char const * name, AudioPort* port )
+void Component::unregisterAudioPort( AudioPort* port )
 {
-  // Note: It is kind of error-prone to get the port list and the iterator through two different function calls.
-  AudioPortVector& vec = getAudioPortList();
-  // Check whether a port with that name already exists.
-  AudioPortVector::const_iterator findIt = findAudioPortEntry( name );
-  if( findIt != vec.end() )
+  AudioPortVector::const_iterator findIt = std::find( mAudioPorts.begin(), mAudioPorts.end(), port );
+  if( findIt != mAudioPorts.end() )
+  {
+    mAudioPorts.erase( findIt );
+  }
+  else
+  {
+    std::cerr << "Component::unregisterAudioPort(): port was not registered." << std::endl;
+  }
+}
+
+void Component::registerAudioPort( AudioPort* port )
+{
+  AudioPortVector & vec = getAudioPortList( );
+  AudioPortVector::const_iterator findIt = findAudioPortEntry( port->name( ) );
+  if( findIt != vec.end( ) )
   {
     throw std::invalid_argument( "Component::registerAudioPort(): port with given name already exists" );
   }
-  vec.push_back( AudioPortDescriptor( name, port ) );
+  vec.push_back( port );
 }
 
+
+struct CompareAudioPort
+{
+  explicit CompareAudioPort( std::string const& name ): mName( name ) {}
+
+  bool operator()( AudioPort const * lhs ) const
+  {
+    return lhs->name( ).compare( mName ) == 0;
+  }
+private:
+  std::string const mName;
+};
 
 Component::AudioPortVector::iterator Component::findAudioPortEntry( std::string const & portName )
 {
   AudioPortVector::iterator findIt
-    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), ComparePortDescriptor( portName ) );
+    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), CompareAudioPort( portName ) );
   return findIt;
 }
 
 Component::AudioPortVector::const_iterator Component::findAudioPortEntry( std::string const & portName ) const
 {
-  AudioPortVector const & vec = getAudioPortList( );
   AudioPortVector::const_iterator findIt
-    = std::find_if( vec.begin( ), vec.end( ), ComparePortDescriptor( portName ) );
+    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), CompareAudioPort( portName ) );
   return findIt;
 }
 
@@ -113,7 +136,7 @@ AudioPort const * Component::findAudioPort( std::string const & portName ) const
   {
     return nullptr;
   }
-  return findIt->mPort;
+  return *findIt;
 }
 
 AudioPort * Component::findAudioPort( std::string const & portName )
@@ -123,7 +146,7 @@ AudioPort * Component::findAudioPort( std::string const & portName )
   {
     return nullptr;
   }
-  return findIt->mPort;
+  return *findIt;
 }
 
 
@@ -143,6 +166,7 @@ AudioPort * Component::findAudioPort( std::string const & portName )
 //template AudioInput* Component::getAudioPort( const char* portName ) const;
 //template AudioOutput* Component::getAudioPort( const char* portName ) const;
 
+#if 0
 struct ComparePortDescriptor
 {
   explicit ComparePortDescriptor( std::string const& name ) : mName( name ) {}
@@ -154,7 +178,7 @@ struct ComparePortDescriptor
 private:
   std::string const mName;
 };
-
+#endif
 // Parameter port related stuff
 Component::ParameterPortContainer::const_iterator 
 Component::parameterPortBegin() const

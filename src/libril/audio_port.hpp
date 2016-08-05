@@ -85,9 +85,9 @@ public:
   const static SignalIndexType cInvalidSignalIndex = UINT_MAX;
 #endif
 
-  explicit AudioPort( Direction direction, Component& container );
+  explicit AudioPort( std::string const & name, Component & container, Direction direction );
 
-  explicit AudioPort( Direction direction, Component& container, std::size_t width );
+  explicit AudioPort( std::string const & name, Component& container, Direction direction, std::size_t width );
 
   ~AudioPort();
 
@@ -115,6 +115,10 @@ public:
   std::size_t width() const { return mWidth; }
 
   //@}
+
+  std::string const & name() const { return mName; }
+
+  Component const & parent() const { return mParentComponent; }
 
   Direction direction() const { return mDirection; }
 
@@ -198,8 +202,11 @@ protected:
 
   SampleType * * signalPointers() { return &mSignalPointers[0]; }
 private:
+  std::string const mName;
 
   Component& mParentComponent;
+
+  Direction const mDirection;
 
   std::size_t mWidth;
 
@@ -219,7 +226,6 @@ private:
 #else
   mutable std::valarray< SampleType* > mSignalPointers;
 #endif
-  Direction const mDirection;
 };
 
 } // namespace ril

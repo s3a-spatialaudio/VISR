@@ -88,6 +88,9 @@ class AudioChannelIndexVector
 {
 public:
   using IndexType = AudioChannelSlice::IndexType;
+  using ContainerType = std::vector<IndexType>;
+  using const_iterator = ContainerType::const_iterator;
+
   AudioChannelIndexVector();
 
   explicit AudioChannelIndexVector( std::vector<IndexType> const & indices );
@@ -107,6 +110,9 @@ public:
   }
 
   IndexType at( std::size_t idx ) const;  
+
+  const_iterator begin() const { return mIndices.begin(); }
+  const_iterator end( ) const { return mIndices.end(); }
 
 private:
 
@@ -182,7 +188,7 @@ private:
   AudioChannelIndexVector const mReceiveIndices;
 };
 
-using AudioConnectionTable = std::set< AudioConnection >;
+using AudioConnectionTable = std::multiset< AudioConnection >;
 
 } // namespace ril
 } // namespace visr

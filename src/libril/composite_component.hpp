@@ -5,10 +5,17 @@
 
 #include "component.hpp"
 
+// Do we need the types for that (or would forward declarations suffice)?
 #include "audio_connection_descriptor.hpp"
 #include "parameter_connection_descriptor.hpp"
 
+// #define USE_COMPONENTS_SET
+
+#ifdef USE_COMPONENTS_SET
 #include <set>
+#else
+#include <map>
+#endif
 
 namespace visr
 {
@@ -40,6 +47,7 @@ public:
    */
   virtual bool isComposite() const override;
 
+#ifdef USE_COMPONENTS_SET
   struct CompareComponents
   {
   public:
@@ -48,9 +56,13 @@ public:
       return lhs->name() < rhs->name();
     }
   };
+#endif
 
-  // using ComponentTable = std::set < Component const *, CompareComponents >;
+#ifdef USE_COMPONENTS_SET
+  using ComponentTable = std::set < Component const *, CompareComponents >;
+#else
   using ComponentTable = std::map<std::string, Component * >;
+#endif
 
   std::size_t numberOfComponents() const;
 
@@ -90,6 +102,19 @@ protected:
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
                                 AudioChannelIndexVector const & receiveIndices );
+
+  void registerAudioConnection( Component const & sendComponent,
+                                std::string const & sendPort,
+                                AudioChannelIndexVector const & sendIndices,
+                                Component const & receiveComponent,
+                                std::string const & receivePort,
+                                AudioChannelIndexVector const & receiveIndices );
+
+  void registerAudioConnection( Component const & sendComponent,
+                                std::string const & sendPort,
+                                Component const & receiveComponent,
+                                std::string const & receivePort );
+
 
   void registerAudioConnection( AudioPort & sender,
                                 AudioChannelIndexVector const & sendIndices,

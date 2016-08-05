@@ -48,6 +48,16 @@ void CompositeComponent::unregisterChildComponent( Component * child )
   }
 }
 
+CompositeComponent::ComponentTable::const_iterator CompositeComponent::componentBegin() const
+{
+  return mComponents.begin();
+}
+
+CompositeComponent::ComponentTable::const_iterator CompositeComponent::componentEnd() const
+{
+  return mComponents.end( );
+}
+
 Component * CompositeComponent::findComponent( std::string const & componentName )
 {
   Component * sender = nullptr;
@@ -117,6 +127,34 @@ void CompositeComponent::registerAudioConnection( std::string const & sendCompon
   AudioConnection newConnection( sender, sendIndices, receiver, receiveIndices );
 
   mAudioConnections.insert( std::move( newConnection ) );
+}
+
+void CompositeComponent::registerAudioConnection( Component const & sendComponent,
+                                                  std::string const & sendPort,
+                                                  AudioChannelIndexVector const & sendIndices,
+                                                  Component const & receiveComponent,
+                                                  std::string const & receivePort,
+                                                  AudioChannelIndexVector const & receiveIndices )
+{
+  // TODO: check whether sendComponent is *this or any of the contained components (can be looked up via name)
+}
+
+void CompositeComponent::registerAudioConnection( Component const & sendComponent,
+                                                  std::string const & sendPort,
+                                                  Component const & receiveComponent,
+                                                  std::string const & receivePort )
+{
+}
+
+AudioConnectionTable::const_iterator
+CompositeComponent::audioConnectionBegin() const
+{
+  return mAudioConnections.begin();
+}
+
+AudioConnectionTable::const_iterator CompositeComponent::audioConnectionEnd() const
+{
+  return mAudioConnections.end();
 }
 
 } // namespace ril

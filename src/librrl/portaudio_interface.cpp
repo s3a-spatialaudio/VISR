@@ -2,6 +2,9 @@
 
 #include "portaudio_interface.hpp"
 
+// TODO: Eliminate this dependency!
+#include "communication_area.hpp"
+
 #include <libril/constants.hpp>
 
 #include <portaudio.h>
@@ -146,7 +149,7 @@ private:
 
   void* mCallbackUserData;
 
-  std::unique_ptr<ril::CommunicationArea<ril::SampleType> > mCommunicationBuffer;
+  std::unique_ptr<rrl::CommunicationArea<ril::SampleType> > mCommunicationBuffer;
 
   /**
    * Buffer to hold the pointers to the sample vectors for the input
@@ -180,7 +183,7 @@ PortaudioInterface::Impl::Impl( Config const & config )
  , mStream( 0 )
  , mCallback( nullptr )
  , mCallbackUserData( nullptr )
- , mCommunicationBuffer( new ril::CommunicationArea<ril::SampleType>(mNumCaptureChannels + mNumPlaybackChannels, mPeriodSize, ril::cVectorAlignmentSamples ) )
+ , mCommunicationBuffer( new CommunicationArea<ril::SampleType>(mNumCaptureChannels + mNumPlaybackChannels, mPeriodSize, ril::cVectorAlignmentSamples ) )
  , mCaptureSampleBuffers( mNumCaptureChannels, nullptr )
  , mPlaybackSampleBuffers( mNumPlaybackChannels, nullptr )
 {

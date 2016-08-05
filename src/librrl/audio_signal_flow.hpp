@@ -8,6 +8,7 @@
 #include <libril/audio_port.hpp>
 #include <libril/constants.hpp>
 #include <libril/processable_interface.hpp>
+#include <libril/signal_flow_context.hpp>
 
 // #include <array>
 #include <iosfwd>
@@ -24,7 +25,6 @@ namespace visr
   // Forward declarations
   namespace ril
   {
-    template <typename T> class CommunicationArea;
     class AtomicComponent;
     class AudioInput;
     class AudioOutput;
@@ -36,6 +36,8 @@ namespace visr
   }
   namespace rrl
 {
+// Forward declarations
+template <typename T> class CommunicationArea;
 
 /**
  * Base class for signal flows, i.e., graphs of connected audio
@@ -141,13 +143,13 @@ private:
    * Can be static or nonmember functions
    */
   //@{
-  bool checkFlow( ril::Component const & comp, bool locally, std::ostream & messages );
+  static bool checkFlow( ril::Component const & comp, bool locally, std::ostream & messages );
 
-  bool checkCompositeLocal( ril::CompositeComponent const & composite , std::ostream & messages );
+  static bool checkCompositeLocal( ril::CompositeComponent const & composite , std::ostream & messages );
 
-  bool checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages );
 
-  bool checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages );
   //@}
 
   /**
@@ -177,11 +179,11 @@ private:
   void initialiseParameterInfrastructure();
 
   std::size_t numberCommunicationProtocols() const;
+#if 0
+  rrl::CommunicationArea<ril::SampleType>& getCommArea() { return *mCommArea; }
 
-  ril::CommunicationArea<ril::SampleType>& getCommArea() { return *mCommArea; }
-
-  ril::CommunicationArea<ril::SampleType> const& getCommArea( ) const { return *mCommArea; }
-
+  rrl::CommunicationArea<ril::SampleType> const& getCommArea( ) const { return *mCommArea; }
+#endif
   /**
    * Method to transfer the capture and playback samples to and from
    * the locations where they are excepted by the process() function
@@ -247,7 +249,14 @@ private:
   * The communication area for this signal flow.
   * @see initCommArea()
   */
-  std::unique_ptr<ril::CommunicationArea<ril::SampleType> > mCommArea;
+  std::unique_ptr<CommunicationArea<ril::SampleType> > mCommArea;
+
+  /**
+   * These ports are the top-level system inputs and outputs.
+   * They correspond to the capture and palybacxk indices.
+   */
+  std::vector < ril::AudioPort*> mTopLevelAudioInputs;
+  std::vector < ril::AudioPort*> mTopLevelAudioOutputs;
 
   std::vector<ril::AudioPort::SignalIndexType> mCaptureIndices;
   std::vector<ril::AudioPort::SignalIndexType> mPlaybackIndices;
