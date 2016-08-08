@@ -159,6 +159,8 @@ protected:
 //#endif
 //  //@}
 
+public: // Temporary solution to make the indices visible to the runtime infrastructure.
+
   SignalIndexType const * indices() const { return &mIndices[0]; }
 
   /**
