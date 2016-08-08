@@ -97,7 +97,7 @@ void FilterRoutingList::parseJson( std::istream & encoded )
   }
   catch( std::exception const & ex )
   {
-    throw std::invalid_argument( std::string( "FilterRoutingList::parseJson(): Error while reading JSON data." ) );
+    throw std::invalid_argument( std::string( "FilterRoutingList::parseJson(): Error while reading JSON data: " ) + ex.what() );
   }
   for( auto v : propTree.get_child( "routings" ) )
   {
