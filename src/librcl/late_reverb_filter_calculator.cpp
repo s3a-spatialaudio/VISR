@@ -7,9 +7,11 @@
 #include <libpml/biquad_parameter.hpp>
 #include <libpml/message_queue.hpp>
 
+#include <algorithm>
 #include <array>
 #include <ciso646>
 #include <iostream>
+#include <functional>
 #include <random>
 
 #include <fstream>
@@ -242,9 +244,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   std::mt19937 gen(rd());
   std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
 
-  for (int n = 0; n < numSamples; ++n) {
-    data[n]=dis(gen);
-  }
+  std::generate( data, data + numSamples, std::bind( dis, gen ) );
 }
 
 /*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
