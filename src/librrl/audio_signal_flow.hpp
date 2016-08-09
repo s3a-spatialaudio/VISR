@@ -108,6 +108,22 @@ public:
    */
   bool initialised() const { return mInitialised; }
 
+  std::size_t numberOfAudioCapturePorts( ) const;
+
+  std::size_t numberOfAudioPlaybackPorts( ) const;
+
+  /**
+  * Return the name of the capture port indexed by \p idx
+  * @throw std::out_of_range If the \p idx exceeds the number of capture ports.
+  */
+  std::string const & audioCapturePortName( std::size_t idx ) const;
+
+  /**
+   * Return the name of the playback port indexed by \p idx
+   * @throw std::out_of_range If the \p idx exceeds the number of playback ports.
+   */
+  std::string const & audioPlaybackPortName( std::size_t idx ) const;
+
   /**
    * Query the width of the capture port, i.e., the number of external
    * inputs of the graph.
@@ -125,11 +141,6 @@ public:
   std::size_t numberOfPlaybackChannels() const;
   //@}
 
-  /**
-   * Mark the signal flow as "initialised".
-   * @todo Decide whether this is the right place for a consistency check.
-   */
-  void setInitialised( bool newState = true ) { mInitialised = newState; }
 
 private:
   /**
@@ -177,6 +188,12 @@ private:
     */
   //@{
   void initialiseParameterInfrastructure();
+
+  /**
+  * Mark the signal flow as "initialised".
+  * @todo Decide whether this is the right place for a consistency check.
+  */
+  void setInitialised( bool newState = true ) { mInitialised = newState; }
 
   std::size_t numberCommunicationProtocols() const;
 #if 0
@@ -253,10 +270,14 @@ private:
 
   /**
    * These ports are the top-level system inputs and outputs.
-   * They correspond to the capture and palybacxk indices.
+   * They correspond to the capture and playback indices.
+   * @note at the moment the order of the ports is determined by the system.
    */
+  //@{
   std::vector < ril::AudioPort*> mTopLevelAudioInputs;
   std::vector < ril::AudioPort*> mTopLevelAudioOutputs;
+  //@}
+
 
   std::vector<ril::AudioPort::SignalIndexType> mCaptureIndices;
   std::vector<ril::AudioPort::SignalIndexType> mPlaybackIndices;

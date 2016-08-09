@@ -157,5 +157,15 @@ AudioConnectionTable::const_iterator CompositeComponent::audioConnectionEnd() co
   return mAudioConnections.end();
 }
 
+ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionsBegin() const
+{
+  return mParameterConnections.begin();
+}
+
+ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionsEnd() const
+{
+  return mParameterConnections.end( );
+}
+
 } // namespace ril
 } // namespace visr

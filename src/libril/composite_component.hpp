@@ -85,6 +85,9 @@ public:
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
   AudioConnectionTable::const_iterator audioConnectionEnd( ) const;
 
+  ParameterConnectionTable::const_iterator parameterConnectionsBegin() const;
+  ParameterConnectionTable::const_iterator parameterConnectionsEnd( ) const;
+
   void registerChildComponent( Component * child );
 
   void unregisterChildComponent( Component * child );

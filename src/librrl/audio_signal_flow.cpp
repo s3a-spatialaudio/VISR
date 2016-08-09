@@ -110,6 +110,42 @@ AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples
   callbackResult = 0; // Means 'no error'
 }
 
+std::size_t AudioSignalFlow::numberOfAudioCapturePorts() const
+{
+  return mTopLevelAudioInputs.size();
+}
+
+std::size_t AudioSignalFlow::numberOfAudioPlaybackPorts() const
+{
+  return mTopLevelAudioOutputs.size( );
+}
+
+/**
+* Return the name of the capture port indexed by \p idx
+* @throw std::out_of_range If the \p idx exceeds the number of capture ports.
+*/
+std::string const & AudioSignalFlow::audioCapturePortName( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioCapturePorts() )
+  {
+    throw(std::out_of_range("AudioSignalFlow::audioCapturePortName(): index exceeds number of ports"));
+  }
+  return mTopLevelAudioInputs.at( idx )->name();
+}
+
+/**
+* Return the name of the playback port indexed by \p idx
+* @throw std::out_of_range If the \p idx exceeds the number of playback ports.
+*/
+std::string const & AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioPlaybackPorts( ) )
+  {
+    throw(std::out_of_range( "AudioSignalFlow::audioPlaybackPortName(): index exceeds number of ports" ));
+  }
+  return mTopLevelAudioOutputs.at( idx )->name( );
+}
+
 std::size_t AudioSignalFlow::numberOfCaptureChannels() const
 {
   if( !initialised() )
@@ -153,11 +189,22 @@ bool AudioSignalFlow::initialise( std::ostream & messages )
 void AudioSignalFlow::initialiseParameterInfrastructure()
 {
   mCommunicationProtocols.clear();
+  if( not mFlow.isComposite() )
+  {
+    return;
+  }
+  // TODO: 
+  // - Recursively iterate over all composite components
+  // - Collect all parameter ports (concrete and placeholders) in containers.
+  // - Collect all connections and store them in a lookup map.
+  // - Infer all connections from the receive end to check whether 
 
 #if 0
   // TODO: This should check whether the contained component is composite, and in this case iterate over the parameter connection table
   for( ril::ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable )
   {
+    ril::ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable
+
     // Note: In case of hierarchical models, we would need to construct the full name here.
     ComponentTable::iterator const sendComponentIt= mComponents.find( connectionDescriptor.first.component() );
     if( sendComponentIt == mComponents.end() )
@@ -678,15 +725,47 @@ public:
     {
       if( (*extPortIt)->direction() == ril::AudioPort::Direction::Input )
       {
+#if 1
+        // In the top-level component, an input port is both a concrete/placeholder input and an external capture port
+        if( comp.isTopLevel( ) )
+        {
+          mExternalCapturePorts.insert( *extPortIt );
+        }
+        if( comp.isComposite( ) )
+        {
+          mPlaceholderReceivePorts.insert( *extPortIt );
+        }
+        else
+        {
+          mConcreteReceivePorts.insert( *extPortIt );
+        }
+#else
         comp.isTopLevel() ? mExternalCapturePorts.insert( *extPortIt )
           : comp.isComposite() ? mPlaceholderReceivePorts.insert( *extPortIt )
           : mConcreteReceivePorts.insert( *extPortIt );
+#endif
       }
       else
       {
+#if 1
+        // For the top-level component, an output port is both a concrete/placeholder output and an external playback port
+        if( comp.isTopLevel( ) )
+        {
+          mExternalPlaybackPorts.insert( *extPortIt );
+        }
+        if( comp.isComposite( ) )
+        {
+          mPlaceholderSendPorts.insert( *extPortIt );
+        }
+        else
+        {
+          mConcreteSendPorts.insert( *extPortIt );
+        }
+#else
         comp.isTopLevel( ) ? mExternalPlaybackPorts.insert( *extPortIt )
           : comp.isComposite( ) ? mPlaceholderSendPorts.insert( *extPortIt )
           : mConcreteSendPorts.insert( *extPortIt );
+#endif
       }
     }
     if( comp.isComposite() )
@@ -738,148 +817,181 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   mTopLevelAudioOutputs.clear();
   mCaptureIndices.clear();
   mPlaybackIndices.clear();
-
   bool result = true; // Result variable, is set to false if an error occurs.
   PortLookup const portLookup( mFlow, true /*recursive*/ );
 
   // Compute the number of audio channels for the different categories that are kept in the communicatio area.
-//  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );
+  //  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );
   std::size_t const numCaptureChannels = countAudioChannels( portLookup.mExternalCapturePorts );
   std::size_t const numConcreteOutputChannels = countAudioChannels( portLookup.mConcreteSendPorts );
-  std::size_t const totalSignalChannels = numCaptureChannels /*+ numPlaybackChannels*/ + numConcreteOutputChannels;
+  std::size_t const totalSignalChannels = numCaptureChannels + numConcreteOutputChannels;
 
-  std::size_t const period = mFlow.period( );
+  std::size_t const period = mFlow.period();
 
   mCommArea.reset( new CommunicationArea<ril::SampleType>( totalSignalChannels, period, ril::cVectorAlignmentSamples ) );
 
-  SignalConnectionMap allConnections;
-  std::stringstream errMessages;
-  if( not fillConnectionMap( mFlow, allConnections, errMessages, true/*recursive*/ ) )
-  {
-    throw std::logic_error( "Filling of connection map failed:" + errMessages.str() );
-  }
-  std::cout << "\n\n\nAll connections:\n" << allConnections << std::endl;
-
-
-
-
-  // Create a new connection map that removes the intermediate placeholder ports.
-  // Precondition: The connection map has been checked for consistency 
-  // (i.e., each receive port is connected to exactly one sender.
-  // @note we need to check for cycles in the graph that are created by placeholder ports.
-  // Otherwise this could create infinite recursions in the placeholder resolution code.
-  // TODO: Factor this into a free function of member of a connection map.
-
-  SignalConnectionMap concreteConnections;
-  for( SignalConnectionMap::value_type const & rawConnection : allConnections )
-  {
-    // Do not care for connections ending at a placeholder port
-    if( isPlaceholder( rawConnection.first.mPort ) )
-    {
-      continue;
-    }
-    else if( not isPlaceholder( rawConnection.second.mPort ) )
-    {
-      concreteConnections.insert( rawConnection ); // insert the connection unaltered
-    }
-    else // The sender is a placeholder
-    {
-      std::size_t const recursionLimit = allConnections.size(); // Last line of defence against a closed loop in the flow.
-      std::size_t recursionCount = 1;
-
-      SignalConnectionMap::const_iterator findIt = allConnections.find( rawConnection.second );
-      for( ;; )
-      {
-        if( findIt == allConnections.end( ) )
-        {
-          throw std::invalid_argument( "Unexpected error: unconnected receive port." );
-        }
-
-        if( not isPlaceholder( findIt->second.mPort ) )
-        {
-          // TODO: do we need take care of re-indexing in the course of a indirect connection?
-          concreteConnections.insert( std::make_pair( rawConnection.first, findIt->second ) );
-          break;
-        }
-        if( ++recursionCount >= recursionLimit )
-        {
-          throw std::runtime_error( "Audio signal connections: closed loop detected in placeholder port connections." );
-        }
-        findIt = allConnections.find( findIt->second );
-      }
-    }
-  }
-
-  std::cout << "\n\n\nConcrete connections:\n" << concreteConnections << std::endl;
-
   // Assign consecutive indices to the ports that need physical communication vectors.
+  // First we do that for the external capture ports, because this part is identical for atomic and component top-level signal flows.
   ril::AudioPort::SignalIndexType offset = 0;
-  //std::for_each( portLookup.mExternalPlaybackPorts.begin(), portLookup.mExternalPlaybackPorts.end(),
-  //  std::bind( assignConsecutiveIndices, _1, std::ref(offset), std::ref(*mCommArea) ) );
   std::size_t const captureSignalOffset = offset;
-  std::for_each( portLookup.mExternalCapturePorts.begin(), portLookup.mExternalCapturePorts.end(),
+  std::for_each( portLookup.mExternalCapturePorts.begin( ), portLookup.mExternalCapturePorts.end( ),
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
-  std::size_t concreteOutputSignalOffset = offset;
-  std::for_each( portLookup.mConcreteSendPorts.begin(), portLookup.mConcreteSendPorts.end(),
+  // Initialise the 'concrete' internal receive ports.
+  std::size_t const concreteOutputSignalOffset = offset;
+  std::for_each( portLookup.mConcreteSendPorts.begin( ), portLookup.mConcreteSendPorts.end( ),
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
-
-  // Initialise the concrete, i.e., real receive ports
-  for( ril::AudioPort * receivePort : portLookup.mConcreteReceivePorts )
+  if( offset != mCommArea->numberOfSignals( ) )
   {
-    std::size_t const portWidth = receivePort->width();
-    std::vector<ril::AudioPort::SignalIndexType> receiveIndices( portWidth );
-    for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
-    {
-      // equal_range is used to detect multiple connections
-      // Normally this should have been detected before in the checking phase.
-      std::pair<SignalConnectionMap::const_iterator, SignalConnectionMap::const_iterator >
-        findRange = concreteConnections.equal_range( AudioSignalDescriptor( receivePort, chIdx ) );
-      if( findRange.first == concreteConnections.end() )
-      {
-        throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
-      }
-      if( std::distance(findRange.first, findRange.second) != 1 )
-      {
-        throw std::runtime_error( "Audio signal connections : Multiple connections detected." );
-      }
-
-      receiveIndices[chIdx] = findRange.first->second.mPort->indices()[findRange.first->second.mIndex];
-    }
-    receivePort->setAudioBasePointer( mCommArea->data() );
-    receivePort->setAudioChannelStride( mCommArea->signalStride() );
-    receivePort->assignCommunicationIndices( receiveIndices.begin(), receiveIndices.end() );
+    throw std::logic_error( "AudioSignalFlow::initialiseAudioConnections(): number of allocated " );
   }
 
-  // same for the playback ports
-  // Problem: We need an ordering of the external ports
-  for( ril::AudioPort * receivePort : portLookup.mConcreteReceivePorts )
+  // Initialise the data structures for the external inputs (capture ports)
+  mTopLevelAudioInputs.reserve( portLookup.mExternalCapturePorts.size( ) );
+  mCaptureIndices.resize( numCaptureChannels );
+  std::size_t captureOffset = 0;
+  for( ril::AudioPort * capturePort : portLookup.mExternalCapturePorts )
   {
-    std::size_t const portWidth = receivePort->width( );
-    std::vector<ril::AudioPort::SignalIndexType> receiveIndices( portWidth );
-    for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
-    {
-      // equal_range is used to detect multiple connections
-      // Normally this should have been detected before in the checking phase.
-      std::pair<SignalConnectionMap::const_iterator, SignalConnectionMap::const_iterator >
-        findRange = concreteConnections.equal_range( AudioSignalDescriptor( receivePort, chIdx ) );
-      if( findRange.first == concreteConnections.end( ) )
-      {
-        throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
-      }
-      if( std::distance( findRange.first, findRange.second ) != 1 )
-      {
-        throw std::runtime_error( "Audio signal connections : Multiple connections detected." );
-      }
-
-      receiveIndices[chIdx] = findRange.first->second.mPort->indices( )[findRange.first->second.mIndex];
-    }
-    receivePort->setAudioBasePointer( mCommArea->data( ) );
-    receivePort->setAudioChannelStride( mCommArea->signalStride( ) );
-    receivePort->assignCommunicationIndices( receiveIndices.begin( ), receiveIndices.end( ) );
+    mTopLevelAudioInputs.push_back( capturePort );
+    std::copy( capturePort->indices( ), capturePort->indices( ) + capturePort->width( ), &mCaptureIndices[captureOffset] );
+    captureOffset += capturePort->width( );
   }
 
+  // Allocate space for the external playback ports and indices.
+  // Filling is different whether the top-level flow is composite or atomic.
+  mPlaybackIndices.resize( countAudioChannels( portLookup.mExternalPlaybackPorts ) );
+  mTopLevelAudioOutputs.reserve( portLookup.mExternalPlaybackPorts.size( ) );
+  std::size_t playbackIndexOffset = 0;
 
+  if( mFlow.isComposite() ) // Internal interconnections are specific to composite top-level flows.
+  {
+    SignalConnectionMap allConnections;
+    std::stringstream errMessages;
+    if( not fillConnectionMap( mFlow, allConnections, errMessages, true/*recursive*/ ) )
+    {
+      throw std::logic_error( "Filling of connection map failed:" + errMessages.str() );
+    }
+    std::cout << "\n\n\nAll connections:\n" << allConnections << std::endl;
 
+    // Create a new connection map that removes the intermediate placeholder ports.
+    // Precondition: The connection map has been checked for consistency 
+    // (i.e., each receive port is connected to exactly one sender.
+    // @note we need to check for cycles in the graph that are created by placeholder ports.
+    // Otherwise this could create infinite recursions in the placeholder resolution code.
+    // TODO: Factor this into a free function of member of a connection map.
+
+    SignalConnectionMap concreteConnections;
+    for( SignalConnectionMap::value_type const & rawConnection : allConnections )
+    {
+      // Do not care for connections ending at a placeholder port
+      if( isPlaceholder( rawConnection.first.mPort ) )
+      {
+        continue;
+      }
+      else if( not isPlaceholder( rawConnection.second.mPort ) )
+      {
+        concreteConnections.insert( rawConnection ); // insert the connection unaltered
+      }
+      else // The sender is a placeholder
+      {
+        std::size_t const recursionLimit = allConnections.size(); // Last line of defence against a closed loop in the flow.
+        std::size_t recursionCount = 1;
+
+        SignalConnectionMap::const_iterator findIt = allConnections.find( rawConnection.second );
+        for( ;; )
+        {
+          if( findIt == allConnections.end() )
+          {
+            throw std::invalid_argument( "Unexpected error: unconnected receive port." );
+          }
+
+          if( not isPlaceholder( findIt->second.mPort ) )
+          {
+            // TODO: do we need take care of re-indexing in the course of a indirect connection?
+            concreteConnections.insert( std::make_pair( rawConnection.first, findIt->second ) );
+            break;
+          }
+          if( ++recursionCount >= recursionLimit )
+          {
+            throw std::runtime_error( "Audio signal connections: closed loop detected in placeholder port connections." );
+          }
+          findIt = allConnections.find( findIt->second );
+        }
+      }
+    }
+
+    std::cout << "\n\n\nConcrete connections:\n" << concreteConnections << std::endl;
+
+    // Initialise the concrete, i.e., real receive ports
+    // Note: this assumes that all send ports (concrete and external capture ports) have already been initialised
+    for( ril::AudioPort * receivePort : portLookup.mConcreteReceivePorts )
+    {
+      std::size_t const portWidth = receivePort->width( );
+      std::vector<ril::AudioPort::SignalIndexType> receiveIndices( portWidth );
+      for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
+      {
+        // equal_range is used to detect multiple connections
+        // Normally this should have been detected before in the checking phase.
+        std::pair<SignalConnectionMap::const_iterator, SignalConnectionMap::const_iterator >
+          findRange = concreteConnections.equal_range( AudioSignalDescriptor( receivePort, chIdx ) );
+        if( findRange.first == concreteConnections.end( ) )
+        {
+          throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
+        }
+        if( std::distance( findRange.first, findRange.second ) != 1 )
+        {
+          throw std::runtime_error( "Audio signal connections : Multiple connections detected." );
+        }
+
+        receiveIndices[chIdx] = findRange.first->second.mPort->indices( )[findRange.first->second.mIndex];
+      }
+      receivePort->setAudioBasePointer( mCommArea->data( ) );
+      receivePort->setAudioChannelStride( mCommArea->signalStride( ) );
+      receivePort->assignCommunicationIndices( receiveIndices.begin( ), receiveIndices.end( ) );
+    }
+
+    // same for the external playback ports
+    // Note: the ordering of the external ports is defined by the order they are arranged in this set.
+    for( ril::AudioPort * playbackPort : portLookup.mExternalPlaybackPorts )
+    {
+      std::size_t const portWidth = playbackPort->width( );
+      std::vector<ril::AudioPort::SignalIndexType> receiveIndices( portWidth );
+      for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
+      {
+        // equal_range is used to detect multiple connections
+        // Normally this should have been detected before in the checking phase.
+        std::pair<SignalConnectionMap::const_iterator, SignalConnectionMap::const_iterator >
+          findRange = concreteConnections.equal_range( AudioSignalDescriptor( playbackPort, chIdx ) );
+        if( findRange.first == concreteConnections.end( ) )
+        {
+          throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
+        }
+        if( std::distance( findRange.first, findRange.second ) != 1 )
+        {
+          throw std::runtime_error( "Audio signal connections : Multiple connections detected." );
+        }
+
+        receiveIndices[chIdx] = findRange.first->second.mPort->indices( )[findRange.first->second.mIndex];
+      }
+      playbackPort->setAudioBasePointer( mCommArea->data( ) );
+      playbackPort->setAudioChannelStride( mCommArea->signalStride( ) );
+      playbackPort->assignCommunicationIndices( receiveIndices.begin( ), receiveIndices.end( ) );
+
+      mTopLevelAudioOutputs.push_back( playbackPort );
+      std::copy( receiveIndices.begin( ), receiveIndices.end( ), &mPlaybackIndices[playbackIndexOffset] );
+      playbackIndexOffset += portWidth;
+    }
+  } // Additional handling for composite top-level flows finished
+  else
+  {
+    // We need a separate treatment for the external playback indices.
+    // This are linked (channel-by-channel) to the respective 'physical' output port of the atomic component.
+    for( ril::AudioPort * playbackPort : portLookup.mExternalPlaybackPorts )
+    {
+      mTopLevelAudioOutputs.push_back( playbackPort );
+      std::copy( playbackPort->indices(), playbackPort->indices( )+playbackPort->width(), &mPlaybackIndices[playbackIndexOffset] );
+      playbackIndexOffset += playbackPort->width();
+    }
+  }
   return result;
 }
 
