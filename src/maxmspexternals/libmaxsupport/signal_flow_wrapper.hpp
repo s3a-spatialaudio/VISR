@@ -12,10 +12,20 @@
 namespace visr
 {
 // forward declaration
+namespace efl
+{
+template<typename ElementType>
+class BasicMatrix;
+}
 namespace ril
 {
-class AudioSignalFlow;
+class Component;
+}
+
+namespace rrl
+{
 template<typename SampleType> class CommunicationArea;
+class AudioSignalFlow;
 }
 
 namespace maxmsp
@@ -25,7 +35,7 @@ template<typename ExternalSampleType>
 class SignalFlowWrapper
 {
 public:
-  SignalFlowWrapper( ril::AudioSignalFlow & flow );
+  SignalFlowWrapper( ril::Component & comp );
 
   ~SignalFlowWrapper( );
 
@@ -33,28 +43,24 @@ public:
                      ExternalSampleType * const * outputSamples );
 private:
   /**
-   * Transfer a portion of the Matlab input signal to the input of the signal flow graph 
-   * (possibly converting the sample type)
+   * Convert the samples to the sample type used by the rendering framework.
+   * Also takes care of the alignement of th target data.
    */
   void transferInputSamples( ExternalSampleType const * const * inputSamples );
 
   /**
-  * Transfer the output of the signal flow graph to a segment of the Matlab output signal
-  * (possibly converting the sample type)
+  * Convert the processaed samples to the data type of the host system.
   */
   void transferOutputSamples( ExternalSampleType * const * outputSamples );
-
-  ril::AudioSignalFlow & mFlow;
+  
+  std::unique_ptr<rrl::AudioSignalFlow> mFlow;
 
   std::size_t const mPeriodSize;
 
-  std::size_t const mNumberOfCaptureSignals;
-  std::size_t const mNumberOfPlaybackSignals;
+  std::unique_ptr< efl::BasicMatrix<ril::SampleType> > mConvertedSamples;
 
-  std::vector<ril::SampleType *> mInputBufferPtrs;
-  std::vector<ril::SampleType *> mOutputBufferPtrs;
-
-  std::unique_ptr<ril::CommunicationArea< ril::SampleType > > mCommBuffer;
+  std::vector<ril::SampleType * const> mInputBufferPtrs;
+  std::vector<ril::SampleType * const> mOutputBufferPtrs;
 };
 
 } // namespace mexsupport

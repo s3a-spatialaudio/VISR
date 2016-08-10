@@ -2,11 +2,14 @@
 
 #include "signal_flow_wrapper.hpp"
 
-#include <libefl/alignment.hpp>
+// #include <libefl/alignment.hpp>
+#include <libefl/basic_matrix.hpp>
 #include <libefl/vector_conversions.hpp>
 
-#include <libril/audio_signal_flow.hpp>
-#include <libril/communication_area.hpp>
+#include <libril/component.hpp>
+
+#include <librrl/audio_interface.hpp>
+#include <librrl/audio_signal_flow.hpp>
 
 #include <cassert>
 #include <ciso646>
@@ -17,26 +20,18 @@ namespace maxmsp
 {
   
 template<typename ExternalSampleType>
-SignalFlowWrapper<ExternalSampleType>::SignalFlowWrapper( ril::AudioSignalFlow & flow )
- : mFlow( flow )
- , mPeriodSize( flow.period() )
- , mNumberOfCaptureSignals( flow.numberOfCaptureChannels() )
- , mNumberOfPlaybackSignals( flow.numberOfPlaybackChannels() )
-  
+SignalFlowWrapper<ExternalSampleType>::SignalFlowWrapper( ril::Component & comp )
+ : mFlow( new rrl::AudioSignalFlow( comp ) )
+ , mPeriodSize( comp.period( ) )
+ , mConvertedSamples( 
+  new efl::BasicMatrix<ril::SampleType>( mFlow->numberOfAudioCapturePorts( ) + mFlow->numberOfAudioPlaybackPorts( ),
+                                         comp.period(), ril::cVectorAlignmentSamples ) )
+ , mInputBufferPtrs( mFlow->numberOfAudioCapturePorts( ) )
+ , mOutputBufferPtrs( mFlow->numberOfAudioPlaybackPorts( ) )
 {
-  mCommBuffer.reset( new ril::CommunicationArea < ril::SampleType>( mNumberOfCaptureSignals + mNumberOfPlaybackSignals,
-                                                                    mPeriodSize, ril::cVectorAlignmentSamples ) );
-
-  mInputBufferPtrs.resize( mNumberOfCaptureSignals, nullptr );
-  for( std::size_t inIdx( 0 ); inIdx < mNumberOfCaptureSignals; ++inIdx )
-  {
-    mInputBufferPtrs[inIdx] = mCommBuffer->at( inIdx );
-  }
-  mOutputBufferPtrs.resize( mNumberOfPlaybackSignals, nullptr );
-  for( std::size_t outIdx( 0 ); outIdx < mNumberOfPlaybackSignals; ++outIdx )
-  {
-    mOutputBufferPtrs[outIdx] = mCommBuffer->at( mNumberOfCaptureSignals + outIdx );
-  }
+  std::size_t index = 0;
+  std::generate( mInputBufferPtrs.begin(), mInputBufferPtrs.end(), [&index, this] { return this->mConvertedSamples->row(index++); } );
+  std::generate( mOutputBufferPtrs.begin( ), mOutputBufferPtrs.end( ), [&index, this] { return this->mConvertedSamples->row( index++); } );
 }
 
 template<typename ExternalSampleType>
@@ -48,10 +43,14 @@ template<typename ExternalSampleType>
 void SignalFlowWrapper<ExternalSampleType>::processBlock( ExternalSampleType const * const * inputSamples,
                                                           ExternalSampleType * const * outputSamples )
 {
-  ril::AudioInterface::CallbackResult processResult;
+  rrl::AudioInterface::CallbackResult processResult;
   transferInputSamples( inputSamples );
-  ril::AudioSignalFlow::processFunction( &mFlow, &mInputBufferPtrs[0], &mOutputBufferPtrs[0],
-                                        processResult );
+  // Note: We should not call the free function here because it directly casts back from void* inside.
+  // AudioSignalFlow (or an appropriately renamed class) should not implement the callback interface directly, 
+  // but should leave it to another wrapper.
+  rrl::AudioSignalFlow::processFunction( mFlow.get(),
+                                         &mInputBufferPtrs[0],
+                                         &mOutputBufferPtrs[0], processResult );
   if( processResult != 0 ) //todo: Lookup error codes
   {
     throw std::runtime_error( "Error while processing the signal flow." );
@@ -62,26 +61,34 @@ void SignalFlowWrapper<ExternalSampleType>::processBlock( ExternalSampleType con
 template<typename ExternalSampleType>
 void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSampleType const * const * inputSamples )
 {
+  std::size_t const numberOfCaptureSignals = mFlow->numberOfAudioCapturePorts();
   std::size_t const inputStride = 1;
-  for( std::size_t inChanIdx( 0 ); inChanIdx < mNumberOfCaptureSignals; ++inChanIdx )
+  for( std::size_t inChanIdx( 0 ); inChanIdx < numberOfCaptureSignals; ++inChanIdx )
   {
-    ExternalSampleType const * firstInSample = inputSamples[inChanIdx];
-    // Note: Due to the interleaved input samples, no alignment guarantees can be made.
-    // TODO: Replace by optimised (stride-free) conversion function.
-    efl::vectorConvertInputStride( firstInSample, mInputBufferPtrs[inChanIdx], mPeriodSize, inputStride, 0 );
+    ExternalSampleType const * const firstInSample = inputSamples[inChanIdx];
+    // Note: No alignment guarantees can be made because we do not know the alignment of inputSamples.
+    efl::ErrorCode const ret = efl::vectorConvert( firstInSample, mInputBufferPtrs[inChanIdx], mPeriodSize, 0 );
+    if( ret != efl::noError )
+    {
+      throw std::runtime_error( "SignalFlowWrapper::transferInputSamples( ) failed." );
+    }
   }
 }
 
 template<typename ExternalSampleType >
 void SignalFlowWrapper<ExternalSampleType>::transferOutputSamples( ExternalSampleType * const * outputSamples )
 {
-  std::size_t const outputStride = 1;
-  for( std::size_t outChanIdx( 0 ); outChanIdx < mNumberOfPlaybackSignals; ++outChanIdx )
+  std::size_t const startIdx = mFlow->numberOfAudioCapturePorts();
+  std::size_t const numberOfPlaybackSignals = mFlow->numberOfAudioPlaybackPorts();
+  for( std::size_t outChanIdx( 0 ); outChanIdx < numberOfPlaybackSignals; ++outChanIdx )
   {
-    ExternalSampleType * firstOutSample = outputSamples[ outChanIdx ];
-    // Note: Due to the interleaved output samples, no alignment guarantees can be made.
-    // TODO: Replace by optimised (stride-free) conversion function.
-    efl::vectorConvertOutputStride( mOutputBufferPtrs[outChanIdx], firstOutSample, mPeriodSize, outputStride, 0 );
+    ExternalSampleType * const firstOutSample = outputSamples[ outChanIdx ];
+    // Note: No alignment guarantees can be made because we do not know the alignment of outputSamples.
+    efl::ErrorCode const ret = efl::vectorConvert( mOutputBufferPtrs[ outChanIdx ], firstOutSample, mPeriodSize, 0 );
+    if( ret != efl::noError )
+    {
+      throw std::runtime_error( "SignalFlowWrapper::transferOutputSamples( ) failed." );
+    }
   }
 }
 
