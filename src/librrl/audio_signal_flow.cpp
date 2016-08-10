@@ -89,7 +89,15 @@ AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples
 
   // call the process() method of the derived class to perform the specific processing.
   // TODO: would this be the appropriate place to catch all exceptions called during the rendering?
-  // process();
+  try
+  {
+    executeComponents();
+  }
+  catch( std::exception const & ex )
+  {
+    // TODO: Add error message to ex.what()
+    throw ex;
+  }
 
   // collect the generated output from the playback part of the communication area and 
   // fill the playbackSamples accordingly.
@@ -108,6 +116,23 @@ AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples
 
   // TODO: use a sophisticated enumeration to signal error conditions
   callbackResult = 0; // Means 'no error'
+}
+
+void AudioSignalFlow::executeComponents()
+{
+  for( ril::ProcessableInterface * pc : mProcessingSchedule )
+  {
+    try
+    {
+      pc->process();
+    }
+    catch( std::exception const & ex )
+    {
+      // TODO: Retrieve information about current object and add it to the exception message
+      // TODO: Consider adding a name() function to ril::ProcessableInterface
+      throw std::runtime_error( std::string("Exception while executing audio signal flow: ") + ex.what() );
+    }
+  }
 }
 
 std::size_t AudioSignalFlow::numberOfAudioCapturePorts() const

@@ -93,11 +93,6 @@ public:
                                 AudioInterface::CallbackResult& callbackResult );
 
   /**
-   * Method called within the processFunction callback to execute the atomic components of the graph
-   */
-  void process();
-
-  /**
    * Query methods.
    */
   //@{
@@ -203,14 +198,19 @@ private:
 #endif
   /**
    * Method to transfer the capture and playback samples to and from
-   * the locations where they are excepted by the process() function
-   * of the subclass, and call this process() function.
+   * the locations where they are expected, and execute the contained atomic components.
    * Called from processFunction(). For a parameter description
    * (except userData), see @see processFunction().
    */
   void processInternal( ril::SampleType const * const * captureSamples,
                         ril::SampleType * const * playbackSamples,
                         AudioInterface::CallbackResult& callbackResult );
+
+  /**
+  * Method called within the processFunction callback to execute the atomic components of the graph
+  */
+  void executeComponents( );
+
 
   /**
    * find a port of a specific audio component, both specified by name
