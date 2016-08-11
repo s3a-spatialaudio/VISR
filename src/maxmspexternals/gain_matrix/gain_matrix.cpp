@@ -66,7 +66,7 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
 #endif
   mNumberOfOutputs = static_cast<std::size_t>(numOutputs);
 
-  mGains.resize( mNumberOfOutputs, mNumberOfInputs );
+  mGains.resize(mNumberOfOutputs, mNumberOfInputs );
   if( argc >= 3 )
   {
     if( atom_gettype( argv + 2 ) != A_SYM )
@@ -241,9 +241,8 @@ int C74_EXPORT main()
 
   visr::maxmsp::ClassRegistrar<visr::maxmsp::GainMatrix>( "gain_matrix~" );
 
-  post("visr::maxmsp::DelayVector::main() finished.");
+  post("visr::maxmsp::GainMatrix::main() finished.");
 
   return 0;
 }
-
 } // extern "C"

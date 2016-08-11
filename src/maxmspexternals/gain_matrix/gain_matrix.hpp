@@ -1,25 +1,20 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <maxmspexternals/libmaxsupport/external_base.hpp>
-#include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
+#include <libpml/matrix_parameter.hpp>
 
 #include <libsignalflows/gain_matrix.hpp>
 
-// Some loony (Max?) obviously defines max, thus hiding any C++/STL functions of the same name.
-#undef max
-#undef min // same for min(), although there is no Min/MSP around.
-
-#include <libpml/matrix_parameter.hpp>
+// We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
+// stuff such as defining macros min and max.
+#include <maxmspexternals/libmaxsupport/external_base.hpp>
+#include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
 #include <cstddef>
 #include <memory>
 
-// Some loony (Max?) obviously defines max, thus hiding any C++/STL functions of the same name.
-#undef max
-#undef min // same for min(), although there is no Min/MSP around.
-
 namespace visr
 {
+
 namespace maxmsp
 {
 
