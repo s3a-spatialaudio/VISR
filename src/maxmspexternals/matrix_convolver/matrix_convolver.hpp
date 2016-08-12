@@ -1,5 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#ifndef VISR_MAXMSP_MATRIX_CONVOLVER_MATRIX_CONVOLVER_HPP_INCLUDED
+#define VISR_MAXMSP_MATRIX_CONVOLVER_MATRIX_CONVOLVER_HPP_INCLUDED
+
+
 // these parameters could easily go into a private implementation object.
 #include <libpml/filter_routing_parameter.hpp>
 #include <libpml/index_sequence.hpp>
@@ -69,3 +73,5 @@ private:
 } // namespace matrix_convolver
 } // namespace maxmsp
 } // namespace visr
+
+#endif // #ifndef VISR_MAXMSP_MATRIX_CONVOLVER_MATRIX_CONVOLVER_HPP_INCLUDED
