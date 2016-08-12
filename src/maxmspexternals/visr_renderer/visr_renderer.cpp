@@ -185,7 +185,9 @@ VisrRenderer::~VisrRenderer()
   }
   catch( std::exception const & e )
   {
-    error( "Error while initialising the signal flow %s", e.what() );
+    std::stringstream errMsg;
+    errMsg << "Error while initialising the signal flow: " << e.what();
+    object_error( reinterpret_cast<t_object *>(getMaxProxy( )), errMsg.str( ).c_str( ));
     return;
   }
 }

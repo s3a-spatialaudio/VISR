@@ -3,6 +3,8 @@
 #ifndef VISR_MAXMSP_MAXSUPPORT_EXTERNAL_WRAPPER_HPP_INCLUDED
 #define VISR_MAXMSP_MAXSUPPORT_EXTERNAL_WRAPPER_HPP_INCLUDED 
 
+#include <sstream>
+
 /* Super-safe determination of the MAX define for setting the operating system. */
 #ifdef __APPLE_CC__
 #ifndef MAC_VERSION 
@@ -76,8 +78,17 @@ template<class ExternalClass>
 {
   post( "ExternalWrapper<ExternalClass>::dsp64 called." );
   
-  obj->mObject->initDsp( dsp64, count, samplerate, maxvectorsize, flags );
-  
+  try
+  {
+    obj->mObject->initDsp( dsp64, count, samplerate, maxvectorsize, flags );
+  }
+  catch( std::exception const & ex )
+  {
+    std::stringstream errMsg;
+    errMsg << "maxmsp::ExternalWrapper: Error during dsp_add64(): " << ex.what( );
+    object_error( reinterpret_cast<t_object*>(obj), errMsg.str( ).c_str( ) );
+  }
+
   dsp_add64( dsp64, reinterpret_cast<t_object*>(obj), reinterpret_cast<t_perfroutine64>(&ExternalWrapper<ExternalClass>::perform64), 0, NULL );
 }
 
