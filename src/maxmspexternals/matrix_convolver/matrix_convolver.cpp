@@ -26,18 +26,13 @@
 
 #include <libpml/index_sequence.hpp>
 
+#include <maxmspexternals/libmaxsupport/argument_list.hpp>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
 #include <cstdlib>
 #include <sstream>
-
-// for ArgumentList
-#include <boost/algorithm/string.hpp>
-#include <algorithm>
-#include <iterator>
-#include <string>
-#include <vector>
 
 #define MAXAPI_USE_MSCRT
 #include "ext.h"
@@ -54,53 +49,6 @@ namespace maxmsp
 {
 namespace matrix_convolver
 {
-
-namespace // unnamed
-{
-  /**
-   * Transform an wrap  MAX/MSP option list into a 'standard argument list.
-   * @note boost::program_option excepts the program name as the first argument. Thus we introduce a dummy first argument.
-   * @todo consider making this a standard facility.
-   */
-  class ArgumentList
-  {
-  public:
-    explicit ArgumentList( short argc, t_atom *argv )
-    {
-      char * textPtr = nullptr;
-      long textSize = 0;
-
-      if( atom_gettext( argc, argv, &textSize, &textPtr, /*OBEX_UTIL_ATOM_GETTEXT_SYM_FORCE_QUOTE |*/ OBEX_UTIL_ATOM_GETTEXT_COMMA_DELIM )
-        != MAX_ERR_NONE )
-      {
-        sysmem_freeptr( textPtr );
-        throw std::invalid_argument( "ArgumentList: Getting text from Max atoms failed." );
-      }
-      std::string const textStr( textPtr );
-      sysmem_freeptr( textPtr );
-      textPtr = nullptr;
-
-      boost::split( mArguments, textStr, boost::is_any_of( "," ) );
-      for( std::string & v : mArguments )
-      {
-        boost::trim_if( v, boost::is_any_of( "\t " ) );
-      }
-
-      mArguments.insert( mArguments.begin(), "zeroth argument" );
-
-      std::transform( mArguments.begin(), mArguments.end(), std::back_inserter(mArgPointers),
-        []( std::string const & v ) { return v.c_str(); } );
-    }
-
-    std::size_t argc() const { return mArguments.size(); }
-
-    char const * const * argv() const { return &mArgPointers[0]; }
-
-  private:
-    std::vector< std::string > mArguments;
-    std::vector<char const *> mArgPointers;
-  };
-}
 
 MatrixConvolver::MatrixConvolver( t_pxobject & maxProxy, short argc, t_atom *argv )
  : ExternalBase( maxProxy )
