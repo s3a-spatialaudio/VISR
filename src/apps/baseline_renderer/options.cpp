@@ -35,6 +35,6 @@ Options::~Options()
 {
 }
 
-} // namespace scene_decoder
+} // namespace baseline_renderer
 } // namespace apps
 } // namespace visr
