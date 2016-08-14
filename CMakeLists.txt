@@ -57,6 +57,10 @@ ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 
 # This covers Linux and MacOS X
 if(UNIX)
+  # Support for the Raspberry Pi: Enable hardware floating-point arithmetic
+  if( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon -mfloat-abi=hard" )
+  endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture
   # features of the machine it is compiled on.
