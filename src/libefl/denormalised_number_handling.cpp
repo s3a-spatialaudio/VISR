@@ -5,8 +5,6 @@
 #if (defined VISR_SYSTEM_PROCESSOR_x86) or (defined VISR_SYSTEM_PROCESSOR_x86_64)
 #define INTEL_PLATFORM // Convenience macro for use within this compilation unit
 #include <xmmintrin.h>
-#else
-#warning "Non-intel platform"
 #endif
 
 namespace visr
