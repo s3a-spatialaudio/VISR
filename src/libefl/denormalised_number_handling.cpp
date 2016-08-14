@@ -2,11 +2,19 @@
 
 #include "denormalised_number_handling.hpp"
 
+#if (defined VISR_SYSTEM_PROCESSOR_x86) or (defined VISR_SYSTEM_PROCESSOR_x86_64)
+#define INTEL_PLATFORM // Convenience macro for use within this compilation unit
+#include <xmmintrin.h>
+#else
+#warning "Non-intel platform"
+#endif
+
 namespace visr
 {
 namespace efl
 {
 
+#ifdef INTEL_PLATFORM
 // only for Intel X86/X86_64 platforms
 namespace // unnamed
 {
@@ -19,7 +27,8 @@ namespace // unnamed
   static const ControlWord cCwMask = ~(cDenormsAreZeroMask bitor cFlushToZeroMask);
 
 } // unnamed namespace
-
+#endif
+  
 DenormalisedNumbers::State DenormalisedNumbers::setDenormHandling( )
 {
   return setDenormHandling( State( true, true ) );
@@ -32,10 +41,13 @@ void DenormalisedNumbers::resetDenormHandling( State stateToRestore )
 
 DenormalisedNumbers::State DenormalisedNumbers::setDenormHandling( State newState )
 {
-  State oldState;
-
-  ControlWord const oldCW = _mm_getcsr( );
-
+#ifdef INTEL_PLATFORM 
+  ControlWord const oldCW =
+#if 0
+  _mm_getcsr( );
+#else
+  0;
+#endif
   bool const oldDAZ = (oldCW bitand cDenormsAreZeroMask) != 0;
   bool const oldFTZ = (oldCW bitand cFlushToZeroMask) != 0;
 
@@ -48,9 +60,14 @@ DenormalisedNumbers::State DenormalisedNumbers::setDenormHandling( State newStat
   {
     newCW = newCW bitor cFlushToZeroMask;
   }
+#if 0
   _mm_setcsr( newCW );
-
+#endif
   return State( oldDAZ, oldFTZ );
+#else
+  // Do nothing, return default object.
+  return State();
+#endif
 }
 
 } // namespace efl
