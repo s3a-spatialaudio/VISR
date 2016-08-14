@@ -11,9 +11,6 @@
 #pragma warning(disable: 4996)
 #endif
 
-// for intel platforms: TODO: Lookup correct file name for Linux and MacOS!
-#include <immintrin.h>
-
 #include <algorithm>
 #include <ciso646> // should not be necessary for c++11, but MSVC needs it somehow
 #include <functional>
