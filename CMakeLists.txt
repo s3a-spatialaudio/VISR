@@ -15,9 +15,6 @@ INCLUDE( CTest )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
-# TBD: Switch between GNU compiler and clang on Linux platforms
-OPTION( SET_CLANG_COMPILER "Use the clang compiler on Linux platforms" OFF )
-
 # Enable C++11 features on Linux platforms
 # See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
 # Maybe there is a more general way to configure the different platforms and toolchains
