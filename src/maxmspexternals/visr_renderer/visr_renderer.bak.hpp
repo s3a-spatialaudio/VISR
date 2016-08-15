@@ -1,14 +1,18 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
-#define VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+#ifndef VISR_MAXMSP_VISR_RENDERER_VISR_RENDERER_HPP_INCLUDED
+#define VISR_MAXMSP_VISR_RENDERER_VISR_RENDERER_HPP_INCLUDED
 
+
+// these parameters could easily go into a private implementation object.
+#include <libpml/filter_routing_parameter.hpp>
+#include <libpml/index_sequence.hpp>
 #include <libpml/matrix_parameter.hpp>
 
-#include <libsignalflows/gain_matrix.hpp>
+#include <libsignalflows/matrix_convolver.hpp>
 
 // We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
-// stuff such as defining macros min, max, and error
+// stuff such as defining macros min and max.
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
@@ -17,17 +21,18 @@
 
 namespace visr
 {
-
 namespace maxmsp
 {
+namespace matrix_convolver
+{
 
-class GainMatrix: public visr::maxmsp::ExternalBase
+class VisrRenderer: public visr::maxmsp::ExternalBase
 {
 public:
 
-  explicit  GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv );
+  explicit  VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv );
 
-  ~GainMatrix();
+  ~VisrRenderer();
 
   /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
 
@@ -48,15 +53,25 @@ private:
   long mPeriod;
   std::size_t mNumberOfInputs;
   std::size_t mNumberOfOutputs;  
-  std::size_t mInterpolationSteps;
+  
+  std::size_t mMaxFilterLength;
+  std::size_t mNumMaxFilters;
 
-  std::unique_ptr<signalflows::GainMatrix> mFlow;
-  std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;
+  pml::FilterRoutingList mRoutings;
+
+  std::string mFilterList;
+  pml::IndexSequence mIndexOffsets;
+
+  std::string mFftLibrary;
+
+  std::unique_ptr<signalflows::MatrixConvolver> mFlow;
+  std::unique_ptr<SignalFlowWrapper<double> > mFlowWrapper;
 
   pml::MatrixParameter<ril::SampleType> mGains;
 };
 
+} // namespace matrix_convolver
 } // namespace maxmsp
 } // namespace visr
 
-#endif // #ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+#endif // #ifndef VISR_MAXMSP_VISR_RENDERER_VISR_RENDERER_HPP_INCLUDED
