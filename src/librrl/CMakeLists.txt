@@ -1,16 +1,20 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 SET( SOURCES
+audio_connection_map.cpp
 audio_signal_flow.cpp
 communication_area.cpp
 portaudio_interface.cpp
+scheduling_graph.cpp
 )
 
 SET( HEADERS
+audio_connection_map.hpp
 audio_interface.hpp
 audio_signal_flow.hpp
 communication_area.hpp
 portaudio_interface.hpp
+scheduling_graph.hpp
 )
 
 IF( BUILD_USE_JACK )
