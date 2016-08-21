@@ -3,9 +3,10 @@
 #include "audio_connection_descriptor.hpp"
 
 #include <ciso646>
-#include <stdexcept>
-#include <numeric>
+#include <iterator>
 #include <limits>
+#include <numeric>
+#include <stdexcept>
 
 namespace visr
 {
