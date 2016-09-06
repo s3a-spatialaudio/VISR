@@ -14,8 +14,6 @@
 #include <functional>
 #include <random>
 
-#include <fstream>
-
 namespace visr
 {
 namespace rcl
@@ -154,13 +152,6 @@ void LateReverbFilterCalculator::process( SubBandMessageQueue & subBandLevels,
     // As the check for parameter changes is done on the sending end, we do not need to do it here again
     // Anyway, this will not change the impulse responses, as the calculation is deterministic.
     calculateImpulseResponse( val.first, val.second, &newFilter[0], mFilterLength );
-    // debug: write IR to file
-    std::ofstream ofs;
-    ofs.open("testcout.txt", std::ofstream::out);
-    //ofs << " more lorem ipsum";
-    std::ostream_iterator<ril::SampleType> out_it (ofs,", ");
-    std::copy ( newFilter.begin(), newFilter.end(), out_it );
-    ofs.close();
     
     lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
     subBandLevels.popNextElement();
