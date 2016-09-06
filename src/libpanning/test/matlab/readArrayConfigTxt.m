@@ -86,7 +86,7 @@ while ~feof( hFile )
             end
             if count == 3 % Must be a 2D setup, but we cannot check this yet, 
             % as is it unclear at which point in the file the '2D' flag is set.  
-                tripletsAll( triplIdx, : ) = [A(2:3).' 0]; % Assign predefined value to 3rd triplet index.
+                tripletsAll( triplIdx, : ) = [A(2:3); 0]; % Assign predefined value to 3rd triplet index.
             else
                 tripletsAll( triplIdx, : ) = A(2:4);
             end

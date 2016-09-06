@@ -68,7 +68,16 @@ void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* e
     mIoServiceWork.reset( new  boost::asio::io_service::work( *mIoService) );
   }
   mInternalMessageBuffer.reset( new pml::MessageQueue< std::string >() ) ;
-  mSocket.reset( new udp::socket( *mIoService,  udp::endpoint(udp::v4(), static_cast<unsigned short>(port) )) );
+  mSocket.reset( new udp::socket( *mIoService ) );
+  boost::system::error_code ec;
+  mSocket->open( udp::v4( ), ec );
+  mSocket->set_option( boost::asio::socket_base::reuse_address( true ) );
+  mSocket->bind( udp::endpoint( udp::v4( ), static_cast<unsigned short>(port) ) );
+
+  if( ec )
+  {
+    throw std::runtime_error( "Error opening UDP port" );
+  }
 
   mSocket->async_receive_from( boost::asio::buffer(mReceiveBuffer),
                                mRemoteEndpoint,

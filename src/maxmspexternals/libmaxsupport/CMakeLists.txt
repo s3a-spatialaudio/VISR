@@ -5,9 +5,18 @@ IF( APPLE )
   INCLUDE_DIRECTORIES( ${CORE_SERVICE_FRAMEWORK}/Versions/A/Frameworks/CarbonCore.framework/Versions/A/Headers )
 ENDIF( APPLE )
 
-SET( SOURCES external_base.cpp signal_flow_wrapper.cpp)
+SET( SOURCES
+argument_list.cpp
+external_base.cpp
+signal_flow_wrapper.cpp
+)
 
-SET( HEADERS class_registrar.hpp  external_base.hpp external_wrapper.hpp signal_flow_wrapper.hpp )
+SET( HEADERS
+argument_list.hpp
+class_registrar.hpp
+external_base.hpp
+external_wrapper.hpp
+signal_flow_wrapper.hpp)
 
 INCLUDE_DIRECTORIES( ${MAXSDK_MSP_INCLUDE_DIR} )
 INCLUDE_DIRECTORIES( ${MAXSDK_MAX_INCLUDE_DIR} )

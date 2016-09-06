@@ -44,6 +44,5 @@ ENDIF( BUILD_USE_IPP )
 # Also set the file extension according to the operating system.
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX ${MATLAB_MEX_SUFFIX} PREFIX "")
 
-# <AF> What to do with the install?
-# install to /bin by default
-install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex )
+# Install the .mexXXX file to mex/
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION mex )

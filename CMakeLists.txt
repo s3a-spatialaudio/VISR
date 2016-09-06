@@ -15,16 +15,6 @@ INCLUDE( CTest )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
-# TBD: Switch between GNU compiler and clang on Linux platforms
-OPTION( SET_CLANG_COMPILER "Use the clang compiler on Linux platforms" OFF )
-
-# Enable C++11 features on Linux platforms
-# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
-# Maybe there is a more general way to configure the different platforms and toolchains
-if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-endif()
-
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
@@ -49,7 +39,7 @@ IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
   SET( VISR_SYSTEM_PROCESSOR x86_64 )
 ENDIF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
 STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME )
-# FOr use as a C/C++ preprocessor definition, we must not use hyphens.
+# For use as a C/C++ preprocessor definition, we must not use hyphens.
 STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_MACRO )
 
 
@@ -57,9 +47,22 @@ STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_
 # MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
 # MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
 
+# Make the platform strings available to the source code.
 ADD_DEFINITIONS("-DVISR_SYSTEM_PROCESSOR_${VISR_SYSTEM_PROCESSOR}")
 ADD_DEFINITIONS("-DVISR_SYSTEM_NAME_${VISR_SYSTEM_NAME}")
 ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
+
+############################################################
+# Set platform-specific compiler flags
+
+# This covers Linux and MacOS X
+if(UNIX)
+  # TODO: Add more elaborate configuration for -march and -mtune
+  # At the moment, the code is invariably built for the architecture
+  # features of the machine it is compiled on.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
+endif(UNIX)
 
 ############################################################
 # Create universal binaries on MacOS
@@ -206,7 +209,8 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
+# In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
 
 IF( BUILD_PYTHON_BINDINGS )
   LIST( APPEND VISR_BOOST_LIBRARIES python ) 
@@ -260,3 +264,6 @@ IF(BUILD_DOCUMENTATION)
  
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc )
 ENDIF()
+
+# Instructions for packaging are held in a separate file.
+INCLUDE( PackageConfig )
