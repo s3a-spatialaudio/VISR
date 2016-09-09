@@ -5,8 +5,8 @@
 #include <libefl/alignment.hpp>
 #include <libefl/vector_conversions.hpp>
 
-#include <libril/audio_signal_flow.hpp>
-#include <libril/communication_area.hpp>
+#include <librrl/audio_signal_flow.hpp>
+#include <librrl/communication_area.hpp>
 
 #include <cassert>
 #include <ciso646>
@@ -58,7 +58,7 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
   }
   output = mOutputMatrix;
 
-  mCommBuffer.reset( new ril::CommunicationArea < ril::SampleType>( numGraphInputs + numGraphOutputs,
+  mCommBuffer.reset( new rrl::CommunicationArea < ril::SampleType>( numGraphInputs + numGraphOutputs,
     mPeriodSize, ril::cVectorAlignmentSamples ) );
 
   mInputBufferPtrs.resize( numGraphInputs, nullptr );
