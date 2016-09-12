@@ -33,6 +33,7 @@
 #else
 #include <climits> // to work around the current limitations of MSVC regarding constexpr
 #endif
+#include <string>
 
 // Temporary solution to get rid of the annoying MSVC unsafe argument warnings when using STL algorithms on std::valarrays
 #define AUDIOPORT_USE_VECTOR_FOR_INDICES
