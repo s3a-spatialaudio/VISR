@@ -13,6 +13,7 @@ composite_component.cpp
 parameter_connection_descriptor.cpp
 parameter_factory.cpp
 parameter_port_base.cpp
+port_base.cpp
 signal_flow_context.cpp
 )
 
@@ -37,6 +38,7 @@ parameter_factory.hpp
 parameter_output_port.hpp
 parameter_port_base.hpp
 parameter_type.hpp
+port_base.hpp
 processable_interface.hpp
 signal_flow_context.hpp
 typed_parameter_base.hpp 
