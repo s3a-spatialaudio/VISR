@@ -77,6 +77,8 @@ private:
 public:
   using Container = std::multimap< AudioSignalDescriptor, AudioSignalDescriptor, CompareDescriptors >;
 
+  using value_type = Container::value_type;
+
   using const_iterator = Container::const_iterator;
 
   /**
