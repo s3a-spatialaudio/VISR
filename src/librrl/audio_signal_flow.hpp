@@ -217,7 +217,7 @@ private:
    * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
    */
   ril::AudioPort & findPort( std::string const & componentName,
-                        std::string const & portName );
+                             std::string const & portName );
 
   /**
    * The signal flow handled by this object.

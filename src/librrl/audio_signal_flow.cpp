@@ -4,6 +4,7 @@
 
 #include "audio_connection_map.hpp"
 #include "communication_area.hpp"
+#include "scheduling_graph.hpp"
 
 #include <libril/audio_connection_descriptor.hpp>
 #include <libril/audio_input.hpp>
@@ -212,13 +213,64 @@ bool AudioSignalFlow::initialise( std::ostream & messages )
   return true;
 }
 
+
+namespace // unnamed
+{
+
+// TODO: Maybe define 'qualified name' and 'full name' methods for all ports.
+std::string name( ril::ParameterPortBase const & port )
+{
+  return port.parent().name() + ":" + port.name();
+}
+
+std::string fullName( ril::ParameterPortBase const & port )
+{
+  return port.parent().fullName() + ":" + port.name();
+}
+
+bool checkParameterCompatibility( ril::ParameterPortBase const & sendPort, ril::ParameterPortBase const & receivePort,
+                         std::ostream & messages)
+{
+  bool result = true;
+  // Check connection for protocol and type compatibility
+  ril::CommunicationProtocolType const sendProtocolType = sendPort.protocolType();
+  ril::CommunicationProtocolType const receiveProtocolType = receivePort.protocolType();
+  if( sendProtocolType != receiveProtocolType )
+  {
+    result = false;
+    messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The communication protocols of the connected parameter ports \""
+             << fullName( sendPort ) << "\" and \"" << fullName( receivePort ) << "\" do not match.\n";
+  }
+  ril::ParameterType const sendParameterType = sendPort.parameterType();
+  ril::ParameterType const receiveParameterType = receivePort.parameterType();
+  if( sendParameterType != receiveParameterType )
+  {
+    result = false;
+    messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \""
+             << fullName( sendPort ) << "\" and \"" << fullName( receivePort ) << "\" do not match.\n";
+  }
+  ril::ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
+  ril::ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
+  if( not sendParameterConfig.compare( receiveParameterConfig ) )
+  {
+    result = false;
+    messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \""
+             << fullName( sendPort ) << "\" and \"" << fullName( receivePort ) << "\" are not compatible.\n";
+  }
+  return result;
+}
+
+} // unnamed namespace
+
 void AudioSignalFlow::initialiseParameterInfrastructure()
 {
   mCommunicationProtocols.clear();
   if( not mFlow.isComposite() )
   {
+    // If the flow is not composite, we also have to initialise the top-level parameter ports.
     return;
   }
+
   // TODO: 
   // - Recursively iterate over all composite components
   // - Collect all parameter ports (concrete and placeholders) in containers.
@@ -227,12 +279,12 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
 
 #if 0
   // TODO: This should check whether the contained component is composite, and in this case iterate over the parameter connection table
-  for( ril::ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable )
+  for( ril::ParameterConnectionTable::const_iterator portIt( mFlow.parameterC : mParameterConnectionTable )
   {
     ril::ParameterConnectionTable::value_type const connectionDescriptor : mParameterConnectionTable
 
     // Note: In case of hierarchical models, we would need to construct the full name here.
-    ComponentTable::iterator const sendComponentIt= mComponents.find( connectionDescriptor.first.component() );
+    ril::ComponentTable::iterator const sendComponentIt= mComponents.find( connectionDescriptor.first.component() );
     if( sendComponentIt == mComponents.end() )
     {
       throw std::logic_error( std::string("AudioSignalFlow::initialiseParameterInfrastructure(): The specified sender component \"")
@@ -256,40 +308,20 @@ void AudioSignalFlow::initialiseParameterInfrastructure()
       throw std::logic_error( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The specified receive parameter port \"" )
         + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" does not exist." );
     }
-    // Check connection for protocol and type compatibility
-    ril::CommunicationProtocolType const sendProtocolType = sendPort->protocolType();
-    ril::CommunicationProtocolType const receiveProtocolType = receivePort->protocolType();
-    if( sendProtocolType != receiveProtocolType )
-    {
-      throw std::invalid_argument( std::string("AudioSignalFlow::initialiseParameterInfrastructure(): The communication protocols of the connected parameter ports \"")
-        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" and \""
-        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\" do not match." );
-    }
-    ril::ParameterType const sendParameterType = sendPort->parameterType();
-    ril::ParameterType const receiveParameterType = receivePort->parameterType();
-    if( sendParameterType != receiveParameterType )
-    {
-      throw std::invalid_argument( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \"" )
-        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" and \""
-        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\" do not match." );
-    }
-    ril::ParameterConfigBase const & sendParameterConfig = sendPort->parameterConfig();
-    ril::ParameterConfigBase const & receiveParameterConfig = receivePort->parameterConfig();
-    if( not sendParameterConfig.compare( receiveParameterConfig ) )
-    {
-      throw std::invalid_argument( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \"" )
-        + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" and \""
-        + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\" are not compatible." );
-    }
-    std::unique_ptr<CommunicationProtocolBase> protocolInstance = CommunicationProtocolFactory::create( sendProtocolType, sendParameterType, sendParameterConfig );
+
+
+    std::unique_ptr<ril::CommunicationProtocolBase> protocolInstance
+      = ril::CommunicationProtocolFactory::create( sendProtocolType, sendParameterType, sendParameterConfig );
     if( not protocolInstance )
     {
       throw std::invalid_argument( std::string( "AudioSignalFlow::initialiseParameterInfrastructure(): Could not instantiate protocol object for parameter connection \"" )
         + connectionDescriptor.first.component() + ":" + connectionDescriptor.first.port() + "\" -> \""
         + connectionDescriptor.second.component() + ":" + connectionDescriptor.second.port() + "\"." );
     }
-    //sendPort->connectProtocol( protocolInstance.get() );
-    //receivePort->connectProtocol( protocolInstance.get() );
+
+    sendPort->connectProtocol( protocolInstance.get() );
+    receivePort->connectProtocol( protocolInstance.get() );
+
     protocolInstance->connectInput( receivePort );
     protocolInstance->connectOutput( sendPort );
 
@@ -441,8 +473,85 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
 
 bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages )
 {
-  // TODO: Implement me!
-  return true;
+  bool result = true; // Result variable, is set to false if an error occurs.
+  using PortTable = std::set<ril::ParameterPortBase const*>;
+  PortTable sendPorts;
+  PortTable receivePorts;
+
+  // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
+  // reversed, i.e. inputs are senders and outputs are receivers.
+  for( ril::Component::ParameterPortContainer::const_iterator extPortIt = composite.parameterPortBegin();
+    extPortIt != composite.parameterPortEnd(); ++extPortIt )
+  {
+    if( extPortIt->second->direction() == ril::ParameterPortBase::Direction::Input )
+    {
+      sendPorts.insert( extPortIt->second );
+    }
+    else
+    {
+      receivePorts.insert( extPortIt->second );
+    }
+  }
+  // Add the ports of the contained components (without descending into the hierarchy)
+  for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+    compIt != composite.componentEnd(); ++compIt )
+  {
+    ril::Component const & containedComponent = *(compIt->second);
+    for( ril::Component::ParameterPortContainer::const_iterator intPortIt = containedComponent.parameterPortBegin();
+      intPortIt != containedComponent.parameterPortEnd(); ++intPortIt )
+    {
+      if( intPortIt->second->direction() == ril::ParameterPortBase::Direction::Input )
+      {
+        receivePorts.insert( intPortIt->second );
+      }
+      else
+      {
+        sendPorts.insert( intPortIt->second );
+      }
+    }
+  }
+#if 0
+  // Now populate the connection map
+  try
+  {
+    AudioConnectionMap const connections( composite, false );
+    for( ril::AudioPort const * receivePort : receivePorts )
+    {
+      std::size_t const numChannels = receivePort->width();
+      for( std::size_t channelIdx( 0 ); channelIdx < numChannels; ++channelIdx )
+      {
+        std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator > findRange
+          = connections.equal_range( AudioSignalDescriptor( receivePort, channelIdx ) );
+        std::ptrdiff_t const numConnections = std::distance( findRange.first, findRange.second );
+        assert( numConnections >= 0 );
+        if( numConnections == 0 )
+        {
+          messages << "Audio signal flow connection check: The receive channel \"" << portWithComponentName( receivePort ) << ":" << channelIdx
+            << " is unconnected" << std::endl;
+          result = false;
+        }
+        else if( numConnections > 1 )
+        {
+          messages << "Audio signal flow connection check: The receive channel \"" << portWithComponentName( receivePort ) << ":"
+            << channelIdx << " is connected to " << numConnections << " send channels: " << printAudioSignalDescriptor( findRange.first->second );
+          ++findRange.first;
+          for( ; findRange.first != findRange.second; ++findRange.first )
+          {
+            messages << ", " << printAudioSignalDescriptor( findRange.first->second );
+          }
+          messages << std::endl;
+          result = false;
+        }
+      }
+    }
+  }
+  catch( std::exception const & ex )
+  {
+    messages << ex.what();
+    result = false;
+  }
+#endif
+  return result;
 }
 
 namespace // unnamed
@@ -684,8 +793,16 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
       std::copy( receiveIndices.begin( ), receiveIndices.end( ), &mPlaybackIndices[playbackIndexOffset] );
       playbackIndexOffset += portWidth;
     }
+
+    // Set up the scheduling graph
+    // For the moment this graph takes cares only about the audio connections.
+    SchedulingGraph depGraph;
+    depGraph.initialise( mFlow, concreteConnections );
+    auto const schedule = depGraph.sequentialSchedule();
+    mProcessingSchedule.assign( schedule.begin(), schedule.end() );
+
   } // Additional handling for composite top-level flows finished
-  else
+  else // The flow consists only of a single atomic component.
   {
     // We need a separate treatment for the external playback indices.
     // This are linked (channel-by-channel) to the respective 'physical' output port of the atomic component.
@@ -695,7 +812,12 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
       std::copy( playbackPort->indices(), playbackPort->indices( )+playbackPort->width(), &mPlaybackIndices[playbackIndexOffset] );
       playbackIndexOffset += playbackPort->width();
     }
-  }
+
+    ril::AtomicComponent * atom = static_cast<ril::AtomicComponent *>( &mFlow );
+    mProcessingSchedule.clear();
+    mProcessingSchedule.push_back( atom );
+  } 
+
   return result;
 }
 
