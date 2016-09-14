@@ -59,8 +59,8 @@ private:
 
   std::unique_ptr< efl::BasicMatrix<ril::SampleType> > mConvertedSamples;
 
-  std::vector<ril::SampleType * const> mInputBufferPtrs;
-  std::vector<ril::SampleType * const> mOutputBufferPtrs;
+  std::vector<ril::SampleType *> mInputBufferPtrs;
+  std::vector<ril::SampleType *> mOutputBufferPtrs;
 };
 
 } // namespace mexsupport

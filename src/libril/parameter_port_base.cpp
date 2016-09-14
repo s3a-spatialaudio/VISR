@@ -16,8 +16,10 @@ namespace ril
 
 ParameterPortBase::ParameterPortBase( Component & parent,
                                       std::string const & name,
-                                       Direction direction )
-  : mDirection( direction )
+                                      Direction direction )
+  : mParent( parent )
+  , mName( name )
+  , mDirection( direction )
 {
   parent.registerParameterPort( this, name );
 }

@@ -62,18 +62,27 @@ public:
 #endif
 
   Direction direction() const { return mDirection; }
+
+  std::string const & name() const { return mName; }
+
+  Component & parent() { return mParent; }
+
+  Component const & parent() const { return mParent; }
+
 protected:
   /**
    * Type-specific method to check and set the connected protocol.
    * @todo Reconsider interface.
-   * @throw std::invalid_argument if the protovol type does not match the concrete port type.
+   * @throw std::invalid_argument if the protocol type does not match the concrete port type.
    * At the moment, we use RTTI as the final check.
    */
   virtual void setProtocol( ril::CommunicationProtocolBase * protocol ) = 0;
 private:
-  Direction const mDirection;
+  Component & mParent;
 
-  // Kind const mKind;
+  std::string const mName;
+
+  Direction const mDirection;
 };
 
 } // namespace ril
