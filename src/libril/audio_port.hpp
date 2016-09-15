@@ -3,26 +3,9 @@
 #ifndef VISR_LIBRIL_AUDIO_PORT_HPP_INCLUDED
 #define VISR_LIBRIL_AUDIO_PORT_HPP_INCLUDED
 
-// Whether to use inline functions to access the containing components.
-// Provide facility to switch off to break suspected dependency cycle.
-// #define VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
-
-// Check how to make warning C4996 disappear
-#define _CRT_SECURE_NO_WARNINGS 1
-
-/**
- * Define whether constexpr keyword is supported by the compiler.
- * @note Maybe this constant should be set the build system.
- * @todo Clean up after all compilers (i.e., MSVC) support constexpr correctly.
- */
-#define CPP_CONSTEXPR_SUPPORT 0
+#include "port_base.hpp"
 
 #include "constants.hpp"
-#ifdef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
-// TODO: Rethink whether we want this include here. 
-// (needed due to inline inline implementations which directly call member functions of their parent component
-#include "audio_component.hpp"
-#endif
 
 #include <array>
 #include <cstddef>
@@ -36,7 +19,7 @@
 #include <string>
 
 // Temporary solution to get rid of the annoying MSVC unsafe argument warnings when using STL algorithms on std::valarrays
-#define AUDIOPORT_USE_VECTOR_FOR_INDICES
+// #define AUDIOPORT_USE_VECTOR_FOR_INDICES
 
 #ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
 #include <vector>
@@ -51,40 +34,10 @@ namespace ril
 
 // Forward declaration(s)
 class Component;
-// Removed due to inclusion of header (see above)
-#ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
-class AudioSignalFlow;
-#endif
-// I'm not sure yet whether the components should know about the CommunicationArea mechanism,
-// or whether they should use just plain pointer arrays.
-// template< typename Type > class CommunicationArea;
 
-class AudioPort
+class AudioPort: public PortBase
 {
 public:
-  enum class Direction
-  {
-    Input,
-    Output
-  };
-
-  /**
-   * The type of signal indices.
-   * @todo move to a central, unique definition
-   */
-  using SignalIndexType = std::size_t;
-
-#if CPP_CONSTEXPR_SUPPORT
-  constexpr static std::size_t cInvalidWidth = std::numeric_limits<std::size_t>::max();
-#else
-  const static std::size_t cInvalidWidth = UINT_MAX;
-#endif
-
-#if CPP_CONSTEXPR_SUPPORT
-  constexpr static SignalIndexType cInvalidSignalIndex = std::numeric_limits<SignalIndexType>::max();
-#else
-  const static SignalIndexType cInvalidSignalIndex = UINT_MAX;
-#endif
 
   explicit AudioPort( std::string const & name, Component & container, Direction direction );
 
@@ -92,16 +45,16 @@ public:
 
   ~AudioPort();
 
-#if 0
-  bool initialised() const
-#ifdef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
-  {
- return mParentComponent.initialised(); }
-#else
-    ;
-#endif
+  /**
+   * The type of signal indices.
+   * @todo move to a central, unique definition
+   */
+  using SignalIndexType = std::size_t;
 
-#endif
+  const static SignalIndexType cInvalidSignalIndex = UINT64_MAX;
+
+
+  const static std::size_t cInvalidWidth = UINT64_MAX;
 
   /**
    * Methods to be called by components 
@@ -117,12 +70,6 @@ public:
 
   //@}
 
-  std::string const & name() const { return mName; }
-
-  Component const & parent() const { return mParentComponent; }
-
-  Direction direction() const { return mDirection; }
-
   void setAudioChannelStride(std::size_t stride)
   {
 	mAudioChannelStride = stride;
@@ -137,28 +84,6 @@ protected:
   ril::SampleType * mAudioBasePtr;
 
   std::size_t mAudioChannelStride;
-
-  //Component & container() { return mParentComponent; }
-
-  //Component const & container( ) const { return mParentComponent; }
-
-//  /**
-//   * @todo make 'em inline after breaking the (suspected) cyclic dependency.
-//   */
-//  //@{
-//  CommunicationArea<SampleType> & commArea()
-//#ifdef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
-//  { return container().commArea(); }
-//#else
-//    ;
-//#endif
-//  CommunicationArea<SampleType> const & commArea() const
-//#ifdef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
-//  { return container().commArea(); }
-//#else
-//    ;
-//#endif
-//  //@}
 
 public: // Temporary solution to make the indices visible to the runtime infrastructure.
 
@@ -200,17 +125,10 @@ public: // Temporary solution to make the indices visible to the runtime infrast
     {
       std::copy( begin, end, &mIndices[0] );
     }
-    // std::copy( begin, end, mIndices.begin() ); // C++11 feature std::valarray<T>::begin(), but not featured either in VC 2013 and GCC 4.8 at this time.
   }
 
   SampleType * * signalPointers() { return &mSignalPointers[0]; }
 private:
-  std::string const mName;
-
-  Component& mParentComponent;
-
-  Direction const mDirection;
-
   std::size_t mWidth;
 
 #ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
@@ -234,4 +152,4 @@ private:
 } // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_COMPONENT_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRIL_AUDIO_PORT_HPP_INCLUDED

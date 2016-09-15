@@ -25,7 +25,7 @@ namespace rcl
                                                     ril::CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )
   , mNumberOfObjectChannels( 0 )
-  , mObjectVectorInput( *this, "objectInput", pml::EmptyParameterConfig() )
+  , mObjectVectorInput( "objectInput", *this, pml::EmptyParameterConfig() )
 {
 }
 

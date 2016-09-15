@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
 #define VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
 
+#include "port_base.hpp"
+
 #include "parameter_type.hpp"
 #include "communication_protocol_type.hpp"
  
@@ -23,7 +25,7 @@ class ParameterConfigBase;
  *
  *
  */
-class ParameterPortBase
+class ParameterPortBase: public PortBase
 {
 public:
 
@@ -33,18 +35,12 @@ public:
     Placeholder
   };
 
-  enum class Direction
-  {
-    Input,
-    Output
-  };
-
-  explicit ParameterPortBase( Component & parent,
-                              std::string const & name,
+  explicit ParameterPortBase( std::string const & name,
+                              Component & parent,
                               Direction direction );
 
   /**
-   *
+   * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
    */
   virtual ~ParameterPortBase();
 
@@ -61,14 +57,6 @@ public:
   void connectProtocol( ril::CommunicationProtocolBase * protocol );
 #endif
 
-  Direction direction() const { return mDirection; }
-
-  std::string const & name() const { return mName; }
-
-  Component & parent() { return mParent; }
-
-  Component const & parent() const { return mParent; }
-
 protected:
   /**
    * Type-specific method to check and set the connected protocol.
@@ -77,12 +65,6 @@ protected:
    * At the moment, we use RTTI as the final check.
    */
   virtual void setProtocol( ril::CommunicationProtocolBase * protocol ) = 0;
-private:
-  Component & mParent;
-
-  std::string const mName;
-
-  Direction const mDirection;
 };
 
 } // namespace ril

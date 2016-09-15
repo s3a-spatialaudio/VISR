@@ -66,12 +66,12 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
 
-  mObjectVectorInput.reset( new ObjectPort( *this, "objectVectorInput", pml::EmptyParameterConfig() ) );
-  mGainOutput.reset( new MatrixPort( *this, "gainOutput", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
+  mObjectVectorInput.reset( new ObjectPort( "objectVectorInput", *this, pml::EmptyParameterConfig() ) );
+  mGainOutput.reset( new MatrixPort( "gainOutput", *this, pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
 
   if( adaptiveListenerPosition )
   {
-    mListenerPositionInput.reset( new ListenerPositionPort( *this, "listenerPosition", pml::EmptyParameterConfig() ) );
+    mListenerPositionInput.reset( new ListenerPositionPort( "listenerPosition", *this, pml::EmptyParameterConfig() ) );
   }
 }
 

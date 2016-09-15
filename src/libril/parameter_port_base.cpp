@@ -14,12 +14,10 @@ namespace visr
 namespace ril
 {
 
-ParameterPortBase::ParameterPortBase( Component & parent,
-                                      std::string const & name,
+ParameterPortBase::ParameterPortBase( std::string const & name,
+                                      Component & parent, 
                                       Direction direction )
-  : mParent( parent )
-  , mName( name )
-  , mDirection( direction )
+  : PortBase( name, parent, direction )
 {
   parent.registerParameterPort( this, name );
 }
