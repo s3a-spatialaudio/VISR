@@ -74,23 +74,6 @@ public:
    */
   std::size_t period() const; // { return mContainingFlow.period(); }
 
-#if 0
-  struct AudioPortDescriptor
-  {
-  public:
-    explicit AudioPortDescriptor( const char* name, AudioPort* port )
-      : mName( name ), mPort( port ) {}
-
-    explicit AudioPortDescriptor( std::string const & name, AudioPort* port )
-      : mName( name ), mPort( port )
-    {
-    }
-
-    std::string mName;
-    AudioPort* mPort;
-  };
-#endif
-
   using AudioPortVector = std::vector<AudioPort*>;
 
   /**
@@ -101,17 +84,6 @@ public:
 
   AudioPortVector::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
   //@}
-
-  /** 
-   * Return a pointer to the port object speficied by name, const version.
-   */
-  AudioPort const * getAudioPort( const char* portName) const;
-
-  /**
-   * Return a pointer to the port object speficied by name, nonconst version.
-   */
-  AudioPort * getAudioPort( const char* portName );
-
 
   /**
    * Parameter port support
