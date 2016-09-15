@@ -4,6 +4,7 @@
 
 #include "audio_connection_map.hpp"
 #include "communication_area.hpp"
+#include "port_utilities.hpp"
 #include "scheduling_graph.hpp"
 
 #include <libril/audio_connection_descriptor.hpp>
@@ -217,17 +218,6 @@ bool AudioSignalFlow::initialise( std::ostream & messages )
 namespace // unnamed
 {
 
-// TODO: Maybe define 'qualified name' and 'full name' methods for all ports.
-std::string name( ril::ParameterPortBase const & port )
-{
-  return port.parent().name() + ":" + port.name();
-}
-
-std::string fullName( ril::ParameterPortBase const & port )
-{
-  return port.parent().fullName() + ":" + port.name();
-}
-
 bool checkParameterCompatibility( ril::ParameterPortBase const & sendPort, ril::ParameterPortBase const & receivePort,
                          std::ostream & messages)
 {
@@ -239,7 +229,7 @@ bool checkParameterCompatibility( ril::ParameterPortBase const & sendPort, ril::
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The communication protocols of the connected parameter ports \""
-             << fullName( sendPort ) << "\" and \"" << fullName( receivePort ) << "\" do not match.\n";
+             << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
   ril::ParameterType const sendParameterType = sendPort.parameterType();
   ril::ParameterType const receiveParameterType = receivePort.parameterType();
@@ -247,7 +237,7 @@ bool checkParameterCompatibility( ril::ParameterPortBase const & sendPort, ril::
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \""
-             << fullName( sendPort ) << "\" and \"" << fullName( receivePort ) << "\" do not match.\n";
+             << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
   ril::ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
   ril::ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
@@ -255,7 +245,7 @@ bool checkParameterCompatibility( ril::ParameterPortBase const & sendPort, ril::
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \""
-             << fullName( sendPort ) << "\" and \"" << fullName( receivePort ) << "\" are not compatible.\n";
+             << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" are not compatible.\n";
   }
   return result;
 }
@@ -442,13 +432,13 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
         assert( numConnections >= 0 );
         if( numConnections == 0 )
         {
-          messages << "Audio signal flow connection check: The receive channel \"" << portWithComponentName( receivePort ) << ":" << channelIdx
+          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":" << channelIdx
             << " is unconnected" << std::endl;
           result = false;
         }
         else if( numConnections > 1 )
         {
-          messages << "Audio signal flow connection check: The receive channel \"" << portWithComponentName( receivePort ) << ":"
+          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":"
             << channelIdx << " is connected to " << numConnections << " send channels: " << printAudioSignalDescriptor( findRange.first->second );
           ++findRange.first;
           for( ; findRange.first != findRange.second; ++findRange.first )
@@ -483,13 +473,13 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
   for( ril::Component::ParameterPortContainer::const_iterator extPortIt = composite.parameterPortBegin();
     extPortIt != composite.parameterPortEnd(); ++extPortIt )
   {
-    if( extPortIt->second->direction() == ril::ParameterPortBase::Direction::Input )
+    if( (*extPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
     {
-      sendPorts.insert( extPortIt->second );
+      sendPorts.insert( *extPortIt );
     }
     else
     {
-      receivePorts.insert( extPortIt->second );
+      receivePorts.insert( *extPortIt );
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
@@ -500,13 +490,13 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
     for( ril::Component::ParameterPortContainer::const_iterator intPortIt = containedComponent.parameterPortBegin();
       intPortIt != containedComponent.parameterPortEnd(); ++intPortIt )
     {
-      if( intPortIt->second->direction() == ril::ParameterPortBase::Direction::Input )
+      if( (*intPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
       {
-        receivePorts.insert( intPortIt->second );
+        receivePorts.insert( *intPortIt );
       }
       else
       {
-        sendPorts.insert( intPortIt->second );
+        sendPorts.insert( *intPortIt );
       }
     }
   }
@@ -526,13 +516,13 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
         assert( numConnections >= 0 );
         if( numConnections == 0 )
         {
-          messages << "Audio signal flow connection check: The receive channel \"" << portWithComponentName( receivePort ) << ":" << channelIdx
+          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":" << channelIdx
             << " is unconnected" << std::endl;
           result = false;
         }
         else if( numConnections > 1 )
         {
-          messages << "Audio signal flow connection check: The receive channel \"" << portWithComponentName( receivePort ) << ":"
+          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":"
             << channelIdx << " is connected to " << numConnections << " send channels: " << printAudioSignalDescriptor( findRange.first->second );
           ++findRange.first;
           for( ; findRange.first != findRange.second; ++findRange.first )
