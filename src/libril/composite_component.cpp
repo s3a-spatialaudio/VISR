@@ -98,13 +98,33 @@ AudioPort * CompositeComponent::findAudioPort( std::string const & componentName
   return comp->findAudioPort( portName );
 }
 
+ParameterPortBase * CompositeComponent::findParameterPort( std::string const & componentName, std::string const & portName )
+{
+  Component * comp = findComponent( componentName );
+  if( not comp )
+  {
+    return nullptr; // Consider turning this into an exception and provide a meaningful message.
+  }
+  return comp->findParameterPort( portName );
+}
+
 void CompositeComponent::registerParameterConnection( std::string const & sendComponent,
                                                       std::string const & sendPort,
                                                       std::string const & receiveComponent,
                                                       std::string const & receivePort )
 {
-  mParameterConnections.insert( std::make_pair( ParameterPortDescriptor( sendComponent, sendPort ),
-                                                ParameterPortDescriptor( receiveComponent, receivePort ) ) );
+  ParameterPortBase * sender = findParameterPort( sendComponent, sendPort );
+  if( not sender )
+  {
+    throw std::invalid_argument( "CompositeComponent::registerParameterConnection(): sender port could not be found." );
+  }
+  ParameterPortBase * receiver = findParameterPort( receiveComponent, receivePort );
+  if( not receiver )
+  {
+    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): receiver port could not be found." );
+  }
+  ParameterConnection newConnection( sender, receiver );
+  mParameterConnections.insert( std::move( newConnection ) );
 }
 
 void CompositeComponent::registerAudioConnection( std::string const & sendComponent,
@@ -129,6 +149,7 @@ void CompositeComponent::registerAudioConnection( std::string const & sendCompon
   mAudioConnections.insert( std::move( newConnection ) );
 }
 
+#if 0
 void CompositeComponent::registerAudioConnection( Component const & sendComponent,
                                                   std::string const & sendPort,
                                                   AudioChannelIndexVector const & sendIndices,
@@ -145,6 +166,7 @@ void CompositeComponent::registerAudioConnection( Component const & sendComponen
                                                   std::string const & receivePort )
 {
 }
+#endif
 
 AudioConnectionTable::const_iterator
 CompositeComponent::audioConnectionBegin() const
@@ -157,12 +179,12 @@ AudioConnectionTable::const_iterator CompositeComponent::audioConnectionEnd() co
   return mAudioConnections.end();
 }
 
-ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionsBegin() const
+ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionBegin() const
 {
   return mParameterConnections.begin();
 }
 
-ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionsEnd() const
+ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionEnd() const
 {
   return mParameterConnections.end( );
 }
