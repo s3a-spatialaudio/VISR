@@ -4,6 +4,7 @@
 
 #include "audio_port.hpp"
 #include "composite_component.hpp"
+#include "parameter_port_base.hpp"
 #include "signal_flow_context.hpp"
 
 #include <ciso646>
@@ -15,8 +16,10 @@ namespace visr
 {
 namespace ril
 {
-class AudioPort;
 
+/**
+ * @TODO: Move separator to a centralised location.
+ */
 /*static*/ const std::string Component::cNameSeparator = "::";
 
 Component::Component( SignalFlowContext& context,
@@ -103,11 +106,11 @@ void Component::registerAudioPort( AudioPort* port )
 }
 
 
-struct CompareAudioPort
+struct ComparePorts
 {
-  explicit CompareAudioPort( std::string const& name ): mName( name ) {}
+  explicit ComparePorts( std::string const& name ): mName( name ) {}
 
-  bool operator()( AudioPort const * lhs ) const
+  bool operator()( PortBase const * lhs ) const
   {
     return lhs->name( ).compare( mName ) == 0;
   }
@@ -118,14 +121,14 @@ private:
 Component::AudioPortVector::iterator Component::findAudioPortEntry( std::string const & portName )
 {
   AudioPortVector::iterator findIt
-    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), CompareAudioPort( portName ) );
+    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), ComparePorts( portName ) );
   return findIt;
 }
 
 Component::AudioPortVector::const_iterator Component::findAudioPortEntry( std::string const & portName ) const
 {
   AudioPortVector::const_iterator findIt
-    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), CompareAudioPort( portName ) );
+    = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), ComparePorts( portName ) );
   return findIt;
 }
 
@@ -204,47 +207,63 @@ Component::parameterPortEnd( )
   return mParameterPorts.end( );
 }
 
-void Component::registerParameterPort( ParameterPortBase * port, std::string const & name )
+void Component::registerParameterPort( ParameterPortBase * port )
 {
-  auto const insertResult = mParameterPorts.insert( std::make_pair( name, port ) );
-  if( not insertResult.second )
+  ParameterPortContainer::const_iterator findIt = findParameterPortEntry( port->name() );
+  if( findIt != mParameterPorts.end() )
   {
-    throw std::invalid_argument( "Parameter port name already used" );
+    throw std::invalid_argument( "Component::registerParameterPort(): port with given name already exists" );
   }
+  mParameterPorts.push_back( port );
 }
 
-bool Component::unregisterParameterPort( std::string const & name )
+bool Component::unregisterParameterPort( ParameterPortBase * port )
 {
-  ParameterPortContainer::iterator findIt = mParameterPorts.find( name );
-  if( findIt == parameterPortEnd() )
+  ParameterPortContainer::const_iterator findIt = std::find( mParameterPorts.begin(), mParameterPorts.end(), port );
+  if( findIt != mParameterPorts.end() )
   {
+    mParameterPorts.erase( findIt );
+  }
+  else
+  {
+    std::cerr << "Component::unregisterParameterPort(): port was not registered." << std::endl;
     return false;
   }
-  mParameterPorts.erase( findIt );
   return true;
 }
 
-ParameterPortBase *
-Component::findParameterPort( std::string const & name )
+Component::ParameterPortContainer::iterator Component::findParameterPortEntry( std::string const & portName )
 {
-  ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
-  if( findIt == mParameterPorts.end( ) )
-  {
-    throw std::invalid_argument( "No parameter port with this name exists." );
-  }
-  return findIt->second;
+  ParameterPortContainer::iterator findIt
+    = std::find_if( mParameterPorts.begin(), mParameterPorts.end(), ComparePorts( portName ) );
+  return findIt;
 }
 
-ParameterPortBase const *
-Component::findParameterPort( std::string const & name ) const
+Component::ParameterPortContainer::const_iterator Component::findParameterPortEntry( std::string const & portName ) const
 {
-  ParameterPortContainer::const_iterator findIt = mParameterPorts.find( name );
-  if( findIt == mParameterPorts.end() )
+  ParameterPortContainer::const_iterator findIt
+    = std::find_if( mParameterPorts.begin(), mParameterPorts.end(), ComparePorts( portName ) );
+  return findIt;
+}
+
+ParameterPortBase const * Component::findParameterPort( std::string const & portName ) const
+{
+  ParameterPortContainer::const_iterator findIt = findParameterPortEntry( portName );
+  if( findIt == parameterPortEnd() )
   {
-//    throw std::invalid_argument( "No parameter port with this name exists." );
     return nullptr;
   }
-  return findIt->second;
+  return *findIt;
+}
+
+ParameterPortBase * Component::findParameterPort( std::string const & portName )
+{
+  ParameterPortContainer::iterator findIt = findParameterPortEntry( portName );
+  if( findIt == parameterPortEnd() )
+  {
+    return nullptr;
+  }
+  return *findIt;
 }
 
 } // namespace ril

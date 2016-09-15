@@ -6,7 +6,6 @@
 #include <libril/constants.hpp>
 
 #include <cstddef>
-#include <map> // for parameter port subsystem
 #include <string>
 #include <vector>
 
@@ -118,7 +117,7 @@ public:
    * Parameter port support
    */
   //@{
-  using ParameterPortContainer = std::map< std::string, ParameterPortBase*>;
+  using ParameterPortContainer = std::vector<ParameterPortBase*>;
 
   ParameterPortContainer::const_iterator parameterPortBegin() const;
   ParameterPortContainer::const_iterator parameterPortEnd( ) const;
@@ -126,19 +125,22 @@ public:
   ParameterPortContainer::iterator parameterPortBegin( );
   ParameterPortContainer::iterator parameterPortEnd( );
 
-  void registerParameterPort( ParameterPortBase *, std::string const & name );
-  bool unregisterParameterPort( std::string const & name );
+  void registerParameterPort( ParameterPortBase * port );
+  bool unregisterParameterPort( ParameterPortBase * port );
+
+  ParameterPortContainer::iterator findParameterPortEntry( std::string const & portName );
+
+  ParameterPortContainer::const_iterator findParameterPortEntry( std::string const & portName ) const;
 
   /**
    * @return pointer to port, nullptr in case the port is not found.
    */
-  ParameterPortBase* findParameterPort( std::string const & name );
+  ParameterPortBase const * Component::findParameterPort( std::string const & portName ) const;
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  ParameterPortBase const * findParameterPort( std::string const & name ) const;
-
+  ParameterPortBase * findParameterPort( std::string const & portName );
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
