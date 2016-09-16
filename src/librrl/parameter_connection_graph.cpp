@@ -71,28 +71,20 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
 
   std::vector<std::size_t> graphComponents( num_vertices( mConnectionGraph ) );
   std::size_t const numComponents = connected_components( mConnectionGraph, &graphComponents[0] );
-  mConnections.reserve( numComponents );
-  for( std::size_t compIdx( 0 ); compIdx < numComponents; ++compIdx )
+  mConnections.resize( numComponents );
+  for( std::size_t runIdx( 0 ); runIdx < graphComponents.size(); ++runIdx )
   {
-    ConnectedPorts connectedComp;
-
-    std::vector<std::size_t> currComponent;
-    for( std::size_t runIdx( 0 ); runIdx < graphComponents.size(); ++runIdx )
+    std::size_t const compIdx = graphComponents[runIdx];
+    ConnectedPorts & connectedComp = mConnections[compIdx];
+    ril::ParameterPortBase * port = mConnectionGraph[runIdx];
+    if( port->direction() == ril::ParameterPortBase::Direction::Input )
     {
-      if( graphComponents[runIdx] == compIdx )
-      {
-        ril::ParameterPortBase const * port = mConnectionGraph[runIdx];
-        if( port->direction() == ril::ParameterPortBase::Direction::Input )
-        {
-          connectedComp.mReceivePorts.push_back( port );
-        }
-        else
-        {
-          connectedComp.mSendPorts.push_back( port );
-        }
-      }
+      connectedComp.mReceivePorts.push_back( port );
     }
-    mConnections.push_back( std::move( connectedComp ) );
+    else
+    {
+      connectedComp.mSendPorts.push_back( port );
+    }
   }
 }
 
@@ -102,62 +94,6 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
 ParameterConnectionGraph::~ParameterConnectionGraph()
 {
 }
-
-#if 0
-/**
- * @todo Consider making this private
- */
-void ParameterConnectionGraph::addDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver )
-{
-  // This assumes that we work on the signal connection map of a 'flattened' graph structure.
-  // check whether the sender is an external capture port or an internal port
-  NodeType const senderType = sender.mPort->parent().isComposite() ? NodeType::Source : NodeType::Processor;
-  NodeType const receiverType = receiver.mPort->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(sender.mPort->parent())) ) : ProcessingNode( NodeType::Source );
-  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(receiver.mPort->parent())) ) : ProcessingNode( NodeType::Sink );
-
-  VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
-  if( senderFindIt == mVertexLookup.end() )
-  {
-    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
-    mDependencyGraph[vertexId] = senderProp;
-    bool insertRes{ false };
-    std::tie( senderFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( senderProp, vertexId ) );
-    if( not insertRes )
-    {
-      throw std::logic_error( "ParameterConnectionGraph: Insertion of sender vertex failed." );
-    }
-  }
-  VertexMap::const_iterator receiverFindIt = mVertexLookup.find( receiverProp );
-  if( receiverFindIt == mVertexLookup.end() )
-  {
-    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
-    mDependencyGraph[vertexId] = receiverProp;
-    bool insertRes{ false };
-    std::tie( receiverFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( receiverProp, vertexId ) );
-    if( not insertRes )
-    {
-      throw std::logic_error( "ParameterConnectionGraph: Insertion of receiver vertex failed." );
-    }
-  }
-  GraphType::vertex_descriptor const senderVertex = senderFindIt->second;
-  GraphType::vertex_descriptor const receiverVertex = receiverFindIt->second;
-
-  // Determine whether the edge already exists.
-  GraphType::edge_descriptor edgeDesc;
-  bool foundEdge;
-  std::tie( edgeDesc, foundEdge ) = edge( senderVertex, receiverVertex, mDependencyGraph );
-  if( not foundEdge )
-  {
-    bool insertRes{ false };
-    std::tie( edgeDesc, insertRes ) = add_edge( senderVertex, receiverVertex, mDependencyGraph );
-    if( not insertRes )
-    {
-      throw std::logic_error( "ParameterConnectionGraph: Insertion of new edge failed." );
-    }
-  }
-}
-#endif
 
 } // namespace rrl
 } // namespace visr
