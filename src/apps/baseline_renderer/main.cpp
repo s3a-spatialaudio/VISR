@@ -21,6 +21,7 @@
 #else
 #include <librrl/portaudio_interface.hpp>
 #endif
+#include <librrl/audio_signal_flow.hpp>
 
 #include <libsignalflows/baseline_renderer.hpp>
 
@@ -168,13 +169,15 @@ int main( int argc, char const * const * argv )
                                         sceneReceiverPort,
                                         reverbConfiguration );
 
+    rrl::AudioSignalFlow audioFlow( flow );
+
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );
 #else
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
-//    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
