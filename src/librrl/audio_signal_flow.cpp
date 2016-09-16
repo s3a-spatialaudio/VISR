@@ -4,6 +4,7 @@
 
 #include "audio_connection_map.hpp"
 #include "communication_area.hpp"
+#include "parameter_connection_graph.hpp"
 #include "parameter_connection_map.hpp"
 #include "port_utilities.hpp"
 #include "scheduling_graph.hpp"
@@ -236,7 +237,6 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     // If the flow is not composite, we also have to initialise the top-level parameter ports.
     return result;
   }
-
   // - Recursively iterate over all composite components
   // - Collect all parameter ports (concrete and placeholders) in containers.
   // - Collect all connections and store them in a lookup map.
@@ -246,8 +246,11 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   if( not res )
   {
     messages << "AudioSignalFlow: Parameter connections are inconsistent.\n";
+    return false;
   }
   ParameterConnectionMap realConnections = resolvePlaceholders( allConnections );
+
+  ParameterConnectionGraph const connectionGraph( realConnections );
 
   bool createResult = true;
   for( ParameterConnectionMap::value_type const & conn : realConnections )
@@ -268,13 +271,36 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
       createResult = false;
     }
-    mCommunicationProtocols.push_back( std::move(protocolInstance ) );
     protocolInstance->connectInput( conn.first );
     protocolInstance->connectOutput( conn.second );
+    mCommunicationProtocols.push_back( std::move(protocolInstance ) );
   }
   if( not createResult )
   {
     result = false;
+  }
+
+  // Check whether all ports have been coonects.
+  PortLookup<ril::ParameterPortBase> allPorts( mFlow );
+  PortLookup<ril::ParameterPortBase>::PortTable allSendPorts( allPorts.externalCapturePorts() );
+  allSendPorts.insert( allPorts.realSendPorts().begin(), allPorts.realSendPorts().end() );
+  for( ril::ParameterPortBase const * const port : allSendPorts )
+  {
+    if( not port->isConnected() )
+    {
+      messages << "Parameter send port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
+      return false;
+    }
+  }
+  PortLookup<ril::ParameterPortBase>::PortTable allReceivePorts( allPorts.externalPlaybackPorts() );
+  allReceivePorts.insert( allPorts.realReceivePorts().begin(), allPorts.realReceivePorts().end() );
+  for( ril::ParameterPortBase const * const port : allReceivePorts )
+  {
+    if( not port->isConnected() )
+    {
+      messages << "Parameter receive port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
+      return false;
+    }
   }
   return result;
 }
