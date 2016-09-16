@@ -42,6 +42,8 @@ namespace visr
 namespace signalflows
 {
 
+#define DISABLE_REVERB_RENDERING 1
+
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
@@ -149,6 +151,7 @@ private:
   //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
 
+#ifndef DISABLE_REVERB_RENDERING
   /**
    * Audio components and parameter data, and internal functions related to the object-based reverberation signal flow.
    * @todo Consider moving this into a separate separate sub-signalflow (after this feature has been implemented).
@@ -194,6 +197,7 @@ private:
 
   rcl::Add mReverbMix;
   //@}
+#endif
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
 
