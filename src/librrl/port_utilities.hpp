@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRRL_PORT_UTILITIES_HPP_INCLUDED
 #define VISR_LIBRRL_PORT_UTILITIES_HPP_INCLUDED
 
+#include <iosfwd>
+#include <set>
 #include <string>
 
 namespace visr
@@ -11,6 +13,7 @@ namespace visr
 namespace ril
 {
 class Component;
+class ParameterPortBase;
 class PortBase;
 }
 
@@ -33,6 +36,43 @@ std::string fullyQualifiedName( ril::PortBase const & port );
 * @todo consider moving to a graph checking and manipulation library to be defined.
 */
 bool isPlaceholderPort( ril::PortBase const * const port );
+
+bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, ril::ParameterPortBase const & receivePort,
+                                      std::ostream & messages );
+
+/**
+* Helper class to traverse through the hierarchical model to collect all ports.
+* The key apect is that this method can be called recursively.
+* @todo Maybe use the same class to collect other data (atomic ports, parameter ports)
+*/
+template<class PortType>
+class PortLookup
+{
+public:
+  using PortTable = std::set<PortType *>;
+
+  explicit PortLookup( ril::Component const & comp, bool recurse = true );
+
+  PortTable const & placeholderReceivePorts() const { return mPlaceholderReceivePorts; }
+  PortTable const & placeholderSendPorts() const { return mPlaceholderSendPorts; }
+  PortTable const & realSendPorts() const { return mRealSendPorts; }
+  PortTable const & realReceivePorts() const { return mRealReceivePorts; }
+  PortTable const & externalCapturePorts() const { return mExternalCapturePorts; }
+  PortTable const & externalPlaybackPorts() const { return mExternalPlaybackPorts;  }
+
+private:
+
+  void traverseComponent( ril::Component const & comp, bool recurse );
+
+  PortTable mPlaceholderReceivePorts;
+  PortTable mPlaceholderSendPorts;
+  PortTable mRealSendPorts;
+  PortTable mRealReceivePorts;
+  PortTable mExternalCapturePorts;
+  PortTable mExternalPlaybackPorts;
+};
+
+
 
 } // namespace rrl
 } // namespace visr

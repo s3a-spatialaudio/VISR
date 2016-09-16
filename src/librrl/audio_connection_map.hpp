@@ -48,11 +48,6 @@ public:
   static SignalIndexType const cInvalidIndex;
 };
 
-  /**
-  * Format a port name
-  */
-  std::string portWithComponentName( ril::AudioPort const * port );
-
   std::string printAudioSignalDescriptor( AudioSignalDescriptor const & desc );
 
 class AudioConnectionMap

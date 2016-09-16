@@ -27,10 +27,9 @@ namespace rrl
 using ParameterConnectionMap = std::multimap< ril::ParameterPortBase *, ril::ParameterPortBase * >;
 
 bool fillRecursive( ParameterConnectionMap & res, ril::Component const & component,
-                    std::ostream & messages,
-                    bool recursive = false );
+                    std::ostream & messages );
 
-ParameterConnectionMap && resolvePlaceholders( ParameterConnectionMap const & fullConnections );
+ParameterConnectionMap resolvePlaceholders( ParameterConnectionMap const & fullConnections );
 
 std::ostream & operator<<(std::ostream & stream, ParameterConnectionMap const & connections);
 

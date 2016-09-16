@@ -16,19 +16,19 @@ namespace rrl
 {
 
 bool fillRecursive( ParameterConnectionMap & res, ril::Component const & component,
-                    std::ostream & messages,
-                    bool recursive /*= false*/ )
+                    std::ostream & messages )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<ril::ParameterPortBase const*>;
-  PortTable sendPorts;
-  PortTable receivePorts;
 
   // No connections in a purely atomic flow..
   if( not component.isComposite() )
   {
     return true;
   }
+  using PortTable = std::set<ril::ParameterPortBase const*>;
+  PortTable sendPorts;
+  PortTable receivePorts;
+
   ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(component);
   // this could be moved to the PortLookup functionality.
 
@@ -83,27 +83,69 @@ bool fillRecursive( ParameterConnectionMap & res, ril::Component const & compone
       result = false;
       continue;
     }
+    // Check the ports for compatibility
+    bool parameterCheckResult = checkParameterPortCompatibility( *connection.sender(), *connection.receiver(), messages );
+    result &= parameterCheckResult;
+
+    // Insert the parameter connection into the global table.
+    // Table entries are sender, receiver
+    res.insert( std::make_pair(connection.receiver(), connection.sender() ) );
   }
-  if( recursive )
+  // Recurse into the subcomponents
   {
     for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( res, *(compIt->second), messages, recursive );
+      result = result and fillRecursive( res, *(compIt->second), messages );
     }
   }
   return result;
 }
 
 
-ParameterConnectionMap && resolvePlaceholders( ParameterConnectionMap const & fullConnections )
+ParameterConnectionMap resolvePlaceholders( ParameterConnectionMap const & fullConnections )
 {
   ParameterConnectionMap flatConnections;
 
+  for( ParameterConnectionMap::value_type const & rawConnection : fullConnections )
+  {
+    // Do not care for connections ending at a placeholder port
+    if( isPlaceholderPort( rawConnection.first ) )
+    {
+      continue;
+    }
+    else if( not isPlaceholderPort( rawConnection.second ) )
+    {
+      flatConnections.insert( rawConnection ); // insert the connection unaltered
+    }
+    else // The sender is a placeholder
+    {
+      std::size_t const recursionLimit = fullConnections.size(); // Last line of defence against a closed loop in the flow.
+      std::size_t recursionCount = 1;
 
+      ParameterConnectionMap::const_iterator findIt = fullConnections.find( rawConnection.second );
+      for( ;; )
+      {
+        if( findIt == fullConnections.end() )
+        {
+          throw std::invalid_argument( "Unexpected error: unconnected receive port." );
+        }
 
-  // TODO Check whether this is legal.
-  return std::move(flatConnections);
+        if( not isPlaceholderPort( findIt->second ) )
+        {
+          flatConnections.insert( std::make_pair( rawConnection.first, findIt->second ) );
+          break;
+        }
+        if( ++recursionCount >= recursionLimit )
+        {
+          throw std::runtime_error( "Audio signal connections: closed loop detected in placeholder port connections." );
+        }
+        findIt = fullConnections.find( findIt->second );
+      }
+    }
+  }
+
+  return flatConnections;
 }
 
 std::ostream & operator<<( std::ostream & stream, ParameterConnectionMap const & connections )

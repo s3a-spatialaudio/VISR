@@ -111,8 +111,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::Component::AudioPortVector::const_iterator extPortIt = composite.audioPortBegin();
-    extPortIt != composite.audioPortEnd(); ++extPortIt )
+  for( ril::Component::PortContainer<ril::AudioPort>::const_iterator extPortIt = composite.portBegin<ril::AudioPort>();
+    extPortIt != composite.portEnd<ril::AudioPort>(); ++extPortIt )
   {
     if( (*extPortIt)->direction() == ril::AudioPort::Direction::Input )
     {
@@ -128,10 +128,10 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     compIt != composite.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
-    for( ril::Component::AudioPortVector::const_iterator intPortIt = containedComponent.audioPortBegin();
-      intPortIt != containedComponent.audioPortEnd(); ++intPortIt )
+    for( ril::Component::PortContainer<ril::AudioPort>::const_iterator intPortIt = containedComponent.portBegin<ril::AudioPort>();
+      intPortIt != containedComponent.portEnd<ril::AudioPort>(); ++intPortIt )
     {
-      if( (*intPortIt)->direction() == ril::AudioPort::Direction::Input )
+      if( (*intPortIt)->direction() == ril::PortBase::Direction::Input )
       {
         receivePorts.insert( *intPortIt );
       }

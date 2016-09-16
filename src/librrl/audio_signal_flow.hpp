@@ -182,7 +182,7 @@ private:
     * Parameter infrastructure
     */
   //@{
-  void initialiseParameterInfrastructure();
+  bool initialiseParameterInfrastructure( std::ostream & messages );
 
   /**
   * Mark the signal flow as "initialised".
