@@ -60,6 +60,8 @@ AudioSignalFlow::AudioSignalFlow( ril::Component & flow )
     std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
     throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
   }
+
+  mInitialised = true;
 }
 
 AudioSignalFlow::~AudioSignalFlow()
@@ -251,33 +253,75 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   ParameterConnectionMap realConnections = resolvePlaceholders( allConnections );
 
   ParameterConnectionGraph const connectionGraph( realConnections );
+  for( ParameterConnectionGraph::ConnectedPorts const & connection : connectionGraph.connectedPorts() )
+  {
+    // First check the connection topology.
+    std::size_t const numSenders = connection.numSenders();
+    std::size_t const numReceivers = connection.numReceivers();
+    // This should not happen if the connections are created with registerParameterConnection()
+    if( numSenders < 1 )
+    {
+      messages << "AudioSignalFlow: A parameter connection must have at least one sending port.\n";
+      result = false;
+    }
+    if( numReceivers < 1 )
+    {
+      messages << "AudioSignalFlow: A parameter connection must have at least one sending port.\n";
+      result = false;
+    }
 
-  bool createResult = true;
-  for( ParameterConnectionMap::value_type const & conn : realConnections )
-  {
-    bool res = checkParameterPortCompatibility( *conn.second, *conn.first, messages );
-    if( not res )
+    // Use one port as reference, all other ports in this connection must have compatible porotocols and parameters.
+    ril::ParameterPortBase const * refPort = connection.sendPorts()[0];
+    // We checked before that connection.sendPorts() is not empty.
+    // Don't check against the first port which is the reference.
+    for( auto portIt( ++connection.sendPorts().begin() ); portIt < connection.sendPorts().end(); ++portIt )
     {
-      createResult = false;
-      continue;
+      bool const res = checkParameterPortCompatibility( *refPort, **portIt, messages );
+      if( not res )
+      {
+        result = false;
+        continue;
+      }
     }
-    ril::ParameterType const paramType = conn.second->parameterType();
-    ril::CommunicationProtocolType const protocol = conn.second->protocolType();
-    ril::ParameterConfigBase const & paramConfig = conn.second->parameterConfig();
-    std::unique_ptr<ril::CommunicationProtocolBase> protocolInstance
-      = ril::CommunicationProtocolFactory::create( protocol, paramType, paramConfig );
-    if( not protocolInstance )
+    for( auto portIt( connection.receivePorts().begin() ); portIt < connection.receivePorts().end(); ++portIt )
     {
-      messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
-      createResult = false;
+      bool const res = checkParameterPortCompatibility( *refPort, **portIt, messages );
+      if( not res )
+      {
+        result = false;
+        continue;
+      }
     }
-    protocolInstance->connectInput( conn.first );
-    protocolInstance->connectOutput( conn.second );
-    mCommunicationProtocols.push_back( std::move(protocolInstance ) );
-  }
-  if( not createResult )
-  {
-    result = false;
+    try
+    {
+      ril::ParameterType const paramType = refPort->parameterType();
+      ril::CommunicationProtocolType const protocol = refPort->protocolType();
+      ril::ParameterConfigBase const & paramConfig = refPort->parameterConfig();
+      std::unique_ptr<ril::CommunicationProtocolBase> protocolInstance
+        = ril::CommunicationProtocolFactory::create( protocol, paramType, paramConfig );
+      if( not protocolInstance )
+      {
+        messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
+        result = false;
+      }
+      // Connect to all ports of the connection.
+      // This will also fail if the connection does not match the arity (one-to-one, one-to-many ...) of the protocol
+      for( auto portIt( connection.sendPorts().begin() ); portIt < connection.sendPorts().end(); ++portIt )
+      {
+        protocolInstance->connectOutput( *portIt );
+      }
+      for( auto portIt( connection.receivePorts().begin() ); portIt < connection.receivePorts().end(); ++portIt )
+      {
+        protocolInstance->connectInput( *portIt );
+      }
+
+      mCommunicationProtocols.push_back( std::move( protocolInstance ) );
+    }
+    catch( const std::exception& ex )
+    {
+      messages << "AudioSignalFlow: Error while initialising the communication parameter infrastructure: "
+               << ex.what() << ".\n";
+    }
   }
 
   // Check whether all ports have been coonects.
@@ -289,7 +333,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     if( not port->isConnected() )
     {
       messages << "Parameter send port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
-      return false;
+      result = false;
     }
   }
   PortLookup<ril::ParameterPortBase>::PortTable allReceivePorts( allPorts.externalPlaybackPorts() );
@@ -299,7 +343,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     if( not port->isConnected() )
     {
       messages << "Parameter receive port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
-      return false;
+      result = false;
     }
   }
   return result;
