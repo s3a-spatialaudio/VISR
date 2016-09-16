@@ -10,9 +10,10 @@
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/object_vector.hpp>
-#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/shared_data_protocol.hpp>
 
 #include <memory>
 #include <vector>
@@ -79,7 +80,7 @@ private:
   void processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains );
 
   ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
-  std::unique_ptr<ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
+  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
 
 };
 
