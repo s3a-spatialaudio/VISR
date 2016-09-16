@@ -74,22 +74,25 @@ public:
    */
   std::size_t period() const; // { return mContainingFlow.period(); }
 
-  using AudioPortVector = std::vector<AudioPort*>;
+  template< class PortType >
+  using PortContainer = std::vector<PortType*>;
+
+  using AudioPortContainer = PortContainer< AudioPort >;
 
   /**
    * Allow access to the port lists 
    */
   //@{
-  AudioPortVector::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
+  AudioPortContainer::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
 
-  AudioPortVector::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
+  AudioPortContainer::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
   //@}
 
   /**
    * Parameter port support
    */
   //@{
-  using ParameterPortContainer = std::vector<ParameterPortBase*>;
+  using ParameterPortContainer = PortContainer<ParameterPortBase>;
 
   ParameterPortContainer::const_iterator parameterPortBegin() const;
   ParameterPortContainer::const_iterator parameterPortEnd( ) const;
@@ -97,9 +100,62 @@ public:
   ParameterPortContainer::iterator parameterPortBegin( );
   ParameterPortContainer::iterator parameterPortEnd( );
 
+  /**
+   * Uniform access to audio and parameter ports using templates
+   */
+  //@{
+
+
+  template<class PortType>
+  PortContainer<PortType> const & ports() const;
+
+  template<>
+  PortContainer<AudioPort> const & ports() const { return mAudioPorts; }
+
+  template<>
+  PortContainer<ParameterPortBase> const & ports() const { return mParameterPorts; }
+
+  template<class PortType>
+  PortContainer<PortType> & ports();
+
+  template<>
+  PortContainer<AudioPort> & ports() { return mAudioPorts; }
+
+  template<>
+  PortContainer<ParameterPortBase> & ports() { return mParameterPorts; }
+
+  template<class PortType>
+  typename PortContainer<PortType>::iterator portBegin() { return ports<PortType>().begin(); }
+  template<class PortType>
+  typename PortContainer<PortType>::iterator portEnd() { return ports<PortType>().end(); }
+  template<class PortType>
+  typename PortContainer<PortType>::const_iterator portBegin() const { return ports<PortType>().begin(); }
+  template<class PortType>
+  typename PortContainer<PortType>::const_iterator portEnd() const { return ports<PortType>().end(); }
+
+  template<class PortType>
+  typename PortContainer<PortType>::const_iterator findPortEntry( std::string const & portName ) const
+  {
+    typename PortContainer<PortType>::const_iterator findIt
+      = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
+    return findIt;
+  }
+
+  template<class PortType>
+  typename PortContainer<PortType>::iterator findPortEntry( std::string const & portName )
+  {
+    typename PortContainer<PortType>::iterator findIt
+      = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
+    return findIt;
+  }
+  //@}
+
   void registerParameterPort( ParameterPortBase * port );
   bool unregisterParameterPort( ParameterPortBase * port );
 
+  /**
+   * @todo Templatise these calls as well
+   */
   ParameterPortContainer::iterator findParameterPortEntry( std::string const & portName );
 
   ParameterPortContainer::const_iterator findParameterPortEntry( std::string const & portName ) const;
@@ -141,15 +197,15 @@ private:
   void registerAudioPort( AudioPort* port );
   void unregisterAudioPort( AudioPort* port );
 
-  AudioPortVector mAudioPorts;
+  AudioPortContainer mAudioPorts;
 
-  AudioPortVector const & getAudioPortList( ) const;
+  AudioPortContainer const & getAudioPortList( ) const;
 
-  AudioPortVector& getAudioPortList( );
+  AudioPortContainer& getAudioPortList( );
 
-  AudioPortVector::iterator findAudioPortEntry( std::string const & portName );
+  AudioPortContainer::iterator findAudioPortEntry( std::string const & portName );
 
-  AudioPortVector::const_iterator findAudioPortEntry( std::string const & portName ) const;
+  AudioPortContainer::const_iterator findAudioPortEntry( std::string const & portName ) const;
 
   SignalFlowContext & mContext;
 
