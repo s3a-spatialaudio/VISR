@@ -56,7 +56,10 @@ public:
    */
   void connectProtocol( ril::CommunicationProtocolBase * protocol );
 #endif
-
+  /**
+   * Check whether the port is connected to a valid protocol.
+   */
+  virtual bool isConnected() const = 0;
 protected:
   /**
    * Type-specific method to check and set the connected protocol.
