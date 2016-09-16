@@ -109,6 +109,12 @@ public:
     return mIndices[idx];
   }
 
+  IndexType& operator[]( std::size_t idx )
+  {
+    return mIndices[idx];
+  }
+
+
   IndexType at( std::size_t idx ) const;  
 
   const_iterator begin() const { return mIndices.begin(); }
