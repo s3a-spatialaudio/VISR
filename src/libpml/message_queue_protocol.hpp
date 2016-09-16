@@ -72,6 +72,10 @@ public:
     {
       mProtocol = protocol;
     }
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
+    }
   private:
     MessageQueueProtocol * mProtocol;
   };
@@ -115,6 +119,11 @@ public:
     void setProtocolInstance( MessageQueueProtocol * protocol )
     {
       mProtocol = protocol;
+    }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
     }
   private:
     MessageQueueProtocol * mProtocol;

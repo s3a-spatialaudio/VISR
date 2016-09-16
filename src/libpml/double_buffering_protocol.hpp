@@ -78,6 +78,11 @@ public:
     {
       mProtocol = protocol;
     }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
+    }
   protected:
 
 
@@ -120,6 +125,12 @@ public:
     /**
     * This whould not be accessible from the component.
     */
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
+    }
+
   protected:
 
   private:

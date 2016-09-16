@@ -56,6 +56,11 @@ public:
     {
       mProtocol = protocol;
     }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
+    }
   private:
     SharedDataProtocol * mProtocol;
   };
@@ -84,6 +89,11 @@ public:
     void setProtocolInstance( SharedDataProtocol * protocol )
     {
       mProtocol = protocol;
+    }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
     }
   private:
     SharedDataProtocol * mProtocol;
