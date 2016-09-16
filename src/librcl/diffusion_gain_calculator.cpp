@@ -36,18 +36,20 @@ DiffusionGainCalculator::~DiffusionGainCalculator()
 void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
+  mGainOutput.reset( new ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::MatrixParameter<CoefficientType > >
+    ( "gainOutput", *this, pml::MatrixParameterConfig( 1, numberOfObjectChannels ) ) );
 }
 
 void DiffusionGainCalculator::process()
 {
   objectmodel::ObjectVector const & objects = mObjectVectorInput.data();
-  pml::VectorParameter<CoefficientType> & gainVector = mGainOutput->data();
-  if( (gainVector.size() != mNumberOfObjectChannels) )
+  pml::MatrixParameter<CoefficientType> & gainMatrix = mGainOutput->data();
+  if( (gainMatrix.numberOfRows() != 1) or (gainMatrix.numberOfColumns() != mNumberOfObjectChannels) )
   {
     throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a vector with numberOfObjectChannels elements." );
   }
-  gainVector.zeroFill( );
-  processInternal( objects, gainVector.data( ) );
+  gainMatrix.zeroFill( );
+  processInternal( objects, gainMatrix.row( 0 ) );
 }
 
 void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains )
