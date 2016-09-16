@@ -139,6 +139,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   mDiffusionGainCalculator.setup( numberOfInputs );
   registerParameterConnection( "SceneDecoder", "objectVectorOutput", "DiffusionCalculator", "objectInput" );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
+  registerParameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
+
 
   /**
    * Adjust the level of the diffuse objects such that they are comparable to point sources.
@@ -168,7 +170,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   // Note: This assumes that the type 'Afloat' used in libpanning is
   // identical to ril::SampleType (at the moment, both are floats).
   efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
-  mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains );
+  mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains, false/*controlInput*/ );
 #ifndef DISABLE_REVERB_RENDERING
   setupReverberationSignalFlow( reverbConfig, loudspeakerConfiguration, numberOfInputs, interpolationPeriod );
 #endif
