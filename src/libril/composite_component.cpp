@@ -60,7 +60,6 @@ CompositeComponent::ComponentTable::const_iterator CompositeComponent::component
 
 Component * CompositeComponent::findComponent( std::string const & componentName )
 {
-  Component * sender = nullptr;
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
     return this;
@@ -75,7 +74,6 @@ Component * CompositeComponent::findComponent( std::string const & componentName
 
 Component const * CompositeComponent::findComponent( std::string const & componentName ) const
 {
-  Component * sender = nullptr;
   if( componentName.empty( ) or componentName.compare( "this" ) == 0 )
   {
     return this;
