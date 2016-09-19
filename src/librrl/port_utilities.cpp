@@ -10,6 +10,7 @@
 #include <libril/parameter_port_base.hpp>
 
 #include <ciso646>
+#include <iostream>
 
 namespace visr
 {
@@ -75,7 +76,7 @@ bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, r
 
 
 template<class PortType>
-PortLookup<PortType>::PortLookup( ril::Component const & comp, bool recurse = true )
+PortLookup<PortType>::PortLookup( ril::Component const & comp, bool recurse /*= true*/ )
 {
   traverseComponent( comp, recurse );
 }

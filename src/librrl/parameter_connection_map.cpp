@@ -9,6 +9,7 @@
 #include <libril/parameter_port_base.hpp>
 
 #include <ciso646>
+#include <iostream>
 
 namespace visr
 {
