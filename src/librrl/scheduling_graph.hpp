@@ -86,7 +86,7 @@ private:
     /**
      * Comparison operator to enforce a strict weak ordering.
      * This means that two source or sinks are determined as 'equal', i.e., the comparisons in both orders are equivalent,
-     * and insertion into a std::map will fail.
+     * and insertion into a std::map will fail. This is fine as there is at most one source and sink in the graph, respectively.
      */
     bool operator()( ProcessingNode const & lhs, ProcessingNode const & rhs ) const
     {
@@ -112,6 +112,9 @@ private:
     }
   };
 
+// Unused at the moment
+// Todo: Reactive with proper set of information when parameter transmission is included in the scheduling.
+#if 0
   struct EdgeNode
   {
   public:
@@ -123,6 +126,7 @@ private:
     std::string mReceivePort;
     std::size_t mWidth;
   };
+#endif
 
   //using VertexProperty = boost::property< boost::vertex_index1_t, ProcessingNode >;
   //using EdgeProperty = boost::property < boost::edge_index_t, EdgeNode >;

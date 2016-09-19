@@ -138,11 +138,13 @@ public:
 
 
 private:
+// Unused at the moment, outdated, incomplete implementation
+#if 0
   /**
    * Top-level initialisation function, called from the constructor
    */
   bool initialise( std::ostream & messages );
-
+#endif
   bool initialiseAudioConnections( std::ostream & messages );
 
   /**

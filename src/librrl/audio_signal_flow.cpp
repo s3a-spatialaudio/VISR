@@ -208,6 +208,9 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
   return mPlaybackIndices.size();
 }
 
+// This method is not used at the moment.
+// TODO: Consider removal
+#if 0
 bool AudioSignalFlow::initialise( std::ostream & messages )
 {
   if( not mFlow.isTopLevel() )
@@ -229,6 +232,7 @@ bool AudioSignalFlow::initialise( std::ostream & messages )
   }
   return true;
 }
+#endif
 
 bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages )
 {

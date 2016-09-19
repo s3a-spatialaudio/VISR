@@ -158,6 +158,7 @@ SchedulingGraph::ProcessingNode::ProcessingNode( ril::AtomicComponent const * at
 {
 }
 
+#if 0
 SchedulingGraph::EdgeNode::EdgeNode()
  : mSendPort()
  , mReceivePort( )
@@ -173,6 +174,7 @@ SchedulingGraph::EdgeNode::EdgeNode( std::string const & sendPort,
  , mWidth( width )
 {
 }
+#endif
 
 } // namespace rrl
 } // namespace visr
