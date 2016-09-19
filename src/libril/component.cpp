@@ -224,24 +224,12 @@ template Component::PortContainer<ParameterPortBase>::const_iterator Component::
 
 Component::ParameterPortContainer::iterator Component::findParameterPortEntry( std::string const & portName )
 {
-#if 1
   return findPortEntry<ParameterPortBase>( portName );
-#else
-  ParameterPortContainer::iterator findIt
-    = std::find_if( mParameterPorts.begin(), mParameterPorts.end(), ComparePorts( portName ) );
-  return findIt;
-#endif
 }
 
 Component::ParameterPortContainer::const_iterator Component::findParameterPortEntry( std::string const & portName ) const
 {
-#if 1
   return findPortEntry<ParameterPortBase>( portName );
-#else
-  ParameterPortContainer::const_iterator findIt
-    = std::find_if( mParameterPorts.begin(), mParameterPorts.end(), ComparePorts( portName ) );
-  return findIt;
-#endif
 }
 
 ParameterPortBase const * Component::findParameterPort( std::string const & portName ) const
@@ -276,8 +264,14 @@ Component::PortContainer<AudioPort> & Component::ports() { return mAudioPorts; }
 template<>
 Component::PortContainer<ParameterPortBase> & Component::ports() { return mParameterPorts; }
 
+// Strange workaround needed for Visual Studio to prevent an error when using the return type
+// TypedPortContainer = Component::PortContainer<PortType>::(const_)iterator direclty in the findPortEntry() definitions below.
+// This resulted in error C2244: 'unable to match function definition to an existing declaration'
+template <class PortType>
+using TypedPortContainer = Component::PortContainer<PortType>;
+
 template<class PortType>
-typename Component::PortContainer<PortType>::const_iterator Component::findPortEntry( std::string const & portName ) const
+typename TypedPortContainer<PortType>::const_iterator Component::findPortEntry( std::string const & portName ) const
 {
   typename PortContainer<PortType>::const_iterator findIt
     = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
@@ -289,8 +283,9 @@ Component::findPortEntry<ril::AudioPort>( std::string const & portName ) const;
 template Component::PortContainer<ril::ParameterPortBase>::const_iterator
 Component::findPortEntry<ril::ParameterPortBase>( std::string const & portName ) const;
 
+
 template<class PortType>
-typename Component::PortContainer<PortType>::iterator Component::findPortEntry( std::string const & portName )
+typename TypedPortContainer<PortType>::iterator Component::findPortEntry( std::string const & portName )
 {
   typename PortContainer<PortType>::iterator findIt
     = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
