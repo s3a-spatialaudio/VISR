@@ -83,7 +83,8 @@ ril::SamplingFrequencyType Component::samplingFrequency() const { return mContex
 
 void Component::unregisterAudioPort( AudioPort* port )
 {
-  AudioPortContainer::const_iterator findIt = std::find( mAudioPorts.begin(), mAudioPorts.end(), port );
+  // According to C++11, findIt may be a const iterator, but the standard library of gcc 4.8 does not permit that.
+  AudioPortContainer::iterator findIt = std::find( mAudioPorts.begin(), mAudioPorts.end(), port );
   if( findIt != mAudioPorts.end() )
   {
     mAudioPorts.erase( findIt );
@@ -189,7 +190,8 @@ void Component::registerParameterPort( ParameterPortBase * port )
 
 bool Component::unregisterParameterPort( ParameterPortBase * port )
 {
-  ParameterPortContainer::const_iterator findIt = std::find( mParameterPorts.begin(), mParameterPorts.end(), port );
+  // According to C++11, findIt may be a const iterator, but the standard library of gcc 4.8 does not permit that.
+  ParameterPortContainer::iterator findIt = std::find( mParameterPorts.begin(), mParameterPorts.end(), port );
   if( findIt != mParameterPorts.end() )
   {
     mParameterPorts.erase( findIt );
@@ -201,26 +203,6 @@ bool Component::unregisterParameterPort( ParameterPortBase * port )
   }
   return true;
 }
-
-//template<class PortType>
-//typename Component::PortContainer<PortType>::const_iterator Component::findPortEntry( std::string const & portName ) const
-//{
-//  typename PortContainer<PortType>::const_iterator findIt
-//    = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
-//  return findIt;
-//}
-template Component::PortContainer<AudioPort>::const_iterator Component::findPortEntry<AudioPort>( std::string const & ) const;
-template Component::PortContainer<ParameterPortBase>::const_iterator Component::findPortEntry<ParameterPortBase>( std::string const & ) const;
-
-//template<class PortType>
-//typename Component::PortContainer<PortType>::iterator Component::findPortEntry( std::string const & portName )
-//{
-//  typename PortContainer<PortType>::iterator findIt
-//    = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
-//  return findIt;
-//}
-//template Component::PortContainer<AudioPort>::iterator Component::findPortEntry<AudioPort>( std::string const & );
-//template Component::PortContainer<ParameterPortBase>::iterator Component::findPortEntry<ParameterPortBase>( std::string const & );
 
 Component::ParameterPortContainer::iterator Component::findParameterPortEntry( std::string const & portName )
 {
