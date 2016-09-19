@@ -264,5 +264,42 @@ ParameterPortBase * Component::findParameterPort( std::string const & portName )
   return *findIt;
 }
 
+template<>
+Component::PortContainer<AudioPort> const & Component::ports() const { return mAudioPorts; }
+
+template<>
+Component::PortContainer<ParameterPortBase> const & Component::ports() const { return mParameterPorts; }
+
+template<>
+Component::PortContainer<AudioPort> & Component::ports() { return mAudioPorts; }
+
+template<>
+Component::PortContainer<ParameterPortBase> & Component::ports() { return mParameterPorts; }
+
+template<class PortType>
+typename Component::PortContainer<PortType>::const_iterator Component::findPortEntry( std::string const & portName ) const
+{
+  typename PortContainer<PortType>::const_iterator findIt
+    = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
+  return findIt;
+}
+// Explicit instantiations
+template Component::PortContainer<ril::AudioPort>::const_iterator
+Component::findPortEntry<ril::AudioPort>( std::string const & portName ) const;
+template Component::PortContainer<ril::ParameterPortBase>::const_iterator
+Component::findPortEntry<ril::ParameterPortBase>( std::string const & portName ) const;
+
+template<class PortType>
+typename Component::PortContainer<PortType>::iterator Component::findPortEntry( std::string const & portName )
+{
+  typename PortContainer<PortType>::iterator findIt
+    = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
+  return findIt;
+}
+// Explicit instantiations
+template Component::PortContainer<ril::AudioPort>::iterator Component::findPortEntry<ril::AudioPort>( std::string const & portName );
+template Component::PortContainer<ril::ParameterPortBase>::iterator Component::findPortEntry<ril::ParameterPortBase>( std::string const & portName );
+
+
 } // namespace ril
 } // namespace visr

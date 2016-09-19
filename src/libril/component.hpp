@@ -106,23 +106,23 @@ public:
   //@{
 
 
+  /**
+   * Return the port container for the specified port type, const version .
+   * This template method is explicitly instantiated for the two possible port types ril::AudioPort and ril::ParameterPortBase
+   * @tparam PortType
+   * @return a const reference to the port container.
+   */
   template<class PortType>
   PortContainer<PortType> const & ports() const;
 
-  template<>
-  PortContainer<AudioPort> const & ports() const { return mAudioPorts; }
-
-  template<>
-  PortContainer<ParameterPortBase> const & ports() const { return mParameterPorts; }
-
+  /**
+   * Return the port container for the specified port type, non-const version.
+   * This template method is explicitly instantiated for the two possible port types ril::AudioPort and ril::ParameterPortBase
+   * @tparam PortType
+   * @return a modifiable reference to the port container.
+   */
   template<class PortType>
   PortContainer<PortType> & ports();
-
-  template<>
-  PortContainer<AudioPort> & ports() { return mAudioPorts; }
-
-  template<>
-  PortContainer<ParameterPortBase> & ports() { return mParameterPorts; }
 
   template<class PortType>
   typename PortContainer<PortType>::iterator portBegin() { return ports<PortType>().begin(); }
@@ -134,36 +134,42 @@ public:
   typename PortContainer<PortType>::const_iterator portEnd() const { return ports<PortType>().end(); }
 
   template<class PortType>
-  typename PortContainer<PortType>::const_iterator findPortEntry( std::string const & portName ) const
-  {
-    typename PortContainer<PortType>::const_iterator findIt
-      = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
-    return findIt;
-  }
+  typename PortContainer<PortType>::const_iterator findPortEntry( std::string const & portName ) const;
 
   template<class PortType>
-  typename PortContainer<PortType>::iterator findPortEntry( std::string const & portName )
-  {
-    typename PortContainer<PortType>::iterator findIt
-      = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
-    return findIt;
-  }
+  typename PortContainer<PortType>::iterator findPortEntry( std::string const & portName );
   //@}
 
+  /**
+   * Register a parameter port in the component. Generally performed in the port's constructor.
+   * @todo consider making this a template method to share the implementation between audio and parameter ports.
+   */
   void registerParameterPort( ParameterPortBase * port );
+
+  /**
+   * Unregister a parameter port in the component. Generally performed in the port's destructor.
+   * @todo consider making this a template method to share the implementation between audio and parameter ports.
+   */
   bool unregisterParameterPort( ParameterPortBase * port );
 
   /**
+   * Find a named parameter port within the component and return an iterator into the port container.
+   * @return A valid iterator into the port container for parameter ports, or the end() iterator if a port of this name is not found.
    * @todo Templatise these calls as well
    */
   ParameterPortContainer::iterator findParameterPortEntry( std::string const & portName );
 
+  /**
+   * Find a named parameter port within the component and return an iterator into the port container, const verstion.
+   * @return A valid iterator into the port container for parameter ports, or the end() iterator if a port of this name is not found.
+   * @todo Templatise these calls as well
+   */
   ParameterPortContainer::const_iterator findParameterPortEntry( std::string const & portName ) const;
 
   /**
    * @return pointer to port, nullptr in case the port is not found.
    */
-  ParameterPortBase const * Component::findParameterPort( std::string const & portName ) const;
+  ParameterPortBase const * findParameterPort( std::string const & portName ) const;
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
