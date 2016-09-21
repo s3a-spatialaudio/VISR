@@ -3,10 +3,12 @@
 #include "scheduling_graph.hpp"
 
 #include "audio_connection_map.hpp"
+#include "parameter_connection_map.hpp"
 
 #include <libril/audio_connection_descriptor.hpp>
 #include <libril/audio_port.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/parameter_port_base.hpp>
 
 #include <boost/graph/topological_sort.hpp>
 
@@ -31,12 +33,17 @@ SchedulingGraph::SchedulingGraph()
 
 }
 
-void SchedulingGraph::initialise( ril::Component const & flow, AudioConnectionMap const & connections )
+void SchedulingGraph::initialise( ril::Component const & flow, AudioConnectionMap const & connections,
+                                  ParameterConnectionMap const & parameterConnections )
 {
   mDependencyGraph.clear();
   for( AudioConnectionMap::value_type const & val : connections )
   {
-    addDependency( val.first, val.second );
+    addAudioDependency( val.first, val.second );
+  }
+  for( ParameterConnectionMap::value_type const & val : parameterConnections )
+  {
+    addParameterDependency( val.second, val.first );
   }
 }
 
@@ -51,7 +58,7 @@ SchedulingGraph::~SchedulingGraph()
 /**
  * @todo Consider making this private
  */
-void SchedulingGraph::addDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver )
+void SchedulingGraph::addAudioDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver )
 {
   // This assumes that we work on the signal connection map of a 'flattened' graph structure.
   // check whether the sender is an external capture port or an internal port
@@ -59,6 +66,61 @@ void SchedulingGraph::addDependency( AudioSignalDescriptor const & sender, Audio
   NodeType const receiverType = receiver.mPort->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
   ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(sender.mPort->parent())) ) : ProcessingNode( NodeType::Source );
   ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(receiver.mPort->parent())) ) : ProcessingNode( NodeType::Sink );
+
+  VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
+  if( senderFindIt == mVertexLookup.end() )
+  {
+    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
+    mDependencyGraph[vertexId] = senderProp;
+    bool insertRes{ false };
+    std::tie( senderFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( senderProp, vertexId ) );
+    if( not insertRes )
+    {
+      throw std::logic_error( "SchedulingGraph: Insertion of sender vertex failed." );
+    }
+  }
+  VertexMap::const_iterator receiverFindIt = mVertexLookup.find( receiverProp );
+  if( receiverFindIt == mVertexLookup.end() )
+  {
+    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
+    mDependencyGraph[vertexId] = receiverProp;
+    bool insertRes{ false };
+    std::tie( receiverFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( receiverProp, vertexId ) );
+    if( not insertRes )
+    {
+      throw std::logic_error( "SchedulingGraph: Insertion of receiver vertex failed." );
+    }
+  }
+  GraphType::vertex_descriptor const senderVertex = senderFindIt->second;
+  GraphType::vertex_descriptor const receiverVertex = receiverFindIt->second;
+
+  // Determine whether the edge already exists.
+  GraphType::edge_descriptor edgeDesc;
+  bool foundEdge;
+  std::tie( edgeDesc, foundEdge ) = edge( senderVertex, receiverVertex, mDependencyGraph );
+  if( not foundEdge )
+  {
+    bool insertRes{ false };
+    std::tie( edgeDesc, insertRes ) = add_edge( senderVertex, receiverVertex, mDependencyGraph );
+    if( not insertRes )
+    {
+      throw std::logic_error( "SchedulingGraph: Insertion of new edge failed." );
+    }
+  }
+}
+
+
+void SchedulingGraph::addParameterDependency( ril::ParameterPortBase const * sender, ril::ParameterPortBase const * receiver )
+{
+  // NOTE: Lots of code duplication with audio connection method.
+  // TODO: Factor out common code without neglecting type-specific differences (as soon as they are implemented).
+
+  // This assumes that we work on the signal connection map of a 'flattened' graph structure.
+  // check whether the sender is an external capture port or an internal port
+  NodeType const senderType = sender->parent().isComposite() ? NodeType::Source : NodeType::Processor;
+  NodeType const receiverType = receiver->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
+  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(sender->parent())) ) : ProcessingNode( NodeType::Source );
+  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(receiver->parent())) ) : ProcessingNode( NodeType::Sink );
 
   VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
   if( senderFindIt == mVertexLookup.end() )

@@ -148,6 +148,13 @@ private:
   bool initialiseAudioConnections( std::ostream & messages );
 
   /**
+   * Initialise the schedule for executing the contained elements.
+   * At the moment, this contains some duplicate effort, because the connection maps for 
+   * both the audio signals and parameters have to be computed again. 
+   */
+  bool initialiseSchedule( std::ostream & messages );
+
+  /**
    * Can be static or nonmember functions
    */
   //@{
@@ -159,17 +166,6 @@ private:
 
   static bool checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages );
   //@}
-
-  /**
-   * Register a component within the graph.
-   * @param component A pointer to the component. Note that this call
-   * does not take over the ownership of the object.
-   * @param componentName The name of the component, which must be
-   * unique within the AudioSignalFlow instance.
-   * @throw std::invalid_argument If the component could not be
-   * inserted, e.g., if a component with this name already exists.
-   */
-//  void registerComponent( ril::AtomicComponent * component, char const * componentName );
 
   /**
    * Initialise the communication area, i.e., the memory area
@@ -193,11 +189,7 @@ private:
   void setInitialised( bool newState = true ) { mInitialised = newState; }
 
   std::size_t numberCommunicationProtocols() const;
-#if 0
-  rrl::CommunicationArea<ril::SampleType>& getCommArea() { return *mCommArea; }
 
-  rrl::CommunicationArea<ril::SampleType> const& getCommArea( ) const { return *mCommArea; }
-#endif
   /**
    * Method to transfer the capture and playback samples to and from
    * the locations where they are expected, and execute the contained atomic components.
@@ -213,13 +205,14 @@ private:
   */
   void executeComponents( );
 
-
+#if 0
   /**
    * find a port of a specific audio component, both specified by name
    * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
    */
   ril::AudioPort & findPort( std::string const & componentName,
                              std::string const & portName );
+#endif
 
   /**
    * The signal flow handled by this object.

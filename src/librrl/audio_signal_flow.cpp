@@ -60,7 +60,12 @@ AudioSignalFlow::AudioSignalFlow( ril::Component & flow )
     std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
     throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
   }
-
+  bool const initScheduleResult = initialiseSchedule( checkMessages );
+  if( not initScheduleResult )
+  {
+    std::cout << "Messages during schedule computation: " << checkMessages.str() << std::endl;
+    throw std::runtime_error( "AudioSignalFlow: Execution schedule could not be created." );
+  }
   mInitialised = true;
 }
 
@@ -325,10 +330,11 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     {
       messages << "AudioSignalFlow: Error while initialising the communication parameter infrastructure: "
                << ex.what() << ".\n";
+      result = false;
     }
   }
 
-  // Check whether all ports have been coonects.
+  // Check whether all ports have been connected.
   PortLookup<ril::ParameterPortBase> allPorts( mFlow );
   PortLookup<ril::ParameterPortBase>::PortTable allSendPorts( allPorts.externalCapturePorts() );
   allSendPorts.insert( allPorts.realSendPorts().begin(), allPorts.realSendPorts().end() );
@@ -352,6 +358,35 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   }
   return result;
 }
+
+bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )
+{
+  bool result = true;
+  if( not mFlow.isComposite() )
+  {
+    mProcessingSchedule.clear();
+    mProcessingSchedule.push_back( dynamic_cast<ril::AtomicComponent *>(&mFlow) );
+  }
+  else
+  {
+    AudioConnectionMap allAudioConnections;
+    result &= allAudioConnections.fill( mFlow, messages, true/*recursive*/ );
+    AudioConnectionMap realAudioConnections;
+    realAudioConnections.resolvePlaceholders( allAudioConnections );
+
+    ParameterConnectionMap allParameterConnections;
+    result &= fillRecursive( allParameterConnections, mFlow, messages );
+    ParameterConnectionMap const realParameterConnections = resolvePlaceholders( allParameterConnections );
+
+    SchedulingGraph depGraph;
+    // TODO: check result!
+    depGraph.initialise( mFlow, realAudioConnections, realParameterConnections );
+    auto const schedule = depGraph.sequentialSchedule();
+    mProcessingSchedule.assign( schedule.begin(), schedule.end() );
+  }
+  return result;
+}
+
 
 std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 {
@@ -437,9 +472,25 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
   try
   {
     AudioConnectionMap const connections( composite, false );
+    for( ril::AudioPort const * sendPort : sendPorts )
+    {
+      std::size_t const numChannels = sendPort->width();
+      if( numChannels == ril::AudioPort::cInvalidWidth )
+      {
+        messages << "Audio signal flow connection check: The send port \"" << fullyQualifiedName( *sendPort ) << " is not initialised." << std::endl;
+        result = false;
+        continue; // Cannot check for this receive port.
+      }
+    }
     for( ril::AudioPort const * receivePort : receivePorts )
     {
       std::size_t const numChannels = receivePort->width( );
+      if( numChannels == ril::AudioPort::cInvalidWidth )
+      {
+        messages << "Audio signal flow connection check: The receive port \"" << fullyQualifiedName( *receivePort ) << " is not initialised." << std::endl;
+        result = false;
+        continue; // Cannot check for this receive port.
+      }
       for( std::size_t channelIdx( 0 ); channelIdx < numChannels; ++channelIdx )
       {
         std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator > findRange
@@ -726,15 +777,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
       std::copy( receiveIndices.begin( ), receiveIndices.end( ), &mPlaybackIndices[playbackIndexOffset] );
       playbackIndexOffset += portWidth;
     }
-
-    // Set up the scheduling graph
-    // For the moment this graph takes cares only about the audio connections.
-    SchedulingGraph depGraph;
-    depGraph.initialise( mFlow, concreteConnections );
-    auto const schedule = depGraph.sequentialSchedule();
-    mProcessingSchedule.assign( schedule.begin(), schedule.end() );
-
-  } // Additional handling for composite top-level flows finished
+   } // Additional handling for composite top-level flows finished
   else // The flow consists only of a single atomic component.
   {
     // We need a separate treatment for the external playback indices.

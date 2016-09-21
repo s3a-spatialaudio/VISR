@@ -3,7 +3,10 @@
 #ifndef VISR_LIBRRL_SCHEDULING_GRAPH_HPP_INCLUDED
 #define VISR_LIBRRL_SCHEDULING_GRAPH_HPP_INCLUDED
 
+#include "parameter_connection_map.hpp"
+
 #include <libril/constants.hpp>
+// #include <libril/parameter_port_base.hpp> // Temporary fix (otherwise 
 
 #include <ciso646>
 #include <iosfwd>
@@ -40,15 +43,18 @@ public:
    */
   ~SchedulingGraph();
 
-  void initialise( ril::Component const & flow, AudioConnectionMap const & connections );
+  void initialise( ril::Component const & flow,
+                   AudioConnectionMap const & audioConnections,
+                   ParameterConnectionMap const & parameterConnections );
 
   std::vector<ril::AtomicComponent *> sequentialSchedule() const;
 
 private:
   // TODO: Consider moving lots of graph functionality into a pimpl class.
 
-  void addDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver );
+  void addAudioDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver );
 
+  void addParameterDependency( ril::ParameterPortBase const * sender, ril::ParameterPortBase const * receiver );
 
   enum class NodeType
   {
