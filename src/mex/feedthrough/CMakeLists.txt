@@ -18,7 +18,19 @@ INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${CMAKE_SOURCE_DIR}/cmake_modules/Matlabdef.def )
 
 # Add any extras dependencies
-target_link_libraries(${PROJECT_NAME} rcl ril efl mexsupport ${MATLAB_LIBRARIES})
+target_link_libraries( ${PROJECT_NAME} rcl )
+target_link_libraries( ${PROJECT_NAME} rbbl )
+target_link_libraries( ${PROJECT_NAME} ril )
+target_link_libraries( ${PROJECT_NAME} pml )
+target_link_libraries( ${PROJECT_NAME} objectmodel )
+target_link_libraries( ${PROJECT_NAME} rrl )
+target_link_libraries( ${PROJECT_NAME} mexsupport )
+target_link_libraries( ${PROJECT_NAME} efl )
+target_link_libraries( ${PROJECT_NAME} ${MATLAB_LIBRARIES} )
+# Current dependency structure pulls in lots of rubble
+target_link_libraries( ${PROJECT_NAME} ${SNDFILE_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.
