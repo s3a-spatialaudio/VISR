@@ -162,9 +162,9 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
         // Ironically, this workaround triggers an error in llvm/clang used in XCode, which also claimes to be __GNUC__.
         // TODO: Remove conditional code after minimum compiler
         // requirement is GCC >= 4.9. 
-        (*((qi::real_parser<TranslateType< ElementType>::type>())[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+        (*((qi::real_parser<typename TranslateType< ElementType>::type>())[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #else
-        (*(qi::real_parser<TranslateType< ElementType>::type >( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+        (*(qi::real_parser<typename TranslateType< ElementType>::type >( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #endif
         % -qi::char_( ',' )) >> *(qi::char_( '%' ) >> *qi::char_)),
         boost::spirit::ascii::space);
