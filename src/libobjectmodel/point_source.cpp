@@ -2,6 +2,8 @@
 
 #include "point_source.hpp"
 
+#include <limits>
+
 namespace visr
 {
 namespace objectmodel
@@ -54,6 +56,11 @@ void PointSource::setZ( Coordinate newZ )
 {
   mZPos = newZ;
 }
+
+/*static*/ const Object::Coordinate PointSource::cAlwaysChannelLock
+= std::numeric_limits<Object::Coordinate>::infinity();
+/*static*/ const Object::Coordinate PointSource::cNoChannelLock
+  = std::numeric_limits<Object::Coordinate>::infinity();
 
 } // namespace objectmodel
 } // namespace visr
