@@ -56,6 +56,8 @@ private:
   template<mxClassID classId>
   void transferOutputSamples( std::size_t blockIdx );
 
+  ril::Component & mFlow;
+
   mxClassID const mSignalType;
 
   std::size_t mSignalLength;
@@ -72,11 +74,13 @@ private:
   std::vector<ril::SampleType *> mInputBufferPtrs;
   std::vector<ril::SampleType *> mOutputBufferPtrs;
 
+  /**
+   * Private buffer area to pass data to the contained signa flow.
+   * Indepependent of the internal communication area of mAudioWrapper
+   */
   std::unique_ptr<rrl::CommunicationArea<ril::SampleType> > mCommBuffer;
 
   std::unique_ptr<rrl::AudioSignalFlow> mAudioWrapper;
-
-  ril::Component & mFlow;
 };
 
 } // namespace mexsupport

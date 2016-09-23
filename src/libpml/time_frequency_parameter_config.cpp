@@ -19,8 +19,8 @@ TimeFrequencyParameterConfig::TimeFrequencyParameterConfig( std::size_t dftSize,
  : ril::ParameterConfigBase()
  , mDftSize( dftSize )
  , mHopSize( hopSize )
- , mNumberOfChannels(numberOfChannels)
  , mNumberOfDftSamples( numberOfDftSamples )
+ , mNumberOfChannels(numberOfChannels)
 {
 }
 

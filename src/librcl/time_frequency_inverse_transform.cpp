@@ -26,10 +26,10 @@ TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( ril::SignalFlowCon
                                                 char const * name,
                                                 ril::CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
- , mOutput( "out", *this )
  , mAlignment( ril::cVectorAlignmentSamples )
- , mCalcBuffer( mAlignment )
+ , mOutput( "out", *this )
  , mAccumulationBuffer( mAlignment )
+ , mCalcBuffer( mAlignment )
 {
 }
 

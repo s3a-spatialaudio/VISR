@@ -37,7 +37,7 @@ MexWrapper::MexWrapper( ril::Component & flow,
 
   try
   {
-    mAudioWrapper.reset( new rrl::AudioSignalFlow( flow ) );
+    mAudioWrapper.reset( new rrl::AudioSignalFlow( mFlow ) );
   }
   catch( std::exception const & ex )
   {
