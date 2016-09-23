@@ -70,20 +70,28 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
   }
 
   std::vector<std::size_t> graphComponents( num_vertices( mConnectionGraph ) );
-  std::size_t const numComponents = connected_components( mConnectionGraph, &graphComponents[0] );
-  mConnections.resize( numComponents );
-  for( std::size_t runIdx( 0 ); runIdx < graphComponents.size(); ++runIdx )
+  if( graphComponents.empty() ) // Special case if there are no connections. 
+  // In this case the access &graphComponents[0] would be illegal.
   {
-    std::size_t const compIdx = graphComponents[runIdx];
-    ConnectedPorts & connectedComp = mConnections[compIdx];
-    ril::ParameterPortBase * port = mConnectionGraph[runIdx];
-    if( port->direction() == ril::ParameterPortBase::Direction::Input )
+    mConnections.clear();
+  }
+  else
+  {
+    std::size_t const numComponents = connected_components( mConnectionGraph, &graphComponents[0] );
+    mConnections.resize( numComponents );
+    for( std::size_t runIdx( 0 ); runIdx < graphComponents.size(); ++runIdx )
     {
-      connectedComp.mReceivePorts.push_back( port );
-    }
-    else
-    {
-      connectedComp.mSendPorts.push_back( port );
+      std::size_t const compIdx = graphComponents[runIdx];
+      ConnectedPorts & connectedComp = mConnections[compIdx];
+      ril::ParameterPortBase * port = mConnectionGraph[runIdx];
+      if( port->direction() == ril::ParameterPortBase::Direction::Input )
+      {
+        connectedComp.mReceivePorts.push_back( port );
+      }
+      else
+      {
+        connectedComp.mSendPorts.push_back( port );
+      }
     }
   }
 }
