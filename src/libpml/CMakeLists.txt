@@ -20,6 +20,8 @@ SET( SOURCES
  signal_routing_parameter.cpp
  string_parameter.cpp
  string_parameter_config.cpp
+ time_frequency_parameter.cpp
+ time_frequency_parameter_config.cpp
  vector_parameter.cpp
  vector_parameter_config.cpp
 )
@@ -44,6 +46,8 @@ SET( HEADERS
  signal_routing_parameter.hpp
  string_parameter.hpp
  string_parameter_config.hpp
+ time_frequency_parameter.hpp
+ time_frequency_parameter_config.hpp
  vector_parameter.hpp
  vector_parameter_config.hpp
 )
