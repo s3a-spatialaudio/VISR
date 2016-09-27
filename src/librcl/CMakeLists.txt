@@ -9,6 +9,7 @@ fir_filter_matrix.cpp gain_matrix.cpp
 late_reverb_filter_calculator.cpp
 listener_compensation.cpp
 null_source.cpp
+panning_calculator.cpp
 panning_gain_calculator.cpp
 position_decoder.cpp
 reverb_parameter_calculator.cpp
@@ -32,6 +33,7 @@ gain_matrix.hpp
 late_reverb_filter_calculator.hpp
 listener_compensation.hpp
 null_source.hpp
+panning_calculator.hpp
 panning_gain_calculator.hpp
 position_decoder.hpp
 reverb_parameter_calculator.hpp
