@@ -180,16 +180,22 @@ std::vector<ril::AtomicComponent *> SchedulingGraph::sequentialSchedule() const
     switch( node.type() )
     {
       case NodeType::Source:
+        // The following check does not work if we have internal sources (e.g., signal generators or network receivers)
+#if 0
         if( idx != 0 )
         {
           throw std::logic_error( "SchedulingGraph: Internal inconsistency while creating a sequential schedule: Source node not at position zero." );
         }
+#endif
         break;
       case NodeType::Sink:
+        // The following check does not work if we have internal sinks (e.g., signal analyzers, terminators, network senders, ...)
+#if 0
         if( idx != topoSort.size() - 1 )
         {
           throw std::logic_error( "SchedulingGraph: Internal inconsistency while creating a sequential schedule: Sink node not at last position." );
         }
+#endif
         break;
       case NodeType::Processor:
       {
