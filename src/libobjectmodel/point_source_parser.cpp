@@ -32,6 +32,8 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     pointSrc.setX( xPos );
     pointSrc.setY( yPos );
     pointSrc.setZ( zPos );
+
+    pointSrc.setChannelLock( tree.get<PointSource::Coordinate>("channelLock", static_cast<PointSource::Coordinate>( 0.0 ) ) );
   }
   // TODO: distinguish between boost property_tree parse errors and bad dynamic casts.
   catch( std::exception const & ex )
@@ -50,6 +52,11 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   tree.put<PointSource::Coordinate>( "position.x", psObj.x() );
   tree.put<PointSource::Coordinate>( "position.y", psObj.y() );
   tree.put<PointSource::Coordinate>( "position.z", psObj.z() );
+
+  if( psObj.channelLockDistance() != static_cast<PointSource::Coordinate>(0.0) )
+  {
+    tree.put<PointSource::Coordinate>( "channelLock", psObj.channelLockDistance() );
+  }
 }
 
 /*static*/ void 
