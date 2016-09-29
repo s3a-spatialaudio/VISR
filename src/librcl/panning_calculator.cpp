@@ -25,8 +25,10 @@
 
 #include <algorithm>
 #include <ciso646>
+#include <cmath>
 #include <cstdio>
 #include <iterator>
+#include <numeric>
 
 // for math utility functions (see implementations in the unnamed namespace below)
 
@@ -50,7 +52,8 @@ PanningCalculator::~PanningCalculator()
 
 void PanningCalculator::setup( std::size_t numberOfObjects,
                                panning::LoudspeakerArray const & arrayConfig,
-                               bool adaptiveListenerPosition /*= false*/ )
+                               bool adaptiveListenerPosition /*= false*/,
+                               bool separateLowpassPanning /*= false*/ )
 {
   mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
@@ -101,6 +104,12 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
   if( adaptiveListenerPosition )
   {
     mListenerPositionInput.reset( new ListenerPositionPort( "listenerPosition", *this, pml::EmptyParameterConfig() ) );
+  }
+
+  if( separateLowpassPanning )
+  {
+    mLowFrequencyGainOutput.reset( new MatrixPort( "lowFrequencyGainOutput", *this,
+                                                  pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ));
   }
 }
 
@@ -267,6 +276,19 @@ void PanningCalculator::process()
           for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
           {
             gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
+          }
+          if( separateLowpassPanning() )
+          {
+            // Crude way to restore the LF coefficients from the normalised HF gains
+            // TODO: Replace by refactored VBAP algorithm
+            pml::MatrixParameter<CoefficientType> & lfGainMatrix = mLowFrequencyGainOutput->data( );
+            CoefficientType l1Norm = std::accumulate( gainRow, gainRow+mNumberOfRegularLoudspeakers, static_cast<CoefficientType>(0.0),
+                                                     [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val)*std::abs(val); } );
+
+            for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+            {
+              lfGainMatrix( outIdx, chIdx ) = level * gainRow[outIdx]*gainRow[outIdx] / l1Norm;
+            }
           }
         } // if( psSrc )
       }

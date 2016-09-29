@@ -32,6 +32,7 @@ Options::Options()
     "\"{ \"port\": <UDP port number>, \"position\": {\"x\": <x in m>, \"y\": <y im m>, \"z\": <z in m> }, \"rotation\": { \"rotX\": rX, \"rotY\": rY, \"rotZ\": rZ } }\" ." );
 
   registerOption<std::size_t>( "scene-port,r", "UDP port for receiving object metadata" );
+  registerOption<bool>("low-frequency-panning", "Activates frequency-dependent panning gains and normalisation" );
 }
 
 Options::~Options()

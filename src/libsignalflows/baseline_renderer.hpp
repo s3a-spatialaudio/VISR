@@ -80,14 +80,15 @@ public:
                              efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
-                             std::string const & reverbConfig );
+                             std::string const & reverbConfig,
+                             bool frequencyDependentPanning );
 
   ~BaselineRenderer();
 
   /**
    * Process function that consumes and produces blocks of \p period() audio samples per input and output channel.
    */
-  /*virtual*/ void process();
+  // /*virtual*/ void process();
 
 private:
 
@@ -200,6 +201,18 @@ private:
 #endif
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
+
+
+  /**
+   * Preliminary support for low-frequency adaptive panning.
+   */
+  //@{
+  bool mFrequencyDependentPanning;
+
+  std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
+
+  std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
+  //@}
 
   ril::AudioInput mInput;
   ril::AudioOutput mOutput;
