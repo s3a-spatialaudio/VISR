@@ -228,6 +228,11 @@ private:
    * Separate gain output for low-frequency panning.
    */
   std::unique_ptr<MatrixPort> mLowFrequencyGainOutput;
+
+  /**
+   * Vector for intermediate results used for separate high/low frequency panning
+   */
+  efl::BasicVector<CoefficientType> mHighFrequencyGains;
 };
 
 } // namespace rcl

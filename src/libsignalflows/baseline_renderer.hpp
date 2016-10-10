@@ -209,9 +209,9 @@ private:
   //@{
   bool mFrequencyDependentPanning;
 
-  std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
-
   std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
+
+  std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
   //@}
 
   ril::AudioInput mInput;
