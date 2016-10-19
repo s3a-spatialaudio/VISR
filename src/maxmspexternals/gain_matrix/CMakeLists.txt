@@ -26,10 +26,16 @@ if(WIN32) # 32-bit and 64-bit Windows
   if (CMAKE_CL_64)
       SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe64)
   else(CMAKE_CL_64)
-      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe)
   endif(CMAKE_CL_64)
 elseif(APPLE)
-  SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxo)
+  # Force generation of MacOS bundles.
+  set_target_properties( ${PROJECT_NAME}  PROPERTIES BUNDLE True )
+  set_target_properties( ${PROJECT_NAME}  PROPERTIES BUNDLE_EXTENSION "mxo" )
+  set_target_properties( ${PROJECT_NAME}  PROPERTIES XCODE_ATTRIBUTE_MACH_O_TYPE mh_bundle )
+  # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/16147
+  # "BUNDLE_EXTENSION doesn't apply for Xcode generator"
+  set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "mxo")
 endif(WIN32)
 
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
