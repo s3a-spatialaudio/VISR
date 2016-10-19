@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<panningConfiguration dimension="2" infinite="false">
+   <loudspeaker channel="27" delay="0" gainDB="0" id="1">
+      <polar az="32.0765" el="0" r="2.561"/>
+   </loudspeaker>
+   <loudspeaker channel="17" delay="0" gainDB="0" id="2">
+      <polar az="-29.5724" el="0.23178" r="2.472"/>
+   </loudspeaker>
+   <virtualspeaker id="3">
+      <polar az="180" el="0" r="1"/>
+   </virtualspeaker>
+   <subwoofer assignedLoudspeakers="1, 2" channel="41" delay="0" gainDB="0" weights="1.000000, 1.000000"/>
+   <triplet l1="2" l2="3"/>
+   <triplet l1="1" l2="2"/>
+   <triplet l1="3" l2="1"/>
+</panningConfiguration>
