@@ -64,7 +64,7 @@ if(UNIX)
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture
   # features of the machine it is compiled on.
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic -march=native" )  
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
