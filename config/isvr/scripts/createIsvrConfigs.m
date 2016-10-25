@@ -6,10 +6,13 @@
 
 % Ensure that $VISR/src/libpanning/test/matlab is in the path.
 
-lspDataFile = '../audiolab_gain_delay.xls';
+lspDataFile = '../data/audiolab_gain_delay.xls';
 
 lspData = xlsread( lspDataFile );
 numAllSpeakers = size( lspData, 1 );
+
+% Use the new measurement data instead
+gainDistanceData = load( '../data/gains_distances.mat' );
 
 %% The configurations
 
@@ -31,6 +34,110 @@ for numConfig = 1:2
         case 2
             configName = 'audiolab_39speakers_1subwoofer';
             channels = 1:39;      % one-offset
+            subChannels = [ 40 ]; % zero-offset
+            subIndices = {0:38};  % zero-offset
+            subGains = {ones(size(channels))};
+            subGainAdjustDB = [ 0 ];
+            subDelayAdjust = [0 ];
+
+            is2D = false;
+            isInfinite = false;
+
+            % No virtual loudspeakers
+            virtualSpeakers = [];
+
+        case 3 % BS-20152 setup 9+10+3
+            configName = 'audiolab_22speakers';
+            channels = [ ... ;      % one-offset channel indices
+             1,... % VoG
+             6, 8, 9, 10, 11, 12, 13, 14, ...
+             16, 17, 18, 19, 20, 22, 24, 25, 26, 27,...
+             28, 29, 35,...
+            ];
+            subChannels = []; % zero-offset
+            subIndices = {[]};  % zero-offset
+            subGains = {[]};
+            subGainAdjustDB = [];
+            subDelayAdjust = [];
+
+            is2D = false;
+            isInfinite = false;
+            
+            virtualSpeakers = [0, 0, -1];
+
+        case 4 % BS-20152 setup 9+10+3
+            configName = 'audiolab_22speakers_1subwoofer';
+            channels = [ ... ;      % one-offset channel indices
+             1,... % VoG
+             6, 8, 9, 10, 11, 12, 13, 14, ...
+             16, 17, 18, 19, 20, 22, 24, 25, 26, 27,...
+             28, 29, 35,...
+            ];
+            subChannels = [ 40 ]; % zero-offset
+            subIndices = {0:21};  % zero-offset
+            subGains = {ones(size(channels))};
+            subGainAdjustDB = [ 0 ];
+            subDelayAdjust = [0 ];
+
+            is2D = false;
+            isInfinite = false;
+            
+            virtualSpeakers = [0, 0, -1];
+        case 5 % 4+5+0 setup
+            configName = 'audiolab_9.1_1subwoofer';
+            channels = [ ... ;      % one-offset channel indices
+                7, 10, 12, 15,...
+                16, 17, 20, 24, 27 ...
+            ];
+            subChannels = [ 40 ]; % zero-offset
+            subIndices = {0:8};  % zero-offset
+            subGains = {ones(size(channels))};
+            subGainAdjustDB = [ 0 ];
+            subDelayAdjust = [0 ];
+
+            is2D = false;
+            isInfinite = false;
+            
+            virtualSpeakers = [0, 0, -1];
+            
+        case 6 % 0+5+0
+            configName = 'audiolab_5.1_1subwoofer';
+            channels = [ ... ;      % one-offset channel indices
+                 27, 16, 17, 20, 24 ...
+            ];
+            subChannels = [ 40 ]; % zero-offset
+            subIndices = {0:4};  % zero-offset
+            subGains = {ones(size(channels))};
+            subGainAdjustDB = [ 0 ];
+            subDelayAdjust = [ 0 ];
+
+            is2D = true;
+            isInfinite = false;
+            
+            virtualSpeakers = [];
+            
+        case 7 % 0+2+0 (vulgo stereo)
+            configName = 'audiolab_stereo_1subwoofer';
+            channels = [ ... ;      % one-offset channel indices
+                 27, 17, ...
+            ];
+            subChannels = [ 40 ]; % zero-offset
+            subIndices = {0:1};  % zero-offset
+            subGains = {ones(size(channels))};
+            subGainAdjustDB = [ 0 ];
+            subDelayAdjust = [0 ];
+
+            is2D = true;
+            isInfinite = false;
+            
+            virtualSpeakers = [-1, 0, 0];
+            
+        case 8
+            configName = 'audiolab_cube_1subwoofer';
+            channels = [ ... ;      % one-offset channel indices
+                 8,10,12,14,...
+                 29, 31, 33, 35 ...
+            ];
             subChannels = [ 39 ]; % zero-offset
             subIndices = {0:38};  % zero-offset
             subGains = {ones(size(channels))};
@@ -116,8 +223,12 @@ for numConfig = 1:2
         numTotalChannels = max(max(finalChannelIndices), max(subChannels+1));
     end
     
-    gainAdjustDB = lspData( :, 24 );
-    delayAdjust = lspData( :, 22 )*1e-3; % table values in ms
+    gainAdjustDB = zeros( 1, numTotalChannels );
+    delayAdjust = zeros( 1, numTotalChannels );
+    gainAdjustDB(channels) = -20*log10(gainDistanceData.G(channels)) - max(-20*log10(gainDistanceData.G(channels)));
+    speedOfSound = 340;
+    delays = gainDistanceData.D(channels) / speedOfSound;
+    delayAdjust(channels) = max(delays) - delays;
     
     % Todo: Set any adjustments to the gains and delays here.
     
