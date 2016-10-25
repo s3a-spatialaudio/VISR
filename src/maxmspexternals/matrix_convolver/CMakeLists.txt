@@ -31,9 +31,9 @@ SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES
 # <AF> TODO: Move this conditional logic to a centralised location!
 if(WIN32) # 32-bit and 64-bit Windows
   if (CMAKE_CL_64)
-      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe64)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe64)
   else(CMAKE_CL_64)
-      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe)
   endif(CMAKE_CL_64)
 elseif(APPLE)
   # Force generation of MacOS bundles.
