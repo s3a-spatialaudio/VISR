@@ -1,0 +1,130 @@
+/**
+ * @page baseline_renderer_usage Baseline Renderer Usage
+ *
+ * @tableofcontents
+ *
+ * @section baseline_renderer_usage_overview Overview
+ * The baseline renderer is controlled by a combination of command line options and configuration file(s), which are itself specified as command line options.
+
+ * At the time being, the VBAP rendering supports two different configuration file formats: plain text and XML-based.
+ * The XML configuration is currently supported only in the git branch \c subwoooferSupport, but will be merged into the main branch (\c master) soon.
+ * The selection of the file format is based on the file extension. Extension \c .xml (case-insensitive) activates XML parsing, all other extensions are treated as the text config format.
+ *
+ * Compared to the the text configuration format, the XML format supports a number of additional features:
+ *   + Subwoofer configuration
+ *   + Integrated gain and delay adjustment for loudspeakers and subwoofers
+ *   + Improved consistency checking and error reporting of the parsed configuration.
+ *   + Extensibility with respect to new features, e.g., new attributes or additional content types.
+ *
+ * For these reasons, we suggest to favour the use of the XML-based format, and to phase out the text-based format at some time in the future. Matlab functions are provided (in \c src/libpanning/test/matlab) to read read and write both formats to provide automatic conversion and the generation of configuration files from position data.
+ * 
+ * The XML-based format also removes the necessity for a separate loudspeaker configuration file to adjsut the gains and delays. To avoid unneccessary complexity regarding channel numbering and the support for additional features as subwoofers, the separate configuration option \c --output-gain, short option \c -g will be removed. For the same, the ability to adjust the output channel ordering (option \c -output-routing is no longer supported.
+ *
+ * @section baseline_renderer_usage_cmdline Command Line Options
+ *
+ * The commandline options are displayed by invoking
+ * 
+ * @code{.sh}
+ * $ baseline_renderer --help
+ * @endcode
+ * The current output is
+ * @code{.sh}
+   -h [ --help ]                   Show help and usage information.
+  -v [ --version ]                Display version information.
+  -D [ --audio-backend ] arg      The audio backend.
+  -f [ --sampling-frequency ] arg Sampling frequency [Hz]
+  -p [ --period ] arg             Period (blocklength) [Number of samples per 
+                                  audio block]
+  -c [ --array-config ] arg       Loudspeaker array configuration file
+  -i [ --input-channels ] arg     Number of input channels for audio object 
+                                  signal
+  -o [ --output-channels ] arg    Number of audio output channels
+  --tracking arg                  Enable adaptation of the panning using visual
+                                  tracking. Accepts the position of the tracker
+                                  in JSON format"{ "port": <UDP port number>, 
+                                  "position": {"x": <x in m>, "y": <y im m>, 
+                                  "z": <z in m> }, "rotation": { "rotX": rX, 
+                                  "rotY": rY, "rotZ": rZ } }" .
+  -r [ --scene-port ] arg         UDP port for receiving object metadata
+ * @endcode
+ *
+ * @subsection baseline_renderer_usage_cmdline_details Command Line OptionsDetailed usage
+ * - \c --audio-backend The audio backend used by the Portaudio driver. Currently supported backends are "ALSA" and "JACK" on Linux, "DirectSound", "ASIO", "WDMKS" and "WASAPI" on Windows (depending on the installed SDKs/Drivers), and "CoreAudio" on MacOS. The value "default" triggers the default backend for this platform (ALSA on Linux).
+ * - \c --sampling-frequency Sampling frequency in Hz. Default: 48000 Hz.
+ * - \c --period The number of samples processed in one iteration of the renderer. Should be a power of 2 (64,128,...,4096,...) Very low values increase the load and the likelihood of audio dropouts, larger value decrease reactiveness and increase audio latency. Default: 1024 samples.
+ * - \c --array-config File path to the loudspeaker configuration file. Path might be relative to the current working directory. Mandatory argument. --input-channels The number of audio input channels. This corresponds to the number of single-waveform objects the renderer will process. Mandatory argument. A (case-insensitive) file extension of \c .xml triggers the use of the XML format for parsing.
+ * - \c --output-channels The number of output channels the renderer will put write to. It can be used to overwrite the channel configuration in the array configuration file. If not given, the number of output channels is determined from the largest logical channel number in the array configuration. If given, it must be in the form "o1=c1, o2=c2, o3=c3,..." or "o1=c1 o2=c2 o3=c3", where "ix" and "ox" denote physical output indices and logical channel indices, respectively. Both indices start at one.
+ * - \c --output-gains Optional gain and delay adjustment for the physical output channels. Takes a string argument to a XML configuration file. The format is described below. The channel indices in this file must refer to the physical outputs of the renderer, i.e., the number of entries must equal the number of renderer outputs (either given implicitly or by the -o option), and must cover all consecutive numbers from 1 to the number of outputs.
+ * - \c --tracking
+Activates the listener-tracked VBAP reproduction, which adjust both the VBAP gains as well as the final loudspeaker gains and delays according to the listener position. It takes a non-empty string argument containing a JSON message of the format: { "port": &lt;UDP port number&gt;, "position": {"x": &lt;x in m&gt;, "y": &lt;y im m&gt;, "z": &lt;z in m&gt; }, "rotation": { "rotX": rX, "rotY": rY, "rotZ": rZ } }". The values are as follows:
+<table>
+<tr> <td>ID </td><td> Description </td><td> Unit </td><td> Default </td></tr>
+<tr> <td>port </td><td> UDP port number </td><td> unsigned int </td><td> 8888 </td></tr>
+<tr> <td>position.x </td><td> x position of the tracker </td><td> m </td><td> 2.08 </td></tr>
+<tr> <td>position.y </td><td> y position of the tracker </td><td> m </td><td> 0.0 </td></tr>
+<tr> <td>position.z </td><td> z position of the tracker </td><td> m </td><td> 0.0 </td></tr>
+<tr> <td>rotation.rotX </td><td> rotation the tracker about the x axis, i.e., y-z plane </td><td> degree </td><td> 0.0 </td></tr>
+<tr> <td>rotation.rotY </td><td> rotation the tracker about the y axis, i.e., z-x plane </td><td> degree </td><td> 0.0 </td></tr>
+<tr> <td>rotation.rotZ </td><td> rotation the tracker about the z axis, i.e., x-y plane </td><td> degree </td><td> 180 </td></tr>
+</table>
+ * @note: The option parsing for \c --tracking not implemented yet, default values are used invariably. TO activate tracking, you need to specify the \c --tracking option with an arbitrary parameter (even \c false activates the tracker).
+ * - \c --scene-port The UDP network port which receives the scene data in the S3A JSON object format.
+ *
+ * @section baseline_renderer_usage_xml_config XML Configuration File
+ *
+ * @subsection baseline_renderer_usage_xml_config_example Example
+ *
+ * @code{.xml}
+ * <?xml version="1.0" encoding="utf-8"?>
+<panningConfiguration dimension="3" infinite="false">
+   <loudspeaker channel="8" delay="0" gainDB="0" id="1"> <cart x="1.994" y="0" z="0"/> </loudspeaker>
+   <loudspeaker channel="9" delay="0" gainDB="0" id="2"> <cart x="2.0542" y="-1.186" z="0"/> </loudspeaker>
+   <loudspeaker channel="7" delay="0" gainDB="0" id="3"> <cart x="2.0542" y="1.186" z="0"/> </loudspeaker>
+   <loudspeaker channel="13" delay="0" gainDB="0" id="4"> <cart x="-0.84117" y="-2.3111" z="0"/> </loudspeaker>
+   <loudspeaker channel="17" delay="0" gainDB="0" id="5"> <cart x="-0.84117" y="2.3111" z="0"/> </loudspeaker>
+   <loudspeaker channel="23" delay="0" gainDB="0" id="6"> <cart x="1.2673" y="-0.73168" z="1.2279"/> </loudspeaker>
+   <loudspeaker channel="21" delay="0" gainDB="0" id="7"> <cart x="1.2673" y="0.73168" z="1.2279"/> </loudspeaker>
+   <loudspeaker channel="26" delay="0" gainDB="0" id="8"> <cart x="-0.5005" y="-1.3751" z="1.2279"/> </loudspeaker>
+   <loudspeaker channel="30" delay="0" gainDB="0" id="9"> <cart x="-0.5005" y="1.3751" z="1.2279"/> </loudspeaker>
+   <virtualspeaker id="10"> <cart x="7.3479e-17" y="0" z="-1.2"/> </virtualspeaker>
+   <subwoofer assignedLoudspeakers="4, 2, 1, 3, 5, 7, 6, 8, 9" channel="33" delay="0.001" gainDB="-3.5" weights="0.500000, 1.000000, 1.000000, 1.000000, 0.500000, 1.000000, 1.000000, 0.500000, 0.500000"/>
+   <subwoofer assignedLoudspeakers="4, 5, 8, 9" channel="34" delay="0.00235" gainDB="-6.5" weights="0.500000, 0.500000, 0.500000, 0.500000"/>
+   <triplet l1="1" l2="2" l3="10"/>
+   <triplet l1="1" l2="3" l3="7"/>
+   <triplet l1="1" l2="6" l3="2"/>
+   <triplet l1="1" l2="7" l3="6"/>
+   <triplet l1="1" l2="10" l3="3"/>
+   <triplet l1="2" l2="4" l3="10"/>
+   <triplet l1="2" l2="6" l3="8"/>
+   <triplet l1="2" l2="8" l3="4"/>
+   <triplet l1="3" l2="5" l3="9"/>
+   <triplet l1="3" l2="9" l3="7"/>
+   <triplet l1="3" l2="10" l3="5"/>
+   <triplet l1="4" l2="5" l3="10"/>
+   <triplet l1="4" l2="8" l3="5"/>
+   <triplet l1="5" l2="8" l3="9"/>
+   <triplet l1="6" l2="7" l3="9"/>
+   <triplet l1="6" l2="9" l3="8"/>
+</panningConfiguration>
+ * @endcode
+ *
+ * @subsection baseline_renderer_usage_xml_config_description Description
+ * The root node of the XML file is \c &lt;panningConfiguration&gt;.
+ * This element supports the folloring optional attributes:
+ * - \c isInfinite Whether the loudspeakers are regardes as point sources located on the unit sphere (\b false) or as plane waves, corresponding to an infinite distance (\b true). Default: \b false.
+ * - \c dimension Whether the setup is considered as a 2-dimensional configuration (value \b 2) or as three-dimensional (value \b 3, default). In the 2D case, the array is considered in the x-y plane , and the \p z and \p el attributes of the loudspeaker positions are not evaluated. In this case, the triplet specifications consist of two indices only (technically being pairs).
+ * 
+ * Four types of elements are contained within the \c &lt;panningConfiguration&gt; root element:
+ * - \c &lt;loudspeaker&gt; Represents a reproduction loudspeaker. The position  is encoded either in a &lt;cart&gt; node representing the cartesian coordinates in the \c x, \c y and \c z attributes (floating point values in meter), or a \c &lt;polar&gt; node with the attributes \c az and \c el (azimuth and elevation, both in degree) and \c r (radius, in meter). Further attributes are:
+ *   + \c id Numerical id id the loudspeaker, equal or larger than zero. Loudspeaker ids must be unique across the &lt;loudspeaker&gt and &lt;virtualspeaker&gt; nodes and must form a consecutive range of integers. The requirement of using consecutive integers might be removed, as well as the restriction to integers. As the IDs are used only to reference loudspeakers in the &lt;triplet&gt; specification, any unique identifier (e.g., a name or a speaker label similar to ITU-R BS.775 labels) would be possible. 
+ *   + \c channel The logical output channel (sound card channel) for this loudspeaker. Logical channel indices start from 1. They must be unique over the set of loudspeaker and subwoofer channel indices.
+ *   + \c gainDB or \c gain Additional gain adjustment for this loudspeaker, either in linear scale or in dB (floating-point valus, default 1.0 / 0 dB ). Only one of them must be used for a single node.
+ *   + \c delay Delay adjustment to be applied to this loudspeaker (floating-point value in seconds, default 0.0). 
+ * - \c &lt;virtualspeaker&gt; An additional vertex added to the triangulation that does not correspond to a physical loudspeaker. Consist of a numerical \c id attribute and a position specified either as a &lt;cart&gt; or a &lt;polar&gt; node (see &lt;loudspeaker&gt; specification).
+ * - \c &lt;subwoofer&gt; Specify a subwoofer channel. In the current implementation, the loudspeaker are weighted and mixed into an arbitraty number of subwoofer channels. The atributes are:
+ *   + \c assignedLoudspeakers The loudspeaker signals (given as a sequence of logical loudspeaker IDs) that contribute to the subwoofer signals. Given as comma-separated list of loudspeaker index or loudspeaker ranges. Index sequences are similar to Matlab array definitions, except that thes commas separating the parts of the sequence are compulsory. Complex example: "1, 3,4,5:7, 2, 8:-3:1". 
+ *   + \c weights Optional weights (linear scale) that scale the contributions of the assigned speakers to the subwoofer signal. Given as a sequence of comma-separated linear-scale gain values, Matlab ranges are also allowed. The number of elements must match the \c assignedLoudspeakers index list. Optional value, the default value uses 1.0 for all assigned loudspeakers. Example: "0:0.2:1.0, 1, 1, 1:-0.2:0".
+ *   + \c gainDB or \c gain Additional gain adjustment for this subwoofer, either in linear scale or in dB (floating-point valus, default 1.0 / 0 dB ). Applied on top of the \c weight attributes to the summed subwoofer signal. See &lt;loudspeaker&gt; specification.
+ *   + \c delay Delay adjustment for this (floating-point value in seconds, default 0.0). See &lt;loudspeaker&gt; specification.
+ * - \c &lt;triplet&gt; Loudspeaker triplet specified by the attributes \c l1, \c l2, and \c l3. In case of a 2D setup, only \c l1 and \c l2 are evaluated. all loudspeaker numbers must denote logical loudspeaker indices. NOTE: This representation does not assign an ID to the triplet, because this is noot required by the VBAP algorithm If an ordering of the triplets is required for whatever reason (the algorithm should not require this), then this should be imposed by the ordering of the triplet nodes.
+ */

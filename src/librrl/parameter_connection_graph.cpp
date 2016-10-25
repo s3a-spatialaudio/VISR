@@ -3,6 +3,7 @@
 #include "parameter_connection_graph.hpp"
 
 #include "parameter_connection_map.hpp"
+#include "port_utilities.hpp"
 
 #include <libril/parameter_port_base.hpp>
 
@@ -60,7 +61,8 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
     if( result )
     {
       // What to do here? This is either a duplicated edge or to edges connecting the ports in both directions.
-      throw std::logic_error( "ParamterConnectionGraph: Detected double edge or two reverse connections." );
+      throw std::logic_error( std::string("ParameterConnectionGraph: Detected double edge or two reverse connection to connection ")
+        + fullyQualifiedName( *(senderIt->first) ) + "->" + fullyQualifiedName(*(receiverIt->first)) + "." );
     }
     std::tie( edgeDesc, result ) = add_edge( senderVertex, receiverVertex, mConnectionGraph );
     if( not result )
