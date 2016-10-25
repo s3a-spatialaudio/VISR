@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<panningConfiguration dimension="3" infinite="false">
+   <outputEqConfiguration numberOfBiquads="1" type="iir">
+      <filterSpec name="lowpass">
+         <biquad a1="-1.9688283" a2="0.96907117" b0="6.0729856e-05" b1="0.00012145971" b2="6.0729856e-05"/>
+      </filterSpec>
+      <filterSpec name="highpass">
+         <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
+      </filterSpec>
+   </outputEqConfiguration>
+   <loudspeaker channel="8" delay="0.00012967" eq="highpass" gainDB="-1.4942" id="1">
+      <cart x="1.77" y="-1.68" z="1.15"/>
+   </loudspeaker>
+   <loudspeaker channel="10" delay="0.00011974" eq="highpass" gainDB="-0.55628" id="2">
+      <cart x="-1.68" y="-1.73" z="1.13"/>
+   </loudspeaker>
+   <loudspeaker channel="12" delay="0.00018542" eq="highpass" gainDB="-1.1831" id="3">
+      <cart x="-1.68" y="1.76" z="1.13"/>
+   </loudspeaker>
+   <loudspeaker channel="14" delay="3.7786e-05" eq="highpass" gainDB="0" id="4">
+      <cart x="1.73" y="1.72" z="1.14"/>
+   </loudspeaker>
+   <loudspeaker channel="29" delay="0.00029098" eq="highpass" gainDB="-0.5163" id="5">
+      <cart x="1.75" y="-1.68" z="-0.87"/>
+   </loudspeaker>
+   <loudspeaker channel="31" delay="0.0003379" eq="highpass" gainDB="-0.74155" id="6">
+      <cart x="-1.74" y="-1.67" z="-0.85"/>
+   </loudspeaker>
+   <loudspeaker channel="33" delay="0" eq="highpass" gainDB="-0.57074" id="7">
+      <cart x="-1.78" y="1.89" z="-0.84"/>
+   </loudspeaker>
+   <loudspeaker channel="35" delay="0.0003578" eq="highpass" gainDB="-0.35979" id="8">
+      <cart x="1.78" y="1.73" z="-0.86"/>
+   </loudspeaker>
+   <subwoofer assignedLoudspeakers="1, 2, 3, 4, 5, 6, 7, 8" channel="40" delay="0" eq="lowpass" gainDB="0" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000"/>
+   <triplet l1="1" l2="2" l3="5"/>
+   <triplet l1="1" l2="4" l3="2"/>
+   <triplet l1="1" l2="5" l3="8"/>
+   <triplet l1="1" l2="8" l3="4"/>
+   <triplet l1="2" l2="3" l3="6"/>
+   <triplet l1="2" l2="4" l3="3"/>
+   <triplet l1="2" l2="6" l3="5"/>
+   <triplet l1="3" l2="4" l3="7"/>
+   <triplet l1="3" l2="7" l3="6"/>
+   <triplet l1="4" l2="8" l3="7"/>
+   <triplet l1="5" l2="6" l3="8"/>
+   <triplet l1="6" l2="7" l3="8"/>
+</panningConfiguration>

@@ -6,10 +6,13 @@
 
 % Ensure that $VISR/src/libpanning/test/matlab is in the path.
 
-lspDataFile = '../audiolab_gain_delay.xls';
+lspDataFile = '../data/audiolab_gain_delay.xls';
 
 lspData = xlsread( lspDataFile );
 numAllSpeakers = size( lspData, 1 );
+
+% Use the new measurement data instead
+gainDistanceData = load( '../data/gains_distances.mat' );
 
 %% The configurations
 for numConfig = 1:8
@@ -82,7 +85,7 @@ for numConfig = 1:8
             
             virtualSpeakers = [0, 0, -1];
         case 5 % 4+5+0 setup
-            configName = '9.1_audiolab_1subwoofer';
+            configName = 'audiolab_9.1_1subwoofer';
             channels = [ ... ;      % one-offset channel indices
                 7, 10, 12, 15,...
                 16, 17, 20, 24, 27 ...
@@ -99,7 +102,7 @@ for numConfig = 1:8
             virtualSpeakers = [0, 0, -1];
             
         case 6 % 0+5+0
-            configName = '5.1_audiolab_1subwoofer';
+            configName = 'audiolab_5.1_1subwoofer';
             channels = [ ... ;      % one-offset channel indices
                  27, 16, 17, 20, 24 ...
             ];
@@ -111,9 +114,11 @@ for numConfig = 1:8
 
             is2D = true;
             isInfinite = false;
-                        
+            
+            virtualSpeakers = [];
+            
         case 7 % 0+2+0 (vulgo stereo)
-            configName = 'stereo_audiolab_1subwoofer';
+            configName = 'audiolab_stereo_1subwoofer';
             channels = [ ... ;      % one-offset channel indices
                  27, 17, ...
             ];
@@ -129,7 +134,7 @@ for numConfig = 1:8
             virtualSpeakers = [-1, 0, 0];
             
         case 8
-            configName = 'cube_audiolab_1subwoofer';
+            configName = 'audiolab_cube_1subwoofer';
             channels = [ ... ;      % one-offset channel indices
                  8,10,12,14,...
                  29, 31, 33, 35 ...
@@ -242,8 +247,15 @@ for numConfig = 1:8
         numTotalChannels = max(max(finalChannelIndices), max(subChannels+1));
     end
     
-    gainAdjustDB = zeros(size(lspData( :, 24 )));
-    delayAdjust = zeros(size(lspData( :, 22 )))*1e-3; % table values in ms
+    gainAdjustDB = zeros( 1, numTotalChannels );
+    delayAdjust = zeros( 1, numTotalChannels );
+%     gainAdjustDB = lspData( :, 24 );
+%     delayAdjust = lspData( :, 22 )*1e-3; % table values in ms
+    gainAdjustDB(channels) = -20*log10(gainDistanceData.G(channels)) - max(-20*log10(gainDistanceData.G(channels)));
+    speedOfSound = 340;
+    delays = gainDistanceData.D(channels) / speedOfSound;
+    delayAdjust(channels) = max(delays) - delays;
+    
     
     % Todo: Set any adjustments to the gains and delays here.
     
