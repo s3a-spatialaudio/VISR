@@ -58,6 +58,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
  , mDiffusionFilters( diffusionFilters )
  , mSceneReceiver( *this, "SceneReceiver" )
  , mSceneDecoder( *this, "SceneDecoder" )
+ , mChannelObjectRoutingCalculator( *this, "ChannelObjectRoutingCalculator" )
+ , mChannelObjectRouting( *this, "ChannelObjectRouting" )
  , mOutputAdjustment( *this, "OutputAdjustment" )
  , mGainCalculator( *this, "VbapGainCalculator" )
  , mAllradGainCalculator( *this, "AllRadGainGalculator" )
@@ -114,11 +116,13 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
 
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup( );
+  mChannelObjectRoutingCalculator.setup( numberOfInputs, loudspeakerConfiguration);
+  mChannelObjectRouting.setup(numberOfInputs, numberOfLoudspeakers);
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
 
   //////////////////////////////////////////////////////////////////////////////////////
-  // Experimental HOA decoding stuff
+  // HOA decoding support
   boost::filesystem::path const regArrayPath( CMAKE_SOURCE_DIR "/src/libpanning/test/matlab/arrays/t-design_t8_P40.xml" );
   boost::filesystem::path const regArrayDecodeMtxPath( CMAKE_SOURCE_DIR "/src/libpanning/test/matlab/arrays/decode_N8_P40_t-design_t8_P40.txt" );
   if( not exists( regArrayPath ) or is_directory( regArrayPath ) )
@@ -148,7 +152,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
    */
   ril::SampleType const diffusorGain = static_cast<ril::SampleType>(1.0) / std::sqrt( static_cast<ril::SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
-  mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
+  mDirectDiffuseMix.setup( numberOfLoudspeakers, 3 ); // Third input is for the channel routing.
   mNullSource.setup( 1/*width*/ );
 
   efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
@@ -169,7 +173,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   // Create the index vectors for connecting the ports.
   // First, create the start indices for all output vectors by adding the width of the previous vector.
   std::size_t const captureStartIdx = 0;
-  std::size_t const vbapMatrixOutStartIdx = captureStartIdx + numberOfInputs;
+  std::size_t const channelObjectRoutingOutStartIdx = captureStartIdx + numberOfInputs;
+  std::size_t const vbapMatrixOutStartIdx = channelObjectRoutingOutStartIdx + numberOfLoudspeakers;
   std::size_t const diffuseMixerOutStartIdx = vbapMatrixOutStartIdx + numberOfLoudspeakers;
   std::size_t const decorrelatorOutStartIdx = diffuseMixerOutStartIdx + 1;
   std::size_t const mixOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
@@ -181,7 +186,8 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   std::size_t const communicationChannelEndIndex = nullSourceOutStartIdx + 1; // One past end index. Also the number of total indices.
 
   // Now, explicitly construct the index vectors.
-  std::vector<ril::AudioPort::SignalIndexType> captureChannels = indexRange( captureStartIdx, vbapMatrixOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType> captureChannels = indexRange( captureStartIdx, channelObjectRoutingOutStartIdx );
+  std::vector<ril::AudioPort::SignalIndexType > const channelObjectRoutingOutChannels = indexRange( channelObjectRoutingOutStartIdx, vbapMatrixOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const vbapMatrixOutChannels = indexRange( vbapMatrixOutStartIdx, diffuseMixerOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const diffuseMixerOutChannels = indexRange( diffuseMixerOutStartIdx, decorrelatorOutStartIdx );
   std::vector<ril::AudioPort::SignalIndexType> const decorrelatorOutChannels = indexRange( decorrelatorOutStartIdx, mixOutStartIdx );
@@ -224,14 +230,17 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   initCommArea( communicationChannelEndIndex, period, ril::cVectorAlignmentSamples );
 
   // Connect the ports
+  assignCommunicationIndices("ChannelObjectRouting", "in", captureChannels);
   assignCommunicationIndices( "VbapGainMatrix", "in", captureChannels );
   assignCommunicationIndices( "DiffusePartMatrix", "in", captureChannels );
+  assignCommunicationIndices("ChannelObjectRouting", "out", channelObjectRoutingOutChannels );
   assignCommunicationIndices( "VbapGainMatrix", "out", vbapMatrixOutChannels );
   assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixerOutChannels );
   assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixerOutChannels );
   assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutChannels );
   assignCommunicationIndices( "DirectDiffuseMixer", "in0", vbapMatrixOutChannels );
   assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutChannels );
+  assignCommunicationIndices( "DirectDiffuseMixer", "in2", channelObjectRoutingOutChannels );
   assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutChannels );
   
   std::vector<ril::AudioPort::SignalIndexType> outputAdjustInChannels( numberOfOutputSignals );
@@ -292,6 +301,9 @@ BaselineRenderer::process()
     mGainCalculator.setListenerPosition( mListenerPosition );
     mListenerCompensation->process( mListenerPosition, mCompensationGains, mCompensationDelays );
   }
+  mChannelObjectRoutingCalculator.process(mObjectVector, mChannelObjectRoutings);
+  mChannelObjectRouting.setRouting(mChannelObjectRoutings);
+  mChannelObjectRouting.process();
   mGainCalculator.process( mObjectVector, mGainParameters );
   // Calculate the panning gains for HOA objects and place them into the panning gain matrix.
   mAllradGainCalculator.process( mObjectVector, mGainParameters );

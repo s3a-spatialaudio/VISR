@@ -6,6 +6,7 @@
 #include <libril/audio_signal_flow.hpp>
 
 #include <librcl/add.hpp>
+#include <librcl/channel_object_routing_calculator.hpp>
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/gain_matrix.hpp>
@@ -15,6 +16,7 @@
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
+#include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
@@ -86,6 +88,10 @@ private:
   
   rcl::SceneDecoder mSceneDecoder;
 
+  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
+
+  rcl::SignalRouting mChannelObjectRouting;
+
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningGainCalculator mGainCalculator;
@@ -115,6 +121,8 @@ private:
   pml::MessageQueue<std::string> mSceneMessages;
 
   objectmodel::ObjectVector mObjectVector;
+
+  pml::SignalRoutingParameter mChannelObjectRoutings;
 
   efl::BasicMatrix<ril::SampleType> mGainParameters;
 
