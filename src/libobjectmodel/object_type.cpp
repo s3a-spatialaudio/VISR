@@ -23,7 +23,8 @@ static const ObjectToString objectToStringLookup =
   { ObjectTypeId::PlaneWave, "plane" },
   { ObjectTypeId::DiffuseSource, "diffuse" },
   { ObjectTypeId::PointSourceWithDiffuseness, "pointdiffuse" },
-  { ObjectTypeId::ExtendedSource, "extended" }
+  { ObjectTypeId::ExtendedSource, "extended" },
+  { ObjectTypeId::ChannelObject, "channel" }
 };
 
 // TODO: This would be nice place for the move constructor idiom
