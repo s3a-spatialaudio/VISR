@@ -71,7 +71,9 @@ namespace panning
     /**
      *
      */
-    void loadXml( std::string const & filePath );
+    void loadXmlFile( std::string const & filePath );
+
+    void loadXmlStream( std::istream & stream );
 
     int setPosition( int id, Afloat x, Afloat y, Afloat z, bool inf )
     {

@@ -93,7 +93,7 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
       throw std::invalid_argument( err.str() );
     }
     // We do not support the legacy text format for Max externals
-    mArrayConfiguration->loadXml( arrayConfigPath.string() );
+    mArrayConfiguration->loadXmlFile( arrayConfigPath.string() );
 
     /* Set up the filter matrix for the diffusion filters. */
     std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix

@@ -132,7 +132,7 @@ BaselineRenderer::BaselineRenderer( panning::LoudspeakerArray const & loudspeake
   pml::MatrixParameter<Afloat> allRadDecoderGains = pml::MatrixParameter<Afloat>::fromTextFile( regArrayDecodeMtxPath.string() );
 
   panning::LoudspeakerArray allRadRegArray;
-  allRadRegArray.loadXml( regArrayPath.string() );
+  allRadRegArray.loadXmlFile( regArrayPath.string() );
   mAllradGainCalculator.setup( allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
 
   //////////////////////////////////////////////////////////////////////////////////////

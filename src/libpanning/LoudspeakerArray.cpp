@@ -347,19 +347,24 @@ void parseEqFilter( boost::property_tree::ptree const & tree,
 } // unnamed namespace
 
 
-void LoudspeakerArray::loadXml( std::string const & filePath )
+void LoudspeakerArray::loadXmlFile(std::string const & filePath)
+{
+  boost::filesystem::path path(filePath);
+  if (not exists(path) or is_directory(path))
+  {
+    throw std::invalid_argument("ArrayConfiguration::loadXml(): File does not exist.");
+  }
+  std::ifstream fileStream(path.string());
+  if (not fileStream)
+  {
+    throw std::invalid_argument("ArrayConfiguration::loadXml(): Invalid file path.");
+  }
+  loadXmlStream(fileStream);
+}
+
+void LoudspeakerArray::loadXmlStream(std::istream & fileStream)
 {
   using namespace boost::property_tree;
-  boost::filesystem::path path( filePath );
-  if( not exists( path ) or is_directory( path ) )
-  {
-    throw std::invalid_argument( "ArrayConfiguration::loadXml(): File does not exist." );
-  }
-  std::ifstream fileStream( path.string( ) );
-  if( not fileStream )
-  {
-    throw std::invalid_argument( "ArrayConfiguration::loadXml(): Invalid file path." );
-  }
   boost::property_tree::ptree parseTree;
   boost::property_tree::read_xml( fileStream, parseTree );
 

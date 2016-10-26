@@ -79,7 +79,7 @@ int main( int argc, char const * const * argv )
     std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : arrayConfigFileName.substr( lastDotIdx + 1 );
     if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
     {
-      loudspeakerArray.loadXml( arrayConfigFileName );
+      loudspeakerArray.loadXmlFile( arrayConfigFileName );
     }
     else
     {

@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : arrayConfigFileName.substr( lastDotIdx + 1 );
   if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
   {
-    loudspeakerArray.loadXml( arrayConfigFileName );
+    loudspeakerArray.loadXmlFile( arrayConfigFileName );
   }
   else
   {
