@@ -5,6 +5,8 @@ channel_object.cpp
 channel_object_parser.cpp
 diffuse_source.cpp
 diffuse_source_parser.cpp
+hoa_source.cpp
+hoa_source_parser.cpp
 object.cpp
 object_factory.cpp
 object_parser.cpp
@@ -24,6 +26,8 @@ channel_object.hpp
 channel_object_parser.hpp
 diffuse_source.hpp
 diffuse_source_parser.hpp
+hoa_source.hpp
+hoa_source_parser.hpp
 object.hpp
 object_factory.hpp
 object_parser.hpp

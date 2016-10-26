@@ -9,6 +9,7 @@
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/hoa_allrad_gain_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_gain_calculator.hpp>
@@ -88,6 +89,8 @@ private:
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningGainCalculator mGainCalculator;
+
+  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 

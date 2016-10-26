@@ -96,7 +96,9 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     objectmodel::Object const & obj = *(objEntry.second);
     if( obj.numberOfChannels() != 1 )
     {
-      std::cerr << "PanningGainCalculator: Only monaural object types are supported at the moment." << std::endl;
+      // Panning is implemented only for single-channel objects.
+      // So we use this check as a first criterion to skip any sources of other types
+      // Other non-matching types will be skipped later on.
       continue;
     }
 
@@ -149,11 +151,15 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
   {
     std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
   }
+  
+  efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();
 
   // TODO: Can be replaced by a vector multiplication.
+  // NOTE: vbapGains might have more columns than real loudspeakers,
+  // because it also contains the gains of all imaginary speakers
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
-    Afloat const * const gainRow = mVbapCalculator.getGains().row( chIdx );
+    Afloat const * const gainRow = vbapGains.row( chIdx );
     objectmodel::LevelType const level = mLevels[ chIdx ];
     for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
     {

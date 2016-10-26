@@ -24,6 +24,7 @@ static const ObjectToString objectToStringLookup =
   { ObjectTypeId::DiffuseSource, "diffuse" },
   { ObjectTypeId::PointSourceWithDiffuseness, "pointdiffuse" },
   { ObjectTypeId::ExtendedSource, "extended" },
+  { ObjectTypeId::HoaSource, "hoa" },
   { ObjectTypeId::ChannelObject, "channel" }
 };
 
