@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   std::size_t const numSpeakers = 2;
 
   boost::filesystem::path const basePath(CMAKE_SOURCE_DIR);
-  boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("config/isvr/stereo_audiolab.txt");
+  boost::filesystem::path const arrayPath = basePath / boost::filesystem::path("config/generic/stereo.xml");
   BOOST_CHECK_MESSAGE( exists(arrayPath), "The loudspeaker array file does not exist.");
   std::string const arrayConfigFileName = arrayPath.string();
   panning::LoudspeakerArray loudspeakerArray;
