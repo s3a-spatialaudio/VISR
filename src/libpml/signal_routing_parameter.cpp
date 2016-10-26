@@ -76,6 +76,11 @@ bool SignalRoutingParameter::removeEntry( IndexType outputIdx )
   return false;
 }
 
+void SignalRoutingParameter::clear()
+{
+  mRoutings.clear();
+}
+
 SignalRoutingParameter::IndexType SignalRoutingParameter::getOutput( IndexType inputIdx ) const
 {
   RoutingsType::const_iterator findIt = std::find_if( mRoutings.begin(), mRoutings.end(),
