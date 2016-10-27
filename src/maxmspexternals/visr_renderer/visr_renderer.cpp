@@ -84,6 +84,8 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
     }
     mNumberOfObjects = cmdLineOptions.getOption<std::size_t>( "input-channels" );
     mNumberOfOutputs = cmdLineOptions.getOption<std::size_t>( "output-channels" );
+    mNumberOfEqSections = cmdLineOptions.getDefaultedOption( "object-eq-sections", 0 );
+
 
     boost::filesystem::path const arrayConfigPath( cmdLineOptions.getOption<std::string>( "array-config" ) );
     if( !exists( arrayConfigPath ) )
@@ -179,6 +181,7 @@ VisrRenderer::~VisrRenderer()
                                                     *mDiffusionFilters,
                                                     mTrackingConfiguration,
                                                     mSceneReceiverPort,
+                                                    mNumberOfEqSections,
                                                     mPeriod,
                                                     samplingFrequency ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>( *mFlow ) );
