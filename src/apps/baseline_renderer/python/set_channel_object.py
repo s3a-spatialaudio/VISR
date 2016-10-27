@@ -43,7 +43,7 @@ msg = "{ \"objects\":[{\"id\": %d, \"outputChannels\": \"%s\", \"channels\": \"%
 udpSocket = socket.socket(socket.AF_INET, # Internet
                           socket.SOCK_DGRAM) # UDP
 
-udpSocket.sendto( msg, (destHost, destPort) )
+udpSocket.sendto( msg.encode('utf-8'), (destHost, destPort) )
 
 if args.verbosity >= 1:
   print( "Send message %s to %s:%d." % ( msg, destHost, destPort ) )
