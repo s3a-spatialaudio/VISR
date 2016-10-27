@@ -90,7 +90,7 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   }
   try
   {
-    mArray.loadXml(configPath.string());
+    mArray.loadXmlFile(configPath.string());
     mVbapCalculator.setLoudspeakerArray( &mArray );
     mVbapCalculator.setNumSources(cNumberOfObjects);
     mVbapCalculator.setSourcePositions(&mSourcePositions[0]);
