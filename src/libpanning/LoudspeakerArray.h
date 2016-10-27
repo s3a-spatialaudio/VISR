@@ -98,6 +98,15 @@ namespace panning
 
     XYZ const * getPositions() const { return m_position.data(); };
 
+    /**
+     * Return the loudspeaker index associated with a loudspeaker at a given
+     * position in the loudspeaker array.
+     * At the moment, the loudspeaker indices are integers consecutively numbered from 1.
+     * That means that there is a fixed relation between the two indices.
+     * @TODO Allow arbitrary inices (or labels), maybe of different types.
+     */
+    LoudspeakerIndexType getLoudspeakerIndex( std::size_t arrayIndex ) const;
+
     ChannelIndex channelIndex( std::size_t spkIndex ) const { return m_channel[spkIndex]; }
 
     int setTriplet( int iTri, int l1, int l2, int l3 )

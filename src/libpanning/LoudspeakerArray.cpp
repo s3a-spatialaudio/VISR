@@ -615,6 +615,12 @@ LoudspeakerArray::outputEqualisationBiquads() const
   return *mOutputEqs;
 }
 
+LoudspeakerArray::LoudspeakerIndexType 
+LoudspeakerArray::getLoudspeakerIndex( std::size_t arrayIndex ) const
+{
+  return static_cast<LoudspeakerIndexType>( arrayIndex + 1 );
+}
+
 } // namespace panning
 } // namespace visr
 
