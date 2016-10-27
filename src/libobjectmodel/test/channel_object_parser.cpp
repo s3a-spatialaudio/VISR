@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(WriteChannelObject)
   boost::property_tree::ptree propTree;
   try
   {
-    // TODO: Should we restrict ourselved to JSON at this level (or should we move the decision up one level?)
-    read_json( std::stringstream(objRepr), propTree);
+    std::stringstream strstr (objRepr);
+    read_json( strstr, propTree);
   }
   catch (std::exception const & ex)
   {

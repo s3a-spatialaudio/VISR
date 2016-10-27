@@ -55,7 +55,7 @@ parse( boost::property_tree::ptree const & tree, Object & obj ) const
   }
 
   std::stringstream outChannelStr;
-  static char * const cSeparator = ",";
+  static char const *cSeparator = ",";
   if (chObj.outputChannels().size() > 0)
   {
     std::copy(chObj.outputChannels().begin(), std::prev(chObj.outputChannels().end()),
