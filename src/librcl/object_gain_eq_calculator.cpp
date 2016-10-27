@@ -1,103 +1,79 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "diffusion_gain_calculator.hpp"
+#include "object_gain_eq_calculator.hpp"
 
-#include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
-// Note: At the moment, all supported source types are translated directly in this file
-// TODO: For the future, consider moving this to another location.
-#include <libobjectmodel/diffuse_source.hpp>
-#include <libobjectmodel/point_source_with_diffuseness.hpp>
 
+#include <libpml/biquad_parameter.hpp>
 
 #include <ciso646>
-#include <iostream>
 
 namespace visr
 {
 namespace rcl
 {
 
-DiffusionGainCalculator::DiffusionGainCalculator( ril::AudioSignalFlow& container, char const * name )
+ObjectGainEqCalculator::ObjectGainEqCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
  , mNumberOfObjectChannels( 0 )
 {
 }
 
-DiffusionGainCalculator::~DiffusionGainCalculator()
+ObjectGainEqCalculator::~ObjectGainEqCalculator()
 {
 }
 
-void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
+void ObjectGainEqCalculator::setup( std::size_t numberOfObjectChannels,
+                                    std::size_t numberOfBiquadSections )
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
+  mNumberOfBiquadSections = numberOfBiquadSections;
+  mInternalBiquadVector.reset( new pml::BiquadParameterList<ril::SampleType >( numberOfBiquadSections ));
 }
 
-void DiffusionGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainVector )
+void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
+					     efl::BasicVector<CoefficientType> & objectSignalGains,
+					     pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs )
 {
-  if( (gainVector.numberOfRows() != 1 ) or( gainVector.numberOfColumns() != mNumberOfObjectChannels ) )
+  using namespace objectmodel;
+  pml::BiquadParameter<ril::SampleType> defaultEq; // Neutral EQ parameters
+  if( objectSignalGains.size() != mNumberOfObjectChannels )
   {
-    throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a 1 x numberOfObjectChannels matrix." );
+    throw std::invalid_argument( "ObjectGainEqCalculator::process(): The parameter \"objectSignalGains\" must hold numberOfObjectChannels elements" );
   }
-  gainVector.zeroFill();
-  processInternal( objects, gainVector.row( 0 ) );
-}
-
-void DiffusionGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicVector<CoefficientType> & gainVector )
-{
-  if( (gainVector.size() != mNumberOfObjectChannels) )
+  if( (objectChannelEqs.numberOfFilters() != mNumberOfObjectChannels) or (objectChannelEqs.numberOfSections() != mNumberOfBiquadSections ) )
   {
-    throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a vectoor with numberOfObjectChannels elements." );
+    throw std::invalid_argument( "ObjectGainEqCalculator::process(): The parameter \"objectChannelEqs\" must have a matrix dimension of numberOfObjectChannels x numberOfBiquadSections" );
   }
-  gainVector.zeroFill( );
-  processInternal( objects, gainVector.data( ) );
-}
-
-void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains )
-{
-  // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
-  // Any potential re-routing will be added later.
-  for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  objectSignalGains.zeroFill();
+  // TODO: Make sure that the EQs of unused channels are set to a neutral value.
+  for( ObjectVector::const_iterator objIt( objects.begin()); objIt != objects.end(); ++objIt )
   {
-    objectmodel::Object const & obj = *(objEntry.second);
-    // Pre-check to handle only monaural objects here. The fine-grained disambiguation between supported object types happens later.
-    if( obj.numberOfChannels() != 1 )
+    Object const & obj = *(objIt->second);
+    LevelType const objLevel = obj.level();
+    // TODO: Retrieve EQ setting from object and store calculate eq section in mInternalBiquadVector
+    std::size_t const objEqSections = 0; // Interim setting until EQ calculation is in place.
+      
+    std::size_t const numObjChannels = obj.numberOfChannels();
+    for( std::size_t chIdx(0); chIdx < numObjChannels; ++chIdx )
     {
-      continue;
+        std::size_t const signalChannelIdx = obj.channelIndex( chIdx );
+        objectSignalGains[ signalChannelIdx ] = objLevel;
+        for( std::size_t eqIdx(0); eqIdx < objEqSections; ++eqIdx ) // Compiler warning 'always false' is harmless at the moment.
+        {
+            objectChannelEqs( signalChannelIdx, eqIdx ) = mInternalBiquadVector->at(eqIdx);
+        }
+        for( std::size_t eqIdx(objEqSections); eqIdx < mNumberOfBiquadSections; ++eqIdx ) // Fill remaining sections with neutral parameters.
+        {
+            objectChannelEqs( signalChannelIdx, eqIdx ) = defaultEq;
+        }
+        
     }
-    objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
-    if( channelId >= mNumberOfObjectChannels )
-    {
-      std::cerr << "DiffusionGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
-                << "exceeds number of channels (" << mNumberOfObjectChannels << ")." << std::endl;
-      continue;
-    }
-
-    objectmodel::ObjectTypeId const ti = obj.type();
-
-    // For the moment, we treat the two supported source type here.
-    // @todo find a proper abstraction to handle many source types.
-    switch( ti )
-    {
-    case objectmodel::ObjectTypeId::DiffuseSource:
-    {
-      gains[channelId] = obj.level();
-      break;
-    }
-    case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
-    {
-      objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-      gains[channelId] = psdSrc.diffuseness() * psdSrc.level();
-      break;
-    }
-    default:
-    // Other source types, including hitherto unknown, are set to zero diffuseness.
-    gains[channelId] = static_cast<objectmodel::LevelType>(0.0f);
-    }
-  } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  }
 }
+
 
 } // namespace rcl
 } // namespace visr

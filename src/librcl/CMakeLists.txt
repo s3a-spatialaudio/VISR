@@ -11,6 +11,7 @@ gain_matrix.cpp
 hoa_allrad_gain_calculator.cpp
 listener_compensation.cpp
 null_source.cpp
+object_gain_eq_calculator.cpp
 panning_gain_calculator.cpp
 position_decoder.cpp
 scene_decoder.cpp
@@ -33,6 +34,7 @@ gain_matrix.hpp
 hoa_allrad_gain_calculator.hpp
 listener_compensation.hpp
 null_source.hpp
+object_gain_eq_calculator.hpp
 panning_gain_calculator.hpp
 position_decoder.hpp
 scene_decoder.hpp
