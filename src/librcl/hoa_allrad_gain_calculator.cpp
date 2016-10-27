@@ -121,7 +121,6 @@ void HoaAllRadGainCalculator::process( objectmodel::ObjectVector const & objects
     try
     {
       objectmodel::HoaSource const & hoaSrc = dynamic_cast<objectmodel::HoaSource const &>(obj);
-      objectmodel::LevelType const srcLevel = hoaSrc.level( );
       std::size_t const numHoaSignals = hoaSrc.numberOfChannels( );
       if( numHoaSignals != (hoaSrc.order()+1)*(hoaSrc.order()+1) )
       {
@@ -136,7 +135,7 @@ void HoaAllRadGainCalculator::process( objectmodel::ObjectVector const & objects
         }
         for( std::size_t spkIdx(0); spkIdx < numRealSpeakers; ++spkIdx )
         {
-          gainMatrix(spkIdx, chIdx ) = srcLevel * decodeGains( sigIdx, spkIdx );
+          gainMatrix(spkIdx, chIdx ) = decodeGains( sigIdx, spkIdx );
         }
       }
     }

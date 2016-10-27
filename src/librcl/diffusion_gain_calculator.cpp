@@ -83,13 +83,13 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
     {
     case objectmodel::ObjectTypeId::DiffuseSource:
     {
-      gains[channelId] = obj.level();
+      gains[channelId] = 1.0f;
       break;
     }
     case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
     {
       objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-      gains[channelId] = psdSrc.diffuseness() * psdSrc.level();
+      gains[channelId] = psdSrc.diffuseness();
       break;
     }
     default:

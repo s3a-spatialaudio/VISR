@@ -110,8 +110,6 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       continue;
     }
 
-    mLevels[channelId] = obj.level( );
-
     objectmodel::ObjectTypeId const ti = obj.type();
 
     // For the moment, we treat the two supported source type here.
@@ -121,13 +119,14 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
     {
       objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-      mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
+      mLevels[channelId] = (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
       // Fall through intentionally
     }
     case objectmodel::ObjectTypeId::PointSource:
     {
       objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
       mSourcePositions[channelId].set( pointSrc.x(), pointSrc.y(), pointSrc.z() );
+      mLevels[channelId] = 1.0f;
       break;
     }
     case objectmodel::ObjectTypeId::PlaneWave:
@@ -138,6 +137,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
                                                                efl::degree2radian( planeSrc.incidenceElevation() ),
                                                                1.0f);
       mSourcePositions[ channelId ].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */);
+      mLevels[channelId] = 1.0f;
       break;
     }
     default:
