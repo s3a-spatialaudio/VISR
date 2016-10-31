@@ -10,6 +10,17 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 # The name of our top-level project.
 PROJECT( VISR CXX C )
 
+# Define central version numbers for the project
+# TODO: Decide whether to move that to an external CMake file .
+set( VISR_MAJOR_VERSION 0 )
+set( VISR_MINOR_VERSION 8 )
+set( VISR_PATCH_VERSION 0 )
+
+ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+
+
 # Add support for unit tests
 INCLUDE( CTest )
 
