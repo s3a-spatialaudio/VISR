@@ -58,8 +58,11 @@ int main( int argc, char const * const * argv )
         cmdLineOptions.printDescription( std::cout );
         return EXIT_SUCCESS;
       case Options::ParseResult::Version:
-        // TODO: Implement retrieval of version information.
-        std::cout << "VISR S3A Baseline Renderer V0.1b" << std::endl;
+        // TODO: Outsource the version string generation to a central file.
+        std::cout << "VISR S3A Baseline Renderer "
+		  << VISR_MAJOR_VERSION << "."
+		  << VISR_MINOR_VERSION << "."
+		  << VISR_PATCH_VERSION << std::endl;
         return EXIT_SUCCESS;
       case Options::ParseResult::Success:
         break; // carry on
