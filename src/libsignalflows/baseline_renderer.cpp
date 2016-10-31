@@ -10,6 +10,7 @@
 #include <librcl/biquad_iir_filter.hpp>
 
 #include <boost/filesystem.hpp>
+#include <boost/preprocessor/cat.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -134,20 +135,22 @@ namespace visr
 
       //////////////////////////////////////////////////////////////////////////////////////
       // HOA decoding support
-      boost::filesystem::path const regArrayPath( CMAKE_SOURCE_DIR "/src/libpanning/test/matlab/arrays/t-design_t8_P40.xml" );
-      boost::filesystem::path const regArrayDecodeMtxPath( CMAKE_SOURCE_DIR "/src/libpanning/test/matlab/arrays/decode_N8_P40_t-design_t8_P40.txt" );
-      if( not exists( regArrayPath ) or is_directory( regArrayPath ) )
-      {
-        throw std::invalid_argument( "Path to regular array does not exist." );
-      }
-      if( not exists( regArrayDecodeMtxPath ) or is_directory( regArrayDecodeMtxPath ) )
-      {
-        throw std::invalid_argument( "Path to HOA decoding matrix does not exist." );
-      }
-      pml::MatrixParameter<Afloat> allRadDecoderGains = pml::MatrixParameter<Afloat>::fromTextFile( regArrayDecodeMtxPath.string() );
-
+      // The decoder configuration is stored in two text files.
+      // At the time being, these are compiled into the binaries.
+      // To this end, ".cpp" files are created by adding quote pairs to each line and
+      // replacing quotes by \". THis is done manually at the moment, but should be automated in the build system.
+      static std::string const cRegularArrayConfigStr = 
+#include "libpanning/test/matlab/arrays/t-design_t8_P40.xml.cpp"
+      ;
       panning::LoudspeakerArray allRadRegArray;
-      allRadRegArray.loadXmlFile( regArrayPath.string() );
+      std::stringstream cRegularArrayConfigStream( cRegularArrayConfigStr );
+      allRadRegArray.loadXmlStream( cRegularArrayConfigStream );
+
+      static std::string const allRadDecoderGainMatrixString =
+#include "libpanning/test/matlab/arrays/decode_N8_P40_t-design_t8_P40.txt.cpp"
+      ;
+      pml::MatrixParameter<Afloat> const allRadDecoderGains
+        = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
       mAllradGainCalculator.setup( allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
 
       //////////////////////////////////////////////////////////////////////////////////////
