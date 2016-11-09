@@ -45,9 +45,9 @@ int main( int argc, char const * const * argv )
   case Options::ParseResult::Version:
     // TODO: Outsource the version string generation to a central file.
     std::cout << "VISR Matrix convolver utility  "
-	      << VISR_MAJOR_VERSION << "."
-	      << VISR_MINOR_VERSION << "."
-	      << VISR_PATCH_VERSION << std::endl;
+              << VISR_MAJOR_VERSION << "."
+              << VISR_MINOR_VERSION << "."
+              << VISR_PATCH_VERSION << std::endl;
     return EXIT_SUCCESS;
   case Options::ParseResult::Success:
     break; // carry on
@@ -107,7 +107,7 @@ int main( int argc, char const * const * argv )
   // back to PortAudio in all other cases.
   // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
 #ifdef VISR_JACK_SUPPORT
-  bool const useNativeJack = boost::iequals(audioBackend, "JACK" );
+  bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
 #endif
 
    std::unique_ptr<visr::ril::AudioInterface> audioInterface;
