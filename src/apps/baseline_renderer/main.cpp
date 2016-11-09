@@ -121,10 +121,10 @@ int main( int argc, char const * const * argv )
     if (useNativeJack)
     {
       rrl::JackInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
+      interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
       interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
       interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
+      interfaceConfig.mSampleRate = samplingRate;
       interfaceConfig.setCapturePortNames("input_", 0, numberOfObjects - 1);
       interfaceConfig.setPlaybackPortNames("output_", 0, numberOfOutputChannels - 1);
       interfaceConfig.mClientName = "VisrRenderer";
