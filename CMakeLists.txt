@@ -7,6 +7,9 @@
 # cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
+# Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
+CMAKE_POLICY(SET CMP0063 NEW)
+
 # The name of our top-level project.
 PROJECT( VISR CXX C )
 
