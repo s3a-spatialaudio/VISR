@@ -1,5 +1,10 @@
 Changelog for project VISR
 
+Version 0.8.1
+=============
+
+- Baseline renderer: Provide option NATIVE_JACK for using the native jack audio driver
+- Matrix convolver: Renamed audio backend option "JACK" to JACK_NATIVE for consistency.
 
 Version 0.8.0
 =============
