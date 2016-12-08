@@ -8,7 +8,9 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
-CMAKE_POLICY(SET CMP0063 NEW)
+if( POLICY CMP0063 ) # (only if the CMake version supports this policy
+  CMAKE_POLICY(SET CMP0063 NEW)
+endif( POLICY CMP0063 )
 
 # The name of our top-level project.
 PROJECT( VISR CXX C )
