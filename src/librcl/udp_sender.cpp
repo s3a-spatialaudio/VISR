@@ -72,7 +72,11 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   mInternalMessageBuffer.reset( new pml::MessageQueue< std::string >( ) );
 
   udp::resolver resolver( *mIoService );
-  udp::resolver::query query( udp::v4( ), receiverAddress, std::to_string(receiverPort) );
+  udp::resolver::query query( udp::v4( ),
+                              receiverAddress,
+                              std::to_string(receiverPort),
+                              udp::resolver::query::flags::passive ); /* Override the default values for the flag parameter which includes "address_configured"
+    that requires a network conection apart from loopback device. */
   mRemoteEndpoint = *resolver.resolve( query );
   std::cout << "Remote endpoint: " << mRemoteEndpoint.address().to_string() << ":" << mRemoteEndpoint.port() << std::endl;
   if( mRemoteEndpoint.port() != static_cast<unsigned short>(receiverPort) )
