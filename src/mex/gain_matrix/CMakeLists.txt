@@ -14,8 +14,7 @@ set(CPP_FILE_NAME ${CPP_FILE}.cpp)
 INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 
 # <AF> Don't use export files, put export the mexFunction explicitly.
-# <AF> Consider replacing SHARED with MODULE
-add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${CMAKE_SOURCE_DIR}/cmake_modules/Matlabdef.def )
+add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${CMAKE_SOURCE_DIR}/cmake_modules/Matlabdef.def )
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.
@@ -26,4 +25,4 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX 
 target_link_libraries(${PROJECT_NAME} rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
 
 # Install the .mexXXX file to mex/
-INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION mex)
+INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION mex)
