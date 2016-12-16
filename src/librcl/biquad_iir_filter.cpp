@@ -78,7 +78,8 @@ void BiquadIirFilter::setCoefficientMatrix( pml::BiquadParameterMatrix< SampleTy
   {
     throw std::invalid_argument( "BiquadIirFilter: The number of filters in the coefficient matrix does not match the number of channels of this component." );
   }
-  if( coeffs.numberOfSections( ) != mNumberOfBiquadSections )
+  // Special case if the parameter has zero channels (i.e., inactive)
+  if( (mNumberOfChannels > 0) and coeffs.numberOfSections( ) != mNumberOfBiquadSections )
   {
     throw std::invalid_argument( "BiquadIirFilter: The number of biquad section in the coefficient matrix does not match the number of sections of this component." );
   }
