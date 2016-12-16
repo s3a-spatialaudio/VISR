@@ -108,11 +108,9 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>("tracking", std::string());
 
-    if( not cmdLineOptions.hasOption( "reverb-config" ) )
-    {
-      throw std::invalid_argument( "VISR renderer: Mandatory option \"reverb-config\" missing." );
-    }
-    const std::string reverbConfiguration= cmdLineOptions.getOption<std::string>( "reverb-config" );
+    // Initialise with a valid, albeit empty JSON string if no reverb config is provided. This translates to a reverb
+    // rendering path with zero reverb object 'slots'
+    const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", "{}" );
 
     // Selection of audio interface:
     // For the moment we check for the name 'NATIVE_JACK' and select the specialized audio interface and fall

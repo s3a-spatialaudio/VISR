@@ -416,17 +416,16 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
     throw std::invalid_argument( std::string( "Error while parsing reverb config string: " ) + ex.what() );
   }
 
-  mMaxNumReverbObjects = tree.get<std::size_t>( "numReverbObjects" );
-  mLateReverbFilterLengthSeconds = tree.get<ril::SampleType>( "lateReverbFilterLength" );
-  std::size_t const lateReverbFilterLengthSamples( static_cast<std::size_t>(std::ceil( mLateReverbFilterLengthSeconds * samplingFrequency() ) ));
+  mMaxNumReverbObjects = tree.get<std::size_t>( "numReverbObjects", 0 );
+  mLateReverbFilterLengthSeconds = tree.get<ril::SampleType>( "lateReverbFilterLength", 0 );
+  std::size_t const lateReverbFilterLengthSamples = std::max( static_cast<std::size_t>(std::ceil( mLateReverbFilterLengthSeconds * samplingFrequency() )), 1ul );
 
-  boost::filesystem::path const lateReverbFilterPath( tree.get<std::string>( "lateReverbDecorrelationFilters" ));
-  mNumDiscreteReflectionsPerObject = tree.get<std::size_t>( "discreteReflectionsPerObject" );
+  std::string const lateReverbDecorrFilterName( tree.get<std::string>( "lateReverbDecorrelationFilters", std::string() ));
+  mNumDiscreteReflectionsPerObject = tree.get<std::size_t>( "discreteReflectionsPerObject", 0 );
 
   std::size_t const numWallReflBiquads = objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads;
 
-  boost::optional<ril::SampleType> discreteReflectionDelayOpt = tree.get_optional<ril::SampleType>( "maxDiscreteReflectionDelay" );
-  ril::SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
+  ril::SampleType const maxDiscreteReflectionDelay = tree.get<ril::SampleType>( "maxDiscreteReflectionDelay",  1.0f );
 
   // The maximum number of late filter recalculations per period.
   std::size_t const cLateFilterUpdatesPerPeriod( tree.get<std::size_t>( "lateReverbFilterUpdatesPerPeriod", 1 ));
@@ -439,31 +438,41 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
     ? std::pow( 10.0, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
     : defaultLateDecorrelatorGain;
-  
 
-  if( not exists( lateReverbFilterPath ) )
+  pml::MatrixParameter<ril::SampleType> lateDecorrelationFilters(ril::cVectorAlignmentSamples );
+  if( lateReverbDecorrFilterName.empty() )
   {
-    throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
+    // The convolution engine requires at least one filter block.
+    lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), period() );
+    lateDecorrelationFilters.zeroFill();
   }
-  pml::MatrixParameter<ril::SampleType> allLateDecorrelationFilters
-    = pml::MatrixParameter<ril::SampleType>::fromAudioFile( lateReverbFilterPath.string( ), ril::cVectorAlignmentSamples );
-  std::size_t const lateDecorrelationFilterLength = allLateDecorrelationFilters.numberOfColumns();
-  if( allLateDecorrelationFilters.numberOfRows() < arrayConfig.getNumRegularSpeakers() )
+  else
   {
-    throw std::invalid_argument( "The number of loudspeakers exceeds the number of late reverberation decorrelation filters in the provided file." );
-  }
-  efl::BasicMatrix<ril::SampleType> lateDecorrelationFilters( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength, ril::cVectorAlignmentSamples );
-  for( std::size_t rowIdx( 0 ); rowIdx < arrayConfig.getNumRegularSpeakers(); ++rowIdx )
-  {
-    // Multiply the raw unit-magnitude filters by the scaling gain.
-    if( efl::vectorMultiplyConstant( lateReverbDecorrelatorGain,
-                                     allLateDecorrelationFilters.row( rowIdx ),
-                                     lateDecorrelationFilters.row( rowIdx ),
-                                     lateDecorrelationFilterLength,
-                                     ril::cVectorAlignmentSamples ) != efl::noError )
+    boost::filesystem::path const lateReverbDecorrFilterPath( lateReverbDecorrFilterName );
+    if( not exists( lateReverbDecorrFilterPath ) )
     {
-      throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
+      throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
     }
+    pml::MatrixParameter<ril::SampleType> const allLateDecorrelationFilters = pml::MatrixParameter<ril::SampleType>::fromAudioFile( lateReverbDecorrFilterName, ril::cVectorAlignmentSamples );
+    std::size_t const lateDecorrelationFilterLength = allLateDecorrelationFilters.numberOfColumns();
+    if( allLateDecorrelationFilters.numberOfRows() < arrayConfig.getNumRegularSpeakers() )
+    {
+      throw std::invalid_argument( "The number of loudspeakers exceeds the number of late reverberation decorrelation filters in the provided file." );
+    }
+    lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength );
+    for( std::size_t rowIdx( 0 ); rowIdx < arrayConfig.getNumRegularSpeakers(); ++rowIdx )
+    {
+      // Multiply the raw unit-magnitude filters by the scaling gain.
+      if( efl::vectorMultiplyConstant( lateReverbDecorrelatorGain,
+                                      allLateDecorrelationFilters.row( rowIdx ),
+                                      lateDecorrelationFilters.row( rowIdx ),
+                                      lateDecorrelationFilterLength,
+                                      ril::cVectorAlignmentSamples ) != efl::noError )
+      {
+        throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
+      }
+    }
+
   }
 
   // set up the components
@@ -509,7 +518,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   {
     lateDecorrelationRouting.addRouting( 0, lspIdx, lspIdx, 1.0f );
   }
-  mLateDiffusionFilter.setup( 1, arrayConfig.getNumRegularSpeakers( ), lateDecorrelationFilterLength,
+  mLateDiffusionFilter.setup( 1, arrayConfig.getNumRegularSpeakers( ), lateDecorrelationFilters.numberOfColumns(),
                               arrayConfig.getNumRegularSpeakers( ), arrayConfig.getNumRegularSpeakers( ),
                               lateDecorrelationFilters, lateDecorrelationRouting );
   mReverbMix.setup( arrayConfig.getNumRegularSpeakers(), 2 );
