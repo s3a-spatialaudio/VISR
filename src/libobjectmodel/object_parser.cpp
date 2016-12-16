@@ -3,6 +3,8 @@
 #include "object_parser.hpp"
 #include "object_type.hpp"
 
+#include <libpml/index_sequence.hpp>
+
 #include <boost/property_tree/ptree.hpp>
 
 #include <iostream>
@@ -16,17 +18,20 @@ namespace objectmodel
 /*virtual*/ void ObjectParser
 ::parse( boost::property_tree::ptree const & tree, Object & obj ) const
 {
-  // TODO: extend this to multichannel objects using a syntax like "0 1 2", "0,1,2" with arbitrary spacing or even "0-2,3 4-6"
   try
   {
-    // for the moment, we only support monaural channels
-    Object::ChannelIndex const scalarChannelIndex = tree.get<Object::ChannelIndex>( "channels" );
-    obj.resetNumberOfChannels( 1 );
-    obj.setChannelIndex( 0, scalarChannelIndex );
+    std::string const channelString = tree.get<std::string>( "channels" );
+    pml::IndexSequence const channelIndices( channelString );
+    // Todo: Consider more convenient set method.
+    obj.resetNumberOfChannels( channelIndices.size() );
+    for( std::size_t idx( 0 ); idx < obj.numberOfChannels(); ++idx )
+    {
+      obj.setChannelIndex( idx, channelIndices.at( idx ) );
+    }
   }
-  catch( std::exception const & /*ex*/ )
+  catch( std::exception const & ex )
   {
-    std::cerr << "ObjectParser: Parsing of channel index failed (only single-channel objects are supported at the moment)";
+    std::cerr << "ObjectParser: Parsing of channel indices failed: " << ex.what() << std::endl;
   }
 
   obj.setObjectId( tree.get<ObjectId>( "id" ) );

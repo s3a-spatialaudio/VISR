@@ -7,23 +7,29 @@
 # cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
+# Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
+if( POLICY CMP0063 ) # (only if the CMake version supports this policy
+  CMAKE_POLICY(SET CMP0063 NEW)
+endif( POLICY CMP0063 )
+
 # The name of our top-level project.
 PROJECT( VISR CXX C )
+
+# Define central version numbers for the project
+# TODO: Decide whether to move that to an external CMake file .
+set( VISR_MAJOR_VERSION 0 )
+set( VISR_MINOR_VERSION 8 )
+set( VISR_PATCH_VERSION 1 )
+
+ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+
 
 # Add support for unit tests
 INCLUDE( CTest )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-
-# TBD: Switch between GNU compiler and clang on Linux platforms
-OPTION( SET_CLANG_COMPILER "Use the clang compiler on Linux platforms" OFF )
-
-# Enable C++11 features on Linux platforms
-# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
-# Maybe there is a more general way to configure the different platforms and toolchains
-if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-endif()
 
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
@@ -49,17 +55,30 @@ IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
   SET( VISR_SYSTEM_PROCESSOR x86_64 )
 ENDIF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
 STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME )
-# FOr use as a C/C++ preprocessor definition, we must not use hyphens.
+# For use as a C/C++ preprocessor definition, we must not use hyphens.
 STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_MACRO )
 
 
-MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
-MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
-MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
+# MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
+# MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
+# MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
 
+# Make the platform strings available to the source code.
 ADD_DEFINITIONS("-DVISR_SYSTEM_PROCESSOR_${VISR_SYSTEM_PROCESSOR}")
 ADD_DEFINITIONS("-DVISR_SYSTEM_NAME_${VISR_SYSTEM_NAME}")
 ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
+
+############################################################
+# Set platform-specific compiler flags
+
+# This covers Linux and MacOS X
+if(UNIX)
+  # TODO: Add more elaborate configuration for -march and -mtune
+  # At the moment, the code is invariably built for the architecture
+  # features of the machine it is compiled on.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
+endif(UNIX)
 
 ############################################################
 # Create universal binaries on MacOS

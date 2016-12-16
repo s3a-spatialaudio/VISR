@@ -97,6 +97,28 @@ BOOST_AUTO_TEST_CASE( UpdateSceneSameIdDifferentType )
   BOOST_CHECK_CLOSE( retrievedObj.level(), 0.25f, 1e-6f );
 }
 
+BOOST_AUTO_TEST_CASE( ParseMultiChannelObject )
+{
+  std::string const msg = "{ \"objects\":[{\"id\": 27,\n \"channels\": \"0,1,2:4\",\n \"type\": \"point\",\n \"group\": 12,\n \"priority\": 3,\n \"level\": 0.8,\n"
+    "\"position\": {\"x\": 2.4, \"y\": 1.2,\n \"z\": -0.3 } }, {\"id\": 5,\n \"channels\": \"0\",\n \"type\": \"point\",\n \"group\": 1,\n \"priority\": 2,\n \"level\": 0.375,\n"
+    "\"position\": {\"x\": 1.5, \"y\": -1.5,\n \"z\": 0 } }] }";
+
+  ObjectVector scene;
+
+  ObjectVectorParser::fillObjectVector( msg, scene );
+
+  BOOST_CHECK( scene.size( ) == 2 );
+
+  ObjectId const id = 27;
+
+  Object const & retrievedObj = scene.at( id );
+
+  BOOST_CHECK( retrievedObj.groupId( ) == 12 );
+
+  BOOST_CHECK( retrievedObj.numberOfChannels() == 5 );
+}
+
+
 } // namespace test
 } // namespace objectmodel
 } // namespce visr

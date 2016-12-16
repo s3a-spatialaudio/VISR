@@ -1,33 +1,23 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-/* Super-safe determination of the MAX define for setting the operating system. */
-#ifdef __APPLE_CC__
-#ifndef MAC_VERSION 
-#define MAC_VERSION
-#undef WIN_VERSION
-#endif
-#else
-#ifdef _MSC_VER
-#ifndef WIN_VERSION 
-#define WIN_VERSION
-#endif
-#undef MAC_VERSION
-#endif
-#endif
-
-#include <maxmspexternals/libmaxsupport/external_base.hpp>
-#include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
-
-#include <libsignalflows/gain_matrix.hpp>
+#ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+#define VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
 
 #include <libpml/matrix_parameter.hpp>
 
+#include <libsignalflows/gain_matrix.hpp>
+
+// We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
+// stuff such as defining macros min, max, and error
+#include <maxmspexternals/libmaxsupport/external_base.hpp>
+#include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
+
 #include <cstddef>
-#include <limits>
 #include <memory>
 
 namespace visr
 {
+
 namespace maxmsp
 {
 
@@ -68,3 +58,5 @@ private:
 
 } // namespace maxmsp
 } // namespace visr
+
+#endif // #ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED

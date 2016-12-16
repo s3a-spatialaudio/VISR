@@ -24,10 +24,14 @@
 #include "z_dsp.h"
 #include "ext_obex.h"
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
 #include <sstream>
 
-// Some loony (Max?) obviously defines max, thus hiding any C++/STL functions of the same name.
+// Some loony (Max/MSP?) obviously defines max, thus hiding any C++/STL functions of the same name.
 #undef max
+#undef min // same for min(), although there is no Min/MSP around.
 
 namespace visr
 {
@@ -39,12 +43,77 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
 {
   post( "GainMatrix::GainMatrix() constructor called." );
 
-  float numChannels = 2.0; // Default number of channels
+  t_atom_long numInputs = std::numeric_limits<long>::max();
+  t_atom_long numOutputs = std::numeric_limits<long>::max();
 
-  atom_arg_getfloat( &numChannels, 0, argc, argv );
-  mNumberOfInputs = static_cast<std::size_t>(numChannels);
-  atom_arg_getfloat( &numChannels, 1, argc, argv );
-  mNumberOfOutputs = static_cast<std::size_t>(numChannels);
+#if 1
+  numInputs = atom_getlong( argv + 0 );
+#else
+  if( atom_arg_getfloat( &numOutputs, 1, argc, argv ) != MAX_ERR_NONE )
+  {
+    object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "error parsing first argument (numInputs)" );
+  }
+#endif
+  mNumberOfInputs = static_cast<std::size_t>(numInputs);
+#if 1
+  numOutputs = atom_getlong( argv + 1 );
+#else
+  mNumberOfOutputs = static_cast<std::size_t>(numOutputs);
+  if( atom_arg_gettext( &numOutputs, 1, argc, argv ) != MAX_ERR_NONE )
+  {
+    object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "error parsing first argument (numInputs)" );
+  }
+#endif
+  mNumberOfOutputs = static_cast<std::size_t>(numOutputs);
+
+  mGains.resize(mNumberOfOutputs, mNumberOfInputs );
+  if( argc >= 3 )
+  {
+    if( atom_gettype( argv + 2 ) != A_SYM )
+    {
+      object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "Argument #2 is not a symbol." );
+      return;
+    }
+    t_symbol const * sym = atom_getsym( argv + 2 );
+    object_post( reinterpret_cast<t_object *>(getMaxProxy( )), "Retrieved symbol pointer." );
+    object_post( reinterpret_cast<t_object *>(getMaxProxy( )), sym->s_name );
+    std::string const initString( sym->s_name );
+    try
+    {
+      if( (initString.size() >= 1) and ( initString[0] == '@' ) )
+      {
+        boost::filesystem::path const filePath( initString.c_str() + 1 );
+        if( not exists( filePath ) )
+        {
+          object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "The initalisation file for the gain matrix does not exist." );
+          return;
+        }
+        pml::MatrixParameter<ril::SampleType> initGains = pml::MatrixParameter<ril::SampleType>::fromTextFile( filePath.string( ) );
+        if( (initGains.numberOfRows( ) != mNumberOfOutputs) or( initGains.numberOfColumns( ) != mNumberOfInputs ) )
+        {
+          object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "The dimensions of the initalisation matrix do not match." );
+          return;
+        }
+        mGains.copy( initGains );
+      }
+      else
+      {
+        pml::MatrixParameter<ril::SampleType> initGains = pml::MatrixParameter<ril::SampleType>::fromString( initString );
+        if( (initGains.numberOfRows() != mNumberOfOutputs) or( initGains.numberOfColumns() != mNumberOfInputs ) )
+        {
+          object_error( reinterpret_cast<t_object *>(getMaxProxy()), "The dimensions of the initalisation matrix do not match." );
+          return;
+        }
+        mGains.copy( initGains );
+      }
+    }
+    catch( std::exception const & ex )
+    {
+      std::stringstream err; err << "Error while parsing/copying initial gainmatrix: " << ex.what();
+      object_error( reinterpret_cast<t_object *>(getMaxProxy( )), err.str().c_str() );
+      return;
+    }
+  }
 
   // Creating the inlets
   dsp_setup( getMaxProxy(), (int)mNumberOfInputs );
@@ -55,13 +124,6 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
     // Again: Using plainObject->mMaxProxy would require a less nasty cast.
     outlet_new( reinterpret_cast<t_object *>(getMaxProxy()), "signal" );
   }
-  float delay = 0.0f;
-  atom_arg_getfloat( &delay, 1, argc, argv );
-  float gain = 1.0f;
-  atom_arg_getfloat( &gain, 2, argc, argv );
-
-  mGains.resize( mNumberOfOutputs, mNumberOfInputs );
-  mGains.fillValue( gain );
 }
 
 GainMatrix::~GainMatrix()
@@ -86,7 +148,8 @@ GainMatrix::~GainMatrix()
     mGains.fillValue( static_cast<ril::SampleType>(f) );
     if( mFlow ) // check whether the DSP part has already been initialised
     {
-      // mFlow->setGain( mDelays );
+      // the signal flow does not provide a means to alter the gain.
+      // TODO: Implement after the framework redesign is finished.
     }
     break;
   default:
@@ -109,8 +172,8 @@ GainMatrix::~GainMatrix()
   {
     ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
     mFlow.reset( new signalflows::GainMatrix( mNumberOfInputs, mNumberOfOutputs,
-					      mGains,
-					      mInterpolationSteps,
+                                              mGains,
+                                              mInterpolationSteps,
                                               static_cast<std::size_t>(mPeriod),
                                               samplingFrequency ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
@@ -155,7 +218,6 @@ GainMatrix::~GainMatrix()
   {
     switch( arg )
     { // if there is more than one inlet or outlet, a switch is necessary
-    case 0: sprintf( dst, "(float/signal1 Input) Scalar delay value (in seconds)." ); break;
     case 1: sprintf( dst, "(float/signal2 Input) Scalar gain value (linear scale)" ); break;
     default: sprintf( dst, "(signal %ld) Input", arg + 1 ); break;
     }
@@ -179,9 +241,8 @@ int C74_EXPORT main()
 
   visr::maxmsp::ClassRegistrar<visr::maxmsp::GainMatrix>( "gain_matrix~" );
 
-  post("visr::maxmsp::DelayVector::main() finished.");
+  post("visr::maxmsp::GainMatrix::main() finished.");
 
   return 0;
 }
-
 } // extern "C"

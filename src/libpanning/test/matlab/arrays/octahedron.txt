@@ -9,14 +9,14 @@
 % positions
 
 % cartesians
-% id	x	y	z
-
-c 1	1.0	0.0	0.0	% Front
-c 2	0.0	1.0	0.0	% Left
-c 3	-1.0	0.0	0.0	% Back
-c 4	0.0	-1.0	0.0	% Right
-c 5	0.0	0.0	1.0	% Up
-c 6	0.0	0.0	-1.0	% Down
+% id	channel	x	y	z
+              
+c 1	1	1.0	0.0	0.0	% Front
+c 2	2	0.0	1.0	0.0	% Left
+c 3	3	-1.0	0.0	0.0	% Back
+c 4	4	0.0	-1.0	0.0	% Right
+c 5	5	0.0	0.0	1.0	% Up
+c 6	6	0.0	0.0	-1.0	% Down
 
 % polars
 %   n	azim.	elev.	distance

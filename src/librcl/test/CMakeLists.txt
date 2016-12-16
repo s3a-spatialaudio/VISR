@@ -4,7 +4,7 @@ SET( APPLICATION_NAME rcl_test )
 
 ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp test_kinect_receiver.cpp )
+ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp hoa_allrad_gain_calculator.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp test_kinect_receiver.cpp )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl panning ril objectmodel pml efl)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )

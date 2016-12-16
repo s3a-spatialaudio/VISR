@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
   BOOST_CHECK( exists( arrayConfigFile ) and not is_directory( arrayConfigFile ) );
 
   panning::LoudspeakerArray arrayConfig;
-  arrayConfig.loadXml( arrayConfigFile.string() );
+  arrayConfig.loadXmlFile( arrayConfigFile.string() );
 
   std::size_t const numberOfInputs = 16;
   std::size_t const numberOfOutputs = 40;
@@ -48,6 +48,8 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
   std::string const lateDiffusionFilters( CMAKE_SOURCE_DIR "/config/filters/random_phase_allpass_64ch_512taps.wav" );
   double const maximumDiscreteReflectionDelay = 0.23456f;
 
+  std::size_t const numInputEqSections = 0;
+
   std::stringstream reverbConfig;
   reverbConfig << "{ \"numReverbObjects\": " << numReverbObjects
                << ", \"discreteReflectionsPerObject\": " << discreteReflectionsPerObject
@@ -63,6 +65,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                                  diffusionFilters,
                                  trackingConfig,
                                  8888,
+                                 numInputEqSections,
                                  reverbConfig.str(),
                                  period,
                                  48000

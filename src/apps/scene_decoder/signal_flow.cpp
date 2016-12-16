@@ -79,7 +79,7 @@ SignalFlow::setup()
   std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : mConfigFileName.substr( lastDotIdx + 1 );
   if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
   {
-    loudspeakerArray.loadXml( mConfigFileName );
+    loudspeakerArray.loadXmlFile( mConfigFileName );
   }
   else
   {

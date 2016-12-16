@@ -101,6 +101,11 @@ public:
    */
   bool removeEntry( IndexType outputIdx );
 
+  /**
+   * Clear all routing entries.
+   */
+  void clear();
+
   Entry const & getEntry( IndexType outputIdx ) const
   {
     static const Entry returnInvalid{ cInvalidIndex, cInvalidIndex };

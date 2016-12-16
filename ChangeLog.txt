@@ -1,0 +1,17 @@
+Changelog for project VISR
+
+Version 0.8.1
+=============
+
+- Baseline renderer: Provide option NATIVE_JACK for using the native jack audio driver
+- Matrix convolver: Renamed audio backend option "JACK" to JACK_NATIVE for consistency.
+
+Version 0.8.0
+=============
+
+- First implementation of ChannelObject objects.
+- First implementation of HOA (Higher-Order Ambisonics) rendering using AllRAD.
+  * Hitherto developed in the hoaSourceObject
+  * Debugging and evaluation not complete yet, but no detrimental influence on other rendering techniques expected.
+- Impemented central versioning scheme for project.
+  * Possibly this will be refined by moving the implementation (version amcros and strings) into a separate file.

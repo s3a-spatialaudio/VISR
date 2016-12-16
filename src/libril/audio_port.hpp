@@ -7,9 +7,6 @@
 // Provide facility to switch off to break suspected dependency cycle.
 // #define VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE
 
-// Check how to make warning C4996 disappear
-#define _CRT_SECURE_NO_WARNINGS 1
-
 /**
  * Define whether constexpr keyword is supported by the compiler.
  * @note Maybe this constant should be set the build system.
