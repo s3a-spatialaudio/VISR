@@ -37,7 +37,7 @@ int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
     m_nSpkSources = nSpks;
     
     return 0;
-};
+}
 
 
 
@@ -74,7 +74,7 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
         }
     }
     return 0;
-};
+}
 
 } // namespace panning
 } // namespace visr

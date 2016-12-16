@@ -302,7 +302,7 @@ void MultichannelConvolverUniform<SampleType>::initFilters( efl::BasicMatrix<Sam
 
 template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::
-transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment /*= 0*/ )
+transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment /*= 0*/ ) const
 {
   if( irLength >= maxFilterLength() )
   {

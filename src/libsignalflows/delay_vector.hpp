@@ -3,7 +3,9 @@
 #ifndef VISR_MAXMSP_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
 #define VISR_MAXMSP_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+#include <libril/composite_component.hpp>
 
 #include <librcl/delay_vector.hpp>
 
@@ -14,13 +16,15 @@ namespace visr
 namespace signalflows
 {
 
-class DelayVector: public ril::AudioSignalFlow
+class DelayVector: public ril::CompositeComponent
 {
 public:
-  explicit DelayVector(std::size_t cNumberOfChannels,
-                       std::size_t interpolationPeriod,
-                       rcl::DelayVector::InterpolationType interpolationMethod,
-                       std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+  explicit DelayVector( ril::SignalFlowContext & context,
+                        const char * name,
+                        ril::CompositeComponent * parent,
+                        std::size_t cNumberOfChannels,
+                        std::size_t interpolationPeriod,
+                        rcl::DelayVector::InterpolationType interpolationMethod );
 
   ~DelayVector();
 
@@ -41,10 +45,9 @@ private:
 
   rcl::DelayVector mDelay;
 
-  /**
-   * Counter to trigger a switch of the gain matrix.
-   */
-  std::size_t mCounter;
+  ril::AudioInput mInput;
+
+  ril::AudioOutput mOutput;
 };
 
 } // namespace signalflows

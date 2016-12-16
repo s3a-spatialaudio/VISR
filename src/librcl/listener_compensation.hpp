@@ -10,12 +10,11 @@
 
 #define __S3A_renderer_dsp__listenerCompensation__
 
-//#include <iostream>
-#include <cstdio>
-
 #include <libefl/basic_matrix.hpp>
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
@@ -24,6 +23,12 @@
 #include <libefl/basic_vector.hpp>
 
 #include <libpml/listener_position.hpp>
+#include <libpml/vector_parameter.hpp>
+#include <libpml/shared_data_protocol.hpp>
+
+//#include <iostream>
+// #include <cstdio>
+#include <memory>
 
 namespace visr
 {
@@ -31,21 +36,19 @@ namespace visr
 namespace rcl
 {
 
-class ListenerCompensation: public ril::AudioComponent
+class ListenerCompensation: public ril::AtomicComponent
 {
 public:
   using SampleType = ril::SampleType;
-private:
-  panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
-  panning::XYZ m_listenerPos; //position of the listener
-  std::size_t mNumberOfLoudspeakers;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit ListenerCompensation(ril::AudioSignalFlow& container, char const * name);
+  explicit ListenerCompensation( ril::SignalFlowContext& context,
+                                 char const * name,
+                                 ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -59,15 +62,17 @@ public:
    * The process function.
    * It takes a listener position as input and calculates a gain vector and a delay vector.
    */
-  void process(pml::ListenerPosition const & pos, efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays );
+  void process() override;
 
-
-  std::size_t getNumSpeakers()  const {
-    return m_array.getNumSpeakers();
+private:
+  std::size_t getNumSpeakers( )  const
+  {
+    return m_array.getNumSpeakers( );
   }
 
-  int setListenerPosition(Afloat x, Afloat y, Afloat z){ //assigning the position of the listener
-    m_listenerPos.set(x, y, z);
+  int setListenerPosition( Afloat x, Afloat y, Afloat z )
+  { //assigning the position of the listener
+    m_listenerPos.set( x, y, z );
     return 0;
   }
 
@@ -85,6 +90,13 @@ public:
   */
   int calcDelayComp( efl::BasicVector<Afloat> & delayComp ); // this function calculates the delay compensation
 
+  panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
+  panning::XYZ m_listenerPos; //position of the listener
+  std::size_t mNumberOfLoudspeakers;
+
+  std::unique_ptr<  ril::ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition > > mPositionInput;
+  std::unique_ptr< ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mGainOutput;
+  std::unique_ptr< ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mDelayOutput;
 };//class Listener Compensation
 
 

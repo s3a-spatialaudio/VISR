@@ -5,7 +5,7 @@
 
 #define USE_CIRCULAR_BUFFER
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
@@ -37,7 +37,7 @@ namespace rcl
  * @todo Implement flexible transition length (at the moment, the block length is always used
  * @todo general cleanup (including more comprehensive range checks for the delay)
  */
-class DelayVector: public ril::AudioComponent
+class DelayVector: public ril::AtomicComponent
 {
   using SampleType = ril::SampleType;
 public:
@@ -57,7 +57,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit DelayVector( ril::AudioSignalFlow& container, char const * name );
+  explicit DelayVector( ril::SignalFlowContext& context,
+                        char const * name,
+                        ril::CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.

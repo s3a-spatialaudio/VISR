@@ -10,8 +10,10 @@ namespace rcl
 {
 
 
-NullSource::NullSource( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  NullSource::NullSource( ril::SignalFlowContext& context,
+                          char const * name,
+                          ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mOutput( "out", *this )
 {
 }

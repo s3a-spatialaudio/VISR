@@ -4,14 +4,19 @@
 
 #include <libefl/vector_functions.hpp>
 
+#include <libril/parameter_input_port.hpp>
+
+#include <iostream> // Temporary solution, replce by proper error / warning API.
+
 namespace visr
 {
 namespace rcl
 {
 
-
-SignalRouting::SignalRouting( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  SignalRouting::SignalRouting( ril::SignalFlowContext& context,
+                                char const * name,
+                                ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 {
@@ -21,17 +26,22 @@ SignalRouting::~SignalRouting()
 {
 }
 
-void SignalRouting::setup( std::size_t inputWidth, std::size_t outputWidth )
+void SignalRouting::setup( std::size_t inputWidth, std::size_t outputWidth, bool controlPort /*= false*/ )
 {
   mInput.setWidth( inputWidth );
   mOutput.setWidth( outputWidth );
+  if (controlPort)
+  {
+    mControlInput.reset(new ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
+  }
   // create an empty routing
   mRoutingVector.resize( outputWidth, pml::SignalRoutingParameter::cInvalidIndex );
 }
 
 void SignalRouting::setup( std::size_t inputWidth,
                            std::size_t outputWidth,
-                           pml::SignalRoutingParameter const & initialRouting )
+                           pml::SignalRoutingParameter const & initialRouting,
+                           bool controlPort /*= false*/)
 {
   setup( inputWidth, outputWidth );
   for( auto e : initialRouting )
@@ -47,6 +57,33 @@ void SignalRouting::process()
 {
   std::size_t const numOutputs = mOutput.width();
   std::size_t const periodSize = period();
+
+  if( mControlInput ) // Dynamic parameter changes are activated.
+  {
+    if( mControlInput->hasChanged() )
+    {
+      try
+      {
+        pml::SignalRoutingParameter const & newRoutings = mControlInput->data();
+        std::vector<pml::SignalRoutingParameter::IndexType> tmpRouting;
+        for (auto e : newRoutings)
+        {
+          pml::SignalRoutingParameter::IndexType const in = e.input;
+          pml::SignalRoutingParameter::IndexType const out = e.output;
+          checkRoutingIndexRanges(in, out);
+          mRoutingVector[out] = in;
+        }
+        mRoutingVector.swap(tmpRouting); // strong exception safety.
+      }
+      catch (std::exception const & ex)
+      {
+        // To be replaced by error reporting interface.
+        std::cerr << fullName() << ": Error while setting new routings: " << ex.what() << std::endl;
+      }
+      mControlInput->resetChanged();
+    }
+  }
+
   for( std::size_t outIdx( 0 ); outIdx < numOutputs; ++outIdx )
   {
     pml::SignalRoutingParameter::IndexType in = mRoutingVector[outIdx];

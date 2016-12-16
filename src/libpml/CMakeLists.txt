@@ -1,9 +1,58 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( SOURCES array_configuration.cpp  biquad_parameter.cpp filter_routing_parameter.cpp float_sequence.cpp index_sequence.cpp listener_position.cpp matrix_parameter.cpp message_queue.cpp signal_routing_parameter.cpp )
+SET( SOURCES
+ array_configuration.cpp
+ biquad_parameter.cpp
+ communication_protocol_instantiation.cpp 
+ double_buffering_protocol.cpp
+ empty_parameter_config.cpp
+ filter_routing_parameter.cpp
+ float_sequence.cpp
+ index_sequence.cpp
+ indexed_value_parameter.cpp
+ listener_position.cpp
+ matrix_parameter.cpp
+ matrix_parameter_config.cpp
+ message_queue.cpp
+ message_queue_protocol.cpp
+ object_vector.cpp
+ parametric_iir_coefficients.cpp
+ shared_data_protocol.cpp
+ signal_routing_parameter.cpp
+ string_parameter.cpp
+ string_parameter_config.cpp
+ time_frequency_parameter.cpp
+ time_frequency_parameter_config.cpp
+ vector_parameter.cpp
+ vector_parameter_config.cpp
+)
 
 # Basically, this makes the headers show up in the Visual studio project.
-SET( HEADERS array_configuration.hpp biquad_parameter.hpp filter_routing_parameter.hpp float_sequence.hpp index_sequence.hpp  listener_position.hpp matrix_parameter.hpp message_queue.hpp signal_routing_parameter.hpp )
+SET( HEADERS
+ array_configuration.hpp
+ biquad_parameter.hpp
+ double_buffering_protocol.hpp
+ empty_parameter_config.hpp
+ filter_routing_parameter.hpp
+ float_sequence.hpp
+ index_sequence.hpp
+ indexed_value_parameter.hpp
+ listener_position.hpp
+ matrix_parameter.hpp
+ matrix_parameter_config.hpp
+ message_queue.hpp
+ message_queue_protocol.hpp
+ object_vector.hpp
+ parametric_iir_coefficients.hpp
+ shared_data_protocol.hpp
+ signal_routing_parameter.hpp
+ string_parameter.hpp
+ string_parameter_config.hpp
+ time_frequency_parameter.hpp
+ time_frequency_parameter_config.hpp
+ vector_parameter.hpp
+ vector_parameter_config.hpp
+)
 
 INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )
 

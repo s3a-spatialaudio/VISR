@@ -4,7 +4,12 @@
 #define VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_output_port.hpp>
+
+#include <libpml/message_queue.hpp> // TODO: Replace by other data structure.
+#include <libpml/string_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -15,16 +20,6 @@
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
-namespace pml
-{
-template<typename MessageType> class MessageQueue;
-}
-
 namespace rcl
 {
 
@@ -34,7 +29,7 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public ril::AudioComponent
+class UdpReceiver: public ril::AtomicComponent
 {
 public:
   enum class Mode
@@ -54,7 +49,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpReceiver( ril::AudioSignalFlow& container, char const * name );
+  explicit UdpReceiver( ril::SignalFlowContext& context,
+                        char const * name,
+                        ril::CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -74,7 +71,7 @@ public:
   /**
    * The process function. 
    */
-  void process( pml::MessageQueue<std::string> & msgQueue);
+  void process() override;
 
 private:
   void handleReceiveData( const boost::system::error_code& error,
@@ -106,11 +103,13 @@ private:
    * Internal queue of messages received asynchronously. They will be copied into the output
    *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
    */
-  std::unique_ptr< pml::MessageQueue< std::string > > mInternalMessageBuffer;
+  std::unique_ptr< pml::MessageQueue< pml::StringParameter > > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
 
   boost::mutex mMutex;
+
+  ril::ParameterOutputPort<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

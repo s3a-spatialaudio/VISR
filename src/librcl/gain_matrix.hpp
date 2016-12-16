@@ -3,10 +3,11 @@
 #ifndef VISR_LIBRCL_GAIN_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_GAIN_MATRIX_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input_port.hpp>
 
 // TODO: make it a forward declaration
 #include <librbbl/gain_matrix.hpp>
@@ -15,14 +16,20 @@
 // so we include the header for the moment.
 // Also, I am not sure whether it makes sense to use a separate type as an alias to efl::BasicMatrix
 #include <libpml/matrix_parameter.hpp>
+#include <libpml/shared_data_protocol.hpp>
 
 #include <libefl/aligned_array.hpp>
 
 
 #include <cstddef> // for std::size_t
+#include <memory>
 
 namespace visr
 {
+//namespace pml
+//{
+//  template< class ElementType > class MatrixParameter;
+//}
 
 namespace rcl
 {
@@ -37,7 +44,7 @@ namespace rcl
  * The width of these ports is determined by the arguments "numberOfInput" and "numberOfOutputs", respectively,
  * which are passed to the setup() method.
  */
-class GainMatrix: public ril::AudioComponent
+class GainMatrix: public ril::AtomicComponent
 {
   using SampleType = ril::SampleType;
 public:
@@ -46,7 +53,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit GainMatrix( ril::AudioSignalFlow& container, char const * name );
+  explicit GainMatrix( ril::SignalFlowContext& context,
+                       char const * name,
+                       ril::CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.
@@ -62,7 +71,8 @@ public:
   void setup( std::size_t numberOfInputs, 
               std::size_t numberOfOutputs,
               std::size_t interpolationSteps,
-              SampleType initialGain = static_cast<SampleType>(0.0) );
+              SampleType initialGain = static_cast<SampleType>(0.0),
+              bool controlInput = true );
   /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfInputs The number of signals in the input signal.
@@ -76,11 +86,10 @@ public:
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,
               std::size_t interpolationSteps,
-              efl::BasicMatrix< SampleType > const & initialGains );
+              efl::BasicMatrix< SampleType > const & initialGains,
+              bool controlInput = true );
 
   void process( );
-
-  void setGains( efl::BasicMatrix< SampleType > const & newGains );
 
 private:
   std::unique_ptr< rbbl::GainMatrix< SampleType > > mMatrix;
@@ -93,6 +102,8 @@ private:
    */
   std::size_t mNumberOfInputs;
   std::size_t mNumberOfOutputs;
+
+  std::unique_ptr<ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
 };
 
 } // namespace rcl

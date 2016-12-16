@@ -3,9 +3,8 @@
 #ifndef VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 #define VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 
-#include <libril/audio_interface.hpp>
+#include "audio_interface.hpp"
 
-#include <libril/communication_area.hpp>
 #include <libril/constants.hpp>
 
 #include <memory>
@@ -17,7 +16,7 @@ namespace visr
 namespace rrl
 {
 
-class JackInterface: public ril::AudioInterface
+class JackInterface: public rrl::AudioInterface
 {
 public:
   /**
@@ -62,7 +61,7 @@ public:
 
   };
 
-  using Base = ril::AudioInterface;
+  using Base = AudioInterface;
 
   explicit JackInterface( Config const & config );
 

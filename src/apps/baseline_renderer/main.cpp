@@ -2,7 +2,7 @@
 
 // Enable native JACK interface instead of PortAudio
 // TODO: Make this selectable via a command line option.
-// #define BASELINE_RENDERER_NATIVE_JACK
+#define BASELINE_RENDERER_NATIVE_JACK
 
 #include "options.hpp"
 
@@ -14,16 +14,20 @@
 
 #include <libpml/signal_routing_parameter.hpp>
 
+#include <libril/signal_flow_context.hpp>
+
 #ifdef BASELINE_RENDERER_NATIVE_JACK
 #include <librrl/jack_interface.hpp>
 #else
 #include <librrl/portaudio_interface.hpp>
 #endif
+#include <librrl/audio_signal_flow.hpp>
 
 #include <libsignalflows/baseline_renderer.hpp>
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
+//  #include <boost/string/replace.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -107,6 +111,14 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
+    const bool lowFrequencyPanning = cmdLineOptions.getDefaultedOption("low-frequency-panning", false );
+
+    if( not cmdLineOptions.hasOption( "reverb-config" ) )
+    {
+      throw std::invalid_argument( "VISR renderer: Mandatory option \"reverb-config\" missing." );
+    }
+    const std::string reverbConfiguration= cmdLineOptions.getOption<std::string>( "reverb-config" );
+
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;
 #else
@@ -146,14 +158,21 @@ int main( int argc, char const * const * argv )
       efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
     }
 
-    signalflows::BaselineRenderer flow( loudspeakerArray,
+    ril::SignalFlowContext context( periodSize, samplingRate );
+
+    signalflows::BaselineRenderer flow( context,
+                                        "", nullptr,
+                                        loudspeakerArray,
                                         numberOfObjects,
                                         numberOfOutputChannels,
                                         cInterpolationLength,
                                         diffusionCoeffs,
                                         trackingConfiguration,
                                         sceneReceiverPort,
-                                        periodSize, samplingRate );
+                                        reverbConfiguration,
+                                        lowFrequencyPanning );
+
+    rrl::AudioSignalFlow audioFlow( flow );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );
@@ -161,7 +180,7 @@ int main( int argc, char const * const * argv )
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
-    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -179,7 +198,7 @@ int main( int argc, char const * const * argv )
 
    // Should there be an explicit stop() method for the sound interface?
 
-    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+//    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

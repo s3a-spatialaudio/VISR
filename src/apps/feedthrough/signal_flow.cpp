@@ -12,51 +12,34 @@ namespace apps
 namespace feedthrough
 {
 
-SignalFlow::SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
- : AudioSignalFlow( period, samplingFrequency )
- , mSum( *this, "Add" )
+Feedthrough::Feedthrough( ril::SignalFlowContext & context,
+                          char const * name,
+                          ril::CompositeComponent * parent )
+ : CompositeComponent( context, name, parent )
+ , mInput( "input", *this )
+ , mOutput( "output", *this )
+ , mSum( context, "Add", this )
 {
+  mInput.setWidth( 2 );
+  mOutput.setWidth( 2 );
+  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
+
+  registerAudioConnection( parent->name(), "input", ril::AudioChannelIndexVector{ 0, 1 },
+                           "Add", "input0", ril::AudioChannelIndexVector{ 0, 1 } );
+  registerAudioConnection( parent->name( ), "input", ril::AudioChannelIndexVector{ 0, 1 },
+                           "Add", "input1", ril::AudioChannelIndexVector{ 1, 0 } );
+  registerAudioConnection( "Add", "output", ril::AudioChannelIndexVector{ 0, 1 },
+                           parent->name( ), "output", ril::AudioChannelIndexVector{ 0, 1 } );
 }
 
-SignalFlow::~SignalFlow( )
+Feedthrough::~Feedthrough( )
 {
 }
  
 /*virtual*/ void 
-SignalFlow::process()
+Feedthrough::process()
 {
-  // TODO: implement me!
   mSum.process();
-}
-
-/*virtual*/ void 
-SignalFlow::setup()
-{
-  // Initialise and configure audio components
-  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
-
-  // Define and set the width of the input and output vectors of the graph
-
-  // Set up communication area 
-  // The required width of the communication area is determined by the number of capture inputs of the graph plus 
-  // the number of port outputs.
-  // Note: The alignment of the communication area should be fixed to this value with no user options.
-  initCommArea( 4, period( ), ril::cVectorAlignmentSamples );
-
-  // connect the ports
-  assignCommunicationIndices( "Add", "in0", { 0, 1} );
-
-  assignCommunicationIndices( std::string( "Add" ), std::string( "in1" ), { 1, 0 } );
-
-  // More elaborate syntax using an explicit index vector
-  std::vector<std::size_t> idxList3{ 2, 3 };
-  assignCommunicationIndices( std::string( "Add" ), std::string( "out" ), idxList3.begin( ), idxList3.end( ) );
-
-  // Set the indices for communicating the signals from and to the outside world.
-  assignCaptureIndices( {0, 1} );
-  assignPlaybackIndices( {2, 3} );
-
-  setInitialised( true );
 }
 
 } // namespace feedthrough

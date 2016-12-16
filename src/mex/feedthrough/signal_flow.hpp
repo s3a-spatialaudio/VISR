@@ -3,7 +3,9 @@
 #ifndef VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+#include <libril/composite_component.hpp>
 
 #include <librcl/add.hpp>
 
@@ -14,18 +16,21 @@ namespace mex
 namespace feedthrough
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class SignalFlow: public ril::CompositeComponent
 {
 public:
-  explicit SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+  explicit SignalFlow( ril::SignalFlowContext& context,
+                       char const * componentName,
+                       CompositeComponent * parent );
 
   ~SignalFlow();
 
-  /*virtual*/ void process( );
-
-  /*virtual*/ void setup( );
+  void setup( );
 
 private:
+  ril::AudioInput mInput;
+  ril::AudioOutput mOutput;
+
   rcl::Add mSum;
 };
 

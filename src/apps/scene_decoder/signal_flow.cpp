@@ -16,41 +16,38 @@ namespace apps
 namespace scene_decoder
 {
 
-namespace
+namespace // unnamed
 {
-// create a helper function in an unnamed namespace
-  std::vector<std::size_t> indexRange( std::size_t startIdx, std::size_t endIdx )
+  // Helper function to create contiguous ranges.
+  ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
   {
-    if( endIdx < startIdx )
-    {
-      return std::vector<std::size_t>();
-    }
-    std::size_t const vecLength( endIdx - startIdx + 1 );
-    std::vector < std::size_t> ret( vecLength );
-    std::generate( ret.begin(), ret.end(), [&] { return startIdx++; } );
-    return ret;
+    std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
+    return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
   }
 }
 
-SignalFlow::SignalFlow( std::size_t numberOfInputs,
-  std::size_t numberOfOutputs,
-  std::size_t interpolationPeriod,
-  std::string const & configFile,
-  std::size_t udpPort,
-  std::size_t period,
-  ril::SamplingFrequencyType samplingFrequency )
- : AudioSignalFlow( period, samplingFrequency )
+SignalFlow::SignalFlow( ril::SignalFlowContext & context,
+                        char const * name,
+                        ril::CompositeComponent * parent,
+                        std::size_t numberOfInputs,
+                        std::size_t numberOfOutputs,
+                        std::size_t interpolationPeriod,
+                        std::string const & configFile,
+                        std::size_t udpPort )
+ : ril::CompositeComponent( context, name, parent )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
  , mConfigFileName( configFile )
  , mNetworkPort( udpPort )
- , mSceneReceiver( *this, "SceneReceiver" )
- , mSceneDecoder( *this, "SceneDecoder" )
- , mSceneEncoder( *this, "SceneEncoder" )
- , mSceneSender( *this, "SceneSender" )
- , mGainCalculator( *this, "VbapGainCalculator" )
- , mMatrix( *this, "GainMatrix" )
+ , mInput( "in", *this )
+ , mOutput( "out", *this )
+ , mSceneReceiver( context, "SceneReceiver", this )
+ , mSceneDecoder( context, "SceneDecoder", this )
+ , mSceneEncoder( context, "SceneEncoder", this )
+ , mSceneSender( context, "SceneSender", this )
+ , mGainCalculator( context, "VbapGainCalculator", this )
+ , mMatrix( context, "GainMatrix", this )
 {
 }
 
@@ -61,18 +58,20 @@ SignalFlow::~SignalFlow( )
 /*virtual*/ void 
 SignalFlow::process()
 {
-  mSceneReceiver.process( mSceneMessages );
-  mSceneDecoder.process( mSceneMessages, mObjectVector );
-  mGainCalculator.process( mObjectVector, mGainParameters );
-  mMatrix.setGains( mGainParameters );
+  mSceneReceiver.process();
+  mSceneDecoder.process();
+  mGainCalculator.process();
   mMatrix.process();
-  mSceneEncoder.process( mObjectVector, mResendMessages );
-  mSceneSender.process( mResendMessages );
+  //mSceneEncoder.process();
+  //mSceneSender.process();
 }
 
 /*virtual*/ void
 SignalFlow::setup()
 {
+  mInput.setWidth( cNumberOfInputs );
+  mOutput.setWidth( cNumberOfOutputs );
+
   panning::LoudspeakerArray loudspeakerArray;
   // As long as we have two different config formats, we decide based on the file extention.
   std::string::size_type lastDotIdx = mConfigFileName.rfind( '.' );
@@ -101,27 +100,12 @@ SignalFlow::setup()
   mSceneEncoder.setup();
   mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
 
-  initCommArea( cNumberOfInputs + cNumberOfOutputs, period( ), ril::cVectorAlignmentSamples );
+  registerAudioConnection( "this", "in", indexRange( 0, cNumberOfInputs ), "GainMatrix", "in", indexRange( 0, cNumberOfInputs ) );
+  registerAudioConnection( "GainMatrix", "out", indexRange( 0, cNumberOfOutputs ), "this", "out", indexRange( 0, cNumberOfOutputs ) );
 
-  // connect the ports
-  assignCommunicationIndices( "GainMatrix", "in", indexRange( 0, cNumberOfInputs-1 ) );
-
-  assignCommunicationIndices( "GainMatrix", "out", indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
-
-  // Set the indices for communicating the signals from and to the outside world.
-  std::vector<ril::AudioPort::SignalIndexType> captureIndices = indexRange( 0, cNumberOfInputs - 1 );
-  std::vector<ril::AudioPort::SignalIndexType> playbackIndices = indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 );
-
-  assignCaptureIndices( &captureIndices[0], captureIndices.size() );
-  assignPlaybackIndices( &playbackIndices[0], playbackIndices.size( ) );
-
-  assignCaptureIndices( indexRange( 0, cNumberOfInputs - 1 ) );
-  assignPlaybackIndices( indexRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
-
-  mGainParameters.resize( cNumberOfOutputs, cNumberOfInputs );
-
-  // should not be done here, but in AudioSignalFlow where this method is called.
-  setInitialised( true );
+  registerParameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+  registerParameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
+  registerParameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
 }
 
 } // namespace scene_decoder

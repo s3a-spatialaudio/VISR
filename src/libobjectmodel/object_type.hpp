@@ -28,7 +28,9 @@ enum class ObjectTypeId: ObjectTypeIntegerRepresentation
   DiffuseSource = 2,  /**< Totally diffuse source type */
   PointSourceWithDiffuseness = 3, /**< Point-source-like audio object with an addditional "diffuseness" attribute 
                                   controlling the fraction of the source that is reproduced diffusely.*/
-  ExtendedSource = 4 /**< Source type with controllable extent, i.e. width and height.*/
+  ExtendedSource = 4, /**< Source type with controllable extent, i.e. width and height.*/
+  PointSourceWithReverb = 5, /**< Point source with reverberation */
+  PointSourceExtent = 6 /**< Point source with explicit spatial extent. */
   // to be continued.
 };
 

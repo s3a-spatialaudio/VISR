@@ -52,7 +52,11 @@ public:
 
   std::size_t size() const 
   {
+<<<<<<< HEAD
     return mValues.size();
+=======
+    return mValues.size();  
+>>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7
   }
 
   ElementType * values()

@@ -4,9 +4,17 @@ SET( APPLICATION_NAME rcl_test )
 
 ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp test_kinect_receiver.cpp )
+#ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp parameter_connection.cpp test_kinect_receiver.cpp )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl panning ril objectmodel pml efl)
+ADD_EXECUTABLE( ${APPLICATION_NAME} test_main.cpp parameter_connection.cpp )
+
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} panning)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ril)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} objectmodel)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} efl)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${SNDFILE_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_THREAD_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )

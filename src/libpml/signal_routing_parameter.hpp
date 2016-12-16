@@ -3,6 +3,11 @@
 #ifndef VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED
 #define VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED
 
+#include "empty_parameter_config.hpp"
+
+#include <libril/parameter_type.hpp>
+#include <libril/typed_parameter_base.hpp>
+
 #include <algorithm>
 #include <ciso646>
 #include <cstdint>
@@ -18,9 +23,11 @@ namespace pml
 {
 
 /**
- *
+ * A parameter class to represent potentially sparse routings between sets of input and output indices.
+ * An output index can be routed to zero or one input index, while an input index can be connected to zer, one, or multiple outputs.
+ * @note Not sure whether we should introduce parameters to limit
  */
-class SignalRoutingParameter
+class SignalRoutingParameter: public ril::TypedParameterBase < pml::EmptyParameterConfig, ril::ParameterType::SignalRouting >
 {
 public:
   using IndexType = std::size_t;
@@ -82,10 +89,22 @@ public:
     addRouting( Entry{ inputIdx, outputIdx } );
   }
 
+  /**
+   * Add a routing entry for the (input, output) pair contained in the entry.
+   * An existing routing entry for the output index is deleted.
+   */
   void addRouting( Entry const & newEntry );
 
+  /**
+   * Remove a routing entry consisting of a input and an output index.
+   * @return If a routing for this (input, output) pair existed before, false if not.
+   */
   bool removeEntry( Entry const & entry );
 
+  /**
+   * Remove a routing for a given output index.
+   * @return True if there was a routing for that output, false if no such entry existed.
+   */
   bool removeEntry( IndexType outputIdx );
 
   Entry const & getEntry( IndexType outputIdx ) const
@@ -113,5 +132,6 @@ private:
 } // namespace pml
 } // namespace visr
 
+DEFINE_PARAMETER_TYPE( visr::pml::SignalRoutingParameter, visr::ril::ParameterType::SignalRouting, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED

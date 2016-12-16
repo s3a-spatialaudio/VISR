@@ -9,13 +9,22 @@ namespace visr
 namespace pml
 {
 
-ListenerPosition::ListenerPosition()
+ListenerPosition::ListenerPosition( ril::ParameterConfigBase const & config )
+  : ListenerPosition( dynamic_cast<EmptyParameterConfig const &>(config) )
+{
+}
+
+ListenerPosition::ListenerPosition( EmptyParameterConfig const & /* = EmptyParameterConfig( )*/ )
  : mX( 0.0f )
  , mY( 0.0f )
  , mZ( 0.0f )
  , mTimeNs( 0 )
  , mFaceID( 0 )
 {}
+
+ListenerPosition::~ListenerPosition()
+{
+}
 
 void ListenerPosition::parse(std::istream &  inputStream)
 {

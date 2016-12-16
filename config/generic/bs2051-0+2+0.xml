@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<panningConfiguration dimension="2" infinite="false">
+   <loudspeaker channel="1" id="1">
+      <polar az="-30" el="0" r="1"/>
+   </loudspeaker>
+   <loudspeaker channel="2" id="2">
+      <polar az="30" el="0" r="1"/>
+   </loudspeaker>
+   <virtualspeaker id="3">
+      <polar az="180" el="0" r="1"/>
+   </virtualspeaker>
+   <triplet l1="1" l2="3"/>
+   <triplet l1="2" l2="1"/>
+   <triplet l1="3" l2="2"/>
+</panningConfiguration>

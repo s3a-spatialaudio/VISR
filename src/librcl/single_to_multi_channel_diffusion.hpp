@@ -5,7 +5,7 @@
 
 #define DIFFUSION_USE_FAST_CONVOLVER
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 
@@ -33,7 +33,7 @@ namespace rcl
 /**
  * Audio Component for creating a set of decorrelated signals out of a single input signal.
  */
-class SingleToMultichannelDiffusion: public ril::AudioComponent
+class SingleToMultichannelDiffusion: public ril::AtomicComponent
 {
   /**
    * Alias for the type of the audio samples processed by this component.
@@ -45,7 +45,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SingleToMultichannelDiffusion( ril::AudioSignalFlow& container, char const * name );
+  explicit SingleToMultichannelDiffusion( ril::SignalFlowContext& context,
+                                          char const * name,
+                                          ril::CompositeComponent * parent = nullptr );
     
   ~SingleToMultichannelDiffusion();
 

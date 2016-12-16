@@ -3,20 +3,20 @@
 #ifndef VISR_LIBRCL_POSITION_DECODER_HPP_INCLUDED
 #define VISR_LIBRCL_POSITION_DECODER_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
-#include <libpanning/LoudspeakerArray.h>
-#include <libefl/vector_functions.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_type.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
+#include <libpml/listener_position.hpp>
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/string_parameter.hpp>
 
+#include <libpanning/XYZ.h>
 
 namespace visr
 {
-namespace pml
-{
-template< typename MessageType > class MessageQueue;
-class ListenerPosition;
-}
-
 namespace rcl
 {
 
@@ -24,7 +24,7 @@ namespace rcl
  * Component to decode listener position data from messages (typically received from a network).
  * This component has neither audio inputs or outputs.
  */
-class PositionDecoder: public ril::AudioComponent
+class PositionDecoder: public ril::AtomicComponent
 {
 public:
   /**
@@ -32,7 +32,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PositionDecoder( ril::AudioSignalFlow& container, char const * name );
+  explicit PositionDecoder( ril::SignalFlowContext& context,
+                            char const * name,
+                            ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -62,7 +64,7 @@ public:
    * @param messages The message queue containing JSON messages. The message queue will be emptied during the function call.
    * @param position The position object where the content of the parsed messages is written to.
    */
-  void process( pml::MessageQueue<std::string> & messages, pml::ListenerPosition & position );
+  void process();
 
 private:
 
@@ -74,6 +76,8 @@ private:
 
   pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
 
+  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionOutput;
 };
 
 } // namespace rcl

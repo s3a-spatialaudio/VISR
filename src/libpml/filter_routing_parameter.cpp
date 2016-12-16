@@ -164,8 +164,35 @@ void FilterRoutingList::parseJson( std::string const & encoded )
 
 void FilterRoutingList::parseJson( std::istream & encoded )
 {
+<<<<<<< HEAD
   FilterRoutingList newList = FilterRoutingList::fromJson( encoded );
   swap( newList ); // Ensure strong exception safety.
+=======
+  FilterRoutingList newList;
+
+  using ptree = boost::property_tree::ptree;
+
+  ptree propTree;
+  try
+  {
+    read_json( encoded, propTree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "FilterRoutingList::parseJson(): Error while reading JSON data: " ) + ex.what() );
+  }
+  for( auto v : propTree.get_child( "routings" ) )
+  {
+    ptree const & routingNode = v.second;
+    IndexType const inIdx = routingNode.get<IndexType>( "input" );
+    IndexType const outIdx = routingNode.get<IndexType>( "output" );
+    IndexType const filterIdx = routingNode.get<IndexType>( "filter" );
+    boost::optional<FilterRoutingParameter::GainType> const gain = routingNode.get_optional<FilterRoutingParameter::GainType>( "gain" );
+    newList.addRouting( inIdx, outIdx, filterIdx, gain ? *gain : static_cast<FilterRoutingParameter::GainType>(1.0) );
+  }
+
+  swap( newList );
+>>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7
 }
 
 } // namespace pml

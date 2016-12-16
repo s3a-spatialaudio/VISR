@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_NULL_SOURCE_HPP_INCLUDED
 #define VISR_LIBRCL_NULL_SOURCE_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
 namespace visr
@@ -18,7 +18,7 @@ namespace rcl
  * because all required null signals can be routed from this single stream. However, from the signal flow point of view, it can be advantageous to provide 
  * dedicated null sources with an appropriate number of channels. At the same time, the performance penalty is minimal.
  */
-class NullSource: public ril::AudioComponent
+class NullSource: public ril::AtomicComponent
 {
 public:
   /**
@@ -26,7 +26,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit NullSource( ril::AudioSignalFlow& container, char const * name );
+  explicit NullSource( ril::SignalFlowContext& context,
+                       char const * name,
+                       ril::CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.

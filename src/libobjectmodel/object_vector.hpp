@@ -65,6 +65,11 @@ public:
   ObjectVector( ObjectVector const & rhs ) = delete;
 
   /**
+   * Assign member function as an explicit alternative to an assignment operator.
+   */
+  void assign( ObjectVector const & rhs );
+
+  /**
    * Exchange the contents of this object with \p rhs.
    * Invalidates all iterators into this and \p rhs
    */

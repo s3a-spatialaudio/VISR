@@ -4,11 +4,14 @@
 #define VISR_LIBRCL_SIGNAL_ROUTING_HPP_INCLUDED
 
 #include <libpml/signal_routing_parameter.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
+#include <libril/parameter_input_port.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace visr
@@ -22,7 +25,7 @@ namespace rcl
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
-class SignalRouting: public ril::AudioComponent
+class SignalRouting: public ril::AtomicComponent
 {
 public:
   /**
@@ -30,7 +33,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SignalRouting( ril::AudioSignalFlow& container, char const * name );
+  explicit SignalRouting( ril::SignalFlowContext& context,
+                          char const * name,
+                          ril::CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -42,8 +47,10 @@ public:
    * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
    * @param inputWidth The width of the input vector, i.e., the number of single signals in this port.
    * @param outputWidth The number of signals channels in the output port.
+   * @param controlPort Whether the component creates a parameter input port (message type: pml::SignalRoutingParameter, protocol: pml::DoubleBufferingProtocol ).
+   * Default: false
    */ 
-  void setup( std::size_t inputWidth, std::size_t outputWidth );
+  void setup( std::size_t inputWidth, std::size_t outputWidth, bool controlPort = false );
 
   /**
    * Method to initialise the component.
@@ -51,10 +58,13 @@ public:
    * @param inputWidth The width of the input vector, i.e., the number of single signals in this port.
    * @param outputWidth The number of signals channels in the output port.
    * @param initialRouting The initial routing connections
+   * @param controlPort Whether the component creates a parameter input port (message type: pml::SignalRoutingParameter, protocol: pml::DoubleBufferingProtocol ).
+   * Default: false
    */
   void setup( std::size_t inputWidth,
               std::size_t outputWidth,
-              pml::SignalRoutingParameter const & initialRouting );
+              pml::SignalRoutingParameter const & initialRouting,
+              bool controlPort = false);
 
   /**
    * The process function.
@@ -97,6 +107,8 @@ private:
    * The audio output of the component.
    */
   ril::AudioOutput mOutput;
+
+  std::unique_ptr<ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
 
   /**
    * Data structure for string the routing information. Eahc vector element corresponds to the respective

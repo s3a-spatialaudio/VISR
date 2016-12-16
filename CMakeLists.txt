@@ -25,6 +25,11 @@ if(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -march=native")
 endif()
 
+IF(WIN32)
+  ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
+  ADD_DEFINITIONS( "-D_WIN32_WINNT=0x0601" )
+ENDIF(WIN32)
+
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
@@ -73,7 +78,7 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
-# TODO: Test and fix this fature.
+# TODO: Test and fix this feature.
 SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
@@ -83,12 +88,16 @@ SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" OFF )
 
 IF( BUILD_MATLAB_EXTERNALS )
-FIND_PACKAGE(Matlab REQUIRED)
-IF(MATLAB_FOUND)
+  FIND_PACKAGE(Matlab REQUIRED)
+  IF(MATLAB_FOUND)
     MESSAGE( STATUS "Matlab found." )
   ELSEIF( MATLAB_FOUND )
     MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
-ENDIF( MATLAB_FOUND )
+  ENDIF( MATLAB_FOUND )
+  # Brute-force way make all the code position-independent if we build Matlab externals.
+  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
+  # SEE: python bindings support
+  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
 ENDIF( BUILD_MATLAB_EXTERNALS )
 
 ################################################################################

@@ -11,8 +11,10 @@ namespace visr
 namespace rcl
 {
 
-FirFilterMatrix::FirFilterMatrix( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+FirFilterMatrix::FirFilterMatrix( ril::SignalFlowContext& context,
+                                  char const * name,
+                                  ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
  , mConvolver()

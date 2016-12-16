@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_FIR_FILTER_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_FIR_FILTER_MATRIX_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
@@ -34,7 +34,7 @@ namespace rcl
  * The widths of the input and the output port are set by the parameters \p 
  * numberOfInputs and \p numberOfOutputs in the setup() method.
  */
-class FirFilterMatrix: public ril::AudioComponent
+class FirFilterMatrix: public ril::AtomicComponent
 {
   using SampleType = ril::SampleType;
 public:
@@ -43,7 +43,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit FirFilterMatrix( ril::AudioSignalFlow& container, char const * name );
+  explicit FirFilterMatrix( ril::SignalFlowContext& context,
+                            char const * name,
+                            ril::CompositeComponent * parent = nullptr );
 
   /**
    * Desctructor
@@ -92,6 +94,7 @@ public:
    * @param inputIdx The input signal index for the routing.
    * @param outputIdx The output signal index for this routing.
    * @param filterIdx The filter index for this routing (pointing to an entry to the filter container of this component)
+   * @param gain An optional, frequency-independent gain for this routing. Optional argument, defaults to 1.0.
    * @throw std::invalid_argument If \p inputIdx, \p outputIdx, or \p filterIdx exceed their respective admissible ranges
    */
   void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx,

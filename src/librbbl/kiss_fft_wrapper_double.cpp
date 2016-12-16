@@ -55,14 +55,14 @@ KissFftWrapper<double>::~KissFftWrapper()
 }
 
 template<>
-efl::ErrorCode KissFftWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out )
+efl::ErrorCode KissFftWrapper<double>::forwardTransform( double const * const in, std::complex<double> * out ) const
 {
   kiss_fftr_double( mImpl->mFwdPlan, const_cast<double*>(in), reinterpret_cast<Impl::TransformDataType*>(out) );
   return efl::noError; // apparently, there is no error reporting.
 }
 
 template<>
-efl::ErrorCode KissFftWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out )
+efl::ErrorCode KissFftWrapper<double>::inverseTransform( std::complex<double> const * const in, double * out ) const
 {
   kiss_fftri_double( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<double>* >(in)), out );
   return efl::noError; // apparently, there is no error reporting.

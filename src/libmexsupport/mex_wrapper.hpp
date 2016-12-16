@@ -13,8 +13,13 @@
 
 namespace visr
 {
-// forward declaration
+// forward declarations
 namespace ril
+{
+class Component;
+class SignalFlowContext;
+}
+namespace rrl
 {
 class AudioSignalFlow;
 template<typename SampleType> class CommunicationArea;
@@ -26,7 +31,8 @@ namespace mexsupport
 class MexWrapper
 {
 public:
-MexWrapper( ril::AudioSignalFlow & flow,
+MexWrapper( ril::Component & flow,
+            ril::SignalFlowContext const & context,
             mxArray const * input,
             mxArray * & output,
             mxArray const * messages = 0 );
@@ -50,7 +56,7 @@ private:
   template<mxClassID classId>
   void transferOutputSamples( std::size_t blockIdx );
 
-  ril::AudioSignalFlow & mFlow;
+  ril::Component & mFlow;
 
   mxClassID const mSignalType;
 
@@ -68,7 +74,13 @@ private:
   std::vector<ril::SampleType *> mInputBufferPtrs;
   std::vector<ril::SampleType *> mOutputBufferPtrs;
 
-  std::unique_ptr<ril::CommunicationArea< ril::SampleType > > mCommBuffer;
+  /**
+   * Private buffer area to pass data to the contained signa flow.
+   * Indepependent of the internal communication area of mAudioWrapper
+   */
+  std::unique_ptr<rrl::CommunicationArea<ril::SampleType> > mCommBuffer;
+
+  std::unique_ptr<rrl::AudioSignalFlow> mAudioWrapper;
 };
 
 } // namespace mexsupport

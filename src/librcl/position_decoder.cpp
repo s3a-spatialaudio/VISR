@@ -4,7 +4,9 @@
 
 #include <libpml/message_queue.hpp>
 #include <libpml/listener_position.hpp>
+#include <libpml/string_parameter.hpp>
 
+#include <libril/parameter_type.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -16,8 +18,12 @@ namespace visr
 namespace rcl
 {
 
-PositionDecoder::PositionDecoder(ril::AudioSignalFlow& container, char const * name)
-: AudioComponent( container, name )
+  PositionDecoder::PositionDecoder( ril::SignalFlowContext& context,
+                                    char const * name,
+                                    ril::CompositeComponent * parent /*= nullptr*/ )
+  : AtomicComponent( context, name, parent )
+  , mDatagramInput( "messageInput", *this, pml::StringParameterConfig( 128 ) )
+  , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )
 {
 }
 
@@ -33,19 +39,18 @@ void PositionDecoder::setup( panning::XYZ const &offsetKinect, float qw /*=1.0f*
   mQx = qx;
   mQy = qy;
   mQz = qz;
-
 }
 
 
-void PositionDecoder::process( pml::MessageQueue<std::string> & messages, pml::ListenerPosition & position )
+void PositionDecoder::process()
 {
   pml::ListenerPosition newPos;
   pml::ListenerPosition foundPos;
   pml::ListenerPosition::IdType smallestFaceId = std::numeric_limits<unsigned int>::max();
   pml::ListenerPosition::TimeType latestTimeStamp = 0;
-  while( !messages.empty() )
+  while( !mDatagramInput.empty() )
   {
-    std::string const & nextMsg = messages.nextElement();
+    std::string const & nextMsg = mDatagramInput.front();
     std::stringstream msgStream( nextMsg );
     try
     {
@@ -68,15 +73,15 @@ void PositionDecoder::process( pml::MessageQueue<std::string> & messages, pml::L
       // Don't abort the program when receiving a corrupted message.
       std::cerr << "PositionDecoder: Error while decoding a position message: " << ex.what() << std::endl;
     }
-    messages.popNextElement();
+    mDatagramInput.pop();
   }
   // Did we actually receive a valid message?
   if( smallestFaceId != std::numeric_limits<unsigned int>::max() )
   {
-    position = translatePosition( foundPos );
+    mPositionOutput.data() = translatePosition( foundPos );
+    mPositionOutput.swapBuffers();
   }
 }
-
 
 pml::ListenerPosition PositionDecoder::translatePosition( const pml::ListenerPosition &pos )
 {

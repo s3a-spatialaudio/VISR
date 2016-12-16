@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_BIQUAD_IIR_FILTER_HPP_INCLUDED
 #define VISR_LIBRCL_BIQUAD_IIR_FILTER_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
@@ -27,7 +27,7 @@ namespace rcl
  * The widths of the input and the output port are identical and is
  * set by the argument <b>numberOfChannels</b> in the setup() method.
  */
-class BiquadIirFilter: public ril::AudioComponent
+class BiquadIirFilter: public ril::AtomicComponent
 {
   using SampleType = ril::SampleType;
 public:
@@ -36,7 +36,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit BiquadIirFilter( ril::AudioSignalFlow& container, char const * name );
+  explicit BiquadIirFilter( ril::SignalFlowContext& context,
+                            char const * name,
+                            ril::CompositeComponent * parent = nullptr  );
     
   /**
    * Setup method to initialise the object and set the parameters.

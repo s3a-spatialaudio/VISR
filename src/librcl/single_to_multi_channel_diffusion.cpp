@@ -19,8 +19,10 @@ namespace visr
 namespace rcl
 {
 
-SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( ril::SignalFlowContext& context,
+                                                                char const * name,
+                                                                ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 #ifndef DIFFUSION_USE_FAST_CONVOLVER

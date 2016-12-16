@@ -5,8 +5,6 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/object_vector_parser.hpp>
 
-#include <libpml/message_queue.hpp>
-
 #include <iostream>
 
 namespace visr
@@ -14,8 +12,12 @@ namespace visr
 namespace rcl
 {
 
-SceneDecoder::SceneDecoder( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  SceneDecoder::SceneDecoder( ril::SignalFlowContext& context,
+                              char const * name,
+                              ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
+ , mDatagramInput( "datagramInput", *this, pml::StringParameterConfig( 255 ) )
+ , mObjectVectorOutput( "objectVectorOutput", *this, pml::EmptyParameterConfig() )
 {
 }
 
@@ -27,20 +29,22 @@ void SceneDecoder::setup( )
 {
 }
 
-void SceneDecoder::process( pml::MessageQueue<std::string> & messages, objectmodel::ObjectVector & objects )
+void SceneDecoder::process()
 {
-  while( !messages.empty() )
+  objectmodel::ObjectVector & objects = mObjectVectorOutput.data();
+  while( not mDatagramInput.empty() )
   {
-    std::string const & nextMsg = messages.nextElement();
+    std::string const & nextMsg = mDatagramInput.front();
     try
     {
       objectmodel::ObjectVectorParser::updateObjectVector( nextMsg, objects );
+      mObjectVectorOutput.swapBuffers();
     }
     catch( std::exception const & ex )
     {
       std::cerr << "SceneDecoder: Error while decoding a scene metadata message: " << ex.what() << std::endl;
     }
-    messages.popNextElement();
+    mDatagramInput.pop();
   }
 }
 

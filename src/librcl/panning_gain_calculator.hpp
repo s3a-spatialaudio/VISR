@@ -3,8 +3,10 @@
 #ifndef VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
 
+#include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_output_port.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -12,26 +14,19 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
+#include <memory>
 #include <vector>
 
 namespace visr
 {
-// forward declarations
-namespace objectmodel
-{
-class ObjectVector;
-}
-namespace efl
-{
-template< typename SampleType > class BasicMatrix;
-}
+
 namespace pml
 {
 class ListenerPosition;
-}
-namespace ril
-{
-class AudioInput;
+class ObjectVector;
+template< typename ElementType > class MatrixParameter;
+template< class ParameterType > class SharedDataProtocol;
+template< class ParameterType > class DoubleBufferingProtocol;
 }
 
 namespace rcl
@@ -40,11 +35,12 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class PanningGainCalculator: public ril::AudioComponent
+class PanningGainCalculator: public ril::AtomicComponent
 {
 public:
   /**
-   * Type of the gain coefficients. We use the same type as
+   * Type of the gain coefficients. We use the same type as the samples in the signal flow graph
+   * @todo maybe this should become a template parameter.
    */
   using CoefficientType = ril::SampleType;
 
@@ -53,7 +49,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PanningGainCalculator( ril::AudioSignalFlow& container, char const * name );
+  explicit PanningGainCalculator( ril::SignalFlowContext& context,
+                                  char const * name,
+                                  ril::CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -61,7 +59,7 @@ public:
   PanningGainCalculator( PanningGainCalculator const & ) = delete;
 
 
-  /**
+  /**`
    * Destructor.
    */
   ~PanningGainCalculator();
@@ -71,24 +69,27 @@ public:
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
    */ 
-  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig );
+  void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig,
+              bool adaptiveListenerPosition=false );
 
   /**
    * The process function. 
    * It takes a vector of objects as input and calculates a vector of output gains.
    */
-  void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
+  void process();
 
+
+private:
   /**
-   * Set the reference listener position. This overload accepts three cartesian coordinates.
-   * The listener positions are used beginning with the next process() call.
-   * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
-   * @param x The x coordinate [in meters]
-   * @param y The y coordinate [in meters]
-   * @param z The z coordinate [in meters]
-   * @throw std::runtime_error If the recalculation of the internal panning data fails.
-   * @todo Consider extending the interface to multiple listener positions.
-   */
+  * Set the reference listener position. This overload accepts three cartesian coordinates.
+  * The listener positions are used beginning with the next process() call.
+  * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
+  * @param x The x coordinate [in meters]
+  * @param y The y coordinate [in meters]
+  * @param z The z coordinate [in meters]
+  * @throw std::runtime_error If the recalculation of the internal panning data fails.
+  * @todo Consider extending the interface to multiple listener positions.
+  */
   void setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z );
 
   /**
@@ -101,7 +102,6 @@ public:
   */
   void setListenerPosition( pml::ListenerPosition const & pos );
 
-private:
   /**
    * The number of audio objects handled by this object.
    */
@@ -142,6 +142,22 @@ private:
    */
   std::valarray<objectmodel::LevelType> mLevels;
   //@}
+
+  /**
+   * Data type of the parmaeter ports for outgoing matrix data.
+   */
+  using ListenerPositionPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+  using ObjectPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
+  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
+
+  std::unique_ptr<ObjectPort> mObjectVectorInput;
+
+  std::unique_ptr<ListenerPositionPort> mListenerPositionInput;
+
+  /**
+   * Needs to be instantiated as a pointer, because the ParameterConfig data is not known until the setup() method.
+   */
+  std::unique_ptr<MatrixPort> mGainOutput;
 };
 
 } // namespace rcl

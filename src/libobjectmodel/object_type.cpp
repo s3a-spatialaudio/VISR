@@ -20,10 +20,12 @@ using StringToObject = std::map< std::string, ObjectTypeId >;
 static const ObjectToString objectToStringLookup =
 {
   { ObjectTypeId::PointSource, "point" },
+  { ObjectTypeId::PointSourceExtent, "pointextent" },
   { ObjectTypeId::PlaneWave, "plane" },
   { ObjectTypeId::DiffuseSource, "diffuse" },
   { ObjectTypeId::PointSourceWithDiffuseness, "pointdiffuse" },
-  { ObjectTypeId::ExtendedSource, "extended" }
+  { ObjectTypeId::ExtendedSource, "extended" },
+  { ObjectTypeId::PointSourceWithReverb, "pointreverb" }
 };
 
 // TODO: This would be nice place for the move constructor idiom

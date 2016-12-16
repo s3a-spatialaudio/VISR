@@ -2,9 +2,11 @@
 
 #include "signal_flow.hpp"
 
+#include <libmexsupport/export_symbol.hpp>
 #include <libmexsupport/mex_wrapper.hpp>
 
 #include <libril/constants.hpp>
+#include <libril/signal_flow_context.hpp>
 
 #include <mex.h> 
 #include <matrix.h>
@@ -19,6 +21,7 @@ static char const * usage()
   return "Usage: output = feedthrough( input [, parameterMessages], blockLength, samplingFrequency )";
 }
 
+VISR_MEXSUPPORT_EXPORT_SYMBOL
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 {
   try
@@ -66,10 +69,12 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     //double const * const input = mxGetPr( prhs[0] );
     //double * const outputPtr = mxGetPr( prhs[1] );
 
-    visr::mex::feedthrough::SignalFlow flow( periodSize, samplingFrequency );
+    ril::SignalFlowContext context( periodSize, samplingFrequency );
+
+    visr::mex::feedthrough::SignalFlow flow( context, "feedthrough", nullptr );
     flow.setup();
 
-    visr::mexsupport::MexWrapper mexWrapper( flow, prhs[0], plhs[0],
+    visr::mexsupport::MexWrapper mexWrapper( flow, context, prhs[0], plhs[0],
 					     hasParameterArg ? prhs[1] : nullptr );
 
     mexWrapper.process();

@@ -20,8 +20,10 @@ namespace visr
 namespace rcl
 {
 
-DelayVector::DelayVector( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  DelayVector::DelayVector( ril::SignalFlowContext& context,
+                            char const * name,
+                            ril::CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 #ifdef USE_CIRCULAR_BUFFER
@@ -34,7 +36,7 @@ DelayVector::DelayVector( ril::AudioSignalFlow& container, char const * name )
  , mCurrentDelays(ril::cVectorAlignmentSamples)
  , mNextGains(ril::cVectorAlignmentSamples)
  , mNextDelays(ril::cVectorAlignmentSamples)
- , cSamplingFrequency( static_cast<SampleType>( container.samplingFrequency() ) )
+ , cSamplingFrequency( static_cast<SampleType>( samplingFrequency() ) )
 {
 }
 

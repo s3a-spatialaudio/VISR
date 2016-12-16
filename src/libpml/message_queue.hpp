@@ -13,19 +13,25 @@ namespace pml
 
 /**
  * A FIFO-type message queue template class for storing and passing message data.
- * @tparam MessageType Type of the contained elements.
+ * @tparam MessageTypeT Type of the contained elements.
  * @note This class does provide the same level of thread safety as, e.g., the STL.
  * I.e., calling code from different thread must ensure that concurrent accesses
  * to the same instances are appropriately secured against race conditions.
  */
-template< typename MessageType >
+template< typename MessageTypeT >
 class MessageQueue
 {
 public:
+
+  /**
+   * Make the message type available to code using this template.
+   */
+  using MessageType = MessageTypeT;
+
   /**
    * Default constructor, creates an empty message queue.
    */
-  MessageQueue() {}
+  MessageQueue();
 
   /**
    * Remove all elements from the message queue.
@@ -77,11 +83,15 @@ private:
   /**
    * The internal data representation.
    */
-  std::deque<MessageType> mQueue;
+  std::deque<MessageTypeT> mQueue;
 };
+
+template< typename MessageTypeT >
+inline MessageQueue< MessageTypeT >::MessageQueue( )
+{
+}
 
 } // namespace pml
 } // namespace visr
-
 
 #endif // VISR_PML_MESSAGE_QUEUE_HPP_INCLUDED

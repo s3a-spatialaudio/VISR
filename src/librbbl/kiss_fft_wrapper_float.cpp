@@ -55,14 +55,14 @@ KissFftWrapper<float>::~KissFftWrapper()
 }
 
 template<>
-efl::ErrorCode KissFftWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out )
+efl::ErrorCode KissFftWrapper<float>::forwardTransform( float const * const in, std::complex<float> * out ) const
 {
   kiss_fftr_float( mImpl->mFwdPlan, const_cast<float*>(in), reinterpret_cast<Impl::TransformDataType*>(out) );
   return efl::noError; // apparently, there is no error reporting.
 }
 
 template<>
-efl::ErrorCode KissFftWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out )
+efl::ErrorCode KissFftWrapper<float>::inverseTransform( std::complex<float> const * const in, float * out ) const
 {
   kiss_fftri_float( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<float>* >(in)), out );
   return efl::noError; // apparently, there is no error reporting.

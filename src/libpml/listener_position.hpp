@@ -3,6 +3,12 @@
 #ifndef VISR_PML_LISTENER_POSITION_HPP_INCLUDED
 #define VISR_PML_LISTENER_POSITION_HPP_INCLUDED
 
+#include "empty_parameter_config.hpp"
+
+#include <libril/parameter_type.hpp>
+#include <libril/typed_parameter_base.hpp>
+
+
 #include <cstdint>
 #include <iosfwd>
 #include <istream>
@@ -12,11 +18,20 @@ namespace visr
 namespace pml
 {
 
-class ListenerPosition
+class ListenerPosition: public ril::TypedParameterBase<EmptyParameterConfig, ril::ParameterType::ListenerPosition >
 {
 public:
   using TimeType = std::uint64_t;
   using IdType = unsigned int;
+
+  explicit ListenerPosition( ril::ParameterConfigBase const & config );
+
+  /**
+   * Also acts as default constructor.
+   */
+  explicit ListenerPosition( EmptyParameterConfig const & config = EmptyParameterConfig() );
+
+  virtual ~ListenerPosition() override;
 
   class Quaternion
   {
@@ -24,15 +39,11 @@ public:
   private:
   };
 
-  /**
-   * Default constructor, creates a position with coordinates (0,0,0).
-   */
-  ListenerPosition();
 
   ListenerPosition(float x, float y, float z)
-	  : mX(x)
-	  , mY(y)
-	  , mZ(z)
+   : mX(x)
+   , mY(y)
+   , mZ(z)
   {}
 
   void parse( std::istream &  inputStream );
@@ -60,5 +71,6 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
 } // namespace pml
 } // namespace visr
 
+DEFINE_PARAMETER_TYPE( visr::pml::ListenerPosition, visr::ril::ParameterType::ListenerPosition, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_LISTENER_POSITION_HPP_INCLUDED
