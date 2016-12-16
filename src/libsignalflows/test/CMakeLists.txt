@@ -2,9 +2,7 @@
 
 SET( APPLICATION_NAME libsignalflow_test )
 
-# Make the current source directory known to the source code to create absolute file paths.
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
-ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
+# CMAKE_DOURCE_DIR is already defined in the parent directory
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} baseline_renderer.cpp test_main.cpp )
 

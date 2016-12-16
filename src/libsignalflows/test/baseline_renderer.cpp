@@ -25,7 +25,7 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( InstantiateRenderer )
 {
-  boost::filesystem::path const arrayConfigFile( CMAKE_SOURCE_DIR "/config/isvr/22.1_audiolab_1subwoofer.xml" );
+  boost::filesystem::path const arrayConfigFile( CMAKE_SOURCE_DIR "/config/generic/bs2051-9+10+3.xml" );
   BOOST_CHECK( exists( arrayConfigFile ) and not is_directory( arrayConfigFile ) );
 
   panning::LoudspeakerArray arrayConfig;
