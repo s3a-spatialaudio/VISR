@@ -1,8 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME libsignalflow_test )
+SET( APPLICATION_NAME signalflows_test )
 
-# CMAKE_DOURCE_DIR is already defined in the parent directory
+ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} baseline_renderer.cpp test_main.cpp )
 

@@ -418,7 +418,8 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
 
   mMaxNumReverbObjects = tree.get<std::size_t>( "numReverbObjects", 0 );
   mLateReverbFilterLengthSeconds = tree.get<ril::SampleType>( "lateReverbFilterLength", 0 );
-  std::size_t const lateReverbFilterLengthSamples = std::max( static_cast<std::size_t>(std::ceil( mLateReverbFilterLengthSeconds * samplingFrequency() )), 1ul );
+  std::size_t const lateReverbFilterLengthSamples = std::max( static_cast<std::size_t>(std::ceil( mLateReverbFilterLengthSeconds * samplingFrequency() )),
+    static_cast<std::size_t>(1) );
 
   std::string const lateReverbDecorrFilterName( tree.get<std::string>( "lateReverbDecorrelationFilters", std::string() ));
   mNumDiscreteReflectionsPerObject = tree.get<std::size_t>( "discreteReflectionsPerObject", 0 );
@@ -434,9 +435,9 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   // the late reverb tail. 
   // The default value is 1/sqrt(#loudspeakers)
   boost::optional<ril::SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<ril::SampleType>( "lateReverbDecorrelationGain" );
-  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( arrayConfig.getNumRegularSpeakers() );
+  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( static_cast<float>(arrayConfig.getNumRegularSpeakers()) );
   ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
-    ? std::pow( 10.0, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
+    ? std::pow( static_cast<ril::SampleType>(10.0), *lateReverbDecorrelatorGainOpt/ static_cast<ril::SampleType>(20.0) ) // TODO: Use dB->lin library function
     : defaultLateDecorrelatorGain;
 
   pml::MatrixParameter<ril::SampleType> lateDecorrelationFilters(ril::cVectorAlignmentSamples );
