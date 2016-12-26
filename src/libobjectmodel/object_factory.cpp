@@ -3,15 +3,19 @@
 
 #include "object_factory.hpp"
 
+#include "channel_object.hpp"
 #include "point_source.hpp"
 #include "plane_wave.hpp"
 #include "point_source_with_diffuseness.hpp"
 #include "diffuse_source.hpp"
+#include "hoa_source.hpp"
 
+#include "channel_object_parser.hpp"
 #include "point_source_parser.hpp"
 #include "plane_wave_parser.hpp"
 #include "point_source_with_diffuseness_parser.hpp"
 #include "diffuse_source_parser.hpp"
+#include "hoa_source_parser.hpp"
 
 #include <stdexcept>
 
@@ -74,10 +78,12 @@ struct InstantiateObjectFactory
 {
   InstantiateObjectFactory()
   {
+    ObjectFactory::registerObjectType<ChannelObject, ChannelObjectParser>(ObjectTypeId::ChannelObject );
     ObjectFactory::registerObjectType<PointSource, PointSourceParser>( ObjectTypeId::PointSource );
     ObjectFactory::registerObjectType<PlaneWave, PlaneWaveParser>( ObjectTypeId::PlaneWave );
     ObjectFactory::registerObjectType<PointSourceWithDiffuseness, PointSourceWithDiffusenessParser>( ObjectTypeId::PointSourceWithDiffuseness );
     ObjectFactory::registerObjectType<DiffuseSource, DiffuseSourceParser>( ObjectTypeId::DiffuseSource );
+    ObjectFactory::registerObjectType<HoaSource, HoaSourceParser>( ObjectTypeId::HoaSource );
   }
 };
 

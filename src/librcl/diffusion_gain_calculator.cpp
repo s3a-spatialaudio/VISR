@@ -62,9 +62,9 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
     objectmodel::Object const & obj = *(objEntry.second);
+    // Pre-check to handle only monaural objects here. The fine-grained disambiguation between supported object types happens later.
     if( obj.numberOfChannels() != 1 )
     {
-      std::cerr << "DiffusionGainCalculator: Only monaural object types are supported at the moment." << std::endl;
       continue;
     }
     objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
@@ -83,13 +83,13 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
     {
     case objectmodel::ObjectTypeId::DiffuseSource:
     {
-      gains[channelId] = obj.level();
+      gains[channelId] = 1.0f;
       break;
     }
     case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
     {
       objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-      gains[channelId] = psdSrc.diffuseness() * psdSrc.level();
+      gains[channelId] = psdSrc.diffuseness();
       break;
     }
     default:

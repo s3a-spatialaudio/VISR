@@ -6,14 +6,19 @@
 #include <libril/audio_signal_flow.hpp>
 
 #include <librcl/add.hpp>
+#include <librcl/biquad_iir_filter.hpp>
+#include <librcl/channel_object_routing_calculator.hpp>
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/hoa_allrad_gain_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
+#include <librcl/object_gain_eq_calculator.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
+#include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
@@ -30,12 +35,6 @@
 
 namespace visr
 {
-
-// Forward declarations
-namespace rcl
-{
-  class BiquadIirFilter;
-}
 
 namespace signalflows
 {
@@ -57,6 +56,7 @@ public:
    * @param diffusionFilters A matrix of floating-point values containing the the FIR coefficients of the decorrelation filter that creates diffuse sound components.
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    * @param sceneReceiverPort The UDP port for receiving the scene data messages.
+   * @param numberOfObjectEqSections The number of biquad sections alocated to each object signal.
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
@@ -67,6 +67,7 @@ public:
                              efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
+                             std::size_t numberOfObjectEqSections,
                              std::size_t period,
                              ril::SamplingFrequencyType samplingFrequency );
 
@@ -80,14 +81,32 @@ public:
 private:
 
   efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
-  
+
   rcl::UdpReceiver mSceneReceiver;
-  
+
   rcl::SceneDecoder mSceneDecoder;
+
+  rcl::ObjectGainEqCalculator mObjectInputGainEqCalculator;
+
+  /**
+   * Apply the the 'level' setting of the object.
+   * We use a DelayVector, which allows also control of the gain, and do not use the delay,
+   * @note This signal flow assumes that each signal input is used only by a single object. Otherwise the settings would
+   * be overwritten
+   */
+  rcl::DelayVector mObjectGain;
+
+  rcl::BiquadIirFilter mObjectEq;
+
+  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
+
+  rcl::SignalRouting mChannelObjectRouting;
 
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningGainCalculator mGainCalculator;
+
+  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
@@ -112,6 +131,12 @@ private:
   pml::MessageQueue<std::string> mSceneMessages;
 
   objectmodel::ObjectVector mObjectVector;
+
+  efl::BasicVector<ril::SampleType> mObjectGainParameter;
+
+  pml::BiquadParameterMatrix<ril::SampleType> mObjectEqParameter;
+
+  pml::SignalRoutingParameter mChannelObjectRoutings;
 
   efl::BasicMatrix<ril::SampleType> mGainParameters;
 

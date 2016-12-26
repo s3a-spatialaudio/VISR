@@ -96,7 +96,9 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     objectmodel::Object const & obj = *(objEntry.second);
     if( obj.numberOfChannels() != 1 )
     {
-      std::cerr << "PanningGainCalculator: Only monaural object types are supported at the moment." << std::endl;
+      // Panning is implemented only for single-channel objects.
+      // So we use this check as a first criterion to skip any sources of other types
+      // Other non-matching types will be skipped later on.
       continue;
     }
 
@@ -108,8 +110,6 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
       continue;
     }
 
-    mLevels[channelId] = obj.level( );
-
     objectmodel::ObjectTypeId const ti = obj.type();
 
     // For the moment, we treat the two supported source type here.
@@ -119,13 +119,14 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
     {
       objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-      mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
+      mLevels[channelId] = (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
       // Fall through intentionally
     }
     case objectmodel::ObjectTypeId::PointSource:
     {
       objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
       mSourcePositions[channelId].set( pointSrc.x(), pointSrc.y(), pointSrc.z() );
+      mLevels[channelId] = 1.0f;
       break;
     }
     case objectmodel::ObjectTypeId::PlaneWave:
@@ -136,6 +137,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
                                                                efl::degree2radian( planeSrc.incidenceElevation() ),
                                                                1.0f);
       mSourcePositions[ channelId ].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */);
+      mLevels[channelId] = 1.0f;
       break;
     }
     default:
@@ -149,11 +151,15 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
   {
     std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
   }
+  
+  efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();
 
   // TODO: Can be replaced by a vector multiplication.
+  // NOTE: vbapGains might have more columns than real loudspeakers,
+  // because it also contains the gains of all imaginary speakers
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
-    Afloat const * const gainRow = mVbapCalculator.getGains().row( chIdx );
+    Afloat const * const gainRow = vbapGains.row( chIdx );
     objectmodel::LevelType const level = mLevels[ chIdx ];
     for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
     {

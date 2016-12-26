@@ -2,6 +2,12 @@
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
+# Preliminary solution: communicate to main.cpp that Jack support is enabled.
+# TODO: Replace by factory mechanism to select audio interface.
+IF( BUILD_USE_JACK )
+  ADD_DEFINITIONS( "-DVISR_JACK_SUPPORT" )
+ENDIF( BUILD_USE_JACK )
+
 ADD_EXECUTABLE( baseline_renderer main.cpp options.hpp options.cpp )
 
 TARGET_LINK_LIBRARIES(baseline_renderer apputilities )
@@ -15,6 +21,7 @@ TARGET_LINK_LIBRARIES(baseline_renderer ril)
 TARGET_LINK_LIBRARIES(baseline_renderer rrl)
 TARGET_LINK_LIBRARIES(baseline_renderer efl)
 TARGET_LINK_LIBRARIES(baseline_renderer ${PORTAUDIO_LIBRARIES} )
+TARGET_LINK_LIBRARIES(baseline_renderer ${SNDFILE_LIBRARY} )
 TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_SYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_THREAD_LIBRARY} )

@@ -40,3 +40,5 @@ TARGET_LINK_LIBRARIES(matrix_convolver_app ${SNDFILE_LIBRARY} )
 TARGET_LINK_LIBRARIES(matrix_convolver_app ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(matrix_convolver_app ${Boost_SYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES(matrix_convolver_app ${Boost_PROGRAM_OPTIONS_LIBRARY} )
+
+INSTALL( TARGETS matrix_convolver_app DESTINATION bin )

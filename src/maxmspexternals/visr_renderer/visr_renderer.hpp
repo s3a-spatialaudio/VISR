@@ -59,6 +59,8 @@ private:
   long mPeriod;
   std::size_t mNumberOfObjects;
   std::size_t mNumberOfOutputs;
+
+  std::size_t mNumberOfEqSections;
   
   std::unique_ptr<panning::LoudspeakerArray> mArrayConfiguration;
 

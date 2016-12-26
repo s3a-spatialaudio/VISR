@@ -7,8 +7,24 @@
 # cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
+# Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
+if( POLICY CMP0063 ) # (only if the CMake version supports this policy
+  CMAKE_POLICY(SET CMP0063 NEW)
+endif( POLICY CMP0063 )
+
 # The name of our top-level project.
 PROJECT( VISR CXX C )
+
+# Define central version numbers for the project
+# TODO: Decide whether to move that to an external CMake file .
+set( VISR_MAJOR_VERSION 0 )
+set( VISR_MINOR_VERSION 8 )
+set( VISR_PATCH_VERSION 1 )
+
+ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+
 
 # Add support for unit tests
 INCLUDE( CTest )
@@ -64,7 +80,7 @@ if(UNIX)
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture
   # features of the machine it is compiled on.
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )  
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 

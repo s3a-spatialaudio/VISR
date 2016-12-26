@@ -84,6 +84,8 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
     }
     mNumberOfObjects = cmdLineOptions.getOption<std::size_t>( "input-channels" );
     mNumberOfOutputs = cmdLineOptions.getOption<std::size_t>( "output-channels" );
+    mNumberOfEqSections = cmdLineOptions.getDefaultedOption( "object-eq-sections", 0 );
+
 
     boost::filesystem::path const arrayConfigPath( cmdLineOptions.getOption<std::string>( "array-config" ) );
     if( !exists( arrayConfigPath ) )
@@ -93,7 +95,7 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
       throw std::invalid_argument( err.str() );
     }
     // We do not support the legacy text format for Max externals
-    mArrayConfiguration->loadXml( arrayConfigPath.string() );
+    mArrayConfiguration->loadXmlFile( arrayConfigPath.string() );
 
     /* Set up the filter matrix for the diffusion filters. */
     std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
@@ -179,6 +181,7 @@ VisrRenderer::~VisrRenderer()
                                                     *mDiffusionFilters,
                                                     mTrackingConfiguration,
                                                     mSceneReceiverPort,
+                                                    mNumberOfEqSections,
                                                     mPeriod,
                                                     samplingFrequency ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>( *mFlow ) );
