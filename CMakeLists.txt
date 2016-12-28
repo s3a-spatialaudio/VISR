@@ -59,9 +59,9 @@ STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME 
 STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_MACRO )
 
 
-# MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
-# MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
-# MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
+MESSAGE( STATUS "VISR system processor: " ${VISR_SYSTEM_PROCESSOR} )
+MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
+MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
 
 # Make the platform strings available to the source code.
 ADD_DEFINITIONS("-DVISR_SYSTEM_PROCESSOR_${VISR_SYSTEM_PROCESSOR}")
@@ -75,7 +75,7 @@ ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 if(UNIX)
   # Support for the Raspberry Pi: Enable hardware floating-point arithmetic
   if( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon -mfloat-abi=hard" )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon-vfpv4 -march=armv7-a -mfloat-abi=hard" )
   endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture
