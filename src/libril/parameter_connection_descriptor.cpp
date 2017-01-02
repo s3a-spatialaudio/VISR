@@ -8,6 +8,7 @@ namespace visr
 namespace ril
 {
 
+#if 0
 ParameterPortDescriptor::
 ParameterPortDescriptor(std::string const & pComponent, std::string const & pPort)
  : mComponent( pComponent)
@@ -28,24 +29,13 @@ operator<(ParameterPortDescriptor const & rhs) const
   }
   else return port() < rhs.port();
 }
+#endif
 
-// Not used in the current code.
-#if 0
 ParameterConnection::
-ParameterConnection( ParameterPortDescriptor const & pSender,
-                     ParameterPortDescriptor const & pReceiver)
+ParameterConnection( ParameterPortBase * pSender,
+                     ParameterPortBase * pReceiver)
  : mSender(pSender)
  , mReceiver(pReceiver)
-{
-}
-
-ParameterConnection::
-ParameterConnection( std::string const & pSendComponent,
-                     std::string const & pSendPort,
-                     std::string const & pReceiveComponent,
-                     std::string const & pReceivePort)
- : ParameterConnection( ParameterPortDescriptor( pSendComponent, pSendPort ),
-	                    ParameterPortDescriptor( pReceiveComponent, pReceivePort) )
 {
 }
 
@@ -61,8 +51,6 @@ bool ParameterConnection::operator<(ParameterConnection const & rhs) const
   }
   return receiver() < rhs.receiver();
 }
-#endif
-
 
 } // namespace ril
 } // namespace visr

@@ -14,6 +14,7 @@
 #include <boost/spirit/include/phoenix_stl.hpp>
 
 #include <ciso646>
+#include <complex>
 #include <fstream>
 #include <limits>
 #include <regex>
@@ -90,6 +91,41 @@ MatrixParameter<ElementType>::fromString( std::string const & textMatrix, std::s
   return fromStream( stream, alignment );
 }
 
+namespace // unnamed
+{
+
+/**
+ * Template to provide type translations for the types used in the stream parsing function.
+ * By default the type is passed unaltered.
+ * For complex floating point types, the template is specialised to translate to the corresponding real type.
+ * @todo Check whether it is possible to use a partial template specification to handle all complex types in one specialisation.
+ */
+template< typename T>
+struct TranslateType
+{
+  using type = T;
+};
+
+/**
+ * Specialization for complex<float>
+ */
+template<>
+struct TranslateType<std::complex<float> >
+{
+  using type = float;
+};
+
+/**
+* Specialization for complex<double>
+*/
+template<>
+struct TranslateType<std::complex<double> >
+{
+  using type = double;
+};
+
+}
+
 template< typename ElementType >
 /*static*/ MatrixParameter<ElementType>
 MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t alignment /*= 0*/ )
@@ -126,9 +162,9 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
         // Ironically, this workaround triggers an error in llvm/clang used in XCode, which also claimes to be __GNUC__.
         // TODO: Remove conditional code after minimum compiler
         // requirement is GCC >= 4.9. 
-        (*((qi::real_parser<ElementType>( ))[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+        (*((qi::real_parser<typename TranslateType< ElementType>::type>())[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #else
-        (*(qi::real_parser<ElementType>( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
+        (*(qi::real_parser<typename TranslateType< ElementType>::type >( )[phoenix::push_back( phoenix::ref( v ), qi::_1 )]
 #endif
         % -qi::char_( ',' )) >> *(qi::char_( '%' ) >> *qi::char_)),
         boost::spirit::ascii::space);
@@ -195,6 +231,32 @@ namespace // unnamed
   {
     return sf_read_double( file, result.data( ), static_cast<sf_count_t>(numElements) );
   }
+
+  /**
+   * Implementation for complex types, to be used in the template specialisations.
+   * Sample data is interpreted as real-only float sequences.
+   */
+  template<typename T>
+  sf_count_t read_samples_complex( SNDFILE * file, efl::AlignedArray<std::complex<T> > & result, std::size_t numElements )
+  {
+    efl::AlignedArray<T> tmp( result.size(), result.alignmentElements() );
+    sf_count_t numEl = read_samples<T>( file, tmp, static_cast<sf_count_t>(numElements) );
+    std::copy( tmp.data(), tmp.data() + tmp.size(), result.data() );
+    return numEl;
+  }
+
+  template<>
+  sf_count_t read_samples<std::complex<float>>( SNDFILE * file, efl::AlignedArray<std::complex<float> > & result, std::size_t numElements )
+  {
+    return read_samples_complex( file, result, numElements );
+  }
+
+  template<>
+  sf_count_t read_samples<std::complex<double>>( SNDFILE * file, efl::AlignedArray<std::complex<double> > & result, std::size_t numElements )
+  {
+    return read_samples_complex( file, result, numElements );
+  }
+
 } // unnamed namespace
 
 template< typename ElementType >
@@ -271,6 +333,8 @@ MatrixParameter<ElementType>::fromTextFile( std::string const & fileName, std::s
 // Explicit instantiations for sample types float and double
 template class MatrixParameter<float>;
 template class MatrixParameter<double>;
+template class MatrixParameter<std::complex<float> >;
+template class MatrixParameter<std::complex<double> >;
 
 } // namespace pml
 } // namespace visr

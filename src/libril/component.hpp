@@ -6,7 +6,6 @@
 #include <libril/constants.hpp>
 
 #include <cstddef>
-#include <map> // for parameter port subsystem
 #include <string>
 #include <vector>
 
@@ -75,50 +74,25 @@ public:
    */
   std::size_t period() const; // { return mContainingFlow.period(); }
 
-#if 0
-  struct AudioPortDescriptor
-  {
-  public:
-    explicit AudioPortDescriptor( const char* name, AudioPort* port )
-      : mName( name ), mPort( port ) {}
+  template< class PortType >
+  using PortContainer = std::vector<PortType*>;
 
-    explicit AudioPortDescriptor( std::string const & name, AudioPort* port )
-      : mName( name ), mPort( port )
-    {
-    }
-
-    std::string mName;
-    AudioPort* mPort;
-  };
-#endif
-
-  using AudioPortVector = std::vector<AudioPort*>;
+  using AudioPortContainer = PortContainer< AudioPort >;
 
   /**
    * Allow access to the port lists 
    */
   //@{
-  AudioPortVector::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
+  AudioPortContainer::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
 
-  AudioPortVector::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
+  AudioPortContainer::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
   //@}
-
-  /** 
-   * Return a pointer to the port object speficied by name, const version.
-   */
-  AudioPort const * getAudioPort( const char* portName) const;
-
-  /**
-   * Return a pointer to the port object speficied by name, nonconst version.
-   */
-  AudioPort * getAudioPort( const char* portName );
-
 
   /**
    * Parameter port support
    */
   //@{
-  using ParameterPortContainer = std::map< std::string, ParameterPortBase*>;
+  using ParameterPortContainer = PortContainer<ParameterPortBase>;
 
   ParameterPortContainer::const_iterator parameterPortBegin() const;
   ParameterPortContainer::const_iterator parameterPortEnd( ) const;
@@ -126,19 +100,81 @@ public:
   ParameterPortContainer::iterator parameterPortBegin( );
   ParameterPortContainer::iterator parameterPortEnd( );
 
-  void registerParameterPort( ParameterPortBase *, std::string const & name );
-  bool unregisterParameterPort( std::string const & name );
+  /**
+   * Uniform access to audio and parameter ports using templates
+   */
+  //@{
+
+
+  /**
+   * Return the port container for the specified port type, const version .
+   * This template method is explicitly instantiated for the two possible port types ril::AudioPort and ril::ParameterPortBase
+   * @tparam PortType
+   * @return a const reference to the port container.
+   */
+  template<class PortType>
+  PortContainer<PortType> const & ports() const;
+
+  /**
+   * Return the port container for the specified port type, non-const version.
+   * This template method is explicitly instantiated for the two possible port types ril::AudioPort and ril::ParameterPortBase
+   * @tparam PortType
+   * @return a modifiable reference to the port container.
+   */
+  template<class PortType>
+  PortContainer<PortType> & ports();
+
+  template<class PortType>
+  typename PortContainer<PortType>::iterator portBegin() { return ports<PortType>().begin(); }
+  template<class PortType>
+  typename PortContainer<PortType>::iterator portEnd() { return ports<PortType>().end(); }
+  template<class PortType>
+  typename PortContainer<PortType>::const_iterator portBegin() const { return ports<PortType>().begin(); }
+  template<class PortType>
+  typename PortContainer<PortType>::const_iterator portEnd() const { return ports<PortType>().end(); }
+
+  template<class PortType>
+  typename PortContainer<PortType>::const_iterator findPortEntry( std::string const & portName ) const;
+
+  template<class PortType>
+  typename PortContainer<PortType>::iterator findPortEntry( std::string const & portName );
+  //@}
+
+  /**
+   * Register a parameter port in the component. Generally performed in the port's constructor.
+   * @todo consider making this a template method to share the implementation between audio and parameter ports.
+   */
+  void registerParameterPort( ParameterPortBase * port );
+
+  /**
+   * Unregister a parameter port in the component. Generally performed in the port's destructor.
+   * @todo consider making this a template method to share the implementation between audio and parameter ports.
+   */
+  bool unregisterParameterPort( ParameterPortBase * port );
+
+  /**
+   * Find a named parameter port within the component and return an iterator into the port container.
+   * @return A valid iterator into the port container for parameter ports, or the end() iterator if a port of this name is not found.
+   * @todo Templatise these calls as well
+   */
+  ParameterPortContainer::iterator findParameterPortEntry( std::string const & portName );
+
+  /**
+   * Find a named parameter port within the component and return an iterator into the port container, const verstion.
+   * @return A valid iterator into the port container for parameter ports, or the end() iterator if a port of this name is not found.
+   * @todo Templatise these calls as well
+   */
+  ParameterPortContainer::const_iterator findParameterPortEntry( std::string const & portName ) const;
 
   /**
    * @return pointer to port, nullptr in case the port is not found.
    */
-  ParameterPortBase* findParameterPort( std::string const & name );
+  ParameterPortBase const * findParameterPort( std::string const & portName ) const;
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  ParameterPortBase const * findParameterPort( std::string const & name ) const;
-
+  ParameterPortBase * findParameterPort( std::string const & portName );
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
@@ -167,15 +203,15 @@ private:
   void registerAudioPort( AudioPort* port );
   void unregisterAudioPort( AudioPort* port );
 
-  AudioPortVector mAudioPorts;
+  AudioPortContainer mAudioPorts;
 
-  AudioPortVector const & getAudioPortList( ) const;
+  AudioPortContainer const & getAudioPortList( ) const;
 
-  AudioPortVector& getAudioPortList( );
+  AudioPortContainer& getAudioPortList( );
 
-  AudioPortVector::iterator findAudioPortEntry( std::string const & portName );
+  AudioPortContainer::iterator findAudioPortEntry( std::string const & portName );
 
-  AudioPortVector::const_iterator findAudioPortEntry( std::string const & portName ) const;
+  AudioPortContainer::const_iterator findAudioPortEntry( std::string const & portName ) const;
 
   SignalFlowContext & mContext;
 

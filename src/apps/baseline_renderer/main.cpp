@@ -2,7 +2,7 @@
 
 // Enable native JACK interface instead of PortAudio
 // TODO: Make this selectable via a command line option.
-// #define BASELINE_RENDERER_NATIVE_JACK
+#define BASELINE_RENDERER_NATIVE_JACK
 
 #include "options.hpp"
 
@@ -21,6 +21,7 @@
 #else
 #include <librrl/portaudio_interface.hpp>
 #endif
+#include <librrl/audio_signal_flow.hpp>
 
 #include <libsignalflows/baseline_renderer.hpp>
 
@@ -110,6 +111,8 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
+    const bool lowFrequencyPanning = cmdLineOptions.getDefaultedOption("low-frequency-panning", false );
+
     if( not cmdLineOptions.hasOption( "reverb-config" ) )
     {
       throw std::invalid_argument( "VISR renderer: Mandatory option \"reverb-config\" missing." );
@@ -166,7 +169,10 @@ int main( int argc, char const * const * argv )
                                         diffusionCoeffs,
                                         trackingConfiguration,
                                         sceneReceiverPort,
-                                        reverbConfiguration );
+                                        reverbConfiguration,
+                                        lowFrequencyPanning );
+
+    rrl::AudioSignalFlow audioFlow( flow );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface audioInterface( interfaceConfig );
@@ -174,7 +180,7 @@ int main( int argc, char const * const * argv )
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
-//    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );

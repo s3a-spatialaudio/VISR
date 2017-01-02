@@ -3,6 +3,7 @@
 SET( SOURCES
  array_configuration.cpp
  biquad_parameter.cpp
+ communication_protocol_instantiation.cpp 
  double_buffering_protocol.cpp
  empty_parameter_config.cpp
  filter_routing_parameter.cpp
@@ -15,11 +16,13 @@ SET( SOURCES
  message_queue.cpp
  message_queue_protocol.cpp
  object_vector.cpp
- communication_protocol_instantiation.cpp
+ parametric_iir_coefficients.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
  string_parameter_config.cpp
+ time_frequency_parameter.cpp
+ time_frequency_parameter_config.cpp
  vector_parameter.cpp
  vector_parameter_config.cpp
 )
@@ -40,10 +43,13 @@ SET( HEADERS
  message_queue.hpp
  message_queue_protocol.hpp
  object_vector.hpp
+ parametric_iir_coefficients.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
  string_parameter.hpp
  string_parameter_config.hpp
+ time_frequency_parameter.hpp
+ time_frequency_parameter_config.hpp
  vector_parameter.hpp
  vector_parameter_config.hpp
 )

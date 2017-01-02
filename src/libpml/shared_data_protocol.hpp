@@ -43,8 +43,8 @@ public:
     /**
     * Default constructor.
     */
-    Input( ril::Component & parent, std::string const & name )
-     : ParameterPortBase( parent, name, ParameterPortBase::Direction::Input )
+    Input( std::string const & name, ril::Component & parent )
+     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
      , mProtocol(nullptr)
     {}
 
@@ -55,6 +55,11 @@ public:
     void setProtocolInstance( SharedDataProtocol * protocol )
     {
       mProtocol = protocol;
+    }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
     }
   private:
     SharedDataProtocol * mProtocol;
@@ -71,8 +76,8 @@ public:
     /**
      * Default constructor.
      */
-    explicit Output( ril::Component & parent, std::string const & name )
-     : ParameterPortBase( parent, name, ParameterPortBase::Direction::Output )
+    explicit Output( std::string const & name, ril::Component & parent )
+     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
      , mProtocol(nullptr)
     {}
 
@@ -84,6 +89,11 @@ public:
     void setProtocolInstance( SharedDataProtocol * protocol )
     {
       mProtocol = protocol;
+    }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
     }
   private:
     SharedDataProtocol * mProtocol;

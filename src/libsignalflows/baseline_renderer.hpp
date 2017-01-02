@@ -16,7 +16,7 @@
 #include <librcl/late_reverb_filter_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/null_source.hpp>
-#include <librcl/panning_gain_calculator.hpp>
+#include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/reverb_parameter_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
@@ -41,6 +41,8 @@ namespace visr
 
 namespace signalflows
 {
+
+#define DISABLE_REVERB_RENDERING 1
 
 /**
  * Audio signal graph object for the VISR baseline renderer.
@@ -78,14 +80,15 @@ public:
                              efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
-                             std::string const & reverbConfig );
+                             std::string const & reverbConfig,
+                             bool frequencyDependentPanning );
 
   ~BaselineRenderer();
 
   /**
    * Process function that consumes and produces blocks of \p period() audio samples per input and output channel.
    */
-  /*virtual*/ void process();
+  // /*virtual*/ void process();
 
 private:
 
@@ -97,7 +100,7 @@ private:
 
   rcl::DelayVector mOutputAdjustment;
 
-  rcl::PanningGainCalculator mGainCalculator;
+  rcl::PanningCalculator mGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
@@ -149,6 +152,7 @@ private:
   //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
 
+#ifndef DISABLE_REVERB_RENDERING
   /**
    * Audio components and parameter data, and internal functions related to the object-based reverberation signal flow.
    * @todo Consider moving this into a separate separate sub-signalflow (after this feature has been implemented).
@@ -194,8 +198,21 @@ private:
 
   rcl::Add mReverbMix;
   //@}
+#endif
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
+
+
+  /**
+   * Preliminary support for low-frequency adaptive panning.
+   */
+  //@{
+  bool mFrequencyDependentPanning;
+
+  std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
+
+  std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
+  //@}
 
   ril::AudioInput mInput;
   ril::AudioOutput mOutput;

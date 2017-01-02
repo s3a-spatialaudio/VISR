@@ -1,194 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
 <panningConfiguration dimension="3" infinite="false">
-   <loudspeaker channel="1" delay="0.00096653" gainDB="-4" id="1">
-      <cart x="2.16" y="-0.66" z="1.03"/>
-   </loudspeaker>
-   <loudspeaker channel="2" delay="0.00034773" gainDB="-0.2" id="2">
-      <cart x="1.73" y="1.72" z="1.14"/>
-   </loudspeaker>
-   <loudspeaker channel="3" delay="0.0051498" gainDB="-6.5" id="3">
+   <outputEqConfiguration numberOfBiquads="1" type="iir">
+      <filterSpec name="lowpass">
+         <biquad a1="-1.9688283" a2="0.96907117" b0="6.0729856e-05" b1="0.00012145971" b2="6.0729856e-05"/>
+      </filterSpec>
+      <filterSpec name="highpass">
+         <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
+      </filterSpec>
+   </outputEqConfiguration>
+   <loudspeaker channel="1" delay="0.0051591" eq="highpass" gainDB="-10.4132" id="1">
       <cart x="0.01" y="0" z="1.06"/>
    </loudspeaker>
-   <loudspeaker channel="4" delay="0.0042236" gainDB="-3" id="4">
+   <loudspeaker channel="2" delay="0.0041438" eq="highpass" gainDB="-6.1703" id="2">
       <cart x="0.67" y="-0.6" z="1.04"/>
    </loudspeaker>
-   <loudspeaker channel="5" delay="0.0042151" gainDB="-2.6" id="5">
+   <loudspeaker channel="3" delay="0.004115" eq="highpass" gainDB="-6.7237" id="3">
       <cart x="-0.65" y="-0.66" z="1.02"/>
    </loudspeaker>
-   <loudspeaker channel="6" delay="0.00043488" gainDB="-0.2" id="6">
-      <cart x="-1.68" y="-1.73" z="1.13"/>
-   </loudspeaker>
-   <loudspeaker channel="7" delay="0.0041222" gainDB="-3.5" id="7">
+   <loudspeaker channel="4" delay="0.0041559" eq="highpass" gainDB="-6.9319" id="4">
       <cart x="-0.7" y="0.66" z="1.03"/>
    </loudspeaker>
-   <loudspeaker channel="8" delay="0.0012537" gainDB="-1.3" id="8">
-      <cart x="-2.1" y="0" z="1.13"/>
+   <loudspeaker channel="5" delay="0.0042488" eq="highpass" gainDB="-7.124" id="5">
+      <cart x="0.67" y="0.66" z="1.03"/>
    </loudspeaker>
-   <loudspeaker channel="9" delay="0.0021382" gainDB="-1.3" id="9">
-      <cart x="0.01" y="1.77" z="1.1"/>
-   </loudspeaker>
-   <loudspeaker channel="10" delay="0.00037728" gainDB="-0.6" id="10">
-      <cart x="-1.68" y="1.76" z="1.13"/>
-   </loudspeaker>
-   <loudspeaker channel="11" delay="0.0010987" gainDB="-1.2" id="11">
+   <loudspeaker channel="6" delay="0.0010714" eq="highpass" gainDB="-2.4001" id="6">
       <cart x="2.17" y="0" z="1.11"/>
    </loudspeaker>
-   <loudspeaker channel="12" delay="0.0023281" gainDB="-1" id="12">
-      <cart x="0" y="-1.7" z="1.09"/>
-   </loudspeaker>
-   <loudspeaker channel="13" delay="0.00033305" gainDB="-0.9" id="13">
-      <cart x="1.77" y="-1.68" z="1.15"/>
-   </loudspeaker>
-   <loudspeaker channel="14" delay="0.00086621" gainDB="-1.8" id="14">
-      <cart x="-2.13" y="1.34" z="0.01"/>
-   </loudspeaker>
-   <loudspeaker channel="15" delay="0.0020167" gainDB="-3.8" id="15">
-      <cart x="-2.12" y="0" z="0.15"/>
-   </loudspeaker>
-   <loudspeaker channel="16" delay="0.0023138" gainDB="-3" id="16">
-      <cart x="1" y="1.76" z="-0.01"/>
-   </loudspeaker>
-   <loudspeaker channel="17" delay="0" gainDB="0" id="17">
-      <cart x="2.18" y="1.36" z="1.14"/>
-   </loudspeaker>
-   <loudspeaker channel="18" delay="0.0021493" gainDB="-2.5" id="18">
-      <cart x="2.08" y="0.03" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="19" delay="0.00073536" gainDB="-2.1" id="19">
-      <cart x="2.17" y="1.36" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="20" delay="0.0033558" gainDB="-1.8" id="20">
-      <cart x="0" y="-1.67" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="21" delay="0.002477" gainDB="-2.7" id="21">
-      <cart x="-1.01" y="-1.69" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="22" delay="0.00097679" gainDB="-1.8" id="22">
-      <cart x="-2.18" y="-1.18" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="23" delay="0.0017544" gainDB="-2.3" id="23">
-      <cart x="-2.08" y="0" z="-0.76"/>
-   </loudspeaker>
-   <loudspeaker channel="24" delay="0.0031205" gainDB="-3" id="24">
-      <cart x="0" y="1.75" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="25" delay="0.0023941" gainDB="-3.1" id="25">
-      <cart x="-0.98" y="1.74" z="0"/>
-   </loudspeaker>
-   <loudspeaker channel="26" delay="0.00099687" gainDB="-1.7" id="26">
-      <cart x="2.15" y="-1.22" z="0.01"/>
-   </loudspeaker>
-   <loudspeaker channel="27" delay="0.00014344" gainDB="-0.4" id="27">
+   <loudspeaker channel="7" delay="2.2721e-05" eq="highpass" gainDB="0" id="7">
       <cart x="2.15" y="-1.28" z="1.17"/>
    </loudspeaker>
-   <loudspeaker channel="28" delay="0.0024214" gainDB="-2.8" id="28">
+   <loudspeaker channel="8" delay="0.00029767" eq="highpass" gainDB="-2.3689" id="8">
+      <cart x="1.77" y="-1.68" z="1.15"/>
+   </loudspeaker>
+   <loudspeaker channel="9" delay="0.0021567" eq="highpass" gainDB="-3.5553" id="9">
+      <cart x="0" y="-1.7" z="1.09"/>
+   </loudspeaker>
+   <loudspeaker channel="10" delay="0.00028773" eq="highpass" gainDB="-1.4309" id="10">
+      <cart x="-1.68" y="-1.73" z="1.13"/>
+   </loudspeaker>
+   <loudspeaker channel="11" delay="0.0011926" eq="highpass" gainDB="-3.0138" id="11">
+      <cart x="-2.1" y="0" z="1.13"/>
+   </loudspeaker>
+   <loudspeaker channel="12" delay="0.00035341" eq="highpass" gainDB="-2.0578" id="12">
+      <cart x="-1.68" y="1.76" z="1.13"/>
+   </loudspeaker>
+   <loudspeaker channel="13" delay="0.0021828" eq="highpass" gainDB="-3.9478" id="13">
+      <cart x="0.01" y="1.77" z="1.1"/>
+   </loudspeaker>
+   <loudspeaker channel="14" delay="0.00020578" eq="highpass" gainDB="-0.87467" id="14">
+      <cart x="1.73" y="1.72" z="1.14"/>
+   </loudspeaker>
+   <loudspeaker channel="15" delay="0" eq="highpass" gainDB="-0.59209" id="15">
+      <cart x="2.18" y="1.36" z="1.14"/>
+   </loudspeaker>
+   <loudspeaker channel="16" delay="0.0018466" eq="highpass" gainDB="-3.7213" id="16">
+      <cart x="2.08" y="0.03" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="17" delay="0.00079522" eq="highpass" gainDB="-1.9297" id="17">
+      <cart x="2.15" y="-1.22" z="0.01"/>
+   </loudspeaker>
+   <loudspeaker channel="18" delay="0.0022194" eq="highpass" gainDB="-2.9261" id="18">
       <cart x="1.03" y="-1.7" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="29" delay="0.00054124" gainDB="-0.4" id="29">
-      <cart x="1.78" y="1.73" z="-0.86"/>
+   <loudspeaker channel="19" delay="0.003072" eq="highpass" gainDB="-4.6035" id="19">
+      <cart x="0" y="-1.67" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="30" delay="0.0025568" gainDB="-2.4" id="30">
-      <cart x="-0.01" y="1.76" z="-0.82"/>
+   <loudspeaker channel="20" delay="0.0022211" eq="highpass" gainDB="-3.3894" id="20">
+      <cart x="-1.01" y="-1.69" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="31" delay="0.0015049" gainDB="-1.5" id="31">
+   <loudspeaker channel="21" delay="0.00084225" eq="highpass" gainDB="-2.8142" id="21">
+      <cart x="-2.18" y="-1.18" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="22" delay="0.0018587" eq="highpass" gainDB="-4.7282" id="22">
+      <cart x="-2.12" y="0" z="0.15"/>
+   </loudspeaker>
+   <loudspeaker channel="23" delay="0.00078927" eq="highpass" gainDB="-3.8795" id="23">
+      <cart x="-2.13" y="1.34" z="0.01"/>
+   </loudspeaker>
+   <loudspeaker channel="24" delay="0.0023929" eq="highpass" gainDB="-3.6401" id="24">
+      <cart x="-0.98" y="1.74" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="25" delay="0.0030953" eq="highpass" gainDB="-4.9568" id="25">
+      <cart x="0" y="1.75" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="26" delay="0.0022729" eq="highpass" gainDB="-3.2534" id="26">
+      <cart x="1" y="1.76" z="-0.01"/>
+   </loudspeaker>
+   <loudspeaker channel="27" delay="0.00069646" eq="highpass" gainDB="-1.5725" id="27">
+      <cart x="2.17" y="1.36" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="28" delay="0.0013155" eq="highpass" gainDB="-1.435" id="28">
       <cart x="2.14" y="0.04" z="-0.84"/>
    </loudspeaker>
-   <loudspeaker channel="32" delay="0.0043151" gainDB="-5" id="32">
-      <cart x="0.65" y="-0.53" z="-1.05"/>
-   </loudspeaker>
-   <loudspeaker channel="33" delay="0.004357" gainDB="-5.5" id="33">
-      <cart x="-0.62" y="-0.53" z="-1.05"/>
-   </loudspeaker>
-   <loudspeaker channel="34" delay="0.00074656" gainDB="-0.5" id="34">
-      <cart x="-1.74" y="-1.67" z="-0.85"/>
-   </loudspeaker>
-   <loudspeaker channel="35" delay="0.0027428" gainDB="-2.6" id="35">
-      <cart x="0" y="-1.69" z="-0.82"/>
-   </loudspeaker>
-   <loudspeaker channel="36" delay="0.0042423" gainDB="-5.4" id="36">
-      <cart x="-0.59" y="0.65" z="-1.05"/>
-   </loudspeaker>
-   <loudspeaker channel="37" delay="0.0044321" gainDB="-4.9" id="37">
-      <cart x="0.54" y="0.59" z="-1.03"/>
-   </loudspeaker>
-   <loudspeaker channel="38" delay="0.00068767" gainDB="-1.2" id="38">
+   <loudspeaker channel="29" delay="0.00045897" eq="highpass" gainDB="-1.391" id="29">
       <cart x="1.75" y="-1.68" z="-0.87"/>
    </loudspeaker>
-   <loudspeaker channel="39" delay="0.00024184" gainDB="-2.1" id="39">
+   <loudspeaker channel="30" delay="0.0023928" eq="highpass" gainDB="-2.8792" id="30">
+      <cart x="0" y="-1.69" z="-0.82"/>
+   </loudspeaker>
+   <loudspeaker channel="31" delay="0.00050589" eq="highpass" gainDB="-1.6162" id="31">
+      <cart x="-1.74" y="-1.67" z="-0.85"/>
+   </loudspeaker>
+   <loudspeaker channel="32" delay="0.001541" eq="highpass" gainDB="-3.2909" id="32">
+      <cart x="-2.08" y="0" z="-0.76"/>
+   </loudspeaker>
+   <loudspeaker channel="33" delay="0.00016799" eq="highpass" gainDB="-1.4454" id="33">
       <cart x="-1.78" y="1.89" z="-0.84"/>
    </loudspeaker>
-   <triplet l1="1" l2="4" l3="27"/>
-   <triplet l1="1" l2="11" l3="4"/>
-   <triplet l1="1" l2="18" l3="11"/>
-   <triplet l1="1" l2="26" l3="18"/>
-   <triplet l1="1" l2="27" l3="26"/>
-   <triplet l1="2" l2="3" l3="17"/>
-   <triplet l1="2" l2="9" l3="3"/>
-   <triplet l1="2" l2="16" l3="9"/>
-   <triplet l1="2" l2="17" l3="19"/>
-   <triplet l1="2" l2="19" l3="16"/>
+   <loudspeaker channel="34" delay="0.0023166" eq="highpass" gainDB="-3.2045" id="34">
+      <cart x="-0.01" y="1.76" z="-0.82"/>
+   </loudspeaker>
+   <loudspeaker channel="35" delay="0.0005258" eq="highpass" gainDB="-1.2345" id="35">
+      <cart x="1.78" y="1.73" z="-0.86"/>
+   </loudspeaker>
+   <loudspeaker channel="36" delay="0.0040481" eq="highpass" gainDB="-6.7189" id="36">
+      <cart x="0.65" y="-0.53" z="-1.05"/>
+   </loudspeaker>
+   <loudspeaker channel="37" delay="0.0042949" eq="highpass" gainDB="-6.4389" id="37">
+      <cart x="-0.62" y="-0.53" z="-1.05"/>
+   </loudspeaker>
+   <loudspeaker channel="38" delay="0.0041128" eq="highpass" gainDB="-6.5175" id="38">
+      <cart x="-0.59" y="0.65" z="-1.05"/>
+   </loudspeaker>
+   <loudspeaker channel="39" delay="0.0041213" eq="highpass" gainDB="-6.0115" id="39">
+      <cart x="0.54" y="0.59" z="-1.03"/>
+   </loudspeaker>
+   <triplet l1="1" l2="2" l3="5"/>
+   <triplet l1="1" l2="3" l3="9"/>
+   <triplet l1="1" l2="4" l3="3"/>
+   <triplet l1="1" l2="5" l3="13"/>
+   <triplet l1="1" l2="9" l3="2"/>
+   <triplet l1="1" l2="13" l3="4"/>
+   <triplet l1="2" l2="6" l3="5"/>
+   <triplet l1="2" l2="7" l3="6"/>
+   <triplet l1="2" l2="8" l3="7"/>
+   <triplet l1="2" l2="9" l3="8"/>
    <triplet l1="3" l2="4" l3="11"/>
-   <triplet l1="3" l2="5" l3="12"/>
-   <triplet l1="3" l2="7" l3="5"/>
-   <triplet l1="3" l2="9" l3="7"/>
-   <triplet l1="3" l2="11" l3="17"/>
-   <triplet l1="3" l2="12" l3="4"/>
-   <triplet l1="4" l2="12" l3="13"/>
-   <triplet l1="4" l2="13" l3="27"/>
-   <triplet l1="5" l2="6" l3="12"/>
-   <triplet l1="5" l2="7" l3="8"/>
-   <triplet l1="5" l2="8" l3="6"/>
-   <triplet l1="6" l2="8" l3="22"/>
-   <triplet l1="6" l2="21" l3="12"/>
-   <triplet l1="6" l2="22" l3="21"/>
-   <triplet l1="7" l2="9" l3="10"/>
-   <triplet l1="7" l2="10" l3="8"/>
-   <triplet l1="8" l2="10" l3="14"/>
-   <triplet l1="8" l2="14" l3="15"/>
-   <triplet l1="8" l2="15" l3="22"/>
-   <triplet l1="9" l2="16" l3="24"/>
-   <triplet l1="9" l2="24" l3="25"/>
-   <triplet l1="9" l2="25" l3="10"/>
-   <triplet l1="10" l2="25" l3="14"/>
-   <triplet l1="11" l2="18" l3="17"/>
-   <triplet l1="12" l2="20" l3="28"/>
-   <triplet l1="12" l2="21" l3="20"/>
-   <triplet l1="12" l2="28" l3="13"/>
-   <triplet l1="13" l2="26" l3="27"/>
-   <triplet l1="13" l2="28" l3="26"/>
-   <triplet l1="14" l2="23" l3="15"/>
-   <triplet l1="14" l2="25" l3="39"/>
-   <triplet l1="14" l2="39" l3="23"/>
-   <triplet l1="15" l2="23" l3="22"/>
-   <triplet l1="16" l2="19" l3="29"/>
-   <triplet l1="16" l2="29" l3="30"/>
-   <triplet l1="16" l2="30" l3="24"/>
-   <triplet l1="17" l2="18" l3="19"/>
-   <triplet l1="18" l2="26" l3="31"/>
-   <triplet l1="18" l2="31" l3="19"/>
-   <triplet l1="19" l2="31" l3="29"/>
-   <triplet l1="20" l2="21" l3="35"/>
-   <triplet l1="20" l2="35" l3="28"/>
-   <triplet l1="21" l2="22" l3="34"/>
-   <triplet l1="21" l2="34" l3="35"/>
-   <triplet l1="22" l2="23" l3="34"/>
-   <triplet l1="23" l2="33" l3="34"/>
-   <triplet l1="23" l2="36" l3="33"/>
-   <triplet l1="23" l2="39" l3="36"/>
-   <triplet l1="24" l2="30" l3="25"/>
-   <triplet l1="25" l2="30" l3="39"/>
-   <triplet l1="26" l2="28" l3="38"/>
-   <triplet l1="26" l2="38" l3="31"/>
-   <triplet l1="28" l2="35" l3="38"/>
-   <triplet l1="29" l2="31" l3="37"/>
-   <triplet l1="29" l2="37" l3="30"/>
-   <triplet l1="30" l2="36" l3="39"/>
+   <triplet l1="3" l2="10" l3="9"/>
+   <triplet l1="3" l2="11" l3="10"/>
+   <triplet l1="4" l2="12" l3="11"/>
+   <triplet l1="4" l2="13" l3="12"/>
+   <triplet l1="5" l2="6" l3="15"/>
+   <triplet l1="5" l2="14" l3="13"/>
+   <triplet l1="5" l2="15" l3="14"/>
+   <triplet l1="6" l2="7" l3="17"/>
+   <triplet l1="6" l2="16" l3="15"/>
+   <triplet l1="6" l2="17" l3="16"/>
+   <triplet l1="7" l2="8" l3="17"/>
+   <triplet l1="8" l2="9" l3="18"/>
+   <triplet l1="8" l2="18" l3="17"/>
+   <triplet l1="9" l2="10" l3="20"/>
+   <triplet l1="9" l2="19" l3="18"/>
+   <triplet l1="9" l2="20" l3="19"/>
+   <triplet l1="10" l2="11" l3="21"/>
+   <triplet l1="10" l2="21" l3="20"/>
+   <triplet l1="11" l2="12" l3="23"/>
+   <triplet l1="11" l2="22" l3="21"/>
+   <triplet l1="11" l2="23" l3="22"/>
+   <triplet l1="12" l2="13" l3="24"/>
+   <triplet l1="12" l2="24" l3="23"/>
+   <triplet l1="13" l2="14" l3="26"/>
+   <triplet l1="13" l2="25" l3="24"/>
+   <triplet l1="13" l2="26" l3="25"/>
+   <triplet l1="14" l2="15" l3="27"/>
+   <triplet l1="14" l2="27" l3="26"/>
+   <triplet l1="15" l2="16" l3="27"/>
+   <triplet l1="16" l2="17" l3="28"/>
+   <triplet l1="16" l2="28" l3="27"/>
+   <triplet l1="17" l2="18" l3="29"/>
+   <triplet l1="17" l2="29" l3="28"/>
+   <triplet l1="18" l2="19" l3="30"/>
+   <triplet l1="18" l2="30" l3="29"/>
+   <triplet l1="19" l2="20" l3="30"/>
+   <triplet l1="20" l2="21" l3="31"/>
+   <triplet l1="20" l2="31" l3="30"/>
+   <triplet l1="21" l2="22" l3="32"/>
+   <triplet l1="21" l2="32" l3="31"/>
+   <triplet l1="22" l2="23" l3="32"/>
+   <triplet l1="23" l2="24" l3="33"/>
+   <triplet l1="23" l2="33" l3="32"/>
+   <triplet l1="24" l2="25" l3="34"/>
+   <triplet l1="24" l2="34" l3="33"/>
+   <triplet l1="25" l2="26" l3="34"/>
+   <triplet l1="26" l2="27" l3="35"/>
+   <triplet l1="26" l2="35" l3="34"/>
+   <triplet l1="27" l2="28" l3="35"/>
+   <triplet l1="28" l2="29" l3="36"/>
+   <triplet l1="28" l2="36" l3="39"/>
+   <triplet l1="28" l2="39" l3="35"/>
+   <triplet l1="29" l2="30" l3="36"/>
+   <triplet l1="30" l2="31" l3="37"/>
    <triplet l1="30" l2="37" l3="36"/>
    <triplet l1="31" l2="32" l3="37"/>
-   <triplet l1="31" l2="38" l3="32"/>
-   <triplet l1="32" l2="33" l3="37"/>
-   <triplet l1="32" l2="35" l3="33"/>
-   <triplet l1="32" l2="38" l3="35"/>
-   <triplet l1="33" l2="35" l3="34"/>
-   <triplet l1="33" l2="36" l3="37"/>
+   <triplet l1="32" l2="33" l3="38"/>
+   <triplet l1="32" l2="38" l3="37"/>
+   <triplet l1="33" l2="34" l3="38"/>
+   <triplet l1="34" l2="35" l3="39"/>
+   <triplet l1="34" l2="39" l3="38"/>
+   <triplet l1="36" l2="37" l3="39"/>
+   <triplet l1="37" l2="38" l3="39"/>
 </panningConfiguration>

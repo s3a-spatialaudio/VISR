@@ -23,21 +23,26 @@ namespace rcl
 void GainMatrix::setup( std::size_t numberOfInputs,
     std::size_t numberOfOutputs,
     std::size_t interpolationSteps,
-    SampleType initialGain /*= static_cast<SampleType>(0.0)*/ )
+    SampleType initialGain /*= static_cast<SampleType>(0.0)*/,
+    bool controlInput /* = true */ )
 {
   mNumberOfInputs = numberOfInputs;
   mNumberOfOutputs = numberOfOutputs;
   mInput.setWidth( mNumberOfInputs );
   mOutput.setWidth( mNumberOfOutputs );
   mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period(), interpolationSteps, initialGain, ril::cVectorAlignmentSamples ) );
-  mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( *this, "gainInput",
-    pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
+  if( controlInput )
+  {
+    mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+      pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
+  }
 }
 
 void GainMatrix::setup( std::size_t numberOfInputs,
                         std::size_t numberOfOutputs,
                         std::size_t interpolationSteps,
-                        efl::BasicMatrix< SampleType > const & initialGains )
+                        efl::BasicMatrix< SampleType > const & initialGains,
+                        bool controlInput /* = true */)
 {
   if( (initialGains.numberOfColumns() != numberOfInputs) or( initialGains.numberOfRows() != numberOfOutputs ) )
   {
@@ -49,14 +54,21 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mOutput.setWidth( mNumberOfOutputs );
   mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ),
                  interpolationSteps, initialGains, ril::cVectorAlignmentSamples ) );
-  mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( *this, "gainInput",
-                    pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
+  if( controlInput )
+  {
+    mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+                      pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
+  }
 }
 
 void GainMatrix::process()
 {
-  // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
-  mMatrix->setNewGains( mGainInput->data() );
+  if( mGainInput )
+  {
+    // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
+    // Thus would be a match for the DoubleBufferingProtocol.
+    mMatrix->setNewGains( mGainInput->data() );
+  }
 
   // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
   if( mInput.width() == 0 or mOutput.width() == 0 )

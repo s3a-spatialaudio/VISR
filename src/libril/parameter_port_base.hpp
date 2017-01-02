@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
 #define VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
 
+#include "port_base.hpp"
+
 #include "parameter_type.hpp"
 #include "communication_protocol_type.hpp"
  
@@ -23,7 +25,7 @@ class ParameterConfigBase;
  *
  *
  */
-class ParameterPortBase
+class ParameterPortBase: public PortBase
 {
 public:
 
@@ -33,18 +35,12 @@ public:
     Placeholder
   };
 
-  enum class Direction
-  {
-    Input,
-    Output
-  };
-
-  explicit ParameterPortBase( Component & parent,
-                              std::string const & name,
+  explicit ParameterPortBase( std::string const & name,
+                              Component & parent,
                               Direction direction );
 
   /**
-   *
+   * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
    */
   virtual ~ParameterPortBase();
 
@@ -60,20 +56,18 @@ public:
    */
   void connectProtocol( ril::CommunicationProtocolBase * protocol );
 #endif
-
-  Direction direction() const { return mDirection; }
+  /**
+   * Check whether the port is connected to a valid protocol.
+   */
+  virtual bool isConnected() const = 0;
 protected:
   /**
    * Type-specific method to check and set the connected protocol.
    * @todo Reconsider interface.
-   * @throw std::invalid_argument if the protovol type does not match the concrete port type.
+   * @throw std::invalid_argument if the protocol type does not match the concrete port type.
    * At the moment, we use RTTI as the final check.
    */
   virtual void setProtocol( ril::CommunicationProtocolBase * protocol ) = 0;
-private:
-  Direction const mDirection;
-
-  // Kind const mKind;
 };
 
 } // namespace ril

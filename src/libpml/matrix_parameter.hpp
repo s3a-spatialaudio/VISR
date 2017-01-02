@@ -10,6 +10,7 @@
 #include <libril/parameter_type.hpp>
 #include <libril/typed_parameter_base.hpp>
 
+#include <complex>
 #include <initializer_list>
 #include <istream>
 
@@ -28,7 +29,6 @@ class MatrixParameter: public efl::BasicMatrix<ElementType>,
   public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterToId<MatrixParameter<ElementType> >::id >
 {
 public:
-  ril::ParameterType foo;
 
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
@@ -105,5 +105,7 @@ private:
 
 DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<float>, visr::ril::ParameterType::MatrixFloat, visr::pml::MatrixParameterConfig )
 DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<double>, visr::ril::ParameterType::MatrixDouble, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<float> >, visr::ril::ParameterType::MatrixFloatComplex, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<double> >, visr::ril::ParameterType::MatrixDoubleComplex, visr::pml::MatrixParameterConfig )
 
 #endif // VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED

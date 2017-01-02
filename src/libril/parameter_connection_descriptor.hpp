@@ -1,23 +1,17 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTORHPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTORHPP_INCLUDED
+#ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#define VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
-
-#include <array>
-#include <initializer_list>
-#include <map>
-#include <memory>
-#include <string>
-#include <stdexcept>
-#include <sstream>
-#include <valarray>
+#include <set>
 
 namespace visr
 {
 namespace ril
 {
+class ParameterPortBase;
 
+#if 0
 struct ParameterPortDescriptor
 {
 public:
@@ -34,9 +28,8 @@ private:
   std::string mComponent;
   std::string mPort;
 };
+#endif
 
-// Not used in the current code.
-#if 0
 /**
  * Store data from definition in derived class until initialisation of runtime structures.
  * @todo This should move into CompositeComponent.
@@ -45,32 +38,33 @@ struct ParameterConnection
 {
 public:
   /**
-   * Default constructor, required for use in standard containers.
-   * Creates a struct with empty strings for all members.
-   */
-  ParameterConnection() = default;
+  * Default constructor, required for use in standard containers.
+  * Creates a struct with empty strings for all members.
+  */
+  ParameterConnection()
+    : mSender( nullptr )
+    , mReceiver( nullptr )
+  {
+  }
 
-  ParameterConnection( ParameterPortDescriptor const & pSender,
-                     ParameterPortDescriptor const & pReceiver );
+  ParameterConnection( ParameterPortBase * pSender,
+                       ParameterPortBase * pReceiver );
 
-  ParameterConnection( std::string const & pSendComponent,
-                       std::string const & pSendPort,
-                       std::string const & pReceiveComponent,
-                       std::string const & pReceivePort );
+  bool operator<( ParameterConnection const & rhs ) const;
 
-  bool operator<(ParameterConnection const & rhs) const;
+  ParameterPortBase * sender() const { return mSender; }
+  ParameterPortBase * receiver() const { return mReceiver; }
 
-  ParameterPortDescriptor const & sender() const { return mSender; }
-  ParameterPortDescriptor const & receiver() const { return mReceiver; }
+
 private:
-  ParameterPortDescriptor const mSender;
-  ParameterPortDescriptor const mReceiver;
+  ParameterPortBase * mSender;
+  ParameterPortBase * mReceiver;
 };
-#endif
 
-using ParameterConnectionTable = std::multimap<ParameterPortDescriptor, ParameterPortDescriptor >;
+// using ParameterConnectionTable = std::multimap<ParameterPortDescriptor, ParameterPortDescriptor >;
+using ParameterConnectionTable = std::multiset<ParameterConnection>;
 
 } // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTORHPP_INCLUDED
+#endif // #ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED

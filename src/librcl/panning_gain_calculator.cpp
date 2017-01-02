@@ -17,6 +17,7 @@
 // TODO: For the future, consider moving this to another location.
 #include <libobjectmodel/diffuse_source.hpp>
 #include <libobjectmodel/point_source.hpp>
+#include <libobjectmodel/point_source_extent.hpp>
 #include <libobjectmodel/point_source_with_diffuseness.hpp>
 #include <libobjectmodel/plane_wave.hpp>
 
@@ -66,12 +67,12 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
 
-  mObjectVectorInput.reset( new ObjectPort( *this, "objectVectorInput", pml::EmptyParameterConfig() ) );
-  mGainOutput.reset( new MatrixPort( *this, "gainOutput", pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
+  mObjectVectorInput.reset( new ObjectPort( "objectVectorInput", *this, pml::EmptyParameterConfig() ) );
+  mGainOutput.reset( new MatrixPort( "gainOutput", *this, pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
 
   if( adaptiveListenerPosition )
   {
-    mListenerPositionInput.reset( new ListenerPositionPort( *this, "listenerPosition", pml::EmptyParameterConfig() ) );
+    mListenerPositionInput.reset( new ListenerPositionPort( "listenerPosition", *this, pml::EmptyParameterConfig() ) );
   }
 }
 
@@ -149,6 +150,7 @@ void PanningGainCalculator::process()
                                                                   // Fall through intentionally
       }
       case objectmodel::ObjectTypeId::PointSource:
+      case objectmodel::ObjectTypeId::PointSourceExtent:
       case objectmodel::ObjectTypeId::PointSourceWithReverb: // TODO: This shows that the current model is not extensible, because it does not consider type hierarchies
       {
                                                                objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);

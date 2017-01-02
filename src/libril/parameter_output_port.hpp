@@ -21,14 +21,13 @@ namespace ril
  *
  */
 template< template<class> class ProtocolT, class ParameterT >
-class ParameterOutputPort: // public ParameterPortBase, // Maybe make this protected or private
-                           public ProtocolT<ParameterT>::Output
+class ParameterOutputPort: public ProtocolT<ParameterT>::Output
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
-  explicit ParameterOutputPort( Component & parent,
-                                std::string const & name,
+  explicit ParameterOutputPort( std::string const & name, 
+                                Component & parent,
                                 ParameterConfigType const & paramConfig );
 
   /**
@@ -68,10 +67,10 @@ private:
 
 template< template<class> class ProtocolT, class ParameterT >
 inline ParameterOutputPort<ProtocolT, ParameterT >::
-ParameterOutputPort( Component & parent,
-                     std::string const & name,
+ParameterOutputPort( std::string const & name, 
+                     Component & parent,
                      ParameterConfigType const & paramConfig )
-  : ProtocolT<ParameterT>::Output( parent, name )
+  : ProtocolT<ParameterT>::Output( name, parent )
   , mConfig( paramConfig )
 {
 }

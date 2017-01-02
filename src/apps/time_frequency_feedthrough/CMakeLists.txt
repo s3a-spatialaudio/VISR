@@ -1,0 +1,36 @@
+# Copyright Institute of Sound and Vibration Research - All rights reserved
+
+ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+
+ADD_EXECUTABLE( time_frequency_feedthrough main.cpp )
+
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough signalflows)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough rcl)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough objectmodel)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough panning)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough rbbl)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough rrl)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ril)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough pml)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough efl)
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${PORTAUDIO_LIBRARIES} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${SNDFILE_LIBRARY} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${Boost_FILESYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${Boost_SYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${Boost_THREAD_LIBRARY} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${Boost_PROGRAM_OPTIONS_LIBRARY} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${CMAKE_THREAD_LIBS_INIT} )
+
+IF( BUILD_USE_JACK )
+  TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${JACK_LIBRARY} )
+ENDIF( BUILD_USE_JACK )
+
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${FFTS_LIBRARY} )
+TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${KISSFFT_LIBRARY} )
+IF( BUILD_USE_FFTW )
+  TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${FFTW3_LIBRARY} )
+  TARGET_LINK_LIBRARIES(time_frequency_feedthrough ${FFTW3F_LIBRARY} )
+ENDIF( BUILD_USE_FFTW )
+IF( BUILD_USE_IPP )
+  TARGET_LINK_LIBRARIES(time_frequency_feedthrough  ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+ENDIF( BUILD_USE_IPP )

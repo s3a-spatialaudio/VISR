@@ -27,9 +27,9 @@ class ParameterInputPort: // public ParameterPortBase, // Maybe make this protec
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
-  explicit ParameterInputPort( Component & parent,
-                              std::string const & name,
-                              ParameterConfigType const & paramConfig );
+  explicit ParameterInputPort( std::string const & name,
+                               Component & parent,
+                               ParameterConfigType const & paramConfig );
 
   /**
    *
@@ -67,10 +67,10 @@ private:
 
 template< template<class> class ProtocolT, class ParameterT >
 inline ParameterInputPort<ProtocolT, ParameterT >::
-ParameterInputPort( Component & parent,
-                           std::string const & name,
-                           ParameterConfigType const & paramConfig )
-  : ProtocolT<ParameterT>::Input( parent, name )
+ParameterInputPort( std::string const & name,
+                    Component & parent,
+                    ParameterConfigType const & paramConfig )
+  : ProtocolT<ParameterT>::Input( name, parent )
   , mConfig( paramConfig )
 {
 }

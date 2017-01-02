@@ -12,6 +12,8 @@ enum class ParameterType
 {
   MatrixFloat,
   MatrixDouble,
+  MatrixFloatComplex,
+  MatrixDoubleComplex,
   BiquadMatrixFloat,
   BiquadMatrixDouble,
   IndexedString, /**< Combination of an index and a string. */
@@ -21,6 +23,8 @@ enum class ParameterType
   ObjectVector,
   SignalRouting,
   String, // TODO: We need a proper string type
+  TimeFrequencyFloat,
+  TimeFrequencyDouble,
   VectorFloat,
   VectorDouble
 };

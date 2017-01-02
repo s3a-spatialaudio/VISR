@@ -82,8 +82,13 @@ public:
 
   AudioPort * findAudioPort( std::string const & componentName, std::string const & portName );
 
+  ParameterPortBase * findParameterPort( std::string const & componentName, std::string const & portName );
+
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
   AudioConnectionTable::const_iterator audioConnectionEnd( ) const;
+
+  ParameterConnectionTable::const_iterator parameterConnectionBegin() const;
+  ParameterConnectionTable::const_iterator parameterConnectionEnd( ) const;
 
   void registerChildComponent( Component * child );
 

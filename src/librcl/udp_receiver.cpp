@@ -23,7 +23,7 @@ namespace rcl
                             ril::CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
- , mDatagramOutput( *this, "messageOutput", pml::StringParameterConfig(255) )
+ , mDatagramOutput( "messageOutput", *this, pml::StringParameterConfig(255) )
 {
 }
 

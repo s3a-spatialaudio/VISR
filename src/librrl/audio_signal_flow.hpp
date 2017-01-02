@@ -93,11 +93,6 @@ public:
                                 AudioInterface::CallbackResult& callbackResult );
 
   /**
-   * Method called within the processFunction callback to execute the atomic components of the graph
-   */
-  void process();
-
-  /**
    * Query methods.
    */
   //@{
@@ -107,6 +102,22 @@ public:
    * @todo After removal of the setup method and performing the setup in the constructor, consider removal of this mechanism.
    */
   bool initialised() const { return mInitialised; }
+
+  std::size_t numberOfAudioCapturePorts( ) const;
+
+  std::size_t numberOfAudioPlaybackPorts( ) const;
+
+  /**
+  * Return the name of the capture port indexed by \p idx
+  * @throw std::out_of_range If the \p idx exceeds the number of capture ports.
+  */
+  std::string const & audioCapturePortName( std::size_t idx ) const;
+
+  /**
+   * Return the name of the playback port indexed by \p idx
+   * @throw std::out_of_range If the \p idx exceeds the number of playback ports.
+   */
+  std::string const & audioPlaybackPortName( std::size_t idx ) const;
 
   /**
    * Query the width of the capture port, i.e., the number of external
@@ -125,19 +136,23 @@ public:
   std::size_t numberOfPlaybackChannels() const;
   //@}
 
-  /**
-   * Mark the signal flow as "initialised".
-   * @todo Decide whether this is the right place for a consistency check.
-   */
-  void setInitialised( bool newState = true ) { mInitialised = newState; }
 
 private:
+// Unused at the moment, outdated, incomplete implementation
+#if 0
   /**
    * Top-level initialisation function, called from the constructor
    */
   bool initialise( std::ostream & messages );
-
+#endif
   bool initialiseAudioConnections( std::ostream & messages );
+
+  /**
+   * Initialise the schedule for executing the contained elements.
+   * At the moment, this contains some duplicate effort, because the connection maps for 
+   * both the audio signals and parameters have to be computed again. 
+   */
+  bool initialiseSchedule( std::ostream & messages );
 
   /**
    * Can be static or nonmember functions
@@ -153,17 +168,6 @@ private:
   //@}
 
   /**
-   * Register a component within the graph.
-   * @param component A pointer to the component. Note that this call
-   * does not take over the ownership of the object.
-   * @param componentName The name of the component, which must be
-   * unique within the AudioSignalFlow instance.
-   * @throw std::invalid_argument If the component could not be
-   * inserted, e.g., if a component with this name already exists.
-   */
-//  void registerComponent( ril::AtomicComponent * component, char const * componentName );
-
-  /**
    * Initialise the communication area, i.e., the memory area
    * containing all input, output, and intermediate signals used in the
    * execution of the derived signal flow.
@@ -176,18 +180,19 @@ private:
     * Parameter infrastructure
     */
   //@{
-  void initialiseParameterInfrastructure();
+  bool initialiseParameterInfrastructure( std::ostream & messages );
+
+  /**
+  * Mark the signal flow as "initialised".
+  * @todo Decide whether this is the right place for a consistency check.
+  */
+  void setInitialised( bool newState = true ) { mInitialised = newState; }
 
   std::size_t numberCommunicationProtocols() const;
-#if 0
-  rrl::CommunicationArea<ril::SampleType>& getCommArea() { return *mCommArea; }
 
-  rrl::CommunicationArea<ril::SampleType> const& getCommArea( ) const { return *mCommArea; }
-#endif
   /**
    * Method to transfer the capture and playback samples to and from
-   * the locations where they are excepted by the process() function
-   * of the subclass, and call this process() function.
+   * the locations where they are expected, and execute the contained atomic components.
    * Called from processFunction(). For a parameter description
    * (except userData), see @see processFunction().
    */
@@ -196,11 +201,18 @@ private:
                         AudioInterface::CallbackResult& callbackResult );
 
   /**
+  * Method called within the processFunction callback to execute the atomic components of the graph
+  */
+  void executeComponents( );
+
+#if 0
+  /**
    * find a port of a specific audio component, both specified by name
    * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
    */
   ril::AudioPort & findPort( std::string const & componentName,
-                        std::string const & portName );
+                             std::string const & portName );
+#endif
 
   /**
    * The signal flow handled by this object.
@@ -253,10 +265,14 @@ private:
 
   /**
    * These ports are the top-level system inputs and outputs.
-   * They correspond to the capture and palybacxk indices.
+   * They correspond to the capture and playback indices.
+   * @note at the moment the order of the ports is determined by the system.
    */
+  //@{
   std::vector < ril::AudioPort*> mTopLevelAudioInputs;
   std::vector < ril::AudioPort*> mTopLevelAudioOutputs;
+  //@}
+
 
   std::vector<ril::AudioPort::SignalIndexType> mCaptureIndices;
   std::vector<ril::AudioPort::SignalIndexType> mPlaybackIndices;

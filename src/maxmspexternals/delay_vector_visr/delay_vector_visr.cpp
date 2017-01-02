@@ -124,9 +124,11 @@ DelayVector::~DelayVector()
   try
   {
     ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
-    mFlow.reset( new signalflows::DelayVector( mNumberOfChannels, mInterpolationSteps,
-                                              mInterpolationType, static_cast<std::size_t>(mPeriod),
-                                              samplingFrequency ) );
+
+    mContext.reset( new ril::SignalFlowContext(static_cast<std::size_t>(mPeriod), samplingFrequency) );
+
+    mFlow.reset( new signalflows::DelayVector( *mContext, "", nullptr, mNumberOfChannels, mInterpolationSteps,
+                                              mInterpolationType ) );
     mFlow->setup();
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
   }

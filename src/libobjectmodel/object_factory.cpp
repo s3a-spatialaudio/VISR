@@ -5,15 +5,17 @@
 
 #include "diffuse_source.hpp"
 #include "point_source.hpp"
-#include "plane_wave.hpp"
+#include "point_source_extent.hpp"
 #include "point_source_with_diffuseness.hpp"
 #include "point_source_with_reverb.hpp"
+#include "plane_wave.hpp"
 
-#include "point_source_parser.hpp"
-#include "plane_wave_parser.hpp"
-#include "point_source_with_diffuseness_parser.hpp"
 #include "diffuse_source_parser.hpp"
+#include "point_source_parser.hpp"
+#include "point_source_extent_parser.hpp"
+#include "point_source_with_diffuseness_parser.hpp"
 #include "point_source_with_reverb_parser.hpp"
+#include "plane_wave_parser.hpp"
 
 #include <stdexcept>
 
@@ -77,6 +79,7 @@ struct InstantiateObjectFactory
   InstantiateObjectFactory()
   {
     ObjectFactory::registerObjectType<PointSource, PointSourceParser>( ObjectTypeId::PointSource );
+    ObjectFactory::registerObjectType<PointSourceExtent, PointSourceExtentParser>( ObjectTypeId::PointSourceExtent );
     ObjectFactory::registerObjectType<PlaneWave, PlaneWaveParser>( ObjectTypeId::PlaneWave );
     ObjectFactory::registerObjectType<PointSourceWithDiffuseness, PointSourceWithDiffusenessParser>( ObjectTypeId::PointSourceWithDiffuseness );
     ObjectFactory::registerObjectType<DiffuseSource, DiffuseSourceParser>( ObjectTypeId::DiffuseSource );

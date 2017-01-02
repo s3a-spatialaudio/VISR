@@ -18,9 +18,11 @@
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
-#include <libsignalflows/delay_vector.hpp>
-
 #include <libefl/basic_vector.hpp>
+
+#include <libril/signal_flow_context.hpp>
+
+#include <libsignalflows/delay_vector.hpp>
 
 #include <cstddef>
 #include <limits>
@@ -59,6 +61,12 @@ private:
   std::size_t mNumberOfChannels;
   std::size_t mInterpolationSteps;
   rcl::DelayVector::InterpolationType mInterpolationType;
+
+  /**
+   * Context object to provide initialisation information and to provide a runt-time interface for the components.
+   * Must be a pointer, as it can be instantiated only in the initiDSP() method.
+   */
+  std::unique_ptr<ril::SignalFlowContext> mContext;
 
   std::unique_ptr<signalflows::DelayVector> mFlow;
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;

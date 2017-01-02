@@ -85,8 +85,8 @@ LateReverbFilterCalculator::LateReverbFilterCalculator( ril::SignalFlowContext& 
  : AtomicComponent( context, name, parent )
  , mAlignment( ril::cVectorAlignmentSamples )
  , mSubBandNoiseSequences( mAlignment )
- , mSubbandInput( *this, "subbandInput", pml::EmptyParameterConfig( ) )
- , mFilterOutput( *this, "lateFilterOutput", pml::EmptyParameterConfig( ) )
+ , mSubbandInput( "subbandInput", *this, pml::EmptyParameterConfig( ) )
+ , mFilterOutput( "lateFilterOutput", *this, pml::EmptyParameterConfig( ) )
 {
 }
 

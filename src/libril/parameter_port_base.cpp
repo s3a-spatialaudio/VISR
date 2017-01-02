@@ -3,28 +3,23 @@
 #include "parameter_port_base.hpp"
 
 #include "component.hpp"
-//#include "communication_protocol_base.hpp"
-//#include "communication_protocol_type.hpp"
-//#include "parameter_config_base.hpp"
-
-// #include <ciso646>
 
 namespace visr
 {
 namespace ril
 {
 
-ParameterPortBase::ParameterPortBase( Component & parent,
-                                      std::string const & name,
-                                       Direction direction )
-  : mDirection( direction )
+ParameterPortBase::ParameterPortBase( std::string const & name,
+                                      Component & parent, 
+                                      Direction direction )
+  : PortBase( name, parent, direction )
 {
-  parent.registerParameterPort( this, name );
+  parent.registerParameterPort( this );
 }
 
 ParameterPortBase::~ParameterPortBase( ) 
 {
-  // todo: we need a reference to the containing component to unregister ourselves.
+  parent().unregisterParameterPort( this );
 }
 
 #if 0

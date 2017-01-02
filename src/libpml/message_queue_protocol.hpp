@@ -48,8 +48,8 @@ public:
     /**
      * Default constructor.
      */
-    explicit Output( ril::Component & parent, std::string const & name )
-     : ParameterPortBase( parent, name, ParameterPortBase::Direction::Output )
+    explicit Output( std::string const & name, ril::Component & parent)
+     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
      , mProtocol( nullptr )
     {}
 
@@ -72,6 +72,10 @@ public:
     {
       mProtocol = protocol;
     }
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
+    }
   private:
     MessageQueueProtocol * mProtocol;
   };
@@ -82,8 +86,8 @@ public:
     /**
     * Default constructor.
     */
-    explicit Input( ril::Component & parent, std::string const & name )
-     : ParameterPortBase( parent, name, ParameterPortBase::Direction::Input )
+    explicit Input( std::string const & name, ril::Component & parent )
+     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
      , mProtocol( nullptr )
     {}
 
@@ -115,6 +119,11 @@ public:
     void setProtocolInstance( MessageQueueProtocol * protocol )
     {
       mProtocol = protocol;
+    }
+
+    bool isConnected() const override
+    {
+      return mProtocol != nullptr;
     }
   private:
     MessageQueueProtocol * mProtocol;

@@ -20,8 +20,8 @@ namespace rcl
                               char const * name,
                               ril::CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
- , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig( ) )
- , mDatagramOutput( *this, "messageOutput", pml::StringParameterConfig( 32768 ) )
+ , mObjectInput( "objectInput", *this, pml::EmptyParameterConfig( ) )
+ , mDatagramOutput( "messageOutput", *this, pml::StringParameterConfig( 32768 ) )
 {
 }
 

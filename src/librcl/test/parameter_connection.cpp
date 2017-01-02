@@ -46,11 +46,11 @@ BOOST_AUTO_TEST_CASE( ParameterConnection )
   for( ril::Component::ParameterPortContainer::const_iterator paramPortIt = decoder.parameterPortBegin();
     paramPortIt != decoder.parameterPortEnd(); ++paramPortIt )
   {
-    std::cout << "Found parameter port in scene decoder:" << paramPortIt->first << std::endl;
+    std::cout << "Found parameter port in scene decoder:" << (*paramPortIt)->name() << std::endl;
 
-    ril::ParameterType const paramType = paramPortIt->second->parameterType();
-    ril::CommunicationProtocolType const protocolType = paramPortIt->second->protocolType( );
-    ril::ParameterConfigBase const & paramConfig = paramPortIt->second->parameterConfig();
+    ril::ParameterType const paramType = (*paramPortIt)->parameterType();
+    ril::CommunicationProtocolType const protocolType = (*paramPortIt)->protocolType( );
+    ril::ParameterConfigBase const & paramConfig = (*paramPortIt)->parameterConfig();
 
     std::unique_ptr<ril::CommunicationProtocolBase> protocol
       = ril::CommunicationProtocolFactory::create( protocolType, paramType, paramConfig );

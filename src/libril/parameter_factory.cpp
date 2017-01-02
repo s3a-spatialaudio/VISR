@@ -7,6 +7,7 @@
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/object_vector.hpp>
 #include <libpml/string_parameter.hpp>
+#include <libpml/time_frequency_parameter.hpp>
 #include <libpml/vector_parameter.hpp>
 
 #include <stdexcept>
@@ -54,8 +55,12 @@ static struct InstantiateParameterCreators
     ParameterFactory::registerParameterType< pml::ListenerPosition>( ril::ParameterType::ListenerPosition );
     ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloat );
     ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDouble);
+    ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloatComplex );
+    ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDoubleComplex );
     ParameterFactory::registerParameterType< pml::ObjectVector >( ril::ParameterType::ObjectVector );
     ParameterFactory::registerParameterType< pml::StringParameter >( ril::ParameterType::String );
+    ParameterFactory::registerParameterType< pml::TimeFrequencyParameter<float> >( ril::ParameterType::TimeFrequencyFloat );
+    ParameterFactory::registerParameterType< pml::TimeFrequencyParameter<double> >( ril::ParameterType::TimeFrequencyDouble );
     ParameterFactory::registerParameterType< pml::VectorParameter<float> >( ril::ParameterType::VectorFloat );
     ParameterFactory::registerParameterType< pml::VectorParameter<double> >( ril::ParameterType::VectorDouble );
     // TODO: Move to libpml (preferable decentralize instantiation into the different implementation files)

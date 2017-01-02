@@ -1,20 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-/* Super-safe determination of the MAX define for setting the operating system. */
-#ifdef __APPLE_CC__
-#ifndef MAC_VERSION 
-#define MAC_VERSION
-#undef WIN_VERSION
-#endif
-#else
-#ifdef _MSC_VER
-#ifndef WIN_VERSION 
-#define WIN_VERSION
-#endif
-#undef MAC_VERSION
-#endif
-#endif
-
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
@@ -28,6 +13,12 @@
 
 namespace visr
 {
+
+namespace ril
+{
+class SignalFlow;
+}
+
 namespace maxmsp
 {
 
@@ -55,10 +46,16 @@ private:
    * The number of samples to be processed per call.
    * The type is chosen to be compatible to the parameter passed by the calling Max/MSP functions.
    */
-  long mPeriod;
+  std::size_t mPeriod;
   std::size_t mNumberOfInputs;
   std::size_t mNumberOfOutputs;  
   std::size_t mInterpolationSteps;
+
+  /**
+   * Context object to provide initialisation information and to provide a runt-time interface for the components.
+   * Must be a pointer, as it can be instantiated only in the initiDSP() method.
+   */
+  std::unique_ptr<ril::SignalFlowContext> mContext;
 
   std::unique_ptr<signalflows::GainMatrix> mFlow;
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;

@@ -14,6 +14,7 @@
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/object_vector.hpp>
 #include <libpml/string_parameter.hpp>
+#include <libpml/time_frequency_parameter.hpp>
 #include <libpml/vector_parameter.hpp>
 
 #include <stdexcept>
@@ -68,6 +69,9 @@ static struct InstantiateCommunicationProtocolCreators
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::MatrixDouble );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::ObjectVector> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::ObjectVector );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::StringParameter> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::String );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::TimeFrequencyParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::TimeFrequencyFloat );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::TimeFrequencyParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::TimeFrequencyDouble );
+    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorDouble );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorFloat );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorDouble );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::MatrixFloat );

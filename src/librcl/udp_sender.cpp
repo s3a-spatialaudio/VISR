@@ -24,7 +24,7 @@ namespace rcl
                         ril::CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
- , mMessageInput( *this, "messageInput", pml::StringParameterConfig(32768) )
+ , mMessageInput( "messageInput", *this, pml::StringParameterConfig(32768) )
 {
 }
 

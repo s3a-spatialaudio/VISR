@@ -2,6 +2,8 @@
 
 #include "gain_matrix.hpp"
 
+#include <libril/signal_flow_context.hpp>
+
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
 /* Super-safe determination of the MAX define for setting the operating system. */
@@ -96,7 +98,7 @@ GainMatrix::~GainMatrix()
 
 /*virtual*/ void GainMatrix::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
-  mPeriod = maxvectorsize; // I'm guessing here.
+  mPeriod = static_cast<std::size_t>(maxvectorsize); // I'm guessing here.
   // Request the actual buffer size
   if( maxvectorsize > std::numeric_limits<short>::max() )
   {
@@ -108,11 +110,10 @@ GainMatrix::~GainMatrix()
   try
   {
     ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
-    mFlow.reset( new signalflows::GainMatrix( mNumberOfInputs, mNumberOfOutputs,
-					      mGains,
-					      mInterpolationSteps,
-                                              static_cast<std::size_t>(mPeriod),
-                                              samplingFrequency ) );
+    mContext.reset( new ril::SignalFlowContext( mPeriod, samplingFrequency ) );
+
+    mFlow.reset( new signalflows::GainMatrix( *mContext, "", nullptr, mNumberOfInputs, mNumberOfOutputs,
+                                              mGains, mInterpolationSteps ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
   }
   catch (std::exception const & e )

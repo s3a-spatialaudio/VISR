@@ -79,7 +79,7 @@ ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0
  : AtomicComponent( context, name, parent )
  , mMaxNumberOfObjects( 0 )
  , cLateReverbParameterComparisonLimit( std::numeric_limits<ril::SampleType>::epsilon( ) )
- , mObjectInput( *this, "objectInput", pml::EmptyParameterConfig() )
+ , mObjectInput( "objectInput", *this, pml::EmptyParameterConfig() )
 {
 }
 
@@ -129,21 +129,21 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
     pml::MatrixParameterConfig const iirMatrixConfig( mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects, objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads );
     pml::MatrixParameterConfig const discretePanningConfig( mNumberOfPanningLoudspeakers, mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects );
     mSignalRoutingOutput.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::SignalRoutingParameter >
-      ( *this, "signalRoutingOutput", pml::EmptyParameterConfig() ) );
+      ( "signalRoutingOutput", *this, pml::EmptyParameterConfig() ) );
     mDiscreteReflectionGainOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
-      (*this, "discreteGainOutput", discreteGainDelayConfig ) );
+      ( "discreteGainOutput", *this, discreteGainDelayConfig ) );
     mDiscreteReflectionDelayOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
-      (*this, "discreteDelayOutput", discreteGainDelayConfig ) );
+      ("discreteDelayOutput", *this, discreteGainDelayConfig ) );
     mDiscreteReflectionFilterCoeffOutput.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<ril::SampleType> >
-      (*this, "discreteFilterCoeffsOutput", iirMatrixConfig ) );
+      ("discreteFilterCoeffsOutput", *this, iirMatrixConfig ) );
     mDiscretePanningGains.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<ril::SampleType> >
-      (*this, "discretePanningMatrixOutput", discretePanningConfig) );
+      ("discretePanningMatrixOutput", *this, discretePanningConfig) );
     mLateReflectionGainOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
-      ( *this, "lateGainOutput", lateGainDelayConfig ) );
+      ( "lateGainOutput", *this, lateGainDelayConfig ) );
     mLateReflectionDelayOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
-      ( *this, "lateDelayOutput", lateGainDelayConfig ) );
+      ( "lateDelayOutput", *this, lateGainDelayConfig ) );
     mLateSubbandOutput.reset( new ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<ril::SampleType> > >
-      (*this, "lateSubbandOutput", pml::EmptyParameterConfig( )) );
+      ( "lateSubbandOutput", *this, pml::EmptyParameterConfig( )) );
 }
 
 /**

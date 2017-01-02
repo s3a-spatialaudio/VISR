@@ -71,7 +71,8 @@ public:
   void setup( std::size_t numberOfInputs, 
               std::size_t numberOfOutputs,
               std::size_t interpolationSteps,
-              SampleType initialGain = static_cast<SampleType>(0.0) );
+              SampleType initialGain = static_cast<SampleType>(0.0),
+              bool controlInput = true );
   /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfInputs The number of signals in the input signal.
@@ -85,11 +86,10 @@ public:
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,
               std::size_t interpolationSteps,
-              efl::BasicMatrix< SampleType > const & initialGains );
+              efl::BasicMatrix< SampleType > const & initialGains,
+              bool controlInput = true );
 
   void process( );
-
-//   void setGains( efl::BasicMatrix< SampleType > const & newGains );
 
 private:
   std::unique_ptr< rbbl::GainMatrix< SampleType > > mMatrix;
