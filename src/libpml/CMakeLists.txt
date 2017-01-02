@@ -13,7 +13,6 @@ SET( SOURCES
  listener_position.cpp
  matrix_parameter.cpp
  matrix_parameter_config.cpp
- message_queue.cpp
  message_queue_protocol.cpp
  object_vector.cpp
  parametric_iir_coefficients.cpp
@@ -40,7 +39,6 @@ SET( HEADERS
  listener_position.hpp
  matrix_parameter.hpp
  matrix_parameter_config.hpp
- message_queue.hpp
  message_queue_protocol.hpp
  object_vector.hpp
  parametric_iir_coefficients.hpp
