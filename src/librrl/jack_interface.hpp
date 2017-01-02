@@ -5,7 +5,7 @@
 
 #include "audio_interface.hpp"
 
-#include <libril/communication_area.hpp>
+#include <librrl/communication_area.hpp>
 #include <libril/constants.hpp>
 
 #include <memory>
