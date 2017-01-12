@@ -6,6 +6,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <cmath>
 #include <istream>
 #include <iostream>
 #include <map>
@@ -227,28 +228,20 @@ void ParametricIirCoefficient< CoefficientType >::loadJson( std::string const & 
   loadJson( stream );
 }
 
-
 template< typename CoefficientType >
 void ParametricIirCoefficient< CoefficientType >::loadXml( boost::property_tree::ptree const & tree )
 {
-  // Hack: Depending from where this method is called, we don't know
-  boost::property_tree::ptree const biquadTree = tree.count( "iir" ) == 0
-    ? tree : tree.get_child( "iir" );
-#if 0
-  boost::optional const a0Optional = biquadTree.get_optional( "<xmlattr>.a0" );
-  CoeffType const a0 = a0Optional ? *a0Optional : static_cast(1.0f);
-  CoeffType const a1 = biquadTree.get( "<xmlattr>.a1" );
-  CoeffType const a2 = biquadTree.get( "<xmlattr>.a2" );
-  CoeffType const b0 = biquadTree.get( "<xmlattr>.b0" );
-  CoeffType const b1 = biquadTree.get( "<xmlattr>.b1" );
-  CoeffType const b2 = biquadTree.get( "<xmlattr>.b2" );
+  boost::property_tree::write_xml( std::cout, tree );
 
-  at( 0 ) = b0 / a0;
-  at( 1 ) = b1 / a0;
-  at( 2 ) = b2 / a0;
-  at( 3 ) = a1 / a0;
-  at( 4 ) = a2 / a0;
-#endif
+  std::string const & typeStr = tree.get<std::string>( "<xmlattr>.type" );
+  Type const typeId  = stringToTypeId( typeStr );
+  CoefficientType const frequency = tree.get<CoefficientType>( "<xmlattr>.f" );
+  CoefficientType const quality = tree.get<CoefficientType>( "<xmlattr>.q" );
+  boost::optional<CoefficientType> const gainOpt = tree.get_optional<CoefficientType>( "<xmlattr>.gain" );
+  setType( typeId );
+  setFrequency( frequency );
+  setQuality( quality );
+  setGain( gainOpt ? *gainOpt : static_cast<CoefficientType>(0.0) );
 }
 
 template< typename CoefficientType >
@@ -284,13 +277,13 @@ void ParametricIirCoefficient<CoefficientType>::loadXml( std::string const & str
 template< typename CoefficientType >
 void ParametricIirCoefficient<CoefficientType>::writeJson( boost::property_tree::ptree & tree ) const
 {
-#if 0
-  tree.put( "b0", b0() );
-  tree.put( "b1", b1( ) );
-  tree.put( "b2", b2( ) );
-  tree.put( "a1", a1( ) );
-  tree.put( "a2", a2( ) );
-#endif
+  tree.put( "type", typeIdToString( type() ) );
+  tree.put( "f", frequency() );
+  tree.put( "q", quality( ) );
+  if( std::abs( gain() >= std::numeric_limits<CoefficientType>::epsilon() ) )
+  {
+    tree.put( "gain", gain() );
+  }
 }
 
 template< typename CoefficientType >
@@ -311,24 +304,181 @@ void ParametricIirCoefficient< CoefficientType >::writeJson( std::string & str )
 template< typename CoefficientType >
 void ParametricIirCoefficient< CoefficientType >::writeXml( boost::property_tree::ptree & tree ) const
 {
-  // TODO: implement me!
-  assert( false );
+  tree.put( "<xmlattr>.type", typeIdToString( type() ) );
+  tree.put( "<xmlattr>.f", frequency() );
+  tree.put( "<xmlattr>.q", quality() );
+  if( std::abs( gain() >= std::numeric_limits<CoefficientType>::epsilon() ) )
+  {
+    tree.put( "<xmlattr>.gain", gain() );
+  }
 }
 
 template< typename CoefficientType >
 void ParametricIirCoefficient< CoefficientType >::writeXml( std::basic_ostream<char> & stream ) const
 {
+  boost::property_tree::ptree tree;
+  writeXml( tree );
+  boost::property_tree::write_xml( stream, tree );
 }
 
 template< typename CoefficientType >
 void ParametricIirCoefficient< CoefficientType >::writeXml( std::string & str ) const
 {
+  std::stringstream stream;
+  writeXml( stream );
+  str = stream.str();
 }
 
 // Explicit instantiations
 template class ParametricIirCoefficient< float >;
 template class ParametricIirCoefficient< double >;
-template class ParametricIirCoefficient< long double >;
+
+///////////////////////////////////////////////////////////////////////////////
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::loadJson( boost::property_tree::ptree const & tree )
+{
+  Container newCoeffs;
+  newCoeffs.reserve( tree.size() );
+  for( auto node : tree )
+  {
+    typename Element newEl = Element::fromJson( node.second );
+    newCoeffs.push_back( std::move(newEl) );
+  }
+  mCoeffs.swap( newCoeffs );
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::loadJson( std::basic_istream<char> & stream )
+{
+  boost::property_tree::ptree tree;
+  try
+  {
+    read_json( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficientList node: " ) + ex.what() );
+  }
+  loadJson( tree );
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::loadJson( std::string const & str )
+{
+  std::stringstream stream( str );
+  loadJson( stream );
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::loadXml( boost::property_tree::ptree const & tree )
+{
+  Container newCoeffs;
+  auto eqNodes = tree.equal_range( "eq" );
+  newCoeffs.reserve( std::distance( eqNodes.first, eqNodes.second ) );
+  for( auto eqNodeIt( eqNodes.first ); eqNodeIt != eqNodes.second; ++eqNodeIt )
+  {
+    typename Element newEl = Element::fromXml( eqNodeIt->second );
+    newCoeffs.push_back( std::move( newEl ) );
+  }
+  mCoeffs.swap( newCoeffs );
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::loadXml( std::basic_istream<char> & stream )
+{
+  boost::property_tree::ptree tree;
+  try
+  {
+    read_xml( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while parsing an Xml ParametricIirCoefficientList node: " ) + ex.what() );
+  }
+  loadXml( tree );
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::loadXml( std::string const & str )
+{
+  std::stringstream stream( str );
+  loadXml( stream );
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::writeJson( boost::property_tree::ptree & tree ) const
+{
+  for( Element const & el : *this )
+  {
+    boost::property_tree::ptree child;
+    el.writeJson( child );
+    tree.add_child("", child ); // Adding unnamed childs creates a JSON array.
+  }
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::writeJson( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree node;
+  writeJson( node );
+  try
+  {
+    boost::property_tree::write_json( stream, node );
+  }
+  catch( std::exception const & ex )
+  {
+    throw( std::invalid_argument( std::string("Serialisation of EQ parameters failed: ") + ex.what() ) );
+  }
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::writeJson( std::string & str ) const
+{
+  std::stringstream stream;
+  writeJson( stream );
+  str = stream.str();
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::writeXml( boost::property_tree::ptree & tree ) const
+{
+  for( Element const & el : *this )
+  {
+    boost::property_tree::ptree child;
+    el.writeJson( child );
+    tree.add_child( "eq", child ); // XML needs named nodes
+  }
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::writeXml( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree node;
+  writeXml( node );
+  try
+  {
+    boost::property_tree::write_xml( stream, node );
+  }
+  catch( std::exception const & ex )
+  {
+    throw(std::invalid_argument( std::string("Serialisation of EQ parameters failed: ") + ex.what() ));
+  }
+
+}
+
+template< typename CoefficientType >
+void ParametricIirCoefficientList< CoefficientType >::writeXml( std::string & str ) const
+{
+  std::stringstream stream;
+  writeXml( stream );
+  str = stream.str();
+}
+
+// Explicit instantiations
+template class ParametricIirCoefficientList< float >;
+template class ParametricIirCoefficientList< double >;
+
 
 } // namespace pml
 } // namespace visr

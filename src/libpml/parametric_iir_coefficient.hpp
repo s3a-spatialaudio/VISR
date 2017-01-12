@@ -8,6 +8,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace visr
 {
@@ -138,6 +139,104 @@ private:
    * Linear scale.
    */
   CoefficientType mGain;
+};
+
+template< typename CoefficientType >
+class ParametricIirCoefficientList
+{
+public:
+  using Element = typename ParametricIirCoefficient< CoefficientType >;
+  using Container = std::vector< Element >;
+  using const_iterator = typename Container::const_iterator;
+  using iterator = typename Container::iterator;
+
+  /**
+   * Default constructor, creates an empty list.
+   */
+  ParametricIirCoefficientList() = default;
+
+  /**
+   * Copy constructor (default)
+   */
+  ParametricIirCoefficientList( ParametricIirCoefficientList<CoefficientType> const &) = default;
+
+  /**
+  * Move constructor (default)
+  */
+  ParametricIirCoefficientList( ParametricIirCoefficientList<CoefficientType> && ) = default;
+
+  ~ParametricIirCoefficientList() = default;
+
+  /**
+   * Assignment operator (default)
+   */
+  ParametricIirCoefficientList<CoefficientType> & operator=( ParametricIirCoefficientList<CoefficientType> const & ) = default;
+
+  /**
+   * Constructor, create a list of identical elements (or defult-constructed elements)
+   */
+  explicit ParametricIirCoefficientList( std::size_t numCoeffs,
+                                         ParametricIirCoefficient<CoefficientType> const & initialValue )
+    : mCoeffs( numCoeffs, initialValue )
+  {
+  }
+
+  explicit ParametricIirCoefficientList( std::initializer_list< ParametricIirCoefficient< CoefficientType > > initList )
+    : mCoeffs( initList )
+  {
+  }
+
+  void loadJson( boost::property_tree::ptree const & tree );
+
+  void loadJson( std::basic_istream<char> & stream );
+
+  void loadJson( std::string const & str );
+  
+  void loadXml( boost::property_tree::ptree const & tree );
+
+  void loadXml( std::basic_istream<char> & stream );
+
+  void loadXml( std::string const & str );
+
+  void writeJson( boost::property_tree::ptree & tree ) const;
+
+  void writeJson( std::basic_ostream<char> & stream ) const;
+
+  void writeJson( std::string & str ) const;
+
+  void writeXml( boost::property_tree::ptree & tree ) const;
+
+  void writeXml( std::basic_ostream<char> & stream ) const;
+
+  void writeXml( std::string & str ) const;
+
+  std::size_t size() const { return mCoeffs.size(); }
+
+  void resize( std::size_t newSize )
+  { 
+    mCoeffs.resize( newSize );
+    std::fill( begin(), end(), typename Element() );
+  }
+
+  bool empty() const { return mCoeffs.empty(); }
+
+  Element const & operator[]( std::size_t index ) const { return mCoeffs[index]; }
+  Element & operator[]( std::size_t index ) { return mCoeffs[index]; }
+
+  Element const & at( std::size_t index ) const { return mCoeffs.at(index); }
+  Element & at( std::size_t index ) { return mCoeffs.at( index ); }
+
+
+  const_iterator begin() const { return mCoeffs.begin(); }
+  const_iterator end() const { return mCoeffs.end(); }
+
+  iterator begin() { return mCoeffs.begin(); }
+  iterator end() { return mCoeffs.end(); }
+
+
+
+private:
+  Container mCoeffs;
 };
 
 } // namespace pml

@@ -26,7 +26,7 @@ namespace objectmodel
     obj.resetNumberOfChannels( channelIndices.size() );
     for( std::size_t idx( 0 ); idx < obj.numberOfChannels(); ++idx )
     {
-      obj.setChannelIndex( idx, channelIndices.at( idx ) );
+      obj.setChannelIndex( idx, static_cast<Object::ChannelIndex>( channelIndices.at( idx ) ) );
     }
   }
   catch( std::exception const & ex )
@@ -38,6 +38,14 @@ namespace objectmodel
   obj.setGroupId( tree.get<GroupId>( "group" ) );
   obj.setLevel( tree.get<LevelType>( "level" ) );
   obj.setPriority( tree.get<Object::Priority>( "priority" ) );
+
+  pml::ParametricIirCoefficientList<Object::Coordinate> eqCoeffs;
+  boost::property_tree::ptree::const_assoc_iterator eqIt =  tree.find( "eq");
+  if( eqIt != tree.not_found() )
+  {
+    eqCoeffs.loadJson( eqIt->second );
+  }
+  obj.setEqCoefficients( eqCoeffs);
 }
 
 /*virtual*/ void ObjectParser
@@ -59,6 +67,13 @@ namespace objectmodel
   tree.put<GroupId>( "group", obj.groupId() );
   tree.put<LevelType>( "level", obj.level() );
   tree.put<Object::Priority>( "priority", obj.priority() );
+
+  if( !obj.eqCoefficients().empty() )
+  {
+    boost::property_tree::ptree eqNode;
+    obj.eqCoefficients().writeXml( eqNode );
+    tree.add_child( "eq", eqNode );
+  }
 }
 
 } // namespace objectmodel

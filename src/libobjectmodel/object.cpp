@@ -2,6 +2,8 @@
 
 #include "object.hpp"
 
+#include <libpml/parametric_iir_coefficient.hpp>
+
 #include <stdexcept>
 
 namespace visr
@@ -27,8 +29,7 @@ namespace objectmodel
 //@}
     
 Object::Object( )
- : mObjectId(cInvalidObjectId )
- , mGroupId( cDefaultGroupId )
+ : Object(cInvalidObjectId )
 {
 }
 
@@ -100,6 +101,16 @@ void Object::setChannelIndex( std::size_t index, ChannelIndex channelIndex )
     throw std::invalid_argument( "Object::channelIndex(): Argument exceeds number of channels.");
   }
   mChannelIndices[ index ] = channelIndex;
+}
+
+pml::ParametricIirCoefficientList<Object::Coordinate> const & Object::eqCoefficients() const
+{
+  return mEqCoefficients;
+}
+
+void Object::setEqCoefficients( pml::ParametricIirCoefficientList<Coordinate> const & newCoeffs )
+{
+  mEqCoefficients = newCoeffs;
 }
 
 } // namespace objectmodel
