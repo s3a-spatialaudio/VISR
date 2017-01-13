@@ -17,6 +17,7 @@ scene_decoder.cpp
 scene_encoder.cpp
 signal_routing.cpp
 single_to_multi_channel_diffusion.cpp
+switch_decoder.cpp
 time_frequency_inverse_transform.cpp
 time_frequency_transform.cpp
 udp_receiver.cpp
@@ -41,10 +42,14 @@ scene_decoder.hpp
 scene_encoder.hpp
 signal_routing.hpp
 single_to_multi_channel_diffusion.hpp
+switch_decoder.hpp
 time_frequency_inverse_transform.hpp
 time_frequency_transform.hpp
 udp_receiver.hpp
 udp_sender.hpp)
+
+# Preliminary hack. Used only for scene_sender. 
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
 ADD_LIBRARY( rcl STATIC ${SOURCES} ${HEADERS} )
 
