@@ -28,9 +28,6 @@
 #include <libefl/basic_matrix.hpp>
 
 #include <libpml/listener_position.hpp>
-//#include <libpml/message_queue.hpp>
-//#include <libpml/signal_routing_parameter.hpp>
-//#include <libpml/string_parameter.hpp>
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/object_vector.hpp>
 
@@ -41,6 +38,13 @@
 
 namespace visr
 {
+
+// Forward declarations
+namespace pml
+{
+template< typename MessageTypeT >
+class MessageQueueProtocol;
+}
 
 namespace signalflows
 {
@@ -90,8 +94,14 @@ private:
 
   ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
 
+  /**
+   * Parameter input for the listener position.
+   * Object is instantiated only if tacking is activated.
+   */
+  std::unique_ptr<ril::ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
+
   efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
-  
+
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningGainCalculator mGainCalculator;
@@ -125,10 +135,7 @@ private:
 
   std::unique_ptr<rcl::DelayVector>  mSpeakerCompensation;
 
-  std::unique_ptr<rcl::UdpReceiver> mTrackingReceiver;
-
   std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
-
   //@}
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
