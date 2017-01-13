@@ -54,7 +54,7 @@ namespace panning
 
     /**
      * Assignment operator
-     * We need an explicitly defined asssignment operator because some members (BasicMatrix) 
+     * We need an explicitly defined assignment operator because some members (BasicMatrix) 
      * intentionally do not have a copy constructor.
      */
     LoudspeakerArray const & operator=( LoudspeakerArray const & rhs );
@@ -72,18 +72,6 @@ namespace panning
      *
      */
     void loadXml( std::string const & filePath );
-
-    int setPosition( int id, Afloat x, Afloat y, Afloat z, bool inf )
-    {
-      m_position[id - 1].set( x, y, z, inf );
-      return 0;
-    };
-
-    int setChannel( int id, int chan )
-    {
-      m_channel[id - 1] = chan;
-      return 0;
-    };
 
     /**
      * TODO: Consider using references!
@@ -213,6 +201,18 @@ namespace panning
     //@}
 
   private:
+
+    int setPosition( int id, Afloat x, Afloat y, Afloat z, bool inf )
+    {
+      m_position[id - 1].set( x, y, z, inf );
+      return 0;
+    };
+
+    int setChannel( int id, int chan )
+    {
+      m_channel[id - 1] = chan;
+      return 0;
+    };
 
     bool m_is2D, m_isInfinite;
 
