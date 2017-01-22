@@ -147,6 +147,10 @@ template< class CoeffType >
 class BiquadParameterList
 {
 public:
+  using Container = typename std::vector< BiquadParameter< CoeffType > >;
+  using iterator = typename Container::iterator;
+  using const_iterator = typename Container::const_iterator;
+
   /**
    * Default constructor, creates an empty list of biquad parameters.
    */
@@ -206,6 +210,13 @@ public:
   BiquadParameter<CoeffType> const & at( std::size_t idx ) const { return mBiquads.at( idx ); }
   BiquadParameter<CoeffType> & at( std::size_t idx ) { return mBiquads.at( idx ); }
 
+  iterator begin() { return mBiquads.begin(); }
+  iterator end() { return mBiquads.end(); }
+
+  iterator begin() const { return mBiquads.begin(); }
+  iterator end() const { return mBiquads.end(); }
+
+
   void loadJson( boost::property_tree::ptree const & tree );
 
   void loadJson( std::basic_istream<char> & stream );
@@ -218,7 +229,7 @@ public:
 
   void loadXml( std::string const & str );
 private:
-  std::vector< BiquadParameter< CoeffType > > mBiquads;
+  Container mBiquads;
 };
 
 template<typename CoeffType>
