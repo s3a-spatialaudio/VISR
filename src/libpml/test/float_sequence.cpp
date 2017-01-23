@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRange1 )
 
   BOOST_CHECK_NO_THROW( fs.at( 4 ) );
 
-  BOOST_CHECK_CLOSE( fs[1], 1, std::numeric_limits<float>::epsilon() );
+  BOOST_CHECK_CLOSE( fs[1], 1.0f, std::numeric_limits<float>::epsilon() );
 }
 
 BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringRangeStride )
