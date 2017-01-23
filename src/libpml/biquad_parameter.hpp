@@ -213,8 +213,8 @@ public:
   iterator begin() { return mBiquads.begin(); }
   iterator end() { return mBiquads.end(); }
 
-  iterator begin() const { return mBiquads.begin(); }
-  iterator end() const { return mBiquads.end(); }
+  const_iterator begin() const { return mBiquads.begin(); }
+  const_iterator end() const { return mBiquads.end(); }
 
 
   void loadJson( boost::property_tree::ptree const & tree );
