@@ -79,15 +79,17 @@ public:
    * Create a ParametricIirCoefficient objects from JSON and XML representations.
    */
   //@{
-  static ParametricIirCoefficient && fromJson( boost::property_tree::ptree const & tree );
+  static ParametricIirCoefficient fromJson( boost::property_tree::ptree const & tree );
 
-  static ParametricIirCoefficient && fromJson( std::basic_istream<char> & stream );
+  static ParametricIirCoefficient fromJson( std::basic_istream<char> & stream );
 
-  static ParametricIirCoefficient && fromJson( std::string const & str );
+  static ParametricIirCoefficient fromJson( std::string const & str );
 
-  static ParametricIirCoefficient && fromXml( boost::property_tree::ptree const & tree );
+  static ParametricIirCoefficient fromXml( boost::property_tree::ptree const & tree );
 
-  static ParametricIirCoefficient && fromXml( std::basic_istream<char> & stream );
+  static ParametricIirCoefficient fromXml( std::basic_istream<char> & stream );
+
+  static ParametricIirCoefficient fromXml( std::string const & str );
   //@}
 
 

@@ -143,53 +143,58 @@ void ParametricIirCoefficient< CoefficientType >::setGain( CoefficientType newGa
 }
 
 template< typename CoefficientType >
-/*static*/ ParametricIirCoefficient< CoefficientType > &&
+/*static*/ ParametricIirCoefficient< CoefficientType >
 ParametricIirCoefficient< CoefficientType >::fromJson( boost::property_tree::ptree const & tree )
 {
   ParametricIirCoefficient< CoefficientType > res;
   res.loadJson( tree );
-  return std::move(res);
+  return res;
 }
 
 template< typename CoefficientType >
-/*static*/ ParametricIirCoefficient< CoefficientType > &&
+/*static*/ ParametricIirCoefficient< CoefficientType >
 ParametricIirCoefficient< CoefficientType >::fromJson( std::basic_istream<char> & stream )
 {
   ParametricIirCoefficient< CoefficientType > res;
   res.loadJson( stream );
-  return std::move(res);
+  return res;
 }
 
 template< typename CoefficientType >
-/*static*/ ParametricIirCoefficient< CoefficientType > &&
+/*static*/ ParametricIirCoefficient< CoefficientType >
 ParametricIirCoefficient< CoefficientType >::fromJson( std::string const & str )
 {
   ParametricIirCoefficient< CoefficientType > res;
   res.loadJson( str );
-  return std::move( res );
+  return res;
 }
 
 template< typename CoefficientType >
-/*static*/ ParametricIirCoefficient< CoefficientType > &&
+/*static*/ ParametricIirCoefficient< CoefficientType >
 ParametricIirCoefficient< CoefficientType >::fromXml( boost::property_tree::ptree const & tree )
 {
   ParametricIirCoefficient< CoefficientType > res;
   res.loadXml( tree );
-  return std::move( res );
+  return res;
 }
 
 template< typename CoefficientType >
-/*static*/ ParametricIirCoefficient< CoefficientType > &&
+/*static*/ ParametricIirCoefficient< CoefficientType >
 ParametricIirCoefficient< CoefficientType >::fromXml( std::basic_istream<char> & stream )
 {
   ParametricIirCoefficient< CoefficientType > res;
   res.loadXml( stream );
-  return std::move( res );
+  return res;
 }
 
 template< typename CoefficientType >
-/*static*/ ParametricIirCoefficient< CoefficientType > && 
-ParametricIirCoefficient< CoefficientType >::fromJson( std::string const & str );
+/*static*/ ParametricIirCoefficient< CoefficientType >
+ParametricIirCoefficient< CoefficientType >::fromXml( std::string const & str )
+{
+  ParametricIirCoefficient< CoefficientType > res;
+  res.loadXml( str );
+  return res;
+}
 
 
 template< typename CoefficientType >

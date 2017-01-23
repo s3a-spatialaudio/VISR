@@ -38,12 +38,13 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<CoefficientType> co
                                CoefficientType samplingFrequency );
 
 template< typename CoefficientType >
-pml::BiquadParameter<CoefficientType> && calculateIirCoefficients( pml::ParametricIirCoefficient<CoefficientType> const & param,
+pml::BiquadParameter<CoefficientType> calculateIirCoefficients( pml::ParametricIirCoefficient<CoefficientType> const & param,
                                                                    CoefficientType samplingFrequency )
 {
   typename pml::BiquadParameter<CoefficientType> res;
   calculateIirCoefficients( param, res, samplingFrequency );
-  return std::move( res );
+  // Return value optimization avoids copy operation (normally)
+  return res;
 }
 
 /**
