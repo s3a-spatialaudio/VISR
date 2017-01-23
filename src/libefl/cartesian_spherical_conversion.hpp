@@ -33,7 +33,7 @@ std::tuple< T, T, T > spherical2cartesian( T az, T el, T radius )
   return std::make_tuple( std::cos( az )*std::cos( el ) * radius,
       std::sin( az )*std::cos( el ) * radius,
       std::sin( el ) * radius );
-};
+}
 
 /**
  * Compute the spherical coordinate representation for a given cartesian position.
@@ -51,7 +51,7 @@ std::tuple< T, T, T > cartesian2spherical( T x, T y, T z )
   T const az = std::atan2( y, x );
   T const el = std::asin( z / radius );
   return std::make_tuple( az, el, radius );
-};
+}
 
 } // namespace efl
 } // namespace visr
