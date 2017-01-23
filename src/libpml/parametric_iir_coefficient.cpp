@@ -60,7 +60,7 @@ public:
   ParametricIirCoefficientBase::TypeIdTranslator::TypeIdTranslator()
     : mFwdMap( { { Type::lowpass, "lowpass" },{ Type::highpass, "highpass" },
     { Type::bandpass, "bandpass" },{ Type::bandstop, "bandstop" },
-    { Type::peak, "peak" },{ Type::notch, "notch" },
+    { Type::peak, "peak" },
     { Type::lowshelf, "lowshelf" },{ Type::highshelf, "highshelf" },
     { Type::allpass, "allpass" } } )
   {
@@ -108,9 +108,9 @@ ParametricIirCoefficient< CoefficientType >::ParametricIirCoefficient( Parametri
 
 template< typename CoefficientType >
 ParametricIirCoefficient< CoefficientType >::ParametricIirCoefficient( Type typeId,
-    CoefficientType centerFrequency,
-    CoefficientType quality,
-    CoefficientType gain = static_cast<CoefficientType>(0.0) )
+                                                                       CoefficientType centerFrequency,
+                                                                       CoefficientType quality,
+                                                                       CoefficientType gain )
  : mType( typeId )
  , mFrequency( centerFrequency )
  , mQuality( quality )
@@ -285,7 +285,7 @@ void ParametricIirCoefficient<CoefficientType>::writeJson( boost::property_tree:
   tree.put( "type", typeIdToString( type() ) );
   tree.put( "f", frequency() );
   tree.put( "q", quality( ) );
-  if( std::abs( gain() >= std::numeric_limits<CoefficientType>::epsilon() ) )
+  if( std::abs( gain() ) >= std::numeric_limits<CoefficientType>::epsilon() )
   {
     tree.put( "gain", gain() );
   }
@@ -312,7 +312,7 @@ void ParametricIirCoefficient< CoefficientType >::writeXml( boost::property_tree
   tree.put( "<xmlattr>.type", typeIdToString( type() ) );
   tree.put( "<xmlattr>.f", frequency() );
   tree.put( "<xmlattr>.q", quality() );
-  if( std::abs( gain() >= std::numeric_limits<CoefficientType>::epsilon() ) )
+  if( std::abs( gain() ) >= std::numeric_limits<CoefficientType>::epsilon() )
   {
     tree.put( "<xmlattr>.gain", gain() );
   }
@@ -347,7 +347,7 @@ void ParametricIirCoefficientList< CoefficientType >::loadJson( boost::property_
   newCoeffs.reserve( tree.size() );
   for( auto node : tree )
   {
-    typename Element newEl = Element::fromJson( node.second );
+    Element newEl = Element::fromJson( node.second );
     newCoeffs.push_back( std::move(newEl) );
   }
   mCoeffs.swap( newCoeffs );
@@ -383,7 +383,7 @@ void ParametricIirCoefficientList< CoefficientType >::loadXml( boost::property_t
   newCoeffs.reserve( std::distance( eqNodes.first, eqNodes.second ) );
   for( auto eqNodeIt( eqNodes.first ); eqNodeIt != eqNodes.second; ++eqNodeIt )
   {
-    typename Element newEl = Element::fromXml( eqNodeIt->second );
+    Element newEl = Element::fromXml( eqNodeIt->second );
     newCoeffs.push_back( std::move( newEl ) );
   }
   mCoeffs.swap( newCoeffs );

@@ -27,7 +27,6 @@ public:
     highshelf,
     lowshelf,
     peak,
-    notch,
     allpass,
   };
 
@@ -147,7 +146,7 @@ template< typename CoefficientType >
 class ParametricIirCoefficientList
 {
 public:
-  using Element = typename ParametricIirCoefficient< CoefficientType >;
+  using Element = ParametricIirCoefficient< CoefficientType >;
   using Container = std::vector< Element >;
   using const_iterator = typename Container::const_iterator;
   using iterator = typename Container::iterator;
@@ -217,7 +216,7 @@ public:
   void resize( std::size_t newSize )
   { 
     mCoeffs.resize( newSize );
-    std::fill( begin(), end(), typename Element() );
+    std::fill( begin(), end(), Element() );
   }
 
   bool empty() const { return mCoeffs.empty(); }

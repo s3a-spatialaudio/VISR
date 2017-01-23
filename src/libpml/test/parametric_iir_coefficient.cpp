@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( InstantiatIirParameterFromInitializer )
 
 BOOST_AUTO_TEST_CASE( InstantiatIirParameterListDefault )
 {
-  ParametricIirCoefficientList<float> const pl;
+  ParametricIirCoefficientList<float> const pl{};
   BOOST_CHECK( pl.empty() );
 }
 
