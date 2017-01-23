@@ -5,9 +5,7 @@
 
 #include <libril/audio_component.hpp>
 
-#include <libobjectmodel/object.hpp> // needed basically for type definitions
-
-#include <libpml/biquad_parameter.hpp>
+// #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
 #include <memory>
 
@@ -87,11 +85,9 @@ private:
   std::size_t mNumberOfBiquadSections;
     
   /**
-   * Data vector used within a call to process to hold intermediate results.
-   * Contents does not need to be retained between process() calls.
-   * Defined as a smart pointer to avoid include in header file.
+   *
    */
-   std::unique_ptr< pml::BiquadParameterList<ril::SampleType> > mInternalBiquadVector;
+  ril::SamplingFrequencyType const cSamplingFrequency;
 };
 
 } // namespace rcl
