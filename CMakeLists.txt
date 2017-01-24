@@ -80,6 +80,26 @@ if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
+if( WIN32 ) # Covers 64-bit Windows as well
+  # Macro to determine the Windows version, stolen from
+  # http://stackoverflow.com/questions/9742003/platform-detection-in-cmake
+  macro(get_win32_winnt_version version)
+    if (WIN32 AND CMAKE_SYSTEM_VERSION)
+        set(ver ${CMAKE_SYSTEM_VERSION})
+        string(REPLACE "." "" ver ${ver})
+        string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+        set(${version} "0x${ver}")
+    endif()
+  endmacro()
+  get_win32_winnt_version( WIN_VERSION_ID )
+  message( STATUS "Window version: " ${WIN_VERSION_ID} )
+  add_definitions( -D_WINN32_WINNT=${WIN_VERSION_ID} )
+  # Avoid specific compiler warnings of the Visual Studio  compiler.
+  add_definitions( -D_SCL_SECURE_NO_WARNINGS ) # STL algorithms with pointers instead of 'real' iterators are perfectly legal.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3" ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+endif( WIN32 )
+
 ############################################################
 # Create universal binaries on MacOS
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
