@@ -19,7 +19,7 @@ PROJECT( VISR CXX C )
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
 set( VISR_MINOR_VERSION 8 )
-set( VISR_PATCH_VERSION 1 )
+set( VISR_PATCH_VERSION 2 )
 
 ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
@@ -109,6 +109,13 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
     SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
   ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+############################################################
+# Set the minimum Mac OS version.
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
