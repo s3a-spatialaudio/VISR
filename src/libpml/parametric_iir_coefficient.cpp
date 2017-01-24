@@ -203,7 +203,7 @@ void ParametricIirCoefficient< CoefficientType >::loadJson( boost::property_tree
   std::string const typeStr = tree.get<std::string>( "type" );
   CoefficientType const frequency = tree.get<CoefficientType>( "f" );
   CoefficientType const quality = tree.get<CoefficientType>( "q" );
-  boost::optional<CoefficientType> const gainOpt = tree.get<CoefficientType>( "gain" );
+  boost::optional<CoefficientType> const gainOpt = tree.get_optional<CoefficientType>( "gain" );
   Type const typeId = stringToTypeId( typeStr ); // might throw
   setType( typeId );
   setFrequency( frequency );
