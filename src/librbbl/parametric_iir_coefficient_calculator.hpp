@@ -53,6 +53,7 @@ pml::BiquadParameter<CoefficientType> calculateIirCoefficients( pml::ParametricI
  * If the output list \p coeffs is shorter than the input list \p params, an InvalidArgument exception is thrown.
  * @param params List of parametreic IIR filter descriptions
  * @param [out] coeffs List to hold the calculated IIR coefficients
+ * @param samplingFrequency
  */
 template< typename CoefficientType >
 void calculateIirCoefficients( pml::ParametricIirCoefficientList<CoefficientType> const & params,
