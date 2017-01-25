@@ -50,12 +50,12 @@ pml::BiquadParameter<CoefficientType> calculateIirCoefficients( pml::ParametricI
 /**
  * Calculate a list of second-order IIR filter coefficients for a list of parametric descriptions.
  * If the ouput list \p coeffs is longer than the parameter list \p params, initialize the remaining coefficients to their defaut values.
- * If the output list \p coeffs is shorter than the input list \params, an InvalidArgument exception is thrown.
+ * If the output list \p coeffs is shorter than the input list \p params, an InvalidArgument exception is thrown.
  * @param params List of parametreic IIR filter descriptions
  * @param [out] coeffs List to hold the calculated IIR coefficients
  */
 template< typename CoefficientType >
-void calculateIirCoefficients( pml::ParametricIirCoefficientList<CoefficientType> const & param,
+void calculateIirCoefficients( pml::ParametricIirCoefficientList<CoefficientType> const & params,
   pml::BiquadParameterList<CoefficientType> & coeffs,
   CoefficientType samplingFrequency );
 

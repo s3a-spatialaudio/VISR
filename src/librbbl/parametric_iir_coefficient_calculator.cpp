@@ -190,7 +190,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficientList<CoefficientType
     throw std::invalid_argument( "calculateIirCoefficients(): The output argument list \"coeffs\" holds less elements than the input list \"params\"." );
   }
   typename pml::BiquadParameterList<CoefficientType>::iterator it = std::transform( params.begin(), params.end(), coeffs.begin(),
-    [samplingFrequency] (typename pml::ParametricIirCoefficient<CoefficientType> const & param ) { return calculateIirCoefficients<CoefficientType>( param, samplingFrequency ); } );
+    [samplingFrequency] (typename pml::ParametricIirCoefficient<CoefficientType> const & params ) { return calculateIirCoefficients<CoefficientType>( params, samplingFrequency ); } );
   // Fill the remaining entries in coeffs with default (flat) biquad parameters.
   std::fill( it, coeffs.end(), pml::BiquadParameter<CoefficientType>() );
 }

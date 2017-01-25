@@ -65,6 +65,8 @@ public:
    * all filters are zero-initialised.
    * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
    * active initially.
+   * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
+   * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,
@@ -92,6 +94,7 @@ public:
    * @param inputIdx The input signal index for the routing.
    * @param outputIdx The output signal index for this routing.
    * @param filterIdx The filter index for this routing (pointing to an entry to the filter container of this component)
+   * @param gain Gain factor for this routing, linear scale. OPtional parameter, default is 1.0
    * @throw std::invalid_argument If \p inputIdx, \p outputIdx, or \p filterIdx exceed their respective admissible ranges
    */
   void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx,

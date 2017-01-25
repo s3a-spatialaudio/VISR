@@ -61,6 +61,7 @@ public:
   /**
    * Method to initialise the component.
    * @param numberOfObjectChannels The number of object channels supported by this calculator.
+   * @param numberOfBiquadSections The number of separate biquad filter sections for each audio channel.
    */ 
   void setup( std::size_t numberOfObjectChannels,
               std::size_t numberOfBiquadSections);
