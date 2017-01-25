@@ -1,10 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "audio_port.hpp"
+#include <libril/audio_port.hpp>
 
-#ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE // otherwise it's already included
-#include "component.hpp"
-#endif
+#include <libril/component.hpp>
 
 namespace visr
 {

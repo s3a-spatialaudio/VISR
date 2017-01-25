@@ -9,7 +9,7 @@
 #include "port_utilities.hpp"
 #include "scheduling_graph.hpp"
 
-#include <libril/audio_connection_descriptor.hpp>
+#include <libvisr_impl/audio_connection_descriptor.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/atomic_component.hpp>
@@ -18,6 +18,8 @@
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/communication_protocol_type.hpp>
 #include <libril/parameter_port_base.hpp>
+
+#include <libvisr_impl/composite_component_implementation.hpp>
 
 #include <algorithm>
 #include <ciso646>
@@ -401,13 +403,17 @@ bool AudioSignalFlow::checkFlow( ril::Component const & comp, bool locally, std:
     return true;
   }
   ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>( comp );
+  // Get the 'implementation' object that holds the tables to ports and contained components.
+  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+
+
   // First, check the connections level by level
   if( locally )
   {
     bool const localResult = checkCompositeLocal( composite, messages );
     bool overallResult = localResult;
-    for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin( ) );
-      compIt != composite.componentEnd( ); ++compIt )
+    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin( ) );
+      compIt != compositeImpl.componentEnd( ); ++compIt )
     {
       bool const compRes = checkFlow( *(compIt->second), locally, messages );
       overallResult = overallResult and compRes;
@@ -436,6 +442,10 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
   PortTable sendPorts;
   PortTable receivePorts;
 
+  // Get the 'implementation' object that holds the tables to ports and contained components.
+  // TODO: Should we pass the 'implementation' object instead?
+  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
   for( ril::Component::AudioPortContainer::const_iterator extPortIt = composite.audioPortBegin();
@@ -451,8 +461,8 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin());
-       compIt != composite.componentEnd(); ++compIt )
+  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin());
+       compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
     for( ril::Component::AudioPortContainer::const_iterator intPortIt = containedComponent.audioPortBegin( );
@@ -535,6 +545,10 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
   PortTable sendPorts;
   PortTable receivePorts;
 
+  // Get the 'implementation' object that holds the tables to ports and contained components.
+  // TODO: Should we pass the 'implementation' object instead?
+  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
   for( ril::Component::ParameterPortContainer::const_iterator extPortIt = composite.parameterPortBegin();
@@ -550,8 +564,8 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
-    compIt != composite.componentEnd(); ++compIt )
+  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+    compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
     for( ril::Component::ParameterPortContainer::const_iterator intPortIt = containedComponent.parameterPortBegin();

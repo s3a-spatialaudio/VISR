@@ -1,7 +1,7 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
-#include <libril/audio_connection_descriptor.hpp>
+#include <libvisr_impl/audio_connection_descriptor.hpp>
 
 #include <boost/test/unit_test.hpp>
 

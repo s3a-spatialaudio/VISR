@@ -9,6 +9,8 @@
 #include <libril/parameter_config_base.hpp>
 #include <libril/parameter_port_base.hpp>
 
+#include <libvisr_impl/composite_component_implementation.hpp>
+
 #include <ciso646>
 #include <iostream>
 
@@ -122,9 +124,11 @@ void PortLookup<PortType>::traverseComponent( ril::Component const & comp, bool 
   if( comp.isComposite() )
   {
     ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp);
+    // Get the 'implementation' object that holds the tables to ports and contained components.
+    ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
     // Add the ports of the contained components (without descending into the hierarchy)
-    for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
-      compIt != composite.componentEnd(); ++compIt )
+    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+      compIt != compositeImpl.componentEnd(); ++compIt )
     {
       traverseComponent( *(compIt->second), recurse );
     }

@@ -1,8 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "atomic_component.hpp"
-
-#include <ciso646>
+#include <libril/atomic_component.hpp>
 
 namespace visr
 {

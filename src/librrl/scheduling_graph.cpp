@@ -5,7 +5,7 @@
 #include "audio_connection_map.hpp"
 #include "parameter_connection_map.hpp"
 
-#include <libril/audio_connection_descriptor.hpp>
+#include <libvisr_impl/audio_connection_descriptor.hpp>
 #include <libril/audio_port.hpp>
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_port_base.hpp>

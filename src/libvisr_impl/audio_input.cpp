@@ -1,8 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "audio_input.hpp"
+#include <libril/audio_input.hpp>
 
-#include "component.hpp"
+#include <libril/component.hpp>
 
 namespace visr
 {
