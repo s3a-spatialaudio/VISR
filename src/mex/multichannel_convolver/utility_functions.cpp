@@ -45,7 +45,8 @@ void createFilterMatrix( mxArray const * array, efl::BasicMatrix<SampleType> & f
   for( std::size_t filterIdx( 0 ); filterIdx < numFilters; ++filterIdx )
   {
     // Convert from double to SampleType and copy
-    std::copy( basePtr + filterIdx*actFilterLength, basePtr + (filterIdx + 1)*actFilterLength, filters.row( filterIdx ) );
+    std::transform( basePtr + filterIdx*actFilterLength, basePtr + (filterIdx + 1)*actFilterLength, filters.row( filterIdx ),
+      []( double x ) { return static_cast<SampleType>( x ); } );
   }
 }
 
@@ -53,12 +54,24 @@ void createFilterMatrix( mxArray const * array, efl::BasicMatrix<SampleType> & f
 template void createFilterMatrix<float>( mxArray const * array, efl::BasicMatrix<float> & filters, std::size_t filterLength );
 template void createFilterMatrix<double>( mxArray const * array, efl::BasicMatrix<double> & filters, std::size_t filterLength );
 
-
 template<typename SampleType>
 void fillInputBuffers( double const * baseInputPtr, std::size_t sampleIdx, std::size_t rowStride, efl::BasicMatrix<SampleType> & inputMatrix )
 {
   std::size_t numChannels = inputMatrix.numberOfRows();
   std::size_t numSamples = inputMatrix.numberOfColumns( );
+  for( std::size_t chIdx( 0 ); chIdx < numChannels; ++chIdx )
+  {
+    double const * startPtr = baseInputPtr + chIdx * rowStride + sampleIdx;
+    std::transform( startPtr, startPtr + numSamples, inputMatrix.row( chIdx ), []( double x ){ return static_cast<SampleType>( x ); } );
+  }
+}
+
+// Specialisation for type double which does not perform a type conversion (cast)
+template<>
+void fillInputBuffers( double const * baseInputPtr, std::size_t sampleIdx, std::size_t rowStride, efl::BasicMatrix<double> & inputMatrix )
+{
+  std::size_t numChannels = inputMatrix.numberOfRows();
+  std::size_t numSamples = inputMatrix.numberOfColumns();
   for( std::size_t chIdx( 0 ); chIdx < numChannels; ++chIdx )
   {
     double const * startPtr = baseInputPtr + chIdx * rowStride + sampleIdx;
@@ -74,16 +87,26 @@ void copyOutputBuffers( efl::BasicMatrix<SampleType> const & outputMatrix, doubl
   for( std::size_t chIdx( 0 ); chIdx < numChannels; ++chIdx )
   {
     double * startPtr = baseOutputPtr + chIdx * rowStride + sampleIdx;
-      std::copy( outputMatrix.row( chIdx ), outputMatrix.row( chIdx ) + numSamples, startPtr );
+    std::transform( outputMatrix.row( chIdx ), outputMatrix.row( chIdx ) + numSamples, startPtr, []( SampleType x ){ return static_cast<double>( x ); } );
+  }
+}
+
+// Specialisation for type double which does not perform a type conversion (cast)
+template<>
+void copyOutputBuffers( efl::BasicMatrix<double> const & outputMatrix, double * baseOutputPtr, std::size_t sampleIdx, std::size_t rowStride )
+{
+  std::size_t numChannels = outputMatrix.numberOfRows();
+  std::size_t numSamples = outputMatrix.numberOfColumns();
+  for( std::size_t chIdx( 0 ); chIdx < numChannels; ++chIdx )
+  {
+    double * startPtr = baseOutputPtr + chIdx * rowStride + sampleIdx;
+    std::copy( outputMatrix.row( chIdx ), outputMatrix.row( chIdx ) + numSamples, startPtr );
   }
 }
 
 // explicit instantiations
 template void fillInputBuffers<float>( double const *, std::size_t, std::size_t, efl::BasicMatrix<float> & );
-template void fillInputBuffers<double>( double const *, std::size_t, std::size_t, efl::BasicMatrix<double> & );
 template void copyOutputBuffers<float>( efl::BasicMatrix<float> const &, double *, std::size_t, std::size_t );
-template void copyOutputBuffers<double>( efl::BasicMatrix<double> const &, double *, std::size_t, std::size_t );
-
 
 } // namespace multichannel_convolver
 } // namespace mex

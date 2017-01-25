@@ -7,6 +7,7 @@
 #include <libobjectmodel/object_vector.hpp>
 
 #include <libpml/biquad_parameter.hpp>
+#include <librbbl/parametric_iir_coefficient_calculator.hpp>
 
 #include <ciso646>
 
@@ -18,6 +19,8 @@ namespace rcl
 ObjectGainEqCalculator::ObjectGainEqCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
  , mNumberOfObjectChannels( 0 )
+ , cSamplingFrequency(container.samplingFrequency() )
+
 {
 }
 
@@ -30,13 +33,14 @@ void ObjectGainEqCalculator::setup( std::size_t numberOfObjectChannels,
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
   mNumberOfBiquadSections = numberOfBiquadSections;
-  mInternalBiquadVector.reset( new pml::BiquadParameterList<ril::SampleType >( numberOfBiquadSections ));
 }
 
 void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
-					     efl::BasicVector<CoefficientType> & objectSignalGains,
-					     pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs )
+                                      efl::BasicVector<CoefficientType> & objectSignalGains,
+                                      pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs )
 {
+
+
   using namespace objectmodel;
   pml::BiquadParameter<ril::SampleType> defaultEq; // Neutral EQ parameters
   if( objectSignalGains.size() != mNumberOfObjectChannels )
@@ -53,23 +57,16 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
   {
     Object const & obj = *(objIt->second);
     LevelType const objLevel = obj.level();
-    // TODO: Retrieve EQ setting from object and store calculate eq section in mInternalBiquadVector
-    std::size_t const objEqSections = 0; // Interim setting until EQ calculation is in place.
-      
     std::size_t const numObjChannels = obj.numberOfChannels();
     for( std::size_t chIdx(0); chIdx < numObjChannels; ++chIdx )
     {
         std::size_t const signalChannelIdx = obj.channelIndex( chIdx );
         objectSignalGains[ signalChannelIdx ] = objLevel;
-        for( std::size_t eqIdx(0); eqIdx < objEqSections; ++eqIdx ) // Compiler warning 'always false' is harmless at the moment.
-        {
-            objectChannelEqs( signalChannelIdx, eqIdx ) = mInternalBiquadVector->at(eqIdx);
-        }
-        for( std::size_t eqIdx(objEqSections); eqIdx < mNumberOfBiquadSections; ++eqIdx ) // Fill remaining sections with neutral parameters.
-        {
-            objectChannelEqs( signalChannelIdx, eqIdx ) = defaultEq;
-        }
-        
+        // Potential minor performance improvement possible: For multichannel objects, compute the coefficients only for the first channel,
+        // and copy it to the remaining channels.
+        rbbl::ParametricIirCoefficientCalculator::calculateIirCoefficients<ril::SampleType>( obj.eqCoefficients(),
+                                                                                             objectChannelEqs[signalChannelIdx],
+                                                                                             static_cast< ril::SampleType>(cSamplingFrequency) );
     }
   }
 }

@@ -13,7 +13,6 @@
 #include <boost/math/constants/constants.hpp>
 
 #include <cmath>
-#include <tuple>
 
 namespace visr
 {

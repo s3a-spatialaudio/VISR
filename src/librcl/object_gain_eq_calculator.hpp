@@ -5,9 +5,7 @@
 
 #include <libril/audio_component.hpp>
 
-#include <libobjectmodel/object.hpp> // needed basically for type definitions
-
-#include <libpml/biquad_parameter.hpp>
+// #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
 #include <memory>
 
@@ -63,6 +61,7 @@ public:
   /**
    * Method to initialise the component.
    * @param numberOfObjectChannels The number of object channels supported by this calculator.
+   * @param numberOfBiquadSections The number of separate biquad filter sections for each audio channel.
    */ 
   void setup( std::size_t numberOfObjectChannels,
               std::size_t numberOfBiquadSections);
@@ -87,11 +86,9 @@ private:
   std::size_t mNumberOfBiquadSections;
     
   /**
-   * Data vector used within a call to process to hold intermediate results.
-   * Contents does not need to be retained between process() calls.
-   * Defined as a smart pointer to avoid include in header file.
+   *
    */
-   std::unique_ptr< pml::BiquadParameterList<ril::SampleType> > mInternalBiquadVector;
+  ril::SamplingFrequencyType const cSamplingFrequency;
 };
 
 } // namespace rcl

@@ -1,5 +1,10 @@
 Changelog for project VISR
 
+Version 0.8.2
+=============
+
+- Baseline renderer: Implemented object equalisation (activated vie --object-eq-sections or -e with argument > 0)
+
 Version 0.8.1
 =============
 
