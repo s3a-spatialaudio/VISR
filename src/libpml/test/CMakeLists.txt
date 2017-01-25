@@ -8,7 +8,7 @@ SET( SOURCES biquad_parameter.cpp filter_routing_parameter.cpp float_sequence.cp
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ril) # strange dependency ril->pml due to temporary hack.
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_impl) # strange dependency ril->pml due to temporary hack.
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} objectmodel)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} efl)

@@ -26,11 +26,15 @@ ADD_SUBDIRECTORY( librbbl )
 # Rendering component library
 ADD_SUBDIRECTORY( librcl )
 
-# Rendering infrastructure library 
-ADD_SUBDIRECTORY( libril )
+# Rendering infrastructure library
+# Nothing to build here
+# ADD_SUBDIRECTORY( libvisr_impl )
 
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )
+
+# Library of implementations of the interface components.
+ADD_SUBDIRECTORY( libvisr_impl )
 
 # Hold applications in a separate subdirectory
 ADD_SUBDIRECTORY( apps )
