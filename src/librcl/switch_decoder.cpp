@@ -39,7 +39,8 @@ void SwitchDecoder::setup(std::size_t numInputs, std::size_t numOutputs, std::si
 
 void SwitchDecoder::process()
 {
-  pml::SignalRoutingParameter & routing = mRoutingOutput.data();
+  // TODO: Use "routing" to generate the output message.
+  // pml::SignalRoutingParameter & routing = mRoutingOutput.data();
   constexpr int cInvalidIdx = std::numeric_limits<int>::max();
   int newIndex = cInvalidIdx;
   // Do we need to set a routing on the first process() call?
@@ -74,7 +75,7 @@ void SwitchDecoder::process()
   // Use the latest received index.
   if( newIndex != cInvalidIdx )
   {
-    if (newIndex >= mNumberOfInputs)
+    if( (newIndex < 0) or (static_cast<std::size_t>(newIndex) >= mNumberOfInputs))
     {
       std::cerr << "SwitchDecoder: Received index exceeds number of outputs." << std::endl;
     }

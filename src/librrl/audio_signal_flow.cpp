@@ -555,8 +555,6 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
   PortTable receivePorts;
 
   // Get the 'implementation' object that holds the tables to ports and contained components.
-  // TODO: Should we pass the 'implementation' object instead?
-  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
@@ -656,11 +654,11 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   // Assign consecutive indices to the ports that need physical communication vectors.
   // First we do that for the external capture ports, because this part is identical for atomic and component top-level signal flows.
   ril::AudioPort::SignalIndexType offset = 0;
-  std::size_t const captureSignalOffset = offset;
+  // std::size_t const captureSignalOffset = offset; // ATM unused.
   std::for_each( portLookup.externalCapturePorts().begin( ), portLookup.externalCapturePorts().end( ),
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
   // Initialise the 'concrete' internal receive ports.
-  std::size_t const concreteOutputSignalOffset = offset;
+  // std::size_t const concreteOutputSignalOffset = offset; // ATM unused
   std::for_each( portLookup.realSendPorts().begin( ), portLookup.realSendPorts().end( ),
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
   if( offset != mCommArea->numberOfSignals( ) )
