@@ -3,13 +3,10 @@
 #ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 #define VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
-// #include <libril/component.hpp>
-
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 #include <libvisr_impl/parameter_connection_descriptor.hpp>
 
 #include <map>
-// #include <memory>
 
 namespace visr
 {
@@ -24,8 +21,8 @@ class CompositeComponentImplementation
 public:
   using ComponentTable = std::map<std::string, Component * >;
 
-  explicit CompositeComponentImplementation( CompositeComponent * parent )
-    : mParent( parent )
+  explicit CompositeComponentImplementation( CompositeComponent & component )
+    : mComponent( component )
   {
   }
 
@@ -51,9 +48,12 @@ public:
 
   Component const * findComponent( std::string const & componentName ) const;
 
+#if 1
+  // Clashes with corrsponding functionality of ComponentInternal?
   AudioPort * findAudioPort( std::string const & componentName, std::string const & portName );
-
+  // Same.
   ParameterPortBase * findParameterPort( std::string const & componentName, std::string const & portName );
+#endif
 
   void registerParameterConnection( std::string const & sendComponent,
                                     std::string const & sendPort,
@@ -76,10 +76,14 @@ public:
   ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
 
 private:
+  CompositeComponent & component() { return mComponent; }
+
+  CompositeComponent const & component() const { return mComponent; }
+
   /**
   * Reference to the component itself (needed because sometimes the component itself needs to be returned).
   */
-  CompositeComponent * const mParent;
+  CompositeComponent & mComponent;
 
   ComponentTable mComponents;
 

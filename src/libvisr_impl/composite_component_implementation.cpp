@@ -1,5 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include "component_internal.hpp"
 #include "composite_component_implementation.hpp"
 
 #include <libril/composite_component.hpp>
@@ -51,7 +52,7 @@ Component * CompositeComponentImplementation::findComponent( std::string const &
 {
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
-    return mParent;
+    return &mComponent;
   }
   ComponentTable::iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -65,7 +66,7 @@ Component const * CompositeComponentImplementation::findComponent( std::string c
 {
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
-    return mParent;
+    return &mComponent;
   }
   ComponentTable::const_iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -82,7 +83,8 @@ AudioPort * CompositeComponentImplementation::findAudioPort( std::string const &
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
   }
-  return comp->findAudioPort( portName );
+
+  return comp->internal().findAudioPort( portName );
 }
 
 ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::string const & componentName, std::string const & portName )
@@ -92,7 +94,7 @@ ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::st
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
   }
-  return comp->findParameterPort( portName );
+  return comp->internal().findParameterPort( portName );
 }
 
 void CompositeComponentImplementation::registerParameterConnection( std::string const & sendComponent,
@@ -115,11 +117,11 @@ void CompositeComponentImplementation::registerParameterConnection( std::string 
 }
 
 void CompositeComponentImplementation::registerAudioConnection( std::string const & sendComponent,
-                                                        std::string const & sendPort,
-                                                        AudioChannelIndexVector const & sendIndices,
-                                                        std::string const & receiveComponent,
-                                                        std::string const & receivePort,
-                                                        AudioChannelIndexVector const & receiveIndices )
+                                                                std::string const & sendPort,
+                                                                AudioChannelIndexVector const & sendIndices,
+                                                                std::string const & receiveComponent,
+                                                                std::string const & receivePort,
+                                                                AudioChannelIndexVector const & receiveIndices )
 {
   AudioPort * sender = findAudioPort( sendComponent, sendPort );
   if( not sender )

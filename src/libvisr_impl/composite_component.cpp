@@ -17,7 +17,7 @@ CompositeComponent::CompositeComponent( SignalFlowContext& context,
                                         char const * name,
                                          CompositeComponent * parent /*= nullptr*/ )
  : Component( context, name, parent )
- , mImpl( new CompositeComponentImplementation(this) )
+ , mImpl( new CompositeComponentImplementation( *this) )
 {
 }
 

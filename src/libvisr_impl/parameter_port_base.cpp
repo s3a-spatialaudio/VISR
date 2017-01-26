@@ -4,6 +4,8 @@
 
 #include <libril/component.hpp>
 
+#include <libvisr_impl/component_internal.hpp>
+
 namespace visr
 {
 namespace ril
@@ -14,12 +16,12 @@ ParameterPortBase::ParameterPortBase( std::string const & name,
                                       Direction direction )
   : PortBase( name, parent, direction )
 {
-  parent.registerParameterPort( this );
+  parent.internal().registerParameterPort( this );
 }
 
 ParameterPortBase::~ParameterPortBase( ) 
 {
-  parent().unregisterParameterPort( this );
+  parent().internal().unregisterParameterPort( this );
 }
 
 } // namespace ril
