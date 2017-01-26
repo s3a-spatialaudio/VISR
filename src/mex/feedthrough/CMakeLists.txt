@@ -28,7 +28,6 @@ target_link_libraries( ${PROJECT_NAME} mexsupport )
 target_link_libraries( ${PROJECT_NAME} efl )
 target_link_libraries( ${PROJECT_NAME} ${MATLAB_LIBRARIES} )
 # Current dependency structure pulls in lots of rubble
-target_link_libraries( ${PROJECT_NAME} ${SNDFILE_LIBRARY} )
 target_link_libraries( ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 

@@ -33,5 +33,10 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
 ADD_LIBRARY( rrl STATIC ${SOURCES} ${HEADERS} )
 
+target_link_libraries( rrl ${PORTAUDIO_LIBRARIES} )
+if( BUILD_USE_JACK )
+  target_link_libraries( rrl ${JACK_LIBRARY} )
+endif( BUILD_USE_JACK )
+
 # Add the unit test directory.
-ADD_SUBDIRECTORY( test )
+add_subdirectory( test )

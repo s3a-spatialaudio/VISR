@@ -26,4 +26,5 @@ typed_parameter_base.hpp
 )
 
 # Essentially empty library (Decide what to do with that!)
-ADD_LIBRARY( visr_impl STATIC ${HEADERS} )
+ADD_LIBRARY( ril STATIC ${HEADERS} )
+set_target_properties( ril PROPERTIES LINKER_LANGUAGE CXX)

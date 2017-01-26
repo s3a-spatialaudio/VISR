@@ -28,7 +28,7 @@ ADD_SUBDIRECTORY( librcl )
 
 # Rendering infrastructure library
 # Nothing to build here
-# ADD_SUBDIRECTORY( libvisr_impl )
+ADD_SUBDIRECTORY( libril )
 
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )

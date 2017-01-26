@@ -56,5 +56,7 @@ INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )
 
 ADD_LIBRARY( pml STATIC ${SOURCES} ${HEADERS} )
 
+target_link_libraries( pml ${SNDFILE_LIBRARY} )
+
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

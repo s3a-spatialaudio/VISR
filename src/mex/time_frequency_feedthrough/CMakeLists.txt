@@ -26,21 +26,8 @@ target_link_libraries( ${PROJECT_NAME} rrl )
 target_link_libraries( ${PROJECT_NAME} efl )
 target_link_libraries( ${PROJECT_NAME} mexsupport )
 target_link_libraries( ${PROJECT_NAME} ${MATLAB_LIBRARIES} )
-target_link_libraries( ${PROJECT_NAME} ${SNDFILE_LIBRARY} )
 target_link_libraries( ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
-
-
-target_link_libraries( ${PROJECT_NAME} ${FFTS_LIBRARY} )
-target_link_libraries( ${PROJECT_NAME} ${KISSFFT_LIBRARY} )
-IF( BUILD_USE_FFTW )
-  target_link_libraries( ${PROJECT_NAME} ${FFTW3_LIBRARY} )
-  target_link_libraries( ${PROJECT_NAME} ${FFTW3F_LIBRARY} )
-ENDIF( BUILD_USE_FFTW )
-IF( BUILD_USE_IPP )
-  target_link_libraries( ${PROJECT_NAME}  ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
-ENDIF( BUILD_USE_IPP )
-
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.
