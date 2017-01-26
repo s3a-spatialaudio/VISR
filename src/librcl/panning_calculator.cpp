@@ -258,7 +258,7 @@ void PanningCalculator::process()
           // We search for the maximum, because we are using the dot product, i.e., the cosine of the angular distance.
           // In case of equidistant nearest speakers, the first is returned.
           CoefficientType const * maxDotProduct = std::max_element( mLoudspeakerDotProducts.data(), mLoudspeakerDotProducts.data() + mNumberOfRegularLoudspeakers );
-          if( maxDotProduct - mLoudspeakerDotProducts.data() >= mNumberOfRegularLoudspeakers )
+          if( maxDotProduct - mLoudspeakerDotProducts.data() >= static_cast<std::ptrdiff_t>(mNumberOfRegularLoudspeakers) )
           {
             // TODO: Replace by error API call.
             throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
