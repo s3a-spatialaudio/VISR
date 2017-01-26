@@ -14,10 +14,10 @@ namespace ril
 {
 // Forward declaration
 class SignalFlowContext;
+class CompositeComponent;
 
 class CompositeComponentImplementation
 {
-  friend class CompositeComponent;
 public:
   using ComponentTable = std::map<std::string, Component * >;
 

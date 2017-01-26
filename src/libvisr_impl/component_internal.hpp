@@ -228,6 +228,11 @@ private:
 
   AudioPortContainer::const_iterator findAudioPortEntry( std::string const & portName ) const;
 
+  /**
+   * The Component object corresponding to this 'internal' representation.
+   */
+  Component & mComponent;
+
   SignalFlowContext & mContext;
 
   /**
@@ -237,12 +242,6 @@ private:
   ParameterPortContainer mParameterPorts;
 
   //@}
-
-  /**
-   * The Component object corresponding to this 'internal' representation.
-   */
-  Component & mComponent;
-
   /**
    * The local, i.e., nonhierarchical, name of the component.
    */
