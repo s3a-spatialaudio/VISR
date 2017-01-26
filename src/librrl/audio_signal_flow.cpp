@@ -9,7 +9,6 @@
 #include "port_utilities.hpp"
 #include "scheduling_graph.hpp"
 
-#include <libvisr_impl/audio_connection_descriptor.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/atomic_component.hpp>
@@ -19,6 +18,8 @@
 #include <libril/communication_protocol_type.hpp>
 #include <libril/parameter_port_base.hpp>
 
+#include <libvisr_impl/audio_connection_descriptor.hpp>
+#include <libvisr_impl/component_internal.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 
 #include <algorithm>
@@ -448,8 +449,8 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::Component::AudioPortContainer::const_iterator extPortIt = composite.audioPortBegin();
-       extPortIt != composite.audioPortEnd(); ++extPortIt )
+  for( ril::ComponentInternal::AudioPortContainer::const_iterator extPortIt = composite.internal().audioPortBegin();
+       extPortIt != composite.internal().audioPortEnd(); ++extPortIt )
   {
     if( (*extPortIt)->direction() == ril::AudioPort::Direction::Input )
     {
@@ -465,8 +466,15 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
        compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
-    for( ril::Component::AudioPortContainer::const_iterator intPortIt = containedComponent.audioPortBegin( );
-      intPortIt != containedComponent.audioPortEnd( ); ++intPortIt )
+#if 0
+    for( auto port : containedComponent.internal().ports<ril::AudioPort>() )
+    {
+      port->direction() == ril::AudioPort::Direction::Input ?
+        receivePorts.insert( port ) : sendPorts.insert( port );
+    }
+#else
+    for( auto intPortIt = containedComponent.internal().audioPortBegin( );
+      intPortIt != containedComponent.internal().audioPortEnd( ); ++intPortIt )
     {
       if( (*intPortIt)->direction( ) == ril::AudioPort::Direction::Input )
       {
@@ -477,6 +485,7 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
         sendPorts.insert( *intPortIt );
       }
     }
+#endif
   }
   // Now populate the connection map
   try
@@ -551,8 +560,15 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::Component::ParameterPortContainer::const_iterator extPortIt = composite.parameterPortBegin();
-    extPortIt != composite.parameterPortEnd(); ++extPortIt )
+#if 1
+  for( auto port : composite.internal().ports<ril::ParameterPortBase>() )
+  {
+    (port->direction() == ril::ParameterPortBase::Direction::Input) ?
+     sendPorts.insert( port ) : receivePorts.insert( port );
+  }
+#else
+  for( auto extPortIt = composite.internal().parameterPortBegin();
+    extPortIt != composite.internal().parameterPortEnd(); ++extPortIt )
   {
     if( (*extPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
     {
@@ -562,9 +578,16 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
     {
       receivePorts.insert( *extPortIt );
     }
-  }
+#endif
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+#if 1
+  for( auto port : composite.internal().ports<ril::ParameterPortBase>() )
+  {
+    (port->direction() == ril::ParameterPortBase::Direction::Input ) ?
+      receivePorts.insert( port ) : sendPorts.insert( port );
+  }
+#else
+  for( auto compIt( compositeImpl.componentBegin() );
     compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
@@ -580,46 +603,6 @@ bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent con
         sendPorts.insert( *intPortIt );
       }
     }
-  }
-#if 0
-  // Now populate the connection map
-  try
-  {
-    ParameterConnectionMap const connections( composite, false );
-    for( ril::AudioPort const * receivePort : receivePorts )
-    {
-      std::size_t const numChannels = receivePort->width();
-      for( std::size_t channelIdx( 0 ); channelIdx < numChannels; ++channelIdx )
-      {
-        std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator > findRange
-          = connections.equal_range( AudioSignalDescriptor( receivePort, channelIdx ) );
-        std::ptrdiff_t const numConnections = std::distance( findRange.first, findRange.second );
-        assert( numConnections >= 0 );
-        if( numConnections == 0 )
-        {
-          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":" << channelIdx
-            << " is unconnected" << std::endl;
-          result = false;
-        }
-        else if( numConnections > 1 )
-        {
-          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":"
-            << channelIdx << " is connected to " << numConnections << " send channels: " << printAudioSignalDescriptor( findRange.first->second );
-          ++findRange.first;
-          for( ; findRange.first != findRange.second; ++findRange.first )
-          {
-            messages << ", " << printAudioSignalDescriptor( findRange.first->second );
-          }
-          messages << std::endl;
-          result = false;
-        }
-      }
-    }
-  }
-  catch( std::exception const & ex )
-  {
-    messages << ex.what();
-    result = false;
   }
 #endif
   return result;
