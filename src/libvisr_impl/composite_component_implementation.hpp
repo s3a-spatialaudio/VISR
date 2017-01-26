@@ -26,7 +26,14 @@ public:
   {
   }
 
-  void registerChildComponent( Component * child );
+  /**
+   * Register a child component 
+   * @param name The local (nonhierarchical) name of the component.
+   * @param child The component to be registered. The pointer does not carry ownership responsibilities.
+   * @note The name has to be provided separately, because typically the object pointed to by 
+   * \p child is not fully constructed at the time of the call.
+   */
+  void registerChildComponent( std::string const & name, Component * child );
 
   void unregisterChildComponent( Component * child );
 
