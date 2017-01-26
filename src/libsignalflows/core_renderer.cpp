@@ -82,20 +82,18 @@ CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
   if( mTrackingEnabled )
   {
     // Instantiate the objects.
+    mListenerPositionPort.reset( new ril::ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition >( "listenerPositionInput", *this, pml::EmptyParameterConfig() ) );
     mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation" ) );
     mSpeakerCompensation.reset( new rcl::DelayVector( context, "TrackingSpeakerCompensation" ) );
-    mTrackingReceiver.reset( new rcl::UdpReceiver( context, "TrackingReceiver" ) );
     mPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder" ) );
 
     // for the very moment, do not parse any options, but use hard-coded option values.
     ril::SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
-    unsigned short cTrackingUdpPort = 8888;
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mSpeakerCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay,
       rcl::DelayVector::InterpolationType::NearestSample,
       0.0f, 0.0f );
-    mTrackingReceiver->setup( cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous );
     mPositionDecoder->setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
   }
 
@@ -167,6 +165,7 @@ CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
     {
       registerAudioConnection( "TrackingSpeakerCompensation", "out", indexRange( 0, numberOfLoudspeakers ), "OutputAdjustment", "in", indexRange( 0, numberOfLoudspeakers ) );
     }
+    registerParameterConnection( "", "listenerPositionInput", "TrackingListenerCompensation", "input" );
   }
   else
   {

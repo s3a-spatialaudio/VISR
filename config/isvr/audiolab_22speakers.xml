@@ -1,73 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <panningConfiguration dimension="3" infinite="false">
-   <loudspeaker channel="1" delay="0" gainDB="0" id="1">
-      <polar az="0" el="89.4595" r="1.06"/>
+   <outputEqConfiguration numberOfBiquads="1" type="iir">
+      <filterSpec name="lowpass">
+         <biquad a1="-1.9688283" a2="0.96907117" b0="6.0729856e-05" b1="0.00012145971" b2="6.0729856e-05"/>
+      </filterSpec>
+      <filterSpec name="highpass">
+         <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
+      </filterSpec>
+   </outputEqConfiguration>
+   <loudspeaker channel="1" delay="0.0049533" eq="highpass" gainDB="-9.5385" id="1">
+      <cart x="0.01" y="0" z="1.06"/>
    </loudspeaker>
-   <loudspeaker channel="6" delay="0" gainDB="0" id="2">
-      <polar az="0" el="27.0907" r="2.4374"/>
+   <loudspeaker channel="6" delay="0.00086558" eq="highpass" gainDB="-1.5254" id="2">
+      <cart x="2.17" y="0" z="1.11"/>
    </loudspeaker>
-   <loudspeaker channel="8" delay="0" gainDB="0" id="3">
-      <polar az="-43.5057" el="25.2319" r="2.6977"/>
+   <loudspeaker channel="8" delay="9.1888e-05" eq="highpass" gainDB="-1.4942" id="3">
+      <cart x="1.77" y="-1.68" z="1.15"/>
    </loudspeaker>
-   <loudspeaker channel="9" delay="0" gainDB="0" id="4">
-      <polar az="-90" el="32.667" r="2.0194"/>
+   <loudspeaker channel="9" delay="0.0019509" eq="highpass" gainDB="-2.6806" id="4">
+      <cart x="0" y="-1.7" z="1.09"/>
    </loudspeaker>
-   <loudspeaker channel="10" delay="0" gainDB="0" id="5">
-      <polar az="-134.1599" el="25.1073" r="2.6631"/>
+   <loudspeaker channel="10" delay="8.1955e-05" eq="highpass" gainDB="-0.55628" id="5">
+      <cart x="-1.68" y="-1.73" z="1.13"/>
    </loudspeaker>
-   <loudspeaker channel="11" delay="0" gainDB="0" id="6">
-      <polar az="180" el="28.2845" r="2.3847"/>
+   <loudspeaker channel="11" delay="0.00098686" eq="highpass" gainDB="-2.1391" id="6">
+      <cart x="-2.1" y="0" z="1.13"/>
    </loudspeaker>
-   <loudspeaker channel="12" delay="0" gainDB="0" id="7">
-      <polar az="133.6678" el="24.9114" r="2.6827"/>
+   <loudspeaker channel="12" delay="0.00014763" eq="highpass" gainDB="-1.1831" id="7">
+      <cart x="-1.68" y="1.76" z="1.13"/>
    </loudspeaker>
-   <loudspeaker channel="13" delay="0" gainDB="0" id="8">
-      <polar az="89.6763" el="31.8593" r="2.084"/>
+   <loudspeaker channel="13" delay="0.001977" eq="highpass" gainDB="-3.0731" id="8">
+      <cart x="0.01" y="1.77" z="1.1"/>
    </loudspeaker>
-   <loudspeaker channel="14" delay="0" gainDB="0" id="9">
-      <polar az="44.8339" el="25.0468" r="2.6927"/>
+   <loudspeaker channel="14" delay="0" eq="highpass" gainDB="0" id="9">
+      <cart x="1.73" y="1.72" z="1.14"/>
    </loudspeaker>
-   <loudspeaker channel="16" delay="0" gainDB="0" id="10">
-      <polar az="0.82632" el="0" r="2.0802"/>
+   <loudspeaker channel="16" delay="0.0016408" eq="highpass" gainDB="-2.8467" id="10">
+      <cart x="2.08" y="0.03" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="17" delay="0" gainDB="0" id="11">
-      <polar az="-29.5724" el="0.23178" r="2.472"/>
+   <loudspeaker channel="17" delay="0.00058945" eq="highpass" gainDB="-1.055" id="11">
+      <cart x="2.15" y="-1.22" z="0.01"/>
    </loudspeaker>
-   <loudspeaker channel="18" delay="0" gainDB="0" id="12">
-      <polar az="-58.7891" el="0" r="1.9877"/>
+   <loudspeaker channel="18" delay="0.0020136" eq="highpass" gainDB="-2.0515" id="12">
+      <cart x="1.03" y="-1.7" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="19" delay="0" gainDB="0" id="13">
-      <polar az="-90" el="0" r="1.67"/>
+   <loudspeaker channel="19" delay="0.0028662" eq="highpass" gainDB="-3.7289" id="13">
+      <cart x="0" y="-1.67" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="20" delay="0" gainDB="0" id="14">
-      <polar az="-120.8639" el="0" r="1.9688"/>
+   <loudspeaker channel="20" delay="0.0020154" eq="highpass" gainDB="-2.5147" id="14">
+      <cart x="-1.01" y="-1.69" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="22" delay="0" gainDB="0" id="15">
-      <polar az="180" el="4.0472" r="2.1253"/>
+   <loudspeaker channel="22" delay="0.001653" eq="highpass" gainDB="-3.8535" id="15">
+      <cart x="-2.12" y="0" z="0.15"/>
    </loudspeaker>
-   <loudspeaker channel="24" delay="0" gainDB="0" id="16">
-      <polar az="119.389" el="0" r="1.997"/>
+   <loudspeaker channel="24" delay="0.0021871" eq="highpass" gainDB="-2.7654" id="16">
+      <cart x="-0.98" y="1.74" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="25" delay="0" gainDB="0" id="17">
-      <polar az="90" el="0" r="1.75"/>
+   <loudspeaker channel="25" delay="0.0028896" eq="highpass" gainDB="-4.0822" id="17">
+      <cart x="0" y="1.75" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="26" delay="0" gainDB="0" id="18">
-      <polar az="60.3955" el="-0.28304" r="2.0243"/>
+   <loudspeaker channel="26" delay="0.0020671" eq="highpass" gainDB="-2.3788" id="18">
+      <cart x="1" y="1.76" z="-0.01"/>
    </loudspeaker>
-   <loudspeaker channel="27" delay="0" gainDB="0" id="19">
-      <polar az="32.0765" el="0" r="2.561"/>
+   <loudspeaker channel="27" delay="0.00049068" eq="highpass" gainDB="-0.69786" id="19">
+      <cart x="2.17" y="1.36" z="0"/>
    </loudspeaker>
-   <loudspeaker channel="28" delay="0" gainDB="0" id="20">
-      <polar az="1.0708" el="-21.4278" r="2.2993"/>
+   <loudspeaker channel="28" delay="0.0011097" eq="highpass" gainDB="-0.56031" id="20">
+      <cart x="2.14" y="0.04" z="-0.84"/>
    </loudspeaker>
-   <loudspeaker channel="29" delay="0" gainDB="0" id="21">
-      <polar az="-43.8309" el="-19.7295" r="2.5772"/>
+   <loudspeaker channel="29" delay="0.00025319" eq="highpass" gainDB="-0.5163" id="21">
+      <cart x="1.75" y="-1.68" z="-0.87"/>
    </loudspeaker>
-   <loudspeaker channel="35" delay="0" gainDB="0" id="22">
-      <polar az="44.1839" el="-19.1095" r="2.627"/>
+   <loudspeaker channel="35" delay="0.00032002" eq="highpass" gainDB="-0.35979" id="22">
+      <cart x="1.78" y="1.73" z="-0.86"/>
    </loudspeaker>
-   <virtualspeaker id="23">
-      <polar az="0" el="-90" r="1"/>
+   <virtualspeaker eq="highpass" id="23">
+      <cart x="0" y="0" z="-1"/>
    </virtualspeaker>
    <triplet l1="1" l2="2" l3="9"/>
    <triplet l1="1" l2="3" l3="2"/>

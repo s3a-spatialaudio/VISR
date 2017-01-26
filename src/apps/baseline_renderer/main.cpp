@@ -111,6 +111,8 @@ int main( int argc, char const * const * argv )
 
     const std::string trackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string() );
 
+    const bool lowFrequencyPanning = cmdLineOptions.getDefaultedOption("low-frequency-panning", false );
+
     if( not cmdLineOptions.hasOption( "reverb-config" ) )
     {
       throw std::invalid_argument( "VISR renderer: Mandatory option \"reverb-config\" missing." );
@@ -167,7 +169,8 @@ int main( int argc, char const * const * argv )
                                         diffusionCoeffs,
                                         trackingConfiguration,
                                         sceneReceiverPort,
-                                        reverbConfiguration );
+                                        reverbConfiguration,
+                                        lowFrequencyPanning );
 
     rrl::AudioSignalFlow audioFlow( flow );
 

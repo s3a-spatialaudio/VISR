@@ -6,10 +6,7 @@
 #include "component.hpp"
 #include "processable_interface.hpp"
 
-#include <algorithm> // due to temporary definition of findPortEntry() in header.
 #include <cstddef>
-#include <string>
-#include <vector>
 
 namespace visr
 {

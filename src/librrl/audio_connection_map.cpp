@@ -8,6 +8,8 @@
 #include <libril/component.hpp>
 #include <libril/composite_component.hpp>
 
+#include <libvisr_impl/composite_component_implementation.hpp>
+
 #include <ciso646>
 #include <iosfwd>
 #include <map>
@@ -109,6 +111,9 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
   ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(component);
   // this could be moved to the PortLookup functionality.
 
+  // Get the 'implementation' object that holds the tables to ports and contained components.
+  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
   for( ril::Component::PortContainer<ril::AudioPort>::const_iterator extPortIt = composite.portBegin<ril::AudioPort>();
@@ -124,8 +129,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
-    compIt != composite.componentEnd(); ++compIt )
+  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+    compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
     for( ril::Component::PortContainer<ril::AudioPort>::const_iterator intPortIt = containedComponent.portBegin<ril::AudioPort>();
@@ -141,8 +146,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
       }
     }
   }
-  for( ril::AudioConnectionTable::const_iterator connIt = composite.audioConnectionBegin();
-    connIt != composite.audioConnectionEnd(); ++connIt )
+  for( ril::AudioConnectionTable::const_iterator connIt = compositeImpl.audioConnectionBegin();
+    connIt != compositeImpl.audioConnectionEnd(); ++connIt )
   {
     ril::AudioConnection const connection = *connIt;
     if( sendPorts.find( connection.sender() ) == sendPorts.end() )
@@ -200,8 +205,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
   }
   if( recursive )
   {
-    for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
-      compIt != composite.componentEnd(); ++compIt )
+    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+      compIt != compositeImpl.componentEnd(); ++compIt )
     {
       result = result and fillRecursive( *(compIt->second), messages, true );
     }

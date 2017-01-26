@@ -1,6 +1,6 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME ril_test )
+SET( APPLICATION_NAME visr_impl_test )
 
 SET( SOURCES
 audio_connection_descriptor.cpp
@@ -10,7 +10,7 @@ test_main.cpp
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ril)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_impl)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 

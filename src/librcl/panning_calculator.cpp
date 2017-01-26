@@ -25,8 +25,10 @@
 
 #include <algorithm>
 #include <ciso646>
+#include <cmath>
 #include <cstdio>
 #include <iterator>
+#include <numeric>
 
 // for math utility functions (see implementations in the unnamed namespace below)
 
@@ -41,6 +43,7 @@ namespace rcl
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( 0 )
  , mLoudspeakerDotProducts( ril::cVectorAlignmentSamples )
+ , mHighFrequencyGains(ril::cVectorAlignmentSamples )
 {
 }
 
@@ -50,7 +53,8 @@ PanningCalculator::~PanningCalculator()
 
 void PanningCalculator::setup( std::size_t numberOfObjects,
                                panning::LoudspeakerArray const & arrayConfig,
-                               bool adaptiveListenerPosition /*= false*/ )
+                               bool adaptiveListenerPosition /*= false*/,
+                               bool separateLowpassPanning /*= false*/ )
 {
   mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
@@ -101,6 +105,16 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
   if( adaptiveListenerPosition )
   {
     mListenerPositionInput.reset( new ListenerPositionPort( "listenerPosition", *this, pml::EmptyParameterConfig() ) );
+  }
+
+  if( separateLowpassPanning )
+  {
+    mLowFrequencyGainOutput.reset( new MatrixPort( "lowFrequencyGainOutput", *this,
+                                                  pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ));
+    // What to do with virtual loudspeakers? At the moment, thei energy is discarded. Thus computing a normalisation factor afterwards without incorporating them could
+    // result in a very low value, boosting the gains of the real loudspeakers.
+    // TODO: Reconsider after another strategy has been selected for handling virtual loudspeakers (downmix matrices before normalisation?)
+    mHighFrequencyGains.resize( mNumberOfAllLoudspeakers );
   }
 }
 
@@ -264,9 +278,38 @@ void PanningCalculator::process()
 
           Afloat const * const gainRow = mVbapCalculator.getGains( ).row( chIdx );
           objectmodel::LevelType const level = mLevels[chIdx];
-          for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+          if( separateLowpassPanning() )
           {
-            gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
+            // Compute the unnormalised high-freuency gains.
+            // Note the use of the virtual loudspeakers (see comment about the size of mHighFrequencyGains in setup() )
+            std::transform( gainRow, gainRow + mNumberOfAllLoudspeakers, mHighFrequencyGains.data(),
+                           []( CoefficientType val ){ return std::sqrt(val); } );
+            // Compute the l_2 norm of the high-frequency gains
+            // TODO: Consider replacing by a library function.
+            CoefficientType const l2NormHF = std::sqrt(std::accumulate( mHighFrequencyGains.data(),
+                                                                       mHighFrequencyGains.data() + mNumberOfAllLoudspeakers, static_cast<CoefficientType>(0.0),
+                                                                       [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val)*std::abs(val); } ) );
+
+
+            CoefficientType const l1NormLF = std::accumulate( gainRow, gainRow+mNumberOfRegularLoudspeakers, static_cast<CoefficientType>(0.0),
+                                                              [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val); } );
+
+            pml::MatrixParameter<CoefficientType> & lfGainMatrix = mLowFrequencyGainOutput->data( );
+            CoefficientType const scaleFactorLF = static_cast<CoefficientType>(1.0)/l1NormLF;
+            CoefficientType const scaleFactorHF = static_cast<CoefficientType>(1.0)/l2NormHF;
+            for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+            {
+              gainMatrix( outIdx, chIdx ) = level * scaleFactorHF * mHighFrequencyGains[outIdx];
+              lfGainMatrix( outIdx, chIdx ) = level * scaleFactorLF * gainRow[outIdx];
+            }
+          }
+          else
+          {
+            // Standard VBAP choice. Use LF coefficients subject to a HF (energy) optimisation for everything.
+            for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+            {
+              gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
+            }
           }
         } // if( psSrc )
       }

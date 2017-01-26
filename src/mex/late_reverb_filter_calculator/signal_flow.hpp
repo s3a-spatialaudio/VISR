@@ -3,7 +3,7 @@
 #ifndef VISR_MEX_LATE_REVERB_FILTER_CALCULATOR_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_MEX_LATE_REVERB_FILTER_CALCULATOR_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <librrl/audio_signal_flow.hpp>
 
 #include <libpml/message_queue.hpp>
 
@@ -21,7 +21,7 @@ namespace mex
 namespace late_reverb_filter_calculator
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class SignalFlow: public rrl::AudioSignalFlow
 {
 public:
   using LateFilterMessageQueue = pml::MessageQueue< std::pair<std::size_t, std::vector<ril::SampleType> > >;

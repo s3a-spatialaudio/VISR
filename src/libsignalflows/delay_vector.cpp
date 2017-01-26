@@ -2,8 +2,6 @@
 
 #include "delay_vector.hpp"
 
-#include <libril/audio_connection_descriptor.hpp>
-
 #include <algorithm>
 #include <vector>
 

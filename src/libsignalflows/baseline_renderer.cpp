@@ -13,14 +13,12 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
-
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <algorithm>
 #include <cmath>
-// #include <cstdio>
 #include <sstream>
 #include <vector>
 
@@ -58,7 +56,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
                                     efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
                                     std::string const & trackingConfiguration,
                                     std::size_t sceneReceiverPort,
-                                    std::string const & reverbConfig )
+                                    std::string const & reverbConfig,
+                                    bool frequencyDependentPanning )
  : ril::CompositeComponent( context, name, parent )
  , mDiffusionFilters( diffusionFilters )
  , mSceneReceiver( context, "SceneReceiver", this )
@@ -85,12 +84,17 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
  , mLateDiffusionFilter( context, "LateDiffusionFilter", this )
  , mReverbMix( context, "ReverbMix", this )
 #endif
+ , mFrequencyDependentPanning( frequencyDependentPanning )
+ , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
+  , mLowFrequencyPanningMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "LowFrequencyPanningMatrix", this ) : nullptr)
  , mInput( "input", *this )
  , mOutput( "output", *this )
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
   std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
   std::size_t const numberOfOutputSignals = numberOfLoudspeakers + numberOfSubwoofers;
+
+  assert( frequencyDependentPanning == mFrequencyDependentPanning );
 
   mTrackingEnabled = not trackingConfiguration.empty( );
   if( mTrackingEnabled )
@@ -131,10 +135,33 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   mSceneDecoder.setup( );
   registerParameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
 
-  mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
+  mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration, false /*no listener adaptation*/,
+                         mFrequencyDependentPanning /*separate lowpass panning*/ );
   registerParameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
   registerParameterConnection( "VbapGainCalculator", "gainOutput", "VbapGainMatrix", "gainInput" );
+
+  if( mFrequencyDependentPanning )
+  {
+    // Static crossover pair (2nd-order Linkwitz-Riley with cutoff 700 Hz @ fs=48 kHz)
+    static pml::BiquadParameter<ril::SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
+       -1.824651307057289f, 0.832338098086468f };
+    // Numerator coeffs are negated to account for the 180 degree phase shift of the original design.
+    static pml::BiquadParameter<ril::SampleType> const highpass{ -0.914247351285939f, 1.828494702571878f, -0.914247351285939f,
+      -1.824651307057289f, 0.832338098086468f };
+
+    pml::BiquadParameterMatrix<ril::SampleType> coeffMatrix( 2*numberOfInputs, 1 );
+    for( std::size_t chIdx(0); chIdx < numberOfInputs; ++chIdx )
+    {
+      coeffMatrix( chIdx, 0 ) = highpass;
+      coeffMatrix( chIdx + numberOfInputs, 0 ) = lowpass;
+    }
+
+    mPanningFilterbank->setup( 2*numberOfInputs, 1, coeffMatrix );
+    mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
+
+    registerParameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
+  }
 
   mDiffusionGainCalculator.setup( numberOfInputs );
   registerParameterConnection( "SceneDecoder", "objectVectorOutput", "DiffusionCalculator", "objectInput" );
@@ -151,9 +178,9 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   ril::SampleType const diffusorGain = static_cast<ril::SampleType>(1.0) / std::sqrt( static_cast<ril::SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
 #ifndef DISABLE_REVERB_RENDERING
-  mDirectDiffuseMix.setup( numberOfLoudspeakers, 3 );
+  mDirectDiffuseMix.setup( numberOfLoudspeakers, mFrequencyDependentPanning ? 4 : 3 );
 #else
-  mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
+  mDirectDiffuseMix.setup( numberOfLoudspeakers, mFrequencyDependentPanning ? 3 : 2 );
 #endif
   mNullSource.setup( 1/*width*/ );
 
@@ -177,11 +204,24 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   mInput.setWidth( numberOfInputs );
   mOutput.setWidth( numberOfOutputs );
 
-  registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "VbapGainMatrix", "in", indexRange( 0, numberOfInputs ) );
   registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "DiffusePartMatrix", "in", indexRange( 0, numberOfInputs ) );
   registerAudioConnection( "VbapGainMatrix", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", indexRange( 0, numberOfLoudspeakers ) );
+  if( mFrequencyDependentPanning )
+  {
+    registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "PanningFilterbank", "in", indexRange( 0, numberOfInputs ) );
+    registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "PanningFilterbank", "in", indexRange( numberOfInputs, 2*numberOfInputs ) );
+    registerAudioConnection( "PanningFilterbank", "out", indexRange( 0, numberOfInputs ), "VbapGainMatrix", "in", indexRange( 0, numberOfInputs ) );
+    registerAudioConnection( "PanningFilterbank", "out", indexRange( numberOfInputs, 2*numberOfInputs ), "LowFrequencyPanningMatrix", "in", indexRange( 0, numberOfInputs ) );
+
+    registerAudioConnection( "LowFrequencyPanningMatrix", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", indexRange( 0, numberOfLoudspeakers ) );
+  }
+  else
+  {
+    registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "VbapGainMatrix", "in", indexRange( 0, numberOfInputs ) );
+  }
   registerAudioConnection( "DiffusePartMatrix", "out", indexRange( 0, 1 ), "DiffusePartDecorrelator", "in", indexRange( 0, 1 ) );
-  registerAudioConnection( "DiffusePartDecorrelator", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", indexRange( 0, numberOfLoudspeakers ) );
+  registerAudioConnection( "DiffusePartDecorrelator", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer",
+                          mFrequencyDependentPanning ? "in2" : "in1", indexRange( 0, numberOfLoudspeakers ) );
 #ifndef DISABLE_REVERB_RENDERING
   registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "ReverbSignalRouting", "in", indexRange( 0, numberOfInputs ) );
   // Calculate the indices for distributing each reverb object to #mNumDiscreteReflectionsPerObject
@@ -204,7 +244,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   registerAudioConnection( "LateReverbFilter", "out", indexRange( 0, 1 ), "LateDiffusionFilter", "in", indexRange( 0, 1 ) );
   registerAudioConnection( "LateDiffusionFilter", "out", indexRange( 0, numberOfLoudspeakers ), "ReverbMix", "in1", indexRange( 0, numberOfLoudspeakers ) );
 
-  registerAudioConnection( "ReverbMix", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in2", indexRange( 0, numberOfLoudspeakers ) );
+  registerAudioConnection( "ReverbMix", "out", indexRange( 0, numberOfLoudspeakers ),
+                           "DirectDiffuseMixer", mFrequencyDependentPanning ? "in3" : "in2", indexRange( 0, numberOfLoudspeakers ) );
 #endif
   if( mTrackingEnabled )
   {
@@ -312,7 +353,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
 BaselineRenderer::~BaselineRenderer( )
 {
 }
- 
+
+#if 0
 /*virtual*/ void 
 BaselineRenderer::process()
 {
@@ -355,6 +397,7 @@ BaselineRenderer::process()
   mOutputAdjustment.process();
   mNullSource.process();
 }
+#endif
 
 #ifndef DISABLE_REVERB_RENDERING
 void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbConfig,

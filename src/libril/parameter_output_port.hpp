@@ -9,6 +9,7 @@
 #include "parameter_type.hpp"
 
 #include <ciso646>
+#include <stdexcept>
 #include <string>
 
 namespace visr

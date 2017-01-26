@@ -79,10 +79,12 @@ public:
    * Method to initialise the component.
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
+   * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener.
    */ 
   void setup( std::size_t numberOfObjects,
-	      panning::LoudspeakerArray const & arrayConfig,
-              bool adaptiveListenerPosition=false );
+              panning::LoudspeakerArray const & arrayConfig,
+              bool adaptiveListenerPosition=false,
+              bool separateLowpassPanning = false );
 
   /**
    * The process function. 
@@ -92,6 +94,9 @@ public:
 
 
 private:
+  bool separateLowpassPanning() const { return bool(mLowFrequencyGainOutput); }
+
+
   using LoudspeakerIndexType = std::size_t;
 
 
@@ -218,6 +223,16 @@ private:
    * Needs to be instantiated as a pointer, because the ParameterConfig data is not known until the setup() method.
    */
   std::unique_ptr<MatrixPort> mGainOutput;
+
+  /**
+   * Separate gain output for low-frequency panning.
+   */
+  std::unique_ptr<MatrixPort> mLowFrequencyGainOutput;
+
+  /**
+   * Vector for intermediate results used for separate high/low frequency panning
+   */
+  efl::BasicVector<CoefficientType> mHighFrequencyGains;
 };
 
 } // namespace rcl

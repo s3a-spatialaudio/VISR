@@ -1,10 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "audio_port.hpp"
+#include <libril/audio_port.hpp>
 
-#ifndef VISR_LIBRIL_AUDIO_PORT_ACCESS_PARENT_INLINE // otherwise it's already included
-#include "component.hpp"
-#endif
+#include <libril/component.hpp>
+
+#include <libvisr_impl/component_internal.hpp>
 
 namespace visr
 {
@@ -15,7 +15,7 @@ AudioPort::AudioPort( std::string const & name, Component & container, Direction
  : PortBase( name, container, direction )
  , mWidth( cInvalidWidth )
 {
-  container.registerAudioPort( this );
+  container.internal().registerAudioPort( this );
 }
 
 AudioPort::AudioPort( std::string const & name, Component& container, Direction direction, std::size_t width )
@@ -26,7 +26,7 @@ AudioPort::AudioPort( std::string const & name, Component& container, Direction 
 
 AudioPort::~AudioPort()
 {
-  parent().unregisterAudioPort( this );
+  parent().internal().unregisterAudioPort( this );
 }
 
 void AudioPort::setWidth( std::size_t newWidth )

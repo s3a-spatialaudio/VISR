@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "parameter_factory.hpp"
+#include <libril/parameter_factory.hpp>
 
 // evil hack: Dependency to libpml
 #include <libpml/listener_position.hpp>

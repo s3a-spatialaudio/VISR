@@ -1,9 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "communication_protocol_factory.hpp"
+#include <libril/communication_protocol_factory.hpp>
 
-#include "communication_protocol_type.hpp"
-#include "parameter_type.hpp"
+#include <libril/communication_protocol_type.hpp>
+#include <libril/parameter_type.hpp>
 
 // evil hack: Dependency to libpml
 // TODO: add first concrete communication protocol class.

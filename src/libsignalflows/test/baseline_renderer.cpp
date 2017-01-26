@@ -68,7 +68,8 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                                  diffusionFilters,
                                  trackingConfig,
                                  8888,
-                                 reverbConfig.str()
+                                 reverbConfig.str(),
+                                 false // No frequency-dependent panning.
                                  );
 }
 
