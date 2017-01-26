@@ -1,6 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "component_internal.hpp"
+#include "composite_component_implementation.hpp"
 
 #include <libril/audio_port.hpp>
 #include <libril/composite_component.hpp>
@@ -33,7 +34,7 @@ ComponentInternal::ComponentInternal( Component & component,
 {
   if( parent != nullptr )
   {
-    parent->registerChildComponent( &mComponent );
+    parent->implementation().registerChildComponent( componentName, &mComponent );
   }
 }
 
@@ -49,8 +50,13 @@ ComponentInternal::~ComponentInternal()
 {
   if( not isTopLevel() )
   {
-    mParent->unregisterChildComponent( &component() );
+    mParent->implementation().unregisterChildComponent( &component() );
   }
+}
+
+std::string const & ComponentInternal::name() const
+{ 
+  return mName;
 }
 
 std::string ComponentInternal::fullName() const

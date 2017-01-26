@@ -30,16 +30,6 @@ bool CompositeComponent::isComposite() const
   return true;
 }
 
-void CompositeComponent::registerChildComponent( Component * child )
-{
-  mImpl->registerChildComponent( child );
-}
-
-void CompositeComponent::unregisterChildComponent( Component * child )
-{
-  mImpl->unregisterChildComponent( child );
-}
-
 std::size_t CompositeComponent::numberOfComponents() const
 {
   return mImpl->numberOfComponents();

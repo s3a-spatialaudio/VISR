@@ -53,7 +53,7 @@ public:
   /**
    * Return the 'local', non-hierarchical name.
    */
-  std::string const & name() const { return mName; }
+  std::string const & name() const;
 
   /**
    * REturn the full, hierarchical name of the component.

@@ -44,7 +44,8 @@ Component::~Component()
 
 std::string const & Component::name() const
 {
-  return mImpl->name();
+  std::string const & nm = mImpl->name();
+  return nm;
 }
 
 std::string Component::fullName() const

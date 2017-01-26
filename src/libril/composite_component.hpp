@@ -53,10 +53,6 @@ public:
    */
   std::size_t numberOfComponents() const;
 
-  void registerChildComponent( Component * child );
-
-  void unregisterChildComponent( Component * child );
-
   /**
    * Return a reference to the internal data structures holding ports and contained components.
    * From the user point of view, these data structure is opaque and unknown.

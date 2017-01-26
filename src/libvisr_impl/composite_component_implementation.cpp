@@ -1,7 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "component_internal.hpp"
 #include "composite_component_implementation.hpp"
+
+#include "component_internal.hpp"
 
 #include <libril/composite_component.hpp>
 
@@ -13,14 +14,14 @@ namespace visr
 namespace ril
 {
 
-void CompositeComponentImplementation::registerChildComponent( Component * child )
+void CompositeComponentImplementation::registerChildComponent( std::string const & name, Component * child )
 {
-  ComponentTable::iterator findComp = mComponents.find( child->name() );
+  ComponentTable::iterator findComp = mComponents.find( name );
   if( findComp != mComponents.end() )
   {
     throw std::invalid_argument( "CompositeComponent::registerChildComponent(): Component with given name already exists." );
   }
-  mComponents.insert( findComp, std::make_pair( child->name(), child ) ); // insert with iterator as hint.
+  mComponents.insert( findComp, std::make_pair( name, child ) ); // insert with iterator as hint.
 }
 
 void CompositeComponentImplementation::unregisterChildComponent( Component * child )
