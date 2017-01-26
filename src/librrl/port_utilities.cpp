@@ -9,6 +9,7 @@
 #include <libril/parameter_config_base.hpp>
 #include <libril/parameter_port_base.hpp>
 
+#include <libvisr_impl/component_internal.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 
 #include <ciso646>
@@ -86,7 +87,7 @@ PortLookup<PortType>::PortLookup( ril::Component const & comp, bool recurse /*= 
 template<class PortType>
 void PortLookup<PortType>::traverseComponent( ril::Component const & comp, bool recurse )
 {
-  for( PortType * port : comp.ports<PortType>() )
+  for( PortType * port : comp.internal().ports<PortType>() )
   {
     if( port->direction() == ril::PortBase::Direction::Input )
     {

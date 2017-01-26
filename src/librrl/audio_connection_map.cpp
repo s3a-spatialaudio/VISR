@@ -9,6 +9,7 @@
 #include <libril/composite_component.hpp>
 
 #include <libvisr_impl/composite_component_implementation.hpp>
+#include <libvisr_impl/component_internal.hpp>
 
 #include <ciso646>
 #include <iosfwd>
@@ -111,13 +112,15 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
   ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(component);
   // this could be moved to the PortLookup functionality.
 
-  // Get the 'implementation' object that holds the tables to ports and contained components.
+  // Get the 'implementation' object that holds the tables to contained components and connections.
   ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+  // Get the 'internal' object of the component that holds the audio port tables.
+  ril::ComponentInternal const & componentInternal = composite.internal();
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::Component::PortContainer<ril::AudioPort>::const_iterator extPortIt = composite.portBegin<ril::AudioPort>();
-    extPortIt != composite.portEnd<ril::AudioPort>(); ++extPortIt )
+  for( ril::ComponentInternal::PortContainer<ril::AudioPort>::const_iterator extPortIt = componentInternal.portBegin<ril::AudioPort>();
+    extPortIt != componentInternal.portEnd<ril::AudioPort>(); ++extPortIt )
   {
     if( (*extPortIt)->direction() == ril::AudioPort::Direction::Input )
     {
@@ -133,8 +136,11 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::Component const & containedComponent = *(compIt->second);
-    for( ril::Component::PortContainer<ril::AudioPort>::const_iterator intPortIt = containedComponent.portBegin<ril::AudioPort>();
-      intPortIt != containedComponent.portEnd<ril::AudioPort>(); ++intPortIt )
+    // Get the 'internal' object of the component that holds the audio port tables.
+    ril::ComponentInternal const & containedComponentInternal = containedComponent.internal();
+
+    for( ril::ComponentInternal::PortContainer<ril::AudioPort>::const_iterator intPortIt = containedComponentInternal.portBegin<ril::AudioPort>();
+      intPortIt != containedComponentInternal.portEnd<ril::AudioPort>(); ++intPortIt )
     {
       if( (*intPortIt)->direction() == ril::PortBase::Direction::Input )
       {
