@@ -61,12 +61,6 @@ public:
   std::string fullName() const;
 
   /**
-   * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
-   * functionality) or a composite consisting of an interconnection of atomic (or further composite) components.
-   */
-//  bool isComposite();
-
-  /**
    * Return the sampling frequency of the containing signal flow.
    */
   ril::SamplingFrequencyType samplingFrequency() const;
