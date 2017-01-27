@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
 #define VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
 
-#include "parameter_type.hpp"
+// #include "parameter_type.hpp"
 
 #include <map>
 #include <memory>
@@ -18,17 +18,30 @@ namespace ril
 
 // Forward declarations
 class ParameterBase;
-// class ParameterType;
+enum class ParameterType;
 class ParameterConfigBase;
 
 class ParameterFactory
 {
 public:
   static std::unique_ptr<ParameterBase> create(ParameterType const & type, ParameterConfigBase const & config);
-  // static std::unique_ptr<ParameterBase> create( ParameterType const & type, ParameterConfigBase const & config );
 
   template< class ConcreteParameterType >
   static void registerParameterType( ParameterType const &  type );
+
+  /**
+   * Template class to register parameter types.
+   * Creating a static object invokes the class registration function.
+   */
+  template< class ConcreteParameterType >
+  class Registrar
+  {
+  public:
+    explicit Registrar( ParameterType type )
+    {
+      creatorTable().insert( std::make_pair( type, TCreator<ConcreteParameterType>() ) );
+    }
+  };
 
 private:
   struct Creator
@@ -68,6 +81,11 @@ void ParameterFactory::registerParameterType( ParameterType const & type )
 {
   creatorTable().insert( std::make_pair( type, TCreator<ConcreteParameterType>() ) );
 }
+
+// The macro does not work for multiple uses in the same .cpp file
+// (multiple definitions of 'maker'), stringization of names difficult
+// because of template brackets and namespace names.
+// #define REGISTER_PARAMETER( type, id ) namespace { static ril::ParameterFactory::Registrar< type > maker( id ); }
 
 } // namespace ril
 } // namespace visr

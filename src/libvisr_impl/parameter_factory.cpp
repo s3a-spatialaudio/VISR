@@ -48,27 +48,5 @@ ParameterFactory::create(ParameterType const & type, ParameterConfigBase const &
   return std::unique_ptr<ParameterBase>( findIt->second.create( config ) );
 }
 
-static struct InstantiateParameterCreators
-{
-  InstantiateParameterCreators()
-  {
-    ParameterFactory::registerParameterType< pml::ListenerPosition>( ril::ParameterType::ListenerPosition );
-    ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloat );
-    ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDouble);
-    ParameterFactory::registerParameterType< pml::MatrixParameter<float> >( ril::ParameterType::MatrixFloatComplex );
-    ParameterFactory::registerParameterType< pml::MatrixParameter<double> >( ril::ParameterType::MatrixDoubleComplex );
-    ParameterFactory::registerParameterType< pml::ObjectVector >( ril::ParameterType::ObjectVector );
-    ParameterFactory::registerParameterType< pml::StringParameter >( ril::ParameterType::String );
-    ParameterFactory::registerParameterType< pml::TimeFrequencyParameter<float> >( ril::ParameterType::TimeFrequencyFloat );
-    ParameterFactory::registerParameterType< pml::TimeFrequencyParameter<double> >( ril::ParameterType::TimeFrequencyDouble );
-    ParameterFactory::registerParameterType< pml::VectorParameter<float> >( ril::ParameterType::VectorFloat );
-    ParameterFactory::registerParameterType< pml::VectorParameter<double> >( ril::ParameterType::VectorDouble );
-    // TODO: Move to libpml (preferable decentralize instantiation into the different implementation files)
-    // TODO: Fill in all missing newly created types.
-  }
-} foo;
-
-// static InstantiateParameterCreators const sFactoryInit;
-
 } // namespace ril
 } // namespace visr

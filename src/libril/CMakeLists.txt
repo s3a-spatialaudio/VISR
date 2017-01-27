@@ -27,4 +27,5 @@ typed_parameter_base.hpp
 
 # Essentially empty library (Decide what to do with that!)
 ADD_LIBRARY( ril STATIC ${HEADERS} )
+# Since the library is empty, we have to set the language explicitly.
 set_target_properties( ril PROPERTIES LINKER_LANGUAGE CXX)
