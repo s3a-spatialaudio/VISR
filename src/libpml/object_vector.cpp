@@ -2,6 +2,9 @@
 
 #include "object_vector.hpp"
 
+#include <libril/parameter_factory.hpp>
+#include <libril/parameter_type.hpp>
+
 namespace visr
 {
 namespace pml
@@ -31,6 +34,8 @@ ObjectVector::ObjectVector( EmptyParameterConfig const & /*config*/ )
 ObjectVector::~ObjectVector()
 {
 }
+
+static ril::ParameterFactory::Registrar< pml::ObjectVector > maker{ ril::ParameterType::ObjectVector };
 
 } // namespace pml
 } // namespace visr

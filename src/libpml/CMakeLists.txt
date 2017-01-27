@@ -56,7 +56,14 @@ INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )
 
 ADD_LIBRARY( pml STATIC ${SOURCES} ${HEADERS} )
 
+target_link_libraries( pml objectmodel )
+target_link_libraries( pml ril )
+target_link_libraries( pml visr_impl )
+target_link_libraries( pml efl )
 target_link_libraries( pml ${SNDFILE_LIBRARY} )
+TARGET_LINK_LIBRARIES( pml ${Boost_FILESYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES( pml ${Boost_SYSTEM_LIBRARY} )
+
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

@@ -3,6 +3,8 @@
 #include "matrix_parameter.hpp"
 
 #include <libril/constants.hpp>
+#include <libril/parameter_factory.hpp>
+#include <libril/parameter_type.hpp>
 
 #include <sndfile.h>
 
@@ -335,6 +337,14 @@ template class MatrixParameter<float>;
 template class MatrixParameter<double>;
 template class MatrixParameter<std::complex<float> >;
 template class MatrixParameter<std::complex<double> >;
+
+// Register the types in the ParameterFactory.
+// Note: thsi requires either dynamic linking or a '--whole-archive'
+// equivalent when linking to pml. 
+static ril::ParameterFactory::Registrar< MatrixParameter<float> > maker1( ril::ParameterType::MatrixFloat );
+static ril::ParameterFactory::Registrar< MatrixParameter<double> > maker2( ril::ParameterType::MatrixDouble );
+static ril::ParameterFactory::Registrar< MatrixParameter<std::complex<float> > > maker3( ril::ParameterType::MatrixFloatComplex );
+static ril::ParameterFactory::Registrar< MatrixParameter<std::complex<double> > > maker4( ril::ParameterType::MatrixDoubleComplex );
 
 } // namespace pml
 } // namespace visr
