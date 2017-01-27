@@ -5,12 +5,14 @@ SET( APPLICATION_NAME visr_impl_test )
 SET( SOURCES
 audio_connection_descriptor.cpp
 component_names.cpp
+parameter_factory.cpp
 test_main.cpp
 )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_impl)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} -Wl,--whole-archive pml -Wl,--no-whole-archive)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
