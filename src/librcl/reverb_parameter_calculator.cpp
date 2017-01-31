@@ -140,17 +140,17 @@ void ReverbParameterCalculator::process( objectmodel::ObjectVector const & objec
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
     objectmodel::Object const & obj = *(objEntry.second);
-    if( obj.numberOfChannels() != 1 )
-    {
-      std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
-      continue;
-    }
-
     objectmodel::ObjectTypeId const ti = obj.type();
     // Process reverb objects, ignore others
     switch( ti )
     {
       case objectmodel::ObjectTypeId::PointSourceWithReverb:
+        // This check should be done elsewhere (e.g., parsing of point sources).
+        if( obj.numberOfChannels() != 1 )
+        {
+          std::cerr << "ReverbParameterCalculator: reverb objects must be singe-channel." << std::endl;
+          continue;
+        }
         foundReverbObjects.push_back( obj.id() );
         break;
       default: // Default handling to prevent compiler warnings about unhandled enumeration values
