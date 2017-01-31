@@ -4,7 +4,7 @@ SET( APPLICATION_NAME pml_test )
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES biquad_parameter.cpp filter_routing_parameter.cpp float_sequence.cpp index_sequence.cpp matrix_parameter.cpp test_main.cpp )
+SET( SOURCES biquad_parameter.cpp filter_routing_parameter.cpp float_sequence.cpp index_sequence.cpp matrix_parameter.cpp parametric_iir_coefficient.cpp test_main.cpp )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
