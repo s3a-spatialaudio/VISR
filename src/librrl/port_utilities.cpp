@@ -77,17 +77,16 @@ bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, r
   return result;
 }
 
-
 template<class PortType>
-PortLookup<PortType>::PortLookup( ril::Component const & comp, bool recurse /*= true*/ )
+PortLookup<PortType>::PortLookup( ril::ComponentInternal const & comp, bool recurse /*= true*/ )
 {
   traverseComponent( comp, recurse );
 }
 
 template<class PortType>
-void PortLookup<PortType>::traverseComponent( ril::Component const & comp, bool recurse )
+void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & comp, bool recurse )
 {
-  for( PortType * port : comp.internal().ports<PortType>() )
+  for( PortType * port : comp.ports<PortType>() )
   {
     if( port->direction() == ril::PortBase::Direction::Input )
     {

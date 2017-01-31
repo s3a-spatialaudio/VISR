@@ -14,7 +14,7 @@ namespace visr
 namespace ril
 {
 
-void CompositeComponentImplementation::registerChildComponent( std::string const & name, Component * child )
+void CompositeComponentImplementation::registerChildComponent( std::string const & name, ComponentInternal * child )
 {
   ComponentTable::iterator findComp = mComponents.find( name );
   if( findComp != mComponents.end() )
@@ -24,7 +24,7 @@ void CompositeComponentImplementation::registerChildComponent( std::string const
   mComponents.insert( findComp, std::make_pair( name, child ) ); // insert with iterator as hint.
 }
 
-void CompositeComponentImplementation::unregisterChildComponent( Component * child )
+void CompositeComponentImplementation::unregisterChildComponent( ComponentInternal * child )
 {
   ComponentTable::iterator findComp = mComponents.find( child->name() );
   if( findComp != mComponents.end() )
@@ -49,11 +49,11 @@ CompositeComponentImplementation::ComponentTable::const_iterator
   return mComponents.end();
 }
 
-Component * CompositeComponentImplementation::findComponent( std::string const & componentName )
+ComponentInternal * CompositeComponentImplementation::findComponent( std::string const & componentName )
 {
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
-    return &mComponent;
+    return &(composite().internal());
   }
   ComponentTable::iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -63,11 +63,11 @@ Component * CompositeComponentImplementation::findComponent( std::string const &
   return findIt->second;
 }
 
-Component const * CompositeComponentImplementation::findComponent( std::string const & componentName ) const
+ComponentInternal const * CompositeComponentImplementation::findComponent( std::string const & componentName ) const
 {
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
-    return &mComponent;
+    return &(composite().internal());
   }
   ComponentTable::const_iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -79,23 +79,23 @@ Component const * CompositeComponentImplementation::findComponent( std::string c
 
 AudioPort * CompositeComponentImplementation::findAudioPort( std::string const & componentName, std::string const & portName )
 {
-  Component * comp = findComponent( componentName );
+  ComponentInternal * comp = findComponent( componentName );
   if( not comp )
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
   }
 
-  return comp->internal().findAudioPort( portName );
+  return comp->findAudioPort( portName );
 }
 
 ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::string const & componentName, std::string const & portName )
 {
-  Component * comp = findComponent( componentName );
+  ComponentInternal * comp = findComponent( componentName );
   if( not comp )
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
   }
-  return comp->internal().findParameterPort( portName );
+  return comp->findParameterPort( portName );
 }
 
 void CompositeComponentImplementation::registerParameterConnection( std::string const & sendComponent,

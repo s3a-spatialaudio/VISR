@@ -27,7 +27,8 @@ namespace ril
 Component::Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent)
- : mImpl( new ComponentInternal( *this, context, componentName, parent ) )
+ : mImpl( new ComponentInternal( *this, context, componentName,
+				 parent == nullptr ? nullptr : &(parent->implementation()) ) )
 {
 }
 

@@ -338,7 +338,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   }
 
   // Check whether all ports have been connected.
-  PortLookup<ril::ParameterPortBase> allPorts( mFlow );
+  PortLookup<ril::ParameterPortBase> allPorts( mFlow.internal() );
   PortLookup<ril::ParameterPortBase>::PortTable allSendPorts( allPorts.externalCapturePorts() );
   allSendPorts.insert( allPorts.realSendPorts().begin(), allPorts.realSendPorts().end() );
   for( ril::ParameterPortBase const * const port : allSendPorts )
@@ -416,7 +416,8 @@ bool AudioSignalFlow::checkFlow( ril::Component const & comp, bool locally, std:
     for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin( ) );
       compIt != compositeImpl.componentEnd( ); ++compIt )
     {
-      bool const compRes = checkFlow( *(compIt->second), locally, messages );
+      // TODO: Check whether we should work on the internal objects instead.
+      bool const compRes = checkFlow( compIt->second->component(), locally, messages );
       overallResult = overallResult and compRes;
     }
     return overallResult;
@@ -465,27 +466,12 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
   for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin());
        compIt != compositeImpl.componentEnd(); ++compIt )
   {
-    ril::Component const & containedComponent = *(compIt->second);
-#if 0
-    for( auto port : containedComponent.internal().ports<ril::AudioPort>() )
+    ril::ComponentInternal const * containedComponent = compIt->second;
+    for( auto port : containedComponent->ports<ril::AudioPort>() )
     {
       port->direction() == ril::AudioPort::Direction::Input ?
         receivePorts.insert( port ) : sendPorts.insert( port );
     }
-#else
-    for( auto intPortIt = containedComponent.internal().audioPortBegin( );
-      intPortIt != containedComponent.internal().audioPortEnd( ); ++intPortIt )
-    {
-      if( (*intPortIt)->direction( ) == ril::AudioPort::Direction::Input )
-      {
-        receivePorts.insert( *intPortIt );
-      }
-      else
-      {
-        sendPorts.insert( *intPortIt );
-      }
-    }
-#endif
   }
   // Now populate the connection map
   try
@@ -639,7 +625,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   mCaptureIndices.clear();
   mPlaybackIndices.clear();
   bool result = true; // Result variable, is set to false if an error occurs.
-  PortLookup<ril::AudioPort> const portLookup( mFlow, true /*recursive*/ );
+  PortLookup<ril::AudioPort> const portLookup( mFlow.internal(), true /*recursive*/ );
 
   // Compute the number of audio channels for the different categories that are kept in the communicatio area.
   //  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );

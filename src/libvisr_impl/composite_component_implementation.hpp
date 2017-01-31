@@ -16,10 +16,12 @@ namespace ril
 class SignalFlowContext;
 class CompositeComponent;
 
+class ComponentInternal;
+
 class CompositeComponentImplementation
 {
 public:
-  using ComponentTable = std::map<std::string, Component * >;
+  using ComponentTable = std::map<std::string, ComponentInternal * >;
 
   explicit CompositeComponentImplementation( CompositeComponent & component )
     : mComponent( component )
@@ -33,9 +35,9 @@ public:
    * @note The name has to be provided separately, because typically the object pointed to by 
    * \p child is not fully constructed at the time of the call.
    */
-  void registerChildComponent( std::string const & name, Component * child );
+  void registerChildComponent( std::string const & name, ComponentInternal * child );
 
-  void unregisterChildComponent( Component * child );
+  void unregisterChildComponent( ComponentInternal * child );
 
   /**
   * Return the number of contained components (not including the composite itself).
@@ -51,9 +53,9 @@ public:
 
   ComponentTable::const_iterator componentEnd() const;
 
-  Component * findComponent( std::string const & componentName );
+  ComponentInternal * findComponent( std::string const & componentName );
 
-  Component const * findComponent( std::string const & componentName ) const;
+  ComponentInternal const * findComponent( std::string const & componentName ) const;
 
 #if 1
   // Clashes with corrsponding functionality of ComponentInternal?
@@ -82,11 +84,11 @@ public:
 
   ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
 
+  CompositeComponent & composite() { return mComponent; }
+
+  CompositeComponent const & composite() const { return mComponent; }  
 private:
-  CompositeComponent & component() { return mComponent; }
-
-  CompositeComponent const & component() const { return mComponent; }
-
+  
   /**
   * Reference to the component itself (needed because sometimes the component itself needs to be returned).
   */

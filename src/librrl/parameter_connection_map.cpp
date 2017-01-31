@@ -41,51 +41,21 @@ bool fillRecursive( ParameterConnectionMap & res, ril::Component const & compone
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-#if 1
   for( auto port : composite.internal().ports<ril::ParameterPortBase>() )
   {
     ( port->direction() == ril::ParameterPortBase::Direction::Input ) ?
       sendPorts.insert( port ) : receivePorts.insert( port );
   }
-#else
-  for( auto extPortIt = composite.internal().parameterPortBegin();
-    extPortIt != composite.internal().parameterPortEnd(); ++extPortIt )
-  {
-    if( (*extPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
-    {
-      sendPorts.insert( *extPortIt );
-    }
-    else
-    {
-      receivePorts.insert( *extPortIt );
-    }
-  }
-#endif
   // Add the ports of the contained components (without descending into the hierarchy)
   for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
     compIt != compositeImpl.componentEnd(); ++compIt )
   {
-    ril::Component const & containedComponent = *(compIt->second);
-#if 1
-    for( auto port : containedComponent.internal().ports<ril::ParameterPortBase>() )
+    ril::ComponentInternal const * containedComponent = compIt->second;
+    for( auto port : containedComponent->ports<ril::ParameterPortBase>() )
     {
       (port->direction() == ril::ParameterPortBase::Direction::Input) ?
         receivePorts.insert( port ) : sendPorts.insert( port );
     }
-#else
-    for( auto intPortIt = containedComponent.internal().parameterPortBegin();
-      intPortIt != containedComponent.internal().parameterPortEnd(); ++intPortIt )
-    {
-      if( (*intPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
-      {
-        receivePorts.insert( *intPortIt );
-      }
-      else
-      {
-        sendPorts.insert( *intPortIt );
-      }
-    }
-#endif
   }
   for( ril::ParameterConnectionTable::const_iterator connIt = compositeImpl.parameterConnectionBegin();
     connIt != compositeImpl.parameterConnectionEnd(); ++connIt )
@@ -119,7 +89,7 @@ bool fillRecursive( ParameterConnectionMap & res, ril::Component const & compone
     for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
       compIt != compositeImpl.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( res, *(compIt->second), messages );
+      result = result and fillRecursive( res, compIt->second->component(), messages );
     }
   }
   return result;

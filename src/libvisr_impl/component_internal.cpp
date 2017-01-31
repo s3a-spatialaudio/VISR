@@ -26,7 +26,7 @@ namespace ril
 ComponentInternal::ComponentInternal( Component & component, 
                                       SignalFlowContext& context,
                                       char const * componentName,
-                                      CompositeComponent * parent)
+                                      CompositeComponentImplementation * parent)
  : mComponent( component )
  , mContext( context )
  , mName( componentName )
@@ -34,14 +34,14 @@ ComponentInternal::ComponentInternal( Component & component,
 {
   if( parent != nullptr )
   {
-    parent->implementation().registerChildComponent( componentName, &mComponent );
+    parent->registerChildComponent( componentName, this );
   }
 }
 
 ComponentInternal::ComponentInternal( Component & component,
                                       SignalFlowContext& context,
                                       std::string const & componentName,
-                                      CompositeComponent * parent)
+                                      CompositeComponentImplementation * parent)
 : ComponentInternal( component, context, componentName.c_str(), parent )
 {
 }
@@ -50,7 +50,7 @@ ComponentInternal::~ComponentInternal()
 {
   if( not isTopLevel() )
   {
-    mParent->implementation().unregisterChildComponent( &component() );
+    mParent->unregisterChildComponent( this );
   }
 }
 
@@ -61,16 +61,23 @@ std::string const & ComponentInternal::name() const
 
 std::string ComponentInternal::fullName() const
 {
-  if( isTopLevel() or mParent->isTopLevel() )
+  if( isTopLevel() or mParent->composite().isTopLevel() )
   {
     return name();
   }
   else
   {
-    return mParent->fullName() + cNameSeparator + name();
+    return mParent->composite().fullName() + cNameSeparator + name();
   }
 }
 
+bool ComponentInternal::isComposite() const
+{
+  // See comment in class definition whether this is the right way to do this (or whether
+  // this should be kept out of the externally visible Component object).
+  return component().isComposite();
+}
+  
 ComponentInternal::AudioPortContainer const&
 ComponentInternal::getAudioPortList()  const
 {

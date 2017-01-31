@@ -18,7 +18,7 @@ namespace ril
 // Forward declaration(s)
 class AudioPort;
 class Component;
-class CompositeComponent;
+class CompositeComponentImplementation;
 class ParameterPortBase; // Note: Naming is inconsistent.
 class SignalFlowContext;
   
@@ -35,13 +35,13 @@ public:
   explicit ComponentInternal( Component & component,
                               SignalFlowContext& context,
                               char const * componentName,
-                              CompositeComponent * parent );
+                              CompositeComponentImplementation * parent );
 
 
   explicit ComponentInternal( Component & component, 
                               SignalFlowContext& context,
                               std::string const & componentName,
-                              CompositeComponent * parent);
+                              CompositeComponentImplementation * parent);
 
   static const std::string cNameSeparator;
 
@@ -56,9 +56,17 @@ public:
   std::string const & name() const;
 
   /**
-   * REturn the full, hierarchical name of the component.
+   * Return the full, hierarchical name of the component.
    */
   std::string fullName() const;
+
+  /**
+   * Query whether the corresponding component is atomic or composite.
+   * @todo Check whether the current approach of storing this information in the
+   * class hierarchy of the externally visible components is the right way to go,
+   * or whether this information should be held local in the internal object.
+   */
+  bool isComposite() const;
 
   /**
    * Return the sampling frequency of the containing signal flow.
@@ -193,16 +201,20 @@ public:
    */
   bool isTopLevel() const { return mParent == nullptr; }
 
+  /**
+   * TODO: Check: where this is required after restructuring.
+   */
+  //@{
+  Component & component() { return mComponent; }
+
+  Component const & component() const { return mComponent; }
+  //@}
 protected:
 
   SignalFlowContext & context() { return mContext; }
   SignalFlowContext const & context( ) const { return mContext; }
 
 private:
-  Component & component() { return mComponent; }
-
-  Component const & component() const { return mComponent; }
-
 
   /**
    * Register a port with a type and a unique name within the port.
@@ -245,8 +257,9 @@ private:
    * The direct parent component if this component is part of a
    * superordinate signal flow graph, and nullptr if this is the
    * top-level component.
+   * Note: We link directly to the implementation object (might be renamed to 'internal')
    */
-  CompositeComponent * mParent;
+  CompositeComponentImplementation * mParent;
 };
 
 } // namespace ril

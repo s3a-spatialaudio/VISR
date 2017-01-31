@@ -89,7 +89,7 @@ AudioConnectionMap::AudioConnectionMap( ril::Component const & component,
 
 bool AudioConnectionMap::fill( ril::Component const & component,
                                std::ostream & messages,
-                                bool recursive /*= false*/ )
+                               bool recursive /*= false*/ )
 {
   mConnections.clear();
   return fillRecursive( component, messages, recursive );
@@ -135,9 +135,9 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
   for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
     compIt != compositeImpl.componentEnd(); ++compIt )
   {
-    ril::Component const & containedComponent = *(compIt->second);
+//    ril::Component const & containedComponent = *(compIt->second);
     // Get the 'internal' object of the component that holds the audio port tables.
-    ril::ComponentInternal const & containedComponentInternal = containedComponent.internal();
+    ril::ComponentInternal const & containedComponentInternal = *(compIt->second);
 
     for( ril::ComponentInternal::PortContainer<ril::AudioPort>::const_iterator intPortIt = containedComponentInternal.portBegin<ril::AudioPort>();
       intPortIt != containedComponentInternal.portEnd<ril::AudioPort>(); ++intPortIt )
@@ -214,7 +214,7 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
       compIt != compositeImpl.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( *(compIt->second), messages, true );
+      result = result and fillRecursive( (compIt->second)->component(), messages, true );
     }
   }
   return result;
