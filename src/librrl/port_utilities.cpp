@@ -123,7 +123,7 @@ void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & com
   }
   if( comp.isComposite() )
   {
-    ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp);
+    ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp.component() );
     // Get the 'implementation' object that holds the tables to ports and contained components.
     ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
     // Add the ports of the contained components (without descending into the hierarchy)
