@@ -26,6 +26,9 @@ typed_parameter_base.hpp
 )
 
 # Essentially empty library (Decide what to do with that!)
-ADD_LIBRARY( ril STATIC ${HEADERS} )
+add_library( ril INTERFACE )
+# target_include_directories( ril INTERFACE ...)
+# target_sources( ril INTERFACE ${HEADERS} ) # requires CMake 3.1 or later
+
 # Since the library is empty, we have to set the language explicitly.
-set_target_properties( ril PROPERTIES LINKER_LANGUAGE CXX)
+# set_target_properties( ril PROPERTIES LINKER_LANGUAGE CXX)
