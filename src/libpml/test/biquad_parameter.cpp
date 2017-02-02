@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJsonNonStandardA0 )
 
   BiquadParameter<CoeffType> const biq = BiquadParameter<CoeffType>::fromJson( str );
 
-  CoeffType const a0 = 0.3333333;
+  CoeffType const a0 = 0.3333333f;
   CoeffType const b0 = 0.2713121e-4f;
   CoeffType const b1 = 0.5426241e-4f;
   CoeffType const b2 = 0.2713121e-4f;
