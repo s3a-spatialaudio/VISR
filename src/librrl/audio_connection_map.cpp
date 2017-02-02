@@ -4,13 +4,14 @@
 
 #include "port_utilities.hpp"
 
-#include <libril/audio_port.hpp>
+#include <libril/audio_port_base.hpp>
 #include <libril/component.hpp>
 #include <libril/composite_component.hpp>
 
 #include <libvisr_impl/composite_component_implementation.hpp>
 #include <libvisr_impl/component_internal.hpp>
 
+#include <algorithm>
 #include <ciso646>
 #include <iosfwd>
 #include <map>
@@ -22,13 +23,6 @@
 
 namespace visr
 {
-// Forward declarations
-namespace ril
-{
-class AtomicComponent;
-class Component;
-class AudioPort;
-}
 
 namespace rrl
 {
@@ -39,7 +33,7 @@ AudioSignalDescriptor::AudioSignalDescriptor( )
 {
 }
 
-AudioSignalDescriptor::AudioSignalDescriptor( ril::AudioPort const * port, SignalIndexType index )
+AudioSignalDescriptor::AudioSignalDescriptor( ril::AudioPortBase const * port, SignalIndexType index )
  : mPort( port )
  , mIndex( index )
 {
@@ -100,7 +94,7 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
                                         bool recursive /*= false */ )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<ril::AudioPort const*>;
+  using PortTable = std::set<ril::AudioPortBase const*>;
   PortTable sendPorts;
   PortTable receivePorts;
 
@@ -119,10 +113,10 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::ComponentInternal::PortContainer<ril::AudioPort>::const_iterator extPortIt = componentInternal.portBegin<ril::AudioPort>();
-    extPortIt != componentInternal.portEnd<ril::AudioPort>(); ++extPortIt )
+  for( ril::ComponentInternal::PortContainer<ril::AudioPortBase>::const_iterator extPortIt = componentInternal.portBegin<ril::AudioPortBase>();
+    extPortIt != componentInternal.portEnd<ril::AudioPortBase>(); ++extPortIt )
   {
-    if( (*extPortIt)->direction() == ril::AudioPort::Direction::Input )
+    if( (*extPortIt)->direction() == ril::AudioPortBase::Direction::Input )
     {
       sendPorts.insert( *extPortIt );
     }
@@ -139,8 +133,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     // Get the 'internal' object of the component that holds the audio port tables.
     ril::ComponentInternal const & containedComponentInternal = *(compIt->second);
 
-    for( ril::ComponentInternal::PortContainer<ril::AudioPort>::const_iterator intPortIt = containedComponentInternal.portBegin<ril::AudioPort>();
-      intPortIt != containedComponentInternal.portEnd<ril::AudioPort>(); ++intPortIt )
+    for( ril::ComponentInternal::PortContainer<ril::AudioPortBase>::const_iterator intPortIt = containedComponentInternal.portBegin<ril::AudioPortBase>();
+      intPortIt != containedComponentInternal.portEnd<ril::AudioPortBase>(); ++intPortIt )
     {
       if( (*intPortIt)->direction() == ril::PortBase::Direction::Input )
       {

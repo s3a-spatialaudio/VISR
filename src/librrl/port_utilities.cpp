@@ -2,7 +2,7 @@
 
 #include "port_utilities.hpp"
 
-#include <libril/audio_port.hpp>
+#include <libril/audio_port_base.hpp>
 #include <libril/component.hpp>
 #include <libril/communication_protocol_type.hpp>
 #include <libril/composite_component.hpp>
@@ -136,7 +136,7 @@ void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & com
 }
 
 // explicit instantiations
-template class PortLookup<ril::AudioPort>;
+template class PortLookup<ril::AudioPortBase>;
 template class PortLookup<ril::ParameterPortBase>;
 
 

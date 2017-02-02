@@ -440,7 +440,7 @@ bool AudioSignalFlow::checkCompositeLocal( ril::CompositeComponent const & compo
 bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<ril::AudioPort const*>;
+  using PortTable = std::set<ril::AudioPortBase const*>;
   PortTable sendPorts;
   PortTable receivePorts;
 
@@ -453,7 +453,7 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
   for( ril::ComponentInternal::AudioPortContainer::const_iterator extPortIt = composite.internal().audioPortBegin();
        extPortIt != composite.internal().audioPortEnd(); ++extPortIt )
   {
-    if( (*extPortIt)->direction() == ril::AudioPort::Direction::Input )
+    if( (*extPortIt)->direction() == ril::AudioPortBase::Direction::Input )
     {
       sendPorts.insert( *extPortIt );
     }
@@ -467,9 +467,9 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
        compIt != compositeImpl.componentEnd(); ++compIt )
   {
     ril::ComponentInternal const * containedComponent = compIt->second;
-    for( auto port : containedComponent->ports<ril::AudioPort>() )
+    for( auto port : containedComponent->ports<ril::AudioPortBase>() )
     {
-      port->direction() == ril::AudioPort::Direction::Input ?
+      port->direction() == ril::AudioPortBase::Direction::Input ?
         receivePorts.insert( port ) : sendPorts.insert( port );
     }
   }
@@ -477,20 +477,20 @@ bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & 
   try
   {
     AudioConnectionMap const connections( composite, false );
-    for( ril::AudioPort const * sendPort : sendPorts )
+    for( ril::AudioPortBase const * sendPort : sendPorts )
     {
       std::size_t const numChannels = sendPort->width();
-      if( numChannels == ril::AudioPort::cInvalidWidth )
+      if( numChannels == ril::AudioPortBase::cInvalidWidth )
       {
         messages << "Audio signal flow connection check: The send port \"" << fullyQualifiedName( *sendPort ) << " is not initialised." << std::endl;
         result = false;
         continue; // Cannot check for this receive port.
       }
     }
-    for( ril::AudioPort const * receivePort : receivePorts )
+    for( ril::AudioPortBase const * receivePort : receivePorts )
     {
       std::size_t const numChannels = receivePort->width( );
-      if( numChannels == ril::AudioPort::cInvalidWidth )
+      if( numChannels == ril::AudioPortBase::cInvalidWidth )
       {
         messages << "Audio signal flow connection check: The receive port \"" << fullyQualifiedName( *receivePort ) << " is not initialised." << std::endl;
         result = false;
@@ -598,17 +598,17 @@ namespace // unnamed
 /**
  * Helper function to sum up the audio channels of a list of ports.
  */
-std::size_t countAudioChannels( PortLookup<ril::AudioPort>::PortTable const & portList )
+std::size_t countAudioChannels( PortLookup<ril::AudioPortBase>::PortTable const & portList )
 {
   return std::accumulate( portList.begin( ), portList.end( ), static_cast<std::size_t>(0) ,
-    []( std::size_t acc, ril::AudioPort const * port ) { return acc + port->width( ); } );
+    []( std::size_t acc, ril::AudioPortBase const * port ) { return acc + port->width( ); } );
 }
 
-void assignConsecutiveIndices( ril::AudioPort * port, ril::AudioPort::SignalIndexType & index, rrl::CommunicationArea<ril::SampleType> & commArea )
+void assignConsecutiveIndices( ril::AudioPortBase * port, ril::AudioPortBase::SignalIndexType & index, rrl::CommunicationArea<ril::SampleType> & commArea )
 {
   std::size_t const portWidth = port->width( );
-  std::vector<ril::AudioPort::SignalIndexType> indexVec( portWidth );
-  ril::AudioPort::SignalIndexType idx = index;
+  std::vector<ril::AudioPortBase::SignalIndexType> indexVec( portWidth );
+  ril::AudioPortBase::SignalIndexType idx = index;
   std::generate( indexVec.begin( ), indexVec.end( ), [&idx] { return idx++; } );
   port->setAudioBasePointer( commArea.data( ) );
   port->setAudioChannelStride( commArea.signalStride() );
@@ -625,7 +625,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   mCaptureIndices.clear();
   mPlaybackIndices.clear();
   bool result = true; // Result variable, is set to false if an error occurs.
-  PortLookup<ril::AudioPort> const portLookup( mFlow.internal(), true /*recursive*/ );
+  PortLookup<ril::AudioPortBase> const portLookup( mFlow.internal(), true /*recursive*/ );
 
   // Compute the number of audio channels for the different categories that are kept in the communicatio area.
   //  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );
@@ -639,7 +639,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
 
   // Assign consecutive indices to the ports that need physical communication vectors.
   // First we do that for the external capture ports, because this part is identical for atomic and component top-level signal flows.
-  ril::AudioPort::SignalIndexType offset = 0;
+  ril::AudioPortBase::SignalIndexType offset = 0;
   // std::size_t const captureSignalOffset = offset; // ATM unused.
   std::for_each( portLookup.externalCapturePorts().begin( ), portLookup.externalCapturePorts().end( ),
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
@@ -656,7 +656,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   mTopLevelAudioInputs.reserve( portLookup.externalCapturePorts().size( ) );
   mCaptureIndices.resize( numCaptureChannels );
   std::size_t captureOffset = 0;
-  for( ril::AudioPort * capturePort : portLookup.externalCapturePorts() )
+  for( ril::AudioPortBase * capturePort : portLookup.externalCapturePorts() )
   {
     mTopLevelAudioInputs.push_back( capturePort );
     std::copy( capturePort->indices( ), capturePort->indices( ) + capturePort->width( ), &mCaptureIndices[captureOffset] );
@@ -701,10 +701,10 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
 
     // Initialise the concrete, i.e., real receive ports
     // Note: this assumes that all send ports (concrete and external capture ports) have already been initialised
-    for( ril::AudioPort * receivePort : portLookup.realReceivePorts() )
+    for( ril::AudioPortBase * receivePort : portLookup.realReceivePorts() )
     {
       std::size_t const portWidth = receivePort->width( );
-      std::vector<ril::AudioPort::SignalIndexType> receiveIndices( portWidth );
+      std::vector<ril::AudioPortBase::SignalIndexType> receiveIndices( portWidth );
       for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
       {
         // equal_range is used to detect multiple connections
@@ -729,10 +729,10 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
 
     // same for the external playback ports
     // Note: the ordering of the external ports is defined by the order they are arranged in this set.
-    for( ril::AudioPort * playbackPort : portLookup.externalPlaybackPorts() )
+    for( ril::AudioPortBase * playbackPort : portLookup.externalPlaybackPorts() )
     {
       std::size_t const portWidth = playbackPort->width( );
-      std::vector<ril::AudioPort::SignalIndexType> receiveIndices( portWidth );
+      std::vector<ril::AudioPortBase::SignalIndexType> receiveIndices( portWidth );
       for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
       {
         // equal_range is used to detect multiple connections
@@ -763,7 +763,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   {
     // We need a separate treatment for the external playback indices.
     // This are linked (channel-by-channel) to the respective 'physical' output port of the atomic component.
-    for( ril::AudioPort * playbackPort : portLookup.externalPlaybackPorts() )
+    for( ril::AudioPortBase * playbackPort : portLookup.externalPlaybackPorts() )
     {
       mTopLevelAudioOutputs.push_back( playbackPort );
       std::copy( playbackPort->indices(), playbackPort->indices( )+playbackPort->width(), &mPlaybackIndices[playbackIndexOffset] );

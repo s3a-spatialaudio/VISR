@@ -5,7 +5,7 @@
 
 #include "audio_interface.hpp"
 
-#include <libril/audio_port.hpp>
+#include <libril/audio_port_base.hpp>
 #include <libril/constants.hpp>
 #include <libril/processable_interface.hpp>
 #include <libril/signal_flow_context.hpp>
@@ -210,7 +210,7 @@ private:
    * find a port of a specific audio component, both specified by name
    * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
    */
-  ril::AudioPort & findPort( std::string const & componentName,
+  ril::AudioPortBase & findPort( std::string const & componentName,
                              std::string const & portName );
 #endif
 
@@ -269,13 +269,13 @@ private:
    * @note at the moment the order of the ports is determined by the system.
    */
   //@{
-  std::vector < ril::AudioPort*> mTopLevelAudioInputs;
-  std::vector < ril::AudioPort*> mTopLevelAudioOutputs;
+  std::vector < ril::AudioPortBase*> mTopLevelAudioInputs;
+  std::vector < ril::AudioPortBase*> mTopLevelAudioOutputs;
   //@}
 
 
-  std::vector<ril::AudioPort::SignalIndexType> mCaptureIndices;
-  std::vector<ril::AudioPort::SignalIndexType> mPlaybackIndices;
+  std::vector<ril::AudioPortBase::SignalIndexType> mCaptureIndices;
+  std::vector<ril::AudioPortBase::SignalIndexType> mPlaybackIndices;
 
   using ProcessingSchedule = std::vector<ril::ProcessableInterface * >;
 

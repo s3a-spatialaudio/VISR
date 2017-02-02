@@ -5,10 +5,11 @@
 #include "audio_connection_map.hpp"
 #include "parameter_connection_map.hpp"
 
-#include <libvisr_impl/audio_connection_descriptor.hpp>
-#include <libril/audio_port.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/audio_port_base.hpp>
 #include <libril/parameter_port_base.hpp>
+
+#include <libvisr_impl/audio_connection_descriptor.hpp>
 
 #include <boost/graph/topological_sort.hpp>
 
