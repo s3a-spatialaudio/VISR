@@ -59,7 +59,7 @@ public:
   std::string const & name() const;
 
   /**
-   * REturn the full, hierarchical name of the component.
+   * Return the full, hierarchical name of the component.
    */
   std::string fullName() const;
 
