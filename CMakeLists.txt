@@ -83,15 +83,12 @@ SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
 ############################################################
-# Support for Building Matlab externals
+# Support for forcing the load of all symbols from a library.
+# This is used, for instance, in self-registering factories.
 
-OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" OFF )
-
-IF( BUILD_MATLAB_EXTERNALS )
-  FIND_PACKAGE(Matlab REQUIRED)
-  IF(MATLAB_FOUND)
+(MATLAB_FOUND)
     MESSAGE( STATUS "Matlab found." )
-  ELSEIF( MATLAB_FOUND )
+  ELSE( MATLAB_FOUND )
     MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
   ENDIF( MATLAB_FOUND )
   # Brute-force way make all the code position-independent if we build Matlab externals.
