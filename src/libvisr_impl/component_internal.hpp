@@ -16,7 +16,7 @@ namespace ril
 {
 
 // Forward declaration(s)
-class AudioPort;
+class AudioPortBase;
 class Component;
 class CompositeComponentImplementation;
 class ParameterPortBase; // Note: Naming is inconsistent.
@@ -29,7 +29,7 @@ class SignalFlowContext;
 class ComponentInternal
 {
 public:
-  friend class AudioPort; // For registering/ unregistering audio ports
+  friend class AudioPortBase; // For registering/ unregistering audio ports
   friend class ParameterPortBase; // For registering / unregistering audio ports.
   
   explicit ComponentInternal( Component & component,
@@ -86,7 +86,7 @@ public:
   template< class PortType >
   using PortContainer = std::vector<PortType*>;
 
-  using AudioPortContainer = PortContainer< AudioPort >;
+  using AudioPortContainer = PortContainer< AudioPortBase >;
 
   /**
    * Allow access to the port lists 
@@ -188,12 +188,12 @@ public:
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  AudioPort* findAudioPort( std::string const & name );
+  AudioPortBase* findAudioPort( std::string const & name );
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  AudioPort const * findAudioPort( std::string const & name ) const;
+  AudioPortBase const * findAudioPort( std::string const & name ) const;
 
   /**
    * Query whether the component is at the top level of a signal flow.
@@ -221,8 +221,8 @@ private:
    * @param name The name of 
    * @throw In case of a non-unique or invalid port name
    */
-  void registerAudioPort( AudioPort* port );
-  void unregisterAudioPort( AudioPort* port );
+  void registerAudioPort( AudioPortBase* port );
+  void unregisterAudioPort( AudioPortBase* port );
 
   AudioPortContainer mAudioPorts;
 

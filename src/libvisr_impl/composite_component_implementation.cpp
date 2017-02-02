@@ -77,7 +77,7 @@ ComponentInternal const * CompositeComponentImplementation::findComponent( std::
   return findIt->second;
 }
 
-AudioPort * CompositeComponentImplementation::findAudioPort( std::string const & componentName, std::string const & portName )
+AudioPortBase * CompositeComponentImplementation::findAudioPort( std::string const & componentName, std::string const & portName )
 {
   ComponentInternal * comp = findComponent( componentName );
   if( not comp )
@@ -124,12 +124,12 @@ void CompositeComponentImplementation::registerAudioConnection( std::string cons
                                                                 std::string const & receivePort,
                                                                 AudioChannelIndexVector const & receiveIndices )
 {
-  AudioPort * sender = findAudioPort( sendComponent, sendPort );
+  AudioPortBase * sender = findAudioPort( sendComponent, sendPort );
   if( not sender )
   {
     throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): sender port could not be found." );
   }
-  AudioPort * receiver = findAudioPort( receiveComponent, receivePort );
+  AudioPortBase * receiver = findAudioPort( receiveComponent, receivePort );
   if( not receiver )
   {
     throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): receiver port could not be found." );

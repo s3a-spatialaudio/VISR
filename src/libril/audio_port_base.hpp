@@ -1,31 +1,21 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_PORT_HPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_PORT_HPP_INCLUDED
+#ifndef VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
+#define VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
 
 #include "port_base.hpp"
 
 #include "constants.hpp"
 
-#include <array>
+// #include <array>
 #include <cstddef>
 #include <exception>
 #include <iterator>
-#if CPP_CONSTEXPR_SUPPORT
 #include <limits>
-#else
-#include <climits> // to work around the current limitations of MSVC regarding constexpr
-#endif
 #include <string>
-
-// Temporary solution to get rid of the annoying MSVC unsafe argument warnings when using STL algorithms on std::valarrays
-// #define AUDIOPORT_USE_VECTOR_FOR_INDICES
-
-#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
 #include <vector>
-#else
+
 #include <valarray>
-#endif
 
 namespace visr
 {
@@ -35,15 +25,15 @@ namespace ril
 // Forward declaration(s)
 class Component;
 
-class AudioPort: public PortBase
+class AudioPortBase: public PortBase
 {
 public:
 
-  explicit AudioPort( std::string const & name, Component & container, Direction direction );
+  explicit AudioPortBase( std::string const & name, Component & container, Direction direction );
 
-  explicit AudioPort( std::string const & name, Component& container, Direction direction, std::size_t width );
+  explicit AudioPortBase( std::string const & name, Component& container, Direction direction, std::size_t width );
 
-  ~AudioPort();
+  ~AudioPortBase();
 
   /**
    * The type of signal indices.
@@ -51,10 +41,15 @@ public:
    */
   using SignalIndexType = std::size_t;
 
-  const static SignalIndexType cInvalidSignalIndex = UINT64_MAX;
+  /**
+   * @note: Not required from user code?
+   */
+  static constexpr SignalIndexType cInvalidSignalIndex = std::numeric_limits<SignalIndexType>::max();
 
-
-  const static std::size_t cInvalidWidth = UINT64_MAX;
+  /**
+   * @note: Not required from user code?
+   */
+  static constexpr std::size_t cInvalidWidth = std::numeric_limits<SignalIndexType>::max();
 
   /**
    * Methods to be called by components 
@@ -63,6 +58,7 @@ public:
 
   /**
    * @throw XXX if called while in initialised state.
+   * @note Might be called from user code.
    */
   void setWidth( std::size_t newWidth );
 
@@ -72,7 +68,7 @@ public:
 
   void setAudioChannelStride(std::size_t stride)
   {
-	mAudioChannelStride = stride;
+    mAudioChannelStride = stride;
   }
 
   void setAudioBasePointer(ril::SampleType * const base) 
@@ -95,7 +91,7 @@ public: // Temporary solution to make the indices visible to the runtime infrast
   //@{
 
   //@}
-
+#if 0
   template< std::size_t vecLength >
   void assignCommunicationIndices( std::array<SignalIndexType, vecLength > const & indexVector )
   {
@@ -104,12 +100,24 @@ public: // Temporary solution to make the indices visible to the runtime infrast
 
   void assignCommunicationIndices( SignalIndexType const * const val, std::size_t vecLength )
   {
-#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
-    std::copy( val, val + vecLength, mIndices.begin( ) );
-#else
     std::copy( val, val+vecLength, &mIndices[0] );
-#endif
   }
+#endif
+
+  /**
+   * @todo remove from header.
+   * @todo remove from public interface
+   * @todo consider changing the implementation to set the width according to the new index vector
+   */
+  void assignCommunicationIndices( std::vector<SignalIndexType> const & rhs )
+  {
+    if( rhs.size() != width() )
+    {
+      throw std::invalid_argument( "assignCommunicationIndices(): The size of the index vector does not match the port width." );
+    }
+    std::copy( rhs.begin(), rhs.end(), std::begin(mIndices) );
+  }
+
 
   template<typename IteratorType>
   void assignCommunicationIndices( IteratorType begin, IteratorType end )
@@ -131,25 +139,17 @@ public: // Temporary solution to make the indices visible to the runtime infrast
 private:
   std::size_t mWidth;
 
-#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
-  std::vector< SignalIndexType > mIndices;
-#else
   std::valarray< SignalIndexType > mIndices;
-#endif
 
   /**
    * Temporary container to hold the buffer addresses computed from the assigned indices.
    * As the location and the calling sequence for resolving the signal pointers is not decided yet, it is unclear whether 
    * this member is kept.
    */
-#ifdef AUDIOPORT_USE_VECTOR_FOR_INDICES
-  mutable std::vector< SampleType* > mSignalPointers;
-#else
   mutable std::valarray< SampleType* > mSignalPointers;
-#endif
 };
 
 } // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_PORT_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED

@@ -14,7 +14,7 @@ namespace visr
 {
 namespace ril
 {
-class AudioPort;
+class AudioPortBase;
 class Component;
 
 class AudioChannelSlice
@@ -167,9 +167,9 @@ public:
   {
   }
 
-  AudioConnection( AudioPort * pSender,
+  AudioConnection( AudioPortBase * pSender,
                    AudioChannelIndexVector const & pSendIndices,
-                   AudioPort * pReceiver,
+                   AudioPortBase * pReceiver,
                    AudioChannelIndexVector const & pReceiveIndices );
 #if 0
   AudioConnection( std::string const & pSendComponent,
@@ -181,15 +181,15 @@ public:
 #endif
   bool operator<(AudioConnection const & rhs) const;
 
-  AudioPort * sender() const { return mSender; }
-  AudioPort * receiver() const { return mReceiver; }
+  AudioPortBase * sender() const { return mSender; }
+  AudioPortBase * receiver() const { return mReceiver; }
 
   AudioChannelIndexVector const & sendIndices() const { return mSendIndices; }
   AudioChannelIndexVector const & receiveIndices( ) const { return mReceiveIndices; }
 
 private:
-  AudioPort * mSender;
-  AudioPort * mReceiver;
+  AudioPortBase * mSender;
+  AudioPortBase * mReceiver;
   AudioChannelIndexVector const mSendIndices;
   AudioChannelIndexVector const mReceiveIndices;
 };

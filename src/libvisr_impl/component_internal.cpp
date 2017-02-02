@@ -3,11 +3,12 @@
 #include "component_internal.hpp"
 #include "composite_component_implementation.hpp"
 
-#include <libril/audio_port.hpp>
+#include <libril/audio_port_base.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/parameter_port_base.hpp>
 #include <libril/signal_flow_context.hpp>
 
+#include <algorithm>
 #include <ciso646>
 #include <exception>
 #include <iostream>
@@ -97,7 +98,7 @@ std::size_t ComponentInternal::period() const { return mContext.period(); }
 
 ril::SamplingFrequencyType ComponentInternal::samplingFrequency() const { return mContext.samplingFrequency(); }
 
-void ComponentInternal::unregisterAudioPort( AudioPort* port )
+void ComponentInternal::unregisterAudioPort( AudioPortBase* port )
 {
   // According to C++11, findIt may be a const iterator, but the standard library of gcc 4.8 does not permit that.
   AudioPortContainer::iterator findIt = std::find( mAudioPorts.begin(), mAudioPorts.end(), port );
@@ -111,7 +112,7 @@ void ComponentInternal::unregisterAudioPort( AudioPort* port )
   }
 }
 
-void ComponentInternal::registerAudioPort( AudioPort* port )
+void ComponentInternal::registerAudioPort( AudioPortBase* port )
 {
   AudioPortContainer & vec = getAudioPortList( );
   AudioPortContainer::const_iterator findIt = findAudioPortEntry( port->name( ) );
@@ -149,7 +150,7 @@ ComponentInternal::AudioPortContainer::const_iterator ComponentInternal::findAud
   return findIt;
 }
 
-AudioPort const * ComponentInternal::findAudioPort( std::string const & portName ) const
+AudioPortBase const * ComponentInternal::findAudioPort( std::string const & portName ) const
 {
   AudioPortContainer::const_iterator findIt = findAudioPortEntry( portName );
   if( findIt == audioPortEnd() )
@@ -159,7 +160,7 @@ AudioPort const * ComponentInternal::findAudioPort( std::string const & portName
   return *findIt;
 }
 
-AudioPort * ComponentInternal::findAudioPort( std::string const & portName )
+AudioPortBase * ComponentInternal::findAudioPort( std::string const & portName )
 {
   AudioPortContainer::iterator findIt = findAudioPortEntry( portName );
   if( findIt == audioPortEnd( ) )
@@ -251,13 +252,13 @@ ParameterPortBase * ComponentInternal::findParameterPort( std::string const & po
 }
 
 template<>
-ComponentInternal::PortContainer<AudioPort> const & ComponentInternal::ports() const { return mAudioPorts; }
+ComponentInternal::PortContainer<AudioPortBase> const & ComponentInternal::ports() const { return mAudioPorts; }
 
 template<>
 ComponentInternal::PortContainer<ParameterPortBase> const & ComponentInternal::ports() const { return mParameterPorts; }
 
 template<>
-ComponentInternal::PortContainer<AudioPort> & ComponentInternal::ports() { return mAudioPorts; }
+ComponentInternal::PortContainer<AudioPortBase> & ComponentInternal::ports() { return mAudioPorts; }
 
 template<>
 ComponentInternal::PortContainer<ParameterPortBase> & ComponentInternal::ports() { return mParameterPorts; }
@@ -276,8 +277,8 @@ typename TypedPortContainer<PortType>::const_iterator ComponentInternal::findPor
   return findIt;
 }
 // Explicit instantiations
-template ComponentInternal::PortContainer<ril::AudioPort>::const_iterator
-ComponentInternal::findPortEntry<ril::AudioPort>( std::string const & portName ) const;
+template ComponentInternal::PortContainer<ril::AudioPortBase>::const_iterator
+ComponentInternal::findPortEntry<ril::AudioPortBase>( std::string const & portName ) const;
 template ComponentInternal::PortContainer<ril::ParameterPortBase>::const_iterator
 ComponentInternal::findPortEntry<ril::ParameterPortBase>( std::string const & portName ) const;
 
@@ -290,7 +291,7 @@ typename TypedPortContainer<PortType>::iterator ComponentInternal::findPortEntry
   return findIt;
 }
 // Explicit instantiations
-template ComponentInternal::PortContainer<ril::AudioPort>::iterator ComponentInternal::findPortEntry<ril::AudioPort>( std::string const & portName );
+template ComponentInternal::PortContainer<ril::AudioPortBase>::iterator ComponentInternal::findPortEntry<ril::AudioPortBase>( std::string const & portName );
 template ComponentInternal::PortContainer<ril::ParameterPortBase>::iterator ComponentInternal::findPortEntry<ril::ParameterPortBase>( std::string const & portName );
 
 

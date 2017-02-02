@@ -4,7 +4,6 @@
 
 #include "component_internal.hpp"
 
-#include <libril/audio_port.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/parameter_port_base.hpp>
 #include <libril/signal_flow_context.hpp>
@@ -28,7 +27,7 @@ Component::Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent)
  : mImpl( new ComponentInternal( *this, context, componentName,
-				 parent == nullptr ? nullptr : &(parent->implementation()) ) )
+                                 parent == nullptr ? nullptr : &(parent->implementation()) ) )
 {
 }
 

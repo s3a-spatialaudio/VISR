@@ -11,13 +11,11 @@ namespace ril
 
 AudioOutput::AudioOutput( char const* portName,
                           Component& container )
- : AudioPort( portName, container, Direction::Output )
+ : AudioPortBase( portName, container, Direction::Output )
 {
 }
 
-AudioOutput::~AudioOutput()
-{
-}
+AudioOutput::~AudioOutput() = default;
 
 } // namespace ril
 } // namespace visr

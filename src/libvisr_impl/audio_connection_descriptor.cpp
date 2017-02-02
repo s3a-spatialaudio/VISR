@@ -160,9 +160,9 @@ AudioChannelIndexVector::IndexType AudioChannelIndexVector::at( std::size_t idx 
 
 
 AudioConnection::
-AudioConnection( AudioPort * pSender,
+AudioConnection( AudioPortBase * pSender,
                  AudioChannelIndexVector const & pSendIndices,
-                 AudioPort * pReceiver,
+                 AudioPortBase * pReceiver,
                  AudioChannelIndexVector const & pReceiveIndices )
  : mSender(pSender)
  , mReceiver(pReceiver)

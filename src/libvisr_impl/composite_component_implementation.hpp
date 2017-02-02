@@ -13,6 +13,7 @@ namespace visr
 namespace ril
 {
 // Forward declaration
+class AudioPortBase;
 class SignalFlowContext;
 class CompositeComponent;
 
@@ -57,12 +58,21 @@ public:
 
   ComponentInternal const * findComponent( std::string const & componentName ) const;
 
-#if 1
-  // Clashes with corrsponding functionality of ComponentInternal?
-  AudioPort * findAudioPort( std::string const & componentName, std::string const & portName );
-  // Same.
+  /**
+   * Find an audio port within the composite component.
+   * This can be either an external port of the composite itself (if \p componentName is either empty or equals "this") or a port of the contained component with name \p componentName
+   * @param componentName
+   * @param portName The port name (case-sensitive)
+   */
+  AudioPortBase * findAudioPort( std::string const & componentName, std::string const & portName );
+
+  /**
+  * Find a parameter port within the composite component.
+  * This can be either an external port of the composite itself (if \p componentName is either empty or equals "this") or a port of the contained component with name \p componentName
+  * @param componentName
+  * @param portName The port name (case-sensitive)
+  */
   ParameterPortBase * findParameterPort( std::string const & componentName, std::string const & portName );
-#endif
 
   void registerParameterConnection( std::string const & sendComponent,
                                     std::string const & sendPort,

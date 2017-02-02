@@ -12,7 +12,7 @@ atomic_component.cpp
 audio_connection_descriptor.cpp
 audio_input.cpp
 audio_output.cpp
-audio_port.cpp
+audio_port_base.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp
 component.cpp
