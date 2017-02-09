@@ -127,7 +127,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
       throw std::invalid_argument( "BaselineRenderer: Size of the output EQ configuration config differs from "
         "the number of output signals (regular loudspeakers + subwoofers).");
     }
-    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( context, "OutputEqualisationFilter" ) );
+    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( context, "OutputEqualisationFilter", this ) );
     mOutputEqualisationFilter->setup( numberOfOutputSignals, outputEqSections, eqConfig );
   }
 
