@@ -216,7 +216,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
     mSourcePositions[srcIdx] = panning::XYZ( discRefl.positionX( ), discRefl.positionY( ), discRefl.positionZ( ) );
 
     // Set the biquad filters
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
       biquadCoeffs( matrixIdx, biquadIdx ) = discRefl.reflectionFilter( biquadIdx );
     }
@@ -233,7 +233,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   {
     std::size_t const matrixIdx = startIdx + srcIdx;
     mSourcePositions[srcIdx] = defaultPosition;
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
       biquadCoeffs( matrixIdx, biquadIdx ) = defaultBiquad;
     }
@@ -293,7 +293,7 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
   for( std::size_t srcIdx( 0 ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
     std::size_t const matrixRow = startRow + srcIdx;
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
       biquadCoeffs( matrixRow, biquadIdx ) = defaultBiquad;
     }
