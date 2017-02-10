@@ -61,12 +61,6 @@ int main( int argc, char const * const * argv )
 
     std::size_t const blockSize = cmdLineOptions.getDefaultedOption<std::size_t>("block-size", 1024);
 
-    // TODO: Split the config vector into individual objects to get the number of output addresses
-
-
-    //std::size_t const numberOfSignals = 1; // TODO: Replace by actual number.
-
-
     // Selection of audio interface:
     // For the moment we check for the name 'NATIVE_JACK' and select the specialized audio interface and fall
     // back to PortAudio in all other cases.
@@ -75,11 +69,11 @@ int main( int argc, char const * const * argv )
     bool const useNativeJack = boost::iequals(audioBackend, "NATIVE_JACK");
 #endif
 
-    std::unique_ptr<visr::ril::AudioInterface> audioInterface;
-
     SignalFlow flow( sceneSendAddresses, blockSize, samplingFrequency );
 
     std::size_t const numberOfSignals = flow.numberOfCaptureChannels();
+
+    std::unique_ptr<visr::ril::AudioInterface> audioInterface;
 
 #ifdef VISR_JACK_SUPPORT
     if (useNativeJack)
@@ -89,9 +83,8 @@ int main( int argc, char const * const * argv )
       interfaceConfig.mNumberOfPlaybackChannels = 0;
       interfaceConfig.mPeriodSize = blockSize;
       interfaceConfig.mSampleRate = samplingFrequency;
-      interfaceConfig.setCapturePortNames("input_", 0, numberOfObjects - 1);
-      interfaceConfig.setPlaybackPortNames("output_", 0, numberOfOutputChannels - 1);
-      interfaceConfig.mClientName = "VisrRenderer";
+      interfaceConfig.setCapturePortNames("input_", 0, numberOfSignals - 1);
+      interfaceConfig.mClientName = "S3A network audio streamer";
       audioInterface.reset(new rrl::JackInterface(interfaceConfig));
     }
     else
