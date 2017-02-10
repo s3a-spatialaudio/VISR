@@ -99,6 +99,7 @@ int main( int argc, char const * const * argv )
 #endif
       rrl::PortaudioInterface::Config interfaceConfig;
       interfaceConfig.mNumberOfCaptureChannels = numberOfSignals;
+      interfaceConfig.mNumberOfPlaybackChannels = 0;
       interfaceConfig.mSampleRate = samplingFrequency;
       interfaceConfig.mInterleaved = false;
       interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
@@ -114,7 +115,7 @@ int main( int argc, char const * const * argv )
     audioInterface->start( );
 
     // Rendering runs until q<Return> is entered on the console.
-    std::cout << "S3A baseline renderer running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+    std::cout << "S3A network audio streamer running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
     char c;
     do
     {

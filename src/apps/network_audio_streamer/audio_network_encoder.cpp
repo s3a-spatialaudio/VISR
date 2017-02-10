@@ -4,8 +4,6 @@
 
 #include <libpml/message_queue.hpp>
 
-#include <boost/endian/buffers.hpp>
-
 #include <memory>
 #include <sstream>
 
@@ -18,7 +16,7 @@ namespace audio_network_streamer
 
 AudioNetworkEncoder::AudioNetworkEncoder( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
- , mInput( "out", *this )
+ , mInput( "in", *this )
 {
 }
 
@@ -54,7 +52,7 @@ std::string AudioNetworkEncoder::encodeSignal( ril::SampleType const * signal, s
   // - Endianness of data stream
   // - unsigned/signed integers.
   // - Consider a conversion function float->int types in libefl
-  boost::endian::endian_buffer<boost::endian::order::little, int16_t, 16 > endianBuffer;
+  // TODO: Do not rely on boost::endian which is implemented only froom Boost 1.58 onwards.
 
   //for( std::size_t sampleIdx(0); sampleIdx < length; ++sampleIdx )
   //{

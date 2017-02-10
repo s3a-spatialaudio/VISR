@@ -52,9 +52,10 @@ SignalFlow::SignalFlow( std::string const & sendAddresses, std::size_t period, r
     std::stringstream nameStr;
     nameStr << "Sender_" << idx;
     std::unique_ptr<rcl::UdpSender> newSender( new rcl::UdpSender( *this, nameStr.str().c_str() ) );
-    newSender->setup( port, hostName, port, rcl::UdpSender::Mode::Asynchronous );
+    newSender->setup( 0, hostName, port, rcl::UdpSender::Mode::Asynchronous ); // '0' means that an available port is used in the local endpoint.
     mSenders.push_back( std::move(newSender) );
   }
+  mEncoder.setup( numSenders, period );
 
   mMessageQueues.resize( numSenders );
 
@@ -67,7 +68,7 @@ SignalFlow::SignalFlow( std::string const & sendAddresses, std::size_t period, r
   std::size_t n(0);
   std::generate_n( std::back_inserter(idxList), numSenders, [&n]{ return n++; } );
 
-  assignCommunicationIndices( "Encoder", "input", idxList );
+  assignCommunicationIndices( "Encoder", "in", idxList );
 
   // Set the indices for communicating the signals from and to the outside world.
   assignCaptureIndices( idxList  );

@@ -20,7 +20,7 @@ Options::Options()
 
   registerOption<std::size_t>( "block-size,b", "Number of samples transmitted in each UDP. Must be an integer power of 2 (because it also serves as the period size of the JACK client" );
 
-  registerOption<std::size_t>( "send-addresses,s", "List of addresses to which the streams are send. Comma-separated list of <address>:<port> with either DNS or numerical IP addresses." );
+  registerOption<std::string>( "send-addresses,s", "List of addresses to which the streams are send. Comma-separated list of <address>:<port> with either DNS or numerical IP addresses." );
 }
 
 Options::~Options()
