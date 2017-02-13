@@ -4,8 +4,11 @@
 
 #include <libpml/message_queue.hpp>
 
-#include <memory>
-#include <sstream>
+#include <ciso646>
+#include <cstdint>
+#include <limits>
+//#include <memory>
+//#include <sstream>
 
 namespace visr
 {
@@ -45,22 +48,17 @@ void AudioNetworkEncoder::process(std::vector<pml::MessageQueue<std::string> > &
 
 std::string AudioNetworkEncoder::encodeSignal( ril::SampleType const * signal, std::size_t length )
 {
-  std::stringstream stream;
-
-  // TODO: Fill in here!
-  // Needs information about
-  // - Endianness of data stream
-  // - unsigned/signed integers.
-  // - Consider a conversion function float->int types in libefl
-  // TODO: Do not rely on boost::endian which is implemented only froom Boost 1.58 onwards.
-
-  //for( std::size_t sampleIdx(0); sampleIdx < length; ++sampleIdx )
-  //{
-
-  //}
-
-  // TODO: implement me.
-  return stream.str();
+  static constexpr ril::SampleType scaleFactor = static_cast<ril::SampleType>(std::numeric_limits<std::int16_t>::max());
+  std::string ret( 2 * length, '\0' );
+  for( std::size_t idx(0); idx < length; ++idx )
+  {
+    ril::SampleType const saturated = std::min( std::max( signal[idx], static_cast<ril::SampleType>(-1.0) ), static_cast<ril::SampleType>(1.0) );
+    ril::SampleType const scaled = saturated * scaleFactor;
+    std::int16_t const intVal = static_cast<std::int16_t>(scaled);
+    ret[idx*2] = static_cast<char>(intVal bitand 0xFF);
+    ret[idx*2+1] = static_cast<char>( (intVal bitand 0xFF00)>>8 );
+  }
+  return ret;
 }
 
 } // audio_network_encoder
