@@ -25,8 +25,7 @@ void SignalRouting::setup( std::size_t inputWidth, std::size_t outputWidth )
 {
   mInput.setWidth( inputWidth );
   mOutput.setWidth( outputWidth );
-  // create an empty routing
-  mRoutingVector.resize( outputWidth, pml::SignalRoutingParameter::cInvalidIndex );
+  mRoutings.clear(); // Initialise an empty routing table.
 }
 
 void SignalRouting::setup( std::size_t inputWidth,
@@ -38,8 +37,7 @@ void SignalRouting::setup( std::size_t inputWidth,
   {
     pml::SignalRoutingParameter::IndexType const in = e.input;
     pml::SignalRoutingParameter::IndexType const out = e.output;
-    checkRoutingIndexRanges( in, out );
-    mRoutingVector[out] = in;
+    setRouting( in, out );
   }
 }
 
@@ -47,54 +45,55 @@ void SignalRouting::process()
 {
   std::size_t const numOutputs = mOutput.width();
   std::size_t const periodSize = period();
+  // Plain version: First zero all output signals.
+  // After that add the signals of defined routings.
+  // There are slight optimisation opportunities by:
+  // 1. Zero only unconnected outputs
+  // 2. Copy the first connected signal to an output
+  // 3. Add any further signals connect to that output
   for( std::size_t outIdx( 0 ); outIdx < numOutputs; ++outIdx )
   {
-    pml::SignalRoutingParameter::IndexType in = mRoutingVector[outIdx];
-    efl::ErrorCode err;
-    if( in == pml::SignalRoutingParameter::cInvalidIndex )
+    efl::ErrorCode res = efl::vectorZero( mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples );
+    if( res != efl::noError )
     {
-      if( (err = efl::vectorZero( mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples )) != efl::noError )
-      {
-        throw std::runtime_error( std::string( "SignalRouting: Error while zeroing an unconnected output channel: " ) + efl::errorMessage( err ) );
-      }
+      throw std::runtime_error( "SignalRouting::process(): Zeroing out signals failed." );
     }
-    else
+  }
+  for( RoutingTable::const_iterator routeIt( mRoutings.begin() ); routeIt != mRoutings.end(); ++routeIt )
+  {
+    pml::SignalRoutingParameter::IndexType inputIdx = std::get<1>( *routeIt );
+    pml::SignalRoutingParameter::IndexType outputIdx = std::get<0>( *routeIt );
+    efl::ErrorCode res = efl::vectorAddInplace( mInput[inputIdx], mOutput[outputIdx], periodSize, ril::cVectorAlignmentSamples );
+    if( res != efl::noError )
     {
-      if( (err = efl::vectorCopy( mInput[in], mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples )) != efl::noError )
-      {
-        throw std::runtime_error( std::string( "SignalRouting: Error while copying a signal to an output channel: " ) + efl::errorMessage( err ) );
-      }
+      throw std::runtime_error( "SignalRouting::process(): Adding signal to output failed." );
     }
   }
 }
 
 void SignalRouting::setRouting( pml::SignalRoutingParameter const & newRouting )
 {
-  std::fill( mRoutingVector.begin(), mRoutingVector.end(), pml::SignalRoutingParameter::cInvalidIndex );
+  mRoutings.clear();
   for( auto e : newRouting )
   {
     pml::SignalRoutingParameter::IndexType const in = e.input;
     pml::SignalRoutingParameter::IndexType const out = e.output;
     checkRoutingIndexRanges( in, out );
-    mRoutingVector[out] = in;
+    mRoutings.insert( std::make_tuple(out,in ) );
   }
 }
 
 void SignalRouting::setRouting( pml::SignalRoutingParameter::IndexType in, pml::SignalRoutingParameter::IndexType out )
 {
   checkRoutingIndexRanges( in, out );
-  mRoutingVector[out] = in;
+  mRoutings.insert( std::make_tuple( out, in ) );
 }
 
 bool SignalRouting::removeRouting( pml::SignalRoutingParameter::IndexType in, pml::SignalRoutingParameter::IndexType out )
 {
   checkRoutingIndexRanges( in, out );
-  if( mRoutingVector[out] == in )
-  {
-    mRoutingVector[out] = pml::SignalRoutingParameter::cInvalidIndex;
-    return true;
-  }
-  return false;
+  std::size_t const removed = mRoutings.erase(  std::make_tuple( out, in ) );
+  return removed > 0;
 }
 
 void SignalRouting::checkRoutingIndexRanges( pml::SignalRoutingParameter::IndexType in, pml::SignalRoutingParameter::IndexType out )
@@ -112,7 +111,6 @@ void SignalRouting::checkRoutingIndexRanges( pml::SignalRoutingParameter::IndexT
     throw std::invalid_argument( "SignalRouting: routing specification with invalid input index." );
   }
 }
-
 
 } // namespace rcl
 } // namespace visr
