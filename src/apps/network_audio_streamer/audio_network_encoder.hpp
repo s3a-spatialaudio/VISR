@@ -51,6 +51,9 @@ public:
   void process( std::vector<pml::MessageQueue<std::string> > & outputMessages);
 
 private:
+  /**
+   * Encode a signal as little-endian 16-bit signed integers.
+   */
   std::string encodeSignal( ril::SampleType const * signal, std::size_t length );
 
   /**
