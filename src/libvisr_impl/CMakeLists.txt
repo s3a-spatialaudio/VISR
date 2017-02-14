@@ -26,6 +26,8 @@ port_base.cpp
 signal_flow_context.cpp
 )
 
+add_definitions( -DVISR_BUILD_CORE_LIBRARIES=1 )
+
 ADD_LIBRARY( visr_impl STATIC ${SOURCES} ${HEADERS} )
 
 # Add the unit test directory.
