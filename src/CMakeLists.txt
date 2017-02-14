@@ -55,3 +55,8 @@ ENDIF( BUILD_MAX_MSP_EXTERNALS )
 IF( BUILD_PYTHON_BINDINGS )
   ADD_SUBDIRECTORY( pythonbindings )
 ENDIF( BUILD_PYTHON_BINDINGS )
+
+# Python bindings for the rendering framework
+if( BUILD_PYTHON_BINDINGS )
+  add_subdirectory( python )
+endif( BUILD_PYTHON_BINDINGS )

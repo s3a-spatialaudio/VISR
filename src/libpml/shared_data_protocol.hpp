@@ -63,7 +63,7 @@ public:
     }
   private:
     SharedDataProtocol * mProtocol;
-  };
+  }; // class Input
 
   /**
    * Provide alias for parameter configuration class type for the contained parameter values.
@@ -97,7 +97,7 @@ public:
     }
   private:
     SharedDataProtocol * mProtocol;
-  };
+  }; // class Output
 
   explicit SharedDataProtocol( ril::ParameterConfigBase const & config );
 
