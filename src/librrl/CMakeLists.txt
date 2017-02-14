@@ -33,6 +33,9 @@ INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
 ADD_LIBRARY( rrl STATIC ${SOURCES} ${HEADERS} )
 
+# Transitive link dependencies
+target_link_libraries( rrl visr_impl )
+target_link_libraries( rrl efl )
 target_link_libraries( rrl ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
   target_link_libraries( rrl ${JACK_LIBRARY} )
