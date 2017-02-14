@@ -48,6 +48,11 @@ LoudspeakerArray::LoudspeakerArray()
 {
 }
 
+LoudspeakerArray::LoudspeakerArray( std::string const & xmlConfiguration )
+{
+  loadXml( xmlConfiguration );
+}
+
 LoudspeakerArray const &  LoudspeakerArray::operator=(LoudspeakerArray const & rhs)
 {
   m_is2D = rhs.m_is2D;

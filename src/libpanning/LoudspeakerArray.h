@@ -53,6 +53,12 @@ namespace panning
     LoudspeakerArray();
 
     /**
+     * Construct an initialised array configuration.
+     * @throw std::invalid_argument if the file \p xmlConfiguration is not found or inconsistent.
+     */
+    explicit LoudspeakerArray( std::string const & xmlConfiguration );
+
+    /**
      * Assignment operator
      * We need an explicitly defined assignment operator because some members (BasicMatrix) 
      * intentionally do not have a copy constructor.
