@@ -1,7 +1,14 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
+component.cpp
 signal_flow_context.cpp
+visr.cpp
+)
+
+set( HEADERS
+component.hpp
+signal_flow_context.hpp
 )
 
 set(PROJECT_NAME visrpython)
@@ -26,7 +33,7 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${SOURCES} )
+add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${HEADER} ${SOURCES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
@@ -35,7 +42,8 @@ if( PYTHON_EXTERNAL_SUFFIX )
 endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
-target_link_libraries( ${PROJECT_NAME} visr_impl ) 
+target_link_libraries( ${PROJECT_NAME} visr_impl )
+
 # Standard dependencies for boost::python projects
 target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )

@@ -1,22 +1,31 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/export_symbols.hpp>
+
 #include <libril/signal_flow_context.hpp>
 
 #include <boost/python.hpp>
 
-#define BOOST_PYTHON_STATIC_LIBS
-
 using namespace boost::python;
 
-BOOST_PYTHON_MODULE(visr) // This must match the library name
+namespace visr
 {
 
-class_<visr::ril::SignalFlowContext>("SignalFlowContext", init<std::size_t, visr::ril::SamplingFrequencyType>() )
-  .add_property( "samplingFrequency", &visr::ril::SignalFlowContext::samplingFrequency )
-  .add_property( "period", &visr::ril::SignalFlowContext::period );
+using ril::SignalFlowContext;
 
+namespace python
+{
+namespace visr
+{
+
+void exportSignalFlowContext()
+{
+  class_<SignalFlowContext>( "SignalFlowContext", init<std::size_t, ril::SamplingFrequencyType>() )
+    .add_property( "samplingFrequency", &SignalFlowContext::samplingFrequency )
+    .add_property( "period", &SignalFlowContext::period );
 }
 
-// } // namespace ril
-// } // namespace visr
+
+} // namepace visr
+} // namespace python
+} // namespace visr
+

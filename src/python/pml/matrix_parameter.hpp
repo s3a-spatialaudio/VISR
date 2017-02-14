@@ -3,8 +3,20 @@
 #ifndef VISR_PYTHON_PML_MATRIX_PARAMETER_HPP_INCLUDED
 #define VISR_PYTHON_PML_MATRIX_PARAMETER_HPP_INCLUDED
 
-// TODO: Namespace?
+namespace visr
+{
+namespace python
+{
+namespace pml
+{
 
+/**
+ * Create Python bindings for pml::MatrixParameter<float> and pml::MatrixParameter<double>
+ */
 void exportMatrixParameters();
 
-// #ifndef VISR_PYTHON_PML_MATRIX_PARAMETER_HPP_INCLUDED
+} // namepace pml
+} // namespace python
+} // namespace visr
+
+#endif // #ifndef VISR_PYTHON_PML_MATRIX_PARAMETER_HPP_INCLUDED

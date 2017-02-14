@@ -1,11 +1,15 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
-pml.cpp
+listener_position.cpp
+loudspeaker_array.cpp
 matrix_parameter.cpp
+pml.cpp
 )
 
 set( HEADERS
+listener_position.hpp
+loudspeaker_array.hpp
 matrix_parameter.hpp
 )
 
@@ -32,7 +36,7 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${SOURCES} )
+add_library(${PROJECT_NAME} MODULE ${HEADERS} ${SOURCES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
@@ -41,9 +45,10 @@ if( PYTHON_EXTERNAL_SUFFIX )
 endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
+target_link_libraries( ${PROJECT_NAME} pml )
+target_link_libraries( ${PROJECT_NAME} panning ) # Hack!! (because we are keeping the Python binding for panning::LoudspeakerArray here)
+
 # Standard dependencies for boost::python projects
-target_link_libraries( ${PROJECT_NAME} rrl )
-target_link_libraries( ${PROJECT_NAME} pml ) # Preliminary solution (vulgo 'hack')
 target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
