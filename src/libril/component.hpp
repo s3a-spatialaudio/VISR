@@ -42,9 +42,25 @@ public:
                       CompositeComponent * parent);
 
   /**
-   * Deleted copy constructor to avoid copy construction.
+   * Deleted copy constructor to avoid copy construction of this and derived classes.
    */
-  Component( Component const & rhs ) = delete;
+  Component( Component const & ) = delete;
+
+   /**
+   * Deleted move constructor to avoid moving of this and derived classes.
+   */
+  Component( Component && ) = delete;
+
+  /**
+   * Deleted assignment operator to prohibit (copy) assignment of this and derived classes.
+   */
+  Component & operator=( Component const & ) = delete;
+
+  /**
+  * Deleted assignment operator to prohibit move assignment of this and derived classes.
+  */
+  Component & operator=( Component && ) = delete;
+
 
   static const std::string cNameSeparator;
 
