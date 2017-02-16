@@ -23,7 +23,7 @@
 #define VISR_PLUGIN_SYMBOL __attribute__((visibility("default")))
 
 #else
-#error "Platform does not support symbol export. 
+#error "Platform does not support symbol export."
 #endif // #ifdef _WIN32
 
 
