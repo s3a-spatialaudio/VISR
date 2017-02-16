@@ -67,8 +67,18 @@ public:
   */
   CompositeComponentImplementation const & implementation() const;
 
-protected:
+// Temporary hack to avoid problems with the Python bindings.:
+// protected:
 
+  /**
+   * TODO: Should we add an explicit addComponent() method instead of the implicit registration?
+   */
+  
+  /**
+   * Register a connection between parameter ports (both real ports of contained components or external placeholder ports.
+
+   * @throw std::invalid_argument if a specified component or port does not exist.
+   */
   void registerParameterConnection( std::string const & sendComponent,
                                     std::string const & sendPort,
                                     std::string const & receiveComponent,
@@ -81,6 +91,8 @@ protected:
                                 std::string const & receivePort,
                                 AudioChannelIndexVector const & receiveIndices );
 
+// Temporary hack to circumvent overload resolution problems in the Python binding.
+#if 0
   void registerAudioConnection( Component const & sendComponent,
                                 std::string const & sendPort,
                                 AudioChannelIndexVector const & sendIndices,
@@ -98,7 +110,7 @@ protected:
                                 AudioChannelIndexVector const & sendIndices,
                                 AudioPort & receiver,
                                 AudioChannelIndexVector const & receiveIndices );
-
+#endif
 private:
   std::unique_ptr<CompositeComponentImplementation> mImpl;
 };
