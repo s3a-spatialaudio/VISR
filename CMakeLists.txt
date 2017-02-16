@@ -81,6 +81,10 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 # TODO: Test and fix this feature.
 SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
+# Disable warning on Mac OS:
+# Target "NNN" of type "EXECUTABLE" has the following visibility properties set for CXX
+cmake_policy(SET CMP0063 NEW)
+
 
 ############################################################
 # Support for forcing the load of all symbols from a library.
