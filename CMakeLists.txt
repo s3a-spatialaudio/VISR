@@ -93,7 +93,8 @@ elseif( VISR_SYSTEM_NAME MATCHES "MacOS" )
   set( WHOLE_ARCHIVE_PREFIX "-Wl,-force_load" )
   set( WHOLE_ARCHIVE_SUFFIX "" )
 elseif( VISR_SYSTEM_NAME MATCHES "Windows" )
-  # TODO: implement me!
+  set( WHOLE_ARCHIVE_PREFIX "" )
+  set( WHOLE_ARCHIVE_SUFFIX "" )
 endif()
 
 ############################################################
