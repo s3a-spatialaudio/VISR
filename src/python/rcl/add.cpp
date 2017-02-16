@@ -2,6 +2,9 @@
 
 #include <librcl/add.hpp> 
 
+#include <libril/composite_component.hpp>
+#include <libril/signal_flow_context.hpp>
+
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
