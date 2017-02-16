@@ -19,36 +19,15 @@ namespace rbbl
 template<typename SampleType>
 class FftWrapperBase;
 
-/**
- * Factory class to construct FftWrapper objects of different types.
- * It is intended to be used only through its static function interface.
- * @tparam DataType The value type for the FFT implementations - generally float or double.
- */
 template<typename SampleType> 
 class FftWrapperFactory
 {
 public:
-  /**
-   * Creation function for FftWrapper objects.
-   * @param wrapperName The name of the FFT library to be instantiated, or "default"
-   * to instantiate the default choice for this platform.
-   * @param fftSize The size of the FFTs (number of real samples used as input to the forward FFT).
-   * @param alignElements Alignment of the vectors passed to the FFT (in number of samples).
-   */
   static std::unique_ptr<FftWrapperBase<SampleType> >
   create( std::string const & wrapperName, std::size_t fftSize, std::size_t alignElements );
 
-  /**
-   * Template function to register a FFT wrapper withing the factory.
-   */
   template< class FftWrapper >
   static void registerWrapper( std::string const & wrapperName );
-
-  /**
-   * Return a list of strings containing the names of the FFT wrappers available on this platform 
-   * (and for this data type).
-   */
-  static std::string listImplementations();
 
 private:
   struct Creator
@@ -58,8 +37,8 @@ private:
     explicit Creator( CreateFunction fcn );
 
     std::unique_ptr< FftWrapperBase<SampleType> > create( std::size_t fftSize,
-                                                          std::size_t alignElements) const;
-  private:
+						      std::size_t alignElements) const;
+ private:
     CreateFunction mCreateFunction;
   };
 
@@ -81,11 +60,6 @@ private:
   using CreatorTable = std::map<std::string, Creator >;
 
   static CreatorTable & creatorTable();
-
-  /**
-   * Private constructor without implementation to prevent instantiation of this class.
-   */
-  FftWrapperFactory();
 };
 
 template< typename SampleType >
@@ -95,7 +69,7 @@ void FftWrapperFactory<SampleType>::registerWrapper( std::string const & wrapper
   std::string lowerName(wrapperName); // convert the name to lower case.
   boost::algorithm::to_lower(lowerName);
   creatorTable().insert( std::make_pair( lowerName,
-                         TCreator<WrapperType>() ) );
+					 TCreator<WrapperType>() ) );
 }
 
 } // namespace rbbl

@@ -12,8 +12,6 @@ namespace visr
 namespace efl
 {
 
-void getCpuId();
-
 template <typename T>
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
@@ -184,10 +182,6 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-ErrorCode testMethod( float const * T );
-
-template< typename T>
-ErrorCode testMethodTemplated( T const * val );
 
 } // namespace efl
 } // namespace visr

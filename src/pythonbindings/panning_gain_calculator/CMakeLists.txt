@@ -48,8 +48,4 @@ target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-IF( BUILD_USE_IPP )
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${IPP_LIB_S} ${IPP_LIB_CORE} )
-ENDIF( BUILD_USE_IPP )
-
 install(TARGETS ${PROJECT_NAME} DESTINATION ../python)

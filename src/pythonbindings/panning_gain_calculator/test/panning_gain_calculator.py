@@ -1,16 +1,10 @@
 import os
-import sys
 
-configFile = "/Users/af5u13/dev/visr/config/isvr/audiolab_22.1.xml"
-
-pythonObjDir = "/Users/af5u13/dev/visr-build/python/Debug/"
-
-sys.path.append( pythonObjDir )
+os.chdir("C:/Users/andi/dev/visr-build/python/Debug" )
 
 from panning_gain_calculator import PanningGainCalculator
-import panning_gain_calculator as vbap
 
-s = PanningGainCalculator( configFile )
+s = PanningGainCalculator("C:\\Users\\andi\\dev\\visr\\config\\isvr\\22.1_audiolab.xml")
 
 s.numberOfSources()
 

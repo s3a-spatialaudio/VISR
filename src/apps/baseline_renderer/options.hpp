@@ -3,7 +3,10 @@
 #ifndef VISR_APPS_BASELINE_RENDERER_OPTIONS_HPP_INCLUDED
 #define VISR_APPS_BASELINE_RENDERER_OPTIONS_HPP_INCLUDED
 
-#include <libapputilities/options.hpp>
+#include <boost/program_options.hpp>
+
+#include <iosfwd>
+#include <string>
 
 namespace visr
 {
@@ -12,16 +15,50 @@ namespace apps
 namespace baseline_renderer
 {
 
-class Options: public apputilities::Options
+class Options
 {
 public:
   Options();
 
   ~Options();
+
+  enum class ParseResult
+  {
+    Success,
+    Failure,
+    Version,
+    Help
+  };
+
+  ParseResult parse( int argc, char const * const * argv, std::ostream & errMsg );
+
+  bool hasOption( char const * optionName ) const;
+
+  template< typename DataType >
+  DataType getOption( char const * optionName ) const;
+
+  template< typename DataType >
+  DataType getDefaultedOption( char const * optionName, DataType const & defaultValue ) const;
+
+  /**
+   * Print the option description.
+   * @param out The output stream to which the description is written to.
+   */
+  void printDescription( std::ostream & out );
+
+protected:
+  template<typename DataType >
+  void registerOption( char const * optionName, char const * description );
+
+  template<typename DataType >
+  void registerPositionalOption( char const * optionName, int position, char const * description );
+
+  boost::program_options::options_description mDescription;
+  boost::program_options::positional_options_description mPositionalDescription;
+
+  boost::program_options::variables_map mVariablesMap;
 };
 
-<<<<<<< HEAD
-=======
 template< typename DataType >
 inline DataType Options::getDefaultedOption( char const * optionName, DataType const & defaultValue) const
 {
@@ -69,7 +106,6 @@ inline void Options::registerPositionalOption( char const * optionName, int maxO
   mPositionalDescription.add( optionName, maxOccurrences );
 }
 
->>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7
 } // namespace baseline_renderer
 } // namespace apps
 } // namespace visr

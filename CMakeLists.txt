@@ -22,7 +22,7 @@ OPTION( SET_CLANG_COMPILER "Use the clang compiler on Linux platforms" OFF )
 # See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
 # Maybe there is a more general way to configure the different platforms and toolchains
 if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -march=native")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -pedantic")
 endif()
 
 IF(WIN32)

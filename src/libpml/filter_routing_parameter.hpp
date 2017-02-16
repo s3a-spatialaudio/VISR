@@ -99,21 +99,6 @@ public:
   FilterRoutingList( const FilterRoutingList & rhs ) = default;
 
   /**
-   * Construct an object from an JSON initialiser string following the 'named constructor' idiom.
-   * @param initString A string containing a JSON array of filter routing points
-   * @see parseJson
-   */
-  static FilterRoutingList const fromJson( std::string const & initString );
-
-  /**
-   * Construct an object from a JSON string provided in an istream object.
-   * This function represents a named constructor.
-   * @param initStream An input stream containing a JSON array with FilterReoutingParameter elements.
-   * @see parseJson
-   */
-  static FilterRoutingList const fromJson( std::istream & initStream );
-
-  /**
    * Function object used for ordering the entries in the internal data structure holding the entries.
    */
   class CompareEntries
@@ -225,14 +210,9 @@ public:
 
   /**
    * Parse a JSON string containing a routing specification.
-   * The top-level JSON object must be an array of elements in the form
-   * { "input": nn, "output": nn, "filter": nn, "gain": x.x }, 
+   * The top-level JSON object must contain an element named "routings", which 
+   * contains an array of elements in the { "input": nn, "output": nn, "filter": nn, "gain": x.x }, 
    * whereas the element "gain" is optional with a default value of 1.0.
-   * Each of the entries "input", "output", "filter" might be either scalars of init lists according to the 
-   * syntax defined by IndexSequence and FloatSequence, respectively. If more than one entry is non-scala, 
-   * the other entries must be scalar or have the same size as the former. In this case, the scalar entries 
-   * are repeated to form sequences of the same length as the non-scalar ones. A routing entry is generated 
-   * for each set of corresponding sequence elements.
    * The previous content is erased if the operation is successful.
    * @param encoded A string containing a JSON message.
    * @throw std::invalid_argument If the parsing fails. In this case, the state prior to the call is retained
@@ -242,20 +222,16 @@ public:
 
   /**
   * Parse a JSON string containing a routing specification from an input stream.
-  * The top-level JSON object must be an array of elements in the form
-  * { "input": nn, "output": nn, "filter": nn, "gain": x.x },
+  * The top-level JSON object must contain an element named "routings", which
+  * contains an array of elements in the { "input": nn, "output": nn, "filter": nn, "gain": x.x },
   * whereas the element "gain" is optional with a default value of 1.0.
-  * Each of the entries "input", "output", "filter" might be either scalars of init lists according to the
-  * syntax defined by IndexSequence and FloatSequence, respectively. If more than one entry is non-scala,
-  * the other entries must be scalar or have the same size as the former. In this case, the scalar entries
-  * are repeated to form sequences of the same length as the non-scalar ones. A routing entry is generated
-  * for each set of corresponding sequence elements.
   * The previous content is erased if the operation is successful.
-  * @param encoded A string containing a JSON message.
+  * @param encoded An input stream containing a JSON message.
   * @throw std::invalid_argument If the parsing fails. In this case, the state prior to the call is retained
   * (strong exception safety)
   */
   void parseJson( std::istream & encoded );
+
 private:
   /**
    * The data structure containing the routing entries.

@@ -20,10 +20,6 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 # Add any extras dependencies
 target_link_libraries(${PROJECT_NAME} rbbl rcl visr_impl efl mexsupport ${MATLAB_LIBRARIES})
 
-IF( BUILD_USE_IPP )
-  TARGET_LINK_LIBRARIES(${APPLICATION_NAME} ${IPP_LIB_S} ${IPP_LIB_CORE} )
-ENDIF( BUILD_USE_IPP )
-
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.
 # Also set the file extension according to the operating system.

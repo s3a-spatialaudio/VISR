@@ -15,8 +15,10 @@ namespace baseline_renderer
 {
 
 Options::Options()
- : apputilities::Options()
 {
+  registerOption<bool>( "help,h", "Show help and usage information." );
+  registerOption<bool>( "version,v", "Display version information." );
+
   registerOption<std::string>( "audio-backend,D", "The audio backend." );
   registerOption<std::size_t>( "sampling-frequency,f", "Sampling frequency [Hz]" );
   registerOption<std::size_t>( "period,p", "Period (blocklength) [Number of samples per audio block]" );
@@ -37,8 +39,6 @@ Options::~Options()
 {
 }
 
-<<<<<<< HEAD
-=======
 Options::ParseResult Options::parse( int argc, char const * const * argv, std::ostream & errMsg )
 {
   try
@@ -74,7 +74,6 @@ void Options::printDescription( std::ostream & out )
   out << mDescription << std::endl;
 }
 
->>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7
 } // namespace scene_decoder
 } // namespace apps
 } // namespace visr

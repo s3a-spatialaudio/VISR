@@ -30,14 +30,10 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} rbbl pml rcl visr_impl efl ${MATLAB_LIBRAR
 # of the project name.
 # Also set the file extension according to the operating system.
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX ${MATLAB_MEX_SUFFIX} PREFIX "")
-SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/mex" )
 
-<<<<<<< HEAD
-=======
 # Put directly into the mex/ subdirectory
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/mex" )
 
 # <AF> What to do with the install?
 # install to /bin by default
->>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7
 install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex )

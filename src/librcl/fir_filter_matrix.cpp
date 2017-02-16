@@ -31,15 +31,14 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
                              std::size_t maxFilters,
                              std::size_t maxRoutings,
                              efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
-                             pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/,
-                             char const * fftImplementation /*= "default" */ )
+                             pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/ )
 {
   mInput.setWidth( numberOfInputs );
   mOutput.setWidth( numberOfOutputs );
   mConvolver.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
     numberOfInputs, numberOfOutputs, period(),
-    filterLength, maxRoutings, maxFilters,
-    routings, filters, ril::cVectorAlignmentSamples, fftImplementation ) );
+    filterLength, maxFilters, maxRoutings,
+    routings, filters, ril::cVectorAlignmentSamples ) );
 }
 
 void FirFilterMatrix::process()
