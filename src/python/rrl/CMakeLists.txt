@@ -2,7 +2,13 @@
 
 set( SOURCES
 audio_signal_flow.cpp
+rrl.cpp
 )
+
+set( HEADERS
+audio_signal_flow.hpp
+)
+
 
 # We don't need header files
 
@@ -29,7 +35,7 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${SOURCES} )
+add_library(${PROJECT_NAME} MODULE ${HEADERS} ${SOURCES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )

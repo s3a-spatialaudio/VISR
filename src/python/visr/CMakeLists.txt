@@ -1,6 +1,7 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
+composite_component.cpp
 component.cpp
 signal_flow_context.cpp
 visr.cpp
@@ -8,6 +9,7 @@ visr.cpp
 
 set( HEADERS
 component.hpp
+composite_component.hpp
 signal_flow_context.hpp
 )
 
@@ -33,7 +35,7 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${HEADER} ${SOURCES} )
+add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${HEADERS} ${SOURCES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )

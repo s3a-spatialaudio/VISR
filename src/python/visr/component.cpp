@@ -1,7 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include "component.hpp"
+
 #include <libril/component.hpp>
-#include <libril/signal_flow_context.hpp>
 
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
