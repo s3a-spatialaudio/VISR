@@ -2,6 +2,8 @@
 
 #include <librrl/audio_signal_flow.hpp> 
 
+#include <libril/component.hpp>
+
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 

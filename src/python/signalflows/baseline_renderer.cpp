@@ -5,6 +5,9 @@
 #include <boost/python.hpp>
 #include "boost/python/args.hpp"
 
+#include <libril/composite_component.hpp>
+#include <libril/signal_flow_context.hpp>
+
 #include <libsignalflows/baseline_renderer.hpp> 
 
 using namespace boost::python;

@@ -1,12 +1,15 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "component.hpp"
-
-#include <libril/component.hpp>
 
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
+
+#include "component.hpp"
+
+#include <libril/component.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/signal_flow_context.hpp>
 
 using namespace boost::python;
 

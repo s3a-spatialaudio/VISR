@@ -7,6 +7,11 @@
 # cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
+# Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
+if( POLICY CMP0063 ) # (only if the CMake version supports this policy
+  CMAKE_POLICY(SET CMP0063 NEW)
+endif( POLICY CMP0063 )
+
 # The name of our top-level project.
 PROJECT( VISR CXX C )
 
@@ -78,9 +83,9 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
-# TODO: Test and fix this feature.
 SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
+
 
 ############################################################
 # Support for forcing the load of all symbols from a library.

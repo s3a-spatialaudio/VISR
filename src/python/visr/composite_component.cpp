@@ -9,6 +9,7 @@
 #include "composite_component.hpp"
 
 #include <libril/composite_component.hpp>
+#include <libril/signal_flow_context.hpp>
 
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
