@@ -3,15 +3,7 @@
 #include "time_frequency_parameter.hpp"
 
 #include <libril/constants.hpp>
-
-#include <sndfile.h>
-
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+#include <libril/parameter_factory.hpp>
 
 #include <ciso646>
 #include <complex>
@@ -115,6 +107,9 @@ resize( std::size_t dftSize, std::size_t numDftSamples, std::size_t numChannels 
 // Explicit instantiations for sample types float and double
 template class TimeFrequencyParameter<float>;
 template class TimeFrequencyParameter<double>;
+
+static ril::ParameterFactory::Registrar< TimeFrequencyParameter<float> > registrarFloat( ril::ParameterType::TimeFrequencyFloat );
+static ril::ParameterFactory::Registrar< TimeFrequencyParameter<double> > registrarDouble( ril::ParameterType::TimeFrequencyDouble );
 
 } // namespace pml
 } // namespace visr

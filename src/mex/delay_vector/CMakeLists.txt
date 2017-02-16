@@ -23,7 +23,7 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX ${MATLAB_MEX_SUFFIX} PREFIX "")
 
 # Add any extras dependencies
-target_link_libraries(${PROJECT_NAME} signalflows rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} signalflows rbbl rcl visr_impl efl mexsupport ${MATLAB_LIBRARIES})
 
 <<<<<<< HEAD
 IF( BUILD_USE_IPP )

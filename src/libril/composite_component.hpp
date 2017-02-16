@@ -3,26 +3,25 @@
 #ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
 #define VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
 
-#include "component.hpp"
+#include <libril/component.hpp>
 
 // Do we need the types for that (or would forward declarations suffice)?
-#include "audio_connection_descriptor.hpp"
-#include "parameter_connection_descriptor.hpp"
+// TODO: Move this to the private implementation object.
+// !! At the moment this is a hack because of the circular dependency!!
+#include <libvisr_impl/audio_connection_descriptor.hpp>
+#include <libvisr_impl/parameter_connection_descriptor.hpp>
 
-// #define USE_COMPONENTS_SET
-
-#ifdef USE_COMPONENTS_SET
-#include <set>
-#else
 #include <map>
-#endif
+#include <memory>
 
 namespace visr
 {
 namespace ril
 {
-// Forward declaration
+// Forward declarations
 class SignalFlowContext;
+
+class CompositeComponentImplementation;
 
 /**
  *
@@ -47,55 +46,39 @@ public:
    */
   virtual bool isComposite() const override;
 
-#ifdef USE_COMPONENTS_SET
-  struct CompareComponents
-  {
-  public:
-    bool operator()(Component const * lhs, Component const * rhs)
-    {
-      return lhs->name() < rhs->name();
-    }
-  };
-#endif
-
-#ifdef USE_COMPONENTS_SET
-  using ComponentTable = std::set < Component const *, CompareComponents >;
-#else
-  using ComponentTable = std::map<std::string, Component * >;
-#endif
-
+  /**
+   * The number of contained components (not including the composite itself).
+   * This method considers only atomic and composite components at the next level,
+   * i.e., not recursively.
+   */
   std::size_t numberOfComponents() const;
 
-  ComponentTable::const_iterator componentBegin() const;
-
-  ComponentTable::const_iterator componentEnd( ) const;
+  /**
+   * Return a reference to the internal data structures holding ports and contained components.
+   * From the user point of view, these data structure is opaque and unknown.
+   * @todo Improve name ('implementation' does not really fit)
+   */
+  CompositeComponentImplementation & implementation();
 
   /**
-   * Return the (non-owning) pointer to a contained component or nullptr if the component cannot be found.
-   * @return 
-   * @param componentName the local (nonhierarchical) name of the component. 
-   * If the name is empty or "this", return the name of the parent component.
+  * Return a reference to the internal data structures holding ports and contained components, const version.
+  * From the user point of view, these data structure is opaque and unknown.
+  * @todo Improve name ('implementation' does not really fit)
+  */
+  CompositeComponentImplementation const & implementation() const;
+
+// Temporary hack to avoid problems with the Python bindings.:
+// protected:
+
+  /**
+   * TODO: Should we add an explicit addComponent() method instead of the implicit registration?
    */
-  Component * findComponent( std::string const & componentName ) ;
+  
+  /**
+   * Register a connection between parameter ports (both real ports of contained components or external placeholder ports.
 
-  Component const * findComponent( std::string const & componentName ) const;
-
-  AudioPort * findAudioPort( std::string const & componentName, std::string const & portName );
-
-  ParameterPortBase * findParameterPort( std::string const & componentName, std::string const & portName );
-
-  AudioConnectionTable::const_iterator audioConnectionBegin() const;
-  AudioConnectionTable::const_iterator audioConnectionEnd( ) const;
-
-  ParameterConnectionTable::const_iterator parameterConnectionBegin() const;
-  ParameterConnectionTable::const_iterator parameterConnectionEnd( ) const;
-
-  void registerChildComponent( Component * child );
-
-  void unregisterChildComponent( Component * child );
-
-protected:
-
+   * @throw std::invalid_argument if a specified component or port does not exist.
+   */
   void registerParameterConnection( std::string const & sendComponent,
                                     std::string const & sendPort,
                                     std::string const & receiveComponent,
@@ -108,6 +91,8 @@ protected:
                                 std::string const & receivePort,
                                 AudioChannelIndexVector const & receiveIndices );
 
+// Temporary hack to circumvent overload resolution problems in the Python binding.
+#if 0
   void registerAudioConnection( Component const & sendComponent,
                                 std::string const & sendPort,
                                 AudioChannelIndexVector const & sendIndices,
@@ -125,14 +110,9 @@ protected:
                                 AudioChannelIndexVector const & sendIndices,
                                 AudioPort & receiver,
                                 AudioChannelIndexVector const & receiveIndices );
-
+#endif
 private:
-  ComponentTable mComponents;
-
-  ParameterConnectionTable mParameterConnections;
-
-  AudioConnectionTable mAudioConnections;
-
+  std::unique_ptr<CompositeComponentImplementation> mImpl;
 };
 
 } // namespace ril

@@ -2,6 +2,8 @@
 
 #include "string_parameter.hpp"
 
+#include <libril/parameter_factory.hpp>
+
 namespace visr
 {
 namespace pml
@@ -30,11 +32,7 @@ StringParameter::StringParameter( std::string const & initStr )
 {
 }
 
-//StringParameter::StringParameter( StringParameter const & rhs )
-//  : StringParameter( rhs.maxLength() )
-//{
-//  std::string::assign( rhs );
-//}
+static ril::ParameterFactory::Registrar< StringParameter > maker( ril::ParameterType::String );
 
 } // namespace pml
 } // namespace visr

@@ -83,6 +83,20 @@ SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
 ############################################################
+# Support for forcing the load of all symbols from a library.
+# This is used, for instance, in self-registering factories.
+
+if( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( WHOLE_ARCHIVE_PREFIX "-Wl,--whole-archive" )
+  set( WHOLE_ARCHIVE_SUFFIX "-Wl,--no-whole-archive" )
+elseif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  set( WHOLE_ARCHIVE_PREFIX "-Wl,-force_load" )
+  set( WHOLE_ARCHIVE_SUFFIX "" )
+elseif( VISR_SYSTEM_NAME MATCHES "Windows" )
+  # TODO: implement me!
+endif()
+
+############################################################
 # Support for Building Matlab externals
 
 OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" OFF )
@@ -91,7 +105,7 @@ IF( BUILD_MATLAB_EXTERNALS )
   FIND_PACKAGE(Matlab REQUIRED)
   IF(MATLAB_FOUND)
     MESSAGE( STATUS "Matlab found." )
-  ELSEIF( MATLAB_FOUND )
+  ELSE( MATLAB_FOUND )
     MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
   ENDIF( MATLAB_FOUND )
   # Brute-force way make all the code position-independent if we build Matlab externals.

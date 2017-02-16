@@ -65,8 +65,10 @@ public:
 
     void enqueue( MessageType const & val )
     {
+      // Move to impl object
       mProtocol ->enqueue( val );
     }
+
 
     void setProtocolInstance( MessageQueueProtocol * protocol )
     {
@@ -77,6 +79,9 @@ public:
       return mProtocol != nullptr;
     }
   private:
+    /**
+     * This should not be part of the user-defined template
+     */
     MessageQueueProtocol * mProtocol;
   };
 

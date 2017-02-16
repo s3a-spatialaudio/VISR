@@ -37,7 +37,7 @@ elseif(APPLE)
   SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxo)
 endif(WIN32)
 
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport signalflows rcl ril rbbl efl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport signalflows rcl visr_impl rbbl efl )
 IF( WIN32 )
   TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_LIBRARY} )
   # I need to exclude this library in combination with MAXAPI_USE_MSCRT

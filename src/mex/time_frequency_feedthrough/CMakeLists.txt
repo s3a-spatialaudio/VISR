@@ -19,28 +19,15 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 target_link_libraries( ${PROJECT_NAME} signalflows )
 target_link_libraries( ${PROJECT_NAME} rcl )
 target_link_libraries( ${PROJECT_NAME} rbbl )
-target_link_libraries( ${PROJECT_NAME} ril )
+target_link_libraries( ${PROJECT_NAME} visr_impl )
 target_link_libraries( ${PROJECT_NAME} pml )
 target_link_libraries( ${PROJECT_NAME} objectmodel )
 target_link_libraries( ${PROJECT_NAME} rrl )
 target_link_libraries( ${PROJECT_NAME} efl )
 target_link_libraries( ${PROJECT_NAME} mexsupport )
 target_link_libraries( ${PROJECT_NAME} ${MATLAB_LIBRARIES} )
-target_link_libraries( ${PROJECT_NAME} ${SNDFILE_LIBRARY} )
 target_link_libraries( ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
-
-
-target_link_libraries( ${PROJECT_NAME} ${FFTS_LIBRARY} )
-target_link_libraries( ${PROJECT_NAME} ${KISSFFT_LIBRARY} )
-IF( BUILD_USE_FFTW )
-  target_link_libraries( ${PROJECT_NAME} ${FFTW3_LIBRARY} )
-  target_link_libraries( ${PROJECT_NAME} ${FFTW3F_LIBRARY} )
-ENDIF( BUILD_USE_FFTW )
-IF( BUILD_USE_IPP )
-  target_link_libraries( ${PROJECT_NAME}  ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
-ENDIF( BUILD_USE_IPP )
-
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.

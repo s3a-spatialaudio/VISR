@@ -12,7 +12,7 @@ namespace visr
 // Forward declarations
 namespace ril
 {
-class Component;
+class ComponentInternal;
 class ParameterPortBase;
 class PortBase;
 }
@@ -51,7 +51,7 @@ class PortLookup
 public:
   using PortTable = std::set<PortType *>;
 
-  explicit PortLookup( ril::Component const & comp, bool recurse = true );
+  explicit PortLookup( ril::ComponentInternal const & comp, bool recurse = true );
 
   PortTable const & placeholderReceivePorts() const { return mPlaceholderReceivePorts; }
   PortTable const & placeholderSendPorts() const { return mPlaceholderSendPorts; }
@@ -62,7 +62,7 @@ public:
 
 private:
 
-  void traverseComponent( ril::Component const & comp, bool recurse );
+  void traverseComponent( ril::ComponentInternal const & comp, bool recurse );
 
   PortTable mPlaceholderReceivePorts;
   PortTable mPlaceholderSendPorts;

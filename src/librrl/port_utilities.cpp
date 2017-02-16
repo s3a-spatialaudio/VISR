@@ -2,12 +2,15 @@
 
 #include "port_utilities.hpp"
 
-#include <libril/audio_port.hpp>
+#include <libril/audio_port_base.hpp>
 #include <libril/component.hpp>
 #include <libril/communication_protocol_type.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/parameter_config_base.hpp>
 #include <libril/parameter_port_base.hpp>
+
+#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/composite_component_implementation.hpp>
 
 #include <ciso646>
 #include <iostream>
@@ -74,15 +77,14 @@ bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, r
   return result;
 }
 
-
 template<class PortType>
-PortLookup<PortType>::PortLookup( ril::Component const & comp, bool recurse /*= true*/ )
+PortLookup<PortType>::PortLookup( ril::ComponentInternal const & comp, bool recurse /*= true*/ )
 {
   traverseComponent( comp, recurse );
 }
 
 template<class PortType>
-void PortLookup<PortType>::traverseComponent( ril::Component const & comp, bool recurse )
+void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & comp, bool recurse )
 {
   for( PortType * port : comp.ports<PortType>() )
   {
@@ -121,10 +123,12 @@ void PortLookup<PortType>::traverseComponent( ril::Component const & comp, bool 
   }
   if( comp.isComposite() )
   {
-    ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp);
+    ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp.component() );
+    // Get the 'implementation' object that holds the tables to ports and contained components.
+    ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
     // Add the ports of the contained components (without descending into the hierarchy)
-    for( ril::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
-      compIt != composite.componentEnd(); ++compIt )
+    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+      compIt != compositeImpl.componentEnd(); ++compIt )
     {
       traverseComponent( *(compIt->second), recurse );
     }
@@ -132,7 +136,7 @@ void PortLookup<PortType>::traverseComponent( ril::Component const & comp, bool 
 }
 
 // explicit instantiations
-template class PortLookup<ril::AudioPort>;
+template class PortLookup<ril::AudioPortBase>;
 template class PortLookup<ril::ParameterPortBase>;
 
 

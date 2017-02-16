@@ -18,7 +18,7 @@ INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${CMAKE_SOURCE_DIR}/cmake_modules/Matlabdef.def )
 
 # Add any extras dependencies
-target_link_libraries(${PROJECT_NAME} rbbl rcl ril efl mexsupport ${MATLAB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} rbbl rcl visr_impl efl mexsupport ${MATLAB_LIBRARIES})
 
 IF( BUILD_USE_IPP )
   TARGET_LINK_LIBRARIES(${APPLICATION_NAME} ${IPP_LIB_S} ${IPP_LIB_CORE} )

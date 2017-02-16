@@ -3,15 +3,15 @@
 #ifndef VISR_LIBRIL_AUDIO_INPUT_HPP_INCLUDED
 #define VISR_LIBRIL_AUDIO_INPUT_HPP_INCLUDED
 
-#include "audio_port.hpp"
+#include "audio_port_base.hpp"
 
 namespace visr
 {
 namespace ril
 {
 
-// @todo: Rethink about public or protected inheritance (whether we want to use some kind of (static) polymorphism to access inputs and outpuits in a uniform way.
-class AudioInput: public AudioPort
+// @todo: Rethink about public or protected inheritance (whether we want to use some kind of (static) polymorphism to access inputs and outputs in a uniform way.
+class AudioInput: public AudioPortBase
 {
 public:
   explicit AudioInput( char const * portName,
