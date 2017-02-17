@@ -1,13 +1,17 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
-composite_component.cpp
+atomic_component.cpp
+audio_port.cpp
 component.cpp
+composite_component.cpp
 signal_flow_context.cpp
 visr.cpp
 )
 
 set( HEADERS
+atomic_component.hpp
+audio_port.hpp
 component.hpp
 composite_component.hpp
 signal_flow_context.hpp

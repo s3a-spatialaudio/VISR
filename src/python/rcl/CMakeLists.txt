@@ -4,6 +4,10 @@ set( SOURCES
 add.cpp
 )
 
+set( HEADERS
+# add.hpp
+)
+
 # We don't need header files
 
 set(PROJECT_NAME rclpython)
@@ -29,7 +33,7 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${SOURCES} )
+add_library(${PROJECT_NAME} MODULE ${HEADERS} ${SOURCES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
