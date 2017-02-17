@@ -7,11 +7,8 @@
 
 // Do we need the types for that (or would forward declarations suffice)?
 // TODO: Move this to the private implementation object.
-// !! At the moment this is a hack because of the circular dependency!!
 #include <libvisr_impl/audio_connection_descriptor.hpp>
-#include <libvisr_impl/parameter_connection_descriptor.hpp>
 
-#include <map>
 #include <memory>
 
 namespace visr
