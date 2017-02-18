@@ -28,9 +28,42 @@ namespace visr
 
 #ifdef USE_PYBIND11
 
+/**
+ * Wrapper class to get access to the full functionality
+ */
+class CompositeComponentWrapper: public CompositeComponent
+{
+public:
+  /**
+   * Use base class' constructors
+   */
+  using CompositeComponent::CompositeComponent;
+
+  /**
+   * Make protected methods available as public.
+   */
+  //@{
+  using CompositeComponent::registerParameterConnection;
+  using CompositeComponent::registerAudioConnection;
+  //@}
+};
+
 void exportCompositeComponent( pybind11::module& m )
 {
-
+  /**
+   * TODO: Decide whether we want additional inspection methods.
+   * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
+   */
+  pybind11::class_<CompositeComponentWrapper, ril::Component >(m, "CompositeComponent" )
+    .def( pybind11::init<ril::SignalFlowContext &, char const*, CompositeComponent *>(),
+	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
+    .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
+    .def( "registerParameterConnection", &CompositeComponentWrapper::registerParameterConnection,
+          pybind11::arg( "sendComponent"), pybind11::arg("sendPort"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort") )
+    // .def( "registerAudioConnection", &CompositeComponent::registerAudioConnection,
+    // ( arg("sendComponent"), arg("sendPort"), arg("sendIndices"), arg("receiveComponent"), arg("receivePort"), arg("receiveIndices") ) )
+    // TODO: Add further overloads of registerAudioConnection?
+    ;
 }
 
 #else
