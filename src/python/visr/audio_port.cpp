@@ -9,24 +9,60 @@
 #include <libril/port_base.hpp>
 #include <libril/signal_flow_context.hpp>
 
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#else
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
-
-using namespace boost::python;
+#endif
 
 namespace visr
 {
-
-using ril::AudioPortBase;
-using ril::AudioInput;
-using ril::AudioOutput;
-using ril::PortBase;
-
+  using ril::AudioPortBase;
+  using ril::AudioInput;
+  using ril::AudioOutput;
+  using ril::Component;
+  using ril::PortBase;
 namespace python
 {
 namespace visr
 {
+
+#ifdef USE_PYBIND11
+
+void exportAudioPort( pybind11::module & m)
+{
+  // Note: we create a named object because we use it subsequenctly for defining the Direction enum
+  pybind11::class_<PortBase> portBase( m, "PortBase" );
+  portBase
+    .def( pybind11::init<std::string const &, ril::Component &, PortBase::Direction>() )
+    .def_property_readonly( "name", &PortBase::name )
+    .def_property_readonly( "direction", &PortBase::direction )
+    .def_property_readonly( "parent", &PortBase::direction ) // Check how to select the const version
+    // .def_property( "parent", static_cast<PortBase::Direction( PortBase::* )() const>(&PortBase::direction) ) // Select the const method overload
+    ;
+
+  pybind11::enum_<PortBase::Direction>( portBase, "Direction" )
+    .value( "Input", PortBase::Direction::Input )
+    .value( "Output", PortBase::Direction::Output )
+    //.export_values() // skip that because we don't want to export the enum values to the parent namespace.
+    ;
+
+  pybind11::class_<AudioPortBase, PortBase>( m, "AudioPortBase" )
+    .def( pybind11::init<char const*, ril::Component &, PortBase::Direction>( ) )
+    .def_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
+    ;
+
+  pybind11::class_<AudioInput, AudioPortBase >( m, "AudioInput" )
+    .def( pybind11::init<char const*, ril::Component &>() )
+    .def_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
+    ;
+}
+
+#else
+using namespace boost::python;
+
 
 
 
@@ -53,8 +89,7 @@ void exportAudioPort()
 
 
 }
-
+#endif
 } // namepace visr
 } // namespace python
 } // namespace visr
-

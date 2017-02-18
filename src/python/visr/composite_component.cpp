@@ -1,25 +1,42 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-// For some strange reasons, we have to onclude the Python stuff before (some?) visr API includes
-// to avoid strange errors about undefined operators (op_) etc.
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-
 #include "composite_component.hpp"
 
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#else
+#include <boost/noncopyable.hpp>
+#include <boost/python.hpp>
+#include <boost/python/args.hpp>
+#endif
+
+
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
 
-using namespace boost::python;
 
 namespace visr
 {
-
 using ril::CompositeComponent;
+namespace python
+{
+namespace visr
+{
+
+#ifdef USE_PYBIND11
+
+void exportCompositeComponent( pybind11::module& m )
+{
+
+}
+
+#else
+using namespace boost::python;
+
+
 
 /** Conversion facilities from Python types to visr::ril::AudioChannelIndexVector
  * @TODO Check whether we can put that into a namespace.
@@ -70,11 +87,6 @@ struct AudioChannelIndexVectorFromPython
 };
 //@}
 
-namespace python
-{
-namespace visr
-{
-
 /**
  * Wrapper class to dispatch the virtual function call isComposite().
  * This seems to be a bit unnecessary because this is not going to be 
@@ -112,6 +124,7 @@ void exportCompositeComponent()
     // TODO: Add further overloads of registerAudioConnection?
     ;
 }
+#endif
 
 } // namepace visr
 } // namespace python

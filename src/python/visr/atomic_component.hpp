@@ -3,6 +3,10 @@
 #ifndef VISR_PYTHON_VISR_ATOMIC_COMPONENT_INCLUDED
 #define VISR_PYTHON_VISR_ATOMIC_COMPONENT_INCLUDED
 
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#endif
+
 namespace visr
 {
 namespace python
@@ -10,7 +14,11 @@ namespace python
 namespace visr
 {
 
+#ifdef USE_PYBIND11
+void exportAtomicComponent( pybind11::module& m);
+#else
 void exportAtomicComponent();
+#endif
 
 } // namepace visr
 } // namespace python

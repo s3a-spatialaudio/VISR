@@ -5,11 +5,32 @@
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
+#ifdef USE_PYBIND11
+#include <pybind11/pybind11.h>
+#else
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
 
 #include <boost/noncopyable.hpp>
+#endif
 
+#ifdef USE_PYBIND11
+
+using visr::rcl::Add;
+
+PYBIND11_PLUGIN( rcl )
+{
+  pybind11::module m("rcl", "VISR atomic components library" );
+
+  pybind11::class_<Add>( m, "Add" )
+    .def( pybind11::init<visr::ril::SignalFlowContext&, char const *, visr::ril::CompositeComponent*>() )
+    .def( "setup", &visr::rcl::Add::setup )
+    .def( "process", &visr::rcl::Add::process );
+
+  return m.ptr();
+}
+
+#else
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE( rcl )
@@ -20,3 +41,4 @@ class_<visr::rcl::Add, boost::noncopyable>( "Add", init<visr::ril::SignalFlowCon
   .def( "process", &visr::rcl::Add::process );
 
 }
+#endif

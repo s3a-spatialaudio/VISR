@@ -41,6 +41,11 @@ INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 # Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
 # INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
+option( BUILD_USE_PYBIND "Use pybind11 instead of boost::python" OFF )
+if( BUILD_USE_PYBIND )
+  include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+  add_definitions( -DUSE_PYBIND11=1 )
+endif( BUILD_USE_PYBIND )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 

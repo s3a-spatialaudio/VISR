@@ -1,17 +1,19 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-
 #include "component.hpp"
 
 #include <libril/component.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
-using namespace boost::python;
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#else
+#include <boost/noncopyable.hpp>
+#include <boost/python.hpp>
+#include <boost/python/args.hpp>
+#endif
 
 namespace visr
 {
@@ -22,6 +24,41 @@ namespace python
 {
 namespace visr
 {
+
+#ifdef USE_PYBIND11
+
+class ComponentWrapper: public Component
+{
+public:
+  /**
+   * Use the constructors of the base class
+   */
+  using Component::Component;
+
+  bool isComposite() const override
+  {
+    PYBIND11_OVERLOAD_PURE( bool, Component, isComposite );
+  }
+
+};
+
+void exportComponent( pybind11::module& m )
+{
+  pybind11::class_<Component, ComponentWrapper>( m, "Component" )
+    .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
+      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = nullptr )
+    .def_readonly_static( "nameSeparator", &Component::cNameSeparator )
+    .def_property_readonly( "name", &Component::name )
+    .def_property_readonly( "fullName", &Component::fullName )
+    .def( "isComposite", &Component::isComposite )
+    .def( "samplingFrequency", &Component::samplingFrequency ) 
+    .def( "period", &Component::period )
+    .def( "isTopLevel", &Component::isTopLevel )
+    ;
+}
+
+#else
+using namespace boost::python;
 
 /**
  * Wrapper class to dispatch the virtual function call isComposite().
@@ -61,9 +98,8 @@ void exportComponent()
     .def( "isTopLevel", &Component::isTopLevel )
     ;
 }
-
+#endif
 
 } // namepace visr
 } // namespace python
 } // namespace visr
-

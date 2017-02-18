@@ -1,19 +1,59 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+
+#include "atomic_component.hpp"
+
+#include <libril/atomic_component.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/signal_flow_context.hpp>
+
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#else
 // For some strange reasons, we have to onclude the Python stuff before (some?) visr API includes
 // to avoid strange errors about undefined operators (op_) etc.
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
-
-#include "atomic_component.hpp"
-
-#include <libril/atomic_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#endif
 
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
 
+#ifdef USE_PYBIND11
+
+using namespace visr::ril;
+namespace visr
+{
+  using ril::AtomicComponent;
+namespace python
+{
+namespace visr
+{
+
+class AtomicComponentWrapper: public AtomicComponent
+{
+public:
+  using AtomicComponent::AtomicComponent;
+
+  void process() override
+  {
+    PYBIND11_OVERLOAD_PURE( void, AtomicComponent, process );
+  }
+};
+
+void exportAtomicComponent( pybind11::module& m )
+{
+  /**
+  * TODO: Decide whether we want additional inspection methods.
+  * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
+  */
+  pybind11::class_<AtomicComponent, AtomicComponentWrapper >( m, "AtomicComponent" )
+    .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>() )
+    .def( "process", &AtomicComponent::process )
+    ;
+}
+#else
 using namespace boost::python;
 
 namespace visr
@@ -25,6 +65,7 @@ namespace python
 {
 namespace visr
 {
+
 
 /**
  * Wrapper class to dispatch the virtual function call isComposite().
@@ -65,8 +106,7 @@ void exportAtomicComponent()
     //// TODO: Add further overloads of registerAudioConnection?
     ;
 }
-
+#endif
 } // namepace visr
 } // namespace python
 } // namespace visr
-
