@@ -37,14 +37,15 @@ public:
 
   bool isComposite() const override
   {
-    PYBIND11_OVERLOAD_PURE( bool, Component, isComposite );
+    PYBIND11_OVERLOAD_PURE( bool, Component, isComposite, );
   }
 
 };
 
 void exportComponent( pybind11::module& m )
 {
-  pybind11::class_<Component, ComponentWrapper>( m, "Component" )
+  pybind11::class_<Component, ComponentWrapper>( m, "Component", pybind11::metaclass() ) 
+    // Note: 'metaclass' required for static properties
     .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = nullptr )
     .def_readonly_static( "nameSeparator", &Component::cNameSeparator )

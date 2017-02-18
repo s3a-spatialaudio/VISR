@@ -63,9 +63,6 @@ void exportAudioPort( pybind11::module & m)
 #else
 using namespace boost::python;
 
-
-
-
 void exportAudioPort()
 {
   PortBase::Direction (PortBase::*PortBaseDirection)() const = &PortBase::direction;
