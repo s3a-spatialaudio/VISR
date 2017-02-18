@@ -64,8 +64,7 @@ public:
   */
   CompositeComponentImplementation const & implementation() const;
 
-// Temporary hack to avoid problems with the Python bindings.:
-// protected:
+protected:
 
   /**
    * TODO: Should we add an explicit addComponent() method instead of the implicit registration?
@@ -88,8 +87,6 @@ public:
                                 std::string const & receivePort,
                                 AudioChannelIndexVector const & receiveIndices );
 
-// Temporary hack to circumvent overload resolution problems in the Python binding.
-#if 0
   void registerAudioConnection( Component const & sendComponent,
                                 std::string const & sendPort,
                                 AudioChannelIndexVector const & sendIndices,
@@ -107,7 +104,6 @@ public:
                                 AudioChannelIndexVector const & sendIndices,
                                 AudioPort & receiver,
                                 AudioChannelIndexVector const & receiveIndices );
-#endif
 private:
   std::unique_ptr<CompositeComponentImplementation> mImpl;
 };
