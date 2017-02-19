@@ -20,25 +20,23 @@
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
 
-#ifdef USE_PYBIND11
 
-using namespace visr::ril;
 namespace visr
 {
-  using ril::AtomicComponent;
 namespace python
 {
 namespace visr
 {
+#ifdef USE_PYBIND11
 
-class AtomicComponentWrapper: public AtomicComponent
+class AtomicComponentWrapper: public ril::AtomicComponent
 {
 public:
-  using AtomicComponent::AtomicComponent;
+  using ril::AtomicComponent::AtomicComponent;
 
   void process() override
   {
-    PYBIND11_OVERLOAD_PURE( void, AtomicComponent, process );
+    PYBIND11_OVERLOAD_PURE( void, ril::AtomicComponent, process, );
   }
 };
 
@@ -48,25 +46,14 @@ void exportAtomicComponent( pybind11::module& m )
   * TODO: Decide whether we want additional inspection methods.
   * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
   */
-  pybind11::class_<AtomicComponent, AtomicComponentWrapper >( m, "AtomicComponent" )
-    .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>() )
-    .def( "process", &AtomicComponent::process )
+  pybind11::class_<ril::AtomicComponent, AtomicComponentWrapper >( m, "AtomicComponent" )
+    .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
+	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent")=static_cast<ril::CompositeComponent *>(nullptr) )
     ;
 }
 #else
+
 using namespace boost::python;
-
-namespace visr
-{
-
-using ril::AtomicComponent;
-
-namespace python
-{
-namespace visr
-{
-
-
 /**
  * Wrapper class to dispatch the virtual function call isComposite().
  * This seems to be a bit unnecessary because this is not going to be 
