@@ -33,7 +33,6 @@ namespace visr
  * Apparently nor required anymore (and is troublesome when deducing the argument
  * type).
  */
-#if 0
 class CompositeComponentWrapper: public CompositeComponent
 {
 public:
@@ -50,7 +49,6 @@ public:
   using CompositeComponent::registerAudioConnection;
   //@}
 };
-#endif
 
 void exportCompositeComponent( pybind11::module& m )
 {
@@ -58,9 +56,9 @@ void exportCompositeComponent( pybind11::module& m )
    * TODO: Decide whether we want additional inspection methods.
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
-  pybind11::class_<::visr::ril::CompositeComponent/*Wrapper*/, ril::Component >(m, "CompositeComponent" )
+  pybind11::class_<ril::CompositeComponent, CompositeComponentWrapper, ril::Component >(m, "CompositeComponent" ) // Note: Trampoline class comes second.
     .def( pybind11::init<ril::SignalFlowContext &, char const*, CompositeComponent *>(),
-	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
+          pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     // .def( pybind11::init<ril::SignalFlowContext &, char const*>(),
     // 	  pybind11::arg("context"), pybind11::arg("name") )
     .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
