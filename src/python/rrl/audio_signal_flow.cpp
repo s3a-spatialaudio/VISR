@@ -4,12 +4,14 @@
 
 #include <libril/component.hpp>
 
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#else
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
-
 #include <boost/noncopyable.hpp>
+#endif
 
-using namespace boost::python;
 
 namespace visr
 {
@@ -20,6 +22,28 @@ namespace python
 {
 namespace rrl
 {
+
+#ifdef USE_PYBIND11
+
+void exportAudioSignalFlow( pybind11::module & m )
+{
+  pybind11::class_<AudioSignalFlow>( m, "AudioSignalFlow" )
+   .def( pybind11::init<visr::ril::Component&>() )
+   .def_property_readonly( "initialised", &AudioSignalFlow::initialised )
+   .def_property_readonly( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
+   .def_property_readonly( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
+   .def_property_readonly( "numberOfCaptureChannels", &AudioSignalFlow::numberOfCaptureChannels )
+   .def_property_readonly( "numberOfPlaybackChannels", &AudioSignalFlow::numberOfPlaybackChannels )
+    .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, pybind11::arg("index"), pybind11::return_value_policy::reference )
+    .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, pybind11::arg( "index" ), pybind11::return_value_policy::reference )
+  ;
+}
+
+
+#else
+
+using namespace boost::python;
+
 
 void exportAudioSignalFlow()
 {
@@ -34,6 +58,8 @@ void exportAudioSignalFlow()
     ;
 }
 
-} // namepace rrl
+#endif
+
+} // namespace rrl
 } // namespace python
 } // namespace visr
