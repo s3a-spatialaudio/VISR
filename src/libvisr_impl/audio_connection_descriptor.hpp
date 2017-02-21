@@ -6,6 +6,7 @@
 #include <ciso646>
 #include <cstddef>
 #include <initializer_list>
+#include <list>
 #include <set>
 #include <string>
 #include <vector>
@@ -100,6 +101,8 @@ public:
   explicit AudioChannelIndexVector( AudioChannelSlice const & slice );
 
   explicit AudioChannelIndexVector( std::initializer_list<AudioChannelSlice> const & slices );
+
+  explicit AudioChannelIndexVector( std::list<AudioChannelSlice> const & slices );
 
 
   std::size_t size() const { return mIndices.size(); }

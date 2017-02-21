@@ -147,6 +147,20 @@ AudioChannelIndexVector::AudioChannelIndexVector( std::initializer_list<AudioCha
   }
 }
 
+AudioChannelIndexVector::AudioChannelIndexVector( std::list<AudioChannelSlice> const & slices )
+{
+  std::size_t numIndices =
+  std::accumulate( slices.begin(), slices.end(), static_cast<std::size_t>(0),
+                   [](std::size_t const & rhs, AudioChannelSlice const & lhs ){ return lhs.size() + rhs; } );
+  mIndices.reserve( numIndices );
+  auto insertIt = std::back_inserter(mIndices);
+  for( AudioChannelSlice const & v : slices )
+  {
+    v.writeIndices( insertIt );
+  }
+}
+
+
 AudioChannelIndexVector::IndexType AudioChannelIndexVector::at( std::size_t idx ) const
 {
   if( idx > mIndices.size() )
