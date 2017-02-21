@@ -1,7 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <librcl/add.hpp> 
+#include <librcl/add.hpp>
 
+#include <libril/atomic_component.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
@@ -22,7 +23,7 @@ PYBIND11_PLUGIN( rcl )
 {
   pybind11::module m("rcl", "VISR atomic components library" );
 
-  pybind11::class_<Add>( m, "Add" )
+  pybind11::class_<Add, visr::ril::AtomicComponent>( m, "Add" )
     .def( pybind11::init<visr::ril::SignalFlowContext&, char const *, visr::ril::CompositeComponent*>() )
     .def( "setup", &visr::rcl::Add::setup )
     .def( "process", &visr::rcl::Add::process );
