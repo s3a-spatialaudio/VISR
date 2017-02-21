@@ -35,8 +35,6 @@ void exportBaselineRenderer( pybind11::module& m )
     .def( pybind11::init< visr::ril::SignalFlowContext&, char const*, visr::ril::CompositeComponent *, visr::panning::LoudspeakerArray const &,
       std::size_t, std::size_t, std::size_t, visr::pml::MatrixParameter<visr::ril::SampleType> const &, std::string const &,
       std::size_t, std::string const &, bool>() )
-    .def( pybind11::init< visr::ril::SignalFlowContext&, char const*, visr::ril::CompositeComponent *, visr::panning::LoudspeakerArray const &,
-      std::size_t, std::size_t>() )
     ;
 }
 
