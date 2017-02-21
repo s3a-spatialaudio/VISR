@@ -33,14 +33,14 @@ namespace visr
 
 void exportAudioPort( pybind11::module & m)
 {
-  // Note: we create a named object because we use it subsequenctly for defining the Direction enum
+  // Note: we create a named object because we use it subsequently for defining the Direction enum
   pybind11::class_<PortBase> portBase( m, "PortBase" );
   portBase
-    .def( pybind11::init<std::string const &, ril::Component &, PortBase::Direction>() )
+    .def( pybind11::init<std::string const &, ril::Component &, PortBase::Direction>(), pybind11::return_value_policy::reference_internal )
     .def_property_readonly( "name", &PortBase::name )
     .def_property_readonly( "direction", &PortBase::direction )
     .def_property_readonly( "parent", &PortBase::direction ) // Check how to select the const version
-    // .def_property( "parent", static_cast<PortBase::Direction( PortBase::* )() const>(&PortBase::direction) ) // Select the const method overload
+    .def_property_readonly( "parent", static_cast<PortBase::Direction( PortBase::* )() const>(&PortBase::direction) ) // Select the const method overload
     ;
 
   pybind11::enum_<PortBase::Direction>( portBase, "Direction" )
@@ -56,7 +56,12 @@ void exportAudioPort( pybind11::module & m)
 
   pybind11::class_<AudioInput, AudioPortBase >( m, "AudioInput" )
     .def( pybind11::init<char const*, ril::Component &>() )
-    .def_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
+    .def_property( "width", &AudioOutput::width, &AudioOutput::setWidth )
+    ;
+
+  pybind11::class_<AudioOutput, AudioPortBase >( m, "AudioOutput" )
+    .def( pybind11::init<char const*, ril::Component &>() )
+    .def_property( "width", &AudioOutput::width, &AudioOutput::setWidth )
     ;
 }
 

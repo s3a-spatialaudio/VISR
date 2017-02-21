@@ -2,6 +2,7 @@
 
 set( SOURCES
 atomic_component.cpp
+audio_channel_index_vector.cpp
 audio_port.cpp
 component.cpp
 composite_component.cpp
@@ -11,6 +12,7 @@ visr.cpp
 
 set( HEADERS
 atomic_component.hpp
+audio_channel_index_vector.hpp
 audio_port.hpp
 component.hpp
 composite_component.hpp

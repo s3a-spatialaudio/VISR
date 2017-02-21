@@ -1,6 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "atomic_component.hpp"
+#include "audio_channel_index_vector.hpp"
 #include "audio_port.hpp"
 #include "component.hpp"
 #include "composite_component.hpp"
@@ -19,6 +20,7 @@ PYBIND11_PLUGIN( visr )
   pybind11::module m( "visr", "VISR core API module" );
   using namespace visr::python::visr;
   exportSignalFlowContext( m );
+  exportAudioChannelIndexVector( m );
   exportAudioPort( m );
   exportComponent( m );
   exportCompositeComponent( m );
@@ -33,6 +35,7 @@ BOOST_PYTHON_MODULE( visr )
   // This is the standard way to creeate Python modules from bindings in multiple files.
   using namespace visr::python::visr;
   exportAtomicComponent();
+  exportAudioChannelIndexVector();
   exportAudioPort();
   exportSignalFlowContext();
   exportComponent();

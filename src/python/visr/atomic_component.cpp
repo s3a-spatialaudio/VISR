@@ -46,7 +46,7 @@ void exportAtomicComponent( pybind11::module& m )
   * TODO: Decide whether we want additional inspection methods.
   * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
   */
-  pybind11::class_<ril::AtomicComponent, AtomicComponentWrapper >( m, "AtomicComponent" )
+  pybind11::class_<ril::AtomicComponent, AtomicComponentWrapper, ril::Component >( m, "AtomicComponent" )
     .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
 	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent")=static_cast<ril::CompositeComponent *>(nullptr) )
     ;
