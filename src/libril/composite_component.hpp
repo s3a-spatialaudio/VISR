@@ -6,7 +6,7 @@
 #include <libril/component.hpp>
 
 // Do we need the types for that (or would forward declarations suffice)?
-// TODO: Move this to the private implementation object.
+// TODO: (URGENT) Move this to the private implementation object.
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 
 #include <memory>
@@ -17,6 +17,8 @@ namespace ril
 {
 // Forward declarations
 class SignalFlowContext;
+
+class AudioChannelIndexVector;
 
 class CompositeComponentImplementation;
 
@@ -64,7 +66,7 @@ public:
   */
   CompositeComponentImplementation const & implementation() const;
 
-protected:
+// protected:
 
   /**
    * TODO: Should we add an explicit addComponent() method instead of the implicit registration?
@@ -86,7 +88,7 @@ protected:
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
                                 AudioChannelIndexVector const & receiveIndices );
-
+#if 0
   void registerAudioConnection( Component const & sendComponent,
                                 std::string const & sendPort,
                                 AudioChannelIndexVector const & sendIndices,
@@ -104,6 +106,7 @@ protected:
                                 AudioChannelIndexVector const & sendIndices,
                                 AudioPort & receiver,
                                 AudioChannelIndexVector const & receiveIndices );
+#endif
 private:
   std::unique_ptr<CompositeComponentImplementation> mImpl;
 };
