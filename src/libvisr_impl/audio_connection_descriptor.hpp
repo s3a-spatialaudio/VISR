@@ -1,7 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTORHPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTORHPP_INCLUDED
+#ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#define VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+
+#include <libril/channel_list.hpp>
 
 #include <ciso646>
 #include <cstddef>
@@ -18,6 +20,7 @@ namespace ril
 class AudioPortBase;
 class Component;
 
+#if 0
 class AudioChannelSlice
 {
 public:
@@ -127,6 +130,7 @@ private:
 
   std::vector<IndexType> mIndices;
 };
+#endif
 
 #if 0
 struct AudioPortDescriptor
@@ -171,30 +175,23 @@ public:
   }
 
   AudioConnection( AudioPortBase * pSender,
-                   AudioChannelIndexVector const & pSendIndices,
+                   ChannelList const & pSendIndices,
                    AudioPortBase * pReceiver,
-                   AudioChannelIndexVector const & pReceiveIndices );
-#if 0
-  AudioConnection( std::string const & pSendComponent,
-                   std::string const & pSendPort,
-                   AudioChannelIndexVector const & pSendIndices,
-                   std::string const & pReceiveComponent,
-                   std::string const & pReceivePort,
-                   AudioChannelIndexVector const & pReceiveIndices );
-#endif
+                   ChannelList const & pReceiveIndices );
+
   bool operator<(AudioConnection const & rhs) const;
 
   AudioPortBase * sender() const { return mSender; }
   AudioPortBase * receiver() const { return mReceiver; }
 
-  AudioChannelIndexVector const & sendIndices() const { return mSendIndices; }
-  AudioChannelIndexVector const & receiveIndices( ) const { return mReceiveIndices; }
+  ChannelList const & sendIndices() const { return mSendIndices; }
+  ChannelList const & receiveIndices( ) const { return mReceiveIndices; }
 
 private:
   AudioPortBase * mSender;
   AudioPortBase * mReceiver;
-  AudioChannelIndexVector const mSendIndices;
-  AudioChannelIndexVector const mReceiveIndices;
+  ChannelList const mSendIndices;
+  ChannelList const mReceiveIndices;
 };
 
 using AudioConnectionTable = std::multiset< AudioConnection >;
@@ -202,4 +199,4 @@ using AudioConnectionTable = std::multiset< AudioConnection >;
 } // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTORHPP_INCLUDED
+#endif // #ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED

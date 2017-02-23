@@ -19,7 +19,7 @@ namespace ril
 class AudioPortBase;
 class Component;
 class CompositeComponentImplementation;
-class ParameterPortBase; // Note: Naming is inconsistent.
+class ParameterPortBase;
 class SignalFlowContext;
   
 /**

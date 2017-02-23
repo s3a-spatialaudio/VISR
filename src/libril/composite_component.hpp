@@ -3,13 +3,11 @@
 #ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
 #define VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
 
-#include <libril/component.hpp>
-
-// Do we need the types for that (or would forward declarations suffice)?
-// TODO: (URGENT) Move this to the private implementation object.
-#include <libvisr_impl/audio_connection_descriptor.hpp>
+#include "component.hpp"
+#include "channel_list.hpp"
 
 #include <memory>
+#include <vector>
 
 namespace visr
 {
@@ -17,8 +15,6 @@ namespace ril
 {
 // Forward declarations
 class SignalFlowContext;
-
-class AudioChannelIndexVector;
 
 class CompositeComponentImplementation;
 
@@ -29,6 +25,16 @@ class CompositeComponentImplementation;
 class CompositeComponent: public Component
 {
 public:
+  /**
+   * Making the type known inside CompositeConponent and derived classes
+   * These are convenience aliases to make the syntax in derived signal flows more concise.
+   * @note: This also means that we include the ChannelList/ChannelRange definition in this header, as these classes become part 
+   * the CompositeComponent interface.
+   */
+  //@{
+  using ChannelRange = visr::ril::ChannelRange;
+  using ChannelList = visr::ril::ChannelList;
+  //@}
 
   explicit CompositeComponent( SignalFlowContext& context,
                                char const * name,
@@ -84,10 +90,10 @@ public:
 
   void registerAudioConnection( std::string const & sendComponent,
                                 std::string const & sendPort,
-                                AudioChannelIndexVector const & sendIndices,
+                                ChannelList const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
-                                AudioChannelIndexVector const & receiveIndices );
+                                ChannelList const & receiveIndices );
 #if 0
   void registerAudioConnection( Component const & sendComponent,
                                 std::string const & sendPort,

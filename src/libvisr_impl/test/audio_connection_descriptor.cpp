@@ -1,7 +1,7 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
-#include <libvisr_impl/audio_connection_descriptor.hpp>
+#include <libril/channel_list.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -12,46 +12,49 @@ namespace ril
 namespace test
 {
 
-BOOST_AUTO_TEST_CASE( instantiateAudioChannelSlice )
+BOOST_AUTO_TEST_CASE( instantiateChannelRange )
 {
-  ril::AudioChannelSlice const emptySlice;
-  BOOST_CHECK( emptySlice.size() == 0 );
+  // Default constructor
+  ChannelRange const emptyRange;
+  BOOST_CHECK( emptyRange.size() == 0 );
 
   std::size_t const singleVal( 42 );
-  ril::AudioChannelSlice const singleValSlice( singleVal );
-  BOOST_CHECK( singleValSlice.size() == 1 );
-  BOOST_CHECK( singleValSlice.start() == singleVal );
-  BOOST_CHECK( singleValSlice[0] == singleVal );
-  BOOST_CHECK_THROW( singleValSlice.at( 1 ), std::out_of_range );
+  ChannelRange const singleValRange( singleVal );
+  BOOST_CHECK( singleValRange.size() == 1 );
+  BOOST_CHECK( singleValRange.start() == singleVal );
+  BOOST_CHECK( singleValRange[0] == singleVal );
+  BOOST_CHECK_THROW( singleValRange.at( 1 ), std::out_of_range );
 
-  ril::AudioChannelSlice const sliceFromInitList{ 10, 5, -1 };
-  BOOST_CHECK( sliceFromInitList.size() == 5 );
-  BOOST_CHECK( sliceFromInitList[2] == 8 );
+  ChannelRange const sliceFromInitList{ 1, 6, 2 };
+  BOOST_CHECK( sliceFromInitList.size() == 3 );
+  BOOST_CHECK( sliceFromInitList[2] == 5 );
 }
 
 BOOST_AUTO_TEST_CASE( instantiateAudioChannelIndexVector )
 {
-  ril::AudioChannelIndexVector const emptyVec;
-  BOOST_CHECK( emptyVec.size() == 0 );
+  ChannelList const emptyList;
+  BOOST_CHECK( emptyList.size() == 0 );
 
   std::vector<std::size_t> initVec{ 3, 4, 5, 6, 7 };
-  ril::AudioChannelIndexVector const vecFromIndexVec( initVec );
+  ChannelList const vecFromIndexVec( initVec );
   BOOST_CHECK( vecFromIndexVec.size() == initVec.size() );
 
-  ril::AudioChannelIndexVector const vecFromInitList{ 3, 4, 5, 6, 7 };
+  ChannelList const vecFromInitList{ 3, 4, 5, 6, 7 };
   BOOST_CHECK( vecFromInitList.size( ) == initVec.size( ) );
 
-  ril::AudioChannelIndexVector const vecFromSlice( AudioChannelSlice( 10, 5, -1 ) );
-  BOOST_CHECK( vecFromSlice.size() == 5 );
-  BOOST_CHECK( vecFromSlice[4] == 6 );
+  ChannelList const vecFromRange( ChannelRange( 10, 5, -1 ) );
+  BOOST_CHECK( vecFromRange.size() == 5 );
+  BOOST_CHECK( vecFromRange[4] == 6 );
 
-  ril::AudioChannelIndexVector const vecFromMultipleSlices( { AudioChannelSlice( 10, 5, -1 ), AudioChannelSlice( 0, 5, 1 ) } );
-  BOOST_CHECK( vecFromMultipleSlices.size( ) == 10 );
-  BOOST_CHECK( vecFromMultipleSlices[6] == 1 );
+  ChannelList const vecFromMultipleRanges( { ChannelRange( 10, 5, -1 ), ChannelRange( 0, 5, 1 ) } );
+  BOOST_CHECK( vecFromMultipleRanges.size( ) == 10 );
+  BOOST_CHECK( vecFromMultipleRanges[6] == 1 );
+
+  ChannelList const vecFromMultipleInitLists = { ChannelRange{ 10, 5, -1 }, ChannelRange{ 3, 7, 1 } };
+  BOOST_CHECK( vecFromMultipleInitLists.size() == 9 );
+  BOOST_CHECK( vecFromMultipleInitLists[5] == 3 );
 
 }
-
-
 
 } // namespace test
 } // namespace ril

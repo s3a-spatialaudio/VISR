@@ -5,6 +5,7 @@
 #include "port_utilities.hpp"
 
 #include <libril/audio_port_base.hpp>
+#include <libril/channel_list.hpp>
 #include <libril/component.hpp>
 #include <libril/composite_component.hpp>
 
@@ -165,8 +166,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
       result = false;
       continue;
     }
-    ril::AudioChannelIndexVector const & sendIndices = connection.sendIndices();
-    ril::AudioChannelIndexVector const & receiveIndices = connection.receiveIndices();
+    ril::ChannelList const & sendIndices = connection.sendIndices();
+    ril::ChannelList const & receiveIndices = connection.receiveIndices();
     if( receiveIndices.size() != sendIndices.size() )
     {
       messages << "Audio signal flow connection check: The channel index vectors of the connection \""
@@ -177,8 +178,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     }
     if( receiveIndices.size() > 0 ) // max_element cannot be dereferenced for empty sequences
     {
-      ril::AudioChannelIndexVector::const_iterator maxSendIndex = std::max_element( sendIndices.begin(), sendIndices.end() );
-      ril::AudioChannelIndexVector::const_iterator maxReceiveIndex = std::max_element( receiveIndices.begin(), receiveIndices.end() );
+      ril::ChannelList::const_iterator maxSendIndex = std::max_element( sendIndices.begin(), sendIndices.end() );
+      ril::ChannelList::const_iterator maxReceiveIndex = std::max_element( receiveIndices.begin(), receiveIndices.end() );
       if( *maxSendIndex >= connection.sender()->width() )
       {
         messages << "Audio signal flow connection check: The send channel index of the connection \""

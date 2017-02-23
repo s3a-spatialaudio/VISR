@@ -6,6 +6,8 @@
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 #include <libvisr_impl/parameter_connection_descriptor.hpp>
 
+#include <libril/composite_component.hpp>
+
 #include <map>
 
 namespace visr
@@ -13,10 +15,6 @@ namespace visr
 namespace ril
 {
 // Forward declaration
-class AudioPortBase;
-class SignalFlowContext;
-class CompositeComponent;
-
 class ComponentInternal;
 
 class CompositeComponentImplementation
@@ -81,10 +79,10 @@ public:
 
   void registerAudioConnection( std::string const & sendComponent,
                                 std::string const & sendPort,
-                                AudioChannelIndexVector const & sendIndices,
+                                ChannelList const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
-                                AudioChannelIndexVector const & receiveIndices );
+                                ChannelList const & receiveIndices );
 
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
 

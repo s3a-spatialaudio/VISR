@@ -136,6 +136,10 @@ public:
   std::size_t numberOfPlaybackChannels() const;
   //@}
 
+  /**
+   * @TODO: Add methods to query and connect to parameter ports
+   */
+
 
 private:
 // Unused at the moment, outdated, incomplete implementation

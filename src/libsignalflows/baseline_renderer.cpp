@@ -27,24 +27,18 @@ namespace visr
 namespace signalflows
 {
 
-namespace
-{
-// create a helper function in an unnamed namespace
-  
-  /**
-   * Create a vector of unsigned integers ranging from \p start to \p end - 1.
-   * @param startIdx the start index of the sequence.
-   * @param endIdx The index value one past the end
-   * @note Compared to other versions of this function, \p endIdx is the 'past the end' value here, as common in C++ STL conventions.
-   * that is indexRange( n, n ) returns an empty vector.
-   */
-  // Helper function to create contiguous ranges.
-  ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
-  {
-    std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
-    return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
-  }
-}
+BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
+  char const * name,
+  ril::CompositeComponent * parent,
+  panning::LoudspeakerArray const & loudspeakerConfiguration,
+  std::size_t numberOfInputs,
+  std::size_t numberOfOutputs
+ )
+  : BaselineRenderer( context, name, parent, loudspeakerConfiguration, numberOfInputs, numberOfOutputs, 
+                      4096ul,
+                      efl::BasicMatrix<ril::SampleType>(numberOfOutputs, 0, ril::cVectorAlignmentSamples ), 
+    std::string(), 4242, std::string(), false )
+{}
 
 BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
                                     char const * name,
@@ -204,87 +198,87 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   mInput.setWidth( numberOfInputs );
   mOutput.setWidth( numberOfOutputs );
 
-  registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "DiffusePartMatrix", "in", indexRange( 0, numberOfInputs ) );
-  registerAudioConnection( "VbapGainMatrix", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", indexRange( 0, numberOfLoudspeakers ) );
+  registerAudioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "DiffusePartMatrix", "in", ChannelRange( 0, numberOfInputs ) );
+  registerAudioConnection( "VbapGainMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
   if( mFrequencyDependentPanning )
   {
-    registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "PanningFilterbank", "in", indexRange( 0, numberOfInputs ) );
-    registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "PanningFilterbank", "in", indexRange( numberOfInputs, 2*numberOfInputs ) );
-    registerAudioConnection( "PanningFilterbank", "out", indexRange( 0, numberOfInputs ), "VbapGainMatrix", "in", indexRange( 0, numberOfInputs ) );
-    registerAudioConnection( "PanningFilterbank", "out", indexRange( numberOfInputs, 2*numberOfInputs ), "LowFrequencyPanningMatrix", "in", indexRange( 0, numberOfInputs ) );
+    registerAudioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "PanningFilterbank", "in", ChannelRange( 0, numberOfInputs ) );
+    registerAudioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "PanningFilterbank", "in", ChannelRange( numberOfInputs, 2*numberOfInputs ) );
+    registerAudioConnection( "PanningFilterbank", "out", ChannelRange( 0, numberOfInputs ), "VbapGainMatrix", "in", ChannelRange( 0, numberOfInputs ) );
+    registerAudioConnection( "PanningFilterbank", "out", ChannelRange( numberOfInputs, 2*numberOfInputs ), "LowFrequencyPanningMatrix", "in", ChannelRange( 0, numberOfInputs ) );
 
-    registerAudioConnection( "LowFrequencyPanningMatrix", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", indexRange( 0, numberOfLoudspeakers ) );
+    registerAudioConnection( "LowFrequencyPanningMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", ChannelRange( 0, numberOfLoudspeakers ) );
   }
   else
   {
-    registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "VbapGainMatrix", "in", indexRange( 0, numberOfInputs ) );
+    registerAudioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "VbapGainMatrix", "in", ChannelRange( 0, numberOfInputs ) );
   }
-  registerAudioConnection( "DiffusePartMatrix", "out", indexRange( 0, 1 ), "DiffusePartDecorrelator", "in", indexRange( 0, 1 ) );
-  registerAudioConnection( "DiffusePartDecorrelator", "out", indexRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer",
-                          mFrequencyDependentPanning ? "in2" : "in1", indexRange( 0, numberOfLoudspeakers ) );
+  registerAudioConnection( "DiffusePartMatrix", "out", ChannelRange( 0, 1 ), "DiffusePartDecorrelator", "in", ChannelRange( 0, 1 ) );
+  registerAudioConnection( "DiffusePartDecorrelator", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer",
+                          mFrequencyDependentPanning ? "in2" : "in1", ChannelRange( 0, numberOfLoudspeakers ) );
 #ifndef DISABLE_REVERB_RENDERING
-  registerAudioConnection( "", "input", indexRange( 0, numberOfInputs ), "ReverbSignalRouting", "in", indexRange( 0, numberOfInputs ) );
+  registerAudioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "ReverbSignalRouting", "in", ChannelRange( 0, numberOfInputs ) );
   // Calculate the indices for distributing each reverb object to #mNumDiscreteReflectionsPerObject
-  ril::AudioChannelIndexVector discreteReflDemuxIndices( ril::AudioChannelSlice(0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
+  ChannelList discreteReflDemuxIndices( ril::AudioChannelSlice(0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
   for( std::size_t cnt( 0 ); cnt < mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject; ++cnt )
   {
     discreteReflDemuxIndices[cnt] = cnt / mNumDiscreteReflectionsPerObject;
   }
   registerAudioConnection( "ReverbSignalRouting", "out", discreteReflDemuxIndices,
-                           "DiscreteReverbDelay", "in", indexRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  registerAudioConnection( "DiscreteReverbDelay", "out", indexRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ),
-                           "DiscreteReverbReflectionFilters", "in", indexRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  registerAudioConnection( "DiscreteReverbReflectionFilters", "out", indexRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ),
-                           "DiscreteReverbPanningMatrix", "in", indexRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  registerAudioConnection( "DiscreteReverbPanningMatrix", "out", indexRange( 0, numberOfLoudspeakers ),
-                           "ReverbMix", "in0", indexRange( 0, numberOfLoudspeakers ) );
+                           "DiscreteReverbDelay", "in", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
+  registerAudioConnection( "DiscreteReverbDelay", "out", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ),
+                           "DiscreteReverbReflectionFilters", "in", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
+  registerAudioConnection( "DiscreteReverbReflectionFilters", "out", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ),
+                           "DiscreteReverbPanningMatrix", "in", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
+  registerAudioConnection( "DiscreteReverbPanningMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ),
+                           "ReverbMix", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
 
-  registerAudioConnection( "ReverbSignalRouting", "out", indexRange( 0, mMaxNumReverbObjects ), "LateReverbGainDelay", "in", indexRange( 0, mMaxNumReverbObjects ) );
-  registerAudioConnection( "LateReverbGainDelay", "out", indexRange( 0, mMaxNumReverbObjects ), "LateReverbFilter", "in", indexRange( 0, mMaxNumReverbObjects ) );
-  registerAudioConnection( "LateReverbFilter", "out", indexRange( 0, 1 ), "LateDiffusionFilter", "in", indexRange( 0, 1 ) );
-  registerAudioConnection( "LateDiffusionFilter", "out", indexRange( 0, numberOfLoudspeakers ), "ReverbMix", "in1", indexRange( 0, numberOfLoudspeakers ) );
+  registerAudioConnection( "ReverbSignalRouting", "out", ChannelRange( 0, mMaxNumReverbObjects ), "LateReverbGainDelay", "in", ChannelRange( 0, mMaxNumReverbObjects ) );
+  registerAudioConnection( "LateReverbGainDelay", "out", ChannelRange( 0, mMaxNumReverbObjects ), "LateReverbFilter", "in", ChannelRange( 0, mMaxNumReverbObjects ) );
+  registerAudioConnection( "LateReverbFilter", "out", ChannelRange( 0, 1 ), "LateDiffusionFilter", "in", ChannelRange( 0, 1 ) );
+  registerAudioConnection( "LateDiffusionFilter", "out", ChannelRange( 0, numberOfLoudspeakers ), "ReverbMix", "in1", ChannelRange( 0, numberOfLoudspeakers ) );
 
-  registerAudioConnection( "ReverbMix", "out", indexRange( 0, numberOfLoudspeakers ),
-                           "DirectDiffuseMixer", mFrequencyDependentPanning ? "in3" : "in2", indexRange( 0, numberOfLoudspeakers ) );
+  registerAudioConnection( "ReverbMix", "out", ChannelRange( 0, numberOfLoudspeakers ),
+                           "DirectDiffuseMixer", mFrequencyDependentPanning ? "in3" : "in2", ChannelRange( 0, numberOfLoudspeakers ) );
 #endif
   if( mTrackingEnabled )
   {
-    registerAudioConnection( "DirectDiffuseMixer", "out", indexRange( 0, numberOfLoudspeakers ), "TrackingSpeakerCompensation", "in", indexRange( 0, numberOfLoudspeakers ) );
-    registerAudioConnection( "TrackingSpeakerCompensation", "out", indexRange( 0, numberOfLoudspeakers ), "SubwooferMixer", "in", indexRange( 0, numberOfLoudspeakers ) );
+    registerAudioConnection( "DirectDiffuseMixer", "out", ChannelRange( 0, numberOfLoudspeakers ), "TrackingSpeakerCompensation", "in", ChannelRange( 0, numberOfLoudspeakers ) );
+    registerAudioConnection( "TrackingSpeakerCompensation", "out", ChannelRange( 0, numberOfLoudspeakers ), "SubwooferMixer", "in", ChannelRange( 0, numberOfLoudspeakers ) );
     if( outputEqSupport )
     {
-      registerAudioConnection( "TrackingSpeakerCompensation", "out", indexRange( 0, numberOfLoudspeakers ), "OutputEqualisationFilter", "in", indexRange( 0, numberOfLoudspeakers ) );
+      registerAudioConnection( "TrackingSpeakerCompensation", "out", ChannelRange( 0, numberOfLoudspeakers ), "OutputEqualisationFilter", "in", ChannelRange( 0, numberOfLoudspeakers ) );
     }
     else
     {
-      registerAudioConnection( "TrackingSpeakerCompensation", "out", indexRange( 0, numberOfLoudspeakers ), "OutputAdjustment", "in", indexRange( 0, numberOfLoudspeakers ) );
+      registerAudioConnection( "TrackingSpeakerCompensation", "out", ChannelRange( 0, numberOfLoudspeakers ), "OutputAdjustment", "in", ChannelRange( 0, numberOfLoudspeakers ) );
     }
   }
   else
   {
-    registerAudioConnection( "DirectDiffuseMixer", "out", indexRange( 0, numberOfLoudspeakers ), "SubwooferMixer", "in", indexRange( 0, numberOfLoudspeakers ) );
+    registerAudioConnection( "DirectDiffuseMixer", "out", ChannelRange( 0, numberOfLoudspeakers ), "SubwooferMixer", "in", ChannelRange( 0, numberOfLoudspeakers ) );
   }
   if( outputEqSupport )
   {
-    registerAudioConnection( "DirectDiffuseMixer", "out", indexRange( 0, numberOfLoudspeakers ), "OutputEqualisationFilter", "in", indexRange( 0, numberOfLoudspeakers ) );
-    registerAudioConnection( "SubwooferMixer", "out", indexRange( 0, numberOfSubwoofers ),
-                             "OutputEqualisationFilter", "in", indexRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
-    registerAudioConnection( "OutputEqualisationFilter", "out", indexRange( 0, numberOfLoudspeakers + numberOfSubwoofers ),
-                             "OutputAdjustment", "in", indexRange( 0, numberOfLoudspeakers + numberOfSubwoofers ) );
+    registerAudioConnection( "DirectDiffuseMixer", "out", ChannelRange( 0, numberOfLoudspeakers ), "OutputEqualisationFilter", "in", ChannelRange( 0, numberOfLoudspeakers ) );
+    registerAudioConnection( "SubwooferMixer", "out", ChannelRange( 0, numberOfSubwoofers ),
+                             "OutputEqualisationFilter", "in", ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
+    registerAudioConnection( "OutputEqualisationFilter", "out", ChannelRange( 0, numberOfLoudspeakers + numberOfSubwoofers ),
+                             "OutputAdjustment", "in", ChannelRange( 0, numberOfLoudspeakers + numberOfSubwoofers ) );
   }
   else
   {
-    registerAudioConnection( "DirectDiffuseMixer", "out", indexRange( 0, numberOfLoudspeakers ), "OutputAdjustment", "in", indexRange( 0, numberOfLoudspeakers ) );
-    registerAudioConnection( "SubwooferMixer", "out", indexRange( 0, numberOfSubwoofers ),
-                             "OutputAdjustment", "in", indexRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
+    registerAudioConnection( "DirectDiffuseMixer", "out", ChannelRange( 0, numberOfLoudspeakers ), "OutputAdjustment", "in", ChannelRange( 0, numberOfLoudspeakers ) );
+    registerAudioConnection( "SubwooferMixer", "out", ChannelRange( 0, numberOfSubwoofers ),
+                             "OutputAdjustment", "in", ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
   }
   // Connect to the external playback channels, including the silencing of unused channels.
   if( numberOfLoudspeakers + numberOfSubwoofers > numberOfOutputs ) // Otherwise the computation below would cause an immense memory allocation.
   {
     throw std::invalid_argument( "The number of loudspeakers plus subwoofers exceeds the number of output channels." );
   }
-  constexpr ril::AudioChannelIndexVector::IndexType invalidIdx = std::numeric_limits<ril::AudioChannelIndexVector::IndexType>::max();
-  std::vector<ril::AudioChannelIndexVector::IndexType> activePlaybackChannels( numberOfLoudspeakers + numberOfSubwoofers, invalidIdx );
+  constexpr ChannelList::IndexType invalidIdx = std::numeric_limits<ChannelList::IndexType>::max();
+  std::vector<ChannelList::IndexType> activePlaybackChannels( numberOfLoudspeakers + numberOfSubwoofers, invalidIdx );
   for( std::size_t idx( 0 ); idx < numberOfLoudspeakers; ++idx )
   {
     panning::LoudspeakerArray::ChannelIndex const chIdx = loudspeakerConfiguration.channelIndex( idx );
@@ -309,22 +303,22 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   {
     throw std::invalid_argument( "Not all active output channels are assigned." );
   }
-  std::vector<ril::AudioChannelIndexVector::IndexType> sortedPlaybackChannels( activePlaybackChannels );
+  std::vector<ChannelList::IndexType> sortedPlaybackChannels( activePlaybackChannels );
   std::sort( sortedPlaybackChannels.begin(), sortedPlaybackChannels.end() );
   if( std::unique( sortedPlaybackChannels.begin(), sortedPlaybackChannels.end() ) != sortedPlaybackChannels.end() )
   {
     throw std::invalid_argument( "The loudspeaker array contains a duplicated output channel index." );
   }
-  registerAudioConnection( "OutputAdjustment", "out", indexRange(0, numberOfLoudspeakers + numberOfSubwoofers ),
-                           "", "output", ril::AudioChannelIndexVector( activePlaybackChannels ) );
+  registerAudioConnection( "OutputAdjustment", "out", ChannelRange(0, numberOfLoudspeakers + numberOfSubwoofers ),
+                           "", "output", ChannelList( activePlaybackChannels ) );
 
   std::size_t const numSilentOutputs = numberOfOutputs - (numberOfLoudspeakers + numberOfSubwoofers);
   if( numSilentOutputs > 0 )
   {
-    std::vector<ril::AudioChannelIndexVector::IndexType> nullOutput( numSilentOutputs, 0 );
-    std::vector<ril::AudioChannelIndexVector::IndexType> silencedPlaybackChannels( numSilentOutputs, invalidIdx );
+    std::vector<ChannelList::IndexType> nullOutput( numSilentOutputs, 0 );
+    std::vector<ChannelList::IndexType> silencedPlaybackChannels( numSilentOutputs, invalidIdx );
     std::size_t silentIdx = 0;
-    std::vector<ril::AudioChannelIndexVector::IndexType>::const_iterator runIt{ sortedPlaybackChannels.begin() };
+    std::vector<ChannelList::IndexType>::const_iterator runIt{ sortedPlaybackChannels.begin() };
     for( std::size_t idx( 0 ); idx < numberOfOutputs; ++idx )
     {
       if( runIt == sortedPlaybackChannels.end() )
@@ -345,8 +339,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
     {
       throw std::logic_error( "Internal logic error: Computation of silent output channels failed." );
     }
-    registerAudioConnection( "NullSource", "out", ril::AudioChannelIndexVector( nullOutput ),
-                             "", "output", ril::AudioChannelIndexVector( silencedPlaybackChannels ) );
+    registerAudioConnection( "NullSource", "out", ChannelList( nullOutput ),
+                             "", "output", ChannelList( silencedPlaybackChannels ) );
   }
 }
 

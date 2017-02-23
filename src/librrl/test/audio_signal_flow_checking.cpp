@@ -10,6 +10,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <ciso646>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -68,7 +69,7 @@ public:
     : ril::CompositeComponent( context, componentName, parent )
     , mAtom( context, "SecondLevelAtom", this, numInputs, numOutputs )
   {
-    ril::AudioChannelIndexVector const indices( ril::AudioChannelSlice( 0, audioWidth, 1 ) );
+    ChannelRange const indices( 0, audioWidth );
 
     for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
     {
@@ -104,7 +105,7 @@ public:
     {
       throw std::invalid_argument( "If \"insertAtom\" is false, then the number of inputs must match the number of outputs." );
     }
-    ril::AudioChannelIndexVector const indices( ril::AudioChannelSlice( 0, audioWidth, 1 ) );
+    ChannelRange const indices( 0, audioWidth, 1 );
     std::stringstream childNameStr;
     if( (recursionCount > 0) or insertAtom )
     {
@@ -178,7 +179,7 @@ public:
    , mComposite1( context, "FirstLevelComposite", this, numInputs, numOutputs )
    , mAtomTopLevel( context, "FirstLevelAtom", this, numOutputs, numOutputs )
   {
-     ril::AudioChannelIndexVector const indices( ril::AudioChannelSlice( 0, audioWidth, 1 ) );
+     ChannelRange const indices( 0, audioWidth, 1 );
 
      for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
      {
@@ -214,7 +215,7 @@ public:
     : ril::CompositeComponent( context, componentName, parent )
     , mComposite( context, "FirstLevelComposite", this, numInputs, numOutputs, recursionLevels, insertAtom )
   {
-      ril::AudioChannelIndexVector const indices( ril::AudioChannelSlice( 0, audioWidth, 1 ) );
+      ChannelRange const indices( 0, audioWidth );
 
       for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
       {

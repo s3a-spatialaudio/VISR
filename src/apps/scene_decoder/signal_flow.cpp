@@ -16,16 +16,6 @@ namespace apps
 namespace scene_decoder
 {
 
-namespace // unnamed
-{
-  // Helper function to create contiguous ranges.
-  ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
-  {
-    std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
-    return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
-  }
-}
-
 SignalFlow::SignalFlow( ril::SignalFlowContext & context,
                         char const * name,
                         ril::CompositeComponent * parent,
@@ -100,8 +90,8 @@ SignalFlow::setup()
   mSceneEncoder.setup();
   mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
 
-  registerAudioConnection( "this", "in", indexRange( 0, cNumberOfInputs ), "GainMatrix", "in", indexRange( 0, cNumberOfInputs ) );
-  registerAudioConnection( "GainMatrix", "out", indexRange( 0, cNumberOfOutputs ), "this", "out", indexRange( 0, cNumberOfOutputs ) );
+  registerAudioConnection( "this", "in", ChannelRange( 0, cNumberOfInputs ), "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs ) );
+  registerAudioConnection( "GainMatrix", "out", ChannelRange( 0, cNumberOfOutputs ), "this", "out", ChannelRange( 0, cNumberOfOutputs ) );
 
   registerParameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
   registerParameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );

@@ -76,14 +76,14 @@ public:
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
   explicit CoreRenderer( ril::SignalFlowContext & context,
-                             char const * name,
-                             ril::CompositeComponent * parent,
-                             panning::LoudspeakerArray const & loudspeakerConfiguration,
-                             std::size_t numberOfInputs,
-                             std::size_t numberOfOutputs,
-                             std::size_t interpolationPeriod,
-                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
-                             std::string const & trackingConfiguration );
+                         char const * name,
+                         ril::CompositeComponent * parent,
+                         panning::LoudspeakerArray const & loudspeakerConfiguration,
+                         std::size_t numberOfInputs,
+                         std::size_t numberOfOutputs,
+                         std::size_t interpolationPeriod,
+                         efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                         std::string const & trackingConfiguration );
 
   ~CoreRenderer();
 

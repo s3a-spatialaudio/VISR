@@ -83,12 +83,14 @@ public:
                              std::string const & reverbConfig,
                              bool frequencyDependentPanning );
 
-  ~BaselineRenderer();
+  explicit BaselineRenderer( ril::SignalFlowContext & context,
+    char const * name,
+    ril::CompositeComponent * parent,
+    panning::LoudspeakerArray const & loudspeakerConfiguration,
+    std::size_t numberOfInputs,
+    std::size_t numberOfOutputs );
 
-  /**
-   * Process function that consumes and produces blocks of \p period() audio samples per input and output channel.
-   */
-  // /*virtual*/ void process();
+  ~BaselineRenderer();
 
 private:
 
@@ -122,14 +124,6 @@ private:
    */
   rcl::NullSource mNullSource;
 
-  //pml::MessageQueue<pml::StringParameter> mSceneMessages;
-
-  //objectmodel::ObjectVector mObjectVector;
-
-  //efl::BasicMatrix<ril::SampleType> mGainParameters;
-
-  //efl::BasicMatrix<ril::SampleType> mDiffuseGains;
-
   /**
    * Tracking-related members
    */
@@ -143,13 +137,6 @@ private:
 
   std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
 
-  // pml::ListenerPosition mListenerPosition;
-
-  //pml::MessageQueue<pml::StringParameter> mTrackingMessages;
-
-  //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
-
-  //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
 
 #ifndef DISABLE_REVERB_RENDERING

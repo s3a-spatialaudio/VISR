@@ -6,6 +6,7 @@
 
 #include <libril/composite_component.hpp>
 
+#include <ciso646>
 #include <iostream>
 #include <stdexcept>
 
@@ -119,10 +120,10 @@ void CompositeComponentImplementation::registerParameterConnection( std::string 
 
 void CompositeComponentImplementation::registerAudioConnection( std::string const & sendComponent,
                                                                 std::string const & sendPort,
-                                                                AudioChannelIndexVector const & sendIndices,
+                                                                ChannelList const & sendIndices,
                                                                 std::string const & receiveComponent,
                                                                 std::string const & receivePort,
-                                                                AudioChannelIndexVector const & receiveIndices )
+                                                                ChannelList const & receiveIndices )
 {
   AudioPortBase * sender = findAudioPort( sendComponent, sendPort );
   if( not sender )

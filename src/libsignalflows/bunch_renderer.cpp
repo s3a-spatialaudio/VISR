@@ -17,25 +17,6 @@ namespace visr
 namespace signalflows
 {
 
-namespace
-{
-// create a helper function in an unnamed namespace
-  
-  /**
-   * Create a vector of unsigned integers ranging from \p start to \p end - 1.
-   * @param startIdx the start index of the sequence.
-   * @param endIdx The index value one past the end
-   * @note Compared to other versions of this function, \p endIdx is the 'past the end' value here, as common in C++ STL conventions.
-   * that is indexRange( n, n ) returns an empty vector.
-   */
-  // Helper function to create contiguous ranges.
-  ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
-  {
-    std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
-    return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
-  }
-}
-
 BunchRenderer::BunchRenderer( ril::SignalFlowContext & context,
                                     char const * name,
                                     ril::CompositeComponent * parent,
@@ -66,8 +47,8 @@ BunchRenderer::BunchRenderer( ril::SignalFlowContext & context,
   registerParameterConnection("SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput");
   registerParameterConnection("SceneDecoder", "objectVectorOutput", "CoreRenderer", "objectDataInput" );
 
-  registerAudioConnection("", "input", indexRange(0, numberOfInputs), "CoreRenderer", "audioIn", indexRange(0, numberOfInputs) );
-  registerAudioConnection("CoreRenderer", "audioOut", indexRange(0, numberOfOutputs), "", "output", indexRange(0, numberOfInputs) );
+  registerAudioConnection("", "input", ChannelRange(0, numberOfInputs), "CoreRenderer", "audioIn", ChannelRange(0, numberOfInputs) );
+  registerAudioConnection("CoreRenderer", "audioOut", ChannelRange(0, numberOfOutputs), "", "output", ChannelRange(0, numberOfInputs) );
 }
 
 BunchRenderer::~BunchRenderer( )

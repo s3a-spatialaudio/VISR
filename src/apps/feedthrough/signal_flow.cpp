@@ -24,12 +24,12 @@ Feedthrough::Feedthrough( ril::SignalFlowContext & context,
   mOutput.setWidth( 2 );
   mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
 
-  registerAudioConnection( parent->name(), "input", ril::AudioChannelIndexVector{ 0, 1 },
-                           "Add", "input0", ril::AudioChannelIndexVector{ 0, 1 } );
-  registerAudioConnection( parent->name( ), "input", ril::AudioChannelIndexVector{ 0, 1 },
-                           "Add", "input1", ril::AudioChannelIndexVector{ 1, 0 } );
-  registerAudioConnection( "Add", "output", ril::AudioChannelIndexVector{ 0, 1 },
-                           parent->name( ), "output", ril::AudioChannelIndexVector{ 0, 1 } );
+  registerAudioConnection( parent->name(), "input", {0,1},
+                           "Add", "input0", { 0, 1 } );
+  registerAudioConnection( parent->name( ), "input", { 0, 1 },
+                           "Add", "input1", { 1, 0 } );
+  registerAudioConnection( "Add", "output", { 0, 1 },
+                           parent->name( ), "output", { 0, 1 } );
 }
 
 Feedthrough::~Feedthrough( )
