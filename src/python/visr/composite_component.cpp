@@ -2,7 +2,9 @@
 
 #include "composite_component.hpp"
 
+#include <libril/audio_port_base.hpp>
 #include <libril/composite_component.hpp>
+#include <libril/parameter_port_base.hpp>
 #include <libril/signal_flow_context.hpp>
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 
@@ -30,7 +32,7 @@ namespace visr
 
 #ifdef USE_PYBIND11
 
-#if 0
+#if 1
 /**
  * Wrapper class to get access to the full functionality
  * Apparently nor required anymore (and is troublesome when deducing the argument
@@ -40,7 +42,7 @@ class CompositeComponentWrapper: public CompositeComponent
 {
 public:
   /**
-   * Use base class' constructors
+   * Use base class constructors
    */
   using CompositeComponent::CompositeComponent;
 
@@ -60,14 +62,16 @@ void exportCompositeComponent( pybind11::module& m )
    * TODO: Decide whether we want additional inspection methods.
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
-  pybind11::class_<ril::CompositeComponent, ril::Component >(m, "CompositeComponent" ) // Note: Trampoline class comes second.
+  pybind11::class_<ril::CompositeComponent, CompositeComponentWrapper, ril::Component >(m, "CompositeComponent" ) // Note: Trampoline class comes second.
     .def( pybind11::init<ril::SignalFlowContext &, char const*, CompositeComponent *>(),
           pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
-    .def( "registerParameterConnection", &CompositeComponentWrapper::registerParameterConnection,
+    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(std::string const&, std::string const&, std::string const&, std::string const&)>(&ril::CompositeComponent/*Wrapper*/::registerParameterConnection),
           pybind11::arg( "sendComponent"), pybind11::arg("sendPort"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort") )
-    .def( "registerAudioConnection", &CompositeComponent::registerAudioConnection,
-	  pybind11::arg("sendComponent"), pybind11::arg("sendPort"), pybind11::arg("sendIndices"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort"), pybind11::arg("receiveIndices") )
+    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(ril::ParameterPortBase&, ril::ParameterPortBase&)>(&ril::CompositeComponent/*Wrapper*/::registerParameterConnection),
+      pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
+    .def( "registerAudioConnection", &ril::CompositeComponent/*Wrapper*/::registerAudioConnection,
+          pybind11::arg( "sendComponent" ), pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receiveComponent" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
     // TODO: Add further overloads of registerAudioConnection?
     ;
 }
