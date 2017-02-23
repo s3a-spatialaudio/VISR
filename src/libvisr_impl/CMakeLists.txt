@@ -13,6 +13,7 @@ audio_connection_descriptor.cpp
 audio_input.cpp
 audio_output.cpp
 audio_port_base.cpp
+channel_list.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp
 component.cpp
