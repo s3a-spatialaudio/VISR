@@ -88,31 +88,25 @@ public:
                                     std::string const & receiveComponent,
                                     std::string const & receivePort );
 
+  void registerParameterConnection( ParameterPortBase & sender,
+                                    ParameterPortBase & receiver );
+
+
   void registerAudioConnection( std::string const & sendComponent,
                                 std::string const & sendPort,
                                 ChannelList const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
                                 ChannelList const & receiveIndices );
-#if 0
-  void registerAudioConnection( Component const & sendComponent,
-                                std::string const & sendPort,
-                                AudioChannelIndexVector const & sendIndices,
-                                Component const & receiveComponent,
-                                std::string const & receivePort,
-                                AudioChannelIndexVector const & receiveIndices );
 
-  void registerAudioConnection( Component const & sendComponent,
-                                std::string const & sendPort,
-                                Component const & receiveComponent,
-                                std::string const & receivePort );
+  void registerAudioConnection( AudioPortBase & sendPort,
+                                ChannelList const & sendIndices,
+                                AudioPortBase & receivePort,
+                                ChannelList const & receiveIndices );
 
+  void registerAudioConnection( AudioPortBase & sendPort,
+                                AudioPortBase & receivePort );
 
-  void registerAudioConnection( AudioPort & sender,
-                                AudioChannelIndexVector const & sendIndices,
-                                AudioPort & receiver,
-                                AudioChannelIndexVector const & receiveIndices );
-#endif
 private:
   std::unique_ptr<CompositeComponentImplementation> mImpl;
 };

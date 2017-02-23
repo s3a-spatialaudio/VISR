@@ -4,7 +4,9 @@
 
 #include "component_internal.hpp"
 
-#include <libril/composite_component.hpp>
+#include <libril/audio_port_base.hpp>
+#include <libril/audio_port_base.hpp>
+#include <libril/channel_list.hpp>
 
 #include <ciso646>
 #include <iostream>
@@ -118,6 +120,13 @@ void CompositeComponentImplementation::registerParameterConnection( std::string 
   mParameterConnections.insert( std::move( newConnection ) );
 }
 
+void CompositeComponentImplementation::registerParameterConnection( ParameterPortBase & sendPort,
+                                                                    ParameterPortBase & receivePort )
+{
+  ParameterConnection newConnection( &sendPort, &receivePort );
+  mParameterConnections.insert( std::move( newConnection ) );
+}
+
 void CompositeComponentImplementation::registerAudioConnection( std::string const & sendComponent,
                                                                 std::string const & sendPort,
                                                                 ChannelList const & sendIndices,
@@ -139,6 +148,31 @@ void CompositeComponentImplementation::registerAudioConnection( std::string cons
 
   mAudioConnections.insert( std::move( newConnection ) );
 }
+
+
+void CompositeComponentImplementation::registerAudioConnection( AudioPortBase & sendPort,
+                                                                ChannelList const & sendIndices,
+                                                                AudioPortBase & receivePort,
+                                                                ChannelList const & receiveIndices )
+{
+  AudioConnection newConnection( &sendPort, sendIndices, &receivePort, receiveIndices );
+  mAudioConnections.insert( std::move( newConnection ) );
+}
+
+void CompositeComponentImplementation::registerAudioConnection( AudioPortBase & sendPort,
+                                                                AudioPortBase & receivePort )
+{
+  std::size_t const sendWidth = sendPort.width();
+  std::size_t const receiveWidth = receivePort.width();
+  if( sendWidth != receiveWidth )
+  {
+    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): send and receive port width do not match." );
+  }
+  ChannelList const indices( ChannelRange( 0, sendWidth ) );
+  registerAudioConnection( sendPort, indices, receivePort, indices );
+}
+
+
 
 AudioConnectionTable::const_iterator CompositeComponentImplementation::audioConnectionBegin() const
 {

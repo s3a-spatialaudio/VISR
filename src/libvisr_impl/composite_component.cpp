@@ -39,6 +39,12 @@ void CompositeComponent::registerParameterConnection( std::string const & sendCo
   mImpl->registerParameterConnection( sendComponent, sendPort, receiveComponent, receivePort );
 }
 
+void CompositeComponent::registerParameterConnection( ParameterPortBase & sender,
+                                                      ParameterPortBase & receiver )
+{
+  mImpl->registerParameterConnection( sender, receiver );
+}
+
 void CompositeComponent::registerAudioConnection( std::string const & sendComponent,
                                                   std::string const & sendPort,
                                                   ChannelList const & sendIndices,
@@ -48,6 +54,21 @@ void CompositeComponent::registerAudioConnection( std::string const & sendCompon
 {
   mImpl->registerAudioConnection( sendComponent, sendPort, sendIndices,
                                   receiveComponent, receivePort, receiveIndices );
+}
+
+void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
+                              ChannelList const & sendIndices,
+                              AudioPortBase & receivePort,
+                              ChannelList const & receiveIndices )
+{
+  mImpl->registerAudioConnection( sendPort, sendIndices, receivePort, receiveIndices );
+}
+
+
+void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
+                                                  AudioPortBase & receivePort )
+{
+  mImpl->registerAudioConnection( sendPort, receivePort );
 }
 
 CompositeComponentImplementation & CompositeComponent::implementation()

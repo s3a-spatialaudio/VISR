@@ -77,12 +77,23 @@ public:
                                     std::string const & receiveComponent,
                                     std::string const & receivePort );
 
+  void registerParameterConnection( ParameterPortBase & sendPort,
+                                    ParameterPortBase & receivePort );
+
   void registerAudioConnection( std::string const & sendComponent,
                                 std::string const & sendPort,
                                 ChannelList const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
                                 ChannelList const & receiveIndices );
+
+  void registerAudioConnection( AudioPortBase & sendPort,
+                                ChannelList const & sendIndices,
+                                AudioPortBase & receivePort,
+                                ChannelList const & receiveIndices );
+
+  void registerAudioConnection( AudioPortBase & sendPort,
+                                AudioPortBase & receivePort );
 
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
 

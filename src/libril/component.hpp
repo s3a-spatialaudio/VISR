@@ -16,9 +16,9 @@ namespace ril
 {
 
 // Forward declaration(s)
-class AudioPort;
+class AudioPortBase;
 class CompositeComponent;
-class ParameterPortBase; // Note: Naming is inconsistent.
+class ParameterPortBase;
 class SignalFlowContext;
 
 class ComponentInternal;
@@ -61,11 +61,13 @@ public:
   */
   Component & operator=( Component && ) = delete;
 
-
+  /**
+   * Separator used to form hierarchical names.
+   */
   static const std::string cNameSeparator;
 
   /**
-   *
+   * Destructor (virtual)
    */
   virtual ~Component();
 
@@ -84,6 +86,24 @@ public:
    * functionality) or a composite consisting of an interconnection of atomic (or further composite) components.
    */
   virtual bool isComposite() const = 0;
+
+  AudioPortBase& audioPort( char const * portName );
+
+  AudioPortBase const& audioPort( char const * portName ) const;
+
+  AudioPortBase& audioPort( std::string const & portName );
+
+  AudioPortBase const& audioPort( std::string const & portName ) const;
+
+
+  ParameterPortBase& parameterPort( char const * portName );
+
+  ParameterPortBase const& parameterPort( char const * portName ) const;
+
+  ParameterPortBase& parameterPort( std::string const & portName );
+
+  ParameterPortBase const& parameterPort( std::string const & portName ) const;
+
 
   /**
    * Return the sampling frequency of the containing signal flow.
@@ -111,37 +131,13 @@ public:
   ComponentInternal & internal();
 
   ComponentInternal const & internal() const;
+
 protected:
 
   SignalFlowContext & context();
   SignalFlowContext const & context( ) const;
 
 private:
-#if 0
-  /**
-   * Register a port with a type and a unique name within the port.
-   * @param name The name of 
-   * @throw In case of a non-unique or invalid port name
-   */
-  void registerAudioPort( AudioPort* port );
-  void unregisterAudioPort( AudioPort* port );
-
-  /**
-  * Register a parameter port in the component. Generally performed in the port's constructor.
-  * @note No need to make this a part of the public interface. Could be moved into the 'internal' object.
-  * @todo consider making this a template method to share the implementation between audio and parameter ports.
-  */
-  void registerParameterPort( ParameterPortBase * port );
-
-  /**
-  * Unregister a parameter port in the component. Generally performed in the port's destructor.
-  * @note No need to make this a part of the public interface. Could be moved into the 'internal' object.
-  * @todo consider making this a template method to share the implementation between audio and parameter ports.
-  */
-  bool unregisterParameterPort( ParameterPortBase * port );
-#endif
-
-
   std::unique_ptr<ComponentInternal> mImpl;
 };
 

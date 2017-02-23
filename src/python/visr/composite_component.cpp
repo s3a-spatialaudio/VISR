@@ -70,9 +70,12 @@ void exportCompositeComponent( pybind11::module& m )
           pybind11::arg( "sendComponent"), pybind11::arg("sendPort"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort") )
     .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(ril::ParameterPortBase&, ril::ParameterPortBase&)>(&ril::CompositeComponent/*Wrapper*/::registerParameterConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
-    .def( "registerAudioConnection", &ril::CompositeComponent/*Wrapper*/::registerAudioConnection,
+    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(std::string const &, std::string const &, ril::ChannelList const &, std::string const &, std::string const &, ril::ChannelList const &)>(&ril::CompositeComponent/*Wrapper*/::registerAudioConnection),
           pybind11::arg( "sendComponent" ), pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receiveComponent" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
-    // TODO: Add further overloads of registerAudioConnection?
+    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(ril::AudioPortBase &, ril::ChannelList const &, ril::AudioPortBase &, ril::ChannelList const &)>(&ril::CompositeComponent/*Wrapper*/::registerAudioConnection),
+      pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
+    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(ril::AudioPortBase &, ril::AudioPortBase &)>(&ril::CompositeComponent/*Wrapper*/::registerAudioConnection),
+      pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
     ;
 }
 
