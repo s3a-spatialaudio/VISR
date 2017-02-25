@@ -3,6 +3,10 @@
 #ifndef VISR_PYTHON_PML_LISTENER_POSITION_HPP_INCLUDED
 #define VISR_PYTHON_PML_LISTENER_POSITION_HPP_INCLUDED
 
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#endif
+
 namespace visr
 {
 namespace python
@@ -10,7 +14,11 @@ namespace python
 namespace pml
 {
 
+#ifdef USE_PYBIND11
+void exportListenerPosition( pybind11::module & m );
+#else
 void exportListenerPosition();
+#endif
 
 } // namepace pml
 } // namespace python

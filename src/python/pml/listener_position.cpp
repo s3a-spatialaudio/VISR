@@ -4,7 +4,11 @@
 
 #include <libpml/listener_position.hpp>
 
+#ifdef USE_PYBIND11
+#include <pybind11.h>
+#else
 #include <boost/python.hpp>
+#endif
 
 namespace visr
 {
@@ -16,6 +20,17 @@ namespace python
 namespace pml
 {
 
+#ifdef USE_PYBIND11
+void exportListenerPosition( pybind11::module & m)
+{
+  pybind11::class_<ListenerPosition>( m, "ListenerPosition" )
+    .def( pybind11::init<float, float, float>() )
+    .def_property_readonly( "x", &ListenerPosition::x )
+    .def_property_readonly( "y", &ListenerPosition::y )
+    .def_property_readonly( "z", &ListenerPosition::z )
+    ;
+}  
+#else
 void exportListenerPosition()
 {
   boost::python::class_<ListenerPosition>( "ListenerPosition", boost::python::init<float, float, float>() )
@@ -24,7 +39,7 @@ void exportListenerPosition()
     .add_property( "z", &ListenerPosition::z )
     ;
 }
-
+#endif
 } // namepace pml
 } // namespace python
 } // namespace visr
