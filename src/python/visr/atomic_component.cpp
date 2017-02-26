@@ -8,7 +8,7 @@
 #include <libril/signal_flow_context.hpp>
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
+#include <pybind11/pybind11.h>
 #else
 // For some strange reasons, we have to onclude the Python stuff before (some?) visr API includes
 // to avoid strange errors about undefined operators (op_) etc.
@@ -49,6 +49,7 @@ void exportAtomicComponent( pybind11::module& m )
   pybind11::class_<ril::AtomicComponent, AtomicComponentWrapper, ril::Component >( m, "AtomicComponent" )
     .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
 	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent")=static_cast<ril::CompositeComponent *>(nullptr) )
+    .def( "process", &ril::AtomicComponent::process )
     ;
 }
 #else

@@ -4,7 +4,7 @@
 #define VISR_PYTHON_VISR_AUDIO_PORT_INCLUDED
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
+#include <pybind11/pybind11.h>
 #endif
 
 

@@ -44,11 +44,13 @@ if( PYTHON_EXTERNAL_SUFFIX )
 endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
-# Standard dependencies for boost::python projects
 target_link_libraries( ${PROJECT_NAME} rrl )
-target_link_libraries( ${PROJECT_NAME} pml ) # Preliminary solution (vulgo 'hack')
-target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
-target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( ${PROJECT_NAME}  ${WHOLE_ARCHIVE_PREFIX} pml ${WHOLE_ARCHIVE_SUFFIX} ) # Preliminary solution (vulgo 'hack')
+if( NOT BUILD_USE_PYBIND )
+  # Standard dependencies for boost::python projects
+  target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
+  target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
+endif( NOT BUILD_USE_PYBIND )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ../python)

@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PYTHON_VISR_COMPOSITE_COMPONENT_INCLUDED
-#define VISR_PYTHON_VISR_COMPOSITE_COMPONENT_INCLUDED
+#ifndef VISR_PYTHON_VISR_PARAMETER_CONFIG_BASE_INCLUDED
+#define VISR_PYTHON_VISR_PARAMETER_CONFIG_BASE_INCLUDED
 
 #ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
@@ -15,13 +15,13 @@ namespace visr
 {
 
 #ifdef USE_PYBIND11
-void exportCompositeComponent( pybind11::module& m );
+void exportParameterConfigBase( pybind11::module& m );
 #else
-void exportCompositeComponent();
+void exportParameterConfigBase();
 #endif
 
 } // namepace visr
 } // namespace python
 } // namespace visr
 
-#endif // #ifndef VISR_PYTHON_VISR_COMPOSITE_COMPONENT_INCLUDED
+#endif // #ifndef VISR_PYTHON_VISR_PARAMETER_CONFIG_BASE_INCLUDED

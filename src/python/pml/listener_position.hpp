@@ -4,7 +4,7 @@
 #define VISR_PYTHON_PML_LISTENER_POSITION_HPP_INCLUDED
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
+#include <pybind11/pybind11.h>
 #endif
 
 namespace visr

@@ -6,7 +6,7 @@
 #include "matrix_parameter.hpp" 
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
+#include <pybind11/pybind11.h>
 #else
 #include <boost/python.hpp>
 #endif
@@ -15,6 +15,8 @@
 
 PYBIND11_PLUGIN( pml )
 {
+  pybind11::module::import( "visr" );
+
   pybind11::module m( "pml", "VISR parameter message module" );
   using namespace visr::python::pml;
   exportListenerPosition( m );
@@ -32,7 +34,6 @@ BOOST_PYTHON_MODULE( pml )
   exportListenerPosition();
   exportLoudspeakerArray();
   exportMatrixParameters();
-
 }
 
 #endif

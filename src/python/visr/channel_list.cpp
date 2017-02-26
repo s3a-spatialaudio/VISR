@@ -5,9 +5,9 @@
 #include <libril/channel_list.hpp>
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
-#include <pytypes.h>
-#include <stl.h> // We should include the base directory instead and say "#include <pybind11/pybind11.h> #include <pybind11/stl.h>"
+#include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
+#include <pybind11/stl.h>
 #endif
 
 #include <algorithm>
@@ -34,7 +34,7 @@ void exportChannelList( pybind11::module& m )
   pybind11::class_<ril::ChannelRange>(m,"ChannelRange")
     .def( pybind11::init<>() )
     .def( pybind11::init<std::size_t, std::size_t, std::ptrdiff_t>(), pybind11::arg("start"), pybind11::arg("end"), pybind11::arg("step")=1 )
-    .def( "__str__", []( ril::ChannelRange const & slice ){ std::stringstream outStr; outStr << slice.start() << ":"; return outStr.str();} )
+    .def( "__str__", []( ril::ChannelRange const & slice ){ std::stringstream outStr; outStr << slice.start() << ":" << slice.step() << ":" << slice.end(); return outStr.str();} )
     ;
 
   /**
@@ -44,6 +44,7 @@ void exportChannelList( pybind11::module& m )
   pybind11::class_<ril::ChannelList>(m, "ChannelList" )
     .def( pybind11::init<>() )
     .def( pybind11::init<std::initializer_list<ril::ChannelList::IndexType > const & >() )
+    .def( pybind11::init<std::list<ril::ChannelList::IndexType > const & >() )
     .def( pybind11::init<ril::ChannelRange const & >() )
 //    .def( pybind11::init<std::list<ril::CompositeComponent::ChannelRange> const & >() )
 //    .def( "__init__", []( ril::ChannelList & inst, pybind11:: sequence const & s ) { new (&inst) ril::ChannelList; } )

@@ -5,7 +5,7 @@
 
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
+#include <pybind11/pybind11.h>
 #else
 #include <boost/python.hpp>
 #endif
@@ -14,6 +14,8 @@
 
 PYBIND11_PLUGIN( signalflows )
 {
+  pybind11::module::import( "visr" );
+
   pybind11::module m( "signalflows", "VISR signal flows library module" );
   using namespace visr::python::signalflows;
   exportBaselineRenderer( m );

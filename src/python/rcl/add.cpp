@@ -7,7 +7,7 @@
 #include <libril/signal_flow_context.hpp>
 
 #ifdef USE_PYBIND11
-#include <pybind11.h>
+#include <pybind11/pybind11.h>
 #else
 #include <boost/python.hpp>
 #include <boost/python/args.hpp>
@@ -21,11 +21,13 @@ using visr::rcl::Add;
 
 PYBIND11_PLUGIN( rcl )
 {
+  pybind11::module::import("visr");
+
   pybind11::module m("rcl", "VISR atomic components library" );
 
   pybind11::class_<Add, visr::ril::AtomicComponent>( m, "Add" )
     .def( pybind11::init<visr::ril::SignalFlowContext&, char const *, visr::ril::CompositeComponent*>() )
-    .def( "setup", &visr::rcl::Add::setup )
+    .def( "setup", &visr::rcl::Add::setup, pybind11::arg( "numInputs" )=2, pybind11::arg( "width" ) = 1 )
     .def( "process", &visr::rcl::Add::process );
 
   return m.ptr();

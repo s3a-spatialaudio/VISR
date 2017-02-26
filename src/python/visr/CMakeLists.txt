@@ -6,6 +6,7 @@ audio_port.cpp
 channel_list.cpp
 component.cpp
 composite_component.cpp
+parameter_config_base.cpp
 signal_flow_context.cpp
 visr.cpp
 )
@@ -16,6 +17,7 @@ audio_port.hpp
 channel_list.hpp
 component.hpp
 composite_component.hpp
+parameter_config_base.hpp
 signal_flow_context.hpp
 )
 
@@ -52,9 +54,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PRO
 
 target_link_libraries( ${PROJECT_NAME} visr_impl )
 
-# Standard dependencies for boost::python projects
-target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
-target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
+if( NOT BUILD_USE_PYBIND )
+  # Standard dependencies for boost::python projects
+  target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
+  target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
+endif( NOT BUILD_USE_PYBIND )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
 # ??? Correct? THE LIBRARY_OUTPUT_DIRECTORY should be enough for the compilation.
