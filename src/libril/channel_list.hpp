@@ -86,21 +86,31 @@ public:
 
   /**
   * Construct a single-element range.
+  * @note this constructor is not explicit to enable construction of ChannelList objects from initializer lists.
   */
   ChannelRange( IndexType val );
 
-  explicit ChannelRange( IndexType start, IndexType end, StepType step = 1 );
+  /**
+  * Construct a range from start, end, and optional step values
+  * @throw std::invalid_argument the range specification is invalid (i.e., if step is zero or the increments goes in the different direction of the end value.)
+  * @note this constructor is not explicit to enable construction of ChannelList objects from initializer lists of ranges.
+  */
+  ChannelRange( IndexType start, IndexType end, StepType step = 1 );
 
   /**
-  * @throw std::invalid_argument the range specification is invalid.
-  */
-  void set( IndexType start, IndexType size = 1, StepType stride = 1 );
+   * Set a range using start, end, and (optional) step notation
+   * @throw std::invalid_argument the range specification is invalid.
+   */
+  void set( IndexType start, IndexType end, StepType stride = 1 );
 
   /**
   * Static method to check whether a range specification is valid.
   */
   static bool isValid( IndexType start, IndexType size, StepType stride );
 
+  /**
+   * Query whether the range is valid, i.e., whether it contains a finite (potentially zero) number of elements.
+   */
   bool isValid() const;
 
   /**
