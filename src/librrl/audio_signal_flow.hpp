@@ -69,6 +69,16 @@ public:
   ~AudioSignalFlow();
 
   /**
+   * Method to transfer the capture and playback samples to and from
+   * the locations where they are expected, and execute the contained atomic components.
+   * Called from processFunction(). For a parameter description
+   * (except userData), see @see processFunction().
+   */
+  AudioInterface::CallbackResult
+  process( ril::SampleType const * const * captureSamples,
+                        ril::SampleType * const * playbackSamples );
+
+  /**
    * A static, i.e., non-class function which can be registered as a
    * callback method. Calling this method triggers the transfer of the
    * passed samples and the invocation of the process() function of
@@ -86,6 +96,7 @@ public:
    * @param callbackResult A enumeration type to hold the result of
    * the process() function. Typically used to signal error conditions
    * or to request termination.
+   * @TODO After the redesign, the translation to a callback function (and discarding the object pointer) needs to be done somewhere else!
    */
   static void  processFunction( void* userData,
                                 ril::SampleType const * const * captureSamples,
@@ -102,6 +113,12 @@ public:
    * @todo After removal of the setup method and performing the setup in the constructor, consider removal of this mechanism.
    */
   bool initialised() const { return mInitialised; }
+
+  /**
+   * Return the number of samples processed in each process() function
+   * @note At the moment this is required by the Python binding.
+   */
+  std::size_t period() const;
 
   std::size_t numberOfAudioCapturePorts( ) const;
 
@@ -193,16 +210,6 @@ private:
   void setInitialised( bool newState = true ) { mInitialised = newState; }
 
   std::size_t numberCommunicationProtocols() const;
-
-  /**
-   * Method to transfer the capture and playback samples to and from
-   * the locations where they are expected, and execute the contained atomic components.
-   * Called from processFunction(). For a parameter description
-   * (except userData), see @see processFunction().
-   */
-  void processInternal( ril::SampleType const * const * captureSamples,
-                        ril::SampleType * const * playbackSamples,
-                        AudioInterface::CallbackResult& callbackResult );
 
   /**
   * Method called within the processFunction callback to execute the atomic components of the graph

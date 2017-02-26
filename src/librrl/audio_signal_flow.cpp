@@ -76,6 +76,11 @@ AudioSignalFlow::~AudioSignalFlow()
 {
 }
 
+std::size_t AudioSignalFlow::period() const
+{
+  return mFlow.period();
+}
+
 // todo: make this method protected?
 void AudioSignalFlow::initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
                                     std::size_t alignmentElements /* = cVectorAlignmentSamples */ )
@@ -90,13 +95,13 @@ AudioSignalFlow::processFunction( void* userData,
                                   AudioInterface::CallbackResult& callbackResult )
 {
   AudioSignalFlow* flowObj = reinterpret_cast<AudioSignalFlow*>( userData );
-  flowObj->processInternal( captureSamples, playbackSamples, callbackResult );
+  callbackResult = flowObj->process( captureSamples, playbackSamples );
 }
 
-void 
-AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples,
-                                  ril::SampleType * const * playbackSamples,
-                                  AudioInterface::CallbackResult& callbackResult )
+
+AudioInterface::CallbackResult
+AudioSignalFlow::process( ril::SampleType const * const * captureSamples,
+                          ril::SampleType * const * playbackSamples )
 {
   // TODO: It needs to be checked beforehand that the widths of the input and output signal vectors match.
 
@@ -123,7 +128,7 @@ AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples
   catch( std::exception const & ex )
   {
     // TODO: Add error message to ex.what()
-    throw ex;
+    return 1;
   }
 
   // collect the generated output from the playback part of the communication area and 
@@ -142,7 +147,7 @@ AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples
   }
 
   // TODO: use a sophisticated enumeration to signal error conditions
-  callbackResult = 0; // Means 'no error'
+  return 0; // Means 'no error'
 }
 
 void AudioSignalFlow::executeComponents()
