@@ -26,20 +26,37 @@ namespace pml
 
 #ifdef USE_PYBIND11
 
-namespace detail
-{
-
-
-
-} // namespace detail
-
-
 template<typename DataType>
-  void exportMatrixParameter( pybind11::module & m, char const * className )
+void exportMatrixParameter( pybind11::module & m, char const * className )
 {
-  pybind11::class_<MatrixParameter< DataType >/*, ril::ParameterBase*/ >(m, className, pybind11::metaclass() )
-  .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") )
+  pybind11::class_<MatrixParameter< DataType >/*, ril::ParameterBase*/ >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
+  .def_buffer([](MatrixParameter<DataType> &mp) -> pybind11::buffer_info
+	      { return pybind11::buffer_info(mp.data(),
+					     sizeof(DataType),
+					     pybind11::format_descriptor<DataType>::format(),
+					     2,
+					     {mp.numberOfRows(), mp.numberOfColumns()},
+					     {sizeof(DataType), mp.stride()*sizeof(DataType)} );
+	      } )
+  .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::ril::cVectorAlignmentSamples )
   .def( pybind11::init<std::size_t, std::size_t, std::size_t>() )
+  .def( "__init__", []( MatrixParameter<DataType> & inst, pybind11::array const & data, std::size_t alignment)
+  {
+    if( data.ndim() != 2 )
+    {
+      throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input aray must be 2D" );
+    }
+    std::size_t const numRows = data.shape()[0];
+    std::size_t const numCols = data.shape()[1];
+    new (&inst) MatrixParameter<DataType>( numRows, numCols, alignment);
+    for( std::size_t rowIdx(0); rowIdx < numRows; ++rowIdx )
+    {
+      for( std::size_t colIdx(0); colIdx < numCols; ++colIdx )
+      {
+        inst( rowIdx, colIdx ) = *static_cast<DataType const *>(data.data( rowIdx, colIdx ));
+      }
+    }
+  }, pybind11::arg("data"), pybind11::arg("alignment") = visr::ril::cVectorAlignmentSamples )
   .def_property_readonly( "numberOfRows", &MatrixParameter<DataType>::numberOfRows )
   .def_property_readonly( "numberOfColumns", &MatrixParameter<DataType>::numberOfColumns )
   .def( "resize", &MatrixParameter<DataType>::resize, pybind11::arg("numberOfRows"), pybind11::arg("numberOfColumns") )
