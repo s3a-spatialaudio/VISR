@@ -29,7 +29,7 @@ namespace pml
  * to the same instances are appropriately secured against race conditions.
  */
 template< typename MessageTypeT >
-class DoubleBufferingProtocol: public ril::CommunicationProtocolBase
+class DoubleBufferingProtocol: public CommunicationProtocolBase
 {
 public:
 
@@ -38,13 +38,13 @@ public:
    */
   using MessageType = MessageTypeT;
 
-  class Input: public ril::ParameterPortBase
+  class Input: public ParameterPortBase
   {
   public:
     /**
     * Default constructor.
     */
-    explicit Input( std::string const & name, ril::Component & parent )
+    explicit Input( std::string const & name, Component & parent )
     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
     , mProtocol(nullptr)
     , mChanged( true ) // Mark the data as changed for the first iteration
@@ -95,15 +95,15 @@ public:
   /**
    * Provide alias for parameter configuration class type for the contained parameter values.
    */
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
+  using ParameterConfigType = typename ParameterToConfigType<MessageTypeT>::ConfigType;
 
-  class Output: public ril::ParameterPortBase
+  class Output: public ParameterPortBase
   {
   public:
     /**
      * Default constructor.
      */
-    explicit Output( std::string const & name, ril::Component & parent )
+    explicit Output( std::string const & name, Component & parent )
      : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
      , mProtocol(nullptr)
     {}
@@ -137,13 +137,13 @@ public:
     DoubleBufferingProtocol * mProtocol;
   };
 
-  explicit DoubleBufferingProtocol( ril::ParameterConfigBase const & config );
+  explicit DoubleBufferingProtocol( ParameterConfigBase const & config );
 
   explicit DoubleBufferingProtocol( ParameterConfigType const & config );
 
-  ril::ParameterType parameterType( ) const override { return ril::ParameterToId<MessageType>::id; }
+  ParameterType parameterType( ) const override { return ParameterToId<MessageType>::id; }
 
-  virtual ril::CommunicationProtocolType protocolType( ) const override { return ril::CommunicationProtocolType::DoubleBuffering; }
+  virtual CommunicationProtocolType protocolType( ) const override { return CommunicationProtocolType::DoubleBuffering; }
 
   MessageType & frontData()
   {
@@ -176,13 +176,13 @@ public:
     std::for_each( mInputs.begin(), mInputs.end(), []( Input* port ) { port->markChanged(); } );
   }
 
-  void connectInput( ril::ParameterPortBase* port ) override;
+  void connectInput( ParameterPortBase* port ) override;
 
-  void connectOutput( ril::ParameterPortBase* port ) override;
+  void connectOutput( ParameterPortBase* port ) override;
 
-  bool disconnectInput( ril::ParameterPortBase* port ) override;
+  bool disconnectInput( ParameterPortBase* port ) override;
 
-  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectOutput( ParameterPortBase* port ) override;
 
 private:
   ParameterConfigType const mConfig;
@@ -198,7 +198,7 @@ private:
 };
 
 template< typename MessageTypeT >
-inline DoubleBufferingProtocol< MessageTypeT >::DoubleBufferingProtocol( ril::ParameterConfigBase const & config )
+inline DoubleBufferingProtocol< MessageTypeT >::DoubleBufferingProtocol( ParameterConfigBase const & config )
 : DoubleBufferingProtocol( dynamic_cast<ParameterConfigType const &>(config) )
 {
 }
@@ -213,7 +213,7 @@ inline DoubleBufferingProtocol< MessageTypeT >::DoubleBufferingProtocol( Paramet
 }
 
 template< typename MessageTypeT >
-inline void DoubleBufferingProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
+inline void DoubleBufferingProtocol< MessageTypeT >::connectInput( ParameterPortBase* port )
 {
   DoubleBufferingProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Input *>(port);
   if( not typedPort )
@@ -228,7 +228,7 @@ inline void DoubleBufferingProtocol< MessageTypeT >::connectInput( ril::Paramete
 }
 
 template< typename MessageTypeT >
-inline void DoubleBufferingProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
+inline void DoubleBufferingProtocol< MessageTypeT >::connectOutput( ParameterPortBase* port )
 {
   DoubleBufferingProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Output*>(port);
   if( not typedPort )
@@ -244,7 +244,7 @@ inline void DoubleBufferingProtocol< MessageTypeT >::connectOutput( ril::Paramet
 }
 
 template< typename MessageTypeT >
-inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
+inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectInput( ParameterPortBase* port )
 {
   DoubleBufferingProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Input *>(port);
   if( not typedPort )
@@ -262,7 +262,7 @@ inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectInput( ril::Param
 }
 
 template< typename MessageTypeT >
-inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
+inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectOutput( ParameterPortBase* port )
 {
   DoubleBufferingProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Output *>(port);
   if( not typedPort )
@@ -282,6 +282,6 @@ inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectOutput( ril::Para
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::DoubleBufferingProtocol, visr::ril::CommunicationProtocolType::DoubleBuffering )
+DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::DoubleBufferingProtocol, visr::CommunicationProtocolType::DoubleBuffering )
 
 #endif // VISR_PML_DOUBLE_BUFFERING_PROTOCOL_HPP_INCLUDED

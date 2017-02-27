@@ -16,12 +16,12 @@ namespace visr
 namespace signalflows
 {
 
-class DelayVector: public ril::CompositeComponent
+class DelayVector: public CompositeComponent
 {
 public:
-  explicit DelayVector( ril::SignalFlowContext & context,
+  explicit DelayVector( SignalFlowContext & context,
                         const char * name,
-                        ril::CompositeComponent * parent,
+                        CompositeComponent * parent,
                         std::size_t cNumberOfChannels,
                         std::size_t interpolationPeriod,
                         rcl::DelayVector::InterpolationType interpolationMethod );
@@ -32,9 +32,9 @@ public:
 
   /*virtual*/ void setup( );
 
-  void setDelay( efl::BasicVector<ril::SampleType> const & newDelays );
+  void setDelay( efl::BasicVector<SampleType> const & newDelays );
 
-  void setGain( efl::BasicVector<ril::SampleType> const & newGains );
+  void setGain( efl::BasicVector<SampleType> const & newGains );
 
 private:
   const std::size_t cNumberOfChannels;
@@ -45,9 +45,9 @@ private:
 
   rcl::DelayVector mDelay;
 
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

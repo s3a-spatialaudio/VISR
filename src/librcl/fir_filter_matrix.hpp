@@ -34,18 +34,18 @@ namespace rcl
  * The widths of the input and the output port are set by the parameters \p 
  * numberOfInputs and \p numberOfOutputs in the setup() method.
  */
-class FirFilterMatrix: public ril::AtomicComponent
+class FirFilterMatrix: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit FirFilterMatrix( ril::SignalFlowContext& context,
+  explicit FirFilterMatrix( SignalFlowContext& context,
                             char const * name,
-                            ril::CompositeComponent * parent = nullptr );
+                            CompositeComponent * parent = nullptr );
 
   /**
    * Desctructor
@@ -117,12 +117,12 @@ private:
   /**
    * The audio input port for this component.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output port for this component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mConvolver;
 };

@@ -25,10 +25,10 @@ namespace pml
  */
 template<typename ElementType >
 class VectorParameter: public efl::BasicVector<ElementType>,
-  public ril::TypedParameterBase<VectorParameterConfig, ril::ParameterToId<VectorParameter<ElementType> >::id >
+  public TypedParameterBase<VectorParameterConfig, ParameterToId<VectorParameter<ElementType> >::id >
 {
 public:
-  explicit VectorParameter(ril::ParameterConfigBase const & config);
+  explicit VectorParameter(ParameterConfigBase const & config);
 
   explicit VectorParameter(VectorParameterConfig const & config);
 };
@@ -36,7 +36,7 @@ public:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::VectorParameter<float>, visr::ril::ParameterType::VectorFloat, visr::pml::VectorParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::VectorParameter<double>, visr::ril::ParameterType::VectorDouble, visr::pml::VectorParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::VectorParameter<float>, visr::ParameterType::VectorFloat, visr::pml::VectorParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::VectorParameter<double>, visr::ParameterType::VectorDouble, visr::pml::VectorParameterConfig )
 
 #endif // VISR_PML_VECTOR_PARAMETER_HPP_INCLUDED

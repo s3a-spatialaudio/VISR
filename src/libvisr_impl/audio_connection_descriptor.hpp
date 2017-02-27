@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#ifndef VISR_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#define VISR_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
 #include <libril/channel_list.hpp>
 
@@ -15,10 +15,12 @@
 
 namespace visr
 {
-namespace ril
-{
+
 class AudioPortBase;
 class Component;
+
+namespace impl
+{
 
 #if 0
 class AudioChannelSlice
@@ -196,7 +198,7 @@ private:
 
 using AudioConnectionTable = std::multiset< AudioConnection >;
 
-} // namespace ril
+} // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#endif // #ifndef VISR_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED

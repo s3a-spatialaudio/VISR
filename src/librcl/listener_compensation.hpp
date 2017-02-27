@@ -36,19 +36,19 @@ namespace visr
 namespace rcl
 {
 
-class ListenerCompensation: public ril::AtomicComponent
+class ListenerCompensation: public AtomicComponent
 {
 public:
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit ListenerCompensation( ril::SignalFlowContext& context,
+  explicit ListenerCompensation( SignalFlowContext& context,
                                  char const * name,
-                                 ril::CompositeComponent * parent = nullptr );
+                                 CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -94,9 +94,9 @@ private:
   panning::XYZ m_listenerPos; //position of the listener
   std::size_t mNumberOfLoudspeakers;
 
-  std::unique_ptr<  ril::ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition > > mPositionInput;
-  std::unique_ptr< ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mGainOutput;
-  std::unique_ptr< ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mDelayOutput;
+  std::unique_ptr<  ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition > > mPositionInput;
+  std::unique_ptr< ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mGainOutput;
+  std::unique_ptr< ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mDelayOutput;
 };//class Listener Compensation
 
 

@@ -10,14 +10,14 @@ namespace visr
 namespace signalflows
 {
 
-GainMatrix::GainMatrix( ril::SignalFlowContext & context,
+GainMatrix::GainMatrix( SignalFlowContext & context,
                         const char * name,
-                        ril::CompositeComponent * parent, 
+                        CompositeComponent * parent, 
                         std::size_t numberOfInputs,
                         std::size_t numberOfOutputs,
-                        efl::BasicMatrix<ril::SampleType> const & initialMatrix,
+                        efl::BasicMatrix<SampleType> const & initialMatrix,
                         std::size_t interpolationPeriod )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
@@ -36,7 +36,7 @@ GainMatrix::GainMatrix( ril::SignalFlowContext & context,
                            "", "output", ChannelRange( 0, cNumberOfOutputs ) );
 
 #else
-  initCommArea( cNumberOfInputs + cNumberOfOutputs, period, ril::cVectorAlignmentSamples );
+  initCommArea( cNumberOfInputs + cNumberOfOutputs, period, cVectorAlignmentSamples );
 
   // connect the ports
   assignCommunicationIndices( "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs - 1 ) );
@@ -44,8 +44,8 @@ GainMatrix::GainMatrix( ril::SignalFlowContext & context,
   assignCommunicationIndices( "GainMatrix", "out", ChannelRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 ) );
 
   // Set the indices for communicating the signals from and to the outside world.
-  std::vector<ril::AudioPort::SignalIndexType> captureIndices = ChannelRange( 0, cNumberOfInputs - 1 );
-  std::vector<ril::AudioPort::SignalIndexType> playbackIndices = ChannelRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 );
+  std::vector<AudioPort::SignalIndexType> captureIndices = ChannelRange( 0, cNumberOfInputs - 1 );
+  std::vector<AudioPort::SignalIndexType> playbackIndices = ChannelRange( cNumberOfInputs, cNumberOfInputs + cNumberOfOutputs - 1 );
 
   assignCaptureIndices( &captureIndices[0], captureIndices.size( ) );
   assignPlaybackIndices( &playbackIndices[0], playbackIndices.size( ) );

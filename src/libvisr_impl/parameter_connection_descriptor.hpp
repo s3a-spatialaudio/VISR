@@ -1,15 +1,16 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#ifndef VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#define VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
 #include <set>
 
 namespace visr
 {
-namespace ril
-{
 class ParameterPortBase;
+
+namespace impl
+{
 
 #if 0
 struct ParameterPortDescriptor
@@ -64,7 +65,7 @@ private:
 // using ParameterConnectionTable = std::multimap<ParameterPortDescriptor, ParameterPortDescriptor >;
 using ParameterConnectionTable = std::multiset<ParameterConnection>;
 
-} // namespace ril
+} // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED

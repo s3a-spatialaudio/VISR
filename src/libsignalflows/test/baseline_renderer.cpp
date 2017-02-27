@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
   std::size_t const interpolationPeriod = 16 * period;
   std::size_t const numRealLoudspeakers = arrayConfig.getNumRegularSpeakers();
   std::size_t const diffusionFilterLength = 512;
-  efl::BasicMatrix<ril::SampleType> const diffusionFilters( numRealLoudspeakers, diffusionFilterLength );
+  efl::BasicMatrix<SampleType> const diffusionFilters( numRealLoudspeakers, diffusionFilterLength );
 
   std::string const trackingConfig( "" );
 
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                << ", \"lateReverbDecorrelationFilters\": \"" << lateDiffusionFilters
                << "\" }";
 
-  ril::SignalFlowContext context( period, 48000 );
+  SignalFlowContext context( period, 48000 );
 
   signalflows::BaselineRenderer( context, "", nullptr,
                                  arrayConfig,

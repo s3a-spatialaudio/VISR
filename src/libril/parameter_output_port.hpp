@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
+#ifndef VISR_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
+#define VISR_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
 
 #include "parameter_port_base.hpp"
 
@@ -13,8 +13,6 @@
 #include <string>
 
 namespace visr
-{
-namespace ril
 {
 
 /**
@@ -52,7 +50,7 @@ public:
   }
 
 protected:
-  void setProtocol( ril::CommunicationProtocolBase * protocol ) override
+  void setProtocol( CommunicationProtocolBase * protocol ) override
   {
     ProtocolT<ParameterT> * typedProtocol
       = dynamic_cast< ProtocolT<ParameterT> * >(protocol);
@@ -81,7 +79,6 @@ inline ParameterOutputPort<ProtocolT, ParameterT >::~ParameterOutputPort( )
 {
 }
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_OUTPUT_PORT_HPP_INCLUDED

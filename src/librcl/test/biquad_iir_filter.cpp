@@ -19,11 +19,11 @@ namespace test
 
 namespace // unnamed
 {
-class BiquadSimple: public ril::AudioSignalFlow
+class BiquadSimple: public AudioSignalFlow
 {
 public:
   BiquadSimple()
-    : ril::AudioSignalFlow( 1024, 48000 )
+    : AudioSignalFlow( 1024, 48000 )
     , mBiquad( *this, "Filter" )
   {
   }

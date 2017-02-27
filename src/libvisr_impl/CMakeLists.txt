@@ -2,7 +2,7 @@
 
 SET( HEADERS
 audio_connection_descriptor.hpp
-component_internal.hpp
+component_impl.hpp
 composite_component_implementation.hpp
 parameter_connection_descriptor.hpp
 )
@@ -17,7 +17,7 @@ channel_list.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp
 component.cpp
-component_internal.cpp
+component_impl.cpp
 composite_component.cpp
 composite_component_implementation.cpp
 parameter_connection_descriptor.cpp

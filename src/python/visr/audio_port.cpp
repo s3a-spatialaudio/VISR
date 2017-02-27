@@ -19,11 +19,6 @@
 
 namespace visr
 {
-  using ril::AudioPortBase;
-  using ril::AudioInput;
-  using ril::AudioOutput;
-  using ril::Component;
-  using ril::PortBase;
 namespace python
 {
 namespace visr
@@ -36,7 +31,7 @@ void exportAudioPort( pybind11::module & m)
   // Note: we create a named object because we use it subsequently for defining the Direction enum
   pybind11::class_<PortBase> portBase( m, "PortBase" );
   portBase
-    .def( pybind11::init<std::string const &, ril::Component &, PortBase::Direction>(), pybind11::return_value_policy::reference_internal )
+    .def( pybind11::init<std::string const &, Component &, PortBase::Direction>(), pybind11::return_value_policy::reference_internal )
     .def_property_readonly( "name", &PortBase::name )
     .def_property_readonly( "direction", &PortBase::direction )
     .def_property_readonly( "parent", &PortBase::direction ) // Check how to select the const version
@@ -50,17 +45,17 @@ void exportAudioPort( pybind11::module & m)
     ;
 
   pybind11::class_<AudioPortBase, PortBase>( m, "AudioPortBase" )
-    .def( pybind11::init<char const*, ril::Component &, PortBase::Direction>( ) )
+    .def( pybind11::init<char const*, Component &, PortBase::Direction>( ) )
     .def_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
     ;
 
   pybind11::class_<AudioInput, AudioPortBase >( m, "AudioInput" )
-    .def( pybind11::init<char const*, ril::Component &>() )
+    .def( pybind11::init<char const*, Component &>() )
     .def_property( "width", &AudioOutput::width, &AudioOutput::setWidth )
     ;
 
   pybind11::class_<AudioOutput, AudioPortBase >( m, "AudioOutput" )
-    .def( pybind11::init<char const*, ril::Component &>() )
+    .def( pybind11::init<char const*, Component &>() )
     .def_property( "width", &AudioOutput::width, &AudioOutput::setWidth )
     ;
 }
@@ -73,7 +68,7 @@ void exportAudioPort()
   PortBase::Direction (PortBase::*PortBaseDirection)() const = &PortBase::direction;
 
   class_<PortBase, boost::noncopyable>("PortBase", no_init )
-    .def( init<std::string const &, ril::Component &, PortBase::Direction>( args( "name", "parent" ) ) )
+    .def( init<std::string const &, Component &, PortBase::Direction>( args( "name", "parent" ) ) )
     .add_property( "name", make_function( &PortBase::name, return_internal_reference<>() ) )
     .add_property( "direction", &PortBase::direction )
 //    .add_property( "parent", PortBaseDirection ) // Check how to select the const version
@@ -81,12 +76,12 @@ void exportAudioPort()
   ;
 
   class_<AudioPortBase, bases<PortBase>, boost::noncopyable >("AudioPortBase", no_init )
-    .def( init<char const*, ril::Component *>( args( "name", "parent" ) ) )
+    .def( init<char const*, Component *>( args( "name", "parent" ) ) )
     .add_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
   ;
   
   class_<AudioInput, bases<AudioPortBase>, boost::noncopyable >( "AudioInput", no_init )
-    .def( init<char const*, ril::Component *>( args( "name", "parent" ) ) )
+    .def( init<char const*, Component *>( args( "name", "parent" ) ) )
     .add_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
 
 

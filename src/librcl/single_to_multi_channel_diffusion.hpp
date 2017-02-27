@@ -33,21 +33,21 @@ namespace rcl
 /**
  * Audio Component for creating a set of decorrelated signals out of a single input signal.
  */
-class SingleToMultichannelDiffusion: public ril::AtomicComponent
+class SingleToMultichannelDiffusion: public AtomicComponent
 {
   /**
    * Alias for the type of the audio samples processed by this component.
    */
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SingleToMultichannelDiffusion( ril::SignalFlowContext& context,
+  explicit SingleToMultichannelDiffusion( SignalFlowContext& context,
                                           char const * name,
-                                          ril::CompositeComponent * parent = nullptr );
+                                          CompositeComponent * parent = nullptr );
     
   ~SingleToMultichannelDiffusion();
 
@@ -85,12 +85,12 @@ private:
   /**
    * The audio input, width 1.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output, width \p numberOfOutputs.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * The number of output channels.
@@ -108,7 +108,7 @@ private:
    * An one-to-N FIR filter for diffusion.
    */
 #ifdef DIFFUSION_USE_FAST_CONVOLVER
-  std::unique_ptr<rbbl::MultichannelConvolverUniform<ril::SampleType> > mDiffusionFilter;
+  std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mDiffusionFilter;
 #else
   std::unique_ptr<rbbl::FIR> mDiffusionFilter;
   /**

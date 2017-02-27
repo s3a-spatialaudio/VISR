@@ -9,7 +9,7 @@
 #include <libril/parameter_config_base.hpp>
 #include <libril/parameter_port_base.hpp>
 
-#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/component_impl.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 
 #include <ciso646>
@@ -20,7 +20,7 @@ namespace visr
 namespace rrl
 {
 
-bool isPlaceholderPort( ril::PortBase const * const port )
+bool isPlaceholderPort( PortBase const * const port )
 {
   if( not port->parent().isComposite() )
   {
@@ -35,39 +35,39 @@ bool isPlaceholderPort( ril::PortBase const * const port )
   return true;
 }
 
-std::string qualifiedName( ril::PortBase const & port )
+std::string qualifiedName( PortBase const & port )
 {
   return port.parent().name() + ":" + port.name();
 }
 
-std::string fullyQualifiedName( ril::PortBase const & port )
+std::string fullyQualifiedName( PortBase const & port )
 {
   return port.parent().fullName() + ":" + port.name();
 }
 
-bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, ril::ParameterPortBase const & receivePort,
+bool checkParameterPortCompatibility( ParameterPortBase const & sendPort, ParameterPortBase const & receivePort,
                                       std::ostream & messages )
 {
   bool result = true;
   // Check connection for protocol and type compatibility
-  ril::CommunicationProtocolType const sendProtocolType = sendPort.protocolType();
-  ril::CommunicationProtocolType const receiveProtocolType = receivePort.protocolType();
+  CommunicationProtocolType const sendProtocolType = sendPort.protocolType();
+  CommunicationProtocolType const receiveProtocolType = receivePort.protocolType();
   if( sendProtocolType != receiveProtocolType )
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The communication protocols of the connected parameter ports \""
       << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
-  ril::ParameterType const sendParameterType = sendPort.parameterType();
-  ril::ParameterType const receiveParameterType = receivePort.parameterType();
+  ParameterType const sendParameterType = sendPort.parameterType();
+  ParameterType const receiveParameterType = receivePort.parameterType();
   if( sendParameterType != receiveParameterType )
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \""
       << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
-  ril::ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
-  ril::ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
+  ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
+  ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
   if( not sendParameterConfig.compare( receiveParameterConfig ) )
   {
     result = false;
@@ -78,17 +78,17 @@ bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, r
 }
 
 template<class PortType>
-PortLookup<PortType>::PortLookup( ril::ComponentInternal const & comp, bool recurse /*= true*/ )
+PortLookup<PortType>::PortLookup( impl::Component const & comp, bool recurse /*= true*/ )
 {
   traverseComponent( comp, recurse );
 }
 
 template<class PortType>
-void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & comp, bool recurse )
+void PortLookup<PortType>::traverseComponent( impl::Component const & comp, bool recurse )
 {
   for( PortType * port : comp.ports<PortType>() )
   {
-    if( port->direction() == ril::PortBase::Direction::Input )
+    if( port->direction() == PortBase::Direction::Input )
     {
       // In the top-level component, an input port is both a concrete/placeholder input and an external capture port
       if( comp.isTopLevel() )
@@ -123,11 +123,11 @@ void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & com
   }
   if( comp.isComposite() )
   {
-    ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp.component() );
+    CompositeComponent const & composite = dynamic_cast<CompositeComponent const &>(comp.component() );
     // Get the 'implementation' object that holds the tables to ports and contained components.
-    ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+    impl::CompositeComponent const & compositeImpl = composite.implementation();
     // Add the ports of the contained components (without descending into the hierarchy)
-    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
       compIt != compositeImpl.componentEnd(); ++compIt )
     {
       traverseComponent( *(compIt->second), recurse );
@@ -136,8 +136,8 @@ void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & com
 }
 
 // explicit instantiations
-template class PortLookup<ril::AudioPortBase>;
-template class PortLookup<ril::ParameterPortBase>;
+template class PortLookup<AudioPortBase>;
+template class PortLookup<ParameterPortBase>;
 
 
 

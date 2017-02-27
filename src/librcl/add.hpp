@@ -13,10 +13,7 @@
 namespace visr
 {
 // forward declarations
-namespace ril
-{
 class AudioInput;
-}
 
 namespace rcl
 {
@@ -26,7 +23,7 @@ namespace rcl
  * The number of inputs is set by the \p numInputs argument passed to the setup() method.
  * All input vectors must have the same number of signals given by the \p width argument to setup().
  */
-class Add: public ril::AtomicComponent
+class Add: public AtomicComponent
 {
 public:
   /**
@@ -34,9 +31,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit Add( ril::SignalFlowContext& context,
+  explicit Add( SignalFlowContext& context,
                 char const * name,
-                ril::CompositeComponent * parent = nullptr );
+                CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -62,12 +59,12 @@ private:
   /**
    * The audio output of the component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * A vector holding an arbitrary number of inputs
    */
-  std::vector<std::unique_ptr<ril::AudioInput> > mInputs;
+  std::vector<std::unique_ptr<AudioInput> > mInputs;
 };
 
 } // namespace rcl

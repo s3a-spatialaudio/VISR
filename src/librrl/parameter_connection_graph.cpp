@@ -85,8 +85,8 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
     {
       std::size_t const compIdx = graphComponents[runIdx];
       ConnectedPorts & connectedComp = mConnections[compIdx];
-      ril::ParameterPortBase * port = mConnectionGraph[runIdx];
-      if( port->direction() == ril::ParameterPortBase::Direction::Input )
+      ParameterPortBase * port = mConnectionGraph[runIdx];
+      if( port->direction() == ParameterPortBase::Direction::Input )
       {
         connectedComp.mReceivePorts.push_back( port );
       }

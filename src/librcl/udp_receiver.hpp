@@ -29,7 +29,7 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public ril::AtomicComponent
+class UdpReceiver: public AtomicComponent
 {
 public:
   enum class Mode
@@ -49,9 +49,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpReceiver( ril::SignalFlowContext& context,
+  explicit UdpReceiver( SignalFlowContext& context,
                         char const * name,
-                        ril::CompositeComponent * parent = nullptr );
+                        CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -109,7 +109,7 @@ private:
 
   boost::mutex mMutex;
 
-  ril::ParameterOutputPort<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
+  ParameterOutputPort<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

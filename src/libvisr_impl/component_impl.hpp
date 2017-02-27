@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMPONENT_INTERNAL_HPP_INCLUDED
-#define VISR_LIBRIL_COMPONENT_INTERNAL_HPP_INCLUDED
+#ifndef VISR_IMPL_COMPONENT_INTERNAL_HPP_INCLUDED
+#define VISR_IMPL_COMPONENT_INTERNAL_HPP_INCLUDED
 
 #include <libril/constants.hpp>
 
@@ -10,45 +10,48 @@
 #include <vector>
 #include <memory>
 
+
+
 namespace visr
 {
-namespace ril
-{
-
 // Forward declaration(s)
 class AudioPortBase;
 class Component;
-class CompositeComponentImplementation;
 class ParameterPortBase;
 class SignalFlowContext;
-  
+
+
+
+namespace impl
+{
+
+class CompositeComponent;
+
 /**
  *
  *
  */
-class ComponentInternal
+class Component
 {
 public:
-  friend class AudioPortBase; // For registering/ unregistering audio ports
-  friend class ParameterPortBase; // For registering / unregistering audio ports.
+  friend class visr::AudioPortBase; // For registering/ unregistering audio ports
+  friend class visr::ParameterPortBase; // For registering / unregistering audio ports.
   
-  explicit ComponentInternal( Component & component,
-                              SignalFlowContext& context,
-                              char const * componentName,
-                              CompositeComponentImplementation * parent );
+  explicit Component( visr::Component & component,
+                      SignalFlowContext& context,
+                      char const * componentName,
+                      CompositeComponent * parent );
 
 
-  explicit ComponentInternal( Component & component, 
-                              SignalFlowContext& context,
-                              std::string const & componentName,
-                              CompositeComponentImplementation * parent);
-
-  static const std::string cNameSeparator;
+  explicit Component( visr::Component & component, 
+                      SignalFlowContext& context,
+                      std::string const & componentName,
+                      CompositeComponent * parent);
 
   /**
    *
    */
-  virtual ~ComponentInternal();
+  virtual ~Component();
 
   /**
    * Return the 'local', non-hierarchical name.
@@ -71,7 +74,7 @@ public:
   /**
    * Return the sampling frequency of the containing signal flow.
    */
-  ril::SamplingFrequencyType samplingFrequency() const;
+  SamplingFrequencyType samplingFrequency() const;
 
   /**
    * Return the period of the containing signal processing graph,
@@ -117,7 +120,7 @@ public:
 
   /**
    * Return the port container for the specified port type, const version .
-   * This template method is explicitly instantiated for the two possible port types ril::AudioPort and ril::ParameterPortBase
+   * This template method is explicitly instantiated for the two possible port types AudioPort and ParameterPortBase
    * @tparam PortType
    * @return a const reference to the port container.
    */
@@ -126,7 +129,7 @@ public:
 
   /**
    * Return the port container for the specified port type, non-const version.
-   * This template method is explicitly instantiated for the two possible port types ril::AudioPort and ril::ParameterPortBase
+   * This template method is explicitly instantiated for the two possible port types AudioPort and ParameterPortBase
    * @tparam PortType
    * @return a modifiable reference to the port container.
    */
@@ -205,9 +208,9 @@ public:
    * TODO: Check: where this is required after restructuring.
    */
   //@{
-  Component & component() { return mComponent; }
+  visr::Component & component() { return mComponent; }
 
-  Component const & component() const { return mComponent; }
+  visr::Component const & component() const { return mComponent; }
   //@}
 protected:
 
@@ -237,7 +240,7 @@ private:
   /**
    * The Component object corresponding to this 'internal' representation.
    */
-  Component & mComponent;
+  visr::Component & mComponent;
 
   SignalFlowContext & mContext;
 
@@ -259,10 +262,10 @@ private:
    * top-level component.
    * Note: We link directly to the implementation object (might be renamed to 'internal')
    */
-  CompositeComponentImplementation * mParent;
+  CompositeComponent * mParent;
 };
 
-} // namespace ril
+} // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_COMPONENT_INTERNAL_HPP_INCLUDED
+#endif // #ifndef VISR_IMPL_COMPONENT_INTERNAL_HPP_INCLUDED

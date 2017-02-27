@@ -20,11 +20,11 @@ namespace test
 
 namespace // unnamed
 {
-class RoutingSimple: public ril::AudioSignalFlow
+class RoutingSimple: public AudioSignalFlow
 {
 public:
   RoutingSimple()
-    : ril::AudioSignalFlow( 1024, 48000 )
+    : AudioSignalFlow( 1024, 48000 )
     , mRouter( *this, "Router" )
   {
   }

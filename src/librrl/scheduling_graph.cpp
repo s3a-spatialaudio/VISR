@@ -34,7 +34,7 @@ SchedulingGraph::SchedulingGraph()
 
 }
 
-void SchedulingGraph::initialise( ril::Component const & flow, AudioConnectionMap const & connections,
+void SchedulingGraph::initialise( Component const & flow, AudioConnectionMap const & connections,
                                   ParameterConnectionMap const & parameterConnections )
 {
   mDependencyGraph.clear();
@@ -65,8 +65,8 @@ void SchedulingGraph::addAudioDependency( AudioSignalDescriptor const & sender, 
   // check whether the sender is an external capture port or an internal port
   NodeType const senderType = sender.mPort->parent().isComposite() ? NodeType::Source : NodeType::Processor;
   NodeType const receiverType = receiver.mPort->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(sender.mPort->parent())) ) : ProcessingNode( NodeType::Source );
-  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(receiver.mPort->parent())) ) : ProcessingNode( NodeType::Sink );
+  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender.mPort->parent())) ) : ProcessingNode( NodeType::Source );
+  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver.mPort->parent())) ) : ProcessingNode( NodeType::Sink );
 
   VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
   if( senderFindIt == mVertexLookup.end() )
@@ -111,7 +111,7 @@ void SchedulingGraph::addAudioDependency( AudioSignalDescriptor const & sender, 
 }
 
 
-void SchedulingGraph::addParameterDependency( ril::ParameterPortBase const * sender, ril::ParameterPortBase const * receiver )
+void SchedulingGraph::addParameterDependency( ParameterPortBase const * sender, ParameterPortBase const * receiver )
 {
   // NOTE: Lots of code duplication with audio connection method.
   // TODO: Factor out common code without neglecting type-specific differences (as soon as they are implemented).
@@ -120,8 +120,8 @@ void SchedulingGraph::addParameterDependency( ril::ParameterPortBase const * sen
   // check whether the sender is an external capture port or an internal port
   NodeType const senderType = sender->parent().isComposite() ? NodeType::Source : NodeType::Processor;
   NodeType const receiverType = receiver->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(sender->parent())) ) : ProcessingNode( NodeType::Source );
-  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<ril::AtomicComponent const *>(&(receiver->parent())) ) : ProcessingNode( NodeType::Sink );
+  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender->parent())) ) : ProcessingNode( NodeType::Source );
+  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver->parent())) ) : ProcessingNode( NodeType::Sink );
 
   VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
   if( senderFindIt == mVertexLookup.end() )
@@ -165,14 +165,14 @@ void SchedulingGraph::addParameterDependency( ril::ParameterPortBase const * sen
   }
 }
 
-std::vector<ril::AtomicComponent *> SchedulingGraph::sequentialSchedule() const
+std::vector<AtomicComponent *> SchedulingGraph::sequentialSchedule() const
 {
   // TODO: check against cycles. (there seems to be no ready-made algorithm, so we have to implement a visitor ourselves)
 
   std::vector<GraphType::vertex_descriptor> topoSort;
   topological_sort( mDependencyGraph, std::back_inserter( topoSort ) );
 
-  std::vector<ril::AtomicComponent *> result;
+  std::vector<AtomicComponent *> result;
   result.reserve( topoSort.size() );
   for( std::size_t idx( 0 ); idx < topoSort.size(); ++idx )
   {
@@ -200,11 +200,11 @@ std::vector<ril::AtomicComponent *> SchedulingGraph::sequentialSchedule() const
         break;
       case NodeType::Processor:
       {
-        ril::AtomicComponent const * atomic = node.node();
+        AtomicComponent const * atomic = node.node();
         assert( atomic ); // no null pointers allowed
         // TODO: check whether it is worth to rearrange the complete infrastructure 
         // to have a non-const pointer here (and to avoid the evil const_cast)
-        result.push_back( const_cast<ril::AtomicComponent *>(atomic) );
+        result.push_back( const_cast<AtomicComponent *>(atomic) );
       }
     }
   }
@@ -221,7 +221,7 @@ SchedulingGraph::ProcessingNode::ProcessingNode( NodeType type )
 {
 }
 
-SchedulingGraph::ProcessingNode::ProcessingNode( ril::AtomicComponent const * atom )
+SchedulingGraph::ProcessingNode::ProcessingNode( AtomicComponent const * atom )
   : mType( NodeType::Processor )
   , mComponent( atom )
 {

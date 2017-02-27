@@ -19,15 +19,15 @@ namespace visr
 namespace rcl
 {
 
-  SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( ril::SignalFlowContext& context,
+  SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( SignalFlowContext& context,
                                                                 char const * name,
-                                                                ril::CompositeComponent * parent /*= nullptr*/ )
+                                                                CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 #ifndef DIFFUSION_USE_FAST_CONVOLVER
- , mGainAdjustments( ril::cVectorAlignmentSamples )
- , mFilterOutputs( ril::cVectorAlignmentSamples )
+ , mGainAdjustments( cVectorAlignmentSamples )
+ , mFilterOutputs( cVectorAlignmentSamples )
 #endif
 {
 }
@@ -70,7 +70,7 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
     mNumberOfOutputs,
     routings,
     diffusionFilters,
-    ril::cVectorAlignmentSamples ) );
+    cVectorAlignmentSamples ) );
 #else
   if( period() % rbbl::FIR::nBlockSamples != 0 )
   {
@@ -129,7 +129,7 @@ void SingleToMultichannelDiffusion::process()
 // Diffusion processing
 #if 1
 #ifdef DIFFUSION_USE_FAST_CONVOLVER
-  mDiffusionFilter->process( &input, outputVector, ril::cVectorAlignmentSamples );
+  mDiffusionFilter->process( &input, outputVector, cVectorAlignmentSamples );
 #else //  DIFFUSION_USE_FAST_CONVOLVER
   std::size_t const blockSize = period();
   // At the moment, the diffusion filter works with a fixed block size.
@@ -143,7 +143,7 @@ void SingleToMultichannelDiffusion::process()
     for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; outIdx++ )
     {
       efl::ErrorCode opRes = efl::vectorMultiplyConstant( mGainAdjustments[outIdx], mOutputPointers[outIdx],
-                             outputVector[outIdx]+startSample, rbbl::FIR::nBlockSamples, ril::cVectorAlignmentSamples );
+                             outputVector[outIdx]+startSample, rbbl::FIR::nBlockSamples, cVectorAlignmentSamples );
       if( opRes != efl::noError )
       {
         throw std::runtime_error( "SingleToMultichannelDiffusion: Error while copying signals to the output channels." );
@@ -156,7 +156,7 @@ void SingleToMultichannelDiffusion::process()
   for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; outIdx++ )
   {
     efl::ErrorCode opRes = efl::vectorMultiplyConstant( mGainAdjustments[outIdx], input, outputVector[outIdx],
-                                                        blockSize, ril::cVectorAlignmentSamples );
+                                                        blockSize, cVectorAlignmentSamples );
     if( opRes != efl::noError )
     {
       throw std::runtime_error( "SingleToMultichannelDiffusion: Error while copying signals to the output channels." );

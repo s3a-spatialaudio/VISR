@@ -7,14 +7,14 @@ namespace visr
 namespace signalflows
 {
 
-TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( ril::SignalFlowContext & context,
+TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext & context,
                                                     char const * name,
-                                                    ril::CompositeComponent * parent,
+                                                    CompositeComponent * parent,
                                                     std::size_t numberOfChannels,
                                                     std::size_t dftSize,
                                                     std::size_t windowLength,
                                                     std::size_t hopSize )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
 #ifndef JUST_FEEDTHROUGH
  , mForwardTransform( context, "ForwardTransform", this )
  , mInverseTransform( context, "InverseTransform", this )

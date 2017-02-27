@@ -44,18 +44,18 @@ namespace rcl
  * The width of these ports is determined by the arguments "numberOfInput" and "numberOfOutputs", respectively,
  * which are passed to the setup() method.
  */
-class GainMatrix: public ril::AtomicComponent
+class GainMatrix: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit GainMatrix( ril::SignalFlowContext& context,
+  explicit GainMatrix( SignalFlowContext& context,
                        char const * name,
-                       ril::CompositeComponent * parent = nullptr );
+                       CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.
@@ -94,8 +94,8 @@ public:
 private:
   std::unique_ptr< rbbl::GainMatrix< SampleType > > mMatrix;
 
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 
   /**
    * 
@@ -103,7 +103,7 @@ private:
   std::size_t mNumberOfInputs;
   std::size_t mNumberOfOutputs;
 
-  std::unique_ptr<ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
+  std::unique_ptr<ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
 };
 
 } // namespace rcl

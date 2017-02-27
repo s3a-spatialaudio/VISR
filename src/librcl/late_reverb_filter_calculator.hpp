@@ -18,8 +18,6 @@
 #include <vector>
 #include <utility> // for std::pair
 
-
-
 namespace visr
 {
 
@@ -29,22 +27,22 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class LateReverbFilterCalculator: public ril::AtomicComponent
+class LateReverbFilterCalculator: public AtomicComponent
 {
 public:
   /**
    * Type of the gain coefficients. We use the same type as the audio samples (typically float, may
    */
-  using CoefficientType = ril::SampleType;
+  using CoefficientType = SampleType;
 
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit LateReverbFilterCalculator( ril::SignalFlowContext& context,
+  explicit LateReverbFilterCalculator( SignalFlowContext& context,
                                        char const * name,
-                                       ril::CompositeComponent * parent = nullptr );
+                                       CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -62,7 +60,7 @@ public:
    * @todo Consider making lateReflectionSubbandFilters optional.
    */ 
   void setup( std::size_t numberOfObjects,
-              ril::SampleType lateReflectionLengthSeconds,
+              SampleType lateReflectionLengthSeconds,
               std::size_t numLateReflectionSubBandLevels );
 
   /**
@@ -84,7 +82,7 @@ private:
    */
   void calculateImpulseResponse( std::size_t objectIdx,
                                  objectmodel::PointSourceWithReverb::LateReverb const & lateParams,
-                                 ril::SampleType * ir,
+                                 SampleType * ir,
                                  std::size_t irLength, std::size_t alignment = 0 );
 
   /**
@@ -93,7 +91,7 @@ private:
    * @param [out] data Buffer to store the result.
    * @param alignment Alignment of the \p data buffer (in number of elements)
    */
-  static void createWhiteNoiseSequence( std::size_t numSamples, ril::SampleType* data, std::size_t alignment = 0 );
+  static void createWhiteNoiseSequence( std::size_t numSamples, SampleType* data, std::size_t alignment = 0 );
 
   /**
    * Filter a sequence with a second-order IIR filter (biquad).
@@ -102,8 +100,8 @@ private:
    * @param output Buffer for filtered data, must hold at least \p numSamples values.
    * @param filter Biquad coefficients.
    */
-  static void filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
-                              pml::BiquadParameter<ril::SampleType> const & filter );
+  static void filterSequence( std::size_t numSamples, SampleType const * const input, SampleType * output,
+                              pml::BiquadParameter<SampleType> const & filter );
 
   /**
    * Create an envelope.
@@ -115,9 +113,9 @@ private:
    * @param decayCoeff Decay parameter for the exponential decay after the peak level.
    * @param samplingFrequency The sampling frequency [Hz] as floating-point value.
    */
-  static void createEnvelope( std::size_t numSamples, ril::SampleType* data,
-                              ril::SampleType initialDelay, ril::SampleType gain, ril::SampleType attackCoeff, ril::SampleType decayCoeff,
-                              ril::SampleType samplingFrequency );
+  static void createEnvelope( std::size_t numSamples, SampleType* data,
+                              SampleType initialDelay, SampleType gain, SampleType attackCoeff, SampleType decayCoeff,
+                              SampleType samplingFrequency );
 
   /**
    * The number of reverb objects that can be rendered with this object.
@@ -133,13 +131,13 @@ private:
    */
   std::size_t const mAlignment;
 
-  efl::BasicMatrix<ril::SampleType> mSubBandNoiseSequences;
+  efl::BasicMatrix<SampleType> mSubBandNoiseSequences;
 
   /**
    * Access functions to the subband coefficients, non-const version.
    * Returns a data buffer of length mFilterLength and alignment mAlignment.
    */
-  ril::SampleType const * const subBandNoiseSequence( std::size_t objectIdx, std::size_t bandIdx ) const
+  SampleType const * const subBandNoiseSequence( std::size_t objectIdx, std::size_t bandIdx ) const
   {
     return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
   }
@@ -148,13 +146,13 @@ private:
   * Access functions to the subband coefficients, non-const version.
   * Returns a data buffer of length mFilterLength and alignment mAlignment.
   */
-  ril::SampleType * const subBandNoiseSequence( std::size_t objectIdx, std::size_t bandIdx )
+  SampleType * const subBandNoiseSequence( std::size_t objectIdx, std::size_t bandIdx )
   {
     return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
   }
 
-  ril::ParameterInputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> > > mSubbandInput;
-  ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> > > mFilterOutput;
+  ParameterInputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mSubbandInput;
+  ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mFilterOutput;
 };
 
 } // namespace rcl

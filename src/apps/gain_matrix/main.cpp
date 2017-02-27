@@ -53,11 +53,11 @@ int main( int argc, char const * const * argv )
       throw std::invalid_argument( "GainMatrix: Exactly one of the options \"--matrix (-m)\" or \"--matrix-file (-f)\" must be provided." );
     }
 
-    std::unique_ptr<pml::MatrixParameter<ril::SampleType> > initialMtx;
+    std::unique_ptr<pml::MatrixParameter<SampleType> > initialMtx;
     if( cmdLineOptions.hasOption( "matrix" ) )
     {
-      initialMtx.reset( new pml::MatrixParameter<ril::SampleType>( pml::MatrixParameter<ril::SampleType>::fromString( cmdLineOptions.getOption<std::string>( "matrix" ),
-                             ril::cVectorAlignmentSamples ) ));
+      initialMtx.reset( new pml::MatrixParameter<SampleType>( pml::MatrixParameter<SampleType>::fromString( cmdLineOptions.getOption<std::string>( "matrix" ),
+                             cVectorAlignmentSamples ) ));
     }
     else
     {
@@ -68,12 +68,12 @@ int main( int argc, char const * const * argv )
         throw std::invalid_argument( std::string("GainMatrix: The file specified by the \"--matrix-file\" argument does not exist." )
           + matrixPath.string() );
       }
-      initialMtx.reset( new pml::MatrixParameter<ril::SampleType>( 
-        pml::MatrixParameter<ril::SampleType>::fromTextFile( matrixPath.string( ), ril::cVectorAlignmentSamples ) ));
+      initialMtx.reset( new pml::MatrixParameter<SampleType>( 
+        pml::MatrixParameter<SampleType>::fromTextFile( matrixPath.string( ), cVectorAlignmentSamples ) ));
     }
-    ril::SampleType const gainAdjustDB = cmdLineOptions.getDefaultedOption<ril::SampleType>( "global-gain", 0.0f );
+    SampleType const gainAdjustDB = cmdLineOptions.getDefaultedOption<SampleType>( "global-gain", 0.0f );
     // TODO: Replace by library function dB2linear
-    ril::SampleType const gainAdjustLinear = std::pow( static_cast<ril::SampleType>(10.0f), gainAdjustDB / static_cast<ril::SampleType>(20.0f) );
+    SampleType const gainAdjustLinear = std::pow( static_cast<SampleType>(10.0f), gainAdjustDB / static_cast<SampleType>(20.0f) );
 
     // define fixed parameters for rendering
     const std::size_t numberOfInputs = initialMtx->numberOfColumns();
@@ -101,14 +101,14 @@ int main( int argc, char const * const * argv )
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;
 
-    ril::SignalFlowContext context( periodSize, samplingRate );
+    SignalFlowContext context( periodSize, samplingRate );
 
     visr::signalflows::GainMatrix flow( context, "", nullptr,
                                         numberOfInputs, numberOfOutputs,
                                         *initialMtx,
                                         cInterpolationLength );
 
-    // audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    // audioInterface.registerCallback( &AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -118,7 +118,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface.stop( );
 
-    // audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    // audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {

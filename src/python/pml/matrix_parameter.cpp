@@ -29,16 +29,17 @@ namespace pml
 template<typename DataType>
 void exportMatrixParameter( pybind11::module & m, char const * className )
 {
-  pybind11::class_<MatrixParameter< DataType >/*, ril::ParameterBase*/ >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
+  pybind11::class_<MatrixParameter< DataType >/*, ParameterBase*/ >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
   .def_buffer([](MatrixParameter<DataType> &mp) -> pybind11::buffer_info
-	      { return pybind11::buffer_info(mp.data(),
-					     sizeof(DataType),
-					     pybind11::format_descriptor<DataType>::format(),
-					     2,
-					     {mp.numberOfRows(), mp.numberOfColumns()},
-					     {sizeof(DataType), mp.stride()*sizeof(DataType)} );
-	      } )
-  .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::ril::cVectorAlignmentSamples )
+  {
+    return pybind11::buffer_info( mp.data(),
+     sizeof( DataType ),
+     pybind11::format_descriptor<DataType>::format(),
+     2,
+     { mp.numberOfRows(), mp.numberOfColumns() },
+     { sizeof( DataType ), mp.stride() * sizeof( DataType ) } );
+  } )
+  .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( pybind11::init<std::size_t, std::size_t, std::size_t>() )
   .def( "__init__", []( MatrixParameter<DataType> & inst, pybind11::array const & data, std::size_t alignment)
   {
@@ -56,24 +57,24 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
         inst( rowIdx, colIdx ) = *static_cast<DataType const *>(data.data( rowIdx, colIdx ));
       }
     }
-  }, pybind11::arg("data"), pybind11::arg("alignment") = visr::ril::cVectorAlignmentSamples )
+  }, pybind11::arg("data"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
   .def_property_readonly( "numberOfRows", &MatrixParameter<DataType>::numberOfRows )
   .def_property_readonly( "numberOfColumns", &MatrixParameter<DataType>::numberOfColumns )
   .def( "resize", &MatrixParameter<DataType>::resize, pybind11::arg("numberOfRows"), pybind11::arg("numberOfColumns") )
   .def( "zeroFill", &MatrixParameter<DataType>::zeroFill )
-    .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = visr::ril::cVectorAlignmentSamples ) 
+    .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples ) 
 
   ;
 }
 
 void exportMatrixParameters( pybind11::module & m)
 {
-  pybind11::class_<MatrixParameterConfig, ril::ParameterConfigBase >( m, "MatrixParameterConfig" )
+  pybind11::class_<MatrixParameterConfig, ParameterConfigBase >( m, "MatrixParameterConfig" )
     .def( pybind11::init<std::size_t, std::size_t>(), pybind11::arg("numberOfRows" ), pybind11::arg("numberOfColumns") )
     .def_property_readonly( "numberOfRows", &MatrixParameterConfig::numberOfRows )
     .def_property_readonly( "numberOfColumns", &MatrixParameterConfig::numberOfColumns )
     .def( "compare", static_cast<bool(MatrixParameterConfig::*)(MatrixParameterConfig const&) const>(&MatrixParameterConfig::compare),  pybind11::arg("rhs") )
-    .def( "compare", static_cast<bool(MatrixParameterConfig::*)(ril::ParameterConfigBase const&) const>(&MatrixParameterConfig::compare),  pybind11::arg("rhs") )
+    .def( "compare", static_cast<bool(MatrixParameterConfig::*)(ParameterConfigBase const&) const>(&MatrixParameterConfig::compare),  pybind11::arg("rhs") )
   ;
 
   exportMatrixParameter<float>( m, "MatrixParameterFloat" );
@@ -92,7 +93,7 @@ void exportMatrixParameter( char const * className )
    .add_property( "numberOfColumns", &MatrixParameter<DataType>::numberOfColumns )
    .def( "resize", &MatrixParameter<DataType>::resize, (arg("numberOfRows"), arg("numberOfColumns") ) )
    .def( "zeroFill", &MatrixParameter<DataType>::zeroFill )
-    .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = ril::SampleType ) 
+    .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = SampleType ) 
     ;
 }
   

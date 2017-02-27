@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_CHANNEL_LIST_HPP_INCLUDED
-#define VISR_LIBRIL_CHANNEL_LIST_HPP_INCLUDED
+#ifndef VISR_CHANNEL_LIST_HPP_INCLUDED
+#define VISR_CHANNEL_LIST_HPP_INCLUDED
 
 #include <iterator>
 #include <initializer_list>
@@ -9,8 +9,7 @@
 
 namespace visr
 {
-namespace ril
-{
+
 // Forward declaration
 class ChannelRange;
 
@@ -153,7 +152,6 @@ private:
   StepType mStep;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_CHANNEL_LIST_HPP_INCLUDED
+#endif // #ifndef VISR_CHANNEL_LIST_HPP_INCLUDED

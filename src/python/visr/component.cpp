@@ -17,9 +17,6 @@
 
 namespace visr
 {
-
-using ril::Component;
-
 namespace python
 {
 namespace visr
@@ -46,8 +43,8 @@ void exportComponent( pybind11::module& m )
 {
   pybind11::class_<Component, ComponentWrapper>( m, "Component", pybind11::metaclass() ) 
     // Note: 'metaclass' required for static properties
-    .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
-      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = nullptr )
+    .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
+      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_readonly_static( "nameSeparator", &Component::cNameSeparator )
     .def_property_readonly( "name", &Component::name )
     .def_property_readonly( "fullName", &Component::fullName, pybind11::return_value_policy::reference )
@@ -68,9 +65,9 @@ using namespace boost::python;
  */
 struct ComponentWrapper: public Component, wrapper<Component>
 {
-  ComponentWrapper( ril::SignalFlowContext & context,
+  ComponentWrapper( SignalFlowContext & context,
                     char const * name,
-                    ril::CompositeComponent * parent )
+                    CompositeComponent * parent )
     : Component( context, name,parent)
   {}
 
@@ -88,7 +85,7 @@ void exportComponent()
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
   class_<ComponentWrapper, boost::noncopyable>("Component", no_init )
-    .def( init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>( 
+    .def( init<SignalFlowContext &, char const*, CompositeComponent *>( 
       args("context", "name", "parent") ) )
     .add_static_property( "nameSeparator", Component::cNameSeparator )
     .add_property( "name", make_function( &Component::name, return_internal_reference<>() ) )

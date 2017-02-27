@@ -28,16 +28,16 @@ BOOST_AUTO_TEST_CASE( KissFftWrapperSingle )
   std::size_t dftSize = 8;
   std::size_t outputSize = 2*(dftSize / 2 + dftSize%2 + 1);
 
-  KissFftWrapper<float> fft( dftSize, ril::cVectorAlignmentSamples );
+  KissFftWrapper<float> fft( dftSize, cVectorAlignmentSamples );
 
-  efl::BasicVector<float> input( dftSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<float> input( dftSize, cVectorAlignmentSamples );
   input[1] = 1.0f;
 
-  efl::BasicVector<std::complex<float> > output( outputSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<std::complex<float> > output( outputSize, cVectorAlignmentSamples );
 
   fft.forwardTransform( input.data(), output.data() );
 
-  efl::BasicVector<float> resultAfterInverse( dftSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<float> resultAfterInverse( dftSize, cVectorAlignmentSamples );
 
   fft.inverseTransform( output.data(), resultAfterInverse.data() );
 }
@@ -48,16 +48,16 @@ BOOST_AUTO_TEST_CASE( FftwWrapperDouble )
   std::size_t dftSize = 1024;
   std::size_t outputSize = 2 * (dftSize / 2 + dftSize % 2 + 1);
 
-  FftwWrapper<double> fft( dftSize, ril::cVectorAlignmentSamples );
+  FftwWrapper<double> fft( dftSize, cVectorAlignmentSamples );
 
-  efl::BasicVector<double> input( dftSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<double> input( dftSize, cVectorAlignmentSamples );
   input[1] = 1.0f;
 
-  efl::BasicVector<std::complex<double> > output( outputSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<std::complex<double> > output( outputSize, cVectorAlignmentSamples );
 
   fft.forwardTransform( input.data( ), output.data( ) );
 
-  efl::BasicVector<double> resultAfterInverse( dftSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<double> resultAfterInverse( dftSize, cVectorAlignmentSamples );
 
   fft.inverseTransform( output.data( ), resultAfterInverse.data( ) );
 }

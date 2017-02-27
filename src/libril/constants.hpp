@@ -1,13 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_CONSTANTS_HPP_INCLUDED
-#define VISR_LIBRIL_CONSTANTS_HPP_INCLUDED
+#ifndef VISR_CONSTANTS_HPP_INCLUDED
+#define VISR_CONSTANTS_HPP_INCLUDED
 
 #include <cstddef>
 
 namespace visr
-{
-namespace ril
 {
 
 /**
@@ -32,7 +30,6 @@ static const std::size_t cVectorAlignmentBytes = 64;
  */
 static const std::size_t cVectorAlignmentSamples = cVectorAlignmentBytes / sizeof(SampleType);
 
-} // namespace ril
-} // namespace constants
+} // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_CONSTANTS_HPP_INCLUDED
+#endif // #ifndef VISR_CONSTANTS_HPP_INCLUDED

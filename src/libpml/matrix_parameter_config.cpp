@@ -13,7 +13,7 @@ namespace pml
 {
 
 MatrixParameterConfig::MatrixParameterConfig( std::size_t numberOfRows, std::size_t numberOfColumns )
- : ril::ParameterConfigBase()
+ : ParameterConfigBase()
  , mNumberOfRows(numberOfRows)
  , mNumberOfColumns(numberOfColumns)
 {
@@ -23,7 +23,7 @@ MatrixParameterConfig::~MatrixParameterConfig()
 {
 }
 
-bool MatrixParameterConfig::compare(ril::ParameterConfigBase const & rhs) const
+bool MatrixParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
   if (std::type_index(typeid(rhs)) != std::type_index(typeid(MatrixParameterConfig)))

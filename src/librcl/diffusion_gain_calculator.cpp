@@ -20,9 +20,9 @@ namespace visr
 namespace rcl
 {
 
-  DiffusionGainCalculator::DiffusionGainCalculator( ril::SignalFlowContext& context,
+  DiffusionGainCalculator::DiffusionGainCalculator( SignalFlowContext& context,
                                                     char const * name,
-                                                    ril::CompositeComponent * parent /*= nullptr*/ )
+                                                    CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )
   , mNumberOfObjectChannels( 0 )
   , mObjectVectorInput( "objectInput", *this, pml::EmptyParameterConfig() )
@@ -36,7 +36,7 @@ DiffusionGainCalculator::~DiffusionGainCalculator()
 void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
-  mGainOutput.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
+  mGainOutput.reset( new ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
     ( "gainOutput", *this, pml::MatrixParameterConfig( 1, numberOfObjectChannels ) ) );
 }
 

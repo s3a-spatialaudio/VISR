@@ -4,8 +4,6 @@
 
 namespace visr
 {
-namespace ril
-{
 
 AtomicComponent::AtomicComponent( SignalFlowContext& context,
                                   char const * name,
@@ -23,5 +21,4 @@ bool AtomicComponent::isComposite() const
   return false;
 }
 
-} // namespace ril
 } // namespace visr

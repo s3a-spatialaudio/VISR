@@ -8,7 +8,7 @@
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/component_impl.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -36,22 +36,22 @@ namespace // unnamed
 
 BOOST_AUTO_TEST_CASE( ParameterConnection )
 {
-  ril::SignalFlowContext context( 256, 48000 );
+  SignalFlowContext context( 256, 48000 );
 
   rcl::SceneDecoder decoder( context, "decoder", nullptr );
   decoder.setup( );
 
-  for( ril::ComponentInternal::ParameterPortContainer::const_iterator paramPortIt = decoder.internal().parameterPortBegin();
-       paramPortIt != decoder.internal().parameterPortEnd(); ++paramPortIt )
+  for( impl::Component::ParameterPortContainer::const_iterator paramPortIt = decoder.implementation().parameterPortBegin();
+       paramPortIt != decoder.implementation().parameterPortEnd(); ++paramPortIt )
   {
     std::cout << "Found parameter port in scene decoder:" << (*paramPortIt)->name() << std::endl;
 
-    ril::ParameterType const paramType = (*paramPortIt)->parameterType();
-    ril::CommunicationProtocolType const protocolType = (*paramPortIt)->protocolType( );
-    ril::ParameterConfigBase const & paramConfig = (*paramPortIt)->parameterConfig();
+    ParameterType const paramType = (*paramPortIt)->parameterType();
+    CommunicationProtocolType const protocolType = (*paramPortIt)->protocolType( );
+    ParameterConfigBase const & paramConfig = (*paramPortIt)->parameterConfig();
 
-    std::unique_ptr<ril::CommunicationProtocolBase> protocol
-      = ril::CommunicationProtocolFactory::create( protocolType, paramType, paramConfig );
+    std::unique_ptr<CommunicationProtocolBase> protocol
+      = CommunicationProtocolFactory::create( protocolType, paramType, paramConfig );
   }
 }
 

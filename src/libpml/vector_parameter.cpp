@@ -10,16 +10,15 @@ namespace visr
 namespace pml
 {
 
-
 template< typename ElementType >
-VectorParameter<ElementType>::VectorParameter( ril::ParameterConfigBase const & config )
+VectorParameter<ElementType>::VectorParameter( ParameterConfigBase const & config )
 : VectorParameter( dynamic_cast<VectorParameterConfig const &>(config) )
 {
 }
 
 template< typename ElementType >
 VectorParameter<ElementType>::VectorParameter( VectorParameterConfig const & config )
-: efl::BasicVector<ElementType>( config.numberOfElements(), ril::cVectorAlignmentSamples ) // Use standard alignment
+: efl::BasicVector<ElementType>( config.numberOfElements(), cVectorAlignmentSamples ) // Use standard alignment
 {
 }
 
@@ -27,8 +26,8 @@ VectorParameter<ElementType>::VectorParameter( VectorParameterConfig const & con
 template class VectorParameter<float>;
 template class VectorParameter<double>;
 
-static ril::ParameterFactory::Registrar< VectorParameter<float> > maker1( ril::ParameterType::VectorFloat );
-static ril::ParameterFactory::Registrar< VectorParameter<double> > maker2( ril::ParameterType::VectorDouble );
+static ParameterFactory::Registrar< VectorParameter<float> > maker1( ParameterType::VectorFloat );
+static ParameterFactory::Registrar< VectorParameter<double> > maker2( ParameterType::VectorDouble );
 
 } // namespace pml
 } // namespace visr

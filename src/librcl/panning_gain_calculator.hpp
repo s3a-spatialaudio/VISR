@@ -35,23 +35,23 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class PanningGainCalculator: public ril::AtomicComponent
+class PanningGainCalculator: public AtomicComponent
 {
 public:
   /**
    * Type of the gain coefficients. We use the same type as the samples in the signal flow graph
    * @todo maybe this should become a template parameter.
    */
-  using CoefficientType = ril::SampleType;
+  using CoefficientType = SampleType;
 
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PanningGainCalculator( ril::SignalFlowContext& context,
+  explicit PanningGainCalculator( SignalFlowContext& context,
                                   char const * name,
-                                  ril::CompositeComponent * parent = nullptr );
+                                  CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -146,9 +146,9 @@ private:
   /**
    * Data type of the parmaeter ports for outgoing matrix data.
    */
-  using ListenerPositionPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
-  using ObjectPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
-  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
+  using ListenerPositionPort = ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+  using ObjectPort = ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
+  using MatrixPort = ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
 
   std::unique_ptr<ObjectPort> mObjectVectorInput;
 

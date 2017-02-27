@@ -39,12 +39,12 @@ namespace
  * Local helper function to find the maximum difference between corresponding elements of
  * two sequences of equal length
  */
-ril::SampleType maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs const & lhs,
+SampleType maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs const & lhs,
                          objectmodel::PointSourceWithReverb::LateReverbCoeffs const & rhs )
 {
-  ril::SampleType const res = std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f,
-                            [](ril::SampleType v1, ril::SampleType v2) { return std::max( v1, v2 ); },
-                            [](ril::SampleType v1, ril::SampleType v2) { return std::abs( v1 - v2 ); } );
+  SampleType const res = std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f,
+                            [](SampleType v1, SampleType v2) { return std::max( v1, v2 ); },
+                            [](SampleType v1, SampleType v2) { return std::abs( v1 - v2 ); } );
   return res;
 }
 
@@ -53,7 +53,7 @@ ril::SampleType maxDiff( objectmodel::PointSourceWithReverb::LateReverbCoeffs co
  */
 bool equal( objectmodel::PointSourceWithReverb::LateReverb const & lhs,
             objectmodel::PointSourceWithReverb::LateReverb const & rhs,
-            ril::SampleType limit )
+            SampleType limit )
 {
   return (std::abs( lhs.onsetDelay() - rhs.onsetDelay() ) <= limit )
    and (maxDiff( lhs.levels(), rhs.levels()) <= limit )
@@ -73,12 +73,12 @@ ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0
   std::vector<objectmodel::PointSourceWithReverb::LateReverb> mPreviousLateReverbs;
 
 
-  ReverbParameterCalculator::ReverbParameterCalculator( ril::SignalFlowContext& context,
+  ReverbParameterCalculator::ReverbParameterCalculator( SignalFlowContext& context,
                                                         char const * name,
-                                                        ril::CompositeComponent * parent /*= nullptr*/ )
+                                                        CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMaxNumberOfObjects( 0 )
- , cLateReverbParameterComparisonLimit( std::numeric_limits<ril::SampleType>::epsilon( ) )
+ , cLateReverbParameterComparisonLimit( std::numeric_limits<SampleType>::epsilon( ) )
  , mObjectInput( "objectInput", *this, pml::EmptyParameterConfig() )
 {
 }
@@ -91,7 +91,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
                                        std::size_t numberOfObjects,
                                        std::size_t numberOfDiscreteReflectionsPerSource,
                                        std::size_t numBiquadSectionsReflectionFilters,
-                                       ril::SampleType lateReflectionLengthSeconds,
+                                       SampleType lateReflectionLengthSeconds,
                                        std::size_t numLateReflectionSubBandFilters )
 {
     mMaxNumberOfObjects=numberOfObjects;
@@ -128,21 +128,21 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
     pml::VectorParameterConfig const lateGainDelayConfig( mMaxNumberOfObjects );
     pml::MatrixParameterConfig const iirMatrixConfig( mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects, objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads );
     pml::MatrixParameterConfig const discretePanningConfig( mNumberOfPanningLoudspeakers, mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects );
-    mSignalRoutingOutput.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::SignalRoutingParameter >
+    mSignalRoutingOutput.reset( new ParameterOutputPort< pml::SharedDataProtocol, pml::SignalRoutingParameter >
       ( "signalRoutingOutput", *this, pml::EmptyParameterConfig() ) );
-    mDiscreteReflectionGainOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
+    mDiscreteReflectionGainOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
       ( "discreteGainOutput", *this, discreteGainDelayConfig ) );
-    mDiscreteReflectionDelayOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
+    mDiscreteReflectionDelayOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
       ("discreteDelayOutput", *this, discreteGainDelayConfig ) );
-    mDiscreteReflectionFilterCoeffOutput.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<ril::SampleType> >
+    mDiscreteReflectionFilterCoeffOutput.reset( new ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<SampleType> >
       ("discreteFilterCoeffsOutput", *this, iirMatrixConfig ) );
-    mDiscretePanningGains.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<ril::SampleType> >
+    mDiscretePanningGains.reset( new ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >
       ("discretePanningMatrixOutput", *this, discretePanningConfig) );
-    mLateReflectionGainOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
+    mLateReflectionGainOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
       ( "lateGainOutput", *this, lateGainDelayConfig ) );
-    mLateReflectionDelayOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> >
+    mLateReflectionDelayOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
       ( "lateDelayOutput", *this, lateGainDelayConfig ) );
-    mLateSubbandOutput.reset( new ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<ril::SampleType> > >
+    mLateSubbandOutput.reset( new ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType> > >
       ( "lateSubbandOutput", *this, pml::EmptyParameterConfig( )) );
 }
 
@@ -154,12 +154,12 @@ void ReverbParameterCalculator::process()
 {
   // Get and check the data members.
   pml::SignalRoutingParameter & signalRouting = mSignalRoutingOutput->data();
-  efl::BasicVector<ril::SampleType> & discreteReflGains = mDiscreteReflectionGainOutput->data();
-  efl::BasicVector<ril::SampleType> & discreteReflDelays = mDiscreteReflectionDelayOutput->data();
-  pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs = mDiscreteReflectionFilterCoeffOutput->data();
-  efl::BasicMatrix<ril::SampleType> & discretePanningMatrix = mDiscretePanningGains->data();
-  efl::BasicVector<ril::SampleType> & lateReverbGains = mLateReflectionGainOutput->data( );
-  efl::BasicVector<ril::SampleType> & lateReverbDelays = mLateReflectionDelayOutput->data( );
+  efl::BasicVector<SampleType> & discreteReflGains = mDiscreteReflectionGainOutput->data();
+  efl::BasicVector<SampleType> & discreteReflDelays = mDiscreteReflectionDelayOutput->data();
+  pml::BiquadParameterMatrix<SampleType> & biquadCoeffs = mDiscreteReflectionFilterCoeffOutput->data();
+  efl::BasicMatrix<SampleType> & discretePanningMatrix = mDiscretePanningGains->data();
+  efl::BasicVector<SampleType> & lateReverbGains = mLateReflectionGainOutput->data( );
+  efl::BasicVector<SampleType> & lateReverbDelays = mLateReflectionDelayOutput->data( );
 
   if( discreteReflGains.size() != mMaxNumberOfObjects )
   {
@@ -218,12 +218,12 @@ void ReverbParameterCalculator::process()
 
 void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWithReverb const & rsao,
                                                      std::size_t renderChannel,
-                                                     efl::BasicVector<ril::SampleType> & discreteReflGains,
-                                                     efl::BasicVector<ril::SampleType> & discreteReflDelays,
-                                                     pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-                                                     efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                                                     efl::BasicVector<ril::SampleType> & lateReverbGains,
-                                                     efl::BasicVector<ril::SampleType> & lateReverbDelays )
+                                                     efl::BasicVector<SampleType> & discreteReflGains,
+                                                     efl::BasicVector<SampleType> & discreteReflDelays,
+                                                     pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
+                                                     efl::BasicMatrix<SampleType> & discretePanningMatrix,
+                                                     efl::BasicVector<SampleType> & lateReverbGains,
+                                                     efl::BasicVector<SampleType> & lateReverbDelays )
 {
   // TODO: Assign the biquad coefficients for the direct path.
 
@@ -257,7 +257,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
 
   // Fill the remaining discrete reflections with neutral values.
   static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
-  static const pml::BiquadParameter<ril::SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
+  static const pml::BiquadParameter<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
   for( std::size_t srcIdx( rsao.numberOfDiscreteReflections() ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
     std::size_t const matrixRow = startRow + srcIdx;
@@ -304,18 +304,18 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
 }
 
 void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
-                                                   efl::BasicVector<ril::SampleType> & discreteReflGains,
-                                                   efl::BasicVector<ril::SampleType> & discreteReflDelays,
-                                                   pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-                                                   efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                                                   efl::BasicVector<ril::SampleType> & lateReverbGains,
-                                                   efl::BasicVector<ril::SampleType> & lateReverbDelays )
+                                                   efl::BasicVector<SampleType> & discreteReflGains,
+                                                   efl::BasicVector<SampleType> & discreteReflDelays,
+                                                   pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
+                                                   efl::BasicMatrix<SampleType> & discretePanningMatrix,
+                                                   efl::BasicVector<SampleType> & lateReverbGains,
+                                                   efl::BasicVector<SampleType> & lateReverbDelays )
 {
   // Define a starting index into the all parameter matrices 
   std::size_t const startRow = renderChannel * mNumberOfDiscreteReflectionsPerSource;
 
   static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
-  static const pml::BiquadParameter<ril::SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
+  static const pml::BiquadParameter<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
   std::fill( mSourcePositions.begin( ), mSourcePositions.end( ), defaultPosition );
   for( std::size_t srcIdx( 0 ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {

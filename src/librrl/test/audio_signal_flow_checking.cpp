@@ -36,44 +36,44 @@ std::string numberedItem( std::string const & base, std::size_t index )
   return res.str();
 }
 
-class MyAtom: public ril::AtomicComponent
+class MyAtom: public AtomicComponent
 {
 public:
-  MyAtom( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent,
+  MyAtom( SignalFlowContext & context, char const * componentName, CompositeComponent * parent,
           std::size_t numInputs, std::size_t numOutputs)
-   : ril::AtomicComponent( context, componentName, parent )
+   : AtomicComponent( context, componentName, parent )
   {
     for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
     {
-      mInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "in", portIdx ).c_str( ), *this ) ) );
+      mInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "in", portIdx ).c_str( ), *this ) ) );
       mInputs[portIdx]->setWidth( audioWidth );
     }
     for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
     {
-      mOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "out", portIdx ).c_str( ), *this ) ) );
+      mOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "out", portIdx ).c_str( ), *this ) ) );
       mOutputs[portIdx]->setWidth( audioWidth );
     }
    }
   void process() override {}
 private:
-  std::vector< std::unique_ptr<ril::AudioInput> > mInputs;
-  std::vector<std::unique_ptr<ril::AudioOutput> > mOutputs;
+  std::vector< std::unique_ptr<AudioInput> > mInputs;
+  std::vector<std::unique_ptr<AudioOutput> > mOutputs;
 
 };
 
-class MyComposite: public ril::CompositeComponent
+class MyComposite: public CompositeComponent
 {
 public:
-  MyComposite( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent,
+  MyComposite( SignalFlowContext & context, char const * componentName, CompositeComponent * parent,
                std::size_t numInputs, std::size_t numOutputs )
-    : ril::CompositeComponent( context, componentName, parent )
+    : CompositeComponent( context, componentName, parent )
     , mAtom( context, "SecondLevelAtom", this, numInputs, numOutputs )
   {
     ChannelRange const indices( 0, audioWidth );
 
     for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
     {
-      mExtInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "placeholder_in", portIdx ).c_str(), *this ) ) );
+      mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str(), *this ) ) );
       mExtInputs[portIdx]->setWidth( audioWidth );
       registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
                                "SecondLevelAtom", numberedItem( "in", portIdx ), indices );
@@ -81,7 +81,7 @@ public:
     }
     for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
     {
-      mExtOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str(), *this ) ) );
+      mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str(), *this ) ) );
       mExtOutputs[portIdx]->setWidth( audioWidth );
       registerAudioConnection( "SecondLevelAtom", numberedItem( "out", portIdx ), indices,
                                "this", numberedItem( "placeholder_out", portIdx ), indices );
@@ -90,16 +90,16 @@ public:
 private:
   MyAtom mAtom;
 
-  std::vector< std::unique_ptr<ril::AudioInput> > mExtInputs;
-  std::vector<std::unique_ptr<ril::AudioOutput> > mExtOutputs;
+  std::vector< std::unique_ptr<AudioInput> > mExtInputs;
+  std::vector<std::unique_ptr<AudioOutput> > mExtOutputs;
 };
 
-class MyRecursiveComposite: public ril::CompositeComponent
+class MyRecursiveComposite: public CompositeComponent
 {
 public:
-  MyRecursiveComposite( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent,
+  MyRecursiveComposite( SignalFlowContext & context, char const * componentName, CompositeComponent * parent,
                         std::size_t numInputs, std::size_t numOutputs, std::size_t recursionCount, bool insertAtom )
-    : ril::CompositeComponent( context, componentName, parent )
+    : CompositeComponent( context, componentName, parent )
   {
     if( (not insertAtom) and( numInputs != numOutputs ) )
     {
@@ -115,14 +115,14 @@ public:
         mChild.reset( new MyRecursiveComposite( context, childNameStr.str().c_str(), this, numInputs, numOutputs, recursionCount - 1, insertAtom ) );
         for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
         {
-          mExtInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
+          mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
           mExtInputs[portIdx]->setWidth( audioWidth );
           registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
             childNameStr.str( ).c_str( ), numberedItem( "placeholder_in", portIdx ), indices );
         }
         for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
         {
-          mExtOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
+          mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
           mExtOutputs[portIdx]->setWidth( audioWidth );
           registerAudioConnection( childNameStr.str( ).c_str( ), numberedItem( "placeholder_out", portIdx ), indices,
             "this", numberedItem( "placeholder_out", portIdx ), indices );
@@ -134,14 +134,14 @@ public:
         mChild.reset( new MyAtom( context, childNameStr.str( ).c_str( ), this, numInputs, numOutputs ) );
         for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
         {
-          mExtInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
+          mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
           mExtInputs[portIdx]->setWidth( audioWidth );
           registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
             childNameStr.str( ).c_str( ), numberedItem( "in", portIdx ), indices );
         }
         for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
         {
-          mExtOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
+          mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
           mExtOutputs[portIdx]->setWidth( audioWidth );
           registerAudioConnection( childNameStr.str( ).c_str( ), numberedItem( "out", portIdx ), indices,
             "this", numberedItem( "placeholder_out", portIdx ), indices );
@@ -152,8 +152,8 @@ public:
     {
       for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
       {
-        mExtInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
-        mExtOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
+        mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
+        mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
         mExtInputs[portIdx]->setWidth( audioWidth );
         mExtOutputs[portIdx]->setWidth( audioWidth );
         registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
@@ -163,19 +163,19 @@ public:
     }
     }
 private:
-  std::unique_ptr<ril::Component> mChild;
+  std::unique_ptr<Component> mChild;
 
-  std::vector< std::unique_ptr<ril::AudioInput> > mExtInputs;
-  std::vector<std::unique_ptr<ril::AudioOutput> > mExtOutputs;
+  std::vector< std::unique_ptr<AudioInput> > mExtInputs;
+  std::vector<std::unique_ptr<AudioOutput> > mExtOutputs;
 };
 
 
-class MyTopLevel: public ril::CompositeComponent
+class MyTopLevel: public CompositeComponent
 {
 public:
-  MyTopLevel( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent,
+  MyTopLevel( SignalFlowContext & context, char const * componentName, CompositeComponent * parent,
               std::size_t numInputs, std::size_t numOutputs )
-   : ril::CompositeComponent( context, componentName, parent )
+   : CompositeComponent( context, componentName, parent )
    , mComposite1( context, "FirstLevelComposite", this, numInputs, numOutputs )
    , mAtomTopLevel( context, "FirstLevelAtom", this, numOutputs, numOutputs )
   {
@@ -183,7 +183,7 @@ public:
 
      for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
      {
-       mExtInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "ext_in", portIdx ).c_str( ), *this ) ) );
+       mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "ext_in", portIdx ).c_str( ), *this ) ) );
        mExtInputs[portIdx]->setWidth( audioWidth );
        registerAudioConnection( "this", numberedItem( "ext_in", portIdx ), indices,
          "FirstLevelComposite", numberedItem( "placeholder_in", portIdx ), indices );
@@ -191,7 +191,7 @@ public:
      }
      for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
      {
-       mExtOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "ext_out", portIdx ).c_str( ), *this ) ) );
+       mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "ext_out", portIdx ).c_str( ), *this ) ) );
        mExtOutputs[portIdx]->setWidth( audioWidth );
        registerAudioConnection( "FirstLevelComposite", numberedItem( "placeholder_out", portIdx ), indices,
          "FirstLevelAtom", numberedItem( "in", portIdx ), indices );
@@ -203,23 +203,23 @@ private:
   MyComposite mComposite1;
   MyAtom mAtomTopLevel;
 
-  std::vector< std::unique_ptr<ril::AudioInput> > mExtInputs;
-  std::vector<std::unique_ptr<ril::AudioOutput> > mExtOutputs;
+  std::vector< std::unique_ptr<AudioInput> > mExtInputs;
+  std::vector<std::unique_ptr<AudioOutput> > mExtOutputs;
 };
 
-class MyTopLevelRecursive: public ril::CompositeComponent
+class MyTopLevelRecursive: public CompositeComponent
 {
 public:
-  MyTopLevelRecursive( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent,
+  MyTopLevelRecursive( SignalFlowContext & context, char const * componentName, CompositeComponent * parent,
     std::size_t numInputs, std::size_t numOutputs, std::size_t recursionLevels, bool insertAtom )
-    : ril::CompositeComponent( context, componentName, parent )
+    : CompositeComponent( context, componentName, parent )
     , mComposite( context, "FirstLevelComposite", this, numInputs, numOutputs, recursionLevels, insertAtom )
   {
       ChannelRange const indices( 0, audioWidth );
 
       for( std::size_t portIdx( 0 ); portIdx < numInputs; ++portIdx )
       {
-        mExtInputs.push_back( std::unique_ptr<ril::AudioInput>( new ril::AudioInput( numberedItem( "ext_in", portIdx ).c_str( ), *this ) ) );
+        mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "ext_in", portIdx ).c_str( ), *this ) ) );
         mExtInputs[portIdx]->setWidth( audioWidth );
         registerAudioConnection( "this", numberedItem( "ext_in", portIdx ), indices,
           "FirstLevelComposite", numberedItem( "placeholder_in", portIdx ), indices );
@@ -227,7 +227,7 @@ public:
       }
       for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
       {
-        mExtOutputs.push_back( std::unique_ptr<ril::AudioOutput>( new ril::AudioOutput( numberedItem( "ext_out", portIdx ).c_str( ), *this ) ) );
+        mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "ext_out", portIdx ).c_str( ), *this ) ) );
         mExtOutputs[portIdx]->setWidth( audioWidth );
         registerAudioConnection( "FirstLevelComposite", numberedItem( "placeholder_out", portIdx ), indices,
           "this", numberedItem( "ext_out", portIdx ), indices );
@@ -236,8 +236,8 @@ public:
 private:
   MyRecursiveComposite mComposite;
 
-  std::vector< std::unique_ptr<ril::AudioInput> > mExtInputs;
-  std::vector<std::unique_ptr<ril::AudioOutput> > mExtOutputs;
+  std::vector< std::unique_ptr<AudioInput> > mExtInputs;
+  std::vector<std::unique_ptr<AudioOutput> > mExtOutputs;
 };
 
 
@@ -245,7 +245,7 @@ private:
 
 BOOST_AUTO_TEST_CASE( CheckAtomicComponent )
 {
-  ril::SignalFlowContext context( 1024, 48000 );
+  SignalFlowContext context( 1024, 48000 );
 
   MyAtom atomicComp( context, "", nullptr, 2, 3 );
 
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE( CheckAtomicComponent )
 
 BOOST_AUTO_TEST_CASE( CheckCompositeComponent )
 {
-  ril::SignalFlowContext context( 1024, 48000 );
+  SignalFlowContext context( 1024, 48000 );
 
   MyComposite composite( context, "", nullptr, 2, 3 );
 
@@ -267,7 +267,7 @@ BOOST_AUTO_TEST_CASE( CheckCompositeComponent )
 
 BOOST_AUTO_TEST_CASE( CheckTwoLevelCompositeComponent )
 {
-  ril::SignalFlowContext context( 1024, 48000 );
+  SignalFlowContext context( 1024, 48000 );
 
   MyTopLevel composite( context, "", nullptr, 3, 4 );
 
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE( CheckTwoLevelCompositeComponent )
  */
 BOOST_AUTO_TEST_CASE( CheckRecursiveCompositeComponentNoAtom )
 {
-  ril::SignalFlowContext context( 1024, 48000 );
+  SignalFlowContext context( 1024, 48000 );
 
   std::size_t const recursionLimit = 3;
   bool const insertAtom = false;
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE( CheckRecursiveCompositeComponentNoAtom )
  */
 BOOST_AUTO_TEST_CASE( CheckRecursiveCompositeComponent )
 {
-  ril::SignalFlowContext context( 1024, 48000 );
+  SignalFlowContext context( 1024, 48000 );
 
   std::size_t const recursionLimit = 3;
   bool const insertAtom = true;

@@ -4,7 +4,7 @@
 
 namespace visr
 {
-namespace ril
+namespace impl
 {
 
 AudioConnection::

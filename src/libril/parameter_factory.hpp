@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
+#ifndef VISR_PARAMETER_FACTORY_HPP_INCLUDED
+#define VISR_PARAMETER_FACTORY_HPP_INCLUDED
 
 // #include "parameter_type.hpp"
 
@@ -12,8 +12,6 @@
 #include <boost/function.hpp>
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
@@ -85,9 +83,8 @@ void ParameterFactory::registerParameterType( ParameterType const & type )
 // The macro does not work for multiple uses in the same .cpp file
 // (multiple definitions of 'maker'), stringization of names difficult
 // because of template brackets and namespace names.
-// #define REGISTER_PARAMETER( type, id ) namespace { static ril::ParameterFactory::Registrar< type > maker( id ); }
+// #define REGISTER_PARAMETER( type, id ) namespace { static ParameterFactory::Registrar< type > maker( id ); }
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_FACTORY_HPP_INCLUDED

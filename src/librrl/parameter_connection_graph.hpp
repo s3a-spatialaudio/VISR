@@ -34,7 +34,7 @@ public:
   {
     friend class ParameterConnectionGraph;
   public:
-    using Ports = std::vector< ril::ParameterPortBase * >;
+    using Ports = std::vector< ParameterPortBase * >;
 
     ConnectedPorts() {}
 
@@ -62,11 +62,11 @@ public:
 
 private:
 
-  using GraphType = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, ril::ParameterPortBase * >;
+  using GraphType = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, ParameterPortBase * >;
 
   GraphType mConnectionGraph;
 
-  using VertexMap = std::map<ril::ParameterPortBase *, GraphType::vertex_descriptor >;
+  using VertexMap = std::map<ParameterPortBase *, GraphType::vertex_descriptor >;
 
   VertexMap mVertexLookup;
 

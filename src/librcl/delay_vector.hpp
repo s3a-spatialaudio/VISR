@@ -37,9 +37,9 @@ namespace rcl
  * @todo Implement flexible transition length (at the moment, the block length is always used
  * @todo general cleanup (including more comprehensive range checks for the delay)
  */
-class DelayVector: public ril::AtomicComponent
+class DelayVector: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Enumeration to denote the type of fractional-delay filtering used.
@@ -57,9 +57,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit DelayVector( ril::SignalFlowContext& context,
+  explicit DelayVector( SignalFlowContext& context,
                         char const * name,
-                        ril::CompositeComponent * parent = nullptr );
+                        CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.
@@ -208,12 +208,12 @@ private:
   /**
    * The audio input port for this component.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output port for this component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * The number of simultaneous audio channels.
@@ -226,7 +226,7 @@ private:
   /**
    * The ring buffer.
    */
-  efl::BasicMatrix< ril::SampleType > mRingBuffer;
+  efl::BasicMatrix< SampleType > mRingBuffer;
 
   /**
    * The current write position in the ring buffer.
@@ -243,19 +243,19 @@ private:
   /**
   * The current gain value.
   */
-  efl::BasicVector< ril::SampleType > mCurrentGains;
+  efl::BasicVector< SampleType > mCurrentGains;
   /**
   * The current amount of delay.
   */
-  efl::BasicVector< ril::SampleType > mCurrentDelays;
+  efl::BasicVector< SampleType > mCurrentDelays;
   /**
   * The future gain value.
   */
-  efl::BasicVector< ril::SampleType > mNextGains;
+  efl::BasicVector< SampleType > mNextGains;
   /**
   * The future amount of delay.
   */
-  efl::BasicVector< ril::SampleType > mNextDelays;
+  efl::BasicVector< SampleType > mNextDelays;
 
   /**
    * The sampling frequency of the audio signal flow, converted to floating-point 

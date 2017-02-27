@@ -20,15 +20,11 @@
 
 namespace visr
 {
+
 // forward declarations
 namespace objectmodel
 {
 class ObjectVector;
-}
-
-namespace ril
-{
-class AudioInput;
 }
 
 namespace rcl
@@ -38,7 +34,7 @@ namespace rcl
  * Component to decode audio objects from messages (typically received from a network).
  * This component has neither audio inputs or outputs.
  */
-class SceneDecoder: public ril::AtomicComponent
+class SceneDecoder: public AtomicComponent
 {
 public:
   /**
@@ -46,9 +42,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SceneDecoder( ril::SignalFlowContext& context,
+  explicit SceneDecoder( SignalFlowContext& context,
                          char const * name,
-                         ril::CompositeComponent * parent = nullptr );
+                         CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -72,8 +68,8 @@ public:
   void process();
 
 private:
-  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorOutput;
+  ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorOutput;
 };
 
 } // namespace rcl

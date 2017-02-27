@@ -20,22 +20,22 @@ namespace visr
 namespace rcl
 {
 
-  DelayVector::DelayVector( ril::SignalFlowContext& context,
+  DelayVector::DelayVector( SignalFlowContext& context,
                             char const * name,
-                            ril::CompositeComponent * parent /*= nullptr*/ )
+                            CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 #ifdef USE_CIRCULAR_BUFFER
  , mRingBuffer() // initialise smart pointer to null
 #else
- , mRingBuffer( ril::cVectorAlignmentSamples )
+ , mRingBuffer( cVectorAlignmentSamples )
  , mWriteIndex( 0 )
 #endif
- , mCurrentGains(ril::cVectorAlignmentSamples)
- , mCurrentDelays(ril::cVectorAlignmentSamples)
- , mNextGains(ril::cVectorAlignmentSamples)
- , mNextDelays(ril::cVectorAlignmentSamples)
+ , mCurrentGains(cVectorAlignmentSamples)
+ , mCurrentDelays(cVectorAlignmentSamples)
+ , mNextGains(cVectorAlignmentSamples)
+ , mNextDelays(cVectorAlignmentSamples)
  , cSamplingFrequency( static_cast<SampleType>( samplingFrequency() ) )
 {
 }
@@ -47,10 +47,10 @@ void DelayVector::setup( std::size_t numberOfChannels,
                          SampleType initialDelaySeconds /* = static_cast<SampleType>(1.0) */,
                          SampleType initialGainLinear /* = static_cast<SampleType>(0.0) */ )
 {
-  efl::BasicVector< SampleType > delayVector( numberOfChannels, ril::cVectorAlignmentSamples );
-  efl::BasicVector< SampleType > gainVector( numberOfChannels, ril::cVectorAlignmentSamples );
-  efl::vectorFill( initialDelaySeconds, delayVector.data(), numberOfChannels, ril::cVectorAlignmentSamples );
-  efl::vectorFill( initialGainLinear, gainVector.data(), numberOfChannels, ril::cVectorAlignmentSamples );
+  efl::BasicVector< SampleType > delayVector( numberOfChannels, cVectorAlignmentSamples );
+  efl::BasicVector< SampleType > gainVector( numberOfChannels, cVectorAlignmentSamples );
+  efl::vectorFill( initialDelaySeconds, delayVector.data(), numberOfChannels, cVectorAlignmentSamples );
+  efl::vectorFill( initialGainLinear, gainVector.data(), numberOfChannels, cVectorAlignmentSamples );
 
   setup( numberOfChannels, interpolationSteps, maximumDelaySeconds, interpolationMethod,
          delayVector, gainVector );
@@ -84,7 +84,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
 #ifdef USE_CIRCULAR_BUFFER
   // period() is used because the current samples must also fit into the buffer without overwriting the oldest data.
   std::size_t const ringbufferLength = maxDelaySamples + interpolationOrder + period( );
-  mRingBuffer.reset( new rbbl::CircularBuffer<SampleType>( numberOfChannels, ringbufferLength, ril::cVectorAlignmentSamples ));
+  mRingBuffer.reset( new rbbl::CircularBuffer<SampleType>( numberOfChannels, ringbufferLength, cVectorAlignmentSamples ));
 #else
   mRingbufferLength = static_cast<std::size_t>(std::ceil( static_cast<SampleType>(maxDelaySamples + interpolationOrder) / period( ) )) * period( );
   mRingBuffer.resize(numberOfChannels, mRingbufferLength ); // this also zeros the ring buffer
@@ -145,7 +145,7 @@ void DelayVector::process()
   assert(mWriteIndex + blockLength <= mRingbufferLength );
   for( std::size_t idc = 0; idc < mNumberOfChannels; ++idc )
   {
-    efl::vectorCopy( mInput[idc], &mRingBuffer( idc, mWriteIndex ), blockLength, ril::cVectorAlignmentSamples );
+    efl::vectorCopy( mInput[idc], &mRingBuffer( idc, mWriteIndex ), blockLength, cVectorAlignmentSamples );
   }
   // The write pointer is advanced at the end of process(), because the delay calculation is based on the prior position.
 

@@ -20,12 +20,9 @@
 namespace visr
 {
 // Forward declarations
-namespace ril
-{
 class AtomicComponent;
 class Component;
 class AudioPort;
-}
 
 namespace rrl
 {
@@ -43,18 +40,18 @@ public:
    */
   ~SchedulingGraph();
 
-  void initialise( ril::Component const & flow,
+  void initialise( Component const & flow,
                    AudioConnectionMap const & audioConnections,
                    ParameterConnectionMap const & parameterConnections );
 
-  std::vector<ril::AtomicComponent *> sequentialSchedule() const;
+  std::vector<AtomicComponent *> sequentialSchedule() const;
 
 private:
   // TODO: Consider moving lots of graph functionality into a pimpl class.
 
   void addAudioDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver );
 
-  void addParameterDependency( ril::ParameterPortBase const * sender, ril::ParameterPortBase const * receiver );
+  void addParameterDependency( ParameterPortBase const * sender, ParameterPortBase const * receiver );
 
   enum class NodeType
   {
@@ -70,9 +67,9 @@ private:
 
     explicit ProcessingNode( NodeType type );
 
-    explicit ProcessingNode( ril::AtomicComponent const * atom );
+    explicit ProcessingNode( AtomicComponent const * atom );
 
-    ril::AtomicComponent const * node() const { return mComponent; }
+    AtomicComponent const * node() const { return mComponent; }
 
     NodeType type() const { return mType; }
 
@@ -83,7 +80,7 @@ private:
      * Reference to the associated component (in case of a Processor) 
      * Remains nullptr for sources and sinks.
      */
-    ril::AtomicComponent const * mComponent;
+    AtomicComponent const * mComponent;
   };
 
   class CompareProcessingNodes

@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
-#define VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
+#ifndef VISR_COMPOSITE_COMPONENT_HPP_INCLUDED
+#define VISR_COMPOSITE_COMPONENT_HPP_INCLUDED
 
 #include "component.hpp"
 #include "channel_list.hpp"
@@ -11,12 +11,14 @@
 
 namespace visr
 {
-namespace ril
-{
+
 // Forward declarations
 class SignalFlowContext;
 
-class CompositeComponentImplementation;
+namespace impl
+{
+class CompositeComponent;
+}
 
 /**
  *
@@ -32,8 +34,8 @@ public:
    * the CompositeComponent interface.
    */
   //@{
-  using ChannelRange = visr::ril::ChannelRange;
-  using ChannelList = visr::ril::ChannelList;
+  using ChannelRange = visr::ChannelRange;
+  using ChannelList = visr::ChannelList;
   //@}
 
   explicit CompositeComponent( SignalFlowContext& context,
@@ -63,14 +65,14 @@ public:
    * From the user point of view, these data structure is opaque and unknown.
    * @todo Improve name ('implementation' does not really fit)
    */
-  CompositeComponentImplementation & implementation();
+  impl::CompositeComponent & implementation();
 
   /**
   * Return a reference to the internal data structures holding ports and contained components, const version.
   * From the user point of view, these data structure is opaque and unknown.
   * @todo Improve name ('implementation' does not really fit)
   */
-  CompositeComponentImplementation const & implementation() const;
+  impl::CompositeComponent const & implementation() const;
 
 // protected:
 
@@ -108,10 +110,9 @@ public:
                                 AudioPortBase & receivePort );
 
 private:
-  std::unique_ptr<CompositeComponentImplementation> mImpl;
+  std::unique_ptr<impl::CompositeComponent> mImpl;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_HPP_INCLUDED
+#endif // #ifndef VISR_COMPOSITE_COMPONENT_HPP_INCLUDED

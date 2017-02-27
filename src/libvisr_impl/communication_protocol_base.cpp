@@ -4,17 +4,10 @@
 
 namespace visr
 {
-namespace ril
-{
 
-CommunicationProtocolBase::CommunicationProtocolBase()
-{
-}
+CommunicationProtocolBase::CommunicationProtocolBase() = default;
  
-/*virtual*/ CommunicationProtocolBase::~CommunicationProtocolBase()
-{
-}
+/*virtual*/ CommunicationProtocolBase::~CommunicationProtocolBase() = default;
 
-} // namespace ril
 } // namespace visr
 

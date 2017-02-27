@@ -21,12 +21,12 @@ PYBIND11_PLUGIN( visr )
   pybind11::module m( "visr", "VISR core API module" );
   using namespace visr::python::visr;
   exportSignalFlowContext( m );
+  exportParameterConfigBase( m );
   exportChannelList( m );
-  exportAudioPort( m );
   exportComponent( m );
+  exportAudioPort( m );
   exportCompositeComponent( m );
   exportAtomicComponent( m );
-  exportParameterConfigBase( m );
   return m.ptr();
 }
 

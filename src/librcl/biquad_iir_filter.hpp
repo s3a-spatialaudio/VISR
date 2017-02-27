@@ -27,18 +27,18 @@ namespace rcl
  * The widths of the input and the output port are identical and is
  * set by the argument <b>numberOfChannels</b> in the setup() method.
  */
-class BiquadIirFilter: public ril::AtomicComponent
+class BiquadIirFilter: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit BiquadIirFilter( ril::SignalFlowContext& context,
+  explicit BiquadIirFilter( SignalFlowContext& context,
                             char const * name,
-                            ril::CompositeComponent * parent = nullptr  );
+                            CompositeComponent * parent = nullptr  );
     
   /**
    * Setup method to initialise the object and set the parameters.
@@ -149,12 +149,12 @@ private:
   /**
    * The audio input port for this component.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output port for this component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * The number of simultaneous audio channels.

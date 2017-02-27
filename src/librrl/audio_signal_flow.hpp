@@ -10,31 +10,25 @@
 #include <libril/processable_interface.hpp>
 #include <libril/signal_flow_context.hpp>
 
-// #include <array>
 #include <iosfwd>
-// #include <initializer_list>
 #include <map>
 #include <memory>
 #include <set>
 #include <stdexcept>
-// #include <valarray>
 #include <vector>
 
 namespace visr
 {
-  // Forward declarations
-  namespace ril
-  {
-    class AtomicComponent;
-    class AudioInput;
-    class AudioOutput;
-    class Component;
-    class CompositeComponent;
-    class AudioPort;
-    class ParameterPortBase;
-    class CommunicationProtocolBase;
-  }
-  namespace rrl
+// Forward declarations
+class AtomicComponent;
+class AudioInput;
+class AudioOutput;
+class Component;
+class CompositeComponent;
+class ParameterPortBase;
+class CommunicationProtocolBase;
+
+namespace rrl
 {
 // Forward declarations
 template <typename T> class CommunicationArea;
@@ -61,7 +55,7 @@ public:
    * @param samplingFrequency The sampling frequency associated with
    * the discrete-time signals to be processed.
    */
-  explicit AudioSignalFlow( ril::Component & flow );
+  explicit AudioSignalFlow( Component & flow );
 
   /**
    * Destructor.
@@ -75,8 +69,8 @@ public:
    * (except userData), see @see processFunction().
    */
   AudioInterface::CallbackResult
-  process( ril::SampleType const * const * captureSamples,
-                        ril::SampleType * const * playbackSamples );
+  process( SampleType const * const * captureSamples,
+                        SampleType * const * playbackSamples );
 
   /**
    * A static, i.e., non-class function which can be registered as a
@@ -99,8 +93,8 @@ public:
    * @TODO After the redesign, the translation to a callback function (and discarding the object pointer) needs to be done somewhere else!
    */
   static void  processFunction( void* userData,
-                                ril::SampleType const * const * captureSamples,
-                                ril::SampleType * const * playbackSamples,
+                                SampleType const * const * captureSamples,
+                                SampleType * const * playbackSamples,
                                 AudioInterface::CallbackResult& callbackResult );
 
   /**
@@ -179,13 +173,13 @@ private:
    * Can be static or nonmember functions
    */
   //@{
-  static bool checkFlow( ril::Component const & comp, bool locally, std::ostream & messages );
+  static bool checkFlow( Component const & comp, bool locally, std::ostream & messages );
 
-  static bool checkCompositeLocal( ril::CompositeComponent const & composite , std::ostream & messages );
+  static bool checkCompositeLocal( CompositeComponent const & composite , std::ostream & messages );
 
-  static bool checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalAudio( CompositeComponent const & composite, std::ostream & messages );
 
-  static bool checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalParameters( CompositeComponent const & composite, std::ostream & messages );
   //@}
 
   /**
@@ -195,7 +189,7 @@ private:
    * To be called from the setup() method of a derived subclass.
    */
   void initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
-                     std::size_t alignmentElements = ril::cVectorAlignmentSamples );
+                     std::size_t alignmentElements = cVectorAlignmentSamples );
 
   /**
     * Parameter infrastructure
@@ -221,7 +215,7 @@ private:
    * find a port of a specific audio component, both specified by name
    * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
    */
-  ril::AudioPortBase & findPort( std::string const & componentName,
+  AudioPortBase & findPort( std::string const & componentName,
                              std::string const & portName );
 #endif
 
@@ -229,7 +223,7 @@ private:
    * The signal flow handled by this object.
    * Can be either an atomic or a (hierachical) composite component/
    */
-  ril::Component & mFlow;
+  Component & mFlow;
 
   /**
    * Flag stating whether the signal flow is fully initialised.
@@ -240,7 +234,7 @@ private:
    * Type for collection and lookup of all audio components contained in this signal flow.
    * @note At this level the signal flow is flat, i.e., only atomic components are important.
    */
-  using ComponentTable = std::map<std::string, ril::AtomicComponent*>;
+  using ComponentTable = std::map<std::string, AtomicComponent*>;
 
   /**
    * A table of all Component objects contained in this graph. 
@@ -253,7 +247,7 @@ private:
    */
   //@{
 
-  using CommunicationProtocolContainer = std::vector<std::unique_ptr<ril::CommunicationProtocolBase> >;
+  using CommunicationProtocolContainer = std::vector<std::unique_ptr<CommunicationProtocolBase> >;
 
   CommunicationProtocolContainer mCommunicationProtocols;
   //@}
@@ -263,16 +257,16 @@ private:
    */
   //@{
 
-  std::vector<ril::AudioInput*> mToplevelInputs;
+  std::vector<AudioInput*> mToplevelInputs;
 
-  std::vector<ril::AudioOutput*> mToplevelOutputs;
+  std::vector<AudioOutput*> mToplevelOutputs;
   //@}
 
   /**
   * The communication area for this signal flow.
   * @see initCommArea()
   */
-  std::unique_ptr<CommunicationArea<ril::SampleType> > mCommArea;
+  std::unique_ptr<CommunicationArea<SampleType> > mCommArea;
 
   /**
    * These ports are the top-level system inputs and outputs.
@@ -280,15 +274,15 @@ private:
    * @note at the moment the order of the ports is determined by the system.
    */
   //@{
-  std::vector < ril::AudioPortBase*> mTopLevelAudioInputs;
-  std::vector < ril::AudioPortBase*> mTopLevelAudioOutputs;
+  std::vector < AudioPortBase*> mTopLevelAudioInputs;
+  std::vector < AudioPortBase*> mTopLevelAudioOutputs;
   //@}
 
 
-  std::vector<ril::AudioPortBase::SignalIndexType> mCaptureIndices;
-  std::vector<ril::AudioPortBase::SignalIndexType> mPlaybackIndices;
+  std::vector<AudioPortBase::SignalIndexType> mCaptureIndices;
+  std::vector<AudioPortBase::SignalIndexType> mPlaybackIndices;
 
-  using ProcessingSchedule = std::vector<ril::ProcessableInterface * >;
+  using ProcessingSchedule = std::vector<ProcessableInterface * >;
 
   ProcessingSchedule mProcessingSchedule;
 };

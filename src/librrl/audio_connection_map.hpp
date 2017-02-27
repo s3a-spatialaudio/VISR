@@ -14,13 +14,11 @@
 
 namespace visr
 {
+
 // Forward declarations
-namespace ril
-{
 class AtomicComponent;
 class Component;
 class AudioPortBase;
-}
 
 namespace rrl
 {
@@ -32,7 +30,7 @@ public:
 
   AudioSignalDescriptor();
 
-  explicit AudioSignalDescriptor( ril::AudioPortBase const * port, SignalIndexType index );
+  explicit AudioSignalDescriptor( AudioPortBase const * port, SignalIndexType index );
 
   /**
   * 'less than operator', used for ordering in a map.
@@ -41,7 +39,7 @@ public:
 
   bool operator==(AudioSignalDescriptor const & rhs) const;
 
-  ril::AudioPortBase const* mPort;
+  AudioPortBase const* mPort;
   SignalIndexType mIndex;
 
   // with proper C++11 support, this could be instantiated in place (using the constexpr mechanism)
@@ -81,10 +79,10 @@ public:
    */
   AudioConnectionMap();
 
-  explicit AudioConnectionMap( ril::Component const & component,
+  explicit AudioConnectionMap( Component const & component,
                                bool recursive = false );
 
-  bool fill( ril::Component const & component,
+  bool fill( Component const & component,
              std::ostream & messages,
              bool recursive = false );
 
@@ -112,7 +110,7 @@ public:
    */
   void resolvePlaceholders( AudioConnectionMap const & fullConnections );
 private:
-  bool fillRecursive( ril::Component const & component,
+  bool fillRecursive( Component const & component,
                       std::ostream & messages,
                       bool recursive );
 

@@ -1,13 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
+#ifndef VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED
+#define VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED
 
 #include "parameter_base.hpp"
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
@@ -33,13 +31,12 @@ public:
    */
   virtual ~TypedParameterBase() {}
 
-  virtual ParameterType type() override
+  virtual ParameterType type() final
   {
     return TypeT;
   }
 };
 
-} // namespace ril
 } // namespace visr
 
 // TODO: Check whether we can provide the lookup template specializations
@@ -47,4 +44,4 @@ public:
 // Problem: We do not see the derived type here, only the base of the actual parameter type.
 // TODO: Is this a place for the Coriously Recurring Template Pattern?
 
-#endif // #ifndef VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED

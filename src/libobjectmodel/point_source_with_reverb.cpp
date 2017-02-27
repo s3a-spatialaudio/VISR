@@ -57,7 +57,7 @@ PointSourceWithReverb::DiscreteReflection::DiscreteReflection()
 
 PointSourceWithReverb::DiscreteReflection::DiscreteReflection( DiscreteReflection const & ) = default;
 
-pml::BiquadParameter<ril::SampleType> const & 
+pml::BiquadParameter<SampleType> const & 
 PointSourceWithReverb::DiscreteReflection::reflectionFilter( std::size_t biquadIdx ) const
 { 
   if( biquadIdx >= cNumDiscreteReflectionBiquads )
@@ -74,7 +74,7 @@ void PointSourceWithReverb::DiscreteReflection::setPosition( Coordinate x, Coord
   mZ = z;
 }
 
-void PointSourceWithReverb::DiscreteReflection::setDelay( ril::SampleType newDelay )
+void PointSourceWithReverb::DiscreteReflection::setDelay( SampleType newDelay )
 {
   mDelay = newDelay;
 }
@@ -84,7 +84,7 @@ void PointSourceWithReverb::DiscreteReflection::setLevel( LevelType newLevel )
   mLevel = newLevel;
 }
 
-void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( pml::BiquadParameterList<ril::SampleType> const & newFilters )
+void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( pml::BiquadParameterList<SampleType> const & newFilters )
 {
   assert( mDiscreteReflectionFilters.size() == cNumDiscreteReflectionBiquads );
   if( newFilters.size() >= cNumDiscreteReflectionBiquads )
@@ -97,11 +97,11 @@ void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( pml::Biqua
   }
   for( std::size_t idx( newFilters.size() ); idx < mDiscreteReflectionFilters.size( ); ++idx )
   {
-    mDiscreteReflectionFilters[idx] = pml::BiquadParameter<ril::SampleType>(); // fill remaining filters with flat default value.
+    mDiscreteReflectionFilters[idx] = pml::BiquadParameter<SampleType>(); // fill remaining filters with flat default value.
   }
 }
 
-void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<ril::SampleType> const & newFilter )
+void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<SampleType> const & newFilter )
 {
   if( biquadIdx >= mDiscreteReflectionFilters.size() )
   {
@@ -115,7 +115,7 @@ void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t
 
 
 PointSourceWithReverb::LateReverb::LateReverb()
- : mOnsetDelay( static_cast<ril::SampleType>(0.0) )
+ : mOnsetDelay( static_cast<SampleType>(0.0) )
 {
 
 }
@@ -124,8 +124,8 @@ namespace // unnamed
 {
 
 /** Local helper function to initialise the coefficient vectors (avoid code duplication). */
-  void initializeCoeffVector( const char * coeffName, PointSourceWithReverb::LateReverbCoeffs & coeff, std::initializer_list<ril::SampleType> const initVal,
-                           ril::SampleType defaultValue )
+  void initializeCoeffVector( const char * coeffName, PointSourceWithReverb::LateReverbCoeffs & coeff, std::initializer_list<SampleType> const initVal,
+                           SampleType defaultValue )
 {
   if( initVal.size() == 0 )
   {
@@ -148,18 +148,18 @@ namespace // unnamed
 
 } // unnamed namespace
 
-PointSourceWithReverb::LateReverb::LateReverb( ril::SampleType onsetDelay,
-                                               std::initializer_list<ril::SampleType> const levels /*= std::initializer_list<ril::SampleType>()*/,
-                                               std::initializer_list<ril::SampleType> const decayCoeffs /*= std::initializer_list<ril::SampleType>()*/,
-                                               std::initializer_list<ril::SampleType> const attackTimes /*= std::initializer_list<ril::SampleType>()*/ )
+PointSourceWithReverb::LateReverb::LateReverb( SampleType onsetDelay,
+                                               std::initializer_list<SampleType> const levels /*= std::initializer_list<SampleType>()*/,
+                                               std::initializer_list<SampleType> const decayCoeffs /*= std::initializer_list<SampleType>()*/,
+                                               std::initializer_list<SampleType> const attackTimes /*= std::initializer_list<SampleType>()*/ )
   : mOnsetDelay(onsetDelay)
 {
-  initializeCoeffVector( "levels", mLevels, levels, static_cast<ril::SampleType>(0.0f) );
-  initializeCoeffVector( "decayCoeffs", mDecayCoeffs, decayCoeffs, static_cast<ril::SampleType>(0.0f) );
-  initializeCoeffVector( "atackTimes", mAttackTimes, attackTimes, static_cast<ril::SampleType>(0.0f) );
+  initializeCoeffVector( "levels", mLevels, levels, static_cast<SampleType>(0.0f) );
+  initializeCoeffVector( "decayCoeffs", mDecayCoeffs, decayCoeffs, static_cast<SampleType>(0.0f) );
+  initializeCoeffVector( "atackTimes", mAttackTimes, attackTimes, static_cast<SampleType>(0.0f) );
 }
 
-void PointSourceWithReverb::LateReverb::setLevels( ril::SampleType const * levels, std::size_t numValues )
+void PointSourceWithReverb::LateReverb::setLevels( SampleType const * levels, std::size_t numValues )
 {
   if( numValues != PointSourceWithReverb::cNumberOfSubBands )
   {
@@ -168,7 +168,7 @@ void PointSourceWithReverb::LateReverb::setLevels( ril::SampleType const * level
   std::copy( levels, levels + numValues, mLevels.begin( ) );
 }
 
-void PointSourceWithReverb::LateReverb::setDecayCoeffs( ril::SampleType const * decays, std::size_t numValues )
+void PointSourceWithReverb::LateReverb::setDecayCoeffs( SampleType const * decays, std::size_t numValues )
 {
   if( numValues != PointSourceWithReverb::cNumberOfSubBands )
   {
@@ -177,7 +177,7 @@ void PointSourceWithReverb::LateReverb::setDecayCoeffs( ril::SampleType const * 
   std::copy( decays, decays + numValues, mDecayCoeffs.begin( ) );
 }
 
-void PointSourceWithReverb::LateReverb::setAttackTimes( ril::SampleType const * attack, std::size_t numValues )
+void PointSourceWithReverb::LateReverb::setAttackTimes( SampleType const * attack, std::size_t numValues )
 {
   if( numValues != PointSourceWithReverb::cNumberOfSubBands )
   {

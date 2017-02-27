@@ -27,11 +27,11 @@ namespace rcl
 namespace test
 {
 
-class Flow: public ril::AudioSignalFlow
+class Flow: public AudioSignalFlow
 {
 public:
-  explicit Flow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
-    : ril::AudioSignalFlow( period, samplingFrequency )
+  explicit Flow( std::size_t period, SamplingFrequencyType samplingFrequency )
+    : AudioSignalFlow( period, samplingFrequency )
   {
   }
 
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   }
 
   pml::ListenerPosition pos;
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> gains(numSpeakers, ril::cVectorAlignmentSamples );
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> delays(numSpeakers, ril::cVectorAlignmentSamples );
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> gains(numSpeakers, cVectorAlignmentSamples );
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> delays(numSpeakers, cVectorAlignmentSamples );
 
 
   kinect.setup( kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous ); //setup to listen from th, how to set up mode?

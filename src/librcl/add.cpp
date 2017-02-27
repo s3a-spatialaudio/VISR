@@ -18,9 +18,9 @@ namespace rcl
 {
 
 
-Add::Add( ril::SignalFlowContext& context,
+Add::Add( SignalFlowContext& context,
           char const * name,
-          ril::CompositeComponent * parent )
+          CompositeComponent * parent )
  : AtomicComponent( context, name, parent )
  , mOutput( "out", *this )
 {
@@ -40,9 +40,9 @@ void Add::setup( std::size_t width, std::size_t numInputs )
     std::stringstream inName;
     inName << "in" << run;
     std::string const & portName = inName.str();
-    ril::AudioInput* newIn = new ril::AudioInput( portName.c_str(), *this );
+    AudioInput* newIn = new AudioInput( portName.c_str(), *this );
     newIn->setWidth( width );
-    mInputs.push_back( std::unique_ptr<ril::AudioInput>( newIn ) );
+    mInputs.push_back( std::unique_ptr<AudioInput>( newIn ) );
   }
 }
 
@@ -54,7 +54,7 @@ void Add::process()
   {
     for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
     {
-      efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), ril::cVectorAlignmentSamples );
+      efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), cVectorAlignmentSamples );
       if( res != efl::noError )
       {
         throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );
@@ -65,7 +65,7 @@ void Add::process()
   {
     for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
     {
-      efl::ErrorCode res = efl::vectorCopy( mInputs.at(0)->at( sigIdx ), mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
+      efl::ErrorCode res = efl::vectorCopy( mInputs.at(0)->at( sigIdx ), mOutput[sigIdx], period( ), cVectorAlignmentSamples );
       if( res != efl::noError ) {
         throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );
       }
@@ -77,7 +77,7 @@ void Add::process()
     {
       efl::ErrorCode res = efl::vectorAdd( mInputs.at( 0 )->at( sigIdx ),
         mInputs.at( 1 )->at( sigIdx ),
-        mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
+        mOutput[sigIdx], period( ), cVectorAlignmentSamples );
       if( res != efl::noError )
       {
         throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );
@@ -88,7 +88,7 @@ void Add::process()
       for( std::size_t sigIdx( 0 ); sigIdx < cWidth; ++sigIdx )
       {
         efl::ErrorCode res = efl::vectorAddInplace( mInputs.at( inputIdx )->at( sigIdx ),
-          mOutput[sigIdx], period( ), ril::cVectorAlignmentSamples );
+          mOutput[sigIdx], period( ), cVectorAlignmentSamples );
         if( res != efl::noError )
         {
           throw std::runtime_error( std::string( "Error during Add::process(): " ) + efl::errorMessage( res ) );

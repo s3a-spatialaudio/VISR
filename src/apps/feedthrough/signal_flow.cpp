@@ -12,9 +12,9 @@ namespace apps
 namespace feedthrough
 {
 
-Feedthrough::Feedthrough( ril::SignalFlowContext & context,
+Feedthrough::Feedthrough( SignalFlowContext & context,
                           char const * name,
-                          ril::CompositeComponent * parent )
+                          CompositeComponent * parent )
  : CompositeComponent( context, name, parent )
  , mInput( "input", *this )
  , mOutput( "output", *this )

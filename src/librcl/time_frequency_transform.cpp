@@ -22,12 +22,12 @@ namespace visr
 namespace rcl
 {
 
-TimeFrequencyTransform::TimeFrequencyTransform( ril::SignalFlowContext& context,
+TimeFrequencyTransform::TimeFrequencyTransform( SignalFlowContext& context,
                                                 char const * name,
-                                                ril::CompositeComponent * parent /*= nullptr*/ )
+                                                CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
- , mAlignment( ril::cVectorAlignmentSamples )
+ , mAlignment( cVectorAlignmentSamples )
  , mWindow( mAlignment )
  , mCalcBuffer( mAlignment )
 {
@@ -100,13 +100,13 @@ void TimeFrequencyTransform::setup( std::size_t numberOfChannels,
 
   mNumberOfChannels = numberOfChannels;
   mInput.setWidth( mNumberOfChannels );
-  mOutput.reset( new ril::ParameterOutputPort < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "out", *this, tfParamConfig ) ) ;
+  mOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "out", *this, tfParamConfig ) ) ;
 }
 
 void TimeFrequencyTransform::process()
 {
   pml::TimeFrequencyParameter<SampleType> & outMtx = mOutput->data();
-  mInputBuffer->write( mInput.getVector(), mNumberOfChannels, period(), ril::cVectorAlignmentSamples );
+  mInputBuffer->write( mInput.getVector(), mNumberOfChannels, period(), cVectorAlignmentSamples );
   for( std::size_t hopIndex( 0 ); hopIndex < mDftSamplesPerPeriod; ++hopIndex )
   {
     std::size_t const blockStartIndex = mWindowLength + (mDftSamplesPerPeriod - hopIndex - 1) * mHopSize;

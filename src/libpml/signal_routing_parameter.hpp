@@ -27,7 +27,7 @@ namespace pml
  * An output index can be routed to zero or one input index, while an input index can be connected to zer, one, or multiple outputs.
  * @note Not sure whether we should introduce parameters to limit
  */
-class SignalRoutingParameter: public ril::TypedParameterBase < pml::EmptyParameterConfig, ril::ParameterType::SignalRouting >
+class SignalRoutingParameter: public TypedParameterBase < pml::EmptyParameterConfig, ParameterType::SignalRouting >
 {
 public:
   using IndexType = std::size_t;
@@ -138,6 +138,6 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::SignalRoutingParameter, visr::ril::ParameterType::SignalRouting, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::SignalRoutingParameter, visr::ParameterType::SignalRouting, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED

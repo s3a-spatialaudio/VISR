@@ -6,14 +6,12 @@
 
 namespace visr
 {
-namespace ril
-{
 
 CompositeComponent::CompositeComponent( SignalFlowContext& context,
                                         char const * name,
                                          CompositeComponent * parent /*= nullptr*/ )
  : Component( context, name, parent )
- , mImpl( new CompositeComponentImplementation( *this) )
+ , mImpl( new impl::CompositeComponent( *this) )
 {
 }
 
@@ -71,15 +69,14 @@ void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
   mImpl->registerAudioConnection( sendPort, receivePort );
 }
 
-CompositeComponentImplementation & CompositeComponent::implementation()
+impl::CompositeComponent & CompositeComponent::implementation()
 {
   return *mImpl;
 }
 
-CompositeComponentImplementation const & CompositeComponent::implementation() const
+impl::CompositeComponent const & CompositeComponent::implementation() const
 {
   return *mImpl;
 }
 
-} // namespace ril
 } // namespace visr

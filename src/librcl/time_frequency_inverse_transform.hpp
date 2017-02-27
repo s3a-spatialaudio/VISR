@@ -34,18 +34,18 @@ class CircularBuffer;
 namespace rcl
 {
 
-class TimeFrequencyInverseTransform: public ril::AtomicComponent
+class TimeFrequencyInverseTransform: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit TimeFrequencyInverseTransform( ril::SignalFlowContext& context,
+  explicit TimeFrequencyInverseTransform( SignalFlowContext& context,
                                    char const * name,
-                                   ril::CompositeComponent * parent = nullptr );
+                                   CompositeComponent * parent = nullptr );
   ~TimeFrequencyInverseTransform();
 
   /**
@@ -61,12 +61,12 @@ public:
 private:
   std::size_t mAlignment;
 
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * Port is configured in the setup() 
    */
-  std::unique_ptr<ril::ParameterInputPort<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mInput;
+  std::unique_ptr<ParameterInputPort<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mInput;
 
   /**
    * 

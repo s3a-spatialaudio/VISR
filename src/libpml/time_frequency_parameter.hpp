@@ -25,7 +25,7 @@ namespace pml
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType >
-class TimeFrequencyParameter: public ril::TypedParameterBase<TimeFrequencyParameterConfig, ril::ParameterToId<TimeFrequencyParameter<ElementType> >::id >
+class TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameterConfig, ParameterToId<TimeFrequencyParameter<ElementType> >::id >
 {
 public:
   /**
@@ -34,7 +34,7 @@ public:
    */
   TimeFrequencyParameter( std::size_t alignment = 0 );
 
-  explicit TimeFrequencyParameter(ril::ParameterConfigBase const & config);
+  explicit TimeFrequencyParameter(ParameterConfigBase const & config);
 
   explicit TimeFrequencyParameter(TimeFrequencyParameterConfig const & config);
 
@@ -104,7 +104,7 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<float>, visr::ril::ParameterType::TimeFrequencyFloat, visr::pml::TimeFrequencyParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<double>, visr::ril::ParameterType::TimeFrequencyDouble, visr::pml::TimeFrequencyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<float>, visr::ParameterType::TimeFrequencyFloat, visr::pml::TimeFrequencyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<double>, visr::ParameterType::TimeFrequencyDouble, visr::pml::TimeFrequencyParameterConfig )
 
 #endif // VISR_PML_TIME_FREQUENCY_PARAMETER_HPP_INCLUDED

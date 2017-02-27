@@ -28,7 +28,7 @@ namespace rcl
  * The message can operate either synchronously (messages are sent when the process() method is called)
  * or asynchronously (the messages queued for sending and then send non-blocking in an extra thread.
  */
-class UdpSender: public ril::AtomicComponent
+class UdpSender: public AtomicComponent
 {
 public:
   enum class Mode
@@ -45,9 +45,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpSender( ril::SignalFlowContext& context,
+  explicit UdpSender( SignalFlowContext& context,
                       char const * name,
-                      ril::CompositeComponent * parent = nullptr );
+                      CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -110,7 +110,7 @@ private:
 
   boost::mutex mMutex;
 
-  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
+  ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
 };
 
 } // namespace rcl

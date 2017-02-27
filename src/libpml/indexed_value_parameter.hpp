@@ -24,7 +24,7 @@ namespace pml
 template<typename IndexType, typename ValueType >
 class IndexedValueParameter:
   public std::pair< std::size_t, std::string >,
-  public ril::TypedParameterBase< EmptyParameterConfig, ril::ParameterToId<IndexedValueParameter< IndexType, ValueType> >::id >
+  public TypedParameterBase< EmptyParameterConfig, ParameterToId<IndexedValueParameter< IndexType, ValueType> >::id >
 {
 public:
   using DataType = std::pair<IndexType, ValueType >;
@@ -33,7 +33,7 @@ public:
 
   explicit IndexedValueParameter( IndexType const & index, ValueType const & value );
 
-  explicit IndexedValueParameter( ril::ParameterConfigBase const & config );
+  explicit IndexedValueParameter( ParameterConfigBase const & config );
 
   explicit IndexedValueParameter( const EmptyParameterConfig & config );
 
@@ -80,7 +80,7 @@ inline IndexedValueParameter< IndexedType, ValueType >::IndexedValueParameter( I
 }
 
 template<typename IndexedType, typename ValueType >
-inline IndexedValueParameter< IndexedType, ValueType >::IndexedValueParameter( ril::ParameterConfigBase const & config )
+inline IndexedValueParameter< IndexedType, ValueType >::IndexedValueParameter( ParameterConfigBase const & config )
   : IndexedValueParameter( dynamic_cast<EmptyParameterConfig const &>(config) )
 {
 }
@@ -106,8 +106,8 @@ using IndexedStringType = visr::pml::IndexedValueParameter<std::size_t, std::str
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::IndexedStringType , visr::ril::ParameterType::IndexedString, visr::pml::EmptyParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorFloatType, visr::ril::ParameterType::IndexedVectorFloat, visr::pml::EmptyParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorDoubleType, visr::ril::ParameterType::IndexedVectorDouble, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::IndexedStringType , visr::ParameterType::IndexedString, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorFloatType, visr::ParameterType::IndexedVectorFloat, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::IndexedVectorDoubleType, visr::ParameterType::IndexedVectorDouble, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_INDEXED_STRING_PARAMETER_HPP_INCLUDED

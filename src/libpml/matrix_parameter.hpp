@@ -26,7 +26,7 @@ namespace pml
  */
 template<typename ElementType >
 class MatrixParameter: public efl::BasicMatrix<ElementType>,
-  public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterToId<MatrixParameter<ElementType> >::id >
+  public TypedParameterBase<MatrixParameterConfig, ParameterToId<MatrixParameter<ElementType> >::id >
 {
 public:
 
@@ -36,9 +36,9 @@ public:
    */
   MatrixParameter( std::size_t alignment = 0 );
 
-  explicit MatrixParameter(ril::ParameterConfigBase const & config);
+  explicit MatrixParameter( ParameterConfigBase const & config );
 
-  explicit MatrixParameter(MatrixParameterConfig const & config);
+  explicit MatrixParameter( MatrixParameterConfig const & config );
 
   /**
    * Construct a parameter matrix with the given dimensions.
@@ -103,9 +103,9 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<float>, visr::ril::ParameterType::MatrixFloat, visr::pml::MatrixParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<double>, visr::ril::ParameterType::MatrixDouble, visr::pml::MatrixParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<float> >, visr::ril::ParameterType::MatrixFloatComplex, visr::pml::MatrixParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<double> >, visr::ril::ParameterType::MatrixDoubleComplex, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<float>, visr::ParameterType::MatrixFloat, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<double>, visr::ParameterType::MatrixDouble, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<float> >, visr::ParameterType::MatrixFloatComplex, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<double> >, visr::ParameterType::MatrixDoubleComplex, visr::pml::MatrixParameterConfig )
 
 #endif // VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED

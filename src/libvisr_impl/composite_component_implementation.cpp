@@ -2,7 +2,7 @@
 
 #include "composite_component_implementation.hpp"
 
-#include "component_internal.hpp"
+#include "component_impl.hpp"
 
 #include <libril/audio_port_base.hpp>
 #include <libril/audio_port_base.hpp>
@@ -14,10 +14,10 @@
 
 namespace visr
 {
-namespace ril
+namespace impl
 {
 
-void CompositeComponentImplementation::registerChildComponent( std::string const & name, ComponentInternal * child )
+void CompositeComponent::registerChildComponent( std::string const & name, impl::Component * child )
 {
   ComponentTable::iterator findComp = mComponents.find( name );
   if( findComp != mComponents.end() )
@@ -27,7 +27,7 @@ void CompositeComponentImplementation::registerChildComponent( std::string const
   mComponents.insert( findComp, std::make_pair( name, child ) ); // insert with iterator as hint.
 }
 
-void CompositeComponentImplementation::unregisterChildComponent( ComponentInternal * child )
+void CompositeComponent::unregisterChildComponent( impl::Component * child )
 {
   ComponentTable::iterator findComp = mComponents.find( child->name() );
   if( findComp != mComponents.end() )
@@ -40,23 +40,24 @@ void CompositeComponentImplementation::unregisterChildComponent( ComponentIntern
   }
 }
 
-CompositeComponentImplementation::ComponentTable::const_iterator
-CompositeComponentImplementation::componentBegin() const
+CompositeComponent::ComponentTable::const_iterator
+CompositeComponent::componentBegin() const
 {
   return mComponents.begin();
 }
 
-CompositeComponentImplementation::ComponentTable::const_iterator
-  CompositeComponentImplementation::componentEnd() const
+CompositeComponent::ComponentTable::const_iterator
+  CompositeComponent::componentEnd() const
 {
   return mComponents.end();
 }
 
-ComponentInternal * CompositeComponentImplementation::findComponent( std::string const & componentName )
+impl::Component * CompositeComponent::findComponent( std::string const & componentName )
 {
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
-    return &(composite().internal());
+    // TODO: Remove this hack (there should not be two separate implementation objects!)
+    return &(composite().Component::implementation());
   }
   ComponentTable::iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -66,11 +67,12 @@ ComponentInternal * CompositeComponentImplementation::findComponent( std::string
   return findIt->second;
 }
 
-ComponentInternal const * CompositeComponentImplementation::findComponent( std::string const & componentName ) const
+impl::Component const * CompositeComponent::findComponent( std::string const & componentName ) const
 {
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
-    return &(composite().internal());
+    // TODO: Remove this hack (there should not be two separate implementation objects!)
+    return &(composite().Component::implementation());
   }
   ComponentTable::const_iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -80,9 +82,9 @@ ComponentInternal const * CompositeComponentImplementation::findComponent( std::
   return findIt->second;
 }
 
-AudioPortBase * CompositeComponentImplementation::findAudioPort( std::string const & componentName, std::string const & portName )
+AudioPortBase * CompositeComponent::findAudioPort( std::string const & componentName, std::string const & portName )
 {
-  ComponentInternal * comp = findComponent( componentName );
+  impl::Component * comp = findComponent( componentName );
   if( not comp )
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
@@ -91,9 +93,9 @@ AudioPortBase * CompositeComponentImplementation::findAudioPort( std::string con
   return comp->findAudioPort( portName );
 }
 
-ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::string const & componentName, std::string const & portName )
+ParameterPortBase * CompositeComponent::findParameterPort( std::string const & componentName, std::string const & portName )
 {
-  ComponentInternal * comp = findComponent( componentName );
+  impl::Component * comp = findComponent( componentName );
   if( not comp )
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
@@ -101,7 +103,7 @@ ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::st
   return comp->findParameterPort( portName );
 }
 
-void CompositeComponentImplementation::registerParameterConnection( std::string const & sendComponent,
+void CompositeComponent::registerParameterConnection( std::string const & sendComponent,
                                                             std::string const & sendPort,
                                                             std::string const & receiveComponent,
                                                             std::string const & receivePort )
@@ -120,14 +122,14 @@ void CompositeComponentImplementation::registerParameterConnection( std::string 
   mParameterConnections.insert( std::move( newConnection ) );
 }
 
-void CompositeComponentImplementation::registerParameterConnection( ParameterPortBase & sendPort,
+void CompositeComponent::registerParameterConnection( ParameterPortBase & sendPort,
                                                                     ParameterPortBase & receivePort )
 {
   ParameterConnection newConnection( &sendPort, &receivePort );
   mParameterConnections.insert( std::move( newConnection ) );
 }
 
-void CompositeComponentImplementation::registerAudioConnection( std::string const & sendComponent,
+void CompositeComponent::registerAudioConnection( std::string const & sendComponent,
                                                                 std::string const & sendPort,
                                                                 ChannelList const & sendIndices,
                                                                 std::string const & receiveComponent,
@@ -150,7 +152,7 @@ void CompositeComponentImplementation::registerAudioConnection( std::string cons
 }
 
 
-void CompositeComponentImplementation::registerAudioConnection( AudioPortBase & sendPort,
+void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
                                                                 ChannelList const & sendIndices,
                                                                 AudioPortBase & receivePort,
                                                                 ChannelList const & receiveIndices )
@@ -159,7 +161,7 @@ void CompositeComponentImplementation::registerAudioConnection( AudioPortBase & 
   mAudioConnections.insert( std::move( newConnection ) );
 }
 
-void CompositeComponentImplementation::registerAudioConnection( AudioPortBase & sendPort,
+void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
                                                                 AudioPortBase & receivePort )
 {
   std::size_t const sendWidth = sendPort.width();
@@ -174,25 +176,25 @@ void CompositeComponentImplementation::registerAudioConnection( AudioPortBase & 
 
 
 
-AudioConnectionTable::const_iterator CompositeComponentImplementation::audioConnectionBegin() const
+AudioConnectionTable::const_iterator CompositeComponent::audioConnectionBegin() const
 {
   return mAudioConnections.begin();
 }
 
-AudioConnectionTable::const_iterator CompositeComponentImplementation::audioConnectionEnd() const
+AudioConnectionTable::const_iterator CompositeComponent::audioConnectionEnd() const
 {
   return mAudioConnections.end();
 }
 
-ParameterConnectionTable::const_iterator CompositeComponentImplementation::parameterConnectionBegin() const
+ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionBegin() const
 {
   return mParameterConnections.begin();
 }
 
-ParameterConnectionTable::const_iterator CompositeComponentImplementation::parameterConnectionEnd() const
+ParameterConnectionTable::const_iterator CompositeComponent::parameterConnectionEnd() const
 {
   return mParameterConnections.end();
 }
 
-} // namespace ril
+} // namespace impl
 } // namespace visr

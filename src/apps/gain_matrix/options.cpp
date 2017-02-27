@@ -2,7 +2,7 @@
 
 #include "options.hpp"
 
-#include <libril/constants.hpp> // for ril::SampleType
+#include <libril/constants.hpp> // for SampleType
 
 #include <cstdint>
 #include <ostream>
@@ -27,7 +27,7 @@ Options::Options()
 
   registerOption<std::string>( "matrix,m", "Initial gain matrix" );
   registerOption<std::string>( "matrix-file,f", "Initial gain matrix as a text file." );
-  registerOption<ril::SampleType>( "global-gain,g", "Overall gain modification (in dB) applied to the initial matrix." );
+  registerOption<SampleType>( "global-gain,g", "Overall gain modification (in dB) applied to the initial matrix." );
 }
 
 Options::~Options()

@@ -2,7 +2,7 @@
 
 #include <libril/component.hpp>
 
-#include "component_internal.hpp"
+#include "component_impl.hpp"
 
 #include <libril/composite_component.hpp>
 #include <libril/parameter_port_base.hpp>
@@ -15,8 +15,6 @@
 
 namespace visr
 {
-namespace ril
-{
 
 /**
  * @TODO: Move separator to a centralised location.
@@ -26,8 +24,8 @@ namespace ril
 Component::Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent)
- : mImpl( new ComponentInternal( *this, context, componentName,
-                                 parent == nullptr ? nullptr : &(parent->implementation()) ) )
+ : mImpl( new impl::Component( *this, context, componentName,
+                               parent == nullptr ? nullptr : &(parent->implementation()) ) )
 {
 }
 
@@ -118,19 +116,18 @@ ParameterPortBase const& Component::parameterPort( std::string const & portName 
   throw std::invalid_argument( "Audio port with given name not found." );
 }
 
-ComponentInternal & Component::internal()
+impl::Component & Component::implementation()
 {
   return *mImpl;
 }
 
-ComponentInternal const & Component::internal() const
+impl::Component const & Component::implementation() const
 {
   return *mImpl;
 }
 
 std::size_t Component::period() const { return mImpl->period(); }
 
-ril::SamplingFrequencyType Component::samplingFrequency() const { return mImpl->samplingFrequency(); }
+SamplingFrequencyType Component::samplingFrequency() const { return mImpl->samplingFrequency(); }
 
-} // namespace ril
 } // namespace visr

@@ -18,9 +18,9 @@ namespace visr
 namespace rcl
 {
 
-  UdpReceiver::UdpReceiver( ril::SignalFlowContext& context,
+  UdpReceiver::UdpReceiver( SignalFlowContext& context,
                             char const * name,
-                            ril::CompositeComponent * parent /*= nullptr*/ )
+                            CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
  , mDatagramOutput( "messageOutput", *this, pml::StringParameterConfig(255) )

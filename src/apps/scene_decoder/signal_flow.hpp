@@ -24,12 +24,12 @@ namespace apps
 namespace scene_decoder
 {
 
-class SignalFlow: public ril::CompositeComponent
+class SignalFlow: public CompositeComponent
 {
 public:
-  explicit SignalFlow( ril::SignalFlowContext & context,
+  explicit SignalFlow( SignalFlowContext & context,
                        char const * name,
-                       ril::CompositeComponent * parent,
+                       CompositeComponent * parent,
                        std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
                        std::size_t interpolationPeriod,
@@ -53,9 +53,9 @@ private:
 
   const std::size_t mNetworkPort;
 
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   rcl::UdpReceiver mSceneReceiver;
 

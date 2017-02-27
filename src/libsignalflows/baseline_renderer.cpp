@@ -27,32 +27,32 @@ namespace visr
 namespace signalflows
 {
 
-BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
+BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
   char const * name,
-  ril::CompositeComponent * parent,
+  CompositeComponent * parent,
   panning::LoudspeakerArray const & loudspeakerConfiguration,
   std::size_t numberOfInputs,
   std::size_t numberOfOutputs
  )
   : BaselineRenderer( context, name, parent, loudspeakerConfiguration, numberOfInputs, numberOfOutputs, 
                       4096ul,
-                      efl::BasicMatrix<ril::SampleType>(numberOfOutputs, 0, ril::cVectorAlignmentSamples ), 
+                      efl::BasicMatrix<SampleType>(numberOfOutputs, 0, cVectorAlignmentSamples ), 
     std::string(), 4242, std::string(), false )
 {}
 
-BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
+BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
                                     char const * name,
-                                    ril::CompositeComponent * parent,
+                                    CompositeComponent * parent,
                                     panning::LoudspeakerArray const & loudspeakerConfiguration,
                                     std::size_t numberOfInputs,
                                     std::size_t numberOfOutputs,
                                     std::size_t interpolationPeriod,
-                                    efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                                    efl::BasicMatrix<SampleType> const & diffusionFilters,
                                     std::string const & trackingConfiguration,
                                     std::size_t sceneReceiverPort,
                                     std::string const & reverbConfig,
                                     bool frequencyDependentPanning )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
  , mDiffusionFilters( diffusionFilters )
  , mSceneReceiver( context, "SceneReceiver", this )
  , mSceneDecoder( context, "SceneDecoder", this )
@@ -100,7 +100,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
     mPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder" ) );
 
     // for the very moment, do not parse any options, but use hard-coded option values.
-    ril::SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
+    SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
     unsigned short cTrackingUdpPort = 8888;
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
@@ -127,24 +127,24 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
 
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup( );
-  registerParameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+  registerParameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder.parameterPort( "datagramInput" ) );
 
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration, false /*no listener adaptation*/,
                          mFrequencyDependentPanning /*separate lowpass panning*/ );
-  registerParameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
+  registerParameterConnection( mSceneDecoder.parameterPort( "objectVectorOutput" ), mGainCalculator.parameterPort( "objectVectorInput" ) );
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-  registerParameterConnection( "VbapGainCalculator", "gainOutput", "VbapGainMatrix", "gainInput" );
+  registerParameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
 
   if( mFrequencyDependentPanning )
   {
     // Static crossover pair (2nd-order Linkwitz-Riley with cutoff 700 Hz @ fs=48 kHz)
-    static pml::BiquadParameter<ril::SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
+    static pml::BiquadParameter<SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
        -1.824651307057289f, 0.832338098086468f };
     // Numerator coeffs are negated to account for the 180 degree phase shift of the original design.
-    static pml::BiquadParameter<ril::SampleType> const highpass{ -0.914247351285939f, 1.828494702571878f, -0.914247351285939f,
+    static pml::BiquadParameter<SampleType> const highpass{ -0.914247351285939f, 1.828494702571878f, -0.914247351285939f,
       -1.824651307057289f, 0.832338098086468f };
 
-    pml::BiquadParameterMatrix<ril::SampleType> coeffMatrix( 2*numberOfInputs, 1 );
+    pml::BiquadParameterMatrix<SampleType> coeffMatrix( 2*numberOfInputs, 1 );
     for( std::size_t chIdx(0); chIdx < numberOfInputs; ++chIdx )
     {
       coeffMatrix( chIdx, 0 ) = highpass;
@@ -169,7 +169,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
    * the case with the current set of decorrelation filters.
    * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source. 
    */
-  ril::SampleType const diffusorGain = static_cast<ril::SampleType>(1.0) / std::sqrt( static_cast<ril::SampleType>(numberOfLoudspeakers) );
+  SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
 #ifndef DISABLE_REVERB_RENDERING
   mDirectDiffuseMix.setup( numberOfLoudspeakers, mFrequencyDependentPanning ? 4 : 3 );
@@ -178,8 +178,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
 #endif
   mNullSource.setup( 1/*width*/ );
 
-  efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
-  efl::BasicVector<ril::SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
+  efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
+  efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
   
   Afloat const * const maxEl = std::max_element( outputDelays.data(),
                                                 outputDelays.data()+outputDelays.size() );
@@ -189,8 +189,8 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
     outputDelays, outputGains );
 
   // Note: This assumes that the type 'Afloat' used in libpanning is
-  // identical to ril::SampleType (at the moment, both are floats).
-  efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
+  // identical to SampleType (at the moment, both are floats).
+  efl::BasicMatrix<SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
   mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains, false/*controlInput*/ );
 #ifndef DISABLE_REVERB_RENDERING
   setupReverberationSignalFlow( reverbConfig, loudspeakerConfiguration, numberOfInputs, interpolationPeriod );
@@ -219,7 +219,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
 #ifndef DISABLE_REVERB_RENDERING
   registerAudioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "ReverbSignalRouting", "in", ChannelRange( 0, numberOfInputs ) );
   // Calculate the indices for distributing each reverb object to #mNumDiscreteReflectionsPerObject
-  ChannelList discreteReflDemuxIndices( ril::AudioChannelSlice(0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
+  ChannelList discreteReflDemuxIndices( AudioChannelSlice(0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
   for( std::size_t cnt( 0 ); cnt < mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject; ++cnt )
   {
     discreteReflDemuxIndices[cnt] = cnt / mNumDiscreteReflectionsPerObject;
@@ -411,7 +411,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   }
 
   mMaxNumReverbObjects = tree.get<std::size_t>( "numReverbObjects" );
-  mLateReverbFilterLengthSeconds = tree.get<ril::SampleType>( "lateReverbFilterLength" );
+  mLateReverbFilterLengthSeconds = tree.get<SampleType>( "lateReverbFilterLength" );
   std::size_t const lateReverbFilterLengthSamples( static_cast<std::size_t>(std::ceil( mLateReverbFilterLengthSeconds * samplingFrequency() ) ));
 
   boost::filesystem::path const lateReverbFilterPath( tree.get<std::string>( "lateReverbDecorrelationFilters" ));
@@ -419,15 +419,15 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
 
   std::size_t const numWallReflBiquads = objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads;
 
-  boost::optional<ril::SampleType> discreteReflectionDelayOpt = tree.get_optional<ril::SampleType>( "maxDiscreteReflectionDelay" );
-  ril::SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
+  boost::optional<SampleType> discreteReflectionDelayOpt = tree.get_optional<SampleType>( "maxDiscreteReflectionDelay" );
+  SampleType const maxDiscreteReflectionDelay = discreteReflectionDelayOpt ? *discreteReflectionDelayOpt : 1.0f;
 
   // Optional argument for the gain of the decorrelation filter for
   // the late reverb tail. 
   // The default value is 1/sqrt(#loudspeakers)
-  boost::optional<ril::SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<ril::SampleType>( "lateReverbDecorrelationGain" );
-  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( static_cast<ril::SampleType>(arrayConfig.getNumRegularSpeakers()) );
-  ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
+  boost::optional<SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<SampleType>( "lateReverbDecorrelationGain" );
+  SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( static_cast<SampleType>(arrayConfig.getNumRegularSpeakers()) );
+  SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
     ? std::pow( 10.0f, *lateReverbDecorrelatorGainOpt/20.0f ) // TODO: Use dB->lin library function
     : defaultLateDecorrelatorGain;
   
@@ -436,14 +436,14 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   {
     throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
   }
-  pml::MatrixParameter<ril::SampleType> allLateDecorrelationFilters
-    = pml::MatrixParameter<ril::SampleType>::fromAudioFile( lateReverbFilterPath.string( ), ril::cVectorAlignmentSamples );
+  pml::MatrixParameter<SampleType> allLateDecorrelationFilters
+    = pml::MatrixParameter<SampleType>::fromAudioFile( lateReverbFilterPath.string( ), cVectorAlignmentSamples );
   std::size_t const lateDecorrelationFilterLength = allLateDecorrelationFilters.numberOfColumns();
   if( allLateDecorrelationFilters.numberOfRows() < arrayConfig.getNumRegularSpeakers() )
   {
     throw std::invalid_argument( "The number of loudspeakers exceeds the number of late reverberation decorrelation filters in the provided file." );
   }
-  efl::BasicMatrix<ril::SampleType> lateDecorrelationFilters( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength, ril::cVectorAlignmentSamples );
+  efl::BasicMatrix<SampleType> lateDecorrelationFilters( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength, cVectorAlignmentSamples );
   for( std::size_t rowIdx( 0 ); rowIdx < arrayConfig.getNumRegularSpeakers(); ++rowIdx )
   {
     // Multiply the raw unit-magnitude filters by the scaling gain.
@@ -451,7 +451,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                                      allLateDecorrelationFilters.row( rowIdx ),
                                      lateDecorrelationFilters.row( rowIdx ),
                                      lateDecorrelationFilterLength,
-                                     ril::cVectorAlignmentSamples ) != efl::noError )
+                                     cVectorAlignmentSamples ) != efl::noError )
     {
       throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
     }
@@ -489,7 +489,7 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
   }
   mLateReverbFilter.setup( mMaxNumReverbObjects, 1, lateReverbFilterLengthSamples,
                            mMaxNumReverbObjects, mMaxNumReverbObjects,
-                           efl::BasicMatrix<ril::SampleType>(), // No initial filters provided.
+                           efl::BasicMatrix<SampleType>(), // No initial filters provided.
                            lateReverbRouting );
 
   // Create a routing from 1 to #loudspeakers signals, each filtered with an individual filter

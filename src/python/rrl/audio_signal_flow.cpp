@@ -28,9 +28,9 @@ namespace rrl
 #ifdef USE_PYBIND11
 
 
-pybind11::array_t<ril::SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, pybind11::array const & input )
+pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, pybind11::array const & input )
 {
-  using DataType = ril::SampleType; // Possibly replace by a template parameter later.
+  using DataType = SampleType; // Possibly replace by a template parameter later.
 
   if( input.dtype() != pybind11::dtype::of<DataType>() )
   {
@@ -45,13 +45,13 @@ pybind11::array_t<ril::SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flo
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 1 input of the input matrix does not match the block size of the signal flow." );
   }
-  if( input.strides(1) != sizeof(ril::SampleType) )
+  if( input.strides(1) != sizeof(SampleType) )
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 1 input of the input matrix must be continuous (row-major)." );
   }
-  std::vector<ril::SampleType const *> inPtrs( flow.numberOfCaptureChannels(), nullptr );
+  std::vector<SampleType const *> inPtrs( flow.numberOfCaptureChannels(), nullptr );
   std::size_t const inChannelStride = input.strides(0) / sizeof(DataType);
-  ril::SampleType const * inPtr = static_cast<ril::SampleType const *>( input.data() );
+  SampleType const * inPtr = static_cast<SampleType const *>( input.data() );
   for( auto & el : inPtrs )
   {
     el = inPtr;
@@ -59,13 +59,13 @@ pybind11::array_t<ril::SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flo
   }
 
   // Allocate the output array.
-  pybind11::array outputSignal( pybind11::dtype::of<ril::SampleType>(),
+  pybind11::array outputSignal( pybind11::dtype::of<SampleType>(),
 				{ flow.numberOfPlaybackChannels(), flow.period() },
-				{ sizeof(ril::SampleType)*flow.period(), sizeof(ril::SampleType) } // TODO: Take care of alignment
+				{ sizeof(SampleType)*flow.period(), sizeof(SampleType) } // TODO: Take care of alignment
                               );
-  std::vector<ril::SampleType *> outPtrs( flow.numberOfPlaybackChannels(), nullptr );
+  std::vector<SampleType *> outPtrs( flow.numberOfPlaybackChannels(), nullptr );
   std::size_t const outChannelStride = outputSignal.strides(0) / sizeof(DataType);
-  ril::SampleType * outPtr = static_cast<ril::SampleType *>( outputSignal.mutable_data() );
+  SampleType * outPtr = static_cast<SampleType *>( outputSignal.mutable_data() );
   for( auto & el : outPtrs )
   {
     el = outPtr;
@@ -80,7 +80,7 @@ pybind11::array_t<ril::SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flo
 void exportAudioSignalFlow( pybind11::module & m )
 {
   pybind11::class_<AudioSignalFlow>( m, "AudioSignalFlow" )
-   .def( pybind11::init<visr::ril::Component&>() )
+   .def( pybind11::init<visr::Component&>() )
    .def_property_readonly( "initialised", &AudioSignalFlow::initialised )
    .def_property_readonly( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
    .def_property_readonly( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
@@ -88,7 +88,7 @@ void exportAudioSignalFlow( pybind11::module & m )
    .def_property_readonly( "numberOfPlaybackChannels", &AudioSignalFlow::numberOfPlaybackChannels )
    .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, pybind11::arg("index"), pybind11::return_value_policy::reference )
    .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, pybind11::arg( "index" ), pybind11::return_value_policy::reference )
-   .def( "process", [](visr::rrl::AudioSignalFlow & flow, pybind11::array const & input) /*-> pybind11::array_t<ril::SampleType>*/ { return wrapProcess( flow, input );}, pybind11::return_value_policy::take_ownership )
+   .def( "process", [](visr::rrl::AudioSignalFlow & flow, pybind11::array const & input) /*-> pybind11::array_t<SampleType>*/ { return wrapProcess( flow, input );}, pybind11::return_value_policy::take_ownership )
   ;
 }
 
@@ -100,7 +100,7 @@ using namespace boost::python;
 
 void exportAudioSignalFlow()
 {
-  class_<AudioSignalFlow, boost::noncopyable>( "AudioSignalFlow", init<visr::ril::Component&>() )
+  class_<AudioSignalFlow, boost::noncopyable>( "AudioSignalFlow", init<visr::Component&>() )
     .add_property( "initialised", &AudioSignalFlow::initialised )
     .add_property( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
     .add_property( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )

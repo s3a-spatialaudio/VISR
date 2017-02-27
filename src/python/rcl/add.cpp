@@ -25,8 +25,8 @@ PYBIND11_PLUGIN( rcl )
 
   pybind11::module m("rcl", "VISR atomic components library" );
 
-  pybind11::class_<Add, visr::ril::AtomicComponent>( m, "Add" )
-    .def( pybind11::init<visr::ril::SignalFlowContext&, char const *, visr::ril::CompositeComponent*>() )
+  pybind11::class_<Add, visr::AtomicComponent>( m, "Add" )
+    .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
     .def( "setup", &visr::rcl::Add::setup, pybind11::arg( "numInputs" )=2, pybind11::arg( "width" ) = 1 )
     .def( "process", &visr::rcl::Add::process );
 
@@ -39,7 +39,7 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE( rcl )
 {
 
-class_<visr::rcl::Add, boost::noncopyable>( "Add", init<visr::ril::SignalFlowContext&, char const *, visr::ril::CompositeComponent*>() )
+class_<visr::rcl::Add, boost::noncopyable>( "Add", init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
   .def( "setup", &visr::rcl::Add::setup, (arg( "numInputs" )=2, arg( "width" ) = 1) )
   .def( "process", &visr::rcl::Add::process );
 

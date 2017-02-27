@@ -28,16 +28,16 @@ namespace visr
 namespace signalflows
 {
 
-CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
+CoreRenderer::CoreRenderer( SignalFlowContext & context,
                                     char const * name,
-                                    ril::CompositeComponent * parent,
+                                    CompositeComponent * parent,
                                     panning::LoudspeakerArray const & loudspeakerConfiguration,
                                     std::size_t numberOfInputs,
                                     std::size_t numberOfOutputs,
                                     std::size_t interpolationPeriod,
-                                    efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                                    efl::BasicMatrix<SampleType> const & diffusionFilters,
                                     std::string const & trackingConfiguration )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
  , mObjectSignalInput( "audioIn", *this )
  , mLoudspeakerOutput( "audioOut", *this )
  , mObjectVector( "objectDataInput", *this, pml::EmptyParameterConfig() )
@@ -63,13 +63,13 @@ CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
   if( mTrackingEnabled )
   {
     // Instantiate the objects.
-    mListenerPositionPort.reset( new ril::ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition >( "listenerPositionInput", *this, pml::EmptyParameterConfig() ) );
+    mListenerPositionPort.reset( new ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition >( "listenerPositionInput", *this, pml::EmptyParameterConfig() ) );
     mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation" ) );
     mSpeakerCompensation.reset( new rcl::DelayVector( context, "TrackingSpeakerCompensation" ) );
     mPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder" ) );
 
     // for the very moment, do not parse any options, but use hard-coded option values.
-    ril::SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
+    SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mSpeakerCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay,
@@ -109,13 +109,13 @@ CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
    * the case with the current set of decorrelation filters.
    * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source. 
    */
-  ril::SampleType const diffusorGain = static_cast<ril::SampleType>(1.0) / std::sqrt( static_cast<ril::SampleType>(numberOfLoudspeakers) );
+  SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
   mDirectDiffuseMix.setup( numberOfLoudspeakers, 2 );
   mNullSource.setup( 1/*width*/ );
 
-  efl::BasicVector<ril::SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
-  efl::BasicVector<ril::SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
+  efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
+  efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
   
   Afloat const * const maxEl = std::max_element( outputDelays.data(),
                                                 outputDelays.data()+outputDelays.size() );
@@ -125,14 +125,14 @@ CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
     outputDelays, outputGains );
 
   // Note: This assumes that the type 'Afloat' used in libpanning is
-  // identical to ril::SampleType (at the moment, both are floats).
-  efl::BasicMatrix<ril::SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
+  // identical to SampleType (at the moment, both are floats).
+  efl::BasicMatrix<SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
   mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains, false/*controlInput*/ );
 
-  registerAudioConnection( "", "audioIn", { { 0, numberOfInputs }}, "VbapGainMatrix", "in", {{ 0, numberOfInputs }} );
-  registerAudioConnection( "", "audioIn", {{ 0, numberOfInputs }}, "DiffusePartMatrix", "in", {{ 0, numberOfInputs }} );
-  registerAudioConnection( "VbapGainMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
-  registerAudioConnection( "DiffusePartMatrix", "out", ChannelRange( 0, 1 ), "DiffusePartDecorrelator", "in", ChannelRange( 0, 1 ) );
+  registerAudioConnection( mObjectSignalInput, mVbapMatrix.audioPort( "in" ) );
+  registerAudioConnection( mObjectSignalInput, mDiffusePartMatrix.audioPort( "in" ) );
+  registerAudioConnection( mVbapMatrix.audioPort( "out" ), mDirectDiffuseMix.audioPort( "in0" ) );
+  registerAudioConnection( mDirectDiffuseMix.audioPort( "out" ), mDiffusePartDecorrelator.audioPort( "in" ) );
   registerAudioConnection( "DiffusePartDecorrelator", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", ChannelRange( 0, numberOfLoudspeakers ) );
   if( mTrackingEnabled )
   {
@@ -197,7 +197,7 @@ CoreRenderer::CoreRenderer( ril::SignalFlowContext & context,
   {
     throw std::invalid_argument( "Not all active output channels are assigned." );
   }
-  std::vector<ril::CompositeComponent::ChannelList::IndexType> sortedPlaybackChannels( activePlaybackChannels );
+  std::vector<CompositeComponent::ChannelList::IndexType> sortedPlaybackChannels( activePlaybackChannels );
   std::sort( sortedPlaybackChannels.begin(), sortedPlaybackChannels.end() );
   if( std::unique( sortedPlaybackChannels.begin(), sortedPlaybackChannels.end() ) != sortedPlaybackChannels.end() )
   {

@@ -18,9 +18,9 @@ namespace visr
 namespace rcl
 {
 
-  PositionDecoder::PositionDecoder( ril::SignalFlowContext& context,
+  PositionDecoder::PositionDecoder( SignalFlowContext& context,
                                     char const * name,
-                                    ril::CompositeComponent * parent /*= nullptr*/ )
+                                    CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )
   , mDatagramInput( "messageInput", *this, pml::StringParameterConfig( 128 ) )
   , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )

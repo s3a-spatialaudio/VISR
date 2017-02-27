@@ -25,7 +25,7 @@ namespace rcl
  * Component to encode audio objects to JSON messages (typically to be sent over a network).
  * This component has neither audio inputs or outputs.
  */
-class SceneEncoder: public ril::AtomicComponent
+class SceneEncoder: public AtomicComponent
 {
 public:
   /**
@@ -33,9 +33,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SceneEncoder( ril::SignalFlowContext& context,
+  explicit SceneEncoder( SignalFlowContext& context,
                          char const * name,
-                         ril::CompositeComponent * parent = nullptr );
+                         CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -61,8 +61,8 @@ public:
   void process();
 
 private:
-  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector> mObjectInput;
-  ril::ParameterOutputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
+  ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector> mObjectInput;
+  ParameterOutputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

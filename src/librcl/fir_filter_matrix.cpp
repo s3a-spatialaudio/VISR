@@ -11,9 +11,9 @@ namespace visr
 namespace rcl
 {
 
-FirFilterMatrix::FirFilterMatrix( ril::SignalFlowContext& context,
+FirFilterMatrix::FirFilterMatrix( SignalFlowContext& context,
                                   char const * name,
-                                  ril::CompositeComponent * parent /*= nullptr*/ )
+                                  CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
@@ -38,14 +38,14 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
   mConvolver.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
     numberOfInputs, numberOfOutputs, period(),
     filterLength, maxFilters, maxRoutings,
-    routings, filters, ril::cVectorAlignmentSamples ) );
+    routings, filters, cVectorAlignmentSamples ) );
 }
 
 void FirFilterMatrix::process()
 {
   SampleType const * const * inputSignals = mInput.getVector();
   SampleType * const * outputSignals = mOutput.getVector( );
-  mConvolver->process( inputSignals, outputSignals, ril::cVectorAlignmentSamples );
+  mConvolver->process( inputSignals, outputSignals, cVectorAlignmentSamples );
 }
 
 void FirFilterMatrix::clearRoutings()

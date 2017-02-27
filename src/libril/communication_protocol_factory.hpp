@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
-#define VISR_LIBRIL_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
+#ifndef VISR_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
+#define VISR_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
 
 #include "export_symbols.hpp"
 
@@ -24,8 +24,6 @@
 #include <boost/function.hpp>
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
@@ -117,7 +115,6 @@ template< class ConcreteCommunicationProtocolType, CommunicationProtocolType pro
 typename CommunicationProtocolRegistrar<ConcreteCommunicationProtocolType, protocolType, parameterType >::Registrar
 CommunicationProtocolRegistrar<ConcreteCommunicationProtocolType, protocolType, parameterType >::sRegistrar;
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
+#endif // #ifndef VISR_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED

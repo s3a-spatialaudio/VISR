@@ -52,7 +52,7 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class CoreRenderer: public ril::CompositeComponent
+class CoreRenderer: public CompositeComponent
 {
 public:
   /**
@@ -75,32 +75,32 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit CoreRenderer( ril::SignalFlowContext & context,
+  explicit CoreRenderer( SignalFlowContext & context,
                          char const * name,
-                         ril::CompositeComponent * parent,
+                         CompositeComponent * parent,
                          panning::LoudspeakerArray const & loudspeakerConfiguration,
                          std::size_t numberOfInputs,
                          std::size_t numberOfOutputs,
                          std::size_t interpolationPeriod,
-                         efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                         efl::BasicMatrix<SampleType> const & diffusionFilters,
                          std::string const & trackingConfiguration );
 
   ~CoreRenderer();
 
 private:
-  ril::AudioInput mObjectSignalInput;
+  AudioInput mObjectSignalInput;
 
-  ril::AudioOutput mLoudspeakerOutput;
+  AudioOutput mLoudspeakerOutput;
 
-  ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
+  ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
 
   /**
    * Parameter input for the listener position.
    * Object is instantiated only if tacking is activated.
    */
-  std::unique_ptr<ril::ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
+  std::unique_ptr<ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
 
-  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
+  efl::BasicMatrix<SampleType> const & mDiffusionFilters;
 
   rcl::DelayVector mOutputAdjustment;
 

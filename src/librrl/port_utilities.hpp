@@ -10,11 +10,12 @@
 namespace visr
 {
 // Forward declarations
-namespace ril
-{
-class ComponentInternal;
 class ParameterPortBase;
 class PortBase;
+
+namespace impl
+{
+class Component;
 }
 
 namespace rrl
@@ -23,21 +24,21 @@ namespace rrl
 /**
  * Return the name of a port including its containing component in the form "component:port"
  */
-std::string qualifiedName( ril::PortBase const & port );
+std::string qualifiedName( PortBase const & port );
 
 /**
  * Return the name of the port including its containing component and all surrounding parent components.
  * @return port name in the form "toplevel:level1:...:leveln:port"
  */
-std::string fullyQualifiedName( ril::PortBase const & port );
+std::string fullyQualifiedName( PortBase const & port );
 
 /**
 * Utility function to check whether a port is considered as a placeholder or a concrete instance.
 * @todo consider moving to a graph checking and manipulation library to be defined.
 */
-bool isPlaceholderPort( ril::PortBase const * const port );
+bool isPlaceholderPort( PortBase const * const port );
 
-bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, ril::ParameterPortBase const & receivePort,
+bool checkParameterPortCompatibility( ParameterPortBase const & sendPort, ParameterPortBase const & receivePort,
                                       std::ostream & messages );
 
 /**
@@ -51,7 +52,7 @@ class PortLookup
 public:
   using PortTable = std::set<PortType *>;
 
-  explicit PortLookup( ril::ComponentInternal const & comp, bool recurse = true );
+  explicit PortLookup( impl::Component const & comp, bool recurse = true );
 
   PortTable const & placeholderReceivePorts() const { return mPlaceholderReceivePorts; }
   PortTable const & placeholderSendPorts() const { return mPlaceholderSendPorts; }
@@ -62,7 +63,7 @@ public:
 
 private:
 
-  void traverseComponent( ril::ComponentInternal const & comp, bool recurse );
+  void traverseComponent( impl::Component const & comp, bool recurse );
 
   PortTable mPlaceholderReceivePorts;
   PortTable mPlaceholderSendPorts;

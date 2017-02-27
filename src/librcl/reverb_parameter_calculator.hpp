@@ -39,7 +39,7 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class ReverbParameterCalculator: public ril::AtomicComponent
+class ReverbParameterCalculator: public AtomicComponent
 {
 public:
   /**
@@ -47,9 +47,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit ReverbParameterCalculator( ril::SignalFlowContext& context,
+  explicit ReverbParameterCalculator( SignalFlowContext& context,
                                       char const * name,
-                                      ril::CompositeComponent * parent = nullptr );
+                                      CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -75,7 +75,7 @@ public:
               std::size_t numberOfObjects,
               std::size_t numberOfDiscreteReflectionsPerSource,
               std::size_t numBiquadSectionsReflectionFilters,
-              ril::SampleType lateReflectionLengthSeconds,
+              SampleType lateReflectionLengthSeconds,
               std::size_t numLateReflectionSubBandFilters );
 
   /**
@@ -93,7 +93,7 @@ private:
 
   std::size_t mNumberOfDiscreteReflectionsPerSource;
   std::size_t mNumberOfBiquadSectionsReflectionFilters;
-  ril::SampleType mLateReflectionLengthSeconds;
+  SampleType mLateReflectionLengthSeconds;
   std::size_t mNumberOfLateReflectionSubBandFilters;
 
   std::size_t mNumberOfPanningLoudspeakers;
@@ -124,15 +124,15 @@ private:
    * A floating-point limit to compare LateReverb parameters,
    * Two parameters are considered equal if the difference between all corresponding floating-point values is less or equal this value.
    */
-  ril::SampleType const cLateReverbParameterComparisonLimit;
+  SampleType const cLateReverbParameterComparisonLimit;
 
   void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
-                            efl::BasicVector<ril::SampleType> & discreteReflGains,
-                            efl::BasicVector<ril::SampleType> & discreteReflDelays,
-                            pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-                            efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                            efl::BasicVector<ril::SampleType> & lateReverbGains,
-                            efl::BasicVector<ril::SampleType> & lateReverbDelays );
+                            efl::BasicVector<SampleType> & discreteReflGains,
+                            efl::BasicVector<SampleType> & discreteReflDelays,
+                            pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
+                            efl::BasicMatrix<SampleType> & discretePanningMatrix,
+                            efl::BasicVector<SampleType> & lateReverbGains,
+                            efl::BasicVector<SampleType> & lateReverbDelays );
 
   // void processInternal( objectmodel::ObjectVector const & objects );
 
@@ -141,22 +141,22 @@ private:
 * Used if a render channels is unused.
 */
   void clearSingleObject( std::size_t renderChannel,
-                          efl::BasicVector<ril::SampleType> & discreteReflGains,
-                          efl::BasicVector<ril::SampleType> & discreteReflDelays,
-                          pml::BiquadParameterMatrix<ril::SampleType> & biquadCoeffs,
-                          efl::BasicMatrix<ril::SampleType> & discretePanningMatrix,
-                          efl::BasicVector<ril::SampleType> & lateReverbGains,
-                          efl::BasicVector<ril::SampleType> & lateReverbDelays );
+                          efl::BasicVector<SampleType> & discreteReflGains,
+                          efl::BasicVector<SampleType> & discreteReflDelays,
+                          pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
+                          efl::BasicMatrix<SampleType> & discretePanningMatrix,
+                          efl::BasicVector<SampleType> & lateReverbGains,
+                          efl::BasicVector<SampleType> & lateReverbDelays );
 
-  ril::ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
-  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::SignalRoutingParameter > > mSignalRoutingOutput;
-  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mDiscreteReflectionGainOutput;
-  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mDiscreteReflectionDelayOutput;
-  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<ril::SampleType> > > mDiscreteReflectionFilterCoeffOutput;
-  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<ril::SampleType> > > mDiscretePanningGains;
-  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mLateReflectionGainOutput;
-  std::unique_ptr<ril::ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<ril::SampleType> > > mLateReflectionDelayOutput;
-  std::unique_ptr<ril::ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<ril::SampleType> > > >
+  ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
+  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::SignalRoutingParameter > > mSignalRoutingOutput;
+  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionGainOutput;
+  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionDelayOutput;
+  std::unique_ptr<ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<SampleType> > > mDiscreteReflectionFilterCoeffOutput;
+  std::unique_ptr<ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mDiscretePanningGains;
+  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionGainOutput;
+  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionDelayOutput;
+  std::unique_ptr<ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType> > > >
     mLateSubbandOutput;
 };
 

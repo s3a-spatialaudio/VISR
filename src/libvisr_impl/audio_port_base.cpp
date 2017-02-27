@@ -4,18 +4,16 @@
 
 #include <libril/component.hpp>
 
-#include <libvisr_impl/component_internal.hpp>
+#include "component_impl.hpp"
 
 namespace visr
-{
-namespace ril
 {
 
 AudioPortBase::AudioPortBase( std::string const & name, Component & container, Direction direction )
  : PortBase( name, container, direction )
  , mWidth( cInvalidWidth )
 {
-  container.internal().registerAudioPort( this );
+  container.implementation().registerAudioPort( this );
 }
 
 AudioPortBase::AudioPortBase( std::string const & name, Component& container, Direction direction, std::size_t width )
@@ -26,7 +24,7 @@ AudioPortBase::AudioPortBase( std::string const & name, Component& container, Di
 
 AudioPortBase::~AudioPortBase()
 {
-  parent().internal().unregisterAudioPort( this );
+  parent().implementation().unregisterAudioPort( this );
 }
 
 void AudioPortBase::setWidth( std::size_t newWidth )
@@ -36,5 +34,4 @@ void AudioPortBase::setWidth( std::size_t newWidth )
   mWidth = newWidth;
 }
 
-} // namespace ril
 } // namespace visr

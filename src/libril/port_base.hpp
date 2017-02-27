@@ -1,13 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PORT_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_PORT_BASE_HPP_INCLUDED
+#ifndef VISR_PORT_BASE_HPP_INCLUDED
+#define VISR_PORT_BASE_HPP_INCLUDED
 
 #include <string>
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declaration(s)
@@ -65,7 +63,6 @@ private:
   Direction const mDirection;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PORT_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_PORT_BASE_HPP_INCLUDED

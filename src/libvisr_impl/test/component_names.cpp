@@ -19,11 +19,11 @@ namespace test
 namespace // unnamed
 {
 
-class MyAtom: public ril::AtomicComponent
+class MyAtom: public AtomicComponent
 {
 public:
-  MyAtom( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent )
-    : ril::AtomicComponent( context, componentName, parent )
+  MyAtom( SignalFlowContext & context, char const * componentName, CompositeComponent * parent )
+    : AtomicComponent( context, componentName, parent )
   {
     std::cout << "MyAtom name: " << name( ) << ", full name: " << fullName( ) << std::endl;
   }
@@ -32,11 +32,11 @@ public:
 private:
 };
 
-class MyComposite: public ril::CompositeComponent
+class MyComposite: public CompositeComponent
 {
 public:
-  MyComposite( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent )
-   : ril::CompositeComponent( context, componentName, parent )
+  MyComposite( SignalFlowContext & context, char const * componentName, CompositeComponent * parent )
+   : CompositeComponent( context, componentName, parent )
    , mAtom( context, "SecondLevelAtom", this )
   {
     std::cout << "MyComposite name: " << name() << ", full name: " << fullName() << std::endl;
@@ -45,11 +45,11 @@ private:
   MyAtom mAtom;
 };
 
-class MyTopLevel: public ril::CompositeComponent
+class MyTopLevel: public CompositeComponent
 {
 public:
-  MyTopLevel( ril::SignalFlowContext & context, char const * componentName, ril::CompositeComponent * parent )
-    : ril::CompositeComponent( context, componentName, parent )
+  MyTopLevel( SignalFlowContext & context, char const * componentName, CompositeComponent * parent )
+    : CompositeComponent( context, componentName, parent )
     , mComposite1( context, "FirstLevelComposite", this )
     , mAtomTopLevel( context, "FirstLevelAtom", this )
   {
@@ -64,7 +64,7 @@ private:
 
 BOOST_AUTO_TEST_CASE( topLevelName )
 {
-  ril::SignalFlowContext context( 1024, 48000 );
+  SignalFlowContext context( 1024, 48000 );
   MyTopLevel const flow( context, "", nullptr );
 }
 

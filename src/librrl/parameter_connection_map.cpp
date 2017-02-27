@@ -9,7 +9,7 @@
 #include <libril/parameter_port_base.hpp>
 
 #include <libvisr_impl/composite_component_implementation.hpp>
-#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/component_impl.hpp>
 
 #include <ciso646>
 #include <iostream>
@@ -19,7 +19,7 @@ namespace visr
 namespace rrl
 {
 
-bool fillRecursive( ParameterConnectionMap & res, ril::Component const & component,
+bool fillRecursive( ParameterConnectionMap & res, Component const & component,
                     std::ostream & messages )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
@@ -29,38 +29,38 @@ bool fillRecursive( ParameterConnectionMap & res, ril::Component const & compone
   {
     return true;
   }
-  using PortTable = std::set<ril::ParameterPortBase const*>;
+  using PortTable = std::set<ParameterPortBase const*>;
   PortTable sendPorts;
   PortTable receivePorts;
 
-  ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(component);
+  CompositeComponent const & composite = dynamic_cast<CompositeComponent const &>(component);
   // this could be moved to the PortLookup functionality.
 
   // Get the 'implementation' object that holds the tables to ports and contained components.
-  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
+  impl::CompositeComponent const & compositeImpl = composite.implementation();
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( auto port : composite.internal().ports<ril::ParameterPortBase>() )
+  for( auto port : composite.Component::implementation().ports<ParameterPortBase>() )
   {
-    ( port->direction() == ril::ParameterPortBase::Direction::Input ) ?
+    ( port->direction() == ParameterPortBase::Direction::Input ) ?
       sendPorts.insert( port ) : receivePorts.insert( port );
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+  for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
     compIt != compositeImpl.componentEnd(); ++compIt )
   {
-    ril::ComponentInternal const * containedComponent = compIt->second;
-    for( auto port : containedComponent->ports<ril::ParameterPortBase>() )
+    impl::Component const * containedComponent = compIt->second;
+    for( auto port : containedComponent->ports<ParameterPortBase>() )
     {
-      (port->direction() == ril::ParameterPortBase::Direction::Input) ?
+      (port->direction() == ParameterPortBase::Direction::Input) ?
         receivePorts.insert( port ) : sendPorts.insert( port );
     }
   }
-  for( ril::ParameterConnectionTable::const_iterator connIt = compositeImpl.parameterConnectionBegin();
+  for( impl::ParameterConnectionTable::const_iterator connIt = compositeImpl.parameterConnectionBegin();
     connIt != compositeImpl.parameterConnectionEnd(); ++connIt )
   {
-    ril::ParameterConnection const & connection = *connIt;
+    impl::ParameterConnection const & connection = *connIt;
     if( sendPorts.find( connection.sender() ) == sendPorts.end() )
     {
       messages << "Audio signal flow connection check: In component \"" << composite.fullName() << "\", the send port \""
@@ -86,7 +86,7 @@ bool fillRecursive( ParameterConnectionMap & res, ril::Component const & compone
   }
   // Recurse into the subcomponents
   {
-    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
+    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
       compIt != compositeImpl.componentEnd(); ++compIt )
     {
       result = result and fillRecursive( res, compIt->second->component(), messages );

@@ -13,9 +13,9 @@ namespace visr
 namespace rcl
 {
 
-  SignalRouting::SignalRouting( ril::SignalFlowContext& context,
+  SignalRouting::SignalRouting( SignalFlowContext& context,
                                 char const * name,
-                                ril::CompositeComponent * parent /*= nullptr*/ )
+                                CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
@@ -32,7 +32,7 @@ void SignalRouting::setup( std::size_t inputWidth, std::size_t outputWidth, bool
   mOutput.setWidth( outputWidth );
   if (controlPort)
   {
-    mControlInput.reset(new ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
+    mControlInput.reset(new ParameterInputPort<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
   }
   // create an empty routing
   mRoutingVector.resize( outputWidth, pml::SignalRoutingParameter::cInvalidIndex );
@@ -90,14 +90,14 @@ void SignalRouting::process()
     efl::ErrorCode err;
     if( in == pml::SignalRoutingParameter::cInvalidIndex )
     {
-      if( (err = efl::vectorZero( mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples )) != efl::noError )
+      if( (err = efl::vectorZero( mOutput[outIdx], periodSize, cVectorAlignmentSamples )) != efl::noError )
       {
         throw std::runtime_error( std::string( "SignalRouting: Error while zeroing an unconnected output channel: " ) + efl::errorMessage( err ) );
       }
     }
     else
     {
-      if( (err = efl::vectorCopy( mInput[in], mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples )) != efl::noError )
+      if( (err = efl::vectorCopy( mInput[in], mOutput[outIdx], periodSize, cVectorAlignmentSamples )) != efl::noError )
       {
         throw std::runtime_error( std::string( "SignalRouting: Error while copying a signal to an output channel: " ) + efl::errorMessage( err ) );
       }

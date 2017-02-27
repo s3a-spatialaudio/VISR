@@ -57,7 +57,7 @@ int main( int argc, char const * const * argv )
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
-    ril::SignalFlowContext context( periodSize, samplingRate );
+    SignalFlowContext context( periodSize, samplingRate );
     Feedthrough flow( context, "feedthrough" );
 
 //    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );

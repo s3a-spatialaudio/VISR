@@ -5,7 +5,7 @@
 
 namespace visr
 {
-namespace ril
+namespace impl
 {
 
 #if 0
@@ -52,5 +52,5 @@ bool ParameterConnection::operator<(ParameterConnection const & rhs) const
   return receiver() < rhs.receiver();
 }
 
-} // namespace ril
+} // namespace impl
 } // namespace visr

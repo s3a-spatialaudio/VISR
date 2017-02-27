@@ -13,16 +13,16 @@ namespace visr
 namespace rcl
 {
 
-  BiquadIirFilter::BiquadIirFilter( ril::SignalFlowContext& context,
+  BiquadIirFilter::BiquadIirFilter( SignalFlowContext& context,
                                     char const * name,
-                                    ril::CompositeComponent * parent /*= nullptr*/ )
+                                    CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
- , mCoefficients( ril::cVectorAlignmentSamples )
- , mState( ril::cVectorAlignmentSamples )
- , mCurrentInput( ril::cVectorAlignmentSamples )
- , mCurrentOutput( ril::cVectorAlignmentSamples )
+ , mCoefficients( cVectorAlignmentSamples )
+ , mState( cVectorAlignmentSamples )
+ , mCurrentInput( cVectorAlignmentSamples )
+ , mCurrentOutput( cVectorAlignmentSamples )
 {
 }
 
@@ -138,7 +138,7 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::process()
 {
-  ril::SampleType const * const * inputVec = mInput.getVector();
+  SampleType const * const * inputVec = mInput.getVector();
 
   static const std::size_t cNumBiquadCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
   std::size_t const blockSamples = period( );
@@ -155,20 +155,20 @@ void BiquadIirFilter::process()
       if( efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 4 ),
         mState.row( 2 * biquadIdx ),
         mCurrentOutput.data( ),
-        mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
       if( efl::vectorMultiplyAddInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 3 ),
         mState.row( 2 * biquadIdx + 1 ),
         mCurrentOutput.data( ),
-        mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
       if( efl::vectorSubtractInplace( mCurrentOutput.data( ),
         mCurrentInput.data( ),
-        mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
@@ -177,21 +177,21 @@ void BiquadIirFilter::process()
       if( efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx ),
                                mCurrentInput.data( ),
                                mCurrentOutput.data(),
-                               mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+                               mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
       if( efl::vectorMultiplyAddInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 1 ),
         mState.row( 2 * biquadIdx + 1 ),
         mCurrentOutput.data( ),
-        mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
       if( efl::vectorMultiplyAddInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 2 ),
         mState.row( 2 * biquadIdx ),
         mCurrentOutput.data( ),
-        mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Numeric error during IIR computation" );
       }
@@ -200,13 +200,13 @@ void BiquadIirFilter::process()
       // Now update the states
       if( efl::vectorCopy( mState.row( 2*biquadIdx + 1 ),
                            mState.row( 2*biquadIdx ),
-                           mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+                           mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Error during update of IIR states" );
       }
       if( efl::vectorCopy( mCurrentInput.data(),
                            mState.row( 2*biquadIdx +1),
-                           mNumberOfChannels, ril::cVectorAlignmentSamples ) != efl::noError )
+                           mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
       {
         throw std::runtime_error( "Error during update of IIR states" );
       }

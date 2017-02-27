@@ -20,7 +20,7 @@ StringParameter::StringParameter(StringParameterConfig const & config)
 {
 }
 
-StringParameter::StringParameter(ril::ParameterConfigBase const & config)
+StringParameter::StringParameter(ParameterConfigBase const & config)
  : StringParameter( dynamic_cast<StringParameter const &>(config) )
 {
   // Todo: handle exceptions
@@ -32,7 +32,7 @@ StringParameter::StringParameter( std::string const & initStr )
 {
 }
 
-static ril::ParameterFactory::Registrar< StringParameter > maker( ril::ParameterType::String );
+static ParameterFactory::Registrar< StringParameter > maker( ParameterType::String );
 
 } // namespace pml
 } // namespace visr

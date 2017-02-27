@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
+#ifndef VISR_PARAMETER_PORT_BASE_HPP_INCLUDED
+#define VISR_PARAMETER_PORT_BASE_HPP_INCLUDED
 
 #include "port_base.hpp"
 
@@ -11,8 +11,6 @@
 #include <string>
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
@@ -54,7 +52,7 @@ public:
   /**
    * @note Done elsewhere at th moment. 
    */
-  void connectProtocol( ril::CommunicationProtocolBase * protocol );
+  void connectProtocol( CommunicationProtocolBase * protocol );
 #endif
   /**
    * Check whether the port is connected to a valid protocol.
@@ -67,10 +65,9 @@ protected:
    * @throw std::invalid_argument if the protocol type does not match the concrete port type.
    * At the moment, we use RTTI as the final check.
    */
-  virtual void setProtocol( ril::CommunicationProtocolBase * protocol ) = 0;
+  virtual void setProtocol( CommunicationProtocolBase * protocol ) = 0;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_PORT_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_PORT_BASE_HPP_INCLUDED

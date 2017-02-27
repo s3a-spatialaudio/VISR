@@ -24,7 +24,6 @@
 
 namespace visr
 {
-using ril::CompositeComponent;
 namespace python
 {
 namespace visr
@@ -62,19 +61,19 @@ void exportCompositeComponent( pybind11::module& m )
    * TODO: Decide whether we want additional inspection methods.
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
-  pybind11::class_<ril::CompositeComponent, CompositeComponentWrapper, ril::Component >(m, "CompositeComponent" ) // Note: Trampoline class comes second.
-    .def( pybind11::init<ril::SignalFlowContext &, char const*, CompositeComponent *>(),
+  pybind11::class_<CompositeComponent, CompositeComponentWrapper, Component >(m, "CompositeComponent" ) // Note: Trampoline class comes second.
+    .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
           pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
-    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(std::string const&, std::string const&, std::string const&, std::string const&)>(&ril::CompositeComponent/*Wrapper*/::registerParameterConnection),
+    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(std::string const&, std::string const&, std::string const&, std::string const&)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
           pybind11::arg( "sendComponent"), pybind11::arg("sendPort"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort") )
-    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(ril::ParameterPortBase&, ril::ParameterPortBase&)>(&ril::CompositeComponent/*Wrapper*/::registerParameterConnection),
+    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(ParameterPortBase&, ParameterPortBase&)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
-    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(std::string const &, std::string const &, ril::ChannelList const &, std::string const &, std::string const &, ril::ChannelList const &)>(&ril::CompositeComponent/*Wrapper*/::registerAudioConnection),
+    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(std::string const &, std::string const &, ChannelList const &, std::string const &, std::string const &, ChannelList const &)>(&CompositeComponent/*Wrapper*/::registerAudioConnection),
           pybind11::arg( "sendComponent" ), pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receiveComponent" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
-    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(ril::AudioPortBase &, ril::ChannelList const &, ril::AudioPortBase &, ril::ChannelList const &)>(&ril::CompositeComponent/*Wrapper*/::registerAudioConnection),
+    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, ChannelList const &, AudioPortBase &, ChannelList const &)>(&CompositeComponent/*Wrapper*/::registerAudioConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
-    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(ril::AudioPortBase &, ril::AudioPortBase &)>(&ril::CompositeComponent/*Wrapper*/::registerAudioConnection),
+    .def( "registerAudioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, AudioPortBase &)>(&CompositeComponent/*Wrapper*/::registerAudioConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
     ;
 }
@@ -84,7 +83,7 @@ using namespace boost::python;
 
 
 
-/** Conversion facilities from Python types to visr::ril::AudioChannelIndexVector
+/** Conversion facilities from Python types to visr::AudioChannelIndexVector
  * @TODO Check whether we can put that into a namespace.
  */
 //@{
@@ -95,7 +94,7 @@ struct AudioChannelIndexVectorFromPython
   */
   AudioChannelIndexVectorFromPython()
   {
-    converter::registry::push_back( &convertible, &construct, type_id<visr::ril::AudioChannelIndexVector>() );
+    converter::registry::push_back( &convertible, &construct, type_id<visr::AudioChannelIndexVector>() );
     std::cout << "Registered AudioChannelIndexVectorFromPython converter." << std::endl;
   }
 
@@ -111,7 +110,7 @@ struct AudioChannelIndexVectorFromPython
 
   static void construct( PyObject* objPtr, boost::python::converter::rvalue_from_python_stage1_data* data )
   {
-    using visr::ril::AudioChannelIndexVector;
+    using visr::AudioChannelIndexVector;
     using ContainedType = AudioChannelIndexVector::IndexType;
 
     Py_ssize_t const len = PySequence_Size( objPtr );
@@ -141,9 +140,9 @@ struct AudioChannelIndexVectorFromPython
 class CompositeComponentWrapper: public CompositeComponent, public wrapper<CompositeComponent>
 {
 public:
-  CompositeComponentWrapper( ril::SignalFlowContext & context,
+  CompositeComponentWrapper( SignalFlowContext & context,
                              char const * name,
-                             ril::CompositeComponent * parent )
+                             CompositeComponent * parent )
     : CompositeComponent( context, name,parent)
   {}
 
@@ -159,8 +158,8 @@ void exportCompositeComponent()
    * TODO: Decide whether we want additional inspection methods.
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
-  class_<CompositeComponentWrapper, boost::noncopyable, bases<ril::Component> >("CompositeComponent", no_init )
-    .def( init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>( 
+  class_<CompositeComponentWrapper, boost::noncopyable, bases<Component> >("CompositeComponent", no_init )
+    .def( init<SignalFlowContext &, char const*, CompositeComponent *>( 
       args("context", "name", "parent") ) )
     .add_property( "numberOfComponents", &CompositeComponent::numberOfComponents )
     .def( "registerParameterConnection", &CompositeComponent::registerParameterConnection,

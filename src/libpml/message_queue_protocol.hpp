@@ -27,7 +27,7 @@ namespace pml
  * to the same instances are appropriately secured against race conditions.
  */
 template< typename MessageTypeT >
-class MessageQueueProtocol: public ril::CommunicationProtocolBase
+class MessageQueueProtocol: public CommunicationProtocolBase
 {
 public:
 
@@ -40,15 +40,15 @@ public:
   /**
    * Provide alias for parameter configuration class type for the contained parameter values.
    */
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
+  using ParameterConfigType = typename ParameterToConfigType<MessageTypeT>::ConfigType;
 
-  class Output: public ril::ParameterPortBase
+  class Output: public ParameterPortBase
   {
   public:
     /**
      * Default constructor.
      */
-    explicit Output( std::string const & name, ril::Component & parent)
+    explicit Output( std::string const & name, Component & parent)
      : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
      , mProtocol( nullptr )
     {}
@@ -85,13 +85,13 @@ public:
     MessageQueueProtocol * mProtocol;
   };
 
-  class Input: public ril::ParameterPortBase
+  class Input: public ParameterPortBase
   {
   public:
     /**
     * Default constructor.
     */
-    explicit Input( std::string const & name, ril::Component & parent )
+    explicit Input( std::string const & name, Component & parent )
      : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
      , mProtocol( nullptr )
     {}
@@ -134,13 +134,13 @@ public:
     MessageQueueProtocol * mProtocol;
   };
 
-  explicit MessageQueueProtocol( ril::ParameterConfigBase const & config );
+  explicit MessageQueueProtocol( ParameterConfigBase const & config );
 
   explicit MessageQueueProtocol( ParameterConfigType const & config );
 
-  ril::ParameterType parameterType() const override { return ril::ParameterToId<MessageTypeT>::id; }
+  ParameterType parameterType() const override { return ParameterToId<MessageTypeT>::id; }
 
-  virtual ril::CommunicationProtocolType protocolType() const override { return ril::CommunicationProtocolType::MessageQueue; }
+  virtual CommunicationProtocolType protocolType() const override { return CommunicationProtocolType::MessageQueue; }
 
   /**
    * Remove all elements from the message queue.
@@ -188,13 +188,13 @@ public:
     mQueue.pop_back();
   }
 
-  void connectInput( ril::ParameterPortBase* port ) override;
+  void connectInput( ParameterPortBase* port ) override;
 
-  void connectOutput( ril::ParameterPortBase* port ) override;
+  void connectOutput( ParameterPortBase* port ) override;
 
-  bool disconnectInput( ril::ParameterPortBase* port ) override;
+  bool disconnectInput( ParameterPortBase* port ) override;
 
-  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectOutput( ParameterPortBase* port ) override;
 
 private:
   /**
@@ -209,7 +209,7 @@ private:
 };
 
 template< typename MessageTypeT >
-inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ril::ParameterConfigBase const & config )
+inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ParameterConfigBase const & config )
 : MessageQueueProtocol( dynamic_cast<ParameterConfigType const &>(config) )
 {
 }
@@ -223,7 +223,7 @@ inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ParameterConf
 }
 
 template< typename MessageTypeT >
-inline void MessageQueueProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
+inline void MessageQueueProtocol< MessageTypeT >::connectInput( ParameterPortBase* port )
 {
   MessageQueueProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Input *>(port);
   if( not typedPort )
@@ -239,7 +239,7 @@ inline void MessageQueueProtocol< MessageTypeT >::connectInput( ril::ParameterPo
 }
 
 template< typename MessageTypeT >
-inline void MessageQueueProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
+inline void MessageQueueProtocol< MessageTypeT >::connectOutput( ParameterPortBase* port )
 {
   MessageQueueProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Output *>(port);
   if( not typedPort )
@@ -255,7 +255,7 @@ inline void MessageQueueProtocol< MessageTypeT >::connectOutput( ril::ParameterP
 }
 
 template< typename MessageTypeT >
-inline bool MessageQueueProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
+inline bool MessageQueueProtocol< MessageTypeT >::disconnectInput( ParameterPortBase* port )
 {
   MessageQueueProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Input *>(port);
   if( not typedPort )
@@ -273,7 +273,7 @@ inline bool MessageQueueProtocol< MessageTypeT >::disconnectInput( ril::Paramete
 }
 
 template< typename MessageTypeT >
-inline bool MessageQueueProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
+inline bool MessageQueueProtocol< MessageTypeT >::disconnectOutput( ParameterPortBase* port )
 {
   MessageQueueProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Output *>(port);
   if( not typedPort )
@@ -294,6 +294,6 @@ inline bool MessageQueueProtocol< MessageTypeT >::disconnectOutput( ril::Paramet
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueueProtocol, visr::ril::CommunicationProtocolType::MessageQueue )
+DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueueProtocol, visr::CommunicationProtocolType::MessageQueue )
 
 #endif // VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED

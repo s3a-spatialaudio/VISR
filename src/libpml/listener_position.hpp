@@ -18,13 +18,13 @@ namespace visr
 namespace pml
 {
 
-class ListenerPosition: public ril::TypedParameterBase<EmptyParameterConfig, ril::ParameterType::ListenerPosition >
+class ListenerPosition: public TypedParameterBase<EmptyParameterConfig, ParameterType::ListenerPosition >
 {
 public:
   using TimeType = std::uint64_t;
   using IdType = unsigned int;
 
-  explicit ListenerPosition( ril::ParameterConfigBase const & config );
+  explicit ListenerPosition( ParameterConfigBase const & config );
 
   /**
    * Also acts as default constructor.
@@ -71,6 +71,6 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::ListenerPosition, visr::ril::ParameterType::ListenerPosition, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::ListenerPosition, visr::ParameterType::ListenerPosition, visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_LISTENER_POSITION_HPP_INCLUDED

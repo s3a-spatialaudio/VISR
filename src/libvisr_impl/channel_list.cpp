@@ -9,8 +9,6 @@
 
 namespace visr
 {
-namespace ril
-{
 
 ChannelRange::ChannelRange()
  : ChannelRange( 0, 0, 1 )
@@ -175,5 +173,4 @@ void ChannelList::appendIndex( IndexType index )
   mChannels.push_back( index );
 }
 
-} // namespace ril
 } // namespace visr

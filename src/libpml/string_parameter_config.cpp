@@ -13,7 +13,7 @@ namespace pml
 {
 
 StringParameterConfig::StringParameterConfig( std::size_t maxLength )
- : ril::ParameterConfigBase()
+ : ParameterConfigBase()
  , mMaxLength(maxLength)
 {
 }
@@ -22,7 +22,7 @@ StringParameterConfig::~StringParameterConfig()
 {
 }
 
-bool StringParameterConfig::compare(ril::ParameterConfigBase const & rhs) const
+bool StringParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
   if (std::type_index(typeid(rhs)) != std::type_index(typeid(StringParameterConfig)))

@@ -365,7 +365,7 @@ BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( MatrixParameterConfig c
 }
 
 template<typename CoeffType>
-BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( ril::ParameterConfigBase const & config )
+BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( ParameterConfigBase const & config )
   : BiquadParameterMatrix( dynamic_cast<MatrixParameterConfig const &>( config ) )
 {
 }

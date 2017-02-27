@@ -29,14 +29,14 @@ namespace visr
 {
 #ifdef USE_PYBIND11
 
-class AtomicComponentWrapper: public ril::AtomicComponent
+class AtomicComponentWrapper: public AtomicComponent
 {
 public:
-  using ril::AtomicComponent::AtomicComponent;
+  using AtomicComponent::AtomicComponent;
 
   void process() override
   {
-    PYBIND11_OVERLOAD_PURE( void, ril::AtomicComponent, process, );
+    PYBIND11_OVERLOAD_PURE( void, AtomicComponent, process, );
   }
 };
 
@@ -46,10 +46,10 @@ void exportAtomicComponent( pybind11::module& m )
   * TODO: Decide whether we want additional inspection methods.
   * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
   */
-  pybind11::class_<ril::AtomicComponent, AtomicComponentWrapper, ril::Component >( m, "AtomicComponent" )
-    .def( pybind11::init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>(),
-	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent")=static_cast<ril::CompositeComponent *>(nullptr) )
-    .def( "process", &ril::AtomicComponent::process )
+  pybind11::class_<AtomicComponent, AtomicComponentWrapper, Component >( m, "AtomicComponent" )
+    .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
+	  pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent")=static_cast<CompositeComponent *>(nullptr) )
+    .def( "process", &AtomicComponent::process )
     ;
 }
 #else
@@ -63,9 +63,9 @@ using namespace boost::python;
 class AtomicComponentWrapper: public AtomicComponent, public wrapper<AtomicComponent>
 {
 public:
-  AtomicComponentWrapper( ril::SignalFlowContext & context,
+  AtomicComponentWrapper( SignalFlowContext & context,
                              char const * name,
-                             ril::CompositeComponent * parent )
+                             CompositeComponent * parent )
     : AtomicComponent( context, name, parent)
   {}
 
@@ -82,8 +82,8 @@ void exportAtomicComponent()
    * TODO: Decide whether we want additional inspection methods.
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
-  class_<AtomicComponentWrapper, boost::noncopyable, bases<ril::Component> >("AtomicComponent", no_init )
-    .def( init<ril::SignalFlowContext &, char const*, ril::CompositeComponent *>( 
+  class_<AtomicComponentWrapper, boost::noncopyable, bases<Component> >("AtomicComponent", no_init )
+    .def( init<SignalFlowContext &, char const*, CompositeComponent *>( 
       args("context", "name", "parent") ) )
     .def( "process", pure_virtual( &AtomicComponent::process ) )
     //.add_property( "numberOfComponents", &CompositeComponent::numberOfComponents )

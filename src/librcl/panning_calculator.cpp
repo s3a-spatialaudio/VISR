@@ -37,13 +37,13 @@ namespace visr
 namespace rcl
 {
 
-  PanningCalculator::PanningCalculator( ril::SignalFlowContext& context,
+  PanningCalculator::PanningCalculator( SignalFlowContext& context,
                                                 char const * name,
-                                                ril::CompositeComponent * parent /*= nullptr*/ )
+                                                CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( 0 )
- , mLoudspeakerDotProducts( ril::cVectorAlignmentSamples )
- , mHighFrequencyGains(ril::cVectorAlignmentSamples )
+ , mLoudspeakerDotProducts( cVectorAlignmentSamples )
+ , mHighFrequencyGains(cVectorAlignmentSamples )
 {
 }
 

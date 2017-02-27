@@ -28,7 +28,7 @@ namespace pml
  * to the same instances are appropriately secured against race conditions.
  */
 template< typename MessageTypeT >
-class SharedDataProtocol: public ril::CommunicationProtocolBase
+class SharedDataProtocol: public CommunicationProtocolBase
 {
 public:
 
@@ -37,13 +37,13 @@ public:
    */
   using MessageType = MessageTypeT;
 
-  class Input: public ril::ParameterPortBase
+  class Input: public ParameterPortBase
   {
   public:
     /**
     * Default constructor.
     */
-    Input( std::string const & name, ril::Component & parent )
+    Input( std::string const & name, Component & parent )
      : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
      , mProtocol(nullptr)
     {}
@@ -68,15 +68,15 @@ public:
   /**
    * Provide alias for parameter configuration class type for the contained parameter values.
    */
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
+  using ParameterConfigType = typename ParameterToConfigType<MessageTypeT>::ConfigType;
 
-  class Output: public ril::ParameterPortBase
+  class Output: public ParameterPortBase
   {
   public:
     /**
      * Default constructor.
      */
-    explicit Output( std::string const & name, ril::Component & parent )
+    explicit Output( std::string const & name, Component & parent )
      : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
      , mProtocol(nullptr)
     {}
@@ -99,13 +99,13 @@ public:
     SharedDataProtocol * mProtocol;
   }; // class Output
 
-  explicit SharedDataProtocol( ril::ParameterConfigBase const & config );
+  explicit SharedDataProtocol( ParameterConfigBase const & config );
 
   explicit SharedDataProtocol( ParameterConfigType const & config );
 
-  ril::ParameterType parameterType( ) const override { return ril::ParameterToId<MessageType>::id; }
+  ParameterType parameterType( ) const override { return ParameterToId<MessageType>::id; }
 
-  virtual ril::CommunicationProtocolType protocolType( ) const override { return ril::CommunicationProtocolType::SharedData; }
+  virtual CommunicationProtocolType protocolType( ) const override { return CommunicationProtocolType::SharedData; }
 
   MessageType & data()
   {
@@ -122,13 +122,13 @@ public:
     mData.operator=( newData );
   }
 
-  void connectInput( ril::ParameterPortBase* port ) override;
+  void connectInput( ParameterPortBase* port ) override;
 
-  void connectOutput( ril::ParameterPortBase* port ) override;
+  void connectOutput( ParameterPortBase* port ) override;
 
-  bool disconnectInput( ril::ParameterPortBase* port ) override;
+  bool disconnectInput( ParameterPortBase* port ) override;
 
-  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectOutput( ParameterPortBase* port ) override;
 
 private:
   ParameterConfigType const mConfig;
@@ -143,7 +143,7 @@ private:
 };
 
 template< typename MessageTypeT >
-inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ril::ParameterConfigBase const & config )
+inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ParameterConfigBase const & config )
 : SharedDataProtocol( dynamic_cast<ParameterConfigType const &>(config) )
 {
 }
@@ -157,7 +157,7 @@ inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ParameterConfigTy
 }
 
 template< typename MessageTypeT >
-inline void SharedDataProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
+inline void SharedDataProtocol< MessageTypeT >::connectInput( ParameterPortBase* port )
 {
   SharedDataProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Input *>(port);
   if( not typedPort )
@@ -172,7 +172,7 @@ inline void SharedDataProtocol< MessageTypeT >::connectInput( ril::ParameterPort
 }
 
 template< typename MessageTypeT >
-inline void SharedDataProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
+inline void SharedDataProtocol< MessageTypeT >::connectOutput( ParameterPortBase* port )
 {
   SharedDataProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Output *>(port);
   if( not typedPort )
@@ -188,7 +188,7 @@ inline void SharedDataProtocol< MessageTypeT >::connectOutput( ril::ParameterPor
 }
 
 template< typename MessageTypeT >
-inline bool SharedDataProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
+inline bool SharedDataProtocol< MessageTypeT >::disconnectInput( ParameterPortBase* port )
 {
   SharedDataProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Input *>(port);
   if( not typedPort )
@@ -206,7 +206,7 @@ inline bool SharedDataProtocol< MessageTypeT >::disconnectInput( ril::ParameterP
 }
 
 template< typename MessageTypeT >
-inline bool SharedDataProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
+inline bool SharedDataProtocol< MessageTypeT >::disconnectOutput( ParameterPortBase* port )
 {
   SharedDataProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Output *>(port);
   if( not typedPort )
@@ -226,6 +226,6 @@ inline bool SharedDataProtocol< MessageTypeT >::disconnectOutput( ril::Parameter
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::SharedDataProtocol, visr::ril::CommunicationProtocolType::SharedData )
+DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::SharedDataProtocol, visr::CommunicationProtocolType::SharedData )
 
 #endif // VISR_PML_SHARED_DATA_PROTOCOL_HPP_INCLUDED

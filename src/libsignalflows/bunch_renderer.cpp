@@ -17,18 +17,18 @@ namespace visr
 namespace signalflows
 {
 
-BunchRenderer::BunchRenderer( ril::SignalFlowContext & context,
+BunchRenderer::BunchRenderer( SignalFlowContext & context,
                                     char const * name,
-                                    ril::CompositeComponent * parent,
+                                    CompositeComponent * parent,
                                     panning::LoudspeakerArray const & loudspeakerConfiguration,
                                     std::size_t numberOfInputs,
                                     std::size_t numberOfOutputs,
                                     std::size_t interpolationPeriod,
-                                    efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                                    efl::BasicMatrix<SampleType> const & diffusionFilters,
                                     std::string const & trackingConfiguration,
                                     std::size_t sceneReceiverPort,
                                     std::string const & reverbConfig )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
  , mSceneReceiver( context, "SceneReceiver", this )
  , mSceneDecoder( context, "SceneDecoder", this )
  , mCoreRenderer( context, "CoreRenderer", this,

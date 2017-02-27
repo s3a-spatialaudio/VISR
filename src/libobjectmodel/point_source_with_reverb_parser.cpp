@@ -81,11 +81,11 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
       PointSourceWithReverb::Coordinate posX, posY, posZ;
       PointSourceParser::parsePosition( earlyTree.get_child( "position" ), posX, posY, posZ );
       refl.setPosition( posX, posY, posZ );
-      refl.setDelay( earlyTree.get<ril::SampleType>( "delay" ) );
+      refl.setDelay( earlyTree.get<SampleType>( "delay" ) );
       refl.setLevel( earlyTree.get<LevelType>( "level" ) );
 
       ptree const & biquadTree = earlyTree.get_child( "biquadsos" );
-      pml::BiquadParameterList<ril::SampleType> biqList;
+      pml::BiquadParameterList<SampleType> biqList;
       biqList.loadJson( biquadTree );
       if( biqList.size() > PointSourceWithReverb::cNumDiscreteReflectionBiquads )
       {
@@ -98,9 +98,9 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
       throw std::invalid_argument( "Object must contain exactly one \"room.lreverb\" element." );
     }
     ptree const & lateTree = roomTree.get_child( "lreverb" );
-    reverbPointSrc.setLateReverbOnset( lateTree.get<ril::SampleType>( "delay" ) );
+    reverbPointSrc.setLateReverbOnset( lateTree.get<SampleType>( "delay" ) );
     std::string const lateLevelString = lateTree.get<std::string>( "level" );
-    pml::FloatSequence<ril::SampleType> lateLevels( lateLevelString );
+    pml::FloatSequence<SampleType> lateLevels( lateLevelString );
     if( lateLevels.size() != PointSourceWithReverb::cNumberOfSubBands )
     {
       throw std::invalid_argument( "The number of elements in the \"lreverb.late\" attribute must match the fixed number of subbands." );
@@ -108,7 +108,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     reverbPointSrc.setLateReverbLevels( lateLevels.values( ), lateLevels.size( ) );
     
     std::string const lateAttacksString = lateTree.get<std::string>( "attacktime" );
-    pml::FloatSequence<ril::SampleType> const lateAttacks( lateAttacksString );
+    pml::FloatSequence<SampleType> const lateAttacks( lateAttacksString );
     if( lateAttacks.size( ) != PointSourceWithReverb::cNumberOfSubBands )
     {
       throw std::invalid_argument( "The number of elements in the \"lreverb.late\" attribute must match the fixed number of subbands." );
@@ -116,7 +116,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     reverbPointSrc.setLateReverbAttackTimes(lateAttacks.values( ), lateAttacks.size( ) );
     
     std::string const lateDecaysString = lateTree.get<std::string>( "decayconst" );
-    pml::FloatSequence<ril::SampleType> const lateDecays( lateDecaysString );
+    pml::FloatSequence<SampleType> const lateDecays( lateDecaysString );
     if( lateDecays.size( ) != PointSourceWithReverb::cNumberOfSubBands )
     {
       throw std::invalid_argument( "The number of elements in the \"lreverb.late\" attribute must match the fixed number of subbands." );
@@ -145,7 +145,7 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   {
     PointSourceWithReverb::DiscreteReflection const & refl = pswdObj.discreteReflection( earlyIdx );
     ptree earlyTree;
-    earlyTree.put<ril::SampleType>( "delay", refl.delay() );
+    earlyTree.put<SampleType>( "delay", refl.delay() );
     earlyTree.put<LevelType>( "level", refl.level() );
 
     ptree biquadTree;
@@ -156,14 +156,14 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   }
   ptree lateTree;
 
-  lateTree.put<ril::SampleType>( "delay", pswdObj.lateReverbOnset() );
+  lateTree.put<SampleType>( "delay", pswdObj.lateReverbOnset() );
   PointSourceWithReverb::LateReverbCoeffs const & lateLevels = pswdObj.lateReverbLevels( );
-  pml::FloatSequence<ril::SampleType> lateLevelCoeffs( &lateLevels[0], lateLevels.size( ) );
+  pml::FloatSequence<SampleType> lateLevelCoeffs( &lateLevels[0], lateLevels.size( ) );
   std::string const lateLevelStr( lateLevelCoeffs.toString( ", " ) );
   lateTree.put<std::string>( "levels", lateLevelStr );
 
   PointSourceWithReverb::LateReverbCoeffs const & lateDecays = pswdObj.lateReverbDecayCoeffs( );
-  pml::FloatSequence<ril::SampleType> lateDecayCoeffs( &lateDecays[0], lateDecays.size( ) );
+  pml::FloatSequence<SampleType> lateDecayCoeffs( &lateDecays[0], lateDecays.size( ) );
   std::string const lateDecayStr( lateDecayCoeffs.toString( ", " ) );
   lateTree.put<std::string>( "decayconst", lateDecayStr );
 

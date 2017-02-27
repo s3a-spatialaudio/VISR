@@ -132,19 +132,19 @@ int main( int argc, char const * const * argv )
     std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
     std::size_t const diffusionFiltersInFile = 64; // Fixed number of filters in file.
     // First create a filter matrix containing all filters from a initializer list that is compiled into the program.
-    efl::BasicMatrix<ril::SampleType> allDiffusionCoeffs( diffusionFiltersInFile,
+    efl::BasicMatrix<SampleType> allDiffusionCoeffs( diffusionFiltersInFile,
                                                           diffusionFilterLength,
 #include "files/quasiAllpassFIR_f64_n63_initializer_list.txt"
-                                                          , ril::cVectorAlignmentSamples );
+                                                          , cVectorAlignmentSamples );
 
     // Create a second filter matrix that matches the number of required filters.
-    efl::BasicMatrix<ril::SampleType> diffusionCoeffs( numberOfLoudspeakers, diffusionFilterLength, ril::cVectorAlignmentSamples );
+    efl::BasicMatrix<SampleType> diffusionCoeffs( numberOfLoudspeakers, diffusionFilterLength, cVectorAlignmentSamples );
     for( std::size_t idx( 0 ); idx < diffusionCoeffs.numberOfRows( ); ++idx )
     {
-      efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
+      efl::vectorCopy( allDiffusionCoeffs.row( idx ), diffusionCoeffs.row( idx ), diffusionFilterLength, cVectorAlignmentSamples );
     }
 
-    ril::SignalFlowContext context( periodSize, samplingRate );
+    SignalFlowContext context( periodSize, samplingRate );
 
     signalflows::BunchRenderer flow( context,
                                      "", nullptr,
@@ -183,7 +183,7 @@ int main( int argc, char const * const * argv )
 
    // Should there be an explicit stop() method for the sound interface?
 
-//    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+//    audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

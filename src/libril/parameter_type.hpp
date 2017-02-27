@@ -1,11 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_TYPE_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_TYPE_HPP_INCLUDED
+#ifndef VISR_PARAMETER_TYPE_HPP_INCLUDED
+#define VISR_PARAMETER_TYPE_HPP_INCLUDED
 
 namespace visr
-{
-namespace ril
 {
 
 enum class ParameterType
@@ -44,11 +42,10 @@ struct IdToParameter;
 template< typename Parameter >
 struct ParameterToConfigType {};
 
-} // namespace ril
 } // namespace visr
 
 #define DEFINE_PARAMETER_TYPE( ParameterClassType, ParameterId, ParameterConfigType)\
-namespace visr { namespace ril { \
+namespace visr { \
 template<> \
 struct ParameterToId< ParameterClassType > \
 {\
@@ -67,6 +64,6 @@ struct ParameterToConfigType< ParameterClassType > \
 public:\
   using ConfigType = ParameterConfigType;\
 }; \
-} }
+}
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_TYPE_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_TYPE_HPP_INCLUDED

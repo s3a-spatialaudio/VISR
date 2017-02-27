@@ -51,12 +51,12 @@ MatrixParameter<ElementType>::MatrixParameter( std::size_t numRows, std::size_t 
 
 template< typename ElementType >
 MatrixParameter<ElementType>::MatrixParameter( MatrixParameterConfig const & config )
-: MatrixParameter<ElementType>( config.numberOfRows( ), config.numberOfColumns( ), ril::cVectorAlignmentSamples )
+: MatrixParameter<ElementType>( config.numberOfRows( ), config.numberOfColumns( ), cVectorAlignmentSamples )
 {
 }
 
 template< typename ElementType >
-MatrixParameter<ElementType>::MatrixParameter( ril::ParameterConfigBase const & config )
+MatrixParameter<ElementType>::MatrixParameter( ParameterConfigBase const & config )
 : MatrixParameter( dynamic_cast<MatrixParameterConfig const &>(config) )
 {
   // Todo: handle exceptions
@@ -341,10 +341,10 @@ template class MatrixParameter<std::complex<double> >;
 // Register the types in the ParameterFactory.
 // Note: thsi requires either dynamic linking or a '--whole-archive'
 // equivalent when linking to pml. 
-static ril::ParameterFactory::Registrar< MatrixParameter<float> > maker1( ril::ParameterType::MatrixFloat );
-static ril::ParameterFactory::Registrar< MatrixParameter<double> > maker2( ril::ParameterType::MatrixDouble );
-static ril::ParameterFactory::Registrar< MatrixParameter<std::complex<float> > > maker3( ril::ParameterType::MatrixFloatComplex );
-static ril::ParameterFactory::Registrar< MatrixParameter<std::complex<double> > > maker4( ril::ParameterType::MatrixDoubleComplex );
+static ParameterFactory::Registrar< MatrixParameter<float> > maker1( ParameterType::MatrixFloat );
+static ParameterFactory::Registrar< MatrixParameter<double> > maker2( ParameterType::MatrixDouble );
+static ParameterFactory::Registrar< MatrixParameter<std::complex<float> > > maker3( ParameterType::MatrixFloatComplex );
+static ParameterFactory::Registrar< MatrixParameter<std::complex<double> > > maker4( ParameterType::MatrixDoubleComplex );
 
 } // namespace pml
 } // namespace visr

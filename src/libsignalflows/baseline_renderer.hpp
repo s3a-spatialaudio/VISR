@@ -47,7 +47,7 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class BaselineRenderer: public ril::CompositeComponent
+class BaselineRenderer: public CompositeComponent
 {
 public:
   /**
@@ -70,22 +70,22 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit BaselineRenderer( ril::SignalFlowContext & context,
+  explicit BaselineRenderer( SignalFlowContext & context,
                              char const * name,
-                             ril::CompositeComponent * parent,
+                             CompositeComponent * parent,
                              panning::LoudspeakerArray const & loudspeakerConfiguration,
                              std::size_t numberOfInputs,
                              std::size_t numberOfOutputs,
                              std::size_t interpolationPeriod,
-                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                             efl::BasicMatrix<SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
                              std::string const & reverbConfig,
                              bool frequencyDependentPanning );
 
-  explicit BaselineRenderer( ril::SignalFlowContext & context,
+  explicit BaselineRenderer( SignalFlowContext & context,
     char const * name,
-    ril::CompositeComponent * parent,
+    CompositeComponent * parent,
     panning::LoudspeakerArray const & loudspeakerConfiguration,
     std::size_t numberOfInputs,
     std::size_t numberOfOutputs );
@@ -94,7 +94,7 @@ public:
 
 private:
 
-  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
+  efl::BasicMatrix<SampleType> const & mDiffusionFilters;
   
   rcl::UdpReceiver mSceneReceiver;
   
@@ -155,7 +155,7 @@ private:
 
   std::size_t mMaxNumReverbObjects;
 
-  ril::SampleType mLateReverbFilterLengthSeconds;
+  SampleType mLateReverbFilterLengthSeconds;
 
   std::size_t mNumDiscreteReflectionsPerObject;
    
@@ -201,8 +201,8 @@ private:
   std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
   //@}
 
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

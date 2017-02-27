@@ -10,13 +10,13 @@ namespace visr
 namespace signalflows
 {
 
-DelayVector::DelayVector( ril::SignalFlowContext & context,
+DelayVector::DelayVector( SignalFlowContext & context,
                           const char * name,
-                          ril::CompositeComponent * parent, 
+                          CompositeComponent * parent, 
                           std::size_t numberOfChannels,
                           std::size_t interpolationPeriod,
                           rcl::DelayVector::InterpolationType interpolationMethod )
-  : ril::CompositeComponent( context, "", parent )
+  : CompositeComponent( context, "", parent )
   , cNumberOfChannels( numberOfChannels )
   , cInterpolationSteps( interpolationPeriod )
   , cInterpolationMethod( interpolationMethod )
@@ -53,12 +53,12 @@ DelayVector::setup()
     "", "output", ChannelRange( 0, cNumberOfChannels ) );
 }
 
-void DelayVector::setDelay( efl::BasicVector<ril::SampleType> const & newDelays )
+void DelayVector::setDelay( efl::BasicVector<SampleType> const & newDelays )
 {
   mDelay.setDelay( newDelays );
 }
 
-void DelayVector::setGain( efl::BasicVector<ril::SampleType> const & newGains )
+void DelayVector::setGain( efl::BasicVector<SampleType> const & newGains )
 {
   mDelay.setGain( newGains );
 }

@@ -1,13 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_OUTPUT_HPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_OUTPUT_HPP_INCLUDED
+#ifndef VISR_AUDIO_OUTPUT_HPP_INCLUDED
+#define VISR_AUDIO_OUTPUT_HPP_INCLUDED
 
 #include "audio_port_base.hpp"
 
 namespace visr
-{
-namespace ril
 {
 
 // @todo: Rethink about public or protected inheritance (whether we want to use some kind of (static) polymorphism to access inputs and outpuits in a uniform way.
@@ -55,14 +53,13 @@ public:
     for( std::size_t runIndex( 0 ); runIndex < width( ); ++runIndex )
 	{
       // TODO: sort out the const_cast issue later on!
-      ptrArray[runIndex] = const_cast<visr::ril::SampleType*>(operator[](runIndex));
+      ptrArray[runIndex] = const_cast<SampleType*>(operator[](runIndex));
     }
     return ptrArray;
   }
 private:
 };
 
-}
-}
+} // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_OUTPUT_HPP_INCLUDED
+#endif // #ifndef VISR_AUDIO_OUTPUT_HPP_INCLUDED

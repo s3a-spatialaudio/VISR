@@ -22,12 +22,12 @@ namespace visr
 namespace signalflows
 {
 
-class TimeFrequencyFeedthrough: public ril::CompositeComponent
+class TimeFrequencyFeedthrough: public CompositeComponent
 {
 public:
-  explicit TimeFrequencyFeedthrough( ril::SignalFlowContext & context,
+  explicit TimeFrequencyFeedthrough( SignalFlowContext & context,
                                      char const * name,
-                                     ril::CompositeComponent * parent,
+                                     CompositeComponent * parent,
                                      std::size_t numberOfChannels,
                                      std::size_t dftSize,
                                      std::size_t windowLength,
@@ -41,8 +41,8 @@ private:
 
   rcl::TimeFrequencyInverseTransform mInverseTransform;
 #endif
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

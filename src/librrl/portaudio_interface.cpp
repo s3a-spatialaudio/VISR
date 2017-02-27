@@ -149,7 +149,7 @@ private:
 
   void* mCallbackUserData;
 
-  std::unique_ptr<rrl::CommunicationArea<ril::SampleType> > mCommunicationBuffer;
+  std::unique_ptr<rrl::CommunicationArea<SampleType> > mCommunicationBuffer;
 
   /**
    * Buffer to hold the pointers to the sample vectors for the input
@@ -157,7 +157,7 @@ private:
    * These samples are written from the capture ports of the sound
    * interface and then passed to the audio processing callback function.
    */
-  std::vector< ril::SampleType * > mCaptureSampleBuffers;
+  std::vector< SampleType * > mCaptureSampleBuffers;
 
   /**
    * Buffer to hold the pointers to the sample vectors for the output
@@ -166,7 +166,7 @@ private:
    * function and then passed to the playback argument of the
    * portaudio callback function.
    */
-  std::vector< ril::SampleType * > mPlaybackSampleBuffers;
+  std::vector< SampleType * > mPlaybackSampleBuffers;
 };
 
 /******************************************************************************/
@@ -183,7 +183,7 @@ PortaudioInterface::Impl::Impl( Config const & config )
  , mStream( 0 )
  , mCallback( nullptr )
  , mCallbackUserData( nullptr )
- , mCommunicationBuffer( new CommunicationArea<ril::SampleType>(mNumCaptureChannels + mNumPlaybackChannels, mPeriodSize, ril::cVectorAlignmentSamples ) )
+ , mCommunicationBuffer( new CommunicationArea<SampleType>(mNumCaptureChannels + mNumPlaybackChannels, mPeriodSize, cVectorAlignmentSamples ) )
  , mCaptureSampleBuffers( mNumCaptureChannels, nullptr )
  , mPlaybackSampleBuffers( mNumPlaybackChannels, nullptr )
 {
@@ -384,14 +384,14 @@ PortaudioInterface::Impl::engineCallbackFunction( void const *input,
 
 void PortaudioInterface::Impl::transferPlaybackBuffers( void * output )
 {
-  static_assert( std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type." );
+  static_assert( std::is_same<SampleType, float >::value, "At the moment, only float is allowed as sample type." );
   if( (mSampleFormat != Config::SampleFormat::float32Bit ) /*or mInterleaved*/  )
   {
     throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in non-interleaved mode." );
   }
   for( std::size_t channelIndex( 0 ); channelIndex < mNumPlaybackChannels; ++channelIndex )
   {
-    ril::SampleType const * inputPtr = mPlaybackSampleBuffers[channelIndex];
+    SampleType const * inputPtr = mPlaybackSampleBuffers[channelIndex];
     const std::size_t outStride = (mInterleaved ? mNumPlaybackChannels : 1);
     // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
     // pointer arrays to sample vectors.
@@ -408,14 +408,14 @@ void PortaudioInterface::Impl::transferPlaybackBuffers( void * output )
 
 void PortaudioInterface::Impl::transferCaptureBuffers( void const * input )
 {
-  static_assert(std::is_same<ril::SampleType, float >::value, "At the moment, only float is allowed as sample type.");
+  static_assert(std::is_same<SampleType, float >::value, "At the moment, only float is allowed as sample type.");
   if( (mSampleFormat != Config::SampleFormat::float32Bit) /*or mInterleaved*/ )
   {
     throw std::invalid_argument( "At the moment, the portaudio interface supports only the sample type float32 in un-interleaved mode." );
   }
   for( std::size_t channelIndex( 0 ); channelIndex < mNumCaptureChannels; ++channelIndex )
   {
-    ril::SampleType * outputPtr = mCaptureSampleBuffers[channelIndex];
+    SampleType * outputPtr = mCaptureSampleBuffers[channelIndex];
     const std::size_t inStride = (mInterleaved ? mNumCaptureChannels : 1);
     // Note: depending in the 'interleaved' mode the portaudio buffer variables are either arrays of samples or
     // pointer arrays to sample vectors.

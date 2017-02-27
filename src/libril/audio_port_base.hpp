@@ -1,13 +1,12 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
+#ifndef VISR_AUDIO_PORT_BASE_HPP_INCLUDED
+#define VISR_AUDIO_PORT_BASE_HPP_INCLUDED
 
 #include "port_base.hpp"
 
 #include "constants.hpp"
 
-// #include <array>
 #include <cstddef>
 #include <exception>
 #include <iterator>
@@ -18,8 +17,6 @@
 #include <valarray>
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declaration(s)
@@ -71,13 +68,13 @@ public:
     mAudioChannelStride = stride;
   }
 
-  void setAudioBasePointer(ril::SampleType * const base) 
+  void setAudioBasePointer( SampleType * const base ) 
   {
 	mAudioBasePtr = base;
   }
 
 protected:
-  ril::SampleType * mAudioBasePtr;
+  SampleType * mAudioBasePtr;
 
   std::size_t mAudioChannelStride;
 
@@ -149,7 +146,6 @@ private:
   mutable std::valarray< SampleType* > mSignalPointers;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_AUDIO_PORT_BASE_HPP_INCLUDED

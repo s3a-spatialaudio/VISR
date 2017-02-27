@@ -15,7 +15,7 @@ namespace pml
 
 /**
  */
-class TimeFrequencyParameterConfig: public ril::ParameterConfigBase
+class TimeFrequencyParameterConfig: public ParameterConfigBase
 {
 public:
   TimeFrequencyParameterConfig( std::size_t dftSize, 
@@ -25,7 +25,7 @@ public:
 
   virtual ~TimeFrequencyParameterConfig();
 
-  bool compare( ril::ParameterConfigBase const & rhs ) const override;
+  bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( TimeFrequencyParameterConfig const & rhs ) const;
 

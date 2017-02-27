@@ -1,18 +1,15 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMPONENT_HPP_INCLUDED
-#define VISR_LIBRIL_COMPONENT_HPP_INCLUDED
+#ifndef VISR_COMPONENT_HPP_INCLUDED
+#define VISR_COMPONENT_HPP_INCLUDED
 
 #include <libril/constants.hpp>
 
 #include <cstddef>
 #include <string>
-#include <vector>
 #include <memory>
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declaration(s)
@@ -21,8 +18,11 @@ class CompositeComponent;
 class ParameterPortBase;
 class SignalFlowContext;
 
-class ComponentInternal;
-  
+namespace impl
+{
+class Component;
+}
+
 /**
  *
  *
@@ -30,8 +30,6 @@ class ComponentInternal;
 class Component
 {
 public:
-  //friend class AudioPort; // For registering / unregistering audio ports.
-  //friend class ParameterPortBase; // For registering / unregistering audio ports.
 
   explicit Component( SignalFlowContext& context,
                       char const * componentName,
@@ -108,7 +106,7 @@ public:
   /**
    * Return the sampling frequency of the containing signal flow.
    */
-  ril::SamplingFrequencyType samplingFrequency() const;
+  SamplingFrequencyType samplingFrequency() const;
 
   /**
    * Return the period of the containing signal processing graph,
@@ -128,9 +126,9 @@ public:
    */
   bool isTopLevel() const;
 
-  ComponentInternal & internal();
+  impl::Component & implementation();
 
-  ComponentInternal const & internal() const;
+  impl::Component const & implementation() const;
 
 protected:
 
@@ -138,10 +136,9 @@ protected:
   SignalFlowContext const & context( ) const;
 
 private:
-  std::unique_ptr<ComponentInternal> mImpl;
+  std::unique_ptr<impl::Component> mImpl;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_COMPONENT_HPP_INCLUDED
+#endif // #ifndef VISR_COMPONENT_HPP_INCLUDED

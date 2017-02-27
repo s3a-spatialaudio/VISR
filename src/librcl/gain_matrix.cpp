@@ -11,9 +11,9 @@ namespace visr
 namespace rcl
 {
 
-  GainMatrix::GainMatrix( ril::SignalFlowContext& context,
+  GainMatrix::GainMatrix( SignalFlowContext& context,
                           char const * name,
-                          ril::CompositeComponent * parent /*= nullptr*/ )
+                          CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
@@ -30,10 +30,10 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mNumberOfOutputs = numberOfOutputs;
   mInput.setWidth( mNumberOfInputs );
   mOutput.setWidth( mNumberOfOutputs );
-  mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period(), interpolationSteps, initialGain, ril::cVectorAlignmentSamples ) );
+  mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period(), interpolationSteps, initialGain, cVectorAlignmentSamples ) );
   if( controlInput )
   {
-    mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+    mGainInput.reset( new ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
       pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
   }
 }
@@ -53,10 +53,10 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mInput.setWidth( mNumberOfInputs );
   mOutput.setWidth( mNumberOfOutputs );
   mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ),
-                 interpolationSteps, initialGains, ril::cVectorAlignmentSamples ) );
+                 interpolationSteps, initialGains, cVectorAlignmentSamples ) );
   if( controlInput )
   {
-    mGainInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+    mGainInput.reset( new ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
                       pml::MatrixParameterConfig( mNumberOfOutputs, mNumberOfInputs ) ) );
   }
 }

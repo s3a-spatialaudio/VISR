@@ -1,10 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
-#define VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#ifndef VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#define VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
-#include <libvisr_impl/audio_connection_descriptor.hpp>
-#include <libvisr_impl/parameter_connection_descriptor.hpp>
+#include "audio_connection_descriptor.hpp"
+#include "parameter_connection_descriptor.hpp"
 
 #include <libril/composite_component.hpp>
 
@@ -12,17 +12,18 @@
 
 namespace visr
 {
-namespace ril
-{
 // Forward declaration
-class ComponentInternal;
+class Component;
+  
+namespace impl
+{
 
-class CompositeComponentImplementation
+class CompositeComponent
 {
 public:
-  using ComponentTable = std::map<std::string, ComponentInternal * >;
+  using ComponentTable = std::map<std::string, impl::Component * >;
 
-  explicit CompositeComponentImplementation( CompositeComponent & component )
+  explicit CompositeComponent( visr::CompositeComponent & component )
     : mComponent( component )
   {
   }
@@ -34,9 +35,9 @@ public:
    * @note The name has to be provided separately, because typically the object pointed to by 
    * \p child is not fully constructed at the time of the call.
    */
-  void registerChildComponent( std::string const & name, ComponentInternal * child );
+  void registerChildComponent( std::string const & name, impl::Component * child );
 
-  void unregisterChildComponent( ComponentInternal * child );
+  void unregisterChildComponent( impl::Component * child );
 
   /**
   * Return the number of contained components (not including the composite itself).
@@ -52,9 +53,9 @@ public:
 
   ComponentTable::const_iterator componentEnd() const;
 
-  ComponentInternal * findComponent( std::string const & componentName );
+  impl::Component * findComponent( std::string const & componentName );
 
-  ComponentInternal const * findComponent( std::string const & componentName ) const;
+  impl::Component const * findComponent( std::string const & componentName ) const;
 
   /**
    * Find an audio port within the composite component.
@@ -103,15 +104,15 @@ public:
 
   ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
 
-  CompositeComponent & composite() { return mComponent; }
+  visr::CompositeComponent & composite() { return mComponent; }
 
-  CompositeComponent const & composite() const { return mComponent; }  
+  visr::CompositeComponent const & composite() const { return mComponent; }
 private:
   
   /**
   * Reference to the component itself (needed because sometimes the component itself needs to be returned).
   */
-  CompositeComponent & mComponent;
+  visr::CompositeComponent & mComponent;
 
   ComponentTable mComponents;
 
@@ -120,7 +121,7 @@ private:
   AudioConnectionTable mAudioConnections;
 };
 
-} // namespace ril
+} // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#endif // #ifndef VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED

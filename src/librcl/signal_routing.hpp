@@ -25,7 +25,7 @@ namespace rcl
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
-class SignalRouting: public ril::AtomicComponent
+class SignalRouting: public AtomicComponent
 {
 public:
   /**
@@ -33,9 +33,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SignalRouting( ril::SignalFlowContext& context,
+  explicit SignalRouting( SignalFlowContext& context,
                           char const * name,
-                          ril::CompositeComponent * parent = nullptr );
+                          CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -101,14 +101,14 @@ private:
   /**
    * The audio input port.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output of the component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
-  std::unique_ptr<ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
+  std::unique_ptr<ParameterInputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
 
   /**
    * Data structure for string the routing information. Eahc vector element corresponds to the respective

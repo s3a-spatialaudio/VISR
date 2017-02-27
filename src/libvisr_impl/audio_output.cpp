@@ -6,8 +6,6 @@
 
 namespace visr
 {
-namespace ril
-{
 
 AudioOutput::AudioOutput( char const* portName,
                           Component& container )
@@ -17,5 +15,4 @@ AudioOutput::AudioOutput( char const* portName,
 
 AudioOutput::~AudioOutput() = default;
 
-} // namespace ril
 } // namespace visr

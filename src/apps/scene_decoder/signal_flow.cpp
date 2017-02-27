@@ -16,15 +16,15 @@ namespace apps
 namespace scene_decoder
 {
 
-SignalFlow::SignalFlow( ril::SignalFlowContext & context,
+SignalFlow::SignalFlow( SignalFlowContext & context,
                         char const * name,
-                        ril::CompositeComponent * parent,
+                        CompositeComponent * parent,
                         std::size_t numberOfInputs,
                         std::size_t numberOfOutputs,
                         std::size_t interpolationPeriod,
                         std::string const & configFile,
                         std::size_t udpPort )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )

@@ -16,15 +16,15 @@ namespace visr
 namespace signalflows
 {
 
-class GainMatrix: public ril::CompositeComponent
+class GainMatrix: public CompositeComponent
 {
 public:
-  explicit GainMatrix( ril::SignalFlowContext & context,
+  explicit GainMatrix( SignalFlowContext & context,
                        const char * name,
-                       ril::CompositeComponent * parent,
+                       CompositeComponent * parent,
                        std::size_t numberOfInputs, 
                        std::size_t numberOfOutputs,
-                       efl::BasicMatrix<ril::SampleType> const & initialMatrix,
+                       efl::BasicMatrix<SampleType> const & initialMatrix,
                        std::size_t interpolationPeriod );
 
   ~GainMatrix();
@@ -40,9 +40,9 @@ private:
 
   rcl::GainMatrix mMatrix;
 
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

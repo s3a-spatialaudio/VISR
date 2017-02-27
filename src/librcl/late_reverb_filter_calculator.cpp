@@ -66,7 +66,7 @@ template efl::ErrorCode filterBiquad( double const * const input, double * const
  * TODO: Add biquad coefficient calculation library functions to the framework(based on RBJ's audio EQ cookbook formulas)
  * and calculate the filters on the fly.
  */
-static const pml::BiquadParameterList<ril::SampleType> cOctaveBandFilters={
+static const pml::BiquadParameterList<SampleType> cOctaveBandFilters={
  { 0.000016684780519f,  0.000033369561037f,  0.000016684780519f, -1.994164939377186f, 0.994231678499260f },
  { 0.005751740181735f,  0.000000000000000f, -0.005751740181735f, -1.988230335335583f, 0.988496519636531f },
  { 0.011437753858235f,  0.000000000000000f, -0.011437753858235f, -1.976065915069578f, 0.977124492283531f },
@@ -79,11 +79,11 @@ static const pml::BiquadParameterList<ril::SampleType> cOctaveBandFilters={
 
 } // unnamed namespace
 
-LateReverbFilterCalculator::LateReverbFilterCalculator( ril::SignalFlowContext& context,
+LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext& context,
                                                         char const * name,
-                                                        ril::CompositeComponent * parent /*= nullptr*/ )
+                                                        CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
- , mAlignment( ril::cVectorAlignmentSamples )
+ , mAlignment( cVectorAlignmentSamples )
  , mSubBandNoiseSequences( mAlignment )
  , mSubbandInput( "subbandInput", *this, pml::EmptyParameterConfig( ) )
  , mFilterOutput( "lateFilterOutput", *this, pml::EmptyParameterConfig( ) )
@@ -95,7 +95,7 @@ LateReverbFilterCalculator::~LateReverbFilterCalculator()
 }
 
 void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
-                                        ril::SampleType lateReflectionLengthSeconds,
+                                        SampleType lateReflectionLengthSeconds,
                                         std::size_t numLateReflectionSubBandLevels )
 {
   mNumberOfObjects = numberOfObjects;
@@ -109,8 +109,8 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
   // sequence to avoid any 'startup behaviour' of the IIR filter. The aligment magic is to allow us to use an aligned copy 
   // operation to store the cropped result of the filtering.
   std::size_t const noiseLength = mFilterLength + numberOfExtraSamples;
-  efl::BasicVector<ril::SampleType> noiseSequence( noiseLength, mAlignment );
-  efl::BasicVector<ril::SampleType> filteredSequence( noiseLength, mAlignment );
+  efl::BasicVector<SampleType> noiseSequence( noiseLength, mAlignment );
+  efl::BasicVector<SampleType> filteredSequence( noiseLength, mAlignment );
 
   if( cOctaveBandFilters.size() != mNumberOfSubBands )
   {
@@ -141,18 +141,18 @@ void LateReverbFilterCalculator::process( )
 {
   while( not mSubbandInput.empty() )
   {
-    pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> > const & val = mSubbandInput.front();
+    pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > const & val = mSubbandInput.front();
     if( val.index() >= mNumberOfObjects )
     {
       throw std::out_of_range( "LateReverbFilterCalculator: Object index out of range." );
     }
-    std::vector<ril::SampleType> newFilter( mFilterLength );
+    std::vector<SampleType> newFilter( mFilterLength );
 
     // As the check for parameter changes is done on the sending end, we do not need to do it here again
     // Anyway, this will not change the impulse responses, as the calculation is deterministic.
 // TODO: this does not work.
 //    calculateImpulseResponse( val.index(), val.value(), &newFilter[0], mFilterLength );
-    mFilterOutput.enqueue( pml::IndexedValueParameter<std::size_t, std::vector<ril::SampleType> >( val.index( ), newFilter ) );
+    mFilterOutput.enqueue( pml::IndexedValueParameter<std::size_t, std::vector<SampleType> >( val.index( ), newFilter ) );
     mSubbandInput.pop();
   }
 }
@@ -160,7 +160,7 @@ void LateReverbFilterCalculator::process( )
 void LateReverbFilterCalculator::
 calculateImpulseResponse( std::size_t objectIdx,
                           objectmodel::PointSourceWithReverb::LateReverb const & lateParams,
-                          ril::SampleType * ir,
+                          SampleType * ir,
                           std::size_t irLength, std::size_t alignment /*= 0*/ )
 {
   try
@@ -171,7 +171,7 @@ calculateImpulseResponse( std::size_t objectIdx,
       throw std::runtime_error( "LateReverbFilterCalculator::calculateImpulseResponse(): the passed filter buffer is too short.");
     }
     // Could be a member allocated in setup.
-    efl::BasicVector<ril::SampleType> envelope( mFilterLength, mAlignment );
+    efl::BasicVector<SampleType> envelope( mFilterLength, mAlignment );
 
     // Do whatever needed to calculate the reverb filter
     // for each subband.
@@ -180,7 +180,7 @@ calculateImpulseResponse( std::size_t objectIdx,
       // Create an envelope.
       createEnvelope( mFilterLength, envelope.data(), lateParams.onsetDelay(),
                       lateParams.levels()[subBandIdx], lateParams.attackTimes()[subBandIdx],
-                      lateParams.decayCoeffs()[subBandIdx], static_cast<ril::SampleType>(samplingFrequency()) );
+                      lateParams.decayCoeffs()[subBandIdx], static_cast<SampleType>(samplingFrequency()) );
 
       // multiply the sequence with the envelope and add them together
       efl::ErrorCode res;
@@ -222,20 +222,20 @@ calculateImpulseResponse( std::size_t objectIdx,
 * @param alignment Alignment of the \p data buffer (in number of elements)
 */
 /*static*/ void LateReverbFilterCalculator::createWhiteNoiseSequence( std::size_t numSamples,
-                                                                      ril::SampleType* data,
+                                                                      SampleType* data,
                                                                       std::size_t alignment )
 {
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
+  std::uniform_real_distribution<SampleType> dis(-1.0f, 1.0f);
 
   for (std::size_t n = 0; n < numSamples; ++n) {
     data[n]=dis(gen);
   }
 }
 
-/*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, ril::SampleType const * const input, ril::SampleType * output,
-  pml::BiquadParameter<ril::SampleType> const & filter )
+/*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, SampleType const * const input, SampleType * output,
+  pml::BiquadParameter<SampleType> const & filter )
 {
 
   filterBiquad(input, output, numSamples, filter);
@@ -243,10 +243,10 @@ calculateImpulseResponse( std::size_t objectIdx,
 }
 
 
-/*static*/ void LateReverbFilterCalculator::createEnvelope( std::size_t numSamples, ril::SampleType* data,
-                                                            ril::SampleType initialDelay, ril::SampleType gain,
-                                                            ril::SampleType attackCoeff, ril::SampleType decayCoeff,
-                                                            ril::SampleType samplingFrequency )
+/*static*/ void LateReverbFilterCalculator::createEnvelope( std::size_t numSamples, SampleType* data,
+                                                            SampleType initialDelay, SampleType gain,
+                                                            SampleType attackCoeff, SampleType decayCoeff,
+                                                            SampleType samplingFrequency )
 {
   // initialDelay in seconds sets leading zeros
   // attackCoeff in seconds is the length of the onset ramp
@@ -254,7 +254,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 
   std::size_t const initialDelaySamples = static_cast<std::size_t>(std::round( initialDelay*samplingFrequency ));
   std::size_t attackCoeffSamples = static_cast<std::size_t>(std::round( attackCoeff*samplingFrequency ));
-  ril::SampleType decayCoeffSamples = decayCoeff/static_cast<ril::SampleType>(samplingFrequency);
+  SampleType decayCoeffSamples = decayCoeff/static_cast<SampleType>(samplingFrequency);
   
   if( initialDelaySamples >= numSamples || initialDelaySamples+attackCoeffSamples >= numSamples )
   {
@@ -267,11 +267,11 @@ calculateImpulseResponse( std::size_t objectIdx,
   }
   for( std::size_t n = initialDelaySamples; n < attackCoeffSamples + initialDelaySamples; ++n )
   { // linear increase up to max
-    data[n] = gain * (static_cast<ril::SampleType>(n - initialDelaySamples) / static_cast<ril::SampleType>(attackCoeffSamples));
+    data[n] = gain * (static_cast<SampleType>(n - initialDelaySamples) / static_cast<SampleType>(attackCoeffSamples));
   }
   for( std::size_t n = attackCoeffSamples + initialDelaySamples; n < numSamples; ++n )
   { // exponential decay to end of envelope
-    ril::SampleType const decay = gain * std::exp( decayCoeffSamples*(n - attackCoeffSamples - initialDelaySamples) );
+    SampleType const decay = gain * std::exp( decayCoeffSamples*(n - attackCoeffSamples - initialDelaySamples) );
     data[n] = decay;
   }
 }
