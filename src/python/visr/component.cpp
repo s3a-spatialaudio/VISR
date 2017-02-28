@@ -24,28 +24,13 @@ namespace visr
 
 #ifdef USE_PYBIND11
 
-class ComponentWrapper: public Component
-{
-public:
-  /**
-   * Use the constructors of the base class
-   */
-  using Component::Component;
-
-  bool isComposite() const override
-  {
-    PYBIND11_OVERLOAD_PURE( bool, Component, isComposite, );
-  }
-
-};
-
 void exportComponent( pybind11::module& m )
 {
-  pybind11::class_<Component, ComponentWrapper>( m, "Component", pybind11::metaclass() ) 
+  pybind11::class_<Component>( m, "Component", pybind11::metaclass() ) 
     // Note: 'metaclass' required for static properties
     .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
-    .def_readonly_static( "nameSeparator", &Component::cNameSeparator )
+    .def_property_readonly_static( "nameSeparator", &Component::nameSeparator )
     .def_property_readonly( "name", &Component::name )
     .def_property_readonly( "fullName", &Component::fullName, pybind11::return_value_policy::reference )
     .def( "isComposite", &Component::isComposite )
