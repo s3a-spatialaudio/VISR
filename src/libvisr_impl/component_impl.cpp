@@ -50,6 +50,8 @@ Component::~Component()
   }
 }
 
+/*static*/ const std::string Component::cNameSeparator = ":";
+
 std::string const & Component::name() const
 { 
   return mName;
@@ -57,23 +59,22 @@ std::string const & Component::name() const
 
 std::string Component::fullName() const
 {
-  if( isTopLevel() or mParent->composite().isTopLevel() )
+  if( isTopLevel() or mParent->isTopLevel() )
   {
     return name();
   }
   else
   {
-    return mParent->composite().fullName() + visr::Component::cNameSeparator + name();
+    return mParent->fullName() + cNameSeparator + name();
   }
 }
 
-bool Component::isComposite() const
+/*virtual*/ bool Component::isComposite() const
 {
-  // See comment in class definition whether this is the right way to do this (or whether
-  // this should be kept out of the externally visible Component object).
-  return component().isComposite();
+  return false;
 }
-  
+
+
 Component::AudioPortContainer const&
 Component::getAudioPortList()  const
 {

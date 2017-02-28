@@ -3,6 +3,8 @@
 #ifndef VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 #define VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
+#include "component_impl.hpp"
+
 #include "audio_connection_descriptor.hpp"
 #include "parameter_connection_descriptor.hpp"
 
@@ -18,15 +20,20 @@ class Component;
 namespace impl
 {
 
-class CompositeComponent
+class CompositeComponent: public impl::Component
 {
 public:
   using ComponentTable = std::map<std::string, impl::Component * >;
 
-  explicit CompositeComponent( visr::CompositeComponent & component )
-    : mComponent( component )
+  explicit CompositeComponent( visr::CompositeComponent & component,
+                               SignalFlowContext& context,
+                               char const * componentName,
+                               impl::CompositeComponent * parent )
+    : impl::Component( component, context, componentName, parent )
   {
   }
+
+  bool isComposite() const final;
 
   /**
    * Register a child component 
@@ -104,15 +111,7 @@ public:
 
   ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
 
-  visr::CompositeComponent & composite() { return mComponent; }
-
-  visr::CompositeComponent const & composite() const { return mComponent; }
 private:
-  
-  /**
-  * Reference to the component itself (needed because sometimes the component itself needs to be returned).
-  */
-  visr::CompositeComponent & mComponent;
 
   ComponentTable mComponents;
 

@@ -62,7 +62,7 @@ public:
   /**
    * Separator used to form hierarchical names.
    */
-  static const std::string cNameSeparator;
+  static const std::string & nameSeparator();
 
   /**
    * Destructor (virtual)
@@ -83,7 +83,7 @@ public:
    * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
    * functionality) or a composite consisting of an interconnection of atomic (or further composite) components.
    */
-  virtual bool isComposite() const = 0;
+  bool isComposite() const;
 
   AudioPortBase& audioPort( char const * portName );
 
@@ -135,7 +135,20 @@ protected:
   SignalFlowContext & context();
   SignalFlowContext const & context( ) const;
 
+protected:
+  /**
+   * Constructor that receives the internal implementation object.
+   * This overload has to be called by the other constructors (including those of subclasses) to make 
+   * sure that the implementation object is instantiated.
+   * The motivation for this constructor is to provide different implementation objects for different subclasses.
+   */
+  explicit Component( std::unique_ptr<impl::Component> && impl );
+
 private:
+  /**
+   * Pointer to the private implementation object.
+   * The type of the impl object might differ due to the actual type of the component.
+   */
   std::unique_ptr<impl::Component> mImpl;
 };
 

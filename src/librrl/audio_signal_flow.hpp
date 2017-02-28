@@ -23,10 +23,14 @@ namespace visr
 class AtomicComponent;
 class AudioInput;
 class AudioOutput;
-class Component;
-class CompositeComponent;
 class ParameterPortBase;
 class CommunicationProtocolBase;
+
+namespace impl
+{
+class Component;
+class CompositeComponent;
+}
 
 namespace rrl
 {
@@ -173,13 +177,13 @@ private:
    * Can be static or nonmember functions
    */
   //@{
-  static bool checkFlow( Component const & comp, bool locally, std::ostream & messages );
+  static bool checkFlow( impl::Component const & comp, bool locally, std::ostream & messages );
 
-  static bool checkCompositeLocal( CompositeComponent const & composite , std::ostream & messages );
+  static bool checkCompositeLocal( impl::CompositeComponent const & composite , std::ostream & messages );
 
-  static bool checkCompositeLocalAudio( CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalAudio( impl::CompositeComponent const & composite, std::ostream & messages );
 
-  static bool checkCompositeLocalParameters( CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalParameters( impl::CompositeComponent const & composite, std::ostream & messages );
   //@}
 
   /**
@@ -223,7 +227,7 @@ private:
    * The signal flow handled by this object.
    * Can be either an atomic or a (hierachical) composite component/
    */
-  Component & mFlow;
+  impl::Component & mFlow;
 
   /**
    * Flag stating whether the signal flow is fully initialised.

@@ -34,7 +34,7 @@ SchedulingGraph::SchedulingGraph()
 
 }
 
-void SchedulingGraph::initialise( Component const & flow, AudioConnectionMap const & connections,
+void SchedulingGraph::initialise( impl::Component const & flow, AudioConnectionMap const & connections,
                                   ParameterConnectionMap const & parameterConnections )
 {
   mDependencyGraph.clear();

@@ -48,12 +48,6 @@ public:
   ~CompositeComponent();
 
   /**
-   * Query whether this component is composite.
-   * @return true
-   */
-  virtual bool isComposite() const override;
-
-  /**
    * The number of contained components (not including the composite itself).
    * This method considers only atomic and composite components at the next level,
    * i.e., not recursively.
@@ -108,9 +102,7 @@ public:
 
   void registerAudioConnection( AudioPortBase & sendPort,
                                 AudioPortBase & receivePort );
-
 private:
-  std::unique_ptr<impl::CompositeComponent> mImpl;
 };
 
 } // namespace visr

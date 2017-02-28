@@ -15,15 +15,19 @@
 namespace visr
 {
 // Forward declarations
-class Component;
 class ParameterPortBase;
+
+namespace impl
+{
+class Component;
+}
 
 namespace rrl
 {
 
 using ParameterConnectionMap = std::multimap< ParameterPortBase *, ParameterPortBase * >;
 
-bool fillRecursive( ParameterConnectionMap & res, Component const & component,
+bool fillRecursive( ParameterConnectionMap & res, impl::Component const & component,
                     std::ostream & messages );
 
 ParameterConnectionMap resolvePlaceholders( ParameterConnectionMap const & fullConnections );

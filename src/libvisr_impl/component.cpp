@@ -16,16 +16,16 @@
 namespace visr
 {
 
-/**
- * @TODO: Move separator to a centralised location.
- */
-/*static*/ const std::string Component::cNameSeparator = "::";
+Component::Component( std::unique_ptr<impl::Component> && impl )
+  : mImpl( std::move(impl) )
+{
+}
 
 Component::Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent)
- : mImpl( new impl::Component( *this, context, componentName,
-                               parent == nullptr ? nullptr : &(parent->implementation()) ) )
+ : Component( std::unique_ptr<impl::Component>(new impl::Component( *this, context, componentName,
+              parent == nullptr ? nullptr : &(parent->implementation()) ) ) )
 {
 }
 
@@ -38,6 +38,11 @@ Component::Component( SignalFlowContext& context,
 
 Component::~Component()
 {
+}
+
+/*static*/ std::string const & Component::nameSeparator()
+{
+  return impl::Component::cNameSeparator;
 }
 
 std::string const & Component::name() const
@@ -55,6 +60,12 @@ bool Component::isTopLevel() const
 {
   return mImpl->isTopLevel();
 }
+
+bool Component::isComposite() const
+{
+  return mImpl->isComposite();
+}
+
 
 AudioPortBase& Component::audioPort( char const * portName )
 {

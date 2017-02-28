@@ -21,8 +21,10 @@ namespace visr
 {
 // Forward declarations
 class AtomicComponent;
+namespace impl
+{
 class Component;
-class AudioPort;
+}
 
 namespace rrl
 {
@@ -40,7 +42,7 @@ public:
    */
   ~SchedulingGraph();
 
-  void initialise( Component const & flow,
+  void initialise( impl::Component const & flow,
                    AudioConnectionMap const & audioConnections,
                    ParameterConnectionMap const & parameterConnections );
 

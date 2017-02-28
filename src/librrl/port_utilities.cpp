@@ -123,12 +123,10 @@ void PortLookup<PortType>::traverseComponent( impl::Component const & comp, bool
   }
   if( comp.isComposite() )
   {
-    CompositeComponent const & composite = dynamic_cast<CompositeComponent const &>(comp.component() );
-    // Get the 'implementation' object that holds the tables to ports and contained components.
-    impl::CompositeComponent const & compositeImpl = composite.implementation();
+    impl::CompositeComponent const & composite = dynamic_cast<impl::CompositeComponent const &>(comp );
     // Add the ports of the contained components (without descending into the hierarchy)
-    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
-      compIt != compositeImpl.componentEnd(); ++compIt )
+    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+      compIt != composite.componentEnd(); ++compIt )
     {
       traverseComponent( *(compIt->second), recurse );
     }

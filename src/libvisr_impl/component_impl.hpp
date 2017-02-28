@@ -53,6 +53,8 @@ public:
    */
   virtual ~Component();
 
+  static const std::string cNameSeparator;
+
   /**
    * Return the 'local', non-hierarchical name.
    */
@@ -69,7 +71,7 @@ public:
    * class hierarchy of the externally visible components is the right way to go,
    * or whether this information should be held local in the internal object.
    */
-  bool isComposite() const;
+  virtual bool isComposite() const;
 
   /**
    * Return the sampling frequency of the containing signal flow.
@@ -205,7 +207,9 @@ public:
   bool isTopLevel() const { return mParent == nullptr; }
 
   /**
-   * TODO: Check: where this is required after restructuring.
+   * Return a reference to the externally visible part of the component.
+   * This is required for atomic components to have their (overridden) process() method called.
+   * @todo Maybe implement a separate impl::AtomicComponent class for that
    */
   //@{
   visr::Component & component() { return mComponent; }

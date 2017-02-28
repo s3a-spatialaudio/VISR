@@ -16,9 +16,4 @@ AtomicComponent::~AtomicComponent()
 {
 }
 
-bool AtomicComponent::isComposite() const
-{
-  return false;
-}
-
 } // namespace visr

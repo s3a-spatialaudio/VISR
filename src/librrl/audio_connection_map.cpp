@@ -72,7 +72,7 @@ AudioConnectionMap::AudioConnectionMap()
 {
 }
 
-AudioConnectionMap::AudioConnectionMap( Component const & component,
+AudioConnectionMap::AudioConnectionMap( impl::Component const & component,
                                         bool recursive /*= false */ )
 {
   std::stringstream messages;
@@ -82,7 +82,7 @@ AudioConnectionMap::AudioConnectionMap( Component const & component,
   }
 }
 
-bool AudioConnectionMap::fill( Component const & component,
+bool AudioConnectionMap::fill( impl::Component const & component,
                                std::ostream & messages,
                                bool recursive /*= false*/ )
 {
@@ -90,7 +90,7 @@ bool AudioConnectionMap::fill( Component const & component,
   return fillRecursive( component, messages, recursive );
 }
 
-bool AudioConnectionMap::fillRecursive( Component const & component,
+bool AudioConnectionMap::fillRecursive( impl::Component const & component,
                                         std::ostream & messages,
                                         bool recursive /*= false */ )
 {
@@ -104,18 +104,13 @@ bool AudioConnectionMap::fillRecursive( Component const & component,
   {
     return true;
   }
-  CompositeComponent const & composite = dynamic_cast<CompositeComponent const &>(component);
+  impl::CompositeComponent const & composite = dynamic_cast<impl::CompositeComponent const &>(component);
   // this could be moved to the PortLookup functionality.
-
-  // Get the 'implementation' object that holds the tables to contained components and connections.
-  impl::CompositeComponent const & compositeImpl = composite.implementation();
-  // Get the 'internal' object of the component that holds the audio port tables.
-  impl::Component const & componentInternal = composite.Component::implementation(); // TODO: Resolve this name clash (ideally there should not be two implementation objects).
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( impl::Component::PortContainer<AudioPortBase>::const_iterator extPortIt = componentInternal.portBegin<AudioPortBase>();
-    extPortIt != componentInternal.portEnd<AudioPortBase>(); ++extPortIt )
+  for( impl::Component::PortContainer<AudioPortBase>::const_iterator extPortIt = component.portBegin<AudioPortBase>();
+    extPortIt != component.portEnd<AudioPortBase>(); ++extPortIt )
   {
     if( (*extPortIt)->direction() == AudioPortBase::Direction::Input )
     {
@@ -127,10 +122,9 @@ bool AudioConnectionMap::fillRecursive( Component const & component,
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
-    compIt != compositeImpl.componentEnd(); ++compIt )
+  for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+    compIt != composite.componentEnd(); ++compIt )
   {
-//    Component const & containedComponent = *(compIt->second);
     // Get the 'internal' object of the component that holds the audio port tables.
     impl::Component const & containedComponentInternal = *(compIt->second);
 
@@ -147,8 +141,8 @@ bool AudioConnectionMap::fillRecursive( Component const & component,
       }
     }
   }
-  for( impl::AudioConnectionTable::const_iterator connIt = compositeImpl.audioConnectionBegin();
-    connIt != compositeImpl.audioConnectionEnd(); ++connIt )
+  for( impl::AudioConnectionTable::const_iterator connIt = composite.audioConnectionBegin();
+    connIt != composite.audioConnectionEnd(); ++connIt )
   {
     impl::AudioConnection const connection = *connIt;
     if( sendPorts.find( connection.sender() ) == sendPorts.end() )
@@ -206,10 +200,10 @@ bool AudioConnectionMap::fillRecursive( Component const & component,
   }
   if( recursive )
   {
-    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
-      compIt != compositeImpl.componentEnd(); ++compIt )
+    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+      compIt != composite.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( (compIt->second)->component(), messages, true );
+      result = result and fillRecursive( *(compIt->second), messages, true );
     }
   }
   return result;

@@ -38,7 +38,7 @@ namespace rrl
 {
 
 AudioSignalFlow::AudioSignalFlow( Component & flow )
- : mFlow( flow )
+ : mFlow( flow.implementation() )
  , mInitialised( false )
 {
   std::stringstream checkMessages;
@@ -343,7 +343,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   }
 
   // Check whether all ports have been connected.
-  PortLookup<ParameterPortBase> allPorts( mFlow.implementation() );
+  PortLookup<ParameterPortBase> allPorts( mFlow );
   PortLookup<ParameterPortBase>::PortTable allSendPorts( allPorts.externalCapturePorts() );
   allSendPorts.insert( allPorts.realSendPorts().begin(), allPorts.realSendPorts().end() );
   for( ParameterPortBase const * const port : allSendPorts )
@@ -402,27 +402,24 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 }
 
 
-bool AudioSignalFlow::checkFlow( Component const & comp, bool locally, std::ostream & messages )
+bool AudioSignalFlow::checkFlow( impl::Component const & comp, bool locally, std::ostream & messages )
 {
   if( not comp.isComposite() )
   {
     return true;
   }
-  CompositeComponent const & composite = dynamic_cast<CompositeComponent const &>( comp );
-  // Get the 'implementation' object that holds the tables to ports and contained components.
-  impl::CompositeComponent const & compositeImpl = composite.implementation();
-
+  impl::CompositeComponent const & composite = dynamic_cast<impl::CompositeComponent const &>( comp );
 
   // First, check the connections level by level
   if( locally )
   {
     bool const localResult = checkCompositeLocal( composite, messages );
     bool overallResult = localResult;
-    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin( ) );
-      compIt != compositeImpl.componentEnd( ); ++compIt )
+    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin( ) );
+      compIt != composite.componentEnd( ); ++compIt )
     {
       // TODO: Check whether we should work on the internal objects instead.
-      bool const compRes = checkFlow( compIt->second->component(), locally, messages );
+      bool const compRes = checkFlow( *(compIt->second), locally, messages );
       overallResult = overallResult and compRes;
     }
     return overallResult;
@@ -435,28 +432,24 @@ bool AudioSignalFlow::checkFlow( Component const & comp, bool locally, std::ostr
   }
 }
 
-bool AudioSignalFlow::checkCompositeLocal( CompositeComponent const & composite, std::ostream & messages )
+bool AudioSignalFlow::checkCompositeLocal( impl::CompositeComponent const & composite, std::ostream & messages )
 {
   bool const audioCheck = checkCompositeLocalAudio( composite, messages );
   bool const paramCheck = checkCompositeLocalParameters( composite, messages );
   return audioCheck and paramCheck;
 }
 
-bool AudioSignalFlow::checkCompositeLocalAudio( CompositeComponent const & composite, std::ostream & messages )
+bool AudioSignalFlow::checkCompositeLocalAudio( impl::CompositeComponent const & composite, std::ostream & messages )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
   using PortTable = std::set<AudioPortBase const*>;
   PortTable sendPorts;
   PortTable receivePorts;
 
-  // Get the 'implementation' object that holds the tables to ports and contained components.
-  // TODO: Should we pass the 'implementation' object instead?
-  impl::CompositeComponent const & compositeImpl = composite.implementation();
-
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( impl::Component::AudioPortContainer::const_iterator extPortIt = composite.Component::implementation().audioPortBegin(); // TODO: Get rif of "Component::"
-       extPortIt != composite.Component::implementation().audioPortEnd(); ++extPortIt )  // TODO: Get rif of "Component::"
+  for( impl::Component::AudioPortContainer::const_iterator extPortIt = composite.audioPortBegin();
+       extPortIt != composite.audioPortEnd(); ++extPortIt )
   {
     if( (*extPortIt)->direction() == AudioPortBase::Direction::Input )
     {
@@ -468,8 +461,8 @@ bool AudioSignalFlow::checkCompositeLocalAudio( CompositeComponent const & compo
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( impl::CompositeComponent::ComponentTable::const_iterator compIt( compositeImpl.componentBegin());
-       compIt != compositeImpl.componentEnd(); ++compIt )
+  for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin());
+       compIt != composite.componentEnd(); ++compIt )
   {
     impl::Component const * containedComponent = compIt->second;
     for( auto port : containedComponent->ports<AudioPortBase>() )
@@ -538,7 +531,7 @@ bool AudioSignalFlow::checkCompositeLocalAudio( CompositeComponent const & compo
   return result;
 }
 
-bool AudioSignalFlow::checkCompositeLocalParameters( CompositeComponent const & composite, std::ostream & messages )
+bool AudioSignalFlow::checkCompositeLocalParameters( impl::CompositeComponent const & composite, std::ostream & messages )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
   using PortTable = std::set<ParameterPortBase const*>;
@@ -550,7 +543,7 @@ bool AudioSignalFlow::checkCompositeLocalParameters( CompositeComponent const & 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
 #if 1
-  for( auto port : composite.Component::implementation().ports<ParameterPortBase>() )   // TODO: Get rif of "Component::"
+  for( auto port : composite.ports<ParameterPortBase>() )
   {
     (port->direction() == ParameterPortBase::Direction::Input) ?
      sendPorts.insert( port ) : receivePorts.insert( port );
@@ -570,7 +563,7 @@ bool AudioSignalFlow::checkCompositeLocalParameters( CompositeComponent const & 
 #endif
   // Add the ports of the contained components (without descending into the hierarchy)
 #if 1
-  for( auto port : composite.Component::implementation().ports<ParameterPortBase>() )  // TODO: Get rif of "Component::"
+  for( auto port : composite.ports<ParameterPortBase>() )
   {
     (port->direction() == ParameterPortBase::Direction::Input ) ?
       receivePorts.insert( port ) : sendPorts.insert( port );
@@ -630,7 +623,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   mCaptureIndices.clear();
   mPlaybackIndices.clear();
   bool result = true; // Result variable, is set to false if an error occurs.
-  PortLookup<AudioPortBase> const portLookup( mFlow.implementation(), true /*recursive*/ );
+  PortLookup<AudioPortBase> const portLookup( mFlow, true /*recursive*/ );
 
   // Compute the number of audio channels for the different categories that are kept in the communicatio area.
   //  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );
@@ -775,7 +768,8 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
       playbackIndexOffset += playbackPort->width();
     }
 
-    AtomicComponent * atom = static_cast<AtomicComponent *>( &mFlow );
+    // This actual requires a back link from the implementation object to the actual (subclassed) atom.
+    AtomicComponent * atom = static_cast<AtomicComponent *>( &(mFlow.component()) );
     mProcessingSchedule.clear();
     mProcessingSchedule.push_back( atom );
   } 

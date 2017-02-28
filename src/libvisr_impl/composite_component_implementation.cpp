@@ -17,6 +17,11 @@ namespace visr
 namespace impl
 {
 
+/*virtual*/ bool CompositeComponent::isComposite() const
+{
+  return true;
+}
+
 void CompositeComponent::registerChildComponent( std::string const & name, impl::Component * child )
 {
   ComponentTable::iterator findComp = mComponents.find( name );
@@ -57,7 +62,7 @@ impl::Component * CompositeComponent::findComponent( std::string const & compone
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
     // TODO: Remove this hack (there should not be two separate implementation objects!)
-    return &(composite().Component::implementation());
+    return this;
   }
   ComponentTable::iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )
@@ -72,7 +77,7 @@ impl::Component const * CompositeComponent::findComponent( std::string const & c
   if( componentName.empty() or componentName.compare( "this" ) == 0 )
   {
     // TODO: Remove this hack (there should not be two separate implementation objects!)
-    return &(composite().Component::implementation());
+    return this;
   }
   ComponentTable::const_iterator findIt = mComponents.find( componentName );
   if( findIt == mComponents.end() )

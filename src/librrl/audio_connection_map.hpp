@@ -16,9 +16,14 @@ namespace visr
 {
 
 // Forward declarations
-class AtomicComponent;
-class Component;
+// class AtomicComponent;
+// class Component;
 class AudioPortBase;
+
+namespace impl
+{
+class Component;
+}
 
 namespace rrl
 {
@@ -79,10 +84,10 @@ public:
    */
   AudioConnectionMap();
 
-  explicit AudioConnectionMap( Component const & component,
+  explicit AudioConnectionMap( impl::Component const & component,
                                bool recursive = false );
 
-  bool fill( Component const & component,
+  bool fill( impl::Component const & component,
              std::ostream & messages,
              bool recursive = false );
 
@@ -110,7 +115,7 @@ public:
    */
   void resolvePlaceholders( AudioConnectionMap const & fullConnections );
 private:
-  bool fillRecursive( Component const & component,
+  bool fillRecursive( impl::Component const & component,
                       std::ostream & messages,
                       bool recursive );
 
