@@ -17,7 +17,7 @@ class SignalFlowContext;
 
 namespace impl
 {
-class CompositeComponent;
+class CompositeComponentImplementation;
 }
 
 /**
@@ -59,14 +59,14 @@ public:
    * From the user point of view, these data structure is opaque and unknown.
    * @todo Improve name ('implementation' does not really fit)
    */
-  impl::CompositeComponent & implementation();
+  impl::CompositeComponentImplementation & implementation();
 
   /**
   * Return a reference to the internal data structures holding ports and contained components, const version.
   * From the user point of view, these data structure is opaque and unknown.
   * @todo Improve name ('implementation' does not really fit)
   */
-  impl::CompositeComponent const & implementation() const;
+  impl::CompositeComponentImplementation const & implementation() const;
 
 // protected:
 

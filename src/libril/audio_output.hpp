@@ -5,60 +5,74 @@
 
 #include "audio_port_base.hpp"
 
+#include "audio_sample_type.hpp"
+
 namespace visr
 {
+  class AudioOutputBase: public AudioPortBase
+  {
+  public:
+    AudioOutputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
 
-// @todo: Rethink about public or protected inheritance (whether we want to use some kind of (static) polymorphism to access inputs and outpuits in a uniform way.
-class AudioOutput: public AudioPortBase
-{
-public:
-  explicit AudioOutput( char const * portName,
-                        Component& container );
+    virtual ~AudioOutputBase() override;
+  };
 
-  ~AudioOutput();
+  template<typename DataType>
+  class AudioOutputT: public AudioOutputBase
+  {
+  public:
+    AudioOutputT( char const * name, Component & container, std::size_t width = 0 )
+      : AudioOutputBase( name, container, AudioSampleType::TypeToId<DataType>::id, width )
+    {
+    }
+
+    virtual ~AudioOutputT() override = default;
+
+    std::size_t channelStrideBytes() const { return channelStrideSamples() * sizeof( DataType ); }
+
+    DataType * base() { return static_cast<DataType * >(AudioPortBase::basePointer()); }
+
+    DataType * at( std::size_t idx )
+    {
+      if( idx >= width() )
+      {
+        throw std::out_of_range( "AudioOutput::at() exceeds port width." );
+      }
+      return operator[]( idx );
+    }
+
+    DataType * operator[]( std::size_t idx )
+    {
+      // TODO: This is not working properly!
+      // return static_cast<DataType * >(base());
+      return base() + idx * channelStrideSamples();
+    }
+
+    /**
+    * Write the channel pointers of all contained elements to an output iterator.
+    * The container that is pointed to by \p outIt must provide space for at least \p width() elements.
+    * @tparam OutputIterator a type fulfilling the OutputIterator concept that accepts assignement of \p DataType const * values.
+    * @param outIt the output iterator to be written to.
+    * @return An output iterator pointing to the element behind the last inserted element.
+    */
+    template< class OutputIterator >
+    OutputIterator getChannelPointers( OutputIterator outIt )
+    {
+      std::size_t const wd( width() );
+      std::size_t const stride( channelStrideSamples() );
+      DataType * ptr( base() );
+      for( std::size_t chIdx( 0 ); chIdx < wd; ++chIdx, ptr += stride, ++outIt )
+      {
+        *outIt = ptr;
+      }
+      return outIt;
+    }
+  };
 
   /**
-   * Element-access interface to be used by derived audio components
+   * Non-templated audio output using the default sample type
    */
-  //@{
-  
-  //@}
-  SampleType * operator[]( std::size_t index )
-  {
-#if 0 // #ifndef NDEBUG
-    if( !initialised( ) ) {
-      throw std::logic_error( "Element access forbidden while the flow is not initialised" );
-    }
-#endif
-    const SignalIndexType commIndex = indices( )[index];
-	return mAudioBasePtr + commIndex * mAudioChannelStride;
-  }
-
-  SampleType * at( std::size_t index )
-  {
-    if( index >= width( ) ) {
-      throw std::out_of_range( "Index exceeds the number of signals" );
-    }
-    return operator[]( index );
-  }
-
-  SampleType * const * getVector( )
-  {
-#if 0 // #ifndef NDEBUG
-    if( !initialised( ) ) {
-      throw std::logic_error( "Element access forbidden while the flow is not initialised" );
-    }
-#endif
-    SampleType * * ptrArray = signalPointers( );
-    for( std::size_t runIndex( 0 ); runIndex < width( ); ++runIndex )
-	{
-      // TODO: sort out the const_cast issue later on!
-      ptrArray[runIndex] = const_cast<SampleType*>(operator[](runIndex));
-    }
-    return ptrArray;
-  }
-private:
-};
+  using AudioOutput = AudioOutputT<SampleType>;
 
 } // namespace visr
 

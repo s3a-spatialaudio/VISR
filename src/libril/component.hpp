@@ -20,7 +20,7 @@ class SignalFlowContext;
 
 namespace impl
 {
-class Component;
+class ComponentImplementation;
 }
 
 /**
@@ -126,9 +126,9 @@ public:
    */
   bool isTopLevel() const;
 
-  impl::Component & implementation();
+  impl::ComponentImplementation & implementation();
 
-  impl::Component const & implementation() const;
+  impl::ComponentImplementation const & implementation() const;
 
 protected:
 
@@ -142,14 +142,14 @@ protected:
    * sure that the implementation object is instantiated.
    * The motivation for this constructor is to provide different implementation objects for different subclasses.
    */
-  explicit Component( std::unique_ptr<impl::Component> && impl );
+  explicit Component( std::unique_ptr<impl::ComponentImplementation> && impl );
 
 private:
   /**
    * Pointer to the private implementation object.
    * The type of the impl object might differ due to the actual type of the component.
    */
-  std::unique_ptr<impl::Component> mImpl;
+  std::unique_ptr<impl::ComponentImplementation> mImpl;
 };
 
 } // namespace visr

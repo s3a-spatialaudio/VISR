@@ -6,6 +6,7 @@ atomic_component.hpp
 audio_input.hpp
 audio_output.hpp
 audio_port_base.hpp
+audio_sample_type.hpp
 channel_list.hpp
 communication_protocol_base.hpp 
 communication_protocol_type.hpp 

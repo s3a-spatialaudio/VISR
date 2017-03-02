@@ -32,7 +32,7 @@ namespace visr
 class ParameterBase;
 class ParameterConfigBase;
 
-VISR_CORE_LIBRARY_SYMBOL
+/*VISR_CORE_LIBRARY_SYMBOL*/ // TODO: Get the library symbol exporting right later on.
 class CommunicationProtocolFactory
 {
 public:
