@@ -14,6 +14,7 @@
 #include <libpml/biquad_parameter.hpp>
 
 #include <cstddef> // for std::size_t
+#include <valarray>
 
 namespace visr
 {
@@ -192,6 +193,13 @@ private:
   efl::BasicVector<SampleType> mCurrentInput;
   efl::BasicVector<SampleType> mCurrentOutput;
   //@}
+
+  /**
+   * Temporary storage to hold the pointers of all input channels.
+   * This is sensible at the moment as the data is processed sample-wise, which makes repeated index access costly.
+   * @todo Consider change to a stride-based access to the input port data.
+   */
+  std::valarray<SampleType const * > mInputChannels;
 };
 
 } // namespace rcl

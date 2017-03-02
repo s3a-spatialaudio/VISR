@@ -15,6 +15,7 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -123,6 +124,16 @@ private:
    * The audio output port for this component.
    */
   AudioOutput mOutput;
+
+  /**
+   * Vectors to the channel pointers of the input and output ports.
+   * They are required by the interface of the contained rbbl::MultiChannelConvolverUniform class.
+   * @todo Consider (optional) stride-based interface for rbbl::MultiChannelConvolverUniform.
+   */
+  //@{
+  std::valarray<SampleType const *> mInputChannels;
+  std::valarray<SampleType * > mOutputChannels;
+  //@}
 
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mConvolver;
 };

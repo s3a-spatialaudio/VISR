@@ -48,13 +48,8 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
   mNumberOfOutputs = numberOfOutputs;
   mInput.setWidth( 1 );
   mOutput.setWidth( mNumberOfOutputs );
+  mOutputChannels.resize( mNumberOfOutputs, nullptr );
 
-#ifndef DIFFUSION_USE_FAST_CONVOLVER
-  mGainAdjustments.resize( mNumberOfOutputs );
-  mGainAdjustments.copy( gainAdjustments );
-#endif
-
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
   std::size_t const filterLength = diffusionFilters.numberOfColumns();
   pml::FilterRoutingList routings;
   for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; ++outIdx )
@@ -71,37 +66,6 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
     routings,
     diffusionFilters,
     cVectorAlignmentSamples ) );
-#else
-  if( period() % rbbl::FIR::nBlockSamples != 0 )
-  {
-    throw std::invalid_argument( "SingleToMultichannelDiffusion: The period is not an integer multiple of the hard-coded block size of the diffusion filter class." );
-  }
-  mDiffusionFilter.reset( new rbbl::FIR() );
-  if( mDiffusionFilter->setNumFIRs( static_cast<int>(mNumberOfOutputs) ) != 0 )
-  {
-    throw std::invalid_argument( "SingleToMultichannelDiffusion: Setting the number of filters failed." );
-  }
-  if( mDiffusionFilter->setNumFIRs( static_cast<int>(mNumberOfOutputs) ) != 0 )
-  {
-    throw std::invalid_argument( "SingleToMultichannelDiffusion: Setting the number of filters failed." );
-  }
-  if( mDiffusionFilter->setNumFIRsamples( static_cast<int>(diffusionFilters.numberOfColumns())) != 0 )
-  {
-    throw std::invalid_argument( "SingleToMultichannelDiffusion: Setting the filter length  failed." );
-  }
-  if( mDiffusionFilter->setUpsampleRatio( 1 ) != 0 ) // for the moment, the upsampling ratio is fixed.
-  {
-    throw std::invalid_argument( "SingleToMultichannelDiffusion: Setting the filter length  failed." );
-  }
-  mDiffusionFilter->loadFIRs( diffusionFilters );
-  mFilterOutputs.resize( mNumberOfOutputs, rbbl::FIR::nBlockSamples );
-#endif
-
-  mOutputPointers.resize( mNumberOfOutputs );
-#ifndef DIFFUSION_USE_FAST_CONVOLVER
-  std::size_t idx( 0 );
-  std::generate( mOutputPointers.begin(), mOutputPointers.end(), [&] { return mFilterOutputs.row(idx++); } );
-#endif
 }
 
 /**
@@ -124,45 +88,10 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
 void SingleToMultichannelDiffusion::process()
 {
   SampleType const * const input = mInput[ 0 ];
-  SampleType * const * outputVector = mOutput.getVector( );
+  mOutput.getChannelPointers( &mOutputChannels[0] );
 
 // Diffusion processing
-#if 1
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
-  mDiffusionFilter->process( &input, outputVector, cVectorAlignmentSamples );
-#else //  DIFFUSION_USE_FAST_CONVOLVER
-  std::size_t const blockSize = period();
-  // At the moment, the diffusion filter works with a fixed block size.
-  assert( period() % rbbl::FIR::nBlockSamples == 0 ); // was checked in setup()
-  for( std::size_t startSample( 0 ); startSample < blockSize; startSample += rbbl::FIR::nBlockSamples )
-  {
-    if( mDiffusionFilter->process( input + startSample, &mOutputPointers[0] ) != 0 )
-    {
-      throw std::runtime_error( "SingleToMultichannelDiffusion: Filtering operation failed." );
-    }
-    for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; outIdx++ )
-    {
-      efl::ErrorCode opRes = efl::vectorMultiplyConstant( mGainAdjustments[outIdx], mOutputPointers[outIdx],
-                             outputVector[outIdx]+startSample, rbbl::FIR::nBlockSamples, cVectorAlignmentSamples );
-      if( opRes != efl::noError )
-      {
-        throw std::runtime_error( "SingleToMultichannelDiffusion: Error while copying signals to the output channels." );
-      }
-    }
-  }
-#endif // DIFFUSION_USE_FAST_CONVOLVER
-
-#else  // No diffusion procesing, simply copy the input to all outputs.
-  for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; outIdx++ )
-  {
-    efl::ErrorCode opRes = efl::vectorMultiplyConstant( mGainAdjustments[outIdx], input, outputVector[outIdx],
-                                                        blockSize, cVectorAlignmentSamples );
-    if( opRes != efl::noError )
-    {
-      throw std::runtime_error( "SingleToMultichannelDiffusion: Error while copying signals to the output channels." );
-    }
-  }
-#endif
+  mDiffusionFilter->process( &input, &mOutputChannels[0], cVectorAlignmentSamples );
 }
 
 } // namespace rcl

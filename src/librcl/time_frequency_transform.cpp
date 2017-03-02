@@ -100,13 +100,14 @@ void TimeFrequencyTransform::setup( std::size_t numberOfChannels,
 
   mNumberOfChannels = numberOfChannels;
   mInput.setWidth( mNumberOfChannels );
+  mInputChannels.resize( mNumberOfChannels, nullptr );
   mOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "out", *this, tfParamConfig ) ) ;
 }
 
 void TimeFrequencyTransform::process()
 {
   pml::TimeFrequencyParameter<SampleType> & outMtx = mOutput->data();
-  mInputBuffer->write( mInput.getVector(), mNumberOfChannels, period(), cVectorAlignmentSamples );
+  mInputBuffer->write( &mInputChannels[0], mNumberOfChannels, period(), cVectorAlignmentSamples );
   for( std::size_t hopIndex( 0 ); hopIndex < mDftSamplesPerPeriod; ++hopIndex )
   {
     std::size_t const blockStartIndex = mWindowLength + (mDftSamplesPerPeriod - hopIndex - 1) * mHopSize;

@@ -14,17 +14,14 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
 namespace rbbl
 {
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
 template< typename SampleType >
 class MultichannelConvolverUniform;
-#else
-class FIR;
-#endif
 }
 
 namespace rcl
@@ -97,31 +94,16 @@ private:
    */
   std::size_t mNumberOfOutputs;
 
-#ifndef DIFFUSION_USE_FAST_CONVOLVER
   /**
-   * Gain adjustment levels (linear scale) for each output channel. 
+   * A one-to-N FIR filter for diffusion.
    */
-  efl::BasicVector<SampleType> mGainAdjustments;
-#endif
-
-  /**
-   * An one-to-N FIR filter for diffusion.
-   */
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mDiffusionFilter;
-#else
-  std::unique_ptr<rbbl::FIR> mDiffusionFilter;
-  /**
-   * Output matrix for the results of the filtering operation.
-   * @note Only needed with the rbbl::FIR class.
-   */
-  efl::BasicMatrix<SampleType> mFilterOutputs;
-#endif
 
   /**
-   * Buffer to hold the pointers into the output buffers for the filtering.
+   * Buffer to hold the pointers to the channels of the output port.
+   * @todo Change if the MultichannelConvolver class offers a stride-based interface
    */
-  std::vector<SampleType*> mOutputPointers;
+  std::valarray<SampleType*> mOutputChannels;
 };
 
 } // namespace rcl

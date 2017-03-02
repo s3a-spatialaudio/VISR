@@ -23,6 +23,7 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -98,10 +99,14 @@ private:
   AudioOutput mOutput;
 
   /**
-   * 
-   */
-  std::size_t mNumberOfInputs;
-  std::size_t mNumberOfOutputs;
+  * Vectors to the channel pointers of the input and output ports.
+  * They are required by the interface of the contained rbbl::GainMatrix class.
+  * @todo Consider (optional) stride-based interface for rbbl::GainMatrix.
+  */
+  //@{
+  std::valarray<SampleType const *> mInputChannels;
+  std::valarray<SampleType * > mOutputChannels;
+  //@}
 
   std::unique_ptr<ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
 };

@@ -85,6 +85,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
   // period() is used because the current samples must also fit into the buffer without overwriting the oldest data.
   std::size_t const ringbufferLength = maxDelaySamples + interpolationOrder + period( );
   mRingBuffer.reset( new rbbl::CircularBuffer<SampleType>( numberOfChannels, ringbufferLength, cVectorAlignmentSamples ));
+  mInputChannels.resize( numberOfChannels, nullptr );
 #else
   mRingbufferLength = static_cast<std::size_t>(std::ceil( static_cast<SampleType>(maxDelaySamples + interpolationOrder) / period( ) )) * period( );
   mRingBuffer.resize(numberOfChannels, mRingbufferLength ); // this also zeros the ring buffer
@@ -114,7 +115,9 @@ void DelayVector::process()
   std::size_t const blockLength = period();
 
 #ifdef USE_CIRCULAR_BUFFER
-  mRingBuffer->write( mInput.getVector(), mNumberOfChannels, blockLength );
+  mInput.getChannelPointers( &mInputChannels[0] );
+
+  mRingBuffer->write( &mInputChannels[0], mNumberOfChannels, blockLength );
   for( std::size_t idc = 0; idc < mNumberOfChannels; ++idc )
   {
     // Get a read pointer position relative to zero delay sample before the current block of data was written into the delay

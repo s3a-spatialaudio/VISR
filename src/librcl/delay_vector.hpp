@@ -11,6 +11,7 @@
 #include <libril/constants.hpp>
 
 #include <libefl/basic_vector.hpp>
+#include <valarray>
 
 #ifdef USE_CIRCULAR_BUFFER
 #include <librbbl/circular_buffer.hpp>
@@ -214,6 +215,15 @@ private:
    * The audio output port for this component.
    */
   AudioOutput mOutput;
+
+#ifdef USE_CIRCULAR_BUFFER
+  /**
+   * Vector to hold the pointers to input channel data.
+   * At the moment this is required because the implementing rbbl::CircularBuffer class requires this as input.
+   * @todo consider (additional) stride-based input format for rbbl::CircularBuffer
+   */
+  std::valarray<SampleType const * > mInputChannels;
+#endif
 
   /**
    * The number of simultaneous audio channels.

@@ -138,7 +138,7 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::process()
 {
-  SampleType const * const * inputVec = mInput.getVector();
+  mInput.getChannelPointers( &mInputChannels[0] );
 
   static const std::size_t cNumBiquadCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
   std::size_t const blockSamples = period( );
@@ -147,7 +147,7 @@ void BiquadIirFilter::process()
     // read the current input sample.
     for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
     {
-      mCurrentInput[channelIdx] = inputVec[channelIdx][sampleIdx];
+      mCurrentInput[channelIdx] = mInputChannels[channelIdx][sampleIdx];
     }
 
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
@@ -237,6 +237,7 @@ void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
 
   mInput.setWidth( mNumberOfChannels );
   mOutput.setWidth( mNumberOfChannels );
+  mInputChannels.resize( numberOfChannels, nullptr );
 }
 
 } // namespace rcl

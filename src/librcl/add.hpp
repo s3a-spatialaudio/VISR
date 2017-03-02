@@ -5,6 +5,7 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 
 #include <memory> // for std::unique_ptr
@@ -12,9 +13,6 @@
 
 namespace visr
 {
-// forward declarations
-class AudioInput;
-
 namespace rcl
 {
 
@@ -64,7 +62,7 @@ private:
   /**
    * A vector holding an arbitrary number of inputs
    */
-  std::vector<std::unique_ptr<AudioInput> > mInputs;
+  std::vector<std::unique_ptr< AudioInput > > mInputs;
 };
 
 } // namespace rcl

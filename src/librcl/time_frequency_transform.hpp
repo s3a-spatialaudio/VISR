@@ -17,6 +17,7 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -64,6 +65,12 @@ public:
 private:
 
   AudioInput mInput;
+
+  /**
+   * Buffer for teporary storage of the input channel pointers.
+   * @todo Change if the delay line supports an (optional) stride-based interface.
+   */
+  std::valarray<SampleType const *> mInputChannels;
 
   /**
    * Port is configured in the setup() 
