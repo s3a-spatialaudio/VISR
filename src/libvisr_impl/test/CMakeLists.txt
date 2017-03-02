@@ -4,6 +4,7 @@ SET( APPLICATION_NAME visr_impl_test )
 
 SET( SOURCES
 audio_connection_descriptor.cpp
+audio_sample_type.cpp
 component_names.cpp
 parameter_factory.cpp
 test_main.cpp

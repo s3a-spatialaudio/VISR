@@ -16,7 +16,7 @@
 namespace visr
 {
 
-Component::Component( std::unique_ptr<impl::Component> && impl )
+Component::Component( std::unique_ptr<impl::ComponentImplementation> && impl )
   : mImpl( std::move(impl) )
 {
 }
@@ -24,7 +24,7 @@ Component::Component( std::unique_ptr<impl::Component> && impl )
 Component::Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent)
- : Component( std::unique_ptr<impl::Component>(new impl::Component( *this, context, componentName,
+ : Component( std::unique_ptr<impl::ComponentImplementation>(new impl::ComponentImplementation( *this, context, componentName,
               parent == nullptr ? nullptr : &(parent->implementation()) ) ) )
 {
 }
@@ -32,7 +32,7 @@ Component::Component( SignalFlowContext& context,
 Component::Component( SignalFlowContext& context,
                       std::string const & componentName,
                       CompositeComponent * parent)
-: Component( context, componentName.c_str(), parent )
+ : Component( context, componentName.c_str(), parent )
 {
 }
 
@@ -42,7 +42,7 @@ Component::~Component()
 
 /*static*/ std::string const & Component::nameSeparator()
 {
-  return impl::Component::cNameSeparator;
+  return impl::ComponentImplementation::cNameSeparator;
 }
 
 std::string const & Component::name() const
@@ -66,7 +66,7 @@ bool Component::isComposite() const
   return mImpl->isComposite();
 }
 
-
+#if 1
 AudioPortBase& Component::audioPort( char const * portName )
 {
   return audioPort( std::string(portName) );
@@ -96,6 +96,7 @@ AudioPortBase const& Component::audioPort( std::string const & portName ) const
   }
   throw std::invalid_argument( "Audio port with given name not found." );
 }
+#endif
 
 ParameterPortBase& Component::parameterPort( char const * portName )
 {
@@ -127,12 +128,12 @@ ParameterPortBase const& Component::parameterPort( std::string const & portName 
   throw std::invalid_argument( "Audio port with given name not found." );
 }
 
-impl::Component & Component::implementation()
+impl::ComponentImplementation & Component::implementation()
 {
   return *mImpl;
 }
 
-impl::Component const & Component::implementation() const
+impl::ComponentImplementation const & Component::implementation() const
 {
   return *mImpl;
 }

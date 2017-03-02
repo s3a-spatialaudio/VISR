@@ -4,22 +4,50 @@
 
 #include <libril/component.hpp>
 
-#include <libvisr_impl/component_impl.hpp>
+#include "component_impl.hpp"
+#include "parameter_port_base_implementation.hpp"
 
 namespace visr
 {
 
 ParameterPortBase::ParameterPortBase( std::string const & name,
                                       Component & parent, 
-                                      Direction direction )
-  : PortBase( name, parent, direction )
+                                      PortBase::Direction direction )
+  : mImpl( new impl::ParameterPortBaseImplementation( name, *this, &(parent.implementation()), direction ) )
 {
-  parent.implementation().registerParameterPort( this );
+  // TODO: registration/ unregistration must be handled in implementation object.
+  // parent.implementation().registerParameterPort( this->implementation() );
 }
 
 ParameterPortBase::~ParameterPortBase( ) 
 {
-  parent().implementation().unregisterParameterPort( this );
+  // TODO: registration/ unregistration must be handled in implementation object.
+  // parent().implementation().unregisterParameterPort( this );
+}
+
+ParameterType ParameterPortBase::parameterType() const
+{
+  return mImpl->parameterType();
+}
+
+CommunicationProtocolType ParameterPortBase::protocolType() const
+{
+  return mImpl->protocolType();
+}
+
+ParameterConfigBase const & ParameterPortBase::parameterConfig() const
+{
+  return mImpl->parameterConfig();
+}
+
+impl::ParameterPortBaseImplementation & ParameterPortBase::implementation()
+{
+  return *mImpl;
+}
+
+impl::ParameterPortBaseImplementation const & ParameterPortBase::implementation() const
+{
+  return *mImpl;
 }
 
 } // namespace visr

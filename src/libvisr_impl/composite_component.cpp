@@ -2,6 +2,8 @@
 
 #include <libril/composite_component.hpp>
 
+#include <libril/audio_port_base.hpp>
+
 #include "composite_component_implementation.hpp"
 
 namespace visr
@@ -10,7 +12,7 @@ namespace visr
 CompositeComponent::CompositeComponent( SignalFlowContext& context,
                                         char const * name,
                                          CompositeComponent * parent /*= nullptr*/ )
- : Component( std::unique_ptr<impl::CompositeComponent>(new impl::CompositeComponent( *this, context, name,
+ : Component( std::unique_ptr<impl::CompositeComponentImplementation>(new impl::CompositeComponentImplementation( *this, context, name,
   (parent == nullptr) ? nullptr : &(parent->implementation()) )) )
 {
 }
@@ -50,30 +52,30 @@ void CompositeComponent::registerAudioConnection( std::string const & sendCompon
 }
 
 void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
-                              ChannelList const & sendIndices,
-                              AudioPortBase & receivePort,
-                              ChannelList const & receiveIndices )
+                                                  ChannelList const & sendIndices,
+                                                  AudioPortBase & receivePort,
+                                                  ChannelList const & receiveIndices )
 {
-  implementation().registerAudioConnection( sendPort, sendIndices, receivePort, receiveIndices );
+  implementation().registerAudioConnection( sendPort.implementation(), sendIndices, receivePort.implementation(), receiveIndices );
 }
 
 
 void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
                                                   AudioPortBase & receivePort )
 {
-  implementation().registerAudioConnection( sendPort, receivePort );
+  implementation().registerAudioConnection( sendPort.implementation(), receivePort.implementation() );
 }
 
-impl::CompositeComponent & CompositeComponent::implementation()
+impl::CompositeComponentImplementation & CompositeComponent::implementation()
 {
   // Cast is safe since the constructor ensures that the impl object is of the derived type.
-  return static_cast<impl::CompositeComponent &>(Component::implementation());
+  return static_cast<impl::CompositeComponentImplementation &>(Component::implementation());
 }
 
-impl::CompositeComponent const & CompositeComponent::implementation() const
+impl::CompositeComponentImplementation const & CompositeComponent::implementation() const
 {
   // Cast is safe since the constructor ensures that the impl object is of the derived type.
-  return static_cast<impl::CompositeComponent const &>(Component::implementation());
+  return static_cast<impl::CompositeComponentImplementation const &>(Component::implementation());
 }
 
 } // namespace visr

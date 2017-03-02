@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_IMPL_COMPONENT_INTERNAL_HPP_INCLUDED
-#define VISR_IMPL_COMPONENT_INTERNAL_HPP_INCLUDED
+#ifndef VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#define VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
 #include <libril/constants.hpp>
 
@@ -20,38 +20,38 @@ class Component;
 class ParameterPortBase;
 class SignalFlowContext;
 
-
-
 namespace impl
 {
 
-class CompositeComponent;
+class CompositeComponentImplementation;
+class AudioPortBaseImplementation;
+class ParameterPortBaseImplementation;
 
 /**
  *
  *
  */
-class Component
+class ComponentImplementation
 {
 public:
-  friend class visr::AudioPortBase; // For registering/ unregistering audio ports
-  friend class visr::ParameterPortBase; // For registering / unregistering audio ports.
+  friend class AudioPortBaseImplementation; // For registering/ unregistering audio ports
+  friend class ParameterPortBaseImplementation; // For registering / unregistering audio ports.
   
-  explicit Component( visr::Component & component,
-                      SignalFlowContext& context,
-                      char const * componentName,
-                      CompositeComponent * parent );
+  explicit ComponentImplementation( visr::Component & component,
+                                    SignalFlowContext& context,
+                                    char const * componentName,
+                                    CompositeComponentImplementation * parent );
 
 
-  explicit Component( visr::Component & component, 
+  explicit ComponentImplementation( Component & component,
                       SignalFlowContext& context,
                       std::string const & componentName,
-                      CompositeComponent * parent);
+                      CompositeComponentImplementation * parent);
 
   /**
    *
    */
-  virtual ~Component();
+  virtual ~ComponentImplementation();
 
   static const std::string cNameSeparator;
 
@@ -91,7 +91,7 @@ public:
   template< class PortType >
   using PortContainer = std::vector<PortType*>;
 
-  using AudioPortContainer = PortContainer< AudioPortBase >;
+  using AudioPortContainer = PortContainer< AudioPortBaseImplementation >;
 
   /**
    * Allow access to the port lists 
@@ -106,7 +106,7 @@ public:
    * Parameter port support
    */
   //@{
-  using ParameterPortContainer = PortContainer<ParameterPortBase>;
+  using ParameterPortContainer = PortContainer<ParameterPortBaseImplementation>;
 
   ParameterPortContainer::const_iterator parameterPortBegin() const;
   ParameterPortContainer::const_iterator parameterPortEnd( ) const;
@@ -158,13 +158,13 @@ public:
    * Register a parameter port in the component. Generally performed in the port's constructor.
    * @todo consider making this a template method to share the implementation between audio and parameter ports.
    */
-  void registerParameterPort( ParameterPortBase * port );
+  void registerParameterPort( ParameterPortBaseImplementation * port );
 
   /**
    * Unregister a parameter port in the component. Generally performed in the port's destructor.
    * @todo consider making this a template method to share the implementation between audio and parameter ports.
    */
-  bool unregisterParameterPort( ParameterPortBase * port );
+  bool unregisterParameterPort( ParameterPortBaseImplementation * port );
 
   /**
    * Find a named parameter port within the component and return an iterator into the port container.
@@ -228,8 +228,8 @@ private:
    * @param name The name of 
    * @throw In case of a non-unique or invalid port name
    */
-  void registerAudioPort( AudioPortBase* port );
-  void unregisterAudioPort( AudioPortBase* port );
+  void registerAudioPort( AudioPortBaseImplementation* port );
+  void unregisterAudioPort( AudioPortBaseImplementation* port );
 
   AudioPortContainer mAudioPorts;
 
@@ -266,10 +266,10 @@ private:
    * top-level component.
    * Note: We link directly to the implementation object (might be renamed to 'internal')
    */
-  CompositeComponent * mParent;
+  CompositeComponentImplementation * mParent;
 };
 
 } // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_IMPL_COMPONENT_INTERNAL_HPP_INCLUDED
+#endif // #ifndef VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED

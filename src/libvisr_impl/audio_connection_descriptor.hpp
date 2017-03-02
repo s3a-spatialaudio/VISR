@@ -21,6 +21,8 @@ class Component;
 
 namespace impl
 {
+class AudioPortBaseImplementation;
+
 
 #if 0
 class AudioChannelSlice
@@ -176,22 +178,22 @@ public:
   {
   }
 
-  AudioConnection( AudioPortBase * pSender,
+  AudioConnection( AudioPortBaseImplementation * pSender,
                    ChannelList const & pSendIndices,
-                   AudioPortBase * pReceiver,
+                   AudioPortBaseImplementation * pReceiver,
                    ChannelList const & pReceiveIndices );
 
   bool operator<(AudioConnection const & rhs) const;
 
-  AudioPortBase * sender() const { return mSender; }
-  AudioPortBase * receiver() const { return mReceiver; }
+  AudioPortBaseImplementation * sender() const { return mSender; }
+  AudioPortBaseImplementation * receiver() const { return mReceiver; }
 
   ChannelList const & sendIndices() const { return mSendIndices; }
   ChannelList const & receiveIndices( ) const { return mReceiveIndices; }
 
 private:
-  AudioPortBase * mSender;
-  AudioPortBase * mReceiver;
+  AudioPortBaseImplementation * mSender;
+  AudioPortBaseImplementation * mReceiver;
   ChannelList const mSendIndices;
   ChannelList const mReceiveIndices;
 };

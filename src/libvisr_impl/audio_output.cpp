@@ -2,17 +2,14 @@
 
 #include <libril/audio_output.hpp>
 
-#include <libril/component.hpp>
-
 namespace visr
 {
 
-AudioOutput::AudioOutput( char const* portName,
-                          Component& container )
- : AudioPortBase( portName, container, Direction::Output )
+AudioOutputBase::AudioOutputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width )
+ : AudioPortBase( name, container, typeId, PortBase::Direction::Output, width )
 {
 }
 
-AudioOutput::~AudioOutput() = default;
+AudioOutputBase::~AudioOutputBase() = default;
 
 } // namespace visr

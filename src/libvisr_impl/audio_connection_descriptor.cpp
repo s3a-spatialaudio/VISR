@@ -8,9 +8,9 @@ namespace impl
 {
 
 AudioConnection::
-AudioConnection( AudioPortBase * pSender,
+AudioConnection( AudioPortBaseImplementation * pSender,
                  ChannelList const & pSendIndices,
-                 AudioPortBase * pReceiver,
+                 AudioPortBaseImplementation * pReceiver,
                  ChannelList const & pReceiveIndices )
  : mSender(pSender)
  , mReceiver(pReceiver)

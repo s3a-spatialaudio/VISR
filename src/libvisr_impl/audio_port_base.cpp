@@ -4,34 +4,57 @@
 
 #include <libril/component.hpp>
 
-#include "component_impl.hpp"
+#include <libvisr_impl/audio_port_base_implementation.hpp>
 
 namespace visr
 {
 
-AudioPortBase::AudioPortBase( std::string const & name, Component & container, Direction direction )
- : PortBase( name, container, direction )
- , mWidth( cInvalidWidth )
+AudioPortBase::AudioPortBase( std::string const & name, Component & container, AudioSampleType::Id sampleType, PortBase::Direction direction )
+ : AudioPortBase( name, container, sampleType, direction, 0 )
 {
-  container.implementation().registerAudioPort( this );
 }
 
-AudioPortBase::AudioPortBase( std::string const & name, Component& container, Direction direction, std::size_t width )
- : AudioPortBase( name, container, direction )
+AudioPortBase::AudioPortBase( std::string const & name, Component& container, AudioSampleType::Id sampleType, PortBase::Direction direction, std::size_t width )
+  : mImpl( new impl::AudioPortBaseImplementation( name, *this, &container.implementation(), sampleType, direction, width ) )
 {
-  setWidth( width );
 }
 
-AudioPortBase::~AudioPortBase()
-{
-  parent().implementation().unregisterAudioPort( this );
-}
+AudioPortBase::~AudioPortBase() = default;
 
 void AudioPortBase::setWidth( std::size_t newWidth )
 {
-  mIndices.resize( newWidth, AudioPortBase::SignalIndexType(cInvalidSignalIndex) );
-  mSignalPointers.resize( newWidth, nullptr );
-  mWidth = newWidth;
+  mImpl->setWidth( newWidth );
 }
+
+std::size_t AudioPortBase::width() const noexcept
+{
+  return mImpl->width();
+}
+
+std::size_t AudioPortBase::channelStrideSamples() const noexcept
+{
+  return mImpl->channelStrideSamples();
+}
+
+void * AudioPortBase::basePointer()
+{
+  return mImpl->basePointer();
+}
+
+void const * AudioPortBase::basePointer() const
+{
+  return mImpl->basePointer();
+}
+
+impl::AudioPortBaseImplementation & AudioPortBase::implementation()
+{
+  return *mImpl;
+}
+
+impl::AudioPortBaseImplementation const & AudioPortBase::implementation() const
+{
+  return *mImpl;
+}
+
 
 } // namespace visr

@@ -2,9 +2,12 @@
 
 SET( HEADERS
 audio_connection_descriptor.hpp
+audio_port_base_implementation.hpp
 component_impl.hpp
 composite_component_implementation.hpp
 parameter_connection_descriptor.hpp
+parameter_port_base_implementation.hpp
+port_base_implementation.hpp
 )
 
 SET( SOURCES 
@@ -13,6 +16,7 @@ audio_connection_descriptor.cpp
 audio_input.cpp
 audio_output.cpp
 audio_port_base.cpp
+audio_port_base_implementation.cpp
 channel_list.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp
@@ -23,7 +27,9 @@ composite_component_implementation.cpp
 parameter_connection_descriptor.cpp
 parameter_factory.cpp
 parameter_port_base.cpp
+parameter_port_base_implementation.cpp
 port_base.cpp
+port_base_implementation.cpp
 signal_flow_context.cpp
 )
 

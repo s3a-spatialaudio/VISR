@@ -7,10 +7,10 @@
 
 namespace visr
 {
-class ParameterPortBase;
 
 namespace impl
 {
+class ParameterPortBaseImplementation;
 
 #if 0
 struct ParameterPortDescriptor
@@ -48,21 +48,20 @@ public:
   {
   }
 
-  ParameterConnection( ParameterPortBase * pSender,
-                       ParameterPortBase * pReceiver );
+  ParameterConnection( ParameterPortBaseImplementation * pSender,
+                       ParameterPortBaseImplementation * pReceiver );
 
   bool operator<( ParameterConnection const & rhs ) const;
 
-  ParameterPortBase * sender() const { return mSender; }
-  ParameterPortBase * receiver() const { return mReceiver; }
+  ParameterPortBaseImplementation * sender() const { return mSender; }
+  ParameterPortBaseImplementation * receiver() const { return mReceiver; }
 
 
 private:
-  ParameterPortBase * mSender;
-  ParameterPortBase * mReceiver;
+  ParameterPortBaseImplementation * mSender;
+  ParameterPortBaseImplementation * mReceiver;
 };
 
-// using ParameterConnectionTable = std::multimap<ParameterPortDescriptor, ParameterPortDescriptor >;
 using ParameterConnectionTable = std::multiset<ParameterConnection>;
 
 } // namespace impl

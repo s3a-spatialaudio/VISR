@@ -1,6 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "component_impl.hpp"
+
+#include "audio_port_base_implementation.hpp"
+#include "parameter_port_base_implementation.hpp"
 #include "composite_component_implementation.hpp"
 
 #include <libril/audio_port_base.hpp>
@@ -19,10 +22,10 @@ namespace visr
 namespace impl
 {
 
-Component::Component( visr::Component & component, 
-                                      SignalFlowContext& context,
-                                      char const * componentName,
-                                      impl::CompositeComponent * parent)
+ComponentImplementation::ComponentImplementation( Component & component, 
+                                                  SignalFlowContext& context,
+                                                  char const * componentName,
+                                                  CompositeComponentImplementation * parent)
  : mComponent( component )
  , mContext( context )
  , mName( componentName )
@@ -34,15 +37,15 @@ Component::Component( visr::Component & component,
   }
 }
 
-Component::Component( visr::Component & component,
+ComponentImplementation::ComponentImplementation( visr::Component & component,
                       SignalFlowContext& context,
                       std::string const & componentName,
-                      impl::CompositeComponent * parent)
-: Component( component, context, componentName.c_str(), parent )
+                      impl::CompositeComponentImplementation * parent)
+: ComponentImplementation( component, context, componentName.c_str(), parent )
 {
 }
 
-Component::~Component()
+ComponentImplementation::~ComponentImplementation()
 {
   if( not isTopLevel() )
   {
@@ -50,14 +53,14 @@ Component::~Component()
   }
 }
 
-/*static*/ const std::string Component::cNameSeparator = ":";
+/*static*/ const std::string ComponentImplementation::cNameSeparator = ":";
 
-std::string const & Component::name() const
+std::string const & ComponentImplementation::name() const
 { 
   return mName;
 }
 
-std::string Component::fullName() const
+std::string ComponentImplementation::fullName() const
 {
   if( isTopLevel() or mParent->isTopLevel() )
   {
@@ -69,37 +72,38 @@ std::string Component::fullName() const
   }
 }
 
-/*virtual*/ bool Component::isComposite() const
+/*virtual*/ bool ComponentImplementation::isComposite() const
 {
   return false;
 }
 
 
-Component::AudioPortContainer const&
-Component::getAudioPortList()  const
+ComponentImplementation::AudioPortContainer const&
+ComponentImplementation::getAudioPortList()  const
 {
   return mAudioPorts;
 }
 
 
-Component::AudioPortContainer&
-Component::getAudioPortList( )
+ComponentImplementation::AudioPortContainer&
+ComponentImplementation::getAudioPortList( )
 {
   return mAudioPorts;
 }
  
-std::size_t Component::period() const { return mContext.period(); }
+std::size_t ComponentImplementation::period() const { return mContext.period(); }
 
-// bool Component::initialised() const  { return mContext.initialised(); }
+// bool ComponentImplementation::initialised() const  { return mContext.initialised(); }
 
-SamplingFrequencyType Component::samplingFrequency() const { return mContext.samplingFrequency(); }
+SamplingFrequencyType ComponentImplementation::samplingFrequency() const { return mContext.samplingFrequency(); }
 
-void Component::unregisterAudioPort( AudioPortBase* port )
+void ComponentImplementation::unregisterAudioPort( AudioPortBaseImplementation* port )
 {
   // According to C++11, findIt may be a const iterator, but the standard library of gcc 4.8 does not permit that.
   AudioPortContainer::iterator findIt = std::find( mAudioPorts.begin(), mAudioPorts.end(), port );
   if( findIt != mAudioPorts.end() )
   {
+    (*findIt)->removeParent();
     mAudioPorts.erase( findIt );
   }
   else
@@ -108,10 +112,10 @@ void Component::unregisterAudioPort( AudioPortBase* port )
   }
 }
 
-void Component::registerAudioPort( AudioPortBase* port )
+void ComponentImplementation::registerAudioPort( AudioPortBaseImplementation* port )
 {
   AudioPortContainer & vec = getAudioPortList( );
-  AudioPortContainer::const_iterator findIt = findAudioPortEntry( port->name( ) );
+  AudioPortContainer::const_iterator findIt = findAudioPortEntry( port->name() );
   if( findIt != vec.end( ) )
   {
     throw std::invalid_argument( "Component::registerAudioPort(): port with given name already exists" );
@@ -119,12 +123,11 @@ void Component::registerAudioPort( AudioPortBase* port )
   vec.push_back( port );
 }
 
-
 struct ComparePorts
 {
   explicit ComparePorts( std::string const& name ): mName( name ) {}
 
-  bool operator()( PortBase const * lhs ) const
+  bool operator()( PortBaseImplementation const * lhs ) const
   {
     return lhs->name( ).compare( mName ) == 0;
   }
@@ -132,76 +135,76 @@ private:
   std::string const mName;
 };
 
-Component::AudioPortContainer::iterator Component::findAudioPortEntry( std::string const & portName )
+ComponentImplementation::AudioPortContainer::iterator ComponentImplementation::findAudioPortEntry( std::string const & portName )
 {
   AudioPortContainer::iterator findIt
     = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), ComparePorts( portName ) );
   return findIt;
 }
 
-Component::AudioPortContainer::const_iterator Component::findAudioPortEntry( std::string const & portName ) const
+ComponentImplementation::AudioPortContainer::const_iterator ComponentImplementation::findAudioPortEntry( std::string const & portName ) const
 {
   AudioPortContainer::const_iterator findIt
     = std::find_if( mAudioPorts.begin( ), mAudioPorts.end( ), ComparePorts( portName ) );
   return findIt;
 }
 
-AudioPortBase const * Component::findAudioPort( std::string const & portName ) const
+AudioPortBase const * ComponentImplementation::findAudioPort( std::string const & portName ) const
 {
   AudioPortContainer::const_iterator findIt = findAudioPortEntry( portName );
   if( findIt == audioPortEnd() )
   {
     return nullptr;
   }
-  return *findIt;
+  return &((*findIt)->containingPort());
 }
 
-AudioPortBase * Component::findAudioPort( std::string const & portName )
+AudioPortBase * ComponentImplementation::findAudioPort( std::string const & portName )
 {
   AudioPortContainer::iterator findIt = findAudioPortEntry( portName );
   if( findIt == audioPortEnd( ) )
   {
     return nullptr;
   }
-  return *findIt;
+  return &((*findIt)->containingPort());
 }
 
 // Parameter port related stuff
-Component::ParameterPortContainer::const_iterator 
-Component::parameterPortBegin() const
+ComponentImplementation::ParameterPortContainer::const_iterator 
+ComponentImplementation::parameterPortBegin() const
 {
-  return portBegin<ParameterPortBase>();
+  return portBegin<ParameterPortBaseImplementation>();
 }
 
-Component::ParameterPortContainer::const_iterator 
-Component::parameterPortEnd() const
+ComponentImplementation::ParameterPortContainer::const_iterator 
+ComponentImplementation::parameterPortEnd() const
 {
-  return portEnd<ParameterPortBase>();
+  return portEnd<ParameterPortBaseImplementation>();
 }
 
-Component::ParameterPortContainer::iterator
-Component::parameterPortBegin( )
+ComponentImplementation::ParameterPortContainer::iterator
+ComponentImplementation::parameterPortBegin( )
 {
-  return portBegin<ParameterPortBase>( );
+  return portBegin<ParameterPortBaseImplementation>( );
 }
 
-Component::ParameterPortContainer::iterator
-Component::parameterPortEnd( )
+ComponentImplementation::ParameterPortContainer::iterator
+ComponentImplementation::parameterPortEnd( )
 {
-  return portEnd<ParameterPortBase>( );
+  return portEnd<ParameterPortBaseImplementation>( );
 }
 
-void Component::registerParameterPort( ParameterPortBase * port )
+void ComponentImplementation::registerParameterPort( ParameterPortBaseImplementation * port )
 {
   ParameterPortContainer::const_iterator findIt = findParameterPortEntry( port->name() );
   if( findIt != mParameterPorts.end() )
   {
-    throw std::invalid_argument( "Component::registerParameterPort(): port with given name already exists" );
+    throw std::invalid_argument( "ComponentImplementation::registerParameterPort(): port with given name already exists" );
   }
   mParameterPorts.push_back( port );
 }
 
-bool Component::unregisterParameterPort( ParameterPortBase * port )
+bool ComponentImplementation::unregisterParameterPort( ParameterPortBaseImplementation * port )
 {
   // According to C++11, findIt may be a const iterator, but the standard library of gcc 4.8 does not permit that.
   ParameterPortContainer::iterator findIt = std::find( mParameterPorts.begin(), mParameterPorts.end(), port );
@@ -217,79 +220,78 @@ bool Component::unregisterParameterPort( ParameterPortBase * port )
   return true;
 }
 
-Component::ParameterPortContainer::iterator Component::findParameterPortEntry( std::string const & portName )
+ComponentImplementation::ParameterPortContainer::iterator ComponentImplementation::findParameterPortEntry( std::string const & portName )
 {
-  return findPortEntry<ParameterPortBase>( portName );
+  return findPortEntry<ParameterPortBaseImplementation>( portName );
 }
 
-Component::ParameterPortContainer::const_iterator Component::findParameterPortEntry( std::string const & portName ) const
+ComponentImplementation::ParameterPortContainer::const_iterator ComponentImplementation::findParameterPortEntry( std::string const & portName ) const
 {
-  return findPortEntry<ParameterPortBase>( portName );
+  return findPortEntry<ParameterPortBaseImplementation>( portName );
 }
 
-ParameterPortBase const * Component::findParameterPort( std::string const & portName ) const
+ParameterPortBase const * ComponentImplementation::findParameterPort( std::string const & portName ) const
 {
   ParameterPortContainer::const_iterator findIt = findParameterPortEntry( portName );
   if( findIt == parameterPortEnd() )
   {
     return nullptr;
   }
-  return *findIt;
+  return &((*findIt)->containingPort());
 }
 
-ParameterPortBase * Component::findParameterPort( std::string const & portName )
+ParameterPortBase * ComponentImplementation::findParameterPort( std::string const & portName )
 {
   ParameterPortContainer::iterator findIt = findParameterPortEntry( portName );
   if( findIt == parameterPortEnd() )
   {
     return nullptr;
   }
-  return *findIt;
+  return &((*findIt)->containingPort());
 }
 
 template<>
-Component::PortContainer<AudioPortBase> const & Component::ports() const { return mAudioPorts; }
+ComponentImplementation::PortContainer<AudioPortBaseImplementation> const & ComponentImplementation::ports() const { return mAudioPorts; }
 
 template<>
-Component::PortContainer<ParameterPortBase> const & Component::ports() const { return mParameterPorts; }
+ComponentImplementation::PortContainer<ParameterPortBaseImplementation> const & ComponentImplementation::ports() const { return mParameterPorts; }
 
 template<>
-Component::PortContainer<AudioPortBase> & Component::ports() { return mAudioPorts; }
+ComponentImplementation::PortContainer<AudioPortBaseImplementation> & ComponentImplementation::ports() { return mAudioPorts; }
 
 template<>
-Component::PortContainer<ParameterPortBase> & Component::ports() { return mParameterPorts; }
+ComponentImplementation::PortContainer<ParameterPortBaseImplementation> & ComponentImplementation::ports() { return mParameterPorts; }
 
 // Strange workaround needed for Visual Studio to prevent an error when using the return type
-// TypedPortContainer = Component::PortContainer<PortType>::(const_)iterator direclty in the findPortEntry() definitions below.
+// TypedPortContainer = ComponentImplementation::PortContainer<PortType>::(const_)iterator direclty in the findPortEntry() definitions below.
 // This resulted in error C2244: 'unable to match function definition to an existing declaration'
 template <class PortType>
-using TypedPortContainer = Component::PortContainer<PortType>;
+using TypedPortContainer = ComponentImplementation::PortContainer<PortType>;
 
 template<class PortType>
-typename TypedPortContainer<PortType>::const_iterator Component::findPortEntry( std::string const & portName ) const
+typename TypedPortContainer<PortType>::const_iterator ComponentImplementation::findPortEntry( std::string const & portName ) const
 {
   typename PortContainer<PortType>::const_iterator findIt
     = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
   return findIt;
 }
 // Explicit instantiations
-template Component::PortContainer<AudioPortBase>::const_iterator
-Component::findPortEntry<AudioPortBase>( std::string const & portName ) const;
-template Component::PortContainer<ParameterPortBase>::const_iterator
-Component::findPortEntry<ParameterPortBase>( std::string const & portName ) const;
+template ComponentImplementation::PortContainer<AudioPortBaseImplementation>::const_iterator
+ComponentImplementation::findPortEntry<AudioPortBaseImplementation>( std::string const & portName ) const;
+template ComponentImplementation::PortContainer<ParameterPortBaseImplementation>::const_iterator
+ComponentImplementation::findPortEntry<ParameterPortBaseImplementation>( std::string const & portName ) const;
 
 
 template<class PortType>
-typename TypedPortContainer<PortType>::iterator Component::findPortEntry( std::string const & portName )
+typename TypedPortContainer<PortType>::iterator ComponentImplementation::findPortEntry( std::string const & portName )
 {
   typename PortContainer<PortType>::iterator findIt
     = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
   return findIt;
 }
 // Explicit instantiations
-template Component::PortContainer<AudioPortBase>::iterator Component::findPortEntry<AudioPortBase>( std::string const & portName );
-template Component::PortContainer<ParameterPortBase>::iterator Component::findPortEntry<ParameterPortBase>( std::string const & portName );
-
+template ComponentImplementation::PortContainer<AudioPortBaseImplementation>::iterator ComponentImplementation::findPortEntry<AudioPortBaseImplementation>( std::string const & portName );
+template ComponentImplementation::PortContainer<ParameterPortBaseImplementation>::iterator ComponentImplementation::findPortEntry<ParameterPortBaseImplementation>( std::string const & portName );
 
 } // namespace impl
 } // namespace visr

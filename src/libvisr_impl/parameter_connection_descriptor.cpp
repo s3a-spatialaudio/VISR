@@ -32,8 +32,8 @@ operator<(ParameterPortDescriptor const & rhs) const
 #endif
 
 ParameterConnection::
-ParameterConnection( ParameterPortBase * pSender,
-                     ParameterPortBase * pReceiver)
+ParameterConnection( ParameterPortBaseImplementation * pSender,
+                     ParameterPortBaseImplementation * pReceiver)
  : mSender(pSender)
  , mReceiver(pReceiver)
 {

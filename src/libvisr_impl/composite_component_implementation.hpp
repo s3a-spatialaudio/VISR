@@ -20,16 +20,16 @@ class Component;
 namespace impl
 {
 
-class CompositeComponent: public impl::Component
+class CompositeComponentImplementation: public ComponentImplementation
 {
 public:
-  using ComponentTable = std::map<std::string, impl::Component * >;
+  using ComponentTable = std::map<std::string, ComponentImplementation * >;
 
-  explicit CompositeComponent( visr::CompositeComponent & component,
-                               SignalFlowContext& context,
-                               char const * componentName,
-                               impl::CompositeComponent * parent )
-    : impl::Component( component, context, componentName, parent )
+  explicit CompositeComponentImplementation( CompositeComponent & component,
+                                             SignalFlowContext& context,
+                                             char const * componentName,
+                                             CompositeComponentImplementation * parent )
+    : ComponentImplementation( component, context, componentName, parent )
   {
   }
 
@@ -42,9 +42,9 @@ public:
    * @note The name has to be provided separately, because typically the object pointed to by 
    * \p child is not fully constructed at the time of the call.
    */
-  void registerChildComponent( std::string const & name, impl::Component * child );
+  void registerChildComponent( std::string const & name, impl::ComponentImplementation * child );
 
-  void unregisterChildComponent( impl::Component * child );
+  void unregisterChildComponent( impl::ComponentImplementation * child );
 
   /**
   * Return the number of contained components (not including the composite itself).
@@ -60,9 +60,9 @@ public:
 
   ComponentTable::const_iterator componentEnd() const;
 
-  impl::Component * findComponent( std::string const & componentName );
+  ComponentImplementation * findComponent( std::string const & componentName );
 
-  impl::Component const * findComponent( std::string const & componentName ) const;
+  ComponentImplementation const * findComponent( std::string const & componentName ) const;
 
   /**
    * Find an audio port within the composite component.
@@ -95,13 +95,13 @@ public:
                                 std::string const & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
+  void registerAudioConnection( AudioPortBaseImplementation & sendPort,
                                 ChannelList const & sendIndices,
-                                AudioPortBase & receivePort,
+                                AudioPortBaseImplementation & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
-                                AudioPortBase & receivePort );
+  void registerAudioConnection( AudioPortBaseImplementation & sendPort,
+                                AudioPortBaseImplementation & receivePort );
 
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
 
