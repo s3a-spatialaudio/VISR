@@ -1,16 +1,12 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "port_utilities.hpp"
-
-#include <libril/audio_port_base.hpp>
-#include <libril/component.hpp>
-#include <libril/communication_protocol_type.hpp>
-#include <libril/composite_component.hpp>
 #include <libril/parameter_config_base.hpp>
-#include <libril/parameter_port_base.hpp>
 
+#include <libvisr_impl/audio_port_base_implementation.hpp>
 #include <libvisr_impl/component_impl.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <ciso646>
 #include <iostream>
@@ -20,7 +16,7 @@ namespace visr
 namespace rrl
 {
 
-bool isPlaceholderPort( PortBase const * const port )
+bool isPlaceholderPort( impl::PortBaseImplementation const * const port )
 {
   if( not port->parent().isComposite() )
   {
@@ -35,17 +31,17 @@ bool isPlaceholderPort( PortBase const * const port )
   return true;
 }
 
-std::string qualifiedName( PortBase const & port )
+std::string qualifiedName( impl::PortBaseImplementation const & port )
 {
   return port.parent().name() + ":" + port.name();
 }
 
-std::string fullyQualifiedName( PortBase const & port )
+std::string fullyQualifiedName( impl::PortBaseImplementation const & port )
 {
   return port.parent().fullName() + ":" + port.name();
 }
 
-bool checkParameterPortCompatibility( ParameterPortBase const & sendPort, ParameterPortBase const & receivePort,
+bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation const & sendPort, impl::ParameterPortBaseImplementation const & receivePort,
                                       std::ostream & messages )
 {
   bool result = true;
@@ -78,13 +74,13 @@ bool checkParameterPortCompatibility( ParameterPortBase const & sendPort, Parame
 }
 
 template<class PortType>
-PortLookup<PortType>::PortLookup( impl::Component const & comp, bool recurse /*= true*/ )
+PortLookup<PortType>::PortLookup( impl::ComponentImplementation const & comp, bool recurse /*= true*/ )
 {
   traverseComponent( comp, recurse );
 }
 
 template<class PortType>
-void PortLookup<PortType>::traverseComponent( impl::Component const & comp, bool recurse )
+void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation const & comp, bool recurse )
 {
   for( PortType * port : comp.ports<PortType>() )
   {
@@ -123,9 +119,9 @@ void PortLookup<PortType>::traverseComponent( impl::Component const & comp, bool
   }
   if( comp.isComposite() )
   {
-    impl::CompositeComponent const & composite = dynamic_cast<impl::CompositeComponent const &>(comp );
+    impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(comp );
     // Add the ports of the contained components (without descending into the hierarchy)
-    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+    for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
       traverseComponent( *(compIt->second), recurse );
@@ -134,8 +130,8 @@ void PortLookup<PortType>::traverseComponent( impl::Component const & comp, bool
 }
 
 // explicit instantiations
-template class PortLookup<AudioPortBase>;
-template class PortLookup<ParameterPortBase>;
+template class PortLookup<impl::AudioPortBaseImplementation>;
+template class PortLookup<impl::ParameterPortBaseImplementation>;
 
 
 

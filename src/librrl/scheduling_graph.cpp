@@ -6,10 +6,11 @@
 #include "parameter_connection_map.hpp"
 
 #include <libril/atomic_component.hpp>
-#include <libril/audio_port_base.hpp>
-#include <libril/parameter_port_base.hpp>
 
 #include <libvisr_impl/audio_connection_descriptor.hpp>
+#include <libvisr_impl/audio_port_base_implementation.hpp>
+#include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <boost/graph/topological_sort.hpp>
 
@@ -34,7 +35,7 @@ SchedulingGraph::SchedulingGraph()
 
 }
 
-void SchedulingGraph::initialise( impl::Component const & flow, AudioConnectionMap const & connections,
+void SchedulingGraph::initialise( impl::ComponentImplementation const & flow, AudioConnectionMap const & connections,
                                   ParameterConnectionMap const & parameterConnections )
 {
   mDependencyGraph.clear();
@@ -65,8 +66,8 @@ void SchedulingGraph::addAudioDependency( AudioSignalDescriptor const & sender, 
   // check whether the sender is an external capture port or an internal port
   NodeType const senderType = sender.mPort->parent().isComposite() ? NodeType::Source : NodeType::Processor;
   NodeType const receiverType = receiver.mPort->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender.mPort->parent())) ) : ProcessingNode( NodeType::Source );
-  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver.mPort->parent())) ) : ProcessingNode( NodeType::Sink );
+  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender.mPort->parent().component())) ) : ProcessingNode( NodeType::Source );
+  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver.mPort->parent().component())) ) : ProcessingNode( NodeType::Sink );
 
   VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
   if( senderFindIt == mVertexLookup.end() )
@@ -111,7 +112,8 @@ void SchedulingGraph::addAudioDependency( AudioSignalDescriptor const & sender, 
 }
 
 
-void SchedulingGraph::addParameterDependency( ParameterPortBase const * sender, ParameterPortBase const * receiver )
+void SchedulingGraph::addParameterDependency( impl::ParameterPortBaseImplementation const * sender,
+                                              impl::ParameterPortBaseImplementation const * receiver )
 {
   // NOTE: Lots of code duplication with audio connection method.
   // TODO: Factor out common code without neglecting type-specific differences (as soon as they are implemented).
@@ -120,8 +122,8 @@ void SchedulingGraph::addParameterDependency( ParameterPortBase const * sender, 
   // check whether the sender is an external capture port or an internal port
   NodeType const senderType = sender->parent().isComposite() ? NodeType::Source : NodeType::Processor;
   NodeType const receiverType = receiver->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender->parent())) ) : ProcessingNode( NodeType::Source );
-  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver->parent())) ) : ProcessingNode( NodeType::Sink );
+  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender->parent().component())) ) : ProcessingNode( NodeType::Source );
+  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver->parent().component())) ) : ProcessingNode( NodeType::Sink );
 
   VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
   if( senderFindIt == mVertexLookup.end() )

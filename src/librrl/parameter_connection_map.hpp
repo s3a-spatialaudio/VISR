@@ -7,27 +7,22 @@
 
 #include <iosfwd>
 #include <map>
-#include <memory>
-#include <set>
-#include <stdexcept>
-#include <vector>
 
 namespace visr
 {
 // Forward declarations
-class ParameterPortBase;
-
 namespace impl
 {
-class Component;
+class ComponentImplementation;
+class ParameterPortBaseImplementation;
 }
 
 namespace rrl
 {
 
-using ParameterConnectionMap = std::multimap< ParameterPortBase *, ParameterPortBase * >;
+using ParameterConnectionMap = std::multimap< impl::ParameterPortBaseImplementation *, impl::ParameterPortBaseImplementation * >;
 
-bool fillRecursive( ParameterConnectionMap & res, impl::Component const & component,
+bool fillRecursive( ParameterConnectionMap & res, impl::ComponentImplementation const & component,
                     std::ostream & messages );
 
 ParameterConnectionMap resolvePlaceholders( ParameterConnectionMap const & fullConnections );

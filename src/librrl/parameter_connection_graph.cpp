@@ -5,7 +5,7 @@
 #include "parameter_connection_map.hpp"
 #include "port_utilities.hpp"
 
-#include <libril/parameter_port_base.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <boost/graph/connected_components.hpp>
 
@@ -85,8 +85,8 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
     {
       std::size_t const compIdx = graphComponents[runIdx];
       ConnectedPorts & connectedComp = mConnections[compIdx];
-      ParameterPortBase * port = mConnectionGraph[runIdx];
-      if( port->direction() == ParameterPortBase::Direction::Input )
+      impl::ParameterPortBaseImplementation * port = mConnectionGraph[runIdx];
+      if( port->direction() == PortBase::Direction::Input )
       {
         connectedComp.mReceivePorts.push_back( port );
       }

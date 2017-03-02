@@ -20,10 +20,11 @@
 namespace visr
 {
 // Forward declarations
-class AtomicComponent;
+class AtomicComponent; // TODO: Replace by ExecutableInterface at some point?
 namespace impl
 {
-class Component;
+class ComponentImplementation;
+class ParameterPortBaseImplementation;
 }
 
 namespace rrl
@@ -42,7 +43,7 @@ public:
    */
   ~SchedulingGraph();
 
-  void initialise( impl::Component const & flow,
+  void initialise( impl::ComponentImplementation const & flow,
                    AudioConnectionMap const & audioConnections,
                    ParameterConnectionMap const & parameterConnections );
 
@@ -53,7 +54,7 @@ private:
 
   void addAudioDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver );
 
-  void addParameterDependency( ParameterPortBase const * sender, ParameterPortBase const * receiver );
+  void addParameterDependency( impl::ParameterPortBaseImplementation const * sender, impl::ParameterPortBaseImplementation const * receiver );
 
   enum class NodeType
   {

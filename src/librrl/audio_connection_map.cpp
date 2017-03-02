@@ -4,11 +4,9 @@
 
 #include "port_utilities.hpp"
 
-#include <libril/audio_port_base.hpp>
 #include <libril/channel_list.hpp>
-#include <libril/component.hpp>
-#include <libril/composite_component.hpp>
 
+#include <libvisr_impl/audio_port_base_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 #include <libvisr_impl/component_impl.hpp>
 
@@ -34,7 +32,7 @@ AudioSignalDescriptor::AudioSignalDescriptor( )
 {
 }
 
-AudioSignalDescriptor::AudioSignalDescriptor( AudioPortBase const * port, SignalIndexType index )
+AudioSignalDescriptor::AudioSignalDescriptor( impl::AudioPortBaseImplementation const * port, SignalIndexType index )
  : mPort( port )
  , mIndex( index )
 {
@@ -72,7 +70,7 @@ AudioConnectionMap::AudioConnectionMap()
 {
 }
 
-AudioConnectionMap::AudioConnectionMap( impl::Component const & component,
+AudioConnectionMap::AudioConnectionMap( impl::ComponentImplementation const & component,
                                         bool recursive /*= false */ )
 {
   std::stringstream messages;
@@ -82,7 +80,7 @@ AudioConnectionMap::AudioConnectionMap( impl::Component const & component,
   }
 }
 
-bool AudioConnectionMap::fill( impl::Component const & component,
+bool AudioConnectionMap::fill( impl::ComponentImplementation const & component,
                                std::ostream & messages,
                                bool recursive /*= false*/ )
 {
@@ -90,12 +88,12 @@ bool AudioConnectionMap::fill( impl::Component const & component,
   return fillRecursive( component, messages, recursive );
 }
 
-bool AudioConnectionMap::fillRecursive( impl::Component const & component,
+bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & component,
                                         std::ostream & messages,
                                         bool recursive /*= false */ )
 {
   bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<AudioPortBase const*>;
+  using PortTable = std::set<impl::AudioPortBaseImplementation const*>;
   PortTable sendPorts;
   PortTable receivePorts;
 
@@ -104,15 +102,15 @@ bool AudioConnectionMap::fillRecursive( impl::Component const & component,
   {
     return true;
   }
-  impl::CompositeComponent const & composite = dynamic_cast<impl::CompositeComponent const &>(component);
+  impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(component);
   // this could be moved to the PortLookup functionality.
 
   // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
   // reversed, i.e. inputs are senders and outputs are receivers.
-  for( impl::Component::PortContainer<AudioPortBase>::const_iterator extPortIt = component.portBegin<AudioPortBase>();
-    extPortIt != component.portEnd<AudioPortBase>(); ++extPortIt )
+  for( impl::ComponentImplementation::PortContainer<impl::AudioPortBaseImplementation>::const_iterator extPortIt = component.portBegin<impl::AudioPortBaseImplementation>();
+    extPortIt != component.portEnd<impl::AudioPortBaseImplementation>(); ++extPortIt )
   {
-    if( (*extPortIt)->direction() == AudioPortBase::Direction::Input )
+    if( (*extPortIt)->direction() == visr::PortBase::Direction::Input )
     {
       sendPorts.insert( *extPortIt );
     }
@@ -122,14 +120,14 @@ bool AudioConnectionMap::fillRecursive( impl::Component const & component,
     }
   }
   // Add the ports of the contained components (without descending into the hierarchy)
-  for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+  for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
     compIt != composite.componentEnd(); ++compIt )
   {
     // Get the 'internal' object of the component that holds the audio port tables.
-    impl::Component const & containedComponentInternal = *(compIt->second);
+    impl::ComponentImplementation const & containedComponentInternal = *(compIt->second);
 
-    for( impl::Component::PortContainer<AudioPortBase>::const_iterator intPortIt = containedComponentInternal.portBegin<AudioPortBase>();
-      intPortIt != containedComponentInternal.portEnd<AudioPortBase>(); ++intPortIt )
+    for( impl::ComponentImplementation::PortContainer<impl::AudioPortBaseImplementation>::const_iterator intPortIt = containedComponentInternal.portBegin<impl::AudioPortBaseImplementation>();
+      intPortIt != containedComponentInternal.portEnd<impl::AudioPortBaseImplementation>(); ++intPortIt )
     {
       if( (*intPortIt)->direction() == PortBase::Direction::Input )
       {
@@ -200,7 +198,7 @@ bool AudioConnectionMap::fillRecursive( impl::Component const & component,
   }
   if( recursive )
   {
-    for( impl::CompositeComponent::ComponentTable::const_iterator compIt( composite.componentBegin() );
+    for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
       result = result and fillRecursive( *(compIt->second), messages, true );

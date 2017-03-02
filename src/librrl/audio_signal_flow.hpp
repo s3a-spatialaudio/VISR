@@ -21,15 +21,13 @@ namespace visr
 {
 // Forward declarations
 class AtomicComponent;
-class AudioInput;
-class AudioOutput;
 class ParameterPortBase;
 class CommunicationProtocolBase;
 
 namespace impl
 {
-class Component;
-class CompositeComponent;
+class ComponentImplementation;
+class CompositeComponentImplementation;
 }
 
 namespace rrl
@@ -49,9 +47,9 @@ template <typename T> class CommunicationArea;
  */
 class AudioSignalFlow
 {
-//  friend class AtomicComponent; // Required for registerComponent(), remove after restructuring.
-//  friend class Component; // Access commArea, remove after restructuring. 
 public:
+  using SignalIndexType = std::size_t; // TODO: Check whether to introduce a consistently used type alias for indices
+
   /**
    * Constructor.
    * @param period The number of samples processed in each invocation
@@ -177,13 +175,13 @@ private:
    * Can be static or nonmember functions
    */
   //@{
-  static bool checkFlow( impl::Component const & comp, bool locally, std::ostream & messages );
+  static bool checkFlow( impl::ComponentImplementation const & comp, bool locally, std::ostream & messages );
 
-  static bool checkCompositeLocal( impl::CompositeComponent const & composite , std::ostream & messages );
+  static bool checkCompositeLocal( impl::CompositeComponentImplementation const & composite , std::ostream & messages );
 
-  static bool checkCompositeLocalAudio( impl::CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalAudio( impl::CompositeComponentImplementation const & composite, std::ostream & messages );
 
-  static bool checkCompositeLocalParameters( impl::CompositeComponent const & composite, std::ostream & messages );
+  static bool checkCompositeLocalParameters( impl::CompositeComponentImplementation const & composite, std::ostream & messages );
   //@}
 
   /**
@@ -227,10 +225,11 @@ private:
    * The signal flow handled by this object.
    * Can be either an atomic or a (hierachical) composite component/
    */
-  impl::Component & mFlow;
+  impl::ComponentImplementation & mFlow;
 
   /**
    * Flag stating whether the signal flow is fully initialised.
+   * @note: As long as initialisation is performed fully in the constructor, here is no need for that,
    */
   bool mInitialised;
 
@@ -261,9 +260,9 @@ private:
    */
   //@{
 
-  std::vector<AudioInput*> mToplevelInputs;
+  std::vector<impl::AudioPortBaseImplementation *> mToplevelInputs;
 
-  std::vector<AudioOutput*> mToplevelOutputs;
+  std::vector<impl::AudioPortBaseImplementation *> mToplevelOutputs;
   //@}
 
   /**
@@ -278,13 +277,12 @@ private:
    * @note at the moment the order of the ports is determined by the system.
    */
   //@{
-  std::vector < AudioPortBase*> mTopLevelAudioInputs;
-  std::vector < AudioPortBase*> mTopLevelAudioOutputs;
+  std::vector < impl::AudioPortBaseImplementation*> mTopLevelAudioInputs;
+  std::vector < impl::AudioPortBaseImplementation*> mTopLevelAudioOutputs;
   //@}
 
-
-  std::vector<AudioPortBase::SignalIndexType> mCaptureIndices;
-  std::vector<AudioPortBase::SignalIndexType> mPlaybackIndices;
+  std::vector<SignalIndexType> mCaptureIndices;
+  std::vector<SignalIndexType> mPlaybackIndices;
 
   using ProcessingSchedule = std::vector<ProcessableInterface * >;
 

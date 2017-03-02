@@ -10,12 +10,14 @@
 namespace visr
 {
 // Forward declarations
+class AudioPortBase;
 class ParameterPortBase;
-class PortBase;
 
 namespace impl
 {
-class Component;
+class ComponentImplementation;
+class ParameterPortBaseImplementation;
+class PortBaseImplementation;
 }
 
 namespace rrl
@@ -24,21 +26,21 @@ namespace rrl
 /**
  * Return the name of a port including its containing component in the form "component:port"
  */
-std::string qualifiedName( PortBase const & port );
+std::string qualifiedName( impl::PortBaseImplementation const & port );
 
 /**
  * Return the name of the port including its containing component and all surrounding parent components.
  * @return port name in the form "toplevel:level1:...:leveln:port"
  */
-std::string fullyQualifiedName( PortBase const & port );
+std::string fullyQualifiedName( impl::PortBaseImplementation const & port );
 
 /**
 * Utility function to check whether a port is considered as a placeholder or a concrete instance.
 * @todo consider moving to a graph checking and manipulation library to be defined.
 */
-bool isPlaceholderPort( PortBase const * const port );
+bool isPlaceholderPort( impl::PortBaseImplementation const * const port );
 
-bool checkParameterPortCompatibility( ParameterPortBase const & sendPort, ParameterPortBase const & receivePort,
+bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation const & sendPort, impl::ParameterPortBaseImplementation const & receivePort,
                                       std::ostream & messages );
 
 /**
@@ -52,7 +54,7 @@ class PortLookup
 public:
   using PortTable = std::set<PortType *>;
 
-  explicit PortLookup( impl::Component const & comp, bool recurse = true );
+  explicit PortLookup( impl::ComponentImplementation const & comp, bool recurse = true );
 
   PortTable const & placeholderReceivePorts() const { return mPlaceholderReceivePorts; }
   PortTable const & placeholderSendPorts() const { return mPlaceholderSendPorts; }
@@ -63,7 +65,7 @@ public:
 
 private:
 
-  void traverseComponent( impl::Component const & comp, bool recurse );
+  void traverseComponent( impl::ComponentImplementation const & comp, bool recurse );
 
   PortTable mPlaceholderReceivePorts;
   PortTable mPlaceholderSendPorts;
@@ -72,8 +74,6 @@ private:
   PortTable mExternalCapturePorts;
   PortTable mExternalPlaybackPorts;
 };
-
-
 
 } // namespace rrl
 } // namespace visr
