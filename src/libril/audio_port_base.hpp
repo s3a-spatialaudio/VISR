@@ -35,6 +35,12 @@ public:
 
   std::size_t channelStrideSamples() const noexcept;
 
+  std::size_t channelStrideBytes() const noexcept;
+
+  AudioSampleType::Id sampleType() const noexcept;
+
+  std::size_t sampleSize() const noexcept;
+
   /**
    * Access the opaque implementation object.
    * @todo: Limit access if possible at all.
