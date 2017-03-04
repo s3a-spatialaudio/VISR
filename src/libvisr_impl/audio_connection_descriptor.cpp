@@ -2,6 +2,10 @@
 
 #include "audio_connection_descriptor.hpp"
 
+#include <libvisr_impl/audio_port_base_implementation.hpp>
+
+#include <ostream>
+
 namespace visr
 {
 namespace impl
@@ -19,22 +23,6 @@ AudioConnection( AudioPortBaseImplementation * pSender,
 {
 }
 
-#if 0
-AudioConnection::
-AudioConnection( std::string const & pSendComponent,
-                     std::string const & pSendPort,
-                     AudioChannelIndexVector const & pSendIndices,
-                     std::string const & pReceiveComponent,
-                     std::string const & pReceivePort,
-                     AudioChannelIndexVector const & pReceiveIndices )
- : AudioConnection( AudioPortDescriptor( pSendComponent, pSendPort ),
-                    pSendIndices,
-                    AudioPortDescriptor( pReceiveComponent, pReceivePort),
-                    pReceiveIndices )
-{
-}
-#endif
-
 bool AudioConnection::operator<(AudioConnection const & rhs) const
 {
   if(sender() < rhs.sender() )
@@ -46,6 +34,23 @@ bool AudioConnection::operator<(AudioConnection const & rhs) const
     return false;
   }
   return receiver() < rhs.receiver();
+}
+
+std::ostream & operator<<( std::ostream & str, impl::AudioConnection const & conn )
+{
+  // todo: replace by name function that includes the component.
+  str << conn.sender()->name() << "->" << conn.receiver()->name() << std::endl;
+  return str;
+}
+
+
+std::ostream & operator<<( std::ostream & str, impl::AudioConnectionTable const & table )
+{
+  for( auto const & e : table )
+  {
+    str << e << std::endl;
+  }
+  return str;
 }
 
 } // namespace ril
