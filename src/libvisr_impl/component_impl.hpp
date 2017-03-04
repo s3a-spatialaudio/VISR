@@ -53,6 +53,17 @@ public:
    */
   virtual ~ComponentImplementation();
 
+  ComponentImplementation() = delete;
+
+  ComponentImplementation( ComponentImplementation const & ) = delete;
+
+  ComponentImplementation( ComponentImplementation && ) = delete;
+
+  ComponentImplementation& operator=( ComponentImplementation const & ) = delete;
+
+  ComponentImplementation& operator=( ComponentImplementation && ) = delete;
+
+
   static const std::string cNameSeparator;
 
   /**

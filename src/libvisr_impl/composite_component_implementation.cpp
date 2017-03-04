@@ -181,7 +181,10 @@ void CompositeComponentImplementation::registerAudioConnection( AudioPortBaseImp
   registerAudioConnection( sendPort, indices, receivePort, indices );
 }
 
-
+AudioConnectionTable const & CompositeComponentImplementation::audioConnections() const
+{
+  return mAudioConnections;
+}
 
 AudioConnectionTable::const_iterator CompositeComponentImplementation::audioConnectionBegin() const
 {

@@ -33,6 +33,19 @@ public:
   {
   }
 
+  virtual ~CompositeComponentImplementation() override = default;
+
+  CompositeComponentImplementation() = delete;
+
+  CompositeComponentImplementation( CompositeComponentImplementation const & ) = delete;
+
+  CompositeComponentImplementation( CompositeComponentImplementation && ) = delete;
+
+  CompositeComponentImplementation& operator=( CompositeComponentImplementation const & ) = delete;
+
+  CompositeComponentImplementation& operator=( CompositeComponentImplementation && ) = delete;
+
+
   bool isComposite() const final;
 
   /**
@@ -55,6 +68,8 @@ public:
   {
     return mComponents.size();
   }
+
+//  ComponentTable const components() const;
 
   ComponentTable::const_iterator componentBegin() const;
 
@@ -102,6 +117,8 @@ public:
 
   void registerAudioConnection( AudioPortBaseImplementation & sendPort,
                                 AudioPortBaseImplementation & receivePort );
+
+  AudioConnectionTable const & audioConnections() const;
 
   AudioConnectionTable::const_iterator audioConnectionBegin() const;
 
