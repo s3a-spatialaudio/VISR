@@ -163,7 +163,6 @@ private:
 
 /**
  * Store data from definition in derived class until initialisation of runtime structures.
- * @todo This should move into CompositeComponent.
  */
 struct AudioConnection
 {

@@ -36,6 +36,11 @@ std::size_t AudioPortBase::channelStrideSamples() const noexcept
   return mImpl->channelStrideSamples();
 }
 
+std::size_t AudioPortBase::channelStrideBytes() const noexcept
+{
+  return mImpl->channelStrideBytes();
+}
+
 void * AudioPortBase::basePointer()
 {
   return mImpl->basePointer();
@@ -44,6 +49,16 @@ void * AudioPortBase::basePointer()
 void const * AudioPortBase::basePointer() const
 {
   return mImpl->basePointer();
+}
+
+AudioSampleType::Id AudioPortBase::sampleType() const noexcept
+{
+  return mImpl->sampleType();
+}
+
+std::size_t AudioPortBase::sampleSize() const noexcept
+{
+  return mImpl->sampleSize();
 }
 
 impl::AudioPortBaseImplementation & AudioPortBase::implementation()

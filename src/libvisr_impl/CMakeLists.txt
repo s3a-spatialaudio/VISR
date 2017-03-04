@@ -17,6 +17,7 @@ audio_input.cpp
 audio_output.cpp
 audio_port_base.cpp
 audio_port_base_implementation.cpp
+audio_sample_type.cpp
 channel_list.cpp
 communication_protocol_base.cpp
 communication_protocol_factory.cpp

@@ -20,7 +20,7 @@ AudioPortBaseImplementation::AudioPortBaseImplementation( std::string const & na
  : PortBaseImplementation( name, container, direction )
  , mContainingPort( containingPort )
  , cSampleType( sampleType )
-// , cSampleSize( sizeof(AudioSampleType::IdToType<sampleType>::Type) )
+ , cSampleSize( AudioSampleType::typeSize(sampleType) )
  , mWidth( width )
  , mBasePointer( nullptr )
  , mChannelStrideSamples( 0 )
@@ -83,18 +83,15 @@ std::size_t AudioPortBaseImplementation::channelStrideSamples() const noexcept
   return mChannelStrideSamples;
 }
 
-//std::size_t AudioPortBaseImplementation::channelStrideElements() const noexcept;
-
-  //@}
+std::size_t AudioPortBaseImplementation::channelStrideBytes() const noexcept
+{
+  return mChannelStrideSamples * cSampleSize;
+}
 
 void AudioPortBaseImplementation::setChannelStrideSamples( std::size_t stride )
 {
   mChannelStrideSamples = stride;
 }
-
-//void AudioPortBaseImplementation::setChannelStrideElements( std::size_t stride )
-//{
-//}
 
 void AudioPortBaseImplementation::setBasePointer( void* base )
 {
@@ -117,40 +114,15 @@ void * AudioPortBaseImplementation::basePointer()
   return mBasePointer;
 }
 
-#if 0
-AudioInputBase::AudioInputBase( std::string const & name, Component * container, AudioSampleType::Id sampleType )
- : AudioPortBaseImplementation( name, container, sampleType, Direction::Input )
+AudioSampleType::Id AudioPortBaseImplementation::sampleType() const noexcept
 {
+  return cSampleType;
 }
 
-AudioInputBase::AudioInputBase( std::string const & name, Component* container, AudioSampleType::Id sampleType, std::size_t width )
- : AudioPortBaseImplementation( name, container, sampleType, Direction::Input, width )
+std::size_t AudioPortBaseImplementation::sampleSize() const noexcept
 {
+  return cSampleSize;
 }
-
-AudioInputBase::~AudioInputBase() = default;
-
-void const * AudioInputBase::basePointer() const
-{
-  return mBasePointer;
-}
-
-AudioOutputBase::AudioOutputBase( std::string const & name, Component * container, AudioSampleType::Id sampleType )
- : AudioPortBaseImplementation( name, container, sampleType, Direction::Output )
-{
-}
-
-AudioOutputBase::AudioOutputBase( std::string const & name, Component* container, AudioSampleType::Id sampleType, std::size_t width )
- : AudioPortBaseImplementation( name, container, sampleType, Direction::Output, width )
-{}
-
-AudioOutputBase::~AudioOutputBase() = default;
-
-void * AudioOutputBase::basePointer()
-{
-  return mBasePointer;
-}
-#endif
 
 } // namespace impl
 } // namespace visr

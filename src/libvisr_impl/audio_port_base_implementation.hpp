@@ -64,13 +64,15 @@ public:
    */
   std::size_t channelStrideSamples() const noexcept;
 
-//  std::size_t channelStrideBytes() const noexcept;
+  std::size_t channelStrideBytes() const noexcept;
 
   //@}
 
   void setChannelStrideSamples(std::size_t stride);
 
-//  void setChannelStrideBytes( std::size_t stride );
+  AudioSampleType::Id sampleType() const noexcept;
+
+  std::size_t sampleSize() const noexcept;
 
   void setBasePointer( void* base );
 
@@ -84,7 +86,7 @@ protected:
 
   AudioSampleType::Id const cSampleType;
 
-// std::size_t const cSampleSize;
+  std::size_t const cSampleSize;
 
   std::size_t mWidth;
 
@@ -92,35 +94,6 @@ protected:
 
   std::size_t mChannelStrideSamples;
 };
-
-/**
- * Implementation base class for audio input ports
- * @todo: Move to a separate file if the class is eventually used.
- */
-//class AudioInputBase: public AudioPortBaseImplementation
-//{
-//public:
-//  explicit AudioInputBase( std::string const & name, Component * container, AudioSampleType::Id sampleType );
-//
-//  explicit AudioInputBase( std::string const & name, Component* container, AudioSampleType::Id sampleType, std::size_t width );
-//
-//  ~AudioInputBase() override;
-//
-//  void const * basePointer() const;
-//};
-//
-//class AudioOutputBase: public AudioPortBaseImplementation
-//{
-//public:
-//  explicit AudioOutputBase( std::string const & name, Component * container, AudioSampleType::Id sampleType );
-//
-//  explicit AudioOutputBase( std::string const & name, Component* container, AudioSampleType::Id sampleType, std::size_t width );
-//
-//  ~AudioOutputBase() override;
-//
-//  void * basePointer();
-//};
-
 
 } // namespace impl
 } // namespace visr
