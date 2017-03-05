@@ -39,7 +39,7 @@ void SchedulingGraph::initialise( impl::ComponentImplementation const & flow, Au
                                   ParameterConnectionMap const & parameterConnections )
 {
   mDependencyGraph.clear();
-  for( AudioConnectionMap::value_type const & val : connections )
+  for( AudioConnectionMap::ValueType const & val : connections )
   {
     addAudioDependency( val.first, val.second );
   }
@@ -60,14 +60,14 @@ SchedulingGraph::~SchedulingGraph()
 /**
  * @todo Consider making this private
  */
-void SchedulingGraph::addAudioDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver )
+void SchedulingGraph::addAudioDependency( AudioChannel const & sender, AudioChannel const & receiver )
 {
   // This assumes that we work on the signal connection map of a 'flattened' graph structure.
   // check whether the sender is an external capture port or an internal port
-  NodeType const senderType = sender.mPort->parent().isComposite() ? NodeType::Source : NodeType::Processor;
-  NodeType const receiverType = receiver.mPort->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender.mPort->parent().component())) ) : ProcessingNode( NodeType::Source );
-  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver.mPort->parent().component())) ) : ProcessingNode( NodeType::Sink );
+  NodeType const senderType = sender.port()->parent().isComposite() ? NodeType::Source : NodeType::Processor;
+  NodeType const receiverType = receiver.port()->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
+  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender.port()->parent().component())) ) : ProcessingNode( NodeType::Source );
+  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver.port()->parent().component())) ) : ProcessingNode( NodeType::Sink );
 
   VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
   if( senderFindIt == mVertexLookup.end() )

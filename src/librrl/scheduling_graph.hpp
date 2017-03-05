@@ -31,7 +31,7 @@ namespace rrl
 {
 // Forward declarations 
 class AudioConnectionMap;
-class AudioSignalDescriptor;
+class AudioChannel;
 
 class SchedulingGraph
 {
@@ -52,7 +52,7 @@ public:
 private:
   // TODO: Consider moving lots of graph functionality into a pimpl class.
 
-  void addAudioDependency( AudioSignalDescriptor const & sender, AudioSignalDescriptor const & receiver );
+  void addAudioDependency( AudioChannel const & sender, AudioChannel const & receiver );
 
   void addParameterDependency( impl::ParameterPortBaseImplementation const * sender, impl::ParameterPortBaseImplementation const * receiver );
 
