@@ -1,6 +1,7 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 #include <librrl/audio_signal_flow.hpp>
+#include <librrl/integrity_checking.hpp>
 
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -12,6 +13,7 @@
 
 #include <ciso646>
 #include <cstddef>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -249,6 +251,10 @@ BOOST_AUTO_TEST_CASE( CheckAtomicComponent )
 
   MyAtom atomicComp( context, "", nullptr, 2, 3 );
 
+  std::stringstream msg;
+  bool const res = checkConnectionIntegrity( atomicComp, true, msg );
+  BOOST_CHECK( res and msg.str().empty() );
+
   rrl::AudioSignalFlow flow( atomicComp );
 
   // Perform basic tests of the external I/O interface
@@ -258,7 +264,15 @@ BOOST_AUTO_TEST_CASE( CheckCompositeComponent )
 {
   SignalFlowContext context( 1024, 48000 );
 
-  MyComposite composite( context, "", nullptr, 2, 3 );
+  MyComposite composite( context, "top", nullptr, 2, 3 );
+
+  std::stringstream msg;
+  bool const res = checkConnectionIntegrity( composite, true, msg );
+  BOOST_CHECK( res and msg.str().empty() );
+  if( not res )
+  {
+    std::cout << "Error messages:\n" << msg.str() << std::endl;
+  }
 
   rrl::AudioSignalFlow flow( composite );
 
@@ -270,6 +284,10 @@ BOOST_AUTO_TEST_CASE( CheckTwoLevelCompositeComponent )
   SignalFlowContext context( 1024, 48000 );
 
   MyTopLevel composite( context, "", nullptr, 3, 4 );
+
+  std::stringstream msg;
+  bool const res = checkConnectionIntegrity( composite, true, msg );
+  BOOST_CHECK( res and msg.str().empty() );
 
   rrl::AudioSignalFlow flow( composite );
 
@@ -289,6 +307,10 @@ BOOST_AUTO_TEST_CASE( CheckRecursiveCompositeComponentNoAtom )
   bool const insertAtom = false;
 
   MyTopLevelRecursive composite( context, "", nullptr, 4, 4, recursionLimit, insertAtom );
+
+  std::stringstream msg;
+  bool const res = checkConnectionIntegrity( composite, true, msg );
+  BOOST_CHECK( res and msg.str().empty() );
 
   rrl::AudioSignalFlow flow( composite );
 
