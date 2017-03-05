@@ -44,35 +44,80 @@ bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation cons
                                       std::ostream & messages );
 
 /**
-* Helper class to traverse through the hierarchical model to collect all ports.
-* The key apect is that this method can be called recursively.
-* @todo Maybe use the same class to collect other data (atomic ports, parameter ports)
-*/
+ * Data structure to collect and categorize all ports contained in a component.
+ * Can be used both in 'hierarchical' mode or on the current level of the hierarchy.
+ */
 template<class PortType>
 class PortLookup
 {
 public:
   using PortTable = std::set<PortType *>;
 
+  /**
+   * Constructor, populate the different port tables.
+   * @param The component to analyse.
+   * @param hierarchical whether to analyse the complete hierarchical signal flow (true) or just the current level of the hierarchy (false).
+   */
   explicit PortLookup( impl::ComponentImplementation const & comp, bool recurse = true );
 
+  /**
+   * Return all input ports that are not placeholders.
+   */
   PortTable const & placeholderReceivePorts() const { return mPlaceholderReceivePorts; }
+
+  /**
+  * Return all input ports that are not placeholders.
+  */
   PortTable const & placeholderSendPorts() const { return mPlaceholderSendPorts; }
-  PortTable const & realSendPorts() const { return mRealSendPorts; }
-  PortTable const & realReceivePorts() const { return mRealReceivePorts; }
+  
+  /**
+  * Return all input ports that are not placeholders.
+  */
+  PortTable const & concreteSendPorts() const { return mConcreteSendPorts; }
+
+  /**
+  * Return all input ports that are not placeholders.
+  */
+  PortTable const & concreteReceivePorts() const { return mConcreteReceivePorts; }
+
+  /**
+   * Return the input ports of the top-level component.
+   */
   PortTable const & externalCapturePorts() const { return mExternalCapturePorts; }
-  PortTable const & externalPlaybackPorts() const { return mExternalPlaybackPorts;  }
+
+  /**
+   * Return the output ports of the top-level components.
+   */
+  PortTable const & externalPlaybackPorts() const { return mExternalPlaybackPorts; }
+
+  /**
+   * Return the union of external playback and concrete receive ports.
+   */
+  PortTable  const & allNonPlaceholderSendPorts() const { return mAllNonPlaceholderSendPorts; }
+
+  /**
+  * Return the union of external capture and concrete send ports.
+  */
+  PortTable  const & allNonPlaceholderReceivePorts() const { return mAllNonPlaceholderReceivePorts; }
 
 private:
 
-  void traverseComponent( impl::ComponentImplementation const & comp, bool recurse );
+  /**
+   * Internal method to populate the sets, called recursively.
+   * @param The component to analyse.
+   * @param hierarchical whether to analyse the complete hierarchical signal flow or just current level of the hierarchy.
+   * @param topLevel Flag to signal that the method is called with the top level component to be analyzed.
+   */
+  void traverseComponent( impl::ComponentImplementation const & comp, bool hierarchical, bool topLevel );
 
   PortTable mPlaceholderReceivePorts;
   PortTable mPlaceholderSendPorts;
-  PortTable mRealSendPorts;
-  PortTable mRealReceivePorts;
+  PortTable mConcreteSendPorts;
+  PortTable mConcreteReceivePorts;
   PortTable mExternalCapturePorts;
   PortTable mExternalPlaybackPorts;
+  PortTable mAllNonPlaceholderSendPorts;
+  PortTable mAllNonPlaceholderReceivePorts;
 };
 
 } // namespace rrl

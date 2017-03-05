@@ -25,7 +25,7 @@ bool isPlaceholderPort( impl::PortBaseImplementation const * const port )
   if( port->parent().isTopLevel() )
   {
     // A toplevel port is not considered as a placeholder here
-    // (It is either replaced by a real port or is handled in a special way.)
+    // (It is either replaced by a concrete port or is handled in a special way.)
     return false;
   }
   return true;
@@ -76,55 +76,51 @@ bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation cons
 template<class PortType>
 PortLookup<PortType>::PortLookup( impl::ComponentImplementation const & comp, bool recurse /*= true*/ )
 {
-  traverseComponent( comp, recurse );
+  traverseComponent( comp, recurse, true /* calling for the top level*/ );
+  mAllNonPlaceholderReceivePorts = mConcreteReceivePorts;
+  mAllNonPlaceholderReceivePorts.insert( mExternalPlaybackPorts.begin(), mExternalPlaybackPorts.end() );
+  mAllNonPlaceholderSendPorts = mConcreteSendPorts;
+  mAllNonPlaceholderSendPorts.insert( mExternalCapturePorts.begin(), mExternalCapturePorts.end() );
 }
 
 template<class PortType>
-void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation const & comp, bool recurse )
+void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation const & comp, bool recurse, bool topLevel )
 {
-  for( PortType * port : comp.ports<PortType>() )
+  // External capture/playback ports exist only at the top level.
+  if( topLevel )
   {
-    if( port->direction() == PortBase::Direction::Input )
+    for( PortType * port : comp.ports<PortType>() )
     {
-      // In the top-level component, an input port is both a concrete/placeholder input and an external capture port
-      if( comp.isTopLevel() )
-      {
-        mExternalCapturePorts.insert( port );
-      }
-      if( comp.isComposite() )
-      {
-        mPlaceholderReceivePorts.insert( port );
-      }
-      else
-      {
-        mRealReceivePorts.insert( port );
-      }
-    }
-    else
-    {
-      // For the top-level component, an output port is both a concrete/placeholder output and an external playback port
-      if( comp.isTopLevel() )
-      {
-        mExternalPlaybackPorts.insert( port );
-      }
-      if( comp.isComposite() )
-      {
-        mPlaceholderSendPorts.insert( port );
-      }
-      else
-      {
-        mRealSendPorts.insert( port );
-      }
+      port->direction() == PortBase::Direction::Input ?
+        mExternalCapturePorts.insert( port ) : mExternalPlaybackPorts.insert( port );
     }
   }
   if( comp.isComposite() )
   {
-    impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(comp );
-    // Add the ports of the contained components (without descending into the hierarchy)
+    impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(comp);
     for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
-      traverseComponent( *(compIt->second), recurse );
+      impl::ComponentImplementation const * subComp = compIt->second;
+      // If we recurse and the component is composite, then its ports are placeholders.
+      if( recurse and compIt->second->isComposite() )
+      {
+        for( PortType * subPort : subComp->ports<PortType>() )
+        {
+          subPort->direction() == PortBase::Direction::Input ?
+            mPlaceholderReceivePorts.insert( subPort ) : mPlaceholderReceivePorts.insert( subPort );
+        }
+        traverseComponent( comp, recurse, false/* Signal that this is called for a level lower than top level*/ );
+      }
+      else // If we don't recurse, then all contained ports count as concrete.
+      {
+        for( PortType * subPort : subComp->ports<PortType>() )
+        {
+          // Note: Directions are reversed here (we send to the inputs of the inner component)
+          subPort->direction() == PortBase::Direction::Input ?
+            mConcreteReceivePorts.insert( subPort ) : mConcreteSendPorts.insert( subPort );
+        }
+      }
     }
   }
 }
@@ -132,8 +128,6 @@ void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation cons
 // explicit instantiations
 template class PortLookup<impl::AudioPortBaseImplementation>;
 template class PortLookup<impl::ParameterPortBaseImplementation>;
-
-
 
 } // namespace rrl
 } // namespace visr
