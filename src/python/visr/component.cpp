@@ -3,8 +3,10 @@
 
 #include "component.hpp"
 
+#include <libril/audio_port_base.hpp>
 #include <libril/component.hpp>
 #include <libril/composite_component.hpp>
+#include <libril/parameter_port_base.hpp>
 #include <libril/signal_flow_context.hpp>
 
 #ifdef USE_PYBIND11
@@ -37,6 +39,8 @@ void exportComponent( pybind11::module& m )
     .def( "samplingFrequency", &Component::samplingFrequency ) 
     .def( "period", &Component::period )
     .def( "isTopLevel", &Component::isTopLevel )
+    .def( "audioPort", static_cast<AudioPortBase&(Component::*)(std::string const &)>(&Component::audioPort), pybind11::arg("portName"), "Return an audio port object by name", pybind11::return_value_policy::reference )
+    .def( "parameterPort", static_cast<ParameterPortBase&(Component::*)(std::string const &)>(&Component::parameterPort), pybind11::arg( "portName" ), "Return a parameter port object by name", pybind11::return_value_policy::reference )
     ;
 }
 

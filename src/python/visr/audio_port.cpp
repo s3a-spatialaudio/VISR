@@ -4,10 +4,14 @@
 #include <libril/audio_port_base.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
+#include <libril/audio_sample_type.hpp>
+#include <libril/constants.hpp>
 
 #include <libril/component.hpp>
-#include <libril/port_base.hpp>
 #include <libril/signal_flow_context.hpp>
+
+// Extend the interface beyond the audio ports visible in the C++ API
+#include <libvisr_impl/audio_port_base_implementation.hpp>
 
 #ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
@@ -26,38 +30,82 @@ namespace visr
 
 #ifdef USE_PYBIND11
 
+namespace // unnamed
+{
+/// Bind an audio input of a given sample type to the specified name.
+template<typename DataType >
+void exportAudioInput( pybind11::module & m, char const * name )
+{
+  pybind11::class_<AudioInputT<DataType>, AudioPortBase >( m, name )
+    .def( pybind11::init<char const*, Component &, std::size_t>(),
+      pybind11::arg("name"), pybind11::arg("parent"), pybind11::arg("width") = 0 )
+    ;
+}
+
+/// Bind an audio output of a given sample type to the specified name.
+template<typename DataType >
+void exportAudioOutput( pybind11::module & m, char const * name )
+{
+  pybind11::class_<AudioOutputT<DataType>, AudioPortBase >( m, name )
+    .def( pybind11::init<char const*, Component &>(),
+      pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "width" ) = 0 )
+    ;
+}
+
+} // unnamed namespace
+
 void exportAudioPort( pybind11::module & m)
 {
-  // Note: we create a named object because we use it subsequently for defining the Direction enum
-  pybind11::class_<PortBase> portBase( m, "PortBase" );
-  portBase
-    .def( pybind11::init<std::string const &, Component &, PortBase::Direction>(), pybind11::return_value_policy::reference_internal )
-    .def_property_readonly( "name", &PortBase::name )
-    .def_property_readonly( "direction", &PortBase::direction )
-    .def_property_readonly( "parent", &PortBase::direction ) // Check how to select the const version
-    .def_property_readonly( "parent", static_cast<PortBase::Direction( PortBase::* )() const>(&PortBase::direction) ) // Select the const method overload
+  pybind11::enum_<AudioSampleType::Id>(m, "AudioSampleType")
+    .value( "floatId", AudioSampleType::floatId )
+    .value( "doubleId", AudioSampleType::doubleId )
+    .value( "longDoubleId", AudioSampleType::longDoubleId )
+    .value( "uint8Id", AudioSampleType::uint8Id )
+    .value( "int8Id", AudioSampleType::int8Id )
+    .value( "uint16Id", AudioSampleType::uint16Id )
+    .value( "int16Id", AudioSampleType::int16Id )
+    .value( "uint32Id", AudioSampleType::uint32Id )
+    .value( "int32Id", AudioSampleType::int32Id )
     ;
 
-  pybind11::enum_<PortBase::Direction>( portBase, "Direction" )
-    .value( "Input", PortBase::Direction::Input )
-    .value( "Output", PortBase::Direction::Output )
-    //.export_values() // skip that because we don't want to export the enum values to the parent namespace.
-    ;
-
-  pybind11::class_<AudioPortBase, PortBase>( m, "AudioPortBase" )
-    .def( pybind11::init<char const*, Component &, PortBase::Direction>( ) )
+  /**
+   * Define the common base class for audio ports.
+   * Instantiation of this class is not intended, therefore no constructors are exposed.
+   */
+  pybind11::class_<AudioPortBase>( m, "AudioPortBase" )
     .def_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
+    .def_property_readonly( "alignmentSamples", &AudioPortBase::alignmentSamples )
+    .def_property_readonly( "alignmentBytes", &AudioPortBase::alignmentBytes )
+    .def_property_readonly( "channelStrideSamples", &AudioPortBase::channelStrideSamples )
+    .def_property_readonly( "channelStrideBytes", &AudioPortBase::channelStrideBytes )
+    .def_property_readonly( "sampleSize", &AudioPortBase::sampleSize )
+    .def_property_readonly( "sampleType", &AudioPortBase::sampleType )
+    .def_property_readonly( "initialised", []( AudioPortBase const & port ){ return port.implementation().initialised(); } )
     ;
 
-  pybind11::class_<AudioInput, AudioPortBase >( m, "AudioInput" )
-    .def( pybind11::init<char const*, Component &>() )
-    .def_property( "width", &AudioOutput::width, &AudioOutput::setWidth )
-    ;
+  // Use the simple name for the default sample type (float)
+  // Unfortunately pybind11 does not support aliases or  a second binding for the same C++ type
+  exportAudioInput<float>( m, "AudioInput" );
+  exportAudioInput<double>( m, "AudioInputDouble" );
+  exportAudioInput<long double>( m, "AudioInputLongDouble" );
+  exportAudioInput<int8_t>( m, "AudioInputInt8" );
+  exportAudioInput<uint8_t>( m, "AudioInputUint8" );
+  exportAudioInput<int16_t>( m, "AudioInputInt16" );
+  exportAudioInput<uint16_t>( m, "AudioInputUint16" );
+  exportAudioInput<int32_t>( m, "AudioInputInt32" );
+  exportAudioInput<uint32_t>( m, "AudioInputUint32" );
 
-  pybind11::class_<AudioOutput, AudioPortBase >( m, "AudioOutput" )
-    .def( pybind11::init<char const*, Component &>() )
-    .def_property( "width", &AudioOutput::width, &AudioOutput::setWidth )
-    ;
+  // Use the simple name for the default sample type (float)
+  // Unfortunately pybind11 does not support aliases or  a second binding for the same C++ type
+  exportAudioOutput<float>( m, "AudioOutput" );
+  exportAudioOutput<double>( m, "AudioOutputDouble" );
+  exportAudioOutput<long double>( m, "AudioOutputLongDouble" );
+  exportAudioOutput<int8_t>( m, "AudioOutputInt8" );
+  exportAudioOutput<uint8_t>( m, "AudioOutputUint8" );
+  exportAudioOutput<int16_t>( m, "AudioOutputInt16" );
+  exportAudioOutput<uint16_t>( m, "AudioOutputUint16" );
+  exportAudioOutput<int32_t>( m, "AudioOutputInt32" );
+  exportAudioOutput<uint32_t>( m, "AudioOutputUint32" );
 }
 
 #else
