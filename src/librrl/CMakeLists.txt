@@ -4,11 +4,13 @@ SET( SOURCES
 audio_connection_map.cpp
 audio_signal_flow.cpp
 communication_area.cpp
+integrity_checking.cpp
 parameter_connection_graph.cpp
 parameter_connection_map.cpp
 port_utilities.cpp
 portaudio_interface.cpp
 scheduling_graph.cpp
+signal_routing_internal.cpp
 )
 
 SET( HEADERS
@@ -16,11 +18,13 @@ audio_connection_map.hpp
 audio_interface.hpp
 audio_signal_flow.hpp
 communication_area.hpp
+integrity_checking.hpp
 parameter_connection_graph.hpp
 parameter_connection_map.hpp
 portaudio_interface.hpp
 port_utilities.hpp
 scheduling_graph.hpp
+signal_routing_internal.hpp
 )
 
 IF( BUILD_USE_JACK )
