@@ -2,11 +2,13 @@
 
 set( SOURCES
 audio_signal_flow.cpp
+integrity_checking.cpp
 rrl.cpp
 )
 
 set( HEADERS
 audio_signal_flow.hpp
+integrity_checking.hpp
 )
 
 
