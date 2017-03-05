@@ -4,6 +4,7 @@
 
 #include "audio_connection_map.hpp"
 #include "communication_area.hpp"
+#include "integrity_checking.hpp"
 #include "parameter_connection_graph.hpp"
 #include "parameter_connection_map.hpp"
 #include "port_utilities.hpp"
@@ -40,7 +41,7 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
  , mInitialised( false )
 {
   std::stringstream checkMessages;
-  bool const checkResult = checkFlow( mFlow, true, checkMessages );
+  bool const checkResult = checkConnectionIntegrity( mFlow, true/* hierarchical*/, checkMessages );
   if( not checkResult )
   {
     // TODO: Devise other ways to transport messages.
@@ -48,19 +49,29 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
     throw std::runtime_error( "Signal flow graph is inconsistent." );
   }
   checkMessages.clear();
-  bool const initAudioResult = initialiseAudioConnections( checkMessages );
-  if( not initAudioResult )
-  {
-    // TODO: Devise other ways to transport messages.
-    std::cout << "Messages during audio initialisation: " << checkMessages.str() << std::endl;
-    throw std::runtime_error( "AudioSignalFlow: Audio connections could not be initialised." );
-  }
+
+  // TODO: Might the parameter initalisation also result in a 
+
   bool const initParamResult = initialiseParameterInfrastructure( checkMessages );
   if( not initParamResult )
   {
     std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
     throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
   }
+  bool const initAudioResult = initialiseAudioConnections( checkMessages );
+
+  // TODO: Come with an updated connection list
+
+  if( not initAudioResult )
+  {
+    // TODO: Devise other ways to transport messages.
+    std::cout << "Messages during audio initialisation: " << checkMessages.str() << std::endl;
+    throw std::runtime_error( "AudioSignalFlow: Audio connections could not be initialised." );
+  }
+
+
+
+  // TODO: Use the full list of components 
   bool const initScheduleResult = initialiseSchedule( checkMessages );
   if( not initScheduleResult )
   {
@@ -219,32 +230,6 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
   return mPlaybackIndices.size();
 }
 
-// This method is not used at the moment.
-// TODO: Consider removal
-#if 0
-bool AudioSignalFlow::initialise( std::ostream & messages )
-{
-  if( not mFlow.isTopLevel() )
-  { 
-    messages << "the component is not a top-level element of a flow.";
-    return false;
-  }
-  if( not mFlow.isComposite() )
-  {
-    AtomicComponent& atom = static_cast<AtomicComponent&>(mFlow);
-    mProcessingSchedule.push_back( std::move( &atom ) );
-  }
-  else
-  {
-    CompositeComponent & topLevel = dynamic_cast<CompositeComponent&>(mFlow);
-    // for( CompositeComponent::Co)
-
-
-  }
-  return true;
-}
-#endif
-
 bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages )
 {
   bool result = true;
@@ -265,9 +250,9 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     messages << "AudioSignalFlow: Parameter connections are inconsistent.\n";
     return false;
   }
-  ParameterConnectionMap realConnections = resolvePlaceholders( allConnections );
+  ParameterConnectionMap concreteConnections = resolvePlaceholders( allConnections );
 
-  ParameterConnectionGraph const connectionGraph( realConnections );
+  ParameterConnectionGraph const connectionGraph( concreteConnections );
   for( ParameterConnectionGraph::ConnectedPorts const & connection : connectionGraph.connectedPorts() )
   {
     // First check the connection topology.
@@ -342,10 +327,8 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   }
 
   // Check whether all ports have been connected.
-  PortLookup<impl::ParameterPortBaseImplementation> allPorts( mFlow );
-  PortLookup<impl::ParameterPortBaseImplementation>::PortTable allSendPorts( allPorts.externalCapturePorts() );
-  allSendPorts.insert( allPorts.realSendPorts().begin(), allPorts.realSendPorts().end() );
-  for( impl::ParameterPortBaseImplementation const * const port : allSendPorts )
+  PortLookup<impl::ParameterPortBaseImplementation> allPorts( mFlow, true );
+  for( impl::ParameterPortBaseImplementation const * const port : allPorts.allNonPlaceholderSendPorts() )
   {
 #ifdef NEW_AUDIO_CONNECTION
     if( not port->isConnected() )
@@ -355,9 +338,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     }
 #endif
   }
-  PortLookup<impl::ParameterPortBaseImplementation>::PortTable allReceivePorts( allPorts.externalPlaybackPorts() );
-  allReceivePorts.insert( allPorts.realReceivePorts().begin(), allPorts.realReceivePorts().end() );
-  for( impl::ParameterPortBaseImplementation const * const port : allReceivePorts )
+  for( impl::ParameterPortBaseImplementation const * const port : allPorts.allNonPlaceholderReceivePorts() )
   {
 #ifdef NEW_AUDIO_CONNECTION
     if( not port->isConnected() )
@@ -382,16 +363,20 @@ bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )
   {
     AudioConnectionMap allAudioConnections;
     result &= allAudioConnections.fill( mFlow, messages, true/*recursive*/ );
-    AudioConnectionMap realAudioConnections;
-    realAudioConnections.resolvePlaceholders( allAudioConnections );
+    AudioConnectionMap const concreteAudioConnections = allAudioConnections.resolvePlaceholders();
 
     ParameterConnectionMap allParameterConnections;
     result &= fillRecursive( allParameterConnections, mFlow, messages );
-    ParameterConnectionMap const realParameterConnections = resolvePlaceholders( allParameterConnections );
+    ParameterConnectionMap const concreteParameterConnections = resolvePlaceholders( allParameterConnections );
+
+    if( not result ) // No use to go on with schedule computation if the connections are inconsistent.
+    {
+      return result;
+    }
 
     SchedulingGraph depGraph;
     // TODO: check result!
-    depGraph.initialise( mFlow, realAudioConnections, realParameterConnections );
+    depGraph.initialise( mFlow, concreteAudioConnections, concreteParameterConnections );
     auto const schedule = depGraph.sequentialSchedule();
     mProcessingSchedule.assign( schedule.begin(), schedule.end() );
   }
@@ -402,197 +387,6 @@ bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )
 std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 {
   return mCommunicationProtocols.size();
-}
-
-
-bool AudioSignalFlow::checkFlow( impl::ComponentImplementation const & comp, bool locally, std::ostream & messages )
-{
-  if( not comp.isComposite() )
-  {
-    return true;
-  }
-  impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>( comp );
-
-  // First, check the connections level by level
-  if( locally )
-  {
-    bool const localResult = checkCompositeLocal( composite, messages );
-    bool overallResult = localResult;
-    for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin( ) );
-      compIt != composite.componentEnd( ); ++compIt )
-    {
-      // TODO: Check whether we should work on the internal objects instead.
-      bool const compRes = checkFlow( *(compIt->second), locally, messages );
-      overallResult = overallResult and compRes;
-    }
-    return overallResult;
-  }
-  else
-  {
-    // No idea how to check hierarchically without flattening the graph.
-    // Maybe we remove that option.
-    return true;
-  }
-}
-
-bool AudioSignalFlow::checkCompositeLocal( impl::CompositeComponentImplementation const & composite, std::ostream & messages )
-{
-  bool const audioCheck = checkCompositeLocalAudio( composite, messages );
-  bool const paramCheck = checkCompositeLocalParameters( composite, messages );
-  return audioCheck and paramCheck;
-}
-
-bool AudioSignalFlow::checkCompositeLocalAudio( impl::CompositeComponentImplementation const & composite, std::ostream & messages )
-{
-  bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<impl::AudioPortBaseImplementation const*>;
-  PortTable sendPorts;
-  PortTable receivePorts;
-
-  // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
-  // reversed, i.e. inputs are senders and outputs are receivers.
-  for( impl::ComponentImplementation::AudioPortContainer::const_iterator extPortIt = composite.audioPortBegin();
-       extPortIt != composite.audioPortEnd(); ++extPortIt )
-  {
-    if( (*extPortIt)->direction() == PortBase::Direction::Input )
-    {
-      sendPorts.insert( *extPortIt );
-    }
-    else
-    {
-      receivePorts.insert( *extPortIt );
-    }
-  }
-  // Add the ports of the contained components (without descending into the hierarchy)
-  for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin());
-       compIt != composite.componentEnd(); ++compIt )
-  {
-    impl::ComponentImplementation const * containedComponent = compIt->second;
-    for( auto port : containedComponent->ports<impl::AudioPortBaseImplementation>() )
-    {
-      port->direction() == PortBase::Direction::Input ?
-        receivePorts.insert( port ) : sendPorts.insert( port );
-    }
-  }
-  // Now populate the connection map
-  try
-  {
-    AudioConnectionMap const connections( composite, false );
-    for( impl::AudioPortBaseImplementation const * sendPort : sendPorts )
-    {
-      std::size_t const numChannels = sendPort->width();
-      // Ports must not necessarily be set (they remain width() == 0 otherwise.)
-      // if( numChannels == AudioPortBase::cInvalidWidth )
-      //{
-      //  messages << "Audio signal flow connection check: The send port \"" << fullyQualifiedName( *sendPort ) << " is not initialised." << std::endl;
-      //  result = false;
-      //  continue; // Cannot check for this receive port.
-      //}
-    }
-    for( impl::AudioPortBaseImplementation const * receivePort : receivePorts )
-    {
-      std::size_t const numChannels = receivePort->width( );
-      // Ports must not necessarily be set (they remain width() == 0 otherwise.)
-      //if( numChannels == AudioPortBase::cInvalidWidth )
-      //{
-      //  messages << "Audio signal flow connection check: The receive port \"" << fullyQualifiedName( *receivePort ) << " is not initialised." << std::endl;
-      //  result = false;
-      //  continue; // Cannot check for this receive port.
-      //}
-      for( std::size_t channelIdx( 0 ); channelIdx < numChannels; ++channelIdx )
-      {
-        std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator > findRange
-          = connections.equal_range( AudioSignalDescriptor( receivePort, channelIdx ) );
-        std::ptrdiff_t const numConnections = std::distance( findRange.first, findRange.second );
-        assert( numConnections >= 0 );
-        if( numConnections == 0 )
-        {
-          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":" << channelIdx
-            << " is unconnected" << std::endl;
-          result = false;
-        }
-        else if( numConnections > 1 )
-        {
-          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":"
-            << channelIdx << " is connected to " << numConnections << " send channels: " << printAudioSignalDescriptor( findRange.first->second );
-          ++findRange.first;
-          for( ; findRange.first != findRange.second; ++findRange.first )
-          {
-            messages << ", " << printAudioSignalDescriptor( findRange.first->second );
-          }
-          messages << std::endl;
-          result = false;
-        }
-      }
-    }
-  }
-  catch( std::exception const & ex )
-  {
-    messages << ex.what();
-    result = false;
-  }
-
-  // Now check that all receivers are uniquely connected
-  return result;
-}
-
-bool AudioSignalFlow::checkCompositeLocalParameters( impl::CompositeComponentImplementation const & composite, std::ostream & messages )
-{
-  bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<impl::ParameterPortBaseImplementation const*>;
-  PortTable sendPorts;
-  PortTable receivePorts;
-
-  // Get the 'implementation' object that holds the tables to ports and contained components.
-
-  // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
-  // reversed, i.e. inputs are senders and outputs are receivers.
-#if 1
-  for( auto port : composite.ports<impl::ParameterPortBaseImplementation>() )
-  {
-    (port->direction() == PortBase::Direction::Input) ?
-     sendPorts.insert( port ) : receivePorts.insert( port );
-  }
-#else
-  for( auto extPortIt = composite.implementation().parameterPortBegin();
-    extPortIt != composite.implementation().parameterPortEnd(); ++extPortIt )
-  {
-    if( (*extPortIt)->direction() == PortBase::Direction::Input )
-    {
-      sendPorts.insert( *extPortIt );
-    }
-    else
-    {
-      receivePorts.insert( *extPortIt );
-    }
-#endif
-  // Add the ports of the contained components (without descending into the hierarchy)
-#if 1
-  for( auto port : composite.ports<impl::ParameterPortBaseImplementation>() )
-  {
-    (port->direction() == PortBase::Direction::Input ) ?
-      receivePorts.insert( port ) : sendPorts.insert( port );
-  }
-#else
-  for( auto compIt( compositeImpl.componentBegin() );
-    compIt != compositeImpl.componentEnd(); ++compIt )
-  {
-    Component const & containedComponent = *(compIt->second);
-    for( Component::ParameterPortContainer::const_iterator intPortIt = containedComponent.parameterPortBegin();
-      intPortIt != containedComponent.parameterPortEnd(); ++intPortIt )
-    {
-      if( (*intPortIt)->direction() == PortBase::Direction::Input )
-      {
-        receivePorts.insert( *intPortIt );
-      }
-      else
-      {
-        sendPorts.insert( *intPortIt );
-      }
-    }
-  }
-#endif
-  return result;
 }
 
 namespace // unnamed
@@ -638,7 +432,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   // Compute the number of audio channels for the different categories that are kept in the communicatio area.
   //  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );
   std::size_t const numCaptureChannels = countAudioChannels( portLookup.externalCapturePorts() );
-  std::size_t const numConcreteOutputChannels = countAudioChannels( portLookup.realSendPorts() );
+  std::size_t const numConcreteOutputChannels = countAudioChannels( portLookup.concreteSendPorts() );
   std::size_t const totalSignalChannels = numCaptureChannels + numConcreteOutputChannels;
 
   std::size_t const period = mFlow.period();
@@ -654,13 +448,13 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
   // Initialise the 'concrete' internal receive ports.
   // std::size_t const concreteOutputSignalOffset = offset; // ATM unused
-  std::for_each( portLookup.realSendPorts().begin( ), portLookup.realSendPorts().end( ),
+  std::for_each( portLookup.concreteSendPorts().begin( ), portLookup.concreteSendPorts().end( ),
     std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
-#endif
   if( offset != mCommArea->numberOfSignals( ) )
   {
     throw std::logic_error( "AudioSignalFlow::initialiseAudioConnections(): number of allocated " );
   }
+#endif
 
   // Initialise the data structures for the external inputs (capture ports)
   mTopLevelAudioInputs.reserve( portLookup.externalCapturePorts().size( ) );
@@ -701,7 +495,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
     AudioConnectionMap concreteConnections;
     try
     {
-      concreteConnections.resolvePlaceholders( allConnections );
+      concreteConnections = std::move(allConnections.resolvePlaceholders());
     }
     catch( std::exception const & ex )
     {
@@ -711,9 +505,8 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
 
     std::cout << "\n\n\nConcrete connections:\n" << concreteConnections << std::endl;
 
-    // Initialise the concrete, i.e., real receive ports
-    // Note: this assumes that all send ports (concrete and external capture ports) have already been initialised
-    for( impl::AudioPortBaseImplementation * receivePort : portLookup.realReceivePorts() )
+    // Initialise the audio ports.
+    for( impl::AudioPortBaseImplementation * receivePort : portLookup.concreteReceivePorts() )
     {
       std::size_t const portWidth = receivePort->width( );
       std::vector<SignalIndexType> receiveIndices( portWidth );
@@ -722,10 +515,10 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
         // equal_range is used to detect multiple connections
         // Normally this should have been detected before in the checking phase.
         std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator >
-          findRange = concreteConnections.equal_range( AudioSignalDescriptor( receivePort, chIdx ) );
+          findRange = concreteConnections.equal_range( AudioChannel( receivePort, chIdx ) );
         if( findRange.first == concreteConnections.end( ) )
         {
-          throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
+          throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel " );
         }
         if( std::distance( findRange.first, findRange.second ) != 1 )
         {
@@ -753,7 +546,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
         // equal_range is used to detect multiple connections
         // Normally this should have been detected before in the checking phase.
         std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator >
-          findRange = concreteConnections.equal_range( AudioSignalDescriptor( playbackPort, chIdx ) );
+          findRange = concreteConnections.equal_range( AudioChannel( playbackPort, chIdx ) );
         if( findRange.first == concreteConnections.end( ) )
         {
           throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );

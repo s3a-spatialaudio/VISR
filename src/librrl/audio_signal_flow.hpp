@@ -20,7 +20,6 @@
 namespace visr
 {
 // Forward declarations
-class AtomicComponent;
 class ParameterPortBase;
 class CommunicationProtocolBase;
 
@@ -155,13 +154,6 @@ public:
 
 
 private:
-// Unused at the moment, outdated, incomplete implementation
-#if 0
-  /**
-   * Top-level initialisation function, called from the constructor
-   */
-  bool initialise( std::ostream & messages );
-#endif
   bool initialiseAudioConnections( std::ostream & messages );
 
   /**
@@ -212,15 +204,6 @@ private:
   */
   void executeComponents( );
 
-#if 0
-  /**
-   * find a port of a specific audio component, both specified by name
-   * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
-   */
-  AudioPortBase & findPort( std::string const & componentName,
-                             std::string const & portName );
-#endif
-
   /**
    * The signal flow handled by this object.
    * Can be either an atomic or a (hierachical) composite component/
@@ -232,18 +215,6 @@ private:
    * @note: As long as initialisation is performed fully in the constructor, here is no need for that,
    */
   bool mInitialised;
-
-  /**
-   * Type for collection and lookup of all audio components contained in this signal flow.
-   * @note At this level the signal flow is flat, i.e., only atomic components are important.
-   */
-  using ComponentTable = std::map<std::string, AtomicComponent*>;
-
-  /**
-   * A table of all Component objects contained in this graph. 
-   * @note: This member does assume the ownership of the components.
-   */
-  ComponentTable mComponents;
 
   /**
    * Parameter infrastructure
