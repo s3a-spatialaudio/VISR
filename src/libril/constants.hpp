@@ -26,7 +26,7 @@ using SamplingFrequencyType = std::size_t;
 static const std::size_t cVectorAlignmentBytes = 64;
 
 /**
- * Desired alignement for contiguous vectors, given in byte.
+ * Desired alignment for contiguous vectors of the default sample type, given in number of elements o.
  */
 static const std::size_t cVectorAlignmentSamples = cVectorAlignmentBytes / sizeof(SampleType);
 

@@ -59,6 +59,18 @@ public:
   std::size_t width() const noexcept;
 
   /**
+  * Return the alignment of the channel vectors in bytes.
+  * This method can be called at any point of the lifetime of an audio port, and the alignemnt is guaranteed not to change.
+  */
+  std::size_t alignmentBytes() noexcept;
+
+  /**
+  * Return the guaranteed alignment of the channel vectors (in multiples of the element size).
+  * This function can be called at any point of the audio port's lifetime and the alignment remians constant througout that lifetime.
+  */
+  std::size_t alignmentSamples() noexcept;
+
+  /**
    * Return the number of samples between the vectors of successive audio channels.
    * If the port has not been initialised, 0 is returned.
    */

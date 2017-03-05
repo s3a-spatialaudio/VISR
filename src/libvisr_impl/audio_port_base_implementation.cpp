@@ -4,6 +4,7 @@
 
 #include "component_impl.hpp"
 
+#include <cassert>
 #include <ciso646>
 
 namespace visr
@@ -25,6 +26,9 @@ AudioPortBaseImplementation::AudioPortBaseImplementation( std::string const & na
  , mBasePointer( nullptr )
  , mChannelStrideSamples( 0 )
 {
+  // last line of defense if the assumption that the elements size fits into the chosen alignment.
+  // TODO: Turn this into an exception if this error is likely to happen apart from a total  internal screwup of the runtime system.
+  assert( alignmentBytes() % cSampleSize == 0 ); 
   if( container )
   {
     container->registerAudioPort( this );
@@ -72,6 +76,16 @@ void AudioPortBaseImplementation::setWidth( std::size_t newWidth )
 std::size_t AudioPortBaseImplementation::width() const noexcept
 {
   return mWidth;
+}
+
+std::size_t AudioPortBaseImplementation::alignmentBytes() noexcept
+{
+  return cVectorAlignmentBytes;
+}
+
+std::size_t AudioPortBaseImplementation::alignmentSamples() noexcept
+{
+  return alignmentBytes() / cSampleSize;
 }
 
 /**

@@ -31,6 +31,16 @@ std::size_t AudioPortBase::width() const noexcept
   return mImpl->width();
 }
 
+std::size_t AudioPortBase::alignmentBytes() noexcept
+{
+  return mImpl->alignmentBytes();
+}
+
+std::size_t AudioPortBase::alignmentSamples() noexcept
+{
+  return mImpl->alignmentSamples();
+}
+
 std::size_t AudioPortBase::channelStrideSamples() const noexcept
 {
   return mImpl->channelStrideSamples();

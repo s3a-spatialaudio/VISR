@@ -28,8 +28,6 @@ namespace visr
 
     virtual ~AudioOutputT() override = default;
 
-    std::size_t channelStrideBytes() const { return channelStrideSamples() * sizeof( DataType ); }
-
     DataType * base() { return static_cast<DataType * >(AudioPortBase::basePointer()); }
 
     DataType * at( std::size_t idx )

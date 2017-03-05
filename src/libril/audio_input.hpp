@@ -28,8 +28,6 @@ public:
 
   virtual ~AudioInputT() override = default;
 
-  std::size_t channelStrideBytes() const { return channelStrideSamples() * sizeof( DataType ); }
-
   DataType const * base() const { return static_cast<DataType const * >(AudioPortBase::basePointer()); }
 
   DataType const * at( std::size_t idx ) const
