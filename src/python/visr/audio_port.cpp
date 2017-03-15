@@ -15,6 +15,8 @@
 
 #ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+
 #else
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
@@ -32,13 +34,87 @@ namespace visr
 
 namespace // unnamed
 {
+
+template<typename DataType>
+pybind11::array_t<DataType> getInputBuffer( AudioInputT<DataType> & port )
+{
+  pybind11::buffer_info info ( const_cast<DataType*>(port.base()),
+    sizeof(DataType),
+    pybind11::format_descriptor<DataType>::format(),
+    2 /* number of dimensions */,
+    { port.width(), port.channelStrideSamples() },
+    { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
+  );
+  return pybind11::array_t<DataType>( info );
+}
+
+template<typename DataType>
+pybind11::array_t<DataType> getOutputBuffer( AudioOutputT<DataType> & port )
+{
+  return pybind11::array_t<DataType>( pybind11::buffer_info( port.base(),
+    sizeof( DataType ),
+    pybind11::format_descriptor<DataType>::format(),
+    2 /* number of dimensions */,
+    { port.width(), port.channelStrideSamples() },
+    { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
+  ) );
+}
+
+template<typename DataType>
+pybind11::array_t<DataType> getInputChannel( AudioInputT<DataType> & port, std::size_t index )
+{
+  pybind11::buffer_info info( const_cast<DataType*>(port.at(index)),
+    sizeof( DataType ),
+    pybind11::format_descriptor<DataType>::format(),
+    1 /* number of dimensions */,
+    { port.channelStrideSamples() },
+    { sizeof( DataType ) }
+  );
+  return pybind11::array_t<DataType>( info );
+}
+
+template<typename DataType>
+pybind11::array_t<DataType> getOutputChannel( AudioOutputT<DataType> & port, std::size_t index )
+{
+  pybind11::buffer_info info( const_cast<DataType*>(port.at( index )),
+    sizeof( DataType ),
+    pybind11::format_descriptor<DataType>::format(),
+    1 /* number of dimensions */,
+    { port.channelStrideSamples() },
+    { sizeof( DataType ) }
+  );
+  return pybind11::array_t<DataType>( info );
+}
+
+template<typename DataType>
+void setOutputBuffer( pybind11::array_t<DataType> & matrix )
+{
+  pybind11::buffer_info info = matrix.request();
+  // TODO: check compatibility of matrices.
+
+  // TODO: Perform copying (accounting for matrix layout and alignment)
+}
+
 /// Bind an audio input of a given sample type to the specified name.
 template<typename DataType >
 void exportAudioInput( pybind11::module & m, char const * name )
 {
-  pybind11::class_<AudioInputT<DataType>, AudioPortBase >( m, name )
+  pybind11::class_<AudioInputT<DataType>, AudioPortBase >( m, name, pybind11::buffer_protocol() )
     .def( pybind11::init<char const*, Component &, std::size_t>(),
       pybind11::arg("name"), pybind11::arg("parent"), pybind11::arg("width") = 0 )
+    .def_buffer( []( AudioInputT<DataType> &port ) -> pybind11::buffer_info
+  {
+    return pybind11::buffer_info( const_cast<DataType*>(port.base()),
+      sizeof( DataType ),
+      pybind11::format_descriptor<DataType>::format(),
+      2 /* number of dimensions */,
+      { port.width(), port.channelStrideSamples() },
+      { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
+    );
+  } )
+  .def( "data", &getInputBuffer<DataType> )
+  .def( "channel", &getInputChannel<DataType>, pybind11::arg("index") )
+  .def( "__getitem__", &getInputChannel<DataType>, pybind11::arg( "index" ) )
     ;
 }
 
@@ -46,9 +122,25 @@ void exportAudioInput( pybind11::module & m, char const * name )
 template<typename DataType >
 void exportAudioOutput( pybind11::module & m, char const * name )
 {
-  pybind11::class_<AudioOutputT<DataType>, AudioPortBase >( m, name )
+  pybind11::class_<AudioOutputT<DataType>, AudioPortBase >( m, name, pybind11::buffer_protocol() )
     .def( pybind11::init<char const*, Component &, std::size_t>(),
       pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "width" ) = 0 )
+    .def_buffer( []( AudioOutputT<DataType> &port ) -> pybind11::buffer_info
+  {
+    return pybind11::buffer_info( const_cast<DataType*>(port.base()),
+      sizeof( DataType ),
+      pybind11::format_descriptor<DataType>::format(),
+      2 /* number of dimensions */,
+      { port.width(), port.channelStrideSamples() },
+      { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
+    );
+  } )
+
+    .def( "data", &getOutputBuffer<DataType>, pybind11::return_value_policy::reference_internal )
+    .def( "set", &setOutputBuffer<DataType> )
+    // TODO: can we get an assign operator?
+    .def( "channel", &getOutputChannel<DataType>, pybind11::return_value_policy::reference_internal, pybind11::arg( "index" ) )
+    .def( "__getitem__", &getOutputChannel<DataType>, pybind11::return_value_policy::reference_internal, pybind11::arg( "index" ) )
     ;
 }
 
