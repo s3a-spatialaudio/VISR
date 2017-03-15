@@ -47,7 +47,7 @@ template<typename DataType >
 void exportAudioOutput( pybind11::module & m, char const * name )
 {
   pybind11::class_<AudioOutputT<DataType>, AudioPortBase >( m, name )
-    .def( pybind11::init<char const*, Component &>(),
+    .def( pybind11::init<char const*, Component &, std::size_t>(),
       pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "width" ) = 0 )
     ;
 }
