@@ -749,6 +749,19 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
         currentOffset += port->width() + channelStrideBytes;
       }
     }
+    // Test code to initialise the communication areas with 'marker' values.
+    // Makes sense only for float data
+    // TODO: Remove ASAP
+    if( sampleType == AudioSampleType::floatId )
+    {
+      std::size_t const numChannels = (currentOffset - dataTypeOffset) / channelStrideBytes;
+      for( std::size_t channelIdx( 0 ); channelIdx < numChannels; ++channelIdx )
+      {
+        float val = static_cast<float>(channelIdx);
+        std::fill_n( reinterpret_cast<float*>(mAudioSignalPool->basePointer() + dataTypeOffset + channelStrideBytes * channelIdx),
+        period(), val );
+      }
+    }
   }
   if( currentOffset != totalBufferSize )
   {
