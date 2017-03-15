@@ -245,54 +245,59 @@ private:
 
 } // namespace unnamed
 
-BOOST_AUTO_TEST_CASE( CheckAtomicComponent )
-{
-  SignalFlowContext context( 1024, 48000 );
-
-  MyAtom atomicComp( context, "", nullptr, 2, 3 );
-
-  std::stringstream msg;
-  bool const res = checkConnectionIntegrity( atomicComp, true, msg );
-  BOOST_CHECK( res and msg.str().empty() );
-
-  rrl::AudioSignalFlow flow( atomicComp );
-
-  // Perform basic tests of the external I/O interface
-}
-
-BOOST_AUTO_TEST_CASE( CheckCompositeComponent )
-{
-  SignalFlowContext context( 1024, 48000 );
-
-  MyComposite composite( context, "top", nullptr, 2, 3 );
-
-  std::stringstream msg;
-  bool const res = checkConnectionIntegrity( composite, true, msg );
-  BOOST_CHECK( res and msg.str().empty() );
-  if( not res )
-  {
-    std::cout << "Error messages:\n" << msg.str() << std::endl;
-  }
-
-  rrl::AudioSignalFlow flow( composite );
-
-  // Perform basic tests of the external I/O interface
-}
-
-BOOST_AUTO_TEST_CASE( CheckTwoLevelCompositeComponent )
-{
-  SignalFlowContext context( 1024, 48000 );
-
-  MyTopLevel composite( context, "", nullptr, 3, 4 );
-
-  std::stringstream msg;
-  bool const res = checkConnectionIntegrity( composite, true, msg );
-  BOOST_CHECK( res and msg.str().empty() );
-
-  rrl::AudioSignalFlow flow( composite );
-
-  // Perform basic tests of the external I/O interface
-}
+//BOOST_AUTO_TEST_CASE( CheckAtomicComponent )
+//{
+//  SignalFlowContext context( 128, 48000 );
+//
+//  MyAtom atomicComp( context, "", nullptr, 2, 3 );
+//
+//  std::stringstream msg;
+//  bool const res = checkConnectionIntegrity( atomicComp, true, msg );
+//  BOOST_CHECK( res and msg.str().empty() );
+//
+//  rrl::AudioSignalFlow flow( atomicComp );
+//
+//  // Perform basic tests of the external I/O interface
+//}
+//
+//BOOST_AUTO_TEST_CASE( CheckCompositeComponent )
+//{
+//  SignalFlowContext context( 128, 48000 );
+//
+//  MyComposite composite( context, "top", nullptr, 2, 3 );
+//
+//  std::stringstream msg;
+//  bool const res = checkConnectionIntegrity( composite, true, msg );
+//  BOOST_CHECK( res and msg.str().empty() );
+//  if( not res )
+//  {
+//    std::cout << "Error messages:\n" << msg.str() << std::endl;
+//  }
+//
+//  rrl::AudioSignalFlow flow( composite );
+//
+//  // Perform basic tests of the external I/O interface
+//}
+//
+//BOOST_AUTO_TEST_CASE( CheckTwoLevelCompositeComponent )
+//{
+//  SignalFlowContext context( 1024, 48000 );
+//
+//  MyTopLevel composite( context, "", nullptr, 1, 1 );
+//
+//  std::stringstream msg;
+//  bool const res = checkConnectionIntegrity( composite, true, msg );
+//  if( not res )
+//  {
+//    std::cout << "Connection check failed, message: " << msg.str() << std::endl;
+//  }
+//  BOOST_CHECK( res and msg.str().empty() );
+//
+//
+//  BOOST_CHECK_NO_THROW( rrl::AudioSignalFlow flow( composite ) );
+//
+//  // Perform basic tests of the external I/O interface
+//}
 
 /**
  * Check the instantiation of a recursive hierachical signal flow that hast a composite component at the lowest level which
@@ -303,10 +308,10 @@ BOOST_AUTO_TEST_CASE( CheckRecursiveCompositeComponentNoAtom )
 {
   SignalFlowContext context( 1024, 48000 );
 
-  std::size_t const recursionLimit = 3;
+  std::size_t const recursionLimit = 1;
   bool const insertAtom = false;
 
-  MyTopLevelRecursive composite( context, "", nullptr, 4, 4, recursionLimit, insertAtom );
+  MyTopLevelRecursive composite( context, "", nullptr, 1, 1, recursionLimit, insertAtom );
 
   std::stringstream msg;
   bool const res = checkConnectionIntegrity( composite, true, msg );
@@ -315,6 +320,8 @@ BOOST_AUTO_TEST_CASE( CheckRecursiveCompositeComponentNoAtom )
   rrl::AudioSignalFlow flow( composite );
 
   // Perform basic tests of the external I/O interface
+  BOOST_CHECK( flow.numberOfAudioCapturePorts() == 1 );
+
 }
 
 /**

@@ -7,6 +7,7 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
+#include <libril/audio_sample_type.hpp>
 
 #include <vector>
 
@@ -15,12 +16,21 @@ namespace visr
 namespace rrl
 {
 
+std::unique_ptr<AtomicComponent> createSignalRoutingComponent( AudioSampleType::Id sampleType,
+                                                               SignalFlowContext& context,
+                                                               char const * name,
+                                                               CompositeComponent * parent,
+                                                               std::size_t inputWidth,
+                                                               std::vector<std::size_t> signalIndices );
+
+
 /**
  * Audio component for performing arbitrary routings between the channels of the input and the output port.
  * The number of channels of the input and output port are set by
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
+template< typename SampleType >
 class SignalRoutingInternal: public AtomicComponent
 {
 public:
@@ -49,16 +59,20 @@ public:
    */
   void process();
 
+  AudioPortBase * input();
+
+  AudioPortBase * output();
+
 private:
   /**
    * The audio input port.
    */
-  AudioInput mInput;
+  AudioInputT<SampleType> mInput;
 
   /**
    * The audio output of the component.
    */
-  AudioOutput mOutput;
+  AudioOutputT<SampleType> mOutput;
 
   std::vector<std::size_t> mInputIndices;
 };

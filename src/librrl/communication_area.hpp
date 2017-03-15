@@ -13,6 +13,22 @@ namespace visr
 namespace rrl
 {
 
+
+class AudioSignalPool
+{
+public:
+  explicit AudioSignalPool( std::size_t size, std::size_t alignment );
+
+  ~AudioSignalPool();
+
+  char * basePointer() { return mPool.data(); }
+
+  char const * basePointer() const { return mPool.data(); }
+
+private:
+  efl::AlignedArray<char> mPool;
+};
+
 /**
  *
  */

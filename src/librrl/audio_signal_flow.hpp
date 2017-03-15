@@ -17,9 +17,12 @@
 #include <stdexcept>
 #include <vector>
 
+#define USE_SIGNAL_POOL
+
 namespace visr
 {
 // Forward declarations
+class AtomicComponent;
 class ParameterPortBase;
 class CommunicationProtocolBase;
 
@@ -31,8 +34,12 @@ class CompositeComponentImplementation;
 
 namespace rrl
 {
+#ifndef  USE_SIGNAL_POOL
 // Forward declarations
 template <typename T> class CommunicationArea;
+#else
+class AudioSignalPool;
+#endif
 
 /**
  * Base class for signal flows, i.e., graphs of connected audio
@@ -164,19 +171,6 @@ private:
   bool initialiseSchedule( std::ostream & messages );
 
   /**
-   * Can be static or nonmember functions
-   */
-  //@{
-  static bool checkFlow( impl::ComponentImplementation const & comp, bool locally, std::ostream & messages );
-
-  static bool checkCompositeLocal( impl::CompositeComponentImplementation const & composite , std::ostream & messages );
-
-  static bool checkCompositeLocalAudio( impl::CompositeComponentImplementation const & composite, std::ostream & messages );
-
-  static bool checkCompositeLocalParameters( impl::CompositeComponentImplementation const & composite, std::ostream & messages );
-  //@}
-
-  /**
    * Initialise the communication area, i.e., the memory area
    * containing all input, output, and intermediate signals used in the
    * execution of the derived signal flow.
@@ -240,8 +234,11 @@ private:
   * The communication area for this signal flow.
   * @see initCommArea()
   */
+#ifdef USE_SIGNAL_POOL
+  std::unique_ptr<AudioSignalPool> mAudioSignalPool;
+#else
   std::unique_ptr<CommunicationArea<SampleType> > mCommArea;
-
+#endif
   /**
    * These ports are the top-level system inputs and outputs.
    * They correspond to the capture and playback indices.
@@ -254,6 +251,10 @@ private:
 
   std::vector<SignalIndexType> mCaptureIndices;
   std::vector<SignalIndexType> mPlaybackIndices;
+
+  using InternalComponentList = std::vector<std::unique_ptr<AtomicComponent> >;
+    
+  InternalComponentList mInfrastructureComponents;
 
   using ProcessingSchedule = std::vector<ProcessableInterface * >;
 

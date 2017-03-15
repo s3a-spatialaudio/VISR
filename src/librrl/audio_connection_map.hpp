@@ -36,9 +36,21 @@ public:
   impl::AudioPortBaseImplementation const * port() const { return std::get<0>( mVal ); }
   std::size_t const channel() const { return std::get<1>( mVal ); }
 
+  AudioChannel( AudioChannel const & rhs ) = default;
+
+  AudioChannel& operator=( AudioChannel const & rhs ) = default;
+
+  AudioChannel( AudioChannel && rhs ) = default;
+
+  AudioChannel& operator=( AudioChannel && rhs ) = default;
+
+
   bool operator<( AudioChannel const & rhs ) const { return mVal < rhs.mVal; }
+
+  bool operator==( AudioChannel const & rhs ) const { return mVal == rhs.mVal; }
+
 private:
-  std::tuple<impl::AudioPortBaseImplementation const *, std::size_t> const mVal;
+  std::tuple<impl::AudioPortBaseImplementation const *, std::size_t> mVal;
 };
 
 /**
@@ -50,6 +62,7 @@ std::ostream& operator<<( std::ostream & str, AudioChannel const & channel );
 class AudioConnectionMap
 {
 public:
+
   using Container = std::multimap< AudioChannel, AudioChannel >;
 
   using ValueType = Container::value_type;
@@ -81,15 +94,13 @@ public:
 
   std::size_t size() const { return mConnections.size(); }
 
-  std::pair<const_iterator, const_iterator > equal_range( AudioChannel const & audioChannel ) const
+  std::pair<const_iterator, const_iterator > connectionsForReceiveChannel( AudioChannel const & audioChannel ) const
   {
     return mConnections.equal_range( audioChannel );
   }
-
-  const_iterator findFirst( AudioChannel const & signal ) const
-  {
-    return mConnections.find( signal );
-  }
+  /**
+   */
+  const_iterator findReceiveChannel( AudioChannel const & signal ) const;
 
   AudioConnectionMap resolvePlaceholders( ) const;
 

@@ -117,6 +117,8 @@ namespace // unnamed namespace
     bool result = true;
     PortLookup<impl::AudioPortBaseImplementation> const localPorts( component, false/* not descending into the hierachy*/ );
 
+    std::cout << "local connection check ports:\n" << localPorts << std::endl;
+
     AudioConnectionCountTable sendChannelTable{ fillTable( localPorts.allNonPlaceholderSendPorts() ) };
     AudioConnectionCountTable receiveChannelTable{ fillTable( localPorts.allNonPlaceholderReceivePorts()  ) };
     
@@ -125,6 +127,8 @@ namespace // unnamed namespace
     {
       return false;
     }
+
+    std::cout << "Local connection map:" << localConnections << "\n\n\n" << std::endl;
 
     for( AudioConnectionMap::ValueType const & connection : localConnections )
     {

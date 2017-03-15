@@ -120,6 +120,12 @@ private:
   PortTable mAllNonPlaceholderReceivePorts;
 };
 
+template<typename PortType>
+std::ostream & operator<<( std::ostream & str, typename PortLookup<PortType>::PortTable const & table );
+
+template<typename PortType>
+std::ostream & operator<<( std::ostream & str, PortLookup<PortType> const & lookup );
+
 } // namespace rrl
 } // namespace visr
 

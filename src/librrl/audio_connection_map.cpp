@@ -78,7 +78,7 @@ bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & co
   bool result = true; // Result variable, is set to false if an error occurs.
 
   impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(component);
-  PortLookup<impl::AudioPortBaseImplementation> const localPorts( composite, recursive );
+  PortLookup<impl::AudioPortBaseImplementation> const localPorts( composite, false /* non-recursive*/ );
 
   for( impl::AudioConnectionTable::const_iterator connIt = composite.audioConnectionBegin();
     connIt != composite.audioConnectionEnd(); ++connIt )
@@ -147,6 +147,12 @@ bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & co
   return result;
 }
 
+AudioConnectionMap::const_iterator AudioConnectionMap::findReceiveChannel( AudioChannel const & signal ) const
+{
+  return std::find_if( mConnections.begin(), mConnections.end(),
+    [&signal]( AudioConnectionMap::ValueType const & entry ){ return entry.second == signal; } );
+}
+
 AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
 {
   AudioConnectionMap resolvedTable;
@@ -163,10 +169,11 @@ AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
     }
     else // The sender is a placeholder
     {
-      std::size_t const recursionLimit = mConnections.size( ); // Last line of defence against a closed loop in the flow.
-      std::size_t recursionCount = 1;
+      // Detect loops in placeholder connections.
+      std::vector<AudioChannel> connectionTrace;
+      connectionTrace.push_back( rawConnection.first );
 
-      const_iterator findIt = findFirst( rawConnection.first );
+      const_iterator findIt = findReceiveChannel( rawConnection.first );
       for( ;; )
       {
         if( findIt == end( ) )
@@ -176,14 +183,20 @@ AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
 
         if( not isPlaceholderPort( findIt->first.port() ) )
         {
-          resolvedTable.insert( rawConnection.first, findIt->second );
+          resolvedTable.insert( findIt->first, rawConnection.second );
           break;
         }
-        if( ++recursionCount >= recursionLimit )
+        connectionTrace.push_back( findIt->first );
+        findIt = findReceiveChannel( findIt->first );
+        if( std::find( connectionTrace.begin(), connectionTrace.end(), findIt->first ) != connectionTrace.end() )
         {
-          throw std::runtime_error( "Audio signal connections: closed loop detected in placeholder port connections." );
+          std::stringstream str;
+          str << "Detected loop in audio placeholder connections: ";
+          std::copy( connectionTrace.rbegin(), connectionTrace.rend(), std::ostream_iterator<AudioChannel>( str, " -> " ) );
+          str << findIt->first;
+          std::cout << str.str() << std::endl;
+          throw std::invalid_argument( str.str() );
         }
-        findIt = findFirst( findIt->second );
       }
     }
   }
