@@ -27,7 +27,7 @@ PYBIND11_PLUGIN( rcl )
 
   pybind11::class_<Add, visr::AtomicComponent>( m, "Add" )
     .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
-    .def( "setup", &visr::rcl::Add::setup, pybind11::arg( "numInputs" )=2, pybind11::arg( "width" ) = 1 )
+    .def( "setup", &visr::rcl::Add::setup, pybind11::arg( "width" ), pybind11::arg( "numInputs" ) )
     .def( "process", &visr::rcl::Add::process );
 
   return m.ptr();
