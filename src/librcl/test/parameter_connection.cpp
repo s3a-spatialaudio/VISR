@@ -9,6 +9,7 @@
 #include <libril/signal_flow_context.hpp>
 
 #include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -41,7 +42,7 @@ BOOST_AUTO_TEST_CASE( ParameterConnection )
   rcl::SceneDecoder decoder( context, "decoder", nullptr );
   decoder.setup( );
 
-  for( impl::Component::ParameterPortContainer::const_iterator paramPortIt = decoder.implementation().parameterPortBegin();
+  for( impl::ComponentImplementation::ParameterPortContainer::const_iterator paramPortIt = decoder.implementation().parameterPortBegin();
        paramPortIt != decoder.implementation().parameterPortEnd(); ++paramPortIt )
   {
     std::cout << "Found parameter port in scene decoder:" << (*paramPortIt)->name() << std::endl;
