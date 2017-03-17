@@ -23,6 +23,8 @@
 #include <boost/python/args.hpp>
 #endif
 
+#include <ciso646>
+
 namespace visr
 {
 namespace python
@@ -56,8 +58,7 @@ pybind11::array_t<DataType> getOutputBuffer( AudioOutputT<DataType> & port )
     pybind11::format_descriptor<DataType>::format(),
     2 /* number of dimensions */,
     { port.width(), port.channelStrideSamples() },
-    { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
-  ) );
+    { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) } ) );
 }
 
 template<typename DataType>
@@ -76,23 +77,44 @@ pybind11::array_t<DataType> getInputChannel( AudioInputT<DataType> & port, std::
 template<typename DataType>
 pybind11::array_t<DataType> getOutputChannel( AudioOutputT<DataType> & port, std::size_t index )
 {
-  pybind11::buffer_info info( const_cast<DataType*>(port.at( index )),
+  //pybind11::buffer_info info( const_cast<DataType*>(port.at( index )),
+  //  sizeof( DataType ),
+  //  pybind11::format_descriptor<DataType>::format(),
+  //  1 /* number of dimensions */,
+  //  { port.channelStrideSamples() },
+  //  { sizeof( DataType ) }
+  //);
+  return pybind11::array_t<DataType>( pybind11::buffer_info( const_cast<DataType*>(port.at( index )),
     sizeof( DataType ),
     pybind11::format_descriptor<DataType>::format(),
     1 /* number of dimensions */,
     { port.channelStrideSamples() },
-    { sizeof( DataType ) }
-  );
-  return pybind11::array_t<DataType>( info );
+    { sizeof( DataType ) } ) );
 }
 
 template<typename DataType>
-void setOutputBuffer( pybind11::array_t<DataType> & matrix )
+void setOutputBuffer( AudioOutputT<DataType> & port, pybind11::array_t<DataType> & matrix )
 {
   pybind11::buffer_info info = matrix.request();
   // TODO: check compatibility of matrices.
-
+  std::size_t const numChannels = port.width();
+  std::size_t const bufferSize = port.channelStrideSamples();  // Should be blockSize
+  if( (info.ndim != 2) or (info.shape[0] != numChannels)
+    or (info.shape[1] != bufferSize ) )  {
+    throw std::invalid_argument( "AudioOutputPort.set(): matrix shape does not match." );
+  }
   // TODO: Perform copying (accounting for matrix layout and alignment)
+  std::size_t const stride0 = info.strides[0];
+  std::size_t const stride1 = info.strides[1];
+  DataType const * srcPtr = matrix.data();
+  for( std::size_t chIdx(0); chIdx < numChannels; ++chIdx )
+  {
+    DataType * destPtr = port[chIdx];
+    for( std::size_t sampleIdx(0); sampleIdx < bufferSize; ++sampleIdx, ++destPtr )
+    {
+      *destPtr = *(srcPtr + stride0 * chIdx + stride1);
+    }
+  }
 }
 
 /// Bind an audio input of a given sample type to the specified name.

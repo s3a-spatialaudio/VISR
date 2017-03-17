@@ -41,9 +41,12 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
     throw std::invalid_argument( "AudioSignalFlow::process(): The input matrix is not 2D" );
   }
   if( input.shape(0) != flow.numberOfCaptureChannels() )
+  {
+    throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 1 input of the input matrix does not match the number of capture channels." );
+  }
   if( input.shape(1) != flow.period() )
   {
-    throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 1 input of the input matrix does not match the block size of the signal flow." );
+    throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 0 input of the input matrix does not match the block size of the signal flow." );
   }
   if( input.strides(1) != sizeof(SampleType) )
   {
@@ -60,8 +63,8 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
 
   // Allocate the output array.
   pybind11::array outputSignal( pybind11::dtype::of<SampleType>(),
-				{ flow.numberOfPlaybackChannels(), flow.period() },
-				{ sizeof(SampleType)*flow.period(), sizeof(SampleType) } // TODO: Take care of alignment
+  { flow.numberOfPlaybackChannels(), flow.period() },
+  { sizeof( SampleType )*flow.period(), sizeof( SampleType ) } // TODO: Take care of alignment
                               );
   std::vector<SampleType *> outPtrs( flow.numberOfPlaybackChannels(), nullptr );
   std::size_t const outChannelStride = outputSignal.strides(0) / sizeof(DataType);
