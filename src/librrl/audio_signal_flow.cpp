@@ -485,7 +485,7 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 
 namespace // unnamed
 {
-
+#if 0
 /**
  * Helper function to sum up the audio channels of a list of ports.
  */
@@ -511,7 +511,7 @@ void assignConsecutiveIndices( impl::AudioPortBaseImplementation * port, std::si
   index += portWidth;
 #endif
 }
-
+#endif
 // 
 template<typename DataType, typename SetType >
 bool inSet( DataType const & key, SetType set )
@@ -542,7 +542,7 @@ using ChannelVector = std::vector<AudioChannel>;
 ChannelVector::const_iterator findContiguityGap( ChannelVector::const_iterator beginIt, ChannelVector::const_iterator endIt)
 {
   return std::adjacent_find( beginIt, endIt,
-   []( auto const & lhs, auto const & rhs )
+   []( AudioChannel const & lhs, AudioChannel const & rhs )
   { return (lhs.port() != rhs.port()) or (rhs.channel() != lhs.channel() + 1);} );
 }
 
