@@ -249,8 +249,8 @@ private:
   std::vector < impl::AudioPortBaseImplementation*> mTopLevelAudioOutputs;
   //@}
 
-  std::vector<char*> mCaptureIndices;
-  std::vector<char*> mPlaybackIndices;
+  std::vector<char*> mCaptureChannels;
+  std::vector<char*> mPlaybackChannels;
 
   using InternalComponentList = std::vector<std::unique_ptr<AtomicComponent> >;
     
