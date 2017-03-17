@@ -242,9 +242,9 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 # Define the boost libraries that must be present.
 SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
 
-IF( BUILD_PYTHON_BINDINGS )
+IF( ${BUILD_PYTHON_BINDINGS} AND NOT ${BUILD_USE_PYBIND} )
   LIST( APPEND VISR_BOOST_LIBRARIES python ) 
-ENDIF( BUILD_PYTHON_BINDINGS )
+ENDIF( ${BUILD_PYTHON_BINDINGS} AND NOT ${BUILD_USE_PYBIND} )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
