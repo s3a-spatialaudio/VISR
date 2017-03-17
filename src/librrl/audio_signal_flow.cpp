@@ -122,7 +122,19 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
 {
   // TODO: It needs to be checked beforehand that the widths of the input and output signal vectors match.
 #ifdef USE_SIGNAL_POOL
-  // Checking should be done during initialisation.
+#if 1
+  // This assumes that all capture ports have the default sample type "SampleType"
+  for( std::size_t chIdx( 0 ); chIdx < numberOfCaptureChannels(); ++chIdx )
+  {
+    SampleType * chPtr = reinterpret_cast<SampleType*>(mCaptureIndices[chIdx]);
+    efl::ErrorCode const res = efl::vectorCopy( captureSamples[chIdx], chPtr, mFlow.period(), 0 );
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
+    }
+  }
+#else
+  // TODO: Checking should be done during initialisation.
   if( mTopLevelAudioInputs.size() > 1 )
   {
     throw std::runtime_error( "AudioSignalFlow::process(): At the moment at most one top-level audio input is allowed." );
@@ -151,6 +163,7 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
       }
     }
   }
+#endif
   try
   {
     executeComponents();
@@ -160,6 +173,18 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
     throw( std::string( "Error during execution of processing schedule: ") + ex.what() );
     return 1;
   }
+#if 1
+  // This assumes that all capture ports have the default sample type "SampleType"
+  for( std::size_t chIdx( 0 ); chIdx < numberOfPlaybackChannels(); ++chIdx )
+  {
+    SampleType const * chPtr = reinterpret_cast<SampleType const*>(mPlaybackIndices[chIdx]);
+    efl::ErrorCode const res = efl::vectorCopy( chPtr, playbackSamples[chIdx], mFlow.period(), 0 );
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
+    }
+  }
+#else
   if( not mTopLevelAudioOutputs.empty() )
   {
     impl::AudioPortBaseImplementation const & output = *mTopLevelAudioOutputs[0];
@@ -180,7 +205,7 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
       }
     }
   }
-
+#endif
 
 #else
   // fill the capture part of the communication area.
@@ -663,6 +688,9 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   }
   mAudioSignalPool.reset( new AudioSignalPool( totalBufferSize, alignment ) );
 
+  std::size_t captureChannelsRunningIndex = 0;
+  std::size_t playbackChannelsRunningIndex = 0;
+
   // For the actual assignment, operate per sample type
   // Collect all audio sample types used.
   std::set<AudioSampleType::Id> usedSampleTypes;
@@ -693,6 +721,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
     }
     else
     {
+      // In case of atomic top-level components, 
       assert( allPorts.concreteReceivePorts().empty() and allPorts.concreteSendPorts().empty() );
       std::copy_if( allPorts.externalPlaybackPorts().begin(), allPorts.externalPlaybackPorts().end(), std::back_inserter( typedPorts ),
         [sampleType]( impl::AudioPortBaseImplementation const * port ) { return port->sampleType() == sampleType; } );
@@ -700,10 +729,6 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
 
     for( impl::AudioPortBaseImplementation * port : typedPorts )
     {
-      if( port->parent().isTopLevel() )
-      {
-        mTopLevelAudioInputs.push_back( port );
-      }
       sendOffsetLookup.insert( std::make_pair( port, currentOffset ) );
       port->setBasePointer( mAudioSignalPool->basePointer() + currentOffset );
       port->setChannelStrideSamples( channelStrideSamples );
@@ -711,7 +736,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
     }
     // Now tackle all receive ports. Put the external playback ports first in the list.
     typedPorts.clear();
-    if( mFlow.isComposite() ) // In case of atomic ports, there are no receive port
+    if( mFlow.isComposite() ) // In case of an atomic top-level component, there are no receive ports that need to be connected
     {
       std::copy_if( allPorts.externalPlaybackPorts().begin(), allPorts.externalPlaybackPorts().end(), std::back_inserter( typedPorts ),
         [sampleType]( impl::AudioPortBaseImplementation const * port ) { return port->sampleType() == sampleType; } );
@@ -720,10 +745,6 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
     }
     for( impl::AudioPortBaseImplementation * port : typedPorts )
     {
-      if( port->parent().isTopLevel() )
-      {
-        mTopLevelAudioOutputs.push_back( port );
-      }
       port->setChannelStrideSamples( channelStrideSamples );
       ChannelVector const sends = sendChannels( port, flatConnections );
       if( port->width() == 0 )
@@ -741,6 +762,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
         }
         std::size_t const sendPortBaseIndex = findIt->second;
         char* basePointer = mAudioSignalPool->basePointer()+sendPortBaseIndex + channelStrideBytes * sendStartIndex;
+        port->setChannelStrideSamples( channelStrideSamples );
       }
       else
       {
@@ -767,6 +789,41 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
   {
     messages << "AudioSignalFlow: internal screwup: size of data allocated differs from previously computed value.";
     return false;
+  }
+
+  // Setup the data structures for communication with the outside world.
+  mTopLevelAudioInputs.assign( allPorts.externalCapturePorts().begin(), allPorts.externalCapturePorts().end() );
+  mTopLevelAudioOutputs.assign( allPorts.externalPlaybackPorts().begin(), allPorts.externalPlaybackPorts().end() );
+  // Count the number of external input (capture) and output (playback) ports
+  // Note that this does not account for the ordering imposed by multiple capture or playback ports.
+  std::size_t const numberOfCaptureChannels = std::accumulate( allPorts.externalCapturePorts().begin(), allPorts.externalCapturePorts().end(),
+    static_cast<std::size_t>(0), []( std::size_t val, impl::AudioPortBaseImplementation const * port ) { return val + port->width(); } );
+  std::size_t numberOfPlaybackChannels = std::accumulate( allPorts.externalPlaybackPorts().begin(), allPorts.externalPlaybackPorts().end(),
+    static_cast<std::size_t>(0), []( std::size_t val, impl::AudioPortBaseImplementation const * port ) { return val + port->width(); } );;
+  mCaptureIndices.clear(); mCaptureIndices.reserve( numberOfCaptureChannels );
+  mPlaybackIndices.clear(); mPlaybackIndices.reserve( numberOfPlaybackChannels );
+
+  std::size_t externalCaptureChannelIdx = 0;
+  for( impl::AudioPortBaseImplementation * port : mTopLevelAudioInputs )
+  {
+    char * basePointer = static_cast<char*>(port->basePointer());
+    std::size_t const width = port->width();
+    std::size_t const stride = port->channelStrideBytes();
+    for( std::size_t chIdx( 0 ); chIdx < width; ++chIdx, ++externalCaptureChannelIdx )
+    {
+      mCaptureIndices.push_back( basePointer + chIdx * stride );
+    }
+  }
+  std::size_t externalPlaybackChannelIdx = 0;
+  for( impl::AudioPortBaseImplementation * port : mTopLevelAudioOutputs )
+  {
+    char * basePointer = static_cast<char*>(port->basePointer());
+    std::size_t const width = port->width();
+    std::size_t const stride = port->channelStrideBytes();
+    for( std::size_t chIdx( 0 ); chIdx < width; ++chIdx, ++externalPlaybackChannelIdx )
+    {
+      mPlaybackIndices.push_back( basePointer + chIdx * stride );
+    }
   }
 
   //// Collect all audio sample types used.
