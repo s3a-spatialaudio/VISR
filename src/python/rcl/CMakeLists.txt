@@ -2,10 +2,11 @@
 
 set( SOURCES
 add.cpp
+rcl.cpp
 )
 
 set( HEADERS
-# add.hpp
+add.hpp
 )
 
 # We don't need header files
