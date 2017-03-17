@@ -37,7 +37,7 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
      pybind11::format_descriptor<DataType>::format(),
      2,
      { mp.numberOfRows(), mp.numberOfColumns() },
-     { sizeof( DataType ), mp.stride() * sizeof( DataType ) } );
+     { sizeof( DataType ) * mp.stride(), sizeof( DataType ) } );
   } )
   .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( pybind11::init<std::size_t, std::size_t, std::size_t>() )
@@ -45,7 +45,7 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
   {
     if( data.ndim() != 2 )
     {
-      throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input aray must be 2D" );
+      throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input array must be 2D" );
     }
     std::size_t const numRows = data.shape()[0];
     std::size_t const numCols = data.shape()[1];
