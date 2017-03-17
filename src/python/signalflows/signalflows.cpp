@@ -28,7 +28,7 @@ PYBIND11_PLUGIN( signalflows )
 BOOST_PYTHON_MODULE( signalflows )
 {
   // Call the initialisation routines of all modules.
-  // This is the standard way to creeate Python modules from bindings in multiple files.
+  // This is the standard way to create Python modules from bindings in multiple files.
   using namespace visr::python::signalflows;
   exportBaselineRenderer();
 }
