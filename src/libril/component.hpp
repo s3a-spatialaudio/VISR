@@ -3,7 +3,9 @@
 #ifndef VISR_COMPONENT_HPP_INCLUDED
 #define VISR_COMPONENT_HPP_INCLUDED
 
-#include <libril/constants.hpp>
+#include "constants.hpp"
+
+#include "export_symbols.hpp"
 
 #include <cstddef>
 #include <string>
@@ -27,7 +29,7 @@ class ComponentImplementation;
  *
  *
  */
-class Component
+class VISR_CORE_LIBRARY_SYMBOL Component
 {
 public:
 

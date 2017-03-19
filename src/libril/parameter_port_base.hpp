@@ -5,6 +5,7 @@
 
 #include "port_base.hpp"
 
+#include "export_symbols.hpp"
 #include "parameter_type.hpp"
 #include "communication_protocol_type.hpp"
  
@@ -29,7 +30,7 @@ class ParameterPortBaseImplementation;
  *
  *
  */
-class ParameterPortBase
+class  VISR_CORE_LIBRARY_SYMBOL ParameterPortBase
 {
 public:
   /**

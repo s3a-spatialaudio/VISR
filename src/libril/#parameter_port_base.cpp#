@@ -4,7 +4,6 @@
 
 #include <libril/component.hpp>
 
-//#include "component_impl.hpp"
 #include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 namespace visr

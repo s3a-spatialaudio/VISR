@@ -4,11 +4,12 @@
 #define VISR_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED
 
 #include "constants.hpp"
+#include "export_symbols.hpp"
 
 namespace visr
 {
 
-class SignalFlowContext
+class VISR_CORE_LIBRARY_SYMBOL SignalFlowContext
 {
 public:
   /**

@@ -3,10 +3,10 @@
 #ifndef VISR_AUDIO_SAMPLE_TYPE_HPP_INCLUDED
 #define VISR_AUDIO_SAMPLE_TYPE_HPP_INCLUDED
 
-#include "component.hpp"
-#include "processable_interface.hpp"
+#include "export_symbols.hpp"
 
-#include <cstddef>
+#include <cstdint>
+
 
 #define VISR_AUDIO_SAMPLE_TYPE_DEFINITION( TypeParameter, IdParameter )\
 template<> struct TypeToId<TypeParameter> { static constexpr Id id = IdParameter; };\
@@ -51,23 +51,23 @@ namespace AudioSampleType
   /**
    * Return the element size for a type id at runtime.
    */
-  std::size_t typeSize( Id id );
+  VISR_CORE_LIBRARY_SYMBOL std::size_t typeSize( Id id );
 
   /**
    * Register the translations for the Type<-> conversion macros.
    */
   //@{
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( float, floatId );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( double, doubleId );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( long double, longDoubleId );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( int8_t, int8Id );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( uint8_t, uint8Id );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( int16_t, int16Id );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( uint16_t, uint16Id );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( int32_t, int32Id );
-  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( uint32_t, uint32Id );
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( float, floatId )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( double, doubleId )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( long double, longDoubleId )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( int8_t, int8Id )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( uint8_t, uint8Id )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( int16_t, int16Id )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( uint16_t, uint16Id )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( int32_t, int32Id )
+  VISR_AUDIO_SAMPLE_TYPE_DEFINITION( uint32_t, uint32Id )
   //@}
-};
+}
 
 } // namespace visr
 

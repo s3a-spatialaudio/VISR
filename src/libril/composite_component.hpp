@@ -5,6 +5,7 @@
 
 #include "component.hpp"
 #include "channel_list.hpp"
+#include "export_symbols.hpp"
 
 #include <memory>
 #include <vector>
@@ -24,7 +25,7 @@ class CompositeComponentImplementation;
  *
  *
  */
-class CompositeComponent: public Component
+class  VISR_CORE_LIBRARY_SYMBOL CompositeComponent: public Component
 {
 public:
   /**

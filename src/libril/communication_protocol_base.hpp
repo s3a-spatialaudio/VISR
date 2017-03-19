@@ -3,6 +3,8 @@
 #ifndef VISR_COMMUNICATION_PROTOCOL_BASE_HPP_INCLUDED
 #define VISR_COMMUNICATION_PROTOCOL_BASE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include "parameter_type.hpp"
 
 namespace visr
@@ -16,7 +18,7 @@ class ParameterPortBase;
  *
  *
  */
-class CommunicationProtocolBase
+class  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase
 {
 public:
 

@@ -1,10 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/composite_component.hpp>
+#include "composite_component.hpp"
 
-#include <libril/audio_port_base.hpp>
-
-#include "composite_component_implementation.hpp"
+#include <libvisr_impl/composite_component_implementation.hpp>
 
 namespace visr
 {
@@ -56,14 +54,14 @@ void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
                                                   AudioPortBase & receivePort,
                                                   ChannelList const & receiveIndices )
 {
-  implementation().registerAudioConnection( sendPort.implementation(), sendIndices, receivePort.implementation(), receiveIndices );
+  implementation().registerAudioConnection( sendPort, sendIndices, receivePort, receiveIndices );
 }
 
 
 void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
                                                   AudioPortBase & receivePort )
 {
-  implementation().registerAudioConnection( sendPort.implementation(), receivePort.implementation() );
+  implementation().registerAudioConnection( sendPort, receivePort );
 }
 
 impl::CompositeComponentImplementation & CompositeComponent::implementation()

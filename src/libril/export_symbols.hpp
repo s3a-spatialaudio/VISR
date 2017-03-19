@@ -19,7 +19,7 @@
 #elif defined(__GNUC__)
 
 // Unix platforms (Linux and Mac OS X)
-#define VISR_CORE_LIBRARY_SYMBOL 
+#define VISR_CORE_LIBRARY_SYMBOL __attribute__((visibility("default"))) 
 #define VISR_PLUGIN_SYMBOL __attribute__((visibility("default")))
 
 #else

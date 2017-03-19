@@ -5,6 +5,8 @@
 
 // #include "parameter_type.hpp"
 
+#include "export_symbols.hpp"
+
 #include <map>
 #include <memory>
 #include <string>
@@ -19,7 +21,7 @@ class ParameterBase;
 enum class ParameterType;
 class ParameterConfigBase;
 
-class ParameterFactory
+class VISR_CORE_LIBRARY_SYMBOL ParameterFactory
 {
 public:
   static std::unique_ptr<ParameterBase> create(ParameterType const & type, ParameterConfigBase const & config);

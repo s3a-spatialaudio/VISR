@@ -6,11 +6,12 @@
 #include "audio_port_base.hpp"
 
 #include "constants.hpp"
+#include "export_symbols.hpp"
 
 namespace visr
 {
 
-class AudioInputBase: public AudioPortBase
+class VISR_CORE_LIBRARY_SYMBOL AudioInputBase: public AudioPortBase
 {
 public:
   AudioInputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );

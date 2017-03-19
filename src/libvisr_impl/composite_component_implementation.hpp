@@ -110,13 +110,13 @@ public:
                                 std::string const & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBaseImplementation & sendPort,
+  void registerAudioConnection( AudioPortBase & sendPort,
                                 ChannelList const & sendIndices,
-                                AudioPortBaseImplementation & receivePort,
+                                AudioPortBase & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBaseImplementation & sendPort,
-                                AudioPortBaseImplementation & receivePort );
+  void registerAudioConnection( AudioPortBase & sendPort,
+                                AudioPortBase & receivePort );
 
   AudioConnectionTable const & audioConnections() const;
 
