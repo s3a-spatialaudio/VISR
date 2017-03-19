@@ -77,13 +77,6 @@ pybind11::array_t<DataType> getInputChannel( AudioInputT<DataType> & port, std::
 template<typename DataType>
 pybind11::array_t<DataType> getOutputChannel( AudioOutputT<DataType> & port, std::size_t index )
 {
-  //pybind11::buffer_info info( const_cast<DataType*>(port.at( index )),
-  //  sizeof( DataType ),
-  //  pybind11::format_descriptor<DataType>::format(),
-  //  1 /* number of dimensions */,
-  //  { port.channelStrideSamples() },
-  //  { sizeof( DataType ) }
-  //);
   return pybind11::array_t<DataType>( pybind11::buffer_info( const_cast<DataType*>(port.at( index )),
     sizeof( DataType ),
     pybind11::format_descriptor<DataType>::format(),
@@ -103,16 +96,18 @@ void setOutputBuffer( AudioOutputT<DataType> & port, pybind11::array_t<DataType>
     or (info.shape[1] != bufferSize ) )  {
     throw std::invalid_argument( "AudioOutputPort.set(): matrix shape does not match." );
   }
-  // TODO: Perform copying (accounting for matrix layout and alignment)
-  std::size_t const stride0 = info.strides[0];
-  std::size_t const stride1 = info.strides[1];
+  // Perform copying
+  // TODO: Replace by optimised implementation
+  std::size_t const stride0 = info.strides[0] / sizeof(DataType);
+  std::size_t const stride1 = info.strides[1] / sizeof(DataType);
   DataType const * srcPtr = matrix.data();
   for( std::size_t chIdx(0); chIdx < numChannels; ++chIdx )
   {
     DataType * destPtr = port[chIdx];
-    for( std::size_t sampleIdx(0); sampleIdx < bufferSize; ++sampleIdx, ++destPtr )
+    DataType const * chPtr = srcPtr + stride0 * chIdx;
+    for( std::size_t sampleIdx(0); sampleIdx < bufferSize; ++sampleIdx, ++destPtr, chPtr += stride1 )
     {
-      *destPtr = *(srcPtr + stride0 * chIdx + stride1);
+      *destPtr = *chPtr;
     }
   }
 }

@@ -12,6 +12,8 @@ import visr
 import rcl
 import rrl
 
+# exec(open("./runAtomicComponent.py").read())
+
 import numpy as np
 import matplotlib.pyplot as plt
 
