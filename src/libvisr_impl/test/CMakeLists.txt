@@ -7,6 +7,7 @@ audio_connection_descriptor.cpp
 audio_sample_type.cpp
 component_names.cpp
 parameter_factory.cpp
+parameter_connection.cpp
 test_main.cpp
 )
 

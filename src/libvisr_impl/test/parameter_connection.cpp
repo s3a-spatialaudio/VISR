@@ -2,8 +2,6 @@
 
 #include <librcl/scene_decoder.hpp>
 
-#include <librcl/panning_gain_calculator.hpp>
-
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/signal_flow_context.hpp>
@@ -25,16 +23,14 @@
 
 namespace visr
 {
-namespace rcl
+namespace impl
 {
 namespace test
 {
 
-namespace // unnamed
-{
 
-} // unnamed namespace
-
+// Not doing anything useful yet. Introspection into impl object is also dubious.
+#if 0
 BOOST_AUTO_TEST_CASE( ParameterConnection )
 {
   SignalFlowContext context( 256, 48000 );
@@ -55,7 +51,8 @@ BOOST_AUTO_TEST_CASE( ParameterConnection )
       = CommunicationProtocolFactory::create( protocolType, paramType, paramConfig );
   }
 }
+#endif
 
 } // namespace test
-} // namespace rcl
+} // namespace impl
 } // namespce visr
