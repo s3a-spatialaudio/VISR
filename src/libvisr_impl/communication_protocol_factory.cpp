@@ -5,6 +5,7 @@
 #include <libril/communication_protocol_type.hpp>
 #include <libril/parameter_type.hpp>
 
+#if 0
 // evil hack: Dependency to libpml
 // TODO: add first concrete communication protocol class.
 #include <libpml/double_buffering_protocol.hpp>
@@ -16,7 +17,7 @@
 #include <libpml/string_parameter.hpp>
 #include <libpml/time_frequency_parameter.hpp>
 #include <libpml/vector_parameter.hpp>
-
+#endif
 #include <stdexcept>
 
 namespace visr
@@ -60,6 +61,7 @@ static struct InstantiateCommunicationProtocolCreators
   // todo: Add instantiations
   InstantiateCommunicationProtocolCreators()
   {
+#if 0
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<float> > >( CommunicationProtocolType::MessageQueue, ParameterType::MatrixFloat );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<double> > >( CommunicationProtocolType::MessageQueue, ParameterType::MatrixDouble );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::StringParameter > >( CommunicationProtocolType::MessageQueue, ParameterType::String );
@@ -78,6 +80,7 @@ static struct InstantiateCommunicationProtocolCreators
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::StringParameter> >( CommunicationProtocolType::DoubleBuffering, ParameterType::String );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<float> > >( CommunicationProtocolType::DoubleBuffering, ParameterType::VectorFloat );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<double> > >( CommunicationProtocolType::DoubleBuffering, ParameterType::VectorDouble );
+#endif
   }
 } // ; InstantiateCommunicationProtocolCreators const
 cInstantiateCommunicationProtocolCreators;
