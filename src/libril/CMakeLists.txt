@@ -30,8 +30,24 @@ version.hpp
 )
 
 SET( SOURCES
+atomic_component.cpp
+audio_input.cpp
+audio_output.cpp
+audio_port_base.cpp
+audio_sample_type.cpp
+channel_list.cpp
+communication_protocol_base.cpp
+component.cpp
+composite_component.cpp
+parameter_factory.cpp
+parameter_port_base.cpp
+port_base.cpp
+signal_flow_context.cpp
 version.cpp
 )
 
 # Essentially empty library (Decide what to do with that!)
-add_library( ril ${HEADERS} ${SOURCES} )
+add_library( ril STATIC ${HEADERS} ${SOURCES} )
+
+# Transitive link dependencies
+target_link_libraries( ril visr_impl )
