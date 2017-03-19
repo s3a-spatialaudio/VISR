@@ -40,7 +40,7 @@ namespace rcl
  */
 class DelayVector: public AtomicComponent
 {
-  using SampleType = SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Enumeration to denote the type of fractional-delay filtering used.

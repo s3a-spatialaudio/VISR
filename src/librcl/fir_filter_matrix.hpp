@@ -37,7 +37,7 @@ namespace rcl
  */
 class FirFilterMatrix: public AtomicComponent
 {
-  using SampleType = SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.

@@ -36,7 +36,7 @@ namespace rcl
 
 class TimeFrequencyInverseTransform: public AtomicComponent
 {
-  using SampleType = SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.

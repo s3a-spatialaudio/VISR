@@ -35,7 +35,7 @@ class SingleToMultichannelDiffusion: public AtomicComponent
   /**
    * Alias for the type of the audio samples processed by this component.
    */
-  using SampleType = SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
