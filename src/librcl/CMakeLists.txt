@@ -54,11 +54,11 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 ADD_LIBRARY( rcl STATIC ${SOURCES} ${HEADERS} )
 
 # Transitive dependencies
+target_link_libraries( rcl pml )
 target_link_libraries( rcl ril )
 target_link_libraries( rcl panning )
 target_link_libraries( rcl objectmodel )
 target_link_libraries( rcl rbbl )
-target_link_libraries( rcl visr_impl )
 target_link_libraries( rcl efl )
 
 target_link_libraries( rcl ${Boost_FILESYSTEM_LIBRARY} )
