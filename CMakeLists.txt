@@ -91,22 +91,6 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
-
-############################################################
-# Support for forcing the load of all symbols from a library.
-# This is used, for instance, in self-registering factories.
-
-if( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( WHOLE_ARCHIVE_PREFIX "-Wl,--whole-archive" )
-  set( WHOLE_ARCHIVE_SUFFIX "-Wl,--no-whole-archive" )
-elseif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  set( WHOLE_ARCHIVE_PREFIX "-Wl,-force_load" )
-  set( WHOLE_ARCHIVE_SUFFIX "" )
-elseif( VISR_SYSTEM_NAME MATCHES "Windows" )
-  set( WHOLE_ARCHIVE_PREFIX "" )
-  set( WHOLE_ARCHIVE_SUFFIX "" )
-endif()
-
 ############################################################
 # Support for Building Matlab externals
 
