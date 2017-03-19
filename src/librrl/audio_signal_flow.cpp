@@ -451,7 +451,12 @@ bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )
   if( not mFlow.isComposite() )
   {
     mProcessingSchedule.clear();
-    mProcessingSchedule.push_back( dynamic_cast<AtomicComponent *>(&mFlow) );
+    AtomicComponent* atom = dynamic_cast<AtomicComponent *>( &(mFlow.component()) );
+    if( atom == nullptr )
+    {
+      throw std::logic_error( "AudioSignalFlow: Internal error: Casting of non-composite component to AtomicComponent failed.");
+    }
+    mProcessingSchedule.push_back( atom );
   }
   else
   {
@@ -762,6 +767,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
         }
         std::size_t const sendPortBaseIndex = findIt->second;
         char* basePointer = mAudioSignalPool->basePointer()+sendPortBaseIndex + channelStrideBytes * sendStartIndex;
+	port->setBasePointer( basePointer );
         port->setChannelStrideSamples( channelStrideSamples );
       }
       else
