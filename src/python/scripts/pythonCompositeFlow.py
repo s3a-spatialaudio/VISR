@@ -18,28 +18,17 @@ import rrl
 import numpy as np
 import matplotlib.pyplot as plt
 
-class PythonAdder3( visr.AtomicComponent ):
-    """ Simple adder for three inputs """
-    def __init__( self, context, name, parent, width ):
-        super(PythonAdder3,self).__init__( context, name, parent )
-        self.input0 = visr.AudioInput( "in0", self, width )
-        self.input1 = visr.AudioInput( "in1", self, width )
-        self.input2 = visr.AudioInput( "in2", self, width )
-        self.output = visr.AudioOutput( "out", self, width )
-    def process( self ):
-        self.output.set( self.input0.data() + self.input1.data() + self.input2.data() )
-
-
-class PythonAdder( visr.AtomicComponent ):
-    """ General-purpose add block for an arbitrary number of inputs"""
+class PythonComposite( visr.CompositeComponent ):
     def __init__( self, context, name, parent, numInputs, width ):
         super(PythonAdder,self).__init__( context, name, parent )
-        self.output = visr.AudioOutput( "out", self, width )
+        self.output = visr.AudioOutput( name, self, width )
+        self.width = width
         self.inputs = []
         for inputIdx in range( 0, numInputs ):
             portName =  "in%d" % inputIdx
             inPort = visr.AudioInput( portName, self, width )
             self.inputs.append( inPort )
+            
     def process( self ):
         if len( self.inputs ) == 0:
             self.output.set( np.zeros( (self.output.width, self.period ), dtype = np.float32 ) )
@@ -59,10 +48,7 @@ blockSize = 64
 c = visr.SignalFlowContext(blockSize, fs )
 
 # Instantiate a single Python adder
-pa = PythonAdder3( c, "pa0", None, 2 )
-
-# Or a more configurable Python adder
-# pa = PythonAdder( c, "pa0", None, 3, 2 )
+pa = PythonAdder( c, "pa0", None, 3, 2 )
 
 numBlocks = 16
 numSamples = numBlocks*blockSize
