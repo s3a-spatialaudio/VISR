@@ -26,8 +26,10 @@ namespace rcl
 void exportAdd( pybind11::module & m )
 {
   pybind11::class_<visr::rcl::Add, visr::AtomicComponent >( m, "Add" )
-    .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
-    .def( "setup", &visr::rcl::Add::setup, pybind11::arg( "width" ), pybind11::arg( "numInputs" ) )
+    .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*, std::size_t, std::size_t>(),
+	  pybind11::arg("context"), pybind11::arg("name"),
+	  pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
+	  pybind11::arg( "numInputs" ),  pybind11::arg( "width" ) )
     .def( "process", &visr::rcl::Add::process );
 }
 #else

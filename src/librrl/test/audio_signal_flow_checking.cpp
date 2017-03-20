@@ -75,7 +75,7 @@ public:
     {
       mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str(), *this ) ) );
       mExtInputs[portIdx]->setWidth( audioWidth );
-      registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
+      audioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
                                "SecondLevelAtom", numberedItem( "in", portIdx ), indices );
 
     }
@@ -83,7 +83,7 @@ public:
     {
       mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str(), *this ) ) );
       mExtOutputs[portIdx]->setWidth( audioWidth );
-      registerAudioConnection( "SecondLevelAtom", numberedItem( "out", portIdx ), indices,
+      audioConnection( "SecondLevelAtom", numberedItem( "out", portIdx ), indices,
                                "this", numberedItem( "placeholder_out", portIdx ), indices );
     }
   }
@@ -117,14 +117,14 @@ public:
         {
           mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
           mExtInputs[portIdx]->setWidth( audioWidth );
-          registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
+          audioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
             childNameStr.str( ).c_str( ), numberedItem( "placeholder_in", portIdx ), indices );
         }
         for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
         {
           mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
           mExtOutputs[portIdx]->setWidth( audioWidth );
-          registerAudioConnection( childNameStr.str( ).c_str( ), numberedItem( "placeholder_out", portIdx ), indices,
+          audioConnection( childNameStr.str( ).c_str( ), numberedItem( "placeholder_out", portIdx ), indices,
             "this", numberedItem( "placeholder_out", portIdx ), indices );
         }
       }
@@ -136,14 +136,14 @@ public:
         {
           mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "placeholder_in", portIdx ).c_str( ), *this ) ) );
           mExtInputs[portIdx]->setWidth( audioWidth );
-          registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
+          audioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
             childNameStr.str( ).c_str( ), numberedItem( "in", portIdx ), indices );
         }
         for( std::size_t portIdx( 0 ); portIdx < numOutputs; ++portIdx )
         {
           mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
           mExtOutputs[portIdx]->setWidth( audioWidth );
-          registerAudioConnection( childNameStr.str( ).c_str( ), numberedItem( "out", portIdx ), indices,
+          audioConnection( childNameStr.str( ).c_str( ), numberedItem( "out", portIdx ), indices,
             "this", numberedItem( "placeholder_out", portIdx ), indices );
         }
       }
@@ -156,7 +156,7 @@ public:
         mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "placeholder_out", portIdx ).c_str( ), *this ) ) );
         mExtInputs[portIdx]->setWidth( audioWidth );
         mExtOutputs[portIdx]->setWidth( audioWidth );
-        registerAudioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
+        audioConnection( "this", numberedItem( "placeholder_in", portIdx ), indices,
           "this", numberedItem( "placeholder_out", portIdx ), indices );
       }
 
@@ -185,7 +185,7 @@ public:
      {
        mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "ext_in", portIdx ).c_str( ), *this ) ) );
        mExtInputs[portIdx]->setWidth( audioWidth );
-       registerAudioConnection( "this", numberedItem( "ext_in", portIdx ), indices,
+       audioConnection( "this", numberedItem( "ext_in", portIdx ), indices,
          "FirstLevelComposite", numberedItem( "placeholder_in", portIdx ), indices );
 
      }
@@ -193,9 +193,9 @@ public:
      {
        mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "ext_out", portIdx ).c_str( ), *this ) ) );
        mExtOutputs[portIdx]->setWidth( audioWidth );
-       registerAudioConnection( "FirstLevelComposite", numberedItem( "placeholder_out", portIdx ), indices,
+       audioConnection( "FirstLevelComposite", numberedItem( "placeholder_out", portIdx ), indices,
          "FirstLevelAtom", numberedItem( "in", portIdx ), indices );
-       registerAudioConnection( "FirstLevelAtom", numberedItem( "out", portIdx ), indices,
+       audioConnection( "FirstLevelAtom", numberedItem( "out", portIdx ), indices,
          "this", numberedItem( "ext_out", portIdx ), indices );
      }
   }
@@ -221,7 +221,7 @@ public:
       {
         mExtInputs.push_back( std::unique_ptr<AudioInput>( new AudioInput( numberedItem( "ext_in", portIdx ).c_str( ), *this ) ) );
         mExtInputs[portIdx]->setWidth( audioWidth );
-        registerAudioConnection( "this", numberedItem( "ext_in", portIdx ), indices,
+        audioConnection( "this", numberedItem( "ext_in", portIdx ), indices,
           "FirstLevelComposite", numberedItem( "placeholder_in", portIdx ), indices );
 
       }
@@ -229,7 +229,7 @@ public:
       {
         mExtOutputs.push_back( std::unique_ptr<AudioOutput>( new AudioOutput( numberedItem( "ext_out", portIdx ).c_str( ), *this ) ) );
         mExtOutputs[portIdx]->setWidth( audioWidth );
-        registerAudioConnection( "FirstLevelComposite", numberedItem( "placeholder_out", portIdx ), indices,
+        audioConnection( "FirstLevelComposite", numberedItem( "placeholder_out", portIdx ), indices,
           "this", numberedItem( "ext_out", portIdx ), indices );
       }
     }

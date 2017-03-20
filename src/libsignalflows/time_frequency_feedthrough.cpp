@@ -27,13 +27,13 @@ TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext & context,
 #ifndef JUST_FEEDTHROUGH
   mForwardTransform.setup( numberOfChannels, dftSize, windowLength, hopSize, "kissfft" );
   mInverseTransform.setup( numberOfChannels, dftSize, hopSize, "kissfft" );
-  registerAudioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "ForwardTransform", "in", ChannelRange( 0, numberOfChannels ) );
-  registerAudioConnection( "InverseTransform", "out", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
+  audioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "ForwardTransform", "in", ChannelRange( 0, numberOfChannels ) );
+  audioConnection( "InverseTransform", "out", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
 
   registerParameterConnection( "ForwardTransform", "out", "InverseTransform", "in" );
 
 #else
-  registerAudioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
+  audioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
 #endif
 }
 

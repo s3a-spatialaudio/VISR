@@ -47,8 +47,8 @@ BunchRenderer::BunchRenderer( SignalFlowContext & context,
   registerParameterConnection("SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput");
   registerParameterConnection("SceneDecoder", "objectVectorOutput", "CoreRenderer", "objectDataInput" );
 
-  registerAudioConnection("", "input", ChannelRange(0, numberOfInputs), "CoreRenderer", "audioIn", ChannelRange(0, numberOfInputs) );
-  registerAudioConnection("CoreRenderer", "audioOut", ChannelRange(0, numberOfOutputs), "", "output", ChannelRange(0, numberOfInputs) );
+  audioConnection("", "input", ChannelRange(0, numberOfInputs), "CoreRenderer", "audioIn", ChannelRange(0, numberOfInputs) );
+  audioConnection("CoreRenderer", "audioOut", ChannelRange(0, numberOfOutputs), "", "output", ChannelRange(0, numberOfInputs) );
 }
 
 BunchRenderer::~BunchRenderer( )

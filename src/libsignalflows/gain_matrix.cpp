@@ -30,9 +30,9 @@ GainMatrix::GainMatrix( SignalFlowContext & context,
   mInput.setWidth( cNumberOfInputs );
   mOutput.setWidth( cNumberOfOutputs );
 
-  registerAudioConnection( "", "input", ChannelRange( 0, cNumberOfInputs ),
+  audioConnection( "", "input", ChannelRange( 0, cNumberOfInputs ),
                            "GainMatrix", "input", ChannelRange( 0, cNumberOfInputs ) );
-  registerAudioConnection( "GainMatrix", "output", ChannelRange( 0, cNumberOfOutputs ),
+  audioConnection( "GainMatrix", "output", ChannelRange( 0, cNumberOfOutputs ),
                            "", "output", ChannelRange( 0, cNumberOfOutputs ) );
 
 #else
