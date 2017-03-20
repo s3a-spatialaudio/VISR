@@ -37,9 +37,7 @@ outputSignal = np.zeros( (2, numSamples), dtype = np.float32 )
 
 c = visr.SignalFlowContext(blockSize, fs )
  
-adder = rcl.Add( c, 'add', None )
- 
-adder.setup( numInputs = 2, width=2)
+adder = rcl.Add( c, 'add', numInputs = 2, width=2)
  
 flow = rrl.AudioSignalFlow( adder )
 
