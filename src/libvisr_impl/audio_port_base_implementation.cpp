@@ -2,7 +2,7 @@
 
 #include "audio_port_base_implementation.hpp"
 
-#include "component_impl.hpp"
+#include "component_implementation.hpp"
 
 #include <cassert>
 #include <ciso646>

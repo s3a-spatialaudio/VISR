@@ -3,7 +3,7 @@
 #ifndef VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 #define VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
-#include "component_impl.hpp"
+#include "component_implementation.hpp"
 
 #include "audio_connection_descriptor.hpp"
 #include "parameter_connection_descriptor.hpp"
@@ -103,20 +103,20 @@ public:
   void registerParameterConnection( ParameterPortBase & sendPort,
                                     ParameterPortBase & receivePort );
 
-  void registerAudioConnection( std::string const & sendComponent,
-                                std::string const & sendPort,
-                                ChannelList const & sendIndices,
-                                std::string const & receiveComponent,
-                                std::string const & receivePort,
-                                ChannelList const & receiveIndices );
+  void audioConnection( std::string const & sendComponent,
+			std::string const & sendPort,
+			ChannelList const & sendIndices,
+			std::string const & receiveComponent,
+			std::string const & receivePort,
+			ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
-                                ChannelList const & sendIndices,
-                                AudioPortBase & receivePort,
-                                ChannelList const & receiveIndices );
+  void audioConnection( AudioPortBase & sendPort,
+			ChannelList const & sendIndices,
+			AudioPortBase & receivePort,
+			ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
-                                AudioPortBase & receivePort );
+  void audioConnection( AudioPortBase & sendPort,
+			AudioPortBase & receivePort );
 
   AudioConnectionTable const & audioConnections() const;
 

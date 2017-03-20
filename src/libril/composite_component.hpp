@@ -89,19 +89,19 @@ public:
                                     ParameterPortBase & receiver );
 
 
-  void registerAudioConnection( std::string const & sendComponent,
+  void audioConnection( std::string const & sendComponent,
                                 std::string const & sendPort,
                                 ChannelList const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
+  void audioConnection( AudioPortBase & sendPort,
                                 ChannelList const & sendIndices,
                                 AudioPortBase & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
+  void audioConnection( AudioPortBase & sendPort,
                                 AudioPortBase & receivePort );
 private:
 };

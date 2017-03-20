@@ -5,7 +5,7 @@
 #include "composite_component.hpp"
 #include "signal_flow_context.hpp"
 
-#include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 
 #include <ciso646>
 #include <exception>
