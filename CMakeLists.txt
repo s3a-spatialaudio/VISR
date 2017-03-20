@@ -45,7 +45,16 @@ option( BUILD_USE_PYBIND "Use pybind11 instead of boost::python" OFF )
 if( BUILD_USE_PYBIND )
   include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
   add_definitions( -DUSE_PYBIND11=1 )
+
+  # Enable the pybind11 cmake support
+  # TODO: Decide whether it's worth to use that in the future or remove it
+  # and the implementation files cmake_modules/pybind11Tools.cmake
+  # and cmake_modules/FindPythonLibsNew.cmake
+  # Support is activated in the CMakeLists.txt files of the respective
+  # Python binding modules.
+  include( pybind11Tools )
 endif( BUILD_USE_PYBIND )
+
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 

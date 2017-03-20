@@ -43,7 +43,10 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${HEADERS} ${SOURCES} )
+# Whether to use the pybind11 build support or the standard 'module' shared library.
+add_library(${PROJECT_NAME} MODULE ${HEADERS} ${SOURCES} )
+# pybind11_add_module( ${PROJECT_NAME} MODULE ${HEADERS} ${SOURCES} )
+
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
