@@ -1,10 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/composite_component.hpp>
+#include "composite_component.hpp"
 
-#include <libril/audio_port_base.hpp>
-
-#include "composite_component_implementation.hpp"
+#include <libvisr_impl/composite_component_implementation.hpp>
 
 namespace visr
 {
@@ -40,30 +38,30 @@ void CompositeComponent::registerParameterConnection( ParameterPortBase & sender
   implementation().registerParameterConnection( sender, receiver );
 }
 
-void CompositeComponent::registerAudioConnection( std::string const & sendComponent,
-                                                  std::string const & sendPort,
-                                                  ChannelList const & sendIndices,
-                                                  std::string const & receiveComponent,
-                                                  std::string const & receivePort,
-                                                  ChannelList const & receiveIndices )
+void CompositeComponent::audioConnection( std::string const & sendComponent,
+					  std::string const & sendPort,
+					  ChannelList const & sendIndices,
+					  std::string const & receiveComponent,
+					  std::string const & receivePort,
+					  ChannelList const & receiveIndices )
 {
-  implementation().registerAudioConnection( sendComponent, sendPort, sendIndices,
-                                  receiveComponent, receivePort, receiveIndices );
+  implementation().audioConnection( sendComponent, sendPort, sendIndices,
+				    receiveComponent, receivePort, receiveIndices );
 }
 
-void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
-                                                  ChannelList const & sendIndices,
-                                                  AudioPortBase & receivePort,
-                                                  ChannelList const & receiveIndices )
+void CompositeComponent::audioConnection( AudioPortBase & sendPort,
+					  ChannelList const & sendIndices,
+					  AudioPortBase & receivePort,
+					  ChannelList const & receiveIndices )
 {
-  implementation().registerAudioConnection( sendPort.implementation(), sendIndices, receivePort.implementation(), receiveIndices );
+  implementation().audioConnection( sendPort, sendIndices, receivePort, receiveIndices );
 }
 
 
-void CompositeComponent::registerAudioConnection( AudioPortBase & sendPort,
+void CompositeComponent::audioConnection( AudioPortBase & sendPort,
                                                   AudioPortBase & receivePort )
 {
-  implementation().registerAudioConnection( sendPort.implementation(), receivePort.implementation() );
+  implementation().audioConnection( sendPort, receivePort );
 }
 
 impl::CompositeComponentImplementation & CompositeComponent::implementation()

@@ -6,7 +6,7 @@
 #include <libril/parameter_config_base.hpp>
 #include <libril/parameter_type.hpp>
 
-#include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 
 #include <cassert>
 #include <string>

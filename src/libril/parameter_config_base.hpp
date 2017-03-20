@@ -5,6 +5,8 @@
 
 #include "parameter_base.hpp"
 
+#include "export_symbols.hpp"
+
 namespace visr
 {
 
@@ -12,7 +14,7 @@ namespace visr
  *
  *
  */
-class ParameterConfigBase
+class VISR_CORE_LIBRARY_SYMBOL ParameterConfigBase
 {
 public:
   ParameterConfigBase()

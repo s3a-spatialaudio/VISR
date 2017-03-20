@@ -10,6 +10,7 @@ SET( SOURCES
  float_sequence.cpp
  index_sequence.cpp
  indexed_value_parameter.cpp
+ initialise_parameter_library.cpp
  listener_position.cpp
  matrix_parameter.cpp
  matrix_parameter_config.cpp
@@ -36,6 +37,7 @@ SET( HEADERS
  float_sequence.hpp
  index_sequence.hpp
  indexed_value_parameter.hpp
+ initialise_parameter_library.hpp
  listener_position.hpp
  matrix_parameter.hpp
  matrix_parameter_config.hpp

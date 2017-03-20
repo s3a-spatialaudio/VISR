@@ -15,33 +15,32 @@
 #include <boost/noncopyable.hpp>
 #endif
 
+namespace visr
+{
+namespace python
+{
+namespace rcl
+{
+
 #ifdef USE_PYBIND11
-
-using visr::rcl::Add;
-
-PYBIND11_PLUGIN( rcl )
+void exportAdd( pybind11::module & m )
 {
-  pybind11::module::import("visr");
-
-  pybind11::module m("rcl", "VISR atomic components library" );
-
-  pybind11::class_<Add, visr::AtomicComponent>( m, "Add" )
-    .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
-    .def( "setup", &visr::rcl::Add::setup, pybind11::arg( "width" ), pybind11::arg( "numInputs" ) )
+  pybind11::class_<visr::rcl::Add, visr::AtomicComponent >( m, "Add" )
+    .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*, std::size_t, std::size_t>(),
+	  pybind11::arg("context"), pybind11::arg("name"),
+	  pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
+	  pybind11::arg( "numInputs" ),  pybind11::arg( "width" ) )
     .def( "process", &visr::rcl::Add::process );
-
-  return m.ptr();
 }
-
 #else
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( rcl )
+void exportAdd()
 {
-
-class_<visr::rcl::Add, boost::noncopyable>( "Add", init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
-  .def( "setup", &visr::rcl::Add::setup, (arg( "numInputs" )=2, arg( "width" ) = 1) )
-  .def( "process", &visr::rcl::Add::process );
-
+  class_<visr::rcl::Add, boost::noncopyable>( "Add", init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>() )
+    .def( "setup", &visr::rcl::Add::setup, arg( "width" ) , (arg( "numInputs" )) )
+    .def( "process", &visr::rcl::Add::process );
 }
 #endif
+
+} // namepace rcl
+} // namespace python
+} // namespace visr

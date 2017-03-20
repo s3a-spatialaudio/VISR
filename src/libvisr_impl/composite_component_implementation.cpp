@@ -2,7 +2,7 @@
 
 #include "composite_component_implementation.hpp"
 
-#include "component_impl.hpp"
+#include "component_implementation.hpp"
 #include "audio_port_base_implementation.hpp"
 #include "parameter_port_base_implementation.hpp"
 
@@ -123,7 +123,7 @@ void CompositeComponentImplementation::registerParameterConnection( std::string 
   ParameterPortBase * receiver = findParameterPort( receiveComponent, receivePort );
   if( not receiver )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): receiver port could not be found." );
+    throw std::invalid_argument( "CompositeComponent::registerParameterConnection(): receiver port could not be found." );
   }
   ParameterConnection newConnection( &(sender->implementation()), &(receiver->implementation()) );
   mParameterConnections.insert( std::move( newConnection ) );
@@ -136,7 +136,7 @@ void CompositeComponentImplementation::registerParameterConnection( ParameterPor
   mParameterConnections.insert( std::move( newConnection ) );
 }
 
-void CompositeComponentImplementation::registerAudioConnection( std::string const & sendComponent,
+void CompositeComponentImplementation::audioConnection( std::string const & sendComponent,
                                                                 std::string const & sendPort,
                                                                 ChannelList const & sendIndices,
                                                                 std::string const & receiveComponent,
@@ -146,39 +146,41 @@ void CompositeComponentImplementation::registerAudioConnection( std::string cons
   AudioPortBase * sender = findAudioPort( sendComponent, sendPort );
   if( not sender )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): sender port could not be found." );
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): sender port could not be found." );
   }
   AudioPortBase * receiver = findAudioPort( receiveComponent, receivePort );
   if( not receiver )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): receiver port could not be found." );
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): receiver port could not be found." );
   }
   AudioConnection newConnection( &(sender->implementation()), sendIndices, &(receiver->implementation()), receiveIndices );
 
   mAudioConnections.insert( std::move( newConnection ) );
 }
 
-
-void CompositeComponentImplementation::registerAudioConnection( AudioPortBaseImplementation & sendPort,
+void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
                                                                 ChannelList const & sendIndices,
-                                                                AudioPortBaseImplementation & receivePort,
+                                                                AudioPortBase & receivePort,
                                                                 ChannelList const & receiveIndices )
 {
-  AudioConnection newConnection( &sendPort, sendIndices, &receivePort, receiveIndices );
+  AudioConnection newConnection( &(sendPort.implementation()), sendIndices,
+				 &(receivePort.implementation()), receiveIndices );
   mAudioConnections.insert( std::move( newConnection ) );
 }
 
-void CompositeComponentImplementation::registerAudioConnection( AudioPortBaseImplementation & sendPort,
-                                                                AudioPortBaseImplementation & receivePort )
+void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
+                                                                AudioPortBase & receivePort )
 {
-  std::size_t const sendWidth = sendPort.width();
-  std::size_t const receiveWidth = receivePort.width();
+  AudioPortBaseImplementation & sendPortImpl = sendPort.implementation();
+  AudioPortBaseImplementation & receivePortImpl = receivePort.implementation();
+  std::size_t const sendWidth = sendPortImpl.width();
+  std::size_t const receiveWidth = receivePortImpl.width();
   if( sendWidth != receiveWidth )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): send and receive port width do not match." );
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): send and receive port width do not match." );
   }
   ChannelList const indices( ChannelRange( 0, sendWidth ) );
-  registerAudioConnection( sendPort, indices, receivePort, indices );
+  audioConnection( sendPort, indices, receivePort, indices );
 }
 
 AudioConnectionTable const & CompositeComponentImplementation::audioConnections() const

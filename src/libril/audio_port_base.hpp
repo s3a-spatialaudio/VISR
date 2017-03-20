@@ -5,6 +5,7 @@
 
 #include "port_base.hpp" // For 'Direction' enum
 #include "audio_sample_type.hpp"
+#include "export_symbols.hpp"
 
 #include <memory>
 #include <string>
@@ -20,7 +21,7 @@ namespace impl
 class AudioPortBaseImplementation;
 }
 
-class AudioPortBase
+class VISR_CORE_LIBRARY_SYMBOL AudioPortBase
 {
 public:
   explicit AudioPortBase( std::string const & name, Component & container, AudioSampleType::Id sampleType, PortBase::Direction direction );

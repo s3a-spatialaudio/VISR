@@ -9,6 +9,8 @@
 #include <libril/parameter_port_base.hpp>
 #include <libril/signal_flow_context.hpp>
 
+#include <libvisr_impl/component_implementation.hpp>
+
 #ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
 #else

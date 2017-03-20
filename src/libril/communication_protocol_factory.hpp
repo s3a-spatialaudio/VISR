@@ -32,8 +32,7 @@ namespace visr
 class ParameterBase;
 class ParameterConfigBase;
 
-/*VISR_CORE_LIBRARY_SYMBOL*/ // TODO: Get the library symbol exporting right later on.
-class CommunicationProtocolFactory
+class  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolFactory
 {
 public:
   static std::unique_ptr<CommunicationProtocolBase> create( CommunicationProtocolType const & protocolType,

@@ -47,9 +47,9 @@ DelayVector::setup()
   mInput.setWidth( cNumberOfChannels );
   mOutput.setWidth( cNumberOfChannels );
 
-  registerAudioConnection( "", "input", ChannelRange( 0, cNumberOfChannels ),
+  audioConnection( "", "input", ChannelRange( 0, cNumberOfChannels ),
     "GainMatrix", "input", ChannelRange( 0, cNumberOfChannels ) );
-  registerAudioConnection( "GainMatrix", "output", ChannelRange( 0, cNumberOfChannels ),
+  audioConnection( "GainMatrix", "output", ChannelRange( 0, cNumberOfChannels ),
     "", "output", ChannelRange( 0, cNumberOfChannels ) );
 }
 

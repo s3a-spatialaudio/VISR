@@ -2,13 +2,12 @@
 
 #include <librcl/scene_decoder.hpp>
 
-#include <librcl/panning_gain_calculator.hpp>
-
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/component_implementation.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -24,16 +23,14 @@
 
 namespace visr
 {
-namespace rcl
+namespace impl
 {
 namespace test
 {
 
-namespace // unnamed
-{
 
-} // unnamed namespace
-
+// Not doing anything useful yet. Introspection into impl object is also dubious.
+#if 0
 BOOST_AUTO_TEST_CASE( ParameterConnection )
 {
   SignalFlowContext context( 256, 48000 );
@@ -41,7 +38,7 @@ BOOST_AUTO_TEST_CASE( ParameterConnection )
   rcl::SceneDecoder decoder( context, "decoder", nullptr );
   decoder.setup( );
 
-  for( impl::Component::ParameterPortContainer::const_iterator paramPortIt = decoder.implementation().parameterPortBegin();
+  for( impl::ComponentImplementation::ParameterPortContainer::const_iterator paramPortIt = decoder.implementation().parameterPortBegin();
        paramPortIt != decoder.implementation().parameterPortEnd(); ++paramPortIt )
   {
     std::cout << "Found parameter port in scene decoder:" << (*paramPortIt)->name() << std::endl;
@@ -54,7 +51,8 @@ BOOST_AUTO_TEST_CASE( ParameterConnection )
       = CommunicationProtocolFactory::create( protocolType, paramType, paramConfig );
   }
 }
+#endif
 
 } // namespace test
-} // namespace rcl
+} // namespace impl
 } // namespce visr

@@ -20,30 +20,26 @@ namespace rcl
 
 Add::Add( SignalFlowContext& context,
           char const * name,
-          CompositeComponent * parent )
+          CompositeComponent * parent,
+	  std::size_t width,
+	  std::size_t numInputs )
  : AtomicComponent( context, name, parent )
- , mOutput( "out", *this )
-{
-}
-
-Add::~Add()
-{
-}
-
-void Add::setup( std::size_t width, std::size_t numInputs )
+ , mOutput( "out", *this, width )
 {
   mInputs.reserve( numInputs );
-  mOutput.setWidth( width );
   for( std::size_t run( 0 ); run < numInputs; ++run )
   {
     // the C++11 function std::to_string(std::size_t) would be nifty here, but is missing on GCC 4.8.3 on Cygwin for some reason
     std::stringstream inName;
     inName << "in" << run;
     std::string const & portName = inName.str();
-    AudioInput* newIn = new AudioInput( portName.c_str(), *this );
-    newIn->setWidth( width );
-    mInputs.push_back( std::unique_ptr<AudioInput>( newIn ) );
+    std::unique_ptr<AudioInput> newIn( new AudioInput( portName.c_str(), *this, width ) );
+    mInputs.push_back(  std::move( newIn ) );
   }
+}
+
+Add::~Add()
+{
 }
 
 void Add::process()

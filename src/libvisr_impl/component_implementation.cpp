@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "component_impl.hpp"
+#include "component_implementation.hpp"
 
 #include "audio_port_base_implementation.hpp"
 #include "parameter_port_base_implementation.hpp"

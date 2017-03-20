@@ -6,6 +6,8 @@
 #include "component.hpp"
 #include "processable_interface.hpp"
 
+#include "export_symbols.hpp"
+
 #include <cstddef>
 
 namespace visr
@@ -15,8 +17,8 @@ namespace visr
  *
  *
  */
-class AtomicComponent: public Component,
-                       public ProcessableInterface
+class  VISR_CORE_LIBRARY_SYMBOL AtomicComponent: public Component,
+						 public ProcessableInterface
 {
 public:
   explicit AtomicComponent( SignalFlowContext& context,

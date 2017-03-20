@@ -6,7 +6,7 @@ ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 #ADD_EXECUTABLE( ${APPLICATION_NAME} biquad_iir_filter.cpp scene_decoder.cpp signal_routing.cpp test_main.cpp test_listener_compensation.cpp parameter_connection.cpp test_kinect_receiver.cpp )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} test_main.cpp parameter_connection.cpp )
+ADD_EXECUTABLE( ${APPLICATION_NAME} test_main.cpp )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} panning)

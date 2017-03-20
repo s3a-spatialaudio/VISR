@@ -5,6 +5,7 @@
 
 #include "component.hpp"
 #include "channel_list.hpp"
+#include "export_symbols.hpp"
 
 #include <memory>
 #include <vector>
@@ -24,7 +25,7 @@ class CompositeComponentImplementation;
  *
  *
  */
-class CompositeComponent: public Component
+class  VISR_CORE_LIBRARY_SYMBOL CompositeComponent: public Component
 {
 public:
   /**
@@ -88,19 +89,19 @@ public:
                                     ParameterPortBase & receiver );
 
 
-  void registerAudioConnection( std::string const & sendComponent,
+  void audioConnection( std::string const & sendComponent,
                                 std::string const & sendPort,
                                 ChannelList const & sendIndices,
                                 std::string const & receiveComponent,
                                 std::string const & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
+  void audioConnection( AudioPortBase & sendPort,
                                 ChannelList const & sendIndices,
                                 AudioPortBase & receivePort,
                                 ChannelList const & receiveIndices );
 
-  void registerAudioConnection( AudioPortBase & sendPort,
+  void audioConnection( AudioPortBase & sendPort,
                                 AudioPortBase & receivePort );
 private:
 };

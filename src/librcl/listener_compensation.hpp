@@ -39,7 +39,7 @@ namespace rcl
 class ListenerCompensation: public AtomicComponent
 {
 public:
-  using SampleType = SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.

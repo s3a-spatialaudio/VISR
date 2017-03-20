@@ -28,23 +28,19 @@ public:
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
+   * @param numInputs The number of signal vectors to be added.
    */
   explicit Add( SignalFlowContext& context,
                 char const * name,
-                CompositeComponent * parent = nullptr );
+                CompositeComponent * parent,
+		std::size_t width,
+		std::size_t numInputs );
 
   /**
    * Destructor.
    */
   ~Add();
-
-  /**
-   * Method to initialise the component.
-   * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
-   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
-   * @param numInputs The number of signal vectors to be added.
-   */ 
-  void setup( std::size_t width, std::size_t numInputs );
 
   /**
    * The process function. 

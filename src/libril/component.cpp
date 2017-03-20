@@ -1,12 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/component.hpp>
 
-#include "component_impl.hpp"
+#include "component.hpp"
+#include "composite_component.hpp"
+#include "signal_flow_context.hpp"
 
-#include <libril/composite_component.hpp>
-#include <libril/parameter_port_base.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 
 #include <ciso646>
 #include <exception>

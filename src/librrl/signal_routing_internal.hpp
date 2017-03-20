@@ -64,6 +64,8 @@ public:
   AudioPortBase * output();
 
 private:
+  std::vector<std::size_t> mInputIndices;
+
   /**
    * The audio input port.
    */
@@ -73,8 +75,6 @@ private:
    * The audio output of the component.
    */
   AudioOutputT<SampleType> mOutput;
-
-  std::vector<std::size_t> mInputIndices;
 };
 
 } // namespace rrl

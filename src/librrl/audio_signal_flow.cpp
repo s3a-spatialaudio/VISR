@@ -22,7 +22,7 @@
 
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 #include <libvisr_impl/audio_port_base_implementation.hpp>
-#include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 #include <libvisr_impl/parameter_port_base_implementation.hpp>
 
@@ -451,7 +451,12 @@ bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )
   if( not mFlow.isComposite() )
   {
     mProcessingSchedule.clear();
-    mProcessingSchedule.push_back( dynamic_cast<AtomicComponent *>(&mFlow) );
+    AtomicComponent* atom = dynamic_cast<AtomicComponent *>( &(mFlow.component()) );
+    if( atom == nullptr )
+    {
+      throw std::logic_error( "AudioSignalFlow: Internal error: Casting of non-composite component to AtomicComponent failed.");
+    }
+    mProcessingSchedule.push_back( atom );
   }
   else
   {
@@ -485,7 +490,7 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 
 namespace // unnamed
 {
-
+#if 0
 /**
  * Helper function to sum up the audio channels of a list of ports.
  */
@@ -511,7 +516,7 @@ void assignConsecutiveIndices( impl::AudioPortBaseImplementation * port, std::si
   index += portWidth;
 #endif
 }
-
+#endif
 // 
 template<typename DataType, typename SetType >
 bool inSet( DataType const & key, SetType set )
@@ -542,7 +547,7 @@ using ChannelVector = std::vector<AudioChannel>;
 ChannelVector::const_iterator findContiguityGap( ChannelVector::const_iterator beginIt, ChannelVector::const_iterator endIt)
 {
   return std::adjacent_find( beginIt, endIt,
-   []( auto const & lhs, auto const & rhs )
+   []( AudioChannel const & lhs, AudioChannel const & rhs )
   { return (lhs.port() != rhs.port()) or (rhs.channel() != lhs.channel() + 1);} );
 }
 
@@ -762,6 +767,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
         }
         std::size_t const sendPortBaseIndex = findIt->second;
         char* basePointer = mAudioSignalPool->basePointer()+sendPortBaseIndex + channelStrideBytes * sendStartIndex;
+	port->setBasePointer( basePointer );
         port->setChannelStrideSamples( channelStrideSamples );
       }
       else

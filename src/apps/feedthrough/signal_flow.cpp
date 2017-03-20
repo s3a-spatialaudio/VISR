@@ -16,30 +16,20 @@ Feedthrough::Feedthrough( SignalFlowContext & context,
                           char const * name,
                           CompositeComponent * parent )
  : CompositeComponent( context, name, parent )
- , mInput( "input", *this )
- , mOutput( "output", *this )
- , mSum( context, "Add", this )
+ , mInput( "input", *this, 2 )
+ , mOutput( "output", *this, 2 )
+ , mSum( context, "Add", this, 2, 2 )
 {
-  mInput.setWidth( 2 );
-  mOutput.setWidth( 2 );
-  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
-
-  registerAudioConnection( parent->name(), "input", {0,1},
-                           "Add", "input0", { 0, 1 } );
-  registerAudioConnection( parent->name( ), "input", { 0, 1 },
-                           "Add", "input1", { 1, 0 } );
-  registerAudioConnection( "Add", "output", { 0, 1 },
-                           parent->name( ), "output", { 0, 1 } );
+  audioConnection( parent->name(), "input", {0,1},
+		   "Add", "input0", { 0, 1 } );
+  audioConnection( parent->name( ), "input", { 0, 1 },
+		   "Add", "input1", { 1, 0 } );
+  audioConnection( "Add", "output", { 0, 1 },
+		   parent->name( ), "output", { 0, 1 } );
 }
 
 Feedthrough::~Feedthrough( )
 {
-}
- 
-/*virtual*/ void 
-Feedthrough::process()
-{
-  mSum.process();
 }
 
 } // namespace feedthrough

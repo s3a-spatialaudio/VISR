@@ -1,67 +1,27 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include "initialise_parameter_library.hpp"
+
+#include "double_buffering_protocol.hpp"
+#include "message_queue_protocol.hpp"
+#include "shared_data_protocol.hpp"
+
+#include "matrix_parameter.hpp"
+#include "object_vector.hpp"
+#include "string_parameter.hpp"
+#include "time_frequency_parameter.hpp"
+#include "vector_parameter.hpp"
+
+#include <libril/parameter_factory.hpp>
 #include <libril/communication_protocol_factory.hpp>
-
-#include <libril/communication_protocol_type.hpp>
-#include <libril/parameter_type.hpp>
-
-#if 0
-// evil hack: Dependency to libpml
-// TODO: add first concrete communication protocol class.
-#include <libpml/double_buffering_protocol.hpp>
-#include <libpml/message_queue_protocol.hpp>
-#include <libpml/shared_data_protocol.hpp>
-
-#include <libpml/matrix_parameter.hpp>
-#include <libpml/object_vector.hpp>
-#include <libpml/string_parameter.hpp>
-#include <libpml/time_frequency_parameter.hpp>
-#include <libpml/vector_parameter.hpp>
-#endif
-#include <stdexcept>
 
 namespace visr
 {
-
-CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn )
- : mCreateFunction( fcn )
+namespace pml
 {
-}
 
-std::unique_ptr<CommunicationProtocolBase >
-CommunicationProtocolFactory::Creator::create( ParameterConfigBase const & config ) const
+void initialiseParameterLibrary()
 {
-  return std::unique_ptr< CommunicationProtocolBase >( mCreateFunction( config ) );
-}
-
-/*static*/ CommunicationProtocolFactory::CreatorTable &
-CommunicationProtocolFactory::creatorTable()
-{
-  static CommunicationProtocolFactory::CreatorTable sCreatorTable;
-  return sCreatorTable;
-}
-
-/*static*/ std::unique_ptr<CommunicationProtocolBase>
-CommunicationProtocolFactory::create( CommunicationProtocolType const & protocolType,
-                                      ParameterType const & parameterType,
-                                      ParameterConfigBase const & config )
-{
-  CreatorTable::const_iterator findIt
-    = creatorTable().find( std::make_pair( protocolType, parameterType ) );
-  if( findIt == creatorTable().end() )
-  {
-    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
-  }
-  // todo: Need to catch construction errors?
-  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.create( config ) );
-}
-
-static struct InstantiateCommunicationProtocolCreators
-{
-  // todo: Add instantiations
-  InstantiateCommunicationProtocolCreators()
-  {
-#if 0
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<float> > >( CommunicationProtocolType::MessageQueue, ParameterType::MatrixFloat );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<double> > >( CommunicationProtocolType::MessageQueue, ParameterType::MatrixDouble );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::StringParameter > >( CommunicationProtocolType::MessageQueue, ParameterType::String );
@@ -80,9 +40,7 @@ static struct InstantiateCommunicationProtocolCreators
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::StringParameter> >( CommunicationProtocolType::DoubleBuffering, ParameterType::String );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<float> > >( CommunicationProtocolType::DoubleBuffering, ParameterType::VectorFloat );
     CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<double> > >( CommunicationProtocolType::DoubleBuffering, ParameterType::VectorDouble );
-#endif
-  }
-} // ; InstantiateCommunicationProtocolCreators const
-cInstantiateCommunicationProtocolCreators;
+}
 
+} // namespace pml
 } // namespace visr

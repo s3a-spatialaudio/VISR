@@ -4,7 +4,7 @@
 #include <libril/parameter_config_base.hpp>
 
 #include <libvisr_impl/audio_port_base_implementation.hpp>
-#include <libvisr_impl/component_impl.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 #include <libvisr_impl/parameter_port_base_implementation.hpp>
 
@@ -209,16 +209,6 @@ void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation cons
 }
 
 template<typename PortType>
-std::ostream & operator<< <PortType>( std::ostream & str, typename PortLookup<PortType>::PortTable const & table )
-{
-  for( auto const * port : table )
-  {
-    str << fullyQualifiedName( *port ) << ", ";
-  }
-  return str;
-}
-
-template<typename PortType>
 std::ostream & writePortTable(std::ostream & str, typename PortLookup<PortType>::PortTable const & table)
 {
   for( auto const * port : table )
@@ -230,39 +220,23 @@ std::ostream & writePortTable(std::ostream & str, typename PortLookup<PortType>:
 
 
 template
-std::ostream & operator<< <typename impl::AudioPortBaseImplementation>( std::ostream & str,
-  typename PortLookup<impl::AudioPortBaseImplementation>::PortTable const & table );
-
-template
 std::ostream & writePortTable<typename impl::AudioPortBaseImplementation>(std::ostream &, typename PortLookup<impl::AudioPortBaseImplementation>::PortTable const & );
 template
 std::ostream & writePortTable<typename impl::ParameterPortBaseImplementation>( std::ostream &,
   typename PortLookup<impl::ParameterPortBaseImplementation>::PortTable const & );
 
 
-// template std::ostream & operator<<( std::ostream & str, PortLookup<impl::AudioPortBaseImplementation>::PortTable const & lookup );
-//template std::ostream & operator<<( std::ostream &, typename PortLookup<impl::ParameterPortBaseImplementation>::PortTable const & );
-
-
 template<typename PortType>
 std::ostream & operator<<( std::ostream & str, PortLookup<PortType> const & lookup )
 {
-  // str << "Real send ports: " << lookup.concreteSendPorts() << "\n";
-  //str << "Real receive ports: " << lookup.concreteReceivePorts() << "\n";
-  //str << "External capture ports" << lookup.externalCapturePorts() << "\n";
-  //str << "External playback ports" << lookup.externalPlaybackPorts() << "\n";
-  //str << "Placeholder send ports: " << lookup.placeholderSendPorts() << std::endl;
-  //str << "Placeholder receive ports: " << lookup.placeholderReceivePorts() << std::endl;
   str << "Real send ports: ";  writePortTable<PortType>( str, lookup.concreteSendPorts() );
   str << "\nReal receive ports: "; writePortTable<PortType>( str, lookup.concreteReceivePorts());
-  str << "\nExternal capture ports"; writePortTable<PortType>( str, lookup.externalCapturePorts());
-  str << "\nExternal playback ports"; writePortTable<PortType>( str, lookup.externalPlaybackPorts());
+  str << "\nExternal capture ports: "; writePortTable<PortType>( str, lookup.externalCapturePorts());
+  str << "\nExternal playback ports: "; writePortTable<PortType>( str, lookup.externalPlaybackPorts());
   str << "\nPlaceholder send ports: "; writePortTable<PortType>( str, lookup.placeholderSendPorts());
   str << "\nPlaceholder receive ports: "; writePortTable<PortType>( str,  lookup.placeholderReceivePorts());
-
   return str;
 }
-
 
 // explicit instantiations
 template class PortLookup<impl::AudioPortBaseImplementation>;

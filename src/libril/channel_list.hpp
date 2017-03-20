@@ -3,6 +3,8 @@
 #ifndef VISR_CHANNEL_LIST_HPP_INCLUDED
 #define VISR_CHANNEL_LIST_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <iterator>
 #include <initializer_list>
 #include <vector>
@@ -13,7 +15,7 @@ namespace visr
 // Forward declaration
 class ChannelRange;
 
-class ChannelList
+class VISR_CORE_LIBRARY_SYMBOL ChannelList
 {
 public:
   using IndexType = std::size_t;
@@ -72,7 +74,7 @@ private:
   void appendRange( ChannelRange const & range );
 };
 
-class ChannelRange
+class VISR_CORE_LIBRARY_SYMBOL ChannelRange
 {
 public:
   using IndexType = ChannelList::IndexType;

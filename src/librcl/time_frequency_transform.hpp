@@ -38,7 +38,7 @@ namespace rcl
 
 class TimeFrequencyTransform: public AtomicComponent
 {
-  using SampleType = SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
