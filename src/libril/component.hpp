@@ -7,7 +7,11 @@
 
 #include <cstddef>
 #include <string>
+#include <sstream>
 #include <memory>
+
+// TODO: Remove ASAP!
+#include <iostream>
 
 namespace visr
 {
@@ -17,6 +21,7 @@ class AudioPortBase;
 class CompositeComponent;
 class ParameterPortBase;
 class SignalFlowContext;
+enum class Status: unsigned char;
 
 namespace impl
 {
@@ -31,10 +36,17 @@ class Component
 {
 public:
 
+  /**
+   * Constructor, constructs a component.
+   */
   explicit Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent );
 
+  /**
+   * Constructor.
+   * Convenvience function, accepts a standard string instead of a C chararacter pointer.
+   */
   explicit Component( SignalFlowContext& context,
                       std::string const & componentName,
                       CompositeComponent * parent);
@@ -78,6 +90,24 @@ public:
    * Return the full, hierarchical name of the component.
    */
   std::string fullName() const;
+
+  /**
+   * Signal informational messages or the error conditions.
+   * Depending on the value of the \p status parameter, this might result
+   * in a message conveyed to the user or abortion of the audio processing.
+   * @param status The class of the status message
+   * @param message An informational message string.
+   */
+  void status( Status status, char const * message )
+  // Mock implementation, remove ASAP.
+  {
+    std::cout << message << std::endl;
+  }
+
+
+  template<typename ... MessageArgs >
+  void status( Status statusId, MessageArgs ... args );
+
 
   /**
    * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
@@ -151,6 +181,32 @@ private:
    */
   std::unique_ptr<impl::ComponentImplementation> mImpl;
 };
+
+namespace
+{
+
+template< typename MessageType >
+void write( std::ostream & str, MessageType const & msg )
+{
+  str << msg;
+}
+
+template< typename MessageType, typename... MessageRest>
+void write( std::ostream & str, MessageType const & msg, MessageRest ... rest )
+{
+  str << msg;
+  write( str, rest );
+}
+
+} // unnamed namespace
+
+template<typename ... MessageArgs >
+inline void Component::status( Status statusId, MessageArgs ... args )
+{
+  std::stringstream str;
+  write( str, args );
+  status( statusId, str.str() );
+}
 
 } // namespace visr
 
