@@ -15,27 +15,46 @@ namespace visr
 // Forward declaration
 class ChannelRange;
 
-class VISR_CORE_LIBRARY_SYMBOL ChannelList
+class ChannelList
 {
 public:
   using IndexType = std::size_t;
 
-  ChannelList();
+  VISR_CORE_LIBRARY_SYMBOL ChannelList();
 
   /**
   * Construct a channel list from a single channel range.
   * This constructor ius intended to support
   */
-  ChannelList( ChannelRange const & range );
+  VISR_CORE_LIBRARY_SYMBOL ChannelList( ChannelRange const & range );
 
-  ChannelList( std::initializer_list<IndexType> const & initList );
+  VISR_CORE_LIBRARY_SYMBOL ChannelList( std::initializer_list<IndexType> const & initList );
 
+  /**
+  * Construct a channel list from a container.
+  * @note This template member function is not an export of the shared library because it is
+  * instantiated at the caller site.
+  * @note With C++11, the implementation might use std::cbegin() and std::cend() instead.
+  * @tparam Container Array type for which std::begin() and std::end() are specialized.
+  * value type is convertible to the index type.
+  * @param begin Begin iterator
+  * @param end Past-the-end iterator
+  */
   template< class Container>
   ChannelList( Container const & container )
     : ChannelList( std::begin(container), std::end(container) )
   {
   }
 
+  /**
+   * Construct a channel list from a sequence.
+   * @note This template member function is not an export of the shared library because it is 
+   * instantiated at the caller site.
+   * @tparam Iterator Iterator type matching the forward iterator concept and whose 
+   * referenced type is convertible to the index type.
+   * @param begin Begin iterator
+   * @param end Past-the-end iterator
+   */
   template< class Iterator>
   ChannelList( Iterator begin, Iterator end )
   {
@@ -46,23 +65,23 @@ public:
   }
 
 
-  ChannelList( std::initializer_list<ChannelRange> const & initList );
+  VISR_CORE_LIBRARY_SYMBOL ChannelList( std::initializer_list<ChannelRange> const & initList );
 
-  std::size_t size() const;
+  VISR_CORE_LIBRARY_SYMBOL std::size_t size() const;
 
-  IndexType operator[]( std::size_t idx ) const;
+  VISR_CORE_LIBRARY_SYMBOL IndexType operator[]( std::size_t idx ) const;
 
-  IndexType& operator[]( std::size_t idx );
+  VISR_CORE_LIBRARY_SYMBOL IndexType& operator[]( std::size_t idx );
 
-  IndexType at( std::size_t idx ) const;
+  VISR_CORE_LIBRARY_SYMBOL IndexType at( std::size_t idx ) const;
 
-  IndexType& at( std::size_t idx );
+  VISR_CORE_LIBRARY_SYMBOL IndexType& at( std::size_t idx );
 
   using ListType = std::vector<IndexType>;
   using const_iterator = ListType::const_iterator;
 
-  const_iterator begin() const { return mChannels.begin(); }
-  const_iterator end() const { return mChannels.end(); }
+  VISR_CORE_LIBRARY_SYMBOL const_iterator begin() const { return mChannels.begin(); }
+  VISR_CORE_LIBRARY_SYMBOL const_iterator end() const { return mChannels.end(); }
 
 private:
 

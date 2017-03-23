@@ -49,6 +49,7 @@ version.cpp
 
 # Essentially empty library (Decide what to do with that!)
 add_library( ril STATIC ${HEADERS} ${SOURCES} )
+target_compile_definitions( ril PRIVATE -DVISR_BUILD_CORE_LIBRARIES )
 
 # Transitive link dependencies
 target_link_libraries( ril visr_impl )
