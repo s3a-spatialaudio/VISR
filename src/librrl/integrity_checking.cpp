@@ -62,7 +62,7 @@ bool checkAudioConnectionIntegrity( impl::ComponentImplementation const & compon
     for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
-      bool const componentResult =checkAudioConnectionIntegrity( *(compIt->second), true, messages );
+      bool const componentResult =checkAudioConnectionIntegrity( *(*compIt), true, messages );
       result = result and componentResult;
     }
   }
@@ -82,7 +82,7 @@ bool checkParameterConnectionIntegrity( impl::ComponentImplementation const & co
     for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
-      bool const componentResult = checkParameterConnectionIntegrity( *(compIt->second), true, messages );
+      bool const componentResult = checkParameterConnectionIntegrity( *(*compIt), true, messages );
       result = result and componentResult;
     }
   }

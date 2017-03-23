@@ -20,12 +20,12 @@ Feedthrough::Feedthrough( SignalFlowContext & context,
  , mOutput( "output", *this, 2 )
  , mSum( context, "Add", this, 2, 2 )
 {
-  audioConnection( parent->name(), "input", {0,1},
-		   "Add", "input0", { 0, 1 } );
-  audioConnection( parent->name( ), "input", { 0, 1 },
-		   "Add", "input1", { 1, 0 } );
-  audioConnection( "Add", "output", { 0, 1 },
-		   parent->name( ), "output", { 0, 1 } );
+  audioConnection( mInput, {0,1},
+                   mSum.audioPort( "input0" ), { 0, 1 } );
+  audioConnection( mInput, { 0, 1 },
+                   mSum.audioPort( "input0" ), { 1, 0 } );
+  audioConnection( mSum.audioPort( "output"), { 0, 1 },
+                   mOutput, { 0, 1 } );
 }
 
 Feedthrough::~Feedthrough( )

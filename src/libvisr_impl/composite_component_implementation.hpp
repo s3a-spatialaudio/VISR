@@ -10,7 +10,7 @@
 
 #include <libril/composite_component.hpp>
 
-#include <map>
+#include <vector>
 
 namespace visr
 {
@@ -23,7 +23,8 @@ namespace impl
 class CompositeComponentImplementation: public ComponentImplementation
 {
 public:
-  using ComponentTable = std::map<std::string, ComponentImplementation * >;
+//  using ComponentTable = std::map<std::string, ComponentImplementation * >;
+  using ComponentTable = std::vector< ComponentImplementation * >;
 
   explicit CompositeComponentImplementation( CompositeComponent & component,
                                              SignalFlowContext& context,
@@ -55,7 +56,7 @@ public:
    * @note The name has to be provided separately, because typically the object pointed to by 
    * \p child is not fully constructed at the time of the call.
    */
-  void registerChildComponent( std::string const & name, impl::ComponentImplementation * child );
+  void registerChildComponent( char const * name, impl::ComponentImplementation * child );
 
   void unregisterChildComponent( impl::ComponentImplementation * child );
 
@@ -75,9 +76,13 @@ public:
 
   ComponentTable::const_iterator componentEnd() const;
 
-  ComponentImplementation * findComponent( std::string const & componentName );
+  ComponentTable::iterator findComponentEntry( char const *componentName );
 
-  ComponentImplementation const * findComponent( std::string const & componentName ) const;
+  ComponentTable::const_iterator findComponentEntry( char const *componentName ) const;
+
+  ComponentImplementation * findComponent( char const *componentName );
+
+  ComponentImplementation const * findComponent( char const * componentName ) const;
 
   /**
    * Find an audio port within the composite component.
@@ -85,7 +90,7 @@ public:
    * @param componentName
    * @param portName The port name (case-sensitive)
    */
-  AudioPortBase * findAudioPort( std::string const & componentName, std::string const & portName );
+  AudioPortBase * findAudioPort( char const * componentName, char const * portName );
 
   /**
   * Find a parameter port within the composite component.
@@ -93,22 +98,22 @@ public:
   * @param componentName
   * @param portName The port name (case-sensitive)
   */
-  ParameterPortBase * findParameterPort( std::string const & componentName, std::string const & portName );
+  ParameterPortBase * findParameterPort( char const * componentName, char const * portName );
 
-  void registerParameterConnection( std::string const & sendComponent,
-                                    std::string const & sendPort,
-                                    std::string const & receiveComponent,
-                                    std::string const & receivePort );
+  void registerParameterConnection( char const * sendComponent,
+                                    char const * sendPort,
+                                    char const * receiveComponent,
+                                    char const * receivePort );
 
   void registerParameterConnection( ParameterPortBase & sendPort,
                                     ParameterPortBase & receivePort );
 
-  void audioConnection( std::string const & sendComponent,
-			std::string const & sendPort,
-			ChannelList const & sendIndices,
-			std::string const & receiveComponent,
-			std::string const & receivePort,
-			ChannelList const & receiveIndices );
+  void audioConnection( char const * sendComponent,
+                        char const * sendPort,
+                        ChannelList const & sendIndices,
+                        char const * receiveComponent,
+                        char const * receivePort,
+                        ChannelList const & receiveIndices );
 
   void audioConnection( AudioPortBase & sendPort,
 			ChannelList const & sendIndices,

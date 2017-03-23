@@ -154,10 +154,10 @@ public:
   typename PortContainer<PortType>::const_iterator portEnd() const { return ports<PortType>().end(); }
 
   template<class PortType>
-  typename PortContainer<PortType>::const_iterator findPortEntry( std::string const & portName ) const;
+  typename PortContainer<PortType>::const_iterator findPortEntry( char const * portName ) const;
 
   template<class PortType>
-  typename PortContainer<PortType>::iterator findPortEntry( std::string const & portName );
+  typename PortContainer<PortType>::iterator findPortEntry( char const * portName );
   //@}
 
   /**
@@ -177,34 +177,34 @@ public:
    * @return A valid iterator into the port container for parameter ports, or the end() iterator if a port of this name is not found.
    * @todo Templatise these calls as well
    */
-  ParameterPortContainer::iterator findParameterPortEntry( std::string const & portName );
+  ParameterPortContainer::iterator findParameterPortEntry( char const * portName );
 
   /**
    * Find a named parameter port within the component and return an iterator into the port container, const verstion.
    * @return A valid iterator into the port container for parameter ports, or the end() iterator if a port of this name is not found.
    * @todo Templatise these calls as well
    */
-  ParameterPortContainer::const_iterator findParameterPortEntry( std::string const & portName ) const;
+  ParameterPortContainer::const_iterator findParameterPortEntry( char const * portName ) const;
 
   /**
    * @return pointer to port, nullptr in case the port is not found.
    */
-  ParameterPortBase const * findParameterPort( std::string const & portName ) const;
+  ParameterPortBase const * findParameterPort( char const * portName ) const;
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  ParameterPortBase * findParameterPort( std::string const & portName );
+  ParameterPortBase * findParameterPort( char const * portName );
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  AudioPortBase* findAudioPort( std::string const & name );
+  AudioPortBase* findAudioPort( char const * name );
 
   /**
   * @return pointer to port, nullptr in case the port is not found.
   */
-  AudioPortBase const * findAudioPort( std::string const & name ) const;
+  AudioPortBase const * findAudioPort( char const * name ) const;
 
   /**
    * Report a status message, either informational or an error condition.
@@ -248,9 +248,9 @@ private:
 
   AudioPortContainer& getAudioPortList( );
 
-  AudioPortContainer::iterator findAudioPortEntry( std::string const & portName );
+  AudioPortContainer::iterator findAudioPortEntry( char const * portName );
 
-  AudioPortContainer::const_iterator findAudioPortEntry( std::string const & portName ) const;
+  AudioPortContainer::const_iterator findAudioPortEntry( char const * portName ) const;
 
   /**
    * The Component object corresponding to this 'internal' representation.

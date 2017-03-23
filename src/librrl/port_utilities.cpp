@@ -119,14 +119,14 @@ void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation cons
     {
       for( auto subCompIt( composite.componentBegin() ); subCompIt != composite.componentEnd(); ++subCompIt )
       {
-        traverseComponent( *(subCompIt->second), true, false/* Signal that this is called for a level lower than top level*/ );
+        traverseComponent( *(*subCompIt), true, false/* Signal that this is called for a level lower than top level*/ );
       }
     }
     else
     {
       for( auto subCompIt( composite.componentBegin() ); subCompIt != composite.componentEnd(); ++subCompIt )
       {
-        for( PortType * port : subCompIt->second->ports<PortType>() )
+        for( PortType * port : (*subCompIt)->ports<PortType>() )
         {
           port->direction() == PortBase::Direction::Input ?
             mConcreteReceivePorts.insert( port ) : mConcreteSendPorts.insert( port );

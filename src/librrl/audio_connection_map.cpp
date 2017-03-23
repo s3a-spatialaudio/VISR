@@ -141,7 +141,7 @@ bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & co
     for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( *(compIt->second), messages, true );
+      result = result and fillRecursive( *(*compIt), messages, true );
     }
   }
   return result;

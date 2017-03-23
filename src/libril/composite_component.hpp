@@ -80,20 +80,20 @@ public:
 
    * @throw std::invalid_argument if a specified component or port does not exist.
    */
-  void registerParameterConnection( std::string const & sendComponent,
-                                    std::string const & sendPort,
-                                    std::string const & receiveComponent,
-                                    std::string const & receivePort );
+  void registerParameterConnection( char const * sendComponent,
+    char const * sendPort,
+    char const * receiveComponent,
+    char const * receivePort );
 
   void registerParameterConnection( ParameterPortBase & sender,
                                     ParameterPortBase & receiver );
 
 
-  void audioConnection( std::string const & sendComponent,
-                                std::string const & sendPort,
-                                ChannelList const & sendIndices,
-                                std::string const & receiveComponent,
-                                std::string const & receivePort,
+  void audioConnection( char const * sendComponent,
+                        char const * sendPort,
+                        ChannelList const & sendIndices,
+                        char const * receiveComponent,
+                        char const * receivePort,
                                 ChannelList const & receiveIndices );
 
   void audioConnection( AudioPortBase & sendPort,

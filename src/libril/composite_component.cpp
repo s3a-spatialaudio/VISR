@@ -24,10 +24,10 @@ std::size_t CompositeComponent::numberOfComponents() const
   return implementation().numberOfComponents();
 }
 
-void CompositeComponent::registerParameterConnection( std::string const & sendComponent,
-                                                      std::string const & sendPort,
-                                                      std::string const & receiveComponent,
-                                                      std::string const & receivePort )
+void CompositeComponent::registerParameterConnection( char const * sendComponent,
+                                                      char const * sendPort,
+                                                      char const * receiveComponent,
+                                                      char const * receivePort )
 {
   implementation().registerParameterConnection( sendComponent, sendPort, receiveComponent, receivePort );
 }
@@ -38,21 +38,21 @@ void CompositeComponent::registerParameterConnection( ParameterPortBase & sender
   implementation().registerParameterConnection( sender, receiver );
 }
 
-void CompositeComponent::audioConnection( std::string const & sendComponent,
-					  std::string const & sendPort,
-					  ChannelList const & sendIndices,
-					  std::string const & receiveComponent,
-					  std::string const & receivePort,
-					  ChannelList const & receiveIndices )
+void CompositeComponent::audioConnection( char const * sendComponent,
+                                          char const * sendPort,
+                                          ChannelList const & sendIndices,
+                                          char const * receiveComponent,
+                                          char const * receivePort,
+                                          ChannelList const & receiveIndices )
 {
   implementation().audioConnection( sendComponent, sendPort, sendIndices,
-				    receiveComponent, receivePort, receiveIndices );
+                                    receiveComponent, receivePort, receiveIndices );
 }
 
 void CompositeComponent::audioConnection( AudioPortBase & sendPort,
-					  ChannelList const & sendIndices,
-					  AudioPortBase & receivePort,
-					  ChannelList const & receiveIndices )
+                                          ChannelList const & sendIndices,
+                                          AudioPortBase & receivePort,
+                                          ChannelList const & receiveIndices )
 {
   implementation().audioConnection( sendPort, sendIndices, receivePort, receiveIndices );
 }

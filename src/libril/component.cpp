@@ -75,18 +75,7 @@ bool Component::isComposite() const
   return mImpl->isComposite();
 }
 
-#if 1
 AudioPortBase& Component::audioPort( char const * portName )
-{
-  return audioPort( std::string(portName) );
-}
-
-AudioPortBase const& Component::audioPort( char const * portName ) const
-{
-  return audioPort( std::string( portName ) );
-}
-
-AudioPortBase& Component::audioPort( std::string const & portName )
 {
   AudioPortBase * port = mImpl->findAudioPort( portName );
   if( port )
@@ -96,7 +85,7 @@ AudioPortBase& Component::audioPort( std::string const & portName )
   throw std::invalid_argument( "Audio port with given name not found." );
 }
 
-AudioPortBase const& Component::audioPort( std::string const & portName ) const
+AudioPortBase const& Component::audioPort( char const * portName ) const
 {
   AudioPortBase const * port = mImpl->findAudioPort( portName );
   if( port )
@@ -105,19 +94,19 @@ AudioPortBase const& Component::audioPort( std::string const & portName ) const
   }
   throw std::invalid_argument( "Audio port with given name not found." );
 }
-#endif
+
+AudioPortBase& Component::audioPort( std::string const & portName )
+{
+  return audioPort( portName.c_str() );
+
+}
+
+AudioPortBase const& Component::audioPort( std::string const & portName ) const
+{
+  return audioPort( portName.c_str() );
+}
 
 ParameterPortBase& Component::parameterPort( char const * portName )
-{
-  return parameterPort( std::string(portName) );
-}
-
-ParameterPortBase const& Component::parameterPort( char const * portName ) const
-{
-  return parameterPort( std::string( portName ) );
-}
-
-ParameterPortBase& Component::parameterPort( std::string const & portName )
 {
   ParameterPortBase * port = mImpl->findParameterPort( portName );
   if( port )
@@ -127,7 +116,7 @@ ParameterPortBase& Component::parameterPort( std::string const & portName )
   throw std::invalid_argument( "Audio port with given name not found." );
 }
 
-ParameterPortBase const& Component::parameterPort( std::string const & portName ) const
+ParameterPortBase const& Component::parameterPort( char const * portName ) const
 {
   ParameterPortBase const * port = mImpl->findParameterPort( portName );
   if( port )
@@ -135,6 +124,16 @@ ParameterPortBase const& Component::parameterPort( std::string const & portName 
     return *port;
   }
   throw std::invalid_argument( "Audio port with given name not found." );
+}
+
+ParameterPortBase& Component::parameterPort( std::string const & portName )
+{
+  return parameterPort( portName.c_str() );
+}
+
+ParameterPortBase const& Component::parameterPort( std::string const & portName ) const
+{
+  return parameterPort( portName.c_str() );
 }
 
 impl::ComponentImplementation & Component::implementation()

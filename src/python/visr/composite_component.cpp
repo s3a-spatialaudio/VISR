@@ -65,11 +65,11 @@ void exportCompositeComponent( pybind11::module& m )
     .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
           pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
-    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(std::string const&, std::string const&, std::string const&, std::string const&)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
+    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, char const *, char const *)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
           pybind11::arg( "sendComponent"), pybind11::arg("sendPort"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort") )
     .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(ParameterPortBase&, ParameterPortBase&)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
-    .def( "audioConnection", static_cast<void(CompositeComponent::*)(std::string const &, std::string const &, ChannelList const &, std::string const &, std::string const &, ChannelList const &)>(&CompositeComponent/*Wrapper*/::audioConnection),
+    .def( "audioConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, ChannelList const &, char const *, char const *, ChannelList const &)>(&CompositeComponent/*Wrapper*/::audioConnection),
           pybind11::arg( "sendComponent" ), pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receiveComponent" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
     .def( "audioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, ChannelList const &, AudioPortBase &, ChannelList const &)>(&CompositeComponent/*Wrapper*/::audioConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )

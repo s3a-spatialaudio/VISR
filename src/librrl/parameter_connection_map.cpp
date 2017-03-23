@@ -44,7 +44,7 @@ bool fillRecursive( ParameterConnectionMap & res, impl::ComponentImplementation 
   for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
     compIt != composite.componentEnd(); ++compIt )
   {
-    impl::ComponentImplementation const * containedComponent = compIt->second;
+    impl::ComponentImplementation const * containedComponent = *compIt;
     for( auto port : containedComponent->ports<impl::ParameterPortBaseImplementation>() )
     {
       (port->direction() == PortBase::Direction::Input) ?
@@ -83,7 +83,7 @@ bool fillRecursive( ParameterConnectionMap & res, impl::ComponentImplementation 
     for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
       compIt != composite.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( res, *(compIt->second), messages );
+      result = result and fillRecursive( res, *(*compIt), messages );
     }
   }
   return result;
