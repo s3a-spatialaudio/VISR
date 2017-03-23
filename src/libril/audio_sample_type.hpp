@@ -6,7 +6,7 @@
 #include "export_symbols.hpp"
 
 #include <cstdint>
-
+#include <cstddef>
 
 #define VISR_AUDIO_SAMPLE_TYPE_DEFINITION( TypeParameter, IdParameter )\
 template<> struct TypeToId<TypeParameter> { static constexpr Id id = IdParameter; };\
