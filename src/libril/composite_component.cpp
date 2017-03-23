@@ -10,8 +10,8 @@ namespace visr
 CompositeComponent::CompositeComponent( SignalFlowContext& context,
                                         char const * name,
                                          CompositeComponent * parent /*= nullptr*/ )
- : Component( std::unique_ptr<impl::CompositeComponentImplementation>(new impl::CompositeComponentImplementation( *this, context, name,
-  (parent == nullptr) ? nullptr : &(parent->implementation()) )) )
+ : Component( new impl::CompositeComponentImplementation( *this, context, name,
+                    (parent == nullptr) ? nullptr : &(parent->implementation()) ) )
 {
 }
 

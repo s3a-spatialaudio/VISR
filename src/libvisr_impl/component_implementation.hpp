@@ -4,6 +4,7 @@
 #define VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
 #include <libril/constants.hpp>
+#include <libril/status_message.hpp>
 
 #include <cstddef>
 #include <string>
@@ -41,12 +42,6 @@ public:
                                     SignalFlowContext& context,
                                     char const * componentName,
                                     CompositeComponentImplementation * parent );
-
-
-  explicit ComponentImplementation( Component & component,
-                      SignalFlowContext& context,
-                      std::string const & componentName,
-                      CompositeComponentImplementation * parent);
 
   /**
    *

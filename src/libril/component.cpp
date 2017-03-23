@@ -15,16 +15,16 @@
 namespace visr
 {
 
-Component::Component( std::unique_ptr<impl::ComponentImplementation> && impl )
-  : mImpl( std::move(impl) )
+Component::Component( impl::ComponentImplementation * impl )
+  : mImpl( impl )
 {
 }
 
 Component::Component( SignalFlowContext& context,
                       char const * componentName,
                       CompositeComponent * parent)
- : Component( std::unique_ptr<impl::ComponentImplementation>(new impl::ComponentImplementation( *this, context, componentName,
-              parent == nullptr ? nullptr : &(parent->implementation()) ) ) )
+ : Component( new impl::ComponentImplementation( *this, context, componentName,
+              parent == nullptr ? nullptr : &(parent->implementation()) ) )
 {
 }
 
@@ -37,6 +37,11 @@ Component::Component( SignalFlowContext& context,
 
 Component::~Component()
 {
+  if( mImpl )
+  {
+    delete mImpl;
+    mImpl = nullptr;
+  }
 }
 
 /*static*/ std::string const & Component::nameSeparator()
@@ -53,6 +58,11 @@ std::string const & Component::name() const
 std::string Component::fullName() const
 {
   return mImpl->fullName();
+}
+
+void Component::status( StatusMessage::Kind statusId, char const * message )
+{
+  mImpl->status( statusId, message );
 }
 
 bool Component::isTopLevel() const

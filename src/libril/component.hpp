@@ -6,14 +6,11 @@
 #include "constants.hpp"
 
 #include "export_symbols.hpp"
+#include "status_message.hpp"
 
 #include <cstddef>
 #include <string>
 #include <sstream>
-#include <memory>
-
-// TODO: Remove ASAP!
-#include <iostream>
 
 namespace visr
 {
@@ -23,7 +20,6 @@ class AudioPortBase;
 class CompositeComponent;
 class ParameterPortBase;
 class SignalFlowContext;
-enum class Status: unsigned char;
 
 namespace impl
 {
@@ -100,16 +96,20 @@ public:
    * @param status The class of the status message
    * @param message An informational message string.
    */
-  void status( Status status, char const * message )
-  // Mock implementation, remove ASAP.
-  {
-    std::cout << message << std::endl;
-  }
+  void status( StatusMessage::Kind status, char const * message );
 
 
+  /**
+  * Signal informational messages or the error conditions where the message string is 
+  * constructed from an arbitrary sequence of arguments.
+  * Depending on the value of the \p status parameter, this might result
+  * in a message conveyed to the user or abortion of the audio processing.
+  * @tparam MessageArgs List of arguments to be printed.
+  * @param status The class of the status message
+  * @param message An informational message string.
+  */
   template<typename ... MessageArgs >
-  void status( Status statusId, MessageArgs ... args );
-
+  void status( StatusMessage::Kind status, MessageArgs ... args );
 
   /**
    * Query whether this component is atomic (i.e., a piece of code implementing a rendering 
@@ -174,39 +174,23 @@ protected:
    * sure that the implementation object is instantiated.
    * The motivation for this constructor is to provide different implementation objects for different subclasses.
    */
-  explicit Component( std::unique_ptr<impl::ComponentImplementation> && impl );
+  explicit Component( impl::ComponentImplementation * impl );
 
 private:
   /**
    * Pointer to the private implementation object.
    * The type of the impl object might differ due to the actual type of the component.
+   * @note This is intentionally a plain pointer (as opposed to a smart pointer)in order not to reveal or 
+   * constrain the possible implementations within the runtime system.
    */
-  std::unique_ptr<impl::ComponentImplementation> mImpl;
+  impl::ComponentImplementation* mImpl;
 };
 
-namespace
-{
-
-template< typename MessageType >
-void write( std::ostream & str, MessageType const & msg )
-{
-  str << msg;
-}
-
-template< typename MessageType, typename... MessageRest>
-void write( std::ostream & str, MessageType const & msg, MessageRest ... rest )
-{
-  str << msg;
-  write( str, rest );
-}
-
-} // unnamed namespace
-
 template<typename ... MessageArgs >
-inline void Component::status( Status statusId, MessageArgs ... args )
+inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... args )
 {
   std::stringstream str;
-  write( str, args );
+  StatusMessage::format( str, args... );
   status( statusId, str.str() );
 }
 

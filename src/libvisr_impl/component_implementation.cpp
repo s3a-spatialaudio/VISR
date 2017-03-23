@@ -37,14 +37,6 @@ ComponentImplementation::ComponentImplementation( Component & component,
   }
 }
 
-ComponentImplementation::ComponentImplementation( visr::Component & component,
-                      SignalFlowContext& context,
-                      std::string const & componentName,
-                      impl::CompositeComponentImplementation * parent)
-: ComponentImplementation( component, context, componentName.c_str(), parent )
-{
-}
-
 ComponentImplementation::~ComponentImplementation()
 {
   if( not isTopLevel() )
@@ -70,6 +62,12 @@ std::string ComponentImplementation::fullName() const
   {
     return mParent->fullName() + cNameSeparator + name();
   }
+}
+
+void ComponentImplementation::status( StatusMessage::Kind statusId, char const * message )
+// Trivial default implementation, ought to be replaced be a more sophisticated solution
+// (should be passed to the runtime system)
+{
 }
 
 /*virtual*/ bool ComponentImplementation::isComposite() const
