@@ -207,6 +207,11 @@ public:
   AudioPortBase const * findAudioPort( std::string const & name ) const;
 
   /**
+   * Report a status message, either informational or an error condition.
+   */
+  void status( StatusMessage::Kind statusId, char const * message );
+
+  /**
    * Query whether the component is at the top level of a signal flow.
    * @note Not needed for user API
    */
