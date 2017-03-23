@@ -1,16 +1,21 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#if USE_PYBIND11
+
+#else
 // Define macro to control the behaviour of boost::python in case the boost libraries are linked statically.
 #if BOOST_USE_STATIC_LIBS
 #define BOOST_PYTHON_STATIC_LIB
 #endif
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
 #include "boost/python/extract.hpp"
 #include "boost/python/numeric.hpp"
+#endif
+
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 
 #include <libpanning/LoudspeakerArray.h>
@@ -42,6 +47,7 @@ public:
    */
   explicit PanningGainCalculator( std::string arrayConfig);
 
+#ifndef USE_PYBIND11
   /**
    * Calculate the panning gains for the source position given Cartesian coordinates.
    * @param x X coordinate in meter.
@@ -50,7 +56,7 @@ public:
    * @return Normalised panning gains as a Python list. The output is identical to the VBAP class, i.e., gains of imaginary speakers are returned as well.
    */
   boost::python::list calculateGains(float x, float y, float z);
-
+#endif
   /**
    * Return the number of loudspeakers, including imaginary ones.
    */
@@ -102,6 +108,9 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   }
 }
 
+#ifdef USE_PYBIND11
+
+#else
 boost::python::list PanningGainCalculator::calculateGains(float x, float y, float z)
 {
   mSourcePositions[0] = visr::panning::XYZ(x, y, z);
@@ -120,9 +129,17 @@ boost::python::list PanningGainCalculator::calculateGains(float x, float y, floa
 
   return retVec;
 }
+#endif
  
 } // namespace namespace pythonbindings
 } // namespace visr
+
+
+#ifdef USE_PYBIND11
+
+// @todo: Implement me!
+
+#else
 
 /**
  * Python module declaration to expose the class and its interface to Python.
@@ -138,3 +155,4 @@ BOOST_PYTHON_MODULE( panning_gain_calculator )
     .def("numberOfLoudspeakers", &PanningGainCalculator::numberOfLoudspeakers)
     .def("numberOfSources", &PanningGainCalculator::numberOfSources);
 }
+#endif
