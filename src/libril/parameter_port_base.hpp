@@ -9,7 +9,6 @@
 #include "parameter_type.hpp"
 #include "communication_protocol_type.hpp"
  
-#include <memory>
 #include <string>
 
 namespace visr
@@ -79,7 +78,13 @@ protected:
   virtual void setProtocol( CommunicationProtocolBase * protocol ) = 0;
 
 private:
-  std::unique_ptr<impl::ParameterPortBaseImplementation> mImpl;
+
+  /**
+   * Opaque pointer to the implementation object.
+   * @note This is deliberately a plain, not a smart, pointer in order to make it independent of the 
+   * possible implementations by the runtime system.
+   */
+  impl::ParameterPortBaseImplementation* mImpl;
 };
 
 } // namespace visr

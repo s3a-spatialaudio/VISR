@@ -9,6 +9,7 @@
 #include <libril/audio_output.hpp>
 #include <libril/audio_sample_type.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace visr

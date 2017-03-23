@@ -7,9 +7,7 @@
 #include "audio_sample_type.hpp"
 #include "export_symbols.hpp"
 
-#include <memory>
 #include <string>
-
 
 namespace visr
 {
@@ -70,7 +68,7 @@ protected:
   void const * basePointer() const;
 
 private:
-  std::unique_ptr<impl::AudioPortBaseImplementation> mImpl;
+  impl::AudioPortBaseImplementation* mImpl;
 };
 
 } // namespace visr

@@ -14,14 +14,15 @@ ParameterPortBase::ParameterPortBase( std::string const & name,
                                       PortBase::Direction direction )
   : mImpl( new impl::ParameterPortBaseImplementation( name, *this, &(parent.implementation()), direction ) )
 {
-  // TODO: registration/ unregistration must be handled in implementation object.
-  // parent.implementation().registerParameterPort( this->implementation() );
 }
 
 ParameterPortBase::~ParameterPortBase( ) 
 {
-  // TODO: registration/ unregistration must be handled in implementation object.
-  // parent().implementation().unregisterParameterPort( this );
+  if( mImpl )
+  {
+    delete mImpl;
+    mImpl = nullptr;
+  }
 }
 
 ParameterType ParameterPortBase::parameterType() const

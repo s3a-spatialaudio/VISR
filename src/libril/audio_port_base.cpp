@@ -19,7 +19,14 @@ AudioPortBase::AudioPortBase( std::string const & name, Component& container, Au
 {
 }
 
-AudioPortBase::~AudioPortBase() = default;
+AudioPortBase::~AudioPortBase()
+{
+  if( mImpl )
+  {
+    delete mImpl;
+    mImpl = nullptr;
+  }
+}
 
 void AudioPortBase::setWidth( std::size_t newWidth )
 {
