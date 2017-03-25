@@ -3,7 +3,6 @@
 SET( SOURCES
  array_configuration.cpp
  biquad_parameter.cpp
- communication_protocol_instantiation.cpp 
  double_buffering_protocol.cpp
  empty_parameter_config.cpp
  filter_routing_parameter.cpp
