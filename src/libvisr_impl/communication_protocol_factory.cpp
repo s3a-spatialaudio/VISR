@@ -29,9 +29,9 @@ CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn )
 }
 
 std::unique_ptr<CommunicationProtocolBase >
-CommunicationProtocolFactory::Creator::create( ParameterConfigBase const & config ) const
+CommunicationProtocolFactory::Creator::create( ParameterType const & paramType, ParameterConfigBase const & config ) const
 {
-  return std::unique_ptr< CommunicationProtocolBase >( mCreateFunction( config ) );
+  return std::unique_ptr< CommunicationProtocolBase >( mCreateFunction( paramType, config ) );
 }
 
 /*static*/ CommunicationProtocolFactory::CreatorTable &
@@ -47,13 +47,13 @@ CommunicationProtocolFactory::create( CommunicationProtocolType const & protocol
                                       ParameterConfigBase const & config )
 {
   CreatorTable::const_iterator findIt
-    = creatorTable().find( std::make_pair( protocolType, parameterType ) );
+    = creatorTable().find( protocolType );
   if( findIt == creatorTable().end() )
   {
     throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
   }
   // todo: Need to catch construction errors?
-  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.create( config ) );
+  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.create( parameterType, config ) );
 }
 
 static struct InstantiateCommunicationProtocolCreators
