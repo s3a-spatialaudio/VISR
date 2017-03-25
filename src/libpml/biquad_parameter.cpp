@@ -410,6 +410,9 @@ template class BiquadParameter<float>;
 template class BiquadParameterList<float>;
 template class BiquadParameterMatrix<float>;
 
+template class BiquadParameter<double>;
+template class BiquadParameterList<double>;
+template class BiquadParameterMatrix<double>;
 
 } // namespace pml
 } // namespace visr
