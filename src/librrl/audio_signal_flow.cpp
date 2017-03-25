@@ -335,9 +335,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     return result;
   }
   // - Recursively iterate over all composite components
-  // - Collect all parameter ports (concrete and placeholders) in containers.
-  // - Collect all connections and store them in a lookup map.
-  // - Infer all connections from the receive end to check whether they contain no loops.
+  // - Traverse all connections from the receive end to check whether they contain loops.
   ParameterConnectionMap allConnections;
   bool res = fillRecursive( allConnections, mFlow, messages );
   if( not res )
@@ -399,18 +397,16 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
         messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
         result = false;
       }
-#ifdef NEW_AUDIO_CONNECTION
       // Connect to all ports of the connection.
       // This will also fail if the connection does not match the arity (one-to-one, one-to-many ...) of the protocol
       for( auto portIt( connection.sendPorts().begin() ); portIt < connection.sendPorts().end(); ++portIt )
       {
-        protocolInstance->connectOutput( *portIt );
+        protocolInstance->connectOutput( &((*portIt)->containingPort()) );
       }
       for( auto portIt( connection.receivePorts().begin() ); portIt < connection.receivePorts().end(); ++portIt )
       {
-        protocolInstance->connectInput( *portIt );
+        protocolInstance->connectInput( &((*portIt)->containingPort()) );
       }
-#endif
       mCommunicationProtocols.push_back( std::move( protocolInstance ) );
     }
     catch( const std::exception& ex )
@@ -420,29 +416,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       result = false;
     }
   }
-
-  // Check whether all ports have been connected.
-  PortLookup<impl::ParameterPortBaseImplementation> allPorts( mFlow, true );
-  for( impl::ParameterPortBaseImplementation const * const port : allPorts.allNonPlaceholderSendPorts() )
-  {
-#ifdef NEW_AUDIO_CONNECTION
-    if( not port->isConnected() )
-    {
-      messages << "Parameter send port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
-      result = false;
-    }
-#endif
-  }
-  for( impl::ParameterPortBaseImplementation const * const port : allPorts.allNonPlaceholderReceivePorts() )
-  {
-#ifdef NEW_AUDIO_CONNECTION
-    if( not port->isConnected() )
-    {
-      messages << "Parameter receive port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
-      result = false;
-    }
-#endif
-  }
+  // TODO: Set up top-level parameter ports. The behaviour depends whether the flow is atomic or composite.
   return result;
 }
 
