@@ -56,11 +56,11 @@ public:
 protected:
   ParameterPortBase & mContainingPort;
 
-  visr::ParameterType mParameterType;
+  visr::ParameterType const mParameterType;
 
-  visr::CommunicationProtocolType mProtocolType;
+  visr::CommunicationProtocolType const mProtocolType;
 
-  std::unique_ptr<visr::ParameterConfigBase> mParameterConfig;
+  std::unique_ptr<visr::ParameterConfigBase> const mParameterConfig;
 };
 
 } // namespace impl

@@ -26,6 +26,7 @@ ParameterPortBaseImplementation( std::string const & name,
                                  ParameterConfigBase const & parameterConfig )
   : PortBaseImplementation( name, parent, direction )
   , mContainingPort( containingPort )
+  , mParameterType( parameterType )
   , mProtocolType( protocolType )
   , mParameterConfig( parameterConfig.clone() ) 
 {
