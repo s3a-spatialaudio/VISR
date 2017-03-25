@@ -80,7 +80,7 @@ CompositeComponentImplementation::findComponentEntry( char const *componentName 
 
 ComponentImplementation * CompositeComponentImplementation::findComponent( char const * componentName )
 {
-  if( (componentName == nullptr) or (strlen( componentName ) == 0) )
+  if( (componentName == nullptr) or (strlen( componentName ) == 0) or (strcmp( componentName, "this" ) == 0) )
   {
     return this;
   }
@@ -90,7 +90,7 @@ ComponentImplementation * CompositeComponentImplementation::findComponent( char 
 
 ComponentImplementation const * CompositeComponentImplementation::findComponent( char const * componentName ) const
 {
-  if( (componentName == nullptr) or (strlen( componentName ) == 0) )
+  if( (componentName == nullptr) or (strlen( componentName ) == 0) or (strcmp( componentName, "this" ) == 0) )
   {
     return this;
   }
