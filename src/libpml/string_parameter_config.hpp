@@ -25,6 +25,8 @@ public:
 
   virtual ~StringParameterConfig();
 
+  std::unique_ptr< ParameterConfigBase > clone() const override;
+
   bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( StringParameterConfig const & rhs ) const;

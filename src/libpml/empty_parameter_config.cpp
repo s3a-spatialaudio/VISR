@@ -21,6 +21,11 @@ EmptyParameterConfig::~EmptyParameterConfig()
 {
 }
 
+std::unique_ptr< ParameterConfigBase > EmptyParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new EmptyParameterConfig(*this) );
+}
+
 bool EmptyParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.

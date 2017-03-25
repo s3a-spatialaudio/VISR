@@ -22,6 +22,11 @@ StringParameterConfig::~StringParameterConfig()
 {
 }
 
+std::unique_ptr< ParameterConfigBase > StringParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new StringParameterConfig( *this ) );
+}
+
 bool StringParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.

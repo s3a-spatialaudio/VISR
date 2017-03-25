@@ -7,6 +7,8 @@
 
 #include "export_symbols.hpp"
 
+#include <memory>
+
 namespace visr
 {
 
@@ -26,6 +28,9 @@ public:
   virtual ~ParameterConfigBase() {}
 
   virtual bool compare( ParameterConfigBase const & rhs) const = 0;
+
+  // Do we need a clone() function?
+  virtual std::unique_ptr<ParameterConfigBase> clone() const = 0;
 };
 
 } // namespace visr

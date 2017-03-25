@@ -22,6 +22,11 @@ VectorParameterConfig::~VectorParameterConfig()
 {
 }
 
+std::unique_ptr< ParameterConfigBase > VectorParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new VectorParameterConfig( *this ) );
+}
+
 bool VectorParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.

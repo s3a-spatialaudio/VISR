@@ -23,6 +23,8 @@ public:
 
   virtual ~VectorParameterConfig();
 
+  std::unique_ptr< ParameterConfigBase > clone() const override;
+
   bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( VectorParameterConfig const & rhs ) const;

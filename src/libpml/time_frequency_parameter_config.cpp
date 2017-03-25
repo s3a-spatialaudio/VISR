@@ -28,6 +28,11 @@ TimeFrequencyParameterConfig::~TimeFrequencyParameterConfig()
 {
 }
 
+std::unique_ptr< ParameterConfigBase > TimeFrequencyParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new TimeFrequencyParameterConfig( *this ) );
+}
+
 bool TimeFrequencyParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
