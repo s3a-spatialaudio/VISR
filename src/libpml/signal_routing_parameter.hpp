@@ -68,9 +68,14 @@ public:
    */
   SignalRoutingParameter() {}
 
-  SignalRoutingParameter( std::initializer_list<Entry> const & entries );
+  explicit SignalRoutingParameter( std::initializer_list<Entry> const & entries );
 
   SignalRoutingParameter( const SignalRoutingParameter & rhs ) = default;
+
+  /**
+   * Constructor using parameter configuration object.
+   */
+  explicit SignalRoutingParameter( const ParameterConfigBase & rhs );
 
   void swap( SignalRoutingParameter& rhs );
 
