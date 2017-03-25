@@ -23,6 +23,11 @@ MatrixParameterConfig::~MatrixParameterConfig()
 {
 }
 
+std::unique_ptr< ParameterConfigBase> MatrixParameterConfig::clone() const
+{
+  return std::unique_ptr< MatrixParameterConfig >( new MatrixParameterConfig(*this) );
+}
+
 bool MatrixParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
