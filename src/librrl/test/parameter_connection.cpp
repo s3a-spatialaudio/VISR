@@ -61,10 +61,10 @@ public:
   void process() override
   {
     pml::MatrixParameter<float> const & mtx = mParamInput.data();
-    if( (mtx.numberOfRows() != numCols) or (mtx.numberOfRows() != numCols) )
+    if( (mtx.numberOfRows() != numRows) or (mtx.numberOfColumns() != numCols) )
     {
       status( StatusMessage::Warning, "ParameterConnection::Receiver: Matrix dimension mismatch. Expected (", numRows, ",", numCols,
-        ") received (",")" );
+        ") received (", mtx.numberOfRows(), ",", mtx.numberOfColumns(), ")." );
     }
   
   }
@@ -93,13 +93,28 @@ BOOST_AUTO_TEST_CASE( CheckParamConnection )
 {
   pml::initialiseParameterLibrary();
 
-  SignalFlowContext context( 128, 48000 );
+  const std::size_t blockSize{64};
+  std::size_t const numBlocks{16};
+
+  SignalFlowContext context( blockSize, 48000 );
 
   MyComposite myComp( context, "topLevel", nullptr );
 
   std::stringstream checkMsg;
   bool const res = rrl::checkConnectionIntegrity( myComp, true, checkMsg );
   BOOST_CHECK_MESSAGE( res, checkMsg.str().c_str() );
+
+  rrl::AudioSignalFlow flow( myComp );
+
+  float ** inputPtr =  nullptr;
+  float ** outputPtr = nullptr;
+
+  for( std::size_t blockIdx(0); blockIdx < numBlocks; ++blockIdx )
+  {
+    flow.process( inputPtr, outputPtr );
+  }
+
+
 
 }
 
