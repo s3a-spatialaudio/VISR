@@ -191,7 +191,7 @@ inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... arg
 {
   std::stringstream str;
   StatusMessage::format( str, args... );
-  status( statusId, str.str() );
+  status( statusId, str.str().c_str() );
 }
 
 } // namespace visr
