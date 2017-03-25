@@ -11,8 +11,12 @@ namespace visr
 
 ParameterPortBase::ParameterPortBase( std::string const & name,
                                       Component & parent, 
-                                      PortBase::Direction direction )
-  : mImpl( new impl::ParameterPortBaseImplementation( name, *this, &(parent.implementation()), direction ) )
+                                      PortBase::Direction direction,
+                                      ParameterType const & parameterType,
+                                      CommunicationProtocolType const & protocolType,
+                                      ParameterConfigBase const & parameterConfig )
+  : mImpl( new impl::ParameterPortBaseImplementation( name, *this, &(parent.implementation()), direction,
+    parameterType, protocolType, parameterConfig ) )
 {
 }
 

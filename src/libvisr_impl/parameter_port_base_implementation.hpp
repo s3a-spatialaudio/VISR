@@ -30,24 +30,13 @@ namespace impl
 class ParameterPortBaseImplementation: public PortBaseImplementation
 {
 public:
-
-  /**
-   * Todo: Is this required anymore?
-   */
-  //enum class Kind
-  //{
-  //  Concrete,
-  //  Placeholder
-  //};
-
   explicit ParameterPortBaseImplementation( std::string const & name,
                                             ParameterPortBase& containingPort,
                                             ComponentImplementation * parent,
-                                            visr::PortBase::Direction direction
-    /*,
-                              ParameterType const & parameterType,
-                              CommunicationProtocolType const & protocolType,
-                              ParameterConfigBase const & parameterConfig */ );
+                                            visr::PortBase::Direction direction,
+                                            ParameterType const & parameterType,
+                                            CommunicationProtocolType const & protocolType,
+                                            ParameterConfigBase const & parameterConfig );
 
   /**
    * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.

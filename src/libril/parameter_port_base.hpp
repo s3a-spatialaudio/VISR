@@ -41,7 +41,10 @@ public:
 
   explicit ParameterPortBase( std::string const & name,
                               Component & parent,
-                              PortBase::Direction direction );
+                              PortBase::Direction direction,
+    ParameterType const & parameterType,
+    CommunicationProtocolType const & protocolType,
+    ParameterConfigBase const & parameterConfig );
 
   /**
    * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
@@ -63,7 +66,7 @@ public:
   /**
    * Check whether the port is connected to a valid protocol.
    */
-  virtual bool isConnected() const = 0;
+  // virtual bool isConnected() const = 0;
 
   impl::ParameterPortBaseImplementation & implementation();
 

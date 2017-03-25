@@ -5,13 +5,13 @@
 
 #include "export_symbols.hpp"
 
+#include "communication_protocol_type.hpp"
 #include "parameter_type.hpp"
 
 namespace visr
 {
 
 // Forward declarations
-enum class CommunicationProtocolType;
 class ParameterPortBase;
 
 /**
@@ -31,6 +31,9 @@ public:
 
   virtual CommunicationProtocolType protocolType() const = 0;
 
+  /**
+   * Return the configured parameter type of this protocol instance.
+   */
   virtual ParameterType parameterType() const = 0;
 
   virtual void connectInput( ParameterPortBase* port ) = 0;

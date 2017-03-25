@@ -3,44 +3,69 @@
 #ifndef VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
 #define VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
 
+#include <string>
+#include <cstddef>
+
 namespace visr
 {
 
-enum class CommunicationProtocolType
+namespace detail
 {
-  SharedData,
-  DoubleBuffering,
-  MessageQueue
-  // To be continued.
-};
+  // Non-cryptographic compile-time hash function.
+  // Adapted from https://github.com/elbeno/constexpr
+  // Licence: MIT
+  constexpr uint64_t fnv1( uint64_t h, const char* s )
+  {
+    return (*s == 0) ? h :
+      fnv1( static_cast<uint64_t>(h * 1099511628211ull) ^
+          static_cast<uint64_t>(*s), s + 1 );
+  }
+
+  constexpr uint64_t fnv1( const char* s )
+  {
+    return true ?
+      detail::fnv1( 14695981039346656037ull, s ) :
+      throw std::logic_error("FNV1 hash failed.");
+  }
+}
+
+
+using CommunicationProtocolType = std::uint64_t;
+
+constexpr CommunicationProtocolType communicationProtocolTypeFromString( char const * typeString )
+{
+  return detail::fnv1( typeString );
+}
+
 
 /**
 * Metaprogramming construct to translate a type to its corresponding ID.
 */
-template< template<typename> class CommunicationProtocolClass, typename ParameterClass >
+template<class CommunicationProtocolClass >
 struct CommunicationProtocolToId {};
 
-template< CommunicationProtocolType CommunicationProtocolTypeId, typename ParameterClass >
+template< CommunicationProtocolType id>
 struct IdToCommunicationProtocol {};
 
 } // namespace visr
 
 
-#define DEFINE_COMMUNICATION_PROTOCOL_TYPE( CommunicationProtocolClassType, CommunicationProtocolId )\
+#define DEFINE_COMMUNICATION_PROTOCOL( CommunicationProtocolClassType, CommunicationProtocolId )\
 namespace visr \
 { \
-  template< typename ParameterClass > \
-   struct CommunicationProtocolToId< CommunicationProtocolClassType, ParameterClass > \
+   template<>\
+   struct CommunicationProtocolToId< CommunicationProtocolClassType > \
     { \
     public: \
       static const CommunicationProtocolType id = CommunicationProtocolId; \
     }; \
-    template<typename ParameterClass > \
-    struct IdToCommunicationProtocol<CommunicationProtocolId, ParameterClass> \
-    { \
-    public: \
-      using ConfigType = CommunicationProtocolClassType<ParameterClass>; \
-    }; \
 }
+
+//template<>\
+//struct IdToCommunicationProtocol<CommunicationProtocolId> \
+//{ \
+//public: \
+//  using ConfigType = CommunicationProtocolClassType; \
+//}; \
 
 #endif // #ifndef VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED

@@ -20,13 +20,14 @@ ParameterPortBaseImplementation::
 ParameterPortBaseImplementation( std::string const & name,
                                  ParameterPortBase& containingPort,
                                  ComponentImplementation * parent,
-                                 visr::PortBase::Direction direction /*,
+                                 visr::PortBase::Direction direction,
                                  ParameterType const & parameterType,
-  CommunicationProtocolType const & protocolType,
-  ParameterConfigBase const & parameterConfig*/
-                               )
+                                 CommunicationProtocolType const & protocolType,
+                                 ParameterConfigBase const & parameterConfig )
   : PortBaseImplementation( name, parent, direction )
   , mContainingPort( containingPort )
+  , mProtocolType( protocolType )
+  , mParameterConfig( parameterConfig.clone() ) 
 {
   parent->registerParameterPort( this );
 }

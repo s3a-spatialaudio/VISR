@@ -19,8 +19,9 @@ namespace visr
  *
  *
  */
-template< template<class> class ProtocolT, class ParameterT >
-class ParameterOutputPort: public ProtocolT<ParameterT>::Output
+template< class ProtocolT, class ParameterT >
+class ParameterOutputPort: public ParameterPortBase,
+                           public ProtocolT::template Output<ParameterT>
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
@@ -32,28 +33,28 @@ public:
   /**
    *
    */
-  /*virtual*/ ~ParameterOutputPort() override;
+  /*virtual*/ ~ParameterOutputPort();
 
-  ParameterType parameterType() const override
+  ParameterType parameterType() const
   {
     return ParameterToId<ParameterT>::id;
   }
 
-  CommunicationProtocolType protocolType() const override
+  CommunicationProtocolType protocolType() const
   {
-    return CommunicationProtocolToId<ProtocolT, ParameterT>::id;
+    return CommunicationProtocolToId<ProtocolT>::id;
   }
 
-  ParameterConfigBase const & parameterConfig() const override
+  ParameterConfigBase const & parameterConfig() const
   {
-    return mConfig;
+    return ParameterPortBase::parameterConfig();
   }
 
 protected:
-  void setProtocol( CommunicationProtocolBase * protocol ) override
+  void setProtocol( CommunicationProtocolBase * protocol )
   {
-    ProtocolT<ParameterT> * typedProtocol
-      = dynamic_cast< ProtocolT<ParameterT> * >(protocol);
+    ProtocolT * typedProtocol
+      = dynamic_cast< ProtocolT * >(protocol);
     if( not typedProtocol )
     {
       throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
@@ -61,20 +62,22 @@ protected:
     this->setProtocolInstance( typedProtocol );
   }
 private:
-  ParameterConfigType const mConfig;
 };
 
-template< template<class> class ProtocolT, class ParameterT >
+template< class ProtocolT, class ParameterT >
 inline ParameterOutputPort<ProtocolT, ParameterT >::
 ParameterOutputPort( std::string const & name, 
                      Component & parent,
                      ParameterConfigType const & paramConfig )
-  : ProtocolT<ParameterT>::Output( name, parent )
-  , mConfig( paramConfig )
+  : ParameterPortBase( name, parent, PortBase::Direction::Output, 
+                       ParameterToId<ParameterT>::id,
+                       CommunicationProtocolToId<ProtocolT>::id,
+                       paramConfig )
+  , ProtocolT::template Output<ParameterT>()
 {
 }
 
-template< template<class> class ProtocolT, class ParameterT >
+template<class ProtocolT, class ParameterT >
 inline ParameterOutputPort<ProtocolT, ParameterT >::~ParameterOutputPort( )
 {
 }

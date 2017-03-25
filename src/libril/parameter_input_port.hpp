@@ -19,9 +19,9 @@ namespace visr
  *
  *
  */
-template< template<class> class ProtocolT, class ParameterT >
-class ParameterInputPort: // public ParameterPortBase, // Maybe make this protected or private
-                          public ProtocolT<ParameterT>::Input
+template< class ProtocolT, class ParameterT >
+class ParameterInputPort: public ParameterPortBase,
+                          public ProtocolT::template Input< ParameterT >
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
@@ -42,18 +42,18 @@ public:
 
   CommunicationProtocolType protocolType() const override
   {
-    return CommunicationProtocolToId<ProtocolT, ParameterT>::id;
+    return CommunicationProtocolToId<ProtocolT>::id;
   }
 
   ParameterConfigBase const & parameterConfig() const override
   {
-    return mConfig;
+    return ParameterPortBase::parameterConfig();
   }
 protected:
   void setProtocol( CommunicationProtocolBase * protocol ) override
   {
-    ProtocolT< ParameterT >* typedProtocol
-      = dynamic_cast< ProtocolT< ParameterT > * >(protocol);
+    ProtocolT* typedProtocol
+      = dynamic_cast< ProtocolT * >(protocol);
     if( not typedProtocol )
     {
       throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
@@ -61,23 +61,23 @@ protected:
     this->setProtocolInstance( typedProtocol );
   }
 private:
-  ParameterConfigType const mConfig;
 };
 
-template< template<class> class ProtocolT, class ParameterT >
+template< class ProtocolT, class ParameterT >
 inline ParameterInputPort<ProtocolT, ParameterT >::
 ParameterInputPort( std::string const & name,
-                    Component & parent,
-                    ParameterConfigType const & paramConfig )
-  : ProtocolT<ParameterT>::Input( name, parent )
-  , mConfig( paramConfig )
+  Component & parent,
+  ParameterConfigType const & paramConfig )
+  : ParameterPortBase( name, parent, PortBase::Direction::Input,
+    ParameterToId<ParameterT>::id,
+    CommunicationProtocolToId<ProtocolT>::id,
+    paramConfig )
+  , ProtocolT::template Input<ParameterT>()
 {
 }
 
-template< template<class> class ProtocolT, class ParameterT >
-inline ParameterInputPort<ProtocolT, ParameterT >::~ParameterInputPort( )
-{
-}
+template< class ProtocolT, class ParameterT >
+inline ParameterInputPort<ProtocolT, ParameterT >::~ParameterInputPort( ) = default;
 
 } // namespace visr
 
