@@ -4,6 +4,7 @@ SET( APPLICATION_NAME rrl_test )
 
 SET( SOURCES
 audio_signal_flow_checking.cpp
+parameter_connection.cpp
 test_main.cpp
 )
 
