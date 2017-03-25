@@ -13,6 +13,7 @@
 #include "signal_routing_internal.hpp"
 
 #include <libefl/alignment.hpp>
+#include <libefl/vector_functions.hpp>
 
 #include <libril/atomic_component.hpp>
 #include <libril/audio_sample_type.hpp>
