@@ -13,7 +13,6 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
-#include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 
 #include <librbbl/object_channel_allocator.hpp>

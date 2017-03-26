@@ -2,7 +2,6 @@
 
 #include "position_decoder.hpp"
 
-#include <libpml/message_queue.hpp>
 #include <libpml/listener_position.hpp>
 #include <libpml/string_parameter.hpp>
 
