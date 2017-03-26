@@ -40,6 +40,8 @@ public:
 
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString( sProtocolName ); }
 
+  static constexpr char * staticName() { return sProtocolName; }
+
   explicit MessageQueueProtocol( ParameterType const & parameterType,
                                  ParameterConfigBase const & config );
 
@@ -99,7 +101,7 @@ private:
   InputBase * mInput;
   OutputBase* mOutput;
 
-  static constexpr const char * sProtocolName = "SharedData";
+  static constexpr char * sProtocolName = "SharedData";
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,6 +230,6 @@ public:
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL( visr::pml::MessageQueueProtocol, visr::pml::MessageQueueProtocol::staticType() )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::MessageQueueProtocol, visr::pml::MessageQueueProtocol::staticType(), visr::pml::MessageQueueProtocol::staticName() )
 
 #endif // VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED

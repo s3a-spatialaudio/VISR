@@ -23,9 +23,15 @@
 namespace visr
 {
 
-CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn )
+CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn, char const * name )
  : mCreateFunction( fcn )
+ , mName( name )
 {
+}
+
+std::string const & CommunicationProtocolFactory::Creator::name() const
+{
+  return mName;
 }
 
 std::unique_ptr<CommunicationProtocolBase >

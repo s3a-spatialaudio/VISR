@@ -40,6 +40,8 @@ public:
 
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString( sProtocolName ); };
 
+  static constexpr char * staticName() { return sProtocolName; }
+
   ParameterBase & data()
   {
     return *mData;
@@ -71,7 +73,7 @@ private:
   OutputBase* mOutput;
   std::vector<InputBase*>  mInputs;
 
-  static constexpr const char * sProtocolName = "SharedData";
+  static constexpr char * sProtocolName = "SharedData";
 };
 
 class SharedDataProtocol::InputBase
@@ -162,6 +164,6 @@ public:
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL( visr::pml::SharedDataProtocol, visr::pml::SharedDataProtocol::staticType() )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::SharedDataProtocol, visr::pml::SharedDataProtocol::staticType(), visr::pml::SharedDataProtocol::staticName() )
 
 #endif // VISR_PML_SHARED_DATA_PROTOCOL_HPP_INCLUDED

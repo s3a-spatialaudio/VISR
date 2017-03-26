@@ -19,7 +19,6 @@ namespace visr
 {
 
 // Forward declarations
-//class CommunicationProtocolType;
 class ParameterBase;
 class ParameterConfigBase;
 enum class ParameterType;
@@ -33,25 +32,31 @@ public:
                                                             ParameterConfigBase const & config );
 
   template< class ConcreteCommunicationProtocol >
-  static void registerCommunicationProtocol( CommunicationProtocolType const & protocolType );
+  static void registerCommunicationProtocol( CommunicationProtocolType const & protocolType, char const * name );
+
+  template< class ConcreteCommunicationProtocol >
+  static void registerCommunicationProtocol();
 
 private:
   struct Creator
   {
     using CreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase>( ParameterType const &, ParameterConfigBase const & ) >;
-    explicit Creator( CreateFunction fcn );
+    explicit Creator( CreateFunction fcn, char const * name );
 
     std::unique_ptr<CommunicationProtocolBase> create( ParameterType const & paramType, ParameterConfigBase const & config ) const;
+
+    std::string const & name() const;
  private:
     CreateFunction mCreateFunction;
+    std::string mName;
   };
 
   template< class ConcreteCommunicationProtocolType >
   class TCreator: public Creator
   {
   public:
-    TCreator( )
-      : Creator( &TCreator<ConcreteCommunicationProtocolType>::construct )
+    TCreator( char const * name)
+      : Creator( &TCreator<ConcreteCommunicationProtocolType>::construct, name )
     {
     }
 
@@ -70,38 +75,19 @@ private:
 };
 
 template< class ConcreteCommunicationProtocolType >
-void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationProtocolType const & protocolType )
+void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationProtocolType const & protocolType, char const * name )
 {
-  creatorTable( ).insert( std::make_pair( protocolType, TCreator<ConcreteCommunicationProtocolType>() ) );
+  creatorTable( ).insert( std::make_pair( protocolType, TCreator<ConcreteCommunicationProtocolType>(name) ) );
 }
 
-//template< class ConcreteCommunicationProtocolType, CommunicationProtocolType protocolType >
-//class CommunicationProtocolRegistrar
-//{
-//private:
-//  /**
-//   * Private constructor to prevent instantiation.
-//   */
-//  CommunicationProtocolRegistrar()
-//  {
-//    // (void)&sRegistrar;
-//  }
-//
-//  class Registrar
-//  {
-//  public:
-//    Registrar()
-//    {
-//      CommunicationProtocolFactory::registerCommunicationProtocol<ConcreteCommunicationProtocolType>( protocolType );
-//    }
-//  };
-//
-//  static Registrar sRegistrar;
-//};
-//
-//template< class ConcreteCommunicationProtocolType, CommunicationProtocolType protocolType, ParameterType parameterType >
-//typename CommunicationProtocolRegistrar<ConcreteCommunicationProtocolType, protocolType, parameterType >::Registrar
-//CommunicationProtocolRegistrar<ConcreteCommunicationProtocolType, protocolType, parameterType >::sRegistrar;
+template< class ConcreteCommunicationProtocolType >
+void CommunicationProtocolFactory::registerCommunicationProtocol()
+{
+  registerCommunicationProtocol<ConcreteCommunicationProtocolType>( 
+    CommunicationProtocolToId<ConcreteCommunicationProtocolType>::id, 
+    CommunicationProtocolToId<ConcreteCommunicationProtocolType>::name ) ;
+}
+
 
 } // namespace visr
 

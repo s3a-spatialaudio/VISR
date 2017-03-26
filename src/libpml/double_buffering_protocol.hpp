@@ -44,6 +44,8 @@ public:
 
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString(sProtocolName); };
 
+  static constexpr char * staticName() { return sProtocolName; }
+
   ParameterType parameterType( ) const override;
 
   virtual CommunicationProtocolType protocolType( ) const override { return staticType(); }
@@ -82,7 +84,7 @@ private:
   std::unique_ptr<ParameterBase> mBackData;
   std::unique_ptr<ParameterBase> mFrontData;
 
-  static constexpr const char * sProtocolName = "DoubleBuffering";
+  static constexpr char * sProtocolName = "DoubleBuffering";
 };
 
 class DoubleBufferingProtocol::InputBase
@@ -168,6 +170,6 @@ public:
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL( visr::pml::DoubleBufferingProtocol, visr::pml::DoubleBufferingProtocol::staticType() )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::DoubleBufferingProtocol, visr::pml::DoubleBufferingProtocol::staticType(), visr::pml::DoubleBufferingProtocol::staticName() )
 
 #endif // VISR_PML_DOUBLE_BUFFERING_PROTOCOL_HPP_INCLUDED

@@ -27,9 +27,13 @@ namespace pml
 void initialiseParameterLibrary()
 {
   
-  CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >( DoubleBufferingProtocol::staticType() );
-  CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >( MessageQueueProtocol::staticType() );
-  CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >( SharedDataProtocol::staticType() );
+  //CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >( DoubleBufferingProtocol::staticType(), DoubleBufferingProtocol::staticName() );
+  //CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >( MessageQueueProtocol::staticType(), DoubleBufferingProtocol::staticName() );
+  //CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >( SharedDataProtocol::staticType(), DoubleBufferingProtocol::staticName() );
+
+  CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >();
+  CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >();
+  CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >();
 
   // Register all supported parameter types.
   ParameterFactory::registerParameterType< BiquadParameterMatrix<float> >( ParameterType::BiquadMatrixFloat );

@@ -11,26 +11,6 @@
 namespace visr
 {
 
-//namespace detail
-//{
-//  // Non-cryptographic compile-time hash function.
-//  // Adapted from https://github.com/elbeno/constexpr
-//  // Licence: MIT
-//  constexpr uint64_t fnv1( uint64_t h, const char* s )
-//  {
-//    return (*s == 0) ? h :
-//      fnv1( static_cast<uint64_t>(h * 1099511628211ull) ^
-//          static_cast<uint64_t>(*s), s + 1 );
-//  }
-//
-//  constexpr uint64_t fnv1( const char* s )
-//  {
-//    return true ?
-//      detail::fnv1( 14695981039346656037ull, s ) :
-//      throw std::logic_error("FNV1 hash failed.");
-//  }
-//}
-
 using CommunicationProtocolType = std::uint64_t;
 
 constexpr CommunicationProtocolType communicationProtocolTypeFromString( char const * typeString )
@@ -51,14 +31,15 @@ struct IdToCommunicationProtocol {};
 } // namespace visr
 
 
-#define DEFINE_COMMUNICATION_PROTOCOL( CommunicationProtocolClassType, CommunicationProtocolId )\
+#define DEFINE_COMMUNICATION_PROTOCOL( CommunicationProtocolClassType, CommunicationProtocolId, CommunicationProtocolName )\
 namespace visr \
 { \
    template<>\
    struct CommunicationProtocolToId< CommunicationProtocolClassType > \
     { \
     public: \
-      static const CommunicationProtocolType id = CommunicationProtocolId; \
+      static constexpr CommunicationProtocolType id = CommunicationProtocolId; \
+      static constexpr char * name = CommunicationProtocolName; \
     }; \
 }
 
