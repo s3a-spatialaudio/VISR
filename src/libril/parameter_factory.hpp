@@ -7,11 +7,10 @@
 
 #include "export_symbols.hpp"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
-
-#include <boost/function.hpp>
 
 namespace visr
 {
@@ -46,7 +45,7 @@ public:
 private:
   struct Creator
   {
-    using CreateFunction = boost::function< ParameterBase* ( ParameterConfigBase const & config ) >;
+    using CreateFunction = std::function< ParameterBase* ( ParameterConfigBase const & config ) >;
 
     explicit Creator( CreateFunction fcn );
 

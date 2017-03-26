@@ -5,18 +5,15 @@
 
 #include <memory>
 
-//#include "export_symbols.hpp"
-//
-//#include "parameter_type.hpp"
-//
+#include "export_symbols.hpp"
+
 #include "communication_protocol_base.hpp"
 #include "communication_protocol_type.hpp"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
-
-#include <boost/function.hpp>
 
 namespace visr
 {
@@ -27,7 +24,7 @@ class ParameterBase;
 class ParameterConfigBase;
 enum class ParameterType;
 
-class /*VISR_CORE_LIBRARY_SYMBOL*/ CommunicationProtocolFactory
+class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolFactory
 {
 public:
 
@@ -41,8 +38,7 @@ public:
 private:
   struct Creator
   {
-    using CreateFunction = boost::function< std::unique_ptr<CommunicationProtocolBase> (ParameterType const &, ParameterConfigBase const & ) >;
-
+    using CreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase>( ParameterType const &, ParameterConfigBase const & ) >;
     explicit Creator( CreateFunction fcn );
 
     std::unique_ptr<CommunicationProtocolBase> create( ParameterType const & paramType, ParameterConfigBase const & config ) const;
