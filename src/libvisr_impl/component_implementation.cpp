@@ -69,6 +69,7 @@ void ComponentImplementation::status( StatusMessage::Kind statusId, char const *
 // Trivial default implementation, ought to be replaced be a more sophisticated solution
 // (should be passed to the runtime system)
 {
+  std::cout << fullName() << ": Message id: " << statusId << ": " << message << std::endl;
 }
 
 /*virtual*/ bool ComponentImplementation::isComposite() const
