@@ -2,19 +2,131 @@
 
 #include "message_queue_protocol.hpp"
 
-#include "matrix_parameter.hpp"
-#include "string_parameter.hpp"
-
-#include <string>
-
 namespace visr
 {
 namespace pml
 {
 
-// explicit instantiation
-template class MessageQueueProtocol<StringParameter>;
-template class MessageQueueProtocol<MatrixParameter<float> >;
+MessageQueueProtocol::MessageQueueProtocol( ParameterType const & parameterType,
+                                            ParameterConfigBase const & parameterConfig )
+ : mParameterType( parameterType )
+ , mParameterConfig( parameterConfig.clone() )
+ , mInput( nullptr )
+ , mOutput( nullptr )
+{
+}
+
+ParameterType MessageQueueProtocol::parameterType() const
+{
+  return mParameterType;
+}
+
+CommunicationProtocolType MessageQueueProtocol::protocolType() const
+{
+  return staticType();
+}
+
+void MessageQueueProtocol::clear()
+{
+  mQueue.clear();
+}
+
+bool MessageQueueProtocol::empty() const 
+{
+  return mQueue.empty();
+}
+
+std::size_t MessageQueueProtocol::numberOfElements() const
+{
+  return mQueue.size();
+}
+
+void MessageQueueProtocol::enqueue( std::unique_ptr<ParameterBase>& val )
+{
+  mQueue.push_front( std::move( val ) );
+}
+
+ParameterBase const& MessageQueueProtocol::nextElement() const
+{
+  if( empty() )
+  {
+    throw std::logic_error( "Calling nextElement() on an empty message queue." );
+  }
+  return *(mQueue.back());
+}
+
+void MessageQueueProtocol::popNextElement()
+{
+  if( empty() )
+  {
+    throw std::logic_error( "Calling nextElement() on an empty message queue." );
+  }
+  mQueue.pop_back();
+}
+
+void MessageQueueProtocol::connectInput( ParameterPortBase* port )
+{
+  MessageQueueProtocol::InputBase * typedPort = dynamic_cast<MessageQueueProtocol::InputBase*>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+  }
+  if( mInput )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): input port already set." );
+  }
+  mInput = typedPort;
+  mInput->setProtocolInstance( this );
+}
+
+void MessageQueueProtocol::connectOutput( ParameterPortBase* port )
+{
+  MessageQueueProtocol::OutputBase * typedPort = dynamic_cast<MessageQueueProtocol::OutputBase *>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectOutput(): port argument has wrong type." );
+  }
+  if( mOutput )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectOutput(): output port already set." );
+  }
+  mOutput = typedPort;
+  mOutput->setProtocolInstance( this );
+}
+
+bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port )
+{
+  MessageQueueProtocol::InputBase * typedPort = dynamic_cast<MessageQueueProtocol::InputBase *>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+  }
+  if( typedPort != mInput )
+  {
+    // Trying to disconnect a port that is not the previously connected input." );
+    return false;
+  }
+  mInput->setProtocolInstance( nullptr );
+  mInput = nullptr;
+  return true;
+}
+
+bool MessageQueueProtocol::disconnectOutput( ParameterPortBase* port )
+{
+  MessageQueueProtocol::OutputBase * typedPort = dynamic_cast<MessageQueueProtocol::OutputBase *>(port);
+  if( not typedPort )
+  {
+    std::invalid_argument( "MessageQueueProtocol::disconnectOutput(): port argument has wrong type." );
+  }
+  if( typedPort != mOutput )
+  {
+    // Trying to disconnect a port that is not the previously connected output." );
+    return false;
+  }
+  mOutput->setProtocolInstance( nullptr );
+  mOutput = nullptr;
+  return true;
+}
 
 } // namespace pml
 } // namespace visr

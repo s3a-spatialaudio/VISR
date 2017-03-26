@@ -92,14 +92,14 @@ void PanningGainCalculator::setListenerPosition( pml::ListenerPosition const & p
 
 void PanningGainCalculator::process()
 {
-  bool const listenerPosChanged = mListenerPositionInput && mListenerPositionInput->hasChanged();
+  bool const listenerPosChanged = mListenerPositionInput && mListenerPositionInput->changed();
   if( listenerPosChanged )
   {
     setListenerPosition( mListenerPositionInput->data( ) );
     mListenerPositionInput->resetChanged( );
   }
 
-  if( mObjectVectorInput->hasChanged() )
+  if( mObjectVectorInput->changed() )
   {
     objectmodel::ObjectVector const & objects = mObjectVectorInput->data( );
 
@@ -112,7 +112,7 @@ void PanningGainCalculator::process()
     gainMatrix.zeroFill( );
 
     mLevels = 0.0f;
-    // As not every source object in the VBAP calculator component might correspond to a real source, we have to set them to safe position beforehand.
+    // As not every source object in the VBAP calculator component might correspond to a concrete source, we have to set them to safe position beforehand.
     static const panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
     std::fill( mSourcePositions.begin(), mSourcePositions.end(), defaultSource );
 

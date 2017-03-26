@@ -51,7 +51,6 @@ public:
 void exportParameterConfigBase( pybind11::module& m )
 {
   pybind11::class_<ParameterConfigBase, ParameterConfigBaseWrapper>(m, "ParameterConfigBase" )
-    .def( pybind11::init<>() )
     .def( "compare", &ParameterConfigBase::compare )
     ;
 }

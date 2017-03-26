@@ -10,7 +10,6 @@
 #include <libril/parameter_type.hpp>
 #include <libril/parameter_config_base.hpp>
 
-#include <algorithm>
 #include <ciso646>
 #include <memory>
 #include <stdexcept>
@@ -22,16 +21,8 @@ namespace pml
 {
 
 /**
- * A FIFO-type message queue template class for storing and passing message data.
- * @tparam MessageTypeT Type of the contained elements.
- * @note This class does provide the same level of thread safety as, e.g., the STL.
- * I.e., calling code from different thread must ensure that concurrent accesses
- * to the same instances are appropriately secured against race conditions.
+ * 
  */
-
-
-// CommunicationProtocolType const doubleBufferingType = ;
-
 class DoubleBufferingProtocol: public CommunicationProtocolBase
 {
 public:
@@ -51,13 +42,11 @@ public:
   explicit DoubleBufferingProtocol( ParameterType const & parameterType,
                                     ParameterConfigBase const & parameterConfig );
 
-  static constexpr const char protocolName[] = "DoubleBuffering";
-
- static constexpr CommunicationProtocolType type = communicationProtocolTypeFromString("DoubleBuffering");
+  static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString(sProtocolName); };
 
   ParameterType parameterType( ) const override;
 
-  virtual CommunicationProtocolType protocolType( ) const override { return type; }
+  virtual CommunicationProtocolType protocolType( ) const override { return staticType(); }
 
   ParameterBase & frontData();
 
@@ -93,6 +82,7 @@ private:
   std::unique_ptr<ParameterBase> mBackData;
   std::unique_ptr<ParameterBase> mFrontData;
 
+  static constexpr const char * sProtocolName = "DoubleBuffering";
 };
 
 class DoubleBufferingProtocol::InputBase
@@ -123,6 +113,7 @@ private:
 template<class MessageType>
 class DoubleBufferingProtocol::Input: public InputBase
 {
+  friend class InputBase;
 public:
   using InputBase::changed;
 
@@ -177,6 +168,6 @@ public:
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL( visr::pml::DoubleBufferingProtocol, visr::pml::DoubleBufferingProtocol::type )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::DoubleBufferingProtocol, visr::pml::DoubleBufferingProtocol::staticType() )
 
 #endif // VISR_PML_DOUBLE_BUFFERING_PROTOCOL_HPP_INCLUDED

@@ -1,6 +1,7 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
+#include <libpml/initialise_parameter_library.hpp>
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/matrix_parameter_config.hpp>
 
@@ -25,6 +26,8 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( instantiateFloatMatrix )
 {
+  initialiseParameterLibrary();
+
   std::size_t numRowsInit = 2;
   std::size_t numColumnsInit = 3;
   MatrixParameterConfig const cfg( numRowsInit, numColumnsInit );

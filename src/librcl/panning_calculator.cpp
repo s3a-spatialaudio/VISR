@@ -2,6 +2,8 @@
 
 #include "panning_calculator.hpp"
 
+#include <libril/status_message.hpp>
+
 #include <libefl/basic_matrix.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>
 #include <libefl/degree_radian_conversion.hpp>
@@ -121,9 +123,10 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
 void PanningCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
   mVbapCalculator.setListenerPosition( x, y, z );
-  if( mVbapCalculator.calcInvMatrices() != 0 )
+  int retVal = mVbapCalculator.calcInvMatrices();
+  if( retVal != 0 )
   {
-    throw std::invalid_argument( "PanningCalculator::setup(): Calculation of inverse matrices failed." );
+    status( StatusMessage::Error, "PanningCalculator::setup(): Calculation of inverse matrices failed, error code ", retVal, " position: ", x, y, z );
   }
 }
 
@@ -134,14 +137,14 @@ void PanningCalculator::setListenerPosition( pml::ListenerPosition const & pos )
 
 void PanningCalculator::process()
 {
-  bool const listenerPosChanged = mListenerPositionInput && mListenerPositionInput->hasChanged();
+  bool const listenerPosChanged = mListenerPositionInput && mListenerPositionInput->changed();
   if( listenerPosChanged )
   {
     setListenerPosition( mListenerPositionInput->data( ) );
     mListenerPositionInput->resetChanged( );
   }
 
-  if( mObjectVectorInput->hasChanged() )
+  if( mObjectVectorInput->changed() )
   {
     objectmodel::ObjectVector const & objects = mObjectVectorInput->data( );
 

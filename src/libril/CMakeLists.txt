@@ -28,6 +28,7 @@ signal_flow_context.hpp
 status_message.hpp
 typed_parameter_base.hpp
 version.hpp
+detail/compile_time_hash_fnv1.hpp
 )
 
 SET( SOURCES

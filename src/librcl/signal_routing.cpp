@@ -60,7 +60,7 @@ void SignalRouting::process()
 
   if( mControlInput ) // Dynamic parameter changes are activated.
   {
-    if( mControlInput->hasChanged() )
+    if( mControlInput->changed() )
     {
       try
       {

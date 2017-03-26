@@ -38,14 +38,6 @@
 
 namespace visr
 {
-
-// Forward declarations
-namespace pml
-{
-template< typename MessageTypeT >
-class MessageQueueProtocol;
-}
-
 namespace signalflows
 {
 

@@ -36,8 +36,8 @@ namespace pml
 class ListenerPosition;
 class ObjectVector;
 template< typename ElementType > class MatrixParameter;
-template< class ParameterType > class SharedDataProtocol;
-template< class ParameterType > class DoubleBufferingProtocol;
+class SharedDataProtocol;
+class DoubleBufferingProtocol;
 }
 
 namespace rcl
