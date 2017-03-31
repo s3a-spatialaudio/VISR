@@ -12,7 +12,7 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
-#include <libpml/signal_routing_parameter.hpp>
+#include <libpml/initialise_parameter_library.hpp>
 
 #include <libril/signal_flow_context.hpp>
 
@@ -48,6 +48,9 @@ int main( int argc, char const * const * argv )
 
   try
   {
+    // Load all parameters and communication protocols into the respective factories.
+    pml::initialiseParameterLibrary();
+
     efl::DenormalisedNumbers::State const oldDenormNumbersState
     = efl::DenormalisedNumbers::setDenormHandling();
 
@@ -113,11 +116,7 @@ int main( int argc, char const * const * argv )
 
     const bool lowFrequencyPanning = cmdLineOptions.getDefaultedOption("low-frequency-panning", false );
 
-    if( not cmdLineOptions.hasOption( "reverb-config" ) )
-    {
-      throw std::invalid_argument( "VISR renderer: Mandatory option \"reverb-config\" missing." );
-    }
-    const std::string reverbConfiguration= cmdLineOptions.getOption<std::string>( "reverb-config" );
+    const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", std::string() );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;

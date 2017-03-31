@@ -62,7 +62,7 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
  , mVbapMatrix( context, "VbapGainMatrix", this )
  , mDiffusePartMatrix( context, "DiffusePartMatrix", this )
  , mDiffusePartDecorrelator( context, "DiffusePartDecorrelator", this )
-#ifndef DISABLE_REVERB_RENDERING
+#ifdef DISABLE_REVERB_RENDERING
  , mDirectDiffuseMix( context, "DirectDiffuseMixer", this,
 		      loudspeakerConfiguration.getNumRegularSpeakers(),
 		      frequencyDependentPanning ? 3 : 2 )
@@ -179,7 +179,6 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
    */
   SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
-  mNullSource.setup( 1/*width*/ );
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
@@ -316,6 +315,7 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
                            "", "output", ChannelList( activePlaybackChannels ) );
 
   std::size_t const numSilentOutputs = numberOfOutputs - (numberOfLoudspeakers + numberOfSubwoofers);
+  mNullSource.setup( numSilentOutputs == 0 ? 0 : 1 );
   if( numSilentOutputs > 0 )
   {
     std::vector<ChannelList::IndexType> nullOutput( numSilentOutputs, 0 );
