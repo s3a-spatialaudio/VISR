@@ -11,7 +11,6 @@
 
 #include <ciso646>
 #include <stdexcept>
-#include <string>
 
 namespace visr
 {
@@ -19,13 +18,13 @@ namespace visr
 class VISR_CORE_LIBRARY_SYMBOL ParameterInputBase: public ParameterPortBase
 {
 protected:
-  explicit ParameterInputBase( std::string const & name,
+  explicit ParameterInputBase( char const * name,
                                Component & parent,
                                ParameterType const & parameterType,
                                CommunicationProtocolType const & protocolType,
                                ParameterConfigBase const & paramConfig );
 
-  explicit ParameterInputBase( std::string const & name,
+  explicit ParameterInputBase( char const * name,
                                Component & parent,
                                ParameterType const & parameterType,
                                CommunicationProtocolType const & protocolType );
@@ -47,13 +46,13 @@ public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
   template<typename ... ProtocolArgs>
-  explicit ParameterInput( std::string const & name,
+  explicit ParameterInput( char const * name,
                            Component & parent,
                            ParameterConfigType const & paramConfig,
                            ProtocolArgs ... protoArgs );
 
   template<typename ... ProtocolArgs>
-  explicit ParameterInput( std::string const & name,
+  explicit ParameterInput( char const * name,
                            Component & parent,
                            ProtocolArgs ... protoArgs );
 
@@ -93,7 +92,7 @@ private:
 template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
 inline ParameterInput<ProtocolT, ParameterT >::
-ParameterInput( std::string const & name,
+ParameterInput( char const * name,
   Component & parent,
   ParameterConfigType const & paramConfig,
   ProtocolArgs ... protoArgs )
@@ -107,16 +106,15 @@ ParameterInput( std::string const & name,
 template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
 inline ParameterInput<ProtocolT, ParameterT >::
-ParameterInput( std::string const & name,
-  Component & parent,
-  ProtocolArgs ... protoArgs )
+ParameterInput( char const * name,
+                Component & parent,
+                ProtocolArgs ... protoArgs )
   : ParameterInputBase( name, parent,
     ParameterToId<ParameterT>::id,
     CommunicationProtocolToId<ProtocolT>::id )
   , ProtocolT::template Input<ParameterT>( protoArgs... )
 {
 }
-
 
 template< class ProtocolT, class ParameterT >
 inline ParameterInput<ProtocolT, ParameterT >::~ParameterInput( ) = default;

@@ -11,7 +11,6 @@
 
 #include <ciso646>
 #include <stdexcept>
-#include <string>
 
 namespace visr
 {
@@ -19,16 +18,16 @@ namespace visr
 class VISR_CORE_LIBRARY_SYMBOL ParameterOutputBase: public ParameterPortBase
 {
 protected:
-  explicit ParameterOutputBase( std::string const & name,
-      Component & parent,
-      ParameterType const & parameterType,
-      CommunicationProtocolType const & protocolType,
-      ParameterConfigBase const & paramConfig );
+  explicit ParameterOutputBase( char const * name,
+                                Component & parent,
+                                ParameterType const & parameterType,
+                                CommunicationProtocolType const & protocolType,
+                                ParameterConfigBase const & paramConfig );
 
-  explicit ParameterOutputBase( std::string const & name,
-      Component & parent,
-      ParameterType const & parameterType,
-      CommunicationProtocolType const & protocolType );
+  explicit ParameterOutputBase( char const * name,
+                                Component & parent,
+                                ParameterType const & parameterType,
+                                CommunicationProtocolType const & protocolType );
 
   virtual ~ParameterOutputBase() override;
 
@@ -47,13 +46,13 @@ public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
   template<typename ... ProtocolArgs>
-  explicit ParameterOutput( std::string const & name, 
-                                Component & parent,
-                                ParameterConfigType const & paramConfig,
-                                ProtocolArgs ... protoArgs );
+  explicit ParameterOutput( char const * name, 
+                            Component & parent,
+                            ParameterConfigType const & paramConfig,
+                            ProtocolArgs ... protoArgs );
 
   template<typename ... ProtocolArgs>
-  explicit ParameterOutput( std::string const & name,
+  explicit ParameterOutput( char const * name,
                             Component & parent,
                             ProtocolArgs ... protoArgs );
 
@@ -95,7 +94,7 @@ private:
 template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
 inline ParameterOutput<ProtocolT, ParameterT >::
-ParameterOutput( std::string const & name, 
+ParameterOutput( char const * name, 
                  Component & parent,
                  ParameterConfigType const & paramConfig,
                  ProtocolArgs ... protoArgs )
@@ -110,7 +109,7 @@ ParameterOutput( std::string const & name,
 template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
 inline ParameterOutput<ProtocolT, ParameterT >::
-ParameterOutput( std::string const & name,
+ParameterOutput( char const * name,
                  Component & parent,
                  ProtocolArgs ... protoArgs )
   : ParameterOutputBase( name, parent,

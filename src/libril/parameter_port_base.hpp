@@ -8,8 +8,6 @@
 #include "export_symbols.hpp"
 #include "parameter_type.hpp"
 #include "communication_protocol_type.hpp"
- 
-#include <string>
 
 namespace visr
 {
@@ -38,18 +36,18 @@ public:
    */
   using Direction = PortBase::Direction;
 
-  explicit ParameterPortBase( std::string const & name,
+  explicit ParameterPortBase( char const * name,
                               Component & parent,
                               PortBase::Direction direction,
                               ParameterType const & parameterType,
                               CommunicationProtocolType const & protocolType,
                               ParameterConfigBase const & parameterConfig );
 
-  ParameterPortBase::ParameterPortBase( std::string const & name,
-                                        Component & parent,
-                                        PortBase::Direction direction,
-                                        ParameterType const & parameterType,
-                                        CommunicationProtocolType const & protocolType );
+  ParameterPortBase( char const * name,
+                     Component & parent,
+                     PortBase::Direction direction,
+                     ParameterType const & parameterType,
+                     CommunicationProtocolType const & protocolType );
 
   /**
    * Set a new parameter configuration. If a configuration is already set, it is overwritten.

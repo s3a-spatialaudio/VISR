@@ -18,7 +18,7 @@ namespace impl
 {
 
 ParameterPortBaseImplementation::
-ParameterPortBaseImplementation( std::string const & name,
+ParameterPortBaseImplementation( char const * name,
                                  ParameterPortBase& containingPort,
                                  ComponentImplementation * parent,
                                  visr::PortBase::Direction direction,
@@ -35,7 +35,7 @@ ParameterPortBaseImplementation( std::string const & name,
 }
 
 ParameterPortBaseImplementation::
-ParameterPortBaseImplementation( std::string const & name,
+ParameterPortBaseImplementation( char const * name,
                                  ParameterPortBase& containingPort,
                                  ComponentImplementation * parent,
                                  visr::PortBase::Direction direction,
@@ -83,9 +83,14 @@ CommunicationProtocolType ParameterPortBaseImplementation::protocolType() const
 
 void ParameterPortBaseImplementation::setParameterConfig( ParameterConfigBase const & parameterConfig )
 {
+  // This invokes the move assignemnt operator=( std::unique_ptr<ParameterConfigBase> && )
   mParameterConfig = parameterConfig.clone();
 }
 
+bool ParameterPortBaseImplementation::hasParameterConfig() const noexcept
+{
+  return bool(mParameterConfig);
+}
 
 ParameterConfigBase const & ParameterPortBaseImplementation::parameterConfig() const
 {

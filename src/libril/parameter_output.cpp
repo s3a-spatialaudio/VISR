@@ -5,7 +5,7 @@
 namespace visr
 {
 
-ParameterOutputBase::ParameterOutputBase( std::string const & name,
+ParameterOutputBase::ParameterOutputBase( char const * name,
                                         Component & parent,
                                         ParameterType const & parameterType,
                                         CommunicationProtocolType const & protocolType,
@@ -13,7 +13,7 @@ ParameterOutputBase::ParameterOutputBase( std::string const & name,
   : ParameterPortBase( name, parent, PortBase::Direction::Output, parameterType, protocolType, paramConfig )
 {}
 
-ParameterOutputBase::ParameterOutputBase( std::string const & name,
+ParameterOutputBase::ParameterOutputBase( char const * name,
     Component & parent,
     ParameterType const & parameterType,
     CommunicationProtocolType const & protocolType )

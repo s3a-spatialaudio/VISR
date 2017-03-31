@@ -5,7 +5,7 @@
 namespace visr
 {
 
-ParameterInputBase::ParameterInputBase( std::string const & name,
+ParameterInputBase::ParameterInputBase( char const * name,
                                         Component & parent,
                                         ParameterType const & parameterType,
                                         CommunicationProtocolType const & protocolType,
@@ -13,7 +13,7 @@ ParameterInputBase::ParameterInputBase( std::string const & name,
   : ParameterPortBase( name, parent, PortBase::Direction::Input, parameterType, protocolType, paramConfig )
 {}
 
-ParameterInputBase::ParameterInputBase( std::string const & name,
+ParameterInputBase::ParameterInputBase( char const * name,
     Component & parent,
     ParameterType const & parameterType,
     CommunicationProtocolType const & protocolType )

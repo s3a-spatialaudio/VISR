@@ -9,7 +9,7 @@
 namespace visr
 {
 
-ParameterPortBase::ParameterPortBase( std::string const & name,
+ParameterPortBase::ParameterPortBase( char const * name,
                                       Component & parent, 
                                       PortBase::Direction direction,
                                       ParameterType const & parameterType,
@@ -20,7 +20,7 @@ ParameterPortBase::ParameterPortBase( std::string const & name,
 {
 }
 
-ParameterPortBase::ParameterPortBase( std::string const & name,
+ParameterPortBase::ParameterPortBase( char const * name,
   Component & parent,
   PortBase::Direction direction,
   ParameterType const & parameterType,

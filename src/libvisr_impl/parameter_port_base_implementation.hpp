@@ -29,7 +29,7 @@ namespace impl
 class ParameterPortBaseImplementation: public PortBaseImplementation
 {
 public:
-  explicit ParameterPortBaseImplementation( std::string const & name,
+  explicit ParameterPortBaseImplementation( char const * name,
                                             ParameterPortBase& containingPort,
                                             ComponentImplementation * parent,
                                             visr::PortBase::Direction direction,
@@ -37,7 +37,7 @@ public:
                                             CommunicationProtocolType const & protocolType,
                                             ParameterConfigBase const & parameterConfig );
 
-  explicit ParameterPortBaseImplementation( std::string const & name,
+  explicit ParameterPortBaseImplementation( char const * name,
                                             ParameterPortBase& containingPort,
                                             ComponentImplementation * parent,
                                             visr::PortBase::Direction direction,
