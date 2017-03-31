@@ -5,8 +5,8 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -79,8 +79,8 @@ private:
    */
   void processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains );
 
-  ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
-  std::unique_ptr<ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
+  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
+  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
 
 };
 

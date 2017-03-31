@@ -5,7 +5,7 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/message_queue.hpp> // TODO: Replace by other data structure.
 #include <libpml/string_parameter.hpp>
@@ -109,7 +109,7 @@ private:
 
   boost::mutex mMutex;
 
-  ParameterOutputPort<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
+  ParameterOutput<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

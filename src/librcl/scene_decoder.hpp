@@ -7,8 +7,8 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/string_parameter.hpp>
 #include <libpml/object_vector.hpp>
@@ -68,8 +68,8 @@ public:
   void process();
 
 private:
-  ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorOutput;
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorOutput;
 };
 
 } // namespace rcl

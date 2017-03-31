@@ -5,7 +5,7 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/message_queue.hpp>
@@ -110,7 +110,7 @@ private:
 
   boost::mutex mMutex;
 
-  ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
 };
 
 } // namespace rcl

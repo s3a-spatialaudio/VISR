@@ -63,7 +63,7 @@ void TimeFrequencyInverseTransform::setup( std::size_t numberOfChannels,
 
   pml::TimeFrequencyParameterConfig const tfParamConfig( dftLength, hopSize, numberOfChannels, mDftSamplesPerPeriod );
   mOutput.setWidth( mNumberOfChannels );
-  mInput.reset( new ParameterInputPort < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "in", *this, tfParamConfig ) ) ;
+  mInput.reset( new ParameterInput < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "in", *this, tfParamConfig ) ) ;
 }
 
 void TimeFrequencyInverseTransform::process()

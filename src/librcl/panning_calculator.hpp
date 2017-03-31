@@ -5,8 +5,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
@@ -211,9 +211,9 @@ private:
   /**
    * Data type of the parmaeter ports for outgoing matrix data.
    */
-  using ListenerPositionPort = ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
-  using ObjectPort = ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
-  using MatrixPort = ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
+  using ListenerPositionPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+  using ObjectPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector >;
+  using MatrixPort = ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
 
   std::unique_ptr<ObjectPort> mObjectVectorInput;
 

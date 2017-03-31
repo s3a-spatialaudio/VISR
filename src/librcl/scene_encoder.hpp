@@ -5,8 +5,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/object_vector.hpp>
@@ -61,8 +61,8 @@ public:
   void process();
 
 private:
-  ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector> mObjectInput;
-  ParameterOutputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
+  ParameterInput< pml::SharedDataProtocol, pml::ObjectVector> mObjectInput;
+  ParameterOutput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

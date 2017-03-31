@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PARAMETER_INPUT_PORT_HPP_INCLUDED
-#define VISR_PARAMETER_INPUT_PORT_HPP_INCLUDED
+#ifndef VISR_PARAMETER_INPUT_HPP_INCLUDED
+#define VISR_PARAMETER_INPUT_HPP_INCLUDED
 
 #include "parameter_port_base.hpp"
 
@@ -20,14 +20,14 @@ namespace visr
  *
  */
 template< class ProtocolT, class ParameterT >
-class ParameterInputPort: public ParameterPortBase,
+class ParameterInput: public ParameterPortBase,
                           public ProtocolT::template Input< ParameterT >
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
   template<typename ... ProtocolArgs>
-  explicit ParameterInputPort( std::string const & name,
+  explicit ParameterInput( std::string const & name,
                                Component & parent,
                                ParameterConfigType const & paramConfig,
                                ProtocolArgs ... protoArgs );
@@ -35,7 +35,7 @@ public:
   /**
    * Virtual desctructor
    */
-  /*virtual*/ ~ParameterInputPort() override;
+  /*virtual*/ ~ParameterInput() override;
 
   ParameterType parameterType() const override
   {
@@ -67,8 +67,8 @@ private:
 
 template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
-inline ParameterInputPort<ProtocolT, ParameterT >::
-ParameterInputPort( std::string const & name,
+inline ParameterInput<ProtocolT, ParameterT >::
+ParameterInput( std::string const & name,
   Component & parent,
   ParameterConfigType const & paramConfig,
   ProtocolArgs ... protoArgs )
@@ -81,8 +81,8 @@ ParameterInputPort( std::string const & name,
 }
 
 template< class ProtocolT, class ParameterT >
-inline ParameterInputPort<ProtocolT, ParameterT >::~ParameterInputPort( ) = default;
+inline ParameterInput<ProtocolT, ParameterT >::~ParameterInput( ) = default;
 
 } // namespace visr
 
-#endif // #ifndef VISR_PARAMETER_INPUT_PORT_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_INPUT_HPP_INCLUDED

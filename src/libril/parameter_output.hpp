@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
-#define VISR_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
+#ifndef VISR_PARAMETER_OUTPUT_HPP_INCLUDED
+#define VISR_PARAMETER_OUTPUT_HPP_INCLUDED
 
 #include "parameter_port_base.hpp"
 
@@ -20,14 +20,14 @@ namespace visr
  *
  */
 template< class ProtocolT, class ParameterT >
-class ParameterOutputPort: public ParameterPortBase,
+class ParameterOutput: public ParameterPortBase,
                            public ProtocolT::template Output<ParameterT>
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
   template<typename ... ProtocolArgs>
-  explicit ParameterOutputPort( std::string const & name, 
+  explicit ParameterOutput( std::string const & name, 
                                 Component & parent,
                                 ParameterConfigType const & paramConfig,
                                 ProtocolArgs ... protoArgs );
@@ -35,7 +35,7 @@ public:
   /**
    *
    */
-  /*virtual*/ ~ParameterOutputPort();
+  /*virtual*/ ~ParameterOutput();
 
   ParameterType parameterType() const
   {
@@ -68,8 +68,8 @@ private:
 
 template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
-inline ParameterOutputPort<ProtocolT, ParameterT >::
-ParameterOutputPort( std::string const & name, 
+inline ParameterOutput<ProtocolT, ParameterT >::
+ParameterOutput( std::string const & name, 
                      Component & parent,
                      ParameterConfigType const & paramConfig,
                      ProtocolArgs ... protoArgs )
@@ -82,10 +82,10 @@ ParameterOutputPort( std::string const & name,
 }
 
 template<class ProtocolT, class ParameterT >
-inline ParameterOutputPort<ProtocolT, ParameterT >::~ParameterOutputPort( )
+inline ParameterOutput<ProtocolT, ParameterT >::~ParameterOutput( )
 {
 }
 
 } // namespace visr
 
-#endif // #ifndef VISR_PARAMETER_OUTPUT_PORT_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_OUTPUT_HPP_INCLUDED

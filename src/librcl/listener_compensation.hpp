@@ -13,8 +13,8 @@
 #include <libefl/basic_matrix.hpp>
 
 #include <libril/atomic_component.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
@@ -94,9 +94,9 @@ private:
   panning::XYZ m_listenerPos; //position of the listener
   std::size_t mNumberOfLoudspeakers;
 
-  std::unique_ptr<  ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition > > mPositionInput;
-  std::unique_ptr< ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mGainOutput;
-  std::unique_ptr< ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mDelayOutput;
+  std::unique_ptr<  ParameterInput<pml::SharedDataProtocol, pml::ListenerPosition > > mPositionInput;
+  std::unique_ptr< ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mGainOutput;
+  std::unique_ptr< ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mDelayOutput;
 };//class Listener Compensation
 
 

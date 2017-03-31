@@ -7,7 +7,7 @@
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
 // TODO: make it a forward declaration
 #include <librbbl/gain_matrix.hpp>
@@ -108,7 +108,7 @@ private:
   std::valarray<SampleType * > mOutputChannels;
   //@}
 
-  std::unique_ptr<ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
+  std::unique_ptr<ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
 };
 
 } // namespace rcl

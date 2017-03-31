@@ -101,7 +101,7 @@ void TimeFrequencyTransform::setup( std::size_t numberOfChannels,
   mNumberOfChannels = numberOfChannels;
   mInput.setWidth( mNumberOfChannels );
   mInputChannels.resize( mNumberOfChannels, nullptr );
-  mOutput.reset( new ParameterOutputPort < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "out", *this, tfParamConfig ) ) ;
+  mOutput.reset( new ParameterOutput < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "out", *this, tfParamConfig ) ) ;
 }
 
 void TimeFrequencyTransform::process()

@@ -5,8 +5,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
@@ -151,8 +151,8 @@ private:
     return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
   }
 
-  ParameterInputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mSubbandInput;
-  ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mFilterOutput;
+  ParameterInput < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mSubbandInput;
+  ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mFilterOutput;
 };
 
 } // namespace rcl

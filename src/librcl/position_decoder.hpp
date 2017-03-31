@@ -5,8 +5,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_type.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/listener_position.hpp>
 #include <libpml/message_queue_protocol.hpp>
@@ -76,8 +76,8 @@ private:
 
   pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
 
-  ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionOutput;
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionOutput;
 };
 
 } // namespace rcl

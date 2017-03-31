@@ -4,8 +4,6 @@
 
 #include <libefl/vector_functions.hpp>
 
-#include <libril/parameter_input_port.hpp>
-
 #include <iostream> // Temporary solution, replce by proper error / warning API.
 
 namespace visr
@@ -32,7 +30,7 @@ void SignalRouting::setup( std::size_t inputWidth, std::size_t outputWidth, bool
   mOutput.setWidth( outputWidth );
   if (controlPort)
   {
-    mControlInput.reset(new ParameterInputPort<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
+    mControlInput.reset(new ParameterInput<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
   }
   // create an empty routing
   mRoutingVector.resize( outputWidth, pml::SignalRoutingParameter::cInvalidIndex );

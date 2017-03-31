@@ -17,9 +17,9 @@ constants.hpp
 export_symbols.hpp
 parameter_base.hpp 
 parameter_config_base.hpp 
-parameter_input_port.hpp
+parameter_input.hpp
 parameter_factory.hpp 
-parameter_output_port.hpp
+parameter_output.hpp
 parameter_port_base.hpp
 parameter_type.hpp
 port_base.hpp

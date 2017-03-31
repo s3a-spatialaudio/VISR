@@ -7,8 +7,8 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/string_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
@@ -72,9 +72,9 @@ public:
   void process();
 
 private:
-  ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
 
-  ParameterOutputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mRoutingOutput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mRoutingOutput;
 
   std::size_t mNumberOfInputs;
 

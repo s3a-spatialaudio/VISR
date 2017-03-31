@@ -32,7 +32,7 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mOutputChannels.resize( numberOfOutputs, nullptr );  mMatrix.reset( new rbbl::GainMatrix<SampleType>( numberOfInputs, numberOfOutputs, period(), interpolationSteps, initialGain, cVectorAlignmentSamples ) );
   if( controlInput )
   {
-    mGainInput.reset( new ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+    mGainInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
       pml::MatrixParameterConfig( numberOfOutputs, numberOfInputs ) ) );
   }
 }
@@ -55,7 +55,7 @@ void GainMatrix::setup( std::size_t numberOfInputs,
                  interpolationSteps, initialGains, cVectorAlignmentSamples ) );
   if( controlInput )
   {
-    mGainInput.reset( new ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+    mGainInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
                       pml::MatrixParameterConfig( numberOfOutputs, numberOfInputs ) ) );
   }
 }

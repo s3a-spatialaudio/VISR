@@ -36,7 +36,7 @@ DiffusionGainCalculator::~DiffusionGainCalculator()
 void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
-  mGainOutput.reset( new ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
+  mGainOutput.reset( new ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
     ( "gainOutput", *this, pml::MatrixParameterConfig( 1, numberOfObjectChannels ) ) );
 }
 

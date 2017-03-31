@@ -4,8 +4,8 @@
 #include <librrl/integrity_checking.hpp>
 
 #include <libril/atomic_component.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
@@ -47,7 +47,7 @@ public:
   }
   void process() override {}
 private:
-  ParameterOutputPort<pml::DoubleBufferingProtocol, pml::MatrixParameter<float> > mParamOutput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::MatrixParameter<float> > mParamOutput;
 };
 
 class Receiver: public AtomicComponent
@@ -69,7 +69,7 @@ public:
   
   }
 private:
-  ParameterInputPort<pml::DoubleBufferingProtocol, pml::MatrixParameter<float> > mParamInput;
+  ParameterInput<pml::DoubleBufferingProtocol, pml::MatrixParameter<float> > mParamInput;
 };
 
 class MyComposite: public CompositeComponent

@@ -6,7 +6,7 @@
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
@@ -84,13 +84,13 @@ private:
 
   AudioOutput mLoudspeakerOutput;
 
-  ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
+  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
 
   /**
    * Parameter input for the listener position.
    * Object is instantiated only if tacking is activated.
    */
-  std::unique_ptr<ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
+  std::unique_ptr<ParameterInput< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
 
   efl::BasicMatrix<SampleType> const & mDiffusionFilters;
 

@@ -9,7 +9,7 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <memory>
 #include <vector>
@@ -108,7 +108,7 @@ private:
    */
   AudioOutput mOutput;
 
-  std::unique_ptr<ParameterInputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
+  std::unique_ptr<ParameterInput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
 
   /**
    * Data structure for string the routing information. Eahc vector element corresponds to the respective

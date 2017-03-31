@@ -57,10 +57,10 @@ void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig 
 
   pml::VectorParameterConfig const vectorConfig( mNumberOfLoudspeakers );
 
-  mPositionInput.reset( new ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition >
+  mPositionInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::ListenerPosition >
     ( "positionInput", *this, pml::EmptyParameterConfig() ) );
-  mGainOutput.reset( new ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "gainOutput", *this, vectorConfig) );
-  mDelayOutput.reset( new ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "delayOutput", *this, vectorConfig ) );
+  mGainOutput.reset( new ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "gainOutput", *this, vectorConfig) );
+  mDelayOutput.reset( new ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "delayOutput", *this, vectorConfig ) );
 }
 
 void ListenerCompensation::process()

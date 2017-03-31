@@ -63,7 +63,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
   if( mTrackingEnabled )
   {
     // Instantiate the objects.
-    mListenerPositionPort.reset( new ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition >( "listenerPositionInput", *this, pml::EmptyParameterConfig() ) );
+    mListenerPositionPort.reset( new ParameterInput< pml::MessageQueueProtocol, pml::ListenerPosition >( "listenerPositionInput", *this, pml::EmptyParameterConfig() ) );
     mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation" ) );
     mSpeakerCompensation.reset( new rcl::DelayVector( context, "TrackingSpeakerCompensation" ) );
     mPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder" ) );

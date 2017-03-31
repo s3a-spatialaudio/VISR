@@ -148,15 +148,15 @@ private:
                           efl::BasicVector<SampleType> & lateReverbGains,
                           efl::BasicVector<SampleType> & lateReverbDelays );
 
-  ParameterInputPort< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
-  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::SignalRoutingParameter > > mSignalRoutingOutput;
-  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionGainOutput;
-  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionDelayOutput;
-  std::unique_ptr<ParameterOutputPort< pml::SharedDataProtocol, pml::BiquadParameterMatrix<SampleType> > > mDiscreteReflectionFilterCoeffOutput;
-  std::unique_ptr<ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mDiscretePanningGains;
-  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionGainOutput;
-  std::unique_ptr<ParameterOutputPort < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionDelayOutput;
-  std::unique_ptr<ParameterOutputPort < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType> > > >
+  ParameterInput< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
+  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::SignalRoutingParameter > > mSignalRoutingOutput;
+  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionGainOutput;
+  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionDelayOutput;
+  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::BiquadParameterMatrix<SampleType> > > mDiscreteReflectionFilterCoeffOutput;
+  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mDiscretePanningGains;
+  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionGainOutput;
+  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionDelayOutput;
+  std::unique_ptr<ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType> > > >
     mLateSubbandOutput;
 };
 

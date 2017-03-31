@@ -6,7 +6,7 @@
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/audio_input.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libefl/aligned_array.hpp>
 
@@ -75,7 +75,7 @@ private:
   /**
    * Port is configured in the setup() 
    */
-  std::unique_ptr<ParameterOutputPort<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mOutput;
+  std::unique_ptr<ParameterOutput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mOutput;
 
   /**
    * 
