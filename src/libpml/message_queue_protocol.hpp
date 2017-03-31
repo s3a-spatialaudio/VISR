@@ -223,7 +223,7 @@ public:
 
   void enqueue( MessageType && val )
   {
-    OutputBase::enqueue( new MessageType( val ) );
+    OutputBase::enqueue( std::unique_ptr<MessageType>(new MessageType( val )) );
   }
 };
 
