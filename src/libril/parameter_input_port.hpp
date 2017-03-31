@@ -26,12 +26,14 @@ class ParameterInputPort: public ParameterPortBase,
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
+  template<typename ... ProtocolArgs>
   explicit ParameterInputPort( std::string const & name,
                                Component & parent,
-                               ParameterConfigType const & paramConfig );
+                               ParameterConfigType const & paramConfig,
+                               ProtocolArgs ... protoArgs );
 
   /**
-   *
+   * Virtual desctructor
    */
   /*virtual*/ ~ParameterInputPort() override;
 
@@ -64,15 +66,17 @@ private:
 };
 
 template< class ProtocolT, class ParameterT >
+template<typename ... ProtocolArgs>
 inline ParameterInputPort<ProtocolT, ParameterT >::
 ParameterInputPort( std::string const & name,
   Component & parent,
-  ParameterConfigType const & paramConfig )
+  ParameterConfigType const & paramConfig,
+  ProtocolArgs ... protoArgs )
   : ParameterPortBase( name, parent, PortBase::Direction::Input,
     ParameterToId<ParameterT>::id,
     CommunicationProtocolToId<ProtocolT>::id,
     paramConfig )
-  , ProtocolT::template Input<ParameterT>()
+  , ProtocolT::template Input<ParameterT>(protoArgs...)
 {
 }
 

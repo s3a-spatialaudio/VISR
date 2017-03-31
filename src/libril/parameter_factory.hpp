@@ -3,9 +3,8 @@
 #ifndef VISR_PARAMETER_FACTORY_HPP_INCLUDED
 #define VISR_PARAMETER_FACTORY_HPP_INCLUDED
 
-// #include "parameter_type.hpp"
-
 #include "export_symbols.hpp"
+#include "parameter_type.hpp"
 
 #include <functional>
 #include <map>
@@ -17,8 +16,8 @@ namespace visr
 
 // Forward declarations
 class ParameterBase;
-enum class ParameterType;
 class ParameterConfigBase;
+template<class ParameterConfig, ParameterType> class TypedParameterBase;
 
 class VISR_CORE_LIBRARY_SYMBOL ParameterFactory
 {
@@ -27,6 +26,13 @@ public:
 
   template< class ConcreteParameterType >
   static void registerParameterType( ParameterType const &  type );
+
+  /**
+   * Special registration function for ParameterType subtypes that inherit from 
+   * TypedParameterBase.
+   */
+  template< class TypedParameterType >
+  static void registerParameterType();
 
   /**
    * Template class to register parameter types.
@@ -80,6 +86,13 @@ void ParameterFactory::registerParameterType( ParameterType const & type )
 {
   creatorTable().insert( std::make_pair( type, TCreator<ConcreteParameterType>() ) );
 }
+
+template< class TypedParameterType >
+static void ParameterFactory::registerParameterType()
+{
+  registerParameterType<TypedParameterType>( TypedParameterType::staticType() );
+}
+
 
 // The macro does not work for multiple uses in the same .cpp file
 // (multiple definitions of 'maker'), stringization of names difficult
