@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "export_symbols.hpp"
+#include "parameter_type.hpp"
 
 #include "communication_protocol_base.hpp"
 #include "communication_protocol_type.hpp"
@@ -21,7 +22,6 @@ namespace visr
 // Forward declarations
 class ParameterBase;
 class ParameterConfigBase;
-enum class ParameterType;
 
 class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolFactory
 {
@@ -47,9 +47,16 @@ private:
 
     std::string const & name() const;
  private:
+
     CreateFunction mCreateFunction;
     std::string mName;
   };
+
+  /**
+   * Internal registration function.
+   * @throw std::invalid_argument If a creator is already registered for the given protocol type \p type
+   */
+  static void registerCommunicationProtocol( CommunicationProtocolType type, Creator&& creator );
 
   template< class ConcreteCommunicationProtocolType >
   class TCreator: public Creator
@@ -77,7 +84,7 @@ private:
 template< class ConcreteCommunicationProtocolType >
 void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationProtocolType const & protocolType, char const * name )
 {
-  creatorTable( ).insert( std::make_pair( protocolType, TCreator<ConcreteCommunicationProtocolType>(name) ) );
+  registerCommunicationProtocol( protocolType, TCreator<ConcreteCommunicationProtocolType>(name) );
 }
 
 template< class ConcreteCommunicationProtocolType >
