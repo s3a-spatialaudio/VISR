@@ -101,7 +101,7 @@ private:
   InputBase * mInput;
   OutputBase* mOutput;
 
-  static constexpr char * sProtocolName = "SharedData";
+  static constexpr char * sProtocolName = "MessageQueue";
 };
 
 ///////////////////////////////////////////////////////////////////////////////
