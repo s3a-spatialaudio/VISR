@@ -5,6 +5,7 @@
 
 #include "empty_parameter_config.hpp"
 
+#include <libril/detail/compile_time_hash_fnv1.hpp>
 #include <libril/parameter_type.hpp>
 #include <libril/typed_parameter_base.hpp>
 
@@ -18,7 +19,12 @@ namespace visr
 namespace pml
 {
 
-class ListenerPosition: public TypedParameterBase<EmptyParameterConfig, ParameterType::ListenerPosition >
+/**
+ * Define a unique name for the parameter type.
+ */
+static constexpr const char* sListenerPositionParameterName = "ListenerPosition";
+
+class ListenerPosition: public TypedParameterBase<EmptyParameterConfig, detail::compileTimeHashFNV1(sListenerPositionParameterName) >
 {
 public:
   using TimeType = std::uint64_t;
@@ -71,6 +77,6 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::ListenerPosition, visr::ParameterType::ListenerPosition, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::ListenerPosition, visr::pml::ListenerPosition::staticType(), visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_LISTENER_POSITION_HPP_INCLUDED

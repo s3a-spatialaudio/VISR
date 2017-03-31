@@ -3,29 +3,35 @@
 #ifndef VISR_PARAMETER_TYPE_HPP_INCLUDED
 #define VISR_PARAMETER_TYPE_HPP_INCLUDED
 
+#include "detail/compile_time_hash_fnv1.hpp"
+
+#include <cstddef>
+
 namespace visr
 {
 
-enum class ParameterType
-{
-  MatrixFloat,
-  MatrixDouble,
-  MatrixFloatComplex,
-  MatrixDoubleComplex,
-  BiquadMatrixFloat,
-  BiquadMatrixDouble,
-  IndexedString, /**< Combination of an index and a string. */
-  IndexedVectorFloat,
-  IndexedVectorDouble,
-  ListenerPosition,
-  ObjectVector,
-  SignalRouting,
-  String, // TODO: We need a proper string type
-  TimeFrequencyFloat,
-  TimeFrequencyDouble,
-  VectorFloat,
-  VectorDouble
-};
+using ParameterType = uint64_t;
+
+//enum class ParameterType
+//{
+//  MatrixFloat,
+//  MatrixDouble,
+//  MatrixFloatComplex,
+//  MatrixDoubleComplex,
+//  BiquadMatrixFloat,
+//  BiquadMatrixDouble,
+//  IndexedString, /**< Combination of an index and a string. */
+//  IndexedVectorFloat,
+//  IndexedVectorDouble,
+//  ListenerPosition,
+//  ObjectVector,
+//  SignalRouting,
+//  String, // TODO: We need a proper string type
+//  TimeFrequencyFloat,
+//  TimeFrequencyDouble,
+//  VectorFloat,
+//  VectorDouble
+//};
 
 /**
  * Metaprogramming construct to translate a type to its corresponding ID.
@@ -50,7 +56,8 @@ template<> \
 struct ParameterToId< ParameterClassType > \
 {\
 public:\
-  static const ParameterType id = ParameterId;\
+  static constexpr ParameterType id =  ParameterId;\
+  using ConfigType = ParameterConfigType; \
 };\
   template<> \
 struct IdToParameter< ParameterId > \

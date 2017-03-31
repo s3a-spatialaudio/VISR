@@ -16,14 +16,16 @@
 
 namespace visr
 {
-  namespace pml
-  {
+namespace pml
+{
+
+static constexpr const char * sStringParameterName = "String"; 
 
     /**
      * A type for passing strings between processing components.
      */
     class StringParameter: public std::string,
-                           public TypedParameterBase<StringParameterConfig, ParameterType::String >
+      public TypedParameterBase<StringParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
     {
     public:
       explicit StringParameter( std::size_t maxLength = 0 );
@@ -49,6 +51,6 @@ namespace visr
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::StringParameter, visr::ParameterType::String, visr::pml::StringParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::StringParameter, visr::pml::StringParameter::staticType(), visr::pml::StringParameterConfig )
 
 #endif // VISR_PML_STRING_PARAMETER_HPP_INCLUDED

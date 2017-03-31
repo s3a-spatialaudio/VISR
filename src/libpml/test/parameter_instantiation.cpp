@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( instantiateFloatMatrix )
   std::size_t numColumnsInit = 3;
   MatrixParameterConfig const cfg( numRowsInit, numColumnsInit );
 
-  std::unique_ptr<ParameterBase> param = ParameterFactory::create( ParameterType::MatrixDouble, cfg );
+  std::unique_ptr<ParameterBase> param = ParameterFactory::create( pml::MatrixParameter<double>::staticType(), cfg );
 
   MatrixParameter<double> const & mtxParam = dynamic_cast<MatrixParameter<double> const &>(*param);
 

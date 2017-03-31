@@ -16,7 +16,6 @@ namespace visr
 
 // Forward declarations
 class Component;
-enum class ParameterType;
 class CommunicationProtocolBase;
 class ParameterConfigBase;
 

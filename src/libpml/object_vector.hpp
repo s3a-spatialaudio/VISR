@@ -21,7 +21,7 @@ namespace pml
 {
 
 class ObjectVector: public objectmodel::ObjectVector,
-                    public TypedParameterBase<EmptyParameterConfig, ParameterType::ObjectVector >
+  public TypedParameterBase<EmptyParameterConfig, detail::compileTimeHashFNV1("ObjectVector") >
 {
 public:
   explicit ObjectVector( ParameterConfigBase const & config );
@@ -45,6 +45,6 @@ public:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::ObjectVector, visr::ParameterType::ObjectVector, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::ObjectVector, visr::pml::ObjectVector::staticType(), visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_OBJECT_VECTOR_HPP_INCLUDED

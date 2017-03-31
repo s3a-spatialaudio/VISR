@@ -4,6 +4,7 @@
 #define VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED
 
 #include "parameter_base.hpp"
+#include "parameter_type.hpp"
 
 namespace visr
 {
@@ -16,7 +17,7 @@ class ParameterConfig;
  *
  *
  */
-template<class ParameterConfigT, ParameterType TypeT >
+template<class ParameterConfigT, ParameterType typeId >
 class TypedParameterBase: public ParameterBase
 {
 public:
@@ -31,9 +32,11 @@ public:
    */
   virtual ~TypedParameterBase() {}
 
+  static const constexpr ParameterType staticType() { return typeId; } 
+
   virtual ParameterType type() final
   {
-    return TypeT;
+    return staticType();
   }
 };
 

@@ -48,7 +48,5 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)
   return stream;
 }
 
-static ParameterFactory::Registrar< pml::ListenerPosition > maker{ ParameterType::ListenerPosition };
-
 } // namespace pml
 } // namespace visr

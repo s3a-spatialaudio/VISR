@@ -26,9 +26,11 @@ class ParameterOutputPort: public ParameterPortBase,
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
 
+  template<typename ... ProtocolArgs>
   explicit ParameterOutputPort( std::string const & name, 
                                 Component & parent,
-                                ParameterConfigType const & paramConfig );
+                                ParameterConfigType const & paramConfig,
+                                ProtocolArgs ... protoArgs );
 
   /**
    *
@@ -65,15 +67,17 @@ private:
 };
 
 template< class ProtocolT, class ParameterT >
+template<typename ... ProtocolArgs>
 inline ParameterOutputPort<ProtocolT, ParameterT >::
 ParameterOutputPort( std::string const & name, 
                      Component & parent,
-                     ParameterConfigType const & paramConfig )
+                     ParameterConfigType const & paramConfig,
+                     ProtocolArgs ... protoArgs )
   : ParameterPortBase( name, parent, PortBase::Direction::Output, 
                        ParameterToId<ParameterT>::id,
                        CommunicationProtocolToId<ProtocolT>::id,
                        paramConfig )
-  , ProtocolT::template Output<ParameterT>()
+  , ProtocolT::template Output<ParameterT>(protoArgs...)
 {
 }
 
