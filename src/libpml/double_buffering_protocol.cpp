@@ -4,7 +4,7 @@
 
 #include <libril/parameter_factory.hpp>
 
-// #include <string>
+#include <algorithm>
 
 namespace visr
 {

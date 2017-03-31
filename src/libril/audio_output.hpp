@@ -8,6 +8,8 @@
 #include "constants.hpp" // for the default SampleType
 #include "export_symbols.hpp"
 
+#include <stdexcept>
+
 namespace visr
 {
   class VISR_CORE_LIBRARY_SYMBOL AudioOutputBase: public AudioPortBase

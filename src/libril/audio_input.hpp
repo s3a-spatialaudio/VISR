@@ -8,6 +8,8 @@
 #include "constants.hpp"
 #include "export_symbols.hpp"
 
+#include <stdexcept>
+
 namespace visr
 {
 

@@ -4,6 +4,8 @@
 
 #include <libril/parameter_factory.hpp>
 
+#include <algorithm>
+
 namespace visr
 {
 namespace pml
