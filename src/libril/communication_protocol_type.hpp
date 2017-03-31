@@ -38,16 +38,9 @@ namespace visr \
    struct CommunicationProtocolToId< CommunicationProtocolClassType > \
     { \
     public: \
-      static constexpr CommunicationProtocolType id = CommunicationProtocolId; \
+      enum : CommunicationProtocolType { id = CommunicationProtocolId };\
       static constexpr const char * name = CommunicationProtocolName; \
     }; \
 }
-
-//template<>\
-//struct IdToCommunicationProtocol<CommunicationProtocolId> \
-//{ \
-//public: \
-//  using ConfigType = CommunicationProtocolClassType; \
-//};
 
 #endif // #ifndef VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
