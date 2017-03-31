@@ -40,7 +40,7 @@ public:
 
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString( sProtocolName ); }
 
-  static constexpr char * staticName() { return sProtocolName; }
+  static constexpr const char * staticName() { return sProtocolName; }
 
   explicit MessageQueueProtocol( ParameterType const & parameterType,
                                  ParameterConfigBase const & config );
@@ -101,7 +101,7 @@ private:
   InputBase * mInput;
   OutputBase* mOutput;
 
-  static constexpr char * sProtocolName = "SharedData";
+  static constexpr const char * sProtocolName = "SharedData";
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -192,7 +192,7 @@ public:
     return mProtocol->numberOfElements();
   }
 
-  void enqueue( std::unique_ptr<ParameterBase> & val )
+  void enqueue( std::unique_ptr<ParameterBase> && val )
   {
     // Move to impl object
     mProtocol->enqueue( val );
@@ -223,7 +223,7 @@ public:
 
   void enqueue( MessageType && val )
   {
-    OutputBase::enqueue( std::unique_ptr<ParameterBase>( new MessageType( val ) ) );
+    OutputBase::enqueue( new MessageType( val ) );
   }
 };
 

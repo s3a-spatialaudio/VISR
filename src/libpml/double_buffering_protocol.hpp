@@ -44,7 +44,7 @@ public:
 
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString(sProtocolName); };
 
-  static constexpr char * staticName() { return sProtocolName; }
+  static constexpr char const * staticName() { return sProtocolName; }
 
   ParameterType parameterType( ) const override;
 
@@ -84,7 +84,7 @@ private:
   std::unique_ptr<ParameterBase> mBackData;
   std::unique_ptr<ParameterBase> mFrontData;
 
-  static constexpr char * sProtocolName = "DoubleBuffering";
+  static constexpr const char * sProtocolName = "DoubleBuffering";
 };
 
 class DoubleBufferingProtocol::InputBase

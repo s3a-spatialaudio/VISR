@@ -40,7 +40,7 @@ public:
 
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString( sProtocolName ); };
 
-  static constexpr char * staticName() { return sProtocolName; }
+  static constexpr const char * staticName() { return sProtocolName; }
 
   ParameterBase & data()
   {
@@ -73,7 +73,7 @@ private:
   OutputBase* mOutput;
   std::vector<InputBase*>  mInputs;
 
-  static constexpr char * sProtocolName = "SharedData";
+  static constexpr const char * sProtocolName = "SharedData";
 };
 
 class SharedDataProtocol::InputBase
