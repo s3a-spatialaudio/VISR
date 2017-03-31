@@ -18,8 +18,8 @@ namespace visr
 namespace mexsupport
 {
 
-MexWrapper::MexWrapper( ril::Component & flow,
-                        ril::SignalFlowContext const & context,
+MexWrapper::MexWrapper( Component & flow,
+                        SignalFlowContext const & context,
                         mxArray const * input,
                         mxArray * & output,
                         mxArray const * messages /* = 0 */ )
@@ -64,9 +64,9 @@ MexWrapper::MexWrapper( ril::Component & flow,
 
 
 
-  mCommBuffer.reset( new rrl::CommunicationArea<ril::SampleType>( mNumberOfCaptureSignals + mNumberOfPlaybackSignals,
+  mCommBuffer.reset( new rrl::CommunicationArea<SampleType>( mNumberOfCaptureSignals + mNumberOfPlaybackSignals,
                      context.period(),
-                     ril::cVectorAlignmentSamples ) );
+                     cVectorAlignmentSamples ) );
 
   // create output array
   mOutputMatrix = mxCreateNumericMatrix( numGraphOutputs, inputSignalLength, mSignalType, mxREAL );

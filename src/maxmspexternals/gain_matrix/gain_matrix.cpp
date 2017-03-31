@@ -85,7 +85,7 @@ GainMatrix::~GainMatrix()
   switch( inlet )
   {
   case 0:
-    mGains.fillValue( static_cast<ril::SampleType>(f) );
+    mGains.fillValue( static_cast<SampleType>(f) );
     if( mFlow ) // check whether the DSP part has already been initialised
     {
       // mFlow->setGain( mDelays );
@@ -109,8 +109,8 @@ GainMatrix::~GainMatrix()
 
   try
   {
-    ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
-    mContext.reset( new ril::SignalFlowContext( mPeriod, samplingFrequency ) );
+    SamplingFrequencyType const samplingFrequency = static_cast<SamplingFrequencyType>(std::round( samplerate ));
+    mContext.reset( new SignalFlowContext( mPeriod, samplingFrequency ) );
 
     mFlow.reset( new signalflows::GainMatrix( *mContext, "", nullptr, mNumberOfInputs, mNumberOfOutputs,
                                               mGains, mInterpolationSteps ) );

@@ -12,16 +12,12 @@
 namespace visr
 {
 // forward declaration
+class Component;
 namespace efl
 {
 template<typename ElementType>
 class BasicMatrix;
 }
-namespace ril
-{
-class Component;
-}
-
 namespace rrl
 {
 template<typename SampleType> class CommunicationArea;
@@ -35,7 +31,7 @@ template<typename ExternalSampleType>
 class SignalFlowWrapper
 {
 public:
-  SignalFlowWrapper( ril::Component & comp );
+  SignalFlowWrapper( Component & comp );
 
   ~SignalFlowWrapper( );
 
@@ -57,10 +53,10 @@ private:
 
   std::size_t const mPeriodSize;
 
-  std::unique_ptr< efl::BasicMatrix<ril::SampleType> > mConvertedSamples;
+  std::unique_ptr< efl::BasicMatrix<SampleType> > mConvertedSamples;
 
-  std::vector<ril::SampleType *> mInputBufferPtrs;
-  std::vector<ril::SampleType *> mOutputBufferPtrs;
+  std::vector<SampleType *> mInputBufferPtrs;
+  std::vector<SampleType *> mOutputBufferPtrs;
 };
 
 } // namespace mexsupport

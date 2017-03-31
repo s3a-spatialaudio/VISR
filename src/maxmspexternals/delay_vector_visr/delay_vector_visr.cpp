@@ -83,7 +83,7 @@ DelayVector::~DelayVector()
   switch( inlet )
   {
   case 0:
-    mDelays.fillValue( static_cast<ril::SampleType>(f) );
+    mDelays.fillValue( static_cast<SampleType>(f) );
     if( mFlow ) // check whether the DSP part has already been initialised
     {
       mFlow->setDelay( mDelays );
@@ -96,7 +96,7 @@ DelayVector::~DelayVector()
     }
     else
     {
-      mGains.fillValue( static_cast<ril::SampleType>(f) );
+      mGains.fillValue( static_cast<SampleType>(f) );
       if( mFlow ) // check whether the DSP part has already been initialised
       {
         mFlow->setGain( mGains );
@@ -123,9 +123,9 @@ DelayVector::~DelayVector()
 
   try
   {
-    ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
+    SamplingFrequencyType const samplingFrequency = static_cast<SamplingFrequencyType>(std::round( samplerate ));
 
-    mContext.reset( new ril::SignalFlowContext(static_cast<std::size_t>(mPeriod), samplingFrequency) );
+    mContext.reset( new SignalFlowContext(static_cast<std::size_t>(mPeriod), samplingFrequency) );
 
     mFlow.reset( new signalflows::DelayVector( *mContext, "", nullptr, mNumberOfChannels, mInterpolationSteps,
                                               mInterpolationType ) );

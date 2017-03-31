@@ -13,12 +13,6 @@
 
 namespace visr
 {
-
-namespace ril
-{
-class SignalFlow;
-}
-
 namespace maxmsp
 {
 
@@ -55,12 +49,12 @@ private:
    * Context object to provide initialisation information and to provide a runt-time interface for the components.
    * Must be a pointer, as it can be instantiated only in the initiDSP() method.
    */
-  std::unique_ptr<ril::SignalFlowContext> mContext;
+  std::unique_ptr<SignalFlowContext> mContext;
 
   std::unique_ptr<signalflows::GainMatrix> mFlow;
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;
 
-  pml::MatrixParameter<ril::SampleType> mGains;
+  pml::MatrixParameter<SampleType> mGains;
 };
 
 } // namespace maxmsp

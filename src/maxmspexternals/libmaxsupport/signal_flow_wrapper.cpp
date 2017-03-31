@@ -20,12 +20,12 @@ namespace maxmsp
 {
   
 template<typename ExternalSampleType>
-SignalFlowWrapper<ExternalSampleType>::SignalFlowWrapper( ril::Component & comp )
- : mFlow( new rrl::AudioSignalFlow( comp ) )
+SignalFlowWrapper<ExternalSampleType>::SignalFlowWrapper( Component & comp )
+  : mFlow( new rrl::AudioSignalFlow( comp ) )
  , mPeriodSize( comp.period( ) )
  , mConvertedSamples( 
-  new efl::BasicMatrix<ril::SampleType>( mFlow->numberOfAudioCapturePorts( ) + mFlow->numberOfAudioPlaybackPorts( ),
-                                         comp.period(), ril::cVectorAlignmentSamples ) )
+  new efl::BasicMatrix<SampleType>( mFlow->numberOfAudioCapturePorts( ) + mFlow->numberOfAudioPlaybackPorts( ),
+                                         comp.period(), cVectorAlignmentSamples ) )
  , mInputBufferPtrs( mFlow->numberOfAudioCapturePorts( ) )
  , mOutputBufferPtrs( mFlow->numberOfAudioPlaybackPorts( ) )
 {
