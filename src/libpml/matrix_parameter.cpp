@@ -338,13 +338,5 @@ template class MatrixParameter<double>;
 template class MatrixParameter<std::complex<float> >;
 template class MatrixParameter<std::complex<double> >;
 
-// Register the types in the ParameterFactory.
-// Note: thsi requires either dynamic linking or a '--whole-archive'
-// equivalent when linking to pml. 
-static ParameterFactory::Registrar< MatrixParameter<float> > maker1( ParameterType::MatrixFloat );
-static ParameterFactory::Registrar< MatrixParameter<double> > maker2( ParameterType::MatrixDouble );
-static ParameterFactory::Registrar< MatrixParameter<std::complex<float> > > maker3( ParameterType::MatrixFloatComplex );
-static ParameterFactory::Registrar< MatrixParameter<std::complex<double> > > maker4( ParameterType::MatrixDoubleComplex );
-
 } // namespace pml
 } // namespace visr

@@ -32,7 +32,5 @@ StringParameter::StringParameter( std::string const & initStr )
 {
 }
 
-static ParameterFactory::Registrar< StringParameter > maker( ParameterType::String );
-
 } // namespace pml
 } // namespace visr

@@ -22,12 +22,11 @@ VectorParameter<ElementType>::VectorParameter( VectorParameterConfig const & con
 {
 }
 
-// Explicit instantiations for element types float and double
+// Explicit instantiations for element types float and double and the corresponding complex types.
 template class VectorParameter<float>;
 template class VectorParameter<double>;
-
-static ParameterFactory::Registrar< VectorParameter<float> > maker1( ParameterType::VectorFloat );
-static ParameterFactory::Registrar< VectorParameter<double> > maker2( ParameterType::VectorDouble );
+template class VectorParameter<std::complex<float> >;
+template class VectorParameter<std::complex<double> >;
 
 } // namespace pml
 } // namespace visr

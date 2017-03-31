@@ -19,13 +19,30 @@ namespace visr
 namespace pml
 {
 
+namespace // unnamed
+{
+  /**
+   * Type trait to assign a unique ParameterType value to each concrete TimeFrequencyParameter type.
+   */
+  template<typename ElementType> struct TimeFrequencyParameterType {};
+
+  template<> struct TimeFrequencyParameterType<float>
+  {
+    static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "TimeFrequencyParameterFloat" ); }
+  };
+  template<> struct TimeFrequencyParameterType<double>
+  {
+    static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "TimeFrequencyParameterDouble" ); }
+  };
+} // unnamed
+
 /**
  * A type for passing matrixes between processing components.
  * The template class is explicitly instantiated for the element types float and double.
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType >
-class TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameterConfig, ParameterToId<TimeFrequencyParameter<ElementType> >::id >
+class TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameterConfig, TimeFrequencyParameterType<ElementType>::ptype() >
 {
 public:
   /**
@@ -104,7 +121,7 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<float>, visr::ParameterType::TimeFrequencyFloat, visr::pml::TimeFrequencyParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<double>, visr::ParameterType::TimeFrequencyDouble, visr::pml::TimeFrequencyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<float>, visr::pml::TimeFrequencyParameter<float>::staticType(), visr::pml::TimeFrequencyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::TimeFrequencyParameter<double>, visr::pml::TimeFrequencyParameter<double>::staticType(), visr::pml::TimeFrequencyParameterConfig )
 
 #endif // VISR_PML_TIME_FREQUENCY_PARAMETER_HPP_INCLUDED

@@ -108,8 +108,5 @@ resize( std::size_t dftSize, std::size_t numDftSamples, std::size_t numChannels 
 template class TimeFrequencyParameter<float>;
 template class TimeFrequencyParameter<double>;
 
-static ParameterFactory::Registrar< TimeFrequencyParameter<float> > registrarFloat( ParameterType::TimeFrequencyFloat );
-static ParameterFactory::Registrar< TimeFrequencyParameter<double> > registrarDouble( ParameterType::TimeFrequencyDouble );
-
 } // namespace pml
 } // namespace visr

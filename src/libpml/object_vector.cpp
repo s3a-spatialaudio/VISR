@@ -35,7 +35,5 @@ ObjectVector::~ObjectVector()
 {
 }
 
-static ParameterFactory::Registrar< pml::ObjectVector > maker{ ParameterType::ObjectVector };
-
 } // namespace pml
 } // namespace visr

@@ -36,35 +36,33 @@ void initialiseParameterLibrary()
   CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >();
 
   // Register all supported parameter types.
-  ParameterFactory::registerParameterType< BiquadParameterMatrix<float> >( ParameterType::BiquadMatrixFloat );
-  ParameterFactory::registerParameterType< BiquadParameterMatrix<double> >( ParameterType::BiquadMatrixDouble );
+  ParameterFactory::registerParameterType< BiquadParameterMatrix<float> >( BiquadParameterMatrix<float>::staticType() );
+  ParameterFactory::registerParameterType< BiquadParameterMatrix<double> >( BiquadParameterMatrix<double>::staticType() );
 
-  ParameterFactory::registerParameterType< IndexedVectorDoubleType >( ParameterType::IndexedVectorDouble );
-  ParameterFactory::registerParameterType< IndexedVectorFloatType >( ParameterType::IndexedVectorFloat );
-  ParameterFactory::registerParameterType< IndexedStringType >( ParameterType::IndexedString );
+  ParameterFactory::registerParameterType< IndexedVectorDoubleType >( IndexedVectorDoubleType::staticType() );
+  ParameterFactory::registerParameterType< IndexedVectorFloatType >( IndexedVectorFloatType::staticType() );
+  ParameterFactory::registerParameterType< IndexedStringType >( IndexedStringType::staticType() );
 
-  ParameterFactory::registerParameterType< ListenerPosition >( ParameterType::ListenerPosition );
+  ParameterFactory::registerParameterType< ListenerPosition >( ListenerPosition::staticType() );
 
-  ParameterFactory::registerParameterType< MatrixParameter<float> >( ParameterType::MatrixFloat );
-  ParameterFactory::registerParameterType< MatrixParameter<double> >( ParameterType::MatrixDouble );
-  ParameterFactory::registerParameterType< MatrixParameter<std::complex<float> > >( ParameterType::MatrixFloatComplex );
-  ParameterFactory::registerParameterType< MatrixParameter<std::complex<double> > >( ParameterType::MatrixDoubleComplex );
+  ParameterFactory::registerParameterType< MatrixParameter<float> >( MatrixParameter<float>::staticType() );
+  ParameterFactory::registerParameterType< MatrixParameter<double> >( MatrixParameter<double>::staticType() );
+  ParameterFactory::registerParameterType< MatrixParameter<std::complex<float> > >( MatrixParameter<std::complex<float> >::staticType() );
+  ParameterFactory::registerParameterType< MatrixParameter<std::complex<double> > >( MatrixParameter<std::complex<double> >::staticType() );
 
-  ParameterFactory::registerParameterType< ObjectVector >( ParameterType::ObjectVector );
+  ParameterFactory::registerParameterType< ObjectVector >(ObjectVector::staticType() );
 
-  ParameterFactory::registerParameterType< ListenerPosition >( ParameterType::ListenerPosition );
+  ParameterFactory::registerParameterType< ListenerPosition >( );
 
+  ParameterFactory::registerParameterType< SignalRoutingParameter >();
 
-  ParameterFactory::registerParameterType< SignalRoutingParameter >( ParameterType::SignalRouting );
+  ParameterFactory::registerParameterType< StringParameter >();
 
+  ParameterFactory::registerParameterType< TimeFrequencyParameter<float> >();
+  ParameterFactory::registerParameterType< TimeFrequencyParameter<double> >();
 
-  ParameterFactory::registerParameterType< StringParameter >( ParameterType::String );
-
-  ParameterFactory::registerParameterType< TimeFrequencyParameter<float> >( ParameterType::TimeFrequencyFloat );
-  ParameterFactory::registerParameterType< TimeFrequencyParameter<double> >( ParameterType::TimeFrequencyDouble );
-
-  ParameterFactory::registerParameterType< VectorParameter<float> >( ParameterType::VectorFloat );
-  ParameterFactory::registerParameterType< VectorParameter<double> >( ParameterType::VectorDouble );
+  ParameterFactory::registerParameterType< VectorParameter<float> >();
+  ParameterFactory::registerParameterType< VectorParameter<double> >();
 }
 
 } // namespace pml
