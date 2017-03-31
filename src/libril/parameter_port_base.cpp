@@ -20,6 +20,22 @@ ParameterPortBase::ParameterPortBase( std::string const & name,
 {
 }
 
+ParameterPortBase::ParameterPortBase( std::string const & name,
+  Component & parent,
+  PortBase::Direction direction,
+  ParameterType const & parameterType,
+  CommunicationProtocolType const & protocolType )
+  : mImpl( new impl::ParameterPortBaseImplementation( name, *this, &(parent.implementation()), direction,
+    parameterType, protocolType ) )
+{
+}
+
+void ParameterPortBase::setParameterConfig( ParameterConfigBase const & parameterConfig )
+{
+  mImpl->setParameterConfig( parameterConfig );
+}
+
+
 ParameterPortBase::~ParameterPortBase( ) 
 {
   if( mImpl )

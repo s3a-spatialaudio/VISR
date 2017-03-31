@@ -37,10 +37,23 @@ public:
                                             CommunicationProtocolType const & protocolType,
                                             ParameterConfigBase const & parameterConfig );
 
+  explicit ParameterPortBaseImplementation( std::string const & name,
+                                            ParameterPortBase& containingPort,
+                                            ComponentImplementation * parent,
+                                            visr::PortBase::Direction direction,
+                                            ParameterType const & parameterType,
+                                            CommunicationProtocolType const & protocolType );
+
   /**
    * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
    */
   virtual ~ParameterPortBaseImplementation();
+
+  /**
+   * Set a new parameter type configuration for this port.
+   * An already existing configuration will be replaced.
+   */
+  void setParameterConfig( ParameterConfigBase const & parameterConfig );
 
   ParameterPortBase & containingPort();
 
@@ -50,6 +63,16 @@ public:
 
   CommunicationProtocolType protocolType() const;
 
+  /**
+   * Query whether a parameter configuration exists (set either in the 
+   * constructor or using setParameterConfig() )
+   */
+  bool hasParameterConfig() const noexcept;
+
+  /**
+   * Return the paramaeter configuration object for this port.
+   * @throw std::logic_error If no parameter configuration has been set.
+   */
   ParameterConfigBase const & parameterConfig() const;
 
 protected:
@@ -59,7 +82,7 @@ protected:
 
   visr::CommunicationProtocolType const mProtocolType;
 
-  std::unique_ptr<visr::ParameterConfigBase> const mParameterConfig;
+  std::unique_ptr<visr::ParameterConfigBase> mParameterConfig;
 };
 
 } // namespace impl

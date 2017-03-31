@@ -6,6 +6,7 @@
 #include "parameter_port_base.hpp"
 
 #include "communication_protocol_type.hpp"
+#include "export_symbols.hpp"
 #include "parameter_type.hpp"
 
 #include <ciso646>
@@ -15,13 +16,32 @@
 namespace visr
 {
 
+class VISR_CORE_LIBRARY_SYMBOL ParameterOutputBase: public ParameterPortBase
+{
+protected:
+  explicit ParameterOutputBase( std::string const & name,
+      Component & parent,
+      ParameterType const & parameterType,
+      CommunicationProtocolType const & protocolType,
+      ParameterConfigBase const & paramConfig );
+
+  explicit ParameterOutputBase( std::string const & name,
+      Component & parent,
+      ParameterType const & parameterType,
+      CommunicationProtocolType const & protocolType );
+
+  virtual ~ParameterOutputBase() override;
+
+  using ParameterPortBase::setParameterConfig;
+};
+
 /**
  *
  *
  */
 template< class ProtocolT, class ParameterT >
-class ParameterOutput: public ParameterPortBase,
-                           public ProtocolT::template Output<ParameterT>
+class ParameterOutput: public ParameterOutputBase,
+                       public ProtocolT::template Output<ParameterT>
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
@@ -31,6 +51,12 @@ public:
                                 Component & parent,
                                 ParameterConfigType const & paramConfig,
                                 ProtocolArgs ... protoArgs );
+
+  template<typename ... ProtocolArgs>
+  explicit ParameterOutput( std::string const & name,
+                            Component & parent,
+                            ProtocolArgs ... protoArgs );
+
 
   /**
    *
@@ -59,7 +85,7 @@ protected:
       = dynamic_cast< ProtocolT * >(protocol);
     if( not typedProtocol )
     {
-      throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Input::setProtocol(): Protocol class type does not match" );
+      throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Output::setProtocol(): Protocol class type does not match" );
     }
     this->setProtocolInstance( typedProtocol );
   }
@@ -70,14 +96,27 @@ template< class ProtocolT, class ParameterT >
 template<typename ... ProtocolArgs>
 inline ParameterOutput<ProtocolT, ParameterT >::
 ParameterOutput( std::string const & name, 
-                     Component & parent,
-                     ParameterConfigType const & paramConfig,
-                     ProtocolArgs ... protoArgs )
-  : ParameterPortBase( name, parent, PortBase::Direction::Output, 
-                       ParameterToId<ParameterT>::id,
-                       CommunicationProtocolToId<ProtocolT>::id,
-                       paramConfig )
+                 Component & parent,
+                 ParameterConfigType const & paramConfig,
+                 ProtocolArgs ... protoArgs )
+  : ParameterOutputBase( name, parent,
+                         ParameterToId<ParameterT>::id,
+                         CommunicationProtocolToId<ProtocolT>::id,
+                         paramConfig )
   , ProtocolT::template Output<ParameterT>(protoArgs...)
+{
+}
+
+template< class ProtocolT, class ParameterT >
+template<typename ... ProtocolArgs>
+inline ParameterOutput<ProtocolT, ParameterT >::
+ParameterOutput( std::string const & name,
+                 Component & parent,
+                 ProtocolArgs ... protoArgs )
+  : ParameterOutputBase( name, parent,
+    ParameterToId<ParameterT>::id,
+    CommunicationProtocolToId<ProtocolT>::id )
+  , ProtocolT::template Output<ParameterT>( protoArgs... )
 {
 }
 

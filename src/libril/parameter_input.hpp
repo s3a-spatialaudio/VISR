@@ -6,6 +6,7 @@
 #include "parameter_port_base.hpp"
 
 #include "communication_protocol_type.hpp"
+#include "export_symbols.hpp"
 #include "parameter_type.hpp"
 
 #include <ciso646>
@@ -15,12 +16,31 @@
 namespace visr
 {
 
+class VISR_CORE_LIBRARY_SYMBOL ParameterInputBase: public ParameterPortBase
+{
+protected:
+  explicit ParameterInputBase( std::string const & name,
+                               Component & parent,
+                               ParameterType const & parameterType,
+                               CommunicationProtocolType const & protocolType,
+                               ParameterConfigBase const & paramConfig );
+
+  explicit ParameterInputBase( std::string const & name,
+                               Component & parent,
+                               ParameterType const & parameterType,
+                               CommunicationProtocolType const & protocolType );
+
+  virtual ~ParameterInputBase() override;
+
+  using ParameterPortBase::setParameterConfig;
+};
+
 /**
  *
  *
  */
 template< class ProtocolT, class ParameterT >
-class ParameterInput: public ParameterPortBase,
+class ParameterInput: public ParameterInputBase,
                           public ProtocolT::template Input< ParameterT >
 {
 public:
@@ -28,9 +48,14 @@ public:
 
   template<typename ... ProtocolArgs>
   explicit ParameterInput( std::string const & name,
-                               Component & parent,
-                               ParameterConfigType const & paramConfig,
-                               ProtocolArgs ... protoArgs );
+                           Component & parent,
+                           ParameterConfigType const & paramConfig,
+                           ProtocolArgs ... protoArgs );
+
+  template<typename ... ProtocolArgs>
+  explicit ParameterInput( std::string const & name,
+                           Component & parent,
+                           ProtocolArgs ... protoArgs );
 
   /**
    * Virtual desctructor
@@ -72,13 +97,26 @@ ParameterInput( std::string const & name,
   Component & parent,
   ParameterConfigType const & paramConfig,
   ProtocolArgs ... protoArgs )
-  : ParameterPortBase( name, parent, PortBase::Direction::Input,
+  : ParameterInputBase( name, parent,
     ParameterToId<ParameterT>::id,
-    CommunicationProtocolToId<ProtocolT>::id,
-    paramConfig )
+    CommunicationProtocolToId<ProtocolT>::id, paramConfig )
   , ProtocolT::template Input<ParameterT>(protoArgs...)
 {
 }
+
+template< class ProtocolT, class ParameterT >
+template<typename ... ProtocolArgs>
+inline ParameterInput<ProtocolT, ParameterT >::
+ParameterInput( std::string const & name,
+  Component & parent,
+  ProtocolArgs ... protoArgs )
+  : ParameterInputBase( name, parent,
+    ParameterToId<ParameterT>::id,
+    CommunicationProtocolToId<ProtocolT>::id )
+  , ProtocolT::template Input<ParameterT>( protoArgs... )
+{
+}
+
 
 template< class ProtocolT, class ParameterT >
 inline ParameterInput<ProtocolT, ParameterT >::~ParameterInput( ) = default;

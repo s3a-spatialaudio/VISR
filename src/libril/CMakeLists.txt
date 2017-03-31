@@ -42,6 +42,8 @@ communication_protocol_base.cpp
 component.cpp
 composite_component.cpp
 parameter_factory.cpp
+parameter_input.cpp
+parameter_output.cpp
 parameter_port_base.cpp
 port_base.cpp
 signal_flow_context.cpp

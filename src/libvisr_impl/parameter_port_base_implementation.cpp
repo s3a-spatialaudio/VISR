@@ -9,6 +9,7 @@
 #include <libvisr_impl/component_implementation.hpp>
 
 #include <cassert>
+#include <ciso646>
 #include <string>
 
 namespace visr
@@ -33,6 +34,22 @@ ParameterPortBaseImplementation( std::string const & name,
   parent->registerParameterPort( this );
 }
 
+ParameterPortBaseImplementation::
+ParameterPortBaseImplementation( std::string const & name,
+                                 ParameterPortBase& containingPort,
+                                 ComponentImplementation * parent,
+                                 visr::PortBase::Direction direction,
+                                 ParameterType const & parameterType,
+                                 CommunicationProtocolType const & protocolType )
+  : PortBaseImplementation( name, parent, direction )
+  , mContainingPort( containingPort )
+  , mParameterType( parameterType )
+  , mProtocolType( protocolType )
+  , mParameterConfig( nullptr )
+{
+  parent->registerParameterPort( this );
+}
+
 ParameterPortBaseImplementation::~ParameterPortBaseImplementation()
 {
   if( hasParent() )
@@ -40,6 +57,8 @@ ParameterPortBaseImplementation::~ParameterPortBaseImplementation()
     parent().unregisterParameterPort( this );
   }
 }
+
+
 
 ParameterPortBase & ParameterPortBaseImplementation::containingPort()
 {
@@ -62,9 +81,18 @@ CommunicationProtocolType ParameterPortBaseImplementation::protocolType() const
   return mProtocolType;
 }
 
+void ParameterPortBaseImplementation::setParameterConfig( ParameterConfigBase const & parameterConfig )
+{
+  mParameterConfig = parameterConfig.clone();
+}
+
+
 ParameterConfigBase const & ParameterPortBaseImplementation::parameterConfig() const
 {
-  assert( mParameterConfig );
+  if( not mParameterConfig )
+  {
+    throw std::logic_error( "ParameterConfigBase::parameterConfig(): no config set." );
+  }
   return *mParameterConfig;
 }
 

@@ -41,9 +41,23 @@ public:
   explicit ParameterPortBase( std::string const & name,
                               Component & parent,
                               PortBase::Direction direction,
-    ParameterType const & parameterType,
-    CommunicationProtocolType const & protocolType,
-    ParameterConfigBase const & parameterConfig );
+                              ParameterType const & parameterType,
+                              CommunicationProtocolType const & protocolType,
+                              ParameterConfigBase const & parameterConfig );
+
+  ParameterPortBase::ParameterPortBase( std::string const & name,
+                                        Component & parent,
+                                        PortBase::Direction direction,
+                                        ParameterType const & parameterType,
+                                        CommunicationProtocolType const & protocolType );
+
+  /**
+   * Set a new parameter configuration. If a configuration is already set, it is overwritten.
+   * Must be called only during the initialisation phase
+   * @param parameterConfig The new parameter configuration.
+   * @throw std::runtime_error When called after the signal flow is initialised.
+   */
+  void setParameterConfig( ParameterConfigBase const & parameterConfig );
 
   /**
    * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
