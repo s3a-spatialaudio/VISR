@@ -88,7 +88,7 @@ void ParameterFactory::registerParameterType( ParameterType const & type )
 }
 
 template< class TypedParameterType >
-static void ParameterFactory::registerParameterType()
+void ParameterFactory::registerParameterType()
 {
   registerParameterType<TypedParameterType>( TypedParameterType::staticType() );
 }

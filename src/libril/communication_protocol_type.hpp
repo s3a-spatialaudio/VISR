@@ -39,7 +39,7 @@ namespace visr \
     { \
     public: \
       static constexpr CommunicationProtocolType id = CommunicationProtocolId; \
-      static constexpr char * name = CommunicationProtocolName; \
+      static constexpr const char * name = CommunicationProtocolName; \
     }; \
 }
 
@@ -48,6 +48,6 @@ namespace visr \
 //{ \
 //public: \
 //  using ConfigType = CommunicationProtocolClassType; \
-//}; \
+//};
 
 #endif // #ifndef VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
