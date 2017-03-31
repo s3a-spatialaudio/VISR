@@ -1,7 +1,7 @@
 ﻿/* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #ifndef VISR_DETAIL_COMPILE_TIME_HASH_FNV1_HPP_INCLUDED
-#define VISR_DETAIL_COMPILE_TIME_HASH_FNV1_TYPE_HPP_INCLUDED
+#define VISR_DETAIL_COMPILE_TIME_HASH_FNV1_HPP_INCLUDED
 
 #include <string>
 #include <cstddef>
