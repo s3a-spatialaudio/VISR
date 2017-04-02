@@ -76,7 +76,7 @@ private:
   static constexpr const char * sProtocolName = "SharedData";
 };
 
-class SharedDataProtocol::InputBase
+class SharedDataProtocol::InputBase: public CommunicationProtocolBase::Input
 {
 public:
   /**
@@ -87,6 +87,14 @@ public:
   {
   }
 
+  virtual ~InputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  SharedDataProtocol * getProtocol() override { return mProtocol; }
+
+  SharedDataProtocol const * getProtocol() const override { return mProtocol; }
+
   ParameterBase const & data() const
   {
     return mProtocol->data();
@@ -96,12 +104,6 @@ public:
   {
     mProtocol = protocol;
   }
-#if 0
-  bool isConnected() const override
-  {
-    return mProtocol != nullptr;
-  }
-#endif
 private:
   SharedDataProtocol * mProtocol;
 }; // class InputBase
@@ -120,7 +122,7 @@ public:
 //////////////////////////////////////////////////////////////////
 // Output
 
-class SharedDataProtocol::OutputBase
+class SharedDataProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
 public:
   /**
@@ -130,6 +132,14 @@ public:
     : mProtocol( nullptr )
   {
   }
+
+  virtual ~OutputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  SharedDataProtocol * getProtocol() override { return mProtocol; }
+
+  SharedDataProtocol const * getProtocol() const override { return mProtocol; }
 
   ParameterBase & data()
   {

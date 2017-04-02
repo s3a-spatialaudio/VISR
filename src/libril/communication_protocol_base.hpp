@@ -43,6 +43,31 @@ public:
   virtual bool disconnectInput( ParameterPortBase* port ) = 0;
 
   virtual bool disconnectOutput( ParameterPortBase* port ) = 0;
+
+  class Input
+  {
+  public:
+    virtual ~Input();
+
+    virtual void setProtocolInstance( CommunicationProtocolBase * protocol ) = 0;
+
+    virtual CommunicationProtocolBase * getProtocol() = 0;
+
+    virtual CommunicationProtocolBase const * getProtocol() const = 0;
+  };
+
+  class Output
+  {
+  public:
+    virtual ~Output();
+
+    virtual void setProtocolInstance( CommunicationProtocolBase * protocol ) = 0;
+
+    virtual CommunicationProtocolBase * getProtocol() = 0;
+
+    virtual CommunicationProtocolBase const * getProtocol() const = 0;
+  };
+
 };
 
 } // namespace visr

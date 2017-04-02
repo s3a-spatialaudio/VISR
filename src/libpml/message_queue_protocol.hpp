@@ -107,7 +107,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // Input
 
-class MessageQueueProtocol::InputBase
+class MessageQueueProtocol::InputBase: public CommunicationProtocolBase::Input
 {
 public:
   /**
@@ -117,6 +117,14 @@ public:
    : mProtocol( nullptr )
   {
   }
+
+  virtual ~InputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  MessageQueueProtocol * getProtocol() override { return mProtocol; }
+
+  MessageQueueProtocol const * getProtocol() const override { return mProtocol; }
 
   bool empty() const
   {
@@ -171,7 +179,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // Output
 
-class MessageQueueProtocol::OutputBase
+class MessageQueueProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
 public:
   /**
@@ -181,6 +189,14 @@ public:
    : mProtocol( nullptr )
   {
   }
+
+  virtual ~OutputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  MessageQueueProtocol * getProtocol() override { return mProtocol; }
+
+  MessageQueueProtocol const * getProtocol() const override { return mProtocol; }
 
   bool empty() const
   {

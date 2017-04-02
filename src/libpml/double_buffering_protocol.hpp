@@ -87,12 +87,14 @@ private:
   static constexpr const char * sProtocolName = "DoubleBuffering";
 };
 
-class DoubleBufferingProtocol::InputBase
+class DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Input
 {
   friend class DoubleBufferingProtocol;
 public:
 
   explicit InputBase();
+
+  virtual ~InputBase();
 
   ParameterBase const & data() const;
 
@@ -100,11 +102,13 @@ public:
 
   void resetChanged();
 
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  DoubleBufferingProtocol * getProtocol() override { return mProtocol; }
+
+  DoubleBufferingProtocol const * getProtocol() const override { return mProtocol; }
+
   void setProtocolInstance( DoubleBufferingProtocol * protocol );
-
-  DoubleBufferingProtocol * getProtocol() { return mProtocol; }
-
-  DoubleBufferingProtocol const * getProtocol() const { return mProtocol; }
 
 private:
 
@@ -134,21 +138,25 @@ private:
 //////////////////////////////////////////////////////////////////
 // Output
 
-class DoubleBufferingProtocol::OutputBase
+class DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
   friend class DoubleBufferingProtocol;
 public:
   explicit OutputBase();
 
+  virtual ~OutputBase();
+
   ParameterBase & data();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  DoubleBufferingProtocol * getProtocol() override { return mProtocol; }
+
+  DoubleBufferingProtocol const * getProtocol() const override { return mProtocol; }
 
   void swapBuffers();
 
   void setProtocolInstance( DoubleBufferingProtocol * protocol );
-
-  DoubleBufferingProtocol * getProtocol() { return mProtocol; }
-
-  DoubleBufferingProtocol const * getProtocol() const { return mProtocol; }
 
 private:
   DoubleBufferingProtocol * mProtocol;

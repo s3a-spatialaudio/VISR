@@ -8,6 +8,7 @@ audio_sample_type.cpp
 component_names.cpp
 parameter_factory.cpp
 parameter_connection.cpp
+polymorphic_parameter_port.cpp
 test_main.cpp
 )
 

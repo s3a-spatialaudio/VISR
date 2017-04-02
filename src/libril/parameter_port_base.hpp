@@ -62,15 +62,15 @@ public:
    */
   virtual ~ParameterPortBase();
 
-  virtual ParameterType parameterType() const = 0;
+  ParameterType parameterType() const;
 
-  virtual CommunicationProtocolType protocolType() const = 0;
+  CommunicationProtocolType protocolType() const;
 
-  virtual ParameterConfigBase const & parameterConfig() const = 0;
+  ParameterConfigBase const & parameterConfig() const;
 
 #if 0
   /**
-   * @note Done elsewhere at th moment. 
+   * @note Done elsewhere at the moment. 
    */
   void connectProtocol( CommunicationProtocolBase * protocol );
 #endif

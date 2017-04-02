@@ -6,6 +6,7 @@
 #include "parameter_port_base.hpp"
 
 #include "communication_protocol_type.hpp"
+#include "communication_protocol_base.hpp"
 #include "export_symbols.hpp"
 #include "parameter_type.hpp"
 
@@ -17,7 +18,7 @@ namespace visr
 
 class VISR_CORE_LIBRARY_SYMBOL ParameterInputBase: public ParameterPortBase
 {
-protected:
+public:
   explicit ParameterInputBase( char const * name,
                                Component & parent,
                                ParameterType const & parameterType,
@@ -31,6 +32,8 @@ protected:
 
   virtual ~ParameterInputBase() override;
 
+  virtual CommunicationProtocolBase::Input & protocolInput() = 0;
+
   using ParameterPortBase::setParameterConfig;
 };
 
@@ -40,7 +43,7 @@ protected:
  */
 template< class ProtocolT, class ParameterT >
 class ParameterInput: public ParameterInputBase,
-                          public ProtocolT::template Input< ParameterT >
+                      public ProtocolT::template Input< ParameterT >
 {
 public:
   using ParameterConfigType = typename ParameterToConfigType<ParameterT>::ConfigType;
@@ -61,19 +64,35 @@ public:
    */
   /*virtual*/ ~ParameterInput() override;
 
-  ParameterType parameterType() const override
+  CommunicationProtocolBase::Input & protocolInput() override
   {
-    return ParameterToId<ParameterT>::id;
-  }
+    return *this; // cast to protocol input type.
+  };
 
-  CommunicationProtocolType protocolType() const override
-  {
-    return CommunicationProtocolToId<ProtocolT>::id;
-  }
 
-  ParameterConfigBase const & parameterConfig() const override
+  //ParameterType parameterType() const override
+  //{
+  //  return ParameterToId<ParameterT>::id;
+  //}
+
+  //CommunicationProtocolType protocolType() const override
+  //{
+  //  return CommunicationProtocolToId<ProtocolT>::id;
+  //}
+
+  //ParameterConfigBase const & parameterConfig() const override
+  //{
+  //  return ParameterPortBase::parameterConfig();
+  //}
+
+  /**
+   * Set the parameter configuration for this port.
+   * This method can be called during initialisation. It replaces a previous configuration.
+   * @throw std::logic_error if the method is called after the parameter infrastracture is initialised.
+   */
+  void setParameterConfig( ParameterConfigType const & parameterConfig )
   {
-    return ParameterPortBase::parameterConfig();
+    ParameterInputBase::setParameterConfig( parameterConfig );
   }
 protected:
   void setProtocol( CommunicationProtocolBase * protocol ) override

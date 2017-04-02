@@ -83,6 +83,9 @@ CommunicationProtocolType ParameterPortBaseImplementation::protocolType() const
 
 void ParameterPortBaseImplementation::setParameterConfig( ParameterConfigBase const & parameterConfig )
 {
+  // TODO: check whether the port already has its protocol set. In this case throw an exception because the config 
+  // cannot be changed after the flow is initialised.
+
   // This invokes the move assignemnt operator=( std::unique_ptr<ParameterConfigBase> && )
   mParameterConfig = parameterConfig.clone();
 }

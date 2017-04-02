@@ -5,6 +5,7 @@
 
 #include "parameter_port_base.hpp"
 
+#include "communication_protocol_base.hpp"
 #include "communication_protocol_type.hpp"
 #include "export_symbols.hpp"
 #include "parameter_type.hpp"
@@ -17,7 +18,7 @@ namespace visr
 
 class VISR_CORE_LIBRARY_SYMBOL ParameterOutputBase: public ParameterPortBase
 {
-protected:
+public:
   explicit ParameterOutputBase( char const * name,
                                 Component & parent,
                                 ParameterType const & parameterType,
@@ -30,6 +31,8 @@ protected:
                                 CommunicationProtocolType const & protocolType );
 
   virtual ~ParameterOutputBase() override;
+
+  virtual CommunicationProtocolBase::Output & protocolOutput() = 0;
 
   using ParameterPortBase::setParameterConfig;
 };
@@ -62,6 +65,11 @@ public:
    */
   /*virtual*/ ~ParameterOutput();
 
+  CommunicationProtocolBase::Output & protocolOutput() override
+  {
+    return *this; // cast to protocol input type.
+  };
+
   ParameterType parameterType() const
   {
     return ParameterToId<ParameterT>::id;
@@ -77,6 +85,16 @@ public:
     return ParameterPortBase::parameterConfig();
   }
 
+  /**
+  * Set the parameter configuration for this port.
+  * This method can be called during initialisation. It replaces a previous configuration.
+  * @throw std::logic_error if the method is called after the parameter infrastracture is initialised.
+  */
+  void setParameterConfig( ParameterConfigType const & parameterConfig )
+  {
+    ParameterInputBase::setParameterConfig( parameterConfig );
+  }
+
 protected:
   void setProtocol( CommunicationProtocolBase * protocol )
   {
@@ -84,7 +102,7 @@ protected:
       = dynamic_cast< ProtocolT * >(protocol);
     if( not typedProtocol )
     {
-      throw std::invalid_argument( "MessageQueueProtocol::MessageQueueProtocol::Output::setProtocol(): Protocol class type does not match" );
+      throw std::invalid_argument( "ParameterOutput::setProtocol(): Protocol class type does not match the protocol type for this port." );
     }
     this->setProtocolInstance( typedProtocol );
   }

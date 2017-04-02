@@ -26,8 +26,13 @@ void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationP
   }
 }
 
-CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn, char const * name )
+CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn, 
+                                                InputCreateFunction inputCreator,
+                                                OutputCreateFunction outputCreator,
+                                                char const * name )
  : mCreateFunction( fcn )
+ , mInputCreateFunction( inputCreator )
+ , mOutputCreateFunction( outputCreator )
  , mName( name )
 {
 }
@@ -40,8 +45,21 @@ std::string const & CommunicationProtocolFactory::Creator::name() const
 std::unique_ptr<CommunicationProtocolBase >
 CommunicationProtocolFactory::Creator::create( ParameterType const & paramType, ParameterConfigBase const & config ) const
 {
-  return std::unique_ptr< CommunicationProtocolBase >( mCreateFunction( paramType, config ) );
+  return mCreateFunction( paramType, config );
 }
+
+std::unique_ptr<CommunicationProtocolBase::Input> 
+CommunicationProtocolFactory::Creator::createInput() const
+{
+  return mInputCreateFunction();
+}
+
+std::unique_ptr<CommunicationProtocolBase::Output> 
+CommunicationProtocolFactory::Creator::createOutput() const
+{
+  return mOutputCreateFunction();
+}
+
 
 /*static*/ CommunicationProtocolFactory::CreatorTable &
 CommunicationProtocolFactory::creatorTable()
@@ -64,5 +82,32 @@ CommunicationProtocolFactory::create( CommunicationProtocolType const & protocol
   // todo: Need to catch construction errors?
   return std::unique_ptr<CommunicationProtocolBase>( findIt->second.create( parameterType, config ) );
 }
+
+/*static*/ std::unique_ptr<CommunicationProtocolBase::Input> 
+CommunicationProtocolFactory::createInput( CommunicationProtocolType const & protocolType )
+{
+  CreatorTable::const_iterator findIt
+    = creatorTable().find( protocolType );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+  }
+  // todo: Need to catch construction errors?
+  return std::unique_ptr<CommunicationProtocolBase::Input>( findIt->second.createInput() );
+}
+
+/*static*/ std::unique_ptr<CommunicationProtocolBase::Output> 
+CommunicationProtocolFactory::createOutput( CommunicationProtocolType const & protocolType )
+{
+  CreatorTable::const_iterator findIt
+    = creatorTable().find( protocolType );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+  }
+  // todo: Need to catch construction errors?
+  return std::unique_ptr<CommunicationProtocolBase::Output>( findIt->second.createOutput() );
+}
+
 
 } // namespace visr

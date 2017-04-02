@@ -71,7 +71,7 @@ bool SharedDataProtocol::disconnectInput( ParameterPortBase* port )
   {
     return false;
   }
-  (*findIt)->setProtocolInstance( nullptr );
+  (*findIt)->setProtocolInstance( static_cast<SharedDataProtocol*>(nullptr) );
   mInputs.erase( findIt );
   return true;
 }
@@ -88,9 +88,40 @@ bool SharedDataProtocol::disconnectOutput( ParameterPortBase* port )
     // Trying to disconnect a port that is not the previously connected output.
     return false;
   }
-  mOutput->setProtocolInstance( nullptr );
+  mOutput->setProtocolInstance( static_cast<SharedDataProtocol*>(nullptr) );
   mOutput = nullptr;
   return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// InputBase
+
+SharedDataProtocol::InputBase::~InputBase() = default;
+
+void SharedDataProtocol::InputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  SharedDataProtocol * dbp = dynamic_cast<SharedDataProtocol*>(protocol);
+  if( not dbp )
+  {
+    throw std::invalid_argument( " SharedDataProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
+  }
+  setProtocolInstance( dbp );
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// OutputBase
+
+SharedDataProtocol::OutputBase::~OutputBase() = default;
+
+void SharedDataProtocol::OutputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  SharedDataProtocol * dbp = dynamic_cast<SharedDataProtocol*>(protocol);
+  if( not dbp )
+  {
+    throw std::invalid_argument( " SharedDataProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
+  }
+  setProtocolInstance( dbp );
 }
 
 } // namespace pml

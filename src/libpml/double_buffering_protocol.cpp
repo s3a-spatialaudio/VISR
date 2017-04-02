@@ -102,7 +102,8 @@ bool DoubleBufferingProtocol::disconnectInput( ParameterPortBase* port )
   {
     return false;
   }
-  (*findIt)->setProtocolInstance( nullptr );
+  // It does not matter which overload is called, but the ambiguity has to be resolved.
+  (*findIt)->setProtocolInstance( static_cast<DoubleBufferingProtocol*>(nullptr) );
   mInputs.erase( findIt );
   return true;
 }
@@ -133,6 +134,8 @@ DoubleBufferingProtocol::InputBase::InputBase()
 {
 }
 
+DoubleBufferingProtocol::InputBase::~InputBase() = default;
+
 ParameterBase const & DoubleBufferingProtocol::InputBase::data() const
 {
   return mProtocol->backData();
@@ -146,6 +149,16 @@ bool DoubleBufferingProtocol::InputBase::changed() const
 void DoubleBufferingProtocol::InputBase::resetChanged()
 {
   mChanged = false;
+}
+
+void DoubleBufferingProtocol::InputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  DoubleBufferingProtocol * dbProtocol = dynamic_cast<DoubleBufferingProtocol*>( protocol );
+  if( not dbProtocol )
+  {
+    throw std::invalid_argument( "DoubleBufferingProtocol::InputBase::setProtocolInstance(): Nonmatching protocol type." );
+  }
+  setProtocolInstance( dbProtocol );
 }
 
 void DoubleBufferingProtocol::InputBase::
@@ -163,6 +176,8 @@ DoubleBufferingProtocol::OutputBase::OutputBase()
 {
 }
 
+DoubleBufferingProtocol::OutputBase::~OutputBase() = default;
+
 ParameterBase & DoubleBufferingProtocol::OutputBase::data()
 {
   return mProtocol->frontData();
@@ -171,6 +186,16 @@ ParameterBase & DoubleBufferingProtocol::OutputBase::data()
 void DoubleBufferingProtocol::OutputBase::swapBuffers()
 {
   mProtocol->swapBuffers();
+}
+
+void DoubleBufferingProtocol::OutputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  DoubleBufferingProtocol * mp = dynamic_cast<DoubleBufferingProtocol*>(protocol);
+  if( not mp )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
+  }
+  setProtocolInstance( mp );
 }
 
 void DoubleBufferingProtocol::OutputBase::

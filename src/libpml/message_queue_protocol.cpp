@@ -106,7 +106,7 @@ bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port )
     // Trying to disconnect a port that is not the previously connected input." );
     return false;
   }
-  mInput->setProtocolInstance( nullptr );
+  mInput->setProtocolInstance( static_cast<MessageQueueProtocol*>(nullptr) );
   mInput = nullptr;
   return true;
 }
@@ -123,9 +123,39 @@ bool MessageQueueProtocol::disconnectOutput( ParameterPortBase* port )
     // Trying to disconnect a port that is not the previously connected output." );
     return false;
   }
-  mOutput->setProtocolInstance( nullptr );
+  mOutput->setProtocolInstance( static_cast<MessageQueueProtocol*>(nullptr) );
   mOutput = nullptr;
   return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// InputBase
+
+MessageQueueProtocol::InputBase::~InputBase() = default;
+
+void MessageQueueProtocol::InputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  MessageQueueProtocol * mp = dynamic_cast<MessageQueueProtocol*>( protocol );
+  if( not mp )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. ");
+  }
+  setProtocolInstance( mp );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// OutputBase
+
+MessageQueueProtocol::OutputBase::~OutputBase() = default;
+
+void MessageQueueProtocol::OutputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  MessageQueueProtocol * mp = dynamic_cast<MessageQueueProtocol*>(protocol);
+  if( not mp )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
+  }
+  setProtocolInstance( mp );
 }
 
 } // namespace pml

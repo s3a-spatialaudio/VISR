@@ -31,6 +31,10 @@ public:
                                                             ParameterType const & paramType,
                                                             ParameterConfigBase const & config );
 
+  static std::unique_ptr<CommunicationProtocolBase::Input> createInput( CommunicationProtocolType const & protocolType );
+  static std::unique_ptr<CommunicationProtocolBase::Output> createOutput( CommunicationProtocolType const & protocolType );
+
+
   template< class ConcreteCommunicationProtocol >
   static void registerCommunicationProtocol( CommunicationProtocolType const & protocolType, char const * name );
 
@@ -41,14 +45,23 @@ private:
   struct Creator
   {
     using CreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase>( ParameterType const &, ParameterConfigBase const & ) >;
-    explicit Creator( CreateFunction fcn, char const * name );
+    using InputCreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase::Input>() >;
+    using OutputCreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase::Output>() >;
+    explicit Creator( CreateFunction fcn,
+                      InputCreateFunction inputCreator,
+                      OutputCreateFunction outputCreator,
+                      char const * name );
 
     std::unique_ptr<CommunicationProtocolBase> create( ParameterType const & paramType, ParameterConfigBase const & config ) const;
+    std::unique_ptr<CommunicationProtocolBase::Input> createInput() const;
+    std::unique_ptr<CommunicationProtocolBase::Output> createOutput() const;
 
     std::string const & name() const;
  private:
 
     CreateFunction mCreateFunction;
+    InputCreateFunction mInputCreateFunction;
+    OutputCreateFunction mOutputCreateFunction;
     std::string mName;
   };
 
@@ -63,7 +76,10 @@ private:
   {
   public:
     TCreator( char const * name)
-      : Creator( &TCreator<ConcreteCommunicationProtocolType>::construct, name )
+      : Creator( &TCreator<ConcreteCommunicationProtocolType>::construct,
+                 &TCreator<ConcreteCommunicationProtocolType>::constructInput,
+                 &TCreator<ConcreteCommunicationProtocolType>::constructOutput,
+                 name )
     {
     }
 
@@ -71,6 +87,16 @@ private:
                                                                  ParameterConfigBase const & config )
     {
       return std::unique_ptr<CommunicationProtocolBase>( new ConcreteCommunicationProtocolType(paramType, config ));
+    }
+
+    static std::unique_ptr<CommunicationProtocolBase::Input> constructInput()
+    {
+      return std::unique_ptr<CommunicationProtocolBase::Input>( new ConcreteCommunicationProtocolType::InputBase() );
+    }
+    static std::unique_ptr<CommunicationProtocolBase::Output> constructOutput()
+    {
+//      return std::unique_ptr<CommunicationProtocolBase::OutputBase>( new ConcreteCommunicationProtocolType::OutputBase() );
+      return std::unique_ptr<CommunicationProtocolBase::Output>( nullptr );
     }
   };
 
@@ -94,7 +120,6 @@ void CommunicationProtocolFactory::registerCommunicationProtocol()
     CommunicationProtocolToId<ConcreteCommunicationProtocolType>::id, 
     CommunicationProtocolToId<ConcreteCommunicationProtocolType>::name ) ;
 }
-
 
 } // namespace visr
 
