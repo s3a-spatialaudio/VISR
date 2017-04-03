@@ -92,7 +92,7 @@ public:
   */
   void setParameterConfig( ParameterConfigType const & parameterConfig )
   {
-    ParameterInputBase::setParameterConfig( parameterConfig );
+    ParameterOutputBase::setParameterConfig( parameterConfig );
   }
 
 protected:

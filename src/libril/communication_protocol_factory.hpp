@@ -91,12 +91,11 @@ private:
 
     static std::unique_ptr<CommunicationProtocolBase::Input> constructInput()
     {
-      return std::unique_ptr<CommunicationProtocolBase::Input>( new ConcreteCommunicationProtocolType::InputBase() );
+      return std::unique_ptr<CommunicationProtocolBase::Input>( new typename ConcreteCommunicationProtocolType::InputBase() );
     }
-    static std::unique_ptr<CommunicationProtocolBase::Output> constructOutput()
+    static std::unique_ptr<typename CommunicationProtocolBase::Output> constructOutput()
     {
-//      return std::unique_ptr<CommunicationProtocolBase::OutputBase>( new ConcreteCommunicationProtocolType::OutputBase() );
-      return std::unique_ptr<CommunicationProtocolBase::Output>( nullptr );
+      return std::unique_ptr<CommunicationProtocolBase::Output>( new typename ConcreteCommunicationProtocolType::OutputBase() );
     }
   };
 
