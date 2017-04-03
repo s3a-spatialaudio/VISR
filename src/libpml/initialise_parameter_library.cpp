@@ -26,6 +26,11 @@ namespace pml
 
 void initialiseParameterLibrary()
 {
+  static bool initialised = false;
+  if( initialised )
+  {
+    return;
+  }
   
   //CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >( DoubleBufferingProtocol::staticType(), DoubleBufferingProtocol::staticName() );
   //CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >( MessageQueueProtocol::staticType(), DoubleBufferingProtocol::staticName() );
@@ -63,6 +68,8 @@ void initialiseParameterLibrary()
 
   ParameterFactory::registerParameterType< VectorParameter<float> >();
   ParameterFactory::registerParameterType< VectorParameter<double> >();
+
+  initialised = true;
 }
 
 } // namespace pml
