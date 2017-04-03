@@ -9,9 +9,12 @@
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <libefl/basic_vector.hpp>
-#include <valarray>
+
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/vector_parameter.hpp>
 
 #ifdef USE_CIRCULAR_BUFFER
 #include <librbbl/circular_buffer.hpp>
@@ -20,6 +23,8 @@
 #endif
 
 #include <cstddef> // for std::size_t
+#include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -215,6 +220,10 @@ private:
    * The audio output port for this component.
    */
   AudioOutput mOutput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDelayInput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mGainInput;
 
 #ifdef USE_CIRCULAR_BUFFER
   /**

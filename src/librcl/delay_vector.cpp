@@ -3,6 +3,8 @@
 #include "delay_vector.hpp"
 #include <libefl/vector_functions.hpp>
 
+#include <libpml/vector_parameter_config.hpp>
+
 #include <cassert>
 #include <ciso646>
 #include <cmath>
@@ -26,6 +28,8 @@ namespace rcl
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
+ , mDelayInput( "delayInput", *this )
+ , mGainInput( "gainInput", *this )
 #ifdef USE_CIRCULAR_BUFFER
  , mRingBuffer() // initialise smart pointer to null
 #else
@@ -67,6 +71,8 @@ void DelayVector::setup( std::size_t numberOfChannels,
   mNumberOfChannels = numberOfChannels;
   mInput.setWidth(numberOfChannels);
   mOutput.setWidth(numberOfChannels);
+  mDelayInput.setParameterConfig( pml::VectorParameterConfig( numberOfChannels ));
+  mGainInput.setParameterConfig( pml::VectorParameterConfig( numberOfChannels ) );
 
   // Additional delay required by the interpolation method
   std::size_t const interpolationOrder = interpolationMethod == InterpolationType::NearestSample
@@ -112,6 +118,18 @@ void DelayVector::setup( std::size_t numberOfChannels,
 
 void DelayVector::process()
 {
+  // TODO: shall we affect the interpolation counter?
+  if( mDelayInput.changed() )
+  {
+    setDelay( mDelayInput.data() );
+    mDelayInput.resetChanged();
+  }
+  if( mGainInput.changed() )
+  {
+    setGain( mGainInput.data() );
+    mGainInput.resetChanged();
+  }
+
   std::size_t const blockLength = period();
 
 #ifdef USE_CIRCULAR_BUFFER
