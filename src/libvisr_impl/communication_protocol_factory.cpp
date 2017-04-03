@@ -7,6 +7,7 @@
 
 #include <ciso646>
 #include <stdexcept>
+#include <string>
 
 namespace visr
 {
@@ -14,9 +15,11 @@ namespace visr
 void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationProtocolType type, Creator && creator )
 {
   CreatorTable & table = creatorTable();
-  if( table.find( type) != table.cend() )
+  auto const findIt = table.find( type );
+  
+  if( findIt != table.cend() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: Entry for protocol type already exists." );
+    throw std::invalid_argument( std::string("CommunicationProtocolFactory: Entry for protocol type \"") + findIt->second.name() + "\" already exists." );
   }
   auto const res = table.insert( std::make_pair( type, creator ) );
   if( not res.second)
