@@ -4,9 +4,12 @@ set( SOURCES
 atomic_component.cpp
 audio_port.cpp
 channel_list.cpp
+communication_protocol.cpp
 component.cpp
 composite_component.cpp
+parameter_base.cpp
 parameter_config_base.cpp
+parameter_port.cpp
 signal_flow_context.cpp
 visr.cpp
 )
@@ -15,9 +18,12 @@ set( HEADERS
 atomic_component.hpp
 audio_port.hpp
 channel_list.hpp
+communication_protocol.hpp
 component.hpp
 composite_component.hpp
+parameter_base.hpp
 parameter_config_base.hpp
+parameter_port.hpp
 signal_flow_context.hpp
 )
 

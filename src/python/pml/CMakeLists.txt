@@ -1,16 +1,20 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
+double_buffering_protocol.cpp
 listener_position.cpp
 loudspeaker_array.cpp
 matrix_parameter.cpp
 pml.cpp
+vector_parameter.cpp
 )
 
 set( HEADERS
+double_buffering_protocol.hpp
 listener_position.hpp
 loudspeaker_array.hpp
 matrix_parameter.hpp
+vector_parameter.hpp
 )
 
 set(PROJECT_NAME pmlpython)

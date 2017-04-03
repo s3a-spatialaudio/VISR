@@ -4,6 +4,8 @@
 #include <libpml/matrix_parameter_config.hpp> 
 
 #include <libril/constants.hpp>
+#include <libril/parameter_base.hpp>
+
 
 #ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
@@ -29,7 +31,7 @@ namespace pml
 template<typename DataType>
 void exportMatrixParameter( pybind11::module & m, char const * className )
 {
-  pybind11::class_<MatrixParameter< DataType >/*, ParameterBase*/ >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
+  pybind11::class_<MatrixParameter< DataType >, ParameterBase >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
   .def_buffer([](MatrixParameter<DataType> &mp) -> pybind11::buffer_info
   {
     return pybind11::buffer_info( mp.data(),
@@ -41,6 +43,7 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
   } )
   .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( pybind11::init<std::size_t, std::size_t, std::size_t>() )
+  .def_property_readonly_static( "staticType", &MatrixParameter<DataType>::staticType )
   .def( "__init__", []( MatrixParameter<DataType> & inst, pybind11::array const & data, std::size_t alignment)
   {
     if( data.ndim() != 2 )

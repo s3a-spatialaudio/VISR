@@ -46,12 +46,21 @@ public:
     PYBIND11_OVERLOAD_PURE( bool, ParameterConfigBase, compare, rhs );
   }
 
+  // Pybind11 doesn't find a correct cast for std::unique_ptr return type.
+  // TODO: Resolve this problem!
+  //std::unique_ptr<ParameterConfigBase> clone() const override
+  //{
+  //  PYBIND11_OVERLOAD_PURE( std::unique_ptr<ParameterConfigBase>, ParameterConfigBase, clone );
+  //}
+
+
 };
 
 void exportParameterConfigBase( pybind11::module& m )
 {
   pybind11::class_<ParameterConfigBase, ParameterConfigBaseWrapper>(m, "ParameterConfigBase" )
     .def( "compare", &ParameterConfigBase::compare )
+//    .def( "clone", &ParameterConfigBase::clone )
     ;
 }
 

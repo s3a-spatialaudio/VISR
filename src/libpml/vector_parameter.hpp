@@ -47,6 +47,11 @@ class VectorParameter: public efl::BasicVector<ElementType>,
   public TypedParameterBase<VectorParameterConfig, VectorParameterType<ElementType>::ptype() >
 {
 public:
+  /**
+   * Make all constructors of BasicVector available.
+   */
+  using efl::BasicVector<ElementType>::BasicVector;
+
   explicit VectorParameter(ParameterConfigBase const & config);
 
   explicit VectorParameter(VectorParameterConfig const & config);

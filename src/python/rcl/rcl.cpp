@@ -2,6 +2,7 @@
 
 
 #include "add.hpp"
+#include "delay_vector.hpp"
 
 #ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
@@ -18,6 +19,7 @@ PYBIND11_PLUGIN(rcl)
   pybind11::module m( "rcl", "VISR atomic component library" );
   using namespace visr::python::rcl;
   exportAdd( m );
+  exportDelayVector( m );
   return m.ptr();
 }
 

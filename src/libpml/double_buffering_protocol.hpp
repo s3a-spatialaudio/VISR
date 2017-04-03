@@ -92,7 +92,7 @@ class DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Inpu
   friend class DoubleBufferingProtocol;
 public:
 
-  explicit InputBase();
+  InputBase();
 
   virtual ~InputBase();
 
@@ -142,7 +142,7 @@ class DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Out
 {
   friend class DoubleBufferingProtocol;
 public:
-  explicit OutputBase();
+  OutputBase();
 
   virtual ~OutputBase();
 

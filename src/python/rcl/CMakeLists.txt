@@ -2,11 +2,13 @@
 
 set( SOURCES
 add.cpp
+delay_vector.cpp
 rcl.cpp
 )
 
 set( HEADERS
 add.hpp
+delay_vector.hpp
 )
 
 # We don't need header files
