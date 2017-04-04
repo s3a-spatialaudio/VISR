@@ -88,9 +88,9 @@ private:
 
   ListType mChannels;
 
-  void appendIndex( IndexType index );
+  VISR_CORE_LIBRARY_SYMBOL void appendIndex( IndexType index );
 
-  void appendRange( ChannelRange const & range );
+  VISR_CORE_LIBRARY_SYMBOL void appendRange( ChannelRange const & range );
 };
 
 class VISR_CORE_LIBRARY_SYMBOL ChannelRange
