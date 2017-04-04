@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "composite_component.hpp"
+#include <libril/composite_component.hpp>
 
 #include <libvisr_impl/composite_component_implementation.hpp>
 
