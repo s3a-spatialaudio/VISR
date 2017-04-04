@@ -6,6 +6,7 @@
 #include "port_base_implementation.hpp"
 
 #include <libril/audio_sample_type.hpp>
+#include <libril/export_symbols.hpp>
 
 //#include <cstddef>
 //#include <exception>
@@ -23,7 +24,7 @@ class AudioPortBase;
 namespace impl
 {
 
-class AudioPortBaseImplementation: public PortBaseImplementation
+class VISR_CORE_LIBRARY_SYMBOL AudioPortBaseImplementation: public PortBaseImplementation
 {
 public:
 

@@ -3,6 +3,7 @@
 #ifndef VISR_POLYMORPHIC_PARAMETER_INPUT_HPP_INCLUDED
 #define VISR_POLYMORPHIC_PARAMETER_INPUT_HPP_INCLUDED
 
+#include <libril/export_symbols.hpp>
 #include <libril/parameter_input.hpp>
 #include <libril/communication_protocol_base.hpp>
 
@@ -11,7 +12,7 @@
 namespace visr
 {
 
-class PolymorphicParameterInput: public ParameterInputBase
+class VISR_CORE_LIBRARY_SYMBOL PolymorphicParameterInput: public ParameterInputBase
 {
 public:
   explicit PolymorphicParameterInput( char const * name,

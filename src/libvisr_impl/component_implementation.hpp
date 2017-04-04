@@ -4,6 +4,7 @@
 #define VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
 #include <libril/constants.hpp>
+#include <libril/export_symbols.hpp>
 #include <libril/status_message.hpp>
 
 #include <cstddef>
@@ -32,7 +33,7 @@ class ParameterPortBaseImplementation;
  *
  *
  */
-class ComponentImplementation
+class VISR_CORE_LIBRARY_SYMBOL ComponentImplementation
 {
 public:
   friend class AudioPortBaseImplementation; // For registering/ unregistering audio ports

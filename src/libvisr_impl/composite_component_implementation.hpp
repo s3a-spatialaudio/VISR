@@ -9,6 +9,7 @@
 #include "parameter_connection_descriptor.hpp"
 
 #include <libril/composite_component.hpp>
+#include <libril/export_symbols.hpp>
 
 #include <vector>
 
@@ -20,7 +21,7 @@ class Component;
 namespace impl
 {
 
-class CompositeComponentImplementation: public ComponentImplementation
+class VISR_CORE_LIBRARY_SYMBOL CompositeComponentImplementation: public ComponentImplementation
 {
 public:
 //  using ComponentTable = std::map<std::string, ComponentImplementation * >;
