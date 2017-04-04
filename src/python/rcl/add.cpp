@@ -29,7 +29,7 @@ void exportAdd( pybind11::module & m )
     .def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*, std::size_t, std::size_t>(),
 	  pybind11::arg("context"), pybind11::arg("name"),
 	  pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
-	  pybind11::arg( "numInputs" ),  pybind11::arg( "width" ) )
+	  pybind11::arg( "width" ), pybind11::arg( "numInputs" ) )
     .def( "process", &visr::rcl::Add::process );
 }
 #else
