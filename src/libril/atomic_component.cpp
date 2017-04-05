@@ -12,8 +12,6 @@ AtomicComponent::AtomicComponent( SignalFlowContext& context,
 {
 }
 
-AtomicComponent::~AtomicComponent()
-{
-}
+AtomicComponent::~AtomicComponent() = default;
 
 } // namespace visr
