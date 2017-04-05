@@ -7,7 +7,6 @@
 
 #include <libril/audio_port_base.hpp>
 #include <libril/constants.hpp>
-#include <libril/processable_interface.hpp>
 #include <libril/signal_flow_context.hpp>
 
 #include <iosfwd>
@@ -256,7 +255,7 @@ private:
     
   InternalComponentList mInfrastructureComponents;
 
-  using ProcessingSchedule = std::vector<ProcessableInterface * >;
+  using ProcessingSchedule = std::vector<AtomicComponent * >;
 
   ProcessingSchedule mProcessingSchedule;
 };

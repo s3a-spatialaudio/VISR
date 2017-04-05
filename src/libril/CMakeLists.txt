@@ -23,7 +23,6 @@ parameter_output.hpp
 parameter_port_base.hpp
 parameter_type.hpp
 port_base.hpp
-processable_interface.hpp
 signal_flow_context.hpp
 status_message.hpp
 typed_parameter_base.hpp

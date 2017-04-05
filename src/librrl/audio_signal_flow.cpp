@@ -256,7 +256,7 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
 
 void AudioSignalFlow::executeComponents()
 {
-  for( ProcessableInterface * pc : mProcessingSchedule )
+  for( AtomicComponent * pc : mProcessingSchedule )
   {
     try
     {
