@@ -66,6 +66,7 @@ ChannelRange::size() const
   }
   StepType const diff = mEnd - mStart;
   // Cast is safe because diff and step always the same sign.
+  // TODO: This fails with non-unity steps if the mEnd value is not the continuation of the index sequence.
   return static_cast<IndexType>(diff / mStep); // integer division (truncates towards zero)
 }
 
