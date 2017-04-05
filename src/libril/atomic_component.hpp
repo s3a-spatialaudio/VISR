@@ -4,7 +4,6 @@
 #define VISR_ATOMIC_COMPONENT_HPP_INCLUDED
 
 #include "component.hpp"
-#include "processable_interface.hpp"
 
 #include "export_symbols.hpp"
 
@@ -14,23 +13,46 @@ namespace visr
 {
 
 /**
- *
- *
+ * Base class for atomic components.
+ * THese components are at the lowest level in the hierarchy and implement runtime functionality as
+ * C++ code.
+ * Abstract base class, derived classes must override the process() method.
  */
-class  VISR_CORE_LIBRARY_SYMBOL AtomicComponent: public Component,
-						 public ProcessableInterface
+class AtomicComponent: public Component
 {
 public:
-  explicit AtomicComponent( SignalFlowContext& context,
-                            char const * name,
-                            CompositeComponent * parent = nullptr );
-
-  virtual void process() override = 0;
+  /**
+   * Constructor.
+   * @param context a signal flow context structure containing general parameters, e.g., sampling rate and block size of computation.
+   * @param name Null-terminated character string containing the name. Name must be unique within the containing composite component (if there is one).
+   * @param parent A composite component to contain this atom, If it is a null pointer (the default), then this component is at the top level.
+   */
+  explicit VISR_CORE_LIBRARY_SYMBOL AtomicComponent( SignalFlowContext& context,
+                                                     char const * name,
+                                                     CompositeComponent * parent = nullptr );
 
   /**
-   *
+   * Deleted copy constructor to avoid copying.
    */
-  ~AtomicComponent();
+  AtomicComponent( AtomicComponent const & ) = delete;
+
+  /**
+  * Deleted move constructor to avoid move construction.
+  */
+  AtomicComponent( AtomicComponent && ) = delete;
+
+  /**
+  *
+  */
+  virtual ~AtomicComponent() override;
+
+
+  /**
+   * Pure virtual process() function.
+   * The overriding methods of base classes are called in regular intervals, each processing a fixed(\p context.period())
+   * number of samples.
+   */
+  virtual void process() = 0;
 
 };
 
