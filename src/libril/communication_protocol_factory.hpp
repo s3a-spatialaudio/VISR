@@ -34,6 +34,27 @@ public:
   static std::unique_ptr<CommunicationProtocolBase::Input> createInput( CommunicationProtocolType const & protocolType );
   static std::unique_ptr<CommunicationProtocolBase::Output> createOutput( CommunicationProtocolType const & protocolType );
 
+  /**
+   * Return the number of registered protocols.
+   */
+  static std::size_t numberOfProtocols() noexcept;
+
+  /**
+   * Return the registered name of a protocol.
+   * @throw std::invalid_argument if no protocol with this name exists.
+   */
+  static CommunicationProtocolType typeFromName( char const * name );
+
+  /**
+   * Lookup the protocol type for a name.
+   * @throw std::invalid_argument if no protocol with this name has
+   * been registered.
+   * @todo Consider changing the return type to char const *
+   */
+  static std::string typeToName( CommunicationProtocolType type );
+
+  static bool typeExists( CommunicationProtocolType type ) noexcept;
+
 
   template< class ConcreteCommunicationProtocol >
   static void registerCommunicationProtocol( CommunicationProtocolType const & protocolType, char const * name );

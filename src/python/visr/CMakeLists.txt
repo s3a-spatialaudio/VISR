@@ -5,6 +5,7 @@ atomic_component.cpp
 audio_port.cpp
 channel_list.cpp
 communication_protocol.cpp
+communication_protocol_factory.cpp
 component.cpp
 composite_component.cpp
 parameter_base.cpp
@@ -19,6 +20,7 @@ atomic_component.hpp
 audio_port.hpp
 channel_list.hpp
 communication_protocol.hpp
+communication_protocol_factory.hpp
 component.hpp
 composite_component.hpp
 parameter_base.hpp

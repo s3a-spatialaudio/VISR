@@ -24,7 +24,9 @@ std::size_t typeSize( Id id )
     {uint16Id, sizeof( uint16_t) },
     {int16Id, sizeof( int16_t ) },
     {uint32Id, sizeof( uint32_t ) },
-    {int32Id, sizeof( int32_t ) }
+    {int32Id, sizeof( int32_t ) },
+    {complexFloatId, sizeof( std::complex<float> ) },
+    {complexDoubleId, sizeof( std::complex<double> ) }
   }; 
   return sSizeLookup.at(id);
 }

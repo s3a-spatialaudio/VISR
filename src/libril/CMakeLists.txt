@@ -31,21 +31,6 @@ detail/compile_time_hash_fnv1.hpp
 )
 
 SET( SOURCES
-atomic_component.cpp
-audio_input.cpp
-audio_output.cpp
-audio_port_base.cpp
-audio_sample_type.cpp
-channel_list.cpp
-communication_protocol_base.cpp
-component.cpp
-composite_component.cpp
-parameter_factory.cpp
-parameter_input.cpp
-parameter_output.cpp
-parameter_port_base.cpp
-port_base.cpp
-signal_flow_context.cpp
 version.cpp
 )
 
@@ -54,4 +39,4 @@ add_library( ril STATIC ${HEADERS} ${SOURCES} )
 target_compile_definitions( ril PRIVATE -DVISR_BUILD_CORE_LIBRARIES )
 
 # Transitive link dependencies
-target_link_libraries( ril visr_impl )
+# target_link_libraries( ril visr_impl )

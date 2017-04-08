@@ -4,6 +4,7 @@
 #include "audio_port.hpp"
 #include "channel_list.hpp"
 #include "communication_protocol.hpp"
+#include "communication_protocol_factory.hpp"
 #include "component.hpp"
 #include "composite_component.hpp"
 #include "parameter_base.hpp"
@@ -27,6 +28,7 @@ PYBIND11_PLUGIN( visr )
   exportParameterConfigBase( m );
   exportParameterBase( m );
   exportCommunicationProtocol( m );
+  exportCommunicationProtocolFactory( m );
   exportChannelList( m );
   exportComponent( m );
   exportAudioPort( m );

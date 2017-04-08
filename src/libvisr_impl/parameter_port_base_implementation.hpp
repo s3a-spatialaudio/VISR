@@ -5,6 +5,7 @@
 
 #include "port_base_implementation.hpp"
 
+#include <libril/export_symbols.hpp>
 #include <libril/parameter_type.hpp>
 #include <libril/communication_protocol_type.hpp>
  
@@ -26,7 +27,7 @@ namespace impl
  *
  *
  */
-class ParameterPortBaseImplementation: public PortBaseImplementation
+class VISR_CORE_LIBRARY_SYMBOL ParameterPortBaseImplementation: public PortBaseImplementation
 {
 public:
   explicit ParameterPortBaseImplementation( char const * name,

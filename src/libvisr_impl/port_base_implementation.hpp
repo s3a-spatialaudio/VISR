@@ -5,6 +5,7 @@
 
 
 #include <libril/port_base.hpp>
+#include <libril/export_symbols.hpp>
 
 #include <string>
 
@@ -16,7 +17,7 @@ namespace impl
 // Forward declaration(s)
 class ComponentImplementation;
 
-class PortBaseImplementation
+class VISR_CORE_LIBRARY_SYMBOL PortBaseImplementation
 {
 public:
 

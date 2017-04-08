@@ -5,7 +5,9 @@
 #include <libril/communication_protocol_type.hpp>
 #include <libril/parameter_type.hpp>
 
+#include <algorithm>
 #include <ciso646>
+#include <cstring>
 #include <stdexcept>
 #include <string>
 
@@ -110,6 +112,41 @@ CommunicationProtocolFactory::createOutput( CommunicationProtocolType const & pr
   }
   // todo: Need to catch construction errors?
   return std::unique_ptr<CommunicationProtocolBase::Output>( findIt->second.createOutput() );
+}
+
+
+/*static*/ std::size_t CommunicationProtocolFactory::numberOfProtocols() noexcept
+{
+  return creatorTable().size();
+}
+
+/*static*/ CommunicationProtocolType
+CommunicationProtocolFactory::typeFromName( char const * name )
+{
+  auto const findIt = std::find_if( creatorTable().begin(), creatorTable().end(),
+				   [name](CreatorTable::value_type const & entry ){ return std::strcmp(entry.second.name().c_str(), name ) == 0; } );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::invalid_argument( "CommunicationProtocolFactory: No protocol with the given name is registered." );
+  }
+  return findIt->first;
+}
+
+/*static*/ std::string 
+CommunicationProtocolFactory::typeToName( CommunicationProtocolType type )
+{
+  auto const findIt = creatorTable().find( type );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::invalid_argument( "CommunicationProtocolFactory: Requested protocol type not registered." );
+  }
+  return findIt->second.name();
+}
+
+/*static*/ bool
+CommunicationProtocolFactory::typeExists( CommunicationProtocolType type ) noexcept
+{
+  return creatorTable().find( type ) != creatorTable().end();
 }
 
 
