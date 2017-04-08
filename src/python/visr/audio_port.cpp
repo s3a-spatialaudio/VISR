@@ -40,7 +40,7 @@ namespace // unnamed
 template<typename DataType>
 pybind11::array_t<DataType> getInputBuffer( AudioInputT<DataType> & port )
 {
-  pybind11::buffer_info info ( const_cast<DataType*>(port.base()),
+  pybind11::buffer_info info ( const_cast<DataType*>(port.data()),
     sizeof(DataType),
     pybind11::format_descriptor<DataType>::format(),
     2 /* number of dimensions */,
@@ -53,7 +53,7 @@ pybind11::array_t<DataType> getInputBuffer( AudioInputT<DataType> & port )
 template<typename DataType>
 pybind11::array_t<DataType> getOutputBuffer( AudioOutputT<DataType> & port )
 {
-  return pybind11::array_t<DataType>( pybind11::buffer_info( port.base(),
+  return pybind11::array_t<DataType>( pybind11::buffer_info( port.data(),
     sizeof( DataType ),
     pybind11::format_descriptor<DataType>::format(),
     2 /* number of dimensions */,
@@ -121,7 +121,7 @@ void exportAudioInput( pybind11::module & m, char const * name )
       pybind11::arg("name"), pybind11::arg("parent"), pybind11::arg("width") = 0 )
     .def_buffer( []( AudioInputT<DataType> &port ) -> pybind11::buffer_info
   {
-    return pybind11::buffer_info( const_cast<DataType*>(port.base()),
+    return pybind11::buffer_info( const_cast<DataType*>(port.data()),
       sizeof( DataType ),
       pybind11::format_descriptor<DataType>::format(),
       2 /* number of dimensions */,
@@ -144,7 +144,7 @@ void exportAudioOutput( pybind11::module & m, char const * name )
       pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "width" ) = 0 )
     .def_buffer( []( AudioOutputT<DataType> &port ) -> pybind11::buffer_info
   {
-    return pybind11::buffer_info( const_cast<DataType*>(port.base()),
+    return pybind11::buffer_info( const_cast<DataType*>(port.data()),
       sizeof( DataType ),
       pybind11::format_descriptor<DataType>::format(),
       2 /* number of dimensions */,
