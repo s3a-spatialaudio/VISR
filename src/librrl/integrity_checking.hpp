@@ -4,7 +4,7 @@
 #define VISR_LIBRRL_INTEGRITY_CHECKING_HPP_INCLUDED
 
 /**
- * @file integrity_checking.hpp
+ * @file librrl/integrity_checking.hpp
  * Checking functions for signal flow components.
  * Functions are provided for checking the audio connections, parameter connections, or both.
  * Functions check either only the current level of a composite signal flow (option hierarchical=false), 
