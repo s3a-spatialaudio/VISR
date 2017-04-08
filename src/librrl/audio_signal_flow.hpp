@@ -129,13 +129,13 @@ public:
   * Return the name of the capture port indexed by \p idx
   * @throw std::out_of_range If the \p idx exceeds the number of capture ports.
   */
-  std::string const & audioCapturePortName( std::size_t idx ) const;
+  char const * audioCapturePortName( std::size_t idx ) const;
 
   /**
    * Return the name of the playback port indexed by \p idx
    * @throw std::out_of_range If the \p idx exceeds the number of playback ports.
    */
-  std::string const & audioPlaybackPortName( std::size_t idx ) const;
+  char const * audioPlaybackPortName( std::size_t idx ) const;
 
   /**
    * Query the width of the capture port, i.e., the number of external

@@ -285,7 +285,7 @@ std::size_t AudioSignalFlow::numberOfAudioPlaybackPorts() const
 * Return the name of the capture port indexed by \p idx
 * @throw std::out_of_range If the \p idx exceeds the number of capture ports.
 */
-std::string const & AudioSignalFlow::audioCapturePortName( std::size_t idx ) const
+char const * AudioSignalFlow::audioCapturePortName( std::size_t idx ) const
 {
   if( idx >= numberOfAudioCapturePorts() )
   {
@@ -298,7 +298,7 @@ std::string const & AudioSignalFlow::audioCapturePortName( std::size_t idx ) con
 * Return the name of the playback port indexed by \p idx
 * @throw std::out_of_range If the \p idx exceeds the number of playback ports.
 */
-std::string const & AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
+char const * AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
 {
   if( idx >= numberOfAudioPlaybackPorts( ) )
   {
