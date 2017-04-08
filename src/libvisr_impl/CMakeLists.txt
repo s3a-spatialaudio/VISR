@@ -30,6 +30,7 @@ channel_list.cpp
 communication_protocol_base.cpp
 component.cpp
 composite_component.cpp
+parameter_config_base.cpp
 parameter_factory.cpp
 parameter_input.cpp
 parameter_output.cpp
@@ -41,6 +42,7 @@ signal_flow_context.cpp
 add_definitions( -DVISR_BUILD_CORE_LIBRARIES=1 )
 
 ADD_LIBRARY( visr_impl SHARED ${SOURCES} ${HEADERS} )
+set_target_properties(visr_impl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/shlib" )
 
 # Mutual dependeny between ril and vir_impl. This might be problematic when one of them is a shared library.
 target_link_libraries( visr_impl ril )
