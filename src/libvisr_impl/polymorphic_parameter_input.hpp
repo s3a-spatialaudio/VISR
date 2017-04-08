@@ -12,27 +12,27 @@
 namespace visr
 {
 
-class VISR_CORE_LIBRARY_SYMBOL PolymorphicParameterInput: public ParameterInputBase
+class PolymorphicParameterInput: public ParameterInputBase
 {
 public:
-  explicit PolymorphicParameterInput( char const * name,
+  VISR_CORE_LIBRARY_SYMBOL explicit PolymorphicParameterInput( char const * name,
                                Component & parent,
                                ParameterType const & parameterType,
                                CommunicationProtocolType const & protocolType,
                                ParameterConfigBase const & paramConfig );
 
-  explicit PolymorphicParameterInput( char const * name,
+  VISR_CORE_LIBRARY_SYMBOL explicit PolymorphicParameterInput( char const * name,
                                Component & parent,
                                ParameterType const & parameterType,
                                CommunicationProtocolType const & protocolType );
 
-  virtual ~PolymorphicParameterInput() override;
+  VISR_CORE_LIBRARY_SYMBOL virtual ~PolymorphicParameterInput() override;
 
-  void setProtocol( CommunicationProtocolBase * protocol ) override;
+  VISR_CORE_LIBRARY_SYMBOL void setProtocol( CommunicationProtocolBase * protocol ) override;
 
-  CommunicationProtocolBase::Input & protocolInput() override;
+  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase::Input & protocolInput() override;
 
-  CommunicationProtocolBase::Input const & protocolInput() const;
+  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase::Input const & protocolInput() const;
 
 private:
   std::unique_ptr<CommunicationProtocolBase::Input> mProtocolInput;

@@ -115,7 +115,7 @@ void ComponentImplementation::unregisterAudioPort( AudioPortBaseImplementation* 
 void ComponentImplementation::registerAudioPort( AudioPortBaseImplementation* port )
 {
   AudioPortContainer & vec = getAudioPortList( );
-  AudioPortContainer::const_iterator findIt = findAudioPortEntry( port->name().c_str() );
+  AudioPortContainer::const_iterator findIt = findAudioPortEntry( port->name() );
   if( findIt != vec.end( ) )
   {
     throw std::invalid_argument( "Component::registerAudioPort(): port with given name already exists" );
@@ -129,7 +129,7 @@ struct ComparePorts
 
   bool operator()( PortBaseImplementation const * lhs ) const
   {
-    return ::strcmp( lhs->name().c_str(), mName ) == 0;
+    return ::strcmp( lhs->name(), mName ) == 0;
   }
 private:
   char const * mName;
@@ -196,7 +196,7 @@ ComponentImplementation::parameterPortEnd( )
 
 void ComponentImplementation::registerParameterPort( ParameterPortBaseImplementation * port )
 {
-  ParameterPortContainer::const_iterator findIt = findParameterPortEntry( port->name().c_str() );
+  ParameterPortContainer::const_iterator findIt = findParameterPortEntry( port->name() );
   if( findIt != mParameterPorts.end() )
   {
     throw std::invalid_argument( "ComponentImplementation::registerParameterPort(): port with given name already exists" );
@@ -251,16 +251,16 @@ ParameterPortBase * ComponentImplementation::findParameterPort( char const * por
 }
 
 template<>
-ComponentImplementation::PortContainer<AudioPortBaseImplementation> const & ComponentImplementation::ports() const { return mAudioPorts; }
+VISR_CORE_LIBRARY_SYMBOL ComponentImplementation::PortContainer<AudioPortBaseImplementation> const & ComponentImplementation::ports() const { return mAudioPorts; }
 
 template<>
-ComponentImplementation::PortContainer<ParameterPortBaseImplementation> const & ComponentImplementation::ports() const { return mParameterPorts; }
+VISR_CORE_LIBRARY_SYMBOL ComponentImplementation::PortContainer<ParameterPortBaseImplementation> const & ComponentImplementation::ports() const { return mParameterPorts; }
 
 template<>
-ComponentImplementation::PortContainer<AudioPortBaseImplementation> & ComponentImplementation::ports() { return mAudioPorts; }
+VISR_CORE_LIBRARY_SYMBOL ComponentImplementation::PortContainer<AudioPortBaseImplementation> & ComponentImplementation::ports() { return mAudioPorts; }
 
 template<>
-ComponentImplementation::PortContainer<ParameterPortBaseImplementation> & ComponentImplementation::ports() { return mParameterPorts; }
+VISR_CORE_LIBRARY_SYMBOL ComponentImplementation::PortContainer<ParameterPortBaseImplementation> & ComponentImplementation::ports() { return mParameterPorts; }
 
 // Strange workaround needed for Visual Studio to prevent an error when using the return type
 // TypedPortContainer = ComponentImplementation::PortContainer<PortType>::(const_)iterator direclty in the findPortEntry() definitions below.

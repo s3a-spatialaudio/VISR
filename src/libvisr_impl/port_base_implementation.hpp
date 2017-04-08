@@ -17,11 +17,11 @@ namespace impl
 // Forward declaration(s)
 class ComponentImplementation;
 
-class VISR_CORE_LIBRARY_SYMBOL PortBaseImplementation
+class PortBaseImplementation
 {
 public:
 
-  explicit PortBaseImplementation( std::string const & name, ComponentImplementation * container, visr::PortBase::Direction direction );
+  explicit VISR_CORE_LIBRARY_SYMBOL PortBaseImplementation( char const * name, ComponentImplementation * container, visr::PortBase::Direction direction );
 
   /**
    * Deleted default constructor.
@@ -44,34 +44,35 @@ public:
 
   /**
    * Destructor.
-   * Ports are not intended to be used polymorphically, so the desctructor is non-virtual.
+   * Ports are not intended to be used polymorphically, so the destructor is non-virtual.
+   * @todo Check whether this still holds.
    */
-  ~PortBaseImplementation();
+  VISR_CORE_LIBRARY_SYMBOL  ~PortBaseImplementation();
 
-  std::string const & name() const { return mName; }
+  VISR_CORE_LIBRARY_SYMBOL  char const * name() const { return mName.c_str(); }
 
-  bool hasParent() const noexcept;
+  VISR_CORE_LIBRARY_SYMBOL bool hasParent() const noexcept;
 
-  ComponentImplementation const & parent() const;
+  VISR_CORE_LIBRARY_SYMBOL  ComponentImplementation const & parent() const;
 
   /**
    * Return the parent component of this port.
    * @throw std::logic if the the port has no parent.
    */
-  ComponentImplementation & parent();
+  VISR_CORE_LIBRARY_SYMBOL ComponentImplementation & parent();
 
   /*
    * Set a new parent to this port.
    * @param newParent the new parent component, use nullptr to unset the parent.
    */
-  void setParent( ComponentImplementation * newParent ) noexcept;
+  VISR_CORE_LIBRARY_SYMBOL void setParent( ComponentImplementation * newParent ) noexcept;
 
   /**
    * Remove the current parent, effectively making the 
    */
-  void removeParent() noexcept;
+  VISR_CORE_LIBRARY_SYMBOL void removeParent() noexcept;
 
-  visr::PortBase::Direction direction() const { return mDirection; }
+  VISR_CORE_LIBRARY_SYMBOL visr::PortBase::Direction direction() const { return mDirection; }
 
 private:
   std::string const mName;

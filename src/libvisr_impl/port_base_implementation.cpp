@@ -10,7 +10,7 @@ namespace visr
 namespace impl
 {
 
-PortBaseImplementation::PortBaseImplementation( std::string const & name, ComponentImplementation * container, visr::PortBase::Direction direction )
+PortBaseImplementation::PortBaseImplementation( char const * name, ComponentImplementation * container, visr::PortBase::Direction direction )
  : mName( name )
  , mParentComponent( container )
  , mDirection( direction )

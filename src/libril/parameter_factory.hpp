@@ -53,9 +53,9 @@ private:
   {
     using CreateFunction = std::function< ParameterBase* ( ParameterConfigBase const & config ) >;
 
-    explicit Creator( CreateFunction fcn );
+    VISR_CORE_LIBRARY_SYMBOL explicit Creator( CreateFunction fcn );
 
-    std::unique_ptr<ParameterBase> create( ParameterConfigBase const & config ) const;
+    VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<ParameterBase> create( ParameterConfigBase const & config ) const;
  private:
     CreateFunction mCreateFunction;
   };

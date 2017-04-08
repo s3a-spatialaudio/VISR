@@ -3,6 +3,8 @@
 #include <libril/parameter_base.hpp>
 #include <libril/parameter_factory.hpp>
 
+#include <libril/parameter_config_base.hpp>
+
 #include <stdexcept>
 
 namespace visr

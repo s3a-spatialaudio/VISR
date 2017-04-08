@@ -5,11 +5,10 @@
 
 #include <memory>
 
-#include "export_symbols.hpp"
-#include "parameter_type.hpp"
-
 #include "communication_protocol_base.hpp"
 #include "communication_protocol_type.hpp"
+#include "export_symbols.hpp"
+#include "parameter_type.hpp"
 
 #include <functional>
 #include <map>
@@ -23,27 +22,27 @@ namespace visr
 class ParameterBase;
 class ParameterConfigBase;
 
-class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolFactory
+class CommunicationProtocolFactory
 {
 public:
 
-  static std::unique_ptr<CommunicationProtocolBase> create( CommunicationProtocolType const & protocolType,
+  VISR_CORE_LIBRARY_SYMBOL static std::unique_ptr<CommunicationProtocolBase> create( CommunicationProtocolType const & protocolType,
                                                             ParameterType const & paramType,
                                                             ParameterConfigBase const & config );
 
-  static std::unique_ptr<CommunicationProtocolBase::Input> createInput( CommunicationProtocolType const & protocolType );
-  static std::unique_ptr<CommunicationProtocolBase::Output> createOutput( CommunicationProtocolType const & protocolType );
+  VISR_CORE_LIBRARY_SYMBOL static std::unique_ptr<CommunicationProtocolBase::Input> createInput( CommunicationProtocolType const & protocolType );
+  VISR_CORE_LIBRARY_SYMBOL static std::unique_ptr<CommunicationProtocolBase::Output> createOutput( CommunicationProtocolType const & protocolType );
 
   /**
    * Return the number of registered protocols.
    */
-  static std::size_t numberOfProtocols() noexcept;
+  VISR_CORE_LIBRARY_SYMBOL static std::size_t numberOfProtocols() noexcept;
 
   /**
    * Return the registered name of a protocol.
    * @throw std::invalid_argument if no protocol with this name exists.
    */
-  static CommunicationProtocolType typeFromName( char const * name );
+  VISR_CORE_LIBRARY_SYMBOL static CommunicationProtocolType typeFromName( char const * name );
 
   /**
    * Lookup the protocol type for a name.
@@ -51,9 +50,9 @@ public:
    * been registered.
    * @todo Consider changing the return type to char const *
    */
-  static std::string typeToName( CommunicationProtocolType type );
+  VISR_CORE_LIBRARY_SYMBOL static std::string typeToName( CommunicationProtocolType type );
 
-  static bool typeExists( CommunicationProtocolType type ) noexcept;
+  VISR_CORE_LIBRARY_SYMBOL static bool typeExists( CommunicationProtocolType type ) noexcept;
 
 
   template< class ConcreteCommunicationProtocol >
@@ -68,16 +67,16 @@ private:
     using CreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase>( ParameterType const &, ParameterConfigBase const & ) >;
     using InputCreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase::Input>() >;
     using OutputCreateFunction = std::function< std::unique_ptr<CommunicationProtocolBase::Output>() >;
-    explicit Creator( CreateFunction fcn,
+    VISR_CORE_LIBRARY_SYMBOL explicit Creator( CreateFunction fcn,
                       InputCreateFunction inputCreator,
                       OutputCreateFunction outputCreator,
                       char const * name );
 
-    std::unique_ptr<CommunicationProtocolBase> create( ParameterType const & paramType, ParameterConfigBase const & config ) const;
-    std::unique_ptr<CommunicationProtocolBase::Input> createInput() const;
-    std::unique_ptr<CommunicationProtocolBase::Output> createOutput() const;
+    VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<CommunicationProtocolBase> create( ParameterType const & paramType, ParameterConfigBase const & config ) const;
+    VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<CommunicationProtocolBase::Input> createInput() const;
+    VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<CommunicationProtocolBase::Output> createOutput() const;
 
-    std::string const & name() const;
+    VISR_CORE_LIBRARY_SYMBOL std::string const & name() const;
  private:
 
     CreateFunction mCreateFunction;
@@ -90,7 +89,7 @@ private:
    * Internal registration function.
    * @throw std::invalid_argument If a creator is already registered for the given protocol type \p type
    */
-  static void registerCommunicationProtocol( CommunicationProtocolType type, Creator&& creator );
+  VISR_CORE_LIBRARY_SYMBOL static void registerCommunicationProtocol( CommunicationProtocolType type, Creator&& creator );
 
   template< class ConcreteCommunicationProtocolType >
   class TCreator: public Creator

@@ -12,12 +12,12 @@ namespace visr
 namespace impl
 {
 
-AudioPortBaseImplementation::AudioPortBaseImplementation( std::string const & name, AudioPortBase& containingPort, ComponentImplementation * container, AudioSampleType::Id sampleType, visr::PortBase::Direction direction )
+AudioPortBaseImplementation::AudioPortBaseImplementation( char const * name, AudioPortBase& containingPort, ComponentImplementation * container, AudioSampleType::Id sampleType, visr::PortBase::Direction direction )
  : AudioPortBaseImplementation( name, containingPort, container, sampleType, direction, 0 )
 {
 }
 
-AudioPortBaseImplementation::AudioPortBaseImplementation( std::string const & name, AudioPortBase& containingPort, ComponentImplementation* container, AudioSampleType::Id sampleType, visr::PortBase::Direction direction, std::size_t width )
+AudioPortBaseImplementation::AudioPortBaseImplementation( char const * name, AudioPortBase& containingPort, ComponentImplementation* container, AudioSampleType::Id sampleType, visr::PortBase::Direction direction, std::size_t width )
  : PortBaseImplementation( name, container, direction )
  , mContainingPort( containingPort )
  , cSampleType( sampleType )
@@ -107,12 +107,12 @@ void AudioPortBaseImplementation::setChannelStrideSamples( std::size_t stride )
   mChannelStrideSamples = stride;
 }
 
-void AudioPortBaseImplementation::setBasePointer( void* base )
+void AudioPortBaseImplementation::setBasePointer( void * base )
 {
   mBasePointer = base;
 }
 
-void AudioPortBaseImplementation::setBufferConfig( void* base, std::size_t channelStrideSamples )
+void AudioPortBaseImplementation::setBufferConfig( void * base, std::size_t channelStrideSamples )
 {
   mBasePointer = base;
   mChannelStrideSamples = channelStrideSamples;

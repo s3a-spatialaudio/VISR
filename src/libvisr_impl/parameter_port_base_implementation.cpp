@@ -10,7 +10,6 @@
 
 #include <cassert>
 #include <ciso646>
-#include <string>
 
 namespace visr
 {

@@ -33,13 +33,13 @@ class ParameterPortBaseImplementation;
  *
  *
  */
-class VISR_CORE_LIBRARY_SYMBOL ComponentImplementation
+class ComponentImplementation
 {
 public:
   friend class AudioPortBaseImplementation; // For registering/ unregistering audio ports
   friend class ParameterPortBaseImplementation; // For registering / unregistering audio ports.
   
-  explicit ComponentImplementation( visr::Component & component,
+  VISR_CORE_LIBRARY_SYMBOL explicit ComponentImplementation( visr::Component & component,
                                     SignalFlowContext& context,
                                     char const * componentName,
                                     CompositeComponentImplementation * parent );
@@ -47,7 +47,7 @@ public:
   /**
    *
    */
-  virtual ~ComponentImplementation();
+  VISR_CORE_LIBRARY_SYMBOL virtual ~ComponentImplementation();
 
   ComponentImplementation() = delete;
 
@@ -60,17 +60,17 @@ public:
   ComponentImplementation& operator=( ComponentImplementation && ) = delete;
 
 
-  static const std::string cNameSeparator;
+  VISR_CORE_LIBRARY_SYMBOL static const std::string cNameSeparator;
 
   /**
    * Return the 'local', non-hierarchical name.
    */
-  std::string const & name() const;
+  VISR_CORE_LIBRARY_SYMBOL std::string const & name() const;
 
   /**
    * Return the full, hierarchical name of the component.
    */
-  std::string fullName() const;
+  VISR_CORE_LIBRARY_SYMBOL std::string fullName() const;
 
   /**
    * Query whether the corresponding component is atomic or composite.
@@ -78,12 +78,12 @@ public:
    * class hierarchy of the externally visible components is the right way to go,
    * or whether this information should be held local in the internal object.
    */
-  virtual bool isComposite() const;
+  VISR_CORE_LIBRARY_SYMBOL virtual bool isComposite() const;
 
   /**
    * Return the sampling frequency of the containing signal flow.
    */
-  SamplingFrequencyType samplingFrequency() const;
+  VISR_CORE_LIBRARY_SYMBOL SamplingFrequencyType samplingFrequency() const;
 
   /**
    * Return the period of the containing signal processing graph,
@@ -93,7 +93,7 @@ public:
    * derived component, i.e., for instance in the constructor.
    * @todo: Check whether this should be made inline again (adding the dependency to the runtime container (aka SignalFlow).
    */
-  std::size_t period() const;
+  VISR_CORE_LIBRARY_SYMBOL std::size_t period() const;
 
   template< class PortType >
   using PortContainer = std::vector<PortType*>;
@@ -104,9 +104,9 @@ public:
    * Allow access to the port lists 
    */
   //@{
-  AudioPortContainer::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
+  VISR_CORE_LIBRARY_SYMBOL AudioPortContainer::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
 
-  AudioPortContainer::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
+  VISR_CORE_LIBRARY_SYMBOL AudioPortContainer::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
   //@}
 
   /**
@@ -115,11 +115,11 @@ public:
   //@{
   using ParameterPortContainer = PortContainer<ParameterPortBaseImplementation>;
 
-  ParameterPortContainer::const_iterator parameterPortBegin() const;
-  ParameterPortContainer::const_iterator parameterPortEnd( ) const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer::const_iterator parameterPortBegin() const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer::const_iterator parameterPortEnd( ) const;
 
-  ParameterPortContainer::iterator parameterPortBegin( );
-  ParameterPortContainer::iterator parameterPortEnd( );
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer::iterator parameterPortBegin( );
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer::iterator parameterPortEnd( );
 
   /**
    * Uniform access to audio and parameter ports using templates
@@ -134,7 +134,7 @@ public:
    * @return a const reference to the port container.
    */
   template<class PortType>
-  PortContainer<PortType> const & ports() const;
+  VISR_CORE_LIBRARY_SYMBOL PortContainer<PortType> const & ports() const;
 
   /**
    * Return the port container for the specified port type, non-const version.
@@ -143,7 +143,7 @@ public:
    * @return a modifiable reference to the port container.
    */
   template<class PortType>
-  PortContainer<PortType> & ports();
+  VISR_CORE_LIBRARY_SYMBOL PortContainer<PortType> & ports();
 
   template<class PortType>
   typename PortContainer<PortType>::iterator portBegin() { return ports<PortType>().begin(); }

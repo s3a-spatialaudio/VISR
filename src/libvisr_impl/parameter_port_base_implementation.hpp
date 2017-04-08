@@ -27,10 +27,10 @@ namespace impl
  *
  *
  */
-class VISR_CORE_LIBRARY_SYMBOL ParameterPortBaseImplementation: public PortBaseImplementation
+class ParameterPortBaseImplementation: public PortBaseImplementation
 {
 public:
-  explicit ParameterPortBaseImplementation( char const * name,
+  VISR_CORE_LIBRARY_SYMBOL explicit ParameterPortBaseImplementation( char const * name,
                                             ParameterPortBase& containingPort,
                                             ComponentImplementation * parent,
                                             visr::PortBase::Direction direction,
@@ -38,7 +38,7 @@ public:
                                             CommunicationProtocolType const & protocolType,
                                             ParameterConfigBase const & parameterConfig );
 
-  explicit ParameterPortBaseImplementation( char const * name,
+  VISR_CORE_LIBRARY_SYMBOL explicit ParameterPortBaseImplementation( char const * name,
                                             ParameterPortBase& containingPort,
                                             ComponentImplementation * parent,
                                             visr::PortBase::Direction direction,
@@ -48,33 +48,33 @@ public:
   /**
    * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
    */
-  virtual ~ParameterPortBaseImplementation();
+  VISR_CORE_LIBRARY_SYMBOL virtual ~ParameterPortBaseImplementation();
 
   /**
    * Set a new parameter type configuration for this port.
    * An already existing configuration will be replaced.
    */
-  void setParameterConfig( ParameterConfigBase const & parameterConfig );
+  VISR_CORE_LIBRARY_SYMBOL void setParameterConfig( ParameterConfigBase const & parameterConfig );
 
-  ParameterPortBase & containingPort();
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortBase & containingPort();
 
-  ParameterPortBase const & containingPort() const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortBase const & containingPort() const;
 
-  ParameterType parameterType() const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterType parameterType() const;
 
-  CommunicationProtocolType protocolType() const;
+  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolType protocolType() const;
 
   /**
    * Query whether a parameter configuration exists (set either in the 
    * constructor or using setParameterConfig() )
    */
-  bool hasParameterConfig() const noexcept;
+  VISR_CORE_LIBRARY_SYMBOL bool hasParameterConfig() const noexcept;
 
   /**
    * Return the paramaeter configuration object for this port.
    * @throw std::logic_error If no parameter configuration has been set.
    */
-  ParameterConfigBase const & parameterConfig() const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterConfigBase const & parameterConfig() const;
 
 protected:
   ParameterPortBase & mContainingPort;

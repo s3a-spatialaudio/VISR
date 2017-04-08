@@ -28,6 +28,7 @@ status_message.hpp
 typed_parameter_base.hpp
 version.hpp
 detail/compile_time_hash_fnv1.hpp
+detail/compose_message_string.hpp
 )
 
 SET( SOURCES

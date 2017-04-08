@@ -18,16 +18,16 @@ class ParameterPortBase;
  *
  *
  */
-class  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase
+class CommunicationProtocolBase
 {
 public:
 
-  CommunicationProtocolBase();
+  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase();
 
   /**
    *
    */
-  virtual ~CommunicationProtocolBase();
+  virtual  VISR_CORE_LIBRARY_SYMBOL ~CommunicationProtocolBase();
 
   virtual CommunicationProtocolType protocolType() const = 0;
 
@@ -47,7 +47,7 @@ public:
   class Input
   {
   public:
-    virtual ~Input();
+    virtual VISR_CORE_LIBRARY_SYMBOL ~Input();
 
     virtual void setProtocolInstance( CommunicationProtocolBase * protocol ) = 0;
 
@@ -59,7 +59,7 @@ public:
   class Output
   {
   public:
-    virtual ~Output();
+    virtual VISR_CORE_LIBRARY_SYMBOL ~Output();
 
     virtual void setProtocolInstance( CommunicationProtocolBase * protocol ) = 0;
 

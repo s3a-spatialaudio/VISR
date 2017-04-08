@@ -42,13 +42,14 @@ public:
   AtomicComponent( AtomicComponent && ) = delete;
 
   /**
-  * Destructor (virtual(
+  * Destructor (virtual).
+  * Atomic components are destined to be instantiated and managed polymorphically, thus requiring virtual destructors.
   */
   virtual  VISR_CORE_LIBRARY_SYMBOL ~AtomicComponent() override;
 
   /**
    * Pure virtual process() function.
-   * The overriding methods of base classes are called in regular intervals, each processing a fixed(\p context.period())
+   * The overriding methods of base classes are called in regular intervals, each processing a fixed number (\p context.period())
    * number of samples.
    */
   virtual void process() = 0;

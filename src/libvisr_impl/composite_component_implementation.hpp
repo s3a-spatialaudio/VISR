@@ -21,13 +21,13 @@ class Component;
 namespace impl
 {
 
-class VISR_CORE_LIBRARY_SYMBOL CompositeComponentImplementation: public ComponentImplementation
+class CompositeComponentImplementation: public ComponentImplementation
 {
 public:
 //  using ComponentTable = std::map<std::string, ComponentImplementation * >;
   using ComponentTable = std::vector< ComponentImplementation * >;
 
-  explicit CompositeComponentImplementation( CompositeComponent & component,
+  VISR_CORE_LIBRARY_SYMBOL explicit CompositeComponentImplementation( CompositeComponent & component,
                                              SignalFlowContext& context,
                                              char const * componentName,
                                              CompositeComponentImplementation * parent )
@@ -35,7 +35,7 @@ public:
   {
   }
 
-  virtual ~CompositeComponentImplementation() override = default;
+  VISR_CORE_LIBRARY_SYMBOL virtual ~CompositeComponentImplementation() override = default;
 
   CompositeComponentImplementation() = delete;
 
@@ -48,7 +48,7 @@ public:
   CompositeComponentImplementation& operator=( CompositeComponentImplementation && ) = delete;
 
 
-  bool isComposite() const final;
+  VISR_CORE_LIBRARY_SYMBOL bool isComposite() const final;
 
   /**
    * Register a child component 
@@ -57,33 +57,33 @@ public:
    * @note The name has to be provided separately, because typically the object pointed to by 
    * \p child is not fully constructed at the time of the call.
    */
-  void registerChildComponent( char const * name, impl::ComponentImplementation * child );
+  VISR_CORE_LIBRARY_SYMBOL void registerChildComponent( char const * name, impl::ComponentImplementation * child );
 
-  void unregisterChildComponent( impl::ComponentImplementation * child );
+  VISR_CORE_LIBRARY_SYMBOL void unregisterChildComponent( impl::ComponentImplementation * child );
 
   /**
   * Return the number of contained components (not including the composite itself).
   * This method considers only atomic and composite components at the next level,
   * i.e., not recursively.
   */
-  std::size_t numberOfComponents() const
+  VISR_CORE_LIBRARY_SYMBOL std::size_t numberOfComponents() const
   {
     return mComponents.size();
   }
 
 //  ComponentTable const components() const;
 
-  ComponentTable::const_iterator componentBegin() const;
+  VISR_CORE_LIBRARY_SYMBOL ComponentTable::const_iterator componentBegin() const;
 
-  ComponentTable::const_iterator componentEnd() const;
+  VISR_CORE_LIBRARY_SYMBOL ComponentTable::const_iterator componentEnd() const;
 
-  ComponentTable::iterator findComponentEntry( char const *componentName );
+  VISR_CORE_LIBRARY_SYMBOL ComponentTable::iterator findComponentEntry( char const *componentName );
 
-  ComponentTable::const_iterator findComponentEntry( char const *componentName ) const;
+  VISR_CORE_LIBRARY_SYMBOL ComponentTable::const_iterator findComponentEntry( char const *componentName ) const;
 
-  ComponentImplementation * findComponent( char const *componentName );
+  VISR_CORE_LIBRARY_SYMBOL ComponentImplementation * findComponent( char const *componentName );
 
-  ComponentImplementation const * findComponent( char const * componentName ) const;
+  VISR_CORE_LIBRARY_SYMBOL ComponentImplementation const * findComponent( char const * componentName ) const;
 
   /**
    * Find an audio port within the composite component.
@@ -91,7 +91,7 @@ public:
    * @param componentName
    * @param portName The port name (case-sensitive)
    */
-  AudioPortBase * findAudioPort( char const * componentName, char const * portName );
+  VISR_CORE_LIBRARY_SYMBOL AudioPortBase * findAudioPort( char const * componentName, char const * portName );
 
   /**
   * Find a parameter port within the composite component.
@@ -99,40 +99,40 @@ public:
   * @param componentName
   * @param portName The port name (case-sensitive)
   */
-  ParameterPortBase * findParameterPort( char const * componentName, char const * portName );
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortBase * findParameterPort( char const * componentName, char const * portName );
 
-  void registerParameterConnection( char const * sendComponent,
+  VISR_CORE_LIBRARY_SYMBOL void registerParameterConnection( char const * sendComponent,
                                     char const * sendPort,
                                     char const * receiveComponent,
                                     char const * receivePort );
 
-  void registerParameterConnection( ParameterPortBase & sendPort,
+  VISR_CORE_LIBRARY_SYMBOL void registerParameterConnection( ParameterPortBase & sendPort,
                                     ParameterPortBase & receivePort );
 
-  void audioConnection( char const * sendComponent,
+  VISR_CORE_LIBRARY_SYMBOL void audioConnection( char const * sendComponent,
                         char const * sendPort,
                         ChannelList const & sendIndices,
                         char const * receiveComponent,
                         char const * receivePort,
                         ChannelList const & receiveIndices );
 
-  void audioConnection( AudioPortBase & sendPort,
+  VISR_CORE_LIBRARY_SYMBOL void audioConnection( AudioPortBase & sendPort,
 			ChannelList const & sendIndices,
 			AudioPortBase & receivePort,
 			ChannelList const & receiveIndices );
 
-  void audioConnection( AudioPortBase & sendPort,
+  VISR_CORE_LIBRARY_SYMBOL void audioConnection( AudioPortBase & sendPort,
 			AudioPortBase & receivePort );
 
-  AudioConnectionTable const & audioConnections() const;
+  VISR_CORE_LIBRARY_SYMBOL AudioConnectionTable const & audioConnections() const;
 
-  AudioConnectionTable::const_iterator audioConnectionBegin() const;
+  VISR_CORE_LIBRARY_SYMBOL AudioConnectionTable::const_iterator audioConnectionBegin() const;
 
-  AudioConnectionTable::const_iterator audioConnectionEnd() const;
+  VISR_CORE_LIBRARY_SYMBOL AudioConnectionTable::const_iterator audioConnectionEnd() const;
 
-  ParameterConnectionTable::const_iterator parameterConnectionBegin() const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterConnectionTable::const_iterator parameterConnectionBegin() const;
 
-  ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
+  VISR_CORE_LIBRARY_SYMBOL ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
 
 private:
 
