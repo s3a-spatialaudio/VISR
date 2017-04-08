@@ -7,6 +7,7 @@
 
 #include "export_symbols.hpp"
 #include "status_message.hpp"
+#include "detail/compose_message_string.hpp"
 
 #include <cstddef>
 #include <string>
@@ -190,7 +191,7 @@ template<typename ... MessageArgs >
 inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... args )
 {
   std::stringstream str;
-  StatusMessage::format( str, args... );
+  detail::composeMessageString( str, args...);
   status( statusId, str.str().c_str() );
 }
 
