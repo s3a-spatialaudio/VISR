@@ -16,7 +16,7 @@ namespace visr
  * Base class for atomic components.
  * THese components are at the lowest level in the hierarchy and implement runtime functionality as
  * C++ code.
- * Abstract base class, derived classes must override the process() method.
+ * Abstract base class, derived classes must override the virtual method process().
  */
 class AtomicComponent: public Component
 {
@@ -42,10 +42,9 @@ public:
   AtomicComponent( AtomicComponent && ) = delete;
 
   /**
-  *
+  * Destructor (virtual(
   */
-  virtual ~AtomicComponent() override;
-
+  virtual  VISR_CORE_LIBRARY_SYMBOL ~AtomicComponent() override;
 
   /**
    * Pure virtual process() function.

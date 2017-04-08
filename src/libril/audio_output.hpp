@@ -12,12 +12,12 @@
 
 namespace visr
 {
-  class VISR_CORE_LIBRARY_SYMBOL AudioOutputBase: public AudioPortBase
+  class AudioOutputBase: public AudioPortBase
   {
   public:
-    AudioOutputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
+    VISR_CORE_LIBRARY_SYMBOL AudioOutputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
 
-    virtual ~AudioOutputBase() override;
+    VISR_CORE_LIBRARY_SYMBOL virtual ~AudioOutputBase() override;
   };
 
   template<typename DataType>
@@ -31,7 +31,7 @@ namespace visr
 
     virtual ~AudioOutputT() override = default;
 
-    DataType * base() { return static_cast<DataType * >(AudioPortBase::basePointer()); }
+    DataType * data() { return static_cast<DataType * >(AudioPortBase::basePointer()); }
 
     DataType * at( std::size_t idx )
     {
@@ -44,9 +44,7 @@ namespace visr
 
     DataType * operator[]( std::size_t idx )
     {
-      // TODO: This is not working properly!
-      // return static_cast<DataType * >(base());
-      return base() + idx * channelStrideSamples();
+      return data() + idx * channelStrideSamples();
     }
 
     /**
@@ -61,7 +59,7 @@ namespace visr
     {
       std::size_t const wd( width() );
       std::size_t const stride( channelStrideSamples() );
-      DataType * ptr( base() );
+      DataType * ptr( data() );
       for( std::size_t chIdx( 0 ); chIdx < wd; ++chIdx, ptr += stride, ++outIt )
       {
         *outIt = ptr;

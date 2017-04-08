@@ -9,12 +9,12 @@
 namespace visr
 {
 
-AudioPortBase::AudioPortBase( std::string const & name, Component & container, AudioSampleType::Id sampleType, PortBase::Direction direction )
+AudioPortBase::AudioPortBase( char const * name, Component & container, AudioSampleType::Id sampleType, PortBase::Direction direction )
  : AudioPortBase( name, container, sampleType, direction, 0 )
 {
 }
 
-AudioPortBase::AudioPortBase( std::string const & name, Component& container, AudioSampleType::Id sampleType, PortBase::Direction direction, std::size_t width )
+AudioPortBase::AudioPortBase( char const * name, Component& container, AudioSampleType::Id sampleType, PortBase::Direction direction, std::size_t width )
   : mImpl( new impl::AudioPortBaseImplementation( name, *this, &container.implementation(), sampleType, direction, width ) )
 {
 }
