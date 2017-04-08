@@ -13,23 +13,29 @@ namespace visr
 {
 
 /**
- *
- *
+ * Base class for parameter configuration objects.
+ * A parameter configuration object adds information about the transmitted parameter objects to a parameter port or communication protocol.
+ * This information contains additional information about the parameter (e.g., the dimension of the matrix), but not the type itself. Each parameter class is associated 
+ * with a specific parameter configuration type, but the same parameter configuration class can be potentially used by multiple parameter classes.
+ * Parameter configuration objects are used by the runtime system to check compatibility of parameter connections, and to construct parameter objects.
  */
 class ParameterConfigBase
 {
 protected:
   /**
    * Default constructor.
+   * This constructor is protected because only derived classes can be instantiated.
    */
   VISR_CORE_LIBRARY_SYMBOL ParameterConfigBase();
 
   /**
    * Copy constructor.
+   * This constructor is protected because only derived classes can be instantiated.
    * @note It is defined explicitly in order to have the symbol placed in the library
    */
   VISR_CORE_LIBRARY_SYMBOL ParameterConfigBase( ParameterConfigBase const & );
 
+public:
   /**
    * Destructor (virtual).
    * Parameter configuration objects are instantiated and managed polymorphically, therefore the destructor has to be virtual
