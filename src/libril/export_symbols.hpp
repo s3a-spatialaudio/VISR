@@ -15,8 +15,8 @@
 #else
 // Does create undefined symbols if the library is built statically, therefore the attributes are commented out.
 // @note logic add logic to add these attributes only if the core library is built dynamically.
-#define VISR_CORE_LIBRARY_SYMBOL // __declspec(dllimport)
-#define VISR_PLUGIN_SYMBOL // __declspec(dllexport)
+#define VISR_CORE_LIBRARY_SYMBOL __declspec(dllimport)
+#define VISR_PLUGIN_SYMBOL __declspec(dllexport)
 #endif // #ifdef VISR_BUILD_CORE_LIBRARIES
 #elif defined(__GNUC__)
 
