@@ -50,6 +50,32 @@ public:
                      CommunicationProtocolType const & protocolType );
 
   /**
+   * Deleted copy constructor to prevent copy construction.
+   */
+  ParameterPortBase( ParameterPortBase const & ) = delete;
+
+  /**
+   * Deleted move constructor to prevent copy construction.
+   */
+  ParameterPortBase( ParameterPortBase && ) = delete;
+
+  /**
+   * Deleted assignment operator to prevent assignment.
+   */
+  ParameterPortBase& operator=( ParameterPortBase const & ) = delete;
+
+  /**
+   * Deleted move assignment operator to prevent moving.
+   */
+  ParameterPortBase& operator=( ParameterPortBase && ) = delete;
+
+
+  /**
+  * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
+  */
+  virtual ~ParameterPortBase();
+
+  /**
    * Set a new parameter configuration. If a configuration is already set, it is overwritten.
    * Must be called only during the initialisation phase
    * @param parameterConfig The new parameter configuration.
@@ -57,10 +83,6 @@ public:
    */
   void setParameterConfig( ParameterConfigBase const & parameterConfig );
 
-  /**
-   * @ TODO: Do we intend to use parameter ports in a virtual way? Obviously yes.
-   */
-  virtual ~ParameterPortBase();
 
   ParameterType parameterType() const;
 
