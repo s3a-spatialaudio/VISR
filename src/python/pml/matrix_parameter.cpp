@@ -43,7 +43,8 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
   } )
   .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( pybind11::init<std::size_t, std::size_t, std::size_t>() )
-  .def_property_readonly_static( "staticType", &MatrixParameter<DataType>::staticType )
+  // Note: See pybind11 documentation for the way the implicit 'self' argument is stripped by using a lambda function.
+  .def_property_readonly_static( "staticType", [](pybind11::object /*self*/) {return MatrixParameter<DataType>::staticType(); } )
   .def( "__init__", []( MatrixParameter<DataType> & inst, pybind11::array const & data, std::size_t alignment)
   {
     if( data.ndim() != 2 )

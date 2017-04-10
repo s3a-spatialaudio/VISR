@@ -26,8 +26,8 @@ void exportDoubleBufferingProtocol( pybind11::module & m)
     doubleBuffering( m, "DoubleBufferingProtocol", pybind11::metaclass() );
 
   doubleBuffering
-    .def_property_readonly_static( "staticName", &DoubleBufferingProtocol::staticName )
-    .def_property_readonly_static( "staticType", &DoubleBufferingProtocol::staticType )
+    .def_property_readonly_static( "staticName", [](pybind11::object /*self*/){ return DoubleBufferingProtocol::staticName(); } )
+    .def_property_readonly_static( "staticType", []( pybind11::object /*self*/ ){ return DoubleBufferingProtocol::staticType(); } )
     .def( pybind11::init<ParameterType const &, ParameterConfigBase const & >() )
     ;
 
@@ -36,6 +36,12 @@ void exportDoubleBufferingProtocol( pybind11::module & m)
     .def( "data", &DoubleBufferingProtocol::InputBase::data )
     .def( "changed", &DoubleBufferingProtocol::InputBase::changed )
     .def( "resetChanged", &DoubleBufferingProtocol::InputBase::changed )
+    ;
+
+  pybind11::class_<DoubleBufferingProtocol::OutputBase, CommunicationProtocolBase::Output>( doubleBuffering, "OutputBase" )
+    .def( pybind11::init<>() )
+    .def( "data", &DoubleBufferingProtocol::OutputBase::data )
+    .def( "swapBuffers", &DoubleBufferingProtocol::OutputBase::swapBuffers )
     ;
 
 }  
