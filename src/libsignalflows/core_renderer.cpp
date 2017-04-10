@@ -93,14 +93,14 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
   }
 
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
-  registerParameterConnection( "this", "objectDataInput", "VbapGainCalculator", "objectVectorInput" );
+  parameterConnection( "this", "objectDataInput", "VbapGainCalculator", "objectVectorInput" );
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-  registerParameterConnection( "VbapGainCalculator", "gainOutput", "VbapGainMatrix", "gainInput" );
+  parameterConnection( "VbapGainCalculator", "gainOutput", "VbapGainMatrix", "gainInput" );
 
   mDiffusionGainCalculator.setup( numberOfInputs );
-  registerParameterConnection("this", "objectDataInput", "DiffusionCalculator", "objectInput" );
+  parameterConnection("this", "objectDataInput", "DiffusionCalculator", "objectInput" );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
-  registerParameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
+  parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
 
 
   /**
@@ -145,7 +145,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
     {
       audioConnection( "TrackingSpeakerCompensation", "out", ChannelRange( 0, numberOfLoudspeakers ), "OutputAdjustment", "in", ChannelRange( 0, numberOfLoudspeakers ) );
     }
-    registerParameterConnection( "", "listenerPositionInput", "TrackingListenerCompensation", "input" );
+    parameterConnection( "", "listenerPositionInput", "TrackingListenerCompensation", "input" );
   }
   else
   {

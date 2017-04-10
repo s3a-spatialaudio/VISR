@@ -93,9 +93,9 @@ SignalFlow::setup()
   audioConnection( "this", "in", ChannelRange( 0, cNumberOfInputs ), "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs ) );
   audioConnection( "GainMatrix", "out", ChannelRange( 0, cNumberOfOutputs ), "this", "out", ChannelRange( 0, cNumberOfOutputs ) );
 
-  registerParameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
-  registerParameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
-  registerParameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
+  parameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+  parameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
+  parameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
 }
 
 } // namespace scene_decoder

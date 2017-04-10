@@ -135,13 +135,13 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
 
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
   mSceneDecoder.setup( );
-  registerParameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder.parameterPort( "datagramInput" ) );
+  parameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder.parameterPort( "datagramInput" ) );
 
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration, false /*no listener adaptation*/,
                          mFrequencyDependentPanning /*separate lowpass panning*/ );
-  registerParameterConnection( mSceneDecoder.parameterPort( "objectVectorOutput" ), mGainCalculator.parameterPort( "objectVectorInput" ) );
+  parameterConnection( mSceneDecoder.parameterPort( "objectVectorOutput" ), mGainCalculator.parameterPort( "objectVectorInput" ) );
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-  registerParameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
+  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
 
   if( mFrequencyDependentPanning )
   {
@@ -162,13 +162,13 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
     mPanningFilterbank->setup( 2*numberOfInputs, 1, coeffMatrix );
     mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
 
-    registerParameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
+    parameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
   }
 
   mDiffusionGainCalculator.setup( numberOfInputs );
-  registerParameterConnection( "SceneDecoder", "objectVectorOutput", "DiffusionCalculator", "objectInput" );
+  parameterConnection( "SceneDecoder", "objectVectorOutput", "DiffusionCalculator", "objectInput" );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
-  registerParameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
+  parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
 
 
   /**
@@ -461,11 +461,11 @@ void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbC
                               lateDecorrelationFilters, lateDecorrelationRouting );
   mReverbMix.setup( arrayConfig.getNumRegularSpeakers(), 2 );
 
-  registerParameterConnection( "SceneDecoder", "objectVectorOutput", "ReverbParameterCalculator", "objectInput" );
+  parameterConnection( "SceneDecoder", "objectVectorOutput", "ReverbParameterCalculator", "objectInput" );
 
 
-  registerParameterConnection( "ReverbParameterCalculator", "objectInput", "LateReverbFilterCalculator", "subbandInput" );
-  // registerParameterConnection( "LateReverbFilterCalculator", "", "LateReverbFilter", "" );
+  parameterConnection( "ReverbParameterCalculator", "objectInput", "LateReverbFilterCalculator", "subbandInput" );
+  // parameterConnection( "LateReverbFilterCalculator", "", "LateReverbFilter", "" );
 }
 #endif
 

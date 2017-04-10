@@ -49,7 +49,7 @@ public:
    * Make protected methods available as public.
    */
   //@{
-  using CompositeComponent::registerParameterConnection;
+  using CompositeComponent::parameterConnection;
   using CompositeComponent::audioConnection;
   //@}
 };
@@ -65,15 +65,15 @@ void exportCompositeComponent( pybind11::module& m )
     .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
           pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
-    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, char const *, char const *)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
+    .def( "parameterConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, char const *, char const *)>(&CompositeComponent::parameterConnection),
           pybind11::arg( "sendComponent"), pybind11::arg("sendPort"), pybind11::arg("receiveComponent"), pybind11::arg("receivePort") )
-    .def( "registerParameterConnection", static_cast<void(CompositeComponent::*)(ParameterPortBase&, ParameterPortBase&)>(&CompositeComponent/*Wrapper*/::registerParameterConnection),
+    .def( "parameterConnection", static_cast<void(CompositeComponent::*)(ParameterPortBase&, ParameterPortBase&)>(&CompositeComponent::parameterConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
-    .def( "audioConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, ChannelList const &, char const *, char const *, ChannelList const &)>(&CompositeComponent/*Wrapper*/::audioConnection),
+    .def( "audioConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, ChannelList const &, char const *, char const *, ChannelList const &)>(&CompositeComponent::audioConnection),
           pybind11::arg( "sendComponent" ), pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receiveComponent" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
-    .def( "audioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, ChannelList const &, AudioPortBase &, ChannelList const &)>(&CompositeComponent/*Wrapper*/::audioConnection),
+    .def( "audioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, ChannelList const &, AudioPortBase &, ChannelList const &)>(&CompositeComponent::audioConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ) )
-    .def( "audioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, AudioPortBase &)>(&CompositeComponent/*Wrapper*/::audioConnection),
+    .def( "audioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, AudioPortBase &)>(&CompositeComponent::audioConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
     ;
 }
@@ -146,7 +146,7 @@ public:
     : CompositeComponent( context, name,parent)
   {}
 
-  using CompositeComponent::registerParameterConnection;
+  using CompositeComponent::parameterConnection;
 
   using CompositeComponent::audioConnection;
 };
@@ -162,7 +162,7 @@ void exportCompositeComponent()
     .def( init<SignalFlowContext &, char const*, CompositeComponent *>( 
       args("context", "name", "parent") ) )
     .add_property( "numberOfComponents", &CompositeComponent::numberOfComponents )
-    .def( "registerParameterConnection", &CompositeComponent::registerParameterConnection,
+    .def( "parameterConnection", &CompositeComponent::parameterConnection,
           ( arg( "sendComponent"), arg("sendPort"), arg("receiveComponent"), arg("receivePort") ) )
     .def( "audioConnection", &CompositeComponent::audioConnection, 
     ( arg("sendComponent"), arg("sendPort"), arg("sendIndices"), arg("receiveComponent"), arg("receivePort"), arg("receiveIndices") ) )

@@ -24,16 +24,16 @@ std::size_t CompositeComponent::numberOfComponents() const
   return implementation().numberOfComponents();
 }
 
-void CompositeComponent::registerParameterConnection( char const * sendComponent,
-                                                      char const * sendPort,
-                                                      char const * receiveComponent,
-                                                      char const * receivePort )
+void CompositeComponent::parameterConnection( char const * sendComponent,
+                                              char const * sendPort,
+                                              char const * receiveComponent,
+                                              char const * receivePort )
 {
   implementation().registerParameterConnection( sendComponent, sendPort, receiveComponent, receivePort );
 }
 
-void CompositeComponent::registerParameterConnection( ParameterPortBase & sender,
-                                                      ParameterPortBase & receiver )
+void CompositeComponent::parameterConnection( ParameterPortBase & sender,
+                                              ParameterPortBase & receiver )
 {
   implementation().registerParameterConnection( sender, receiver );
 }

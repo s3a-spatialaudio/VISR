@@ -44,8 +44,8 @@ BunchRenderer::BunchRenderer( SignalFlowContext & context,
   mSceneDecoder.setup( );
    // mCoreRenderer is initialised in the ctor
 
-  registerParameterConnection("SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput");
-  registerParameterConnection("SceneDecoder", "objectVectorOutput", "CoreRenderer", "objectDataInput" );
+  parameterConnection("SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput");
+  parameterConnection("SceneDecoder", "objectVectorOutput", "CoreRenderer", "objectDataInput" );
 
   audioConnection("", "input", ChannelRange(0, numberOfInputs), "CoreRenderer", "audioIn", ChannelRange(0, numberOfInputs) );
   audioConnection("CoreRenderer", "audioOut", ChannelRange(0, numberOfOutputs), "", "output", ChannelRange(0, numberOfInputs) );

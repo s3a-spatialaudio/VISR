@@ -30,7 +30,7 @@ TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext & context,
   audioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "ForwardTransform", "in", ChannelRange( 0, numberOfChannels ) );
   audioConnection( "InverseTransform", "out", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
 
-  registerParameterConnection( "ForwardTransform", "out", "InverseTransform", "in" );
+  parameterConnection( "ForwardTransform", "out", "InverseTransform", "in" );
 
 #else
   audioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );

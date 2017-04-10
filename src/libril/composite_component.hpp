@@ -76,18 +76,27 @@ public:
    */
   
   /**
-   * Register a connection between parameter ports (both real ports of contained components or external placeholder ports.
-
+   * Register a connection between parameter ports (both real ports of contained components or external placeholder ports).
+   * @param sendComponent The name of the component holding the send port (local name, not the 
+   * fully qualified name). When specifiying an external port of a composite component, use an empty string or \p "this".
+   * @param sendPort The local (not fully qualified) name of the send port. 
+   * @param receiveComponent The name of the component holding the receive port (local name, not the
+   * fully qualified name). When specifiying an external port of a composite component, use an empty string or \p "this".
+   * @param sendPort The local (not fully qualified) name of the receive port.
    * @throw std::invalid_argument if a specified component or port does not exist.
    */
-  void registerParameterConnection( char const * sendComponent,
-    char const * sendPort,
-    char const * receiveComponent,
-    char const * receivePort );
+  void parameterConnection( char const * sendComponent,
+                            char const * sendPort,
+                            char const * receiveComponent,
+                            char const * receivePort );
 
-  void registerParameterConnection( ParameterPortBase & sender,
-                                    ParameterPortBase & receiver );
-
+  /**
+   * Register a connection between parameter ports (both real ports of contained components or external placeholder ports).
+   * @param sender Reference to the sendig port (retrieved, for example using \p Component::audioPort() )
+   * @param receiver Reference to the sendig port (retrieved, for example using \p Component::audioPort() )
+   */
+   void parameterConnection( ParameterPortBase & sender,
+                            ParameterPortBase & receiver );
 
   void audioConnection( char const * sendComponent,
                         char const * sendPort,

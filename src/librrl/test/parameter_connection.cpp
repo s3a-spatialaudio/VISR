@@ -80,7 +80,7 @@ public:
     , mSender( context, "Sender", this )
     , mReceiver( context, "Receiver", this)
   {
-    registerParameterConnection( mSender.parameterPort("paramOut"), mReceiver.parameterPort("paramIn") );
+    parameterConnection( mSender.parameterPort("paramOut"), mReceiver.parameterPort("paramIn") );
   }
 private:
   Sender mSender;
