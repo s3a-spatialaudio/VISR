@@ -11,6 +11,10 @@
 
 #include <libefl/basic_vector.hpp>
 
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/vector_parameter_config.hpp>
+#include <libpml/vector_parameter_config.hpp>
+
 namespace visr
 {
 namespace signalflows
@@ -28,14 +32,6 @@ public:
 
   ~DelayVector();
 
-  /*virtual*/ void process( );
-
-  /*virtual*/ void setup( );
-
-  void setDelay( efl::BasicVector<SampleType> const & newDelays );
-
-  void setGain( efl::BasicVector<SampleType> const & newGains );
-
 private:
   const std::size_t cNumberOfChannels;
 
@@ -48,6 +44,10 @@ private:
   AudioInput mInput;
 
   AudioOutput mOutput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mGainInput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDelayInput;
 };
 
 } // namespace signalflows

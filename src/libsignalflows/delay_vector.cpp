@@ -23,44 +23,26 @@ DelayVector::DelayVector( SignalFlowContext & context,
   , mDelay( context, "DelayVector", this )
   , mInput( "input", *this )
   , mOutput( "output", *this )
-{
-}
-
-DelayVector::~DelayVector()
-{
-}
-
-/*virtual*/ void
-DelayVector::process()
-{
-  mDelay.process();
-}
-
-/*virtual*/ void
-DelayVector::setup()
+  , mGainInput( "globalGainInput", *this, pml::VectorParameterConfig(numberOfChannels) )
+  , mDelayInput( "globalDelayInput", *this, pml::VectorParameterConfig( numberOfChannels ) )
 {
   // Initialise and configure audio components
   mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-                0.02f, cInterpolationMethod,
-                0.0f, 1.0f );
+    0.02f, cInterpolationMethod,
+    0.0f, 1.0f );
 
   mInput.setWidth( cNumberOfChannels );
   mOutput.setWidth( cNumberOfChannels );
 
-  audioConnection( "", "input", ChannelRange( 0, cNumberOfChannels ),
-    "GainMatrix", "input", ChannelRange( 0, cNumberOfChannels ) );
-  audioConnection( "GainMatrix", "output", ChannelRange( 0, cNumberOfChannels ),
-    "", "output", ChannelRange( 0, cNumberOfChannels ) );
+  audioConnection( mInput, mDelay.audioPort("in") );
+  audioConnection( mDelay.audioPort( "out" ), mOutput );
+
+  parameterConnection( mGainInput, mDelay.parameterPort("gainInput") );
+  parameterConnection( mDelayInput, mDelay.parameterPort( "delayInput" ) );
 }
 
-void DelayVector::setDelay( efl::BasicVector<SampleType> const & newDelays )
+DelayVector::~DelayVector()
 {
-  mDelay.setDelay( newDelays );
-}
-
-void DelayVector::setGain( efl::BasicVector<SampleType> const & newGains )
-{
-  mDelay.setGain( newGains );
 }
 
 } // namespace signalflows
