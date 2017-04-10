@@ -59,12 +59,12 @@ void SharedDataProtocol::connectOutput( ParameterPortBase* port )
   typedPort->setProtocolInstance( this );
 }
 
-bool SharedDataProtocol::disconnectInput( ParameterPortBase* port )
+bool SharedDataProtocol::disconnectInput( ParameterPortBase* port ) noexcept
 {
   InputBase * typedPort = dynamic_cast<InputBase *>(port);
   if( not typedPort )
   {
-    throw std::invalid_argument( "SharedDataProtocol::connectInput(): port argument has wrong type." );
+    return false;
   }
   typename std::vector<InputBase*>::iterator findIt = std::find( mInputs.begin(), mInputs.end(), typedPort );
   if( findIt == mInputs.end() )
@@ -76,12 +76,12 @@ bool SharedDataProtocol::disconnectInput( ParameterPortBase* port )
   return true;
 }
 
-bool SharedDataProtocol::disconnectOutput( ParameterPortBase* port )
+bool SharedDataProtocol::disconnectOutput( ParameterPortBase* port ) noexcept
 {
   OutputBase * typedPort = dynamic_cast<OutputBase *>(port);
   if( not typedPort )
   {
-    throw std::invalid_argument( "SharedDataProtocol::disconnectOutput(): port argument has wrong type." );
+    return false;
   }
   if( typedPort != mOutput )
   {

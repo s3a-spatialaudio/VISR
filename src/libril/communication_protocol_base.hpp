@@ -15,34 +15,56 @@ namespace visr
 class ParameterPortBase;
 
 /**
- *
- *
+ * Abstract base class for communication communication protocols which define the 
+ * semantics of data transmissions between parameter ports.
  */
 class CommunicationProtocolBase
 {
 public:
 
-  VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase();
-
   /**
-   *
+   * Destructor, virtual.
+   * Communication protocols are instantiated and used polymophically, so the desctructor needs to be virtual.
    */
   virtual  VISR_CORE_LIBRARY_SYMBOL ~CommunicationProtocolBase();
 
+  /**
+   * Return the protocol type (a numerical id) of the concrete derived protocol object.
+   * Derived protocol types are required to override this method.
+   */
   virtual CommunicationProtocolType protocolType() const = 0;
 
   /**
    * Return the configured parameter type of this protocol instance.
+   * Derived protocols are requirted to override this method.
    */
   virtual ParameterType parameterType() const = 0;
 
+  /**
+   * Connect an input port to this protocol.
+   * Derived protocol types must override this pure virtual interface.
+   * @param port An parameter input with compatible protocol and parameter types.
+   * @throw std::exception If the protocol or parameter types do not match.
+   * @throw std::exception If the connection would violate the "arity" of the protocol, i.e.,
+   * attempting multiple inputs in case of a 1:1 or 1:N protocol.
+   */
   virtual void connectInput( ParameterPortBase* port ) = 0;
 
+  /**
+   * Connect an output port to this protocol.
+   * Derived protocol types must override this pure virtual interface.
+   * @param port An parameter output with compatible protocol and parameter types.
+   * @throw std::exception If the protocol or parameter types do not match.
+   * @throw std::exception If the connection would violate the "arity" of the protocol, i.e.,
+   * attempting multiple outputs in case of a 1:1 or N:1 protocol.
+   */
   virtual void connectOutput( ParameterPortBase* port ) = 0;
 
-  virtual bool disconnectInput( ParameterPortBase* port ) = 0;
+  /**
+   */
+  virtual bool disconnectInput( ParameterPortBase* port ) noexcept = 0;
 
-  virtual bool disconnectOutput( ParameterPortBase* port ) = 0;
+  virtual bool disconnectOutput( ParameterPortBase* port ) noexcept= 0;
 
   class Input
   {

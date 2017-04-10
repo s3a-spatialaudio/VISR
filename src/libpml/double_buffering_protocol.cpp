@@ -88,15 +88,13 @@ void DoubleBufferingProtocol::connectOutput( ParameterPortBase* port )
   typedPort->setProtocolInstance( this );
 }
 
-bool DoubleBufferingProtocol::disconnectInput( ParameterPortBase* port )
+bool DoubleBufferingProtocol::disconnectInput( ParameterPortBase* port ) noexcept
 {
   InputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::InputBase *>(port);
   if( not typedPort )
   {
-    throw std::invalid_argument( "DoubleBufferingProtocol::connectInput(): port argument has wrong type." );
+    return false;
   }
-  // TODO: Check parameter type (should have been checked before)
-  // TODO: Re-check parameter configuration
   typename std::vector<InputBase*>::iterator findIt = std::find( mInputs.begin(), mInputs.end(), typedPort );
   if( findIt == mInputs.end() )
   {
@@ -108,19 +106,19 @@ bool DoubleBufferingProtocol::disconnectInput( ParameterPortBase* port )
   return true;
 }
 
-bool DoubleBufferingProtocol::disconnectOutput( ParameterPortBase* port )
+bool DoubleBufferingProtocol::disconnectOutput( ParameterPortBase* port ) noexcept
 {
   DoubleBufferingProtocol::OutputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::OutputBase *>(port);
   if( not typedPort )
   {
-    throw std::invalid_argument( "DoubleBufferingProtocol::disconnectOutput(): port argument has wrong type." );
+    return false;
   }
   if( typedPort != mOutput )
   {
     // Trying to disconnect a port that is not the previously connected output
     return false;
   }
-  mOutput->setProtocolInstance( this );
+  mOutput->setProtocolInstance( static_cast<DoubleBufferingProtocol*>(nullptr) );
   mOutput = nullptr;
   return true;
 }

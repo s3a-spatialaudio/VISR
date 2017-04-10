@@ -66,9 +66,9 @@ public:
 
   void connectOutput( ParameterPortBase* port ) override;
 
-  bool disconnectInput( ParameterPortBase* port ) override;
+  bool disconnectInput( ParameterPortBase* port ) noexcept override;
 
-  bool disconnectOutput( ParameterPortBase* port ) override;
+  bool disconnectOutput( ParameterPortBase* port ) noexcept override;
 
 private:
   ParameterType const mParameterType;

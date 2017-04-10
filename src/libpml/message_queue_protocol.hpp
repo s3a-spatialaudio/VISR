@@ -83,9 +83,9 @@ public:
 
   void connectOutput( ParameterPortBase* port ) override;
 
-  bool disconnectInput( ParameterPortBase* port ) override;
+  bool disconnectInput( ParameterPortBase* port ) noexcept override;
 
-  bool disconnectOutput( ParameterPortBase* port ) override;
+  bool disconnectOutput( ParameterPortBase* port ) noexcept override;
 
 private:
   using QueueType = std::deque<std::unique_ptr<ParameterBase> >;

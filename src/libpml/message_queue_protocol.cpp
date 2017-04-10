@@ -94,12 +94,12 @@ void MessageQueueProtocol::connectOutput( ParameterPortBase* port )
   mOutput->setProtocolInstance( this );
 }
 
-bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port )
+bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port ) noexcept
 {
   MessageQueueProtocol::InputBase * typedPort = dynamic_cast<MessageQueueProtocol::InputBase *>(port);
   if( not typedPort )
   {
-    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+    return false;
   }
   if( typedPort != mInput )
   {
@@ -111,12 +111,12 @@ bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port )
   return true;
 }
 
-bool MessageQueueProtocol::disconnectOutput( ParameterPortBase* port )
+bool MessageQueueProtocol::disconnectOutput( ParameterPortBase* port ) noexcept
 {
   MessageQueueProtocol::OutputBase * typedPort = dynamic_cast<MessageQueueProtocol::OutputBase *>(port);
   if( not typedPort )
   {
-    std::invalid_argument( "MessageQueueProtocol::disconnectOutput(): port argument has wrong type." );
+    return false;
   }
   if( typedPort != mOutput )
   {
