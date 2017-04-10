@@ -25,27 +25,6 @@ namespace visr
 
 #ifdef USE_PYBIND11
 
-  ///**
-  //*
-  //*/
-  //virtual ~CommunicationProtocolBase();
-
-  //virtual CommunicationProtocolType protocolType() const = 0;
-
-  ///**
-  //* Return the configured parameter type of this protocol instance.
-  //*/
-  //virtual ParameterType parameterType() const = 0;
-
-  //virtual void connectInput( ParameterPortBase* port ) = 0;
-
-  //virtual void connectOutput( ParameterPortBase* port ) = 0;
-
-  //virtual bool disconnectInput( ParameterPortBase* port ) = 0;
-
-  //virtual bool disconnectOutput( ParameterPortBase* port ) = 0;
-
-
 class CommunicationProtocolWrapper: public CommunicationProtocolBase
   {
   public:
@@ -70,7 +49,7 @@ void exportCommunicationProtocol( pybind11::module & m)
 
   commProtocolBase
     //.def( pybind11::init<>()/*, "Default constructor"*/ )
-    //.def( "parameterType", &CommunicationProtocolBase::parameterType, "Return the parameter type of the port." )
+    .def( "parameterType", &CommunicationProtocolBase::parameterType, "Return the parameter type of the port." )
     .def( "protocolType", &CommunicationProtocolBase::protocolType, "Return the protocol type of the port." )
     ;
 
