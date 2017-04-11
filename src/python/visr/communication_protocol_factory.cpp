@@ -21,13 +21,15 @@ void exportCommunicationProtocolFactory( pybind11::module& m )
 {
 
   pybind11::class_<CommunicationProtocolFactory>( m, "CommunicationProtocolFactory", pybind11::metaclass() )
-    .def_property_readonly_static( "numberOfProtocols", &CommunicationProtocolFactory::numberOfProtocols )
+    .def_property_readonly_static( "numberOfProtocols", [](pybind11::object /*self*/){ return CommunicationProtocolFactory::numberOfProtocols(); } )
     .def_static( "create", &CommunicationProtocolFactory::create, pybind11::arg("protocolType"),
           pybind11::arg("parameterType"), pybind11::arg("parameterConfig") )
+    .def_static( "createInput", &CommunicationProtocolFactory::createInput, pybind11::arg("protocolType") )
+    .def_static( "createOutput", &CommunicationProtocolFactory::createOutput, pybind11::arg( "protocolType" ) )
     .def_static( "typeFromName", &CommunicationProtocolFactory::typeFromName )
     .def_static( "typeToName", &CommunicationProtocolFactory::typeToName )
     .def_static( "typeExists", &CommunicationProtocolFactory::typeExists )
-	;
+    ;
 }
 
 } // namepace visr

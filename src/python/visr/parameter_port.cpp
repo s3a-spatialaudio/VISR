@@ -40,15 +40,15 @@ void exportParameterPort( pybind11::module & m)
     .def_property_readonly( "parameterType", &ParameterPortBase::parameterType )
     .def_property_readonly( "protocolType", &ParameterPortBase::protocolType )
     .def_property( "parameterConfig", &ParameterPortBase::parameterConfig, &ParameterPortBase::setParameterConfig,  pybind11::arg("parameterConfig") )
-    .def( "hasParameterConfig", &ParameterPortBase::hasParameterConfig)
+//    .def( "hasParameterConfig", &ParameterPortBase::hasParameterConfig)
     ;
 
   pybind11::class_<ParameterInputBase, ParameterPortBase>( m, "ParameterInput" )
-    .def( "protocolInput", &ParameterInputBase::protocolInput )
+    .def( "protocolInput", &ParameterInputBase::protocolInput, pybind11::return_value_policy::reference )
     ;
 
   pybind11::class_<ParameterOutputBase, ParameterPortBase>( m, "ParameterOutput" )
-    .def( "protocolOutput", &ParameterOutputBase::protocolOutput )
+    .def( "protocolOutput", &ParameterOutputBase::protocolOutput, pybind11::return_value_policy::reference )
     ;
 
   pybind11::class_<PolymorphicParameterInput, ParameterInputBase>( m, "PolyParameterInput" )
