@@ -2,11 +2,15 @@
 
 set( SOURCES
 baseline_renderer.cpp
+core_renderer.cpp
+delay_vector.cpp
 signalflows.cpp
 )
 
 set( HEADERS
 baseline_renderer.hpp
+core_renderer.hpp
+delay_vector.hpp
 )
 
 set(PROJECT_NAME signalflowspython)
