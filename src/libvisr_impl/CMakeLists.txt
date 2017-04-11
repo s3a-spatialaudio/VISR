@@ -8,6 +8,7 @@ composite_component_implementation.hpp
 parameter_connection_descriptor.hpp
 parameter_port_base_implementation.hpp
 polymorphic_parameter_input.hpp
+polymorphic_parameter_output.hpp
 port_base_implementation.hpp
 )
 
@@ -20,6 +21,7 @@ composite_component_implementation.cpp
 parameter_connection_descriptor.cpp
 parameter_port_base_implementation.cpp
 polymorphic_parameter_input.cpp
+polymorphic_parameter_output.cpp
 port_base_implementation.cpp
 atomic_component.cpp
 audio_input.cpp
