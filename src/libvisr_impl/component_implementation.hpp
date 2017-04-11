@@ -104,6 +104,9 @@ public:
    * Allow access to the port lists 
    */
   //@{
+  VISR_CORE_LIBRARY_SYMBOL AudioPortContainer audioPorts() const { return mAudioPorts; }
+
+
   VISR_CORE_LIBRARY_SYMBOL AudioPortContainer::const_iterator audioPortBegin() const { return mAudioPorts.begin(); }
 
   VISR_CORE_LIBRARY_SYMBOL AudioPortContainer::const_iterator audioPortEnd( ) const { return mAudioPorts.end(); }
@@ -114,6 +117,9 @@ public:
    */
   //@{
   using ParameterPortContainer = PortContainer<ParameterPortBaseImplementation>;
+
+  VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer parameterPorts() const { return mParameterPorts; }
+
 
   VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer::const_iterator parameterPortBegin() const;
   VISR_CORE_LIBRARY_SYMBOL ParameterPortContainer::const_iterator parameterPortEnd( ) const;
