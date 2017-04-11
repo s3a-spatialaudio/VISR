@@ -175,6 +175,8 @@ void exportAudioPort( pybind11::module & m)
     .value( "int16Id", AudioSampleType::int16Id )
     .value( "uint32Id", AudioSampleType::uint32Id )
     .value( "int32Id", AudioSampleType::int32Id )
+    .value( "complexFloatId", AudioSampleType::complexFloatId )
+    .value( "complexDoubleId", AudioSampleType::complexDoubleId )
     ;
 
   /**
@@ -192,9 +194,7 @@ void exportAudioPort( pybind11::module & m)
     .def_property_readonly( "initialised", []( AudioPortBase const & port ){ return port.implementation().initialised(); } )
     ;
 
-  // Use the simple name for the default sample type (float)
-  // Unfortunately pybind11 does not support aliases or  a second binding for the same C++ type
-  exportAudioInput<float>( m, "AudioInput" );
+  exportAudioInput<float>( m, "AudioInputFloat" );
   exportAudioInput<double>( m, "AudioInputDouble" );
   exportAudioInput<long double>( m, "AudioInputLongDouble" );
   exportAudioInput<int8_t>( m, "AudioInputInt8" );
@@ -203,10 +203,10 @@ void exportAudioPort( pybind11::module & m)
   exportAudioInput<uint16_t>( m, "AudioInputUint16" );
   exportAudioInput<int32_t>( m, "AudioInputInt32" );
   exportAudioInput<uint32_t>( m, "AudioInputUint32" );
+  exportAudioInput<std::complex<float> >( m, "AudioInputComplexFloat" );
+  exportAudioInput<std::complex<double> >( m, "AudioInputComplexDouble" );
 
-  // Use the simple name for the default sample type (float)
-  // Unfortunately pybind11 does not support aliases or  a second binding for the same C++ type
-  exportAudioOutput<float>( m, "AudioOutput" );
+  exportAudioOutput<float>( m, "AudioOutputFloat" );
   exportAudioOutput<double>( m, "AudioOutputDouble" );
   exportAudioOutput<long double>( m, "AudioOutputLongDouble" );
   exportAudioOutput<int8_t>( m, "AudioOutputInt8" );
@@ -215,6 +215,8 @@ void exportAudioPort( pybind11::module & m)
   exportAudioOutput<uint16_t>( m, "AudioOutputUint16" );
   exportAudioOutput<int32_t>( m, "AudioOutputInt32" );
   exportAudioOutput<uint32_t>( m, "AudioOutputUint32" );
+  exportAudioOutput<std::complex<float> >( m, "AudioOutputComplexFloat" );
+  exportAudioOutput<std::complex<double> >( m, "AudioOutputComplexDouble" );
 }
 
 #else
