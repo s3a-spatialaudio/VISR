@@ -6,7 +6,7 @@ Created on Sun Feb 26 16:41:01 2017
 """
 
 import sys
-sys.path.append( '/home/andi/dev/visr-build-debug/python' )
+sys.path.append( 'c:/local/dev/visr-build/python/Debug' )
 
 import visr
 import rcl
@@ -27,6 +27,7 @@ class PythonAdder3( visr.AtomicComponent ):
         self.input2 = visr.AudioInput( "in2", self, width )
         self.output = visr.AudioOutput( "out", self, width )
     def process( self ):
+        self.status( visr.StatusMessage.Information, "Called PythonAdder3::process()" )
         self.output.set( self.input0.data() + self.input1.data() + self.input2.data() )
 
 

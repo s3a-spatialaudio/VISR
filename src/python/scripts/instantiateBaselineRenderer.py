@@ -6,7 +6,9 @@ Created on Tue Feb 14 15:59:11 2017
 """
 
 import sys
-sys.path.append( '/home/andi/dev/visr-build-debug/python' )
+#sys.path.append( '/home/andi/dev/visr-build-debug/python' )
+sys.path.append( 'c:/local/visr-build/python/Debug' )
+
 
 import visr
 import signalflows
@@ -16,7 +18,8 @@ import rrl
 
 ctxt = visr.SignalFlowContext( 1024, 48000 )
 
-lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+#lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+lc = pml.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
 diffFilters = pml.MatrixParameterFloat( 39, 512, 16 )
 
