@@ -333,11 +333,33 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   mCommunicationProtocols.clear();
   if( not mFlow.isComposite() )
   {
-    // If the flow is not composite, we also have to initialise the top-level parameter ports.
-    if( std::distance( mFlow.parameterPortBegin(), mFlow.parameterPortEnd() ) > 0 )
+    // TODO: Maybe move to a specific method for atomic flows
+    for( auto paramPort : mFlow.parameterPorts() )
     {
-      messages << "AudioSignalFlow: Atomic components with message ports are not implemented yet.\n";
-      result = false;
+      visr::ParameterType const paramType = paramPort->parameterType();
+      CommunicationProtocolType const protocol = paramPort->protocolType();
+      ParameterConfigBase const & paramConfig = paramPort->parameterConfig();
+      std::unique_ptr<CommunicationProtocolBase> protocolInstance
+        = CommunicationProtocolFactory::create( protocol, paramType, paramConfig );
+      if( not protocolInstance )
+      {
+        messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
+        result = false;
+      }
+      if( paramPort->direction() == PortBase::Direction::Input )
+      {
+        std::unique_ptr<CommunicationProtocolBase::Output> protocolOutput = CommunicationProtocolFactory::createOutput( protocol );
+        protocolInstance->connectOutput( protocolOutput.get() );
+        ProtocolReceiveEndpoints::value_type insertPair{ std::string( paramPort->name() ), std::move( protocolOutput ) };
+        auto protocolIt = mProtocolReceiveEndpoints.insert( std::move( insertPair ) );
+      }
+      else
+      {
+        std::unique_ptr<CommunicationProtocolBase::Input> protocolInput = CommunicationProtocolFactory::createInput( protocol );
+        protocolInstance->connectInput( protocolInput.get() );
+        ProtocolSendEndpoints::value_type insertPair{ std::string( paramPort->name() ), std::move( protocolInput ) };
+        auto protocolIt = mProtocolSendEndpoints.insert( std::move( insertPair ) );
+      }
     }
     return result;
   }
