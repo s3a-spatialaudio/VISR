@@ -55,7 +55,7 @@ void DoubleBufferingProtocol::setData( ParameterBase const & newData )
 void DoubleBufferingProtocol::swapBuffers()
 {
   mBackData.swap( mFrontData );
-  //std::for_each( mInputs.begin(), mInputs.end(), []( InputBase* port ) { port->markChanged(); } );
+  std::for_each( mInputs.begin(), mInputs.end(), []( InputBase* port ) { port->markChanged(); } );
 }
 
 

@@ -111,6 +111,7 @@ public:
   void setProtocolInstance( DoubleBufferingProtocol * protocol );
 
 private:
+  void markChanged() { mChanged = true; }
 
   DoubleBufferingProtocol * mProtocol;
   bool mChanged;
