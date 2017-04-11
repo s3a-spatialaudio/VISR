@@ -51,17 +51,14 @@ private:
   PolymorphicParameterInput mPolyInput;
 };
 
-#if 0
 BOOST_AUTO_TEST_CASE( ParameterConnection )
 {
-// We rely that the parameter library is already initialised.
-//  pml::initialiseParameterLibrary();
+  pml::initialiseParameterLibrary();
 
   SignalFlowContext context( 64, 1024 );
 
   TestAtom( context, "PolyParameterTest" );
 }
-#endif
 
 } // namespace test
 } // namespace impl
