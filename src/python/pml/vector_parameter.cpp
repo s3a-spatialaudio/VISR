@@ -32,6 +32,31 @@ namespace pml
 
 #ifdef USE_PYBIND11
 
+namespace // unnamed
+{
+
+template<typename DataType>
+void setData( VectorParameter<DataType> & param, pybind11::array_t<DataType> & vec )
+{
+  pybind11::buffer_info info = vec.request();
+  std::size_t const numElements = param.size();
+  if( (info.ndim != 1) or (info.shape[0] != numElements) )
+  {
+    throw std::invalid_argument( "VectorParameter.set(): array length does not match." );
+  }
+  // Perform copying
+  // TODO: Replace by optimised implementation
+  std::size_t const stride = info.strides[0] / sizeof( DataType );
+  DataType const * srcPtr = vec.data();
+  DataType * destPtr = param.data();
+  for( std::size_t elIdx( 0 ); elIdx < numElements; ++elIdx, ++destPtr, srcPtr += stride )
+  {
+    *destPtr = *srcPtr;
+  }
+}
+
+} // unnamed namespace
+
 template<typename DataType>
 void exportVectorParameter( pybind11::module & m, char const * className )
 {
@@ -60,9 +85,13 @@ void exportVectorParameter( pybind11::module & m, char const * className )
       inst[elIdx] = *static_cast<DataType const *>(data.data( elIdx ));
     }
   }, pybind11::arg("data"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
-  .def_property_readonly( "size", &VectorParameter<DataType>::size )
-  .def( "resize", &VectorParameter<DataType>::resize, pybind11::arg("numberOfElements") )
-  .def( "zeroFill", &VectorParameter<DataType>::zeroFill )
+  .def_property_readonly( "size", []( VectorParameter<DataType> const & vp ){ return vp.size(); } )
+//  .def( "resize", &VectorParameter<DataType>::resize, pybind11::arg("numberOfElements") )
+  .def( "resize", []( VectorParameter<DataType> & vp, std::size_t newSize ) { vp.resize(newSize); }, pybind11::arg( "numberOfElements" ) )
+  .def( "zeroFill", []( VectorParameter<DataType> & vp ) { vp.zeroFill(); } )
+  .def( "set", &setData<DataType> )
+  .def( "__getitem__", []( VectorParameter<DataType> const & vp, std::size_t idx ) { return vp.at( idx ); }, pybind11::arg( "index" ) )
+  .def( "__setitem__", []( VectorParameter<DataType> & vp, std::size_t idx, DataType val ) { vp.at( idx ) = val; }, pybind11::arg( "index" ), pybind11::arg( "value" ) )
   ;
 }
 
