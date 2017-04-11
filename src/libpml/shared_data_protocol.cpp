@@ -30,7 +30,7 @@ CommunicationProtocolType SharedDataProtocol::protocolType() const
   return staticType();
 }
 
-void SharedDataProtocol::connectInput( ParameterPortBase* port )
+void SharedDataProtocol::connectInput( CommunicationProtocolBase::Input* port )
 {
   SharedDataProtocol::InputBase * typedPort = dynamic_cast<SharedDataProtocol::InputBase *>(port);
   if( not typedPort )
@@ -44,7 +44,7 @@ void SharedDataProtocol::connectInput( ParameterPortBase* port )
   }
 }
 
-void SharedDataProtocol::connectOutput( ParameterPortBase* port )
+void SharedDataProtocol::connectOutput( CommunicationProtocolBase::Output* port )
 {
   OutputBase * typedPort = dynamic_cast<OutputBase *>(port);
   if( not typedPort )
@@ -59,7 +59,7 @@ void SharedDataProtocol::connectOutput( ParameterPortBase* port )
   typedPort->setProtocolInstance( this );
 }
 
-bool SharedDataProtocol::disconnectInput( ParameterPortBase* port ) noexcept
+bool SharedDataProtocol::disconnectInput( CommunicationProtocolBase::Input* port ) noexcept
 {
   InputBase * typedPort = dynamic_cast<InputBase *>(port);
   if( not typedPort )
@@ -76,7 +76,7 @@ bool SharedDataProtocol::disconnectInput( ParameterPortBase* port ) noexcept
   return true;
 }
 
-bool SharedDataProtocol::disconnectOutput( ParameterPortBase* port ) noexcept
+bool SharedDataProtocol::disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept
 {
   OutputBase * typedPort = dynamic_cast<OutputBase *>(port);
   if( not typedPort )

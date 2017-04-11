@@ -59,7 +59,7 @@ void DoubleBufferingProtocol::swapBuffers()
 }
 
 
-void DoubleBufferingProtocol::connectInput( ParameterPortBase* port )
+void DoubleBufferingProtocol::connectInput( CommunicationProtocolBase::Input* port )
 {
   DoubleBufferingProtocol::InputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::InputBase *>(port);
   if( not typedPort )
@@ -73,7 +73,7 @@ void DoubleBufferingProtocol::connectInput( ParameterPortBase* port )
   typedPort->setProtocolInstance( this );
 }
 
-void DoubleBufferingProtocol::connectOutput( ParameterPortBase* port )
+void DoubleBufferingProtocol::connectOutput( CommunicationProtocolBase::Output* port )
 {
   DoubleBufferingProtocol::OutputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::OutputBase*>(port);
   if( not typedPort )
@@ -88,7 +88,7 @@ void DoubleBufferingProtocol::connectOutput( ParameterPortBase* port )
   typedPort->setProtocolInstance( this );
 }
 
-bool DoubleBufferingProtocol::disconnectInput( ParameterPortBase* port ) noexcept
+bool DoubleBufferingProtocol::disconnectInput( CommunicationProtocolBase::Input* port ) noexcept
 {
   InputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::InputBase *>(port);
   if( not typedPort )
@@ -106,7 +106,7 @@ bool DoubleBufferingProtocol::disconnectInput( ParameterPortBase* port ) noexcep
   return true;
 }
 
-bool DoubleBufferingProtocol::disconnectOutput( ParameterPortBase* port ) noexcept
+bool DoubleBufferingProtocol::disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept
 {
   DoubleBufferingProtocol::OutputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::OutputBase *>(port);
   if( not typedPort )

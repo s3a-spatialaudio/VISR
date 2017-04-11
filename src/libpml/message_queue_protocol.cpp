@@ -64,7 +64,7 @@ void MessageQueueProtocol::popNextElement()
   mQueue.pop_back();
 }
 
-void MessageQueueProtocol::connectInput( ParameterPortBase* port )
+void MessageQueueProtocol::connectInput( CommunicationProtocolBase::Input* port )
 {
   MessageQueueProtocol::InputBase * typedPort = dynamic_cast<MessageQueueProtocol::InputBase*>(port);
   if( not typedPort )
@@ -79,7 +79,7 @@ void MessageQueueProtocol::connectInput( ParameterPortBase* port )
   mInput->setProtocolInstance( this );
 }
 
-void MessageQueueProtocol::connectOutput( ParameterPortBase* port )
+void MessageQueueProtocol::connectOutput( CommunicationProtocolBase::Output* port )
 {
   MessageQueueProtocol::OutputBase * typedPort = dynamic_cast<MessageQueueProtocol::OutputBase *>(port);
   if( not typedPort )
@@ -94,7 +94,7 @@ void MessageQueueProtocol::connectOutput( ParameterPortBase* port )
   mOutput->setProtocolInstance( this );
 }
 
-bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port ) noexcept
+bool MessageQueueProtocol::disconnectInput( CommunicationProtocolBase::Input* port ) noexcept
 {
   MessageQueueProtocol::InputBase * typedPort = dynamic_cast<MessageQueueProtocol::InputBase *>(port);
   if( not typedPort )
@@ -111,7 +111,7 @@ bool MessageQueueProtocol::disconnectInput( ParameterPortBase* port ) noexcept
   return true;
 }
 
-bool MessageQueueProtocol::disconnectOutput( ParameterPortBase* port ) noexcept
+bool MessageQueueProtocol::disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept
 {
   MessageQueueProtocol::OutputBase * typedPort = dynamic_cast<MessageQueueProtocol::OutputBase *>(port);
   if( not typedPort )

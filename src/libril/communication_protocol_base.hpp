@@ -21,6 +21,9 @@ class ParameterPortBase;
 class CommunicationProtocolBase
 {
 public:
+  // Forward declarations
+  class Input;
+  class Output;
 
   /**
    * Destructor, virtual.
@@ -48,7 +51,7 @@ public:
    * @throw std::exception If the connection would violate the "arity" of the protocol, i.e.,
    * attempting multiple inputs in case of a 1:1 or 1:N protocol.
    */
-  virtual void connectInput( ParameterPortBase* port ) = 0;
+  virtual void connectInput( Input* port ) = 0;
 
   /**
    * Connect an output port to this protocol.
@@ -58,13 +61,13 @@ public:
    * @throw std::exception If the connection would violate the "arity" of the protocol, i.e.,
    * attempting multiple outputs in case of a 1:1 or N:1 protocol.
    */
-  virtual void connectOutput( ParameterPortBase* port ) = 0;
+  virtual void connectOutput( Output* port ) = 0;
 
   /**
    */
-  virtual bool disconnectInput( ParameterPortBase* port ) noexcept = 0;
+  virtual bool disconnectInput( Input* port ) noexcept = 0;
 
-  virtual bool disconnectOutput( ParameterPortBase* port ) noexcept= 0;
+  virtual bool disconnectOutput( Output* port ) noexcept= 0;
 
   class Input
   {

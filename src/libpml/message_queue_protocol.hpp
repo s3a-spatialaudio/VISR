@@ -79,13 +79,13 @@ public:
    */
   void popNextElement();
 
-  void connectInput( ParameterPortBase* port ) override;
+  void connectInput( CommunicationProtocolBase::Input* port ) override;
 
-  void connectOutput( ParameterPortBase* port ) override;
+  void connectOutput( CommunicationProtocolBase::Output* port ) override;
 
-  bool disconnectInput( ParameterPortBase* port ) noexcept override;
+  bool disconnectInput( CommunicationProtocolBase::Input* port ) noexcept override;
 
-  bool disconnectOutput( ParameterPortBase* port ) noexcept override;
+  bool disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept override;
 
 private:
   using QueueType = std::deque<std::unique_ptr<ParameterBase> >;
