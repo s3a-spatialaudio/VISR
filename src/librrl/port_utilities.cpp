@@ -31,6 +31,11 @@ bool isPlaceholderPort( impl::PortBaseImplementation const * const port )
   return true;
 }
 
+bool isToplevelPort( impl::PortBaseImplementation const * const port )
+{
+  return port->parent().isTopLevel();
+}
+
 std::string qualifiedName( impl::PortBaseImplementation const & port )
 {
   return port.parent().name() + ":" + port.name();

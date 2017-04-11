@@ -40,6 +40,11 @@ std::string fullyQualifiedName( impl::PortBaseImplementation const & port );
 */
 bool isPlaceholderPort( impl::PortBaseImplementation const * const port );
 
+/**
+* Utility function to check whether a port is located at the interface of the top-level component.
+*/
+bool isToplevelPort( impl::PortBaseImplementation const * const port );
+
 bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation const & sendPort, impl::ParameterPortBaseImplementation const & receivePort,
                                       std::ostream & messages );
 
