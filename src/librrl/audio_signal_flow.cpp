@@ -17,6 +17,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/audio_sample_type.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/communication_protocol_type.hpp>
@@ -332,6 +334,11 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   if( not mFlow.isComposite() )
   {
     // If the flow is not composite, we also have to initialise the top-level parameter ports.
+    if( std::distance( mFlow.parameterPortBegin(), mFlow.parameterPortEnd() ) > 0 )
+    {
+      messages << "AudioSignalFlow: Atomic components with message ports are not implemented yet.\n";
+      result = false;
+    }
     return result;
   }
   // - Recursively iterate over all composite components
@@ -361,6 +368,11 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     {
       messages << "AudioSignalFlow: A parameter connection must have at least one sending port.\n";
       result = false;
+    }
+
+    if( numSenders < 1 )
+    {
+      continue;
     }
 
     // Use one port as reference, all other ports in this connection must have compatible porotocols and parameters.
@@ -399,13 +411,55 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       }
       // Connect to all ports of the connection.
       // This will also fail if the connection does not match the arity (one-to-one, one-to-many ...) of the protocol
-      for( auto portIt( connection.sendPorts().begin() ); portIt < connection.sendPorts().end(); ++portIt )
+      for( auto port : connection.sendPorts() )
       {
-        protocolInstance->connectOutput( &((*portIt)->containingPort()) );
+        if( port->parent().isTopLevel() ) // Whether this is 'symbolic' input on the top level.
+        {
+          // This is a toplevel parameter input. We need to create a communication protocol output port for that.
+          // TODO: Improve exception safety!
+          std::unique_ptr<CommunicationProtocolBase::Output> protocolOutput = CommunicationProtocolFactory::createOutput( protocol );
+          protocolInstance->connectOutput( protocolOutput.get() );
+          ProtocolReceiveEndpoints::value_type insertPair{ std::string(port->name()), std::move(protocolOutput) };
+          auto protocolIt = mProtocolReceiveEndpoints.insert( std::move(insertPair) );
+        }
+        else
+        {
+          try
+          {
+            ParameterOutputBase & paramOutput = dynamic_cast<ParameterOutputBase&>(port->containingPort());
+            protocolInstance->connectOutput( &(paramOutput.protocolOutput()) );
+          }
+          catch( std::exception const & ex )
+          {
+            result = false;
+            messages << "Error connection protocol output to output port \"" << fullyQualifiedName( *port )
+                     << "\": " << ex.what() << ".\n";
+          }
+        }
       }
-      for( auto portIt( connection.receivePorts().begin() ); portIt < connection.receivePorts().end(); ++portIt )
+      for( auto port: connection.receivePorts() )
       {
-        protocolInstance->connectInput( &((*portIt)->containingPort()) );
+        if( port->parent().isTopLevel() ) // Whether this is 'symbolic' output on the top level.
+        {
+          // This is a toplevel parameter output. We need to create a communication protocol input port for that.
+          // TODO: Improve exception safety!
+          auto protocolIt = mProtocolSendEndpoints.insert( std::make_pair( port->name(), CommunicationProtocolFactory::createInput( protocol ) ) );
+          protocolInstance->connectInput( protocolIt.first->second.get() );
+        }
+        else
+        {
+          try
+          {
+            ParameterInputBase & paramInput = dynamic_cast<ParameterInputBase&>(port->containingPort());
+            protocolInstance->connectInput( &(paramInput.protocolInput()) );
+          }
+          catch( std::exception const & ex )
+          {
+            result = false;
+            messages << "Error connection protocol output to output port \"" << fullyQualifiedName( *port )
+                     << "\": " << ex.what() << ".\n";
+          }
+        }
       }
       mCommunicationProtocols.push_back( std::move( protocolInstance ) );
     }
@@ -418,6 +472,26 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
   }
   // TODO: Set up top-level parameter ports. The behaviour depends whether the flow is atomic or composite.
   return result;
+}
+
+CommunicationProtocolBase::Output & AudioSignalFlow::externalParameterReceivePort( char const * portName )
+{
+  auto const findIt = mProtocolReceiveEndpoints.find( std::string(portName) );
+  if( findIt == mProtocolReceiveEndpoints.end() )
+  {
+    throw std::out_of_range( "External receive port named \"\" does not exist." );
+  }
+  return *(findIt->second);
+}
+
+CommunicationProtocolBase::Input & AudioSignalFlow::externalParameterSendPort( char const * portName )
+{
+  auto const findIt = mProtocolSendEndpoints.find( std::string( portName ) );
+  if( findIt == mProtocolSendEndpoints.end() )
+  {
+    throw std::out_of_range( "External receive port named \"\" does not exist." );
+  }
+  return *(findIt->second);
 }
 
 bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )

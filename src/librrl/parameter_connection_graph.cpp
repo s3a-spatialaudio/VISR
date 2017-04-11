@@ -86,7 +86,12 @@ ParameterConnectionGraph::ParameterConnectionGraph( ParameterConnectionMap const
       std::size_t const compIdx = graphComponents[runIdx];
       ConnectedPorts & connectedComp = mConnections[compIdx];
       impl::ParameterPortBaseImplementation * port = mConnectionGraph[runIdx];
-      if( port->direction() == PortBase::Direction::Input )
+      // Classify the ports into receiving and sending ports.
+      // This is different whether the port is at the toplevel (e.g., an external input or output) or internal.
+      // @note This classification make sense only for non-atomioc flows.
+      // A 'xor' would work as well but might be conceived as confusing.
+      if( (not isToplevelPort( port ) and port->direction() == PortBase::Direction::Input)
+        or( (isToplevelPort( port )) and port->direction() == PortBase::Direction::Output ) )
       {
         connectedComp.mReceivePorts.push_back( port );
       }

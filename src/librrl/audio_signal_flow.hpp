@@ -6,6 +6,7 @@
 #include "audio_interface.hpp"
 
 #include <libril/audio_port_base.hpp>
+#include <libril/communication_protocol_base.hpp>
 #include <libril/constants.hpp>
 #include <libril/signal_flow_context.hpp>
 
@@ -23,7 +24,6 @@ namespace visr
 // Forward declarations
 class AtomicComponent;
 class ParameterPortBase;
-class CommunicationProtocolBase;
 
 namespace impl
 {
@@ -155,8 +155,46 @@ public:
   //@}
 
   /**
-   * @TODO: Add methods to query and connect to parameter ports
+   * Query and access external parameter ports.
    */
+  //@{
+
+  using ProtocolReceiveEndpoints = std::map<std::string, std::unique_ptr<CommunicationProtocolBase::Output> >;
+  using ProtocolSendEndpoints = std::map<std::string, std::unique_ptr<CommunicationProtocolBase::Input> >;
+
+  std::size_t numberExternalParameterReceivePorts() const
+  {
+    return mProtocolReceiveEndpoints.size();
+  }
+
+  std::size_t numberExternalParameterSendPorts() const
+  {
+    return mProtocolSendEndpoints.size();
+  }
+
+  ProtocolReceiveEndpoints const & externalParameterReceiveEndpoints() const
+  {
+    return mProtocolReceiveEndpoints;
+  }
+
+  ProtocolSendEndpoints const & externalParameterSendEndpoints() const
+  {
+    return mProtocolSendEndpoints;
+  }
+
+  /**
+   * Return a input protocol for a named top-level parameter port.
+   * @throw std::out_of_range No top-level parameter port with this name exists.
+   */
+  CommunicationProtocolBase::Output & externalParameterReceivePort( char const * portName );
+
+  /**
+  * Return a output protocol for a named top-level parameter port.
+  * @throw std::out_of_range No top-level parameter port with this name exists.
+  */
+  CommunicationProtocolBase::Input & externalParameterSendPort( char const * portName );
+
+  //@}
 
 
 private:
@@ -250,6 +288,16 @@ private:
 
   std::vector<char*> mCaptureChannels;
   std::vector<char*> mPlaybackChannels;
+
+  /**
+   * Data structures to hold top-level parameter ports (or their input/output facilities)
+   */
+  //@{
+  ProtocolReceiveEndpoints mProtocolReceiveEndpoints;
+
+  ProtocolSendEndpoints mProtocolSendEndpoints;
+
+  //@}
 
   using InternalComponentList = std::vector<std::unique_ptr<AtomicComponent> >;
     
