@@ -18,7 +18,7 @@ namespace visr
  * C++ code.
  * Abstract base class, derived classes must override the virtual method process().
  */
-class AtomicComponent: public Component
+class VISR_CORE_LIBRARY_SYMBOL AtomicComponent: public Component
 {
 public:
   /**
@@ -27,7 +27,7 @@ public:
    * @param name Null-terminated character string containing the name. Name must be unique within the containing composite component (if there is one).
    * @param parent A composite component to contain this atom, If it is a null pointer (the default), then this component is at the top level.
    */
-  explicit VISR_CORE_LIBRARY_SYMBOL AtomicComponent( SignalFlowContext& context,
+  explicit /*VISR_CORE_LIBRARY_SYMBOL*/ AtomicComponent( SignalFlowContext& context,
                                                      char const * name,
                                                      CompositeComponent * parent = nullptr );
 
@@ -45,7 +45,7 @@ public:
   * Destructor (virtual).
   * Atomic components are destined to be instantiated and managed polymorphically, thus requiring virtual destructors.
   */
-  virtual  VISR_CORE_LIBRARY_SYMBOL ~AtomicComponent() override;
+  virtual  /*VISR_CORE_LIBRARY_SYMBOL*/ ~AtomicComponent() override;
 
   /**
    * Pure virtual process() function.

@@ -21,6 +21,14 @@ namespace visr
 namespace impl
 {
 
+CompositeComponentImplementation::~CompositeComponentImplementation()
+{
+  for( auto comp : mComponents )
+  {
+    comp->setParent( nullptr );
+  }
+}
+
 /*virtual*/ bool CompositeComponentImplementation::isComposite() const
 {
   return true;

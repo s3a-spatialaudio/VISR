@@ -12,12 +12,12 @@
 
 namespace visr
 {
-  class AudioOutputBase: public AudioPortBase
+  class VISR_CORE_LIBRARY_SYMBOL AudioOutputBase: public AudioPortBase
   {
   public:
-    VISR_CORE_LIBRARY_SYMBOL AudioOutputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
+    /*VISR_CORE_LIBRARY_SYMBOL*/ AudioOutputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
 
-    VISR_CORE_LIBRARY_SYMBOL virtual ~AudioOutputBase() override;
+    /*VISR_CORE_LIBRARY_SYMBOL*/ virtual ~AudioOutputBase() override;
   };
 
   template<typename DataType>

@@ -19,7 +19,7 @@ namespace visr
  * This class itself cannot be instantiated, because it is not 
  * associated with a specific sample type. Only derived classes may actually be instantiated.
  */
-class AudioInputBase: public AudioPortBase
+class VISR_CORE_LIBRARY_SYMBOL AudioInputBase: public AudioPortBase
 {
 protected:
   /**
@@ -29,13 +29,13 @@ protected:
    * @param typeId An enumeration value that specifies the data type.
    * @param width The number of single audio channels associated with this port.
    */
-  VISR_CORE_LIBRARY_SYMBOL AudioInputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ AudioInputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
 public:
   /**
    * Destructor (virtual).
    * @note Reconsider whether audio ports shall be instantiated polymorphically. Otherwise, the destructor would not need to  be virtual.
    */
-  VISR_CORE_LIBRARY_SYMBOL virtual ~AudioInputBase() override;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ virtual ~AudioInputBase() override;
 };
 
 /**
