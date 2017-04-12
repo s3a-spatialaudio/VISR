@@ -29,34 +29,42 @@ numberOfChannels = 2
 
 c = visr.SignalFlowContext(blockSize, fs )
 
-cc = visr.CompositeComponent( c, "top" )
+if False:
+    cc = visr.CompositeComponent( c, "top" )
 
-# Instantiate a single delay line
-dl = rcl.DelayVector( c, "DL", cc )
-dl.setup(numberOfChannels, interpolationType=rcl.DelayVector.InterpolationType.Linear, initialDelay=0,
-         initialGain=1.0)
+    # Instantiate a single delay line
+    dl = rcl.DelayVector( c, "DL", cc )
+    dl.setup(numberOfChannels, interpolationType=rcl.DelayVector.InterpolationType.Linear, initialDelay=0,
+         initialGain=1.0, interpolationSteps=blockSize)
 
-aip = visr.AudioInputFloat( "globalAudioIn", cc, numberOfChannels )
-aop = visr.AudioOutputFloat( "globalAudioOut", cc, numberOfChannels )
+    aip = visr.AudioInputFloat( "globalAudioIn", cc, numberOfChannels )
+    aop = visr.AudioOutputFloat( "globalAudioOut", cc, numberOfChannels )
 
-cc.audioConnection( aip, dl.audioPort("in") )
-cc.audioConnection( dl.audioPort("out"), aop )
+    cc.audioConnection( aip, dl.audioPort("in") )
+    cc.audioConnection( dl.audioPort("out"), aop )
 
-# Define the global parameter inputs and the corresponding connections.
-vecParamType = pml.VectorParameterFloat.staticType
-vecCfg = pml.VectorParameterConfig(numberOfChannels)
-dbProtType = pml.DoubleBufferingProtocol.staticType
+    # Define the global parameter inputs and the corresponding connections.
+    vecParamType = pml.VectorParameterFloat.staticType
+    vecCfg = pml.VectorParameterConfig(numberOfChannels)
+    dbProtType = pml.DoubleBufferingProtocol.staticType
+    
+    topGainInput = visr.ParameterInput( "gainInput", cc, vecParamType, dbProtType, vecCfg )
+    topDelayInput = visr.ParameterInput( "delayInput", cc, vecParamType, dbProtType, vecCfg )
 
-topGainInput = visr.PolyParameterInput( "globalGainIn", cc, vecParamType, dbProtType, vecCfg )
-topDelayInput = visr.PolyParameterInput( "globalDelayIn", cc, vecParamType, dbProtType, vecCfg )
+    cc.parameterConnection( topGainInput, dl.parameterPort("gainInput"))
+    cc.parameterConnection( topDelayInput, dl.parameterPort("delayInput"))
 
-cc.parameterConnection( topGainInput, dl.parameterPort("gainInput"))
-cc.parameterConnection( topDelayInput, dl.parameterPort("delayInput"))
+    flow = rrl.AudioSignalFlow( cc )
+else:
+    # Instantiate the atomic flow
+    dl = rcl.DelayVector( c, "DL" )
+    dl.setup(numberOfChannels, interpolationType=rcl.DelayVector.InterpolationType.Linear, initialDelay=0,
+         initialGain=1.0, interpolationSteps=blockSize)
 
-flow = rrl.AudioSignalFlow( cc )
+    flow = rrl.AudioSignalFlow( dl )
 
-gainInputProtocol = flow.parameterReceivePort("globalGainIn")
-delayInputProtocol = flow.parameterReceivePort("globalDelayIn")
+gainInputProtocol = flow.parameterReceivePort("gainInput")
+delayInputProtocol = flow.parameterReceivePort("delayInput")
 
 
 numBlocks = 16
@@ -76,12 +84,18 @@ outputSignal = np.zeros( [numberOfChannels,numSamples], dtype=np.float32 )
 #gainParameter[1] = -0.1
 #
 #delayParameter[0] = 1e-3
-             
+
+gainInputProtocol.data().set( [0.5, 0.25 ])
+delayInputProtocol.data().set( [ 1.4e-3, 1e-3 ] )
+#gainInputProtocol.swapBuffers()
+#delayInputProtocol.swapBuffers()
+
 for blockIdx in range(0,numBlocks):
-#    gainInputProtocol.data().set( [1.0+np.cos(float(blockIdx)*np.pi/8 ), 0.7 ])
-#    delayInputProtocol.data().set( [ 1e-3, 2e-3 ] )
-#    gainInputProtocol.swapBuffers()
-#    delayInputProtocol.swapBuffers()
+    newGains = [1.0+0.1*np.cos(float(blockIdx)*np.pi/4 ), 0.7 ]
+    gainInputProtocol.data().set( newGains )
+    delayInputProtocol.data().set( [ 1e-3, 2e-3 ] )
+    gainInputProtocol.swapBuffers()
+    delayInputProtocol.swapBuffers()
 
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
