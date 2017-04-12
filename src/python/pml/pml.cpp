@@ -4,6 +4,7 @@
 #include <libpml/initialise_parameter_library.hpp>
 
 #include "double_buffering_protocol.hpp"
+#include "empty_parameter_config.hpp"
 #include "listener_position.hpp"
 #include "loudspeaker_array.hpp" // kept here temporarily.
 #include "matrix_parameter.hpp"
@@ -30,6 +31,7 @@ PYBIND11_PLUGIN( pml )
   // Export the communication protocols
   exportDoubleBufferingProtocol( m );
 
+  exportEmptyParameterConfig( m );
   exportListenerPosition( m );
   exportLoudspeakerArray( m );
   exportMatrixParameters( m);

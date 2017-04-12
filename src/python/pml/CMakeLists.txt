@@ -2,6 +2,7 @@
 
 set( SOURCES
 double_buffering_protocol.cpp
+empty_parameter_config.cpp
 listener_position.cpp
 loudspeaker_array.cpp
 matrix_parameter.cpp
@@ -11,6 +12,7 @@ vector_parameter.cpp
 
 set( HEADERS
 double_buffering_protocol.hpp
+empty_parameter_config.hpp
 listener_position.hpp
 loudspeaker_array.hpp
 matrix_parameter.hpp
