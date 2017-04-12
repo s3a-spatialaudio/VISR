@@ -5,8 +5,8 @@ Created on Sun Feb 26 16:41:01 2017
 @author: andi
 """
 
-# import sys
-# sys.path.append( 'c:/local/visr-build/python/Debug' )
+import sys
+sys.path.append( '/home/andi/dev/visr-build-debug/python' )
 
 import visr
 import pml # This loads the parameter types and protocols used.
@@ -14,7 +14,7 @@ import rcl
 import rrl
 
 # Usage in debugger:
-# exec(open("./pythonAtomicFlow.py").read())
+# exec(open("./parameterConnection.py").read())
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ numberOfChannels = 2
 
 c = visr.SignalFlowContext(blockSize, fs )
 
-if False:
+if True:
     cc = visr.CompositeComponent( c, "top" )
 
     # Instantiate a single delay line
@@ -77,18 +77,26 @@ inputSignal[0,:] = 0.5 * np.sin( 2.0*440*np.pi*t )
 
 outputSignal = np.zeros( [numberOfChannels,numSamples], dtype=np.float32 )
 
-#gainParameter = pml.VectorParameterFloat( numberOfChannels, 16 )
-#delayParameter = pml.VectorParameterFloat( numberOfChannels, 16 )
-#
-#gainParameter[0] = 1.0
-#gainParameter[1] = -0.1
-#
-#delayParameter[0] = 1e-3
+gainParameter = pml.VectorParameterFloat( numberOfChannels, 16 )
+delayParameter = pml.VectorParameterFloat( numberOfChannels, 16 )
+
+gainParameter[0] = 1.0
+gainParameter[1] = -0.1
+
+delayParameter[0] = 1e-3
+
+print( gainInputProtocol.data() )
+print( delayInputProtocol.data() )
+
 
 gainInputProtocol.data().set( [0.5, 0.25 ])
 delayInputProtocol.data().set( [ 1.4e-3, 1e-3 ] )
 #gainInputProtocol.swapBuffers()
 #delayInputProtocol.swapBuffers()
+
+print( gainInputProtocol.data() )
+print( delayInputProtocol.data() )
+
 
 for blockIdx in range(0,numBlocks):
     newGains = [1.0+0.1*np.cos(float(blockIdx)*np.pi/4 ), 0.7 ]
