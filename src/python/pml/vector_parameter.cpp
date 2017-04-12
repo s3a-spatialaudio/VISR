@@ -3,12 +3,6 @@
 #include <libpml/vector_parameter.hpp> 
 #include <libpml/vector_parameter_config.hpp> 
 
-
-// Test code, remove ASAP
-#include <libril/parameter_input.hpp>
-#include <libril/component.hpp>
-#include <libpml/double_buffering_protocol.hpp>
-
 #include <libril/constants.hpp>
 #include <libril/parameter_base.hpp>
 #ifdef USE_PYBIND11
@@ -17,7 +11,6 @@
 #else
 #include <boost/python.hpp>
 #endif
-
 
 namespace visr
 {
@@ -106,11 +99,6 @@ void exportVectorParameters( pybind11::module & m)
 
   exportVectorParameter<float>( m, "VectorParameterFloat" );
   exportVectorParameter<double>( m, "VectorParameterDouble" );
-
-  // Test code, remove ASAP
-  pybind11::class_<ParameterInput<::visr::pml::DoubleBufferingProtocol, ::visr::pml::VectorParameter<float> >, visr::ParameterInputBase, ::visr::CommunicationProtocolBase::Input >( m, "DoubleBufferingVectorFloatInput" )
-    .def( pybind11::init<char const *, Component &, ::visr::pml::VectorParameterConfig const &>(),
-      pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "parameterConfig" ) );
 }
 #endif
 
