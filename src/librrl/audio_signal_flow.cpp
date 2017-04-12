@@ -349,6 +349,9 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       if( paramPort->direction() == PortBase::Direction::Input )
       {
         std::unique_ptr<CommunicationProtocolBase::Output> protocolOutput = CommunicationProtocolFactory::createOutput( protocol );
+	// TODO: Do we need to care for failing dynamic_casts (this would be a logical error).
+        ParameterInputBase & paramInput = dynamic_cast<ParameterInputBase&>(paramPort->containingPort());
+        protocolInstance->connectInput( &(paramInput.protocolInput()) );
         protocolInstance->connectOutput( protocolOutput.get() );
         ProtocolReceiveEndpoints::value_type insertPair{ std::string( paramPort->name() ), std::move( protocolOutput ) };
         auto protocolIt = mProtocolReceiveEndpoints.insert( std::move( insertPair ) );
@@ -356,10 +359,13 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       else
       {
         std::unique_ptr<CommunicationProtocolBase::Input> protocolInput = CommunicationProtocolFactory::createInput( protocol );
+        ParameterOutputBase & paramOutput = dynamic_cast<ParameterOutputBase&>(paramPort->containingPort());
+        protocolInstance->connectOutput( &(paramOutput.protocolOutput()) );
         protocolInstance->connectInput( protocolInput.get() );
         ProtocolSendEndpoints::value_type insertPair{ std::string( paramPort->name() ), std::move( protocolInput ) };
         auto protocolIt = mProtocolSendEndpoints.insert( std::move( insertPair ) );
       }
+      mCommunicationProtocols.push_back( std::move( protocolInstance ) );
     }
     return result;
   }
