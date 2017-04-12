@@ -13,6 +13,7 @@ PolymorphicParameterInput::PolymorphicParameterInput( char const * name,
                                         CommunicationProtocolType const & protocolType,
                                         ParameterConfigBase const & paramConfig )
   : ParameterInputBase( name, parent, parameterType, protocolType, paramConfig )
+  , mProtocolInput( CommunicationProtocolFactory::createInput( protocolType )  )
 {}
 
 PolymorphicParameterInput::PolymorphicParameterInput( char const * name,
@@ -20,7 +21,7 @@ PolymorphicParameterInput::PolymorphicParameterInput( char const * name,
     ParameterType const & parameterType,
     CommunicationProtocolType const & protocolType )
   : ParameterInputBase( name, parent, parameterType, protocolType )
-  , mProtocolInput( nullptr )
+  , mProtocolInput( CommunicationProtocolFactory::createInput( protocolType ) )
 {}
 
 PolymorphicParameterInput::~PolymorphicParameterInput() = default;

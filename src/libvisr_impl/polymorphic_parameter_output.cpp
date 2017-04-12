@@ -13,6 +13,7 @@ PolymorphicParameterOutput::PolymorphicParameterOutput( char const * name,
                                         CommunicationProtocolType const & protocolType,
                                         ParameterConfigBase const & paramConfig )
   : ParameterOutputBase( name, parent, parameterType, protocolType, paramConfig )
+  , mProtocolOutput( CommunicationProtocolFactory::createOutput( protocolType )  )
 {}
 
 PolymorphicParameterOutput::PolymorphicParameterOutput( char const * name,
@@ -20,7 +21,7 @@ PolymorphicParameterOutput::PolymorphicParameterOutput( char const * name,
     ParameterType const & parameterType,
     CommunicationProtocolType const & protocolType )
   : ParameterOutputBase( name, parent, parameterType, protocolType )
-  , mProtocolOutput( nullptr )
+  , mProtocolOutput( CommunicationProtocolFactory::createOutput( protocolType )  )
 {}
 
 PolymorphicParameterOutput::~PolymorphicParameterOutput() = default;
