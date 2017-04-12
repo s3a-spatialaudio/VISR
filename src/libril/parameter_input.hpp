@@ -66,7 +66,7 @@ public:
 
   CommunicationProtocolBase::Input & protocolInput() override
   {
-    return static_cast<ProtocolT::template Input< ParameterT > & >(*this); // cast to protocol input type.
+    return static_cast<typename ProtocolT::template Input< ParameterT > & >(*this); // cast to protocol input type.
   };
 
 

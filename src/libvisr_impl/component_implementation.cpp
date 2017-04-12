@@ -97,6 +97,11 @@ std::size_t ComponentImplementation::period() const { return mContext.period(); 
 
 SamplingFrequencyType ComponentImplementation::samplingFrequency() const { return mContext.samplingFrequency(); }
 
+void ComponentImplementation::setParent( CompositeComponentImplementation * parent )
+{
+  mParent = parent;
+}
+
 void ComponentImplementation::unregisterAudioPort( AudioPortBaseImplementation* port )
 {
   // According to C++11, findIt may be a const iterator, but the standard library of gcc 4.8 does not permit that.

@@ -18,7 +18,7 @@ class ParameterPortBase;
  * Abstract base class for communication communication protocols which define the 
  * semantics of data transmissions between parameter ports.
  */
-class CommunicationProtocolBase
+class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase
 {
 public:
   // Forward declarations
@@ -29,7 +29,7 @@ public:
    * Destructor, virtual.
    * Communication protocols are instantiated and used polymophically, so the destructor needs to be virtual.
    */
-  virtual  VISR_CORE_LIBRARY_SYMBOL ~CommunicationProtocolBase();
+  virtual  /*VISR_CORE_LIBRARY_SYMBOL*/ ~CommunicationProtocolBase();
 
   /**
    * Return the protocol type (a numerical id) of the concrete derived protocol object.
@@ -83,14 +83,14 @@ public:
  * Communication protocols derived from CommunicationProtocolBase must define classes derived from this base interface,
  * implementing its pure virtual methods
  */
-class CommunicationProtocolBase::Input
+class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase::Input
 {
 public:
   /**
    * Virtual destructor.
    * This class is intended to be instantiated and used polymorphically.
    */
-  virtual VISR_CORE_LIBRARY_SYMBOL ~Input();
+  virtual /*VISR_CORE_LIBRARY_SYMBOL*/ ~Input();
 
   /**
    * Connect the input to protocol instance.
@@ -113,14 +113,14 @@ public:
  * Communication protocols derived from CommunicationProtocolBase must provide a Input class derived from this base 
  * class and override its pure virtual methods.
  */
-class CommunicationProtocolBase::Output
+class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase::Output
 {
 public:
   /**
    * Virtual destructor.
    * Derived classes are instantiated and used polymorphically, therefore the destructor has to be virtual.
    */
-  virtual VISR_CORE_LIBRARY_SYMBOL ~Output();
+  virtual /*VISR_CORE_LIBRARY_SYMBOL*/ ~Output();
 
   /**
    * Set the protocol instance for this protocol input.
