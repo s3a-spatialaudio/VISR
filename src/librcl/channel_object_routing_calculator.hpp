@@ -61,6 +61,7 @@ public:
   /**
    * Method to initialise the component.
    * @param numberOfObjectChannels The number of object channels supported by this calculator.
+   * @param config The setup configuration data.
    */ 
   void setup( std::size_t numberOfObjectChannels,
               panning::LoudspeakerArray const & config );

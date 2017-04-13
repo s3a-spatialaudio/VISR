@@ -17,7 +17,7 @@ namespace baseline_renderer
 Options::Options()
  : apputilities::Options()
 {
-  registerOption<std::string>( "audio-backend,D", "The audio backend." );
+  registerOption<std::string>( "audio-backend,D", "The audio backend. NATIVE_JACK activates the native Jack driver insteat of the PortAudio implementation." );
   registerOption<std::size_t>( "sampling-frequency,f", "Sampling frequency [Hz]" );
   registerOption<std::size_t>( "period,p", "Period (blocklength) [Number of samples per audio block]" );
 

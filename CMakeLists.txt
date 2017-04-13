@@ -19,7 +19,7 @@ PROJECT( VISR CXX C )
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
 set( VISR_MINOR_VERSION 8 )
-set( VISR_PATCH_VERSION 1 )
+set( VISR_PATCH_VERSION 2 )
 
 ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
@@ -84,6 +84,26 @@ if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
+if( WIN32 ) # Covers 64-bit Windows as well
+  # Macro to determine the Windows version, stolen from
+  # http://stackoverflow.com/questions/9742003/platform-detection-in-cmake
+  macro(get_win32_winnt_version version)
+    if (WIN32 AND CMAKE_SYSTEM_VERSION)
+        set(ver ${CMAKE_SYSTEM_VERSION})
+        string(REPLACE "." "" ver ${ver})
+        string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+        set(${version} "0x${ver}")
+    endif()
+  endmacro()
+  get_win32_winnt_version( WIN_VERSION_ID )
+  message( STATUS "Window version: " ${WIN_VERSION_ID} )
+  add_definitions( -D_WINN32_WINNT=${WIN_VERSION_ID} )
+  # Avoid specific compiler warnings of the Visual Studio  compiler.
+  add_definitions( -D_SCL_SECURE_NO_WARNINGS ) # STL algorithms with pointers instead of 'real' iterators are perfectly legal.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3" ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+endif( WIN32 )
+
 ############################################################
 # Create universal binaries on MacOS
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
@@ -93,6 +113,13 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
     SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
   ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+############################################################
+# Set the minimum Mac OS version.
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)

@@ -5,6 +5,8 @@
 
 #include "object_type.hpp"
 
+#include <libpml/parametric_iir_coefficient.hpp>
+
 #include <climits>
 #include <cstdint>
 #include <memory>
@@ -12,6 +14,7 @@
 
 namespace visr
 {
+
 namespace objectmodel
 {
 
@@ -119,6 +122,11 @@ public:
   void setChannelIndex( std::size_t index, ChannelIndex channelIndex );
   //@}
 
+  pml::ParametricIirCoefficientList<Coordinate> const & eqCoefficients() const;
+
+  void setEqCoefficients( pml::ParametricIirCoefficientList<Coordinate>  const & newCoeffs );
+
+
   /**
    * Clone function used to emulate 'virtual copy constructor' functionality.
    * Must be implemented in every derived instantiated class.
@@ -137,6 +145,8 @@ private:
   Priority mPriority;
 
   std::valarray<ChannelIndex> mChannelIndices;
+
+  pml::ParametricIirCoefficientList<Coordinate> mEqCoefficients;
 };
 
 } // namespace objectmodel

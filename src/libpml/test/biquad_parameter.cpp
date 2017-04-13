@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJson )
   BOOST_CHECK_CLOSE( biq.a2( ), a2, std::numeric_limits<CoeffType>::epsilon( ) );
 }
 
-BOOST_AUTO_TEST_CASE( InstantiateListFromJson )
+BOOST_AUTO_TEST_CASE( InstantiateListFromXml )
 {
   using CoeffType = float;
 
