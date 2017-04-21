@@ -49,7 +49,9 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 
   PythonWrapper pyAtom1( ctxt, "PythonAtom", nullptr,
 			 modulePath.string().c_str(),
-			 "PythonAdder" );
+			 "PythonAdder",
+			 "3,", "{'width':5}" );
+
   std::stringstream errMsg;
   bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
   BOOST_CHECK_MESSAGE( res, errMsg.str() );

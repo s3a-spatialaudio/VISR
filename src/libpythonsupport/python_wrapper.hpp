@@ -7,9 +7,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include <map>
-#include <memory> // for std::unique_ptr
-#include <string>
+#include <memory>
 #include <vector>
 
 namespace visr
@@ -31,7 +29,6 @@ namespace pythonsupport
 class PythonWrapper: public CompositeComponent
 {
 public:
-  using ArgumentMap = std::map<std::string, std::string >;
 
   /**
    * Constructor.
@@ -45,7 +42,8 @@ public:
                           CompositeComponent * parent,
 			  char const * modulePath,
 			  char const * componentClassName,
-			  ArgumentMap const & arguments = ArgumentMap() );
+			  char const * positionalArguments = nullptr,
+			  char const * keywordArguments = nullptr );
 
   /**
    * Destructor.
