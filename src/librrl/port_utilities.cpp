@@ -225,10 +225,9 @@ std::ostream & writePortTable(std::ostream & str, typename PortLookup<PortType>:
 
 
 template
-std::ostream & writePortTable<typename impl::AudioPortBaseImplementation>(std::ostream &, typename PortLookup<impl::AudioPortBaseImplementation>::PortTable const & );
+std::ostream & writePortTable<impl::AudioPortBaseImplementation>(std::ostream &, PortLookup<impl::AudioPortBaseImplementation>::PortTable const & );
 template
-std::ostream & writePortTable<typename impl::ParameterPortBaseImplementation>( std::ostream &,
-  typename PortLookup<impl::ParameterPortBaseImplementation>::PortTable const & );
+std::ostream & writePortTable<impl::ParameterPortBaseImplementation>( std::ostream &, PortLookup<impl::ParameterPortBaseImplementation>::PortTable const & );
 
 
 template<typename PortType>

@@ -27,7 +27,6 @@
 #include <libefl/basic_matrix.hpp>
 
 #include <libpml/listener_position.hpp>
-#include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 #include <libpml/string_parameter.hpp>
 
