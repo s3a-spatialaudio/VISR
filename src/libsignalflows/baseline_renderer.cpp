@@ -13,14 +13,12 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
-
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <algorithm>
 #include <cmath>
-// #include <cstdio>
 #include <sstream>
 #include <vector>
 
@@ -129,7 +127,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
       throw std::invalid_argument( "BaselineRenderer: Size of the output EQ configuration config differs from "
         "the number of output signals (regular loudspeakers + subwoofers).");
     }
-    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( context, "OutputEqualisationFilter" ) );
+    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( context, "OutputEqualisationFilter", this ) );
     mOutputEqualisationFilter->setup( numberOfOutputSignals, outputEqSections, eqConfig );
   }
 
@@ -290,7 +288,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   for( std::size_t idx( 0 ); idx < numberOfLoudspeakers; ++idx )
   {
     panning::LoudspeakerArray::ChannelIndex const chIdx = loudspeakerConfiguration.channelIndex( idx );
-    if( (chIdx < 0) or (chIdx >= numberOfOutputs) )
+    if( (chIdx < 0) or (chIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs)) )
     {
       throw std::invalid_argument( "The loudspeakers channel index exceeds the admissible range." );
     }
@@ -300,7 +298,7 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   for( std::size_t idx( 0 ); idx < numberOfSubwoofers; ++idx )
   {
     panning::LoudspeakerArray::ChannelIndex const chIdx = loudspeakerConfiguration.getSubwooferChannels()[idx];
-    if( (chIdx <= 0) or (chIdx >= numberOfOutputs) )
+    if( (chIdx <= 0) or (chIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs)) )
     {
       throw std::invalid_argument( "The subwoofer channel index exceeds the admissible range." );
     }

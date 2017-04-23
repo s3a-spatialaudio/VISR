@@ -3,7 +3,7 @@
 #ifndef VISR_MEX_BIQUAD_IIR_FILTER_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_MEX_BIQUAD_IIR_FILTER_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <librrl/audio_signal_flow.hpp>
 
 #include <libpml/biquad_parameter.hpp>
 
@@ -18,7 +18,7 @@ namespace mex
 namespace gain_matrix
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class SignalFlow: public rrl::AudioSignalFlow
 {
 public:
   explicit SignalFlow( std::size_t numberOfChannels, 

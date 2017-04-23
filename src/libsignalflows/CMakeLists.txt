@@ -21,5 +21,9 @@ time_frequency_feedthrough.hpp
 
 ADD_LIBRARY( signalflows STATIC ${SOURCES} ${HEADERS} )
 
+# Transitive link dependencies
+target_link_libraries( signalflows rcl )
+target_link_libraries( signalflows pml )
+
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

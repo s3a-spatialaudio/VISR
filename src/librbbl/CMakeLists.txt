@@ -28,5 +28,16 @@ ENDIF( BUILD_USE_IPP )
 
 ADD_LIBRARY( rbbl STATIC ${SOURCES} ${HEADERS} )
 
+target_link_libraries( rbbl ${FFTS_LIBRARY} )
+target_link_libraries( rbbl ${KISSFFT_LIBRARY} )
+if( BUILD_USE_FFTW )
+  target_link_libraries( rbbl ${FFTW3_LIBRARY} )
+  target_link_libraries( rbbl ${FFTW3F_LIBRARY} )
+endif( BUILD_USE_FFTW )
+
+if( BUILD_USE_IPP )
+  target_link_libraries( rbbl ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+endif( BUILD_USE_IPP )
+
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

@@ -1,17 +1,52 @@
+% writeArrayConfigXml - Write a loudspeaker configuration into an XML
+% representation accepted by the VISR renderer
 % Copyright (c) 2015, Andreas Franck, Institute of Sound and Vibration Research,
 % University of Southampton, United Kingdom
 % a.franck@soton.ac.uk
+% Arguments:
+% fileName: file name or path of the output file. If an empty string is
+% provided, e.g., [], the XML representation is returned as a string.
+% spkPos: The loudspeaker position in Cartesian coordinates as a Lx3 matrix
+% (L is the number of real + virtual loudspeakers.
+% triplets: The triangulation of the loudspeaker setup used by VBAP panning
+% algorithms, size Tx3, where T denotes the number of triplets. The values
+% are integer and represent loudspeaker indices corresponding to spkPos
+% (one-offset)
+% isInfinite: Boolean flag to denote whether the loudspeakers are assumed as
+% plane waves (infinite distance). The effect on the reproduction algorithm
+% is implementation-dependent.
+% is2D: Boolean flag whether the setup should be considered as a horizontal
+% 2D setup. In this case the third loudspeaker coordinate and the third
+% speaker index are ignored.
+% channelIndices: The audio interface output channels corresponding to the
+% loudspeakers in spkPos. Indices are one-offset. Values < 1 are used to
+% flag virtual/dead/phantom loudspeakers.
+% subwooferConfig: A Matlab struct representing the subwoofer
+% configuration. See the code and example scripts for the exact structure.
+% Optional parameter.
+% gainAdjust: Optional gain adjustments for the loudspeakers in dB. A
+% vector of size L corresponding to the loudspeakers in spkPos.
+% delayAdjust: Optional delay adjustments for the loudspeakers in seconds. A
+% vector of size L corresponding to the loudspeakers in spkPos.
+% Return value: the XML representation as a string if fileName is empty.
+% TODO:
+% - Provide 'real' 2D configs
+% - Document subwoofer config
+% - Optional downmix vectors for virtual loudspeakers
+% - Incorporate equalisation config.
 
-function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig, gainAdjust, delayAdjust )
+function  [outputString] = writeArrayConfigXml( fileName, spkPos, triplets, isInfinite, is2D, channelIndices, subwooferConfig, gainAdjust, delayAdjust, eqConfig )
 
 subwooferConfigPresent = (nargin >= 7);
 
 gainAdjustPresent = (nargin >= 8);
 delayAdjustPresent = (nargin >= 9);
 
+eqConfigPresent = (nargin >= 10 );
+
 % Whether to write Cartesian or polar coordinates.
 % TODO: Consider making this a configurable option.
-useCartesian = true;
+useCartesian = false;
 
 domNode = com.mathworks.xml.XMLUtils.createDocument('panningConfiguration');
 
@@ -33,6 +68,15 @@ rootNode.setAttribute( 'dimension', dimStr );
 numSpeakers = size( spkPos, 1 );
 numTriplets = size( triplets, 1 );
 
+if eqConfigPresent
+    speakerEqLookup = zeros( 1, numSpeakers );
+
+    eqNode = domNode.createElement( 'outputEqConfiguration' );
+
+    for eqIdx = 1: length( eqConfig )
+        
+    end
+end
 
 for spkIdx = 1:numSpeakers 
     isVirtual = (channelIndices( spkIdx ) < 1);

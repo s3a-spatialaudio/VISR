@@ -15,7 +15,6 @@ SET( SOURCES
  matrix_parameter_config.cpp
  message_queue_protocol.cpp
  object_vector.cpp
- parametric_iir_coefficients.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
@@ -41,7 +40,6 @@ SET( HEADERS
  matrix_parameter_config.hpp
  message_queue_protocol.hpp
  object_vector.hpp
- parametric_iir_coefficients.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
  string_parameter.hpp
@@ -55,6 +53,15 @@ SET( HEADERS
 INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )
 
 ADD_LIBRARY( pml STATIC ${SOURCES} ${HEADERS} )
+
+target_link_libraries( pml objectmodel )
+target_link_libraries( pml ril )
+target_link_libraries( pml visr_impl )
+target_link_libraries( pml efl )
+target_link_libraries( pml ${SNDFILE_LIBRARY} )
+TARGET_LINK_LIBRARIES( pml ${Boost_FILESYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES( pml ${Boost_SYSTEM_LIBRARY} )
+
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRIL_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
 #define VISR_LIBRIL_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include "parameter_type.hpp"
 
 #include "communication_protocol_base.hpp"
@@ -32,6 +34,7 @@ namespace ril
 class ParameterBase;
 class ParameterConfigBase;
 
+VISR_CORE_LIBRARY_SYMBOL
 class CommunicationProtocolFactory
 {
 public:

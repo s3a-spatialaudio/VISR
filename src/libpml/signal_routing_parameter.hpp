@@ -84,6 +84,12 @@ public:
 
   RoutingsType::const_iterator end() const { return mRoutings.end(); }
 
+  /**
+   * Remove all routing entries.
+   * @post empty() == true
+   */
+  void clear() { mRoutings.clear();  }
+
   void addRouting( IndexType inputIdx, IndexType outputIdx )
   {
     addRouting( Entry{ inputIdx, outputIdx } );

@@ -229,7 +229,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   std::mt19937 gen(rd());
   std::uniform_real_distribution<ril::SampleType> dis(-1.0f, 1.0f);
 
-  for (int n = 0; n < numSamples; ++n) {
+  for (std::size_t n = 0; n < numSamples; ++n) {
     data[n]=dis(gen);
   }
 }

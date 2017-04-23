@@ -7,6 +7,11 @@
 # cygwin platform not defining WIN32 anymore.
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
 
+# Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
+if( POLICY CMP0063 ) # (only if the CMake version supports this policy
+  CMAKE_POLICY(SET CMP0063 NEW)
+endif( POLICY CMP0063 )
+
 # The name of our top-level project.
 PROJECT( VISR CXX C )
 
@@ -78,9 +83,24 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
-# TODO: Test and fix this feature.
 SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
+
+
+############################################################
+# Support for forcing the load of all symbols from a library.
+# This is used, for instance, in self-registering factories.
+
+if( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( WHOLE_ARCHIVE_PREFIX "-Wl,--whole-archive" )
+  set( WHOLE_ARCHIVE_SUFFIX "-Wl,--no-whole-archive" )
+elseif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  set( WHOLE_ARCHIVE_PREFIX "-Wl,-force_load" )
+  set( WHOLE_ARCHIVE_SUFFIX "" )
+elseif( VISR_SYSTEM_NAME MATCHES "Windows" )
+  set( WHOLE_ARCHIVE_PREFIX "" )
+  set( WHOLE_ARCHIVE_SUFFIX "" )
+endif()
 
 ############################################################
 # Support for Building Matlab externals
@@ -91,7 +111,7 @@ IF( BUILD_MATLAB_EXTERNALS )
   FIND_PACKAGE(Matlab REQUIRED)
   IF(MATLAB_FOUND)
     MESSAGE( STATUS "Matlab found." )
-  ELSEIF( MATLAB_FOUND )
+  ELSE( MATLAB_FOUND )
     MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
   ENDIF( MATLAB_FOUND )
   # Brute-force way make all the code position-independent if we build Matlab externals.

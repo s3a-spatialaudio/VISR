@@ -75,7 +75,7 @@ ErrorCode vectorConvertInputOutputStride( InputType const * const src,
 /**
  * Template specialisations
  * Note that we also provide conversions to the same type for two reasons:
- * - Enable a uniform interface and callinng sequence
+ * - Enable a uniform interface and calling sequence
  * - Provide functions to deal with general striding constellations
  */
 //@{

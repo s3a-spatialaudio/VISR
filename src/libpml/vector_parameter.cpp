@@ -3,6 +3,7 @@
 #include "vector_parameter.hpp"
 
 #include <libril/constants.hpp>
+#include <libril/parameter_factory.hpp>
 
 namespace visr
 {
@@ -25,6 +26,9 @@ VectorParameter<ElementType>::VectorParameter( VectorParameterConfig const & con
 // Explicit instantiations for element types float and double
 template class VectorParameter<float>;
 template class VectorParameter<double>;
+
+static ril::ParameterFactory::Registrar< VectorParameter<float> > maker1( ril::ParameterType::VectorFloat );
+static ril::ParameterFactory::Registrar< VectorParameter<double> > maker2( ril::ParameterType::VectorDouble );
 
 } // namespace pml
 } // namespace visr

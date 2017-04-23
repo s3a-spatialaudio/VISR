@@ -19,7 +19,7 @@ namespace ril
 {
 class AtomicComponent;
 class Component;
-class AudioPort;
+class AudioPortBase;
 }
 
 namespace rrl
@@ -32,7 +32,7 @@ public:
 
   AudioSignalDescriptor();
 
-  explicit AudioSignalDescriptor( ril::AudioPort const * port, SignalIndexType index );
+  explicit AudioSignalDescriptor( ril::AudioPortBase const * port, SignalIndexType index );
 
   /**
   * 'less than operator', used for ordering in a map.
@@ -41,7 +41,7 @@ public:
 
   bool operator==(AudioSignalDescriptor const & rhs) const;
 
-  ril::AudioPort const* mPort;
+  ril::AudioPortBase const* mPort;
   SignalIndexType mIndex;
 
   // with proper C++11 support, this could be instantiated in place (using the constexpr mechanism)

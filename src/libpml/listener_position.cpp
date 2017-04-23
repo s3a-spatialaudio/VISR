@@ -4,6 +4,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <libril/parameter_factory.hpp>
+
 namespace visr
 {
 namespace pml
@@ -45,6 +47,8 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)
   stream << "time: " << static_cast<double>(pos.timeNs())/1.0e9 << " s, face ID " << pos.faceID() << ", pos: (" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")";
   return stream;
 }
+
+static ril::ParameterFactory::Registrar< pml::ListenerPosition > maker{ ril::ParameterType::ListenerPosition };
 
 } // namespace pml
 } // namespace visr

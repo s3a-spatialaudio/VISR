@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                                  trackingConfig,
                                  8888,
                                  reverbConfig.str(),
-                                 false /* Frequency-dependent panning*/
+                                 false // No frequency-dependent panning.
                                  );
 }
 

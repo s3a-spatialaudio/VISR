@@ -26,11 +26,15 @@ ADD_SUBDIRECTORY( librbbl )
 # Rendering component library
 ADD_SUBDIRECTORY( librcl )
 
-# Rendering infrastructure library 
+# Rendering infrastructure library
+# Nothing to build here
 ADD_SUBDIRECTORY( libril )
 
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )
+
+# Library of implementations of the interface components.
+ADD_SUBDIRECTORY( libvisr_impl )
 
 # Hold applications in a separate subdirectory
 ADD_SUBDIRECTORY( apps )
@@ -51,3 +55,8 @@ ENDIF( BUILD_MAX_MSP_EXTERNALS )
 IF( BUILD_PYTHON_BINDINGS )
   ADD_SUBDIRECTORY( pythonbindings )
 ENDIF( BUILD_PYTHON_BINDINGS )
+
+# Python bindings for the rendering framework
+if( BUILD_PYTHON_BINDINGS )
+  add_subdirectory( python )
+endif( BUILD_PYTHON_BINDINGS )

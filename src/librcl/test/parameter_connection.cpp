@@ -8,9 +8,7 @@
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/signal_flow_context.hpp>
 
-
-//#include <libpml/message_queue.hpp>
-//#include <libpml/listener_position.hpp>
+#include <libvisr_impl/component_internal.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -43,8 +41,8 @@ BOOST_AUTO_TEST_CASE( ParameterConnection )
   rcl::SceneDecoder decoder( context, "decoder", nullptr );
   decoder.setup( );
 
-  for( ril::Component::ParameterPortContainer::const_iterator paramPortIt = decoder.parameterPortBegin();
-    paramPortIt != decoder.parameterPortEnd(); ++paramPortIt )
+  for( ril::ComponentInternal::ParameterPortContainer::const_iterator paramPortIt = decoder.internal().parameterPortBegin();
+       paramPortIt != decoder.internal().parameterPortEnd(); ++paramPortIt )
   {
     std::cout << "Found parameter port in scene decoder:" << (*paramPortIt)->name() << std::endl;
 
