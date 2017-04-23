@@ -146,11 +146,11 @@ BaselineRenderer::BaselineRenderer( ril::SignalFlowContext & context,
   if( mFrequencyDependentPanning )
   {
     // Static crossover pair (2nd-order Linkwitz-Riley with cutoff 700 Hz @ fs=48 kHz)
-    static pml::BiquadParameter<ril::SampleType> const lowpass{ 0.001921697757295, 0.003843395514590, 0.001921697757295,
-       -1.824651307057289, 0.832338098086468 };
+    static pml::BiquadParameter<ril::SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
+       -1.824651307057289f, 0.832338098086468f };
     // Numerator coeffs are negated to account for the 180 degree phase shift of the original design.
-    static pml::BiquadParameter<ril::SampleType> const highpass{ -0.914247351285939, 1.828494702571878, -0.914247351285939,
-      -1.824651307057289, 0.832338098086468 };
+    static pml::BiquadParameter<ril::SampleType> const highpass{ -0.914247351285939f, 1.828494702571878f, -0.914247351285939f,
+      -1.824651307057289f, 0.832338098086468f };
 
     pml::BiquadParameterMatrix<ril::SampleType> coeffMatrix( 2*numberOfInputs, 1 );
     for( std::size_t chIdx(0); chIdx < numberOfInputs; ++chIdx )

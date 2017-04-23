@@ -2,8 +2,6 @@
 
 #include "udp_receiver.hpp"
 
-#include <libpml/message_queue.hpp>
-
 #include <boost/asio/placeholders.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/lock_types.hpp>
@@ -70,7 +68,6 @@ void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* e
   {
     mIoServiceWork.reset( new  boost::asio::io_service::work( *mIoService) );
   }
-  mInternalMessageBuffer.reset( new pml::MessageQueue< pml::StringParameter >() ) ;
   mSocket.reset( new udp::socket( *mIoService,  udp::endpoint(udp::v4(), static_cast<unsigned short>(port) )) );
 
   mSocket->async_receive_from( boost::asio::buffer(mReceiveBuffer),
@@ -92,11 +89,11 @@ void UdpReceiver::process()
     mIoService->poll();
   }
   boost::lock_guard<boost::mutex> lock( mMutex );
-  while( !mInternalMessageBuffer->empty() )
+  while( not mInternalMessageBuffer.empty() )
   {
-    std::string const & nextMsg = mInternalMessageBuffer->nextElement();
-    mDatagramOutput.enqueue( pml::StringParameter( nextMsg ) );
-    mInternalMessageBuffer->popNextElement();
+    pml::StringParameter const & nextMsg = mInternalMessageBuffer.front();
+    mDatagramOutput.enqueue( nextMsg  );
+    mInternalMessageBuffer.pop_front();
   }
 }
 
@@ -105,7 +102,7 @@ void UdpReceiver::handleReceiveData( const boost::system::error_code& error,
 {
   {
     boost::lock_guard<boost::mutex> lock( mMutex );
-    mInternalMessageBuffer->enqueue( pml::StringParameter( std::string( &mReceiveBuffer[0], numBytesTransferred )) );
+    mInternalMessageBuffer.push_back( pml::StringParameter( std::string( &mReceiveBuffer[0], numBytesTransferred ) ) );
   }
   mSocket->async_receive_from( boost::asio::buffer(mReceiveBuffer),
                                mRemoteEndpoint,

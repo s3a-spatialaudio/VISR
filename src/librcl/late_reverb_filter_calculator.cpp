@@ -5,7 +5,7 @@
 #include <libefl/basic_vector.hpp>
 
 #include <libpml/biquad_parameter.hpp>
-#include <libpml/message_queue.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <array>
 #include <ciso646>
