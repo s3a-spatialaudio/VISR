@@ -14,7 +14,7 @@ namespace visr
 
 /**
  * Base class for atomic components.
- * THese components are at the lowest level in the hierarchy and implement runtime functionality as
+ * These components are at the lowest level in the hierarchy and implement runtime functionality as
  * C++ code.
  * Abstract base class, derived classes must override the virtual method process().
  */

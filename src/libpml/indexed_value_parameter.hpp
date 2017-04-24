@@ -48,7 +48,7 @@ public:
 
   IndexedValueParameter();
 
-  explicit IndexedValueParameter( IndexType const & index, ValueType const & value );
+  explicit IndexedValueParameter( IndexedType const & index, ValueType const & value );
 
   explicit IndexedValueParameter( ParameterConfigBase const & config );
 

@@ -20,11 +20,20 @@ constexpr CommunicationProtocolType communicationProtocolTypeFromString( char co
 
 
 /**
-* Metaprogramming construct to translate a type to its corresponding ID.
-*/
+ * Type trait (metaprogramming construct) for compile-time translation between a type and its corresponding ID.
+ * Must be specialized by derived parameter types, with the specialized template definining an unnamed enum with a value 'id'
+ * holding the type id of this type
+ * For convenience the macro DEFINE_COMMUNICATION_PROTOCOL should be used.
+ */
 template<class CommunicationProtocolClass >
 struct CommunicationProtocolToId {};
 
+/**
+ * Type trait (metaprogramming construct) for compile-time translation between a type id and the corresponding C++ type.
+ * Must be specialized by derived parameter types.
+ * his template also stores the registered name of the type.
+ * For convenience the macro DEFINE_COMMUNICATION_PROTOCOL should be used.
+ */
 template< CommunicationProtocolType id>
 struct IdToCommunicationProtocol {};
 
