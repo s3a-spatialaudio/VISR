@@ -2,13 +2,11 @@
 """
 Created on Sun Feb 26 16:41:01 2017
 
-@author: andi
+@author: Andreas Franck a.franck@soton.ac.uk
 """
 
 
-# Make sure that the VISR python modules are on the path. 
-import sys
-sys.path.append( '/home/andi/dev/visr-build-debug/python' )
+# Make sure that the VISR python modules are on the Python search path (e.g., PYTHONPATH)
 
 import visr
 
