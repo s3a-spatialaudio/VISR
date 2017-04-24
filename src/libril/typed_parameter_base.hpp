@@ -17,7 +17,9 @@ class ParameterConfig;
  *
  *
  */
-template<class ParameterConfigT, ParameterType typeId >
+template< typename ConcreteParameterType,
+          class ParameterConfigT,
+          ParameterType typeId >
 class TypedParameterBase: public ParameterBase
 {
 public:
@@ -32,12 +34,22 @@ public:
    */
   virtual ~TypedParameterBase() {}
 
-  static const constexpr ParameterType staticType() { return typeId; } 
+  static const constexpr ParameterType staticType()
+  {
+    return typeId;
+  }
 
-  virtual ParameterType type() final
+  /*virtual*/ ParameterType type() final
   {
     return staticType();
   }
+
+  /*virtual*/ std::unique_ptr<ParameterBase> clone() const final
+  {
+    return std::unique_ptr<ParameterBase>(
+      new ConcreteParameterType(static_cast<ConcreteParameterType const &>(*this) ) );
+  }
+
 };
 
 } // namespace visr
@@ -45,6 +57,5 @@ public:
 // TODO: Check whether we can provide the lookup template specializations
 // ParameterToId, IdToParameter, and ParameterToConfigType for all types here.
 // Problem: We do not see the derived type here, only the base of the actual parameter type.
-// TODO: Is this a place for the Coriously Recurring Template Pattern?
 
 #endif // #ifndef VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED

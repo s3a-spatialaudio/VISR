@@ -282,7 +282,7 @@ template<> struct BiquadMatrixParameterType<double>
 } // unnamed
 
 template<typename CoeffType >
-class BiquadParameterMatrix: public TypedParameterBase<MatrixParameterConfig, BiquadMatrixParameterType<CoeffType>::ptype() >
+class BiquadParameterMatrix: public TypedParameterBase<BiquadParameterMatrix<CoeffType>, MatrixParameterConfig, BiquadMatrixParameterType<CoeffType>::ptype() >
 {
 public:
   explicit BiquadParameterMatrix( MatrixParameterConfig const & config );
@@ -297,7 +297,6 @@ public:
   std::size_t numberOfSections() const { return mRows.empty() ? 0 : mRows[0].size(); }
 
   void resize( std::size_t numberOfFilters, std::size_t numberOfBiquads );
-
   BiquadParameterList<CoeffType> const & operator[]( std::size_t rowIdx ) const { return mRows[rowIdx]; }
   BiquadParameterList<CoeffType> & operator[]( std::size_t rowIdx ) { return mRows[rowIdx]; }
 

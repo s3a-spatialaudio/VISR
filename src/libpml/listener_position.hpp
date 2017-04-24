@@ -24,7 +24,7 @@ namespace pml
  */
 static constexpr const char* sListenerPositionParameterName = "ListenerPosition";
 
-class ListenerPosition: public TypedParameterBase<EmptyParameterConfig, detail::compileTimeHashFNV1(sListenerPositionParameterName) >
+class ListenerPosition: public TypedParameterBase<ListenerPosition, EmptyParameterConfig, detail::compileTimeHashFNV1(sListenerPositionParameterName) >
 {
 public:
   using TimeType = std::uint64_t;
