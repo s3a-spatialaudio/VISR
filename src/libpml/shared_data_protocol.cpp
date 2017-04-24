@@ -17,6 +17,7 @@ SharedDataProtocol::SharedDataProtocol( ParameterType const & parameterType,
   , mParameterType( parameterType )
   , mParameterConfig( parameterConfig.clone() )
   , mData( ParameterFactory::create( parameterType, parameterConfig ) )
+  , mOutput( nullptr )
 {
 }
 
