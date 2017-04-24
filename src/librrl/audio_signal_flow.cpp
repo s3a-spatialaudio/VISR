@@ -340,7 +340,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       CommunicationProtocolType const protocol = paramPort->protocolType();
       ParameterConfigBase const & paramConfig = paramPort->parameterConfig();
       std::unique_ptr<CommunicationProtocolBase> protocolInstance
-        = CommunicationProtocolFactory::create( protocol, paramType, paramConfig );
+        = CommunicationProtocolFactory::createProtocol( protocol, paramType, paramConfig );
       if( not protocolInstance )
       {
         messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
@@ -431,7 +431,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       CommunicationProtocolType const protocol = refPort->protocolType();
       ParameterConfigBase const & paramConfig = refPort->parameterConfig();
       std::unique_ptr<CommunicationProtocolBase> protocolInstance
-        = CommunicationProtocolFactory::create( protocol, paramType, paramConfig );
+        = CommunicationProtocolFactory::createProtocol( protocol, paramType, paramConfig );
       if( not protocolInstance )
       {
         messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
