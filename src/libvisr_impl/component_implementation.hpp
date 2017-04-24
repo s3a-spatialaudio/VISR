@@ -235,7 +235,6 @@ public:
 
   visr::Component const & component() const { return mComponent; }
   //@}
-protected:
 
   SignalFlowContext & context() { return mContext; }
   SignalFlowContext const & context( ) const { return mContext; }
