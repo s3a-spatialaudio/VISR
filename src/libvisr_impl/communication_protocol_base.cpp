@@ -4,9 +4,16 @@
 
 namespace visr
 {
+
+CommunicationProtocolBase::CommunicationProtocolBase() = default;
+
 /*virtual*/ CommunicationProtocolBase::~CommunicationProtocolBase() = default;
 
+CommunicationProtocolBase::Input::Input() = default;
+
 /*virtual*/ CommunicationProtocolBase::Input::~Input() = default;
+
+CommunicationProtocolBase::Output::Output() = default;
 
 /*virtual*/ CommunicationProtocolBase::Output::~Output() = default;
 
