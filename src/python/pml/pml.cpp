@@ -8,6 +8,8 @@
 #include "listener_position.hpp"
 #include "loudspeaker_array.hpp" // kept here temporarily.
 #include "matrix_parameter.hpp"
+#include "message_queue_protocol.hpp"
+#include "object_vector.hpp"
 #include "vector_parameter.hpp"
 
 #ifdef USE_PYBIND11
@@ -30,12 +32,15 @@ PYBIND11_PLUGIN( pml )
 
   // Export the communication protocols
   exportDoubleBufferingProtocol( m );
+  exportMessageQueueProtocol( m );
 
   exportEmptyParameterConfig( m );
   exportListenerPosition( m );
   exportLoudspeakerArray( m );
   exportMatrixParameters( m);
+  exportObjectVector( m );
   exportVectorParameters( m );
+
   return m.ptr();
 }
 
