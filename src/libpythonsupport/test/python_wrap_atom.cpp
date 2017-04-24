@@ -1,5 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include <libpythonsupport/initialisation_guard.hpp>
 #include <libpythonsupport/python_wrapper.hpp>
 
 #include <libril/constants.hpp>
@@ -33,9 +34,9 @@ using pythonsupport::PythonWrapper;
 
 BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 {
-  Py_Initialize();
+  pythonsupport::InitialisationGuard::initialise();
 
-  std::string moduleName = "pythonHello";
+  std::string moduleName = "pythonAtoms";
 
   boost::filesystem::path basePath{CMAKE_SOURCE_DIR}; 
   boost::filesystem::path const modulePath = basePath /
@@ -47,6 +48,8 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 
   SignalFlowContext ctxt( blockSize, samplingFrequency );
 
+  // Instantiate the atomic component (implemented in Python)
+  // by a mixture or poristional and keyword constructor arguments
   PythonWrapper pyAtom1( ctxt, "PythonAtom", nullptr,
 			 modulePath.string().c_str(),
 			 "PythonAdder",

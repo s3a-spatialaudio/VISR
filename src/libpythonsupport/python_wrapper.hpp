@@ -14,7 +14,8 @@ namespace visr
 {
 
 // Forward declarationsBase
-class AudioPort;
+class AudioInputBase;
+class AudioOutputBase;
 class CompositeComponent;
 class ParameterPortBase;
 class PolymorphicParameterInput;
@@ -32,7 +33,7 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
+   * @param context The signal flow context object containing 
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
    * @param numInputs The number of signal vectors to be added.
@@ -59,11 +60,14 @@ private:
   /**
    * A vector holding an arbitrary number of input
    */
-  std::vector<std::unique_ptr<AudioPortBase > > mAudioPorts;
+  std::vector<std::unique_ptr<AudioInputBase > > mAudioInputs;
+
+  std::vector<std::unique_ptr<AudioOutputBase > > mAudioOutputs;
+
 
   // TODO: Do the same for parameter ports (instantiate and connect them as polymorphic input/output ports
   // Note: As these need to manage their own protocol inputs/outputs, they need to be different from the port base classes. This also implies that we need different containers for inputs and outputs.
-  std::vector<std::unique_ptr<PolymorphicParameterOutput> > mParameterInputs;
+  std::vector<std::unique_ptr<PolymorphicParameterInput> > mParameterInputs;
 
   std::vector<std::unique_ptr<PolymorphicParameterOutput> > mParameterOutputs;
 

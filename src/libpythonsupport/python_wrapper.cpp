@@ -2,6 +2,10 @@
 
 #include "python_wrapper.hpp"
 
+// Whether to load the Python module from the full path or just the name.
+// As we are currently experiencing problems to retrieve the contained classes from a py::module, we use the 'full path' variant for the time being.
+#define PYTHON_WRAPPER_FULL_MODULE_PATH 1
+
 #include <libril/detail/compose_message_string.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
@@ -15,9 +19,14 @@
 
 #include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/audio_port_base_implementation.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
+// Not needed if modules loaded by name (provided that they are on the path)
+// In this case we only use pybind11 functionality.
+#ifdef PYTHON_WRAPPER_FULL_MODULE_PATH
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#endif
 
 #include <pybind11/cast.h>
 #include <pybind11/eval.h>
@@ -33,12 +42,13 @@ namespace pythonsupport
 
 namespace py = pybind11;
 
+#ifdef PYTHON_WRAPPER_FULL_MODULE_PATH
 namespace // unnamed
 {
 
-  py::object loadModule( std::string const & module,
-			 std::string const & path,
-			 py::object & globals)
+py::object loadModule( std::string const & module,
+                       std::string const & path,
+                       py::object & globals)
 {
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/
@@ -62,8 +72,9 @@ namespace // unnamed
   return locals["new_module"];
 }
 
-
 } // unnamed namespace
+#endif
+
 
 PythonWrapper::PythonWrapper( SignalFlowContext& context,
                               char const * name,
@@ -74,6 +85,9 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
                               char const * keywordArguments )
   : CompositeComponent( context, (std::string(name)+std::string("_wrapper")).c_str(), parent )
 {
+#ifndef PYTHON_WRAPPER_FULL_MODULE_PATH
+  mModule = py::module( modulePath );
+#else
   boost::filesystem::path const modPath( modulePath );
 
   if( not exists( modPath ) )
@@ -93,6 +107,7 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
   {
     throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
   }
+#endif
 
   mComponentClass = mModule.attr( componentClassName );
 
@@ -130,28 +145,61 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
     throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
   }
   impl::ComponentImplementation & compImpl = mComponent->implementation();
+  // Collect the audio ports of the contained components, create matching external ports on the outside of 'this;
+  // composite component, and connect them. This additional set of connections will be removed by the 'flattening' phase, leaving only an additional level in the full names.
   for( auto audioPort : compImpl.audioPorts() )
   {
     char const * portName = audioPort->name();
     auto sampleType = audioPort->sampleType();
     PortBase::Direction const direction = audioPort->direction();
     auto const width = audioPort->width();
-    auto portPlaceholder = std::unique_ptr<AudioPortBase>(
-      new AudioPortBase( portName,
-			 *this,
-			 sampleType,
-			 direction,
-			 width ) );
     if( direction == PortBase::Direction::Input )
     {
+      auto portPlaceholder = std::unique_ptr<AudioInputBase>(
+        new AudioInputBase( portName,
+			    *this,
+			    sampleType,
+			    width ) );
       audioConnection( *portPlaceholder, audioPort->containingPort() );
+      mAudioInputs.push_back( std::move( portPlaceholder ) );
     }
     else
     {
+      auto portPlaceholder = std::unique_ptr<AudioOutputBase>(
+        new AudioOutputBase( portName,
+			    *this,
+			    sampleType,
+			    width ) );
       audioConnection( audioPort->containingPort(), *portPlaceholder );
+      mAudioOutputs.push_back( std::move( portPlaceholder ) );
     }
-    mAudioPorts.push_back( std::move( portPlaceholder ) );
   }
+  // Do the same for parameter ports.
+  for( auto parameterPort : compImpl.parameterPorts() )
+  {
+    char const * portName = parameterPort->name();
+    auto const parameterType = parameterPort->parameterType();
+    auto const protocolType = parameterPort->protocolType();
+    PortBase::Direction const direction = parameterPort->direction();
+    ParameterConfigBase const & paramConfig = parameterPort->parameterConfig();
+    if( direction == PortBase::Direction::Input )
+    {
+      auto portPlaceholder = std::unique_ptr<PolymorphicParameterInput>(
+	  new PolymorphicParameterInput( portName, *this, parameterType, protocolType,
+                                         paramConfig ) );
+      parameterConnection( *portPlaceholder, parameterPort->containingPort() );
+      mParameterInputs.push_back( std::move( portPlaceholder ) );
+    }
+    else
+    {
+      auto portPlaceholder = std::unique_ptr<PolymorphicParameterOutput>(
+	  new PolymorphicParameterOutput( portName, *this, parameterType, protocolType,
+                                         paramConfig ) );
+      parameterConnection( parameterPort->containingPort(), *portPlaceholder );
+      mParameterOutputs.push_back( std::move( portPlaceholder ) );
+    }
+  }
+
 }
 
 PythonWrapper::~PythonWrapper()
