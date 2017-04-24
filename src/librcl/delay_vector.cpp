@@ -28,8 +28,6 @@ namespace rcl
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
- , mDelayInput( "delayInput", *this )
- , mGainInput( "gainInput", *this )
 #ifdef USE_CIRCULAR_BUFFER
  , mRingBuffer() // initialise smart pointer to null
 #else
@@ -48,6 +46,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
                          std::size_t interpolationSteps,
                          SampleType maximumDelaySeconds,
                          InterpolationType interpolationMethod,
+			 bool controlInputs,
                          SampleType initialDelaySeconds /* = static_cast<SampleType>(1.0) */,
                          SampleType initialGainLinear /* = static_cast<SampleType>(0.0) */ )
 {
@@ -56,7 +55,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
   efl::vectorFill( initialDelaySeconds, delayVector.data(), numberOfChannels, cVectorAlignmentSamples );
   efl::vectorFill( initialGainLinear, gainVector.data(), numberOfChannels, cVectorAlignmentSamples );
 
-  setup( numberOfChannels, interpolationSteps, maximumDelaySeconds, interpolationMethod,
+  setup( numberOfChannels, interpolationSteps, maximumDelaySeconds, interpolationMethod, controlInputs,
          delayVector, gainVector );
 }
 
@@ -64,6 +63,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
                           std::size_t interpolationSteps,
                           SampleType maximumDelaySeconds,
                           InterpolationType interpolationMethod,
+			  bool controlInputs,
                           efl::BasicVector< SampleType > const & initialDelaysSeconds,
                           efl::BasicVector< SampleType > const & initialGainsLinear )
 {
@@ -71,8 +71,13 @@ void DelayVector::setup( std::size_t numberOfChannels,
   mNumberOfChannels = numberOfChannels;
   mInput.setWidth(numberOfChannels);
   mOutput.setWidth(numberOfChannels);
-  mDelayInput.setParameterConfig( pml::VectorParameterConfig( numberOfChannels ));
-  mGainInput.setParameterConfig( pml::VectorParameterConfig( numberOfChannels ) );
+
+  if( controlInputs )
+  {
+    mGainInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "gainInput", *this, pml::VectorParameterConfig( numberOfChannels ) ) );
+    mGainInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "delayInput", *this ) );
+    mGainInput->setParameterConfig( pml::VectorParameterConfig( numberOfChannels ) );
+  }
 
   // Additional delay required by the interpolation method
   std::size_t const interpolationOrder = interpolationMethod == InterpolationType::NearestSample
@@ -118,16 +123,19 @@ void DelayVector::setup( std::size_t numberOfChannels,
 
 void DelayVector::process()
 {
-  // TODO: shall we affect the interpolation counter?
-  if( mDelayInput.changed() )
+  if( mGainInput )
   {
-    setDelay( mDelayInput.data() );
-    mDelayInput.resetChanged();
-  }
-  if( mGainInput.changed() )
-  {
-    setGain( mGainInput.data() );
-    mGainInput.resetChanged();
+    // TODO: shall we affect the interpolation counter?
+    if( mDelayInput->changed() )
+    {
+      setDelay( mDelayInput->data() );
+      mDelayInput->resetChanged();
+    }
+    if( mGainInput->changed() )
+    {
+      setGain( mGainInput->data() );
+      mGainInput->resetChanged();
+    }
   }
 
   std::size_t const blockLength = period();
