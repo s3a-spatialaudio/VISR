@@ -1,11 +1,13 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 SET( SOURCES
+initialisation_guard.cpp
 python_wrapper.cpp
 )
 
 # Basically, this makes the files show up in the Visual studio project.
 SET( HEADERS
+initialisation_guard.hpp
 python_wrapper.hpp
 )
 
