@@ -96,7 +96,7 @@ public:
   }
 
 protected:
-  void setProtocol( CommunicationProtocolBase * protocol )
+  void setProtocol( CommunicationProtocolBase * protocol ) override
   {
     ProtocolT * typedProtocol
       = dynamic_cast< ProtocolT * >(protocol);

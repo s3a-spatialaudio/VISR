@@ -41,14 +41,14 @@ template<> struct IndexedValueParameterType<std::string >
 template<typename IndexType, typename ValueType >
 class IndexedValueParameter:
   public std::pair< std::size_t, std::string >,
-  public TypedParameterBase< EmptyParameterConfig, IndexedValueParameterType<ValueType>::ptype() >
+  public TypedParameterBase< IndexedValueParameter<IndexType, ValueType>, EmptyParameterConfig, IndexedValueParameterType<ValueType>::ptype() >
 {
 public:
   using DataType = std::pair<IndexType, ValueType >;
 
   IndexedValueParameter();
 
-  explicit IndexedValueParameter( IndexedType const & index, ValueType const & value );
+  explicit IndexedValueParameter( IndexType const & index, ValueType const & value );
 
   explicit IndexedValueParameter( ParameterConfigBase const & config );
 

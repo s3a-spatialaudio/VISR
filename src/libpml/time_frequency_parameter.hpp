@@ -42,7 +42,7 @@ namespace // unnamed
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType >
-class TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameterConfig, TimeFrequencyParameterType<ElementType>::ptype() >
+class TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameter<ElementType>, TimeFrequencyParameterConfig, TimeFrequencyParameterType<ElementType>::ptype() >
 {
 public:
   /**

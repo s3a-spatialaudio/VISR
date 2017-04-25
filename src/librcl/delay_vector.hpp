@@ -78,6 +78,7 @@ public:
    * @param maximumDelaySeconds The maximal delay value supported by this
    * object (in seconds)
    * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
+   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
    * @param initialDelaySeconds The initial delay value for all
    * channels (in seconds, default: 0.0)
    * @param initialGainLinear The initial delay value for all
@@ -87,6 +88,7 @@ public:
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
               InterpolationType interpolationMethod,
+	      bool controlInputs = false,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
   /**
@@ -99,6 +101,7 @@ public:
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
   * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
+   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
   * @param initialDelaysSeconds The delays for all channels in
   * seconds. The number of elements of this vector must match the channel number of this object.
   * @param initialGainsLinear The initial gain values for all
@@ -109,6 +112,7 @@ public:
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
               InterpolationType interpolationMethod,
+	      bool controlInputs,
               efl::BasicVector< SampleType > const & initialDelaysSeconds,
               efl::BasicVector< SampleType > const & initialGainsLinear );
 
@@ -221,9 +225,9 @@ private:
    */
   AudioOutput mOutput;
 
-  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDelayInput;
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > > mDelayInput;
 
-  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mGainInput;
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > > mGainInput;
 
 #ifdef USE_CIRCULAR_BUFFER
   /**

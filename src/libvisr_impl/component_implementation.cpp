@@ -281,9 +281,9 @@ typename TypedPortContainer<PortType>::const_iterator ComponentImplementation::f
   return findIt;
 }
 // Explicit instantiations
-template typename ComponentImplementation::PortContainer<AudioPortBaseImplementation>::const_iterator
+template ComponentImplementation::PortContainer<AudioPortBaseImplementation>::const_iterator
 ComponentImplementation::findPortEntry<AudioPortBaseImplementation>( char const * portName ) const;
-template typename ComponentImplementation::PortContainer<ParameterPortBaseImplementation>::const_iterator
+template ComponentImplementation::PortContainer<ParameterPortBaseImplementation>::const_iterator
 ComponentImplementation::findPortEntry<ParameterPortBaseImplementation>( char const * portName ) const;
 
 template<class PortType>

@@ -26,17 +26,18 @@ public:
   class Output;
 
   /**
-   * Default constructor.
-   * This needs to be defined and implemented (using =default) because the class is marked as export.
-   * Otherwise MSVC reports multiple definitions.
-   */
+  * Default constructor.
+  * Because this class exports its symbol from a shared library, we need to provide an explicit constructor in order to avoid multiple
+  * auto-generated default constructors.
+  * @todo Check whether this is necessary if the methods would be exported individually (rather than the whole class)
+  */
   /*VISR_CORE_LIBRARY_SYMBOL*/ CommunicationProtocolBase();
 
   /**
    * Destructor, virtual.
    * Communication protocols are instantiated and used polymophically, so the destructor needs to be virtual.
    */
-  virtual  /*VISR_CORE_LIBRARY_SYMBOL*/ ~CommunicationProtocolBase();
+  virtual /*VISR_CORE_LIBRARY_SYMBOL*/ ~CommunicationProtocolBase();
 
   /**
    * Return the protocol type (a numerical id) of the concrete derived protocol object.
@@ -88,7 +89,7 @@ public:
 /**
  * Abstract interface for an input to a protocol.
  * Communication protocols derived from CommunicationProtocolBase must define classes derived from this base interface,
- * implementing its pure virtual methods
+ * implementing its pure virtual methods.
  */
 class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase::Input
 {
@@ -132,7 +133,8 @@ class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolBase::Output
 public:
   /**
    * Default constructor.
-   * Because the class is exported, it has to be defined and implemented (using =default) to prevent multiple symbols in MSVC.
+   * Because this class exports its symbol from a shared library, we need to provide an explicit constructor in order to avoid multiple
+   * auto-generated default constructors.
    */
   /*VISR_CORE_LIBRARY_SYMBOL*/ Output();
 

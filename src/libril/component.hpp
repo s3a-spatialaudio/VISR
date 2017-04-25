@@ -190,9 +190,7 @@ private:
 template<typename ... MessageArgs >
 inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... args )
 {
-  std::stringstream str;
-  detail::composeMessageString( str, args...);
-  status( statusId, str.str().c_str() );
+  status( statusId, detail::composeMessageString( args ... ) );
 }
 
 } // namespace visr

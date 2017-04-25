@@ -40,7 +40,7 @@ void exportParameterPort( pybind11::module & m)
   pybind11::class_<ParameterPortBase>( m, "ParameterPortBase" )
     .def_property_readonly( "parameterType", &ParameterPortBase::parameterType )
     .def_property_readonly( "protocolType", &ParameterPortBase::protocolType )
-    .def_property( "parameterConfig", &ParameterPortBase::parameterConfig, &ParameterPortBase::setParameterConfig,  pybind11::arg("parameterConfig") )
+    .def_property( "parameterConfig", &ParameterPortBase::parameterConfig, &ParameterPortBase::setParameterConfig )
 //    .def( "hasParameterConfig", &ParameterPortBase::hasParameterConfig)
     ;
 
@@ -69,6 +69,7 @@ void exportParameterPort( pybind11::module & m)
       pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "parameterType" ),
       pybind11::arg( "protocolType" ) )
     ;
+
 }
 #endif
 } // namepace visr

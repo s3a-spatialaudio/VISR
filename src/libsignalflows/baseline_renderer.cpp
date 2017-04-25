@@ -113,8 +113,9 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mSpeakerCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay,
-      rcl::DelayVector::InterpolationType::NearestSample,
-      0.0f, 0.0f );
+                                 rcl::DelayVector::InterpolationType::NearestSample,
+                                 false /*Control inputs*/,
+                                 0.0f, 0.0f );
     mTrackingReceiver->setup( cTrackingUdpPort, rcl::UdpReceiver::Mode::Synchronous );
     mPositionDecoder->setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
   }
@@ -187,8 +188,10 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
                                                 outputDelays.data()+outputDelays.size() );
   Afloat const maxDelay = std::ceil( *maxEl ); // Sufficient for nearestSample even if there is no particular compensation for the interpolation method's delay inside.
   
-  mOutputAdjustment.setup( numberOfOutputSignals, period(), maxDelay, rcl::DelayVector::InterpolationType::NearestSample,
-    outputDelays, outputGains );
+  mOutputAdjustment.setup( numberOfOutputSignals, period(), maxDelay,
+                           rcl::DelayVector::InterpolationType::NearestSample,
+                           false /*No control inputs*/,
+                           outputDelays, outputGains );
 
   // Note: This assumes that the type 'Afloat' used in libpanning is
   // identical to SampleType (at the moment, both are floats).

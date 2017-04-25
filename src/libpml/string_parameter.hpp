@@ -25,7 +25,7 @@ static constexpr const char * sStringParameterName = "String";
      * A type for passing strings between processing components.
      */
     class StringParameter: public std::string,
-      public TypedParameterBase<StringParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
+                           public TypedParameterBase<StringParameter, StringParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
     {
     public:
       explicit StringParameter( std::size_t maxLength = 0 );

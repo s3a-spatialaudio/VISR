@@ -17,7 +17,7 @@ namespace visr
 // Forward declarations
 class ParameterBase;
 class ParameterConfigBase;
-template<class ParameterConfig, ParameterType> class TypedParameterBase;
+template<class ConcreteType, class ParameterConfig, ParameterType> class TypedParameterBase;
 
 class VISR_CORE_LIBRARY_SYMBOL ParameterFactory
 {
