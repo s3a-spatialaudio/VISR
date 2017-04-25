@@ -38,8 +38,7 @@ void exportComponent( pybind11::module& m )
     .value( "Critical", ::visr::StatusMessage::Critical )
     ;
 
-  pybind11::class_<Component>( m, "Component", pybind11::metaclass() ) 
-    // Note: 'metaclass' required for static properties
+  pybind11::class_<Component>( m, "Component" ) 
     .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_property_readonly_static( "nameSeparator", &Component::nameSeparator )

@@ -23,7 +23,7 @@ namespace pml
 void exportMessageQueueProtocol( pybind11::module & m)
 {
   pybind11::class_<MessageQueueProtocol, visr::CommunicationProtocolBase>
-    messagequeue( m, "MessageQueueProtocol", pybind11::metaclass() );
+    messagequeue( m, "MessageQueueProtocol" );
 
   messagequeue
     .def_property_readonly_static( "staticName", [](pybind11::object /*self*/){ return MessageQueueProtocol::staticName(); } )

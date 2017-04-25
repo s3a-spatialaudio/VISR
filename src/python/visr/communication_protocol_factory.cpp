@@ -20,7 +20,7 @@ namespace visr
 void exportCommunicationProtocolFactory( pybind11::module& m )
 {
 
-  pybind11::class_<CommunicationProtocolFactory>( m, "CommunicationProtocolFactory", pybind11::metaclass() )
+  pybind11::class_<CommunicationProtocolFactory>( m, "CommunicationProtocolFactory" )
     .def_property_readonly_static( "numberOfProtocols", [](pybind11::object /*self*/){ return CommunicationProtocolFactory::numberOfProtocols(); } )
     .def_static( "createProtocol", &CommunicationProtocolFactory::createProtocol, pybind11::arg("protocolType"),
           pybind11::arg("parameterType"), pybind11::arg("parameterConfig") )

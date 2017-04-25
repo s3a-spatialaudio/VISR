@@ -21,7 +21,7 @@ void exportObjectVector( pybind11::module & m)
   // TODO: It is a good idea to hide this import locally?
   pybind11::module::import( "objectmodel" );
 
-  pybind11::class_<visr::pml::ObjectVector, ParameterBase, objectmodel::ObjectVector>( m, "ObjectVector", pybind11::metaclass() )
+  pybind11::class_<visr::pml::ObjectVector, ParameterBase, objectmodel::ObjectVector>( m, "ObjectVector" )
     .def_property_readonly_static( "staticType", [](pybind11::object /*self*/) {return ObjectVector::staticType(); } )
     // .def( pybind11::init<>() ) // Do we need a default constructor
     .def( pybind11::init<visr::pml::ObjectVector const &>(), "Copy construction of an object vector." )

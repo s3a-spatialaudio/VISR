@@ -73,7 +73,7 @@ void exportBasicMatrix( pybind11::module & m, char const * className )
 template<typename DataType>
 void exportMatrixParameter( pybind11::module & m, char const * className )
 {
-  pybind11::class_<MatrixParameter<DataType >, efl::BasicMatrix<DataType>, ParameterBase >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
+  pybind11::class_<MatrixParameter<DataType >, efl::BasicMatrix<DataType>, ParameterBase >(m, className, pybind11::buffer_protocol() )
     .def_buffer([](MatrixParameter<DataType> &mp) -> pybind11::buffer_info
                 {
                   return pybind11::buffer_info( mp.data(),

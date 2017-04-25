@@ -53,7 +53,7 @@ void setData( VectorParameter<DataType> & param, pybind11::array_t<DataType> & v
 template<typename DataType>
 void exportVectorParameter( pybind11::module & m, char const * className )
 {
-  pybind11::class_<VectorParameter< DataType>, ParameterBase >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
+  pybind11::class_<VectorParameter< DataType>, ParameterBase >(m, className, pybind11::buffer_protocol() )
   .def_buffer([](VectorParameter<DataType> &vp) -> pybind11::buffer_info
   {
     return pybind11::buffer_info( vp.data(),

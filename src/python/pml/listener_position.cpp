@@ -23,7 +23,7 @@ namespace pml
 #ifdef USE_PYBIND11
 void exportListenerPosition( pybind11::module & m)
 {
-  pybind11::class_<ListenerPosition, ParameterBase>( m, "ListenerPosition", pybind11::metaclass() )
+  pybind11::class_<ListenerPosition, ParameterBase>( m, "ListenerPosition" )
     .def_property_readonly_static( "staticType", [](pybind11::object /*self*/) {return ListenerPosition::staticType(); } )
     .def( pybind11::init<float, float, float>() )
     .def_property_readonly( "x", &ListenerPosition::x )
