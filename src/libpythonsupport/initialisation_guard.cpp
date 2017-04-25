@@ -2,10 +2,11 @@
 
 #include "initialisation_guard.hpp"
 
-// Use the pybind11 header to include Python.h
+// Use the pybind11 header to include Python.h (instead of doing this directly)
 // This is to overcome the pecularities of Python.h on Windows, 
 // which enforces linking to a debug version of the python library.
-#include <pybind11/common.h>
+// The pybind11 header already contains the magic to circumvent this.
+#include <pybind11/pybind11.h>
 
 namespace visr
 {
