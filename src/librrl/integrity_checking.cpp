@@ -103,7 +103,7 @@ namespace // unnamed namespace
   AudioConnectionCountTable fillTable( PortLookup<impl::AudioPortBaseImplementation>::PortTable const & ports )
   {
     AudioConnectionCountTable table;
-    for( impl::AudioPortBaseImplementation const * port : ports )
+    for( impl::AudioPortBaseImplementation* port : ports )
     {
       std::size_t const width = port->width();
       for( std::size_t chIdx(0); chIdx < width; ++chIdx )
@@ -132,7 +132,7 @@ namespace // unnamed namespace
 
     std::cout << "Local connection map:" << localConnections << "\n\n\n" << std::endl;
 
-    for( AudioConnectionMap::ValueType const & connection : localConnections )
+    for( AudioConnectionMap::value_type const & connection : localConnections )
     {
       AudioConnectionCountTable::iterator sendPortEntryIt = sendChannelTable.find( connection.first );
       if( sendPortEntryIt == sendChannelTable.end() )
