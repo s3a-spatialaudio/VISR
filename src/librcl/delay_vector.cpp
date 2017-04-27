@@ -75,8 +75,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
   if( controlInputs )
   {
     mGainInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "gainInput", *this, pml::VectorParameterConfig( numberOfChannels ) ) );
-    mGainInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "delayInput", *this ) );
-    mGainInput->setParameterConfig( pml::VectorParameterConfig( numberOfChannels ) );
+    mDelayInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "delayInput", *this, pml::VectorParameterConfig( numberOfChannels ) ) );
   }
 
   // Additional delay required by the interpolation method
