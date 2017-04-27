@@ -751,6 +751,13 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
     std::size_t const typeOffset = poolOffsetBytes;
     std::size_t typedChannelCount = 0;
     std::size_t const channelSizeBytes = efl::nextAlignedSize( blockSize*AudioSampleType::typeSize(sampleTypeId), alignment );
+    if( channelSizeBytes % AudioSampleType::typeSize(sampleTypeId) )
+    {
+      throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                              "Aligned channel stride is not a multiple of the sample size." );
+    }
+    std::size_t const channelSizeSamples = channelSizeBytes / AudioSampleType::typeSize(sampleTypeId);
+
     PortOffsetLookup const sendOffsets = allSendPortOffsets[sampleTypeId] ;
     PortOffsetLookup const receiveOffsets = allReceivePortOffsets[sampleTypeId];
 
@@ -759,7 +766,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
       std::size_t const portWidth = sendEntry.first->width();
       std::size_t const channelOffset = sendEntry.second;
       std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
-      sendEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeBytes );
+      sendEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeSamples );
 
       typedChannelCount += portWidth;
     }
@@ -779,7 +786,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
       }
       std::size_t const channelOffset = receiveEntry.second;
       std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
-      receiveEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeBytes );
+      receiveEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeSamples );
     }
   }
   if( poolOffsetBytes != totalAudioPoolSize )
