@@ -61,19 +61,20 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
   }
   checkMessages.clear();
 
-  AudioConnectionMap audioConnections;
-  ParameterConnectionMap parameterConnections;
+  // TODO: homogenise interfaces between parameter and audio connection maps.
+  AudioConnectionMap const originalAudioConnections( mFlow, true );
+  AudioConnectionMap const flatAudioConnections = originalAudioConnections.resolvePlaceholders();
 
-  bool const initParamResult = initialiseParameterInfrastructure( checkMessages, parameterConnections );
-  if( not initParamResult )
+  ParameterConnectionMap originalParameterConnections;
+  if( not fillRecursive( originalParameterConnections, mFlow, checkMessages ) )
   {
-    std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
-    throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
+    throw std::runtime_error(checkMessages.str() );
   }
-  bool const initAudioResult = initialiseAudioConnections( checkMessages, audioConnections );
+  ParameterConnectionMap const flatParameterConnections = resolvePlaceholders( originalParameterConnections );
 
-  // TODO: Come with an updated connection list
-
+  AudioConnectionMap adjustedAudioConnections;
+  bool const initAudioResult = initialiseAudioConnections( checkMessages, flatAudioConnections,
+                                                           adjustedAudioConnections);
   if( not initAudioResult )
   {
     // TODO: Devise other ways to transport messages.
@@ -82,9 +83,19 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
   }
 
 
+  ParameterConnectionMap adjustedParameterConnections;
+  bool const initParamResult = initialiseParameterInfrastructure( checkMessages, flatParameterConnections,
+                                                                  adjustedParameterConnections);
+  if( not initParamResult )
+  {
+    std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
+    throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
+  }
+
+
 
   // TODO: Use the full list of components 
-  bool const initScheduleResult = initialiseSchedule( checkMessages, audioConnections, parameterConnections );
+  bool const initScheduleResult = initialiseSchedule( checkMessages, adjustedAudioConnections, adjustedParameterConnections );
   if( not initScheduleResult )
   {
     std::cout << "Messages during schedule computation: " << checkMessages.str() << std::endl;
@@ -277,7 +288,7 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
   return mPlaybackChannels.size();
 }
 
-bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap & paramConnections )
+bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections )
 {
   bool result = true;
   mCommunicationProtocols.clear();
@@ -319,18 +330,8 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     }
     return result;
   }
-  // - Recursively iterate over all composite components
-  // - Traverse all connections from the receive end to check whether they contain loops.
-  ParameterConnectionMap allConnections;
-  bool res = fillRecursive( allConnections, mFlow, messages );
-  if( not res )
-  {
-    messages << "AudioSignalFlow: Parameter connections are inconsistent.\n";
-    return false;
-  }
-  ParameterConnectionMap concreteConnections = resolvePlaceholders( allConnections );
-
-  ParameterConnectionGraph const connectionGraph( concreteConnections );
+  // Composite component case starts here.
+  ParameterConnectionGraph const connectionGraph( originalConnections );
   for( ParameterConnectionGraph::ConnectedPorts const & connection : connectionGraph.connectedPorts() )
   {
     // First check the connection topology.
@@ -448,8 +449,10 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       result = false;
     }
   }
-  // TODO: Set up top-level parameter ports. The behaviour depends whether the flow is atomic or composite.
-  paramConnections = concreteConnections; // Set the output parameter directly before return.
+
+  // At the moment, there are no infrastructure modifications.
+  // Therefore the connection map is passed back unaltered.
+  finalConnections = originalConnections;
   return result;
 }
 
@@ -606,7 +609,7 @@ ChannelVector sendChannels( impl::AudioPortBaseImplementation const * receivePor
 {
   ConnectionList receivingConnections;
   std::copy_if( flatConnections.begin(), flatConnections.end(), std::back_inserter( receivingConnections ),
-      [receivePort]( AudioConnectionMap::ValueType const & conn ) { return conn.second.port() == receivePort; } );
+      [receivePort]( AudioConnectionMap::value_type const & conn ) { return conn.second.port() == receivePort; } );
   if( receivingConnections.size() != receivePort->width() )
   {
     std::stringstream str; str << "AudioSignalFlow: Number of incoming channels (" << receivingConnections.size() << ") to receive port " << fullyQualifiedName( *receivePort )
@@ -644,34 +647,170 @@ std::size_t calcBufferRequirement( impl::AudioPortBaseImplementation const * por
 
 } // namespace unnamed.
 
-bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, AudioConnectionMap & audioConnections )
+bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections )
 {
   mTopLevelAudioInputs.clear();
   mTopLevelAudioOutputs.clear();
   mCaptureChannels.clear();
   mPlaybackChannels.clear();
+
+  AudioConnectionMap tmpConnections; // To be assigned to or swapped with finalConnections after the initialisation was successful.
+
   bool result = true; // Result variable, is set to false if an error occurs.
-  PortLookup<impl::AudioPortBaseImplementation> const allPorts( mFlow, true /*recursive*/ );
-  std::cout << "All ports:\n" << allPorts << "\n\n" << std::endl;
 
-  AudioConnectionMap allConnections;
 
-  std::stringstream errMessages;
-  if( not allConnections.fill( mFlow, errMessages, true/*recursive*/ ) )
-  {
-    throw std::logic_error( "AudioSignalFlow: Audio connections are inconsistent." + errMessages.str() );
-  }
-
-  std::cout << "All audio connections:\n" << allConnections << "\n\n" << std::endl;
-
-  // TODO: catch exceptions
-  AudioConnectionMap const flatConnections = allConnections.resolvePlaceholders();
-
-  std::cout << "Flat audio connections:\n" << flatConnections << "\n\n" << std::endl;
-
+  // Collect all used audio sample types.
+  std::set<AudioSampleType::Id> usedSampleTypes;
+  std::transform( originalConnections.begin(), originalConnections.end(),
+    std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType(); } );
 
   std::size_t const alignment = cVectorAlignmentBytes; // Maybe replace by a function that returns the current alignment setting.
   std::size_t const blockSize = mFlow.period();
+  std::size_t totalAudioPoolSize = 0;
+
+  using PortOffsetLookup = std::map<impl::AudioPortBaseImplementation *, std::size_t>;
+  std::map<AudioSampleType::Id, PortOffsetLookup> allSendPortOffsets;
+  std::map<AudioSampleType::Id, PortOffsetLookup> allReceivePortOffsets;
+
+  for( AudioSampleType::Id sampleTypeId : usedSampleTypes )
+  {
+    PortOffsetLookup sendOffsets;
+    PortOffsetLookup receiveOffsets;
+    AudioConnectionMap typedConnections;
+    std::copy_if(originalConnections.begin(), originalConnections.end(), std::inserter( typedConnections, typedConnections.begin()),
+                 [sampleTypeId]( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType() == sampleTypeId; } );
+    std::vector<impl::AudioPortBaseImplementation*> allSendPorts;
+    std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter(allSendPorts), []( AudioConnectionMap::value_type const & conn ){ return conn.first.port();} );
+    std::sort( allSendPorts.begin(), allSendPorts.end() ); // Sorting is a required before unique.
+    allSendPorts.erase( std::unique( allSendPorts.begin(), allSendPorts.end() ), allSendPorts.end() ); // remove duplicates.
+    // Partition the send ports such that the external ports come first.
+    std::partition( allSendPorts.begin(), allSendPorts.end(), [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
+
+    std::size_t sendPortOffset = 0;
+    for( impl::AudioPortBaseImplementation * sendPort: allSendPorts )
+    {
+      sendOffsets.insert( std::make_pair( sendPort, sendPortOffset ) );
+      sendPortOffset += sendPort->width();
+    }
+    // sendPortOffset now contains the port index one past the all original send ports.
+
+    // Now check the receive ports and see where we need routing components to get the receive ports continuous.
+    std::vector<impl::AudioPortBaseImplementation*> allReceivePorts;
+    std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter(allReceivePorts), []( AudioConnectionMap::value_type const & conn ){ return conn.second.port();} );
+    std::sort( allReceivePorts.begin(), allReceivePorts.end() ); // Sorting is a required before unique.
+    allReceivePorts.erase( std::unique( allReceivePorts.begin(), allReceivePorts.end() ), allReceivePorts.end() );
+    // Partition the send ports such that the external ports come first.
+    std::partition( allReceivePorts.begin(), allReceivePorts.end(), [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
+    for( impl::AudioPortBaseImplementation * receivePort: allReceivePorts )
+    {
+      if( receivePort->width() == 0 ) // Zero-wdth port are legal, but we need to skip the computation (sends[0] would be illegal)
+      {
+        continue;
+      }
+      AudioConnectionMap localConnections; // all connections ending in receivePort
+      std::copy_if( typedConnections.begin(), typedConnections.end(), std::inserter(localConnections, localConnections.begin()),
+                    [receivePort](AudioConnectionMap::value_type const & connection ){ return connection.second.port() == receivePort; } );
+
+      ChannelVector sends = sendChannels( receivePort, localConnections ); // extracting by receivePort would not be necessary (already done for localConnections)
+      if( contiguousRange(sends) )
+      {
+        impl::AudioPortBaseImplementation * correspondingSendPort = sends[0].port();
+        auto const sendLookupIt = sendOffsets.find( correspondingSendPort );
+        if( sendLookupIt == sendOffsets.end() )
+        {
+          throw std::logic_error("Internal logic error: Send port not found in offset lookup table.");
+        }
+        std::size_t const receivePortOffset = sendLookupIt->second + sends[0].channel();
+
+        receiveOffsets.insert( std::make_pair( receivePort, receivePortOffset ) );
+        tmpConnections.insert( localConnections.begin(), localConnections.end() );
+      }
+      else
+      {
+        // Create index list
+        // Instantiate internal routing component
+        // Create connection entries t
+        // Add entry to sendPortOffsets,
+        // add width to sendPortOffset counter
+
+        throw std::runtime_error( "Not implemented yet");
+      }
+    }
+    allSendPortOffsets.insert( std::make_pair(sampleTypeId, std::move(sendOffsets) ) );
+    allReceivePortOffsets.insert( std::make_pair(sampleTypeId, std::move(receiveOffsets) ) );
+
+    std::size_t const typedPoolSize =  sendPortOffset * efl::nextAlignedSize( blockSize*AudioSampleType::typeSize(sampleTypeId), alignment );
+    totalAudioPoolSize += typedPoolSize;
+  }
+  mAudioSignalPool.reset( new AudioSignalPool( totalAudioPoolSize, alignment ) );
+
+  // Second run: Do the actual buffer assignment (for contiguous input and output ranges)
+  std::size_t poolOffsetBytes = 0;
+  for( AudioSampleType::Id sampleTypeId : usedSampleTypes )
+  {
+    std::size_t const typeOffset = poolOffsetBytes;
+    std::size_t typedChannelCount = 0;
+    std::size_t const channelSizeBytes = efl::nextAlignedSize( blockSize*AudioSampleType::typeSize(sampleTypeId), alignment );
+    PortOffsetLookup const sendOffsets = allSendPortOffsets[sampleTypeId] ;
+    PortOffsetLookup const receiveOffsets = allReceivePortOffsets[sampleTypeId];
+
+    for( auto const sendEntry : sendOffsets )
+    {
+      std::size_t const portWidth = sendEntry.first->width();
+      std::size_t const channelOffset = sendEntry.second;
+      std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
+      sendEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeBytes );
+
+      typedChannelCount += portWidth;
+    }
+    poolOffsetBytes += typedChannelCount * channelSizeBytes;
+
+    // Same for receive ports.
+    for( auto const receiveEntry : receiveOffsets )
+    {
+      impl::AudioPortBaseImplementation * port = receiveEntry.first;
+      std::size_t const portWidth = port->width();
+      // Extra sanity checking whether the insertion of internal signal routing primitives has been successful.
+      ChannelVector sends = sendChannels( port, tmpConnections );
+      if( not contiguousRange( sends ) )
+      {
+        throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+            "Non-contiguous port input range despite previous modification stage." );
+      }
+      std::size_t const channelOffset = receiveEntry.second;
+      std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
+      receiveEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeBytes );
+    }
+  }
+  if( poolOffsetBytes != totalAudioPoolSize )
+  {
+    throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error: "
+        "Size of audio channel buffers differs from previously calculated value." );
+  }
+
+  mTopLevelAudioInputs.clear();
+  std::transform( tmpConnections.begin(), tmpConnections.end(), std::back_inserter(mTopLevelAudioInputs),
+    []( AudioConnectionMap::value_type const & conn ){ return conn.first.port();} );
+  std::sort(mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.end());
+  mTopLevelAudioInputs.erase( std::unique(mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.end()), mTopLevelAudioInputs.end() );
+  auto const topLevelInputsEnd = std::partition(mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.end(),
+        [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
+  mTopLevelAudioInputs.erase( topLevelInputsEnd, mTopLevelAudioInputs.end() );
+
+  mTopLevelAudioOutputs.clear();
+  std::transform( tmpConnections.begin(), tmpConnections.end(), std::back_inserter(mTopLevelAudioOutputs),
+    []( AudioConnectionMap::value_type const & conn ){ return conn.second.port();} );
+  std::sort(mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.end());
+  mTopLevelAudioOutputs.erase( std::unique(mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.end()), mTopLevelAudioOutputs.end() );
+  auto const topLevelOutputsEnd = std::partition(mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.end(),
+        [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
+  mTopLevelAudioOutputs.erase( topLevelOutputsEnd, mTopLevelAudioOutputs.end() );
+
+  finalConnections = tmpConnections;
+
+#if 0
+  PortLookup<impl::AudioPortBaseImplementation> const allPorts( mFlow, true /*recursive*/ );
+
 
   // Count the buffer size
   std::size_t totalBufferSize = 0;
@@ -684,7 +823,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
   {
     if( mFlow.isComposite() )
     {
-      ChannelVector sends = sendChannels( port, flatConnections );
+      ChannelVector sends = sendChannels( port, originalConnections );
       if( not contiguousRange( sends ) )
       {
         totalBufferSize += calcBufferRequirement( port, blockSize, alignment );
@@ -697,24 +836,20 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
   }
   for( impl::AudioPortBaseImplementation const * port : allPorts.concreteReceivePorts() )
   {
-    ChannelVector sends = sendChannels( port, flatConnections );
+    ChannelVector sends = sendChannels( port, originalConnections );
     if( not contiguousRange( sends ) )
     {
       totalBufferSize += calcBufferRequirement( port, blockSize, alignment );
     }
   }
   mAudioSignalPool.reset( new AudioSignalPool( totalBufferSize, alignment ) );
+#endif
 
-//  std::size_t captureChannelsRunningIndex = 0;
-//  std::size_t playbackChannelsRunningIndex = 0;
 
+#if 0
   // For the actual assignment, operate per sample type
-  // Collect all audio sample types used.
-  std::set<AudioSampleType::Id> usedSampleTypes;
-  std::transform( allPorts.allNonPlaceholderReceivePorts().begin(), allPorts.allNonPlaceholderReceivePorts().end(),
-    std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( impl::AudioPortBaseImplementation const * port ) { return port->sampleType(); } );
-  std::transform( allPorts.allNonPlaceholderSendPorts().begin(), allPorts.allNonPlaceholderSendPorts().end(),
-    std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( impl::AudioPortBaseImplementation const * port ) { return port->sampleType(); } );
+
+
 
   std::size_t currentOffset = 0;
   for( AudioSampleType::Id sampleType : usedSampleTypes )
@@ -762,7 +897,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
     for( impl::AudioPortBaseImplementation * port : typedReceivePorts )
     {
       port->setChannelStrideSamples( channelStrideSamples );
-      ChannelVector const sends = sendChannels( port, flatConnections );
+      ChannelVector const sends = sendChannels( port, originalConnections );
       if( port->width() == 0 )
       {
         continue; // Ports of width zero are permitted but require no handling.
@@ -882,6 +1017,9 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
   mCaptureChannels.clear(); mCaptureChannels.reserve( numberOfCaptureChannels );
   mPlaybackChannels.clear(); mPlaybackChannels.reserve( numberOfPlaybackChannels );
 
+#endif
+
+  // Not sure whether we want to keep that.
   std::size_t externalCaptureChannelIdx = 0;
   for( impl::AudioPortBaseImplementation * port : mTopLevelAudioInputs )
   {
@@ -904,8 +1042,6 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
       mPlaybackChannels.push_back( basePointer + chIdx * stride );
     }
   }
-  audioConnections = flatConnections;
-
 
   //// Collect all audio sample types used.
   //std::set<AudioSampleType::Id> usedSampleTypes;

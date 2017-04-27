@@ -197,7 +197,7 @@ public:
 
 
 private:
-  bool initialiseAudioConnections( std::ostream & messages, AudioConnectionMap & audioConnections );
+  bool initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections);
 
   /**
     * Initialise the parameter infrastructure.
@@ -205,7 +205,7 @@ private:
     * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
     * @param [out] parameterConnections Connection map to be filled during the initialisation process.
     */
-  bool initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap & parameterConnections );
+  bool initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections );
 
   /**
    * Initialise the schedule for executing the contained elements.
@@ -233,7 +233,7 @@ private:
 
   /**
    * The signal flow handled by this object.
-   * Can be either an atomic or a (hierachical) composite component/
+   * Can be either an atomic or a (hierarchical) composite component/
    */
   impl::ComponentImplementation & mFlow;
 
