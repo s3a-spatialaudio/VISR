@@ -19,7 +19,7 @@ namespace visr
 namespace rcl
 {
 
-  UdpSender::UdpSender( SignalFlowContext& context,
+  UdpSender::UdpSender( SignalFlowContext const & context,
                         char const * name,
                         CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

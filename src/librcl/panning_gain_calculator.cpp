@@ -40,7 +40,7 @@ namespace visr
 namespace rcl
 {
 
-  PanningGainCalculator::PanningGainCalculator( SignalFlowContext& context,
+  PanningGainCalculator::PanningGainCalculator( SignalFlowContext const & context,
                                                 char const * name,
                                                 CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

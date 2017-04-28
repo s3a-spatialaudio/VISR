@@ -35,7 +35,7 @@ void exportDelayVector( pybind11::module & m )
     .value( "CubicLagrange", DelayVector::InterpolationType::CubicLagrange )
     ;
 
-  dVec.def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>(),
+  dVec.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
     .def( "setup", static_cast<void(DelayVector::*)( std::size_t, std::size_t, SampleType, 
                                                      DelayVector::InterpolationType, bool, SampleType, SampleType)>(&DelayVector::setup), pybind11::arg("numberOfChannels"),

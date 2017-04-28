@@ -70,7 +70,7 @@ ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0
   std::vector<objectmodel::PointSourceWithReverb::LateReverb> mPreviousLateReverbs;
 
 
-  ReverbParameterCalculator::ReverbParameterCalculator( SignalFlowContext& context,
+  ReverbParameterCalculator::ReverbParameterCalculator( SignalFlowContext const & context,
                                                         char const * name,
                                                         CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

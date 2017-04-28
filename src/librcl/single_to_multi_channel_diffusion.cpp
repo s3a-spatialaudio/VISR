@@ -19,7 +19,7 @@ namespace visr
 namespace rcl
 {
 
-  SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( SignalFlowContext& context,
+  SingleToMultichannelDiffusion::SingleToMultichannelDiffusion( SignalFlowContext const & context,
                                                                 char const * name,
                                                                 CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

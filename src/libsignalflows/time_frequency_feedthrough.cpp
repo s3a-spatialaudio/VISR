@@ -7,7 +7,7 @@ namespace visr
 namespace signalflows
 {
 
-TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext & context,
+TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext const & context,
                                                     char const * name,
                                                     CompositeComponent * parent,
                                                     std::size_t numberOfChannels,

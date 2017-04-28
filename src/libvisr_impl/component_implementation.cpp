@@ -24,7 +24,7 @@ namespace impl
 {
 
 ComponentImplementation::ComponentImplementation( Component & component, 
-                                                  SignalFlowContext& context,
+                                                  SignalFlowContext const & context,
                                                   char const * componentName,
                                                   CompositeComponentImplementation * parent)
  : mComponent( component )

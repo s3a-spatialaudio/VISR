@@ -40,7 +40,7 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit LateReverbFilterCalculator( SignalFlowContext& context,
+  explicit LateReverbFilterCalculator( SignalFlowContext const & context,
                                        char const * name,
                                        CompositeComponent * parent = nullptr );
 

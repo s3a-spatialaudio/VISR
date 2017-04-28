@@ -31,7 +31,7 @@ public:
    * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
    * @param numInputs The number of signal vectors to be added.
    */
-  explicit Add( SignalFlowContext& context,
+  explicit Add( SignalFlowContext const & context,
                 char const * name,
                 CompositeComponent * parent,
 		std::size_t width,

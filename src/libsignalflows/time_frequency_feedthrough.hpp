@@ -25,7 +25,7 @@ namespace signalflows
 class TimeFrequencyFeedthrough: public CompositeComponent
 {
 public:
-  explicit TimeFrequencyFeedthrough( SignalFlowContext & context,
+  explicit TimeFrequencyFeedthrough( SignalFlowContext const & context,
                                      char const * name,
                                      CompositeComponent * parent,
                                      std::size_t numberOfChannels,

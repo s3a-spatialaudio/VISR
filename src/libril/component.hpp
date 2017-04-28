@@ -28,7 +28,7 @@ class ComponentImplementation;
 }
 
 /**
- *
+ * Base class for p
  *
  */
 class VISR_CORE_LIBRARY_SYMBOL Component
@@ -37,8 +37,9 @@ public:
 
   /**
    * Constructor, constructs a component.
+   * @param context Ob
    */
-  explicit Component( SignalFlowContext& context,
+  explicit Component( SignalFlowContext const & context,
                       char const * componentName,
                       CompositeComponent * parent );
 
@@ -46,7 +47,7 @@ public:
    * Constructor.
    * Convenvience function, accepts a standard string instead of a C chararacter pointer.
    */
-  explicit Component( SignalFlowContext& context,
+  explicit Component( SignalFlowContext const & context,
                       std::string const & componentName,
                       CompositeComponent * parent);
 
@@ -164,11 +165,6 @@ public:
   impl::ComponentImplementation const & implementation() const;
 
 protected:
-
-  SignalFlowContext & context();
-  SignalFlowContext const & context( ) const;
-
-protected:
   /**
    * Constructor that receives the internal implementation object.
    * This overload has to be called by the other constructors (including those of subclasses) to make 
@@ -190,7 +186,7 @@ private:
 template<typename ... MessageArgs >
 inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... args )
 {
-  status( statusId, detail::composeMessageString( args ... ) );
+  status( statusId, detail::composeMessageString( args ... ).c_str() );
 }
 
 } // namespace visr

@@ -49,7 +49,7 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpReceiver( SignalFlowContext& context,
+  explicit UdpReceiver( SignalFlowContext const & context,
                         char const * name,
                         CompositeComponent * parent = nullptr );
 

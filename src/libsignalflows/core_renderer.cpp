@@ -28,15 +28,15 @@ namespace visr
 namespace signalflows
 {
 
-CoreRenderer::CoreRenderer( SignalFlowContext & context,
-                                    char const * name,
-                                    CompositeComponent * parent,
-                                    panning::LoudspeakerArray const & loudspeakerConfiguration,
-                                    std::size_t numberOfInputs,
-                                    std::size_t numberOfOutputs,
-                                    std::size_t interpolationPeriod,
-                                    efl::BasicMatrix<SampleType> const & diffusionFilters,
-                                    std::string const & trackingConfiguration )
+CoreRenderer::CoreRenderer( SignalFlowContext const & context,
+                            char const * name,
+                            CompositeComponent * parent,
+                            panning::LoudspeakerArray const & loudspeakerConfiguration,
+                            std::size_t numberOfInputs,
+                            std::size_t numberOfOutputs,
+                            std::size_t interpolationPeriod,
+                            efl::BasicMatrix<SampleType> const & diffusionFilters,
+                            std::string const & trackingConfiguration )
  : CompositeComponent( context, name, parent )
  , mObjectSignalInput( "audioIn", *this )
  , mLoudspeakerOutput( "audioOut", *this )

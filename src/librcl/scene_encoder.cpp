@@ -16,7 +16,7 @@ namespace visr
 namespace rcl
 {
 
-  SceneEncoder::SceneEncoder( SignalFlowContext& context,
+  SceneEncoder::SceneEncoder( SignalFlowContext const & context,
                               char const * name,
                               CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

@@ -21,6 +21,14 @@ namespace visr
 namespace impl
 {
 
+CompositeComponentImplementation::CompositeComponentImplementation( CompositeComponent & component,
+                                                                    SignalFlowContext const & context,
+                                                                    char const * componentName,
+                                                                    CompositeComponentImplementation * parent )
+ : ComponentImplementation( component, context, componentName, parent )
+{
+}
+
 CompositeComponentImplementation::~CompositeComponentImplementation()
 {
   for( auto comp : mComponents )

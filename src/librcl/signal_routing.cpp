@@ -11,7 +11,7 @@ namespace visr
 namespace rcl
 {
 
-  SignalRouting::SignalRouting( SignalFlowContext& context,
+  SignalRouting::SignalRouting( SignalFlowContext const & context,
                                 char const * name,
                                 CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

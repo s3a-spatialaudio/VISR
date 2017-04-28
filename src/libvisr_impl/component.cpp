@@ -20,7 +20,7 @@ Component::Component( impl::ComponentImplementation * impl )
 {
 }
 
-Component::Component( SignalFlowContext& context,
+Component::Component( SignalFlowContext const & context,
                       char const * componentName,
                       CompositeComponent * parent)
  : Component( new impl::ComponentImplementation( *this, context, componentName,
@@ -28,7 +28,7 @@ Component::Component( SignalFlowContext& context,
 {
 }
 
-Component::Component( SignalFlowContext& context,
+Component::Component( SignalFlowContext const & context,
                       std::string const & componentName,
                       CompositeComponent * parent)
  : Component( context, componentName.c_str(), parent )

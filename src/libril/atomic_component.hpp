@@ -27,9 +27,9 @@ public:
    * @param name Null-terminated character string containing the name. Name must be unique within the containing composite component (if there is one).
    * @param parent A composite component to contain this atom, If it is a null pointer (the default), then this component is at the top level.
    */
-  explicit /*VISR_CORE_LIBRARY_SYMBOL*/ AtomicComponent( SignalFlowContext& context,
-                                                     char const * name,
-                                                     CompositeComponent * parent = nullptr );
+  explicit /*VISR_CORE_LIBRARY_SYMBOL*/ AtomicComponent( SignalFlowContext const & context,
+                                                         char const * name,
+                                                         CompositeComponent * parent = nullptr );
 
   /**
    * Deleted copy constructor to avoid copying.

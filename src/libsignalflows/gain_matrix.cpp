@@ -10,7 +10,7 @@ namespace visr
 namespace signalflows
 {
 
-GainMatrix::GainMatrix( SignalFlowContext & context,
+GainMatrix::GainMatrix( SignalFlowContext const & context,
                         const char * name,
                         CompositeComponent * parent, 
                         std::size_t numberOfInputs,

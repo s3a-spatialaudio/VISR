@@ -22,7 +22,7 @@ namespace visr
 namespace rcl
 {
 
-TimeFrequencyTransform::TimeFrequencyTransform( SignalFlowContext& context,
+TimeFrequencyTransform::TimeFrequencyTransform( SignalFlowContext const & context,
                                                 char const * name,
                                                 CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

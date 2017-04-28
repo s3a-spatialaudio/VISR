@@ -44,7 +44,7 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit FirFilterMatrix( SignalFlowContext& context,
+  explicit FirFilterMatrix( SignalFlowContext const & context,
                             char const * name,
                             CompositeComponent * parent = nullptr );
 

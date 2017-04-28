@@ -22,7 +22,7 @@ namespace visr
 namespace rcl
 {
 
-  DelayVector::DelayVector( SignalFlowContext& context,
+  DelayVector::DelayVector( SignalFlowContext const & context,
                             char const * name,
                             CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

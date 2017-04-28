@@ -16,7 +16,7 @@ namespace visr
 namespace rcl
 {
 
-  UdpReceiver::UdpReceiver( SignalFlowContext& context,
+  UdpReceiver::UdpReceiver( SignalFlowContext const & context,
                             char const * name,
                             CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

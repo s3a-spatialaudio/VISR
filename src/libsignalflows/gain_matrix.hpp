@@ -19,7 +19,7 @@ namespace signalflows
 class GainMatrix: public CompositeComponent
 {
 public:
-  explicit GainMatrix( SignalFlowContext & context,
+  explicit GainMatrix( SignalFlowContext const & context,
                        const char * name,
                        CompositeComponent * parent,
                        std::size_t numberOfInputs, 

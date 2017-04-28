@@ -11,7 +11,7 @@ namespace visr
 namespace rcl
 {
 
-  GainMatrix::GainMatrix( SignalFlowContext& context,
+  GainMatrix::GainMatrix( SignalFlowContext const & context,
                           char const * name,
                           CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

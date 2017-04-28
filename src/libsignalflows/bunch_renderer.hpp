@@ -49,7 +49,7 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit BunchRenderer( SignalFlowContext & context,
+  explicit BunchRenderer( SignalFlowContext const & context,
                              char const * name,
                              CompositeComponent * parent,
                              panning::LoudspeakerArray const & loudspeakerConfiguration,

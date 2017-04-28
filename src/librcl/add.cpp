@@ -18,7 +18,7 @@ namespace rcl
 {
 
 
-Add::Add( SignalFlowContext& context,
+Add::Add( SignalFlowContext const & context,
           char const * name,
           CompositeComponent * parent,
 	  std::size_t width,

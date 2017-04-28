@@ -7,9 +7,9 @@
 namespace visr
 {
 
-CompositeComponent::CompositeComponent( SignalFlowContext& context,
+CompositeComponent::CompositeComponent( SignalFlowContext const & context,
                                         char const * name,
-                                         CompositeComponent * parent /*= nullptr*/ )
+                                        CompositeComponent * parent /*= nullptr*/ )
  : Component( new impl::CompositeComponentImplementation( *this, context, name,
                     (parent == nullptr) ? nullptr : &(parent->implementation()) ) )
 {

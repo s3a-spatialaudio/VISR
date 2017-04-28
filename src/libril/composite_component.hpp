@@ -39,7 +39,7 @@ public:
   using ChannelList = visr::ChannelList;
   //@}
 
-  explicit CompositeComponent( SignalFlowContext& context,
+  explicit CompositeComponent( SignalFlowContext const & context,
                                char const * name,
                                CompositeComponent * parent = nullptr );
 

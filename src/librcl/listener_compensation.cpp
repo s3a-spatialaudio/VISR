@@ -41,7 +41,7 @@ namespace visr
 {
 namespace rcl
 {
-  ListenerCompensation::ListenerCompensation( SignalFlowContext& context,
+  ListenerCompensation::ListenerCompensation( SignalFlowContext const & context,
                                               char const * name,
                                               CompositeComponent * parent /*= nullptr*/ )//constructor
   : AtomicComponent( context, name, parent )

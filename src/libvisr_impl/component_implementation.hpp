@@ -41,9 +41,9 @@ public:
   friend class CompositeComponentImplementation; // For unsetting the parent member during destruction.
   
   /*VISR_CORE_LIBRARY_SYMBOL*/ explicit ComponentImplementation( visr::Component & component,
-                                    SignalFlowContext& context,
-                                    char const * componentName,
-                                    CompositeComponentImplementation * parent );
+                                                                 SignalFlowContext const & context,
+                                                                 char const * componentName,
+                                                                 CompositeComponentImplementation * parent );
 
   /**
    *
@@ -236,7 +236,6 @@ public:
   visr::Component const & component() const { return mComponent; }
   //@}
 
-  SignalFlowContext & context() { return mContext; }
   SignalFlowContext const & context( ) const { return mContext; }
 
 private:
@@ -270,7 +269,7 @@ private:
    */
   visr::Component & mComponent;
 
-  SignalFlowContext & mContext;
+  SignalFlowContext const & mContext;
 
   /**
    * Parameter port subsystem

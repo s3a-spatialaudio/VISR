@@ -11,7 +11,7 @@ namespace visr
 namespace rcl
 {
 
-FirFilterMatrix::FirFilterMatrix( SignalFlowContext& context,
+FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
                                   char const * name,
                                   CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

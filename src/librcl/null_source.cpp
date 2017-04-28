@@ -10,7 +10,7 @@ namespace rcl
 {
 
 
-  NullSource::NullSource( SignalFlowContext& context,
+  NullSource::NullSource( SignalFlowContext const & context,
                           char const * name,
                           CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

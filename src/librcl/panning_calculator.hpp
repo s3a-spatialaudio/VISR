@@ -60,9 +60,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PanningCalculator( SignalFlowContext& context,
-                                  char const * name,
-                                  CompositeComponent * parent = nullptr );
+  explicit PanningCalculator( SignalFlowContext const & context,
+                              char const * name,
+                              CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor

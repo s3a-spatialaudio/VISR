@@ -22,7 +22,7 @@ namespace signalflows
 void exportCoreRenderer( pybind11::module& m )
 {
   pybind11::class_<::visr::signalflows::CoreRenderer, CompositeComponent>( m, "CoreRenderer" )
-    .def( pybind11::init<SignalFlowContext &, char const *, CompositeComponent *,
+    .def( pybind11::init<SignalFlowContext const &, char const *, CompositeComponent *,
       panning::LoudspeakerArray const &, std::size_t, std::size_t, std::size_t,
         efl::BasicMatrix<SampleType> const &, std::string const &>(),
         pybind11::arg("context"), pybind11::arg( "name" ),

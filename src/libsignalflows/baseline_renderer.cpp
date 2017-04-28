@@ -27,7 +27,7 @@ namespace visr
 namespace signalflows
 {
 
-BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
+BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
   char const * name,
   CompositeComponent * parent,
   panning::LoudspeakerArray const & loudspeakerConfiguration,
@@ -40,7 +40,7 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
     std::string(), 4242, std::string(), false )
 {}
 
-BaselineRenderer::BaselineRenderer( SignalFlowContext & context,
+BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
                                     char const * name,
                                     CompositeComponent * parent,
                                     panning::LoudspeakerArray const & loudspeakerConfiguration,
