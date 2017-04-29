@@ -18,7 +18,7 @@ namespace rrl
 {
 
 std::unique_ptr<AtomicComponent> createSignalRoutingComponent( AudioSampleType::Id sampleType,
-                                                               SignalFlowContext& context,
+                                                               SignalFlowContext const & context,
                                                                char const * name,
                                                                CompositeComponent * parent,
                                                                std::size_t inputWidth,
@@ -40,7 +40,7 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SignalRoutingInternal( SignalFlowContext& context,
+  explicit SignalRoutingInternal( SignalFlowContext const & context,
                                   char const * name,
                                   CompositeComponent * parent,
                                   std::size_t inputWidth,
