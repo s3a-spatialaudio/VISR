@@ -5,12 +5,9 @@
 
 #include <libril/constants.hpp>
 #include <libril/parameter_base.hpp>
-#ifdef USE_PYBIND11
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#else
-#include <boost/python.hpp>
-#endif
 
 namespace visr
 {
@@ -22,8 +19,6 @@ namespace python
 {
 namespace pml
 {
-
-#ifdef USE_PYBIND11
 
 namespace // unnamed
 {
@@ -100,7 +95,6 @@ void exportVectorParameters( pybind11::module & m)
   exportVectorParameter<float>( m, "VectorParameterFloat" );
   exportVectorParameter<double>( m, "VectorParameterDouble" );
 }
-#endif
 
 } // namepace pml
 } // namespace python

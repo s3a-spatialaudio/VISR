@@ -6,18 +6,10 @@
 #include <libril/parameter_type.hpp>
 
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#endif
-
 
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
-
 
 namespace visr
 {
@@ -25,8 +17,6 @@ namespace python
 {
 namespace visr
 {
-
-#ifdef USE_PYBIND11
 
 /**
  * Wrapper class to get access to the full functionality
@@ -49,12 +39,6 @@ void exportParameterBase( pybind11::module& m )
     .def( "type", &ParameterBase::type )
     ;
 }
-
-#else
-
-#error "ParameterBase binding not implemented for boost::python"
-
-#endif
 
 } // namepace visr
 } // namespace python

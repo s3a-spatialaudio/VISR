@@ -5,14 +5,7 @@
 // This is a temporary hack. Move LoudspeakerArray away from libpanning (and rename!)
 #include <libpanning/LoudspeakerArray.h>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#endif
-
-
 
 namespace visr
 {
@@ -23,7 +16,6 @@ namespace python
 namespace pml
 {
 
-#ifdef USE_PYBIND11
 void exportLoudspeakerArray( pybind11::module & m)
 {
   pybind11::class_<LoudspeakerArray>( m, "LoudspeakerArray" )
@@ -32,19 +24,8 @@ void exportLoudspeakerArray( pybind11::module & m)
     .def_property_readonly( "numberOfLoudspeakers", &LoudspeakerArray::getNumRegularSpeakers )
     .def( "loadXml", &LoudspeakerArray::loadXml )
     ;
-  }
-#else
-using namespace boost::python;
-
-void exportLoudspeakerArray()
-{
-  class_<LoudspeakerArray, boost::noncopyable>( "LoudspeakerArray", boost::python::init<std::string const &>( args("xmlFile") ) )
-    .add_property( "numberOfTriplets", &LoudspeakerArray::getNumTriplets )
-    .add_property( "numberOfLoudspeakers", &LoudspeakerArray::getNumRegularSpeakers )
-    .def( "loadXml", &LoudspeakerArray::loadXml )
-    ;
 }
-#endif
+
 } // namepace pml
 } // namespace python
 } // namespace visr

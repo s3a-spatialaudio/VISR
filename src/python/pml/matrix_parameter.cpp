@@ -8,14 +8,8 @@
 #include <libril/constants.hpp>
 #include <libril/parameter_base.hpp>
 
-
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#else
-#include <boost/python.hpp>
-#endif
-
 
 namespace visr
 {
@@ -27,9 +21,6 @@ namespace python
 {
 namespace pml
 {
-
-#ifdef USE_PYBIND11
-
 
 template<typename DataType>
 void exportBasicMatrix( pybind11::module & m, char const * className )
@@ -126,28 +117,6 @@ void exportMatrixParameters( pybind11::module & m)
   exportMatrixParameter<double>( m, "MatrixParameterDouble" );
 }
 
-#else
-using namespace boost::python;
-
-template<typename DataType>
-void exportMatrixParameter( char const * className )
-{
-  boost::python::class_<MatrixParameter< DataType > >( className, init<std::size_t>( args("alignment") ) )
-   .def( init<std::size_t, std::size_t, std::size_t>() )
-   .add_property( "numberOfRows", &MatrixParameter<DataType>::numberOfRows )
-   .add_property( "numberOfColumns", &MatrixParameter<DataType>::numberOfColumns )
-   .def( "resize", &MatrixParameter<DataType>::resize, (arg("numberOfRows"), arg("numberOfColumns") ) )
-   .def( "zeroFill", &MatrixParameter<DataType>::zeroFill )
-   .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = SampleType )
-    ;
-}
-  
-void exportMatrixParameters()
-{
-  exportMatrixParameter<float>( "MatrixParameterFloat" );
-  exportMatrixParameter<double>( "MatrixParameterDouble" );
-}
-#endif
 } // namepace pml
 } // namespace python
 } // namespace visr

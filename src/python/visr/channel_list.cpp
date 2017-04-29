@@ -4,11 +4,9 @@
 
 #include <libril/channel_list.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
-#endif
 
 #include <algorithm>
 #include <ciso646>
@@ -21,8 +19,6 @@ namespace python
 {
 namespace visr
 {
-
-#ifdef USE_PYBIND11
 
 void exportChannelList( pybind11::module& m )
 {
@@ -46,12 +42,6 @@ void exportChannelList( pybind11::module& m )
     .def( "__str__", [](ChannelList const & self ){ std::stringstream outStr; std::copy(self.begin(), self.end(), std::ostream_iterator<std::size_t>(outStr, ",") ); return outStr.str();} )
     ;
 }
-
-#else
-
-#error "ChannelList bindings not supported for boost::python"
-
-#endif
 
 } // namepace visr
 } // namespace python

@@ -6,14 +6,7 @@
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-
-#include <boost/noncopyable.hpp>
-#endif
 
 namespace visr
 {
@@ -22,7 +15,6 @@ namespace python
 namespace rcl
 {
 
-#ifdef USE_PYBIND11
 void exportDelayVector( pybind11::module & m )
 {
   using visr::rcl::DelayVector;
@@ -44,11 +36,9 @@ void exportDelayVector( pybind11::module & m )
           pybind11::arg("controlInputs") = false,
           pybind11::arg( "initialDelay" ) = 0.0f,
       pybind11::arg( "initialGain" ) = 1.0f )
-    // TO
+    // TODO: Add bindings for vector parameters.
     .def( "process", &DelayVector::process );
 }
-
-#endif
 
 } // namepace rcl
 } // namespace python

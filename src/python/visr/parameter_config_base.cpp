@@ -4,19 +4,10 @@
 
 #include <libril/parameter_config_base.hpp>
 
-
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#endif
-
 
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
-
 
 namespace visr
 {
@@ -24,8 +15,6 @@ namespace python
 {
 namespace visr
 {
-
-#ifdef USE_PYBIND11
 
 /**
  * Wrapper class to get access to the full functionality
@@ -63,12 +52,6 @@ void exportParameterConfigBase( pybind11::module& m )
 //    .def( "clone", &ParameterConfigBase::clone )
     ;
 }
-
-#else
-
-#error "ParameterConfigBase binding not implemented for boost::python"
-
-#endif
 
 } // namepace visr
 } // namespace python

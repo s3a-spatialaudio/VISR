@@ -3,9 +3,7 @@
 #ifndef VISR_PYTHON_PML_MATRIX_PARAMETER_HPP_INCLUDED
 #define VISR_PYTHON_PML_MATRIX_PARAMETER_HPP_INCLUDED
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#endif
 
 namespace visr
 {
@@ -17,11 +15,7 @@ namespace pml
 /**
  * Create Python bindings for pml::MatrixParameter<float> and pml::MatrixParameter<double>
  */
-#ifdef USE_PYBIND11
 void exportMatrixParameters( pybind11::module & m );
-#else
-void exportMatrixParameters();
-#endif
 
 } // namepace pml
 } // namespace python

@@ -5,14 +5,7 @@
 #include <libril/communication_protocol_type.hpp>
 #include <libril/parameter_type.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-
-#else
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#endif
 
 #include <ciso646>
 
@@ -22,8 +15,6 @@ namespace python
 {
 namespace visr
 {
-
-#ifdef USE_PYBIND11
 
 class CommunicationProtocolWrapper: public CommunicationProtocolBase
   {
@@ -66,7 +57,7 @@ void exportCommunicationProtocol( pybind11::module & m)
 
   ;
 }
-#endif
+
 } // namepace visr
 } // namespace python
 } // namespace visr

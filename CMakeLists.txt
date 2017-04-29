@@ -39,23 +39,6 @@ ENDIF(WIN32)
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
-# Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
-# INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
-option( BUILD_USE_PYBIND "Use pybind11 instead of boost::python" OFF )
-if( BUILD_USE_PYBIND )
-  include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
-  add_definitions( -DUSE_PYBIND11=1 )
-
-  # Enable the pybind11 cmake support
-  # TODO: Decide whether it's worth to use that in the future or remove it
-  # and the implementation files cmake_modules/pybind11Tools.cmake
-  # and cmake_modules/FindPythonLibsNew.cmake
-  # Support is activated in the CMakeLists.txt files of the respective
-  # Python binding modules.
-  include( pybind11Tools )
-endif( BUILD_USE_PYBIND )
-
-
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Copy the executables to the binary directory
@@ -140,6 +123,17 @@ IF( BUILD_PYTHON_BINDINGS )
   # Brute-force way make all the code position-independent if we use python bindings.
   # TODO: Devise more selective solution (separate sets of static libraries, etc.)
   SET( CMAKE_POSITION_INDEPENDENT_CODE True )
+
+  include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+
+  # Enable the pybind11 cmake support
+  # TODO: Decide whether it's worth to use that in the future or remove it
+  # and the implementation files cmake_modules/pybind11Tools.cmake
+  # and cmake_modules/FindPythonLibsNew.cmake
+  # Support is activated in the CMakeLists.txt files of the respective
+  # Python binding modules.
+  include( pybind11Tools )
+
 ENDIF( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
@@ -234,10 +228,6 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
 SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
-
-IF( ${BUILD_PYTHON_BINDINGS} AND NOT ${BUILD_USE_PYBIND} )
-  LIST( APPEND VISR_BOOST_LIBRARIES python ) 
-ENDIF( ${BUILD_PYTHON_BINDINGS} AND NOT ${BUILD_USE_PYBIND} )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
