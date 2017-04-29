@@ -1,18 +1,4 @@
-/* Copyright Institute of Sound and Vibration Research - All rights reserved */
-
-#if USE_PYBIND11
-
-#else
-// Define macro to control the behaviour of boost::python in case the boost libraries are linked statically.
-#if BOOST_USE_STATIC_LIBS
-#define BOOST_PYTHON_STATIC_LIB
-#endif
-
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include "boost/python/extract.hpp"
-#include "boost/python/numeric.hpp"
-#endif
+/* opyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -47,7 +33,7 @@ public:
    */
   explicit PanningGainCalculator( std::string arrayConfig);
 
-#ifndef USE_PYBIND11
+#if 0
   /**
    * Calculate the panning gains for the source position given Cartesian coordinates.
    * @param x X coordinate in meter.
@@ -108,9 +94,7 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   }
 }
 
-#ifdef USE_PYBIND11
-
-#else
+#if 0
 boost::python::list PanningGainCalculator::calculateGains(float x, float y, float z)
 {
   mSourcePositions[0] = visr::panning::XYZ(x, y, z);
@@ -135,12 +119,7 @@ boost::python::list PanningGainCalculator::calculateGains(float x, float y, floa
 } // namespace visr
 
 
-#ifdef USE_PYBIND11
-
-// @todo: Implement me!
-
-#else
-
+#if 0
 /**
  * Python module declaration to expose the class and its interface to Python.
  * @note The python module name must match the file name.
