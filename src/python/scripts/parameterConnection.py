@@ -14,7 +14,7 @@ import rcl
 import rrl
 
 # Usage in debugger:
-# exec(open("./parameterConnection.py").read())
+# exec(open("/home/andi/dev/visr/src/python/scripts/parameterConnection.py").read())
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,7 +35,7 @@ if True:
     # Instantiate a single delay line
     dl = rcl.DelayVector( c, "DL", cc )
     dl.setup(numberOfChannels, interpolationType=rcl.DelayVector.InterpolationType.Linear, initialDelay=0,
-         initialGain=1.0, interpolationSteps=blockSize)
+             controlInputs=True, initialGain=1.0, interpolationSteps=blockSize)
 
     aip = visr.AudioInputFloat( "globalAudioIn", cc, numberOfChannels )
     aop = visr.AudioOutputFloat( "globalAudioOut", cc, numberOfChannels )
@@ -59,7 +59,7 @@ else:
     # Instantiate the atomic flow
     dl = rcl.DelayVector( c, "DL" )
     dl.setup(numberOfChannels, interpolationType=rcl.DelayVector.InterpolationType.Linear, initialDelay=0,
-         initialGain=1.0, interpolationSteps=blockSize)
+         initialGain=1.0, interpolationSteps=blockSize, controlInputs = True )
 
     flow = rrl.AudioSignalFlow( dl )
 

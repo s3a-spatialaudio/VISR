@@ -23,7 +23,7 @@ def sph2cart(az,el,r):
     z = r*np.sin(el)
     return x,y,z
 
-blockSize = 64
+blockSize = 128
 samplingFrequency = 48000
 parameterUpdatePeriod = 1024
 
@@ -36,12 +36,12 @@ numBlocks = 1024;
 signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
 
-numOutputChannels = 22;
+numOutputChannels = 24;
 
 ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 
 #lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3.xml' )
+lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3_linear.xml' )
 # lc = pml.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
 diffFilters = pml.MatrixParameterFloat( 22, 512, 16 )

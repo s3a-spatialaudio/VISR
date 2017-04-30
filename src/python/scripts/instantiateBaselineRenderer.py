@@ -18,12 +18,12 @@ import rrl
 
 ctxt = visr.SignalFlowContext( 1024, 48000 )
 
-#lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-lc = pml.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+#lc = pml.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
-diffFilters = pml.MatrixParameterFloat( 39, 512, 16 )
+diffFilters = pml.BasicMatrixFloat( 39, 512, 16 )
 
-renderer1 = br = signalflows.BaselineRenderer( ctxt, 'renderer1', None, lc, 2, 41, 4096, diffFilters, '', 4242, '', False )
+renderer1 = signalflows.BaselineRenderer( ctxt, 'renderer1', None, lc, 2, 41, 4096, diffFilters, '', 4242, '', False )
 
 print( 'Created renderer.' )
 
