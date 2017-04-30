@@ -511,51 +511,6 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
 
 namespace // unnamed
 {
-#if 0
-/**
- * Helper function to sum up the audio channels of a list of ports.
- */
-std::size_t countAudioChannels( PortLookup<impl::AudioPortBaseImplementation>::PortTable const & portList )
-{
-  return std::accumulate( portList.begin( ), portList.end( ), static_cast<std::size_t>(0) ,
-    []( std::size_t acc, impl::AudioPortBaseImplementation const * port ) { return acc + port->width( ); } );
-}
-
-void assignConsecutiveIndices( impl::AudioPortBaseImplementation * port, std::size_t & index, rrl::CommunicationArea<SampleType> & commArea )
-{
-
-  std::size_t const portWidth = port->width( );
-  std::vector<std::size_t> indexVec( portWidth );
-  std::size_t idx = index;
-  std::generate( indexVec.begin( ), indexVec.end( ), [&idx] { return idx++; } );
-
-  // TODO: This part needs replacing (checking for consecutivity, rearranging if necessary, assigning of base pointer and stride)
-#ifdef NEW_AUDIO_CONNECTION
-  port->setAudioBasePointer( commArea.data( ) );
-  port->setAudioChannelStride( commArea.signalStride() );
-  port->assignCommunicationIndices( indexVec.begin( ), indexVec.end( ) );
-  index += portWidth;
-#endif
-}
-#endif
-// 
-template<typename DataType, typename SetType >
-bool inSet( DataType const & key, SetType set )
-{
-  return set.count(key) > 0;
-}
-
-
-/**
- * Data structure to hold an adjacency wish.
- * Format:
- * get<0>: The first send port of the requested adjacency pair
- * get<1>: The second send port of the requested adjacency pair.
- * get<2>: The receive port requesting the adjacent pair of send ports.
- */
-using AdjacencyWish = std::tuple<impl::AudioPortBaseImplementation const *, impl::AudioPortBaseImplementation const *, impl::AudioPortBaseImplementation const * >;
-
-using AdjacencyWishList = std::multiset<AdjacencyWish>;
 
 // Data structure holding an ordered list of 
 using ConnectionList = std::vector<std::pair<AudioChannel, AudioChannel > >;
@@ -589,6 +544,18 @@ bool contiguousRange( ChannelVector const & channels, PortOffsetLookup const & o
 /**
  * Internal function used to detect the first contiguity gap of the send ports
  */
+
+ /**
+ * Data structure to hold an adjacency wish.
+ * Format:
+ * get<0>: The first send port of the requested adjacency pair
+ * get<1>: The second send port of the requested adjacency pair.
+ * get<2>: The receive port requesting the adjacent pair of send ports.
+ */
+using AdjacencyWish = std::tuple<impl::AudioPortBaseImplementation const *, impl::AudioPortBaseImplementation const *, impl::AudioPortBaseImplementation const * >;
+
+using AdjacencyWishList = std::multiset<AdjacencyWish>;
+
 ChannelVector::const_iterator findContiguityGap( ChannelVector::const_iterator beginIt, ChannelVector::const_iterator endIt)
 {
   return std::adjacent_find( beginIt, endIt,
@@ -664,8 +631,17 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
 
   // Collect all used audio sample types.
   std::set<AudioSampleType::Id> usedSampleTypes;
+  if( mFlow.isComposite() )
+  {
   std::transform( originalConnections.begin(), originalConnections.end(),
     std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType(); } );
+  }
+  else
+  {
+    // For atomic top-level components, the sample types are determined by the audio ports of the component itself.
+    std::transform( mFlow.audioPorts().begin(), mFlow.audioPorts().end(),
+      std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( impl::AudioPortBaseImplementation const * port ) { return port->sampleType(); } );
+  }
 
   std::size_t const alignment = cVectorAlignmentBytes; // Maybe replace by a function that returns the current alignment setting.
   std::size_t const blockSize = mFlow.period();
@@ -678,131 +654,147 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
   {
     PortOffsetLookup sendOffsets;
     PortOffsetLookup receiveOffsets;
-    AudioConnectionMap typedConnections;
-    std::copy_if(originalConnections.begin(), originalConnections.end(), std::inserter( typedConnections, typedConnections.begin()),
-                 [sampleTypeId]( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType() == sampleTypeId; } );
-    std::vector<impl::AudioPortBaseImplementation*> allSendPorts;
-    std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter(allSendPorts), []( AudioConnectionMap::value_type const & conn ){ return conn.first.port();} );
-    std::sort( allSendPorts.begin(), allSendPorts.end() ); // Sorting is a required before unique.
-    allSendPorts.erase( std::unique( allSendPorts.begin(), allSendPorts.end() ), allSendPorts.end() ); // remove duplicates.
-    // Partition the send ports such that the external ports come first.
-    std::partition( allSendPorts.begin(), allSendPorts.end(), [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
-
     std::size_t sendPortOffset = 0;
-    for( impl::AudioPortBaseImplementation * sendPort: allSendPorts )
+
+    if( mFlow.isComposite() ) // Atomic, non-composite top-level components receive special treatment (below).
     {
-      sendOffsets.insert( std::make_pair( sendPort, sendPortOffset ) );
-      sendPortOffset += sendPort->width();
-    }
-    // sendPortOffset now contains the port index one past the all original send ports.
+      AudioConnectionMap typedConnections;
+      std::copy_if( originalConnections.begin(), originalConnections.end(), std::inserter( typedConnections, typedConnections.begin() ),
+                   [sampleTypeId]( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType() == sampleTypeId; } );
+      std::vector<impl::AudioPortBaseImplementation*> allSendPorts;
+      std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter( allSendPorts ), []( AudioConnectionMap::value_type const & conn ) { return conn.first.port(); } );
+      std::sort( allSendPorts.begin(), allSendPorts.end() ); // Sorting is a required before unique.
+      allSendPorts.erase( std::unique( allSendPorts.begin(), allSendPorts.end() ), allSendPorts.end() ); // remove duplicates.
+      // Partition the send ports such that the external ports come first.
+      std::partition( allSendPorts.begin(), allSendPorts.end(), []( impl::AudioPortBaseImplementation const * port ) { return isToplevelPort( port ); } );
 
-    // Now check the receive ports and see where we need routing components to get the receive ports continuous.
-    std::vector<impl::AudioPortBaseImplementation*> allReceivePorts;
-    std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter(allReceivePorts), []( AudioConnectionMap::value_type const & conn ){ return conn.second.port();} );
-    std::sort( allReceivePorts.begin(), allReceivePorts.end() ); // Sorting is a required before unique.
-    allReceivePorts.erase( std::unique( allReceivePorts.begin(), allReceivePorts.end() ), allReceivePorts.end() );
-    // Partition the send ports such that the external ports come first.
-    std::partition( allReceivePorts.begin(), allReceivePorts.end(), [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
-    for( impl::AudioPortBaseImplementation * receivePort: allReceivePorts )
+      for( impl::AudioPortBaseImplementation * sendPort : allSendPorts )
+      {
+        sendOffsets.insert( std::make_pair( sendPort, sendPortOffset ) );
+        sendPortOffset += sendPort->width();
+      }
+      // sendPortOffset now contains the port index one past the all original send ports.
+
+      // Now check the receive ports and see where we need routing components to get the receive ports continuous.
+      std::vector<impl::AudioPortBaseImplementation*> allReceivePorts;
+      std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter( allReceivePorts ), []( AudioConnectionMap::value_type const & conn ) { return conn.second.port(); } );
+      std::sort( allReceivePorts.begin(), allReceivePorts.end() ); // Sorting is a required before unique.
+      allReceivePorts.erase( std::unique( allReceivePorts.begin(), allReceivePorts.end() ), allReceivePorts.end() );
+      // Partition the send ports such that the external ports come first.
+      std::partition( allReceivePorts.begin(), allReceivePorts.end(), []( impl::AudioPortBaseImplementation const * port ) { return isToplevelPort( port ); } );
+      for( impl::AudioPortBaseImplementation * receivePort : allReceivePorts )
+      {
+        if( receivePort->width() == 0 ) // Zero-width port are legal, but we need to skip the computation (sends[0] would be illegal)
+        {
+          continue;
+        }
+        AudioConnectionMap localConnections; // all connections ending in receivePort
+        std::copy_if( typedConnections.begin(), typedConnections.end(), std::inserter( localConnections, localConnections.begin() ),
+                      [receivePort]( AudioConnectionMap::value_type const & connection ) { return connection.second.port() == receivePort; } );
+
+        ChannelVector sends = sendChannels( receivePort, localConnections ); // extracting by receivePort would not be necessary (already done for localConnections)
+        if( contiguousRange( sends, sendOffsets ) )
+        {
+          impl::AudioPortBaseImplementation * correspondingSendPort = sends[0].port();
+          auto const sendLookupIt = sendOffsets.find( correspondingSendPort );
+          if( sendLookupIt == sendOffsets.end() )
+          {
+            throw std::logic_error( "Internal logic error: Send port not found in offset lookup table." );
+          }
+          std::size_t const receivePortOffset = sendLookupIt->second + sends[0].channel();
+
+          receiveOffsets.insert( std::make_pair( receivePort, receivePortOffset ) );
+          tmpConnections.insert( localConnections.begin(), localConnections.end() );
+        }
+        else
+        {
+          std::size_t const receiveWidth = receivePort->width();
+          std::vector<std::size_t> sendIndices( receiveWidth );
+          // Create index list
+          for( std::size_t idx( 0 ); idx < receiveWidth; ++idx )
+          {
+            auto const sendPort = sends[idx].port();
+            auto const offsetIt = sendOffsets.find( sendPort );
+            if( offsetIt == sendOffsets.end() )
+            {
+              throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                  "Send port not found in offset table." );
+            }
+            std::size_t const sendOffset = offsetIt->second + sends[idx].channel();
+            sendIndices[idx] = sendOffset;
+          }
+          auto const minIndexIt = std::min_element( sendIndices.cbegin(), sendIndices.cend() );
+          assert( minIndexIt != sendIndices.end() ); // could fail only if the sequence is empty
+          std::size_t const minIndex = *minIndexIt;
+          std::for_each( sendIndices.begin(), sendIndices.end(),
+                         [minIndex]( std::size_t & val ) { val -= minIndex; } );
+
+          // The width of the routing component must span all contained indices.
+          auto const maxIndexIt = std::max_element( sendIndices.cbegin(), sendIndices.cend() );
+          assert( maxIndexIt != sendIndices.end() ); // could fail only if the sequence is empty
+          std::size_t const routingInputWidth = *maxIndexIt + 1;
+
+          std::stringstream routingCompName;
+          routingCompName << fullyQualifiedName( *receivePort ) << "_inputrouting";
+
+          std::unique_ptr<AtomicComponent> routingComp
+            = createSignalRoutingComponent( sampleTypeId,
+                                            mFlow.context(),
+                                            routingCompName.str().c_str(),
+                                            static_cast<CompositeComponent*>(&(mFlow.component())),
+                                            routingInputWidth,
+                                            sendIndices );
+          impl::ComponentImplementation & routingCompImpl = routingComp->implementation();
+
+          impl::AudioPortBaseImplementation& routingIn = routingCompImpl.findAudioPort( "in" )->implementation();
+          impl::AudioPortBaseImplementation& routingOut = routingCompImpl.findAudioPort( "out" )->implementation();
+
+          for( std::size_t inputIdx( 0 ); inputIdx < routingInputWidth; ++inputIdx )
+          {
+            std::size_t const channelIndex = minIndex + inputIdx;
+            PortOffsetLookup::const_iterator findPortIt = std::find_if( sendOffsets.cbegin(), sendOffsets.cend(),
+              [channelIndex]( PortOffsetLookup::value_type const & entry )
+            {
+              return (channelIndex >= entry.second) and (channelIndex < entry.second + entry.first->width());
+            } );
+            if( findPortIt == sendOffsets.end() )
+            {
+              throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                  "Send port needed for a contiguous send range of an internal routing port found in offset table." );
+            }
+            std::size_t const finalSendIndex = channelIndex - findPortIt->second;
+            tmpConnections.insert( AudioChannel( findPortIt->first, finalSendIndex ),
+                                   AudioChannel( &routingIn, inputIdx ) );
+          }
+
+          for( std::size_t sigIdx( 0 ); sigIdx < receiveWidth; ++sigIdx )
+          {
+            tmpConnections.insert( AudioChannel( &routingOut, sigIdx ), AudioChannel( receivePort, sigIdx ) );
+          }
+
+          sendOffsets.insert( std::make_pair( &routingOut, sendPortOffset ) );
+          receiveOffsets.insert( std::make_pair( &routingIn, minIndex ) );
+          // Insert the original receive port as well. Same offset as the send port of the inserted routing component.
+          receiveOffsets.insert( std::make_pair( receivePort, sendPortOffset ) );
+          sendPortOffset += receiveWidth;
+          mInfrastructureComponents.push_back( std::move( routingComp ) );
+        }
+      }
+    }
+    else
     {
-      if( receivePort->width() == 0 ) // Zero-width port are legal, but we need to skip the computation (sends[0] would be illegal)
+      // For atomic ports, all ports are considered as send ports, because buffers need to be allocated for them.
+      for( auto portIt( mFlow.audioPorts().begin() ); portIt != mFlow.audioPorts().end(); ++portIt )
       {
-        continue;
-      }
-      AudioConnectionMap localConnections; // all connections ending in receivePort
-      std::copy_if( typedConnections.begin(), typedConnections.end(), std::inserter(localConnections, localConnections.begin()),
-                    [receivePort](AudioConnectionMap::value_type const & connection ){ return connection.second.port() == receivePort; } );
-
-      ChannelVector sends = sendChannels( receivePort, localConnections ); // extracting by receivePort would not be necessary (already done for localConnections)
-      if( contiguousRange(sends, sendOffsets) )
-      {
-        impl::AudioPortBaseImplementation * correspondingSendPort = sends[0].port();
-        auto const sendLookupIt = sendOffsets.find( correspondingSendPort );
-        if( sendLookupIt == sendOffsets.end() )
-        {
-          throw std::logic_error("Internal logic error: Send port not found in offset lookup table.");
-        }
-        std::size_t const receivePortOffset = sendLookupIt->second + sends[0].channel();
-
-        receiveOffsets.insert( std::make_pair( receivePort, receivePortOffset ) );
-        tmpConnections.insert( localConnections.begin(), localConnections.end() );
-      }
-      else
-      {
-        std::size_t const receiveWidth = receivePort->width();
-        std::vector<std::size_t> sendIndices(receiveWidth);
-        // Create index list
-        for( std::size_t idx(0); idx < receiveWidth; ++idx )
-        {
-          auto const sendPort = sends[idx].port();
-          auto const offsetIt = sendOffsets.find( sendPort );
-          if( offsetIt == sendOffsets.end() )
-          {
-            throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
-                "Send port not found in offset table." );
-          }
-          std::size_t const sendOffset = offsetIt->second + sends[idx].channel();
-          sendIndices[idx] = sendOffset;
-        }
-        auto const minIndexIt = std::min_element( sendIndices.cbegin(), sendIndices.cend() );
-        assert( minIndexIt != sendIndices.end() ); // could fail only if the sequence is empty
-        std::size_t const minIndex = *minIndexIt;
-        std::for_each( sendIndices.begin(), sendIndices.end(),
-                       [minIndex](std::size_t & val ){ val -= minIndex; } );
-
-        // The width of the routing component must span all contained indices.
-        auto const maxIndexIt = std::max_element( sendIndices.cbegin(), sendIndices.cend() );
-        assert( maxIndexIt != sendIndices.end() ); // could fail only if the sequence is empty
-        std::size_t const routingInputWidth = *maxIndexIt + 1;
-
-        std::stringstream routingCompName;
-        routingCompName << fullyQualifiedName( *receivePort ) << "_inputrouting";
-
-        std::unique_ptr<AtomicComponent> routingComp
-          = createSignalRoutingComponent( sampleTypeId,
-                                          mFlow.context(),
-                                          routingCompName.str().c_str(),
-                                          static_cast<CompositeComponent*>(&(mFlow.component())),
-                                          routingInputWidth,
-                                          sendIndices );
-        impl::ComponentImplementation & routingCompImpl = routingComp->implementation();
-
-        impl::AudioPortBaseImplementation& routingIn = routingCompImpl.findAudioPort("in")->implementation();
-        impl::AudioPortBaseImplementation& routingOut = routingCompImpl.findAudioPort("out")->implementation();
-
-        for( std::size_t inputIdx(0); inputIdx < routingInputWidth; ++inputIdx )
-        {
-          std::size_t const channelIndex = minIndex + inputIdx;
-          PortOffsetLookup::const_iterator findPortIt = std::find_if( sendOffsets.cbegin(), sendOffsets.cend(),
-            [channelIndex]( PortOffsetLookup::value_type const & entry )
-            { return (channelIndex >= entry.second) and (channelIndex < entry.second+entry.first->width());});
-          if( findPortIt == sendOffsets.end() )
-          {
-            throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
-                "Send port needed for a contiguous send range of an internal routing port found in offset table." );
-          }
-          std::size_t const finalSendIndex = channelIndex - findPortIt->second;
-          tmpConnections.insert( AudioChannel(findPortIt->first, finalSendIndex ),
-                                 AudioChannel(&routingIn, inputIdx));
-        }
-
-        for( std::size_t sigIdx(0); sigIdx < receiveWidth; ++sigIdx )
-        {
-          tmpConnections.insert( AudioChannel(&routingOut, sigIdx), AudioChannel(receivePort, sigIdx) );
-        }
-
-        sendOffsets.insert( std::make_pair(&routingOut, sendPortOffset) );
-        receiveOffsets.insert( std::make_pair(&routingIn, minIndex) );
-        // Insert the original receive port as well. Same offset as the send port of the inserted routing component.
-        receiveOffsets.insert( std::make_pair(receivePort, sendPortOffset) );
-        sendPortOffset += receiveWidth;
-        mInfrastructureComponents.push_back( std::move(routingComp) );
+        std::size_t const portWidth = (*portIt)->width();
+        sendOffsets.insert( std::make_pair( *portIt, sendPortOffset ) );
+        sendPortOffset += portWidth;
       }
     }
-    allSendPortOffsets.insert( std::make_pair(sampleTypeId, std::move(sendOffsets) ) );
-    allReceivePortOffsets.insert( std::make_pair(sampleTypeId, std::move(receiveOffsets) ) );
+    allSendPortOffsets.insert( std::make_pair( sampleTypeId, std::move( sendOffsets ) ) );
+    allReceivePortOffsets.insert( std::make_pair( sampleTypeId, std::move( receiveOffsets ) ) );
 
-    std::size_t const typedPoolSize =  sendPortOffset * efl::nextAlignedSize( blockSize*AudioSampleType::typeSize(sampleTypeId), alignment );
+    std::size_t const typedPoolSize = sendPortOffset * efl::nextAlignedSize( blockSize*AudioSampleType::typeSize( sampleTypeId ), alignment );
     totalAudioPoolSize += typedPoolSize;
   }
   mAudioSignalPool.reset( new AudioSignalPool( totalAudioPoolSize, alignment ) );
@@ -840,11 +832,15 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
     {
       impl::AudioPortBaseImplementation * port = receiveEntry.first;
       // Extra sanity checking whether the insertion of internal signal routing primitives has been successful.
-      ChannelVector sends = sendChannels( port, tmpConnections );
-      if( not contiguousRange( sends, sendOffsets ) )
+      // Makes sense (and can be done) only for composite top-level flows.
+      if( mFlow.isComposite() )
       {
-        throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+        ChannelVector sends = sendChannels( port, tmpConnections );
+        if( not contiguousRange( sends, sendOffsets ) )
+        {
+          throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
             "Non-contiguous port input range despite previous modification stage." );
+        }
       }
       std::size_t const channelOffset = receiveEntry.second;
       std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
