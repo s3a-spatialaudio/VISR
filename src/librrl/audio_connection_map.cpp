@@ -47,6 +47,11 @@ AudioConnectionMap::AudioConnectionMap( impl::ComponentImplementation const & co
   }
 }
 
+void AudioConnectionMap::swap( AudioConnectionMap & rhs ) noexcept
+{
+  mConnections.swap( rhs.mConnections );
+}
+
 void AudioConnectionMap::insert( value_type const & connection )
 {
   mConnections.insert( connection );

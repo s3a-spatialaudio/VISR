@@ -622,11 +622,6 @@ ChannelVector sendChannels( impl::AudioPortBaseImplementation const * receivePor
 
 bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections )
 {
-  mTopLevelAudioInputs.clear();
-  mTopLevelAudioOutputs.clear();
-  mCaptureChannels.clear();
-  mPlaybackChannels.clear();
-
   AudioConnectionMap tmpConnections; // To be assigned to or swapped with finalConnections after the initialisation was successful.
 
   // Collect all used audio sample types.
@@ -854,26 +849,18 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
   }
 
   mTopLevelAudioInputs.clear();
-  std::transform( tmpConnections.begin(), tmpConnections.end(), std::back_inserter(mTopLevelAudioInputs),
-    []( AudioConnectionMap::value_type const & conn ){ return conn.first.port();} );
-  std::sort(mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.end());
-  mTopLevelAudioInputs.erase( std::unique(mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.end()), mTopLevelAudioInputs.end() );
-  auto const topLevelInputsEnd = std::partition(mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.end(),
-        [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
-  mTopLevelAudioInputs.erase( topLevelInputsEnd, mTopLevelAudioInputs.end() );
+  std::copy_if( mFlow.audioPorts().begin(), mFlow.audioPorts().end(), std::back_inserter(mTopLevelAudioInputs),
+                  []( impl::AudioPortBaseImplementation const * port ){ return port->direction() == PortBase::Direction::Input; } );
 
   mTopLevelAudioOutputs.clear();
-  std::transform( tmpConnections.begin(), tmpConnections.end(), std::back_inserter(mTopLevelAudioOutputs),
-    []( AudioConnectionMap::value_type const & conn ){ return conn.second.port();} );
-  std::sort(mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.end());
-  mTopLevelAudioOutputs.erase( std::unique(mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.end()), mTopLevelAudioOutputs.end() );
-  auto const topLevelOutputsEnd = std::partition(mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.end(),
-        [](impl::AudioPortBaseImplementation const * port ){ return isToplevelPort(port); } );
-  mTopLevelAudioOutputs.erase( topLevelOutputsEnd, mTopLevelAudioOutputs.end() );
+  std::copy_if( mFlow.audioPorts().begin(), mFlow.audioPorts().end(), std::back_inserter(mTopLevelAudioOutputs),
+                  []( impl::AudioPortBaseImplementation const * port ){ return port->direction() == PortBase::Direction::Output; } );
 
-  finalConnections = tmpConnections;
-
-  // Not sure whether we want to keep that.
+  // Not sure whether we want to keep that or whether the process() stage should access the top-level input and output ports directly.
+  // The code below fails if there are audio ports with types differing from the standard type.
+  // Also, if there is more than one in- or output, the ordering is undefined.
+  mCaptureChannels.clear();
+  mPlaybackChannels.clear();
   std::size_t externalCaptureChannelIdx = 0;
   for( impl::AudioPortBaseImplementation * port : mTopLevelAudioInputs )
   {
@@ -896,6 +883,8 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
       mPlaybackChannels.push_back( basePointer + chIdx * stride );
     }
   }
+
+  finalConnections.swap( tmpConnections );
   return true;
 }
 

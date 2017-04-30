@@ -82,6 +82,11 @@ public:
              std::ostream & messages,
              bool recursive = false );
 
+  /**
+   * Exchange the content of this object with that of \p rhs.
+   */
+  void swap( AudioConnectionMap & rhs ) noexcept;
+
   void insert( value_type const & connection );
 
   iterator insert( iterator hint, value_type const & connection );
