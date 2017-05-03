@@ -6,10 +6,12 @@
 
 #include <libpml/biquad_parameter.hpp>
 
+#include <algorithm>
 #include <array>
 #include <ciso646>
 #include <cmath>
 #include <iostream>
+#include <functional>
 #include <random>
 
 namespace visr
@@ -95,10 +97,12 @@ LateReverbFilterCalculator::~LateReverbFilterCalculator()
 
 void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
                                         SampleType lateReflectionLengthSeconds,
-                                        std::size_t numLateReflectionSubBandLevels )
+                                        std::size_t numLateReflectionSubBandLevels,
+                                        std::size_t maxUpdatesPerPeriod /* = 0 */ )
 {
   mNumberOfObjects = numberOfObjects;
   mNumberOfSubBands = numLateReflectionSubBandLevels;
+  mMaxUpdatesPerIteration = maxUpdatesPerPeriod == 0 ? mNumberOfObjects : maxUpdatesPerPeriod;
   mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) );
 
   // Create a matrix to hold all bandpassed random sequences for all objects.
@@ -138,6 +142,7 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
 
 void LateReverbFilterCalculator::process( )
 {
+  std::size_t objCnt = 0;
   while( not mSubbandInput.empty() )
   {
     pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > const & val = mSubbandInput.front();
@@ -149,10 +154,18 @@ void LateReverbFilterCalculator::process( )
 
     // As the check for parameter changes is done on the sending end, we do not need to do it here again
     // Anyway, this will not change the impulse responses, as the calculation is deterministic.
-// TODO: this does not work.
-//    calculateImpulseResponse( val.index(), val.value(), &newFilter[0], mFilterLength );
-    mFilterOutput.enqueue( pml::IndexedValueParameter<std::size_t, std::vector<SampleType> >( val.index( ), newFilter ) );
+#if 0
+    // TODO: Fix this code before finalising the merge!!!
+    calculateImpulseResponse( val.first, val.second, &newFilter[0], mFilterLength );
+    
+    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
+#endif
     mSubbandInput.pop();
+    ++objCnt;
+    if( objCnt >= mMaxUpdatesPerIteration )
+    {
+      break;
+    }
   }
 }
 
@@ -228,9 +241,7 @@ calculateImpulseResponse( std::size_t objectIdx,
   std::mt19937 gen(rd());
   std::uniform_real_distribution<SampleType> dis(-1.0f, 1.0f);
 
-  for (std::size_t n = 0; n < numSamples; ++n) {
-    data[n]=dis(gen);
-  }
+  std::generate( data, data + numSamples, std::bind( dis, gen ) );
 }
 
 /*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, SampleType const * const input, SampleType * output,

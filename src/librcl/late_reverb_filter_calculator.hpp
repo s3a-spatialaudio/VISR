@@ -57,18 +57,24 @@ public:
 
   /**
    * Method to initialise the component.
-   * @todo Consider making lateReflectionSubbandFilters optional.
+   * @param numberOfObjects
+   * @param lateReflectionLengthSeconds
+   * @param numLateReflectionSubBandLevels Teh e
+   * @param maxUpdatesPerPeriod The maximum number of filter updates calculated in a single period. Defaults to 0
+   * (all new filter are updated immediately,).
+   * @todo Consider making lateReflectionSubbandLevels optional.
    */ 
   void setup( std::size_t numberOfObjects,
               SampleType lateReflectionLengthSeconds,
-              std::size_t numLateReflectionSubBandLevels );
+              std::size_t numLateReflectionSubBandLevels,
+              std::size_t maxUpdatesPerPeriod = 0  );
 
   /**
    * The process function. 
    * Iterates over all entries of the subBandLevels message queue and clears it.
    * For each entry, a impulse response is created and added to the \p lateFilters massage queue.
    */
-  void process();
+  void process() override;
 
 private:
   /**
@@ -132,6 +138,11 @@ private:
   std::size_t const mAlignment;
 
   efl::BasicMatrix<SampleType> mSubBandNoiseSequences;
+
+  /**
+   * Maximum number of filter updates per process() call.
+   */
+  std::size_t mMaxUpdatesPerIteration;
 
   /**
    * Access functions to the subband coefficients, non-const version.

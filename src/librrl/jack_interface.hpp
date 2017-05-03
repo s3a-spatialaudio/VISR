@@ -67,13 +67,13 @@ public:
 
   ~JackInterface( );
 
-  /* virtual */ void start();
+  /* virtual */ void start() override;
 
-  /* virtual */ void stop();
+  /* virtual */ void stop() override;
 
-  /*virtual*/ bool registerCallback( AudioCallback callback, void* userData );
+  /*virtual*/ bool registerCallback( AudioCallback callback, void* userData ) override;
 
-  /*virtual*/ bool unregisterCallback( AudioCallback audioCallback );
+  /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
 private:
   /**
    * Private implementation class to avoid dependencies to the Portaudio library in the public interface.

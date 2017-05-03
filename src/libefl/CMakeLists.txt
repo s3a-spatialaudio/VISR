@@ -14,6 +14,7 @@ alignment.hpp
 basic_matrix.hpp
 basic_vector.hpp
 cartesian_spherical_conversion.hpp
+db_linear_conversion.hpp
 degree_radian_conversion.hpp
 denormalised_number_handling.hpp
 error_codes.hpp

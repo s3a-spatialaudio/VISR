@@ -104,40 +104,35 @@ void PanningGainCalculator::process()
     objectmodel::ObjectVector const & objects = mObjectVectorInput->data( );
 
     pml::MatrixParameter<CoefficientType> & gainMatrix = mGainOutput->data( );
-
+    // 
     if( (gainMatrix.numberOfRows( ) != mNumberOfLoudspeakers) or( gainMatrix.numberOfColumns( ) != mNumberOfObjects ) )
     {
       throw std::invalid_argument( "PanningGainCalculator::process(): The size of the gain matrix does not match the object/loudspeaker configuration." );
     }
     gainMatrix.zeroFill( );
 
-    mLevels = 0.0f;
-    // As not every source object in the VBAP calculator component might correspond to a concrete source, we have to set them to safe position beforehand.
+    // Fill the source positions with neutral values.
+    // TODO: The VBAP calculation should change into a stateless function 
+    // called for a single object a time. Then this step will become obsolete.
     static const panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
     std::fill( mSourcePositions.begin(), mSourcePositions.end(), defaultSource );
 
     // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
+    // As not every source object in the VBAP calculator component might correspond to a concrete source, we have to set them to safe position beforehand.
     // Any potential re-routing will be added later.
     for( objectmodel::ObjectVector::value_type const & objEntry : objects )
     {
       objectmodel::Object const & obj = *(objEntry.second);
-      if( obj.numberOfChannels( ) != 1 )
+      if( obj.numberOfChannels() != 1 )
       {
-        std::cerr << "PanningGainCalculator: Only monaural object types are supported at the moment." << std::endl;
+        // Panning is implemented only for single-channel objects.
+        // So we use this check as a first criterion to skip any sources of other types
+        // Other non-matching types will be skipped later on.
         continue;
       }
-
+      
+      objectmodel::ObjectTypeId const ti = obj.type();
       objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
-      if( channelId >= mNumberOfObjects )
-      {
-        std::cerr << "PanningGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
-          << "exceeds number of channels (" << mNumberOfObjects << ")." << std::endl;
-        continue;
-      }
-
-      mLevels[channelId] = obj.level( );
-
-      objectmodel::ObjectTypeId const ti = obj.type( );
 
       // For the moment, we treat the two supported source type here.
       // @todo find a proper abstraction to handle many source types.
@@ -145,27 +140,29 @@ void PanningGainCalculator::process()
       {
       case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
       {
-                                                                  objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-                                                                  mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0) - psdSrc.diffuseness( )); // Adjust the amount of direct sound according to the diffuseness
-                                                                  // Fall through intentionally
+        objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
+        mLevels[channelId] = (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
+        // Fall through intentionally
       }
       case objectmodel::ObjectTypeId::PointSource:
-      case objectmodel::ObjectTypeId::PointSourceExtent:
       case objectmodel::ObjectTypeId::PointSourceWithReverb: // TODO: This shows that the current model is not extensible, because it does not consider type hierarchies
       {
-                                                               objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
-                                                               mSourcePositions[channelId].set( pointSrc.x( ), pointSrc.y( ), pointSrc.z( ) );
-                                                               break;
+        objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
+        mSourcePositions[channelId].set( pointSrc.x(), pointSrc.y(), pointSrc.z() );
+        mLevels[channelId] = 1.0f;
+        break;
       }
       case objectmodel::ObjectTypeId::PlaneWave:
       {
-                                                 objectmodel::PlaneWave const & planeSrc = dynamic_cast<objectmodel::PlaneWave const &>(obj);
-                                                 objectmodel::Object::Coordinate xPos, yPos, zPos;
-                                                 std::tie( xPos, yPos, zPos ) = efl::spherical2cartesian( efl::degree2radian( planeSrc.incidenceAzimuth( ) ),
-                                                   efl::degree2radian( planeSrc.incidenceElevation( ) ),
-                                                   1.0f );
-                                                 mSourcePositions[channelId].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */ );
-                                                 break;
+        objectmodel::PlaneWave const & planeSrc = dynamic_cast<objectmodel::PlaneWave const &>(obj);
+        objectmodel::Object::Coordinate xPos, yPos, zPos;
+        std::tie( xPos, yPos, zPos )
+          = efl::spherical2cartesian( efl::degree2radian( planeSrc.incidenceAzimuth() ),
+                                      efl::degree2radian( planeSrc.incidenceElevation() ),
+                                      1.0f);
+        mSourcePositions[ channelId ].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */);
+        mLevels[channelId] = 1.0f;
+        break;
       }
       default:
         // Ignore unknown source types by setting them to a zero level).
@@ -174,17 +171,21 @@ void PanningGainCalculator::process()
       }
     } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
     mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
-    if( mVbapCalculator.calcGains( ) != 0 )
+    if( mVbapCalculator.calcGains() != 0 )
     {
       std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
     }
+  
+    efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();
 
     // TODO: Can be replaced by a vector multiplication.
-    for( std::size_t chIdx( 0 ); chIdx < mNumberOfObjects; ++chIdx )
+    // NOTE: vbapGains might have more columns than real loudspeakers,
+    // because it also contains the gains of all imaginary speakers
+    for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
     {
-      Afloat const * const gainRow = mVbapCalculator.getGains( ).row( chIdx );
-      objectmodel::LevelType const level = mLevels[chIdx];
-      for( std::size_t outIdx( 0 ); outIdx < mNumberOfLoudspeakers; ++outIdx )
+      Afloat const * const gainRow = vbapGains.row( chIdx );
+      objectmodel::LevelType const level = mLevels[ chIdx ];
+      for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
       {
         gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
       }

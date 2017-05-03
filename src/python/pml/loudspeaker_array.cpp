@@ -22,7 +22,7 @@ void exportLoudspeakerArray( pybind11::module & m)
     .def( pybind11::init<std::string const &>(), pybind11::arg("xmlFile") )
     .def_property_readonly( "numberOfTriplets", &LoudspeakerArray::getNumTriplets )
     .def_property_readonly( "numberOfLoudspeakers", &LoudspeakerArray::getNumRegularSpeakers )
-    .def( "loadXml", &LoudspeakerArray::loadXml )
+    .def( "loadXmlFile", &LoudspeakerArray::loadXmlFile )
     ;
 }
 

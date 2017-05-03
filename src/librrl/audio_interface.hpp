@@ -85,6 +85,10 @@ public:
                                  ExternalSampleType * const * /*playbackBuffer*/,
                                  CallbackResult& /*errorCode*/);
 
+  virtual void start() = 0;
+
+  virtual void stop() = 0;
+
   virtual bool registerCallback( AudioCallback callbackPtr, void* userData ) = 0;
 
   virtual bool unregisterCallback( AudioCallback callbackPtr ) = 0;

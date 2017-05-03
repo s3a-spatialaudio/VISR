@@ -1,18 +1,26 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+#define VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
-#include <libsignalflows/gain_matrix.hpp>
-
 #include <libpml/matrix_parameter.hpp>
 
+#include <libsignalflows/gain_matrix.hpp>
+
+// We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
+// stuff such as defining macros min, max, and error
+#include <maxmspexternals/libmaxsupport/external_base.hpp>
+#include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
+
 #include <cstddef>
-#include <limits>
 #include <memory>
 
 namespace visr
 {
+
 namespace maxmsp
 {
 
@@ -59,3 +67,5 @@ private:
 
 } // namespace maxmsp
 } // namespace visr
+
+#endif // #ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED

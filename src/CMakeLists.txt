@@ -2,6 +2,9 @@
 
 # Build configuration for the top-level src/ directory
 
+# Common functionalties for realtime applications
+ADD_SUBDIRECTORY( libapputilities )
+
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
@@ -21,7 +24,6 @@ ADD_SUBDIRECTORY( libpml )
 if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( libpythonsupport )
 endif( BUILD_PYTHON_BINDINGS )
-
 
 # Library for signal flows.
 ADD_SUBDIRECTORY( libsignalflows )

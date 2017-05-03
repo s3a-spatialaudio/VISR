@@ -11,8 +11,9 @@
 #include <libril/audio_output.hpp>
 #include <libril/parameter_input.hpp>
 
+#include <map>
 #include <memory>
-#include <vector>
+#include <tuple>
 
 namespace visr
 {
@@ -111,11 +112,20 @@ private:
   std::unique_ptr<ParameterInput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
 
   /**
+   * Entry type for routings.
+   * Tuples are used because they provide operator<().
+   * Ordering: <outputIndex, inputIndex>
+   */
+  using RoutingEntry = std::tuple<pml::SignalRoutingParameter::IndexType, pml::SignalRoutingParameter::IndexType>;
+
+  using RoutingTable = std::set<RoutingEntry>;
+
+  /**
    * Data structure for string the routing information. Eahc vector element corresponds to the respective
    * channel of the output port. It contains the index of the input channel to be routed to this output channel,
    * or pml::SignalRoutingParameter::cInvalidIndex if the output channel shall be filled with zeros.
    */
-  std::vector<pml::SignalRoutingParameter::IndexType> mRoutingVector;
+  RoutingTable mRoutings;
 
   /**
    * Check whether the input and output indices are within the ranges of valid admissible values.

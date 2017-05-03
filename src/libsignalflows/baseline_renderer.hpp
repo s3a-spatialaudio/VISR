@@ -9,12 +9,15 @@
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
+#include <librcl/channel_object_routing_calculator.hpp>
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/hoa_allrad_gain_calculator.hpp>
 #include <librcl/late_reverb_filter_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
+#include <librcl/object_gain_eq_calculator.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
@@ -60,6 +63,7 @@ public:
    * @param diffusionFilters A matrix of floating-point values containing the the FIR coefficients of the decorrelation filter that creates diffuse sound components.
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    * @param sceneReceiverPort The UDP port for receiving the scene data messages.
+   * @param numberOfObjectEqSections The number of biquad sections alocated to each object signal.
    * @param reverbConfig A JSON message containing configuration options for the late reverberation part.
    *        - numReverbObjects (integer) The maximum number of reverb objects (at a given time)
    *        - lateReverbFilterLength (floating-point) The length of the late reverberation filter (in seconds)
@@ -79,6 +83,7 @@ public:
                              efl::BasicMatrix<SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
+                             std::size_t numberOfObjectEqSections,
                              std::string const & reverbConfig,
                              bool frequencyDependentPanning );
 
@@ -94,14 +99,32 @@ public:
 private:
 
   efl::BasicMatrix<SampleType> const & mDiffusionFilters;
-  
+
   rcl::UdpReceiver mSceneReceiver;
-  
+
   rcl::SceneDecoder mSceneDecoder;
+
+  rcl::ObjectGainEqCalculator mObjectInputGainEqCalculator;
+
+  /**
+   * Apply the the 'level' setting of the object.
+   * We use a DelayVector, which allows also control of the gain, and do not use the delay,
+   * @note This signal flow assumes that each signal input is used only by a single object. Otherwise the settings would
+   * be overwritten
+   */
+  rcl::DelayVector mObjectGain;
+
+  rcl::BiquadIirFilter mObjectEq;
+
+  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
+
+  rcl::SignalRouting mChannelObjectRouting;
 
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningCalculator mGainCalculator;
+
+  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 

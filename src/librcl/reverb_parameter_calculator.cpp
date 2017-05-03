@@ -114,7 +114,7 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
     {
       throw std::invalid_argument( "ReverbParameterCalculator::setup(): Calculation of inverse matrices for VBAP calculatorfailed." );
     }
-    mNumberOfPanningLoudspeakers = mVbapCalculator.getNumSpeakers();
+    mNumberOfPanningLoudspeakers = arrayConfig.getNumRegularSpeakers();
 
     mPreviousLateReverbs.resize( mMaxNumberOfObjects, cDefaultLateReverbParameter );
     // Set one member to an invalid value to trigger sending of late reverb messages on the first call to process();
@@ -168,17 +168,17 @@ void ReverbParameterCalculator::process()
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
     objectmodel::Object const & obj = *(objEntry.second);
-    if( obj.numberOfChannels() != 1 )
-    {
-      std::cerr << "ReverbParameterCalculator: Only monaural object types are supported at the moment." << std::endl;
-      continue;
-    }
-
     objectmodel::ObjectTypeId const ti = obj.type();
     // Process reverb objects, ignore others
     switch( ti )
     {
       case objectmodel::ObjectTypeId::PointSourceWithReverb:
+        // This check should be done elsewhere (e.g., parsing of point sources).
+        if( obj.numberOfChannels() != 1 )
+        {
+          std::cerr << "ReverbParameterCalculator: reverb objects must be singe-channel." << std::endl;
+          continue;
+        }
         foundReverbObjects.push_back( obj.id() );
         break;
       default: // Default handling to prevent compiler warnings about unhandled enumeration values
@@ -230,26 +230,26 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   }
  
   // Define a starting index into the all parameter matrices 
-  std::size_t const startRow = renderChannel * mNumberOfDiscreteReflectionsPerSource;
+  std::size_t const startIdx = renderChannel * mNumberOfDiscreteReflectionsPerSource;
 
   // Assign the positions for the discrete reflections.
   for( std::size_t srcIdx( 0 ); srcIdx < rsao.numberOfDiscreteReflections( ); ++srcIdx )
   {
     objectmodel::PointSourceWithReverb::DiscreteReflection const & discRefl = rsao.discreteReflection( srcIdx );
-    std::size_t matrixRow = startRow + srcIdx;
+    std::size_t const matrixIdx = startIdx + srcIdx;
 
     // Set the position for the VBAP calculator
     mSourcePositions[srcIdx] = panning::XYZ( discRefl.positionX( ), discRefl.positionY( ), discRefl.positionZ( ) );
 
     // Set the biquad filters
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
-      biquadCoeffs( matrixRow, biquadIdx ) = discRefl.reflectionFilter( biquadIdx );
+      biquadCoeffs( matrixIdx, biquadIdx ) = discRefl.reflectionFilter( biquadIdx );
     }
 
     // Set the gain and delay for each discrete reflection
-    discreteReflGains[matrixRow] = rsao.level() * discRefl.level();
-    discreteReflDelays[matrixRow] = discRefl.delay();
+    discreteReflGains[matrixIdx] = rsao.level() * discRefl.level();
+    discreteReflDelays[matrixIdx] = discRefl.delay();
   }
 
   // Fill the remaining discrete reflections with neutral values.
@@ -257,21 +257,19 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   static const pml::BiquadParameter<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
   for( std::size_t srcIdx( rsao.numberOfDiscreteReflections() ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
-    std::size_t const matrixRow = startRow + srcIdx;
+    std::size_t const matrixIdx = startIdx + srcIdx;
     mSourcePositions[srcIdx] = defaultPosition;
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
-      biquadCoeffs( matrixRow, biquadIdx ) = defaultBiquad;
+      biquadCoeffs( matrixIdx, biquadIdx ) = defaultBiquad;
     }
-    discreteReflGains[matrixRow] = 0.0f;
-    discreteReflDelays[matrixRow] = 0.0f;
+    discreteReflGains[matrixIdx] = 0.0f;
+    discreteReflDelays[matrixIdx] = 0.0f;
 
-    // Already zero the panning gains for unused reflections
-    // TODO: Control alignment via an option.
-    if( efl::vectorZero( discretePanningMatrix.row( matrixRow ), mNumberOfPanningLoudspeakers,
-                         0 /*Cannot make assumptions about alignment*/ ) != efl::noError )
+    // Set the panning gains for unused reflections to zero.
+    for( std::size_t lspIdx(0 ); lspIdx < mNumberOfPanningLoudspeakers; ++lspIdx )
     {
-      throw std::runtime_error( "ReverbParameterCalculator: Error zeroing panning matrix for unused entries." );
+      discretePanningMatrix( lspIdx, matrixIdx ) = 0.0f;
     }
   }
   std::fill( mSourcePositions.begin() + rsao.numberOfDiscreteReflections(), mSourcePositions.end(), defaultPosition );
@@ -280,12 +278,15 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
     std::cout << "ReverbParameterCalculator: Error calculating VBAP gains for discrete reflections." << std::endl;
   }
 
+  // Fill the used discrete reflections with sensible values.
   for( std::size_t srcIdx( 0 ); srcIdx < rsao.numberOfDiscreteReflections(); ++srcIdx )
   {
+    std::size_t const matrixIdx = startIdx + srcIdx;
     Afloat const * const gainRow = mVbapCalculator.getGains( ).row( srcIdx );
-    std::size_t const matrixIdx = startRow + srcIdx;
     for( std::size_t lspIdx(0 ); lspIdx < mNumberOfPanningLoudspeakers; ++lspIdx )
-    discretePanningMatrix( lspIdx, matrixIdx ) = gainRow[lspIdx];
+    {
+      discretePanningMatrix( lspIdx, matrixIdx ) = gainRow[lspIdx];
+    }
   }
   // The unused rows are already zeroed.
 
@@ -317,7 +318,7 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
   for( std::size_t srcIdx( 0 ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
     std::size_t const matrixRow = startRow + srcIdx;
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfDiscreteReflectionsPerSource; ++biquadIdx )
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
       biquadCoeffs( matrixRow, biquadIdx ) = defaultBiquad;
     }

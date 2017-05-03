@@ -106,6 +106,7 @@ inline void Options::registerPositionalOption( char const * optionName, int maxO
   mPositionalDescription.add( optionName, maxOccurrences );
 }
 
+
 } // namespace baseline_renderer
 } // namespace apps
 } // namespace visr

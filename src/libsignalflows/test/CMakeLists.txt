@@ -1,9 +1,7 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME libsignalflow_test )
+SET( APPLICATION_NAME signalflows_test )
 
-# Make the current source directory known to the source code to create absolute file paths.
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} 

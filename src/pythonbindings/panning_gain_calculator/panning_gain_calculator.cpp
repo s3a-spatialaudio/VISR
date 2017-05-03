@@ -1,4 +1,4 @@
-/* opyright Institute of Sound and Vibration Research - All rights reserved */
+/* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -82,7 +82,7 @@ PanningGainCalculator::PanningGainCalculator(std::string arrayConfig)
   }
   try
   {
-    mArray.loadXml(configPath.string());
+    mArray.loadXmlFile(configPath.string());
     mVbapCalculator.setLoudspeakerArray( &mArray );
     mVbapCalculator.setNumSources(cNumberOfObjects);
     mVbapCalculator.setSourcePositions(&mSourcePositions[0]);

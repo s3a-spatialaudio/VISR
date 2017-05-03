@@ -68,6 +68,8 @@ public:
    * all filters are zero-initialised.
    * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
    * active initially.
+   * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
+   * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,

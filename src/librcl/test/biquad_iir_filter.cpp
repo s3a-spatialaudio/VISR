@@ -2,7 +2,8 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
-#include <librrl/audio_signal_flow.hpp>
+#include <libril/signal_flow_context.hpp>
+
 #include <libpml/biquad_parameter.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -17,35 +18,14 @@ namespace rcl
 namespace test
 {
 
-namespace // unnamed
-{
-class BiquadSimple: public AudioSignalFlow
-{
-public:
-  BiquadSimple()
-    : rrl::AudioSignalFlow( 1024, 48000 )
-    , mBiquad( *this, "Filter" )
-  {
-  }
-
-  void setup()
-  {
-  }
-
-  void process()
-  {
-    mBiquad.process();
-  }
-
-private:
-  rcl::BiquadIirFilter mBiquad;
-};
-}
-
 BOOST_AUTO_TEST_CASE( InstantiateBiquad )
 {
-  BiquadSimple mFlow;
-  // TODO: Implement me!
+  std::size_t const blockSize{64};
+  SamplingFrequencyType const fs{48000};
+  SignalFlowContext const ctxt( blockSize, fs );
+
+  rcl::BiquadIirFilter biquad( ctxt, "biquad", nullptr );
+  // TODO: Implement setup and checks!
 }
 
 } // namespace test

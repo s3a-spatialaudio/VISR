@@ -2,7 +2,8 @@
 
 #include <librcl/signal_routing.hpp>
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/signal_flow_context.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -20,12 +21,14 @@ namespace test
 
 namespace // unnamed
 {
-class RoutingSimple: public AudioSignalFlow
+class RoutingSimple: public CompositeComponent
 {
 public:
-  RoutingSimple()
-    : AudioSignalFlow( 1024, 48000 )
-    , mRouter( *this, "Router" )
+  RoutingSimple( SignalFlowContext const & context,
+                 char const * name,
+                 CompositeComponent * parent )
+    : CompositeComponent( context, name, parent )
+    , mRouter( context, "Router", this )
   {
   }
 
@@ -33,11 +36,6 @@ public:
   {
     pml::SignalRoutingParameter initRouting{ { 0, 1 }, { 2, 0 }, { 5, 7 } };
     mRouter.setup( 6, 8, initRouting );
-  }
-
-  void process()
-  {
-    mRouter.process();
   }
 
 private:
@@ -71,10 +69,9 @@ BOOST_AUTO_TEST_CASE( InstantiateSignalRoutingParameter )
 
 BOOST_AUTO_TEST_CASE( InstantiateSignalRouting )
 {
-  RoutingSimple mFlow;
-
-  mFlow.setup();
-
+  SignalFlowContext const context{64,48000};
+  RoutingSimple mFlow( context, "toplevel", nullptr/*no parent*/ );
+  // TODO: Add checks!
 }
 
 BOOST_AUTO_TEST_CASE( parseSignalRoutingParameter )

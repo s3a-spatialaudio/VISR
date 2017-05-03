@@ -90,12 +90,6 @@ public:
 
   RoutingsType::const_iterator end() const { return mRoutings.end(); }
 
-  /**
-   * Remove all routing entries.
-   * @post empty() == true
-   */
-  void clear() { mRoutings.clear();  }
-
   void addRouting( IndexType inputIdx, IndexType outputIdx )
   {
     addRouting( Entry{ inputIdx, outputIdx } );
@@ -118,6 +112,11 @@ public:
    * @return True if there was a routing for that output, false if no such entry existed.
    */
   bool removeEntry( IndexType outputIdx );
+
+  /**
+   * Clear all routing entries.
+   */
+  void clear();
 
   Entry const & getEntry( IndexType outputIdx ) const
   {
