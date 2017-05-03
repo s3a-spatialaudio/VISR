@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_HPP_INCLUDED
-#define VISR_LIBEFL_VECTOR_FUNCTIONS_HPP_INCLUDED
+#ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_HPP_INCLUDED
+#define VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_HPP_INCLUDED
 
 #include "error_codes.hpp"
 
@@ -11,17 +11,17 @@ namespace visr
 {
 namespace efl
 {
-
-void getCpuId();
-
-template <typename T>
-ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+namespace reference
+{
 
 template <typename T>
-ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+ErrorCode vectorZeroReference( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
 template <typename T>
-ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+ErrorCode vectorFillReference( const T value, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+
+template <typename T>
+ErrorCode vectorCopyReference( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
 /**
  * Fill an array with a ramp defined by its start and end value.
@@ -184,12 +184,9 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-ErrorCode testMethod( float const * T );
 
-template< typename T>
-ErrorCode testMethodTemplated( T const * val );
-
+} // namespace reference
 } // namespace efl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_HPP_INCLUDED
+#endif // #ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_HPP_INCLUDED

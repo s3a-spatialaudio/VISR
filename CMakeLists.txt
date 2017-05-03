@@ -25,9 +25,15 @@ ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
 
-
 # Add support for unit tests
 INCLUDE( CTest )
+
+# Enable C++11 features on Linux platforms
+# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
+# Maybe there is a more general way to configure the different platforms and toolchains
+if(UNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -march=native")
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 

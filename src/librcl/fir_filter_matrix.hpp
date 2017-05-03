@@ -77,7 +77,8 @@ public:
               std::size_t maxFilters,
               std::size_t maxRoutings,
               efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
-              pml::FilterRoutingList const & routings = pml::FilterRoutingList() );
+              pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
+              char const * fftImplementation = "default" );
 
   /**
    * The process method performs the multichannel convolution.

@@ -9,8 +9,11 @@
 
 #include <librbbl/fft_wrapper_factory.hpp>
 
+#include <libril/signal_flow_context.hpp>
+
 #include <libsignalflows/matrix_convolver.hpp>
 
+#include <librrl/audio_signal_flow.hpp>
 #ifdef VISR_JACK_SUPPORT
 #include <librrl/jack_interface.hpp>
 #endif
@@ -62,7 +65,7 @@ int main( int argc, char const * const * argv )
   if( cmdLineOptions.getDefaultedOption<bool>( "list-fft-libraries", false ) )
   {
     std::cout << "Supported FFT libraries:"
-              << rbbl::FftWrapperFactory<ril::SampleType>::listImplementations() << std::endl;
+              << rbbl::FftWrapperFactory<SampleType>::listImplementations() << std::endl;
     return EXIT_SUCCESS;
   }
 
@@ -85,22 +88,24 @@ int main( int argc, char const * const * argv )
   std::string const filterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
   std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string( ) );
   pml::IndexSequence const indexOffsets( indexOffsetString );
-  efl::BasicMatrix<ril::SampleType> initialFilters( ril::cVectorAlignmentSamples );
+  efl::BasicMatrix<SampleType> initialFilters( cVectorAlignmentSamples );
   initFilterMatrix( filterList, maxFilterLengthOption, maxFilterOption, indexOffsets, initialFilters );
 
   // The final values for the number and length of filter slots are determined by the logic of the initialisation function.
   std::size_t const maxFilters = initialFilters.numberOfRows();
 
   std::size_t const periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
-  ril::SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<ril::SamplingFrequencyType>( "sampling-frequency", 48000 );
+  SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<SamplingFrequencyType>( "sampling-frequency", 48000 );
 
   std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
 
-  signalflows::MatrixConvolver flow( numberOfInputChannels, numberOfOutputChannels,
+  SignalFlowContext const context{ periodSize, samplingFrequency };
+
+  signalflows::MatrixConvolver flow( context, "MatrixConvolver", nullptr/*instantiate as top-level flow*/,
+                                     numberOfInputChannels, numberOfOutputChannels,
                                      initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
                                      initialFilters, routings,
-                                     fftLibrary.c_str(),
-                                     periodSize, samplingFrequency );
+                                     fftLibrary.c_str() );
 
   // Selection of audio interface:
   // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
@@ -110,7 +115,7 @@ int main( int argc, char const * const * argv )
   bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
 #endif
 
-   std::unique_ptr<visr::ril::AudioInterface> audioInterface;
+   std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
 
   try 
   {
@@ -141,7 +146,7 @@ int main( int argc, char const * const * argv )
       audioInterface.reset( new rrl::PortaudioInterface( interfaceConfig ) );
     }
 
-    audioInterface->registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface->start( );
@@ -158,7 +163,7 @@ int main( int argc, char const * const * argv )
     audioInterface->stop( );
 
    // Should there be an explicit stop() method for the sound interface?
-    audioInterface->unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

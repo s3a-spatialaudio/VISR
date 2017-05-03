@@ -2,8 +2,6 @@
 
 #include "signal_flow.hpp"
 
-#include <libpml/message_queue.hpp>
-
 #include <librcl/udp_sender.hpp>
 
 #include <boost/algorithm/string/split.hpp>
@@ -21,9 +19,13 @@ namespace apps
 namespace audio_network_streamer
 {
 
-SignalFlow::SignalFlow( std::string const & sendAddresses, std::size_t period, ril::SamplingFrequencyType samplingFrequency )
- : AudioSignalFlow( period, samplingFrequency )
- , mEncoder( *this, "Encoder" )
+SignalFlow::SignalFlow( SignalFlowContext const & context,
+                        char const * name,
+                        CompositeComponent * parent,
+                        std::string const & sendAddresses )
+ : CompositeComponent( context, name, parent )
+ , mAudioInput( "audioIn", *this )
+ , mEncoder( context, "Encoder", this )
 {
   std::vector<std::string> addresses; 
   boost::split( addresses, sendAddresses, boost::is_any_of( "," ) );
@@ -51,46 +53,24 @@ SignalFlow::SignalFlow( std::string const & sendAddresses, std::size_t period, r
 
     std::stringstream nameStr;
     nameStr << "Sender_" << idx;
-    std::unique_ptr<rcl::UdpSender> newSender( new rcl::UdpSender( *this, nameStr.str().c_str() ) );
-    newSender->setup( 0, hostName, port, rcl::UdpSender::Mode::Asynchronous ); // '0' means that an available port is used in the local endpoint.
+    std::unique_ptr<rcl::UdpSender> newSender( new rcl::UdpSender( context, nameStr.str().c_str(), this ) );
+    newSender->setup( 0, hostName, port, rcl::UdpSender::Mode::Asynchronous ); // '0' means that an available port is used at the local endpoint.
+
+    std::stringstream portNameStr;
+    portNameStr << "msgOut" << idx;
+    parameterConnection( mEncoder.parameterPort(portNameStr.str().c_str()), newSender->parameterPort( "msgIn" ) );
+
     mSenders.push_back( std::move(newSender) );
   }
-  mEncoder.setup( numSenders, period );
-
-  mMessageQueues.resize( numSenders );
-
-  // Set up communication area 
-  initCommArea( numSenders, period, ril::cVectorAlignmentSamples );
-
-  // connect the ports
-
-  std::vector<std::size_t> idxList;
-  std::size_t n(0);
-  std::generate_n( std::back_inserter(idxList), numSenders, [&n]{ return n++; } );
-
-  assignCommunicationIndices( "Encoder", "in", idxList );
-
-  // Set the indices for communicating the signals from and to the outside world.
-  assignCaptureIndices( idxList  );
-
-  setInitialised( true );
+  mEncoder.setup( numSenders, period() );
+  mAudioInput.setWidth( numSenders );
+  audioConnection( mAudioInput, mEncoder.audioPort("input") );
 }
 
 SignalFlow::~SignalFlow( )
 {
 }
  
-/*virtual*/ void 
-SignalFlow::process()
-{
-  mEncoder.process( mMessageQueues );
-  std::size_t numSignals = mMessageQueues.size();
-  for( std::size_t idx(0); idx < numSignals; ++idx )
-  {
-    mSenders[idx]->process( mMessageQueues[idx] );
-  }
-}
-
 } // namespace audio_network_streamer
 } // namespace apps
 } // namespace visr

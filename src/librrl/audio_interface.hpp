@@ -72,7 +72,11 @@ public:
   //@}
 
   /** 
+<<<<<<< HEAD:src/libril/audio_interface.hpp
+   * Status returned by the callback initialised by the audio interface
+=======
    * Status returned by the callback initialed by the audio interface
+>>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7:src/librrl/audio_interface.hpp
    * Maybe we replace this by an enumeration later 
    */
   using CallbackResult = int;
@@ -85,17 +89,25 @@ public:
                                  ExternalSampleType * const * /*playbackBuffer*/,
                                  CallbackResult& /*errorCode*/);
 
-  virtual void start() = 0;
-
-  virtual void stop() = 0;
-
   virtual bool registerCallback( AudioCallback callbackPtr, void* userData ) = 0;
 
   virtual bool unregisterCallback( AudioCallback callbackPtr ) = 0;
 
+  /**
+   * Start the audio interface, i.e., reacting to callbacks and passing them to the registered callback
+   * handlers.
+   * Pure virtual method, must be implemented in all concrete derived classes.
+   */
+  virtual void start() = 0;
+
+  /**
+   * Stop the audio interface, i.e., calling the registered callback functions anymore.
+   * Pure virtual method, must be implemented in all concrete derived classes.
+   */
+  virtual void stop() = 0;
 };
 
-}
-}
+} // namespace rrl
+} // namespace visr
 
 #endif // #ifndef VISR_LIBRRL_AUDIO_INTERFACE_HPP_INCLUDED

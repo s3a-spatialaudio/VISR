@@ -5,9 +5,9 @@
 
 #include "audio_network_encoder.hpp"
 
-#include <libril/audio_signal_flow.hpp>
-
-#include <librcl/add.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/signal_flow_context.hpp>
 
 #include <memory>
 #include <vector>
@@ -31,23 +31,24 @@ namespace apps
 namespace audio_network_streamer
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class SignalFlow: public CompositeComponent
 {
 public:
-  explicit SignalFlow( std::string const & sendAddresses, std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+  explicit SignalFlow( SignalFlowContext const & context,
+                       char const * name,
+                       CompositeComponent * parent,
+                       std::string const & sendAddresses );
 
   ~SignalFlow();
 
-  /*virtual*/ void process( );
-
 private:
+  AudioInputT<SampleType> mAudioInput;
+
   AudioNetworkEncoder mEncoder;
 
   std::vector< std::unique_ptr<rcl::UdpSender> > mSenders;
 
   std::size_t mNumberOfSignals;
-
-  std::vector<pml::MessageQueue<std::string> > mMessageQueues;
 
 };
 

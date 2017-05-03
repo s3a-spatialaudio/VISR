@@ -5,6 +5,7 @@
 
 #include <libefl/denormalised_number_handling.hpp>
 
+#include <librrl/audio_signal_flow.hpp>
 #ifdef VISR_JACK_SUPPORT
 #include <librrl/jack_interface.hpp>
 #endif
@@ -55,7 +56,7 @@ int main( int argc, char const * const * argv )
 
     std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>("audio-backend", "default");
 
-    ril::SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<ril::SamplingFrequencyType>( "sampling-frequency", 48000 );
+    SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<SamplingFrequencyType>( "sampling-frequency", 48000 );
 
     std::string const sceneSendAddresses = cmdLineOptions.getOption<std::string>("send-addresses" );
 
@@ -69,11 +70,15 @@ int main( int argc, char const * const * argv )
     bool const useNativeJack = boost::iequals(audioBackend, "NATIVE_JACK");
 #endif
 
-    SignalFlow flow( sceneSendAddresses, blockSize, samplingFrequency );
+    SignalFlowContext const context{ blockSize, samplingFrequency };
+
+    SignalFlow topLevelGraph( context, "NetworkAudioStreamer", nullptr, sceneSendAddresses );
+
+    rrl::AudioSignalFlow flow( topLevelGraph );
 
     std::size_t const numberOfSignals = flow.numberOfCaptureChannels();
 
-    std::unique_ptr<visr::ril::AudioInterface> audioInterface;
+    std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
 
 #ifdef VISR_JACK_SUPPORT
     if (useNativeJack)
@@ -102,7 +107,7 @@ int main( int argc, char const * const * argv )
     }
 #endif
 
-    audioInterface->registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface->start( );
@@ -118,7 +123,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface->stop( );
 
-    audioInterface->unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

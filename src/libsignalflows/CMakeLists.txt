@@ -6,6 +6,7 @@ baseline_renderer.cpp
 bunch_renderer.cpp 
 delay_vector.cpp 
 gain_matrix.cpp
+matrix_convolver.hpp
 time_frequency_feedthrough.cpp
 )
 
@@ -16,6 +17,7 @@ bunch_renderer.hpp
 core_renderer.hpp
 delay_vector.hpp 
 gain_matrix.hpp
+matrix_convolver.cpp
 time_frequency_feedthrough.hpp
 )
 

@@ -10,10 +10,9 @@ ENDIF( BUILD_USE_JACK )
 
 ADD_EXECUTABLE( baseline_renderer main.cpp options.hpp options.cpp )
 
-# TARGET_LINK_LIBRARIES(baseline_renderer apputilities)
+TARGET_LINK_LIBRARIES(baseline_renderer apputilities )
 TARGET_LINK_LIBRARIES(baseline_renderer signalflows)
 TARGET_LINK_LIBRARIES(baseline_renderer rrl)
-TARGET_LINK_LIBRARIES(baseline_renderer ${Boost_PROGRAM_OPTIONS_LIBRARY} )
-
 
 INSTALL( TARGETS baseline_renderer DESTINATION bin )
+TARGET_LINK_LIBRARIES(baseline_renderer ${CMAKE_THREAD_LIBS_INIT} )

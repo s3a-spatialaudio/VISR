@@ -48,11 +48,15 @@ public:
    */
   explicit FloatSequence( std::initializer_list<ElementType> const & val );
 
+  /**
+   * Create an object from an a string representation.
+   * @param val A string containig a comma-separated sequence of float values or Matlab-style ranges "start:stride:end"
+   */
   explicit FloatSequence( std::string const & val );
 
   std::size_t size() const 
   {
-    return mValues.size();  
+    return mValues.size();
   }
 
   ElementType * values()
