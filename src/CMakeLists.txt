@@ -41,6 +41,10 @@ ADD_SUBDIRECTORY( libril )
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )
 
+# Data types and components related to the reverb audio object.
+ADD_SUBDIRECTORY( librsao )
+
+
 # Library of implementations of the interface components.
 ADD_SUBDIRECTORY( libvisr_impl )
 
