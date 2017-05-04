@@ -7,11 +7,15 @@
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
 #include <libpml/filter_routing_parameter.hpp>
+#include <libpml/indexed_value_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
+
 
 #include <cstddef> // for std::size_t
 #include <memory>
@@ -78,6 +82,7 @@ public:
               std::size_t maxRoutings,
               efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
               pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
+              bool controlInputs = false,
               char const * fftImplementation = "default" );
 
   /**
@@ -127,6 +132,8 @@ private:
    * The audio output port for this component.
    */
   AudioOutput mOutput;
+
+  std::unique_ptr<ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > > > mSetFilterInput;
 
   /**
    * Vectors to the channel pointers of the input and output ports.

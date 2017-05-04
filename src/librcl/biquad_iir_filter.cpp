@@ -4,6 +4,8 @@
 
 #include <libefl/vector_functions.hpp>
 
+#include <libpml/matrix_parameter_config.hpp>
+
 #include <libril/constants.hpp>
 
 #include <ciso646>
@@ -19,6 +21,7 @@ namespace rcl
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
+ , mEqInput( nullptr )
  , mCoefficients( cVectorAlignmentSamples )
  , mState( cVectorAlignmentSamples )
  , mCurrentInput( cVectorAlignmentSamples )
@@ -98,9 +101,17 @@ void BiquadIirFilter::setCoefficientMatrixInternal( pml::BiquadParameterMatrix< 
 
 void BiquadIirFilter::setup( std::size_t numberOfChannels,
                              std::size_t numberOfBiquads,
-                             pml::BiquadParameter<SampleType> const & defaultBiquad /*= pml::BiquadParameter< SampleType >( )*/ )
+                             bool controlInput /*= false*/ )
 {
-  setupDataMembers( numberOfChannels, numberOfBiquads );
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
+}
+
+void BiquadIirFilter::setup( std::size_t numberOfChannels,
+                             std::size_t numberOfBiquads,
+                             pml::BiquadParameter<SampleType> const & defaultBiquad,
+                             bool controlInput /*= false*/ )
+{
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
   for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
   {
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
@@ -112,13 +123,14 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::setup( std::size_t numberOfChannels,
                              std::size_t numberOfBiquads,
-                             pml::BiquadParameterList< SampleType > const & coeffs )
+                             pml::BiquadParameterList< SampleType > const & coeffs,
+                             bool controlInput )
 {
   if( coeffs.size() != numberOfBiquads )
   {
     throw std::invalid_argument( "BiquadIirFilter: The length of the coefficient initialiser list does not match the number of biquads per channel." );
   }
-  setupDataMembers( numberOfChannels, numberOfBiquads );
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
   for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
   {
     setChannelCoefficientsInternal( channelIdx, coeffs );
@@ -127,18 +139,25 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::setup( std::size_t numberOfChannels,
                              std::size_t numberOfBiquads,
-                             pml::BiquadParameterMatrix< SampleType > const & coeffs )
+                             pml::BiquadParameterMatrix< SampleType > const & coeffs,
+                             bool controlInput )
 {
   if( (coeffs.numberOfFilters() != numberOfChannels) or ( coeffs.numberOfSections() != numberOfBiquads ) )
   {
     throw std::invalid_argument( "BiquadIirFilter: The size of the coefficient matrix does not match the dimension numberOfChannels x numberOfBiquads." );
   }
-  setupDataMembers( numberOfChannels, numberOfBiquads );
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
   setCoefficientMatrixInternal( coeffs );
 }
 
 void BiquadIirFilter::process()
 {
+  if( mEqInput and mEqInput->changed() )
+  {
+    setCoefficientMatrix( mEqInput->data() );
+    mEqInput->resetChanged();
+  }
+
   mInput.getChannelPointers( &mInputChannels[0] );
 
   static const std::size_t cNumBiquadCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
@@ -224,7 +243,8 @@ void BiquadIirFilter::process()
 }
 
 void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
-                                        std::size_t numberOfBiquads )
+                                        std::size_t numberOfBiquads,
+                                        bool controlInput )
 {
   static const std::size_t cCoeffsPerBiquad = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
 
@@ -238,6 +258,15 @@ void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
 
   mInput.setWidth( mNumberOfChannels );
   mOutput.setWidth( mNumberOfChannels );
+  if( controlInput )
+  {
+    mEqInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::BiquadParameterMatrix<SampleType> >( "eqInput", *this,
+                                                                                                               pml::MatrixParameterConfig(numberOfChannels, numberOfBiquads)));
+  }
+  else
+  {
+    mEqInput.reset();
+  }
   mInputChannels.resize( numberOfChannels, nullptr );
 }
 
