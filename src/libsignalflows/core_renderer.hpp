@@ -14,12 +14,10 @@
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
-#include <librcl/late_reverb_filter_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/position_decoder.hpp>
-#include <librcl/reverb_parameter_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
