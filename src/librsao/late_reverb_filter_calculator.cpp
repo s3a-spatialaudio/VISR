@@ -16,7 +16,7 @@
 
 namespace visr
 {
-namespace rcl
+namespace rsao
 {
 
 namespace
@@ -145,7 +145,7 @@ void LateReverbFilterCalculator::process( )
   std::size_t objCnt = 0;
   while( not mSubbandInput.empty() )
   {
-    pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > const & val = mSubbandInput.front();
+    LateReverbParameter const & val = mSubbandInput.front();
     if( val.index() >= mNumberOfObjects )
     {
       throw std::out_of_range( "LateReverbFilterCalculator: Object index out of range." );
@@ -286,5 +286,5 @@ calculateImpulseResponse( std::size_t objectIdx,
   }
 }
   
-} // namespace rcl
+} // namespace rsao
 } // namespace visr

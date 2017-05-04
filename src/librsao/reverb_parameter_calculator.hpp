@@ -1,15 +1,18 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRCL_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
-#define VISR_LIBRCL_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
+#ifndef VISR_LIBRSAO_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
+#define VISR_LIBRSAO_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
 
 // Preliminary solution, dependencies between components are suboptimal
 #include "late_reverb_filter_calculator.hpp"
+
+#include "late_reverb_parameter.hpp"
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 
 #include <libpml/biquad_parameter.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/object_vector.hpp>
@@ -33,7 +36,7 @@ namespace rbbl
   class ObjectChannelAllocator;
 }
 
-namespace rcl
+namespace rsao
 {
 
 /**
@@ -148,19 +151,18 @@ private:
                           efl::BasicVector<SampleType> & lateReverbGains,
                           efl::BasicVector<SampleType> & lateReverbDelays );
 
-  ParameterInput< pml::SharedDataProtocol, pml::ObjectVector > mObjectInput;
-  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::SignalRoutingParameter > > mSignalRoutingOutput;
-  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionGainOutput;
-  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mDiscreteReflectionDelayOutput;
-  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::BiquadParameterMatrix<SampleType> > > mDiscreteReflectionFilterCoeffOutput;
-  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mDiscretePanningGains;
-  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionGainOutput;
-  std::unique_ptr<ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> > > mLateReflectionDelayOutput;
-  std::unique_ptr<ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType> > > >
-    mLateSubbandOutput;
+  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectInput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mSignalRoutingOutput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDiscreteReflectionGainOutput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDiscreteReflectionDelayOutput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::BiquadParameterMatrix<SampleType> > mDiscreteReflectionFilterCoeffOutput;
+  ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mDiscretePanningGains;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mLateReflectionGainOutput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mLateReflectionDelayOutput;
+  ParameterOutput< pml::MessageQueueProtocol, LateReverbParameter > mLateSubbandOutput;
 };
 
-} // namespace rcl
+} // namespace rsao
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRCL_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRSAO_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED

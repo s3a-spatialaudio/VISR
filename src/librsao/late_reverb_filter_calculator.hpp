@@ -1,7 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
-#define VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+#ifndef VISR_LIBRSAO_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+#define VISR_LIBRSAO_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+
+#include "late_reverb_parameter.hpp"
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
@@ -21,7 +23,7 @@
 namespace visr
 {
 
-namespace rcl
+namespace rsao
 {
 
 /**
@@ -162,11 +164,11 @@ private:
     return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
   }
 
-  ParameterInput < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mSubbandInput;
+  ParameterInput < pml::MessageQueueProtocol, LateReverbParameter > mSubbandInput;
   ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mFilterOutput;
 };
 
-} // namespace rcl
+} // namespace rsao
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRCL_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRSAO_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED

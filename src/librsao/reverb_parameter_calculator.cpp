@@ -25,7 +25,7 @@
 
 namespace visr
 {
-namespace rcl
+namespace rsao
 {
 
 
@@ -77,6 +77,14 @@ ReverbParameterCalculator::cDefaultLateReverbParameter( 0.0, {0.0f}, {0.0f}, { 0
  , mMaxNumberOfObjects( 0 )
  , cLateReverbParameterComparisonLimit( std::numeric_limits<SampleType>::epsilon( ) )
  , mObjectInput( "objectInput", *this, pml::EmptyParameterConfig() )
+ , mSignalRoutingOutput( "signalRoutingOut", *this, pml::EmptyParameterConfig() )
+ , mDiscreteReflectionGainOutput( "discreteGainOut", *this )
+ , mDiscreteReflectionDelayOutput( "discreteDelayOut", *this )
+ , mDiscreteReflectionFilterCoeffOutput( "discreteEqOut", *this )
+ , mDiscretePanningGains( "discretePanningGainOut", *this )
+ , mLateReflectionGainOutput( "lateGainOut", *this )
+ , mLateReflectionDelayOutput( "lateDelayOut", *this )
+ , mLateSubbandOutput( "lateSubbandOut", *this )
 {
 }
 
@@ -91,56 +99,48 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
                                        SampleType lateReflectionLengthSeconds,
                                        std::size_t numLateReflectionSubBandFilters )
 {
-    mMaxNumberOfObjects=numberOfObjects;
-    mNumberOfDiscreteReflectionsPerSource = numberOfDiscreteReflectionsPerSource;
-    mNumberOfBiquadSectionsReflectionFilters = numBiquadSectionsReflectionFilters;
-    mLateReflectionLengthSeconds = lateReflectionLengthSeconds;
-    mNumberOfLateReflectionSubBandFilters = numLateReflectionSubBandFilters;
+  mMaxNumberOfObjects=numberOfObjects;
+  mNumberOfDiscreteReflectionsPerSource = numberOfDiscreteReflectionsPerSource;
+  mNumberOfBiquadSectionsReflectionFilters = numBiquadSectionsReflectionFilters;
+  mLateReflectionLengthSeconds = lateReflectionLengthSeconds;
+  mNumberOfLateReflectionSubBandFilters = numLateReflectionSubBandFilters;
 
-    if( mNumberOfBiquadSectionsReflectionFilters != objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads )
-    {
-      throw std::invalid_argument( "The number of biquad sections for the discrete reflections differs from the constant used in the object definition." );
-    }
+  if( mNumberOfBiquadSectionsReflectionFilters != objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads )
+  {
+    throw std::invalid_argument( "The number of biquad sections for the discrete reflections differs from the constant used in the object definition." );
+  }
 
-    mChannelAllocator.reset( new rbbl::ObjectChannelAllocator( mMaxNumberOfObjects ) );
+  mChannelAllocator.reset( new rbbl::ObjectChannelAllocator( mMaxNumberOfObjects ) );
 
-    // Configure the VBAP calculator
-    mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
-    mVbapCalculator.setNumSources( mNumberOfDiscreteReflectionsPerSource /* * mMaxNumberOfObjects */ );
-    mVbapCalculator.setSourcePositions(&mSourcePositions[0] );
-    mVbapCalculator.setLoudspeakerArray( &arrayConfig );
-    mVbapCalculator.setListenerPosition( 0.0f, 0.0f, 0.0f ); // Use a default listener position
-    if( mVbapCalculator.calcInvMatrices( ) != 0 )
-    {
-      throw std::invalid_argument( "ReverbParameterCalculator::setup(): Calculation of inverse matrices for VBAP calculatorfailed." );
-    }
-    mNumberOfPanningLoudspeakers = arrayConfig.getNumRegularSpeakers();
+  // Configure the VBAP calculator
+  mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
+  mVbapCalculator.setNumSources( mNumberOfDiscreteReflectionsPerSource /* * mMaxNumberOfObjects */ );
+  mVbapCalculator.setSourcePositions(&mSourcePositions[0] );
+  mVbapCalculator.setLoudspeakerArray( &arrayConfig );
+  mVbapCalculator.setListenerPosition( 0.0f, 0.0f, 0.0f ); // Use a default listener position
+  if( mVbapCalculator.calcInvMatrices( ) != 0 )
+  {
+    throw std::invalid_argument( "ReverbParameterCalculator::setup(): Calculation of inverse matrices for VBAP calculatorfailed." );
+  }
+  mNumberOfPanningLoudspeakers = arrayConfig.getNumRegularSpeakers();
 
-    mPreviousLateReverbs.resize( mMaxNumberOfObjects, cDefaultLateReverbParameter );
-    // Set one member to an invalid value to trigger sending of late reverb messages on the first call to process();
-    std::for_each(mPreviousLateReverbs.begin(), mPreviousLateReverbs.end(), []( objectmodel::PointSourceWithReverb::LateReverb & v ) { v.setOnsetDelay( -1.0f); } );
+  mPreviousLateReverbs.resize( mMaxNumberOfObjects, cDefaultLateReverbParameter );
+  // Set one member to an invalid value to trigger sending of late reverb messages on the first call to process();
+  std::for_each(mPreviousLateReverbs.begin(), mPreviousLateReverbs.end(), []( objectmodel::PointSourceWithReverb::LateReverb & v ) { v.setOnsetDelay( -1.0f); } );
 
-    // Set up the parameter ports.
-    pml::VectorParameterConfig const discreteGainDelayConfig( mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects );
-    pml::VectorParameterConfig const lateGainDelayConfig( mMaxNumberOfObjects );
-    pml::MatrixParameterConfig const iirMatrixConfig( mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects, objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads );
-    pml::MatrixParameterConfig const discretePanningConfig( mNumberOfPanningLoudspeakers, mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects );
-    mSignalRoutingOutput.reset( new ParameterOutput< pml::SharedDataProtocol, pml::SignalRoutingParameter >
-      ( "signalRoutingOutput", *this, pml::EmptyParameterConfig() ) );
-    mDiscreteReflectionGainOutput.reset( new ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
-      ( "discreteGainOutput", *this, discreteGainDelayConfig ) );
-    mDiscreteReflectionDelayOutput.reset( new ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
-      ("discreteDelayOutput", *this, discreteGainDelayConfig ) );
-    mDiscreteReflectionFilterCoeffOutput.reset( new ParameterOutput< pml::SharedDataProtocol, pml::BiquadParameterMatrix<SampleType> >
-      ("discreteFilterCoeffsOutput", *this, iirMatrixConfig ) );
-    mDiscretePanningGains.reset( new ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >
-      ("discretePanningMatrixOutput", *this, discretePanningConfig) );
-    mLateReflectionGainOutput.reset( new ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
-      ( "lateGainOutput", *this, lateGainDelayConfig ) );
-    mLateReflectionDelayOutput.reset( new ParameterOutput < pml::SharedDataProtocol, pml::VectorParameter<SampleType> >
-      ( "lateDelayOutput", *this, lateGainDelayConfig ) );
-    mLateSubbandOutput.reset( new ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType> > >
-      ( "lateSubbandOutput", *this, pml::EmptyParameterConfig( )) );
+  // Set up the parameter ports.
+  pml::VectorParameterConfig const discreteGainDelayConfig( mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects );
+  pml::VectorParameterConfig const lateGainDelayConfig( mMaxNumberOfObjects );
+  pml::MatrixParameterConfig const iirMatrixConfig( mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects, objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads );
+  pml::MatrixParameterConfig const discretePanningConfig( mNumberOfPanningLoudspeakers, mNumberOfDiscreteReflectionsPerSource * mMaxNumberOfObjects );
+  mSignalRoutingOutput.setParameterConfig( pml::EmptyParameterConfig() );
+  mDiscreteReflectionGainOutput.setParameterConfig( discreteGainDelayConfig );
+  mDiscreteReflectionDelayOutput.setParameterConfig( discreteGainDelayConfig );
+  mDiscreteReflectionFilterCoeffOutput.setParameterConfig( iirMatrixConfig );
+  mDiscretePanningGains.setParameterConfig( discretePanningConfig );
+  mLateReflectionGainOutput.setParameterConfig( lateGainDelayConfig );
+  mLateReflectionDelayOutput.setParameterConfig( lateGainDelayConfig );
+  mLateSubbandOutput.setParameterConfig( pml::EmptyParameterConfig() );
 }
 
 /**
@@ -150,18 +150,13 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
 void ReverbParameterCalculator::process()
 {
   // Get and check the data members.
-  pml::SignalRoutingParameter & signalRouting = mSignalRoutingOutput->data();
-  efl::BasicVector<SampleType> & discreteReflGains = mDiscreteReflectionGainOutput->data();
-  efl::BasicVector<SampleType> & discreteReflDelays = mDiscreteReflectionDelayOutput->data();
-  pml::BiquadParameterMatrix<SampleType> & biquadCoeffs = mDiscreteReflectionFilterCoeffOutput->data();
-  efl::BasicMatrix<SampleType> & discretePanningMatrix = mDiscretePanningGains->data();
-  efl::BasicVector<SampleType> & lateReverbGains = mLateReflectionGainOutput->data( );
-  efl::BasicVector<SampleType> & lateReverbDelays = mLateReflectionDelayOutput->data( );
-
-  if( discreteReflGains.size() != mMaxNumberOfObjects )
-  {
-    throw std::invalid_argument( "ReverbParameterCalculator::process( ): output parameter of port "" has a wrong vector length." );
-  }
+  pml::SignalRoutingParameter & signalRouting = mSignalRoutingOutput.data();
+  efl::BasicVector<SampleType> & discreteReflGains = mDiscreteReflectionGainOutput.data();
+  efl::BasicVector<SampleType> & discreteReflDelays = mDiscreteReflectionDelayOutput.data();
+  pml::BiquadParameterMatrix<SampleType> & biquadCoeffs = mDiscreteReflectionFilterCoeffOutput.data();
+  efl::BasicMatrix<SampleType> & discretePanningMatrix = mDiscretePanningGains.data();
+  efl::BasicVector<SampleType> & lateReverbGains = mLateReflectionGainOutput.data();
+  efl::BasicVector<SampleType> & lateReverbDelays = mLateReflectionDelayOutput.data();
 
   std::vector<objectmodel::ObjectId> foundReverbObjects;
   pml::ObjectVector const & objects = mObjectInput.data();
@@ -176,7 +171,7 @@ void ReverbParameterCalculator::process()
         // This check should be done elsewhere (e.g., parsing of point sources).
         if( obj.numberOfChannels() != 1 )
         {
-          std::cerr << "ReverbParameterCalculator: reverb objects must be singe-channel." << std::endl;
+          status( StatusMessage::Error, "ReverbParameterCalculator: reverb objects must be single-channel." );
           continue;
         }
         foundReverbObjects.push_back( obj.id() );
@@ -211,6 +206,13 @@ void ReverbParameterCalculator::process()
                            lateReverbGains, lateReverbDelays);
     }
   }
+  mSignalRoutingOutput.swapBuffers();
+  mDiscreteReflectionGainOutput.swapBuffers();
+  mDiscreteReflectionDelayOutput.swapBuffers();
+  mDiscreteReflectionFilterCoeffOutput.swapBuffers();
+  // No swapBuffers() mDiscretePanningGains, because this port uses the pml::SharedDataProtocol.
+  mLateReflectionGainOutput.swapBuffers();
+  mLateReflectionDelayOutput.swapBuffers();
 } //process
 
 void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWithReverb const & rsao,
@@ -297,7 +299,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   if( not equal( mPreviousLateReverbs[renderChannel], rsao.lateReverb(), cLateReverbParameterComparisonLimit ))
   {
     mPreviousLateReverbs[renderChannel] = rsao.lateReverb();
-    // XXX lateReflectionSubbandFilters.enqueue( std::make_pair( renderChannel, mPreviousLateReverbs[renderChannel] ));
+    mLateSubbandOutput.enqueue( LateReverbParameter( renderChannel, mPreviousLateReverbs[renderChannel] ) );
   }
 }
 
@@ -332,10 +334,10 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
   if( not equal( mPreviousLateReverbs[renderChannel], cDefaultLateReverbParameter, cLateReverbParameterComparisonLimit ))
   {
     mPreviousLateReverbs[renderChannel] = cDefaultLateReverbParameter;
-    // XXX lateReflectionSubbandFilters.enqueue( std::make_pair( renderChannel, mPreviousLateReverbs[renderChannel] ));
+    mLateSubbandOutput.enqueue( LateReverbParameter( renderChannel, mPreviousLateReverbs[renderChannel] ) );
   }
 
 }
 
-} // namespace rcl
+} // namespace rsao
 } // namespace visr
