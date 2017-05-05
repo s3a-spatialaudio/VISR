@@ -5,8 +5,6 @@
 
 #include <libril/composite_component.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <memory>
 #include <vector>
 
@@ -38,13 +36,13 @@ public:
    * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
    * @param numInputs The number of signal vectors to be added.
    */
-  explicit PythonWrapper( SignalFlowContext& context,
+  explicit PythonWrapper( SignalFlowContext const & context,
                           char const * name,
                           CompositeComponent * parent,
-			  char const * modulePath,
-			  char const * componentClassName,
-			  char const * positionalArguments = nullptr,
-			  char const * keywordArguments = nullptr );
+                          char const * modulePath,
+                          char const * componentClassName,
+                          char const * positionalArguments = nullptr,
+                          char const * keywordArguments = nullptr );
 
   /**
    * Destructor.
@@ -54,38 +52,15 @@ public:
 
 private:
   /**
-   * The audio output of the component.
+   * Forward declaration of private implementation object.
    */
+  class Impl;
 
   /**
-   * A vector holding an arbitrary number of input
+   * Private implementation object.
+   * The primary reason for this object to avoid a inteface dependency to pybind11 and Python.
    */
-  std::vector<std::unique_ptr<AudioInputBase > > mAudioInputs;
-
-  std::vector<std::unique_ptr<AudioOutputBase > > mAudioOutputs;
-
-
-  // TODO: Do the same for parameter ports (instantiate and connect them as polymorphic input/output ports
-  // Note: As these need to manage their own protocol inputs/outputs, they need to be different from the port base classes. This also implies that we need different containers for inputs and outputs.
-  std::vector<std::unique_ptr<PolymorphicParameterInput> > mParameterInputs;
-
-  std::vector<std::unique_ptr<PolymorphicParameterOutput> > mParameterOutputs;
-
-  /**
-   * Hold the Python module containing the contained component.
-   * @note We use a Python object to hold the module, because that is
-   * what load_module() returns and we only need the object interface.
-   */
-  pybind11::object mModule;
-
-  pybind11::object mGlobals;
-
-  pybind11::object mComponentClass;
-
-  pybind11::object mComponentWrapper;
-  
-  Component * mComponent;
-
+  std::unique_ptr<Impl> mImpl;
 };
 
 } // namespace pythonsupport
