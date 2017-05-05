@@ -105,6 +105,7 @@ int main( int argc, char const * const * argv )
                                      numberOfInputChannels, numberOfOutputChannels,
                                      initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
                                      initialFilters, routings,
+                                     false /*no control inputs*/,
                                      fftLibrary.c_str() );
 
   // Selection of audio interface:
