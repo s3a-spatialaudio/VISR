@@ -56,12 +56,12 @@
  *  * Go to the boost_root directory
  *  * Execute the bootstrap build function to build the build tools <tt>.\\bootstrap.bat</tt>
  *  * Build boost: <tt>.\\b2 address-model=64 --build-type=complete stage</tt> (this takes a while and consumes about 10 GB disk space).
- *  * If you want to build the Python bindings for some of the renderer functionality, you must add the <tt>--with-python</tt> option and a user configuration file: <tt>.\\b2 address-model=64 --build-type=complete --with-python --user-config=user-config.jamstage</tt> with a file user-config.jam containing the line: <tt></tt>.
  *  * Alternatively, precompiled boost libraries can be used:
- *    * Download the correct version from <a href=http://sourceforge.net/projects/boost/files/boost-binaries/ http://sourceforge.net/projects/boost/files/boost-binaries/</a>.
+ *    * Download the correct version from <a href=http://sourceforge.net/projects/boost/files/boost-binaries/>http://sourceforge.net/projects/boost/files/boost-binaries/</a>.
  *    * Install and rename the directory <tt>lib-msvc-VVVV</tt> to <tt>lib</tt>
  *  * Add the following environment variable to Windows (Control Center->System->Advanced System settings->Environment Variables): <tt>BOOST_ROOT=boost_root</tt>.
  *  * A subsequent configure run in CMake should yield "Boost version: 1.xx.x Found the following Boost libraries: ..." 
+ *  * Note: Because Python bindings are created using the header-only pybind11 library, no Python support is needed in Boost.
  *
  *  @subsection windows_external_libraries External Libraries on Windows
  *
