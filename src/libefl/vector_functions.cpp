@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#define USE_INTEL_INTRINSICS 1
+// #define USE_INTEL_INTRINSICS 1
 
 #include "vector_functions.hpp"
 
@@ -8,7 +8,6 @@
 #include <immintrin.h>
 #endif
 
-#include <cpuid.h>
 
 #include <iostream>
 
@@ -20,6 +19,7 @@ namespace visr
 namespace efl
 {
 
+#ifdef USE_INTEL_INTRINSICS
 void getCpuId()
 {
   const int functionId = 0x01;
@@ -34,6 +34,7 @@ void getCpuId()
   std::cout << "CPU features: " << id << std::endl;
 #endif
 }
+#endif
 
 template <typename T>
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
