@@ -5,14 +5,11 @@
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
-// avoid annoying warning about unsafe STL functions.
-#ifdef _MSC_VER 
-#pragma warning(disable: 4996)
-#endif
-
 #include <libpanning/VBAP.h>
 #include <libpanning/AllRAD.h>
 #include <boost/filesystem.hpp>
+
+#include <boost/test/unit_test.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -22,7 +19,9 @@
 #include <stdexcept>
 #include <vector>
 
-int main(int argc, const char * argv[])
+// Text format will be removed soon.
+#if 0
+BOOST_AUTO_TEST_CASE( LoudspeakerArrayLoadTextFormat )
 {
   using namespace visr;
   using namespace visr::panning;
@@ -49,28 +48,37 @@ int main(int argc, const char * argv[])
 
   boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/22.1_audiolab.txt" );
 
+  BOOST_CHECK_MESSAGE( exists(bfile), "Loudspeaker configuration text file dows not exist." );
+
   file = fopen( bfile.string().c_str(), "r" );
-  if( array.load( file ) == -1 )
-  {
-    return -1;
-  }
+  BOOST_CHECK( file != 0 );
+  BOOST_CHECK( array.load( file ) != -1 );
+
   fclose( file );
   file = 0;
+}
+#endif
+
+BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
+{
+  using namespace visr;
+  using namespace visr::panning;
+  LoudspeakerArray array;
+
+  boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
+  boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
 
   // Alternatively, load the config file in XML format.
-  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/22.1_audiolab_2subwoofers.xml" );
-  array.loadXmlFile( configFileXml.string() );
+  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
+  BOOST_ASSERT( exists( configFileXml ) );
+  BOOST_CHECK_NO_THROW( array.loadXmlFile( configFileXml.string() ) );
 
-  try
-  {
-    vbap.setLoudspeakerArray( &array );
-  }
-  catch( std::invalid_argument const & e )
-  {
-    std::cerr << "Error while loading XML array configuration: " << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
+  VBAP vbap;
+  BOOST_CHECK_NO_THROW( vbap.setLoudspeakerArray( &array ) );
+}
 
+#if 0
+{
   vbap.setListenerPosition( 0.0f, 0.0f, 0.0f );
   //    vbap.setListenerPosition(-1.9f, 0.0f, -0.1f);
   //    vbap.setListenerPosition(1.5f, 0.0f, 0.4f);
@@ -208,3 +216,4 @@ int main(int argc, const char * argv[])
   }
   return 0;
 }
+#endif
