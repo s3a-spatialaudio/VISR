@@ -2,11 +2,15 @@
 
 set( SOURCES
 baseline_renderer.cpp
+core_renderer.cpp
+delay_vector.cpp
 signalflows.cpp
 )
 
 set( HEADERS
 baseline_renderer.hpp
+core_renderer.hpp
+delay_vector.hpp
 )
 
 set(PROJECT_NAME signalflowspython)
@@ -16,12 +20,6 @@ set(MODULE_NAME signalflows)
 
 ########################################################################
 # Internal logic, do not edit.
-
-# Trigger separate handling dependent on whether the boost libraries
-# are linked statically or dynamically
-IF( Boost_USE_STATIC_LIBS )
-  ADD_DEFINITIONS( -DBOOST_PYTHON_STATIC_LIBS=1 )
-ENDIF( Boost_USE_STATIC_LIBS )
 
 include_directories(${PYTHON_INCLUDE_DIR})
 
@@ -44,9 +42,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PRO
 
 target_link_libraries( ${PROJECT_NAME} signalflows ) 
 
-# Standard dependencies for boost::python projects
-target_link_libraries(${PROJECT_NAME} ${Boost_PYTHON_LIBRARY} )
-target_link_libraries(${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ../python)

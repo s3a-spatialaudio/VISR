@@ -2,7 +2,6 @@
 
 #include "position_decoder.hpp"
 
-#include <libpml/message_queue.hpp>
 #include <libpml/listener_position.hpp>
 #include <libpml/string_parameter.hpp>
 
@@ -18,9 +17,9 @@ namespace visr
 namespace rcl
 {
 
-  PositionDecoder::PositionDecoder( ril::SignalFlowContext& context,
+  PositionDecoder::PositionDecoder( SignalFlowContext const & context,
                                     char const * name,
-                                    ril::CompositeComponent * parent /*= nullptr*/ )
+                                    CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )
   , mDatagramInput( "messageInput", *this, pml::StringParameterConfig( 128 ) )
   , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )

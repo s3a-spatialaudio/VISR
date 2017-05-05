@@ -2,15 +2,15 @@
 
 #include "baseline_renderer.hpp"
 
-#include <boost/python.hpp>
-#include "boost/python/args.hpp"
+#include <libpanning/LoudspeakerArray.h>
+
 
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
 #include <libsignalflows/baseline_renderer.hpp> 
 
-using namespace boost::python;
+#include <pybind11/pybind11.h>
 
 namespace visr
 {
@@ -22,13 +22,26 @@ namespace python
 namespace signalflows
 {
 
-void exportBaselineRenderer()
+void exportBaselineRenderer( pybind11::module& m )
 {
-  class_<BaselineRenderer, bases<ril::CompositeComponent>, boost::noncopyable>( "BaselineRenderer", boost::python::no_init )
-    .def( boost::python::init< visr::ril::SignalFlowContext&, char const*, visr::ril::CompositeComponent *, visr::panning::LoudspeakerArray const &,
-                               std::size_t, std::size_t, std::size_t, visr::pml::MatrixParameter<visr::ril::SampleType> const &, std::string const &,
-                               std::size_t, std::string const &, bool>
-      ( args( "context", "name", "parent", "loudspeakerConfiguration", "numberOfInputs", "numberOfOutputs", "interpolationPeriod", "diffusionFilters", "trackingConfiguration", "sceneReceiverPort", "reverbConfig", "frequencyDependentPanning" ) ) );
+  pybind11::class_<BaselineRenderer, CompositeComponent>( m, "BaselineRenderer" )
+    .def( pybind11::init< visr::SignalFlowContext const&, char const*, visr::CompositeComponent *, visr::panning::LoudspeakerArray const &,
+                          std::size_t, std::size_t, std::size_t, visr::pml::MatrixParameter<visr::SampleType> const &, std::string const &, std::size_t,
+                          std::size_t, std::string const &, bool>(),
+          pybind11::arg("context"),
+          pybind11::arg("name"),
+          pybind11::arg("parent"),
+          pybind11::arg("loudspeakerConfig"),
+          pybind11::arg("numberOfInputs"),
+          pybind11::arg("numberOfOutputs"),
+          pybind11::arg("interpolationPeriod"),
+          pybind11::arg("diffusionFilters"),
+          pybind11::arg("trackingConfiguration")="",
+          pybind11::arg("sceneReceiverPort")=4242,
+          pybind11::arg("numberEqSections")=0,
+          pybind11::arg("reverbConfig")="",
+          pybind11::arg("frequencyDependentPanning")=false
+      );
 }
 
 } // namepace signalflows

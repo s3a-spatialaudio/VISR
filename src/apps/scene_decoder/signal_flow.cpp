@@ -16,25 +16,15 @@ namespace apps
 namespace scene_decoder
 {
 
-namespace // unnamed
-{
-  // Helper function to create contiguous ranges.
-  ril::AudioChannelIndexVector indexRange( std::size_t startIdx, std::size_t endIdx )
-  {
-    std::size_t const numElements = endIdx > startIdx ? endIdx - startIdx : 0;
-    return ril::AudioChannelIndexVector( ril::AudioChannelSlice( startIdx, numElements, 1 ) );
-  }
-}
-
-SignalFlow::SignalFlow( ril::SignalFlowContext & context,
+SignalFlow::SignalFlow( SignalFlowContext & context,
                         char const * name,
-                        ril::CompositeComponent * parent,
+                        CompositeComponent * parent,
                         std::size_t numberOfInputs,
                         std::size_t numberOfOutputs,
                         std::size_t interpolationPeriod,
                         std::string const & configFile,
                         std::size_t udpPort )
- : ril::CompositeComponent( context, name, parent )
+ : CompositeComponent( context, name, parent )
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
@@ -78,7 +68,7 @@ SignalFlow::setup()
   std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : mConfigFileName.substr( lastDotIdx + 1 );
   if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
   {
-    loudspeakerArray.loadXml( mConfigFileName );
+    loudspeakerArray.loadXmlFile( mConfigFileName );
   }
   else
   {
@@ -100,12 +90,12 @@ SignalFlow::setup()
   mSceneEncoder.setup();
   mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
 
-  registerAudioConnection( "this", "in", indexRange( 0, cNumberOfInputs ), "GainMatrix", "in", indexRange( 0, cNumberOfInputs ) );
-  registerAudioConnection( "GainMatrix", "out", indexRange( 0, cNumberOfOutputs ), "this", "out", indexRange( 0, cNumberOfOutputs ) );
+  audioConnection( "this", "in", ChannelRange( 0, cNumberOfInputs ), "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs ) );
+  audioConnection( "GainMatrix", "out", ChannelRange( 0, cNumberOfOutputs ), "this", "out", ChannelRange( 0, cNumberOfOutputs ) );
 
-  registerParameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
-  registerParameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
-  registerParameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
+  parameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+  parameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
+  parameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
 }
 
 } // namespace scene_decoder

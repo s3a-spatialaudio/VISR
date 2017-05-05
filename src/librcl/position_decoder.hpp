@@ -5,8 +5,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_type.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/listener_position.hpp>
 #include <libpml/message_queue_protocol.hpp>
@@ -24,7 +24,7 @@ namespace rcl
  * Component to decode listener position data from messages (typically received from a network).
  * This component has neither audio inputs or outputs.
  */
-class PositionDecoder: public ril::AtomicComponent
+class PositionDecoder: public AtomicComponent
 {
 public:
   /**
@@ -32,9 +32,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PositionDecoder( ril::SignalFlowContext& context,
+  explicit PositionDecoder( SignalFlowContext const & context,
                             char const * name,
-                            ril::CompositeComponent * parent = nullptr );
+                            CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -76,8 +76,8 @@ private:
 
   pml::ListenerPosition translatePosition(const pml::ListenerPosition &pos);
 
-  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
-  ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionOutput;
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionOutput;
 };
 
 } // namespace rcl

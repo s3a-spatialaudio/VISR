@@ -13,7 +13,7 @@ namespace pml
 {
 
 VectorParameterConfig::VectorParameterConfig( std::size_t numberOfElements )
- : ril::ParameterConfigBase()
+ : ParameterConfigBase()
  , mNumberOfElements(numberOfElements)
 {
 }
@@ -22,7 +22,12 @@ VectorParameterConfig::~VectorParameterConfig()
 {
 }
 
-bool VectorParameterConfig::compare(ril::ParameterConfigBase const & rhs) const
+std::unique_ptr< ParameterConfigBase > VectorParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new VectorParameterConfig( *this ) );
+}
+
+bool VectorParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
   if (std::type_index(typeid(rhs)) != std::type_index(typeid(VectorParameterConfig)))

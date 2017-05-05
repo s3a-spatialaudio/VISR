@@ -5,39 +5,39 @@
 
 #include "audio_interface.hpp"
 
+// TODO: Replace by forward declarations if possible
+#include "audio_connection_map.hpp"
+#include "parameter_connection_map.hpp"
+
 #include <libril/audio_port_base.hpp>
+#include <libril/communication_protocol_base.hpp>
 #include <libril/constants.hpp>
-#include <libril/processable_interface.hpp>
 #include <libril/signal_flow_context.hpp>
 
-// #include <array>
 #include <iosfwd>
-// #include <initializer_list>
 #include <map>
 #include <memory>
 #include <set>
 #include <stdexcept>
-// #include <valarray>
 #include <vector>
 
 namespace visr
 {
-  // Forward declarations
-  namespace ril
-  {
-    class AtomicComponent;
-    class AudioInput;
-    class AudioOutput;
-    class Component;
-    class CompositeComponent;
-    class AudioPort;
-    class ParameterPortBase;
-    class CommunicationProtocolBase;
-  }
-  namespace rrl
-{
 // Forward declarations
-template <typename T> class CommunicationArea;
+class AtomicComponent;
+class ParameterPortBase;
+
+namespace impl
+{
+class ComponentImplementation;
+class CompositeComponentImplementation;
+}
+
+namespace rrl
+{
+
+// Forward declarations
+class AudioSignalPool;
 
 /**
  * Base class for signal flows, i.e., graphs of connected audio
@@ -51,9 +51,9 @@ template <typename T> class CommunicationArea;
  */
 class AudioSignalFlow
 {
-//  friend class AtomicComponent; // Required for registerComponent(), remove after restructuring.
-//  friend class Component; // Access commArea, remove after restructuring. 
 public:
+  using SignalIndexType = std::size_t; // TODO: Check whether to introduce a consistently used type alias for indices
+
   /**
    * Constructor.
    * @param period The number of samples processed in each invocation
@@ -61,12 +61,22 @@ public:
    * @param samplingFrequency The sampling frequency associated with
    * the discrete-time signals to be processed.
    */
-  explicit AudioSignalFlow( ril::Component & flow );
+  explicit AudioSignalFlow( Component & flow );
 
   /**
    * Destructor.
    */
   ~AudioSignalFlow();
+
+  /**
+   * Method to transfer the capture and playback samples to and from
+   * the locations where they are expected, and execute the contained atomic components.
+   * Called from processFunction(). For a parameter description
+   * (except userData), see @see processFunction().
+   */
+  AudioInterface::CallbackResult
+  process( SampleType const * const * captureSamples,
+                        SampleType * const * playbackSamples );
 
   /**
    * A static, i.e., non-class function which can be registered as a
@@ -86,10 +96,11 @@ public:
    * @param callbackResult A enumeration type to hold the result of
    * the process() function. Typically used to signal error conditions
    * or to request termination.
+   * @TODO After the redesign, the translation to a callback function (and discarding the object pointer) needs to be done somewhere else!
    */
   static void  processFunction( void* userData,
-                                ril::SampleType const * const * captureSamples,
-                                ril::SampleType * const * playbackSamples,
+                                SampleType const * const * captureSamples,
+                                SampleType * const * playbackSamples,
                                 AudioInterface::CallbackResult& callbackResult );
 
   /**
@@ -103,6 +114,12 @@ public:
    */
   bool initialised() const { return mInitialised; }
 
+  /**
+   * Return the number of samples processed in each process() function
+   * @note At the moment this is required by the Python binding.
+   */
+  std::size_t period() const;
+
   std::size_t numberOfAudioCapturePorts( ) const;
 
   std::size_t numberOfAudioPlaybackPorts( ) const;
@@ -111,13 +128,13 @@ public:
   * Return the name of the capture port indexed by \p idx
   * @throw std::out_of_range If the \p idx exceeds the number of capture ports.
   */
-  std::string const & audioCapturePortName( std::size_t idx ) const;
+  char const * audioCapturePortName( std::size_t idx ) const;
 
   /**
    * Return the name of the playback port indexed by \p idx
    * @throw std::out_of_range If the \p idx exceeds the number of playback ports.
    */
-  std::string const & audioPlaybackPortName( std::size_t idx ) const;
+  char const * audioPlaybackPortName( std::size_t idx ) const;
 
   /**
    * Query the width of the capture port, i.e., the number of external
@@ -136,113 +153,102 @@ public:
   std::size_t numberOfPlaybackChannels() const;
   //@}
 
+  /**
+   * Query and access external parameter ports.
+   */
+  //@{
+
+  using ProtocolReceiveEndpoints = std::map<std::string, std::unique_ptr<CommunicationProtocolBase::Output> >;
+  using ProtocolSendEndpoints = std::map<std::string, std::unique_ptr<CommunicationProtocolBase::Input> >;
+
+  std::size_t numberExternalParameterReceivePorts() const
+  {
+    return mProtocolReceiveEndpoints.size();
+  }
+
+  std::size_t numberExternalParameterSendPorts() const
+  {
+    return mProtocolSendEndpoints.size();
+  }
+
+  ProtocolReceiveEndpoints const & externalParameterReceiveEndpoints() const
+  {
+    return mProtocolReceiveEndpoints;
+  }
+
+  ProtocolSendEndpoints const & externalParameterSendEndpoints() const
+  {
+    return mProtocolSendEndpoints;
+  }
+
+  /**
+   * Return a input protocol for a named top-level parameter port.
+   * @throw std::out_of_range No top-level parameter port with this name exists.
+   */
+  CommunicationProtocolBase::Output & externalParameterReceivePort( char const * portName );
+
+  /**
+  * Return a output protocol for a named top-level parameter port.
+  * @throw std::out_of_range No top-level parameter port with this name exists.
+  */
+  CommunicationProtocolBase::Input & externalParameterSendPort( char const * portName );
+
+  //@}
+
 
 private:
-// Unused at the moment, outdated, incomplete implementation
-#if 0
+  bool initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections);
+
   /**
-   * Top-level initialisation function, called from the constructor
-   */
-  bool initialise( std::ostream & messages );
-#endif
-  bool initialiseAudioConnections( std::ostream & messages );
+    * Initialise the parameter infrastructure.
+    * @return True if the initialisation was successful, false otherwise. In this case, \p messages should provide an explanation.
+    * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
+    * @param [out] parameterConnections Connection map to be filled during the initialisation process.
+    */
+  bool initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections );
 
   /**
    * Initialise the schedule for executing the contained elements.
-   * At the moment, this contains some duplicate effort, because the connection maps for 
-   * both the audio signals and parameters have to be computed again. 
+   * @return Boolean value indicating whether the initialisation was successful.
+   * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
+   * @param audioConnections The audio connection relations of the final signal flow (possibly including additional infrastructure components created during initialisation)
+   * @param parameterConnections The parameter connection relations of the final signal flow (possibly including additional infrastructure components created during initialisation)
    */
-  bool initialiseSchedule( std::ostream & messages );
+  bool initialiseSchedule( std::ostream & messages,
+                           AudioConnectionMap const & audioConnections,
+                           ParameterConnectionMap const & parameterConnections );
 
   /**
-   * Can be static or nonmember functions
+   * Mark the signal flow as "initialised".
+   * @todo Decide whether this is the right place for a consistency check.
    */
-  //@{
-  static bool checkFlow( ril::Component const & comp, bool locally, std::ostream & messages );
-
-  static bool checkCompositeLocal( ril::CompositeComponent const & composite , std::ostream & messages );
-
-  static bool checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages );
-
-  static bool checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages );
-  //@}
-
-  /**
-   * Initialise the communication area, i.e., the memory area
-   * containing all input, output, and intermediate signals used in the
-   * execution of the derived signal flow.
-   * To be called from the setup() method of a derived subclass.
-   */
-  void initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
-                     std::size_t alignmentElements = ril::cVectorAlignmentSamples );
-
-  /**
-    * Parameter infrastructure
-    */
-  //@{
-  bool initialiseParameterInfrastructure( std::ostream & messages );
-
-  /**
-  * Mark the signal flow as "initialised".
-  * @todo Decide whether this is the right place for a consistency check.
-  */
   void setInitialised( bool newState = true ) { mInitialised = newState; }
 
   std::size_t numberCommunicationProtocols() const;
-
-  /**
-   * Method to transfer the capture and playback samples to and from
-   * the locations where they are expected, and execute the contained atomic components.
-   * Called from processFunction(). For a parameter description
-   * (except userData), see @see processFunction().
-   */
-  void processInternal( ril::SampleType const * const * captureSamples,
-                        ril::SampleType * const * playbackSamples,
-                        AudioInterface::CallbackResult& callbackResult );
 
   /**
   * Method called within the processFunction callback to execute the atomic components of the graph
   */
   void executeComponents( );
 
-#if 0
-  /**
-   * find a port of a specific audio component, both specified by name
-   * @throw std::invalid_argument If either component or port specified by the respective name does not exist.
-   */
-  ril::AudioPortBase & findPort( std::string const & componentName,
-                             std::string const & portName );
-#endif
-
   /**
    * The signal flow handled by this object.
-   * Can be either an atomic or a (hierachical) composite component/
+   * Can be either an atomic or a (hierarchical) composite component/
    */
-  ril::Component & mFlow;
+  impl::ComponentImplementation & mFlow;
 
   /**
    * Flag stating whether the signal flow is fully initialised.
+   * @note: As long as initialisation is performed fully in the constructor, here is no need for that,
    */
   bool mInitialised;
-
-  /**
-   * Type for collection and lookup of all audio components contained in this signal flow.
-   * @note At this level the signal flow is flat, i.e., only atomic components are important.
-   */
-  using ComponentTable = std::map<std::string, ril::AtomicComponent*>;
-
-  /**
-   * A table of all Component objects contained in this graph. 
-   * @note: This member does assume the ownership of the components.
-   */
-  ComponentTable mComponents;
 
   /**
    * Parameter infrastructure
    */
   //@{
 
-  using CommunicationProtocolContainer = std::vector<std::unique_ptr<ril::CommunicationProtocolBase> >;
+  using CommunicationProtocolContainer = std::vector<std::unique_ptr<CommunicationProtocolBase> >;
 
   CommunicationProtocolContainer mCommunicationProtocols;
   //@}
@@ -252,16 +258,15 @@ private:
    */
   //@{
 
-  std::vector<ril::AudioInput*> mToplevelInputs;
+  std::vector<impl::AudioPortBaseImplementation *> mToplevelInputs;
 
-  std::vector<ril::AudioOutput*> mToplevelOutputs;
+  std::vector<impl::AudioPortBaseImplementation *> mToplevelOutputs;
   //@}
 
   /**
   * The communication area for this signal flow.
-  * @see initCommArea()
   */
-  std::unique_ptr<CommunicationArea<ril::SampleType> > mCommArea;
+  std::unique_ptr<AudioSignalPool> mAudioSignalPool;
 
   /**
    * These ports are the top-level system inputs and outputs.
@@ -269,15 +274,28 @@ private:
    * @note at the moment the order of the ports is determined by the system.
    */
   //@{
-  std::vector < ril::AudioPortBase*> mTopLevelAudioInputs;
-  std::vector < ril::AudioPortBase*> mTopLevelAudioOutputs;
+  std::vector < impl::AudioPortBaseImplementation*> mTopLevelAudioInputs;
+  std::vector < impl::AudioPortBaseImplementation*> mTopLevelAudioOutputs;
   //@}
 
+  std::vector<char*> mCaptureChannels;
+  std::vector<char*> mPlaybackChannels;
 
-  std::vector<ril::AudioPortBase::SignalIndexType> mCaptureIndices;
-  std::vector<ril::AudioPortBase::SignalIndexType> mPlaybackIndices;
+  /**
+   * Data structures to hold top-level parameter ports (or their input/output facilities)
+   */
+  //@{
+  ProtocolReceiveEndpoints mProtocolReceiveEndpoints;
 
-  using ProcessingSchedule = std::vector<ril::ProcessableInterface * >;
+  ProtocolSendEndpoints mProtocolSendEndpoints;
+
+  //@}
+
+  using InternalComponentList = std::vector<std::unique_ptr<AtomicComponent> >;
+    
+  InternalComponentList mInfrastructureComponents;
+
+  using ProcessingSchedule = std::vector<AtomicComponent * >;
 
   ProcessingSchedule mProcessingSchedule;
 };

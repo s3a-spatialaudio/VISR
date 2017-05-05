@@ -1,20 +1,13 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include <libril/parameter_base.hpp>
 #include <libril/parameter_factory.hpp>
 
-// evil hack: Dependency to libpml
-#include <libpml/listener_position.hpp>
-#include <libpml/matrix_parameter.hpp>
-#include <libpml/object_vector.hpp>
-#include <libpml/string_parameter.hpp>
-#include <libpml/time_frequency_parameter.hpp>
-#include <libpml/vector_parameter.hpp>
+#include <libril/parameter_config_base.hpp>
 
 #include <stdexcept>
 
 namespace visr
-{
-namespace ril
 {
 
 ParameterFactory::Creator::Creator( CreateFunction fcn )
@@ -48,5 +41,4 @@ ParameterFactory::create(ParameterType const & type, ParameterConfigBase const &
   return std::unique_ptr<ParameterBase>( findIt->second.create( config ) );
 }
 
-} // namespace ril
 } // namespace visr

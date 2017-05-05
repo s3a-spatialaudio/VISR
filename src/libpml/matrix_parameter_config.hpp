@@ -21,14 +21,16 @@ namespace pml
  * The template class is explicitly instantiated for the element types float and double.
  * @tparam ElementType The data type of the elements of the matrix.
  */
-class MatrixParameterConfig: public ril::ParameterConfigBase
+class MatrixParameterConfig: public ParameterConfigBase
 {
 public:
   MatrixParameterConfig( std::size_t numberOfRows, std::size_t numberOfColumns );
 
   virtual ~MatrixParameterConfig();
 
-  bool compare( ril::ParameterConfigBase const & rhs ) const override;
+  std::unique_ptr< ParameterConfigBase > clone() const override;
+
+  bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( MatrixParameterConfig const & rhs ) const;
 

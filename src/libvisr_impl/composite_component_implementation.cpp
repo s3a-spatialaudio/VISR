@@ -2,31 +2,59 @@
 
 #include "composite_component_implementation.hpp"
 
-#include "component_internal.hpp"
+#include "component_implementation.hpp"
+#include "audio_port_base_implementation.hpp"
+#include "parameter_port_base_implementation.hpp"
 
-#include <libril/composite_component.hpp>
+#include <libril/audio_port_base.hpp>
+#include <libril/channel_list.hpp>
+#include <libril/parameter_port_base.hpp>
 
+#include <algorithm>
+#include <ciso646>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 
 namespace visr
 {
-namespace ril
+namespace impl
 {
 
-void CompositeComponentImplementation::registerChildComponent( std::string const & name, ComponentInternal * child )
+CompositeComponentImplementation::CompositeComponentImplementation( CompositeComponent & component,
+                                                                    SignalFlowContext const & context,
+                                                                    char const * componentName,
+                                                                    CompositeComponentImplementation * parent )
+ : ComponentImplementation( component, context, componentName, parent )
 {
-  ComponentTable::iterator findComp = mComponents.find( name );
-  if( findComp != mComponents.end() )
-  {
-    throw std::invalid_argument( "CompositeComponent::registerChildComponent(): Component with given name already exists." );
-  }
-  mComponents.insert( findComp, std::make_pair( name, child ) ); // insert with iterator as hint.
 }
 
-void CompositeComponentImplementation::unregisterChildComponent( ComponentInternal * child )
+CompositeComponentImplementation::~CompositeComponentImplementation()
 {
-  ComponentTable::iterator findComp = mComponents.find( child->name() );
+  for( auto comp : mComponents )
+  {
+    comp->setParent( nullptr );
+  }
+}
+
+/*virtual*/ bool CompositeComponentImplementation::isComposite() const
+{
+  return true;
+}
+
+void CompositeComponentImplementation::registerChildComponent( char const * name, ComponentImplementation * child )
+{
+  ComponentTable::iterator findComp = findComponentEntry( name );
+  if( findComp != mComponents.end() )
+  {
+    throw std::invalid_argument( "CompositeComponentImplementation::registerChildComponent(): Component with given name already exists." );
+  }
+  mComponents.push_back( child );
+}
+
+void CompositeComponentImplementation::unregisterChildComponent( ComponentImplementation * child )
+{
+  ComponentTable::iterator findComp = findComponentEntry( child->name().c_str() );
   if( findComp != mComponents.end() )
   {
     mComponents.erase( findComp );
@@ -49,37 +77,46 @@ CompositeComponentImplementation::ComponentTable::const_iterator
   return mComponents.end();
 }
 
-ComponentInternal * CompositeComponentImplementation::findComponent( std::string const & componentName )
+CompositeComponentImplementation::ComponentTable::iterator 
+CompositeComponentImplementation::findComponentEntry( char const *componentName )
 {
-  if( componentName.empty() or componentName.compare( "this" ) == 0 )
-  {
-    return &(composite().internal());
-  }
-  ComponentTable::iterator findIt = mComponents.find( componentName );
-  if( findIt == mComponents.end() )
-  {
-    return nullptr;
-  }
-  return findIt->second;
+  ComponentTable::iterator findIt = std::find_if( mComponents.begin(), mComponents.end(),
+    [componentName]( ComponentImplementation const * comp ) { return strcmp( componentName, comp->name().c_str()) == 0; } );
+  return findIt;
 }
 
-ComponentInternal const * CompositeComponentImplementation::findComponent( std::string const & componentName ) const
+CompositeComponentImplementation::ComponentTable::const_iterator
+CompositeComponentImplementation::findComponentEntry( char const *componentName ) const
 {
-  if( componentName.empty() or componentName.compare( "this" ) == 0 )
-  {
-    return &(composite().internal());
-  }
-  ComponentTable::const_iterator findIt = mComponents.find( componentName );
-  if( findIt == mComponents.end() )
-  {
-    return nullptr;
-  }
-  return findIt->second;
+  ComponentTable::const_iterator findIt = std::find_if( mComponents.begin(), mComponents.end(),
+    [componentName]( ComponentImplementation const * comp ) { return strcmp( componentName, comp->name().c_str()) == 0; } );
+  return findIt;
 }
 
-AudioPortBase * CompositeComponentImplementation::findAudioPort( std::string const & componentName, std::string const & portName )
+
+ComponentImplementation * CompositeComponentImplementation::findComponent( char const * componentName )
 {
-  ComponentInternal * comp = findComponent( componentName );
+  if( (componentName == nullptr) or (strlen( componentName ) == 0) or (strcmp( componentName, "this" ) == 0) )
+  {
+    return this;
+  }
+  ComponentTable::iterator findIt = findComponentEntry( componentName );
+  return ( findIt == componentEnd() ) ? nullptr : *findIt;
+}
+
+ComponentImplementation const * CompositeComponentImplementation::findComponent( char const * componentName ) const
+{
+  if( (componentName == nullptr) or (strlen( componentName ) == 0) or (strcmp( componentName, "this" ) == 0) )
+  {
+    return this;
+  }
+  ComponentTable::const_iterator findIt = findComponentEntry( componentName );
+  return (findIt == componentEnd()) ? nullptr : *findIt;
+}
+
+AudioPortBase * CompositeComponentImplementation::findAudioPort( char const * componentName, char const * portName )
+{
+  ComponentImplementation * comp = findComponent( componentName );
   if( not comp )
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
@@ -88,9 +125,9 @@ AudioPortBase * CompositeComponentImplementation::findAudioPort( std::string con
   return comp->findAudioPort( portName );
 }
 
-ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::string const & componentName, std::string const & portName )
+ParameterPortBase * CompositeComponentImplementation::findParameterPort( char const * componentName, char const * portName )
 {
-  ComponentInternal * comp = findComponent( componentName );
+  ComponentImplementation * comp = findComponent( componentName );
   if( not comp )
   {
     return nullptr; // Consider turning this into an exception and provide a meaningful message.
@@ -98,10 +135,10 @@ ParameterPortBase * CompositeComponentImplementation::findParameterPort( std::st
   return comp->findParameterPort( portName );
 }
 
-void CompositeComponentImplementation::registerParameterConnection( std::string const & sendComponent,
-                                                            std::string const & sendPort,
-                                                            std::string const & receiveComponent,
-                                                            std::string const & receivePort )
+void CompositeComponentImplementation::registerParameterConnection( char const * sendComponent,
+                                                                    char const * sendPort,
+                                                                    char const * receiveComponent,
+                                                                    char const * receivePort )
 {
   ParameterPortBase * sender = findParameterPort( sendComponent, sendPort );
   if( not sender )
@@ -111,32 +148,69 @@ void CompositeComponentImplementation::registerParameterConnection( std::string 
   ParameterPortBase * receiver = findParameterPort( receiveComponent, receivePort );
   if( not receiver )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): receiver port could not be found." );
+    throw std::invalid_argument( "CompositeComponent::registerParameterConnection(): receiver port could not be found." );
   }
-  ParameterConnection newConnection( sender, receiver );
+  ParameterConnection newConnection( &(sender->implementation()), &(receiver->implementation()) );
   mParameterConnections.insert( std::move( newConnection ) );
 }
 
-void CompositeComponentImplementation::registerAudioConnection( std::string const & sendComponent,
-                                                                std::string const & sendPort,
-                                                                AudioChannelIndexVector const & sendIndices,
-                                                                std::string const & receiveComponent,
-                                                                std::string const & receivePort,
-                                                                AudioChannelIndexVector const & receiveIndices )
+void CompositeComponentImplementation::registerParameterConnection( ParameterPortBase & sendPort,
+                                                                    ParameterPortBase & receivePort )
+{
+  ParameterConnection newConnection( &(sendPort.implementation()), &(receivePort.implementation()) );
+  mParameterConnections.insert( std::move( newConnection ) );
+}
+
+void CompositeComponentImplementation::audioConnection( char const * sendComponent,
+                                                        char const * sendPort,
+                                                        ChannelList const & sendIndices,
+                                                        char const * receiveComponent,
+                                                        char const * receivePort,
+                                                        ChannelList const & receiveIndices )
 {
   AudioPortBase * sender = findAudioPort( sendComponent, sendPort );
   if( not sender )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): sender port could not be found." );
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): sender port could not be found." );
   }
   AudioPortBase * receiver = findAudioPort( receiveComponent, receivePort );
   if( not receiver )
   {
-    throw std::invalid_argument( "CompositeComponent::registerAudioConnection(): receiver port could not be found." );
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): receiver port could not be found." );
   }
-  AudioConnection newConnection( sender, sendIndices, receiver, receiveIndices );
+  AudioConnection newConnection( &(sender->implementation()), sendIndices, &(receiver->implementation()), receiveIndices );
 
   mAudioConnections.insert( std::move( newConnection ) );
+}
+
+void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
+                                                                ChannelList const & sendIndices,
+                                                                AudioPortBase & receivePort,
+                                                                ChannelList const & receiveIndices )
+{
+  AudioConnection newConnection( &(sendPort.implementation()), sendIndices,
+				 &(receivePort.implementation()), receiveIndices );
+  mAudioConnections.insert( std::move( newConnection ) );
+}
+
+void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
+                                                                AudioPortBase & receivePort )
+{
+  AudioPortBaseImplementation & sendPortImpl = sendPort.implementation();
+  AudioPortBaseImplementation & receivePortImpl = receivePort.implementation();
+  std::size_t const sendWidth = sendPortImpl.width();
+  std::size_t const receiveWidth = receivePortImpl.width();
+  if( sendWidth != receiveWidth )
+  {
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): send and receive port width do not match." );
+  }
+  ChannelList const indices( ChannelRange( 0, sendWidth ) );
+  audioConnection( sendPort, indices, receivePort, indices );
+}
+
+AudioConnectionTable const & CompositeComponentImplementation::audioConnections() const
+{
+  return mAudioConnections;
 }
 
 AudioConnectionTable::const_iterator CompositeComponentImplementation::audioConnectionBegin() const
@@ -159,5 +233,5 @@ ParameterConnectionTable::const_iterator CompositeComponentImplementation::param
   return mParameterConnections.end();
 }
 
-} // namespace ril
+} // namespace impl
 } // namespace visr

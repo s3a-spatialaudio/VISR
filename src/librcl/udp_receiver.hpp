@@ -5,9 +5,8 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_output.hpp>
 
-#include <libpml/message_queue.hpp> // TODO: Replace by other data structure.
 #include <libpml/string_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
 
@@ -17,6 +16,7 @@
 
 #include <memory>
 #include <string>
+#include <deque>
 
 namespace visr
 {
@@ -29,7 +29,7 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public ril::AtomicComponent
+class UdpReceiver: public AtomicComponent
 {
 public:
   enum class Mode
@@ -49,9 +49,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpReceiver( ril::SignalFlowContext& context,
+  explicit UdpReceiver( SignalFlowContext const & context,
                         char const * name,
-                        ril::CompositeComponent * parent = nullptr );
+                        CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -103,13 +103,13 @@ private:
    * Internal queue of messages received asynchronously. They will be copied into the output
    *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
    */
-  std::unique_ptr< pml::MessageQueue< pml::StringParameter > > mInternalMessageBuffer;
+  std::deque< pml::StringParameter > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
 
   boost::mutex mMutex;
 
-  ril::ParameterOutputPort<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
+  ParameterOutput<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

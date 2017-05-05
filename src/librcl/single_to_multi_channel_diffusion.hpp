@@ -14,17 +14,14 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
 namespace rbbl
 {
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
 template< typename SampleType >
 class MultichannelConvolverUniform;
-#else
-class FIR;
-#endif
 }
 
 namespace rcl
@@ -33,21 +30,21 @@ namespace rcl
 /**
  * Audio Component for creating a set of decorrelated signals out of a single input signal.
  */
-class SingleToMultichannelDiffusion: public ril::AtomicComponent
+class SingleToMultichannelDiffusion: public AtomicComponent
 {
   /**
    * Alias for the type of the audio samples processed by this component.
    */
-  using SampleType = ril::SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SingleToMultichannelDiffusion( ril::SignalFlowContext& context,
+  explicit SingleToMultichannelDiffusion( SignalFlowContext const & context,
                                           char const * name,
-                                          ril::CompositeComponent * parent = nullptr );
+                                          CompositeComponent * parent = nullptr );
     
   ~SingleToMultichannelDiffusion();
 
@@ -85,43 +82,28 @@ private:
   /**
    * The audio input, width 1.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output, width \p numberOfOutputs.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * The number of output channels.
    */
   std::size_t mNumberOfOutputs;
 
-#ifndef DIFFUSION_USE_FAST_CONVOLVER
   /**
-   * Gain adjustment levels (linear scale) for each output channel. 
+   * A one-to-N FIR filter for diffusion.
    */
-  efl::BasicVector<SampleType> mGainAdjustments;
-#endif
+  std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mDiffusionFilter;
 
   /**
-   * An one-to-N FIR filter for diffusion.
+   * Buffer to hold the pointers to the channels of the output port.
+   * @todo Change if the MultichannelConvolver class offers a stride-based interface
    */
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
-  std::unique_ptr<rbbl::MultichannelConvolverUniform<ril::SampleType> > mDiffusionFilter;
-#else
-  std::unique_ptr<rbbl::FIR> mDiffusionFilter;
-  /**
-   * Output matrix for the results of the filtering operation.
-   * @note Only needed with the rbbl::FIR class.
-   */
-  efl::BasicMatrix<SampleType> mFilterOutputs;
-#endif
-
-  /**
-   * Buffer to hold the pointers into the output buffers for the filtering.
-   */
-  std::vector<SampleType*> mOutputPointers;
+  std::valarray<SampleType*> mOutputChannels;
 };
 
 } // namespace rcl

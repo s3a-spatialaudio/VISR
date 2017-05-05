@@ -3,6 +3,8 @@
 #ifndef VISR_PYTHON_PML_LOUDSPEAKER_ARRAY_HPP_INCLUDED
 #define VISR_PYTHON_PML_LOUDSPEAKER_ARRAY_HPP_INCLUDED
 
+#include <pybind11/pybind11.h>
+
 namespace visr
 {
 namespace python
@@ -10,7 +12,7 @@ namespace python
 namespace pml
 {
 
-void exportLoudspeakerArray();
+void exportLoudspeakerArray( pybind11::module & m );
 
 } // namepace pml
 } // namespace python

@@ -9,10 +9,11 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
+#include <map>
 #include <memory>
-#include <vector>
+#include <tuple>
 
 namespace visr
 {
@@ -25,7 +26,7 @@ namespace rcl
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
-class SignalRouting: public ril::AtomicComponent
+class SignalRouting: public AtomicComponent
 {
 public:
   /**
@@ -33,9 +34,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SignalRouting( ril::SignalFlowContext& context,
+  explicit SignalRouting( SignalFlowContext const & context,
                           char const * name,
-                          ril::CompositeComponent * parent = nullptr );
+                          CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -101,21 +102,30 @@ private:
   /**
    * The audio input port.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output of the component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
-  std::unique_ptr<ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
+  std::unique_ptr<ParameterInput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
+
+  /**
+   * Entry type for routings.
+   * Tuples are used because they provide operator<().
+   * Ordering: <outputIndex, inputIndex>
+   */
+  using RoutingEntry = std::tuple<pml::SignalRoutingParameter::IndexType, pml::SignalRoutingParameter::IndexType>;
+
+  using RoutingTable = std::set<RoutingEntry>;
 
   /**
    * Data structure for string the routing information. Eahc vector element corresponds to the respective
    * channel of the output port. It contains the index of the input channel to be routed to this output channel,
    * or pml::SignalRoutingParameter::cInvalidIndex if the output channel shall be filled with zeros.
    */
-  std::vector<pml::SignalRoutingParameter::IndexType> mRoutingVector;
+  RoutingTable mRoutings;
 
   /**
    * Check whether the input and output indices are within the ranges of valid admissible values.

@@ -5,6 +5,7 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 
 #include <memory> // for std::unique_ptr
@@ -12,12 +13,6 @@
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
-
 namespace rcl
 {
 
@@ -26,30 +21,26 @@ namespace rcl
  * The number of inputs is set by the \p numInputs argument passed to the setup() method.
  * All input vectors must have the same number of signals given by the \p width argument to setup().
  */
-class Add: public ril::AtomicComponent
+class Add: public AtomicComponent
 {
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
+   * @param numInputs The number of signal vectors to be added.
    */
-  explicit Add( ril::SignalFlowContext& context,
+  explicit Add( SignalFlowContext const & context,
                 char const * name,
-                ril::CompositeComponent * parent = nullptr );
+                CompositeComponent * parent,
+		std::size_t width,
+		std::size_t numInputs );
 
   /**
    * Destructor.
    */
   ~Add();
-
-  /**
-   * Method to initialise the component.
-   * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
-   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
-   * @param numInputs The number of signal vectors to be added.
-   */ 
-  void setup( std::size_t width, std::size_t numInputs );
 
   /**
    * The process function. 
@@ -62,12 +53,12 @@ private:
   /**
    * The audio output of the component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * A vector holding an arbitrary number of inputs
    */
-  std::vector<std::unique_ptr<ril::AudioInput> > mInputs;
+  std::vector<std::unique_ptr< AudioInput > > mInputs;
 };
 
 } // namespace rcl

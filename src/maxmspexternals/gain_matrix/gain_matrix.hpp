@@ -1,23 +1,25 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+#define VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED
+
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
-#include <libsignalflows/gain_matrix.hpp>
-
 #include <libpml/matrix_parameter.hpp>
 
+#include <libsignalflows/gain_matrix.hpp>
+
+// We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
+// stuff such as defining macros min, max, and error
+#include <maxmspexternals/libmaxsupport/external_base.hpp>
+#include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
+
 #include <cstddef>
-#include <limits>
 #include <memory>
 
 namespace visr
 {
-
-namespace ril
-{
-class SignalFlow;
-}
 
 namespace maxmsp
 {
@@ -55,13 +57,15 @@ private:
    * Context object to provide initialisation information and to provide a runt-time interface for the components.
    * Must be a pointer, as it can be instantiated only in the initiDSP() method.
    */
-  std::unique_ptr<ril::SignalFlowContext> mContext;
+  std::unique_ptr<SignalFlowContext> mContext;
 
   std::unique_ptr<signalflows::GainMatrix> mFlow;
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;
 
-  pml::MatrixParameter<ril::SampleType> mGains;
+  pml::MatrixParameter<SampleType> mGains;
 };
 
 } // namespace maxmsp
 } // namespace visr
+
+#endif // #ifndef VISR_MAXMSP_GAIN_MATRIX_GAIN_MATRIX_HPP_INCLUDED

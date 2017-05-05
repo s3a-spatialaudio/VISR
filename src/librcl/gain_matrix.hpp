@@ -7,7 +7,7 @@
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
 // TODO: make it a forward declaration
 #include <librbbl/gain_matrix.hpp>
@@ -23,6 +23,7 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -44,18 +45,18 @@ namespace rcl
  * The width of these ports is determined by the arguments "numberOfInput" and "numberOfOutputs", respectively,
  * which are passed to the setup() method.
  */
-class GainMatrix: public ril::AtomicComponent
+class GainMatrix: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit GainMatrix( ril::SignalFlowContext& context,
+  explicit GainMatrix( SignalFlowContext const & context,
                        char const * name,
-                       ril::CompositeComponent * parent = nullptr );
+                       CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.
@@ -94,16 +95,20 @@ public:
 private:
   std::unique_ptr< rbbl::GainMatrix< SampleType > > mMatrix;
 
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 
   /**
-   * 
-   */
-  std::size_t mNumberOfInputs;
-  std::size_t mNumberOfOutputs;
+  * Vectors to the channel pointers of the input and output ports.
+  * They are required by the interface of the contained rbbl::GainMatrix class.
+  * @todo Consider (optional) stride-based interface for rbbl::GainMatrix.
+  */
+  //@{
+  std::valarray<SampleType const *> mInputChannels;
+  std::valarray<SampleType * > mOutputChannels;
+  //@}
 
-  std::unique_ptr<ril::ParameterInputPort<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
+  std::unique_ptr<ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
 };
 
 } // namespace rcl

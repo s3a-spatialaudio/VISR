@@ -9,6 +9,14 @@ namespace visr
 {
 namespace rrl
 {
+
+AudioSignalPool::AudioSignalPool( std::size_t size, std::size_t alignment )
+ : mPool( size, alignment )
+{
+}
+
+AudioSignalPool::~AudioSignalPool() = default;
+
   template<typename SampleType>
   CommunicationArea<SampleType>::CommunicationArea( std::size_t numberOfSignals, std::size_t signalLength,
                                                     std::size_t alignmentElements /* = 0 */ )

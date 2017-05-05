@@ -66,13 +66,13 @@ private:
    * Context object to provide initialisation information and to provide a runt-time interface for the components.
    * Must be a pointer, as it can be instantiated only in the initiDSP() method.
    */
-  std::unique_ptr<ril::SignalFlowContext> mContext;
+  std::unique_ptr<SignalFlowContext> mContext;
 
   std::unique_ptr<signalflows::DelayVector> mFlow;
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;
 
-  efl::BasicVector<ril::SampleType> mGains;
-  efl::BasicVector<ril::SampleType> mDelays;
+  efl::BasicVector<SampleType> mGains;
+  efl::BasicVector<SampleType> mDelays;
 };
 
 } // namespace maxmsp

@@ -41,10 +41,10 @@ namespace visr
 {
 namespace rcl
 {
-  ListenerCompensation::ListenerCompensation( ril::SignalFlowContext& context,
+  ListenerCompensation::ListenerCompensation( SignalFlowContext const & context,
                                               char const * name,
-                                              ril::CompositeComponent * parent /*= nullptr*/ )//constructor
-  : ril::AtomicComponent( context, name, parent )
+                                              CompositeComponent * parent /*= nullptr*/ )//constructor
+  : AtomicComponent( context, name, parent )
   , m_listenerPos( 0.0f, 0.0f, 0.0f )
   , mNumberOfLoudspeakers( 0 )
 {
@@ -57,10 +57,10 @@ void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig 
 
   pml::VectorParameterConfig const vectorConfig( mNumberOfLoudspeakers );
 
-  mPositionInput.reset( new ril::ParameterInputPort<pml::SharedDataProtocol, pml::ListenerPosition >
+  mPositionInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::ListenerPosition >
     ( "positionInput", *this, pml::EmptyParameterConfig() ) );
-  mGainOutput.reset( new ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "gainOutput", *this, vectorConfig) );
-  mDelayOutput.reset( new ril::ParameterOutputPort<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "delayOutput", *this, vectorConfig ) );
+  mGainOutput.reset( new ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "gainOutput", *this, vectorConfig) );
+  mDelayOutput.reset( new ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "delayOutput", *this, vectorConfig ) );
 }
 
 void ListenerCompensation::process()

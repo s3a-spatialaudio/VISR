@@ -14,79 +14,86 @@
 
 namespace visr
 {
-// Forward declarations
-namespace ril
+namespace impl
 {
-class AtomicComponent;
-class Component;
-class AudioPortBase;
+class AudioPortBaseImplementation;
+class ComponentImplementation;
 }
 
 namespace rrl
 {
 
-class AudioSignalDescriptor
+/**
+ * Data structure representing a single audio channel.
+ */
+class AudioChannel
 {
 public:
-  using SignalIndexType = std::size_t;
+  explicit AudioChannel( impl::AudioPortBaseImplementation * port, std::size_t channel )
+    : mVal( port, channel )
+  {
+  }
+  impl::AudioPortBaseImplementation * port() const { return std::get<0>( mVal ); }
+  std::size_t const channel() const { return std::get<1>( mVal ); }
 
-  AudioSignalDescriptor();
+  AudioChannel( AudioChannel const & rhs ) = default;
 
-  explicit AudioSignalDescriptor( ril::AudioPortBase const * port, SignalIndexType index );
+  AudioChannel& operator=( AudioChannel const & rhs ) = default;
 
-  /**
-  * 'less than operator', used for ordering in a map.
-  */
-  bool operator<(AudioSignalDescriptor const & rhs) const;
+  AudioChannel( AudioChannel && rhs ) = default;
 
-  bool operator==(AudioSignalDescriptor const & rhs) const;
+  AudioChannel& operator=( AudioChannel && rhs ) = default;
 
-  ril::AudioPortBase const* mPort;
-  SignalIndexType mIndex;
 
-  // with proper C++11 support, this could be instantiated in place (using the constexpr mechanism)
-  static SignalIndexType const cInvalidIndex;
+  bool operator<( AudioChannel const & rhs ) const { return mVal < rhs.mVal; }
+
+  bool operator==( AudioChannel const & rhs ) const { return mVal == rhs.mVal; }
+
+private:
+  std::tuple<impl::AudioPortBaseImplementation *, std::size_t> mVal;
 };
 
-  std::string printAudioSignalDescriptor( AudioSignalDescriptor const & desc );
+/**
+ * Stream operator to print an audio channel.
+ * Format <full port name>:<channel index>
+ */
+std::ostream& operator<<( std::ostream & str, AudioChannel const & channel );
 
 class AudioConnectionMap
 {
-private:
-  struct CompareDescriptors
-  {
-    bool operator()( AudioSignalDescriptor const & lhs, AudioSignalDescriptor const & rhs ) const
-    {
-      if( lhs.mPort < rhs.mPort )
-      {
-        return true;
-      }
-      else if( lhs.mPort == rhs.mPort )
-      {
-        return lhs.mIndex < rhs.mIndex;
-      }
-      return false;
-    }
-  };
-
 public:
-  using Container = std::multimap< AudioSignalDescriptor, AudioSignalDescriptor, CompareDescriptors >;
+
+  using Container = std::multimap< AudioChannel, AudioChannel >;
 
   using value_type = Container::value_type;
 
+  using iterator = Container::const_iterator;
   using const_iterator = Container::const_iterator;
 
   /**
-   * Default constructor, creates an empty connection map.
-   */
+  * Default constructor, creates an empty connection map.
+  */
   AudioConnectionMap();
 
-  explicit AudioConnectionMap( ril::Component const & component,
+  explicit AudioConnectionMap( impl::ComponentImplementation const & component,
                                bool recursive = false );
 
-  bool fill( ril::Component const & component,
+  bool fill( impl::ComponentImplementation const & component,
              std::ostream & messages,
              bool recursive = false );
+
+  /**
+   * Exchange the content of this object with that of \p rhs.
+   */
+  void swap( AudioConnectionMap & rhs ) noexcept;
+
+  void insert( value_type const & connection );
+
+  iterator insert( iterator hint, value_type const & connection );
+
+  void insert( iterator first, iterator last );
+
+  void insert( AudioChannel const & sender, AudioChannel const & receiver );
 
   Container const & connections() const { return mConnections; }
 
@@ -96,30 +103,30 @@ public:
 
   std::size_t size() const { return mConnections.size(); }
 
-  std::pair<const_iterator, const_iterator > equal_range( AudioSignalDescriptor const signal ) const
+  std::pair<const_iterator, const_iterator > connectionsForReceiveChannel( AudioChannel const & audioChannel ) const
   {
-    return mConnections.equal_range( signal );
+    return mConnections.equal_range( audioChannel );
   }
-
-  const_iterator findFirst( AudioSignalDescriptor const signal ) const
-  {
-    return mConnections.find( signal );
-  }
-
   /**
-   * @throw std::invalid_argument if the flow graph is inconsistent.
-   * If an exception is thrown, the object is not altered.
    */
-  void resolvePlaceholders( AudioConnectionMap const & fullConnections );
+  const_iterator findReceiveChannel( AudioChannel const & signal ) const;
+
+  AudioConnectionMap resolvePlaceholders( ) const;
+
 private:
-  bool fillRecursive( ril::Component const & component,
+  bool fillRecursive( impl::ComponentImplementation const & component,
                       std::ostream & messages,
                       bool recursive );
 
   Container mConnections;
 };
 
-std::ostream & operator<<(std::ostream & stream, AudioConnectionMap const & connections);
+/**
+ * Stream operator to print an audio connection map.
+ * Output format: the contained connection entries in the format 
+ * <send audio channel>-><receive audio channel> separated by line ends.
+ */
+std::ostream & operator<<( std::ostream & stream, AudioConnectionMap const & connections );
 
 } // namespace rrl
 } // namespace visr

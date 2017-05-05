@@ -1,13 +1,13 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_BASE_HPP_INCLUDED
+#ifndef VISR_PARAMETER_BASE_HPP_INCLUDED
+#define VISR_PARAMETER_BASE_HPP_INCLUDED
 
 #include "parameter_type.hpp"
 
+#include <memory>
+
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
@@ -28,11 +28,18 @@ public:
    */
   virtual ~ParameterBase() {}
 
+  /**
+   * Return the dynamic type of the parameter object.
+   */
   virtual ParameterType type() = 0;
 
+  /**
+   * Virtual copy constructor interface, returns a pointer
+   * to a copy of the derived object.
+   */
+  virtual std::unique_ptr<ParameterBase> clone() const = 0;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_BASE_HPP_INCLUDED

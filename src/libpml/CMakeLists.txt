@@ -3,19 +3,19 @@
 SET( SOURCES
  array_configuration.cpp
  biquad_parameter.cpp
- communication_protocol_instantiation.cpp 
  double_buffering_protocol.cpp
  empty_parameter_config.cpp
  filter_routing_parameter.cpp
  float_sequence.cpp
  index_sequence.cpp
  indexed_value_parameter.cpp
+ initialise_parameter_library.cpp
  listener_position.cpp
  matrix_parameter.cpp
  matrix_parameter_config.cpp
- message_queue.cpp
  message_queue_protocol.cpp
  object_vector.cpp
+ parametric_iir_coefficient.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
@@ -36,12 +36,13 @@ SET( HEADERS
  float_sequence.hpp
  index_sequence.hpp
  indexed_value_parameter.hpp
+ initialise_parameter_library.hpp
  listener_position.hpp
  matrix_parameter.hpp
  matrix_parameter_config.hpp
- message_queue.hpp
  message_queue_protocol.hpp
  object_vector.hpp
+ parametric_iir_coefficient.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
  string_parameter.hpp

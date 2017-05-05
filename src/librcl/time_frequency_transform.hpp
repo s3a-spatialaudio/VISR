@@ -6,7 +6,7 @@
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/audio_input.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libefl/aligned_array.hpp>
 
@@ -17,6 +17,7 @@
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -35,18 +36,18 @@ class CircularBuffer;
 namespace rcl
 {
 
-class TimeFrequencyTransform: public ril::AtomicComponent
+class TimeFrequencyTransform: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit TimeFrequencyTransform( ril::SignalFlowContext& context,
+  explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
-                                   ril::CompositeComponent * parent = nullptr );
+                                   CompositeComponent * parent = nullptr );
   
   ~TimeFrequencyTransform();
 
@@ -63,12 +64,18 @@ public:
 
 private:
 
-  ril::AudioInput mInput;
+  AudioInput mInput;
+
+  /**
+   * Buffer for teporary storage of the input channel pointers.
+   * @todo Change if the delay line supports an (optional) stride-based interface.
+   */
+  std::valarray<SampleType const *> mInputChannels;
 
   /**
    * Port is configured in the setup() 
    */
-  std::unique_ptr<ril::ParameterOutputPort<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mOutput;
+  std::unique_ptr<ParameterOutput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mOutput;
 
   /**
    * 

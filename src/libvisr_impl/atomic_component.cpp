@@ -4,24 +4,14 @@
 
 namespace visr
 {
-namespace ril
-{
 
-AtomicComponent::AtomicComponent( SignalFlowContext& context,
+AtomicComponent::AtomicComponent( SignalFlowContext const & context,
                                   char const * name,
                                   CompositeComponent * parent /*= nullptr */ )
  : Component( context, name, parent )
 {
 }
 
-AtomicComponent::~AtomicComponent()
-{
-}
+AtomicComponent::~AtomicComponent() = default;
 
-bool AtomicComponent::isComposite() const
-{
-  return false;
-}
-
-} // namespace ril
 } // namespace visr

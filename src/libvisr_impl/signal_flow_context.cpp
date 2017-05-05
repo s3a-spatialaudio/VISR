@@ -4,8 +4,6 @@
 
 namespace visr
 {
-namespace ril
-{
 
 SignalFlowContext::SignalFlowContext( std::size_t period, SamplingFrequencyType samplingFrequency )
  : mPeriod( period )
@@ -23,5 +21,4 @@ void SignalFlowContext::setInitialised( bool initialised /*= true*/ )
   mInitialised = initialised;
 }
 
-} // namespace ril
 } // namespace visr

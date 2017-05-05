@@ -2,24 +2,205 @@
 
 #include "double_buffering_protocol.hpp"
 
-#include <libril/communication_protocol_factory.hpp>
+#include <libril/parameter_factory.hpp>
 
-#include "listener_position.hpp"
-#include "matrix_parameter.hpp"
-#include "string_parameter.hpp"
-
-#include <string>
+#include <algorithm>
 
 namespace visr
 {
 namespace pml
 {
 
-// explicit instantiation
-template class DoubleBufferingProtocol<ListenerPosition>;
-template class DoubleBufferingProtocol<StringParameter>;
-template class DoubleBufferingProtocol<MatrixParameter<float> >;
-template class DoubleBufferingProtocol<MatrixParameter<double> >;
+DoubleBufferingProtocol::DoubleBufferingProtocol( ParameterType const & parameterType,
+                                                  ParameterConfigBase const & parameterConfig )
+ : CommunicationProtocolBase()
+ , mParameterType( parameterType )
+ , mConfig( parameterConfig.clone() )
+ , mOutput( nullptr )
+ , mBackData( ParameterFactory::create( parameterType, parameterConfig) )
+ , mFrontData( ParameterFactory::create( parameterType, parameterConfig ) )
+{
+}
+
+ParameterType DoubleBufferingProtocol::parameterType() const
+{
+  return mParameterType;
+}
+
+ParameterBase & DoubleBufferingProtocol::frontData()
+{
+  return *mFrontData;
+}
+
+ParameterBase const & DoubleBufferingProtocol::frontData() const
+{
+  return *mFrontData;
+}
+
+ParameterBase & DoubleBufferingProtocol::backData()
+{
+  return *mBackData;
+}
+
+ParameterBase const & DoubleBufferingProtocol::backData() const
+{
+  return *mBackData;
+}
+
+void DoubleBufferingProtocol::setData( ParameterBase const & newData )
+{
+  *mBackData = newData;
+}
+
+void DoubleBufferingProtocol::swapBuffers()
+{
+  mBackData.swap( mFrontData );
+  std::for_each( mInputs.begin(), mInputs.end(), []( InputBase* port ) { port->markChanged(); } );
+}
+
+
+void DoubleBufferingProtocol::connectInput( CommunicationProtocolBase::Input* port )
+{
+  DoubleBufferingProtocol::InputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::InputBase *>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "DoubleBufferingProtocol::connectInput(): port argument has wrong type." );
+  }
+  if( std::find( mInputs.begin(), mInputs.end(), typedPort ) == mInputs.end() )
+  {
+    mInputs.push_back( typedPort );
+  }
+  typedPort->setProtocolInstance( this );
+}
+
+void DoubleBufferingProtocol::connectOutput( CommunicationProtocolBase::Output* port )
+{
+  DoubleBufferingProtocol::OutputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::OutputBase*>(port);
+  if( not typedPort )
+  {
+    throw std::invalid_argument( "DoubleBufferingProtocol::connectOutput(): port argument has wrong type." );
+  }
+  if( mOutput )
+  {
+    throw std::invalid_argument( "DoubleBufferingProtocol::connectOutput(): output port already set." );
+  }
+  mOutput = typedPort;
+  typedPort->setProtocolInstance( this );
+}
+
+bool DoubleBufferingProtocol::disconnectInput( CommunicationProtocolBase::Input* port ) noexcept
+{
+  InputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::InputBase *>(port);
+  if( not typedPort )
+  {
+    return false;
+  }
+  std::vector<InputBase*>::iterator findIt = std::find( mInputs.begin(), mInputs.end(), typedPort );
+  if( findIt == mInputs.end() )
+  {
+    return false;
+  }
+  // It does not matter which overload is called, but the ambiguity has to be resolved.
+  (*findIt)->setProtocolInstance( static_cast<DoubleBufferingProtocol*>(nullptr) );
+  mInputs.erase( findIt );
+  return true;
+}
+
+bool DoubleBufferingProtocol::disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept
+{
+  DoubleBufferingProtocol::OutputBase * typedPort = dynamic_cast<DoubleBufferingProtocol::OutputBase *>(port);
+  if( not typedPort )
+  {
+    return false;
+  }
+  if( typedPort != mOutput )
+  {
+    // Trying to disconnect a port that is not the previously connected output
+    return false;
+  }
+  mOutput->setProtocolInstance( static_cast<DoubleBufferingProtocol*>(nullptr) );
+  mOutput = nullptr;
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// InputBase
+
+DoubleBufferingProtocol::InputBase::InputBase()
+  : mProtocol( nullptr )
+  , mChanged( true ) // Mark the data as changed for the first iteration
+{
+}
+
+DoubleBufferingProtocol::InputBase::~InputBase() = default;
+
+ParameterBase const & DoubleBufferingProtocol::InputBase::data() const
+{
+  return mProtocol->backData();
+}
+
+bool DoubleBufferingProtocol::InputBase::changed() const
+{
+  return mChanged;
+}
+
+void DoubleBufferingProtocol::InputBase::resetChanged()
+{
+  mChanged = false;
+}
+
+void DoubleBufferingProtocol::InputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  DoubleBufferingProtocol * dbProtocol = dynamic_cast<DoubleBufferingProtocol*>( protocol );
+  if( not dbProtocol )
+  {
+    throw std::invalid_argument( "DoubleBufferingProtocol::InputBase::setProtocolInstance(): Nonmatching protocol type." );
+  }
+  setProtocolInstance( dbProtocol );
+}
+
+void DoubleBufferingProtocol::InputBase::
+setProtocolInstance( DoubleBufferingProtocol * protocol )
+{
+  mProtocol = protocol;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// OutputBase
+
+DoubleBufferingProtocol::OutputBase::OutputBase()
+  : mProtocol( nullptr )
+{
+}
+
+DoubleBufferingProtocol::OutputBase::~OutputBase() = default;
+
+ParameterBase & DoubleBufferingProtocol::OutputBase::data()
+{
+  return mProtocol->frontData();
+}
+
+void DoubleBufferingProtocol::OutputBase::swapBuffers()
+{
+  mProtocol->swapBuffers();
+}
+
+void DoubleBufferingProtocol::OutputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
+{
+  DoubleBufferingProtocol * mp = dynamic_cast<DoubleBufferingProtocol*>(protocol);
+  if( not mp )
+  {
+    throw std::invalid_argument( "MessageQueueProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
+  }
+  setProtocolInstance( mp );
+}
+
+void DoubleBufferingProtocol::OutputBase::
+setProtocolInstance( DoubleBufferingProtocol * protocol )
+{
+  mProtocol = protocol;
+}
 
 } // namespace pml
 } // namespace visr

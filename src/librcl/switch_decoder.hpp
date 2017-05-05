@@ -7,8 +7,8 @@
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpml/string_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
@@ -38,7 +38,7 @@ namespace rcl
 /**
  * Component to decode OSC messages containing a single integer and to fill a signal routing parameter list accordingly.
  */
-class SwitchDecoder: public ril::AtomicComponent
+class SwitchDecoder: public AtomicComponent
 {
 public:
   /**
@@ -46,9 +46,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SwitchDecoder( ril::SignalFlowContext& context,
+  explicit SwitchDecoder( SignalFlowContext const & context,
                          char const * name,
-                         ril::CompositeComponent * parent = nullptr );
+                         CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -72,9 +72,9 @@ public:
   void process();
 
 private:
-  ril::ParameterInputPort< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
 
-  ril::ParameterOutputPort< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mRoutingOutput;
+  ParameterOutput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mRoutingOutput;
 
   std::size_t mNumberOfInputs;
 

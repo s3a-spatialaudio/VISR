@@ -5,8 +5,8 @@
 
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
@@ -36,8 +36,8 @@ namespace pml
 class ListenerPosition;
 class ObjectVector;
 template< typename ElementType > class MatrixParameter;
-template< class ParameterType > class SharedDataProtocol;
-template< class ParameterType > class DoubleBufferingProtocol;
+class SharedDataProtocol;
+class DoubleBufferingProtocol;
 }
 
 namespace rcl
@@ -46,23 +46,23 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class PanningCalculator: public ril::AtomicComponent
+class PanningCalculator: public AtomicComponent
 {
 public:
   /**
    * Type of the gain coefficients. We use the same type as the samples in the signal flow graph
    * @todo maybe this should become a template parameter.
    */
-  using CoefficientType = ril::SampleType;
+  using CoefficientType = SampleType;
 
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit PanningCalculator( ril::SignalFlowContext& context,
-                                  char const * name,
-                                  ril::CompositeComponent * parent = nullptr );
+  explicit PanningCalculator( SignalFlowContext const & context,
+                              char const * name,
+                              CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -211,9 +211,9 @@ private:
   /**
    * Data type of the parmaeter ports for outgoing matrix data.
    */
-  using ListenerPositionPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
-  using ObjectPort = ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::ObjectVector >;
-  using MatrixPort = ril::ParameterOutputPort<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
+  using ListenerPositionPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+  using ObjectPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector >;
+  using MatrixPort = ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> >;
 
   std::unique_ptr<ObjectPort> mObjectVectorInput;
 

@@ -18,7 +18,7 @@ namespace rcl
  * because all required null signals can be routed from this single stream. However, from the signal flow point of view, it can be advantageous to provide 
  * dedicated null sources with an appropriate number of channels. At the same time, the performance penalty is minimal.
  */
-class NullSource: public ril::AtomicComponent
+class NullSource: public AtomicComponent
 {
 public:
   /**
@@ -26,9 +26,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit NullSource( ril::SignalFlowContext& context,
+  explicit NullSource( SignalFlowContext const & context,
                        char const * name,
-                       ril::CompositeComponent * parent = nullptr );
+                       CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -53,7 +53,7 @@ private:
   /**
    * The audio output of the component, named "out".
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 };
 
 } // namespace rcl

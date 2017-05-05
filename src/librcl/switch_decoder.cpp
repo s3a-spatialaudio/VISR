@@ -16,9 +16,9 @@ namespace visr
 namespace rcl
 {
 
-SwitchDecoder::SwitchDecoder( ril::SignalFlowContext& context,
+SwitchDecoder::SwitchDecoder( SignalFlowContext const & context,
                               char const * name,
-                              ril::CompositeComponent * parent /*= nullptr*/ )
+                              CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mDatagramInput( "datagramInput", *this, pml::StringParameterConfig( 255 ) )
  , mRoutingOutput( "routingOutput", *this, pml::EmptyParameterConfig() )

@@ -27,11 +27,11 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( InstantiateRenderer )
 {
-  boost::filesystem::path const arrayConfigFile( CMAKE_SOURCE_DIR "/config/isvr/22.1_audiolab_1subwoofer.xml" );
+  boost::filesystem::path const arrayConfigFile( CMAKE_SOURCE_DIR "/config/generic/bs2051-9+10+3.xml" );
   BOOST_CHECK( exists( arrayConfigFile ) and not is_directory( arrayConfigFile ) );
 
   panning::LoudspeakerArray arrayConfig;
-  arrayConfig.loadXml( arrayConfigFile.string() );
+  arrayConfig.loadXmlFile( arrayConfigFile.string() );
 
   std::size_t const numberOfInputs = 16;
   std::size_t const numberOfOutputs = 40;
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
   std::size_t const interpolationPeriod = 16 * period;
   std::size_t const numRealLoudspeakers = arrayConfig.getNumRegularSpeakers();
   std::size_t const diffusionFilterLength = 512;
-  efl::BasicMatrix<ril::SampleType> const diffusionFilters( numRealLoudspeakers, diffusionFilterLength );
+  efl::BasicMatrix<SampleType> const diffusionFilters( numRealLoudspeakers, diffusionFilterLength );
 
   std::string const trackingConfig( "" );
 
@@ -50,6 +50,8 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
   std::string const lateDiffusionFilters( CMAKE_SOURCE_DIR "/config/filters/random_phase_allpass_64ch_512taps.wav" );
   double const maximumDiscreteReflectionDelay = 0.23456f;
 
+  std::size_t const numInputEqSections = 0;
+
   std::stringstream reverbConfig;
   reverbConfig << "{ \"numReverbObjects\": " << numReverbObjects
                << ", \"discreteReflectionsPerObject\": " << discreteReflectionsPerObject
@@ -58,7 +60,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                << ", \"lateReverbDecorrelationFilters\": \"" << lateDiffusionFilters
                << "\" }";
 
-  ril::SignalFlowContext context( period, 48000 );
+  SignalFlowContext context( period, 48000 );
 
   signalflows::BaselineRenderer( context, "", nullptr,
                                  arrayConfig,
@@ -68,6 +70,7 @@ BOOST_AUTO_TEST_CASE( InstantiateRenderer )
                                  diffusionFilters,
                                  trackingConfig,
                                  8888,
+                                 numInputEqSections,
                                  reverbConfig.str(),
                                  false // No frequency-dependent panning.
                                  );

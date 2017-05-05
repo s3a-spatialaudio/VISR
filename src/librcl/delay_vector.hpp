@@ -9,8 +9,12 @@
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <libefl/basic_vector.hpp>
+
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/vector_parameter.hpp>
 
 #ifdef USE_CIRCULAR_BUFFER
 #include <librbbl/circular_buffer.hpp>
@@ -19,6 +23,8 @@
 #endif
 
 #include <cstddef> // for std::size_t
+#include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -37,9 +43,9 @@ namespace rcl
  * @todo Implement flexible transition length (at the moment, the block length is always used
  * @todo general cleanup (including more comprehensive range checks for the delay)
  */
-class DelayVector: public ril::AtomicComponent
+class DelayVector: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Enumeration to denote the type of fractional-delay filtering used.
@@ -57,9 +63,9 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit DelayVector( ril::SignalFlowContext& context,
+  explicit DelayVector( SignalFlowContext const & context,
                         char const * name,
-                        ril::CompositeComponent * parent = nullptr );
+                        CompositeComponent * parent = nullptr );
     
   /**
    * Setup method to initialise the object and set the parameters.
@@ -72,6 +78,7 @@ public:
    * @param maximumDelaySeconds The maximal delay value supported by this
    * object (in seconds)
    * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
+   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
    * @param initialDelaySeconds The initial delay value for all
    * channels (in seconds, default: 0.0)
    * @param initialGainLinear The initial delay value for all
@@ -81,6 +88,7 @@ public:
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
               InterpolationType interpolationMethod,
+	      bool controlInputs = false,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
   /**
@@ -93,6 +101,7 @@ public:
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
   * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
+   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
   * @param initialDelaysSeconds The delays for all channels in
   * seconds. The number of elements of this vector must match the channel number of this object.
   * @param initialGainsLinear The initial gain values for all
@@ -103,6 +112,7 @@ public:
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
               InterpolationType interpolationMethod,
+	      bool controlInputs,
               efl::BasicVector< SampleType > const & initialDelaysSeconds,
               efl::BasicVector< SampleType > const & initialGainsLinear );
 
@@ -208,12 +218,25 @@ private:
   /**
    * The audio input port for this component.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output port for this component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
+
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > > mDelayInput;
+
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > > mGainInput;
+
+#ifdef USE_CIRCULAR_BUFFER
+  /**
+   * Vector to hold the pointers to input channel data.
+   * At the moment this is required because the implementing rbbl::CircularBuffer class requires this as input.
+   * @todo consider (additional) stride-based input format for rbbl::CircularBuffer
+   */
+  std::valarray<SampleType const * > mInputChannels;
+#endif
 
   /**
    * The number of simultaneous audio channels.
@@ -226,7 +249,7 @@ private:
   /**
    * The ring buffer.
    */
-  efl::BasicMatrix< ril::SampleType > mRingBuffer;
+  efl::BasicMatrix< SampleType > mRingBuffer;
 
   /**
    * The current write position in the ring buffer.
@@ -243,19 +266,19 @@ private:
   /**
   * The current gain value.
   */
-  efl::BasicVector< ril::SampleType > mCurrentGains;
+  efl::BasicVector< SampleType > mCurrentGains;
   /**
   * The current amount of delay.
   */
-  efl::BasicVector< ril::SampleType > mCurrentDelays;
+  efl::BasicVector< SampleType > mCurrentDelays;
   /**
   * The future gain value.
   */
-  efl::BasicVector< ril::SampleType > mNextGains;
+  efl::BasicVector< SampleType > mNextGains;
   /**
   * The future amount of delay.
   */
-  efl::BasicVector< ril::SampleType > mNextDelays;
+  efl::BasicVector< SampleType > mNextDelays;
 
   /**
    * The sampling frequency of the audio signal flow, converted to floating-point 

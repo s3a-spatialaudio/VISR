@@ -10,7 +10,9 @@ namespace visr
 namespace pml
 {
 
-ObjectVector::ObjectVector( ril::ParameterConfigBase const & config )
+ObjectVector::ObjectVector() = default;
+
+ObjectVector::ObjectVector( ParameterConfigBase const & config )
 : ObjectVector( dynamic_cast<pml::EmptyParameterConfig const &>( config) )
 {
 }
@@ -34,8 +36,6 @@ ObjectVector::ObjectVector( EmptyParameterConfig const & /*config*/ )
 ObjectVector::~ObjectVector()
 {
 }
-
-static ril::ParameterFactory::Registrar< pml::ObjectVector > maker{ ril::ParameterType::ObjectVector };
 
 } // namespace pml
 } // namespace visr

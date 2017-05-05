@@ -4,8 +4,6 @@
 
 #include <libefl/vector_functions.hpp>
 
-#include <libril/parameter_input_port.hpp>
-
 #include <iostream> // Temporary solution, replce by proper error / warning API.
 
 namespace visr
@@ -13,9 +11,9 @@ namespace visr
 namespace rcl
 {
 
-  SignalRouting::SignalRouting( ril::SignalFlowContext& context,
+  SignalRouting::SignalRouting( SignalFlowContext const & context,
                                 char const * name,
-                                ril::CompositeComponent * parent /*= nullptr*/ )
+                                CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
@@ -32,10 +30,9 @@ void SignalRouting::setup( std::size_t inputWidth, std::size_t outputWidth, bool
   mOutput.setWidth( outputWidth );
   if (controlPort)
   {
-    mControlInput.reset(new ril::ParameterInputPort<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
+    mControlInput.reset(new ParameterInput<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter >("controlInput", *this, pml::EmptyParameterConfig()));
   }
-  // create an empty routing
-  mRoutingVector.resize( outputWidth, pml::SignalRoutingParameter::cInvalidIndex );
+  mRoutings.clear(); // Initialise an empty routing table.
 }
 
 void SignalRouting::setup( std::size_t inputWidth,
@@ -48,8 +45,7 @@ void SignalRouting::setup( std::size_t inputWidth,
   {
     pml::SignalRoutingParameter::IndexType const in = e.input;
     pml::SignalRoutingParameter::IndexType const out = e.output;
-    checkRoutingIndexRanges( in, out );
-    mRoutingVector[out] = in;
+    setRouting( in, out );
   }
 }
 
@@ -60,20 +56,20 @@ void SignalRouting::process()
 
   if( mControlInput ) // Dynamic parameter changes are activated.
   {
-    if( mControlInput->hasChanged() )
+    if( mControlInput->changed() )
     {
       try
       {
         pml::SignalRoutingParameter const & newRoutings = mControlInput->data();
-        std::vector<pml::SignalRoutingParameter::IndexType> tmpRouting;
+        RoutingTable tmpRouting;
         for (auto e : newRoutings)
         {
           pml::SignalRoutingParameter::IndexType const in = e.input;
           pml::SignalRoutingParameter::IndexType const out = e.output;
           checkRoutingIndexRanges(in, out);
-          mRoutingVector[out] = in;
+          tmpRouting.insert( std::make_tuple( out, in ) );
         }
-        mRoutingVector.swap(tmpRouting); // strong exception safety.
+        mRoutings.swap(tmpRouting); // strong exception safety.
       }
       catch (std::exception const & ex)
       {
@@ -86,52 +82,47 @@ void SignalRouting::process()
 
   for( std::size_t outIdx( 0 ); outIdx < numOutputs; ++outIdx )
   {
-    pml::SignalRoutingParameter::IndexType in = mRoutingVector[outIdx];
-    efl::ErrorCode err;
-    if( in == pml::SignalRoutingParameter::cInvalidIndex )
+    efl::ErrorCode res = efl::vectorZero( mOutput[outIdx], periodSize, cVectorAlignmentSamples );
+    if( res != efl::noError )
     {
-      if( (err = efl::vectorZero( mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples )) != efl::noError )
-      {
-        throw std::runtime_error( std::string( "SignalRouting: Error while zeroing an unconnected output channel: " ) + efl::errorMessage( err ) );
-      }
+      throw std::runtime_error( std::string( "SignalRouting: Error while zeroing an unconnected output channel: " ) + efl::errorMessage( res ) );
     }
-    else
+  }
+  for( RoutingTable::const_iterator routeIt( mRoutings.begin() ); routeIt != mRoutings.end(); ++routeIt )
+  {
+    pml::SignalRoutingParameter::IndexType inputIdx = std::get<1>( *routeIt );
+    pml::SignalRoutingParameter::IndexType outputIdx = std::get<0>( *routeIt );
+    efl::ErrorCode res = efl::vectorAddInplace( mInput[inputIdx], mOutput[outputIdx], periodSize, cVectorAlignmentSamples );
+    if( res != efl::noError )
     {
-      if( (err = efl::vectorCopy( mInput[in], mOutput[outIdx], periodSize, ril::cVectorAlignmentSamples )) != efl::noError )
-      {
-        throw std::runtime_error( std::string( "SignalRouting: Error while copying a signal to an output channel: " ) + efl::errorMessage( err ) );
-      }
+      throw std::runtime_error( std::string( "SignalRouting: Error while copying a signal to an output channel: " ) + efl::errorMessage( res ) );
     }
   }
 }
 
 void SignalRouting::setRouting( pml::SignalRoutingParameter const & newRouting )
 {
-  std::fill( mRoutingVector.begin(), mRoutingVector.end(), pml::SignalRoutingParameter::cInvalidIndex );
+  mRoutings.clear();
   for( auto e : newRouting )
   {
     pml::SignalRoutingParameter::IndexType const in = e.input;
     pml::SignalRoutingParameter::IndexType const out = e.output;
     checkRoutingIndexRanges( in, out );
-    mRoutingVector[out] = in;
+    mRoutings.insert( std::make_tuple(out,in ) );
   }
 }
 
 void SignalRouting::setRouting( pml::SignalRoutingParameter::IndexType in, pml::SignalRoutingParameter::IndexType out )
 {
   checkRoutingIndexRanges( in, out );
-  mRoutingVector[out] = in;
+  mRoutings.insert( std::make_tuple( out, in ) );
 }
 
 bool SignalRouting::removeRouting( pml::SignalRoutingParameter::IndexType in, pml::SignalRoutingParameter::IndexType out )
 {
   checkRoutingIndexRanges( in, out );
-  if( mRoutingVector[out] == in )
-  {
-    mRoutingVector[out] = pml::SignalRoutingParameter::cInvalidIndex;
-    return true;
-  }
-  return false;
+  std::size_t const removed = mRoutings.erase(  std::make_tuple( out, in ) );
+  return removed > 0;
 }
 
 void SignalRouting::checkRoutingIndexRanges( pml::SignalRoutingParameter::IndexType in, pml::SignalRoutingParameter::IndexType out )
@@ -149,7 +140,6 @@ void SignalRouting::checkRoutingIndexRanges( pml::SignalRoutingParameter::IndexT
     throw std::invalid_argument( "SignalRouting: routing specification with invalid input index." );
   }
 }
-
 
 } // namespace rcl
 } // namespace visr

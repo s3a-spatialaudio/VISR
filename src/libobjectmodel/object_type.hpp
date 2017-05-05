@@ -30,7 +30,9 @@ enum class ObjectTypeId: ObjectTypeIntegerRepresentation
                                   controlling the fraction of the source that is reproduced diffusely.*/
   ExtendedSource = 4, /**< Source type with controllable extent, i.e. width and height.*/
   PointSourceWithReverb = 5, /**< Point source with reverberation */
-  PointSourceExtent = 6 /**< Point source with explicit spatial extent. */
+  PointSourceExtent = 6, /**< Point source with explicit spatial extent. */
+  HoaSource = 7, /**< Higher Order Ambbisonics object, sound field representation based on spherical harmonics */ 
+  ChannelObject = 8, /**< Source type representing a single or multiple channels routed to a set of loudspeaker channels. */
   // to be continued.
 };
 

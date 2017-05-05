@@ -16,10 +16,10 @@ namespace mex
 namespace feedthrough
 {
 
-class SignalFlow: public ril::CompositeComponent
+class SignalFlow: public CompositeComponent
 {
 public:
-  explicit SignalFlow( ril::SignalFlowContext& context,
+  explicit SignalFlow( SignalFlowContext& context,
                        char const * componentName,
                        CompositeComponent * parent );
 
@@ -28,8 +28,8 @@ public:
   void setup( );
 
 private:
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 
   rcl::Add mSum;
 };

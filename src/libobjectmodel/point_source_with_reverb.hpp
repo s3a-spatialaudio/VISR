@@ -45,7 +45,7 @@ namespace objectmodel
      * Data type for holding the subband information (levels and decay coefficients) for the
      * generation of the late reerberation filters.
      */
-    using LateReverbCoeffs = std::array<ril::SampleType, cNumberOfSubBands >;
+    using LateReverbCoeffs = std::array<SampleType, cNumberOfSubBands >;
 
     /**
      * Internal class to represent a single discrete reflection (early reflections)
@@ -71,7 +71,7 @@ namespace objectmodel
       Coordinate positionZ() const { return mZ; }
 
       /** Return the delay (in seconds) for the discrete reflection. */
-      ril::SampleType delay() const { return mDelay; }
+      SampleType delay() const { return mDelay; }
 
       /**
        * Return the level (linear gain) of the discrete reflection.
@@ -82,14 +82,14 @@ namespace objectmodel
       /**
        * Return the wall reflection coefficients for this discrete reflection.
        */
-      pml::BiquadParameterList<ril::SampleType> const & reflectionFilters() const { return mDiscreteReflectionFilters; }
+      pml::BiquadParameterList<SampleType> const & reflectionFilters() const { return mDiscreteReflectionFilters; }
 
       /**
        * Return a specific biquad section of the wall reflection filter.
        * @param biquadIdx The index of the biquad to be returned.
        * @throw std::out_of_range If \p biquadIdx exceeds the number of biquads (\p cNumDiscreteReflectionBiquads)
        */
-      pml::BiquadParameter<ril::SampleType> const & reflectionFilter( std::size_t biquadIdx ) const;
+      pml::BiquadParameter<SampleType> const & reflectionFilter( std::size_t biquadIdx ) const;
 
       /**
        * Set the position of the discrete reflection.
@@ -103,7 +103,7 @@ namespace objectmodel
        * Set the delay value for the discrete reflection.
        * @param newDelay New delay value (in seconds)
        */
-      void setDelay( ril::SampleType newDelay );
+      void setDelay( SampleType newDelay );
 
       /**
         * Set the level of the discrete reflection.
@@ -117,7 +117,7 @@ namespace objectmodel
        * @param newFilters a set of biquad parameter coefficients. It must contain at most cNumDiscreteReflectionBiquads entries.
        * @throw std::invalid_argument If the size of \p newFilters exceeds cNumDiscreteReflectionBiquads
        */
-      void setReflectionFilters( pml::BiquadParameterList<ril::SampleType> const & newFilters );
+      void setReflectionFilters( pml::BiquadParameterList<SampleType> const & newFilters );
 
       /**
        * Set a specific biquad of the wall reflection filter for this reflections
@@ -125,7 +125,7 @@ namespace objectmodel
        * @param newFilter The new biquad parameters
        * @throw std::out_of_range If the index \p biquadIdx exceeds the range of available biquads (\p cNumDiscreteReflectionBiquads)
        */
-      void setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<ril::SampleType> const & newFilter );
+      void setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<SampleType> const & newFilter );
     private:
       /** Cartesion x coordinate. */
       Coordinate mX;
@@ -137,7 +137,7 @@ namespace objectmodel
       /**
        * Delay value (in seconds)
        */
-      ril::SampleType mDelay;
+      SampleType mDelay;
 
       /**
        * Discrete reflection level (linear scale).
@@ -147,7 +147,7 @@ namespace objectmodel
       /**
        * A set of biquad IIR filters to model the frequency response of this discrete reflection.
        */
-      pml::BiquadParameterList<ril::SampleType> mDiscreteReflectionFilters;
+      pml::BiquadParameterList<SampleType> mDiscreteReflectionFilters;
     };
 
     /**
@@ -173,21 +173,21 @@ namespace objectmodel
        * @param decayCoeffs The decay coefficients (time constants) governing the decay after the peak.
        * @param attackTimes The attack (onset) times denoting the amount of time from the onset delay until the envelope reaches the peak value (in seconds).
        */
-      explicit LateReverb( ril::SampleType onsetDelay,
-                           std::initializer_list<ril::SampleType> const levels = std::initializer_list<ril::SampleType>(),
-                           std::initializer_list<ril::SampleType> const decayCoeffs = std::initializer_list<ril::SampleType>(),
-                           std::initializer_list<ril::SampleType> const attackTimes = std::initializer_list<ril::SampleType>() );
+      explicit LateReverb( SampleType onsetDelay,
+                           std::initializer_list<SampleType> const levels = std::initializer_list<SampleType>(),
+                           std::initializer_list<SampleType> const decayCoeffs = std::initializer_list<SampleType>(),
+                           std::initializer_list<SampleType> const attackTimes = std::initializer_list<SampleType>() );
 
       /**
       * Retrieve the initial delay (closely related to mixing time) for the late reverberation tail in seconds.
       */
-      ril::SampleType const onsetDelay() const { return mOnsetDelay; }
+      SampleType const onsetDelay() const { return mOnsetDelay; }
 
       /**
       * Set the onset time for the late reverberation part.
       * @param onset Offset time in seconds.
       */
-      void setOnsetDelay( ril::SampleType onset ) { mOnsetDelay = onset; }
+      void setOnsetDelay( SampleType onset ) { mOnsetDelay = onset; }
 
       /**
       * Return the late reverberation decay coefficients.
@@ -219,7 +219,7 @@ namespace objectmodel
        * @param numValues The number of values contained in the \p levels array.
        * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
        */
-      void setLevels( ril::SampleType const * levels, std::size_t numValues );
+      void setLevels( SampleType const * levels, std::size_t numValues );
 
       /**
       * Set the late reverberation decay coefficients.
@@ -233,7 +233,7 @@ namespace objectmodel
       * @param numValues The number of values contained in the \p decay array.
       * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
       */
-      void setDecayCoeffs( ril::SampleType const * decay, std::size_t numValues );
+      void setDecayCoeffs( SampleType const * decay, std::size_t numValues );
 
       /**
        * Set the attack times for the late reverberation decay coefficients.
@@ -247,12 +247,12 @@ namespace objectmodel
        * @param numValues The number of values contained in the \p decay array.
        * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
        */
-      void setAttackTimes( ril::SampleType const * attack, std::size_t numValues );
+      void setAttackTimes( SampleType const * attack, std::size_t numValues );
     private:
       /**
       * Onset delay (closely related to mixing time) for the late reverberation tail.
       */
-      ril::SampleType mOnsetDelay;
+      SampleType mOnsetDelay;
 
       /**
       * Attack times for the subbands.
@@ -304,13 +304,13 @@ namespace objectmodel
     /**
      * Retrieve the initial delay (closely related to mixing time) for the late reverberation tail in seconds.
      */
-    ril::SampleType const lateReverbOnset() const { return lateReverb().onsetDelay(); }
+    SampleType const lateReverbOnset() const { return lateReverb().onsetDelay(); }
 
     /**
      * Set the onset time for the late reverberation part.
      * @param onset Offset time in seconds.
      */
-    void setLateReverbOnset( ril::SampleType onset ) { lateReverb().setOnsetDelay( onset ); }
+    void setLateReverbOnset( SampleType onset ) { lateReverb().setOnsetDelay( onset ); }
 
     /**
      * Return the late reverberation decay coefficients.
@@ -343,7 +343,7 @@ namespace objectmodel
      * @param numValues The number of values contained in the \p levels array.
      * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
      */
-    void setLateReverbLevels( ril::SampleType const * levels, std::size_t numValues ) { lateReverb().setLevels( levels, numValues ); }
+    void setLateReverbLevels( SampleType const * levels, std::size_t numValues ) { lateReverb().setLevels( levels, numValues ); }
 
     /**
     * Set the late reverberation decay coefficients.
@@ -357,7 +357,7 @@ namespace objectmodel
     * @param numValues The number of values contained in the \p decay array.
     * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
     */
-    void setLateReverbDecayCoeffs( ril::SampleType const * decay, std::size_t numValues ) { lateReverb().setDecayCoeffs( decay, numValues ); }
+    void setLateReverbDecayCoeffs( SampleType const * decay, std::size_t numValues ) { lateReverb().setDecayCoeffs( decay, numValues ); }
 
     /**
      * Set the attack times for the late reverberation decay coefficients.
@@ -371,7 +371,7 @@ namespace objectmodel
      * @param numValues The number of values contained in the \p decay array.
      * @throw std::invalid_argument If numValues does not match the fixed number of subbands.
      */
-    void setLateReverbAttackTimes( ril::SampleType const * attack, std::size_t numValues ) { lateReverb().setAttackTimes( attack, numValues ); }
+    void setLateReverbAttackTimes( SampleType const * attack, std::size_t numValues ) { lateReverb().setAttackTimes( attack, numValues ); }
 
 
   /**

@@ -1,22 +1,29 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <librcl/add.hpp> 
+#include <librcl/add.hpp>
 
+#include <libril/atomic_component.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-
-#include <boost/noncopyable.hpp>
-
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( rcl )
+#include <pybind11/pybind11.h>
+namespace visr
+{
+namespace python
+{
+namespace rcl
 {
 
-class_<visr::rcl::Add, boost::noncopyable>( "Add", init<visr::ril::SignalFlowContext&, char const *, visr::ril::CompositeComponent*>() )
-  .def( "setup", &visr::rcl::Add::setup, (arg( "numInputs" )=2, arg( "width" ) = 1) )
-  .def( "process", &visr::rcl::Add::process );
-
+void exportAdd( pybind11::module & m )
+{
+  pybind11::class_<visr::rcl::Add, visr::AtomicComponent >( m, "Add" )
+    .def( pybind11::init<visr::SignalFlowContext const &, char const *, visr::CompositeComponent*, std::size_t, std::size_t>(),
+          pybind11::arg( "context" ), pybind11::arg( "name" ),
+          pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
+          pybind11::arg( "width" ), pybind11::arg( "numInputs" ) )
+    .def( "process", &visr::rcl::Add::process );
 }
+
+} // namepace rcl
+} // namespace python
+} // namespace visr

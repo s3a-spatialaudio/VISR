@@ -3,6 +3,7 @@
 #ifndef VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED
 #define VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED
 
+
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_type.hpp>
 
@@ -12,6 +13,7 @@
 
 #include <ciso646>
 #include <deque>
+#include <memory>
 #include <stdexcept>
 
 namespace visr
@@ -21,279 +23,229 @@ namespace pml
 
 /**
  * A FIFO-type message queue template class for storing and passing message data.
- * @tparam MessageTypeT Type of the contained elements.
  * @note This class does provide the same level of thread safety as, e.g., the STL.
  * I.e., calling code from different thread must ensure that concurrent accesses
  * to the same instances are appropriately secured against race conditions.
  */
-template< typename MessageTypeT >
-class MessageQueueProtocol: public ril::CommunicationProtocolBase
+class MessageQueueProtocol: public CommunicationProtocolBase
 {
 public:
-
   /**
-   * Make the message type available to code using this template.
-   */
-  using MessageType = MessageTypeT;
+  * Forward declarations of the internal data types.
+  */
+  class InputBase;
+  template<class DataType > class Input;
+  class OutputBase;
+  template<class DataType > class Output;
 
+  static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString( sProtocolName ); }
 
-  /**
-   * Provide alias for parameter configuration class type for the contained parameter values.
-   */
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
+  static constexpr const char * staticName() { return sProtocolName; }
 
-  class Output: public ril::ParameterPortBase
-  {
-  public:
-    /**
-     * Default constructor.
-     */
-    explicit Output( std::string const & name, ril::Component & parent)
-     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
-     , mProtocol( nullptr )
-    {}
+  explicit MessageQueueProtocol( ParameterType const & parameterType,
+                                 ParameterConfigBase const & config );
 
-    bool empty( ) const
-    {
-      return mProtocol->empty( );
-    }
+  ParameterType parameterType() const override;
 
-    std::size_t size( ) const
-    {
-      return mProtocol ->numberOfElements( );
-    }
-
-    void enqueue( MessageType const & val )
-    {
-      // Move to impl object
-      mProtocol ->enqueue( val );
-    }
-
-
-    void setProtocolInstance( MessageQueueProtocol * protocol )
-    {
-      mProtocol = protocol;
-    }
-    bool isConnected() const override
-    {
-      return mProtocol != nullptr;
-    }
-  private:
-    /**
-     * This should not be part of the user-defined template
-     */
-    MessageQueueProtocol * mProtocol;
-  };
-
-  class Input: public ril::ParameterPortBase
-  {
-  public:
-    /**
-    * Default constructor.
-    */
-    explicit Input( std::string const & name, ril::Component & parent )
-     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
-     , mProtocol( nullptr )
-    {}
-
-    bool empty() const
-    {
-      return mProtocol ->empty();
-    }
-
-    std::size_t size() const
-    {
-      return mProtocol ->numberOfElements();
-    }
-
-    MessageType const & front() const
-    {
-      return mProtocol ->nextElement();
-    }
-
-    void pop()
-    {
-      mProtocol ->popNextElement();
-    }
-
-    void clear()
-    {
-      mProtocol ->clear();
-    }
-
-    void setProtocolInstance( MessageQueueProtocol * protocol )
-    {
-      mProtocol = protocol;
-    }
-
-    bool isConnected() const override
-    {
-      return mProtocol != nullptr;
-    }
-  private:
-    MessageQueueProtocol * mProtocol;
-  };
-
-  explicit MessageQueueProtocol( ril::ParameterConfigBase const & config );
-
-  explicit MessageQueueProtocol( ParameterConfigType const & config );
-
-  ril::ParameterType parameterType() const override { return ril::ParameterToId<MessageTypeT>::id; }
-
-  virtual ril::CommunicationProtocolType protocolType() const override { return ril::CommunicationProtocolType::MessageQueue; }
+  virtual CommunicationProtocolType protocolType() const override;
 
   /**
    * Remove all elements from the message queue.
    */
-  void clear() { mQueue.clear(); }
+  void clear();
 
   /**
    * Return whether the list is empty, i.e., contains zero elements.
    */
-  bool empty() const { return mQueue.empty(); }
+  bool empty() const;
 
   /**
    * Return the number of elements currently contained in the list.
    */
-  std::size_t numberOfElements() const { return mQueue.size(); }
+  std::size_t numberOfElements() const;
 
-  void enqueue( MessageType const & val ) { mQueue.push_front( val ); }
+  void enqueue( std::unique_ptr<ParameterBase>& val );
 
-  void enqueue( MessageType && val ) { mQueue.push_front( val ); }
-
-  /**
+  /*
    * Return the next element in the FIFO queue.
    * @return A reference to the next element.
    * @throw logic_error If the queue is empty
    */
-  MessageType const& nextElement() const
-  {
-    if( empty() )
-    {
-      throw std::logic_error( "Calling nextElement() on an empty message queue." );
-    }
-    return mQueue.back();
-  }
-
+  ParameterBase const& nextElement() const
+;
   /**
    * Remove the next output element from the list.
    * @throw std::logic_error If the queue is empty prior to this call.
    */
-  void popNextElement()
-  {
-    if( empty() )
-    {
-      throw std::logic_error( "Calling nextElement() on an empty message queue." );
-    }
-    mQueue.pop_back();
-  }
+  void popNextElement();
 
-  void connectInput( ril::ParameterPortBase* port ) override;
+  void connectInput( CommunicationProtocolBase::Input* port ) override;
 
-  void connectOutput( ril::ParameterPortBase* port ) override;
+  void connectOutput( CommunicationProtocolBase::Output* port ) override;
 
-  bool disconnectInput( ril::ParameterPortBase* port ) override;
+  bool disconnectInput( CommunicationProtocolBase::Input* port ) noexcept override;
 
-  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept override;
 
 private:
+  using QueueType = std::deque<std::unique_ptr<ParameterBase> >;
   /**
    * The internal data representation.
    */
-  std::deque<MessageTypeT> mQueue;
+  QueueType mQueue;
 
-  ParameterConfigType const mConfig;
+  ParameterType const mParameterType;
 
-  Input * mInput;
-  Output* mOutput;
+  std::unique_ptr<ParameterConfigBase> const mParameterConfig;
+
+  InputBase * mInput;
+  OutputBase* mOutput;
+
+  static constexpr const char * sProtocolName = "MessageQueue";
 };
 
-template< typename MessageTypeT >
-inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ril::ParameterConfigBase const & config )
-: MessageQueueProtocol( dynamic_cast<ParameterConfigType const &>(config) )
-{
-}
+///////////////////////////////////////////////////////////////////////////////
+// Input
 
-template< typename MessageTypeT >
-inline MessageQueueProtocol< MessageTypeT >::MessageQueueProtocol( ParameterConfigType const & config )
-  : mConfig( config )
-  , mInput( nullptr )
-  , mOutput( nullptr )
+class MessageQueueProtocol::InputBase: public CommunicationProtocolBase::Input
 {
-}
+public:
+  /**
+  * Default constructor.
+  */
+  InputBase()
+   : mProtocol( nullptr )
+  {
+  }
 
-template< typename MessageTypeT >
-inline void MessageQueueProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
+  virtual ~InputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  MessageQueueProtocol * getProtocol() override { return mProtocol; }
+
+  MessageQueueProtocol const * getProtocol() const override { return mProtocol; }
+
+  bool empty() const
+  {
+    return mProtocol->empty();
+  }
+
+  std::size_t size() const
+  {
+    return mProtocol->numberOfElements();
+  }
+
+  ParameterBase const & front() const
+  {
+    return mProtocol->nextElement();
+  }
+
+  void pop()
+  {
+    mProtocol->popNextElement();
+  }
+
+  void clear()
+  {
+    mProtocol->clear();
+  }
+
+  void setProtocolInstance( MessageQueueProtocol * protocol )
+  {
+    mProtocol = protocol;
+  }
+
+#if 0
+  bool isConnected() const override
+  {
+    return mProtocol != nullptr;
+  }
+#endif
+private:
+  MessageQueueProtocol * mProtocol;
+};
+
+template<typename MessageType>
+class MessageQueueProtocol::Input: public InputBase
 {
-  MessageQueueProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Input *>(port);
-  if( not typedPort )
+public:
+  MessageType const & front() const
   {
-    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+    return static_cast<MessageType const &>( InputBase::front() );
   }
-  if( mInput )
-  {
-    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): input port already set." );
-  }
-  mInput = typedPort;
-  mInput->setProtocolInstance( this );
-}
+};
 
-template< typename MessageTypeT >
-inline void MessageQueueProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
+///////////////////////////////////////////////////////////////////////////////
+// Output
+
+class MessageQueueProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
-  MessageQueueProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Output *>(port);
-  if( not typedPort )
+public:
+  /**
+  * Default constructor.
+  */
+  OutputBase()
+   : mProtocol( nullptr )
   {
-    throw std::invalid_argument( "MessageQueueProtocol::connectOutput(): port argument has wrong type." );
   }
-  if( mOutput )
-  {
-    throw std::invalid_argument( "MessageQueueProtocol::connectOutput(): output port already set." );
-  }
-  mOutput = typedPort;
-  mOutput->setProtocolInstance( this );
-}
 
-template< typename MessageTypeT >
-inline bool MessageQueueProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
+  virtual ~OutputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  MessageQueueProtocol * getProtocol() override { return mProtocol; }
+
+  MessageQueueProtocol const * getProtocol() const override { return mProtocol; }
+
+  bool empty() const
+  {
+    return mProtocol->empty();
+  }
+
+  std::size_t size() const
+  {
+    return mProtocol->numberOfElements();
+  }
+
+  void enqueue( std::unique_ptr<ParameterBase> && val )
+  {
+    // Move to impl object
+    mProtocol->enqueue( val );
+  }
+
+  void setProtocolInstance( MessageQueueProtocol * protocol )
+  {
+    mProtocol = protocol;
+  }
+#if 0
+  bool isConnected() const override
+  {
+    return mProtocol != nullptr;
+  }
+#endif
+private:
+  MessageQueueProtocol * mProtocol;
+};
+
+template<class MessageType>
+class MessageQueueProtocol::Output: public OutputBase
 {
-  MessageQueueProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Input *>(port);
-  if( not typedPort )
+public:
+  void enqueue( MessageType const & val )
   {
-    throw std::invalid_argument( "MessageQueueProtocol::connectInput(): port argument has wrong type." );
+    OutputBase::enqueue( std::unique_ptr<ParameterBase>( new MessageType( val ) ) );
   }
-  if( typedPort != mInput )
-  {
-    // Trying to disconnect a port that is not the previously connected input." );
-    return false;
-  }
-  mInput->setProtocolInstance( nullptr );
-  mInput = nullptr;
-  return true;
-}
 
-template< typename MessageTypeT >
-inline bool MessageQueueProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
-{
-  MessageQueueProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<MessageQueueProtocol< MessageTypeT >::Output *>(port);
-  if( not typedPort )
+  void enqueue( MessageType && val )
   {
-    std::invalid_argument( "MessageQueueProtocol::disconnectOutput(): port argument has wrong type." );
+    OutputBase::enqueue( std::unique_ptr<MessageType>(new MessageType( val )) );
   }
-  if( typedPort != mOutput )
-  {
-    // Trying to disconnect a port that is not the previously connected output." );
-    return false;
-  }
-  mOutput->setProtocolInstance( nullptr );
-  mOutput = nullptr;
-  return true;
-}
-
+};
 
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::MessageQueueProtocol, visr::ril::CommunicationProtocolType::MessageQueue )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::MessageQueueProtocol, visr::pml::MessageQueueProtocol::staticType(), visr::pml::MessageQueueProtocol::staticName() )
 
 #endif // VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED

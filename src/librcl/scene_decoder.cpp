@@ -12,9 +12,9 @@ namespace visr
 namespace rcl
 {
 
-  SceneDecoder::SceneDecoder( ril::SignalFlowContext& context,
+  SceneDecoder::SceneDecoder( SignalFlowContext const & context,
                               char const * name,
-                              ril::CompositeComponent * parent /*= nullptr*/ )
+                              CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mDatagramInput( "datagramInput", *this, pml::StringParameterConfig( 255 ) )
  , mObjectVectorOutput( "objectVectorOutput", *this, pml::EmptyParameterConfig() )

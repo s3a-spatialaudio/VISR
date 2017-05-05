@@ -2,6 +2,9 @@
 
 # Build configuration for the top-level src/ directory
 
+# Common functionalties for realtime applications
+ADD_SUBDIRECTORY( libapputilities )
+
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
@@ -16,6 +19,11 @@ ADD_SUBDIRECTORY( libpanning )
 
 # Parameter message library
 ADD_SUBDIRECTORY( libpml )
+
+# Python support for calling Python functionality from C++
+if( BUILD_PYTHON_BINDINGS )
+  add_subdirectory( libpythonsupport )
+endif( BUILD_PYTHON_BINDINGS )
 
 # Library for signal flows.
 ADD_SUBDIRECTORY( libsignalflows )
@@ -32,6 +40,10 @@ ADD_SUBDIRECTORY( libril )
 
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )
+
+# Data types and components related to the reverb audio object.
+ADD_SUBDIRECTORY( librsao )
+
 
 # Library of implementations of the interface components.
 ADD_SUBDIRECTORY( libvisr_impl )

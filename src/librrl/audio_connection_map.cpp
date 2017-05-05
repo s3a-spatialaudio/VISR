@@ -4,16 +4,16 @@
 
 #include "port_utilities.hpp"
 
-#include <libril/audio_port_base.hpp>
-#include <libril/component.hpp>
-#include <libril/composite_component.hpp>
+#include <libril/channel_list.hpp>
 
+#include <libvisr_impl/audio_port_base_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
-#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 
 #include <algorithm>
 #include <ciso646>
 #include <iosfwd>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <set>
@@ -27,51 +27,17 @@ namespace visr
 namespace rrl
 {
 
-AudioSignalDescriptor::AudioSignalDescriptor( )
- : mPort( nullptr )
- , mIndex( cInvalidIndex )
+std::ostream& operator<<( std::ostream & str, AudioChannel const & channel )
 {
-}
-
-AudioSignalDescriptor::AudioSignalDescriptor( ril::AudioPortBase const * port, SignalIndexType index )
- : mPort( port )
- , mIndex( index )
-{
-}
-
-bool AudioSignalDescriptor::operator<(AudioSignalDescriptor const & rhs) const
-{
-  if( mPort < rhs.mPort )
-  {
-    return true;
-  }
-  else if( mPort == rhs.mPort )
-  {
-    return mIndex < rhs.mIndex;
-  }
-  return false;
-}
-
-bool AudioSignalDescriptor::operator==(AudioSignalDescriptor const & rhs) const
-{
-  return (mPort == rhs.mPort) and mIndex == rhs.mIndex;
-}
-
-AudioSignalDescriptor::SignalIndexType const AudioSignalDescriptor::
-cInvalidIndex = std::numeric_limits<AudioSignalDescriptor::SignalIndexType>::max();
-
-std::string printAudioSignalDescriptor( AudioSignalDescriptor const & desc )
-{
-  std::stringstream str;
-  str << desc.mPort->parent().name() << "." << desc.mPort->name() << ":" << desc.mIndex;
-  return str.str();
+  str << fullyQualifiedName( *channel.port() ) << ":" << channel.channel();
+  return str;
 }
 
 AudioConnectionMap::AudioConnectionMap()
 {
 }
 
-AudioConnectionMap::AudioConnectionMap( ril::Component const & component,
+AudioConnectionMap::AudioConnectionMap( impl::ComponentImplementation const & component,
                                         bool recursive /*= false */ )
 {
   std::stringstream messages;
@@ -81,7 +47,34 @@ AudioConnectionMap::AudioConnectionMap( ril::Component const & component,
   }
 }
 
-bool AudioConnectionMap::fill( ril::Component const & component,
+void AudioConnectionMap::swap( AudioConnectionMap & rhs ) noexcept
+{
+  mConnections.swap( rhs.mConnections );
+}
+
+void AudioConnectionMap::insert( value_type const & connection )
+{
+  mConnections.insert( connection );
+}
+
+AudioConnectionMap::iterator AudioConnectionMap::insert( iterator hint, value_type const & connection )
+{
+  return mConnections.insert( hint, connection );
+
+}
+
+void AudioConnectionMap::insert( iterator first, iterator last )
+{
+  return mConnections.insert( first, last );
+}
+
+void AudioConnectionMap::insert( AudioChannel const & sender, AudioChannel const & receiver )
+{
+  insert( std::make_pair( sender, receiver ) );
+}
+
+
+bool AudioConnectionMap::fill( impl::ComponentImplementation const & component,
                                std::ostream & messages,
                                bool recursive /*= false*/ )
 {
@@ -89,75 +82,32 @@ bool AudioConnectionMap::fill( ril::Component const & component,
   return fillRecursive( component, messages, recursive );
 }
 
-bool AudioConnectionMap::fillRecursive( ril::Component const & component,
+bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & component,
                                         std::ostream & messages,
                                         bool recursive /*= false */ )
 {
-  bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<ril::AudioPortBase const*>;
-  PortTable sendPorts;
-  PortTable receivePorts;
-
-  // No connections in a purely atomic flow..
+  // No connections in a purely atomic flow, i.e., no errors possible.
   if( not component.isComposite() )
   {
     return true;
   }
-  ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(component);
-  // this could be moved to the PortLookup functionality.
+  bool result = true; // Result variable, is set to false if an error occurs.
 
-  // Get the 'implementation' object that holds the tables to contained components and connections.
-  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
-  // Get the 'internal' object of the component that holds the audio port tables.
-  ril::ComponentInternal const & componentInternal = composite.internal();
+  impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(component);
+  PortLookup<impl::AudioPortBaseImplementation> const localPorts( composite, false /* non-recursive*/ );
 
-  // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
-  // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::ComponentInternal::PortContainer<ril::AudioPortBase>::const_iterator extPortIt = componentInternal.portBegin<ril::AudioPortBase>();
-    extPortIt != componentInternal.portEnd<ril::AudioPortBase>(); ++extPortIt )
+  for( impl::AudioConnectionTable::const_iterator connIt = composite.audioConnectionBegin();
+    connIt != composite.audioConnectionEnd(); ++connIt )
   {
-    if( (*extPortIt)->direction() == ril::AudioPortBase::Direction::Input )
-    {
-      sendPorts.insert( *extPortIt );
-    }
-    else
-    {
-      receivePorts.insert( *extPortIt );
-    }
-  }
-  // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
-    compIt != compositeImpl.componentEnd(); ++compIt )
-  {
-//    ril::Component const & containedComponent = *(compIt->second);
-    // Get the 'internal' object of the component that holds the audio port tables.
-    ril::ComponentInternal const & containedComponentInternal = *(compIt->second);
-
-    for( ril::ComponentInternal::PortContainer<ril::AudioPortBase>::const_iterator intPortIt = containedComponentInternal.portBegin<ril::AudioPortBase>();
-      intPortIt != containedComponentInternal.portEnd<ril::AudioPortBase>(); ++intPortIt )
-    {
-      if( (*intPortIt)->direction() == ril::PortBase::Direction::Input )
-      {
-        receivePorts.insert( *intPortIt );
-      }
-      else
-      {
-        sendPorts.insert( *intPortIt );
-      }
-    }
-  }
-  for( ril::AudioConnectionTable::const_iterator connIt = compositeImpl.audioConnectionBegin();
-    connIt != compositeImpl.audioConnectionEnd(); ++connIt )
-  {
-    ril::AudioConnection const connection = *connIt;
-    if( sendPorts.find( connection.sender() ) == sendPorts.end() )
+    impl::AudioConnection const connection = *connIt;
+    if( localPorts.allNonPlaceholderSendPorts().find( connection.sender() ) == localPorts.allNonPlaceholderSendPorts().end() )
     {
       messages << "Audio signal flow connection check: In component \"" << composite.fullName() << "\", the send port \""
         << qualifiedName( *connection.sender() ) << "\" is not found." << std::endl;
       result = false;
       continue;
     }
-    if( receivePorts.find( connection.receiver() ) == receivePorts.end() )
+    if( localPorts.allNonPlaceholderReceivePorts().find( connection.receiver() ) == localPorts.allNonPlaceholderReceivePorts().end() )
     {
       // Todo: define flexible formatting of port names
       messages << "Audio signal flow connection check: In component \"" << composite.fullName() << "\", the receive port \""
@@ -165,8 +115,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
       result = false;
       continue;
     }
-    ril::AudioChannelIndexVector const & sendIndices = connection.sendIndices();
-    ril::AudioChannelIndexVector const & receiveIndices = connection.receiveIndices();
+    ChannelList const & sendIndices = connection.sendIndices();
+    ChannelList const & receiveIndices = connection.receiveIndices();
     if( receiveIndices.size() != sendIndices.size() )
     {
       messages << "Audio signal flow connection check: The channel index vectors of the connection \""
@@ -177,8 +127,8 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
     }
     if( receiveIndices.size() > 0 ) // max_element cannot be dereferenced for empty sequences
     {
-      ril::AudioChannelIndexVector::const_iterator maxSendIndex = std::max_element( sendIndices.begin(), sendIndices.end() );
-      ril::AudioChannelIndexVector::const_iterator maxReceiveIndex = std::max_element( receiveIndices.begin(), receiveIndices.end() );
+      ChannelList::const_iterator maxSendIndex = std::max_element( sendIndices.begin(), sendIndices.end() );
+      ChannelList::const_iterator maxReceiveIndex = std::max_element( receiveIndices.begin(), receiveIndices.end() );
       if( *maxSendIndex >= connection.sender()->width() )
       {
         messages << "Audio signal flow connection check: The send channel index of the connection \""
@@ -197,72 +147,83 @@ bool AudioConnectionMap::fillRecursive( ril::Component const & component,
       }
       for( std::size_t runIdx( 0 ); runIdx < receiveIndices.size(); ++runIdx )
       {
-        // Table entries are sender, receiver
-        mConnections.insert( std::make_pair( AudioSignalDescriptor( connection.receiver(), receiveIndices[runIdx] ),
-          AudioSignalDescriptor( connection.sender(), sendIndices[runIdx] ) ) );
+       insert( AudioChannel( connection.sender(), sendIndices[runIdx] ),
+               AudioChannel( connection.receiver(), receiveIndices[runIdx] ) );
       }
     }
   }
   if( recursive )
   {
-    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
-      compIt != compositeImpl.componentEnd(); ++compIt )
+    for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
+      compIt != composite.componentEnd(); ++compIt )
     {
-      result = result and fillRecursive( (compIt->second)->component(), messages, true );
+      result = result and fillRecursive( *(*compIt), messages, true );
     }
   }
   return result;
 }
 
-void AudioConnectionMap::resolvePlaceholders( AudioConnectionMap const & fullConnections )
+AudioConnectionMap::const_iterator AudioConnectionMap::findReceiveChannel( AudioChannel const & signal ) const
 {
-  Container newConnections;
-  for( Container::value_type const & rawConnection : fullConnections )
+  return std::find_if( mConnections.begin(), mConnections.end(),
+    [&signal]( AudioConnectionMap::value_type const & entry ){ return entry.second == signal; } );
+}
+
+AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
+{
+  AudioConnectionMap resolvedTable;
+  for( Container::value_type const & rawConnection : mConnections )
   {
     // Do not care for connections ending at a placeholder port
-    if( isPlaceholderPort( rawConnection.first.mPort ) )
+    if( isPlaceholderPort( rawConnection.second.port() ) )
     {
       continue;
     }
-    else if( not isPlaceholderPort( rawConnection.second.mPort ) )
+    else if( not isPlaceholderPort( rawConnection.first.port() ) )
     {
-      newConnections.insert( rawConnection ); // insert the connection unaltered
+      resolvedTable.insert( rawConnection ); // insert the connection unaltered
     }
     else // The sender is a placeholder
     {
-      std::size_t const recursionLimit = fullConnections.size( ); // Last line of defence against a closed loop in the flow.
-      std::size_t recursionCount = 1;
+      // Detect loops in placeholder connections.
+      std::vector<AudioChannel> connectionTrace;
+      connectionTrace.push_back( rawConnection.first );
 
-      const_iterator findIt = fullConnections.findFirst( rawConnection.second );
+      const_iterator findIt = findReceiveChannel( rawConnection.first );
       for( ;; )
       {
-        if( findIt == fullConnections.end( ) )
+        if( findIt == end( ) )
         {
           throw std::invalid_argument( "Unexpected error: unconnected receive port." );
         }
 
-        if( not isPlaceholderPort( findIt->second.mPort ) )
+        if( not isPlaceholderPort( findIt->first.port() ) )
         {
-          newConnections.insert( std::make_pair( rawConnection.first, findIt->second ) );
+          resolvedTable.insert( findIt->first, rawConnection.second );
           break;
         }
-        if( ++recursionCount >= recursionLimit )
+        connectionTrace.push_back( findIt->first );
+        findIt = findReceiveChannel( findIt->first );
+        if( std::find( connectionTrace.begin(), connectionTrace.end(), findIt->first ) != connectionTrace.end() )
         {
-          throw std::runtime_error( "Audio signal connections: closed loop detected in placeholder port connections." );
+          std::stringstream str;
+          str << "Detected loop in audio placeholder connections: ";
+          std::copy( connectionTrace.rbegin(), connectionTrace.rend(), std::ostream_iterator<AudioChannel>( str, " -> " ) );
+          str << findIt->first;
+          std::cout << str.str() << std::endl;
+          throw std::invalid_argument( str.str() );
         }
-        findIt = fullConnections.findFirst( findIt->second );
       }
     }
   }
-  // Strong exception safety, swap only after everything went fine;
-  mConnections.swap( newConnections );
+  return resolvedTable;
 }
 
 std::ostream & operator << (std::ostream & stream, AudioConnectionMap const & connections)
 {
-  for( AudioConnectionMap::Container::value_type const & entry : connections.connections() )
+  for( AudioConnectionMap::value_type const & entry : connections )
   {
-    stream << printAudioSignalDescriptor( entry.second ) << "->" << printAudioSignalDescriptor( entry.first ) << "\n";
+    stream << entry.first << "->" << entry.second << "\n";
   }
   return stream;
 }

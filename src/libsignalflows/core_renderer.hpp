@@ -6,7 +6,7 @@
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
-#include <libril/parameter_input_port.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
@@ -14,12 +14,10 @@
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
-#include <librcl/late_reverb_filter_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_gain_calculator.hpp>
 #include <librcl/position_decoder.hpp>
-#include <librcl/reverb_parameter_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
@@ -38,21 +36,13 @@
 
 namespace visr
 {
-
-// Forward declarations
-namespace pml
-{
-template< typename MessageTypeT >
-class MessageQueueProtocol;
-}
-
 namespace signalflows
 {
 
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class CoreRenderer: public ril::CompositeComponent
+class CoreRenderer: public CompositeComponent
 {
 public:
   /**
@@ -75,32 +65,32 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit CoreRenderer( ril::SignalFlowContext & context,
-                             char const * name,
-                             ril::CompositeComponent * parent,
-                             panning::LoudspeakerArray const & loudspeakerConfiguration,
-                             std::size_t numberOfInputs,
-                             std::size_t numberOfOutputs,
-                             std::size_t interpolationPeriod,
-                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
-                             std::string const & trackingConfiguration );
+  explicit CoreRenderer( SignalFlowContext const & context,
+                         char const * name,
+                         CompositeComponent * parent,
+                         panning::LoudspeakerArray const & loudspeakerConfiguration,
+                         std::size_t numberOfInputs,
+                         std::size_t numberOfOutputs,
+                         std::size_t interpolationPeriod,
+                         efl::BasicMatrix<SampleType> const & diffusionFilters,
+                         std::string const & trackingConfiguration );
 
   ~CoreRenderer();
 
 private:
-  ril::AudioInput mObjectSignalInput;
+  AudioInput mObjectSignalInput;
 
-  ril::AudioOutput mLoudspeakerOutput;
+  AudioOutput mLoudspeakerOutput;
 
-  ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
+  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
 
   /**
    * Parameter input for the listener position.
    * Object is instantiated only if tacking is activated.
    */
-  std::unique_ptr<ril::ParameterInputPort< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
+  std::unique_ptr<ParameterInput< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
 
-  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
+  efl::BasicMatrix<SampleType> const & mDiffusionFilters;
 
   rcl::DelayVector mOutputAdjustment;
 

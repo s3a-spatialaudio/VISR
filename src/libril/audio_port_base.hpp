@@ -1,155 +1,136 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
+#ifndef VISR_AUDIO_PORT_BASE_HPP_INCLUDED
+#define VISR_AUDIO_PORT_BASE_HPP_INCLUDED
 
-#include "port_base.hpp"
+#include "port_base.hpp" // For the 'Direction' enum
+#include "audio_sample_type.hpp"
+#include "export_symbols.hpp"
 
-#include "constants.hpp"
-
-// #include <array>
-#include <cstddef>
-#include <exception>
-#include <iterator>
-#include <limits>
 #include <string>
-#include <vector>
-
-#include <valarray>
 
 namespace visr
 {
-namespace ril
-{
-
 // Forward declaration(s)
 class Component;
 
-class AudioPortBase: public PortBase
+namespace impl
+{
+class AudioPortBaseImplementation;
+}
+
+/**
+ * Base class for audio ports.
+ * Audio ports can form part of the external interface of components and denote start and end points od audio signal connections.
+ * An audio port is characterised by a sample type (fundamental integral and floating-point data type as well as complex floating-point types),
+ * the width, that is, the number of elementary audio signals represented by this port.
+ */
+class VISR_CORE_LIBRARY_SYMBOL AudioPortBase
 {
 public:
-
-  explicit AudioPortBase( std::string const & name, Component & container, Direction direction );
-
-  explicit AudioPortBase( std::string const & name, Component& container, Direction direction, std::size_t width );
-
-  ~AudioPortBase();
+  /**
+   * Constructor, construct a base audio port object with width zero. 
+   * The width can be set later on during initialization using setWidth().
+   * @param name Zero-terminated charracter array containing the name of the port. The port name must be unique within all audio ports of the containing component
+   * @param container The component to contain that port.
+   * @param sampleType Enumeration value denoting the data type of the samples used by this port.
+   * @param direction The direction of the port (either input or output)
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ explicit AudioPortBase( char const * name, Component & container, AudioSampleType::Id sampleType, PortBase::Direction direction );
 
   /**
-   * The type of signal indices.
-   * @todo move to a central, unique definition
-   */
-  using SignalIndexType = std::size_t;
+  * Constructor, construct a base audio port object with a width parameter.
+  * @param name Zero-terminated charracter array containing the name of the port. The port name must be unique within all audio ports of the containing component
+  * @param container The component to contain that port.
+  * @param sampleType Enumeration value denoting the data type of the samples used by this port.
+  * @param direction The direction of the port (either input or output)
+  */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ explicit AudioPortBase( char const * name, Component& container, AudioSampleType::Id sampleType, PortBase::Direction direction, std::size_t width );
 
   /**
-   * @note: Not required from user code?
+   * Destructor (virtual).
+   * Audio ports can possibley be created and held polymorphically, although this is not done in standard components.
    */
-  static constexpr SignalIndexType cInvalidSignalIndex = std::numeric_limits<SignalIndexType>::max();
+  /*VISR_CORE_LIBRARY_SYMBOL*/ virtual ~AudioPortBase();
 
   /**
-   * @note: Not required from user code?
+   * Set the width (i.e., the number of individual audio signals) contained within this port.
+   * The new value overwrites any previously set values and can be called multiple times on a single port.
+   * This method must only be called in the initialisation phase of the signal flow, not during runtime.
+   * @param newWidth The new width (number of single audio signals).
+   * @throw std::logic_error If the method is called during runtime.
    */
-  static constexpr std::size_t cInvalidWidth = std::numeric_limits<SignalIndexType>::max();
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void setWidth( std::size_t newWidth );
 
   /**
-   * Methods to be called by components 
+   * Return the number of individual channels held by this port.
    */
-  //@{
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t width() const noexcept;
 
   /**
-   * @throw XXX if called while in initialised state.
-   * @note Might be called from user code.
+   * Return the alignment of the channel vectors in bytes.
+   * This method can be called at any point of the lifetime of an audio port, and the alignment is guaranteed not to change.
    */
-  void setWidth( std::size_t newWidth );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t alignmentBytes() noexcept;
 
-  std::size_t width() const { return mWidth; }
+  /**
+  * Return the guaranteed alignment of the channel vectors (in multiples of the sample size).
+  * This function can be called at any point of the audio port's lifetime and the alignment remains constant througout that lifetime.
+  */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t alignmentSamples() noexcept;
 
-  //@}
+  /**
+   * Return the number of samples between the start of consecutive audio channels.
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t channelStrideSamples() const noexcept;
 
-  void setAudioChannelStride(std::size_t stride)
-  {
-    mAudioChannelStride = stride;
-  }
+  /**
+   * Return the number of bytesbetween the start of consecutive audio channels.
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t channelStrideBytes() const noexcept;
 
-  void setAudioBasePointer(ril::SampleType * const base) 
-  {
-	mAudioBasePtr = base;
-  }
+  /**
+   * Return an enumeration value denoting the type of the audio samples used by this port.
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ AudioSampleType::Id sampleType() const noexcept;
+
+  /**
+   * Return the size (in bytes) of the data type provided by this port
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t sampleSize() const noexcept;
+
+  /**
+   * Return  apointer to the opaque implemenentation object.
+   * This method is not to be used by implementation code.
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ impl::AudioPortBaseImplementation & implementation();
+
+  /**
+  * Return  apointer to the opaque implemenentation object, const version.
+  * This method is not to be used by implementation code.
+  */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ impl::AudioPortBaseImplementation const & implementation() const;
 
 protected:
-  ril::SampleType * mAudioBasePtr;
-
-  std::size_t mAudioChannelStride;
-
-public: // Temporary solution to make the indices visible to the runtime infrastructure.
-
-  SignalIndexType const * indices() const { return &mIndices[0]; }
+  /**
+   * Return the data pointer to fir first (technically zeroth) channel.
+   * The type of this pointer is char and needs to be casted in derived, typed port classes.
+   */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void * basePointer();
 
   /**
-   * Methods to be called by derived audio port classes classes
-   */
-  //@{
+  * Return the data pointer to fir first (technically zeroth) channel, costant versiob
+  * The type of this pointer is char and needs to be casted in derived, typed port classes.
+  */
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void const * basePointer() const;
 
-  //@}
-#if 0
-  template< std::size_t vecLength >
-  void assignCommunicationIndices( std::array<SignalIndexType, vecLength > const & indexVector )
-  {
-    assignCommunicationIndices( &indexVector[0], indexVector.size() );
-  }
-
-  void assignCommunicationIndices( SignalIndexType const * const val, std::size_t vecLength )
-  {
-    std::copy( val, val+vecLength, &mIndices[0] );
-  }
-#endif
-
-  /**
-   * @todo remove from header.
-   * @todo remove from public interface
-   * @todo consider changing the implementation to set the width according to the new index vector
-   */
-  void assignCommunicationIndices( std::vector<SignalIndexType> const & rhs )
-  {
-    if( rhs.size() != width() )
-    {
-      throw std::invalid_argument( "assignCommunicationIndices(): The size of the index vector does not match the port width." );
-    }
-    std::copy( rhs.begin(), rhs.end(), std::begin(mIndices) );
-  }
-
-
-  template<typename IteratorType>
-  void assignCommunicationIndices( IteratorType begin, IteratorType end )
-  {
-    // calculating the distance might be linear in the length of the sequence, but this is proportional to 
-    // the running time of the copy call below and thus acceptable.
-    typename std::iterator_traits<IteratorType>::difference_type numElements = std::distance( begin, end );
-    if( numElements != mWidth )
-    {
-      throw std::invalid_argument( "AudioPort: The length of the sequence passed to assignCommunicationIndices() must match the width of the port." );
-    }
-    if( numElements > 0 ) // MSVC triggers an debug assertion for &mIndices[0] if the size is zero.
-    {
-      std::copy( begin, end, &mIndices[0] );
-    }
-  }
-
-  SampleType * * signalPointers() { return &mSignalPointers[0]; }
 private:
-  std::size_t mWidth;
-
-  std::valarray< SignalIndexType > mIndices;
-
   /**
-   * Temporary container to hold the buffer addresses computed from the assigned indices.
-   * As the location and the calling sequence for resolving the signal pointers is not decided yet, it is unclear whether 
-   * this member is kept.
+   * Pointer to the private, opaque implementation object.
    */
-  mutable std::valarray< SampleType* > mSignalPointers;
+  impl::AudioPortBaseImplementation* mImpl;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_AUDIO_PORT_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_AUDIO_PORT_BASE_HPP_INCLUDED

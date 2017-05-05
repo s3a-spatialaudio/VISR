@@ -5,6 +5,7 @@
 
 #include "empty_parameter_config.hpp"
 
+#include <libril/detail/compile_time_hash_fnv1.hpp>
 #include <libril/parameter_type.hpp>
 #include <libril/typed_parameter_base.hpp>
 
@@ -27,7 +28,7 @@ namespace pml
  * An output index can be routed to zero or one input index, while an input index can be connected to zer, one, or multiple outputs.
  * @note Not sure whether we should introduce parameters to limit
  */
-class SignalRoutingParameter: public ril::TypedParameterBase < pml::EmptyParameterConfig, ril::ParameterType::SignalRouting >
+class SignalRoutingParameter: public TypedParameterBase<SignalRoutingParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1("SignalRouting") >
 {
 public:
   using IndexType = std::size_t;
@@ -68,9 +69,14 @@ public:
    */
   SignalRoutingParameter() {}
 
-  SignalRoutingParameter( std::initializer_list<Entry> const & entries );
+  explicit SignalRoutingParameter( std::initializer_list<Entry> const & entries );
 
   SignalRoutingParameter( const SignalRoutingParameter & rhs ) = default;
+
+  /**
+   * Constructor using parameter configuration object.
+   */
+  explicit SignalRoutingParameter( const ParameterConfigBase & rhs );
 
   void swap( SignalRoutingParameter& rhs );
 
@@ -83,12 +89,6 @@ public:
   RoutingsType::const_iterator begin() const { return mRoutings.begin(); }
 
   RoutingsType::const_iterator end() const { return mRoutings.end(); }
-
-  /**
-   * Remove all routing entries.
-   * @post empty() == true
-   */
-  void clear() { mRoutings.clear();  }
 
   void addRouting( IndexType inputIdx, IndexType outputIdx )
   {
@@ -112,6 +112,11 @@ public:
    * @return True if there was a routing for that output, false if no such entry existed.
    */
   bool removeEntry( IndexType outputIdx );
+
+  /**
+   * Clear all routing entries.
+   */
+  void clear();
 
   Entry const & getEntry( IndexType outputIdx ) const
   {
@@ -138,6 +143,6 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::SignalRoutingParameter, visr::ril::ParameterType::SignalRouting, visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::SignalRoutingParameter, visr::pml::SignalRoutingParameter::staticType(), visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED

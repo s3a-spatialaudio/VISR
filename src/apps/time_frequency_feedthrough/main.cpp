@@ -37,7 +37,7 @@ int main( int argc, char const * const * argv )
     std::size_t const hopSize = period;
     std::size_t const dftSize = 2 * windowLength;
 
-    ril::SamplingFrequencyType const samplingRate = 48000;
+    SamplingFrequencyType const samplingRate = 48000;
 
 #ifdef NATIVE_JACK
     rrl::JackInterface::Config interfaceConfig;
@@ -58,7 +58,7 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mHostApi = "default";
 #endif
 
-    ril::SignalFlowContext context( period, samplingRate );
+    SignalFlowContext context( period, samplingRate );
 
     //ril::SignalFlowContext & context,
     //  char const * name,

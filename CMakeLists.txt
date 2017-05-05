@@ -15,32 +15,31 @@ endif( POLICY CMP0063 )
 # The name of our top-level project.
 PROJECT( VISR CXX C )
 
+# Define central version numbers for the project
+# TODO: Decide whether to move that to an external CMake file .
+set( VISR_MAJOR_VERSION 0 )
+set( VISR_MINOR_VERSION 8 )
+set( VISR_PATCH_VERSION 2 )
+
+ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
+ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+
 # Add support for unit tests
 INCLUDE( CTest )
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-
-# TBD: Switch between GNU compiler and clang on Linux platforms
-OPTION( SET_CLANG_COMPILER "Use the clang compiler on Linux platforms" OFF )
 
 # Enable C++11 features on Linux platforms
 # See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
 # Maybe there is a more general way to configure the different platforms and toolchains
 if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -pedantic")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -march=native")
 endif()
 
-IF(WIN32)
-  ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
-  ADD_DEFINITIONS( "-D_WIN32_WINNT=0x0601" )
-ENDIF(WIN32)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
-
-# Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
-# INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
@@ -59,7 +58,7 @@ IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
   SET( VISR_SYSTEM_PROCESSOR x86_64 )
 ENDIF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
 STRING( TOLOWER ${VISR_SYSTEM_NAME}-${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME )
-# FOr use as a C/C++ preprocessor definition, we must not use hyphens.
+# For use as a C/C++ preprocessor definition, we must not use hyphens.
 STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_MACRO )
 
 
@@ -67,9 +66,48 @@ STRING( TOLOWER ${VISR_SYSTEM_NAME}_${VISR_SYSTEM_PROCESSOR} VISR_PLATFORM_NAME_
 # MESSAGE( STATUS "VISR system name:      " ${VISR_SYSTEM_NAME} )
 # MESSAGE( STATUS "VISR platform name:    " ${VISR_PLATFORM_NAME} )
 
+# Make the platform strings available to the source code.
 ADD_DEFINITIONS("-DVISR_SYSTEM_PROCESSOR_${VISR_SYSTEM_PROCESSOR}")
 ADD_DEFINITIONS("-DVISR_SYSTEM_NAME_${VISR_SYSTEM_NAME}")
 ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
+
+############################################################
+# Set platform-specific compiler flags
+
+# This covers Linux and MacOS X
+if(UNIX)
+  # TODO: Add more elaborate configuration for -march and -mtune
+  # At the moment, the code is invariably built for the architecture
+  # features of the machine it is compiled on.
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
+endif(UNIX)
+
+if( WIN32 ) # Covers 64-bit Windows as well
+  # Macro to determine the Windows version, stolen from
+  # http://stackoverflow.com/questions/9742003/platform-detection-in-cmake
+  macro(get_win32_winnt_version version)
+    if (WIN32 AND CMAKE_SYSTEM_VERSION)
+        set(ver ${CMAKE_SYSTEM_VERSION})
+        string(REPLACE "." "" ver ${ver})
+        string(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+        set(${version} "0x${ver}")
+    endif()
+  endmacro()
+  get_win32_winnt_version( WIN_VERSION_ID )
+  message( STATUS "Window version: " ${WIN_VERSION_ID} )
+  add_definitions( -D_WINN32_WINNT=${WIN_VERSION_ID} )
+  # Avoid specific compiler warnings of the Visual Studio  compiler.
+  add_definitions( -D_SCL_SECURE_NO_WARNINGS ) # STL algorithms with pointers instead of 'real' iterators are perfectly legal.
+
+# TODO: Do we want/need that?
+#   ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
+#   ADD_DEFINITIONS( "-D_WIN32_WINNT=0x0601" )
+
+
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3" ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+endif( WIN32 )
 
 ############################################################
 # Create universal binaries on MacOS
@@ -82,25 +120,16 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
-# Set default visibility of shared library symbols to hidden (as on Windows platforms)
-SET( CMAKE_C_VISIBILITY_PRESET hidden )
-SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
+# Set the minimum Mac OS version.
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 
 ############################################################
-# Support for forcing the load of all symbols from a library.
-# This is used, for instance, in self-registering factories.
-
-if( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( WHOLE_ARCHIVE_PREFIX "-Wl,--whole-archive" )
-  set( WHOLE_ARCHIVE_SUFFIX "-Wl,--no-whole-archive" )
-elseif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  set( WHOLE_ARCHIVE_PREFIX "-Wl,-force_load" )
-  set( WHOLE_ARCHIVE_SUFFIX "" )
-elseif( VISR_SYSTEM_NAME MATCHES "Windows" )
-  set( WHOLE_ARCHIVE_PREFIX "" )
-  set( WHOLE_ARCHIVE_SUFFIX "" )
-endif()
+# Set default visibility of shared library symbols to hidden (as on Windows platforms)
+SET( CMAKE_C_VISIBILITY_PRESET hidden )
+SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
 ############################################################
 # Support for Building Matlab externals
@@ -142,6 +171,17 @@ IF( BUILD_PYTHON_BINDINGS )
   # Brute-force way make all the code position-independent if we use python bindings.
   # TODO: Devise more selective solution (separate sets of static libraries, etc.)
   SET( CMAKE_POSITION_INDEPENDENT_CODE True )
+
+  include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+
+  # Enable the pybind11 cmake support
+  # TODO: Decide whether it's worth to use that in the future or remove it
+  # and the implementation files cmake_modules/pybind11Tools.cmake
+  # and cmake_modules/FindPythonLibsNew.cmake
+  # Support is activated in the CMakeLists.txt files of the respective
+  # Python binding modules.
+  include( pybind11Tools )
+
 ENDIF( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
@@ -235,11 +275,8 @@ ENDIF( NOT Boost_USE_STATIC_LIBS )
 ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
-SET( VISR_BOOST_LIBRARIES date_time filesystem program_options system thread unit_test_framework )
-
-IF( BUILD_PYTHON_BINDINGS )
-  LIST( APPEND VISR_BOOST_LIBRARIES python ) 
-ENDIF( BUILD_PYTHON_BINDINGS )
+# In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
@@ -289,3 +326,6 @@ IF(BUILD_DOCUMENTATION)
  
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc )
 ENDIF()
+
+# Instructions for packaging are held in a separate file.
+INCLUDE( PackageConfig )

@@ -30,8 +30,7 @@ std::string features();
 
 bool hasFeature( std::string const & feature );
 
+} // namespace version
+} // namespace visr
 
-}
-}
-
-#endif // #ifndef VISR_LIBRIL_AUDIO_INPUT_HPP_INCLUDED
+#endif // #ifndef VISR_AUDIO_INPUT_HPP_INCLUDED

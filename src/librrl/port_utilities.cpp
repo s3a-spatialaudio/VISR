@@ -1,16 +1,12 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "port_utilities.hpp"
-
-#include <libril/audio_port_base.hpp>
-#include <libril/component.hpp>
-#include <libril/communication_protocol_type.hpp>
-#include <libril/composite_component.hpp>
 #include <libril/parameter_config_base.hpp>
-#include <libril/parameter_port_base.hpp>
 
-#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/audio_port_base_implementation.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <ciso646>
 #include <iostream>
@@ -20,7 +16,7 @@ namespace visr
 namespace rrl
 {
 
-bool isPlaceholderPort( ril::PortBase const * const port )
+bool isPlaceholderPort( impl::PortBaseImplementation const * const port )
 {
   if( not port->parent().isComposite() )
   {
@@ -29,45 +25,50 @@ bool isPlaceholderPort( ril::PortBase const * const port )
   if( port->parent().isTopLevel() )
   {
     // A toplevel port is not considered as a placeholder here
-    // (It is either replaced by a real port or is handled in a special way.)
+    // (It is either replaced by a concrete port or is handled in a special way.)
     return false;
   }
   return true;
 }
 
-std::string qualifiedName( ril::PortBase const & port )
+bool isToplevelPort( impl::PortBaseImplementation const * const port )
+{
+  return port->parent().isTopLevel();
+}
+
+std::string qualifiedName( impl::PortBaseImplementation const & port )
 {
   return port.parent().name() + ":" + port.name();
 }
 
-std::string fullyQualifiedName( ril::PortBase const & port )
+std::string fullyQualifiedName( impl::PortBaseImplementation const & port )
 {
   return port.parent().fullName() + ":" + port.name();
 }
 
-bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, ril::ParameterPortBase const & receivePort,
+bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation const & sendPort, impl::ParameterPortBaseImplementation const & receivePort,
                                       std::ostream & messages )
 {
   bool result = true;
   // Check connection for protocol and type compatibility
-  ril::CommunicationProtocolType const sendProtocolType = sendPort.protocolType();
-  ril::CommunicationProtocolType const receiveProtocolType = receivePort.protocolType();
+  CommunicationProtocolType const sendProtocolType = sendPort.protocolType();
+  CommunicationProtocolType const receiveProtocolType = receivePort.protocolType();
   if( sendProtocolType != receiveProtocolType )
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The communication protocols of the connected parameter ports \""
       << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
-  ril::ParameterType const sendParameterType = sendPort.parameterType();
-  ril::ParameterType const receiveParameterType = receivePort.parameterType();
+  ParameterType const sendParameterType = sendPort.parameterType();
+  ParameterType const receiveParameterType = receivePort.parameterType();
   if( sendParameterType != receiveParameterType )
   {
     result = false;
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \""
       << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
-  ril::ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
-  ril::ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
+  ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
+  ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
   if( not sendParameterConfig.compare( receiveParameterConfig ) )
   {
     result = false;
@@ -78,66 +79,175 @@ bool checkParameterPortCompatibility( ril::ParameterPortBase const & sendPort, r
 }
 
 template<class PortType>
-PortLookup<PortType>::PortLookup( ril::ComponentInternal const & comp, bool recurse /*= true*/ )
+PortLookup<PortType>::PortLookup( impl::ComponentImplementation const & comp, bool recurse /*= true*/ )
 {
-  traverseComponent( comp, recurse );
+  traverseComponent( comp, recurse, true /* calling for the top level*/ );
+  mAllNonPlaceholderReceivePorts = mConcreteReceivePorts;
+  mAllNonPlaceholderReceivePorts.insert( mExternalPlaybackPorts.begin(), mExternalPlaybackPorts.end() );
+  mAllNonPlaceholderSendPorts = mConcreteSendPorts;
+  mAllNonPlaceholderSendPorts.insert( mExternalCapturePorts.begin(), mExternalCapturePorts.end() );
 }
 
 template<class PortType>
-void PortLookup<PortType>::traverseComponent( ril::ComponentInternal const & comp, bool recurse )
+void PortLookup<PortType>::traverseComponent( impl::ComponentImplementation const & comp, bool recurse, bool topLevel )
 {
-  for( PortType * port : comp.ports<PortType>() )
+#if 1
+  // External capture/playback ports exist only at the top level.
+  if( topLevel )
   {
-    if( port->direction() == ril::PortBase::Direction::Input )
+    for( PortType * port : comp.ports<PortType>() )
     {
-      // In the top-level component, an input port is both a concrete/placeholder input and an external capture port
-      if( comp.isTopLevel() )
-      {
-        mExternalCapturePorts.insert( port );
-      }
-      if( comp.isComposite() )
-      {
-        mPlaceholderReceivePorts.insert( port );
-      }
-      else
-      {
-        mRealReceivePorts.insert( port );
-      }
+      port->direction() == PortBase::Direction::Input ?
+        mExternalCapturePorts.insert( port ) : mExternalPlaybackPorts.insert( port );
     }
-    else
+  }
+  else if( comp.isComposite() )
+  {
+    for( PortType * port : comp.ports<PortType>() )
     {
-      // For the top-level component, an output port is both a concrete/placeholder output and an external playback port
-      if( comp.isTopLevel() )
-      {
-        mExternalPlaybackPorts.insert( port );
-      }
-      if( comp.isComposite() )
-      {
-        mPlaceholderSendPorts.insert( port );
-      }
-      else
-      {
-        mRealSendPorts.insert( port );
-      }
+      port->direction() == PortBase::Direction::Input ?
+        mPlaceholderReceivePorts.insert( port ) : mPlaceholderSendPorts.insert( port );
+    }
+  }
+  else
+  {
+    for( PortType * port : comp.ports<PortType>() )
+    {
+      port->direction() == PortBase::Direction::Input ?
+        mConcreteReceivePorts.insert( port ) : mConcreteSendPorts.insert( port );
     }
   }
   if( comp.isComposite() )
   {
-    ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>(comp.component() );
-    // Get the 'implementation' object that holds the tables to ports and contained components.
-    ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
-    // Add the ports of the contained components (without descending into the hierarchy)
-    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin() );
-      compIt != compositeImpl.componentEnd(); ++compIt )
+    impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(comp);
+    if( recurse )
     {
-      traverseComponent( *(compIt->second), recurse );
+      for( auto subCompIt( composite.componentBegin() ); subCompIt != composite.componentEnd(); ++subCompIt )
+      {
+        traverseComponent( *(*subCompIt), true, false/* Signal that this is called for a level lower than top level*/ );
+      }
+    }
+    else
+    {
+      for( auto subCompIt( composite.componentBegin() ); subCompIt != composite.componentEnd(); ++subCompIt )
+      {
+        for( PortType * port : (*subCompIt)->ports<PortType>() )
+        {
+          port->direction() == PortBase::Direction::Input ?
+            mConcreteReceivePorts.insert( port ) : mConcreteSendPorts.insert( port );
+        }
+      }
     }
   }
+  //// External capture/playback ports exist only at the top level.
+  //if( topLevel )
+  //{
+  //  for( PortType * port : comp.ports<PortType>() )
+  //  {
+  //    port->direction() == PortBase::Direction::Input ?
+  //      mExternalCapturePorts.insert( port ) : mExternalPlaybackPorts.insert( port );
+  //  }
+  //}
+  //else if( recurse and comp.isComposite() )
+  //{
+  //  for( PortType * port : comp.ports<PortType>() )
+  //  {
+  //    port->direction() == PortBase::Direction::Input ?
+  //      mPlaceholderReceivePorts.insert( port ) : mPlaceholderSendPorts.insert( port );
+  //  }
+  //}
+  //else // atomic or not recursing 
+  //{
+  //  for( PortType * port : comp.ports<PortType>() )
+  //  {
+  //    port->direction() == PortBase::Direction::Input ?
+  //      mConcreteReceivePorts.insert( port ) : mConcreteSendPorts.insert( port );
+  //  }
+  //}
+  //if( comp.isComposite() or topLevel )
+  //{
+  //  impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(comp);
+  //  for( auto subCompIt( composite.componentBegin() ); subCompIt != composite.componentEnd(); ++subCompIt )
+  //  {
+  //    traverseComponent( *(subCompIt->second), recurse, false/* Signal that this is called for a level lower than top level*/ );
+  //  }
+  //}
+#else
+  // External capture/playback ports exist only at the top level.
+  if( topLevel )
+  {
+    for( PortType * port : comp.ports<PortType>() )
+    {
+      port->direction() == PortBase::Direction::Input ?
+        mExternalCapturePorts.insert( port ) : mExternalPlaybackPorts.insert( port );
+    }
+  }
+  if( comp.isComposite() )
+  {
+    impl::CompositeComponentImplementation const & composite = dynamic_cast<impl::CompositeComponentImplementation const &>(comp);
+    for( impl::CompositeComponentImplementation::ComponentTable::const_iterator compIt( composite.componentBegin() );
+      compIt != composite.componentEnd(); ++compIt )
+    {
+      impl::ComponentImplementation const * subComp = compIt->second;
+      // If we recurse and the component is composite, then its ports are placeholders.
+      if( recurse and compIt->second->isComposite() )
+      {
+        for( PortType * subPort : subComp->ports<PortType>() )
+        {
+          subPort->direction() == PortBase::Direction::Input ?
+            mPlaceholderReceivePorts.insert( subPort ) : mPlaceholderSendPorts.insert( subPort );
+        }
+        traverseComponent( *subComp, recurse, false/* Signal that this is called for a level lower than top level*/ );
+      }
+      else // If we don't recurse, then all contained ports count as concrete.
+      {
+        for( PortType * subPort : subComp->ports<PortType>() )
+        {
+          // Note: Directions are reversed here (we send to the inputs of the inner component)
+          subPort->direction() == PortBase::Direction::Input ?
+            mConcreteReceivePorts.insert( subPort ) : mConcreteSendPorts.insert( subPort );
+        }
+      }
+    }
+  }
+#endif
+}
+
+template<typename PortType>
+std::ostream & writePortTable(std::ostream & str, typename PortLookup<PortType>::PortTable const & table)
+{
+  for( auto const * port : table )
+  {
+    str << fullyQualifiedName( *port ) << ", ";
+  }
+  return str;
+}
+
+
+template
+std::ostream & writePortTable<impl::AudioPortBaseImplementation>(std::ostream &, PortLookup<impl::AudioPortBaseImplementation>::PortTable const & );
+template
+std::ostream & writePortTable<impl::ParameterPortBaseImplementation>( std::ostream &, PortLookup<impl::ParameterPortBaseImplementation>::PortTable const & );
+
+
+template<typename PortType>
+std::ostream & operator<<( std::ostream & str, PortLookup<PortType> const & lookup )
+{
+  str << "Real send ports: ";  writePortTable<PortType>( str, lookup.concreteSendPorts() );
+  str << "\nReal receive ports: "; writePortTable<PortType>( str, lookup.concreteReceivePorts());
+  str << "\nExternal capture ports: "; writePortTable<PortType>( str, lookup.externalCapturePorts());
+  str << "\nExternal playback ports: "; writePortTable<PortType>( str, lookup.externalPlaybackPorts());
+  str << "\nPlaceholder send ports: "; writePortTable<PortType>( str, lookup.placeholderSendPorts());
+  str << "\nPlaceholder receive ports: "; writePortTable<PortType>( str,  lookup.placeholderReceivePorts());
+  return str;
 }
 
 // explicit instantiations
-template class PortLookup<ril::AudioPortBase>;
-template class PortLookup<ril::ParameterPortBase>;
+template class PortLookup<impl::AudioPortBaseImplementation>;
+template class PortLookup<impl::ParameterPortBaseImplementation>;
+
+template std::ostream & operator<<( std::ostream & str, PortLookup<impl::AudioPortBaseImplementation> const & lookup );
+template std::ostream & operator<<( std::ostream & str, PortLookup<impl::ParameterPortBaseImplementation> const & lookup );
 
 
 

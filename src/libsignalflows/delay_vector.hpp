@@ -11,30 +11,26 @@
 
 #include <libefl/basic_vector.hpp>
 
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/vector_parameter_config.hpp>
+#include <libpml/vector_parameter_config.hpp>
+
 namespace visr
 {
 namespace signalflows
 {
 
-class DelayVector: public ril::CompositeComponent
+class DelayVector: public CompositeComponent
 {
 public:
-  explicit DelayVector( ril::SignalFlowContext & context,
+  explicit DelayVector( SignalFlowContext const & context,
                         const char * name,
-                        ril::CompositeComponent * parent,
+                        CompositeComponent * parent,
                         std::size_t cNumberOfChannels,
                         std::size_t interpolationPeriod,
                         rcl::DelayVector::InterpolationType interpolationMethod );
 
   ~DelayVector();
-
-  /*virtual*/ void process( );
-
-  /*virtual*/ void setup( );
-
-  void setDelay( efl::BasicVector<ril::SampleType> const & newDelays );
-
-  void setGain( efl::BasicVector<ril::SampleType> const & newGains );
 
 private:
   const std::size_t cNumberOfChannels;
@@ -45,9 +41,13 @@ private:
 
   rcl::DelayVector mDelay;
 
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mGainInput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDelayInput;
 };
 
 } // namespace signalflows

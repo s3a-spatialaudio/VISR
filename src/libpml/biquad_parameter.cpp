@@ -132,13 +132,20 @@ void BiquadParameter<CoeffType>::writeJson( std::basic_ostream<char> & stream ) 
 {
   boost::property_tree::ptree tree;
   writeJson( tree );
+  try
+  {
+    write_json( stream, tree);
+  } catch (std::exception const & ex)
+  {
+    throw( "Error while writing BiquadParameter message to JSON" );
+  }
 }
 
 template< typename CoeffType >
 void BiquadParameter<CoeffType>::writeJson( std::string & str ) const
 {
   std::stringstream stream;
-  writeJson( str );
+  writeJson( stream );
   str = stream.str();
 }
 
@@ -152,6 +159,9 @@ void BiquadParameter<CoeffType>::writeXml( boost::property_tree::ptree & tree ) 
 template< typename CoeffType >
 void BiquadParameter<CoeffType>::writeXml( std::basic_ostream<char> & stream ) const
 {
+  boost::property_tree::ptree tree;
+  writeJson( tree );
+
 }
 
 template< typename CoeffType >
@@ -365,7 +375,7 @@ BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( MatrixParameterConfig c
 }
 
 template<typename CoeffType>
-BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( ril::ParameterConfigBase const & config )
+BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( ParameterConfigBase const & config )
   : BiquadParameterMatrix( dynamic_cast<MatrixParameterConfig const &>( config ) )
 {
 }
@@ -410,6 +420,9 @@ template class BiquadParameter<float>;
 template class BiquadParameterList<float>;
 template class BiquadParameterMatrix<float>;
 
+template class BiquadParameter<double>;
+template class BiquadParameterList<double>;
+template class BiquadParameterMatrix<double>;
 
 } // namespace pml
 } // namespace visr

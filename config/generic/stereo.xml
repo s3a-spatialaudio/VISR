@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Generic stero configuration with left and right speakers routed to channels 1 and 2. --> 
 <panningConfiguration dimension="2" infinite="false">
    <loudspeaker channel="1" delay="0" gainDB="0" id="1">
       <polar az="-30" el="1" r="1"/>

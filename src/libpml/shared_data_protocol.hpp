@@ -10,8 +10,8 @@
 #include <libril/parameter_config_base.hpp>
 #include <libril/parameter_port_base.hpp>
 
-#include <algorithm>
 #include <ciso646>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -20,212 +20,160 @@ namespace visr
 namespace pml
 {
 
-/**
- * A FIFO-type message queue template class for storing and passing message data.
- * @tparam MessageTypeT Type of the contained elements.
- * @note This class does provide the same level of thread safety as, e.g., the STL.
- * I.e., calling code from different thread must ensure that concurrent accesses
- * to the same instances are appropriately secured against race conditions.
- */
-template< typename MessageTypeT >
-class SharedDataProtocol: public ril::CommunicationProtocolBase
+class SharedDataProtocol: public CommunicationProtocolBase
 {
 public:
-
   /**
-   * Make the message type available to code using this template.
+   * Forward declarations of inner classes.
    */
-  using MessageType = MessageTypeT;
+  class InputBase;
+  template<class DataType > class Input;
+  class OutputBase;
+  template<class DataType > class Output;
 
-  class Input: public ril::ParameterPortBase
+  explicit SharedDataProtocol( ParameterType const & config,
+                               ParameterConfigBase const & parameterConfig );
+
+  ParameterType parameterType( ) const override;
+
+  virtual CommunicationProtocolType protocolType( ) const override;
+
+  static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString( sProtocolName ); };
+
+  static constexpr const char * staticName() { return sProtocolName; }
+
+  ParameterBase & data()
   {
-  public:
-    /**
-    * Default constructor.
-    */
-    Input( std::string const & name, ril::Component & parent )
-     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
-     , mProtocol(nullptr)
-    {}
-
-    MessageType const & data( ) const
-    {
-      return mProtocol->data( );
-    }
-    void setProtocolInstance( SharedDataProtocol * protocol )
-    {
-      mProtocol = protocol;
-    }
-
-    bool isConnected() const override
-    {
-      return mProtocol != nullptr;
-    }
-  private:
-    SharedDataProtocol * mProtocol;
-  }; // class Input
-
-  /**
-   * Provide alias for parameter configuration class type for the contained parameter values.
-   */
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
-
-  class Output: public ril::ParameterPortBase
-  {
-  public:
-    /**
-     * Default constructor.
-     */
-    explicit Output( std::string const & name, ril::Component & parent )
-     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
-     , mProtocol(nullptr)
-    {}
-
-    MessageType & data()
-    {
-      return mProtocol ->data( );
-    }
-
-    void setProtocolInstance( SharedDataProtocol * protocol )
-    {
-      mProtocol = protocol;
-    }
-
-    bool isConnected() const override
-    {
-      return mProtocol != nullptr;
-    }
-  private:
-    SharedDataProtocol * mProtocol;
-  }; // class Output
-
-  explicit SharedDataProtocol( ril::ParameterConfigBase const & config );
-
-  explicit SharedDataProtocol( ParameterConfigType const & config );
-
-  ril::ParameterType parameterType( ) const override { return ril::ParameterToId<MessageType>::id; }
-
-  virtual ril::CommunicationProtocolType protocolType( ) const override { return ril::CommunicationProtocolType::SharedData; }
-
-  MessageType & data()
-  {
-    return mData;
+    return *mData;
   }
 
-  MessageType const & data( ) const
+  ParameterBase const & data( ) const
   {
-    return mData;
+    return *mData;
   }
 
-  void setData( MessageType const & newData )
-  {
-    mData.operator=( newData );
-  }
+  void connectInput( CommunicationProtocolBase::Input* port ) override;
 
-  void connectInput( ril::ParameterPortBase* port ) override;
+  void connectOutput( CommunicationProtocolBase::Output* port ) override;
 
-  void connectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectInput( CommunicationProtocolBase::Input* port ) noexcept override;
 
-  bool disconnectInput( ril::ParameterPortBase* port ) override;
-
-  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept override;
 
 private:
-  ParameterConfigType const mConfig;
+  ParameterType mParameterType;
+
+  std::unique_ptr<ParameterConfigBase> const mParameterConfig;
 
   /**
    * The internal data representation.
    */
-  MessageTypeT mData;
+  std::unique_ptr<ParameterBase> mData;
 
-  Output* mOutput;
-  std::vector<Input*>  mInputs;
+  OutputBase* mOutput;
+  std::vector<InputBase*>  mInputs;
+
+  static constexpr const char * sProtocolName = "SharedData";
 };
 
-template< typename MessageTypeT >
-inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ril::ParameterConfigBase const & config )
-: SharedDataProtocol( dynamic_cast<ParameterConfigType const &>(config) )
+class SharedDataProtocol::InputBase: public CommunicationProtocolBase::Input
 {
-}
+public:
+  /**
+  * Default constructor.
+  */
+  InputBase()
+    : mProtocol( nullptr )
+  {
+  }
 
-template< typename MessageTypeT >
-inline SharedDataProtocol< MessageTypeT >::SharedDataProtocol( ParameterConfigType const & config )
-  : mConfig( config )
-  , mData( config )
-  , mOutput( nullptr )
-{
-}
+  virtual ~InputBase();
 
-template< typename MessageTypeT >
-inline void SharedDataProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
-{
-  SharedDataProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Input *>(port);
-  if( not typedPort )
-  {
-    throw std::invalid_argument( "SharedDataProtocol::connectInput(): port argument has wrong type." );
-  }
-  if( std::find( mInputs.begin(), mInputs.end(), typedPort ) == mInputs.end() )
-  {
-    mInputs.push_back( typedPort );
-    typedPort->setProtocolInstance( this );
-  }
-}
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
 
-template< typename MessageTypeT >
-inline void SharedDataProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
-{
-  SharedDataProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Output *>(port);
-  if( not typedPort )
-  {
-    throw std::invalid_argument( "SharedDataProtocol::connectOutput(): port argument has wrong type." );
-  }
-  if( mOutput )
-  {
-    throw std::invalid_argument( "SharedDataProtocol::connectOutput(): output port already set." );
-  }
-  mOutput = typedPort;
-  typedPort->setProtocolInstance( this );
-}
+  SharedDataProtocol * getProtocol() override { return mProtocol; }
 
-template< typename MessageTypeT >
-inline bool SharedDataProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
-{
-  SharedDataProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Input *>(port);
-  if( not typedPort )
-  {
-    throw std::invalid_argument( "SharedDataProtocol::connectInput(): port argument has wrong type." );
-  }
-  typename std::vector<Input*>::iterator findIt = std::find( mInputs.begin( ), mInputs.end( ), typedPort );
-  if( findIt == mInputs.end( ) )
-  {
-    return false;
-  }
-  (*findIt)->setProtocolInstance( nullptr );
-  mInputs.erase( findIt );
-  return true;
-}
+  SharedDataProtocol const * getProtocol() const override { return mProtocol; }
 
-template< typename MessageTypeT >
-inline bool SharedDataProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
+  ParameterBase const & data() const
+  {
+    return mProtocol->data();
+  }
+
+  void setProtocolInstance( SharedDataProtocol * protocol )
+  {
+    mProtocol = protocol;
+  }
+private:
+  SharedDataProtocol * mProtocol;
+}; // class InputBase
+
+template<class MessageType>
+class SharedDataProtocol::Input: public InputBase
 {
-  SharedDataProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<SharedDataProtocol< MessageTypeT >::Output *>(port);
-  if( not typedPort )
+  friend class InputBase;
+public:
+  MessageType const & data() const
   {
-    throw std::invalid_argument( "SharedDataProtocol::disconnectOutput(): port argument has wrong type." );
+    return static_cast<MessageType const&>(InputBase::data());
   }
-  if( typedPort != mOutput )
+};
+
+//////////////////////////////////////////////////////////////////
+// Output
+
+class SharedDataProtocol::OutputBase: public CommunicationProtocolBase::Output
+{
+public:
+  /**
+  * Default constructor.
+  */
+  OutputBase()
+    : mProtocol( nullptr )
   {
-    // Trying to disconnect a port that is not the previously connected output.
-    return false;
   }
-  mOutput->setProtocolInstance( nullptr );
-  mOutput = nullptr;
-  return true;
-}
+
+  virtual ~OutputBase();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  SharedDataProtocol * getProtocol() override { return mProtocol; }
+
+  SharedDataProtocol const * getProtocol() const override { return mProtocol; }
+
+  ParameterBase & data()
+  {
+    return mProtocol->data();
+  }
+
+  void setProtocolInstance( SharedDataProtocol * protocol )
+  {
+    mProtocol = protocol;
+  }
+
+#if 0
+  bool isConnected() const override
+  {
+    return mProtocol != nullptr;
+  }
+#endif
+private:
+  SharedDataProtocol * mProtocol;
+}; // class OutputBase
+
+template<class MessageType>
+class SharedDataProtocol::Output: public OutputBase
+{
+public:
+  MessageType & data()
+  {
+    return static_cast<MessageType&>(OutputBase::data());
+  }
+};
 
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::SharedDataProtocol, visr::ril::CommunicationProtocolType::SharedData )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::SharedDataProtocol, visr::pml::SharedDataProtocol::staticType(), visr::pml::SharedDataProtocol::staticName() )
 
 #endif // VISR_PML_SHARED_DATA_PROTOCOL_HPP_INCLUDED

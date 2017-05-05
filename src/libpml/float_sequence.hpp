@@ -42,13 +42,21 @@ public:
    */
   explicit FloatSequence( ElementType const * const val, std::size_t numValues );
 
-  FloatSequence( std::initializer_list<ElementType> const & val );
+  /**
+   * Construct a float sequence from a C++ initializer list.
+   * @param val initializer list (literal list of floating point values as { 0.0, 0.3, 0.4 }
+   */
+  explicit FloatSequence( std::initializer_list<ElementType> const & val );
 
+  /**
+   * Create an object from an a string representation.
+   * @param val A string containig a comma-separated sequence of float values or Matlab-style ranges "start:stride:end"
+   */
   explicit FloatSequence( std::string const & val );
 
   std::size_t size() const 
   {
-    return mValues.size();  
+    return mValues.size();
   }
 
   ElementType * values()

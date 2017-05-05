@@ -11,7 +11,7 @@ namespace visr
 namespace pml
 {
 
-ListenerPosition::ListenerPosition( ril::ParameterConfigBase const & config )
+ListenerPosition::ListenerPosition( ParameterConfigBase const & config )
   : ListenerPosition( dynamic_cast<EmptyParameterConfig const &>(config) )
 {
 }
@@ -47,8 +47,6 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)
   stream << "time: " << static_cast<double>(pos.timeNs())/1.0e9 << " s, face ID " << pos.faceID() << ", pos: (" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")";
   return stream;
 }
-
-static ril::ParameterFactory::Registrar< pml::ListenerPosition > maker{ ril::ParameterType::ListenerPosition };
 
 } // namespace pml
 } // namespace visr

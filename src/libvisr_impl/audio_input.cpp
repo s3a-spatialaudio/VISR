@@ -2,20 +2,14 @@
 
 #include <libril/audio_input.hpp>
 
-#include <libril/component.hpp>
-
 namespace visr
 {
-namespace ril
-{
 
-AudioInput::AudioInput( char const * portName, 
-                        Component& container )
- : AudioPortBase( portName, container, Direction::Input )
+AudioInputBase::AudioInputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width )
+ : AudioPortBase( name, container, typeId, PortBase::Direction::Input, width )
 {
 }
 
-AudioInput::~AudioInput() = default;
+AudioInputBase::~AudioInputBase() = default;
 
-} // namespace ril
 } // namespace visr

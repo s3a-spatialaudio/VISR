@@ -1,33 +1,38 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
+#ifndef VISR_PARAMETER_FACTORY_HPP_INCLUDED
+#define VISR_PARAMETER_FACTORY_HPP_INCLUDED
 
-// #include "parameter_type.hpp"
+#include "export_symbols.hpp"
+#include "parameter_type.hpp"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
 
-#include <boost/function.hpp>
-
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
 class ParameterBase;
-enum class ParameterType;
 class ParameterConfigBase;
+template<class ConcreteType, class ParameterConfig, ParameterType> class TypedParameterBase;
 
-class ParameterFactory
+class VISR_CORE_LIBRARY_SYMBOL ParameterFactory
 {
 public:
   static std::unique_ptr<ParameterBase> create(ParameterType const & type, ParameterConfigBase const & config);
 
   template< class ConcreteParameterType >
   static void registerParameterType( ParameterType const &  type );
+
+  /**
+   * Special registration function for ParameterType subtypes that inherit from 
+   * TypedParameterBase.
+   */
+  template< class TypedParameterType >
+  static void registerParameterType();
 
   /**
    * Template class to register parameter types.
@@ -46,11 +51,11 @@ public:
 private:
   struct Creator
   {
-    using CreateFunction = boost::function< ParameterBase* ( ParameterConfigBase const & config ) >;
+    using CreateFunction = std::function< ParameterBase* ( ParameterConfigBase const & config ) >;
 
-    explicit Creator( CreateFunction fcn );
+    VISR_CORE_LIBRARY_SYMBOL explicit Creator( CreateFunction fcn );
 
-    std::unique_ptr<ParameterBase> create( ParameterConfigBase const & config ) const;
+    VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<ParameterBase> create( ParameterConfigBase const & config ) const;
  private:
     CreateFunction mCreateFunction;
   };
@@ -82,12 +87,18 @@ void ParameterFactory::registerParameterType( ParameterType const & type )
   creatorTable().insert( std::make_pair( type, TCreator<ConcreteParameterType>() ) );
 }
 
+template< class TypedParameterType >
+void ParameterFactory::registerParameterType()
+{
+  registerParameterType<TypedParameterType>( TypedParameterType::staticType() );
+}
+
+
 // The macro does not work for multiple uses in the same .cpp file
 // (multiple definitions of 'maker'), stringization of names difficult
 // because of template brackets and namespace names.
-// #define REGISTER_PARAMETER( type, id ) namespace { static ril::ParameterFactory::Registrar< type > maker( id ); }
+// #define REGISTER_PARAMETER( type, id ) namespace { static ParameterFactory::Registrar< type > maker( id ); }
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_FACTORY_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_FACTORY_HPP_INCLUDED

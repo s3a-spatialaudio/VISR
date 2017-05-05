@@ -16,14 +16,16 @@ namespace pml
 /**
  * A type for encapsulating the configuration of a vector parameter.
  */
-class VectorParameterConfig: public ril::ParameterConfigBase
+class VectorParameterConfig: public ParameterConfigBase
 {
 public:
   explicit VectorParameterConfig( std::size_t numberOfElements );
 
   virtual ~VectorParameterConfig();
 
-  bool compare( ril::ParameterConfigBase const & rhs ) const override;
+  std::unique_ptr< ParameterConfigBase > clone() const override;
+
+  bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( VectorParameterConfig const & rhs ) const;
 

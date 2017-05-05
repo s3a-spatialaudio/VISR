@@ -5,7 +5,7 @@
 
 namespace visr
 {
-namespace ril
+namespace impl
 {
 
 #if 0
@@ -32,8 +32,8 @@ operator<(ParameterPortDescriptor const & rhs) const
 #endif
 
 ParameterConnection::
-ParameterConnection( ParameterPortBase * pSender,
-                     ParameterPortBase * pReceiver)
+ParameterConnection( ParameterPortBaseImplementation * pSender,
+                     ParameterPortBaseImplementation * pReceiver)
  : mSender(pSender)
  , mReceiver(pReceiver)
 {
@@ -52,5 +52,5 @@ bool ParameterConnection::operator<(ParameterConnection const & rhs) const
   return receiver() < rhs.receiver();
 }
 
-} // namespace ril
+} // namespace impl
 } // namespace visr

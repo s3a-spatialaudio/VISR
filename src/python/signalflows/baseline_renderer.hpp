@@ -3,6 +3,8 @@
 #ifndef VISR_PYTHON_SIGNALFLOWS_BASELINE_RENDERER_HPP_INCLUDED
 #define VISR_PYTHON_SIGNALFLOWS_BASELINE_RENDERER_HPP_INCLUDED
 
+#include <pybind11/pybind11.h>
+
 namespace visr
 {
 namespace python
@@ -10,7 +12,7 @@ namespace python
 namespace signalflows
 {
 
-void exportBaselineRenderer();
+void exportBaselineRenderer( pybind11::module& m );
 
 } // namepace signalflows
 } // namespace python

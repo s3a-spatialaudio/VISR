@@ -1,13 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_CONSTANTS_HPP_INCLUDED
-#define VISR_LIBRIL_CONSTANTS_HPP_INCLUDED
+#ifndef VISR_CONSTANTS_HPP_INCLUDED
+#define VISR_CONSTANTS_HPP_INCLUDED
 
 #include <cstddef>
 
 namespace visr
-{
-namespace ril
 {
 
 /**
@@ -28,11 +26,10 @@ using SamplingFrequencyType = std::size_t;
 static const std::size_t cVectorAlignmentBytes = 64;
 
 /**
- * Desired alignement for contiguous vectors, given in byte.
+ * Desired alignment for contiguous vectors of the default sample type, given in number of elements o.
  */
 static const std::size_t cVectorAlignmentSamples = cVectorAlignmentBytes / sizeof(SampleType);
 
-} // namespace ril
-} // namespace constants
+} // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_CONSTANTS_HPP_INCLUDED
+#endif // #ifndef VISR_CONSTANTS_HPP_INCLUDED

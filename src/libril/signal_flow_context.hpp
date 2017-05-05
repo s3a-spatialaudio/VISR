@@ -1,16 +1,15 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED
-#define VISR_LIBRIL_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED
+#ifndef VISR_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED
+#define VISR_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED
 
 #include "constants.hpp"
+#include "export_symbols.hpp"
 
 namespace visr
 {
-namespace ril
-{
 
-class SignalFlowContext
+class VISR_CORE_LIBRARY_SYMBOL SignalFlowContext
 {
 public:
   /**
@@ -57,7 +56,6 @@ private:
   bool mInitialised;
 };
 
-} // namespace ril
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED
+#endif // #ifndef VISR_SIGNAL_FLOW_CONTEXT_HPP_INCLUDED

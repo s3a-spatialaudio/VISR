@@ -1,33 +1,51 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
-#define VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#ifndef VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#define VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
-#include <libvisr_impl/audio_connection_descriptor.hpp>
-#include <libvisr_impl/parameter_connection_descriptor.hpp>
+#include "component_implementation.hpp"
 
-#include <map>
+#include "audio_connection_descriptor.hpp"
+#include "parameter_connection_descriptor.hpp"
+
+#include <libril/composite_component.hpp>
+#include <libril/export_symbols.hpp>
+
+#include <vector>
 
 namespace visr
 {
-namespace ril
-{
 // Forward declaration
-class AudioPortBase;
-class SignalFlowContext;
-class CompositeComponent;
+class Component;
+  
+namespace impl
+{
 
-class ComponentInternal;
-
-class CompositeComponentImplementation
+class VISR_CORE_LIBRARY_SYMBOL CompositeComponentImplementation: public ComponentImplementation
 {
 public:
-  using ComponentTable = std::map<std::string, ComponentInternal * >;
+//  using ComponentTable = std::map<std::string, ComponentImplementation * >;
+  using ComponentTable = std::vector< ComponentImplementation * >;
 
-  explicit CompositeComponentImplementation( CompositeComponent & component )
-    : mComponent( component )
-  {
-  }
+  /*VISR_CORE_LIBRARY_SYMBOL*/ explicit CompositeComponentImplementation( CompositeComponent & component,
+                                             SignalFlowContext const & context,
+                                             char const * componentName,
+                                             CompositeComponentImplementation * parent );
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ virtual ~CompositeComponentImplementation() override;
+
+  CompositeComponentImplementation() = delete;
+
+  CompositeComponentImplementation( CompositeComponentImplementation const & ) = delete;
+
+  CompositeComponentImplementation( CompositeComponentImplementation && ) = delete;
+
+  CompositeComponentImplementation& operator=( CompositeComponentImplementation const & ) = delete;
+
+  CompositeComponentImplementation& operator=( CompositeComponentImplementation && ) = delete;
+
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ bool isComposite() const final;
 
   /**
    * Register a child component 
@@ -36,27 +54,33 @@ public:
    * @note The name has to be provided separately, because typically the object pointed to by 
    * \p child is not fully constructed at the time of the call.
    */
-  void registerChildComponent( std::string const & name, ComponentInternal * child );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void registerChildComponent( char const * name, impl::ComponentImplementation * child );
 
-  void unregisterChildComponent( ComponentInternal * child );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void unregisterChildComponent( impl::ComponentImplementation * child );
 
   /**
   * Return the number of contained components (not including the composite itself).
   * This method considers only atomic and composite components at the next level,
   * i.e., not recursively.
   */
-  std::size_t numberOfComponents() const
+  /*VISR_CORE_LIBRARY_SYMBOL*/ std::size_t numberOfComponents() const
   {
     return mComponents.size();
   }
 
-  ComponentTable::const_iterator componentBegin() const;
+//  ComponentTable const components() const;
 
-  ComponentTable::const_iterator componentEnd() const;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ComponentTable::const_iterator componentBegin() const;
 
-  ComponentInternal * findComponent( std::string const & componentName );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ComponentTable::const_iterator componentEnd() const;
 
-  ComponentInternal const * findComponent( std::string const & componentName ) const;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ComponentTable::iterator findComponentEntry( char const *componentName );
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ComponentTable::const_iterator findComponentEntry( char const *componentName ) const;
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ComponentImplementation * findComponent( char const *componentName );
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ComponentImplementation const * findComponent( char const * componentName ) const;
 
   /**
    * Find an audio port within the composite component.
@@ -64,7 +88,7 @@ public:
    * @param componentName
    * @param portName The port name (case-sensitive)
    */
-  AudioPortBase * findAudioPort( std::string const & componentName, std::string const & portName );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ AudioPortBase * findAudioPort( char const * componentName, char const * portName );
 
   /**
   * Find a parameter port within the composite component.
@@ -72,37 +96,42 @@ public:
   * @param componentName
   * @param portName The port name (case-sensitive)
   */
-  ParameterPortBase * findParameterPort( std::string const & componentName, std::string const & portName );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ParameterPortBase * findParameterPort( char const * componentName, char const * portName );
 
-  void registerParameterConnection( std::string const & sendComponent,
-                                    std::string const & sendPort,
-                                    std::string const & receiveComponent,
-                                    std::string const & receivePort );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void registerParameterConnection( char const * sendComponent,
+                                    char const * sendPort,
+                                    char const * receiveComponent,
+                                    char const * receivePort );
 
-  void registerAudioConnection( std::string const & sendComponent,
-                                std::string const & sendPort,
-                                AudioChannelIndexVector const & sendIndices,
-                                std::string const & receiveComponent,
-                                std::string const & receivePort,
-                                AudioChannelIndexVector const & receiveIndices );
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void registerParameterConnection( ParameterPortBase & sendPort,
+                                    ParameterPortBase & receivePort );
 
-  AudioConnectionTable::const_iterator audioConnectionBegin() const;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void audioConnection( char const * sendComponent,
+                        char const * sendPort,
+                        ChannelList const & sendIndices,
+                        char const * receiveComponent,
+                        char const * receivePort,
+                        ChannelList const & receiveIndices );
 
-  AudioConnectionTable::const_iterator audioConnectionEnd() const;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void audioConnection( AudioPortBase & sendPort,
+			ChannelList const & sendIndices,
+			AudioPortBase & receivePort,
+			ChannelList const & receiveIndices );
 
-  ParameterConnectionTable::const_iterator parameterConnectionBegin() const;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ void audioConnection( AudioPortBase & sendPort,
+			AudioPortBase & receivePort );
 
-  ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
+  /*VISR_CORE_LIBRARY_SYMBOL*/ AudioConnectionTable const & audioConnections() const;
 
-  CompositeComponent & composite() { return mComponent; }
+  /*VISR_CORE_LIBRARY_SYMBOL*/ AudioConnectionTable::const_iterator audioConnectionBegin() const;
 
-  CompositeComponent const & composite() const { return mComponent; }  
+  /*VISR_CORE_LIBRARY_SYMBOL*/ AudioConnectionTable::const_iterator audioConnectionEnd() const;
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ParameterConnectionTable::const_iterator parameterConnectionBegin() const;
+
+  /*VISR_CORE_LIBRARY_SYMBOL*/ ParameterConnectionTable::const_iterator parameterConnectionEnd() const;
+
 private:
-  
-  /**
-  * Reference to the component itself (needed because sometimes the component itself needs to be returned).
-  */
-  CompositeComponent & mComponent;
 
   ComponentTable mComponents;
 
@@ -111,7 +140,7 @@ private:
   AudioConnectionTable mAudioConnections;
 };
 
-} // namespace ril
+} // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
+#endif // #ifndef VISR_COMPOSITE_COMPONENT_IMPLEMENTATION_HPP_INCLUDED

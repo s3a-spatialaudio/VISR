@@ -10,7 +10,6 @@
 #include <libril/parameter_type.hpp>
 #include <libril/parameter_config_base.hpp>
 
-#include <algorithm>
 #include <ciso646>
 #include <memory>
 #include <stdexcept>
@@ -22,266 +21,164 @@ namespace pml
 {
 
 /**
- * A FIFO-type message queue template class for storing and passing message data.
- * @tparam MessageTypeT Type of the contained elements.
- * @note This class does provide the same level of thread safety as, e.g., the STL.
- * I.e., calling code from different thread must ensure that concurrent accesses
- * to the same instances are appropriately secured against race conditions.
+ * 
  */
-template< typename MessageTypeT >
-class DoubleBufferingProtocol: public ril::CommunicationProtocolBase
+class DoubleBufferingProtocol: public CommunicationProtocolBase
 {
 public:
+  /**
+   * Forward declarations of the internal data types.
+    */
+  class InputBase;
+  template<class DataType > class Input;
+  class OutputBase;
+  template<class DataType > class Output;
 
   /**
-   * Make the message type available to code using this template.
+   * Constructor.
+   * @param parameterType The parameter type that will transmitted through the protocol.
+   * @param parameterConfig The configuration of the parameter. The dynamic type must ne compatible with the parameter type.
    */
-  using MessageType = MessageTypeT;
+  explicit DoubleBufferingProtocol( ParameterType const & parameterType,
+                                    ParameterConfigBase const & parameterConfig );
 
-  class Input: public ril::ParameterPortBase
-  {
-  public:
-    /**
-    * Default constructor.
-    */
-    explicit Input( std::string const & name, ril::Component & parent )
-    : ParameterPortBase( name, parent, ParameterPortBase::Direction::Input )
-    , mProtocol(nullptr)
-    , mChanged( true ) // Mark the data as changed for the first iteration
-    {}
+  static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString(sProtocolName); };
 
-    MessageType const & data( ) const
-    {
-      return mProtocol->backData( );
-    }
+  static constexpr char const * staticName() { return sProtocolName; }
 
-    bool hasChanged() const
-    {
-      return mChanged;
-    }
+  ParameterType parameterType( ) const override;
 
-    void resetChanged()
-    {
-      mChanged = false;
-    }
+  virtual CommunicationProtocolType protocolType( ) const override { return staticType(); }
 
-    /**
-     * To be called from the protocol.
-    */
-    void markChanged( )
-    {
-      mChanged = true;
-    }
+  ParameterBase & frontData();
 
+  ParameterBase const & frontData() const;
 
-    void setProtocolInstance( DoubleBufferingProtocol * protocol )
-    {
-      mProtocol = protocol;
-    }
+  ParameterBase & backData();
 
-    bool isConnected() const override
-    {
-      return mProtocol != nullptr;
-    }
-  protected:
+  ParameterBase const & backData() const;
 
+  void setData( ParameterBase const & newData );
 
-  private:
-    DoubleBufferingProtocol * mProtocol;
-    bool mChanged;
-  };
+  void swapBuffers();
 
+  void connectInput( CommunicationProtocolBase::Input* port ) override;
 
-  /**
-   * Provide alias for parameter configuration class type for the contained parameter values.
-   */
-  using ParameterConfigType = typename ril::ParameterToConfigType<MessageTypeT>::ConfigType;
+  void connectOutput( CommunicationProtocolBase::Output* port ) override;
 
-  class Output: public ril::ParameterPortBase
-  {
-  public:
-    /**
-     * Default constructor.
-     */
-    explicit Output( std::string const & name, ril::Component & parent )
-     : ParameterPortBase( name, parent, ParameterPortBase::Direction::Output )
-     , mProtocol(nullptr)
-    {}
+  bool disconnectInput( CommunicationProtocolBase::Input* port ) noexcept override;
 
-    MessageType & data()
-    {
-      return mProtocol -> frontData( );
-    }
-
-    void swapBuffers()
-    {
-      mProtocol->swapBuffers();
-    }
-
-    void setProtocolInstance( DoubleBufferingProtocol * protocol )
-    {
-      mProtocol = protocol;
-    }
-    /**
-    * This whould not be accessible from the component.
-    */
-
-    bool isConnected() const override
-    {
-      return mProtocol != nullptr;
-    }
-
-  protected:
-
-  private:
-    DoubleBufferingProtocol * mProtocol;
-  };
-
-  explicit DoubleBufferingProtocol( ril::ParameterConfigBase const & config );
-
-  explicit DoubleBufferingProtocol( ParameterConfigType const & config );
-
-  ril::ParameterType parameterType( ) const override { return ril::ParameterToId<MessageType>::id; }
-
-  virtual ril::CommunicationProtocolType protocolType( ) const override { return ril::CommunicationProtocolType::DoubleBuffering; }
-
-  MessageType & frontData()
-  {
-    return *mFrontData;
-  }
-
-  MessageType const & frontData( ) const
-  {
-    return *mFrontData;
-  }
-
-  MessageType & backData( )
-  {
-    return *mBackData;
-  }
-
-  MessageType const & backData( ) const
-  {
-    return *mBackData;
-  }
-
-  void setData( MessageType const & newData )
-  {
-    *mBackData = newData;
-  }
-
-  void swapBuffers()
-  {
-    mBackData.swap( mFrontData );
-    std::for_each( mInputs.begin(), mInputs.end(), []( Input* port ) { port->markChanged(); } );
-  }
-
-  void connectInput( ril::ParameterPortBase* port ) override;
-
-  void connectOutput( ril::ParameterPortBase* port ) override;
-
-  bool disconnectInput( ril::ParameterPortBase* port ) override;
-
-  bool disconnectOutput( ril::ParameterPortBase* port ) override;
+  bool disconnectOutput( CommunicationProtocolBase::Output* port ) noexcept override;
 
 private:
-  ParameterConfigType const mConfig;
+  ParameterType const mParameterType;
 
-  Output* mOutput;
-  std::vector<Input*> mInputs;
+  std::unique_ptr<ParameterConfigBase> const mConfig;
+
+  OutputBase* mOutput;
+  std::vector<InputBase*> mInputs;
 
   /**
-   * The internal data representation.
-   */
-  std::unique_ptr<MessageTypeT> mBackData;
-  std::unique_ptr<MessageTypeT> mFrontData;
+  * The internal data representation.
+  */
+  std::unique_ptr<ParameterBase> mBackData;
+  std::unique_ptr<ParameterBase> mFrontData;
+
+  static constexpr const char * sProtocolName = "DoubleBuffering";
 };
 
-template< typename MessageTypeT >
-inline DoubleBufferingProtocol< MessageTypeT >::DoubleBufferingProtocol( ril::ParameterConfigBase const & config )
-: DoubleBufferingProtocol( dynamic_cast<ParameterConfigType const &>(config) )
+class DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Input
 {
-}
+  friend class DoubleBufferingProtocol;
+public:
 
-template< typename MessageTypeT >
-inline DoubleBufferingProtocol< MessageTypeT >::DoubleBufferingProtocol( ParameterConfigType const & config )
-  : mConfig( config )
-  , mOutput( nullptr )
-  , mBackData( new MessageTypeT( config ) )
-  , mFrontData( new MessageTypeT( config ) )
-{
-}
+  InputBase();
 
-template< typename MessageTypeT >
-inline void DoubleBufferingProtocol< MessageTypeT >::connectInput( ril::ParameterPortBase* port )
-{
-  DoubleBufferingProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Input *>(port);
-  if( not typedPort )
-  {
-    throw std::invalid_argument( "DoubleBufferingProtocol::connectInput(): port argument has wrong type." );
-  }
-  if( std::find( mInputs.begin( ), mInputs.end( ), typedPort ) == mInputs.end( ) )
-  {
-    mInputs.push_back( typedPort );
-  }
-  typedPort->setProtocolInstance( this );
-}
+  virtual ~InputBase();
 
-template< typename MessageTypeT >
-inline void DoubleBufferingProtocol< MessageTypeT >::connectOutput( ril::ParameterPortBase* port )
-{
-  DoubleBufferingProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Output*>(port);
-  if( not typedPort )
-  {
-    throw std::invalid_argument( "DoubleBufferingProtocol::connectOutput(): port argument has wrong type." );
-  }
-  if( mOutput )
-  {
-    throw std::invalid_argument( "DoubleBufferingProtocol::connectOutput(): output port already set." );
-  }
-  mOutput = typedPort;
-  typedPort->setProtocolInstance( this );
-}
+  ParameterBase const & data() const;
 
-template< typename MessageTypeT >
-inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectInput( ril::ParameterPortBase* port )
-{
-  DoubleBufferingProtocol< MessageTypeT >::Input * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Input *>(port);
-  if( not typedPort )
-  {
-    throw std::invalid_argument( "DoubleBufferingProtocol::connectInput(): port argument has wrong type." );
-  }
-  typename std::vector<Input*>::iterator findIt = std::find( mInputs.begin( ), mInputs.end( ), typedPort );
-  if( findIt == mInputs.end( ) )
-  {
-    return false;
-  }
-  (*findIt)->setProtocolInstance( nullptr );
-  mInputs.erase( findIt );
-  return true;
-}
+  bool changed() const;
 
-template< typename MessageTypeT >
-inline bool DoubleBufferingProtocol< MessageTypeT >::disconnectOutput( ril::ParameterPortBase* port )
+  void resetChanged();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  DoubleBufferingProtocol * getProtocol() override { return mProtocol; }
+
+  DoubleBufferingProtocol const * getProtocol() const override { return mProtocol; }
+
+  void setProtocolInstance( DoubleBufferingProtocol * protocol );
+
+private:
+  void markChanged() { mChanged = true; }
+
+  DoubleBufferingProtocol * mProtocol;
+  bool mChanged;
+};
+
+template<class MessageType>
+class DoubleBufferingProtocol::Input: public InputBase
 {
-  DoubleBufferingProtocol< MessageTypeT >::Output * typedPort = dynamic_cast<DoubleBufferingProtocol< MessageTypeT >::Output *>(port);
-  if( not typedPort )
+  friend class InputBase;
+public:
+  using InputBase::changed;
+
+  using InputBase::resetChanged;
+
+  MessageType const & data() const
   {
-    throw std::invalid_argument( "DoubleBufferingProtocol::disconnectOutput(): port argument has wrong type." );
+    return static_cast<MessageType const&>(InputBase::data());
   }
-  if( typedPort != mOutput )
+
+protected:
+
+private:
+};
+
+//////////////////////////////////////////////////////////////////
+// Output
+
+class DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Output
+{
+  friend class DoubleBufferingProtocol;
+public:
+  OutputBase();
+
+  virtual ~OutputBase();
+
+  ParameterBase & data();
+
+  void setProtocolInstance( CommunicationProtocolBase * protocol ) override;
+
+  DoubleBufferingProtocol * getProtocol() override { return mProtocol; }
+
+  DoubleBufferingProtocol const * getProtocol() const override { return mProtocol; }
+
+  void swapBuffers();
+
+  void setProtocolInstance( DoubleBufferingProtocol * protocol );
+
+private:
+  DoubleBufferingProtocol * mProtocol;
+};
+
+
+template<class MessageType>
+class DoubleBufferingProtocol::Output: public OutputBase
+{
+public:
+  using OutputBase::swapBuffers;
+
+  MessageType & data()
   {
-    // Trying to disconnect a port that is not the previously connected output
-    return false;
+    return static_cast<MessageType&>(mProtocol->frontData());
   }
-  mOutput->setProtocolInstance( this );
-  mOutput = nullptr;
-  return true;
-}
+};
 
 } // namespace pml
 } // namespace visr
 
-DEFINE_COMMUNICATION_PROTOCOL_TYPE( visr::pml::DoubleBufferingProtocol, visr::ril::CommunicationProtocolType::DoubleBuffering )
+DEFINE_COMMUNICATION_PROTOCOL( visr::pml::DoubleBufferingProtocol, visr::pml::DoubleBufferingProtocol::staticType(), visr::pml::DoubleBufferingProtocol::staticName() )
 
 #endif // VISR_PML_DOUBLE_BUFFERING_PROTOCOL_HPP_INCLUDED

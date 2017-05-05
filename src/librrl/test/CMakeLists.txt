@@ -4,11 +4,16 @@ SET( APPLICATION_NAME rrl_test )
 
 SET( SOURCES
 audio_signal_flow_checking.cpp
+delay_vector.cpp
+parameter_connection.cpp
 test_main.cpp
 )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
+# Note: Consider moving delay_vector somewhere else (if dependency on real component libraries is not desired here.)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} signalflows )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rrl )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_impl )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml )

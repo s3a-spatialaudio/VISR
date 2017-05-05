@@ -18,14 +18,16 @@ namespace pml
 
 /**
  */
-class StringParameterConfig: public ril::ParameterConfigBase
+class StringParameterConfig: public ParameterConfigBase
 {
 public:
   explicit StringParameterConfig( std::size_t maxLength );
 
   virtual ~StringParameterConfig();
 
-  bool compare( ril::ParameterConfigBase const & rhs ) const override;
+  std::unique_ptr< ParameterConfigBase > clone() const override;
+
+  bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( StringParameterConfig const & rhs ) const;
 

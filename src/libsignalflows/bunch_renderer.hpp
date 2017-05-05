@@ -26,7 +26,7 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class BunchRenderer: public ril::CompositeComponent
+class BunchRenderer: public CompositeComponent
 {
 public:
   /**
@@ -49,14 +49,14 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit BunchRenderer( ril::SignalFlowContext & context,
+  explicit BunchRenderer( SignalFlowContext const & context,
                              char const * name,
-                             ril::CompositeComponent * parent,
+                             CompositeComponent * parent,
                              panning::LoudspeakerArray const & loudspeakerConfiguration,
                              std::size_t numberOfInputs,
                              std::size_t numberOfOutputs,
                              std::size_t interpolationPeriod,
-                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                             efl::BasicMatrix<SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
                              std::string const & reverbConfig );
@@ -70,8 +70,8 @@ private:
 
   CoreRenderer mCoreRenderer;
 
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

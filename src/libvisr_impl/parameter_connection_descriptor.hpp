@@ -1,15 +1,16 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
-#define VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#ifndef VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#define VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
 #include <set>
 
 namespace visr
 {
-namespace ril
+
+namespace impl
 {
-class ParameterPortBase;
+class ParameterPortBaseImplementation;
 
 #if 0
 struct ParameterPortDescriptor
@@ -47,24 +48,23 @@ public:
   {
   }
 
-  ParameterConnection( ParameterPortBase * pSender,
-                       ParameterPortBase * pReceiver );
+  ParameterConnection( ParameterPortBaseImplementation * pSender,
+                       ParameterPortBaseImplementation * pReceiver );
 
   bool operator<( ParameterConnection const & rhs ) const;
 
-  ParameterPortBase * sender() const { return mSender; }
-  ParameterPortBase * receiver() const { return mReceiver; }
+  ParameterPortBaseImplementation * sender() const { return mSender; }
+  ParameterPortBaseImplementation * receiver() const { return mReceiver; }
 
 
 private:
-  ParameterPortBase * mSender;
-  ParameterPortBase * mReceiver;
+  ParameterPortBaseImplementation * mSender;
+  ParameterPortBaseImplementation * mReceiver;
 };
 
-// using ParameterConnectionTable = std::multimap<ParameterPortDescriptor, ParameterPortDescriptor >;
 using ParameterConnectionTable = std::multiset<ParameterConnection>;
 
-} // namespace ril
+} // namespace impl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRIL_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
+#endif // #ifndef VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED

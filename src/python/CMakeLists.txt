@@ -9,3 +9,7 @@ ADD_SUBDIRECTORY( rcl )
 ADD_SUBDIRECTORY( rrl )
 
 ADD_SUBDIRECTORY( pml )
+
+ADD_SUBDIRECTORY( objectmodel )
+
+add_subdirectory( reverbobject )

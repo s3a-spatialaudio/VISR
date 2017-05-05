@@ -20,9 +20,9 @@ namespace visr
 namespace rcl
 {
 
-  DiffusionGainCalculator::DiffusionGainCalculator( ril::SignalFlowContext& context,
+  DiffusionGainCalculator::DiffusionGainCalculator( SignalFlowContext const & context,
                                                     char const * name,
-                                                    ril::CompositeComponent * parent /*= nullptr*/ )
+                                                    CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )
   , mNumberOfObjectChannels( 0 )
   , mObjectVectorInput( "objectInput", *this, pml::EmptyParameterConfig() )
@@ -36,7 +36,7 @@ DiffusionGainCalculator::~DiffusionGainCalculator()
 void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
-  mGainOutput.reset( new ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
+  mGainOutput.reset( new ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
     ( "gainOutput", *this, pml::MatrixParameterConfig( 1, numberOfObjectChannels ) ) );
 }
 
@@ -59,9 +59,9 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
     objectmodel::Object const & obj = *(objEntry.second);
+    // Pre-check to handle only monaural objects here. The fine-grained disambiguation between supported object types happens later.
     if( obj.numberOfChannels() != 1 )
     {
-      std::cerr << "DiffusionGainCalculator: Only monaural object types are supported at the moment." << std::endl;
       continue;
     }
     objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
@@ -80,13 +80,13 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
     {
     case objectmodel::ObjectTypeId::DiffuseSource:
     {
-      gains[channelId] = obj.level();
+      gains[channelId] = 1.0f;
       break;
     }
     case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
     {
       objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-      gains[channelId] = psdSrc.diffuseness() * psdSrc.level();
+      gains[channelId] = psdSrc.diffuseness();
       break;
     }
     default:

@@ -3,37 +3,79 @@
 #include <libril/communication_protocol_factory.hpp>
 
 #include <libril/communication_protocol_type.hpp>
+#include <libril/detail/compose_message_string.hpp>
 #include <libril/parameter_type.hpp>
 
-// evil hack: Dependency to libpml
-// TODO: add first concrete communication protocol class.
-#include <libpml/double_buffering_protocol.hpp>
-#include <libpml/message_queue_protocol.hpp>
-#include <libpml/shared_data_protocol.hpp>
-
-#include <libpml/matrix_parameter.hpp>
-#include <libpml/object_vector.hpp>
-#include <libpml/string_parameter.hpp>
-#include <libpml/time_frequency_parameter.hpp>
-#include <libpml/vector_parameter.hpp>
-
+#include <algorithm>
+#include <ciso646>
+#include <cstring>
 #include <stdexcept>
+#include <string>
 
 namespace visr
 {
-namespace ril
-{
 
-CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn )
- : mCreateFunction( fcn )
+void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationProtocolType type, Creator && creator )
 {
+  CreatorTable & table = creatorTable();
+  auto const findIt = table.find( type );
+  
+  if( findIt != table.cend() )
+  {
+    throw std::invalid_argument( std::string("CommunicationProtocolFactory: Entry for protocol type \"") + findIt->second.name() + "\" already exists." );
+  }
+
+  auto const findNameIt = std::find_if( table.begin(), table.end(), [creator]( CreatorTable::value_type const & val ){ return val.second.name() == creator.name(); } );
+  if( findNameIt != table.cend() )
+  {
+    throw std::invalid_argument( std::string( "CommunicationProtocolFactory: Protocol name\"") +  creator.name() +  "\" already used for different protocol type." );
+  }
+
+
+  auto const res = table.insert( std::make_pair( type, creator ) );
+  if( not res.second)
+  {
+    throw std::invalid_argument( "CommunicationProtocolFactory: Error while registering protocol type." );
+
+  }
+}
+
+CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn, 
+                                                InputCreateFunction inputCreator,
+                                                OutputCreateFunction outputCreator,
+                                                char const * name )
+ : mCreateFunction( fcn )
+ , mInputCreateFunction( inputCreator )
+ , mOutputCreateFunction( outputCreator )
+ , mName( name )
+{
+}
+
+CommunicationProtocolFactory::Creator::~Creator() = default;
+
+std::string const & CommunicationProtocolFactory::Creator::name() const
+{
+  return mName;
 }
 
 std::unique_ptr<CommunicationProtocolBase >
-CommunicationProtocolFactory::Creator::create( ParameterConfigBase const & config ) const
+CommunicationProtocolFactory::Creator::createProtocol( ParameterType const & paramType, ParameterConfigBase const & config ) const
 {
-  return std::unique_ptr< CommunicationProtocolBase >( mCreateFunction( config ) );
+  return mCreateFunction( paramType, config );
 }
+
+std::unique_ptr<CommunicationProtocolBase::Input> 
+CommunicationProtocolFactory::Creator::createInput() const
+{
+  return mInputCreateFunction();
+}
+
+std::unique_ptr<CommunicationProtocolBase::Output> 
+CommunicationProtocolFactory::Creator::createOutput() const
+{
+  return mOutputCreateFunction();
+}
+
 
 /*static*/ CommunicationProtocolFactory::CreatorTable &
 CommunicationProtocolFactory::creatorTable()
@@ -43,46 +85,80 @@ CommunicationProtocolFactory::creatorTable()
 }
 
 /*static*/ std::unique_ptr<CommunicationProtocolBase>
-CommunicationProtocolFactory::create( CommunicationProtocolType const & protocolType,
-                                      ParameterType const & parameterType,
-                                      ParameterConfigBase const & config )
+CommunicationProtocolFactory::createProtocol( CommunicationProtocolType const & protocolType,
+                                              ParameterType const & parameterType,
+                                              ParameterConfigBase const & config )
 {
   CreatorTable::const_iterator findIt
-    = creatorTable().find( std::make_pair( protocolType, parameterType ) );
+    = creatorTable().find( protocolType );
   if( findIt == creatorTable().end() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+    throw std::out_of_range( "CommunicationProtocolFactory: No creator function for requested parameter type " );
   }
   // todo: Need to catch construction errors?
-  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.create( config ) );
+  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.createProtocol( parameterType, config ) );
 }
 
-static struct InstantiateCommunicationProtocolCreators
+/*static*/ std::unique_ptr<CommunicationProtocolBase::Input> 
+CommunicationProtocolFactory::createInput( CommunicationProtocolType const & protocolType )
 {
-  // todo: Add instantiations
-  InstantiateCommunicationProtocolCreators()
+  CreatorTable::const_iterator findIt
+    = creatorTable().find( protocolType );
+  if( findIt == creatorTable().end() )
   {
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::MatrixFloat );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::MatrixDouble );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::MessageQueueProtocol< pml::StringParameter > >( ril::CommunicationProtocolType::MessageQueue, ril::ParameterType::String );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::MatrixFloat );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::MatrixDouble );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::ObjectVector> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::ObjectVector );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::StringParameter> >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::String );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::TimeFrequencyParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::TimeFrequencyFloat );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::TimeFrequencyParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::TimeFrequencyDouble );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorDouble );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<float> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorFloat );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::SharedDataProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::SharedData, ril::ParameterType::VectorDouble );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::MatrixParameter<float> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::MatrixFloat );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::MatrixParameter<double> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::MatrixDouble );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::ObjectVector> >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::ObjectVector );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::StringParameter> >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::String );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<float> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::VectorFloat );
-    CommunicationProtocolFactory::registerCommunicationProtocolType< pml::DoubleBufferingProtocol< pml::VectorParameter<double> > >( ril::CommunicationProtocolType::DoubleBuffering, ril::ParameterType::VectorDouble );
+    throw std::out_of_range( "CommunicationProtocolFactory: No creator function for requested parameter type " );
   }
-} // ; InstantiateCommunicationProtocolCreators const
-cInstantiateCommunicationProtocolCreators;
+  // todo: Need to catch construction errors?
+  return std::unique_ptr<CommunicationProtocolBase::Input>( findIt->second.createInput() );
+}
 
-} // namespace ril
+/*static*/ std::unique_ptr<CommunicationProtocolBase::Output> 
+CommunicationProtocolFactory::createOutput( CommunicationProtocolType const & protocolType )
+{
+  CreatorTable::const_iterator findIt
+    = creatorTable().find( protocolType );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::out_of_range( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+  }
+  // todo: Need to catch construction errors?
+  return std::unique_ptr<CommunicationProtocolBase::Output>( findIt->second.createOutput() );
+}
+
+
+/*static*/ std::size_t CommunicationProtocolFactory::numberOfProtocols() noexcept
+{
+  return creatorTable().size();
+}
+
+/*static*/ CommunicationProtocolType
+CommunicationProtocolFactory::typeFromName( char const * name )
+{
+  auto const findIt = std::find_if( creatorTable().begin(), creatorTable().end(),
+   [name](CreatorTable::value_type const & entry ){ return std::strcmp(entry.second.name().c_str(), name ) == 0; } );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::out_of_range( "CommunicationProtocolFactory: No protocol with the given name is registered." );
+  }
+  return findIt->first;
+}
+
+/*static*/ std::string 
+CommunicationProtocolFactory::typeToName( CommunicationProtocolType type )
+{
+  auto const findIt = creatorTable().find( type );
+  if( findIt == creatorTable().end() )
+  {
+    throw std::out_of_range( "CommunicationProtocolFactory: Requested protocol type not registered." );
+  }
+  return findIt->second.name();
+}
+
+/*static*/ bool
+CommunicationProtocolFactory::typeExists( CommunicationProtocolType type ) noexcept
+{
+  return creatorTable().find( type ) != creatorTable().end();
+}
+
+
 } // namespace visr

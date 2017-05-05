@@ -4,9 +4,8 @@
 
 namespace visr
 {
-namespace ril
-{
 
+#if 0
 PortBase::PortBase( std::string const & name, Component & container, Direction direction )
  : mName( name )
  , mParentComponent( container )
@@ -17,6 +16,5 @@ PortBase::PortBase( std::string const & name, Component & container, Direction d
 PortBase::~PortBase()
 {
 }
-
-} // namespace ril
+#endif
 } // namespace visr

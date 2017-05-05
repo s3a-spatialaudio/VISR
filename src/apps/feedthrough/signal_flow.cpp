@@ -12,34 +12,24 @@ namespace apps
 namespace feedthrough
 {
 
-Feedthrough::Feedthrough( ril::SignalFlowContext & context,
+Feedthrough::Feedthrough( SignalFlowContext & context,
                           char const * name,
-                          ril::CompositeComponent * parent )
+                          CompositeComponent * parent )
  : CompositeComponent( context, name, parent )
- , mInput( "input", *this )
- , mOutput( "output", *this )
- , mSum( context, "Add", this )
+ , mInput( "input", *this, 2 )
+ , mOutput( "output", *this, 2 )
+ , mSum( context, "Add", this, 2, 2 )
 {
-  mInput.setWidth( 2 );
-  mOutput.setWidth( 2 );
-  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
-
-  registerAudioConnection( parent->name(), "input", ril::AudioChannelIndexVector{ 0, 1 },
-                           "Add", "input0", ril::AudioChannelIndexVector{ 0, 1 } );
-  registerAudioConnection( parent->name( ), "input", ril::AudioChannelIndexVector{ 0, 1 },
-                           "Add", "input1", ril::AudioChannelIndexVector{ 1, 0 } );
-  registerAudioConnection( "Add", "output", ril::AudioChannelIndexVector{ 0, 1 },
-                           parent->name( ), "output", ril::AudioChannelIndexVector{ 0, 1 } );
+  audioConnection( mInput, {0,1},
+                   mSum.audioPort( "input0" ), { 0, 1 } );
+  audioConnection( mInput, { 0, 1 },
+                   mSum.audioPort( "input0" ), { 1, 0 } );
+  audioConnection( mSum.audioPort( "output"), { 0, 1 },
+                   mOutput, { 0, 1 } );
 }
 
 Feedthrough::~Feedthrough( )
 {
-}
- 
-/*virtual*/ void 
-Feedthrough::process()
-{
-  mSum.process();
 }
 
 } // namespace feedthrough

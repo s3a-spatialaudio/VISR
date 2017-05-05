@@ -1,13 +1,12 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
-#define VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
+#ifndef VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED
+#define VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED
 
 #include "parameter_base.hpp"
+#include "parameter_type.hpp"
 
 namespace visr
-{
-namespace ril
 {
 
 // Forward declarations
@@ -18,7 +17,9 @@ class ParameterConfig;
  *
  *
  */
-template<class ParameterConfigT, ParameterType TypeT >
+template< typename ConcreteParameterType,
+          class ParameterConfigT,
+          ParameterType typeId >
 class TypedParameterBase: public ParameterBase
 {
 public:
@@ -33,18 +34,28 @@ public:
    */
   virtual ~TypedParameterBase() {}
 
-  virtual ParameterType type() override
+  static const constexpr ParameterType staticType()
   {
-    return TypeT;
+    return typeId;
   }
+
+  /*virtual*/ ParameterType type() final
+  {
+    return staticType();
+  }
+
+  /*virtual*/ std::unique_ptr<ParameterBase> clone() const final
+  {
+    return std::unique_ptr<ParameterBase>(
+      new ConcreteParameterType(static_cast<ConcreteParameterType const &>(*this) ) );
+  }
+
 };
 
-} // namespace ril
 } // namespace visr
 
 // TODO: Check whether we can provide the lookup template specializations
 // ParameterToId, IdToParameter, and ParameterToConfigType for all types here.
 // Problem: We do not see the derived type here, only the base of the actual parameter type.
-// TODO: Is this a place for the Coriously Recurring Template Pattern?
 
-#endif // #ifndef VISR_LIBRIL_TYPED_PARAMETER_BASE_HPP_INCLUDED
+#endif // #ifndef VISR_TYPED_PARAMETER_BASE_HPP_INCLUDED

@@ -4,25 +4,35 @@
 
 #include "audio_connection_map.hpp"
 #include "communication_area.hpp"
+#include "integrity_checking.hpp"
 #include "parameter_connection_graph.hpp"
 #include "parameter_connection_map.hpp"
 #include "port_utilities.hpp"
 #include "scheduling_graph.hpp"
 
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
+#include "signal_routing_internal.hpp"
+
+#include <libefl/alignment.hpp>
+#include <libefl/vector_functions.hpp>
+
 #include <libril/atomic_component.hpp>
-#include <libril/composite_component.hpp>
+#include <libril/audio_sample_type.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/communication_protocol_type.hpp>
-#include <libril/parameter_port_base.hpp>
+#include <libril/detail/compose_message_string.hpp>
+
 
 #include <libvisr_impl/audio_connection_descriptor.hpp>
-#include <libvisr_impl/component_internal.hpp>
+#include <libvisr_impl/audio_port_base_implementation.hpp>
+#include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <ciso646>
 #include <functional>
 #include <iostream>
@@ -37,12 +47,12 @@ namespace visr
 namespace rrl
 {
 
-AudioSignalFlow::AudioSignalFlow( ril::Component & flow )
- : mFlow( flow )
+AudioSignalFlow::AudioSignalFlow( Component & flow )
+ : mFlow( flow.implementation() )
  , mInitialised( false )
 {
   std::stringstream checkMessages;
-  bool const checkResult = checkFlow( mFlow, true, checkMessages );
+  bool const checkResult = checkConnectionIntegrity( mFlow, true/* hierarchical*/, checkMessages );
   if( not checkResult )
   {
     // TODO: Devise other ways to transport messages.
@@ -50,20 +60,42 @@ AudioSignalFlow::AudioSignalFlow( ril::Component & flow )
     throw std::runtime_error( "Signal flow graph is inconsistent." );
   }
   checkMessages.clear();
-  bool const initAudioResult = initialiseAudioConnections( checkMessages );
+
+  // TODO: homogenise interfaces between parameter and audio connection maps.
+  AudioConnectionMap const originalAudioConnections( mFlow, true );
+  AudioConnectionMap const flatAudioConnections = originalAudioConnections.resolvePlaceholders();
+
+  ParameterConnectionMap originalParameterConnections;
+  if( not fillRecursive( originalParameterConnections, mFlow, checkMessages ) )
+  {
+    throw std::runtime_error(checkMessages.str() );
+  }
+  ParameterConnectionMap const flatParameterConnections = resolvePlaceholders( originalParameterConnections );
+
+  AudioConnectionMap adjustedAudioConnections;
+  bool const initAudioResult = initialiseAudioConnections( checkMessages, flatAudioConnections,
+                                                           adjustedAudioConnections);
   if( not initAudioResult )
   {
     // TODO: Devise other ways to transport messages.
     std::cout << "Messages during audio initialisation: " << checkMessages.str() << std::endl;
     throw std::runtime_error( "AudioSignalFlow: Audio connections could not be initialised." );
   }
-  bool const initParamResult = initialiseParameterInfrastructure( checkMessages );
+
+
+  ParameterConnectionMap adjustedParameterConnections;
+  bool const initParamResult = initialiseParameterInfrastructure( checkMessages, flatParameterConnections,
+                                                                  adjustedParameterConnections);
   if( not initParamResult )
   {
     std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
     throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
   }
-  bool const initScheduleResult = initialiseSchedule( checkMessages );
+
+
+
+  // TODO: Use the full list of components 
+  bool const initScheduleResult = initialiseSchedule( checkMessages, adjustedAudioConnections, adjustedParameterConnections );
   if( not initScheduleResult )
   {
     std::cout << "Messages during schedule computation: " << checkMessages.str() << std::endl;
@@ -76,78 +108,118 @@ AudioSignalFlow::~AudioSignalFlow()
 {
 }
 
-// todo: make this method protected?
-void AudioSignalFlow::initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
-                                    std::size_t alignmentElements /* = cVectorAlignmentSamples */ )
+std::size_t AudioSignalFlow::period() const
 {
-  mCommArea.reset( new rrl::CommunicationArea<ril::SampleType>( numberOfSignals, signalLength, alignmentElements ) );
+  return mFlow.period();
 }
 
 /*static*/ void 
 AudioSignalFlow::processFunction( void* userData,
-                                  ril::SampleType const * const * captureSamples,
-                                  ril::SampleType * const * playbackSamples,
+                                  SampleType const * const * captureSamples,
+                                  SampleType * const * playbackSamples,
                                   AudioInterface::CallbackResult& callbackResult )
 {
   AudioSignalFlow* flowObj = reinterpret_cast<AudioSignalFlow*>( userData );
-  flowObj->processInternal( captureSamples, playbackSamples, callbackResult );
+  callbackResult = flowObj->process( captureSamples, playbackSamples );
 }
 
-void 
-AudioSignalFlow::processInternal( ril::SampleType const * const * captureSamples,
-                                  ril::SampleType * const * playbackSamples,
-                                  AudioInterface::CallbackResult& callbackResult )
+
+AudioInterface::CallbackResult
+AudioSignalFlow::process( SampleType const * const * captureSamples,
+                          SampleType * const * playbackSamples )
 {
   // TODO: It needs to be checked beforehand that the widths of the input and output signal vectors match.
-
-  // fill the capture part of the communication area.
-  std::size_t const numCaptureChannels = numberOfCaptureChannels();
-  for( std::size_t captureIdx( 0 ); captureIdx < numCaptureChannels; ++captureIdx )
+#if 1
+  // This assumes that all capture ports have the default sample type "SampleType"
+  for( std::size_t chIdx( 0 ); chIdx < numberOfCaptureChannels(); ++chIdx )
   {
-    ril::SampleType * const destPtr = mCommArea->at( mCaptureIndices[captureIdx] );
-    // Note: We cannot assume an alignment as we don't know the alignment of the passed captureSamples.
-    // TODO: Add optional argument to the AudioCallback interface to signal the alignment of the input and output samples.
-    efl::ErrorCode const res = efl::vectorCopy( captureSamples[captureIdx], destPtr, mFlow.period(), 0 );
+    SampleType * chPtr = reinterpret_cast<SampleType*>(mCaptureChannels[chIdx]);
+    efl::ErrorCode const res = efl::vectorCopy( captureSamples[chIdx], chPtr, mFlow.period(), 0 );
     if( res != efl::noError )
     {
       throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
     }
   }
-
-  // call the process() method of the derived class to perform the specific processing.
-  // TODO: would this be the appropriate place to catch all exceptions called during the rendering?
+#else
+  // TODO: Checking should be done during initialisation.
+  if( mTopLevelAudioInputs.size() > 1 )
+  {
+    throw std::runtime_error( "AudioSignalFlow::process(): At the moment at most one top-level audio input is allowed." );
+  }
+  if( mTopLevelAudioOutputs.size() > 1 )
+  {
+    throw std::runtime_error( "AudioSignalFlow::process(): At the moment at most one top-level audio output is allowed." );
+  }
+  if( not mTopLevelAudioInputs.empty() )
+  {
+    impl::AudioPortBaseImplementation & input = *mTopLevelAudioInputs[0];
+    if( input.sampleType() != AudioSampleType::TypeToId<SampleType>::id )
+    {
+      throw std::runtime_error( "AudioSignalFlow::process(): The sample type of the top-level audio input differs from the input sample type." );
+    }
+    std::size_t const width{ input.width() };
+    SampleType * const basePointer{  static_cast<SampleType*>(input.basePointer()) };
+    std::size_t const channelStride{ input.channelStrideSamples() };
+    for( std::size_t chIdx(0); chIdx < width; ++chIdx )
+    {
+      SampleType * const chPtr = basePointer + chIdx * channelStride;
+      efl::ErrorCode const res = efl::vectorCopy( captureSamples[chIdx], chPtr, mFlow.period(), 0 );
+      if( res != efl::noError )
+      {
+        throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
+      }
+    }
+  }
+#endif
   try
   {
     executeComponents();
   }
   catch( std::exception const & ex )
   {
-    // TODO: Add error message to ex.what()
-    throw ex;
+    throw( std::string( "Error during execution of processing schedule: ") + ex.what() );
+    return 1;
   }
-
-  // collect the generated output from the playback part of the communication area and 
-  // fill the playbackSamples accordingly.
-  std::size_t const numPlaybackChannels = numberOfPlaybackChannels( );
-  for( std::size_t playbackIdx( 0 ); playbackIdx < numPlaybackChannels; ++playbackIdx )
+#if 1
+  // This assumes that all capture ports have the default sample type "SampleType"
+  for( std::size_t chIdx( 0 ); chIdx < numberOfPlaybackChannels(); ++chIdx )
   {
-    ril::SampleType const * const srcPtr = mCommArea->at( mPlaybackIndices[playbackIdx] );
-    // Note: We cannot assume an alignment as we don't know the alignment of the passed playbackSamples.
-    // TODO: Add optional argument to the AudioCallback interface to signal the alignment of the input and output samples.
-    efl::ErrorCode const res = efl::vectorCopy( srcPtr, playbackSamples[playbackIdx], mFlow.period(), 0 );
+    SampleType const * chPtr = reinterpret_cast<SampleType const*>(mPlaybackChannels[chIdx]);
+    efl::ErrorCode const res = efl::vectorCopy( chPtr, playbackSamples[chIdx], mFlow.period(), 0 );
     if( res != efl::noError )
     {
       throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
     }
   }
-
+#else
+  if( not mTopLevelAudioOutputs.empty() )
+  {
+    impl::AudioPortBaseImplementation const & output = *mTopLevelAudioOutputs[0];
+    if( output.sampleType() != AudioSampleType::TypeToId<SampleType>::id )
+    {
+      throw std::runtime_error( "AudioSignalFlow::process(): The sample type of the top-level audio output differs from the input sample type." );
+    }
+    std::size_t const width{ output.width() };
+    SampleType const * const basePointer{ static_cast<SampleType const* const>(output.basePointer()) };
+    std::size_t const channelStride{ output.channelStrideSamples() };
+    for( std::size_t chIdx( 0 ); chIdx < width; ++chIdx )
+    {
+      SampleType const * const chPtr = basePointer + chIdx * channelStride;
+      efl::ErrorCode const res = efl::vectorCopy( chPtr, playbackSamples[chIdx], mFlow.period(), 0 );
+      if( res != efl::noError )
+      {
+        throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
+      }
+    }
+  }
+#endif
   // TODO: use a sophisticated enumeration to signal error conditions
-  callbackResult = 0; // Means 'no error'
+  return 0; // Means 'no error'
 }
 
 void AudioSignalFlow::executeComponents()
 {
-  for( ril::ProcessableInterface * pc : mProcessingSchedule )
+  for( AtomicComponent * pc : mProcessingSchedule )
   {
     try
     {
@@ -156,7 +228,7 @@ void AudioSignalFlow::executeComponents()
     catch( std::exception const & ex )
     {
       // TODO: Retrieve information about current object and add it to the exception message
-      // TODO: Consider adding a name() function to ril::ProcessableInterface
+      // TODO: Consider adding a name() function to ProcessableInterface
       throw std::runtime_error( std::string("Exception while executing audio signal flow: ") + ex.what() );
     }
   }
@@ -176,7 +248,7 @@ std::size_t AudioSignalFlow::numberOfAudioPlaybackPorts() const
 * Return the name of the capture port indexed by \p idx
 * @throw std::out_of_range If the \p idx exceeds the number of capture ports.
 */
-std::string const & AudioSignalFlow::audioCapturePortName( std::size_t idx ) const
+char const * AudioSignalFlow::audioCapturePortName( std::size_t idx ) const
 {
   if( idx >= numberOfAudioCapturePorts() )
   {
@@ -189,7 +261,7 @@ std::string const & AudioSignalFlow::audioCapturePortName( std::size_t idx ) con
 * Return the name of the playback port indexed by \p idx
 * @throw std::out_of_range If the \p idx exceeds the number of playback ports.
 */
-std::string const & AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
+char const * AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
 {
   if( idx >= numberOfAudioPlaybackPorts( ) )
   {
@@ -204,7 +276,7 @@ std::size_t AudioSignalFlow::numberOfCaptureChannels() const
   {
     throw std::logic_error( "AudioSignalFlow::captureWidth() must be called only after initalisation of the object is complete." );
   }
-  return mCaptureIndices.size();
+  return mCaptureChannels.size();
 }
 
 std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
@@ -213,58 +285,53 @@ std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
   {
     throw std::logic_error( "AudioSignalFLow::playbackWidth() must be called only after initalisation of the object is complete." );
   }
-  return mPlaybackIndices.size();
+  return mPlaybackChannels.size();
 }
 
-// This method is not used at the moment.
-// TODO: Consider removal
-#if 0
-bool AudioSignalFlow::initialise( std::ostream & messages )
-{
-  if( not mFlow.isTopLevel() )
-  { 
-    messages << "the component is not a top-level element of a flow.";
-    return false;
-  }
-  if( not mFlow.isComposite() )
-  {
-    ril::AtomicComponent& atom = static_cast<ril::AtomicComponent&>(mFlow);
-    mProcessingSchedule.push_back( std::move( &atom ) );
-  }
-  else
-  {
-    ril::CompositeComponent & topLevel = dynamic_cast<ril::CompositeComponent&>(mFlow);
-    // for( ril::CompositeComponent::Co)
-
-
-  }
-  return true;
-}
-#endif
-
-bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages )
+bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections )
 {
   bool result = true;
   mCommunicationProtocols.clear();
   if( not mFlow.isComposite() )
   {
-    // If the flow is not composite, we also have to initialise the top-level parameter ports.
+    // TODO: Maybe move to a specific method for atomic flows
+    for( auto paramPort : mFlow.parameterPorts() )
+    {
+      visr::ParameterType const paramType = paramPort->parameterType();
+      CommunicationProtocolType const protocol = paramPort->protocolType();
+      ParameterConfigBase const & paramConfig = paramPort->parameterConfig();
+      std::unique_ptr<CommunicationProtocolBase> protocolInstance
+        = CommunicationProtocolFactory::createProtocol( protocol, paramType, paramConfig );
+      if( not protocolInstance )
+      {
+        messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
+        result = false;
+      }
+      if( paramPort->direction() == PortBase::Direction::Input )
+      {
+        std::unique_ptr<CommunicationProtocolBase::Output> protocolOutput = CommunicationProtocolFactory::createOutput( protocol );
+	// TODO: Do we need to care for failing dynamic_casts (this would be a logical error).
+        ParameterInputBase & paramInput = dynamic_cast<ParameterInputBase&>(paramPort->containingPort());
+        protocolInstance->connectInput( &(paramInput.protocolInput()) );
+        protocolInstance->connectOutput( protocolOutput.get() );
+        ProtocolReceiveEndpoints::value_type insertPair{ std::string( paramPort->name() ), std::move( protocolOutput ) };
+        mProtocolReceiveEndpoints.insert( std::move( insertPair ) );
+      }
+      else
+      {
+        std::unique_ptr<CommunicationProtocolBase::Input> protocolInput = CommunicationProtocolFactory::createInput( protocol );
+        ParameterOutputBase & paramOutput = dynamic_cast<ParameterOutputBase&>(paramPort->containingPort());
+        protocolInstance->connectOutput( &(paramOutput.protocolOutput()) );
+        protocolInstance->connectInput( protocolInput.get() );
+        ProtocolSendEndpoints::value_type insertPair{ std::string( paramPort->name() ), std::move( protocolInput ) };
+        mProtocolSendEndpoints.insert( std::move( insertPair ) );
+      }
+      mCommunicationProtocols.push_back( std::move( protocolInstance ) );
+    }
     return result;
   }
-  // - Recursively iterate over all composite components
-  // - Collect all parameter ports (concrete and placeholders) in containers.
-  // - Collect all connections and store them in a lookup map.
-  // - Infer all connections from the receive end to check whether they contain no loops.
-  ParameterConnectionMap allConnections;
-  bool res = fillRecursive( allConnections, mFlow, messages );
-  if( not res )
-  {
-    messages << "AudioSignalFlow: Parameter connections are inconsistent.\n";
-    return false;
-  }
-  ParameterConnectionMap realConnections = resolvePlaceholders( allConnections );
-
-  ParameterConnectionGraph const connectionGraph( realConnections );
+  // Composite component case starts here.
+  ParameterConnectionGraph const connectionGraph( originalConnections );
   for( ParameterConnectionGraph::ConnectedPorts const & connection : connectionGraph.connectedPorts() )
   {
     // First check the connection topology.
@@ -282,8 +349,13 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       result = false;
     }
 
+    if( numSenders < 1 )
+    {
+      continue;
+    }
+
     // Use one port as reference, all other ports in this connection must have compatible porotocols and parameters.
-    ril::ParameterPortBase const * refPort = connection.sendPorts()[0];
+    impl::ParameterPortBaseImplementation const * refPort = connection.sendPorts()[0];
     // We checked before that connection.sendPorts() is not empty.
     // Don't check against the first port which is the reference.
     for( auto portIt( ++connection.sendPorts().begin() ); portIt < connection.sendPorts().end(); ++portIt )
@@ -306,11 +378,11 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     }
     try
     {
-      ril::ParameterType const paramType = refPort->parameterType();
-      ril::CommunicationProtocolType const protocol = refPort->protocolType();
-      ril::ParameterConfigBase const & paramConfig = refPort->parameterConfig();
-      std::unique_ptr<ril::CommunicationProtocolBase> protocolInstance
-        = ril::CommunicationProtocolFactory::create( protocol, paramType, paramConfig );
+      visr::ParameterType const paramType = refPort->parameterType();
+      CommunicationProtocolType const protocol = refPort->protocolType();
+      ParameterConfigBase const & paramConfig = refPort->parameterConfig();
+      std::unique_ptr<CommunicationProtocolBase> protocolInstance
+        = CommunicationProtocolFactory::createProtocol( protocol, paramType, paramConfig );
       if( not protocolInstance )
       {
         messages << "AudioSignalFlow: Could not instantiate communication protocol for parameter connection.\n";
@@ -318,15 +390,56 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       }
       // Connect to all ports of the connection.
       // This will also fail if the connection does not match the arity (one-to-one, one-to-many ...) of the protocol
-      for( auto portIt( connection.sendPorts().begin() ); portIt < connection.sendPorts().end(); ++portIt )
+      for( auto port : connection.sendPorts() )
       {
-        protocolInstance->connectOutput( *portIt );
+        if( port->parent().isTopLevel() ) // Whether this is 'symbolic' input on the top level.
+        {
+          // This is a toplevel parameter input. We need to create a communication protocol output port for that.
+          // TODO: Improve exception safety!
+          std::unique_ptr<CommunicationProtocolBase::Output> protocolOutput = CommunicationProtocolFactory::createOutput( protocol );
+          protocolInstance->connectOutput( protocolOutput.get() );
+          ProtocolReceiveEndpoints::value_type insertPair{ std::string(port->name()), std::move(protocolOutput) };
+          mProtocolReceiveEndpoints.insert( std::move(insertPair) );
+        }
+        else
+        {
+          try
+          {
+            ParameterOutputBase & paramOutput = dynamic_cast<ParameterOutputBase&>(port->containingPort());
+            protocolInstance->connectOutput( &(paramOutput.protocolOutput()) );
+          }
+          catch( std::exception const & ex )
+          {
+            result = false;
+            messages << "Error connection protocol output to output port \"" << fullyQualifiedName( *port )
+                     << "\": " << ex.what() << ".\n";
+          }
+        }
       }
-      for( auto portIt( connection.receivePorts().begin() ); portIt < connection.receivePorts().end(); ++portIt )
+      for( auto port: connection.receivePorts() )
       {
-        protocolInstance->connectInput( *portIt );
+        if( port->parent().isTopLevel() ) // Whether this is 'symbolic' output on the top level.
+        {
+          // This is a toplevel parameter output. We need to create a communication protocol input port for that.
+          // TODO: Improve exception safety!
+          auto protocolIt = mProtocolSendEndpoints.insert( std::make_pair( port->name(), CommunicationProtocolFactory::createInput( protocol ) ) );
+          protocolInstance->connectInput( protocolIt.first->second.get() );
+        }
+        else
+        {
+          try
+          {
+            ParameterInputBase & paramInput = dynamic_cast<ParameterInputBase&>(port->containingPort());
+            protocolInstance->connectInput( &(paramInput.protocolInput()) );
+          }
+          catch( std::exception const & ex )
+          {
+            result = false;
+            messages << "Error connection protocol output to output port \"" << fullyQualifiedName( *port )
+                     << "\": " << ex.what() << ".\n";
+          }
+        }
       }
-
       mCommunicationProtocols.push_back( std::move( protocolInstance ) );
     }
     catch( const std::exception& ex )
@@ -337,53 +450,53 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     }
   }
 
-  // Check whether all ports have been connected.
-  PortLookup<ril::ParameterPortBase> allPorts( mFlow.internal() );
-  PortLookup<ril::ParameterPortBase>::PortTable allSendPorts( allPorts.externalCapturePorts() );
-  allSendPorts.insert( allPorts.realSendPorts().begin(), allPorts.realSendPorts().end() );
-  for( ril::ParameterPortBase const * const port : allSendPorts )
-  {
-    if( not port->isConnected() )
-    {
-      messages << "Parameter send port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
-      result = false;
-    }
-  }
-  PortLookup<ril::ParameterPortBase>::PortTable allReceivePorts( allPorts.externalPlaybackPorts() );
-  allReceivePorts.insert( allPorts.realReceivePorts().begin(), allPorts.realReceivePorts().end() );
-  for( ril::ParameterPortBase const * const port : allReceivePorts )
-  {
-    if( not port->isConnected() )
-    {
-      messages << "Parameter receive port \"" << fullyQualifiedName( *port ) << "\" is not connected to a valid protocol.\n";
-      result = false;
-    }
-  }
+  // At the moment, there are no infrastructure modifications.
+  // Therefore the connection map is passed back unaltered.
+  finalConnections = originalConnections;
   return result;
 }
 
-bool AudioSignalFlow::initialiseSchedule( std::ostream & messages )
+CommunicationProtocolBase::Output & AudioSignalFlow::externalParameterReceivePort( char const * portName )
+{
+  auto const findIt = mProtocolReceiveEndpoints.find( std::string(portName) );
+  if( findIt == mProtocolReceiveEndpoints.end() )
+  {
+    throw std::out_of_range( detail::composeMessageString("External receive port named \"", portName , "\" does not exist." ) );
+  }
+  return *(findIt->second);
+}
+
+CommunicationProtocolBase::Input & AudioSignalFlow::externalParameterSendPort( char const * portName )
+{
+  auto const findIt = mProtocolSendEndpoints.find( std::string( portName ) );
+  if( findIt == mProtocolSendEndpoints.end() )
+  {
+    throw std::out_of_range(
+      detail::composeMessageString("External send port named \"", portName , "\" does not exist." ) );
+  }
+  return *(findIt->second);
+}
+
+bool AudioSignalFlow::initialiseSchedule( std::ostream & messages,
+                                          AudioConnectionMap const & audioConnections,
+                                          ParameterConnectionMap const & parameterConnections )
 {
   bool result = true;
   if( not mFlow.isComposite() )
   {
     mProcessingSchedule.clear();
-    mProcessingSchedule.push_back( dynamic_cast<ril::AtomicComponent *>(&mFlow) );
+    AtomicComponent* atom = dynamic_cast<AtomicComponent *>( &(mFlow.component()) );
+    if( not atom )
+    {
+      throw std::logic_error( "AudioSignalFlow: Internal error: Casting of non-composite component to AtomicComponent failed.");
+    }
+    mProcessingSchedule.push_back( atom );
   }
   else
   {
-    AudioConnectionMap allAudioConnections;
-    result &= allAudioConnections.fill( mFlow, messages, true/*recursive*/ );
-    AudioConnectionMap realAudioConnections;
-    realAudioConnections.resolvePlaceholders( allAudioConnections );
-
-    ParameterConnectionMap allParameterConnections;
-    result &= fillRecursive( allParameterConnections, mFlow, messages );
-    ParameterConnectionMap const realParameterConnections = resolvePlaceholders( allParameterConnections );
-
     SchedulingGraph depGraph;
     // TODO: check result!
-    depGraph.initialise( mFlow, realAudioConnections, realParameterConnections );
+    depGraph.initialise( mFlow, audioConnections, parameterConnections );
     auto const schedule = depGraph.sequentialSchedule();
     mProcessingSchedule.assign( schedule.begin(), schedule.end() );
   }
@@ -396,386 +509,383 @@ std::size_t AudioSignalFlow::numberCommunicationProtocols() const
   return mCommunicationProtocols.size();
 }
 
-
-bool AudioSignalFlow::checkFlow( ril::Component const & comp, bool locally, std::ostream & messages )
-{
-  if( not comp.isComposite() )
-  {
-    return true;
-  }
-  ril::CompositeComponent const & composite = dynamic_cast<ril::CompositeComponent const &>( comp );
-  // Get the 'implementation' object that holds the tables to ports and contained components.
-  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
-
-
-  // First, check the connections level by level
-  if( locally )
-  {
-    bool const localResult = checkCompositeLocal( composite, messages );
-    bool overallResult = localResult;
-    for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin( ) );
-      compIt != compositeImpl.componentEnd( ); ++compIt )
-    {
-      // TODO: Check whether we should work on the internal objects instead.
-      bool const compRes = checkFlow( compIt->second->component(), locally, messages );
-      overallResult = overallResult and compRes;
-    }
-    return overallResult;
-  }
-  else
-  {
-    // No idea how to check hierarchically without flattening the graph.
-    // Maybe we remove that option.
-    return true;
-  }
-}
-
-bool AudioSignalFlow::checkCompositeLocal( ril::CompositeComponent const & composite, std::ostream & messages )
-{
-  bool const audioCheck = checkCompositeLocalAudio( composite, messages );
-  bool const paramCheck = checkCompositeLocalParameters( composite, messages );
-  return audioCheck and paramCheck;
-}
-
-bool AudioSignalFlow::checkCompositeLocalAudio( ril::CompositeComponent const & composite, std::ostream & messages )
-{
-  bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<ril::AudioPortBase const*>;
-  PortTable sendPorts;
-  PortTable receivePorts;
-
-  // Get the 'implementation' object that holds the tables to ports and contained components.
-  // TODO: Should we pass the 'implementation' object instead?
-  ril::CompositeComponentImplementation const & compositeImpl = composite.implementation();
-
-  // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
-  // reversed, i.e. inputs are senders and outputs are receivers.
-  for( ril::ComponentInternal::AudioPortContainer::const_iterator extPortIt = composite.internal().audioPortBegin();
-       extPortIt != composite.internal().audioPortEnd(); ++extPortIt )
-  {
-    if( (*extPortIt)->direction() == ril::AudioPortBase::Direction::Input )
-    {
-      sendPorts.insert( *extPortIt );
-    }
-    else
-    {
-      receivePorts.insert( *extPortIt );
-    }
-  }
-  // Add the ports of the contained components (without descending into the hierarchy)
-  for( ril::CompositeComponentImplementation::ComponentTable::const_iterator compIt( compositeImpl.componentBegin());
-       compIt != compositeImpl.componentEnd(); ++compIt )
-  {
-    ril::ComponentInternal const * containedComponent = compIt->second;
-    for( auto port : containedComponent->ports<ril::AudioPortBase>() )
-    {
-      port->direction() == ril::AudioPortBase::Direction::Input ?
-        receivePorts.insert( port ) : sendPorts.insert( port );
-    }
-  }
-  // Now populate the connection map
-  try
-  {
-    AudioConnectionMap const connections( composite, false );
-    for( ril::AudioPortBase const * sendPort : sendPorts )
-    {
-      std::size_t const numChannels = sendPort->width();
-      if( numChannels == ril::AudioPortBase::cInvalidWidth )
-      {
-        messages << "Audio signal flow connection check: The send port \"" << fullyQualifiedName( *sendPort ) << " is not initialised." << std::endl;
-        result = false;
-        continue; // Cannot check for this receive port.
-      }
-    }
-    for( ril::AudioPortBase const * receivePort : receivePorts )
-    {
-      std::size_t const numChannels = receivePort->width( );
-      if( numChannels == ril::AudioPortBase::cInvalidWidth )
-      {
-        messages << "Audio signal flow connection check: The receive port \"" << fullyQualifiedName( *receivePort ) << " is not initialised." << std::endl;
-        result = false;
-        continue; // Cannot check for this receive port.
-      }
-      for( std::size_t channelIdx( 0 ); channelIdx < numChannels; ++channelIdx )
-      {
-        std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator > findRange
-          = connections.equal_range( AudioSignalDescriptor( receivePort, channelIdx ) );
-        std::ptrdiff_t const numConnections = std::distance( findRange.first, findRange.second );
-        assert( numConnections >= 0 );
-        if( numConnections == 0 )
-        {
-          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":" << channelIdx
-            << " is unconnected" << std::endl;
-          result = false;
-        }
-        else if( numConnections > 1 )
-        {
-          messages << "Audio signal flow connection check: The receive channel \"" << fullyQualifiedName( *receivePort ) << ":"
-            << channelIdx << " is connected to " << numConnections << " send channels: " << printAudioSignalDescriptor( findRange.first->second );
-          ++findRange.first;
-          for( ; findRange.first != findRange.second; ++findRange.first )
-          {
-            messages << ", " << printAudioSignalDescriptor( findRange.first->second );
-          }
-          messages << std::endl;
-          result = false;
-        }
-      }
-    }
-  }
-  catch( std::exception const & ex )
-  {
-    messages << ex.what();
-    result = false;
-  }
-
-  // Now check that all receivers are uniquely connected
-  return result;
-}
-
-bool AudioSignalFlow::checkCompositeLocalParameters( ril::CompositeComponent const & composite, std::ostream & messages )
-{
-  bool result = true; // Result variable, is set to false if an error occurs.
-  using PortTable = std::set<ril::ParameterPortBase const*>;
-  PortTable sendPorts;
-  PortTable receivePorts;
-
-  // Get the 'implementation' object that holds the tables to ports and contained components.
-
-  // First add the external ports of 'composite'. From the local viewpoint of this component, the directions are 
-  // reversed, i.e. inputs are senders and outputs are receivers.
-#if 1
-  for( auto port : composite.internal().ports<ril::ParameterPortBase>() )
-  {
-    (port->direction() == ril::ParameterPortBase::Direction::Input) ?
-     sendPorts.insert( port ) : receivePorts.insert( port );
-  }
-#else
-  for( auto extPortIt = composite.internal().parameterPortBegin();
-    extPortIt != composite.internal().parameterPortEnd(); ++extPortIt )
-  {
-    if( (*extPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
-    {
-      sendPorts.insert( *extPortIt );
-    }
-    else
-    {
-      receivePorts.insert( *extPortIt );
-    }
-#endif
-  // Add the ports of the contained components (without descending into the hierarchy)
-#if 1
-  for( auto port : composite.internal().ports<ril::ParameterPortBase>() )
-  {
-    (port->direction() == ril::ParameterPortBase::Direction::Input ) ?
-      receivePorts.insert( port ) : sendPorts.insert( port );
-  }
-#else
-  for( auto compIt( compositeImpl.componentBegin() );
-    compIt != compositeImpl.componentEnd(); ++compIt )
-  {
-    ril::Component const & containedComponent = *(compIt->second);
-    for( ril::Component::ParameterPortContainer::const_iterator intPortIt = containedComponent.parameterPortBegin();
-      intPortIt != containedComponent.parameterPortEnd(); ++intPortIt )
-    {
-      if( (*intPortIt)->direction() == ril::ParameterPortBase::Direction::Input )
-      {
-        receivePorts.insert( *intPortIt );
-      }
-      else
-      {
-        sendPorts.insert( *intPortIt );
-      }
-    }
-  }
-#endif
-  return result;
-}
-
 namespace // unnamed
 {
 
+// Data structure holding an ordered list of 
+using ConnectionList = std::vector<std::pair<AudioChannel, AudioChannel > >;
+
+using ChannelVector = std::vector<AudioChannel>;
+
+using PortOffsetLookup = std::map<impl::AudioPortBaseImplementation *, std::size_t>;
+
 /**
- * Helper function to sum up the audio channels of a list of ports.
+ * Check whether a connection list is contiguous, i.e., refers to a contiguous index range of send channels according to the offset table
+ * \p offsetTable
+ * @pre The elements of \p connections are ordered according to their receive channel index.
+ * @throw std::out_of_range if a send port referenced in \channels is not contained in \p offsetTable
  */
-std::size_t countAudioChannels( PortLookup<ril::AudioPortBase>::PortTable const & portList )
+bool contiguousRange( ChannelVector const & channels, PortOffsetLookup const & offsetTable )
 {
-  return std::accumulate( portList.begin( ), portList.end( ), static_cast<std::size_t>(0) ,
-    []( std::size_t acc, ril::AudioPortBase const * port ) { return acc + port->width( ); } );
+  // at() throws if the indexed element is not contained.
+  auto const findIt =  std::adjacent_find( channels.begin(), channels.end(),
+    [&offsetTable](AudioChannel const & lhs,AudioChannel const & rhs)
+    {
+      return offsetTable.at(lhs.port()) + lhs.channel() + 1 != offsetTable.at(rhs.port()) + rhs.channel();
+    } );
+  return findIt == channels.end();
+//  return findContiguityGap(channels.begin(), channels.end()) == channels.end();
 }
 
-void assignConsecutiveIndices( ril::AudioPortBase * port, ril::AudioPortBase::SignalIndexType & index, rrl::CommunicationArea<ril::SampleType> & commArea )
+// Not used at the moment.
+// Reimplement if we want to adjust the order of send ports maximise the number of contiguous receive ranges (or minimise the the number of
+// copy operations.
+#if 0
+/**
+ * Internal function used to detect the first contiguity gap of the send ports
+ */
+
+ /**
+ * Data structure to hold an adjacency wish.
+ * Format:
+ * get<0>: The first send port of the requested adjacency pair
+ * get<1>: The second send port of the requested adjacency pair.
+ * get<2>: The receive port requesting the adjacent pair of send ports.
+ */
+using AdjacencyWish = std::tuple<impl::AudioPortBaseImplementation const *, impl::AudioPortBaseImplementation const *, impl::AudioPortBaseImplementation const * >;
+
+using AdjacencyWishList = std::multiset<AdjacencyWish>;
+
+ChannelVector::const_iterator findContiguityGap( ChannelVector::const_iterator beginIt, ChannelVector::const_iterator endIt)
 {
-  std::size_t const portWidth = port->width( );
-  std::vector<ril::AudioPortBase::SignalIndexType> indexVec( portWidth );
-  ril::AudioPortBase::SignalIndexType idx = index;
-  std::generate( indexVec.begin( ), indexVec.end( ), [&idx] { return idx++; } );
-  port->setAudioBasePointer( commArea.data( ) );
-  port->setAudioChannelStride( commArea.signalStride() );
-  port->assignCommunicationIndices( indexVec.begin( ), indexVec.end( ) );
-  index += portWidth;
+  return std::adjacent_find( beginIt, endIt,
+   []( AudioChannel const & lhs, AudioChannel const & rhs )
+  { return (lhs.port() != rhs.port()) or (rhs.channel() != lhs.channel() + 1);} );
+}
+
+std::tuple<bool, AdjacencyWishList> possiblyContiguousRange( ChannelVector const & channels, impl::AudioPortBaseImplementation * receivePort )
+{
+  AdjacencyWishList wishList;
+  for( ChannelVector::const_iterator runIt = channels.begin();; )
+  {
+    ChannelVector::const_iterator gapIt = findContiguityGap( runIt, channels.end() );
+    if( gapIt == channels.end() )
+    {
+      return std::make_tuple( true, wishList );
+    }
+    ChannelVector::const_iterator nextIt = gapIt + 1;
+    if( nextIt == channels.end() ) // Shouldn't be possible due to the workings of adjacent_find.
+    {
+      return std::make_tuple( true, wishList );
+    }
+    if( (runIt->channel() != runIt->port()->width()-1) or nextIt->channel() != 0 )
+    {
+      return std::make_tuple( false, AdjacencyWishList{} );
+    }
+    wishList.insert( std::make_tuple( runIt->port(), nextIt->port(), receivePort ) );
+    runIt = nextIt;
+  }
+}
+#endif
+
+ChannelVector sendChannels( impl::AudioPortBaseImplementation const * receivePort, AudioConnectionMap const & flatConnections )
+{
+  ConnectionList receivingConnections;
+  std::copy_if( flatConnections.begin(), flatConnections.end(), std::back_inserter( receivingConnections ),
+      [receivePort]( AudioConnectionMap::value_type const & conn ) { return conn.second.port() == receivePort; } );
+  if( receivingConnections.size() != receivePort->width() )
+  {
+    std::stringstream str; str << "AudioSignalFlow: Number of incoming channels (" << receivingConnections.size() << ") to receive port " << fullyQualifiedName( *receivePort )
+      << " does not match the port width (" << receivePort->width() << ").";
+    throw std::logic_error( str.str() );
+  }
+  ChannelVector sendRange( receivePort->width(), AudioChannel( nullptr, 0 ) );
+  for( ConnectionList::value_type const & conn : receivingConnections )
+  {
+    std::size_t receiveChannel = conn.second.channel();
+    if( receiveChannel >= receivePort->width() )
+    {
+      std::stringstream str; str << "AudioSignalFlow: Connection entry " << conn.first << "->" << conn.second << " exceeds the receiver port width (" << receivePort->width() << ").";
+      throw std::logic_error( str.str() );
+    }
+    if( sendRange[receiveChannel].port() != nullptr )
+    {
+      std::stringstream str; str << "AudioSignalFlow: More than one connection to receive channel " << conn.second << ".";
+      throw std::logic_error( str.str() );
+    }
+    sendRange[receiveChannel] = conn.first;
+  }
+  return sendRange;
 }
 
 } // namespace unnamed.
 
-bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages )
+bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections )
 {
+  AudioConnectionMap tmpConnections; // To be assigned to or swapped with finalConnections after the initialisation was successful.
+
+  // Collect all used audio sample types.
+  std::set<AudioSampleType::Id> usedSampleTypes;
+  if( mFlow.isComposite() )
+  {
+  std::transform( originalConnections.begin(), originalConnections.end(),
+    std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType(); } );
+  }
+  else
+  {
+    // For atomic top-level components, the sample types are determined by the audio ports of the component itself.
+    std::transform( mFlow.audioPorts().begin(), mFlow.audioPorts().end(),
+      std::inserter( usedSampleTypes, usedSampleTypes.begin() ), []( impl::AudioPortBaseImplementation const * port ) { return port->sampleType(); } );
+  }
+
+  std::size_t const alignment = cVectorAlignmentBytes; // Maybe replace by a function that returns the current alignment setting.
+  std::size_t const blockSize = mFlow.period();
+  std::size_t totalAudioPoolSize = 0;
+
+  std::map<AudioSampleType::Id, PortOffsetLookup> allSendPortOffsets;
+  std::map<AudioSampleType::Id, PortOffsetLookup> allReceivePortOffsets;
+
+  for( AudioSampleType::Id sampleTypeId : usedSampleTypes )
+  {
+    PortOffsetLookup sendOffsets;
+    PortOffsetLookup receiveOffsets;
+    std::size_t sendPortOffset = 0;
+
+    if( mFlow.isComposite() ) // Atomic, non-composite top-level components receive special treatment (below).
+    {
+      AudioConnectionMap typedConnections;
+      std::copy_if( originalConnections.begin(), originalConnections.end(), std::inserter( typedConnections, typedConnections.begin() ),
+                   [sampleTypeId]( AudioConnectionMap::value_type const & connection ) { return connection.first.port()->sampleType() == sampleTypeId; } );
+      std::vector<impl::AudioPortBaseImplementation*> allSendPorts;
+      std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter( allSendPorts ), []( AudioConnectionMap::value_type const & conn ) { return conn.first.port(); } );
+      std::sort( allSendPorts.begin(), allSendPorts.end() ); // Sorting is a required before unique.
+      allSendPorts.erase( std::unique( allSendPorts.begin(), allSendPorts.end() ), allSendPorts.end() ); // remove duplicates.
+      // Partition the send ports such that the external ports come first.
+      std::partition( allSendPorts.begin(), allSendPorts.end(), []( impl::AudioPortBaseImplementation const * port ) { return isToplevelPort( port ); } );
+
+      for( impl::AudioPortBaseImplementation * sendPort : allSendPorts )
+      {
+        sendOffsets.insert( std::make_pair( sendPort, sendPortOffset ) );
+        sendPortOffset += sendPort->width();
+      }
+      // sendPortOffset now contains the port index one past the all original send ports.
+
+      // Now check the receive ports and see where we need routing components to get the receive ports continuous.
+      std::vector<impl::AudioPortBaseImplementation*> allReceivePorts;
+      std::transform( typedConnections.begin(), typedConnections.end(), std::back_inserter( allReceivePorts ), []( AudioConnectionMap::value_type const & conn ) { return conn.second.port(); } );
+      std::sort( allReceivePorts.begin(), allReceivePorts.end() ); // Sorting is a required before unique.
+      allReceivePorts.erase( std::unique( allReceivePorts.begin(), allReceivePorts.end() ), allReceivePorts.end() );
+      // Partition the send ports such that the external ports come first.
+      std::partition( allReceivePorts.begin(), allReceivePorts.end(), []( impl::AudioPortBaseImplementation const * port ) { return isToplevelPort( port ); } );
+      for( impl::AudioPortBaseImplementation * receivePort : allReceivePorts )
+      {
+        if( receivePort->width() == 0 ) // Zero-width port are legal, but we need to skip the computation (sends[0] would be illegal)
+        {
+          continue;
+        }
+        AudioConnectionMap localConnections; // all connections ending in receivePort
+        std::copy_if( typedConnections.begin(), typedConnections.end(), std::inserter( localConnections, localConnections.begin() ),
+                      [receivePort]( AudioConnectionMap::value_type const & connection ) { return connection.second.port() == receivePort; } );
+
+        ChannelVector sends = sendChannels( receivePort, localConnections ); // extracting by receivePort would not be necessary (already done for localConnections)
+        if( contiguousRange( sends, sendOffsets ) )
+        {
+          impl::AudioPortBaseImplementation * correspondingSendPort = sends[0].port();
+          auto const sendLookupIt = sendOffsets.find( correspondingSendPort );
+          if( sendLookupIt == sendOffsets.end() )
+          {
+            throw std::logic_error( "Internal logic error: Send port not found in offset lookup table." );
+          }
+          std::size_t const receivePortOffset = sendLookupIt->second + sends[0].channel();
+
+          receiveOffsets.insert( std::make_pair( receivePort, receivePortOffset ) );
+          tmpConnections.insert( localConnections.begin(), localConnections.end() );
+        }
+        else
+        {
+          std::size_t const receiveWidth = receivePort->width();
+          std::vector<std::size_t> sendIndices( receiveWidth );
+          // Create index list
+          for( std::size_t idx( 0 ); idx < receiveWidth; ++idx )
+          {
+            auto const sendPort = sends[idx].port();
+            auto const offsetIt = sendOffsets.find( sendPort );
+            if( offsetIt == sendOffsets.end() )
+            {
+              throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                  "Send port not found in offset table." );
+            }
+            std::size_t const sendOffset = offsetIt->second + sends[idx].channel();
+            sendIndices[idx] = sendOffset;
+          }
+          auto const minIndexIt = std::min_element( sendIndices.cbegin(), sendIndices.cend() );
+          assert( minIndexIt != sendIndices.end() ); // could fail only if the sequence is empty
+          std::size_t const minIndex = *minIndexIt;
+          std::for_each( sendIndices.begin(), sendIndices.end(),
+                         [minIndex]( std::size_t & val ) { val -= minIndex; } );
+
+          // The width of the routing component must span all contained indices.
+          auto const maxIndexIt = std::max_element( sendIndices.cbegin(), sendIndices.cend() );
+          assert( maxIndexIt != sendIndices.end() ); // could fail only if the sequence is empty
+          std::size_t const routingInputWidth = *maxIndexIt + 1;
+
+          std::stringstream routingCompName;
+          routingCompName << fullyQualifiedName( *receivePort ) << "_inputrouting";
+
+          std::unique_ptr<AtomicComponent> routingComp
+            = createSignalRoutingComponent( sampleTypeId,
+                                            mFlow.context(),
+                                            routingCompName.str().c_str(),
+                                            static_cast<CompositeComponent*>(&(mFlow.component())),
+                                            routingInputWidth,
+                                            sendIndices );
+          impl::ComponentImplementation & routingCompImpl = routingComp->implementation();
+
+          impl::AudioPortBaseImplementation& routingIn = routingCompImpl.findAudioPort( "in" )->implementation();
+          impl::AudioPortBaseImplementation& routingOut = routingCompImpl.findAudioPort( "out" )->implementation();
+
+          for( std::size_t inputIdx( 0 ); inputIdx < routingInputWidth; ++inputIdx )
+          {
+            std::size_t const channelIndex = minIndex + inputIdx;
+            PortOffsetLookup::const_iterator findPortIt = std::find_if( sendOffsets.cbegin(), sendOffsets.cend(),
+              [channelIndex]( PortOffsetLookup::value_type const & entry )
+            {
+              return (channelIndex >= entry.second) and (channelIndex < entry.second + entry.first->width());
+            } );
+            if( findPortIt == sendOffsets.end() )
+            {
+              throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                  "Send port needed for a contiguous send range of an internal routing port found in offset table." );
+            }
+            std::size_t const finalSendIndex = channelIndex - findPortIt->second;
+            tmpConnections.insert( AudioChannel( findPortIt->first, finalSendIndex ),
+                                   AudioChannel( &routingIn, inputIdx ) );
+          }
+
+          for( std::size_t sigIdx( 0 ); sigIdx < receiveWidth; ++sigIdx )
+          {
+            tmpConnections.insert( AudioChannel( &routingOut, sigIdx ), AudioChannel( receivePort, sigIdx ) );
+          }
+
+          sendOffsets.insert( std::make_pair( &routingOut, sendPortOffset ) );
+          receiveOffsets.insert( std::make_pair( &routingIn, minIndex ) );
+          // Insert the original receive port as well. Same offset as the send port of the inserted routing component.
+          receiveOffsets.insert( std::make_pair( receivePort, sendPortOffset ) );
+          sendPortOffset += receiveWidth;
+          mInfrastructureComponents.push_back( std::move( routingComp ) );
+        }
+      }
+    }
+    else
+    {
+      // For atomic ports, all ports are considered as send ports, because buffers need to be allocated for them.
+      for( auto portIt( mFlow.audioPorts().begin() ); portIt != mFlow.audioPorts().end(); ++portIt )
+      {
+        std::size_t const portWidth = (*portIt)->width();
+        sendOffsets.insert( std::make_pair( *portIt, sendPortOffset ) );
+        sendPortOffset += portWidth;
+      }
+    }
+    allSendPortOffsets.insert( std::make_pair( sampleTypeId, std::move( sendOffsets ) ) );
+    allReceivePortOffsets.insert( std::make_pair( sampleTypeId, std::move( receiveOffsets ) ) );
+
+    std::size_t const typedPoolSize = sendPortOffset * efl::nextAlignedSize( blockSize*AudioSampleType::typeSize( sampleTypeId ), alignment );
+    totalAudioPoolSize += typedPoolSize;
+  }
+  mAudioSignalPool.reset( new AudioSignalPool( totalAudioPoolSize, alignment ) );
+
+  // Second run: Do the actual buffer assignment (for contiguous input and output ranges)
+  std::size_t poolOffsetBytes = 0;
+  for( AudioSampleType::Id sampleTypeId : usedSampleTypes )
+  {
+    std::size_t const typeOffset = poolOffsetBytes;
+    std::size_t typedChannelCount = 0;
+    std::size_t const channelSizeBytes = efl::nextAlignedSize( blockSize*AudioSampleType::typeSize(sampleTypeId), alignment );
+    if( channelSizeBytes % AudioSampleType::typeSize(sampleTypeId) )
+    {
+      throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                              "Aligned channel stride is not a multiple of the sample size." );
+    }
+    std::size_t const channelSizeSamples = channelSizeBytes / AudioSampleType::typeSize(sampleTypeId);
+
+    PortOffsetLookup const sendOffsets = allSendPortOffsets[sampleTypeId] ;
+    PortOffsetLookup const receiveOffsets = allReceivePortOffsets[sampleTypeId];
+
+    for( auto const sendEntry : sendOffsets )
+    {
+      std::size_t const portWidth = sendEntry.first->width();
+      std::size_t const channelOffset = sendEntry.second;
+      std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
+      sendEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeSamples );
+
+      typedChannelCount += portWidth;
+    }
+    poolOffsetBytes += typedChannelCount * channelSizeBytes;
+
+    // Same for receive ports.
+    for( auto const receiveEntry : receiveOffsets )
+    {
+      impl::AudioPortBaseImplementation * port = receiveEntry.first;
+      // Extra sanity checking whether the insertion of internal signal routing primitives has been successful.
+      // Makes sense (and can be done) only for composite top-level flows.
+      if( mFlow.isComposite() )
+      {
+        ChannelVector sends = sendChannels( port, tmpConnections );
+        if( not contiguousRange( sends, sendOffsets ) )
+        {
+          throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+            "Non-contiguous port input range despite previous modification stage." );
+        }
+      }
+      std::size_t const channelOffset = receiveEntry.second;
+      std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
+      receiveEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeSamples );
+    }
+  }
+  if( poolOffsetBytes != totalAudioPoolSize )
+  {
+    throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error: "
+        "Size of audio channel buffers differs from previously calculated value." );
+  }
+
   mTopLevelAudioInputs.clear();
+  std::copy_if( mFlow.audioPorts().begin(), mFlow.audioPorts().end(), std::back_inserter(mTopLevelAudioInputs),
+                  []( impl::AudioPortBaseImplementation const * port ){ return port->direction() == PortBase::Direction::Input; } );
+
   mTopLevelAudioOutputs.clear();
-  mCaptureIndices.clear();
-  mPlaybackIndices.clear();
-  bool result = true; // Result variable, is set to false if an error occurs.
-  PortLookup<ril::AudioPortBase> const portLookup( mFlow.internal(), true /*recursive*/ );
+  std::copy_if( mFlow.audioPorts().begin(), mFlow.audioPorts().end(), std::back_inserter(mTopLevelAudioOutputs),
+                  []( impl::AudioPortBaseImplementation const * port ){ return port->direction() == PortBase::Direction::Output; } );
 
-  // Compute the number of audio channels for the different categories that are kept in the communicatio area.
-  //  std::size_t const numPlaybackChannels = countAudioChannels( portLookup.mExternalPlaybackPorts );
-  std::size_t const numCaptureChannels = countAudioChannels( portLookup.externalCapturePorts() );
-  std::size_t const numConcreteOutputChannels = countAudioChannels( portLookup.realSendPorts() );
-  std::size_t const totalSignalChannels = numCaptureChannels + numConcreteOutputChannels;
-
-  std::size_t const period = mFlow.period();
-
-  mCommArea.reset( new CommunicationArea<ril::SampleType>( totalSignalChannels, period, ril::cVectorAlignmentSamples ) );
-
-  // Assign consecutive indices to the ports that need physical communication vectors.
-  // First we do that for the external capture ports, because this part is identical for atomic and component top-level signal flows.
-  ril::AudioPortBase::SignalIndexType offset = 0;
-  // std::size_t const captureSignalOffset = offset; // ATM unused.
-  std::for_each( portLookup.externalCapturePorts().begin( ), portLookup.externalCapturePorts().end( ),
-    std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
-  // Initialise the 'concrete' internal receive ports.
-  // std::size_t const concreteOutputSignalOffset = offset; // ATM unused
-  std::for_each( portLookup.realSendPorts().begin( ), portLookup.realSendPorts().end( ),
-    std::bind( assignConsecutiveIndices, std::placeholders::_1, std::ref( offset ), std::ref( *mCommArea ) ) );
-  if( offset != mCommArea->numberOfSignals( ) )
+  // Not sure whether we want to keep that or whether the process() stage should access the top-level input and output ports directly.
+  // The code below fails if there are audio ports with types differing from the standard type.
+  // Also, if there is more than one in- or output, the ordering is undefined.
+  mCaptureChannels.clear();
+  mPlaybackChannels.clear();
+  std::size_t externalCaptureChannelIdx = 0;
+  for( impl::AudioPortBaseImplementation * port : mTopLevelAudioInputs )
   {
-    throw std::logic_error( "AudioSignalFlow::initialiseAudioConnections(): number of allocated " );
+    char * basePointer = static_cast<char*>(port->basePointer());
+    std::size_t const width = port->width();
+    std::size_t const stride = port->channelStrideBytes();
+    for( std::size_t chIdx( 0 ); chIdx < width; ++chIdx, ++externalCaptureChannelIdx )
+    {
+      mCaptureChannels.push_back( basePointer + chIdx * stride );
+    }
+  }
+  std::size_t externalPlaybackChannelIdx = 0;
+  for( impl::AudioPortBaseImplementation * port : mTopLevelAudioOutputs )
+  {
+    char * basePointer = static_cast<char*>(port->basePointer());
+    std::size_t const width = port->width();
+    std::size_t const stride = port->channelStrideBytes();
+    for( std::size_t chIdx( 0 ); chIdx < width; ++chIdx, ++externalPlaybackChannelIdx )
+    {
+      mPlaybackChannels.push_back( basePointer + chIdx * stride );
+    }
   }
 
-  // Initialise the data structures for the external inputs (capture ports)
-  mTopLevelAudioInputs.reserve( portLookup.externalCapturePorts().size( ) );
-  mCaptureIndices.resize( numCaptureChannels );
-  std::size_t captureOffset = 0;
-  for( ril::AudioPortBase * capturePort : portLookup.externalCapturePorts() )
-  {
-    mTopLevelAudioInputs.push_back( capturePort );
-    std::copy( capturePort->indices( ), capturePort->indices( ) + capturePort->width( ), &mCaptureIndices[captureOffset] );
-    captureOffset += capturePort->width( );
-  }
-
-  // Allocate space for the external playback ports and indices.
-  // Filling is different whether the top-level flow is composite or atomic.
-  mPlaybackIndices.resize( countAudioChannels( portLookup.externalPlaybackPorts() ) );
-  mTopLevelAudioOutputs.reserve( portLookup.externalPlaybackPorts().size( ) );
-  std::size_t playbackIndexOffset = 0;
-
-  if( mFlow.isComposite() ) // Internal interconnections are specific to composite top-level flows.
-  {
-    AudioConnectionMap allConnections;
-    std::stringstream errMessages;
-    if( not allConnections.fill( mFlow, errMessages, true/*recursive*/ ) )
-    {
-      throw std::logic_error( "Filling of connection map failed:" + errMessages.str() );
-    }
-    std::cout << "\n\n\nAll connections:\n" << allConnections << std::endl;
-
-    // Create a new connection map that removes the intermediate placeholder ports.
-    // Precondition: The connection map has been checked for consistency 
-    // (i.e., each receive port is connected to exactly one sender.
-    // @note we need to check for cycles in the graph that are created by placeholder ports.
-    // Otherwise this could create infinite recursions in the placeholder resolution code.
-    // TODO: Factor this into a free function of member of a connection map.
-
-    AudioConnectionMap concreteConnections;
-    try
-    {
-      concreteConnections.resolvePlaceholders( allConnections );
-    }
-    catch( std::exception const & ex )
-    {
-      errMessages << ex.what() << '\n';
-      result = false;
-    }
-
-    std::cout << "\n\n\nConcrete connections:\n" << concreteConnections << std::endl;
-
-    // Initialise the concrete, i.e., real receive ports
-    // Note: this assumes that all send ports (concrete and external capture ports) have already been initialised
-    for( ril::AudioPortBase * receivePort : portLookup.realReceivePorts() )
-    {
-      std::size_t const portWidth = receivePort->width( );
-      std::vector<ril::AudioPortBase::SignalIndexType> receiveIndices( portWidth );
-      for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
-      {
-        // equal_range is used to detect multiple connections
-        // Normally this should have been detected before in the checking phase.
-        std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator >
-          findRange = concreteConnections.equal_range( AudioSignalDescriptor( receivePort, chIdx ) );
-        if( findRange.first == concreteConnections.end( ) )
-        {
-          throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
-        }
-        if( std::distance( findRange.first, findRange.second ) != 1 )
-        {
-          throw std::runtime_error( "Audio signal connections : Multiple connections detected." );
-        }
-
-        receiveIndices[chIdx] = findRange.first->second.mPort->indices( )[findRange.first->second.mIndex];
-      }
-      receivePort->setAudioBasePointer( mCommArea->data( ) );
-      receivePort->setAudioChannelStride( mCommArea->signalStride( ) );
-      receivePort->assignCommunicationIndices( receiveIndices.begin( ), receiveIndices.end( ) );
-    }
-
-    // same for the external playback ports
-    // Note: the ordering of the external ports is defined by the order they are arranged in this set.
-    for( ril::AudioPortBase * playbackPort : portLookup.externalPlaybackPorts() )
-    {
-      std::size_t const portWidth = playbackPort->width( );
-      std::vector<ril::AudioPortBase::SignalIndexType> receiveIndices( portWidth );
-      for( std::size_t chIdx( 0 ); chIdx < portWidth; ++chIdx )
-      {
-        // equal_range is used to detect multiple connections
-        // Normally this should have been detected before in the checking phase.
-        std::pair<AudioConnectionMap::const_iterator, AudioConnectionMap::const_iterator >
-          findRange = concreteConnections.equal_range( AudioSignalDescriptor( playbackPort, chIdx ) );
-        if( findRange.first == concreteConnections.end( ) )
-        {
-          throw std::runtime_error( "Audio signal connections : Did not find connection entry for receive channel." );
-        }
-        if( std::distance( findRange.first, findRange.second ) != 1 )
-        {
-          throw std::runtime_error( "Audio signal connections : Multiple connections detected." );
-        }
-
-        receiveIndices[chIdx] = findRange.first->second.mPort->indices( )[findRange.first->second.mIndex];
-      }
-      playbackPort->setAudioBasePointer( mCommArea->data( ) );
-      playbackPort->setAudioChannelStride( mCommArea->signalStride( ) );
-      playbackPort->assignCommunicationIndices( receiveIndices.begin( ), receiveIndices.end( ) );
-
-      mTopLevelAudioOutputs.push_back( playbackPort );
-      std::copy( receiveIndices.begin( ), receiveIndices.end( ), &mPlaybackIndices[playbackIndexOffset] );
-      playbackIndexOffset += portWidth;
-    }
-   } // Additional handling for composite top-level flows finished
-  else // The flow consists only of a single atomic component.
-  {
-    // We need a separate treatment for the external playback indices.
-    // This are linked (channel-by-channel) to the respective 'physical' output port of the atomic component.
-    for( ril::AudioPortBase * playbackPort : portLookup.externalPlaybackPorts() )
-    {
-      mTopLevelAudioOutputs.push_back( playbackPort );
-      std::copy( playbackPort->indices(), playbackPort->indices( )+playbackPort->width(), &mPlaybackIndices[playbackIndexOffset] );
-      playbackIndexOffset += playbackPort->width();
-    }
-
-    ril::AtomicComponent * atom = static_cast<ril::AtomicComponent *>( &mFlow );
-    mProcessingSchedule.clear();
-    mProcessingSchedule.push_back( atom );
-  } 
-
-  return result;
+  finalConnections.swap( tmpConnections );
+  return true;
 }
 
 } // namespace rrl

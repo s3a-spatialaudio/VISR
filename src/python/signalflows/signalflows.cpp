@@ -2,12 +2,21 @@
 
 
 #include "baseline_renderer.hpp"
+#include "core_renderer.hpp"
+#include "delay_vector.hpp"
 
-#include <boost/python.hpp>
+#include <pybind11/pybind11.h>
 
-BOOST_PYTHON_MODULE( signalflows )
+PYBIND11_PLUGIN( signalflows )
 {
-  // Call the initialisation routines of all modules.
+  pybind11::module::import( "visr" );
+  pybind11::module::import( "pml" );
+  pybind11::module::import( "rcl" );
+
+  pybind11::module m( "signalflows", "VISR signal flows library module" );
   using namespace visr::python::signalflows;
-  exportBaselineRenderer();
+  exportBaselineRenderer( m );
+  exportCoreRenderer( m );
+  exportDelayVector( m );
+  return m.ptr();
 }

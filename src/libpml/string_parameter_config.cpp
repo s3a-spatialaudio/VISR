@@ -13,7 +13,7 @@ namespace pml
 {
 
 StringParameterConfig::StringParameterConfig( std::size_t maxLength )
- : ril::ParameterConfigBase()
+ : ParameterConfigBase()
  , mMaxLength(maxLength)
 {
 }
@@ -22,7 +22,12 @@ StringParameterConfig::~StringParameterConfig()
 {
 }
 
-bool StringParameterConfig::compare(ril::ParameterConfigBase const & rhs) const
+std::unique_ptr< ParameterConfigBase > StringParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new StringParameterConfig( *this ) );
+}
+
+bool StringParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
   if (std::type_index(typeid(rhs)) != std::type_index(typeid(StringParameterConfig)))

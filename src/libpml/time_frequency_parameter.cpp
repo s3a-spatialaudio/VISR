@@ -28,7 +28,7 @@ TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( std::size_t alignme
 }
 
 template< typename ElementType >
-TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( ril::ParameterConfigBase const & config )
+TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( ParameterConfigBase const & config )
   : TimeFrequencyParameter<ElementType>( dynamic_cast<TimeFrequencyParameterConfig const &>(config))
 {
 
@@ -36,7 +36,7 @@ TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( ril::ParameterConfi
 
 template< typename ElementType >
 TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( TimeFrequencyParameterConfig const & config )
-  : mData( config.numberOfChannels() * config.numberOfDftSamples(), config.dftSize(), ril::cVectorAlignmentSamples )
+  : mData( config.numberOfChannels() * config.numberOfDftSamples(), config.dftSize(), cVectorAlignmentSamples )
   , mNumberOfChannels( config.numberOfChannels() )
 {
 
@@ -107,9 +107,6 @@ resize( std::size_t dftSize, std::size_t numDftSamples, std::size_t numChannels 
 // Explicit instantiations for sample types float and double
 template class TimeFrequencyParameter<float>;
 template class TimeFrequencyParameter<double>;
-
-static ril::ParameterFactory::Registrar< TimeFrequencyParameter<float> > registrarFloat( ril::ParameterType::TimeFrequencyFloat );
-static ril::ParameterFactory::Registrar< TimeFrequencyParameter<double> > registrarDouble( ril::ParameterType::TimeFrequencyDouble );
 
 } // namespace pml
 } // namespace visr

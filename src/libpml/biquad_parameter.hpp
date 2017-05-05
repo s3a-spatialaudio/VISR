@@ -6,6 +6,7 @@
 #include "matrix_parameter_config.hpp" // might be a forward declaration
 
 #include <libril/typed_parameter_base.hpp>
+#include <libril/parameter_type.hpp>
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
@@ -170,6 +171,10 @@ template< class CoeffType >
 class BiquadParameterList
 {
 public:
+  using Container = typename std::vector< BiquadParameter< CoeffType > >;
+  using iterator = typename Container::iterator;
+  using const_iterator = typename Container::const_iterator;
+
   /**
    * Default constructor, creates an empty list of biquad parameters.
    */
@@ -229,6 +234,13 @@ public:
   BiquadParameter<CoeffType> const & at( std::size_t idx ) const { return mBiquads.at( idx ); }
   BiquadParameter<CoeffType> & at( std::size_t idx ) { return mBiquads.at( idx ); }
 
+  iterator begin() { return mBiquads.begin(); }
+  iterator end() { return mBiquads.end(); }
+
+  const_iterator begin() const { return mBiquads.begin(); }
+  const_iterator end() const { return mBiquads.end(); }
+
+
   void loadJson( boost::property_tree::ptree const & tree );
 
   void loadJson( std::basic_istream<char> & stream );
@@ -260,16 +272,33 @@ public:
 
 
 private:
-  std::vector< BiquadParameter< CoeffType > > mBiquads;
+  Container mBiquads;
 };
 
-template<typename CoeffType>
-class BiquadParameterMatrix: public ril::TypedParameterBase<MatrixParameterConfig, ril::ParameterToId< BiquadParameterMatrix<CoeffType> >::id >
+namespace // unnamed
+{
+/**
+ * Type trait to assign a unique type to each concrete BiquadParameterMatrix type.
+ */
+template<typename ElementType> struct BiquadMatrixParameterType{};
+
+template<> struct BiquadMatrixParameterType<float>
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "BiquadFloatMatrix" ); }
+};
+template<> struct BiquadMatrixParameterType<double>
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "BiquadDoubleMatrix" ); }
+};
+} // unnamed
+
+template<typename CoeffType >
+class BiquadParameterMatrix: public TypedParameterBase<BiquadParameterMatrix<CoeffType>, MatrixParameterConfig, BiquadMatrixParameterType<CoeffType>::ptype() >
 {
 public:
   explicit BiquadParameterMatrix( MatrixParameterConfig const & config );
 
-  explicit BiquadParameterMatrix( ril::ParameterConfigBase const & config );
+  explicit BiquadParameterMatrix( ParameterConfigBase const & config );
 
   explicit BiquadParameterMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );
 
@@ -279,7 +308,6 @@ public:
   std::size_t numberOfSections() const { return mRows.empty() ? 0 : mRows[0].size(); }
 
   void resize( std::size_t numberOfFilters, std::size_t numberOfBiquads );
-
   BiquadParameterList<CoeffType> const & operator[]( std::size_t rowIdx ) const { return mRows[rowIdx]; }
   BiquadParameterList<CoeffType> & operator[]( std::size_t rowIdx ) { return mRows[rowIdx]; }
 
@@ -303,7 +331,7 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<float>, visr::ril::ParameterType::BiquadMatrixFloat, visr::pml::MatrixParameterConfig )
-DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<double>, visr::ril::ParameterType::BiquadMatrixDouble, visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<float>, visr::pml::BiquadParameterMatrix<float>::staticType(), visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<double>, visr::pml::BiquadParameterMatrix<double>::staticType(), visr::pml::MatrixParameterConfig )
 
 #endif // VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED

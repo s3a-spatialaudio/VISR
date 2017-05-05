@@ -9,25 +9,28 @@
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
+#include <librcl/channel_object_routing_calculator.hpp>
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
-#include <librcl/late_reverb_filter_calculator.hpp>
+#include <librcl/hoa_allrad_gain_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
+#include <librcl/object_gain_eq_calculator.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
-#include <librcl/reverb_parameter_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
+#include <librsao/late_reverb_filter_calculator.hpp>
+#include <librsao/reverb_parameter_calculator.hpp>
+
 #include <libefl/basic_matrix.hpp>
 
 #include <libpml/listener_position.hpp>
-#include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 #include <libpml/string_parameter.hpp>
 
@@ -47,7 +50,7 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class BaselineRenderer: public ril::CompositeComponent
+class BaselineRenderer: public CompositeComponent
 {
 public:
   /**
@@ -61,6 +64,7 @@ public:
    * @param diffusionFilters A matrix of floating-point values containing the the FIR coefficients of the decorrelation filter that creates diffuse sound components.
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    * @param sceneReceiverPort The UDP port for receiving the scene data messages.
+   * @param numberOfObjectEqSections The number of biquad sections alocated to each object signal.
    * @param reverbConfig A JSON message containing configuration options for the late reverberation part.
    *        - numReverbObjects (integer) The maximum number of reverb objects (at a given time)
    *        - lateReverbFilterLength (floating-point) The length of the late reverberation filter (in seconds)
@@ -70,37 +74,58 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit BaselineRenderer( ril::SignalFlowContext & context,
+  explicit BaselineRenderer( SignalFlowContext const & context,
                              char const * name,
-                             ril::CompositeComponent * parent,
+                             CompositeComponent * parent,
                              panning::LoudspeakerArray const & loudspeakerConfiguration,
                              std::size_t numberOfInputs,
                              std::size_t numberOfOutputs,
                              std::size_t interpolationPeriod,
-                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                             efl::BasicMatrix<SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
+                             std::size_t numberOfObjectEqSections,
                              std::string const & reverbConfig,
                              bool frequencyDependentPanning );
 
-  ~BaselineRenderer();
+  explicit BaselineRenderer( SignalFlowContext const & context,
+                             char const * name,
+                             CompositeComponent * parent,
+                             panning::LoudspeakerArray const & loudspeakerConfiguration,
+                             std::size_t numberOfInputs,
+                             std::size_t numberOfOutputs );
 
-  /**
-   * Process function that consumes and produces blocks of \p period() audio samples per input and output channel.
-   */
-  // /*virtual*/ void process();
+  ~BaselineRenderer();
 
 private:
 
-  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
-  
+  efl::BasicMatrix<SampleType> const & mDiffusionFilters;
+
   rcl::UdpReceiver mSceneReceiver;
-  
+
   rcl::SceneDecoder mSceneDecoder;
+
+  rcl::ObjectGainEqCalculator mObjectInputGainEqCalculator;
+
+  /**
+   * Apply the the 'level' setting of the object.
+   * We use a DelayVector, which allows also control of the gain, and do not use the delay,
+   * @note This signal flow assumes that each signal input is used only by a single object. Otherwise the settings would
+   * be overwritten
+   */
+  rcl::DelayVector mObjectGain;
+
+  rcl::BiquadIirFilter mObjectEq;
+
+  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
+
+  rcl::SignalRouting mChannelObjectRouting;
 
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningCalculator mGainCalculator;
+
+  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
@@ -122,14 +147,6 @@ private:
    */
   rcl::NullSource mNullSource;
 
-  //pml::MessageQueue<pml::StringParameter> mSceneMessages;
-
-  //objectmodel::ObjectVector mObjectVector;
-
-  //efl::BasicMatrix<ril::SampleType> mGainParameters;
-
-  //efl::BasicMatrix<ril::SampleType> mDiffuseGains;
-
   /**
    * Tracking-related members
    */
@@ -143,13 +160,6 @@ private:
 
   std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
 
-  // pml::ListenerPosition mListenerPosition;
-
-  //pml::MessageQueue<pml::StringParameter> mTrackingMessages;
-
-  //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
-
-  //efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
   //@}
 
 #ifndef DISABLE_REVERB_RENDERING
@@ -168,7 +178,7 @@ private:
 
   std::size_t mMaxNumReverbObjects;
 
-  ril::SampleType mLateReverbFilterLengthSeconds;
+  SampleType mLateReverbFilterLengthSeconds;
 
   std::size_t mNumDiscreteReflectionsPerObject;
    
@@ -214,8 +224,8 @@ private:
   std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
   //@}
 
-  ril::AudioInput mInput;
-  ril::AudioOutput mOutput;
+  AudioInput mInput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

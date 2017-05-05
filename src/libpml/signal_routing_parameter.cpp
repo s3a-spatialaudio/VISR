@@ -36,6 +36,12 @@ SignalRoutingParameter::SignalRoutingParameter( std::initializer_list<Entry> con
   }
 }
 
+SignalRoutingParameter::SignalRoutingParameter( const ParameterConfigBase & )
+ : SignalRoutingParameter() // Call default constructor
+{
+  // TODO: Check whether the parameter is of type EmptyParameterConfig.
+}
+
 void SignalRoutingParameter::swap( SignalRoutingParameter& rhs )
 {
   mRoutings.swap( rhs.mRoutings );
@@ -74,6 +80,11 @@ bool SignalRoutingParameter::removeEntry( IndexType outputIdx )
     return true;
   }
   return false;
+}
+
+void SignalRoutingParameter::clear()
+{
+  mRoutings.clear();
 }
 
 SignalRoutingParameter::IndexType SignalRoutingParameter::getOutput( IndexType inputIdx ) const

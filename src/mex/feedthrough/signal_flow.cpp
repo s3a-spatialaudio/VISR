@@ -12,13 +12,13 @@ namespace mex
 namespace feedthrough
 {
 
-SignalFlow::SignalFlow( ril::SignalFlowContext& context,
+SignalFlow::SignalFlow( SignalFlowContext& context,
                         char const * componentName,
                         CompositeComponent * parent )
- : ril::CompositeComponent( context, componentName, parent )
+ : CompositeComponent( context, componentName, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
- , mSum( context, "Add", this )
+ , mSum( context, "Add", this, 2, 2 )
 {
 }
 
@@ -32,11 +32,10 @@ SignalFlow::setup()
   mInput.setWidth( 2 );
   mOutput.setWidth( 2 );
   // Initialise and configure audio components
-  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
 
-  registerAudioConnection( "this", "in", ril::AudioChannelIndexVector( { 0, 1 } ), "Add", "in0", ril::AudioChannelIndexVector( { 1, 0 } ) );
-  registerAudioConnection( "this", "in", ril::AudioChannelIndexVector( { 0, 1 } ), "Add", "in1", ril::AudioChannelIndexVector( { 0, 1 } ) );
-  registerAudioConnection( "Add", "out", ril::AudioChannelIndexVector( { 0, 1 } ), "this", "out", ril::AudioChannelIndexVector( { 0, 1 } ) );
+  audioConnection( "this", "in", { 0, 1 }, "Add", "in0", { 1, 0 } );
+  audioConnection( "this", "in", { 0, 1 }, "Add", "in1", { 0, 1 } );
+  audioConnection( "Add", "out", { 0, 1 }, "this", "out", { 0, 1 } );
 
 }
 

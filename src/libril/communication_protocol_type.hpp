@@ -1,52 +1,55 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRIL_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
-#define VISR_LIBRIL_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
+#ifndef VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
+#define VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
+
+#include "detail/compile_time_hash_fnv1.hpp"
+
+#include <string>
+#include <cstddef>
 
 namespace visr
 {
-namespace ril
-{
 
-enum class CommunicationProtocolType
+using CommunicationProtocolType = std::uint64_t;
+
+constexpr CommunicationProtocolType communicationProtocolTypeFromString( char const * typeString )
 {
-  SharedData,
-  DoubleBuffering,
-  MessageQueue
-  // To be continued.
-};
+  return detail::compileTimeHashFNV1( typeString );
+}
+
 
 /**
-* Metaprogramming construct to translate a type to its corresponding ID.
-*/
-template< template<typename> class CommunicationProtocolClass, typename ParameterClass >
+ * Type trait (metaprogramming construct) for compile-time translation between a type and its corresponding ID.
+ * Must be specialized by derived parameter types, with the specialized template definining an unnamed enum with a value 'id'
+ * holding the type id of this type
+ * For convenience the macro DEFINE_COMMUNICATION_PROTOCOL should be used.
+ */
+template<class CommunicationProtocolClass >
 struct CommunicationProtocolToId {};
 
-template< CommunicationProtocolType CommunicationProtocolTypeId, typename ParameterClass >
+/**
+ * Type trait (metaprogramming construct) for compile-time translation between a type id and the corresponding C++ type.
+ * Must be specialized by derived parameter types.
+ * his template also stores the registered name of the type.
+ * For convenience the macro DEFINE_COMMUNICATION_PROTOCOL should be used.
+ */
+template< CommunicationProtocolType id>
 struct IdToCommunicationProtocol {};
 
-} // namespace ril
 } // namespace visr
 
 
-#define DEFINE_COMMUNICATION_PROTOCOL_TYPE( CommunicationProtocolClassType, CommunicationProtocolId )\
+#define DEFINE_COMMUNICATION_PROTOCOL( CommunicationProtocolClassType, CommunicationProtocolId, CommunicationProtocolName )\
 namespace visr \
 { \
-  namespace ril \
-  { \
-    template< typename ParameterClass > \
-    struct CommunicationProtocolToId< CommunicationProtocolClassType, ParameterClass > \
+   template<>\
+   struct CommunicationProtocolToId< CommunicationProtocolClassType > \
     { \
     public: \
-      static const CommunicationProtocolType id = CommunicationProtocolId; \
+      enum : CommunicationProtocolType { id = CommunicationProtocolId };\
+      static constexpr const char * name = CommunicationProtocolName; \
     }; \
-    template<typename ParameterClass > \
-    struct IdToCommunicationProtocol<CommunicationProtocolId, ParameterClass> \
-    { \
-    public: \
-      using ConfigType = CommunicationProtocolClassType<ParameterClass>; \
-    }; \
-  } \
 }
 
-#endif // #ifndef VISR_LIBRIL_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED
+#endif // #ifndef VISR_COMMUNICATION_PROTOCOL_TYPE_HPP_INCLUDED

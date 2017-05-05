@@ -86,7 +86,7 @@ private:
    * These samples are written from the capture ports of the sound
    * interface and then passed to the audio processing callback function.
    */
-  std::vector< ril::SampleType const * > mCaptureSampleBuffers;
+  std::vector< SampleType const * > mCaptureSampleBuffers;
 
   /**
    * Buffer to hold the pointers to the sample vectors for the output
@@ -95,7 +95,7 @@ private:
    * function and then passed to the playback argument of the
    * portaudio callback function.
    */
-  std::vector< ril::SampleType * > mPlaybackSampleBuffers;
+  std::vector< SampleType * > mPlaybackSampleBuffers;
 
   jack_client_t* mClient;
 
@@ -398,8 +398,8 @@ void JackInterface::Impl::setCaptureBuffers( jack_nframes_t numFrames )
 {
   for( std::size_t captureIdx(0); captureIdx < mCapturePorts.size(); ++captureIdx )
   {
-    ril::SampleType const * const capturePtr
-      = static_cast<ril::SampleType const * const>(jack_port_get_buffer( mCapturePorts[captureIdx],
+    SampleType const * const capturePtr
+      = static_cast<SampleType const * const>(jack_port_get_buffer( mCapturePorts[captureIdx],
 									 numFrames ));
     assert( capturePtr );
     mCaptureSampleBuffers[captureIdx] = capturePtr;
@@ -410,8 +410,8 @@ void JackInterface::Impl::setPlaybackBuffers( jack_nframes_t numFrames )
 {
   for( std::size_t playbackIdx(0); playbackIdx < mPlaybackPorts.size(); ++playbackIdx )
   {
-    ril::SampleType * const playbackPtr
-      = static_cast<ril::SampleType * const>(jack_port_get_buffer( mPlaybackPorts[playbackIdx],
+    SampleType * const playbackPtr
+      = static_cast<SampleType * const>(jack_port_get_buffer( mPlaybackPorts[playbackIdx],
 									 numFrames ));
     assert( playbackPtr );
     mPlaybackSampleBuffers[playbackIdx] = playbackPtr;

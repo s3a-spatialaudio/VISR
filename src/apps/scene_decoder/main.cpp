@@ -57,7 +57,7 @@ int main( int argc, char const * const * argv )
 
     const std::size_t cInterpolationLength = periodSize;
 
-    ril::SignalFlowContext context( periodSize, samplingRate );
+    SignalFlowContext context( periodSize, samplingRate );
 
     SignalFlow graph( context, "SceneDecoder", nullptr,
                      numberOfObjects, numberOfLoudspeakers,
@@ -68,7 +68,7 @@ int main( int argc, char const * const * argv )
     rrl::AudioSignalFlow flow( graph );
 
 
-    // audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    // audioInterface.registerCallback( &AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -78,7 +78,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface.stop( );
 
-    // audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    // audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {

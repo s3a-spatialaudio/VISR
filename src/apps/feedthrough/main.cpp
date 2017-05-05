@@ -57,10 +57,12 @@ int main( int argc, char const * const * argv )
     rrl::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
-    ril::SignalFlowContext context( periodSize, samplingRate );
-    Feedthrough flow( context, "feedthrough" );
+    SignalFlowContext context( periodSize, samplingRate );
+    Feedthrough topLevel( context, "feedthrough" );
 
-//    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    rrl::AudioSignalFlow flow( topLevel );
+
+    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface.start( );
@@ -70,7 +72,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface.stop( );
 
-    // audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+     audioInterface.unregisterCallback( &rrl::AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {

@@ -155,7 +155,7 @@ std::string FloatSequence<ElementType>::toString( std::string const & separator 
 
 // Explicit instantiations
 template class FloatSequence<float>;
-// template class FloatSequence<double>; // Uncomment when required (increases compile time)
+template class FloatSequence<double>;
 
 } // namespace pml
 } // namespace visr

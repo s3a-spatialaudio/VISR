@@ -41,7 +41,7 @@
  * * libecasoundc-dev
  * * libjack-jack2-dev (probably)
  *
- * The SoundScapeRenderer must be downaloaded from the <a href=http://spatialaudio.net/ssr/download/>SSR download page</a> and installed accoording to the <a href=http://ssr.rtfd.org/>User manual</a>.
+ * The SoundScapeRenderer must be downloaded from the <a href=http://spatialaudio.net/ssr/download/>SSR download page</a> and installed accoording to the <a href=http://ssr.rtfd.org/>User manual</a>.
  * This possibly requires additional software (automake, gmake).
  *
  * @section handling_3rdparty_libs Handling of Third-Party Libraries
@@ -92,7 +92,7 @@
  *    - <tt>brew install portaudio --universal</tt>
  *    - <tt>brew install libsndfile --universal</tt>
  *  * When the python bindings are going to be used, install boost as follows (taken from <a href= http://www.pyimagesearch.com/2015/04/27/installing-boost-and-boost-python-on-osx-with-homebrew/> http://www.pyimagesearch.com/2015/04/27/installing-boost-and-boost-python-on-osx-with-homebrew/</a>)
- *    - If necessary, uninstall a previously instaled boost beforehand: <tt>brew uninstall boost</tt>
+ *    - If necessary, uninstall a previously installed boost beforehand: <tt>brew uninstall boost</tt>
  *    - <tt>brew install python --universal</tt>
  *    - <tt>brew install boost --universal --with-python</tt>
  *    - <tt>brew install boost-python --universal</tt>

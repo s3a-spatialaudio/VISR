@@ -26,10 +26,16 @@ if(WIN32) # 32-bit and 64-bit Windows
   if (CMAKE_CL_64)
       SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe64)
   else(CMAKE_CL_64)
-      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe)
   endif(CMAKE_CL_64)
 elseif(APPLE)
-  SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxo)
+  # Force generation of MacOS bundles.
+  set_target_properties( ${PROJECT_NAME}  PROPERTIES BUNDLE True )
+  set_target_properties( ${PROJECT_NAME}  PROPERTIES BUNDLE_EXTENSION "mxo" )
+  set_target_properties( ${PROJECT_NAME}  PROPERTIES XCODE_ATTRIBUTE_MACH_O_TYPE mh_bundle )
+  # Workaround for CMake bug https://gitlab.kitware.com/cmake/cmake/issues/16147
+  # "BUNDLE_EXTENSION doesn't apply for Xcode generator"
+  set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "mxo")
 endif(WIN32)
 
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
@@ -42,13 +48,11 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME} visr_impl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} efl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} objectmodel )
 IF( WIN32 )
-#  TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_LIBRARY} )
   # I need to exclude this library in combination with MAXAPI_USE_MSCRT
   # defined in the source file in order to avoid crashes when C++
   # standard library functions are called.  
   # TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_P_LIBRARY} )
   # Still required?
-#  SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:MSVCRTD.lib" )
 ENDIF( WIN32 )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_AUDIO_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_API_LIBRARY} )

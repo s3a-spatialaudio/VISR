@@ -22,11 +22,11 @@ namespace visr
 namespace rcl
 {
 
-TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( ril::SignalFlowContext& context,
-                                                char const * name,
-                                                ril::CompositeComponent * parent /*= nullptr*/ )
+TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( SignalFlowContext const & context,
+                                                              char const * name,
+                                                              CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
- , mAlignment( ril::cVectorAlignmentSamples )
+ , mAlignment( cVectorAlignmentSamples )
  , mOutput( "out", *this )
  , mAccumulationBuffer( mAlignment )
  , mCalcBuffer( mAlignment )
@@ -63,7 +63,7 @@ void TimeFrequencyInverseTransform::setup( std::size_t numberOfChannels,
 
   pml::TimeFrequencyParameterConfig const tfParamConfig( dftLength, hopSize, numberOfChannels, mDftSamplesPerPeriod );
   mOutput.setWidth( mNumberOfChannels );
-  mInput.reset( new ril::ParameterInputPort < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "in", *this, tfParamConfig ) ) ;
+  mInput.reset( new ParameterInput < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "in", *this, tfParamConfig ) ) ;
 }
 
 void TimeFrequencyInverseTransform::process()

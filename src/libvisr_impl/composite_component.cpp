@@ -2,22 +2,16 @@
 
 #include <libril/composite_component.hpp>
 
-#include "composite_component_implementation.hpp"
-
-
-#include <iostream>
-#include <stdexcept>
+#include <libvisr_impl/composite_component_implementation.hpp>
 
 namespace visr
 {
-namespace ril
-{
 
-CompositeComponent::CompositeComponent( SignalFlowContext& context,
+CompositeComponent::CompositeComponent( SignalFlowContext const & context,
                                         char const * name,
-                                         CompositeComponent * parent /*= nullptr*/ )
- : Component( context, name, parent )
- , mImpl( new CompositeComponentImplementation( *this) )
+                                        CompositeComponent * parent /*= nullptr*/ )
+ : Component( new impl::CompositeComponentImplementation( *this, context, name,
+                    (parent == nullptr) ? nullptr : &(parent->implementation()) ) )
 {
 }
 
@@ -25,49 +19,61 @@ CompositeComponent::~CompositeComponent()
 {
 }
 
-bool CompositeComponent::isComposite() const
-{
-  return true;
-}
-
 std::size_t CompositeComponent::numberOfComponents() const
 {
-  return mImpl->numberOfComponents();
+  return implementation().numberOfComponents();
 }
 
-void CompositeComponent::registerParameterConnection( std::string const & sendComponent,
-                                                      std::string const & sendPort,
-                                                      std::string const & receiveComponent,
-                                                      std::string const & receivePort )
+void CompositeComponent::parameterConnection( char const * sendComponent,
+                                              char const * sendPort,
+                                              char const * receiveComponent,
+                                              char const * receivePort )
 {
-  mImpl->registerParameterConnection( sendComponent, sendPort, receiveComponent, receivePort );
+  implementation().registerParameterConnection( sendComponent, sendPort, receiveComponent, receivePort );
 }
 
-void CompositeComponent::registerAudioConnection( std::string const & sendComponent,
-                                                  std::string const & sendPort,
-                                                  AudioChannelIndexVector const & sendIndices,
-                                                  std::string const & receiveComponent,
-                                                  std::string const & receivePort,
-                                                  AudioChannelIndexVector const & receiveIndices )
+void CompositeComponent::parameterConnection( ParameterPortBase & sender,
+                                              ParameterPortBase & receiver )
 {
-  mImpl->registerAudioConnection( sendComponent, sendPort, sendIndices,
-                                  receiveComponent, receivePort, receiveIndices );
+  implementation().registerParameterConnection( sender, receiver );
 }
 
-CompositeComponentImplementation & CompositeComponent::implementation()
+void CompositeComponent::audioConnection( char const * sendComponent,
+                                          char const * sendPort,
+                                          ChannelList const & sendIndices,
+                                          char const * receiveComponent,
+                                          char const * receivePort,
+                                          ChannelList const & receiveIndices )
 {
-  return *mImpl;
+  implementation().audioConnection( sendComponent, sendPort, sendIndices,
+                                    receiveComponent, receivePort, receiveIndices );
 }
 
-/**
-* Return a reference to the internal data structures holding ports and contained components, const version.
-* From the user point of view, these data structure is opaque and unknown.
-* @todo Improve name ('implementation' does not really fit)
-*/
-CompositeComponentImplementation const & CompositeComponent::implementation() const
+void CompositeComponent::audioConnection( AudioPortBase & sendPort,
+                                          ChannelList const & sendIndices,
+                                          AudioPortBase & receivePort,
+                                          ChannelList const & receiveIndices )
 {
-  return *mImpl;
+  implementation().audioConnection( sendPort, sendIndices, receivePort, receiveIndices );
 }
 
-} // namespace ril
+
+void CompositeComponent::audioConnection( AudioPortBase & sendPort,
+                                                  AudioPortBase & receivePort )
+{
+  implementation().audioConnection( sendPort, receivePort );
+}
+
+impl::CompositeComponentImplementation & CompositeComponent::implementation()
+{
+  // Cast is safe since the constructor ensures that the impl object is of the derived type.
+  return static_cast<impl::CompositeComponentImplementation &>(Component::implementation());
+}
+
+impl::CompositeComponentImplementation const & CompositeComponent::implementation() const
+{
+  // Cast is safe since the constructor ensures that the impl object is of the derived type.
+  return static_cast<impl::CompositeComponentImplementation const &>(Component::implementation());
+}
+
 } // namespace visr

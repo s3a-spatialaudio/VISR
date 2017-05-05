@@ -5,8 +5,8 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
-#include <libril/parameter_input_port.hpp>
-#include <libril/parameter_output_port.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -26,22 +26,22 @@ namespace rcl
 /**
  * Audio component for extracting the diffuseness gain from an object vector.
  */
-class DiffusionGainCalculator: public ril::AtomicComponent
+class DiffusionGainCalculator: public AtomicComponent
 {
 public:
   /**
    * Type of the gain coefficients. We use the same type as the audio samples.
    */
-  using CoefficientType = ril::SampleType;
+  using CoefficientType = SampleType;
 
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit DiffusionGainCalculator( ril::SignalFlowContext& context,
+  explicit DiffusionGainCalculator( SignalFlowContext const & context,
                                     char const * name,
-                                    ril::CompositeComponent * parent = nullptr );
+                                    CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -79,8 +79,8 @@ private:
    */
   void processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains );
 
-  ril::ParameterInputPort< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
-  std::unique_ptr<ril::ParameterOutputPort< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
+  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
+  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
 
 };
 

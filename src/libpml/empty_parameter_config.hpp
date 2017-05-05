@@ -16,14 +16,16 @@ namespace pml
 /**
  * A dummy config types for parameters that do not require a configuration.
  */
-class EmptyParameterConfig: public ril::ParameterConfigBase
+class EmptyParameterConfig: public ParameterConfigBase
 {
 public:
   EmptyParameterConfig();
 
   virtual ~EmptyParameterConfig();
 
-  bool compare( ril::ParameterConfigBase const & rhs ) const override;
+  std::unique_ptr< ParameterConfigBase > clone() const override;
+
+  bool compare( ParameterConfigBase const & rhs ) const override;
 
   bool compare( EmptyParameterConfig const & rhs ) const;
 private:

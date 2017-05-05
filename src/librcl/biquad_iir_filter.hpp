@@ -7,13 +7,17 @@
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
 #include <libpml/biquad_parameter.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 
 #include <cstddef> // for std::size_t
+#include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -27,19 +31,32 @@ namespace rcl
  * The widths of the input and the output port are identical and is
  * set by the argument <b>numberOfChannels</b> in the setup() method.
  */
-class BiquadIirFilter: public ril::AtomicComponent
+class BiquadIirFilter: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
    * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param name The name of the component. Must be unique within tdefhe containing AudioSignalFlow.
    */
-  explicit BiquadIirFilter( ril::SignalFlowContext& context,
+  explicit BiquadIirFilter( SignalFlowContext const & context,
                             char const * name,
-                            ril::CompositeComponent * parent = nullptr  );
-    
+                            CompositeComponent * parent = nullptr  );
+
+  /**
+   * Setup method to initialise the object and set all eq parameters to a default (flat) response.
+   * @param numberOfChannels The number of single audio waveforms in
+   * the multichannel input and output waveforms. .
+   * @param numberOfBiquads The number of biquads per audio channel.
+   * @param initialBiquad The initial setting for the filter characteristics. All biquads in all channels are set
+   * to this coefficient set. The default is a flat, direct-feedthrough filter
+   */
+  void setup( std::size_t numberOfChannels,
+              std::size_t numberOfBiquads,
+              bool controlInput = false );
+
+
   /**
    * Setup method to initialise the object and set the parameters.
    * @param numberOfChannels The number of single audio waveforms in
@@ -50,7 +67,8 @@ public:
    */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameter<SampleType> const & initialBiquad = pml::BiquadParameter< SampleType >() );
+              pml::BiquadParameter<SampleType> const & initialBiquad,
+              bool controlInput = false );
 
   /**
   * Setup method to initialise the object and set the parameters.
@@ -61,7 +79,8 @@ public:
   */
   void setup( std::size_t numberOfChannels,
     std::size_t numberOfBiquads,
-    pml::BiquadParameterList< SampleType > const & coeffs );
+    pml::BiquadParameterList< SampleType > const & coeffs,
+    bool controlInput = false );
 
   /**
   * Setup method to initialise the object and set the biquad filters individually for each filter channel and biquad section.
@@ -71,7 +90,8 @@ public:
   */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameterMatrix< SampleType > const & coeffs );
+              pml::BiquadParameterMatrix< SampleType > const & coeffs,
+              bool controlInput = false );
 
   /**
    * The process method applies the IIR filters to the audio channels.
@@ -119,7 +139,8 @@ private:
    * Contains the code common to all constructors.
    */
   void setupDataMembers( std::size_t numberOfChannels,
-                         std::size_t numberOfBiquads );
+                         std::size_t numberOfBiquads,
+                         bool controlInput );
 
   /**
    * Internal method to set a single biquad section.
@@ -149,12 +170,14 @@ private:
   /**
    * The audio input port for this component.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output port for this component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
+
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::BiquadParameterMatrix<SampleType> > > mEqInput;
 
   /**
    * The number of simultaneous audio channels.
@@ -192,6 +215,13 @@ private:
   efl::BasicVector<SampleType> mCurrentInput;
   efl::BasicVector<SampleType> mCurrentOutput;
   //@}
+
+  /**
+   * Temporary storage to hold the pointers of all input channels.
+   * This is sensible at the moment as the data is processed sample-wise, which makes repeated index access costly.
+   * @todo Consider change to a stride-based access to the input port data.
+   */
+  std::valarray<SampleType const * > mInputChannels;
 };
 
 } // namespace rcl

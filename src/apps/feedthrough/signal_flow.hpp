@@ -18,19 +18,19 @@ namespace apps
 namespace feedthrough
 {
 
-class Feedthrough: public ril::CompositeComponent
+class Feedthrough: public CompositeComponent
 {
 public:
-  explicit Feedthrough( ril::SignalFlowContext & context, const char* name, ril::CompositeComponent * parent = nullptr );
+  explicit Feedthrough( SignalFlowContext & context, const char* name, CompositeComponent * parent = nullptr );
 
   ~Feedthrough();
 
   /*virtual*/ void process( );
 
 private:
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   rcl::Add mSum;
 };

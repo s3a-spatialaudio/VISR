@@ -16,7 +16,7 @@ TimeFrequencyParameterConfig::TimeFrequencyParameterConfig( std::size_t dftSize,
                                                             std::size_t hopSize,
                                                             std::size_t numberOfChannels,
                                                             std::size_t numberOfDftSamples )
- : ril::ParameterConfigBase()
+ : ParameterConfigBase()
  , mDftSize( dftSize )
  , mHopSize( hopSize )
  , mNumberOfDftSamples( numberOfDftSamples )
@@ -28,7 +28,12 @@ TimeFrequencyParameterConfig::~TimeFrequencyParameterConfig()
 {
 }
 
-bool TimeFrequencyParameterConfig::compare(ril::ParameterConfigBase const & rhs) const
+std::unique_ptr< ParameterConfigBase > TimeFrequencyParameterConfig::clone() const
+{
+  return std::unique_ptr<ParameterConfigBase>( new TimeFrequencyParameterConfig( *this ) );
+}
+
+bool TimeFrequencyParameterConfig::compare(ParameterConfigBase const & rhs) const
 {
   // maybe move this to the base class.
   if (std::type_index(typeid(rhs)) != std::type_index(typeid(TimeFrequencyParameterConfig)))
