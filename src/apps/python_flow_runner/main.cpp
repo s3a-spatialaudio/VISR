@@ -8,11 +8,10 @@
 
 #include <libril/signal_flow_context.hpp>
 
-#ifdef BASELINE_RENDERER_NATIVE_JACK
+#ifdef VISR_JACK_SUPPORT
 #include <librrl/jack_interface.hpp>
-#else
-#include <librrl/portaudio_interface.hpp>
 #endif
+#include <librrl/portaudio_interface.hpp>
 #include <librrl/audio_signal_flow.hpp>
 
 #include <libpythonsupport/python_wrapper.hpp>
@@ -82,7 +81,7 @@ int main( int argc, char const * const * argv )
     std::string const pythonClassName = cmdLineOptions.getOption<std::string>( "python-class-name");
     std::string const objectName = cmdLineOptions.getDefaultedOption<std::string>( "python-class-name", "PythonFlow" );
     std::string const positionalArgs = cmdLineOptions.getOption<std::string>( "positional-arguments" );
-    std::string const kwArgs = cmdLineOptions.getOption<std::string>( "keyword-arguments" );
+    std::string const kwArgs = cmdLineOptions.getDefaultedOption<std::string>( "keyword-arguments", "" );
 
     SignalFlowContext const ctxt( periodSize, samplingRate );
     pythonsupport::PythonWrapper topLevelComponent( ctxt, objectName.c_str(), nullptr, 
@@ -111,9 +110,9 @@ int main( int argc, char const * const * argv )
       interfaceConfig.mNumberOfPlaybackChannels = numOutputs;
       interfaceConfig.mPeriodSize = periodSize;
       interfaceConfig.mSampleRate = samplingRate;
-      interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects - 1 );
-      interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels - 1 );
-      interfaceConfig.mClientName = "VisrRenderer";
+      interfaceConfig.setCapturePortNames( "input_", 0, numInputs - 1 );
+      interfaceConfig.setPlaybackPortNames( "output_", 0, numOutputs - 1 );
+      interfaceConfig.mClientName = objectName;
       audioInterface.reset( new rrl::JackInterface( interfaceConfig ) );
     }
     else
