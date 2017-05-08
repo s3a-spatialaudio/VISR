@@ -166,8 +166,14 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   py::dict keywordDict;
   try
   {
-    keywordList = py::eval( positionalArguments )/*.cast<py::tuple>()*/;
-    keywordDict = py::eval( keywordArguments ).cast<py::dict>();
+    if( not std::string(positionalArguments).empty())
+    {
+      keywordList = py::eval( positionalArguments ).cast<py::tuple>();
+    }
+    if( not std::string(keywordArguments).empty())
+    {
+      keywordDict = py::eval( keywordArguments ).cast<py::dict>();
+    }
   }
   catch( std::exception const & ex )
   {
