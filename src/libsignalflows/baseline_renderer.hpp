@@ -14,6 +14,7 @@
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/gain_vector.hpp>
 #include <librcl/hoa_allrad_gain_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/object_gain_eq_calculator.hpp>
@@ -42,10 +43,14 @@
 namespace visr
 {
 
+// Forward declarations
+namespace rsao
+{
+class ReverbObjectRenderer;
+}
+
 namespace signalflows
 {
-
-#define DISABLE_REVERB_RENDERING 1
 
 /**
  * Audio signal graph object for the VISR baseline renderer.
@@ -55,6 +60,9 @@ class BaselineRenderer: public CompositeComponent
 public:
   /**
    * Constructor to create, initialise and interconnect all processing components.
+   * @param context The signal flow context object containing information such as sampling frequency and period (block) size.
+   * @param name The name of the component, used for identification and error reporting.
+   * @param parent The containing component, if there is one. Use nullptr to mark this as the toplevel component.
    * @param loudspeakerConfiguration The configuration of the reproduction array, including the routing to physical output channels,
    * potentially virtual loudspeakers and subwoofer configuration.
    * @param numberOfInputs The number of inputs, i.e., the number of audio object signals
@@ -88,6 +96,9 @@ public:
                              std::string const & reverbConfig,
                              bool frequencyDependentPanning );
 
+  /**
+   * Simplified constructor using default values for several parameters.
+   */
   explicit BaselineRenderer( SignalFlowContext const & context,
                              char const * name,
                              CompositeComponent * parent,
@@ -108,12 +119,11 @@ private:
   rcl::ObjectGainEqCalculator mObjectInputGainEqCalculator;
 
   /**
-   * Apply the the 'level' setting of the object.
-   * We use a DelayVector, which allows also control of the gain, and do not use the delay,
+   * Apply the 'level' setting of the object.
    * @note This signal flow assumes that each signal input is used only by a single object. Otherwise the settings would
    * be overwritten
    */
-  rcl::DelayVector mObjectGain;
+  rcl::GainVector mObjectGain;
 
   rcl::BiquadIirFilter mObjectEq;
 
@@ -162,63 +172,15 @@ private:
 
   //@}
 
-#ifndef DISABLE_REVERB_RENDERING
-  /**
-   * Audio components and parameter data, and internal functions related to the object-based reverberation signal flow.
-   * @todo Consider moving this into a separate separate sub-signalflow (after this feature has been implemented).
-   */
-  //@{
-  /**
-   * @throw std::invalid_argument If there is an error in the configuration (e.g., an inconsistency or a missing file path)
-   */
-  void setupReverberationSignalFlow( std::string const & reverbConfig,
-                                     panning::LoudspeakerArray const & arrayConfig,
-                                     std::size_t numberOfInputs,
-                                     std::size_t interpolationSteps );
 
-  std::size_t mMaxNumReverbObjects;
-
-  SampleType mLateReverbFilterLengthSeconds;
-
-  std::size_t mNumDiscreteReflectionsPerObject;
-   
-  rcl::ReverbParameterCalculator mReverbParameterCalculator;
-
-  rcl::SignalRouting mReverbSignalRouting;
-
-  rcl::DelayVector mDiscreteReverbDelay;
-
-  rcl::BiquadIirFilter mDiscreteReverbReflFilters;
-
-  rcl::GainMatrix mDiscreteReverbPanningMatrix;
-
-  rcl::LateReverbFilterCalculator mLateReverbFilterCalculator;
-
-  /**
-   * Overall gain and delay for the source signals going into the late
-   * reverberation part.
-   * This is used to apply the object level, but should also apply the
-   * onset delay.
-   */
-  rcl::DelayVector mLateReverbGainDelay;
-
-  rcl::FirFilterMatrix mLateReverbFilter;
-
-  rcl::FirFilterMatrix mLateDiffusionFilter;
-
-  rcl::Add mReverbMix;
-  //@}
-#endif
+  std::unique_ptr<rsao::ReverbObjectRenderer> mReverbRenderer;
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
-
 
   /**
    * Preliminary support for low-frequency adaptive panning.
    */
   //@{
-  bool mFrequencyDependentPanning;
-
   std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
 
   std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;

@@ -13,6 +13,8 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
+#include <librsao/reverb_object_renderer.hpp>
+
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -70,43 +72,19 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
  , mVbapMatrix( context, "VbapGainMatrix", this )
  , mDiffusePartMatrix( context, "DiffusePartMatrix", this )
  , mDiffusePartDecorrelator( context, "DiffusePartDecorrelator", this )
-#ifdef DISABLE_REVERB_RENDERING
  , mDirectDiffuseMix( context, "DirectDiffuseMixer", this,
-		      loudspeakerConfiguration.getNumRegularSpeakers(),
-		      frequencyDependentPanning ? 3 : 2 )
-#else
- , mDirectDiffuseMix( context, "DirectDiffuseMixer", this,
-		      loudspeakerConfiguration.getNumRegularSpeakers(),
-		      frequencyDependentPanning ? 4 : 3 )
-#endif
+                      loudspeakerConfiguration.getNumRegularSpeakers(),
+                      3 + (frequencyDependentPanning ?1:0) + (reverbConfig.empty() ? 0 : 1) )
  , mSubwooferMix( context, "SubwooferMixer", this )
  , mNullSource( context, "NullSource", this )
-// , mObjectEqParameter( 0, 0 ) // TODO: remove
-// , mDiffuseGains( cVectorAlignmentSamples ) // TODO: Remove
-#ifndef DISABLE_REVERB_RENDERING
- // Reverberation-related members
- , mReverbParameterCalculator( context, "ReverbParameterCalculator", this )
- , mReverbSignalRouting( context, "ReverbSignalRouting", this )
- , mDiscreteReverbDelay( context, "DiscreteReverbDelay", this )
- , mDiscreteReverbReflFilters( context, "DiscreteReverbReflectionFilters", this )
- , mDiscreteReverbPanningMatrix( context, "DiscreteReverbPanningMatrix", this )
- , mLateReverbFilterCalculator( context, "LateReverbFilterCalculator", this )
- , mLateReverbGainDelay( context, "LateReverbGainDelay", this )
- , mLateReverbFilter( context, "LateReverbFilter", this )
- , mLateDiffusionFilter( context, "LateDiffusionFilter", this )
- , mReverbMix( context, "ReverbMix", this )
-#endif
- , mFrequencyDependentPanning( frequencyDependentPanning )
  , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
-  , mLowFrequencyPanningMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "LowFrequencyPanningMatrix", this ) : nullptr)
+ , mLowFrequencyPanningMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "LowFrequencyPanningMatrix", this ) : nullptr)
  , mInput( "input", *this, numberOfInputs )
  , mOutput( "output", *this, numberOfOutputs )
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
   std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
   std::size_t const numberOfOutputSignals = numberOfLoudspeakers + numberOfSubwoofers;
-
-  assert( frequencyDependentPanning == mFrequencyDependentPanning );
 
   mTrackingEnabled = not trackingConfiguration.empty( );
   if( mTrackingEnabled )
@@ -150,21 +128,33 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
   parameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder.parameterPort( "datagramInput" ) );
 
   mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration, false /*no listener adaptation*/,
-                         mFrequencyDependentPanning /*separate lowpass panning*/ );
+                         frequencyDependentPanning /*separate lowpass panning*/ );
   parameterConnection( mSceneDecoder.parameterPort( "objectVectorOutput" ), mGainCalculator.parameterPort( "objectVectorInput" ) );
 
   mObjectInputGainEqCalculator.setup( numberOfInputs, numberOfObjectEqSections );
-  mObjectGain.setup( numberOfInputs, interpolationPeriod, 0.0 /*No delay*/,
-                    rcl::DelayVector::InterpolationType::NearestSample );
-  mObjectEq.setup( numberOfInputs, numberOfObjectEqSections );
+  parameterConnection(mSceneDecoder.parameterPort( "objectVectorOutput" ), mObjectInputGainEqCalculator.parameterPort("objectIn") );
+  mObjectGain.setup( numberOfInputs, interpolationPeriod, true /* controlInputs */ );
+  audioConnection( mInput, mObjectGain.audioPort("in") );
+  parameterConnection( mObjectInputGainEqCalculator.parameterPort("gainOut"), mObjectGain.parameterPort("gainInput"));
+
+
+  mObjectEq.setup( numberOfInputs, numberOfObjectEqSections, true /* Enable control input */ );
+  audioConnection( mObjectGain.audioPort("out"), mObjectEq.audioPort("in") );
+  parameterConnection( mObjectInputGainEqCalculator.parameterPort("eqOut"), mObjectEq.parameterPort("eqInput"));
+
 
   mChannelObjectRoutingCalculator.setup( numberOfInputs, loudspeakerConfiguration);
-  mChannelObjectRouting.setup(numberOfInputs, numberOfLoudspeakers);
-  mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration );
+  parameterConnection(mSceneDecoder.parameterPort( "objectVectorOutput" ), mChannelObjectRoutingCalculator.parameterPort("objectIn") );
+
+  mChannelObjectRouting.setup(numberOfInputs, numberOfLoudspeakers, true /* activate control input*/ );
+  audioConnection( mObjectEq.audioPort("out"), mChannelObjectRouting.audioPort("in") );
+  audioConnection( mChannelObjectRouting.audioPort("out"), mDirectDiffuseMix.audioPort("in0") );
+  parameterConnection( mChannelObjectRoutingCalculator.parameterPort("routingOut"), mChannelObjectRouting.parameterPort("controlInput") );
+
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
   parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
-
-  if( mFrequencyDependentPanning )
+  audioConnection( mVbapMatrix.audioPort("out"), mDirectDiffuseMix.audioPort("in1") );
+  if( frequencyDependentPanning )
   {
     // Static crossover pair (2nd-order Linkwitz-Riley with cutoff 700 Hz @ fs=48 kHz)
     static pml::BiquadParameter<SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
@@ -182,8 +172,20 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 
     mPanningFilterbank->setup( 2*numberOfInputs, 1, coeffMatrix );
     mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-
     parameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
+
+    audioConnection( "VbapGainMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
+
+    audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
+    audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( numberOfInputs, 2*numberOfInputs ) );
+    audioConnection( mPanningFilterbank->audioPort("out"), mVbapMatrix.audioPort("in") );
+    audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( numberOfInputs, 2*numberOfInputs ), mLowFrequencyPanningMatrix->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
+
+    audioConnection( mLowFrequencyPanningMatrix->audioPort("out"), mDirectDiffuseMix.audioPort("in2") );
+  }
+  else
+  {
+    audioConnection( mObjectEq.audioPort("out"), mVbapMatrix.audioPort("in") );
   }
 
   //////////////////////////////////////////////////////////////////////////////////////
@@ -209,13 +211,10 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
   //////////////////////////////////////////////////////////////////////////////////////
 
   mDiffusionGainCalculator.setup( numberOfInputs );
-  mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
-
-  mDiffusionGainCalculator.setup( numberOfInputs );
   parameterConnection( "SceneDecoder", "objectVectorOutput", "DiffusionCalculator", "objectInput" );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
   parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
-
+  audioConnection( mObjectEq.audioPort("out"), mDiffusePartMatrix.audioPort("in") );
 
   /**
    * Adjust the level of the diffuse objects such that they are comparable to point sources.
@@ -225,6 +224,8 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
    */
   SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
+
+
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
@@ -242,151 +243,24 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
   // identical to SampleType (at the moment, both are floats).
   efl::BasicMatrix<SampleType> const & subwooferMixGains = loudspeakerConfiguration.getSubwooferGains();
   mSubwooferMix.setup( numberOfLoudspeakers, numberOfSubwoofers, 0/*interpolation steps*/, subwooferMixGains, false/*controlInput*/ );
-#ifndef DISABLE_REVERB_RENDERING
-  setupReverberationSignalFlow( reverbConfig, loudspeakerConfiguration, numberOfInputs, interpolationPeriod );
-#endif
 
-  audioConnection( audioPort("input"), mDiffusePartMatrix.audioPort("in") );
-  audioConnection( "VbapGainMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
-  if( mFrequencyDependentPanning )
-#if 0
-  // Create the index vectors for connecting the ports.
-  // First, create the start indices for all output vectors by adding the width of the previous vector.
-  std::size_t const captureStartIdx = 0;
-  std::size_t const objectGainOutStartIdx = captureStartIdx + numberOfInputs;
-  std::size_t const objectEqOutStartIdx = objectGainOutStartIdx + numberOfInputs;
-  std::size_t const channelObjectRoutingOutStartIdx = objectEqOutStartIdx + numberOfInputs;
-
-  std::size_t const vbapMatrixOutStartIdx = channelObjectRoutingOutStartIdx + numberOfLoudspeakers;
-  std::size_t const diffuseMixerOutStartIdx = vbapMatrixOutStartIdx + numberOfLoudspeakers;
-  std::size_t const decorrelatorOutStartIdx = diffuseMixerOutStartIdx + 1;
-
-  // reverberation-related part
-  std::size_t const reverbRoutingOutStartIdx = decorrelatorOutStartIdx + numberOfLoudspeakers;
-  std::size_t const reverbDiscreteDelayOutStartIdx = reverbRoutingOutStartIdx + mMaxNumReverbObjects;
-  std::size_t const reverbDiscreteWallReflOutStartIdx = reverbDiscreteDelayOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
-  std::size_t const reverbDiscretePanningOutStartIdx = reverbDiscreteWallReflOutStartIdx + mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject;
-  std::size_t const reverbLateGainDelayOutStartIdx = reverbDiscretePanningOutStartIdx + numberOfLoudspeakers;
-  std::size_t const reverbLateFilterOutStartIdx = reverbLateGainDelayOutStartIdx + mMaxNumReverbObjects;
-  std::size_t const reverbLateDecorrOutStartIdx = reverbLateFilterOutStartIdx + 1;
-  std::size_t const reverbMixOutStatIdx = reverbLateDecorrOutStartIdx + numberOfLoudspeakers;
-
-  // signal flow copmmon to all object types
-  std::size_t const mixOutStartIdx = reverbMixOutStatIdx + numberOfLoudspeakers;
-  std::size_t const trackingCompensationOutStartIdx = mixOutStartIdx + numberOfLoudspeakers;
-  std::size_t const subwooferMixerOutStartIdx = trackingCompensationOutStartIdx + (mTrackingEnabled ? numberOfLoudspeakers : 0 );
-  std::size_t const outputEqualisationOutStartIdx = subwooferMixerOutStartIdx + numberOfSubwoofers;
-  std::size_t const outputAdjustOutStartIdx = outputEqualisationOutStartIdx + (outputEqSupport ? numberOfOutputSignals : 0);
-  std::size_t const nullSourceOutStartIdx = outputAdjustOutStartIdx + numberOfOutputSignals;
-  std::size_t const communicationChannelEndIndex = nullSourceOutStartIdx + 1; // One past end index. Also the number of total indices.
-
-  // Now, explicitly construct the index vectors.
-  std::vector<ril::AudioPort::SignalIndexType> const captureChannels = indexRange( captureStartIdx, objectGainOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const objectGainOutChannels = indexRange( objectGainOutStartIdx, objectEqOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const objectEqOutChannels = indexRange( objectEqOutStartIdx, channelObjectRoutingOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const channelObjectRoutingOutChannels = indexRange( channelObjectRoutingOutStartIdx, vbapMatrixOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const vbapMatrixOutChannels = indexRange( vbapMatrixOutStartIdx, diffuseMixerOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const diffuseMixerOutChannels = indexRange( diffuseMixerOutStartIdx, decorrelatorOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const decorrelatorOutChannels = indexRange( decorrelatorOutStartIdx, reverbRoutingOutStartIdx );
-  // Reverb-related stuff
-  std::vector<ril::AudioPort::SignalIndexType> const reverbRoutingOutChannels = indexRange( reverbRoutingOutStartIdx, reverbDiscreteDelayOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbDiscreteDelayOutChannels = indexRange( reverbDiscreteDelayOutStartIdx, reverbDiscreteWallReflOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbDiscreteWallReflOutChannels = indexRange( reverbDiscreteWallReflOutStartIdx, reverbDiscretePanningOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbDiscretePanningOutChannels = indexRange( reverbDiscretePanningOutStartIdx, reverbLateGainDelayOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbGainDelayOutChannels = indexRange( reverbLateGainDelayOutStartIdx, reverbLateFilterOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbLateFilterOutChannels = indexRange( reverbLateFilterOutStartIdx, reverbLateDecorrOutStartIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbLateDecorrOutChannels = indexRange( reverbLateDecorrOutStartIdx, reverbMixOutStatIdx );
-  std::vector<ril::AudioPort::SignalIndexType> const reverbMixOutChannels = indexRange( reverbMixOutStatIdx, mixOutStartIdx );
-  // Construct the input channel indices for the mDiscreteReverbReflFilters, which distributes each of the
-  // mMaxNumReverbObjects signals to mNumDiscreteReflectionsPerObject consecutive channels.
-  std::vector<ril::AudioPort::SignalIndexType> reverbDiscreteReflDelayInChannels( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject );
-  for( std::size_t objIdx( 0 ); objIdx < mMaxNumReverbObjects; ++objIdx )
-#endif
+  if( not reverbConfig.empty() )
   {
-    audioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "PanningFilterbank", "in", ChannelRange( 0, numberOfInputs ) );
-    audioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "PanningFilterbank", "in", ChannelRange( numberOfInputs, 2*numberOfInputs ) );
-    audioConnection( "PanningFilterbank", "out", ChannelRange( 0, numberOfInputs ), "VbapGainMatrix", "in", ChannelRange( 0, numberOfInputs ) );
-    audioConnection( "PanningFilterbank", "out", ChannelRange( numberOfInputs, 2*numberOfInputs ), "LowFrequencyPanningMatrix", "in", ChannelRange( 0, numberOfInputs ) );
+    mReverbRenderer.reset( new rsao::ReverbObjectRenderer( context, "ReverbObjectRenderer", this,
+                                                           reverbConfig, loudspeakerConfiguration,
+                                                           numberOfInputs ) );
 
-    audioConnection( "LowFrequencyPanningMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", ChannelRange( 0, numberOfLoudspeakers ) );
+    audioConnection( mObjectEq.audioPort("out"), mReverbRenderer->audioPort("in") );
+    char const * diffuseInPort = frequencyDependentPanning ? "in2" : "in3";
+    audioConnection( mReverbRenderer->audioPort("out"), mDirectDiffuseMix.audioPort( diffuseInPort) );
+
+    parameterConnection( mSceneDecoder.parameterPort( "objectVectorOutput" ), mReverbRenderer->parameterPort("objectIn") );
   }
-  else
-  {
-    audioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "VbapGainMatrix", "in", ChannelRange( 0, numberOfInputs ) );
-  }
-  audioConnection( "DiffusePartMatrix", "out", ChannelRange( 0, 1 ), "DiffusePartDecorrelator", "in", ChannelRange( 0, 1 ) );
-  audioConnection( "DiffusePartDecorrelator", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer",
-                          mFrequencyDependentPanning ? "in2" : "in1", ChannelRange( 0, numberOfLoudspeakers ) );
-#ifndef DISABLE_REVERB_RENDERING
-  audioConnection( "", "input", ChannelRange( 0, numberOfInputs ), "ReverbSignalRouting", "in", ChannelRange( 0, numberOfInputs ) );
-  // Calculate the indices for distributing each reverb object to #mNumDiscreteReflectionsPerObject
-  ChannelList discreteReflDemuxIndices( AudioChannelSlice(0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  for( std::size_t cnt( 0 ); cnt < mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject; ++cnt )
-  {
-    discreteReflDemuxIndices[cnt] = cnt / mNumDiscreteReflectionsPerObject;
-  }
-  audioConnection( "ReverbSignalRouting", "out", discreteReflDemuxIndices,
-                           "DiscreteReverbDelay", "in", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  audioConnection( "DiscreteReverbDelay", "out", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ),
-                           "DiscreteReverbReflectionFilters", "in", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  audioConnection( "DiscreteReverbReflectionFilters", "out", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ),
-                           "DiscreteReverbPanningMatrix", "in", ChannelRange( 0, mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject ) );
-  audioConnection( "DiscreteReverbPanningMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ),
-                           "ReverbMix", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
 
-  audioConnection( "ReverbSignalRouting", "out", ChannelRange( 0, mMaxNumReverbObjects ), "LateReverbGainDelay", "in", ChannelRange( 0, mMaxNumReverbObjects ) );
-  audioConnection( "LateReverbGainDelay", "out", ChannelRange( 0, mMaxNumReverbObjects ), "LateReverbFilter", "in", ChannelRange( 0, mMaxNumReverbObjects ) );
-  audioConnection( "LateReverbFilter", "out", ChannelRange( 0, 1 ), "LateDiffusionFilter", "in", ChannelRange( 0, 1 ) );
-  audioConnection( "LateDiffusionFilter", "out", ChannelRange( 0, numberOfLoudspeakers ), "ReverbMix", "in1", ChannelRange( 0, numberOfLoudspeakers ) );
 
-  audioConnection( "ReverbMix", "out", ChannelRange( 0, numberOfLoudspeakers ),
-                           "DirectDiffuseMixer", mFrequencyDependentPanning ? "in3" : "in2", ChannelRange( 0, numberOfLoudspeakers ) );
-#endif
-#if 0  
-  initCommArea( communicationChannelEndIndex, period, ril::cVectorAlignmentSamples );
-
-  // Connect the ports
-  assignCommunicationIndices( "ObjectGain", "in", captureChannels );
-  assignCommunicationIndices( "ObjectGain", "out", objectGainOutChannels );
-  assignCommunicationIndices( "ObjectEq", "in", objectGainOutChannels );
-  assignCommunicationIndices( "ObjectEq", "out", objectEqOutChannels );
-  assignCommunicationIndices( "ChannelObjectRouting", "in", objectEqOutChannels);
-  assignCommunicationIndices( "VbapGainMatrix", "in", objectEqOutChannels );
-  assignCommunicationIndices( "DiffusePartMatrix", "in", objectEqOutChannels );
-  assignCommunicationIndices( "ChannelObjectRouting", "out", channelObjectRoutingOutChannels );
-  assignCommunicationIndices( "VbapGainMatrix", "out", vbapMatrixOutChannels );
-  assignCommunicationIndices( "DiffusePartMatrix", "out", diffuseMixerOutChannels );
-  assignCommunicationIndices( "DiffusePartDecorrelator", "in", diffuseMixerOutChannels );
-  assignCommunicationIndices( "DiffusePartDecorrelator", "out", decorrelatorOutChannels );
-
-  // Reverb-specific signal path
-  assignCommunicationIndices( "ReverbSignalRouting", "in", objectEqOutChannels );
-  assignCommunicationIndices( "ReverbSignalRouting", "out", reverbRoutingOutChannels );
-  assignCommunicationIndices( "DiscreteReverbDelay", "in", reverbDiscreteReflDelayInChannels );
-  assignCommunicationIndices( "DiscreteReverbDelay", "out", reverbDiscreteDelayOutChannels );
-  assignCommunicationIndices( "DiscreteReverbReflectionFilters", "in", reverbDiscreteDelayOutChannels );
-  assignCommunicationIndices( "DiscreteReverbReflectionFilters", "out", reverbDiscreteWallReflOutChannels );
-  assignCommunicationIndices( "DiscreteReverbPanningMatrix", "in", reverbDiscreteWallReflOutChannels );
-  assignCommunicationIndices( "DiscreteReverbPanningMatrix", "out", reverbDiscretePanningOutChannels );
-  assignCommunicationIndices( "ReverbMix", "in0", reverbDiscretePanningOutChannels );
-  assignCommunicationIndices( "LateReverbGainDelay", "in", reverbRoutingOutChannels );
-  assignCommunicationIndices( "LateReverbGainDelay", "out", reverbGainDelayOutChannels );
-  assignCommunicationIndices( "LateReverbFilter", "in", reverbGainDelayOutChannels );
-  assignCommunicationIndices( "LateReverbFilter", "out", reverbLateFilterOutChannels );
-  assignCommunicationIndices( "LateDiffusionFilter", "in", reverbLateFilterOutChannels );
-  assignCommunicationIndices( "LateDiffusionFilter", "out", reverbLateDecorrOutChannels );
-  assignCommunicationIndices( "ReverbMix", "in1", reverbLateDecorrOutChannels );
-  assignCommunicationIndices( "ReverbMix", "out", reverbMixOutChannels );
-
-  // signal flow common to all object types (starting with summation of the different signal paths
-  assignCommunicationIndices( "DirectDiffuseMixer", "in0", vbapMatrixOutChannels );
-  assignCommunicationIndices( "DirectDiffuseMixer", "in1", decorrelatorOutChannels );
-  assignCommunicationIndices( "DirectDiffuseMixer", "in3", channelObjectRoutingOutChannels );
-  assignCommunicationIndices( "DirectDiffuseMixer", "in2", reverbMixOutChannels );
-  assignCommunicationIndices( "DirectDiffuseMixer", "out", mixOutChannels );
-  
-  std::vector<ril::AudioPort::SignalIndexType> outputAdjustInChannels( numberOfOutputSignals );
-#endif
+  audioConnection( mDiffusePartMatrix.audioPort("out"), mDiffusePartDecorrelator.audioPort("in") );
+  audioConnection( mDiffusePartDecorrelator.audioPort("out"),
+                   mDirectDiffuseMix.audioPort( frequencyDependentPanning ? "in3" : "in2" ) );
 
   if( mTrackingEnabled )
   {
@@ -498,7 +372,7 @@ BaselineRenderer::~BaselineRenderer( )
 }
 
 
-#ifndef DISABLE_REVERB_RENDERING
+#if 0
 void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbConfig,
                                                      panning::LoudspeakerArray const & arrayConfig, 
                                                      std::size_t numberOfInputs,
