@@ -26,8 +26,8 @@ ChannelObjectRoutingCalculator( SignalFlowContext const & context,
                                 char const * name,
                                 CompositeComponent * parent )
  : AtomicComponent( context, name, parent )
- , mObjectInput( "objectIn", *this )
- , mRoutingOutput( "routingOut", *this )
+ , mObjectInput( "objectIn", *this, pml::EmptyParameterConfig() )
+ , mRoutingOutput( "routingOut", *this, pml::EmptyParameterConfig() )
  , mNumberOfObjectChannels( 0 )
 {
 }
