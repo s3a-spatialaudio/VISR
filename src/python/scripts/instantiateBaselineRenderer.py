@@ -12,18 +12,30 @@ sys.path.append( 'c:/local/visr-build/python/Debug' )
 
 import visr
 import signalflows
+import panning
 import pml
 import rcl
 import rrl
 
 ctxt = visr.SignalFlowContext( 1024, 48000 )
 
-lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-#lc = pml.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+#lc = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
-diffFilters = pml.BasicMatrixFloat( 39, 512, 16 )
+diffFilters = pml.MatrixParameterFloat( 39, 512, 16 )
 
-renderer1 = signalflows.BaselineRenderer( ctxt, 'renderer1', None, lc, 2, 41, 4096, diffFilters, '', 4242, '', False )
+renderer1 = signalflows.BaselineRenderer( context=ctxt,
+                                         name='renderer1',
+                                         parent=None,
+                                         loudspeakerConfig=lc, 
+                                         numberOfInputs=2,
+                                         numberOfOutputs=41, 
+                                         interpolationPeriod=4096, 
+                                         diffusionFilters=diffFilters, 
+                                         trackingConfiguration='', 
+                                         sceneReceiverPort=4242,
+                                         reverbConfig='',
+                                         frequencyDependentPanning=False )
 
 print( 'Created renderer.' )
 

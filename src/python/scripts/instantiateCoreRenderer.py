@@ -10,6 +10,7 @@ Created on Tue Feb 14 15:59:11 2017
 
 import visr
 import signalflows
+import panning
 import pml
 import rrl
 import objectmodel
@@ -40,9 +41,9 @@ numOutputChannels = 24;
 
 ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 
-#lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-lc = pml.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3_linear.xml' )
-# lc = pml.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+#lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
+lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3_linear.xml' )
+# lc = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
 diffFilters = pml.MatrixParameterFloat( 22, 512, 16 )
 #
@@ -53,7 +54,6 @@ diffFilters = pml.MatrixParameterFloat( 22, 512, 16 )
 ##                                          interpolationPeriod=1024, 
 ##                                          diffusionFilters=diffFilters,
 ##                                          tra ckingConfiguration='' )
-
 
 renderer1 = signalflows.CoreRenderer( ctxt, 'renderer1', None,
                                       loudspeakerConfiguration=lc,
