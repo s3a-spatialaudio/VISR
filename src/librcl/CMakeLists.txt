@@ -8,6 +8,7 @@ delay_vector.cpp
 diffusion_gain_calculator.cpp
 fir_filter_matrix.cpp
 gain_matrix.cpp
+gain_vector.cpp
 hoa_allrad_gain_calculator.cpp
 listener_compensation.cpp
 null_source.cpp
@@ -35,6 +36,7 @@ delay_vector.hpp
 diffusion_gain_calculator.hpp
 fir_filter_matrix.hpp
 gain_matrix.hpp
+gain_vector.cpp
 hoa_allrad_gain_calculator.hpp
 listener_compensation.hpp
 object_gain_eq_calculator.hpp
