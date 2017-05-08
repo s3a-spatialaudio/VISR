@@ -12,6 +12,7 @@ PYBIND11_PLUGIN( signalflows )
   pybind11::module::import( "visr" );
   pybind11::module::import( "pml" );
   pybind11::module::import( "rcl" );
+  pybind11::module::import( "panning" );
 
   pybind11::module m( "signalflows", "VISR signal flows library module" );
   using namespace visr::python::signalflows;
