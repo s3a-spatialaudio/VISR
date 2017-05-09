@@ -6,7 +6,6 @@
 #include "double_buffering_protocol.hpp"
 #include "empty_parameter_config.hpp"
 #include "listener_position.hpp"
-#include "loudspeaker_array.hpp" // kept here temporarily.
 #include "matrix_parameter.hpp"
 #include "message_queue_protocol.hpp"
 #include "object_vector.hpp"
@@ -30,7 +29,6 @@ PYBIND11_PLUGIN( pml )
 
   exportEmptyParameterConfig( m );
   exportListenerPosition( m );
-  exportLoudspeakerArray( m );
   exportMatrixParameters( m);
   exportObjectVector( m );
   exportVectorParameters( m );

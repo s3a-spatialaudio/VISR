@@ -20,6 +20,7 @@ MatrixConvolver::MatrixConvolver( SignalFlowContext const & context,
                                   std::size_t maxRoutings,
                                   efl::BasicMatrix<SampleType> const & initialFilters,
                                   pml::FilterRoutingList const & initialRoutings,
+                                  bool controlInputs,
                                   char const * fftImplementation )
  : CompositeComponent( context, name, parent )
  , mAudioIn( "in", *this, numberOfInputs )
@@ -27,9 +28,17 @@ MatrixConvolver::MatrixConvolver( SignalFlowContext const & context,
  , mConvolver( context, "Convolver", this )
 {
   mConvolver.setup( numberOfInputs, numberOfOutputs, filterLength, 
-                    maxFilters, maxRoutings, initialFilters, initialRoutings, fftImplementation );
+                    maxFilters, maxRoutings, initialFilters, initialRoutings,
+                    controlInputs, fftImplementation );
   audioConnection( mAudioIn, mConvolver.audioPort("in") );
   audioConnection( mConvolver.audioPort("out"), mAudioOut );
+
+  if( controlInputs )
+  {
+    mFilterInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > >
+      ( "filterInput", *this, pml::EmptyParameterConfig() ) );
+    parameterConnection( *mFilterInput, mConvolver.parameterPort("filterInput") );
+  }
 }
 
 MatrixConvolver::~MatrixConvolver( )

@@ -15,8 +15,6 @@
 #include <ciso646>
 #include <string>
 
-namespace ril = visr::ril;
-
 static char const * usage()
 {
   return "Usage: output = feedthrough( input [, parameterMessages], blockLength, samplingFrequency )";
@@ -62,12 +60,12 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
     }
 
     std::size_t const periodSize
-      = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[periodSizeParamIdx] ));
+      = static_cast<std::size_t>(mxGetScalar( prhs[periodSizeParamIdx] ));
 
-    ril::SamplingFrequencyType const samplingFrequency
-      = static_cast<ril::SamplingFrequencyType>(mxGetScalar( prhs[samplingFreqParamIdx] ));
+    visr::SamplingFrequencyType const samplingFrequency
+      = static_cast<visr::SamplingFrequencyType>(mxGetScalar( prhs[samplingFreqParamIdx] ));
 
-    ril::SignalFlowContext context( periodSize, samplingFrequency );
+    visr::SignalFlowContext const context( periodSize, samplingFrequency );
 
     std::size_t const numberOfChannels = mxGetM( prhs[0] );
 
@@ -79,7 +77,7 @@ void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
                                                       numberOfChannels, dftSize, windowLength, hopSize );
 
     visr::mexsupport::MexWrapper mexWrapper( flow, context, prhs[0], plhs[0],
-					     hasParameterArg ? prhs[1] : nullptr );
+                                             hasParameterArg ? prhs[1] : nullptr );
 
     mexWrapper.process();
   }

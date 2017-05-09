@@ -5,8 +5,8 @@ Created on Sun Feb 26 16:41:01 2017
 @author: andi
 """
 
-import sys
-sys.path.append( '/home/andi/dev/visr-build-debug/python' )
+#import sys
+#sys.path.append( '/home/andi/dev/visr-build-debug/python' )
 
 import visr
 import pml # This loads the parameter types and protocols used.

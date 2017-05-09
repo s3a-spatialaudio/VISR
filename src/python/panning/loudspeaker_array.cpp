@@ -1,8 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "loudspeaker_array.hpp"
-
-// This is a temporary hack. Move LoudspeakerArray away from libpanning (and rename!)
 #include <libpanning/LoudspeakerArray.h>
 
 #include <pybind11/pybind11.h>
@@ -13,7 +10,7 @@ using panning::LoudspeakerArray;
 
 namespace python
 {
-namespace pml
+namespace panning
 {
 
 void exportLoudspeakerArray( pybind11::module & m)
@@ -26,6 +23,6 @@ void exportLoudspeakerArray( pybind11::module & m)
     ;
 }
 
-} // namepace pml
+} // namepace panning
 } // namespace python
 } // namespace visr

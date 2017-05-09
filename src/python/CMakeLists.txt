@@ -8,6 +8,8 @@ ADD_SUBDIRECTORY( rcl )
 
 ADD_SUBDIRECTORY( rrl )
 
+ADD_SUBDIRECTORY( panning )
+
 ADD_SUBDIRECTORY( pml )
 
 ADD_SUBDIRECTORY( objectmodel )

@@ -20,6 +20,7 @@ public:
   Internal()
   {
     Py_Initialize();
+    PyEval_InitThreads();
     mInitialised = true;
   }
 

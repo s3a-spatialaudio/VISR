@@ -28,6 +28,7 @@
 #include <boost/filesystem/operations.hpp>
 #endif
 
+#include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
 #include <pybind11/eval.h>
 #include <pybind11/pytypes.h> // For testing purposes
@@ -59,10 +60,10 @@ py::object loadModule( std::string const & module,
   try
   {
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
-				  "import imp\n"
-				  "new_module = imp.load_module(module_name, open(path), path, ('py', 'U', imp.PY_SOURCE))\n",
-				  globals,
-				  locals);
+      "import imp\n"
+      "new_module = imp.load_module(module_name, open(path), path, ('py', 'U', imp.PY_SOURCE))\n",
+      globals,
+      locals);
   }
   catch( std::exception const & ex )
   {
@@ -75,8 +76,47 @@ py::object loadModule( std::string const & module,
 } // unnamed namespace
 #endif
 
+class PythonWrapper::Impl
+{
+public:
+  explicit Impl( SignalFlowContext const & context,
+                 char const * name,
+                 PythonWrapper * parent,
+                 char const * modulePath,
+                 char const * componentClassName,
+                 char const * positionalArguments,
+                 char const * keywordArguments );
+private:
+  /**
+  * A vector holding an arbitrary number of input ports
+  */
+  std::vector<std::unique_ptr<AudioInputBase > > mAudioInputs;
 
-PythonWrapper::PythonWrapper( SignalFlowContext& context,
+  std::vector<std::unique_ptr<AudioOutputBase > > mAudioOutputs;
+
+  // TODO: Do the same for parameter ports (instantiate and connect them as polymorphic input/output ports
+  // Note: As these need to manage their own protocol inputs/outputs, they need to be different from the port base classes. This also implies that we need different containers for inputs and outputs.
+  std::vector<std::unique_ptr<PolymorphicParameterInput> > mParameterInputs;
+
+  std::vector<std::unique_ptr<PolymorphicParameterOutput> > mParameterOutputs;
+
+  /**
+  * Hold the Python module containing the contained component.
+  * @note We use a Python object to hold the module, because that is
+  * what load_module() returns and we only need the object interface.
+  */
+  pybind11::object mModule;
+
+  pybind11::object mGlobals;
+
+  pybind11::object mComponentClass;
+
+  pybind11::object mComponentWrapper;
+
+  Component * mComponent;
+};
+
+PythonWrapper::PythonWrapper( SignalFlowContext const & context,
                               char const * name,
                               CompositeComponent * parent,
                               char const * modulePath,
@@ -84,6 +124,17 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
                               char const * positionalArguments,
                               char const * keywordArguments )
   : CompositeComponent( context, (std::string(name)+std::string("_wrapper")).c_str(), parent )
+  , mImpl( new Impl( context, name, this, modulePath, componentClassName, positionalArguments, keywordArguments ) )
+{}
+
+
+PythonWrapper::Impl::Impl( SignalFlowContext const & context,
+                           char const * name,
+                           PythonWrapper * parent,
+                           char const * modulePath,
+                           char const * componentClassName,
+                           char const * positionalArguments,
+                           char const * keywordArguments )
 {
 #ifndef PYTHON_WRAPPER_FULL_MODULE_PATH
   mModule = py::module( modulePath );
@@ -115,8 +166,14 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
   py::dict keywordDict;
   try
   {
-    keywordList = py::eval( positionalArguments )/*.cast<py::tuple>()*/;
-    keywordDict = py::eval( keywordArguments ).cast<py::dict>();
+    if( not std::string(positionalArguments).empty())
+    {
+      keywordList = py::eval( positionalArguments ).cast<py::tuple>();
+    }
+    if( not std::string(keywordArguments).empty())
+    {
+      keywordDict = py::eval( keywordArguments ).cast<py::dict>();
+    }
   }
   catch( std::exception const & ex )
   {
@@ -126,9 +183,9 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
   try
   {
     mComponentWrapper = mComponentClass( context, name,
-					 static_cast<CompositeComponent*>(this),
-					 *keywordList,
-					 **keywordDict );
+                                         static_cast<CompositeComponent*>(parent),
+                                         *keywordList,
+                                         **keywordDict );
   }
   catch( std::exception const & ex )
   {
@@ -157,20 +214,20 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
     {
       auto portPlaceholder = std::unique_ptr<AudioInputBase>(
         new AudioInputBase( portName,
-			    *this,
-			    sampleType,
-			    width ) );
-      audioConnection( *portPlaceholder, audioPort->containingPort() );
+                            *parent,
+                            sampleType,
+                            width ) );
+      parent->audioConnection( *portPlaceholder, audioPort->containingPort() );
       mAudioInputs.push_back( std::move( portPlaceholder ) );
     }
     else
     {
       auto portPlaceholder = std::unique_ptr<AudioOutputBase>(
         new AudioOutputBase( portName,
-			    *this,
-			    sampleType,
-			    width ) );
-      audioConnection( audioPort->containingPort(), *portPlaceholder );
+                             *parent,
+                             sampleType,
+                             width ) );
+      parent->audioConnection( audioPort->containingPort(), *portPlaceholder );
       mAudioOutputs.push_back( std::move( portPlaceholder ) );
     }
   }
@@ -185,17 +242,17 @@ PythonWrapper::PythonWrapper( SignalFlowContext& context,
     if( direction == PortBase::Direction::Input )
     {
       auto portPlaceholder = std::unique_ptr<PolymorphicParameterInput>(
-	  new PolymorphicParameterInput( portName, *this, parameterType, protocolType,
+        new PolymorphicParameterInput( portName, *parent, parameterType, protocolType,
                                          paramConfig ) );
-      parameterConnection( *portPlaceholder, parameterPort->containingPort() );
+      parent->parameterConnection( *portPlaceholder, parameterPort->containingPort() );
       mParameterInputs.push_back( std::move( portPlaceholder ) );
     }
     else
     {
       auto portPlaceholder = std::unique_ptr<PolymorphicParameterOutput>(
-	  new PolymorphicParameterOutput( portName, *this, parameterType, protocolType,
+        new PolymorphicParameterOutput( portName, *parent, parameterType, protocolType,
                                          paramConfig ) );
-      parameterConnection( parameterPort->containingPort(), *portPlaceholder );
+      parent->parameterConnection( parameterPort->containingPort(), *portPlaceholder );
       mParameterOutputs.push_back( std::move( portPlaceholder ) );
     }
   }
