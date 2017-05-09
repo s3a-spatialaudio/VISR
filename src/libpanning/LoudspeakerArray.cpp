@@ -14,6 +14,8 @@
 
 #include <libefl/degree_radian_conversion.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>
+#include <libefl/db_linear_conversion.hpp>
+
 
 #include <libpml/biquad_parameter.hpp>
 #include <libpml/index_sequence.hpp>
@@ -415,9 +417,12 @@ namespace visr
 
 			m_position.resize(numTotalSpeakers);
 			m_channel.resize(numRegularSpeakers);
-
+			
 			m_gainAdjustment.resize(numRegularSpeakers + numSubwoofers);
 			m_delayAdjustment.resize(numRegularSpeakers + numSubwoofers);
+
+			m_reRoutingCoeff.resize(numVirtualSpeakers, numRegularSpeakers);
+			m_reRoutingCoeff.zeroFill();
 
 			const ChannelIndex cInvalidChannel = std::numeric_limits<ChannelIndex>::max();
 			std::fill(m_channel.begin(), m_channel.end(), cInvalidChannel); // assign special value to check afterwards if every speaker index has been assigned.
@@ -456,23 +461,18 @@ namespace visr
 			{
 				ptree const childTree = treeIt->second;
 				std::string id = childTree.get<std::string>("<xmlattr>.id");
-				/* if( id < 1 or id > maxSpeakerIndexOneOffset )
-				 {
-				   throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id exceeds the number of loudspeakers." );
-				 }*/
 				if (m_id.find(id) != m_id.end() or id.empty() or !std::regex_match(id, std::regex("^[A-za-z0-9@&()+/:-_ ]*$")))
-
 				{
 					throw std::invalid_argument("LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" ");
 				}
 
 				boost::trim_if(id, boost::is_any_of("\t "));
 				//std::cout << "ID " << id << std::endl;
-			   /* int idZeroOffset = id - 1;
+			    int idZeroOffset = i;
 				if( m_channel[idZeroOffset] != cInvalidChannel )
 				{
-				  throw std::invalid_argument( "LoudspeakerArray::loadXml(): Each speaker id must be used exactly once." );
-				}*/
+				  throw std::invalid_argument( "LoudspeakerArray::loadXml(): Each channel id must be used exactly once." );
+				}
 				ChannelIndex const chIdx = childTree.get<ChannelIndex>("<xmlattr>.channel");
 				if (chIdx < 1)
 				{
@@ -497,12 +497,53 @@ namespace visr
 				ptree const childTree = treeIt->second;
 				std::string id = childTree.get<std::string>("<xmlattr>.id");
 
-				if (m_id.find(id) != m_id.end() or id.empty())
+				if (m_id.find(id) != m_id.end() or id.empty() or !std::regex_match(id, std::regex("^[A-za-z0-9@&()+/:-_ ]*$")))
+
 				{
-					throw std::invalid_argument("LoudspeakerArray::loadXml(): The virtual loudspeaker id is not unique.");
+					std::cout << "WREONG" << std::endl;
+					throw std::invalid_argument("LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" ");
 				}
+
+				boost::trim_if(id, boost::is_any_of("\t "));
+
 				m_id[id] = i;
-				// std::cout << "KEYV: " << id << " VALV: " << m_id[id] << std::endl;
+
+
+
+
+				auto const routeNodes = childTree.equal_range("route");
+				std::size_t const numRoutes = std::distance(routeNodes.first, routeNodes.second);
+				
+				int w = 0;
+				for (ptree::const_assoc_iterator routeIt(routeNodes.first); routeIt != routeNodes.second; ++routeIt, w++)
+				{
+					ptree const childTree = routeIt->second;
+					std::array<LoudspeakerIndexType, 3> triplet;
+					std::string lspId = childTree.get<std::string>("<xmlattr>.lspId");
+					Afloat const gainDB = childTree.get<Afloat>("<xmlattr>.gainDB");
+					boost::trim_if(lspId, boost::is_any_of("\t "));
+					//boost::trim_if(gainDB, boost::is_any_of("\t "));
+					//std::cout << "LSPID: " << lspId << " VAL " << m_id[lspId] << " gainDB: " << gainDB << std::endl;
+
+
+						if (m_id.find(lspId) == m_id.end() or lspId.empty())
+						{
+							//std::cout << "WRONG " << std::endl;
+							throw std::invalid_argument("LoudspeakerArray::loadXml(): Cannot find loudspeaker id in virtual speaker routing.");
+						}
+					
+						m_reRoutingCoeff(i-numRegularSpeakers, m_id[lspId]) = efl::dB2linear(gainDB);
+
+				}
+
+				//print rerouting matrix
+				size_t row, columns;
+				for (size_t row = 0; row < numVirtualSpeakers; row++)
+				{
+					for (int columns = 0; columns<numRegularSpeakers; columns++)
+						std::cout << m_reRoutingCoeff.at(row,columns)<<"\t";
+					std::cout << std::endl;
+				}
 				m_position[i] = parseCoordNode(childTree, m_isInfinite);
 			}
 			// The checks above (all speaker indices are between 1 and numTotalSpeakers && the indices are unique) are 
