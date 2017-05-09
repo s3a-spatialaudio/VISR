@@ -4,9 +4,9 @@ ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 SET( SOURCES
-allrad.cpp
+#allrad.cpp
 loudspeaker_array.cpp
-vbap.cpp
+#vbap.cpp
 test_main.cpp
 )
 

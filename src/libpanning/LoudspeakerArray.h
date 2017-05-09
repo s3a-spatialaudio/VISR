@@ -20,6 +20,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace visr
 {
@@ -238,7 +239,7 @@ namespace panning
     std::vector< TripletType > m_triplet;
 
     std::vector<ChannelIndex> m_channel;
-
+	std::map<std::string,LoudspeakerIndexType> m_id;
     /**
     * Subwoofer configuration support.
     */
