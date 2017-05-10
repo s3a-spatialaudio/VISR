@@ -81,6 +81,11 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
     for( std::size_t chIdx(0); chIdx < numObjChannels; ++chIdx )
     {
         std::size_t const signalChannelIdx = obj.channelIndex( chIdx );
+        if( signalChannelIdx >= mNumberOfObjectChannels )
+        {
+          status( StatusMessage::Error, "Signal index ", signalChannelIdx, " exceeds number of object signal channels (", mNumberOfObjectChannels, ")" );
+          continue;
+        }
         objectSignalGains[ signalChannelIdx ] = objLevel;
         // Potential minor performance improvement possible: For multichannel objects, compute the coefficients only for the first channel,
         // and copy it to the remaining channels.
