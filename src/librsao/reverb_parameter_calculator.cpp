@@ -115,7 +115,10 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
   // Configure the VBAP calculator
   mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
   mVbapCalculator.setNumSources( mNumberOfDiscreteReflectionsPerSource /* * mMaxNumberOfObjects */ );
-  mVbapCalculator.setSourcePositions(&mSourcePositions[0] );
+  if( mMaxNumberOfObjects > 0 ) // avoid MSVC debug assertion if reverb is inactive.
+  {
+    mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
+  }
   mVbapCalculator.setLoudspeakerArray( &arrayConfig );
   mVbapCalculator.setListenerPosition( 0.0f, 0.0f, 0.0f ); // Use a default listener position
   if( mVbapCalculator.calcInvMatrices( ) != 0 )
