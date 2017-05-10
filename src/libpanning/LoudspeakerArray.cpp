@@ -522,18 +522,12 @@ namespace visr
 					std::string lspId = childTree.get<std::string>("<xmlattr>.lspId");
 					Afloat const gainDB = childTree.get<Afloat>("<xmlattr>.gainDB");
 					boost::trim_if(lspId, boost::is_any_of("\t "));
-					//boost::trim_if(gainDB, boost::is_any_of("\t "));
-					//std::cout << "LSPID: " << lspId << " VAL " << m_id[lspId] << " gainDB: " << gainDB << std::endl;
-
-
+					
 						if (m_id.find(lspId) == m_id.end() or lspId.empty())
 						{
-							//std::cout << "WRONG " << std::endl;
 							throw std::invalid_argument("LoudspeakerArray::loadXml(): Cannot find loudspeaker id in virtual speaker routing.");
 						}
-					
 						m_reRoutingCoeff(i-numRegularSpeakers, m_id[lspId]) = efl::dB2linear(gainDB);
-
 				}
 
 				//print rerouting matrix

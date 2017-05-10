@@ -25,10 +25,14 @@ class VBAP
 {
 private:
     
-    LoudspeakerArray const * m_array;
+   // LoudspeakerArray const * m_array;
+	efl::BasicMatrix<Afloat> m_gain;
     efl::BasicMatrix<Afloat> m_invMatrix;
-    efl::BasicMatrix<Afloat> m_gain;
-    XYZ m_listenerPos;
+	efl::BasicMatrix<Afloat> mPositions;
+	std::vector<LoudspeakerArray::TripletType> mTriplets;
+	bool is2D;
+	
+	XYZ m_listenerPos;
     XYZ const * m_sourcePos;
     std::size_t m_nSources;
     Afloat m_maxGain = 10.0f;
@@ -40,15 +44,18 @@ public:
    * Default constructor.
    * Sets object to save values (no array, zero sources).
    */
-  VBAP();
+ // VBAP();
+	explicit VBAP(LoudspeakerArray const * array);
+
+
 
     int setLoudspeakerArray(LoudspeakerArray const * array){
-        m_array = array;
-        m_invMatrix.resize( array->getNumTriplets(), 9 );
-        m_gain.resize( m_nSources, array->getNumSpeakers( ) );
+      //  m_array = array;
+       // m_invMatrix.resize( array->getNumTriplets(), 9 );
+      //  m_gain.resize( m_nSources, array->getNumSpeakers( ) );
         return 0;
     }
-
+	//
     int setListenerPosition(Afloat x, Afloat y, Afloat z){
 
 #ifdef VBAP_DEBUG_MESSAGES
@@ -59,9 +66,9 @@ public:
 
         return 0;
     }
-    
+    //private
     int calcInvMatrices();
-    
+    //
     int setSourcePositions(XYZ const *sp ) {
         m_sourcePos = sp;
         return 0;
@@ -71,14 +78,20 @@ public:
         m_nSources = n;
 	// Take care of the fact that the loudspeaker
 	// array might not been set yet.
-	std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
-        m_gain.resize( m_nSources, numSpeakers );
-        return n;
+		//std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
+       // m_gain.resize( m_nSources, numSpeakers );
+        
+		m_gain.resize(m_nSources, mPositions.numberOfRows());
+
+		return n;
     }
     
     int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
     
-    std::size_t getNumSpeakers() const { return m_array->getNumSpeakers(); }
+    std::size_t getNumSpeakers() const { 
+		//return m_array->getNumSpeakers(); 
+		return mPositions.numberOfRows();
+	}
     
     int calcGains();
     

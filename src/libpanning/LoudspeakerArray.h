@@ -165,50 +165,28 @@ namespace panning
     Afloat getSubwooferGain( std::size_t subIdx, std::size_t spkIdx ) const { return m_subwooferGains.at( subIdx, spkIdx ); }
     //@}
 
+	/**
+	* Virtual speaker rerouting matrix configuration support.
+	* 
+	*/
+	//@{
 
+	
+	/**
+	* Retrieve the matrix of rereouting coefficients from virtual to real loudspeakers
+	* @return Reference to rereouting matrix, dimension number of virtual loudspeakers * number of physical loudspeakers.
+	*/
+	efl::BasicMatrix<SampleType> const & getReroutingCoefficients() const { return m_reRoutingCoeff; }
 
-
-
-
-
-
-
-
-
-
-	///**
-	//* Rerouting Matrix configuration support.
-	//* Supported only by the XML configuration format.
-	//*/
-	////@{
-
-	//
-	///**
-	//* Retrieve the gain matrix for panning loudspeaker signals into the subwoofers.
-	//* @return Reference to gain matrix, dimension number of subwoofers * number of physical loudspeakers.
-	//*/
-	//efl::BasicMatrix<Afloat> const & getSubwooferGains() const { return m_subwooferGains; }
-
-	///**
-	//* Retrieve the matrix gain from a given loudspeaker to a given subwoofer.
-	//* @param subIdx Subwoofer index (zero-offset)
-	//* @param spkIdx Loudspeaker index (zero-offset) This is the logical speaker index, not the channel index used for routing.
-	//* @return Linear-scale gain value (not incorporating gain corrections applied to the channel signal).
-	//* @throw std::out_of_range if either \p subIdx or \p spkIdx is out of the respective admissible range.
-	//*/
-	//Afloat getSubwooferGain(std::size_t subIdx, std::size_t spkIdx) const { return m_subwooferGains.at(subIdx, spkIdx); }
-	////@}
-
-
-
-
-
-
-
-
-
-
-
+	/**
+	* Retrieve the rereouting coefficient from a virtual to a real loudspeaker
+	* @param virtIdx virtual loudspeaker index (zero-offset)
+	* @param realIdx real loudspeaker index (zero-offset) This is the logical speaker index, not the channel index used for routing.
+	* @return Rerouting coefficient as a linear-scale gain value (not incorporating gain corrections applied to the channel signal).
+	* @throw std::out_of_range if either \p virtIdx or \p realIdx is out of the respective admissible range.
+	*/
+	Afloat getReroutingCoefficient(std::size_t virtIdx, std::size_t realIdx) const { return m_reRoutingCoeff.at(virtIdx, realIdx); }
+	//@}
 
 
 

@@ -17,7 +17,7 @@ void exportLoudspeakerArray( pybind11::module & m );
 PYBIND11_PLUGIN( panning )
 {
   pybind11::module::import( "visr" );
-
+  pybind11::module::import("pml");
   pybind11::module m( "panning", "VISR panning data structures and core algorithms" );
   using namespace visr::python::panning;
 
