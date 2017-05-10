@@ -107,12 +107,6 @@ public:
    * Query methods.
    */
   //@{
-  /**
-   * Query whether the signal flow has been set up successfully.
-   * The corresponding data member must be set in the constructor or a specific initialisation method.
-   * @todo After removal of the setup method and performing the setup in the constructor, consider removal of this mechanism.
-   */
-  bool initialised() const { return mInitialised; }
 
   /**
    * Return the number of samples processed in each process() function
@@ -139,16 +133,12 @@ public:
   /**
    * Query the width of the capture port, i.e., the number of external
    * inputs of the graph.
-   * @throw std::logic_error if the method is called before the object
-   * is initialised.
    */
   std::size_t numberOfCaptureChannels() const;
   
   /**
    * Query the width of the playback port, i.e., the number of external
    * outputs of the graph.
-   * @throw std::logic_error if the method is called before the object
-   * is initialised.
    */
   std::size_t numberOfPlaybackChannels() const;
   //@}
@@ -217,13 +207,10 @@ private:
   bool initialiseSchedule( std::ostream & messages,
                            AudioConnectionMap const & audioConnections,
                            ParameterConnectionMap const & parameterConnections );
-
   /**
-   * Mark the signal flow as "initialised".
-   * @todo Decide whether this is the right place for a consistency check.
+   * Return the total number of communication protocols in the signal
+   * flow.
    */
-  void setInitialised( bool newState = true ) { mInitialised = newState; }
-
   std::size_t numberCommunicationProtocols() const;
 
   /**
@@ -236,12 +223,6 @@ private:
    * Can be either an atomic or a (hierarchical) composite component/
    */
   impl::ComponentImplementation & mFlow;
-
-  /**
-   * Flag stating whether the signal flow is fully initialised.
-   * @note: As long as initialisation is performed fully in the constructor, here is no need for that,
-   */
-  bool mInitialised;
 
   /**
    * Parameter infrastructure

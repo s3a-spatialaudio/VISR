@@ -75,7 +75,6 @@ void exportAudioSignalFlow( pybind11::module & m )
 {
   pybind11::class_<AudioSignalFlow>( m, "AudioSignalFlow" )
    .def( pybind11::init<visr::Component&>() )
-   .def_property_readonly( "initialised", &AudioSignalFlow::initialised )
    .def_property_readonly( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
    .def_property_readonly( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
    .def_property_readonly( "numberOfCaptureChannels", &AudioSignalFlow::numberOfCaptureChannels )
