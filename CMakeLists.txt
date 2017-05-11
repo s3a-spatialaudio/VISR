@@ -18,8 +18,8 @@ PROJECT( VISR CXX C )
 # Define central version numbers for the project
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 8 )
-set( VISR_PATCH_VERSION 2 )
+set( VISR_MINOR_VERSION 9 )
+set( VISR_PATCH_VERSION 0 )
 
 ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
@@ -99,10 +99,11 @@ if( WIN32 ) # Covers 64-bit Windows as well
   add_definitions( -D_WINN32_WINNT=${WIN_VERSION_ID} )
   # Avoid specific compiler warnings of the Visual Studio  compiler.
   add_definitions( -D_SCL_SECURE_NO_WARNINGS ) # STL algorithms with pointers instead of 'real' iterators are perfectly legal.
-
-# TODO: Do we want/need that?
-#   ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
-#   ADD_DEFINITIONS( "-D_WIN32_WINNT=0x0601" )
+  # Avoid complaints about STL members in classes with VISR_CORE_LIBRARY_SYMBOL not having DLL interfaces.
+  add_definitions( "/wd4251" )
+  #
+#   ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /wd4251 /nologo" )
+   add_definitions( "-D_WIN32_WINNT=0x0601" )
 
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3" ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
