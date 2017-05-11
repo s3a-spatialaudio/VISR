@@ -19,10 +19,24 @@ namespace visr
 namespace panning
 {
   
-VBAP::VBAP()
- : m_array( 0 )
- , m_nSources( 0 )
+VBAP::VBAP(LoudspeakerArray const * lsarray)
 {
+	is2D = lsarray->is2D();
+	m_invMatrix.resize(lsarray->getNumTriplets(), 9);
+	mPositions.resize(lsarray->getNumSpeakers(), 3);
+	mTriplets.resize(lsarray->getNumTriplets());
+	//mPositions 
+	for (int i = 0; i < lsarray->getNumSpeakers(); i++) {
+		mPositions(i, 0) = lsarray->getPosition(i).x;
+		mPositions(i, 1) = lsarray->getPosition(i).y;
+		mPositions(i, 2) = lsarray->getPosition(i).z;
+	}
+	
+	for (int i = 0; i < lsarray->getNumTriplets(); i++) {
+		mTriplets[i][0] = lsarray->getTriplet(i)[0];
+		mTriplets[i][1] = lsarray->getTriplet(i)[1];
+		mTriplets[i][2] = lsarray->getTriplet(i)[2];
+	}
 }
 
 int VBAP::calcInvMatrices(){
@@ -34,15 +48,28 @@ int VBAP::calcInvMatrices(){
     printf("calcInvMatrices()\n");   //!
 #endif
         
-    for (std::size_t i = 0 ; i < m_array->getNumTriplets(); i++) {
+    for (std::size_t i = 0 ; i < mTriplets.size(); i++) {
 
-      LoudspeakerArray::TripletType const & triplet = m_array->getTriplet( i );
+      LoudspeakerArray::TripletType const & triplet = mTriplets[i];
       if( triplet[0] == -1 ) continue;  //  triplet unused
 
-      l1 = m_array->getPosition( triplet[0] );
-      l2 = m_array->getPosition( triplet[1] );
-      if( m_array->is2D() ) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
-      else l3 = m_array->getPosition( triplet[2] );
+      l1.x = mPositions(triplet[0], 0);
+	  l1.y = mPositions(triplet[0], 1);
+	  l1.z = mPositions(triplet[0], 2);
+
+	  l2.x = mPositions(triplet[1], 0);
+	  l2.y = mPositions(triplet[1], 1);
+	  l2.z = mPositions(triplet[1], 2);
+
+
+      if(is2D) { 
+		  l3.x = 0; l3.y = 0; l3.z = 1; 
+	  }  // adapt 3D calc for 2D array
+	  else {
+		  l3.x = mPositions(triplet[2], 0);
+		  l3.y = mPositions(triplet[2], 1);
+		  l3.z = mPositions(triplet[2], 2);
+	  }
         
       // calc speaker positions relative to listener.
       l1.x = l1.x - m_listenerPos.x;
@@ -114,18 +141,18 @@ int VBAP::calcGains(){
         }
 
 
-        if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
+        if (is2D) z = 0; //! temp fix. no fade from 2D plane.
         
-        for(std::size_t j = 0; j < m_array->getNumTriplets(); j++) {
+        for(std::size_t j = 0; j < mTriplets.size(); j++) {
 
-            if (m_array->getTriplet(j)[0] == -1) continue;  //  triplet unused
+            if (mTriplets[j][0] == -1) continue;  //  triplet unused
 
             Afloat const * inv = m_invMatrix.row(j);
             g1 = x*inv[0] + y*inv[1] + z*inv[2];
             g2 = x*inv[3] + y*inv[4] + z*inv[5];
             g3 = x*inv[6] + y*inv[7] + z*inv[8];
 
-            if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || m_array->is2D() ) )  // inside triplet, or edge in 2D case.
+            if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || is2D ) )  // inside triplet, or edge in 2D case.
             {
                 jmin = j;
                 g1min = g1; g2min = g2; g3min = g3;
@@ -186,12 +213,12 @@ int VBAP::calcGains(){
         if (g3 > m_maxGain) g3 = m_maxGain;
         if (g3 < -m_maxGain) g3 = -m_maxGain;
         
-        l1 = m_array->getTriplet(jmin)[0];
-        l2 = m_array->getTriplet(jmin)[1];
-        l3 = m_array->getTriplet(jmin)[2];
+        l1 = mTriplets[jmin][0];
+        l2 = mTriplets[jmin][1];
+        l3 = mTriplets[jmin][2];
         m_gain(i, l1 ) = g1;
         m_gain(i, l2 ) = g2;
-        if (!m_array->is2D()) m_gain(i,l3) = g3;     // l3 undefined in 2D case 
+        if (!is2D) m_gain(i,l3) = g3;     // l3 undefined in 2D case 
 #ifdef VBAP_DEBUG_MESSAGES
         printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3, g1,g2,g3);
 #endif

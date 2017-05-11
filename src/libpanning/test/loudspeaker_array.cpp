@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   BOOST_ASSERT( exists( configFileXml ) );
   BOOST_CHECK_NO_THROW( array.loadXmlFile( configFileXml.string() ) );
 
-  VBAP vbap;
-  BOOST_CHECK_NO_THROW( vbap.setLoudspeakerArray( &array ) );
+  VBAP vbap(&array);
+ // BOOST_CHECK_NO_THROW( vbap.setLoudspeakerArray( &array ) );
 }
 
 #if 0

@@ -17,9 +17,12 @@
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
+#include <libril/constants.hpp>
+
 #include <array>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace visr
 {
@@ -42,7 +45,7 @@ namespace panning
      * At the moment, we use 'int' to let negative numbers denote invalid/unused triplets.
      */
     using LoudspeakerIndexType = int;
-
+	using SampleType = visr::SampleType;
     using TripletType = std::array<LoudspeakerIndexType, 3>;
 
     using ChannelIndex = int;
@@ -162,6 +165,31 @@ namespace panning
     Afloat getSubwooferGain( std::size_t subIdx, std::size_t spkIdx ) const { return m_subwooferGains.at( subIdx, spkIdx ); }
     //@}
 
+	/**
+	* Virtual speaker rerouting matrix configuration support.
+	* 
+	*/
+	//@{
+
+	
+	/**
+	* Retrieve the matrix of rereouting coefficients from virtual to real loudspeakers
+	* @return Reference to rereouting matrix, dimension number of virtual loudspeakers * number of physical loudspeakers.
+	*/
+	efl::BasicMatrix<SampleType> const & getReroutingCoefficients() const { return m_reRoutingCoeff; }
+
+	/**
+	* Retrieve the rereouting coefficient from a virtual to a real loudspeaker
+	* @param virtIdx virtual loudspeaker index (zero-offset)
+	* @param realIdx real loudspeaker index (zero-offset) This is the logical speaker index, not the channel index used for routing.
+	* @return Rerouting coefficient as a linear-scale gain value (not incorporating gain corrections applied to the channel signal).
+	* @throw std::out_of_range if either \p virtIdx or \p realIdx is out of the respective admissible range.
+	*/
+	Afloat getReroutingCoefficient(std::size_t virtIdx, std::size_t realIdx) const { return m_reRoutingCoeff.at(virtIdx, realIdx); }
+	//@}
+
+
+
     /**
      * Gain and delay adjustments.
      */
@@ -238,7 +266,7 @@ namespace panning
     std::vector< TripletType > m_triplet;
 
     std::vector<ChannelIndex> m_channel;
-
+	std::map<std::string,LoudspeakerIndexType> m_id;
     /**
     * Subwoofer configuration support.
     */
@@ -246,6 +274,9 @@ namespace panning
     std::vector<ChannelIndex> m_subwooferChannels;
 
     efl::BasicMatrix<Afloat> m_subwooferGains;
+
+	efl::BasicMatrix<SampleType> m_reRoutingCoeff;
+
     //@}
 
     /**
