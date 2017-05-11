@@ -10,6 +10,8 @@ namespace python
 namespace panning
 {
 void exportLoudspeakerArray( pybind11::module & m );
+void exportXYZ(pybind11::module & m);
+void exportVBAP(pybind11::module & m);
 }
 }
 }
@@ -23,6 +25,7 @@ PYBIND11_PLUGIN( panning )
 
   // Export the communication protocols
   exportLoudspeakerArray( m );
-
+  exportXYZ(m);
+  exportVBAP(m);
   return m.ptr();
 }

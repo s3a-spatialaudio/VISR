@@ -85,8 +85,8 @@ namespace visr
 		{
 			int n, i, chan;
 			char c;
-			Afloat x, y, z;
-			Afloat az, el, r;
+			SampleType x, y, z;
+			SampleType az, el, r;
 			int l1, l2, l3;
 			int nSpk, nTri;
 
@@ -266,18 +266,18 @@ namespace visr
 					ptree::const_assoc_iterator cartIt = node.find("cart");
 					assert(cartIt != node.not_found());
 					ptree const coordNode = cartIt->second;
-					pos.x = coordNode.get<Afloat>("<xmlattr>.x");
-					pos.y = coordNode.get<Afloat>("<xmlattr>.y");
-					pos.z = coordNode.get<Afloat>("<xmlattr>.z");
+					pos.x = coordNode.get<SampleType>("<xmlattr>.x");
+					pos.y = coordNode.get<SampleType>("<xmlattr>.y");
+					pos.z = coordNode.get<SampleType>("<xmlattr>.z");
 				}
 				else
 				{
 					ptree::const_assoc_iterator polarIt = node.find("polar");
 					assert(polarIt != node.not_found());
 					ptree const coordNode = polarIt->second;
-					Afloat const az = coordNode.get<Afloat>("<xmlattr>.az");
-					Afloat const el = coordNode.get<Afloat>("<xmlattr>.el");
-					Afloat const r = coordNode.get<Afloat>("<xmlattr>.r");
+					SampleType const az = coordNode.get<SampleType>("<xmlattr>.az");
+					SampleType const el = coordNode.get<SampleType>("<xmlattr>.el");
+					SampleType const r = coordNode.get<SampleType>("<xmlattr>.r");
 					std::tie(pos.x, pos.y, pos.z) = efl::spherical2cartesian(efl::degree2radian(az), efl::degree2radian(el), r);
 				}
 				return pos;
@@ -290,10 +290,10 @@ namespace visr
 			 * @param [out] delay The parsed delay value, in seconds.
 			 * @throw std::invalid_argument if the parsing fails.
 			 */
-			void parseGainDelayAdjustments(boost::property_tree::ptree const & node, Afloat & gain, Afloat & delay)
+			void parseGainDelayAdjustments(boost::property_tree::ptree const & node, SampleType & gain, SampleType & delay)
 			{
-				boost::optional<Afloat> const gainLinear = node.get_optional<Afloat>("<xmlattr>.gain");
-				boost::optional<Afloat> const gainDB = node.get_optional<Afloat>("<xmlattr>.gainDB");
+				boost::optional<SampleType> const gainLinear = node.get_optional<SampleType>("<xmlattr>.gain");
+				boost::optional<SampleType> const gainDB = node.get_optional<Afloat>("<xmlattr>.gainDB");
 				if (gainLinear and gainDB)
 				{
 					throw std::invalid_argument("ArrayConfiguration::loadXml(): The \"gain\" or \"gainDB\" attributes are mutually exclusive.");
@@ -520,7 +520,7 @@ namespace visr
 					ptree const childTree = routeIt->second;
 					std::array<LoudspeakerIndexType, 3> triplet;
 					std::string lspId = childTree.get<std::string>("<xmlattr>.lspId");
-					Afloat const gainDB = childTree.get<Afloat>("<xmlattr>.gainDB");
+					SampleType const gainDB = childTree.get<SampleType>("<xmlattr>.gainDB");
 					boost::trim_if(lspId, boost::is_any_of("\t "));
 					
 						if (m_id.find(lspId) == m_id.end() or lspId.empty())
@@ -633,7 +633,7 @@ namespace visr
 				boost::optional<std::string> const weightStr = subNode.get_optional<std::string>("<xmlattr>.weights");
 				if (weightStr)
 				{
-					pml::FloatSequence<Afloat> speakerWeights(*weightStr);
+					pml::FloatSequence<SampleType> speakerWeights(*weightStr);
 					if (speakerWeights.size() != speakerIndices.size())
 					{
 						throw std::invalid_argument("The loudspeaker index list and the weight vector must have the same length.");
@@ -726,7 +726,7 @@ namespace visr
 		* \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
 		* @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
 		*/
-		pml::BiquadParameterMatrix<Afloat> const &
+		pml::BiquadParameterMatrix<SampleType> const &
 			LoudspeakerArray::outputEqualisationBiquads() const
 		{
 			if (not outputEqualisationPresent())

@@ -20,24 +20,34 @@ namespace visr
 {
 namespace panning
 {
+static void normalise(std::vector<SampleType> &gains);
 
 class VBAP
 {
 private:
     
    // LoudspeakerArray const * m_array;
-	efl::BasicMatrix<Afloat> m_gain;
-    efl::BasicMatrix<Afloat> m_invMatrix;
-	efl::BasicMatrix<Afloat> mPositions;
+
+    efl::BasicMatrix<SampleType> mInvMatrix;
+	efl::BasicMatrix<SampleType> mPositions;
+	efl::BasicMatrix<SampleType> mReroutingMatrix;
+
 	std::vector<LoudspeakerArray::TripletType> mTriplets;
 	bool is2D;
+	bool isInfinite;
+	std::array<SampleType, 3> mListenerPos;
+	std::vector<SampleType> mGain;
+	/*XYZ ;
 	
-	XYZ m_listenerPos;
     XYZ const * m_sourcePos;
     std::size_t m_nSources;
-    Afloat m_maxGain = 10.0f;
-    
-    
+ 
+    */
+	int calcInvMatrices();
+	void calcPlainVBAP(XYZ pos);
+	void applyRerouting();
+	
+	
     
 public:
   /**
@@ -45,60 +55,64 @@ public:
    * Sets object to save values (no array, zero sources).
    */
  // VBAP();
-	explicit VBAP(LoudspeakerArray const * array);
 
-
-
-    int setLoudspeakerArray(LoudspeakerArray const * array){
-      //  m_array = array;
-       // m_invMatrix.resize( array->getNumTriplets(), 9 );
-      //  m_gain.resize( m_nSources, array->getNumSpeakers( ) );
-        return 0;
-    }
-	//
-    int setListenerPosition(Afloat x, Afloat y, Afloat z){
-
-#ifdef VBAP_DEBUG_MESSAGES
-      printf("setListenerPosition %f %f %f\n",x,y,z);
-#endif
-
-        m_listenerPos.set(x, y, z);
-
-        return 0;
-    }
-    //private
-    int calcInvMatrices();
-    //
-    int setSourcePositions(XYZ const *sp ) {
-        m_sourcePos = sp;
-        return 0;
-    }
-    
-    std::size_t setNumSources( std::size_t n) {
-        m_nSources = n;
-	// Take care of the fact that the loudspeaker
-	// array might not been set yet.
-		//std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
-       // m_gain.resize( m_nSources, numSpeakers );
-        
-		m_gain.resize(m_nSources, mPositions.numberOfRows());
-
-		return n;
-    }
-    
-    int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
-    
-    std::size_t getNumSpeakers() const { 
-		//return m_array->getNumSpeakers(); 
+	explicit VBAP(const LoudspeakerArray &array, SampleType x, SampleType y, SampleType z);
+	
+	void calcGain(XYZ pos);
+	
+	
+	std::size_t getNumSpeakers() const {
 		return mPositions.numberOfRows();
 	}
+
+	
+	std::vector<SampleType> const & getGains() const {
+		return mGain;
+	}
+	
+//    int setLoudspeakerArray(LoudspeakerArray const * array){
+//      //  m_array = array;
+//       // m_invMatrix.resize( array->getNumTriplets(), 9 );
+//      //  m_gain.resize( m_nSources, array->getNumSpeakers( ) );
+//        return 0;
+//    }
+//	//
+//    int setListenerPosition(SampleType x, SampleType y, SampleType z){
+//
+//#ifdef VBAP_DEBUG_MESSAGES
+//      printf("setListenerPosition %f %f %f\n",x,y,z);
+//#endif
+//
+//        m_listenerPos.set(x, y, z);
+//
+//        return 0;
+//    }
+
+
+    //private
+   
+    //
+ //   int setSourcePositions(XYZ const *sp ) {
+ //       m_sourcePos = sp;
+ //       return 0;
+ //   }
+ //   
+ //   std::size_t setNumSources( std::size_t n) {
+ //       m_nSources = n;
+	//// Take care of the fact that the loudspeaker
+	//// array might not been set yet.
+	//	//std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
+ //      // m_gain.resize( m_nSources, numSpeakers );
+ //       
+	//	m_gain.resize(m_nSources, mPositions.numberOfRows());
+
+	//	return n;
+ //   }
     
-    int calcGains();
+ 
     
-    efl::BasicMatrix<Afloat> const & getGains() const {
-       return m_gain;
-    }
-    
+   
+ 
 };
 
 } // namespace panning

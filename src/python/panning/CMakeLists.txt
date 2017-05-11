@@ -3,6 +3,8 @@
 set( SOURCES
 loudspeaker_array.cpp
 panning.cpp
+vbap.cpp
+xyz.cpp
 )
 
 set(PROJECT_NAME panningpython)

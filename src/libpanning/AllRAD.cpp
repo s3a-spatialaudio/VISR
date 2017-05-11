@@ -71,7 +71,7 @@ int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
 int AllRAD::calcDecodeGains(VBAP* vbap){
     
     // In vbap first do externally: setListenerPosition, then calcInvMatrix.
-    
+#if 0
     vbap->setSourcePositions( m_regArray->getPositions()  );
     
     vbap->setNumSources(m_regArray->getNumSpeakers());
@@ -102,6 +102,7 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
             m_decode( i, j ) = sum;
         }
     }
+#endif
     return 0;
 }
 
