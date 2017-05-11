@@ -23,6 +23,7 @@ namespace rcl
  , mOutput( "out", *this )
  , mCurrentGains(cVectorAlignmentSamples)
  , mNextGains(cVectorAlignmentSamples)
+ , mRamp(cVectorAlignmentSamples)
 {
 }
 
@@ -101,7 +102,7 @@ void GainVector::process()
       status( StatusMessage::Error, "Error during ramp multiplication: ", efl::errorMessage(res) );
     }
   }
-  mInterpolationCounter = std::min( ++mInterpolationCounter, mInterpolationPeriods );
+  mInterpolationCounter = std::min( mInterpolationCounter+1, mInterpolationPeriods );
 }
 
 void GainVector::setGain( efl::BasicVector< SampleType > const & newGains )

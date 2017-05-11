@@ -3,6 +3,7 @@
 set( SOURCES
 double_buffering_protocol.cpp
 empty_parameter_config.cpp
+indexed_value_parameter.cpp
 listener_position.cpp
 matrix_parameter.cpp
 message_queue_protocol.cpp

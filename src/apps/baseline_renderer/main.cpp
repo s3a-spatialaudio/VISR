@@ -196,7 +196,7 @@ int main( int argc, char const * const * argv )
 
     rrl::AudioSignalFlow audioFlow( flow );
 
-    audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
+    audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface->start( );

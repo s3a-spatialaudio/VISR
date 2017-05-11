@@ -49,7 +49,6 @@ namespace rrl
 
 AudioSignalFlow::AudioSignalFlow( Component & flow )
  : mFlow( flow.implementation() )
- , mInitialised( false )
 {
   std::stringstream checkMessages;
   bool const checkResult = checkConnectionIntegrity( mFlow, true/* hierarchical*/, checkMessages );
@@ -101,7 +100,6 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
     std::cout << "Messages during schedule computation: " << checkMessages.str() << std::endl;
     throw std::runtime_error( "AudioSignalFlow: Execution schedule could not be created." );
   }
-  mInitialised = true;
 }
 
 AudioSignalFlow::~AudioSignalFlow()
@@ -272,19 +270,11 @@ char const * AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
 
 std::size_t AudioSignalFlow::numberOfCaptureChannels() const
 {
-  if( !initialised() )
-  {
-    throw std::logic_error( "AudioSignalFlow::captureWidth() must be called only after initalisation of the object is complete." );
-  }
   return mCaptureChannels.size();
 }
 
 std::size_t AudioSignalFlow::numberOfPlaybackChannels() const
 {
-  if( !initialised() )
-  {
-    throw std::logic_error( "AudioSignalFLow::playbackWidth() must be called only after initalisation of the object is complete." );
-  }
   return mPlaybackChannels.size();
 }
 
