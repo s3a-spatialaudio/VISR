@@ -28,16 +28,16 @@ BOOST_AUTO_TEST_CASE( IppFftWrapperSingle )
   std::size_t dftSize = 8;
   std::size_t outputSize = dftSize / 2 + 1;
 
-  IppFftWrapper<float> fft( dftSize, ril::cVectorAlignmentSamples );
+  IppFftWrapper<float> fft( dftSize, cVectorAlignmentSamples );
 
-  efl::BasicVector<float> input( dftSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<float> input( dftSize, cVectorAlignmentSamples );
   input[1] = 1.0f;
 
-  efl::BasicVector<std::complex<float> > output( outputSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<std::complex<float> > output( outputSize, cVectorAlignmentSamples );
 
   fft.forwardTransform( input.data(), output.data() );
 
-  efl::BasicVector<float> resultAfterInverse( dftSize, ril::cVectorAlignmentSamples );
+  efl::BasicVector<float> resultAfterInverse( dftSize, cVectorAlignmentSamples );
 
   fft.inverseTransform( output.data(), resultAfterInverse.data() );
 }
