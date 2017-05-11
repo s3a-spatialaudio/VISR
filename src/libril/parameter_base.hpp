@@ -3,6 +3,7 @@
 #ifndef VISR_PARAMETER_BASE_HPP_INCLUDED
 #define VISR_PARAMETER_BASE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 #include "parameter_type.hpp"
 
 namespace visr
@@ -15,7 +16,7 @@ class ParameterConfig;
  *
  *
  */
-class ParameterBase
+class VISR_CORE_LIBRARY_SYMBOL ParameterBase
 {
 public:
 
