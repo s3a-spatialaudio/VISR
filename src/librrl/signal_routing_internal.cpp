@@ -13,7 +13,7 @@ namespace rrl
 {
 
 template< typename SampleType >
-SignalRoutingInternal<SampleType>::SignalRoutingInternal( SignalFlowContext& context,
+SignalRoutingInternal<SampleType>::SignalRoutingInternal( SignalFlowContext const & context,
                                   char const * name,
                                   CompositeComponent * parent,
                                   std::size_t inputWidth,
@@ -69,7 +69,7 @@ template class SignalRoutingInternal<double>;
 
 
 std::unique_ptr<AtomicComponent> createSignalRoutingComponent( AudioSampleType::Id sampleType,
-                                                               SignalFlowContext& context,
+                                                               SignalFlowContext const & context,
                                                                char const * name,
                                                                CompositeComponent * parent,
                                                                std::size_t inputWidth,

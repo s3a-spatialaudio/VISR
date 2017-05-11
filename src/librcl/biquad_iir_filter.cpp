@@ -13,7 +13,7 @@ namespace visr
 namespace rcl
 {
 
-  BiquadIirFilter::BiquadIirFilter( SignalFlowContext& context,
+  BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
                                     char const * name,
                                     CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

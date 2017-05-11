@@ -47,9 +47,25 @@ AudioConnectionMap::AudioConnectionMap( impl::ComponentImplementation const & co
   }
 }
 
-void AudioConnectionMap::insert( ValueType const & connection )
+void AudioConnectionMap::swap( AudioConnectionMap & rhs ) noexcept
+{
+  mConnections.swap( rhs.mConnections );
+}
+
+void AudioConnectionMap::insert( value_type const & connection )
 {
   mConnections.insert( connection );
+}
+
+AudioConnectionMap::iterator AudioConnectionMap::insert( iterator hint, value_type const & connection )
+{
+  return mConnections.insert( hint, connection );
+
+}
+
+void AudioConnectionMap::insert( iterator first, iterator last )
+{
+  return mConnections.insert( first, last );
 }
 
 void AudioConnectionMap::insert( AudioChannel const & sender, AudioChannel const & receiver )
@@ -150,7 +166,7 @@ bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & co
 AudioConnectionMap::const_iterator AudioConnectionMap::findReceiveChannel( AudioChannel const & signal ) const
 {
   return std::find_if( mConnections.begin(), mConnections.end(),
-    [&signal]( AudioConnectionMap::ValueType const & entry ){ return entry.second == signal; } );
+    [&signal]( AudioConnectionMap::value_type const & entry ){ return entry.second == signal; } );
 }
 
 AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
@@ -205,7 +221,7 @@ AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
 
 std::ostream & operator << (std::ostream & stream, AudioConnectionMap const & connections)
 {
-  for( AudioConnectionMap::ValueType const & entry : connections )
+  for( AudioConnectionMap::value_type const & entry : connections )
   {
     stream << entry.first << "->" << entry.second << "\n";
   }

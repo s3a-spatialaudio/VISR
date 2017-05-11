@@ -21,9 +21,14 @@ namespace pml
 {
 
 class ObjectVector: public objectmodel::ObjectVector,
-  public TypedParameterBase<EmptyParameterConfig, detail::compileTimeHashFNV1("ObjectVector") >
+                    public TypedParameterBase<ObjectVector, EmptyParameterConfig, detail::compileTimeHashFNV1("ObjectVector") >
 {
 public:
+  /**
+   * Default constructor, creates an empty object vector.
+   */
+  ObjectVector();
+
   explicit ObjectVector( ParameterConfigBase const & config );
 
   explicit ObjectVector( EmptyParameterConfig const & config );

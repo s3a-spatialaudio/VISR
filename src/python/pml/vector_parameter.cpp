@@ -5,12 +5,9 @@
 
 #include <libril/constants.hpp>
 #include <libril/parameter_base.hpp>
-#ifdef USE_PYBIND11
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#else
-#include <boost/python.hpp>
-#endif
 
 namespace visr
 {
@@ -22,8 +19,6 @@ namespace python
 {
 namespace pml
 {
-
-#ifdef USE_PYBIND11
 
 namespace // unnamed
 {
@@ -53,7 +48,7 @@ void setData( VectorParameter<DataType> & param, pybind11::array_t<DataType> & v
 template<typename DataType>
 void exportVectorParameter( pybind11::module & m, char const * className )
 {
-  pybind11::class_<VectorParameter< DataType>, ParameterBase >(m, className, pybind11::metaclass(), pybind11::buffer_protocol() )
+  pybind11::class_<VectorParameter< DataType>, ParameterBase >(m, className, pybind11::buffer_protocol() )
   .def_buffer([](VectorParameter<DataType> &vp) -> pybind11::buffer_info
   {
     return pybind11::buffer_info( vp.data(),
@@ -100,7 +95,6 @@ void exportVectorParameters( pybind11::module & m)
   exportVectorParameter<float>( m, "VectorParameterFloat" );
   exportVectorParameter<double>( m, "VectorParameterDouble" );
 }
-#endif
 
 } // namepace pml
 } // namespace python

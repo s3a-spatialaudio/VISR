@@ -10,7 +10,7 @@ namespace visr
 namespace signalflows
 {
 
-DelayVector::DelayVector( SignalFlowContext & context,
+DelayVector::DelayVector( SignalFlowContext const & context,
                           const char * name,
                           CompositeComponent * parent, 
                           std::size_t numberOfChannels,

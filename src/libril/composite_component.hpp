@@ -39,7 +39,7 @@ public:
   using ChannelList = visr::ChannelList;
   //@}
 
-  explicit CompositeComponent( SignalFlowContext& context,
+  explicit CompositeComponent( SignalFlowContext const & context,
                                char const * name,
                                CompositeComponent * parent = nullptr );
 
@@ -82,7 +82,7 @@ public:
    * @param sendPort The local (not fully qualified) name of the send port. 
    * @param receiveComponent The name of the component holding the receive port (local name, not the
    * fully qualified name). When specifiying an external port of a composite component, use an empty string or \p "this".
-   * @param sendPort The local (not fully qualified) name of the receive port.
+   * @param receivePort The local (not fully qualified) name of the receive port.
    * @throw std::invalid_argument if a specified component or port does not exist.
    */
   void parameterConnection( char const * sendComponent,

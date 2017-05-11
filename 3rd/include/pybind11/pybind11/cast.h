@@ -18,12 +18,16 @@
 
 NAMESPACE_BEGIN(pybind11)
 NAMESPACE_BEGIN(detail)
+inline PyTypeObject *make_static_property_type();
+inline PyTypeObject *make_default_metaclass();
 
 /// Additional type information which does not fit into the PyTypeObject
 struct type_info {
     PyTypeObject *type;
     size_t type_size;
+    void *(*operator_new)(size_t);
     void (*init_holder)(PyObject *, const void *);
+    void (*dealloc)(PyObject *);
     std::vector<PyObject *(*)(PyObject *, PyTypeObject *)> implicit_conversions;
     std::vector<std::pair<const std::type_info *, void *(*)(void *)>> implicit_casts;
     std::vector<bool (*)(PyObject *, void *&)> *direct_conversions;
@@ -73,6 +77,8 @@ PYBIND11_NOINLINE inline internals &get_internals() {
                 }
             }
         );
+        internals_ptr->static_property_type = make_static_property_type();
+        internals_ptr->default_metaclass = make_default_metaclass();
     }
     return *internals_ptr;
 }
@@ -464,6 +470,7 @@ public:
     public: \
         static PYBIND11_DESCR name() { return type_descr(py_name); } \
         static handle cast(const type *src, return_value_policy policy, handle parent) { \
+            if (!src) return none().release(); \
             return cast(*src, policy, parent); \
         } \
         operator type*() { return &value; } \
@@ -636,22 +643,23 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
     static_assert(!std::is_same<CharT, wchar_t>::value || sizeof(CharT) == 2 || sizeof(CharT) == 4,
             "Unsupported wchar_t size != 2/4");
     static constexpr size_t UTF_N = 8 * sizeof(CharT);
-    static constexpr const char *encoding = UTF_N == 8 ? "utf8" : UTF_N == 16 ? "utf16" : "utf32";
 
     using StringType = std::basic_string<CharT, Traits, Allocator>;
 
     bool load(handle src, bool) {
-#if PY_VERSION_MAJOR < 3
+#if PY_MAJOR_VERSION < 3
         object temp;
 #endif
         handle load_src = src;
         if (!src) {
             return false;
         } else if (!PyUnicode_Check(load_src.ptr())) {
-#if PY_VERSION_MAJOR >= 3
+#if PY_MAJOR_VERSION >= 3
             return false;
             // The below is a guaranteed failure in Python 3 when PyUnicode_Check returns false
 #else
+            if (!PYBIND11_BYTES_CHECK(load_src.ptr()))
+                return false;
             temp = reinterpret_steal<object>(PyUnicode_FromObject(load_src.ptr()));
             if (!temp) { PyErr_Clear(); return false; }
             load_src = temp;
@@ -659,7 +667,7 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
         }
 
         object utfNbytes = reinterpret_steal<object>(PyUnicode_AsEncodedString(
-            load_src.ptr(), encoding, nullptr));
+            load_src.ptr(), UTF_N == 8 ? "utf-8" : UTF_N == 16 ? "utf-16" : "utf-32", nullptr));
         if (!utfNbytes) { PyErr_Clear(); return false; }
 
         const CharT *buffer = reinterpret_cast<const CharT *>(PYBIND11_BYTES_AS_STRING(utfNbytes.ptr()));
@@ -672,12 +680,28 @@ struct type_caster<std::basic_string<CharT, Traits, Allocator>, enable_if_t<is_s
     static handle cast(const StringType &src, return_value_policy /* policy */, handle /* parent */) {
         const char *buffer = reinterpret_cast<const char *>(src.c_str());
         ssize_t nbytes = ssize_t(src.size() * sizeof(CharT));
-        handle s = PyUnicode_Decode(buffer, nbytes, encoding, nullptr);
+        handle s = decode_utfN(buffer, nbytes);
         if (!s) throw error_already_set();
         return s;
     }
 
     PYBIND11_TYPE_CASTER(StringType, _(PYBIND11_STRING_NAME));
+
+private:
+    static handle decode_utfN(const char *buffer, ssize_t nbytes) {
+#if !defined(PYPY_VERSION)
+        return
+            UTF_N == 8  ? PyUnicode_DecodeUTF8(buffer, nbytes, nullptr) :
+            UTF_N == 16 ? PyUnicode_DecodeUTF16(buffer, nbytes, nullptr, nullptr) :
+                          PyUnicode_DecodeUTF32(buffer, nbytes, nullptr, nullptr);
+#else
+        // PyPy seems to have multiple problems related to PyUnicode_UTF*: the UTF8 version
+        // sometimes segfaults for unknown reasons, while the UTF16 and 32 versions require a
+        // non-const char * arguments, which is also a nuissance, so bypass the whole thing by just
+        // passing the encoding as a string value, which works properly:
+        return PyUnicode_Decode(buffer, nbytes, UTF_N == 8 ? "utf-8" : UTF_N == 16 ? "utf-16" : "utf-32", nullptr);
+#endif
+    }
 };
 
 // Type caster for C-style strings.  We basically use a std::string type caster, but also add the
@@ -878,6 +902,8 @@ template <typename type, typename holder_type>
 struct copyable_holder_caster : public type_caster_base<type> {
 public:
     using base = type_caster_base<type>;
+    static_assert(std::is_base_of<base, type_caster<type>>::value,
+            "Holder classes are only supported for custom types");
     using base::base;
     using base::cast;
     using base::typeinfo;
@@ -895,6 +921,9 @@ public:
             value = nullptr;
             return true;
         }
+
+        if (typeinfo->default_holder)
+            throw cast_error("Unable to load a custom holder type from a default-holder instance");
 
         if (typeinfo->simple_type) { /* Case 1: no multiple inheritance etc. involved */
             /* Check if we can safely perform a reinterpret-style cast */
@@ -991,6 +1020,9 @@ class type_caster<std::shared_ptr<T>> : public copyable_holder_caster<T, std::sh
 
 template <typename type, typename holder_type>
 struct move_only_holder_caster {
+    static_assert(std::is_base_of<type_caster_base<type>, type_caster<type>>::value,
+            "Holder classes are only supported for custom types");
+
     static handle cast(holder_type &&src, return_value_policy, handle) {
         auto *ptr = holder_helper<holder_type>::get(src);
         return type_caster_base<type>::cast_holder(ptr, &src);
@@ -1089,6 +1121,17 @@ template <typename type> using cast_is_temporary_value_reference = bool_constant
     (std::is_reference<type>::value || std::is_pointer<type>::value) &&
     !std::is_base_of<type_caster_generic, make_caster<type>>::value
 >;
+
+// When a value returned from a C++ function is being cast back to Python, we almost always want to
+// force `policy = move`, regardless of the return value policy the function/method was declared
+// with.  Some classes (most notably Eigen::Ref and related) need to avoid this, and so can do so by
+// specializing this struct.
+template <typename Return, typename SFINAE = void> struct return_value_policy_override {
+    static return_value_policy policy(return_value_policy p) {
+        return !std::is_lvalue_reference<Return>::value && !std::is_pointer<Return>::value
+            ? return_value_policy::move : p;
+    }
+};
 
 // Basic python -> C++ casting; throws if casting fails
 template <typename T, typename SFINAE> type_caster<T, SFINAE> &load_type(type_caster<T, SFINAE> &conv, const handle &handle) {
@@ -1208,18 +1251,19 @@ NAMESPACE_END(detail)
 
 template <return_value_policy policy = return_value_policy::automatic_reference,
           typename... Args> tuple make_tuple(Args&&... args_) {
-    const size_t size = sizeof...(Args);
+    constexpr size_t size = sizeof...(Args);
     std::array<object, size> args {
         { reinterpret_steal<object>(detail::make_caster<Args>::cast(
             std::forward<Args>(args_), policy, nullptr))... }
     };
-    for (auto &arg_value : args) {
-        if (!arg_value) {
+    for (size_t i = 0; i < args.size(); i++) {
+        if (!args[i]) {
 #if defined(NDEBUG)
             throw cast_error("make_tuple(): unable to convert arguments to Python object (compile in debug mode for details)");
 #else
-            throw cast_error("make_tuple(): unable to convert arguments of types '" +
-                (std::string) type_id<std::tuple<Args...>>() + "' to Python object");
+            std::array<std::string, size> argtypes { {type_id<Args>()...} };
+            throw cast_error("make_tuple(): unable to convert argument of type '" +
+                argtypes[i] + "' to Python object");
 #endif
         }
     }
@@ -1345,14 +1389,14 @@ public:
         return load_impl_sequence(call, indices{});
     }
 
-    template <typename Return, typename Func>
+    template <typename Return, typename Guard, typename Func>
     enable_if_t<!std::is_void<Return>::value, Return> call(Func &&f) {
-        return call_impl<Return>(std::forward<Func>(f), indices{});
+        return call_impl<Return>(std::forward<Func>(f), indices{}, Guard{});
     }
 
-    template <typename Return, typename Func>
+    template <typename Return, typename Guard, typename Func>
     enable_if_t<std::is_void<Return>::value, void_type> call(Func &&f) {
-        call_impl<Return>(std::forward<Func>(f), indices{});
+        call_impl<Return>(std::forward<Func>(f), indices{}, Guard{});
         return void_type();
     }
 
@@ -1368,8 +1412,8 @@ private:
         return true;
     }
 
-    template <typename Return, typename Func, size_t... Is>
-    Return call_impl(Func &&f, index_sequence<Is...>) {
+    template <typename Return, typename Func, size_t... Is, typename Guard>
+    Return call_impl(Func &&f, index_sequence<Is...>, Guard &&) {
         return std::forward<Func>(f)(cast_op<Args>(std::get<Is>(value))...);
     }
 

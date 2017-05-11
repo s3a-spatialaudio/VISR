@@ -28,15 +28,15 @@ namespace visr
 namespace signalflows
 {
 
-CoreRenderer::CoreRenderer( SignalFlowContext & context,
-                                    char const * name,
-                                    CompositeComponent * parent,
-                                    panning::LoudspeakerArray const & loudspeakerConfiguration,
-                                    std::size_t numberOfInputs,
-                                    std::size_t numberOfOutputs,
-                                    std::size_t interpolationPeriod,
-                                    efl::BasicMatrix<SampleType> const & diffusionFilters,
-                                    std::string const & trackingConfiguration )
+CoreRenderer::CoreRenderer( SignalFlowContext const & context,
+                            char const * name,
+                            CompositeComponent * parent,
+                            panning::LoudspeakerArray const & loudspeakerConfiguration,
+                            std::size_t numberOfInputs,
+                            std::size_t numberOfOutputs,
+                            std::size_t interpolationPeriod,
+                            efl::BasicMatrix<SampleType> const & diffusionFilters,
+                            std::string const & trackingConfiguration )
  : CompositeComponent( context, name, parent )
  , mObjectSignalInput( "audioIn", *this )
  , mLoudspeakerOutput( "audioOut", *this )
@@ -73,8 +73,9 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mSpeakerCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay,
-      rcl::DelayVector::InterpolationType::NearestSample,
-      0.0f, 0.0f );
+                                 rcl::DelayVector::InterpolationType::NearestSample,
+                                 true /*control inputs*/,
+                                 0.0f, 0.0f );
     mPositionDecoder->setup( panning::XYZ( +2.08f, 0.0f, 0.0f ) );
   }
 
@@ -88,7 +89,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
       throw std::invalid_argument( "CoreRenderer: Size of the output EQ configuration config differs from "
         "the number of output signals (regular loudspeakers + subwoofers).");
     }
-    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( context, "OutputEqualisationFilter" ) );
+    mOutputEqualisationFilter.reset( new rcl::BiquadIirFilter( context, "OutputEqualisationFilter", this ) );
     mOutputEqualisationFilter->setup( numberOfOutputSignals, outputEqSections, eqConfig );
   }
 
@@ -111,7 +112,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
    */
   SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
   mDiffusePartDecorrelator.setup( numberOfLoudspeakers, mDiffusionFilters, diffusorGain );
-  mNullSource.setup( 1/*width*/ );
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
@@ -121,7 +121,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
   Afloat const maxDelay = std::ceil( *maxEl ); // Sufficient for nearestSample even if there is no particular compensation for the interpolation method's delay inside.
   
   mOutputAdjustment.setup( numberOfOutputSignals, period(), maxDelay, rcl::DelayVector::InterpolationType::NearestSample,
-    outputDelays, outputGains );
+                           false /*No control inputs*/,
+                           outputDelays, outputGains );
 
   // Note: This assumes that the type 'Afloat' used in libpanning is
   // identical to SampleType (at the moment, both are floats).
@@ -131,8 +132,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
   audioConnection( mObjectSignalInput, mVbapMatrix.audioPort( "in" ) );
   audioConnection( mObjectSignalInput, mDiffusePartMatrix.audioPort( "in" ) );
   audioConnection( mVbapMatrix.audioPort( "out" ), mDirectDiffuseMix.audioPort( "in0" ) );
-  audioConnection( mDirectDiffuseMix.audioPort( "out" ), mDiffusePartDecorrelator.audioPort( "in" ) );
-  audioConnection( "DiffusePartDecorrelator", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in1", ChannelRange( 0, numberOfLoudspeakers ) );
+  audioConnection( mDiffusePartMatrix.audioPort( "out" ), mDiffusePartDecorrelator.audioPort( "in" ) );
+  audioConnection( mDiffusePartDecorrelator.audioPort( "out" ), mDirectDiffuseMix.audioPort( "in1" ) );
   if( mTrackingEnabled )
   {
     audioConnection( "DirectDiffuseMixer", "out", ChannelRange( 0, numberOfLoudspeakers ), "TrackingSpeakerCompensation", "in", ChannelRange( 0, numberOfLoudspeakers ) );
@@ -153,11 +154,10 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
   }
   if( outputEqSupport )
   {
-    audioConnection( "DirectDiffuseMixer", "out", ChannelRange( 0, numberOfLoudspeakers ), "OutputEqualisationFilter", "in", ChannelRange( 0, numberOfLoudspeakers ) );
-    audioConnection( "SubwooferMixer", "out", ChannelRange( 0, numberOfSubwoofers ),
-                             "OutputEqualisationFilter", "in", ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
-    audioConnection( "OutputEqualisationFilter", "out", ChannelRange( 0, numberOfLoudspeakers + numberOfSubwoofers ),
-                             "OutputAdjustment", "in", ChannelRange( 0, numberOfLoudspeakers + numberOfSubwoofers ) );
+    audioConnection( mDirectDiffuseMix.audioPort("out"), ChannelRange(0, numberOfLoudspeakers), mOutputEqualisationFilter->audioPort("in"), ChannelRange(0, numberOfLoudspeakers) );
+    audioConnection( mSubwooferMix.audioPort("out"), ChannelRange( 0, numberOfSubwoofers ),
+                     mOutputEqualisationFilter->audioPort("in"), ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
+    audioConnection( mOutputEqualisationFilter->audioPort("out"), mOutputAdjustment.audioPort("in") );
   }
   else
   {
@@ -206,6 +206,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
                            "", "audioOut", activePlaybackChannels );
 
   std::size_t const numSilentOutputs = numberOfOutputs - (numberOfLoudspeakers + numberOfSubwoofers);
+  mNullSource.setup( numSilentOutputs == 0 ? 0 : 1 );
   if( numSilentOutputs > 0 )
   {
     std::vector<ChannelList::IndexType> nullOutput( numSilentOutputs, 0 );
@@ -232,8 +233,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext & context,
     {
       throw std::logic_error( "Internal logic error: Computation of silent output channels failed." );
     }
-    audioConnection( "NullSource", "out", nullOutput,
-                             "", "output", silencedPlaybackChannels );
+    audioConnection( mNullSource.audioPort("out"), nullOutput,
+		     mLoudspeakerOutput, silencedPlaybackChannels );
   }
 }
 

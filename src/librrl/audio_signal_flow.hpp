@@ -5,6 +5,10 @@
 
 #include "audio_interface.hpp"
 
+// TODO: Replace by forward declarations if possible
+#include "audio_connection_map.hpp"
+#include "parameter_connection_map.hpp"
+
 #include <libril/audio_port_base.hpp>
 #include <libril/communication_protocol_base.hpp>
 #include <libril/constants.hpp>
@@ -16,8 +20,6 @@
 #include <set>
 #include <stdexcept>
 #include <vector>
-
-#define USE_SIGNAL_POOL
 
 namespace visr
 {
@@ -33,12 +35,9 @@ class CompositeComponentImplementation;
 
 namespace rrl
 {
-#ifndef  USE_SIGNAL_POOL
+
 // Forward declarations
-template <typename T> class CommunicationArea;
-#else
 class AudioSignalPool;
-#endif
 
 /**
  * Base class for signal flows, i.e., graphs of connected audio
@@ -198,34 +197,31 @@ public:
 
 
 private:
-  bool initialiseAudioConnections( std::ostream & messages );
+  bool initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections);
+
+  /**
+    * Initialise the parameter infrastructure.
+    * @return True if the initialisation was successful, false otherwise. In this case, \p messages should provide an explanation.
+    * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
+    * @param [out] parameterConnections Connection map to be filled during the initialisation process.
+    */
+  bool initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections );
 
   /**
    * Initialise the schedule for executing the contained elements.
-   * At the moment, this contains some duplicate effort, because the connection maps for 
-   * both the audio signals and parameters have to be computed again. 
+   * @return Boolean value indicating whether the initialisation was successful.
+   * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
+   * @param audioConnections The audio connection relations of the final signal flow (possibly including additional infrastructure components created during initialisation)
+   * @param parameterConnections The parameter connection relations of the final signal flow (possibly including additional infrastructure components created during initialisation)
    */
-  bool initialiseSchedule( std::ostream & messages );
+  bool initialiseSchedule( std::ostream & messages,
+                           AudioConnectionMap const & audioConnections,
+                           ParameterConnectionMap const & parameterConnections );
 
   /**
-   * Initialise the communication area, i.e., the memory area
-   * containing all input, output, and intermediate signals used in the
-   * execution of the derived signal flow.
-   * To be called from the setup() method of a derived subclass.
+   * Mark the signal flow as "initialised".
+   * @todo Decide whether this is the right place for a consistency check.
    */
-  void initCommArea( std::size_t numberOfSignals, std::size_t signalLength,
-                     std::size_t alignmentElements = cVectorAlignmentSamples );
-
-  /**
-    * Parameter infrastructure
-    */
-  //@{
-  bool initialiseParameterInfrastructure( std::ostream & messages );
-
-  /**
-  * Mark the signal flow as "initialised".
-  * @todo Decide whether this is the right place for a consistency check.
-  */
   void setInitialised( bool newState = true ) { mInitialised = newState; }
 
   std::size_t numberCommunicationProtocols() const;
@@ -237,7 +233,7 @@ private:
 
   /**
    * The signal flow handled by this object.
-   * Can be either an atomic or a (hierachical) composite component/
+   * Can be either an atomic or a (hierarchical) composite component/
    */
   impl::ComponentImplementation & mFlow;
 
@@ -269,13 +265,9 @@ private:
 
   /**
   * The communication area for this signal flow.
-  * @see initCommArea()
   */
-#ifdef USE_SIGNAL_POOL
   std::unique_ptr<AudioSignalPool> mAudioSignalPool;
-#else
-  std::unique_ptr<CommunicationArea<SampleType> > mCommArea;
-#endif
+
   /**
    * These ports are the top-level system inputs and outputs.
    * They correspond to the capture and playback indices.

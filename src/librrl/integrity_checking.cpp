@@ -10,8 +10,10 @@
 #include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 #include <libvisr_impl/audio_port_base_implementation.hpp>
+#include <libvisr_impl/parameter_port_base_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <ciso646>
 #include <iostream>
@@ -101,7 +103,7 @@ namespace // unnamed namespace
   AudioConnectionCountTable fillTable( PortLookup<impl::AudioPortBaseImplementation>::PortTable const & ports )
   {
     AudioConnectionCountTable table;
-    for( impl::AudioPortBaseImplementation const * port : ports )
+    for( impl::AudioPortBaseImplementation* port : ports )
     {
       std::size_t const width = port->width();
       for( std::size_t chIdx(0); chIdx < width; ++chIdx )
@@ -130,7 +132,7 @@ namespace // unnamed namespace
 
     std::cout << "Local connection map:" << localConnections << "\n\n\n" << std::endl;
 
-    for( AudioConnectionMap::ValueType const & connection : localConnections )
+    for( AudioConnectionMap::value_type const & connection : localConnections )
     {
       AudioConnectionCountTable::iterator sendPortEntryIt = sendChannelTable.find( connection.first );
       if( sendPortEntryIt == sendChannelTable.end() )
@@ -232,12 +234,48 @@ namespace // unnamed namespace
     }
     if( usedSendPorts != localPorts.allNonPlaceholderSendPorts() )
     {
-      messages << component.fullName() << " contains unconnected send ports." << std::endl;
+      PortLookup<impl::ParameterPortBaseImplementation>::PortTable unconnectedSends;
+      std::set_difference( localPorts.allNonPlaceholderSendPorts().begin(), localPorts.allNonPlaceholderSendPorts().end(),
+                           usedSendPorts.begin(), usedSendPorts.end(), std::inserter( unconnectedSends, unconnectedSends.begin() ) );
+
+      messages << component.fullName() << " contains unconnected parameter send ports: ";
+      bool first{false};
+      for( impl::ParameterPortBaseImplementation * v : unconnectedSends)
+      {
+	if( first )
+	{
+	  messages << fullyQualifiedName(*v);
+	  first = false;
+	}
+	else
+	{
+	  messages << ", " << fullyQualifiedName(*v);
+	}
+      }
+      messages << std::endl;
       result = false;
     }
     if( usedReceivePorts != localPorts.allNonPlaceholderReceivePorts() )
     {
-      messages << component.fullName() << " contains unconnected send ports." << std::endl;
+      PortLookup<impl::ParameterPortBaseImplementation>::PortTable unconnectedReceives;
+      std::set_difference( localPorts.allNonPlaceholderReceivePorts().begin(), localPorts.allNonPlaceholderReceivePorts().end(),
+			   usedReceivePorts.begin(), usedReceivePorts.end(), std::inserter(unconnectedReceives, unconnectedReceives.begin() ) );
+
+      messages << component.fullName() << " contains unconnected parameter receive ports: ";
+      bool first{false};
+      for( impl::ParameterPortBaseImplementation * v : unconnectedReceives)
+      {
+	if( first )
+	{
+	  messages << fullyQualifiedName(*v);
+	  first = false;
+	}
+	else
+	{
+	  messages << ", " << fullyQualifiedName(*v);
+	}
+      }
+      messages << std::endl;
       result = false;
     }
     return result;

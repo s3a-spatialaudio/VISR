@@ -10,13 +10,7 @@
 
 #include <libsignalflows/baseline_renderer.hpp> 
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/python.hpp>
-#include "boost/python/args.hpp"
-#endif
-
 
 namespace visr
 {
@@ -28,30 +22,14 @@ namespace python
 namespace signalflows
 {
 
-#ifdef USE_PYBIND11
 void exportBaselineRenderer( pybind11::module& m )
 {
   pybind11::class_<BaselineRenderer, CompositeComponent>( m, "BaselineRenderer" )
-    .def( pybind11::init< visr::SignalFlowContext&, char const*, visr::CompositeComponent *, visr::panning::LoudspeakerArray const &,
+    .def( pybind11::init< visr::SignalFlowContext const&, char const*, visr::CompositeComponent *, visr::panning::LoudspeakerArray const &,
       std::size_t, std::size_t, std::size_t, visr::pml::MatrixParameter<visr::SampleType> const &, std::string const &,
       std::size_t, std::string const &, bool>() )
     ;
 }
-
-#else
-
-using namespace boost::python;
-
-void exportBaselineRenderer()
-{
-  class_<BaselineRenderer, bases<CompositeComponent>, boost::noncopyable>( "BaselineRenderer", boost::python::no_init )
-    .def( boost::python::init< visr::SignalFlowContext&, char const*, visr::CompositeComponent *, visr::panning::LoudspeakerArray const &,
-                               std::size_t, std::size_t, std::size_t, visr::pml::MatrixParameter<visr::SampleType> const &, std::string const &,
-                               std::size_t, std::string const &, bool>
-      ( args( "context", "name", "parent", "loudspeakerConfiguration", "numberOfInputs", "numberOfOutputs", "interpolationPeriod", "diffusionFilters", "trackingConfiguration", "sceneReceiverPort", "reverbConfig", "frequencyDependentPanning" ) ) );
-}
-
-#endif
 
 } // namepace signalflows
 } // namespace python

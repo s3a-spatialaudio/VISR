@@ -21,16 +21,15 @@ namespace visr
  */
 class VISR_CORE_LIBRARY_SYMBOL AudioInputBase: public AudioPortBase
 {
-protected:
+public:
   /**
-   * Constructor (protected). Sets up the data members of the base port type and defines it as an input.
+   * Constructor. Sets up the data members of the base port type and defines it as an input.
    * @param name The name of the port as a zero-terminated character array. Name must be unique among the audio ports of the containing component.
    * @param container The component (atomic or composite) holding that audio type.
    * @param typeId An enumeration value that specifies the data type.
    * @param width The number of single audio channels associated with this port.
    */
   /*VISR_CORE_LIBRARY_SYMBOL*/ AudioInputBase( char const * name, Component & container, AudioSampleType::Id typeId, std::size_t width );
-public:
   /**
    * Destructor (virtual).
    * @note Reconsider whether audio ports shall be instantiated polymorphically. Otherwise, the destructor would not need to  be virtual.

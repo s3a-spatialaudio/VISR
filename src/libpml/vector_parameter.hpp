@@ -44,13 +44,15 @@ template<> struct VectorParameterType<std::complex<double> >
  */
 template<typename ElementType >
 class VectorParameter: public efl::BasicVector<ElementType>,
-  public TypedParameterBase<VectorParameterConfig, VectorParameterType<ElementType>::ptype() >
+                       public TypedParameterBase<VectorParameter<ElementType>, VectorParameterConfig, VectorParameterType<ElementType>::ptype() >
 {
 public:
   /**
    * Make all constructors of BasicVector available.
    */
   using efl::BasicVector<ElementType>::BasicVector;
+
+  VectorParameter( VectorParameter<ElementType> const & rhs );
 
   explicit VectorParameter(ParameterConfigBase const & config);
 

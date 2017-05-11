@@ -20,7 +20,7 @@ namespace visr
 namespace rcl
 {
 
-  DiffusionGainCalculator::DiffusionGainCalculator( SignalFlowContext& context,
+  DiffusionGainCalculator::DiffusionGainCalculator( SignalFlowContext const & context,
                                                     char const * name,
                                                     CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )

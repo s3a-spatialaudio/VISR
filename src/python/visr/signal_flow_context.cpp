@@ -3,12 +3,7 @@
 
 #include <libril/signal_flow_context.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#endif
 
 namespace visr
 {
@@ -17,7 +12,6 @@ namespace python
 namespace visr
 {
 
-#ifdef USE_PYBIND11
 void exportSignalFlowContext( pybind11::module & m )
 {
   pybind11::class_<SignalFlowContext>( m, "SignalFlowContext" )
@@ -26,20 +20,8 @@ void exportSignalFlowContext( pybind11::module & m )
    .def_property_readonly( "samplingFrequency", &SignalFlowContext::samplingFrequency )
    .def_property_readonly( "period", &SignalFlowContext::period )
    ;
-  }
-
-#else
-using namespace boost::python;
-
-
-void exportSignalFlowContext()
-{
-  class_<SignalFlowContext>( "SignalFlowContext", init<std::size_t, SamplingFrequencyType>() )
-    .add_property( "samplingFrequency", &SignalFlowContext::samplingFrequency )
-    .add_property( "period", &SignalFlowContext::period );
 }
 
-#endif
 } // namepace visr
 } // namespace python
 } // namespace visr

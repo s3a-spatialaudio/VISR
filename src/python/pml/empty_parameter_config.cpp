@@ -2,12 +2,8 @@
 
 #include <libpml/empty_parameter_config.hpp> 
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#else
-#error "No boost::python bindings for pml::EmptyParameterConfig"
-#endif
 
 namespace visr
 {
@@ -19,8 +15,6 @@ namespace python
 namespace pml
 {
 
-#ifdef USE_PYBIND11
-
 void exportEmptyParameterConfig( pybind11::module & m)
 {
   pybind11::class_<EmptyParameterConfig, ParameterConfigBase >( m, "EmptyParameterConfig" )
@@ -29,8 +23,6 @@ void exportEmptyParameterConfig( pybind11::module & m)
     .def( "compare", static_cast<bool(EmptyParameterConfig::*)(ParameterConfigBase const&) const>(&EmptyParameterConfig::compare),  pybind11::arg("rhs") )
   ;
 }
-
-#endif
 
 } // namepace pml
 } // namespace python

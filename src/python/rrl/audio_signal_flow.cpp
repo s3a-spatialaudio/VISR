@@ -4,14 +4,8 @@
 
 #include <libril/component.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#else
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#include <boost/noncopyable.hpp>
-#endif
 
 #include <vector>
 
@@ -24,9 +18,6 @@ namespace python
 {
 namespace rrl
 {
-
-#ifdef USE_PYBIND11
-
 
 pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, pybind11::array const & input )
 {
@@ -100,27 +91,6 @@ void exportAudioSignalFlow( pybind11::module & m )
    .def( "process", [](visr::rrl::AudioSignalFlow & flow, pybind11::array const & input) /*-> pybind11::array_t<SampleType>*/ { return wrapProcess( flow, input );}, pybind11::return_value_policy::take_ownership )
   ;
 }
-
-
-#else
-
-using namespace boost::python;
-
-
-void exportAudioSignalFlow()
-{
-  class_<AudioSignalFlow, boost::noncopyable>( "AudioSignalFlow", init<visr::Component&>() )
-    .add_property( "initialised", &AudioSignalFlow::initialised )
-    .add_property( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
-    .add_property( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
-    .add_property( "numberOfCaptureChannels", &AudioSignalFlow::numberOfCaptureChannels )
-    .add_property( "numberOfPlaybackChannels", &AudioSignalFlow::numberOfPlaybackChannels )
-    .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, (arg("index")), return_internal_reference<>() )
-    .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, (arg( "index" )), return_internal_reference<>() )
-    ;
-}
-
-#endif
 
 } // namespace rrl
 } // namespace python

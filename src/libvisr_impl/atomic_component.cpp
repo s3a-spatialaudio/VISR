@@ -5,7 +5,7 @@
 namespace visr
 {
 
-AtomicComponent::AtomicComponent( SignalFlowContext& context,
+AtomicComponent::AtomicComponent( SignalFlowContext const & context,
                                   char const * name,
                                   CompositeComponent * parent /*= nullptr */ )
  : Component( context, name, parent )

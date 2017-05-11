@@ -27,7 +27,6 @@
 #include <libefl/basic_matrix.hpp>
 
 #include <libpml/listener_position.hpp>
-#include <libpml/message_queue.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 #include <libpml/string_parameter.hpp>
 
@@ -70,7 +69,7 @@ public:
    * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
    * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
-  explicit BaselineRenderer( SignalFlowContext & context,
+  explicit BaselineRenderer( SignalFlowContext const & context,
                              char const * name,
                              CompositeComponent * parent,
                              panning::LoudspeakerArray const & loudspeakerConfiguration,
@@ -83,12 +82,12 @@ public:
                              std::string const & reverbConfig,
                              bool frequencyDependentPanning );
 
-  explicit BaselineRenderer( SignalFlowContext & context,
-    char const * name,
-    CompositeComponent * parent,
-    panning::LoudspeakerArray const & loudspeakerConfiguration,
-    std::size_t numberOfInputs,
-    std::size_t numberOfOutputs );
+  explicit BaselineRenderer( SignalFlowContext const & context,
+                             char const * name,
+                             CompositeComponent * parent,
+                             panning::LoudspeakerArray const & loudspeakerConfiguration,
+                             std::size_t numberOfInputs,
+                             std::size_t numberOfOutputs );
 
   ~BaselineRenderer();
 

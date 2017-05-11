@@ -6,14 +6,7 @@
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-
-#include <boost/noncopyable.hpp>
-#endif
 
 namespace visr
 {
@@ -22,7 +15,6 @@ namespace python
 namespace rcl
 {
 
-#ifdef USE_PYBIND11
 void exportDelayVector( pybind11::module & m )
 {
   using visr::rcl::DelayVector;
@@ -35,18 +27,18 @@ void exportDelayVector( pybind11::module & m )
     .value( "CubicLagrange", DelayVector::InterpolationType::CubicLagrange )
     ;
 
-  dVec.def( pybind11::init<visr::SignalFlowContext&, char const *, visr::CompositeComponent*>(),
+  dVec.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
     .def( "setup", static_cast<void(DelayVector::*)( std::size_t, std::size_t, SampleType, 
-      DelayVector::InterpolationType, SampleType, SampleType)>(&DelayVector::setup), pybind11::arg("numberOfChannels"),
+                                                     DelayVector::InterpolationType, bool, SampleType, SampleType)>(&DelayVector::setup), pybind11::arg("numberOfChannels"),
       pybind11::arg( "interpolationSteps" ) = 1024, pybind11::arg( "maxDelay" ) = 3.0f,
-      pybind11::arg( "interpolationType" ) = DelayVector::InterpolationType::CubicLagrange, pybind11::arg( "initialDelay" ) = 0.0f,
+      pybind11::arg( "interpolationType" ) = DelayVector::InterpolationType::CubicLagrange,
+          pybind11::arg("controlInputs") = false,
+          pybind11::arg( "initialDelay" ) = 0.0f,
       pybind11::arg( "initialGain" ) = 1.0f )
-    // TO
+    // TODO: Add bindings for vector parameters.
     .def( "process", &DelayVector::process );
 }
-
-#endif
 
 } // namepace rcl
 } // namespace python

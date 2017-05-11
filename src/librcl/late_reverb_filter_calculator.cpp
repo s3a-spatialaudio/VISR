@@ -78,7 +78,7 @@ static const pml::BiquadParameterList<SampleType> cOctaveBandFilters={
 
 } // unnamed namespace
 
-LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext& context,
+LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext const & context,
                                                         char const * name,
                                                         CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

@@ -39,9 +39,9 @@ namespace visr
 namespace rcl
 {
 
-  PanningCalculator::PanningCalculator( SignalFlowContext& context,
-                                                char const * name,
-                                                CompositeComponent * parent /*= nullptr*/ )
+  PanningCalculator::PanningCalculator( SignalFlowContext const & context,
+                                        char const * name,
+                                        CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( 0 )
  , mLoudspeakerDotProducts( cVectorAlignmentSamples )
@@ -72,7 +72,10 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
     pos.normalise();
     mLoudspeakerPositions( 0, lspIdx ) = pos.x;
     mLoudspeakerPositions( 1, lspIdx ) = pos.y;
-    mLoudspeakerPositions( 2, lspIdx ) = pos.z;
+    if( mVectorDimension > 2 )
+    {
+      mLoudspeakerPositions( 2, lspIdx ) = pos.z;
+    }
 // The ordering that the virtual loudspeakers are at the end is implicit in LoudspeakerArray.
 #if 0
     bool const isPhantom = arrayConfig.channelIndex( lspIdx ) < 0;

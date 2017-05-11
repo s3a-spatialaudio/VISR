@@ -10,6 +10,8 @@ namespace visr
 namespace pml
 {
 
+ObjectVector::ObjectVector() = default;
+
 ObjectVector::ObjectVector( ParameterConfigBase const & config )
 : ObjectVector( dynamic_cast<pml::EmptyParameterConfig const &>( config) )
 {

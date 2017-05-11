@@ -49,7 +49,7 @@ template<> struct MatrixParameterType<std::complex<double> >
  */
 template<typename ElementType >
 class MatrixParameter: public efl::BasicMatrix<ElementType>,
-  public TypedParameterBase<MatrixParameterConfig, MatrixParameterType<ElementType>::ptype() >
+                       public TypedParameterBase<MatrixParameter<ElementType>, MatrixParameterConfig, MatrixParameterType<ElementType>::ptype() >
 {
 public:
 

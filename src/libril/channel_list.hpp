@@ -35,10 +35,9 @@ public:
   * @note This template member function is not an export of the shared library because it is
   * instantiated at the caller site.
   * @note With C++11, the implementation might use std::cbegin() and std::cend() instead.
-  * @tparam Container Array type for which std::begin() and std::end() are specialized.
+  * @tparam Container Array type for which std::begin() and std::end() are specialized and whose
   * value type is convertible to the index type.
-  * @param begin Begin iterator
-  * @param end Past-the-end iterator
+  * @param container Container containing indices (or data convertible to indices)
   */
   template< class Container>
   ChannelList( Container const & container )

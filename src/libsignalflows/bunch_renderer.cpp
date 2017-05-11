@@ -17,7 +17,7 @@ namespace visr
 namespace signalflows
 {
 
-BunchRenderer::BunchRenderer( SignalFlowContext & context,
+BunchRenderer::BunchRenderer( SignalFlowContext const & context,
                                     char const * name,
                                     CompositeComponent * parent,
                                     panning::LoudspeakerArray const & loudspeakerConfiguration,

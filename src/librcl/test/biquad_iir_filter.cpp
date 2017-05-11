@@ -2,7 +2,7 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
-#include <libril/audio_signal_flow.hpp>
+#include <librrl/audio_signal_flow.hpp>
 #include <libpml/biquad_parameter.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -23,7 +23,7 @@ class BiquadSimple: public AudioSignalFlow
 {
 public:
   BiquadSimple()
-    : AudioSignalFlow( 1024, 48000 )
+    : rrl::AudioSignalFlow( 1024, 48000 )
     , mBiquad( *this, "Filter" )
   {
   }

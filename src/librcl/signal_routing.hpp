@@ -33,7 +33,7 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit SignalRouting( SignalFlowContext& context,
+  explicit SignalRouting( SignalFlowContext const & context,
                           char const * name,
                           CompositeComponent * parent = nullptr );
 

@@ -13,15 +13,8 @@
 // Extend the interface beyond the audio ports visible in the C++ API
 #include <libvisr_impl/audio_port_base_implementation.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-
-#else
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#endif
 
 #include <ciso646>
 
@@ -31,8 +24,6 @@ namespace python
 {
 namespace visr
 {
-
-#ifdef USE_PYBIND11
 
 namespace // unnamed
 {
@@ -219,33 +210,6 @@ void exportAudioPort( pybind11::module & m)
   exportAudioOutput<std::complex<double> >( m, "AudioOutputComplexDouble" );
 }
 
-#else
-using namespace boost::python;
-
-void exportAudioPort()
-{
-  PortBase::Direction (PortBase::*PortBaseDirection)() const = &PortBase::direction;
-
-  class_<PortBase, boost::noncopyable>("PortBase", no_init )
-    .def( init<std::string const &, Component &, PortBase::Direction>( args( "name", "parent" ) ) )
-    .add_property( "name", make_function( &PortBase::name, return_internal_reference<>() ) )
-    .add_property( "direction", &PortBase::direction )
-//    .add_property( "parent", PortBaseDirection ) // Check how to select the const version
-    .add_property( "parent", static_cast<PortBase::Direction( PortBase::*)() const>(&PortBase::direction) ) // Select the const method overload
-  ;
-
-  class_<AudioPortBase, bases<PortBase>, boost::noncopyable >("AudioPortBase", no_init )
-    .def( init<char const*, Component *>( args( "name", "parent" ) ) )
-    .add_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
-  ;
-  
-  class_<AudioInput, bases<AudioPortBase>, boost::noncopyable >( "AudioInput", no_init )
-    .def( init<char const*, Component *>( args( "name", "parent" ) ) )
-    .add_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
-
-
-}
-#endif
 } // namepace visr
 } // namespace python
 } // namespace visr

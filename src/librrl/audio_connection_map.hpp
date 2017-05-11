@@ -29,11 +29,11 @@ namespace rrl
 class AudioChannel
 {
 public:
-  explicit AudioChannel( impl::AudioPortBaseImplementation const * port, std::size_t channel )
+  explicit AudioChannel( impl::AudioPortBaseImplementation * port, std::size_t channel )
     : mVal( port, channel )
   {
   }
-  impl::AudioPortBaseImplementation const * port() const { return std::get<0>( mVal ); }
+  impl::AudioPortBaseImplementation * port() const { return std::get<0>( mVal ); }
   std::size_t const channel() const { return std::get<1>( mVal ); }
 
   AudioChannel( AudioChannel const & rhs ) = default;
@@ -50,7 +50,7 @@ public:
   bool operator==( AudioChannel const & rhs ) const { return mVal == rhs.mVal; }
 
 private:
-  std::tuple<impl::AudioPortBaseImplementation const *, std::size_t> mVal;
+  std::tuple<impl::AudioPortBaseImplementation *, std::size_t> mVal;
 };
 
 /**
@@ -65,7 +65,7 @@ public:
 
   using Container = std::multimap< AudioChannel, AudioChannel >;
 
-  using ValueType = Container::value_type;
+  using value_type = Container::value_type;
 
   using iterator = Container::const_iterator;
   using const_iterator = Container::const_iterator;
@@ -82,7 +82,16 @@ public:
              std::ostream & messages,
              bool recursive = false );
 
-  void insert( ValueType const & connection );
+  /**
+   * Exchange the content of this object with that of \p rhs.
+   */
+  void swap( AudioConnectionMap & rhs ) noexcept;
+
+  void insert( value_type const & connection );
+
+  iterator insert( iterator hint, value_type const & connection );
+
+  void insert( iterator first, iterator last );
 
   void insert( AudioChannel const & sender, AudioChannel const & receiver );
 

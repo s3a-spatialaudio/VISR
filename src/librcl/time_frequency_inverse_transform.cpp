@@ -22,9 +22,9 @@ namespace visr
 namespace rcl
 {
 
-TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( SignalFlowContext& context,
-                                                char const * name,
-                                                CompositeComponent * parent /*= nullptr*/ )
+TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( SignalFlowContext const & context,
+                                                              char const * name,
+                                                              CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mAlignment( cVectorAlignmentSamples )
  , mOutput( "out", *this )

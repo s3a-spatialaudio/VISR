@@ -8,7 +8,6 @@
 #include <libril/parameter_input.hpp>
 
 #include <libpml/message_queue_protocol.hpp>
-#include <libpml/message_queue.hpp>
 #include <libpml/string_parameter.hpp>
 
 #include <boost/array.hpp>
@@ -45,7 +44,7 @@ public:
    * @param container A reference to the containing AudioSignalFlow object.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    */
-  explicit UdpSender( SignalFlowContext& context,
+  explicit UdpSender( SignalFlowContext const & context,
                       char const * name,
                       CompositeComponent * parent = nullptr );
 
@@ -104,7 +103,7 @@ private:
   * Internal queue of messages received asynchronously. They will be copied into the output
   *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
   */
-  std::unique_ptr< pml::MessageQueue< pml::StringParameter > > mInternalMessageBuffer;
+  std::deque< pml::StringParameter > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
 

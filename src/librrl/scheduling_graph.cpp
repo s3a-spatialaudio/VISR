@@ -39,7 +39,7 @@ void SchedulingGraph::initialise( impl::ComponentImplementation const & flow, Au
                                   ParameterConnectionMap const & parameterConnections )
 {
   mDependencyGraph.clear();
-  for( AudioConnectionMap::ValueType const & val : connections )
+  for( AudioConnectionMap::value_type const & val : connections )
   {
     addAudioDependency( val.first, val.second );
   }

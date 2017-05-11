@@ -3,6 +3,7 @@
 #include <libril/communication_protocol_factory.hpp>
 
 #include <libril/communication_protocol_type.hpp>
+#include <libril/detail/compose_message_string.hpp>
 #include <libril/parameter_type.hpp>
 
 #include <algorithm>
@@ -23,6 +24,14 @@ void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationP
   {
     throw std::invalid_argument( std::string("CommunicationProtocolFactory: Entry for protocol type \"") + findIt->second.name() + "\" already exists." );
   }
+
+  auto const findNameIt = std::find_if( table.begin(), table.end(), [creator]( CreatorTable::value_type const & val ){ return val.second.name() == creator.name(); } );
+  if( findNameIt != table.cend() )
+  {
+    throw std::invalid_argument( std::string( "CommunicationProtocolFactory: Protocol name\"") +  creator.name() +  "\" already used for different protocol type." );
+  }
+
+
   auto const res = table.insert( std::make_pair( type, creator ) );
   if( not res.second)
   {
@@ -42,13 +51,15 @@ CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn,
 {
 }
 
+CommunicationProtocolFactory::Creator::~Creator() = default;
+
 std::string const & CommunicationProtocolFactory::Creator::name() const
 {
   return mName;
 }
 
 std::unique_ptr<CommunicationProtocolBase >
-CommunicationProtocolFactory::Creator::create( ParameterType const & paramType, ParameterConfigBase const & config ) const
+CommunicationProtocolFactory::Creator::createProtocol( ParameterType const & paramType, ParameterConfigBase const & config ) const
 {
   return mCreateFunction( paramType, config );
 }
@@ -74,18 +85,18 @@ CommunicationProtocolFactory::creatorTable()
 }
 
 /*static*/ std::unique_ptr<CommunicationProtocolBase>
-CommunicationProtocolFactory::create( CommunicationProtocolType const & protocolType,
-                                      ParameterType const & parameterType,
-                                      ParameterConfigBase const & config )
+CommunicationProtocolFactory::createProtocol( CommunicationProtocolType const & protocolType,
+                                              ParameterType const & parameterType,
+                                              ParameterConfigBase const & config )
 {
   CreatorTable::const_iterator findIt
     = creatorTable().find( protocolType );
   if( findIt == creatorTable().end() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+    throw std::out_of_range( "CommunicationProtocolFactory: No creator function for requested parameter type " );
   }
   // todo: Need to catch construction errors?
-  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.create( parameterType, config ) );
+  return std::unique_ptr<CommunicationProtocolBase>( findIt->second.createProtocol( parameterType, config ) );
 }
 
 /*static*/ std::unique_ptr<CommunicationProtocolBase::Input> 
@@ -95,7 +106,7 @@ CommunicationProtocolFactory::createInput( CommunicationProtocolType const & pro
     = creatorTable().find( protocolType );
   if( findIt == creatorTable().end() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+    throw std::out_of_range( "CommunicationProtocolFactory: No creator function for requested parameter type " );
   }
   // todo: Need to catch construction errors?
   return std::unique_ptr<CommunicationProtocolBase::Input>( findIt->second.createInput() );
@@ -108,7 +119,7 @@ CommunicationProtocolFactory::createOutput( CommunicationProtocolType const & pr
     = creatorTable().find( protocolType );
   if( findIt == creatorTable().end() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: No creator function for requested parameter type " );
+    throw std::out_of_range( "CommunicationProtocolFactory: No creator function for requested parameter type " );
   }
   // todo: Need to catch construction errors?
   return std::unique_ptr<CommunicationProtocolBase::Output>( findIt->second.createOutput() );
@@ -124,10 +135,10 @@ CommunicationProtocolFactory::createOutput( CommunicationProtocolType const & pr
 CommunicationProtocolFactory::typeFromName( char const * name )
 {
   auto const findIt = std::find_if( creatorTable().begin(), creatorTable().end(),
-				   [name](CreatorTable::value_type const & entry ){ return std::strcmp(entry.second.name().c_str(), name ) == 0; } );
+   [name](CreatorTable::value_type const & entry ){ return std::strcmp(entry.second.name().c_str(), name ) == 0; } );
   if( findIt == creatorTable().end() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: No protocol with the given name is registered." );
+    throw std::out_of_range( "CommunicationProtocolFactory: No protocol with the given name is registered." );
   }
   return findIt->first;
 }
@@ -138,7 +149,7 @@ CommunicationProtocolFactory::typeToName( CommunicationProtocolType type )
   auto const findIt = creatorTable().find( type );
   if( findIt == creatorTable().end() )
   {
-    throw std::invalid_argument( "CommunicationProtocolFactory: Requested protocol type not registered." );
+    throw std::out_of_range( "CommunicationProtocolFactory: Requested protocol type not registered." );
   }
   return findIt->second.name();
 }

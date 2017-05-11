@@ -22,7 +22,7 @@ namespace signalflows
 void exportDelayVector( pybind11::module& m )
 {
   pybind11::class_<::visr::signalflows::DelayVector, CompositeComponent>( m, "DelayVector" )
-    .def( pybind11::init<SignalFlowContext &, const char *, CompositeComponent *,
+    .def( pybind11::init<SignalFlowContext const &, const char *, CompositeComponent *,
       std::size_t, std::size_t, rcl::DelayVector::InterpolationType>(),
       pybind11::arg("context"), pybind11::arg( "name"), pybind11::arg( "parent"),
       pybind11::arg( "numberOfChannels"), pybind11::arg( "interpolationPeriod"),

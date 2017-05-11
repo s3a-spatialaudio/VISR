@@ -17,6 +17,7 @@ SharedDataProtocol::SharedDataProtocol( ParameterType const & parameterType,
   , mParameterType( parameterType )
   , mParameterConfig( parameterConfig.clone() )
   , mData( ParameterFactory::create( parameterType, parameterConfig ) )
+  , mOutput( nullptr )
 {
 }
 
@@ -66,7 +67,7 @@ bool SharedDataProtocol::disconnectInput( CommunicationProtocolBase::Input* port
   {
     return false;
   }
-  typename std::vector<InputBase*>::iterator findIt = std::find( mInputs.begin(), mInputs.end(), typedPort );
+  std::vector<InputBase*>::iterator findIt = std::find( mInputs.begin(), mInputs.end(), typedPort );
   if( findIt == mInputs.end() )
   {
     return false;

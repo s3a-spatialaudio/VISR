@@ -28,12 +28,9 @@ public:
   using ComponentTable = std::vector< ComponentImplementation * >;
 
   /*VISR_CORE_LIBRARY_SYMBOL*/ explicit CompositeComponentImplementation( CompositeComponent & component,
-                                             SignalFlowContext& context,
+                                             SignalFlowContext const & context,
                                              char const * componentName,
-                                             CompositeComponentImplementation * parent )
-    : ComponentImplementation( component, context, componentName, parent )
-  {
-  }
+                                             CompositeComponentImplementation * parent );
 
   /*VISR_CORE_LIBRARY_SYMBOL*/ virtual ~CompositeComponentImplementation() override;
 

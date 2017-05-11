@@ -16,7 +16,7 @@ namespace visr
 namespace rcl
 {
 
-SwitchDecoder::SwitchDecoder( SignalFlowContext& context,
+SwitchDecoder::SwitchDecoder( SignalFlowContext const & context,
                               char const * name,
                               CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )

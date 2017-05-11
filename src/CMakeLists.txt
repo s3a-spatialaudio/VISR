@@ -17,6 +17,12 @@ ADD_SUBDIRECTORY( libpanning )
 # Parameter message library
 ADD_SUBDIRECTORY( libpml )
 
+# Python support for calling Python functionality from C++
+if( BUILD_PYTHON_BINDINGS )
+  add_subdirectory( libpythonsupport )
+endif( BUILD_PYTHON_BINDINGS )
+
+
 # Library for signal flows.
 ADD_SUBDIRECTORY( libsignalflows )
 

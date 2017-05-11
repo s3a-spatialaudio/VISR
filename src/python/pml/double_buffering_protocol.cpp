@@ -4,11 +4,7 @@
 
 #include <libpml/double_buffering_protocol.hpp>
 
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-#else
-#error "Python bindings for pml::DoubleBuifferingProtocol are only defined for pybind11."
-#endif
 
 namespace visr
 {
@@ -23,7 +19,7 @@ namespace pml
 void exportDoubleBufferingProtocol( pybind11::module & m)
 {
   pybind11::class_<DoubleBufferingProtocol, visr::CommunicationProtocolBase>
-    doubleBuffering( m, "DoubleBufferingProtocol", pybind11::metaclass() );
+    doubleBuffering( m, "DoubleBufferingProtocol" );
 
   doubleBuffering
     .def_property_readonly_static( "staticName", [](pybind11::object /*self*/){ return DoubleBufferingProtocol::staticName(); } )

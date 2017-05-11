@@ -17,7 +17,7 @@ namespace visr
 namespace rcl
 {
 
-  PositionDecoder::PositionDecoder( SignalFlowContext& context,
+  PositionDecoder::PositionDecoder( SignalFlowContext const & context,
                                     char const * name,
                                     CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )

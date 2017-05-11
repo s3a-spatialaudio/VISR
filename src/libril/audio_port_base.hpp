@@ -3,7 +3,7 @@
 #ifndef VISR_AUDIO_PORT_BASE_HPP_INCLUDED
 #define VISR_AUDIO_PORT_BASE_HPP_INCLUDED
 
-#include "port_base.hpp" // For 'Direction' enum
+#include "port_base.hpp" // For the 'Direction' enum
 #include "audio_sample_type.hpp"
 #include "export_symbols.hpp"
 
@@ -49,7 +49,7 @@ public:
 
   /**
    * Destructor (virtual).
-   * @note Reconsider whether the class might be used polymorphically.
+   * Audio ports can possibley be created and held polymorphically, although this is not done in standard components.
    */
   /*VISR_CORE_LIBRARY_SYMBOL*/ virtual ~AudioPortBase();
 
@@ -57,7 +57,7 @@ public:
    * Set the width (i.e., the number of individual audio signals) contained within this port.
    * The new value overwrites any previously set values and can be called multiple times on a single port.
    * This method must only be called in the initialisation phase of the signal flow, not during runtime.
-   * @param width The new width (number of single audio signals).
+   * @param newWidth The new width (number of single audio signals).
    * @throw std::logic_error If the method is called during runtime.
    */
   /*VISR_CORE_LIBRARY_SYMBOL*/ void setWidth( std::size_t newWidth );

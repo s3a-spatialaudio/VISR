@@ -20,7 +20,7 @@ Component::Component( impl::ComponentImplementation * impl )
 {
 }
 
-Component::Component( SignalFlowContext& context,
+Component::Component( SignalFlowContext const & context,
                       char const * componentName,
                       CompositeComponent * parent)
  : Component( new impl::ComponentImplementation( *this, context, componentName,
@@ -28,7 +28,7 @@ Component::Component( SignalFlowContext& context,
 {
 }
 
-Component::Component( SignalFlowContext& context,
+Component::Component( SignalFlowContext const & context,
                       std::string const & componentName,
                       CompositeComponent * parent)
  : Component( context, componentName.c_str(), parent )
@@ -113,7 +113,7 @@ ParameterPortBase& Component::parameterPort( char const * portName )
   {
     return *port;
   }
-  throw std::invalid_argument( "Audio port with given name not found." );
+  throw std::invalid_argument( "Parameter port with given name not found." );
 }
 
 ParameterPortBase const& Component::parameterPort( char const * portName ) const
@@ -123,7 +123,7 @@ ParameterPortBase const& Component::parameterPort( char const * portName ) const
   {
     return *port;
   }
-  throw std::invalid_argument( "Audio port with given name not found." );
+  throw std::invalid_argument( "ParameterPort port with given name not found." );
 }
 
 ParameterPortBase& Component::parameterPort( std::string const & portName )

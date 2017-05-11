@@ -10,15 +10,7 @@
 #include <libvisr_impl/polymorphic_parameter_input.hpp>
 #include <libvisr_impl/polymorphic_parameter_output.hpp>
 
-
-#ifdef USE_PYBIND11
 #include <pybind11/pybind11.h>
-
-#else
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
-#include <boost/python/args.hpp>
-#endif
 
 #include <ciso646>
 
@@ -29,8 +21,6 @@ namespace python
 namespace visr
 {
 
-#ifdef USE_PYBIND11
-
 void exportParameterPort( pybind11::module & m)
 {
   /**
@@ -40,7 +30,7 @@ void exportParameterPort( pybind11::module & m)
   pybind11::class_<ParameterPortBase>( m, "ParameterPortBase" )
     .def_property_readonly( "parameterType", &ParameterPortBase::parameterType )
     .def_property_readonly( "protocolType", &ParameterPortBase::protocolType )
-    .def_property( "parameterConfig", &ParameterPortBase::parameterConfig, &ParameterPortBase::setParameterConfig,  pybind11::arg("parameterConfig") )
+    .def_property( "parameterConfig", &ParameterPortBase::parameterConfig, &ParameterPortBase::setParameterConfig )
 //    .def( "hasParameterConfig", &ParameterPortBase::hasParameterConfig)
     ;
 
@@ -70,7 +60,7 @@ void exportParameterPort( pybind11::module & m)
       pybind11::arg( "protocolType" ) )
     ;
 }
-#endif
+
 } // namepace visr
 } // namespace python
 } // namespace visr
