@@ -73,38 +73,38 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlString ){
   //BOOST_ASSERT( exists( configFileXml ) );
   //BOOST_CHECK_NO_THROW( array.loadXmlFile( configFileXml.string() ) );
   //
-  std::string xml = "<?xml version=\"1.0\" encoding=\"utf - 8\"?>";
-  xml += "<panningConfiguration dimension = \"2\" infinite = \"false\">";
-  xml += "<outputEqConfiguration numberOfBiquads = \"1\" type = \"iir\">";
-  xml += "<filterSpec name = \"lowpass\">";
-  xml += "<biquad a1 = \"-1.9688283\" a2 = \"0.96907117\" b0 = \"6.0729856e-05\" b1 = \"0.00012145971\" b2 = \"6.0729856e-05\"/>";
-  xml += "</filterSpec>";
-  xml += "<filterSpec name = \"highpass\">";
-  xml += "<biquad a1 = \"-1.9688283\" a2 = \"0.96907117\" b0 = \"-0.98447486\" b1 = \"1.9689497\" b2 = \"-0.98447486\"/>";
-  xml += "</filterSpec>";
-  xml += "</outputEqConfiguration>";
-  xml += "<loudspeaker channel = \"27\" delay = \"0\" eq = \"highpass\" gainDB = \"0\" id = \"1\">";
-  xml += "<cart x = \"2.17\" y = \"1.36\" z = \"0\"/>";
-  xml += "</loudspeaker>";
-  xml += "<loudspeaker channel = \"16\" delay = \"0.0011502\" eq = \"highpass\" gainDB = \"-2.1488\" id = \"2\">";
-  xml += "<cart x = \"2.08\" y = \"0.03\" z = \"0\"/>";
-  xml += "</loudspeaker>";
-  xml += "<loudspeaker channel = \"17\" delay = \"9.8764e-05\" eq = \"highpass\" gainDB = \"-0.35712\" id = \"3\">";
-  xml += "<cart x = \"2.15\" y = \"-1.22\" z = \"0.01\"/>";
-  xml += "</loudspeaker>";
-  xml += "<loudspeaker channel = \"20\" delay = \"0.0015247\" eq = \"highpass\" gainDB = \"-1.8169\" id = \"4\">";
-  xml += "<cart x = \"-1.01\" y = \"-1.69\" z = \"0\"/>";
-  xml += "</loudspeaker>";
-  xml += "<loudspeaker channel = \"24\" delay = \"0.0016965\" eq = \"highpass\" gainDB = \"-2.0675\" id = \"5\">";
-  xml += "<cart x = \"-0.98\" y = \"1.74\" z = \"0\"/>";
-  xml += "</loudspeaker>";
-  xml += "<subwoofer assignedLoudspeakers = \"1, 2, 3, 4, 5\" channel = \"41\" delay = \"0\" eq = \"lowpass\" gainDB = \"0\" weights = \"1.000000, 1.000000, 1.000000, 1.000000, 1.000000\"/>";
-  xml += "<triplet l1 = \"4\" l2 = \"5\"/>";
-  xml += "<triplet l1 = \"3\" l2 = \"4\"/>";
-  xml += "<triplet l1 = \"2\" l2 = \"3\"/>";
-  xml += "<triplet l1 = \"1\" l2 = \"2\"/>";
-  xml += "<triplet l1 = \"5\" l2 = \"1\"/>";
-  xml += "</panningConfiguration>";
+  std::string xml = "<?xml version=\"1.0\" encoding=\"utf - 8\"?>"
+  "<panningConfiguration dimension = \"2\" infinite = \"false\">"
+  "<outputEqConfiguration numberOfBiquads = \"1\" type = \"iir\">"
+  "<filterSpec name = \"lowpass\">"
+  "<biquad a1 = \"-1.9688283\" a2 = \"0.96907117\" b0 = \"6.0729856e-05\" b1 = \"0.00012145971\" b2 = \"6.0729856e-05\"/>"
+  "</filterSpec>"
+  "<filterSpec name = \"highpass\">"
+  "<biquad a1 = \"-1.9688283\" a2 = \"0.96907117\" b0 = \"-0.98447486\" b1 = \"1.9689497\" b2 = \"-0.98447486\"/>"
+  "</filterSpec>"
+  "</outputEqConfiguration>"
+  "<loudspeaker channel = \"27\" delay = \"0\" eq = \"highpass\" gainDB = \"0\" id = \"1\">"
+  "<cart x = \"2.17\" y = \"1.36\" z = \"0\"/>"
+  "</loudspeaker>"
+  "<loudspeaker channel = \"16\" delay = \"0.0011502\" eq = \"highpass\" gainDB = \"-2.1488\" id = \"2\">"
+  "<cart x = \"2.08\" y = \"0.03\" z = \"0\"/>"
+  "</loudspeaker>"
+  "<loudspeaker channel = \"17\" delay = \"9.8764e-05\" eq = \"highpass\" gainDB = \"-0.35712\" id = \"3\">"
+  "<cart x = \"2.15\" y = \"-1.22\" z = \"0.01\"/>"
+  "</loudspeaker>"
+  "<loudspeaker channel = \"20\" delay = \"0.0015247\" eq = \"highpass\" gainDB = \"-1.8169\" id = \"4\">"
+  "<cart x = \"-1.01\" y = \"-1.69\" z = \"0\"/>"
+  "</loudspeaker>"
+  "<loudspeaker channel = \"24\" delay = \"0.0016965\" eq = \"highpass\" gainDB = \"-2.0675\" id = \"5\">"
+  "<cart x = \"-0.98\" y = \"1.74\" z = \"0\"/>"
+  "</loudspeaker>"
+  "<subwoofer assignedLoudspeakers = \"1, 2, 3, 4, 5\" channel = \"41\" delay = \"0\" eq = \"lowpass\" gainDB = \"0\" weights = \"1.000000, 1.000000, 1.000000, 1.000000, 1.000000\"/>"
+  "<triplet l1 = \"4\" l2 = \"5\"/>"
+  "<triplet l1 = \"3\" l2 = \"4\"/>"
+  "<triplet l1 = \"2\" l2 = \"3\"/>"
+  "<triplet l1 = \"1\" l2 = \"2\"/>"
+  "<triplet l1 = \"5\" l2 = \"1\"/>"
+  "</panningConfiguration>";
   //std::cout<<xml<<std::endl;
   array.loadXmlString( xml );
   VBAP vbap( array, 0.0f, 0.0f, 0.0f );
