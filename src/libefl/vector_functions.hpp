@@ -184,10 +184,34 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-ErrorCode testMethod( float const * T );
+/**
+* Copy a strided sequence of values, i.e., a memory area where the elements have a constant, but not necessarily
+* unit distance, to another strided sequence
+* @tparam DataType The data type contained in the sequences. Must provide an assignemnt operator.
+* @param src
+* @param dest
+* @param srcAlignmentElements
+* @param destAlignmentElements
+* @param numberOfElements
+* @param alignmentElements
+* @note Consider making this a library function in libefl
+*/
+template<typename DataType>
+ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t srcStrideElements,
+  std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements );
 
-template< typename T>
-ErrorCode testMethodTemplated( T const * val );
+/**
+* Copy a strided sequence of values, i.e., a memory area where the elements have a constant, but not necessarily
+* unit distance, to another strided sequence
+* @tparam DataType The data type contained in the sequences. Must provide an assignemnt operator.
+* @param dest
+* @param destAlignmentElements
+* @param numberOfElements
+* @param alignmentElements
+* @note Consider making this a library function in libefl
+*/
+template<typename DataType>
+efl::ErrorCode vectorFillStrided( DataType val, DataType * dest, std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements );
 
 } // namespace efl
 } // namespace visr
