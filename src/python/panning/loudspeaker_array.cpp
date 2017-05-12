@@ -45,7 +45,8 @@ void exportLoudspeakerArray( pybind11::module & m)
 		.def("getDelayAdjustments", &LoudspeakerArray::getDelayAdjustment)
 		.def("isOutputEqualisationPresent", &LoudspeakerArray::outputEqualisationPresent)
 		.def("outputEqualisationNumberOfBiquads", &LoudspeakerArray::outputEqualisationNumberOfBiquads)
-		.def("outputEqualisationBiquads", &LoudspeakerArray::outputEqualisationBiquads);}
+		.def("outputEqualisationBiquads", &LoudspeakerArray::outputEqualisationBiquads);
+}
 } // namepace panning
 } // namespace python
 } // namespace visr

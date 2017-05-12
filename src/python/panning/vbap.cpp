@@ -19,8 +19,7 @@ namespace visr
 			{
 				pybind11::class_<VBAP>(m, "VBAP")
 					.def(pybind11::init<const LoudspeakerArray &, SampleType, SampleType, SampleType>(), pybind11::arg("loudspeakerArray"), pybind11::arg("listenerPosX"), pybind11::arg("listenerPosY"), pybind11::arg("listenerPosZ"))
-					.def("calcGain", &VBAP::calcGain, pybind11::arg("sourcePos"))
-					.def("getGains", &VBAP::getGains)
+					.def("calcGain", &VBAP::calculateGains, pybind11::arg("sourcePosX"), pybind11::arg( "sourcePosY" ) , pybind11::arg( "sourcePosZ" ) , pybind11::arg( "outGains" ) )
 					.def("getNumSpeakers", &VBAP::getNumSpeakers)
 					;			}
 		} // namepace panning
