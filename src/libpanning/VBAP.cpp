@@ -12,6 +12,8 @@
 
 #include "VBAP.h"
 
+#include <cmath>
+#include <numeric>
 #include <limits>
 
 namespace visr
@@ -53,6 +55,38 @@ namespace visr
 
 			calcInvMatrices();
 		}
+
+  namespace
+  {
+    void powerNormalisation( SampleType const * in, SampleType * out, std::size_t numberOfElements )
+    {
+      SampleType const sigPower = std::accumulate( in, in+numberOfElements, 0.0f,
+        []( SampleType acc, SampleType val ) { return acc + val*val; } );
+      SampleType const normFactor = 1.0f / std::max( std::sqrt( sigPower ), std::numeric_limits<SampleType>::epsilon() );
+      efl::ErrorCode res = efl::vectorMultiplyConstant(normFactor, in, out, numberOfElements, 0/*alignment*/);
+      if( res != efl::noError )
+      {
+        throw std::runtime_error( "VBAP: error diuring power normalisation." );
+      }
+    }
+  } // unnamed namespace
+
+  void VBAP::calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains )
+  {
+    // Filling in zeros should be done in calcPlainVBAP
+    std::fill( mGain.begin(), mGain.end(), 0.0f );
+    calcPlainVBAP( XYZ(x,y,z) );
+    applyRerouting();
+    powerNormalisation( &mGain[0], gains, getNumSpeakers() );
+  }
+
+  void VBAP::setListenerPosition( SampleType x, SampleType y, SampleType z )
+  {
+    mListenerPos = {x, y, z};
+    calcInvMatrices();
+  }
+
+
 
 		int VBAP::calcInvMatrices() {
 			XYZ l1, l2, l3;

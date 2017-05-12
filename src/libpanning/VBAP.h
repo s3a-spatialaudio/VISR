@@ -56,10 +56,27 @@ public:
    */
  // VBAP();
 
-	explicit VBAP(const LoudspeakerArray &array, SampleType x, SampleType y, SampleType z);
-	
+  // <af> meaning of x,y,z?
+  // <af> x,y,z, need to be renamed
+	explicit VBAP(const LoudspeakerArray &array, SampleType x=0.0f, SampleType y=0.0f, SampleType z=0.0f);
+
+  /**
+   * Copy constructor (deleted) to prevent unintentional copying.
+   */
+  VBAP( VBAP const & ) = delete;
+
 	void calcGain(XYZ pos);
 	
+  /**
+   * Calculate the panning gains for a single source position.
+   * @param x Cartesian x coordinate of the source position
+   * @param y Cartesian y coordinate of the source position
+   * @param z Cartesian z coordinate of the source position
+   * @param gains[out] array holding the panning gains for the regular (non-virtual) loudspeakers). 
+   * Buffer must provide space for at least getNumSpeakers() values.
+   */
+  void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains );
+
 	
 	std::size_t getNumSpeakers() const {
 		return mPositions.numberOfRows();
@@ -77,7 +94,15 @@ public:
 //        return 0;
 //    }
 //	//
-//    int setListenerPosition(SampleType x, SampleType y, SampleType z){
+
+  /**
+   * Reset the listener position.
+   * This causes a recalculation of the internal data structures (inverse matrices)
+   * @param x Cartesian x coordinate of the new listener position
+   * @param y Cartesian y coordinate of the new listener position
+   * @param z Cartesian z coordinate of the new listener position
+   */
+  void setListenerPosition(SampleType x, SampleType y, SampleType z);
 //
 //#ifdef VBAP_DEBUG_MESSAGES
 //      printf("setListenerPosition %f %f %f\n",x,y,z);
