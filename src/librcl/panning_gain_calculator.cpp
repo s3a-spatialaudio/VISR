@@ -45,6 +45,7 @@ namespace rcl
                                                 CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( 0 )
+ , mTmpGains( cVectorAlignmentSamples )
 {
 }
 
@@ -58,14 +59,12 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
   mNumberOfLoudspeakers = mSpeakerArray.getNumRegularSpeakers();
-  mSourcePositions.resize( numberOfObjects );
+//  mSourcePositions.resize( numberOfObjects );
 
-  mVbapCalculator.setLoudspeakerArray( &mSpeakerArray );
-  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
-  // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
-  setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
-  mLevels.resize( mNumberOfObjects );
-  mLevels = 0.0f;
+  mVbapCalculator.reset( new panning::VBAP( mSpeakerArray, 0.0f, 0.0f, 0.0f ) );
+  //mLevels.resize( mNumberOfObjects );
+  //mLevels = 0.0f;
+  mTmpGains.resize( mNumberOfLoudspeakers );
 
   mObjectVectorInput.reset( new ObjectPort( "objectVectorInput", *this, pml::EmptyParameterConfig() ) );
   mGainOutput.reset( new MatrixPort( "gainOutput", *this, pml::MatrixParameterConfig( mNumberOfLoudspeakers, mNumberOfObjects ) ) );
@@ -78,11 +77,7 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
 
 void PanningGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
-  mVbapCalculator.setListenerPosition( x, y, z );
-  if( mVbapCalculator.calcInvMatrices() != 0 )
-  {
-    throw std::invalid_argument( "PanningGainCalculator::setup(): Calculation of inverse matrices failed." );
-  }
+  mVbapCalculator->setListenerPosition( x, y, z );
 }
 
 void PanningGainCalculator::setListenerPosition( pml::ListenerPosition const & pos )
@@ -111,12 +106,6 @@ void PanningGainCalculator::process()
     }
     gainMatrix.zeroFill( );
 
-    // Fill the source positions with neutral values.
-    // TODO: The VBAP calculation should change into a stateless function 
-    // called for a single object a time. Then this step will become obsolete.
-    static const panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
-    std::fill( mSourcePositions.begin(), mSourcePositions.end(), defaultSource );
-
     // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
     // As not every source object in the VBAP calculator component might correspond to a concrete source, we have to set them to safe position beforehand.
     // Any potential re-routing will be added later.
@@ -134,13 +123,48 @@ void PanningGainCalculator::process()
       objectmodel::ObjectTypeId const ti = obj.type();
       objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
 
-      // For the moment, we treat the two supported source type here.
-      // @todo find a proper abstraction to handle many source types.
-      switch( ti )
+      // Use C++ type information to check whether the source is a pointsource.
+      objectmodel::PointSource const * pointSrc = dynamic_cast<objectmodel::PointSource const *>(&obj);
+      if( pointSrc )
       {
-      case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
+        mVbapCalculator->calculateGains( pointSrc->x(), pointSrc->y(), pointSrc->z(),
+          mTmpGains.data() );
+
+        // special handling for point sources with diffuseness: Adjust the level of the direct sound.
+        objectmodel::PointSourceWithDiffuseness const * psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const *>(&obj);
+        if( psdSrc )
+        {
+          efl::ErrorCode res = efl::vectorMultiplyConstantInplace( 1.0f-psdSrc->diffuseness(), mTmpGains.data(), mNumberOfLoudspeakers );
+        }
+        // We need to copy the data explicitly into a matrix column of a row-major matrix.
+        // This could be replaced by a copy function with a stride argument.
+        for( std::size_t lspIdx(0); lspIdx < mNumberOfLoudspeakers; ++lspIdx )
+        {
+          gainMatrix( lspIdx, channelId ) = mTmpGains[lspIdx];
+        }
+      }
+      else
       {
-        objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
+        objectmodel::PlaneWave const * pwSrc = dynamic_cast<objectmodel::PlaneWave const *>(&obj);
+        {
+          if( pwSrc )
+          {
+            SampleType posX, posY, posZ;
+            std::tie( posX, posY, posZ )
+              = efl::spherical2cartesian( efl::degree2radian( pwSrc->incidenceAzimuth() ),
+                  efl::degree2radian( pwSrc->incidenceElevation() ), 1.0f );
+            mVbapCalculator->calculateGains( posX, posY, posZ, mTmpGains.data() );
+            // We need to copy the data explicitly into a matrix column of a row-major matrix.
+            // This could be replaced by a copy function with a stride argument.
+            for( std::size_t lspIdx( 0 ); lspIdx < mNumberOfLoudspeakers; ++lspIdx )
+            {
+              gainMatrix( lspIdx, channelId ) = mTmpGains[lspIdx];
+            }
+          }
+        }
+      }
+#if 0
+      objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
         mLevels[channelId] = (static_cast<objectmodel::LevelType>(1.0)-psdSrc.diffuseness()); // Adjust the amount of direct sound according to the diffuseness
         // Fall through intentionally
       }
@@ -169,13 +193,10 @@ void PanningGainCalculator::process()
         // That means that the VBAP gains will be calculated for the default position, but zeroed afterwards.
         mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
       }
+#endif
     } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-    mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
-    if( mVbapCalculator.calcGains() != 0 )
-    {
-      std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
-    }
-  
+
+#if 0
     efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();
 
     // TODO: Can be replaced by a vector multiplication.
@@ -190,6 +211,7 @@ void PanningGainCalculator::process()
         gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
       }
     }
+#endif
     mObjectVectorInput->resetChanged();
   }
 }

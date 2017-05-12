@@ -76,17 +76,8 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
     {
       mLoudspeakerPositions( 2, lspIdx ) = pos.z;
     }
-// The ordering that the virtual loudspeakers are at the end is implicit in LoudspeakerArray.
-#if 0
-    bool const isPhantom = arrayConfig.channelIndex( lspIdx ) < 0;
-    if( isPhantom != (lspIdx >=mNumberOfRegularLoudspeakers ))
-    {
-      throw std::invalid_argument( "PanningCalculator: virtual (phantom) loudspeakers must be at the end of the array.");
-    }
-#endif
   }
   mSourceCoordinates.resize( mNumberOfObjects, mVectorDimension );
-
 
   // Compute the triplet centers
   efl::BasicMatrix<CoefficientType> tripletCenters(mVectorDimension, arrayConfig.getNumTriplets() );
@@ -94,11 +85,9 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
 
   mLoudspeakerDotProducts.resize( mNumberOfRegularLoudspeakers );
 
-  // Legacy members
-  mSourcePositions.resize( numberOfObjects );
 
-  mVbapCalculator.setLoudspeakerArray( &mSpeakerArray );
-  mVbapCalculator.setNumSources( static_cast<int>(mNumberOfObjects) );
+  mVbapCalculator.reset( new panning::VBAP( mSpeakerArray ) );
+
   // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
   setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
   mLevels.resize( mNumberOfObjects );
@@ -125,12 +114,7 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
 
 void PanningCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
-  mVbapCalculator.setListenerPosition( x, y, z );
-  int retVal = mVbapCalculator.calcInvMatrices();
-  if( retVal != 0 )
-  {
-    status( StatusMessage::Error, "PanningCalculator::setup(): Calculation of inverse matrices failed, error code ", retVal, " position: ", x, y, z );
-  }
+  mVbapCalculator->setListenerPosition( x, y, z );
 }
 
 void PanningCalculator::setListenerPosition( pml::ListenerPosition const & pos )
@@ -160,10 +144,8 @@ void PanningCalculator::process()
     // Not necessary if we opt to set the complete matrix.
     gainMatrix.zeroFill( );
 
+    // TODO: The level is now applied elsewhere.
     mLevels = 0.0f;
-    // As not every source object in the VBAP calculator component might correspond to a real source, we have to set them to safe position beforehand.
-    static const panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
-    std::fill( mSourcePositions.begin(), mSourcePositions.end(), defaultSource );
 
     // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
     // Any potential re-routing will be added later.
@@ -194,22 +176,16 @@ void PanningCalculator::process()
       {
       case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
       {
-                                                                  objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-                                                                  mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0) - psdSrc.diffuseness( )); // Adjust the amount of direct sound according to the diffuseness
-                                                                  // Fall through intentionally
+        objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
+        mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0) - psdSrc.diffuseness( )); // Adjust the amount of direct sound according to the diffuseness
+        // Fall through intentionally
       }
       case objectmodel::ObjectTypeId::PointSource:
       case objectmodel::ObjectTypeId::PointSourceExtent:
       case objectmodel::ObjectTypeId::PointSourceWithReverb: // TODO: This shows that the current model is not extensible, because it does not consider type hierarchies
       {
-                                                               objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
-                                                               mSourcePositions[channelId].set( pointSrc.x( ), pointSrc.y( ), pointSrc.z( ) );
-        // preliminary solution for normalisation:
-        panning::XYZ tmp(pointSrc.x(), pointSrc.y(), pointSrc.z() );
-        tmp.normalise();
-        mSourceCoordinates( channelId, 0 ) = tmp.x;
-        mSourceCoordinates( channelId, 1 ) = tmp.y;
-        mSourceCoordinates( channelId, 2 ) = tmp.z;
+        objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
+        // mVbapCalculator->calcGain( gainMatrix.row( channelId ) );
         break;
       }
       case objectmodel::ObjectTypeId::PlaneWave:
@@ -219,10 +195,7 @@ void PanningCalculator::process()
                                                  std::tie( xPos, yPos, zPos ) = efl::spherical2cartesian( efl::degree2radian( planeSrc.incidenceAzimuth( ) ),
                                                    efl::degree2radian( planeSrc.incidenceElevation( ) ),
                                                    1.0f );
-                                                 mSourcePositions[channelId].set( xPos, yPos, zPos, true /*atInfinity corresponds to a plane wave */ );
-        mSourceCoordinates( channelId, 0 ) = xPos;
-        mSourceCoordinates( channelId, 1 ) = yPos;
-        mSourceCoordinates( channelId, 2 ) = zPos;
+//        mVbapCalculator->
         break;
       }
       default:
@@ -231,14 +204,8 @@ void PanningCalculator::process()
         mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
       }
     } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-    mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
 
-
-    if( mVbapCalculator.calcGains( ) != 0 )
-    {
-      std::cout << "PanningCalculator: Error calculating VBAP gains." << std::endl;
-    }
-
+#if 0
     // TODO: Can be replaced by a vector multiplication.
     for( std::size_t chIdx( 0 ); chIdx < mNumberOfObjects; ++chIdx )
     {
@@ -327,6 +294,7 @@ void PanningCalculator::process()
         }
       } // else branch of findIt != objects.end() )
     } // for
+#endif
     mObjectVectorInput->resetChanged();
     }
 }

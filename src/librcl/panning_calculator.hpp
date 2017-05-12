@@ -17,8 +17,6 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
-
-
 #include <memory>
 #include <valarray>
 #include <vector>
@@ -189,17 +187,12 @@ private:
    * we make a copy of the reference passed to setup method.
    */
   panning::LoudspeakerArray mSpeakerArray;
-  
-  /**
-   * A vector to hold the source position data.
-   * @todo: replace this by a variable-sized vector;
-   */
-  std::vector<panning::XYZ> mSourcePositions;
+ 
 
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  panning::VBAP mVbapCalculator;
+  std::unique_ptr<panning::VBAP> mVbapCalculator;
   
   /**
    * The levels of the object channels in linear scale.
