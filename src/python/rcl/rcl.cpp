@@ -6,6 +6,18 @@
 
 #include <pybind11/pybind11.h>
 
+// Forward declarations
+namespace visr
+{
+namespace python
+{
+namespace rcl
+{
+  void exportPanningCalculator( pybind11::module & m );
+}
+}
+}
+
 PYBIND11_PLUGIN(rcl)
 {
   pybind11::module::import( "visr" );
@@ -16,5 +28,6 @@ PYBIND11_PLUGIN(rcl)
   using namespace visr::python::rcl;
   exportAdd( m );
   exportDelayVector( m );
+  exportPanningCalculator( m );
   return m.ptr();
 }

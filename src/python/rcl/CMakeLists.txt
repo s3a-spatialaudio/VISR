@@ -1,14 +1,10 @@
-# Python bindings for the main VISR interface classes
+# Python bindings for the standard VISR interface component
 
 set( SOURCES
 add.cpp
 delay_vector.cpp
+panning_calculator.cpp
 rcl.cpp
-)
-
-set( HEADERS
-add.hpp
-delay_vector.hpp
 )
 
 # We don't need header files
@@ -30,7 +26,7 @@ if( WIN32 )
   set( PYTHON_EXTERNAL_SUFFIX ".pyd" )
 endif( WIN32 )
 
-add_library(${PROJECT_NAME} MODULE ${HEADERS} ${SOURCES} )
+add_library(${PROJECT_NAME} MODULE ${SOURCES} )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MODULE_NAME} )
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" )
