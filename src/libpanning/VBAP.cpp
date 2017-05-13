@@ -83,7 +83,7 @@ namespace visr
 
     void VBAP::setListenerPosition( SampleType x, SampleType y, SampleType z )
     {
-      mListenerPos = { x, y, z };
+      mListenerPos = std::array<SampleType, 3>{ x, y, z };
       calcInvMatrices();
     }
 
@@ -267,7 +267,7 @@ namespace visr
       SampleType g;
       for( size_t i = 0; i < gains.size(); i++ )
       {
-        g += std::powf( gains[i], 2 );
+        g += std::pow( gains[i], 2 );
       }
 
       g = sqrt( g );

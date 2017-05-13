@@ -20,7 +20,6 @@ namespace visr
 {
   namespace panning
   {
-    static void normalise( std::vector<SampleType> &gains );
 
     class VBAP
     {
