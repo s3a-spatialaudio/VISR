@@ -916,8 +916,8 @@ template<typename DataType>
 ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t srcStrideElements,
   std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements )
 {
-  if( checkAlignment( src, alignmentElements ) ) return efl::alignmentError;
-  if( checkAlignment( dest, alignmentElements ) ) return efl::alignmentError;
+  if( not checkAlignment( src, alignmentElements ) ) return efl::alignmentError;
+  if( not checkAlignment( dest, alignmentElements ) ) return efl::alignmentError;
   // TODO: check whether the strides are compatible with the alignment
 
   for( std::size_t elIdx( 0 ); elIdx < numberOfElements; ++elIdx, src += srcStrideElements, dest += destStrideElements )
@@ -932,7 +932,7 @@ template ErrorCode vectorCopyStrided( double const *, double *, std::size_t, std
 template<typename DataType>
 ErrorCode vectorFillStrided( DataType val, DataType * dest, std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements )
 {
-  if( checkAlignment( dest, alignmentElements ) ) return alignmentError;
+  if( not checkAlignment( dest, alignmentElements ) ) return alignmentError;
   for( std::size_t elIdx( 0 ); elIdx < numberOfElements; ++elIdx, dest += destStrideElements )
   {
     *dest = val;
