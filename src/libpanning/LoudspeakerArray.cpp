@@ -69,6 +69,9 @@ namespace visr
       m_position = rhs.m_position;
       m_triplet = rhs.m_triplet;
       m_channel = rhs.m_channel;
+      m_id = rhs.m_id;
+      m_reRoutingCoeff.resize( m_reRoutingCoeff.numberOfRows(), m_reRoutingCoeff.numberOfColumns() );
+      m_reRoutingCoeff.copy( rhs.m_reRoutingCoeff );
       m_subwooferChannels = rhs.m_subwooferChannels;
       m_subwooferGains.resize( rhs.m_subwooferGains.numberOfRows(), rhs.m_subwooferGains.numberOfColumns() );
       m_subwooferGains.copy( rhs.m_subwooferGains );
@@ -505,13 +508,11 @@ namespace visr
         m_id[id] = i;
 
         auto const routeNodes = childTree.equal_range( "route" );
-        std::size_t const numRoutes = std::distance( routeNodes.first, routeNodes.second );
 
         int w = 0;
         for( ptree::const_assoc_iterator routeIt( routeNodes.first ); routeIt != routeNodes.second; ++routeIt, w++ )
         {
           ptree const childTree = routeIt->second;
-          std::array<LoudspeakerIndexType, 3> triplet;
           std::string lspId = childTree.get<std::string>( "<xmlattr>.lspId" );
           SampleType const gainDB = childTree.get<SampleType>( "<xmlattr>.gainDB" );
           boost::trim_if( lspId, boost::is_any_of( "\t " ) );
