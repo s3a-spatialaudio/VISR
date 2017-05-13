@@ -16,7 +16,7 @@
 #include <librcl/gain_matrix.hpp>
 #include <librcl/listener_compensation.hpp>
 #include <librcl/null_source.hpp>
-#include <librcl/panning_gain_calculator.hpp>
+#include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
@@ -94,7 +94,7 @@ private:
 
   rcl::DelayVector mOutputAdjustment;
 
-  rcl::PanningGainCalculator mGainCalculator;
+  rcl::PanningCalculator mGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
