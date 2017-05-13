@@ -56,12 +56,12 @@ PanningGainCalculator::~PanningGainCalculator()
 void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig,
                                    bool adaptiveListenerPosition /*= false*/ )
 {
-  mSpeakerArray = arrayConfig;
+//  mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
   mNumberOfLoudspeakers = mSpeakerArray.getNumRegularSpeakers();
 //  mSourcePositions.resize( numberOfObjects );
 
-  mVbapCalculator.reset( new panning::VBAP( mSpeakerArray, 0.0f, 0.0f, 0.0f ) );
+  mVbapCalculator.reset( new panning::VBAP( arrayConfig, 0.0f, 0.0f, 0.0f ) );
   //mLevels.resize( mNumberOfObjects );
   //mLevels = 0.0f;
   mTmpGains.resize( mNumberOfLoudspeakers );

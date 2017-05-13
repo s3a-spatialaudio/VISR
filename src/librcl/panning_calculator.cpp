@@ -45,6 +45,7 @@ namespace rcl
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( 0 )
  , mLoudspeakerDotProducts( cVectorAlignmentSamples )
+ , mTmpGains( cVectorAlignmentSamples )
  , mHighFrequencyGains(cVectorAlignmentSamples )
 {
 }
@@ -58,7 +59,7 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
                                bool adaptiveListenerPosition /*= false*/,
                                bool separateLowpassPanning /*= false*/ )
 {
-  mSpeakerArray = arrayConfig;
+  // mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
   mNumberOfRegularLoudspeakers = arrayConfig.getNumRegularSpeakers();
   mNumberOfAllLoudspeakers = arrayConfig.getNumSpeakers();
@@ -77,21 +78,19 @@ void PanningCalculator::setup( std::size_t numberOfObjects,
       mLoudspeakerPositions( 2, lspIdx ) = pos.z;
     }
   }
-  mSourceCoordinates.resize( mNumberOfObjects, mVectorDimension );
+  // mSourceCoordinates.resize( mNumberOfObjects, mVectorDimension );
 
   // Compute the triplet centers
   efl::BasicMatrix<CoefficientType> tripletCenters(mVectorDimension, arrayConfig.getNumTriplets() );
   std::vector<bool> tripletProcessed( arrayConfig.getNumTriplets(), false );
 
   mLoudspeakerDotProducts.resize( mNumberOfRegularLoudspeakers );
+  mTmpGains.resize( mNumberOfRegularLoudspeakers );
 
-
-  mVbapCalculator.reset( new panning::VBAP( mSpeakerArray ) );
+  mVbapCalculator.reset( new panning::VBAP( arrayConfig ) );
 
   // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
   setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
-  mLevels.resize( mNumberOfObjects );
-  mLevels = 0.0f;
 
   mObjectVectorInput.reset( new ObjectPort( "objectVectorInput", *this, pml::EmptyParameterConfig() ) );
   mGainOutput.reset( new MatrixPort( "gainOutput", *this, pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ) );
@@ -144,9 +143,6 @@ void PanningCalculator::process()
     // Not necessary if we opt to set the complete matrix.
     gainMatrix.zeroFill( );
 
-    // TODO: The level is now applied elsewhere.
-    mLevels = 0.0f;
-
     // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
     // Any potential re-routing will be added later.
     for( objectmodel::ObjectVector::value_type const & objEntry : objects )
@@ -162,142 +158,193 @@ void PanningCalculator::process()
       if( channelId >= mNumberOfObjects )
       {
         std::cerr << "PanningCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
-          << "exceeds number of channels (" << mNumberOfObjects << ")." << std::endl;
+            << "exceeds number of channels (" << mNumberOfObjects << ")." << std::endl;
         continue;
       }
 
-      mLevels[channelId] = obj.level( );
-
-      objectmodel::ObjectTypeId const ti = obj.type( );
-
-      // For the moment, we treat the two supported source type here.
-      // @todo find a proper abstraction to handle many source types.
-      switch( ti )
+      // Use C++ type information to check whether the source is a pointsource.
+      objectmodel::PointSource const * pointSrc = dynamic_cast<objectmodel::PointSource const *>(&obj);
+      if( pointSrc )
       {
-      case objectmodel::ObjectTypeId::PointSourceWithDiffuseness:
-      {
-        objectmodel::PointSourceWithDiffuseness const & psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const &>(obj);
-        mLevels[channelId] *= (static_cast<objectmodel::LevelType>(1.0) - psdSrc.diffuseness( )); // Adjust the amount of direct sound according to the diffuseness
-        // Fall through intentionally
-      }
-      case objectmodel::ObjectTypeId::PointSource:
-      case objectmodel::ObjectTypeId::PointSourceExtent:
-      case objectmodel::ObjectTypeId::PointSourceWithReverb: // TODO: This shows that the current model is not extensible, because it does not consider type hierarchies
-      {
-        objectmodel::PointSource const & pointSrc = dynamic_cast<objectmodel::PointSource const &>(obj);
-        // mVbapCalculator->calcGain( gainMatrix.row( channelId ) );
-        break;
-      }
-      case objectmodel::ObjectTypeId::PlaneWave:
-      {
-                                                 objectmodel::PlaneWave const & planeSrc = dynamic_cast<objectmodel::PlaneWave const &>(obj);
-                                                 objectmodel::Object::Coordinate xPos, yPos, zPos;
-                                                 std::tie( xPos, yPos, zPos ) = efl::spherical2cartesian( efl::degree2radian( planeSrc.incidenceAzimuth( ) ),
-                                                   efl::degree2radian( planeSrc.incidenceElevation( ) ),
-                                                   1.0f );
-//        mVbapCalculator->
-        break;
-      }
-      default:
-        // Ignore unknown source types by setting them to a zero level).
-        // That means that the VBAP gains will be calculated for the default position, but zeroed afterwards.
-        mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
-      }
-    } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-
-#if 0
-    // TODO: Can be replaced by a vector multiplication.
-    for( std::size_t chIdx( 0 ); chIdx < mNumberOfObjects; ++chIdx )
-    {
-      // Duplicated, inefficient code due to the use of the legacy VBAP object.
-      objectmodel::ObjectVector::const_iterator findIt = objects.find( chIdx);
-      if( findIt != objects.end() )
-      {
-        objectmodel::PointSource const * psSrc = dynamic_cast<objectmodel::PointSource const *>(findIt->second.get() );
-        if( psSrc )
+        // channelLock processing first
+        std::vector<SampleType> sourcePos( mVectorDimension );
+        sourcePos[0] = pointSrc->x();
+        sourcePos[1] = pointSrc->y();
+        if( mVectorDimension == 3 )
         {
+          sourcePos[2] = pointSrc->z();
+        }
 
-          efl::ErrorCode res = efl::product( mSourceCoordinates.row( chIdx ), mLoudspeakerPositions.data(), mLoudspeakerDotProducts.data(),
-                                            1 /*numResultRows*/, mNumberOfRegularLoudspeakers /* numResultColumns */, mVectorDimension /*numOp1Columns*/,
-                                            mSourceCoordinates.stride() /* op1RowStride */, 1 /*op1ColumnStride*/,
-                                            mLoudspeakerPositions.stride() /*op2RowStride*/, 1 /*op2ColumnStride*/,
-                                            1 /*resRowStride, not used, since  only one row. */, 1 /*resColumnStride*/ );
+        efl::ErrorCode res = efl::product( &sourcePos[0], mLoudspeakerPositions.data(), mLoudspeakerDotProducts.data(),
+                                           1 /*numResultRows*/, mNumberOfRegularLoudspeakers /* numResultColumns */, mVectorDimension /*numOp1Columns*/,
+                                           1 /* op1RowStride */, 1 /*op1ColumnStride*/,
+                                           mLoudspeakerPositions.stride() /*op2RowStride*/, 1 /*op2ColumnStride*/,
+                                           1 /*resRowStride, not used, since there is only one row. */, 1 /*resColumnStride*/ );
+        if( res != efl::noError )
+        {
+          // TODO: Replace by error API call.
+          throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
+        }
+        // Search only across the regular loudspeakers
+        // We search for the maximum, because we are using the dot product, i.e., the cosine of the angular distance.
+        // In case of equidistant nearest speakers, the first is returned.
+        CoefficientType const * maxDotProduct = std::max_element( mLoudspeakerDotProducts.data(), mLoudspeakerDotProducts.data() + mNumberOfRegularLoudspeakers );
+        if( maxDotProduct - mLoudspeakerDotProducts.data() >= static_cast<std::ptrdiff_t>(mNumberOfRegularLoudspeakers) )
+        {
+          // TODO: Replace by error API call.
+          throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
+        }
+        CoefficientType const lockLimit = std::cos( efl::degree2radian(pointSrc->channelLockDistance() ) );
+        if( *maxDotProduct >= lockLimit )
+        {
+          // Cast is safe because maxDotProduct >= mLoudspeakerDotProducts.data() always holds because of the way it is obtained
+          std::size_t const lockLspIdx = static_cast<std::size_t>( maxDotProduct - mLoudspeakerDotProducts.data() );
+          mTmpGains.zeroFill();
+          mTmpGains[lockLspIdx] = static_cast<SampleType>(1.0);
+        }
+        else
+        {
+          mVbapCalculator->calculateGains( pointSrc->x(), pointSrc->y(), pointSrc->z(),
+                                           mTmpGains.data() );
+        }
+        // special handling for point sources with diffuseness: Adjust the level of the direct sound.
+        objectmodel::PointSourceWithDiffuseness const * psdSrc = dynamic_cast<objectmodel::PointSourceWithDiffuseness const *>(&obj);
+        if( psdSrc )
+        {
+          efl::ErrorCode res = efl::vectorMultiplyConstantInplace( 1.0f-psdSrc->diffuseness(), mTmpGains.data(), mNumberOfRegularLoudspeakers );
           if( res != efl::noError )
           {
-            // TODO: Replace by error API call.
-            throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
+            status( StatusMessage::Error, "Gain adjustment for source diffuseness failed: ", efl::errorMessage(res) );
+            return;
           }
-          // Search only across the regular loudspeakers
-          // We search for the maximum, because we are using the dot product, i.e., the cosine of the angular distance.
-          // In case of equidistant nearest speakers, the first is returned.
-          CoefficientType const * maxDotProduct = std::max_element( mLoudspeakerDotProducts.data(), mLoudspeakerDotProducts.data() + mNumberOfRegularLoudspeakers );
-          if( maxDotProduct - mLoudspeakerDotProducts.data() >= static_cast<std::ptrdiff_t>(mNumberOfRegularLoudspeakers) )
-          {
-            // TODO: Replace by error API call.
-            throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
-          }
-          CoefficientType const lockLimit = std::cos( efl::degree2radian(psSrc->channelLockDistance() ) );
-          if( *maxDotProduct >= lockLimit )
-          {
-            std::size_t const lockLspIdx = static_cast<std::size_t>( maxDotProduct - mLoudspeakerDotProducts.data() );
-            // Not necessary if we cleared the matrix before
-            for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
-            {
-              gainMatrix( outIdx, chIdx ) = static_cast<CoefficientType>(0.0);
-            }
-            gainMatrix( lockLspIdx, chIdx ) = mLevels[chIdx];
-          }
-          // Otherwise fall through to copying the already computed VBAP gains
-
-          Afloat const * const gainRow = mVbapCalculator.getGains( ).row( chIdx );
-          objectmodel::LevelType const level = mLevels[chIdx];
-          if( separateLowpassPanning() )
-          {
-            // Compute the unnormalised high-freuency gains.
-            // Note the use of the virtual loudspeakers (see comment about the size of mHighFrequencyGains in setup() )
-            std::transform( gainRow, gainRow + mNumberOfAllLoudspeakers, mHighFrequencyGains.data(),
-                           []( CoefficientType val ){ return std::sqrt(val); } );
-            // Compute the l_2 norm of the high-frequency gains
-            // TODO: Consider replacing by a library function.
-            CoefficientType const l2NormHF = std::sqrt(std::accumulate( mHighFrequencyGains.data(),
-                                                                       mHighFrequencyGains.data() + mNumberOfAllLoudspeakers, static_cast<CoefficientType>(0.0),
-                                                                       [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val)*std::abs(val); } ) );
-
-
-            CoefficientType const l1NormLF = std::accumulate( gainRow, gainRow+mNumberOfRegularLoudspeakers, static_cast<CoefficientType>(0.0),
-                                                              [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val); } );
-
-            pml::MatrixParameter<CoefficientType> & lfGainMatrix = mLowFrequencyGainOutput->data( );
-            CoefficientType const scaleFactorLF = static_cast<CoefficientType>(1.0)/l1NormLF;
-            CoefficientType const scaleFactorHF = static_cast<CoefficientType>(1.0)/l2NormHF;
-            for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
-            {
-              gainMatrix( outIdx, chIdx ) = level * scaleFactorHF * mHighFrequencyGains[outIdx];
-              lfGainMatrix( outIdx, chIdx ) = level * scaleFactorLF * gainRow[outIdx];
-            }
-          }
-          else
-          {
-            // Standard VBAP choice. Use LF coefficients subject to a HF (energy) optimisation for everything.
-            for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
-            {
-              gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
-            }
-          }
-        } // if( psSrc )
+        }
+        // We need to copy the data explicitly into a matrix column of a row-major matrix.
+        res = efl::vectorCopyStrided( mTmpGains.data(), &gainMatrix( 0, channelId ), 1, gainMatrix.stride(),
+                                                     mNumberOfRegularLoudspeakers, 0/*no assumptions about alignment possible*/ );
+        if( res != efl::noError )
+        {
+          status( StatusMessage::Error, "Error while copying panning gains: ", efl::errorMessage(res) );
+          return;
+        }
       }
       else
       {
-        for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+        objectmodel::PlaneWave const * pwSrc = dynamic_cast<objectmodel::PlaneWave const *>(&obj);
         {
-          gainMatrix( outIdx, chIdx ) = static_cast<CoefficientType>(0.0);
+          if( pwSrc )
+          {
+            SampleType posX, posY, posZ;
+            std::tie( posX, posY, posZ )
+            = efl::spherical2cartesian( efl::degree2radian( pwSrc->incidenceAzimuth() ),
+                                        efl::degree2radian( pwSrc->incidenceElevation() ), 1.0f );
+            mVbapCalculator->calculateGains( posX, posY, posZ, mTmpGains.data() );
+            // We need to copy the data explicitly into a matrix column of a row-major matrix.
+            // This could be replaced by a copy function with a stride argument.
+            efl::ErrorCode res = efl::vectorCopyStrided( mTmpGains.data(), &gainMatrix( 0, channelId ), 1, gainMatrix.stride(),
+                                                         mNumberOfRegularLoudspeakers, 0/*no assumptions about alignment possible*/ );
+            if( res != efl::noError )
+            {
+              status( StatusMessage::Error, "Error while copying panning gains: ", efl::errorMessage(res) );
+              return;
+            }
+          }
         }
-      } // else branch of findIt != objects.end() )
-    } // for
-#endif
-    mObjectVectorInput->resetChanged();
+      }
     }
-}
+
+#if 0
+      // TODO: Can be replaced by a vector multiplication.
+      for( std::size_t chIdx( 0 ); chIdx < mNumberOfObjects; ++chIdx )
+      {
+        // Duplicated, inefficient code due to the use of the legacy VBAP object.
+        objectmodel::ObjectVector::const_iterator findIt = objects.find( chIdx);
+        if( findIt != objects.end() )
+        {
+          objectmodel::PointSource const * psSrc = dynamic_cast<objectmodel::PointSource const *>(findIt->second.get() );
+          if( psSrc )
+          {
+
+            efl::ErrorCode res = efl::product( mSourceCoordinates.row( chIdx ), mLoudspeakerPositions.data(), mLoudspeakerDotProducts.data(),
+                                               1 /*numResultRows*/, mNumberOfRegularLoudspeakers /* numResultColumns */, mVectorDimension /*numOp1Columns*/,
+                                               mSourceCoordinates.stride() /* op1RowStride */, 1 /*op1ColumnStride*/,
+                                               mLoudspeakerPositions.stride() /*op2RowStride*/, 1 /*op2ColumnStride*/,
+                                               1 /*resRowStride, not used, since  only one row. */, 1 /*resColumnStride*/ );
+            if( res != efl::noError )
+            {
+              // TODO: Replace by error API call.
+              throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
+            }
+            // Search only across the regular loudspeakers
+            // We search for the maximum, because we are using the dot product, i.e., the cosine of the angular distance.
+            // In case of equidistant nearest speakers, the first is returned.
+            CoefficientType const * maxDotProduct = std::max_element( mLoudspeakerDotProducts.data(), mLoudspeakerDotProducts.data() + mNumberOfRegularLoudspeakers );
+            if( maxDotProduct - mLoudspeakerDotProducts.data() >= static_cast<std::ptrdiff_t>(mNumberOfRegularLoudspeakers) )
+            {
+              // TODO: Replace by error API call.
+              throw std::runtime_error( "PanningCalculator: dot product for computing channel lock failed.");
+            }
+            CoefficientType const lockLimit = std::cos( efl::degree2radian(psSrc->channelLockDistance() ) );
+            if( *maxDotProduct >= lockLimit )
+            {
+              std::size_t const lockLspIdx = static_cast<std::size_t>( maxDotProduct - mLoudspeakerDotProducts.data() );
+              // Not necessary if we cleared the matrix before
+              for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+              {
+                gainMatrix( outIdx, chIdx ) = static_cast<CoefficientType>(0.0);
+              }
+              gainMatrix( lockLspIdx, chIdx ) = mLevels[chIdx];
+            }
+            // Otherwise fall through to copying the already computed VBAP gains
+
+            Afloat const * const gainRow = mVbapCalculator.getGains( ).row( chIdx );
+            objectmodel::LevelType const level = mLevels[chIdx];
+            if( separateLowpassPanning() )
+            {
+              // Compute the unnormalised high-freuency gains.
+              // Note the use of the virtual loudspeakers (see comment about the size of mHighFrequencyGains in setup() )
+              std::transform( gainRow, gainRow + mNumberOfAllLoudspeakers, mHighFrequencyGains.data(),
+                              []( CoefficientType val ){ return std::sqrt(val); } );
+              // Compute the l_2 norm of the high-frequency gains
+              // TODO: Consider replacing by a library function.
+              CoefficientType const l2NormHF = std::sqrt(std::accumulate( mHighFrequencyGains.data(),
+                                                                          mHighFrequencyGains.data() + mNumberOfAllLoudspeakers, static_cast<CoefficientType>(0.0),
+                                                                          [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val)*std::abs(val); } ) );
+
+
+              CoefficientType const l1NormLF = std::accumulate( gainRow, gainRow+mNumberOfRegularLoudspeakers, static_cast<CoefficientType>(0.0),
+                                                                [](CoefficientType acc, CoefficientType val ){ return acc += std::abs(val); } );
+
+              pml::MatrixParameter<CoefficientType> & lfGainMatrix = mLowFrequencyGainOutput->data( );
+              CoefficientType const scaleFactorLF = static_cast<CoefficientType>(1.0)/l1NormLF;
+              CoefficientType const scaleFactorHF = static_cast<CoefficientType>(1.0)/l2NormHF;
+              for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+              {
+                gainMatrix( outIdx, chIdx ) = level * scaleFactorHF * mHighFrequencyGains[outIdx];
+                lfGainMatrix( outIdx, chIdx ) = level * scaleFactorLF * gainRow[outIdx];
+              }
+            }
+            else
+            {
+              // Standard VBAP choice. Use LF coefficients subject to a HF (energy) optimisation for everything.
+              for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+              {
+                gainMatrix( outIdx, chIdx ) = level * gainRow[outIdx];
+              }
+            }
+          } // if( psSrc )
+        }
+        else
+        {
+          for( std::size_t outIdx( 0 ); outIdx < mNumberOfRegularLoudspeakers; ++outIdx )
+          {
+            gainMatrix( outIdx, chIdx ) = static_cast<CoefficientType>(0.0);
+          }
+        } // else branch of findIt != objects.end() )
+      } // for
+#endif
+      mObjectVectorInput->resetChanged();
+    }
+  }
 
 } // namespace rcl
 } // namespace visr

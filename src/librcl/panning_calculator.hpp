@@ -150,11 +150,11 @@ private:
    */
   std::size_t mVectorDimension;
 
-  efl::BasicMatrix<CoefficientType> mSourceCoordinates;
+  // efl::BasicMatrix<CoefficientType> mSourceCoordinates;
 
   efl::BasicMatrix<CoefficientType> mLoudspeakerPositions;
 
-  efl::BasicMatrix<CoefficientType> mPolygonCenters;
+  // efl::BasicMatrix<CoefficientType> mPolygonCenters;
 
   /**
    * Describe the polygons within the
@@ -180,26 +180,16 @@ private:
 
   efl::BasicVector<CoefficientType> mLoudspeakerDotProducts;
 
-#if 1
-  /**
-   * The loudspeaker array configuration.
-   * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
-   * we make a copy of the reference passed to setup method.
-   */
-  panning::LoudspeakerArray mSpeakerArray;
- 
-
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
   std::unique_ptr<panning::VBAP> mVbapCalculator;
   
   /**
-   * The levels of the object channels in linear scale.
+   * Temporary storage for the computed panning gains of one source.
+   * Dimension: mNumberOfRegularLoudspeakers
    */
-  std::valarray<objectmodel::LevelType> mLevels;
-  //@}
-#endif
+  mutable efl::BasicVector<SampleType> mTmpGains;
 
   /**
    * Data type of the parmaeter ports for outgoing matrix data.
