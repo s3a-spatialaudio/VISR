@@ -33,7 +33,6 @@ endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
 target_link_libraries( ${PROJECT_NAME} panning )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${Boost_REGEX_LIBRARY} )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
