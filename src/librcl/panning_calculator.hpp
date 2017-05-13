@@ -150,35 +150,7 @@ private:
    */
   std::size_t mVectorDimension;
 
-  // efl::BasicMatrix<CoefficientType> mSourceCoordinates;
-
   efl::BasicMatrix<CoefficientType> mLoudspeakerPositions;
-
-  // efl::BasicMatrix<CoefficientType> mPolygonCenters;
-
-  /**
-   * Describe the polygons within the
-   */
-  //@{
-  std::vector<LoudspeakerIndexType> mPolygonIndices;
-
-  std::vector<std::size_t> mPolygonStartOffsets;
-
-
-  std::size_t numberOfPolygons() const;
-
-  std::size_t tripletStartIndex( std::size_t polygonIdx ) const;
-
-  std::size_t tripletEndIndex( std::size_t polygonIdx ) const;
-
-  std::size_t verticesInPolgon( std::size_t polygonIdx ) const;
-
-  LoudspeakerIndexType polygonVertex( std::size_t polygonIdx, std::size_t vertexIndex ) const;
-
-  LoudspeakerIndexType const & polygonVertices( std::size_t polygonIdx ) const;
-  //@}
-
-  efl::BasicVector<CoefficientType> mLoudspeakerDotProducts;
 
   /**
    * The calculator object to generate the panning matrix coefficients.
@@ -192,7 +164,7 @@ private:
   mutable efl::BasicVector<SampleType> mTmpGains;
 
   /**
-   * Data type of the parmaeter ports for outgoing matrix data.
+   * Data type of the parameter ports for outgoing matrix data.
    */
   using ListenerPositionPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
   using ObjectPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector >;
