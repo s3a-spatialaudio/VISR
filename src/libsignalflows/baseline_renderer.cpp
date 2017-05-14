@@ -2,23 +2,11 @@
 
 #include "baseline_renderer.hpp"
 
-#include <libefl/vector_functions.hpp>
-
-#include <libobjectmodel/point_source_with_reverb.hpp>
-
-#include <libpanning/XYZ.h>
 #include <libpanning/LoudspeakerArray.h>
 
 #include <libpml/biquad_parameter.hpp>
 
-#include <librcl/biquad_iir_filter.hpp>
-
 #include <librsao/reverb_object_renderer.hpp>
-
-#include <boost/filesystem.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/preprocessor/cat.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -370,140 +358,6 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 BaselineRenderer::~BaselineRenderer( )
 {
 }
-
-
-#if 0
-void BaselineRenderer::setupReverberationSignalFlow( std::string const & reverbConfig,
-                                                     panning::LoudspeakerArray const & arrayConfig, 
-                                                     std::size_t numberOfInputs,
-                                                     std::size_t interpolationSteps )
-{
-  std::stringstream stream( reverbConfig );
-  boost::property_tree::ptree tree;
-  try
-  {
-    read_json( stream, tree );
-  }
-  catch( std::exception const & ex )
-  {
-    throw std::invalid_argument( std::string( "Error while parsing reverb config string: " ) + ex.what() );
-  }
-
-  mMaxNumReverbObjects = tree.get<std::size_t>( "numReverbObjects", 0 );
-  mLateReverbFilterLengthSeconds = tree.get<ril::SampleType>( "lateReverbFilterLength", 0 );
-  std::size_t const lateReverbFilterLengthSamples = std::max( static_cast<std::size_t>(std::ceil( mLateReverbFilterLengthSeconds * samplingFrequency() )),
-    static_cast<std::size_t>(1) );
-
-  std::string const lateReverbDecorrFilterName( tree.get<std::string>( "lateReverbDecorrelationFilters", std::string() ));
-  mNumDiscreteReflectionsPerObject = tree.get<std::size_t>( "discreteReflectionsPerObject", 0 );
-
-  std::size_t const numWallReflBiquads = objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads;
-
-  ril::SampleType const maxDiscreteReflectionDelay = tree.get<ril::SampleType>( "maxDiscreteReflectionDelay",  1.0f );
-
-  // The maximum number of late filter recalculations per period.
-  std::size_t const cLateFilterUpdatesPerPeriod( tree.get<std::size_t>( "lateReverbFilterUpdatesPerPeriod", 1 ));
-
-  // Optional argument for the gain of the decorrelation filter for
-  // the late reverb tail. 
-  // The default value is 1/sqrt(#loudspeakers)
-  boost::optional<ril::SampleType> const lateReverbDecorrelatorGainOpt = tree.get_optional<ril::SampleType>( "lateReverbDecorrelationGain" );
-  ril::SampleType const defaultLateDecorrelatorGain = 1.0f / std::sqrt( static_cast<float>(arrayConfig.getNumRegularSpeakers()) );
-  ril::SampleType const lateReverbDecorrelatorGain = lateReverbDecorrelatorGainOpt
-    ? std::pow( static_cast<ril::SampleType>(10.0), *lateReverbDecorrelatorGainOpt/ static_cast<ril::SampleType>(20.0) ) // TODO: Use dB->lin library function
-    : defaultLateDecorrelatorGain;
-
-  pml::MatrixParameter<SampleType> lateDecorrelationFilters(ril::cVectorAlignmentSamples );
-  if( lateReverbDecorrFilterName.empty() )
-  {
-    // The convolution engine requires at least one filter block.
-    lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), period() );
-    lateDecorrelationFilters.zeroFill();
-  }
-  else
-  {
-    boost::filesystem::path const lateReverbDecorrFilterPath( lateReverbDecorrFilterName );
-    if( not exists( lateReverbDecorrFilterPath ) )
-    {
-      throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
-    }
-    pml::MatrixParameter<ril::SampleType> const allLateDecorrelationFilters = pml::MatrixParameter<ril::SampleType>::fromAudioFile( lateReverbDecorrFilterName, ril::cVectorAlignmentSamples );
-    std::size_t const lateDecorrelationFilterLength = allLateDecorrelationFilters.numberOfColumns();
-    if( allLateDecorrelationFilters.numberOfRows() < arrayConfig.getNumRegularSpeakers() )
-    {
-      throw std::invalid_argument( "The number of loudspeakers exceeds the number of late reverberation decorrelation filters in the provided file." );
-    }
-    lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), lateDecorrelationFilterLength );
-    for( std::size_t rowIdx( 0 ); rowIdx < arrayConfig.getNumRegularSpeakers(); ++rowIdx )
-    {
-      // Multiply the raw unit-magnitude filters by the scaling gain.
-      if( efl::vectorMultiplyConstant( lateReverbDecorrelatorGain,
-                                      allLateDecorrelationFilters.row( rowIdx ),
-                                      lateDecorrelationFilters.row( rowIdx ),
-                                      lateDecorrelationFilterLength,
-                                      ril::cVectorAlignmentSamples ) != efl::noError )
-      {
-        throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
-      }
-    }
-
-  }
-
-  // set up the components
-  mReverbSignalRouting.setup( numberOfInputs, mMaxNumReverbObjects );
-
-  mReverbParameterCalculator.setup( arrayConfig, mMaxNumReverbObjects,
-                                    mNumDiscreteReflectionsPerObject,
-                                    numWallReflBiquads,
-                                    mLateReverbFilterLengthSeconds,
-                                    objectmodel::PointSourceWithReverb::cNumberOfSubBands );
-  mDiscreteReverbDelay.setup( mMaxNumReverbObjects * mNumDiscreteReflectionsPerObject,
-                              interpolationSteps,
-                              maxDiscreteReflectionDelay,
-                              rcl::DelayVector::InterpolationType::Linear, 0.0f, 0.0f );
-  mDiscreteReverbReflFilters.setup( mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject, numWallReflBiquads );
-  mDiscreteReverbPanningMatrix.setup( mMaxNumReverbObjects*mNumDiscreteReflectionsPerObject,
-                                      arrayConfig.getNumRegularSpeakers(),
-                                      interpolationSteps );
-  mLateReverbFilterCalculator.setup( mMaxNumReverbObjects, mLateReverbFilterLengthSeconds,
-                                     objectmodel::PointSourceWithReverb::cNumberOfSubBands,
-                                     cLateFilterUpdatesPerPeriod );
-
-  // TODO: Add configuration parameters for maximum delay of the late reverb onset delay.
-  mLateReverbGainDelay.setup( mMaxNumReverbObjects,
-                              interpolationSteps,
-                              maxDiscreteReflectionDelay, // For the moment, use the same max. delay as for discretes.
-                              rcl::DelayVector::InterpolationType::Linear, 0.0f, 0.0f );
-
-  // Create a routing for #reverbObjects signals, each filtered with an individual filter, and summed into a single
-  pml::FilterRoutingList lateReverbRouting;
-  for( std::size_t objIdx( 0 ); objIdx < mMaxNumReverbObjects; ++objIdx )
-  {
-    lateReverbRouting.addRouting( objIdx, 0, objIdx, 1.0f );
-  }
-  mLateReverbFilter.setup( mMaxNumReverbObjects, 1, lateReverbFilterLengthSamples,
-                           mMaxNumReverbObjects, mMaxNumReverbObjects,
-                           efl::BasicMatrix<SampleType>(), // No initial filters provided.
-                           lateReverbRouting );
-
-  // Create a routing from 1 to #loudspeakers signals, each filtered with an individual filter
-  pml::FilterRoutingList lateDecorrelationRouting;
-  for( std::size_t lspIdx( 0 ); lspIdx < arrayConfig.getNumRegularSpeakers(); ++lspIdx )
-  {
-    lateDecorrelationRouting.addRouting( 0, lspIdx, lspIdx, 1.0f );
-  }
-  mLateDiffusionFilter.setup( 1, arrayConfig.getNumRegularSpeakers( ), lateDecorrelationFilters.numberOfColumns(),
-                              arrayConfig.getNumRegularSpeakers( ), arrayConfig.getNumRegularSpeakers( ),
-                              lateDecorrelationFilters, lateDecorrelationRouting );
-  mReverbMix.setup( arrayConfig.getNumRegularSpeakers(), 2 );
-
-  parameterConnection( "SceneDecoder", "objectVectorOutput", "ReverbParameterCalculator", "objectInput" );
-
-
-  parameterConnection( "ReverbParameterCalculator", "objectInput", "LateReverbFilterCalculator", "subbandInput" );
-  // parameterConnection( "LateReverbFilterCalculator", "", "LateReverbFilter", "" );
-}
-#endif
 
 } // namespace signalflows
 } // namespace visr
