@@ -248,13 +248,14 @@ void PanningCalculator::process()
         status( StatusMessage::Error, "Error while copying panning gains: ", efl::errorMessage(res) );
         return;
       }
-      if( separateLowpassPanning() ) // If there
-      {
-
-      }
-      mObjectVectorInput->resetChanged();
     }
+    if( separateLowpassPanning() ) // If there
+    {
+
+    }
+    mObjectVectorInput->resetChanged();
   }
+}
 
 } // namespace rcl
 } // namespace visr
