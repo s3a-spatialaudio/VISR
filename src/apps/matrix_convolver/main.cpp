@@ -11,7 +11,7 @@
 
 #include <libril/signal_flow_context.hpp>
 
-#include <libsignalflows/matrix_convolver.hpp>
+#include <librcl/fir_filter_matrix.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
 #ifdef VISR_JACK_SUPPORT
@@ -56,70 +56,73 @@ int main( int argc, char const * const * argv )
     break; // carry on
   }
 
-  // Query options
-  if( cmdLineOptions.getDefaultedOption<bool>( "list-audio-backends", false ) )
+  try
   {
-    std::cout << "Supported audio backends:" << "TBD" << std::endl;
-    return EXIT_SUCCESS;
-  }
-  if( cmdLineOptions.getDefaultedOption<bool>( "list-fft-libraries", false ) )
-  {
-    std::cout << "Supported FFT libraries:"
-              << rbbl::FftWrapperFactory<SampleType>::listImplementations() << std::endl;
-    return EXIT_SUCCESS;
-  }
+    // Query options
+    if( cmdLineOptions.getDefaultedOption<bool>( "list-audio-backends", false ) )
+    {
+      std::cout << "Supported audio backends:" << "TBD" << std::endl;
+      return EXIT_SUCCESS;
+    }
+    if( cmdLineOptions.getDefaultedOption<bool>( "list-fft-libraries", false ) )
+    {
+      std::cout << "Supported FFT libraries:"
+          << rbbl::FftWrapperFactory<SampleType>::listImplementations() << std::endl;
+      return EXIT_SUCCESS;
+    }
 
-  std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
+    std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
 
-  std::size_t const numberOfInputChannels = cmdLineOptions.getOption<std::size_t>( "input-channels" );
-  std::size_t const numberOfOutputChannels = cmdLineOptions.getOption<std::size_t>( "output-channels" );
-  std::string const routingsString = cmdLineOptions.getDefaultedOption<std::string>( "routings", "[]" );
-  pml::FilterRoutingList const routings( pml::FilterRoutingList::fromJson( routingsString ) );
-  const std::size_t maxFilterRoutings = cmdLineOptions.getDefaultedOption<std::size_t>( "max-routings", routings.size() );
-  if( routings.size() > maxFilterRoutings )
-  {
-    throw std::invalid_argument( "The number of initial filter routings exceeds the value specified in \"--maxRoutings\"." );
-  }
+    std::size_t const numberOfInputChannels = cmdLineOptions.getOption<std::size_t>( "input-channels" );
+    std::size_t const numberOfOutputChannels = cmdLineOptions.getOption<std::size_t>( "output-channels" );
+    std::string const routingsString = cmdLineOptions.getDefaultedOption<std::string>( "routings", "[]" );
+    pml::FilterRoutingList const routings( pml::FilterRoutingList::fromJson( routingsString ) );
+    const std::size_t maxFilterRoutings = cmdLineOptions.getDefaultedOption<std::size_t>( "max-routings", routings.size() );
+    if( routings.size() > maxFilterRoutings )
+    {
+      throw std::invalid_argument( "The number of initial filter routings exceeds the value specified in \"--maxRoutings\"." );
+    }
 
-  // Initialise the impulse response matrix
-  // Use max() as special value to denote "no maximum length specified"
-  std::size_t const maxFilterLengthOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filter-length", std::numeric_limits<std::size_t>::max() );
-  std::size_t const maxFilterOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filters", std::numeric_limits<std::size_t>::max( ) ); // max() denotes
-  std::string const filterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
-  std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string( ) );
-  pml::IndexSequence const indexOffsets( indexOffsetString );
-  efl::BasicMatrix<SampleType> initialFilters( cVectorAlignmentSamples );
-  initFilterMatrix( filterList, maxFilterLengthOption, maxFilterOption, indexOffsets, initialFilters );
+    // Initialise the impulse response matrix
+    // Use max() as special value to denote "no maximum length specified"
+    std::size_t const maxFilterLengthOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filter-length", std::numeric_limits<std::size_t>::max() );
+    std::size_t const maxFilterOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filters", std::numeric_limits<std::size_t>::max( ) ); // max() denotes
+    std::string const filterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
+    std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string( ) );
+    pml::IndexSequence const indexOffsets( indexOffsetString );
+    efl::BasicMatrix<SampleType> initialFilters( cVectorAlignmentSamples );
+    initFilterMatrix( filterList, maxFilterLengthOption, maxFilterOption, indexOffsets, initialFilters );
 
-  // The final values for the number and length of filter slots are determined by the logic of the initialisation function.
-  std::size_t const maxFilters = initialFilters.numberOfRows();
+    // The final values for the number and length of filter slots are determined by the logic of the initialisation function.
+    std::size_t const maxFilters = initialFilters.numberOfRows();
 
-  std::size_t const periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
-  SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<SamplingFrequencyType>( "sampling-frequency", 48000 );
+    std::size_t const periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
+    SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<SamplingFrequencyType>( "sampling-frequency", 48000 );
 
-  std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
+    std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
 
-  SignalFlowContext const context{ periodSize, samplingFrequency };
+    SignalFlowContext const context{ periodSize, samplingFrequency };
 
-  signalflows::MatrixConvolver flow( context, "MatrixConvolver", nullptr/*instantiate as top-level flow*/,
-                                     numberOfInputChannels, numberOfOutputChannels,
-                                     initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
-                                     initialFilters, routings,
-                                     false /*no control inputs*/,
-                                     fftLibrary.c_str() );
+    rcl::FirFilterMatrix convolver( context, "MatrixConvolver", nullptr/*instantiate as top-level flow*/ );
 
-  // Selection of audio interface:
-  // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
-  // back to PortAudio in all other cases.
-  // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
+    convolver.setup( numberOfInputChannels, numberOfOutputChannels,
+                     initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
+                     initialFilters, routings,
+                     false /*no control inputs*/,
+                     fftLibrary.c_str() );
+
+    rrl::AudioSignalFlow flow( convolver );
+
+    // Selection of audio interface:
+    // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
+    // back to PortAudio in all other cases.
+    // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
 #ifdef VISR_JACK_SUPPORT
-  bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
+    bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
 #endif
 
-   std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
+    std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
 
-  try 
-  {
 #ifdef VISR_JACK_SUPPORT
     if( useNativeJack )
     {
@@ -163,7 +166,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface->stop( );
 
-   // Should there be an explicit stop() method for the sound interface?
+    // Should there be an explicit stop() method for the sound interface?
     audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
