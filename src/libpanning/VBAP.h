@@ -46,10 +46,7 @@ namespace visr
       void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;
 
 
-      std::size_t getNumSpeakers() const
-      {
-        return mReroutingMatrix.numberOfColumns();
-      }
+     
 
       /**
        * Reset the listener position.
@@ -65,6 +62,10 @@ namespace visr
       bool is2D;
       bool isInfinite;
 
+      size_t numTotLoudspeakers;
+      size_t numRegLoudspeakers;
+      size_t numVirtLoudspeakers;
+      size_t numTriplets;
       /**
       * Inverse matrix of the vector components of loudspeakers positions considering loudspeaker triplets.
       * Dimension: #triplets(Rows) x #vectorComponents(Columns).

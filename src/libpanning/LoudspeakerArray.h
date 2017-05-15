@@ -91,9 +91,21 @@ namespace visr
 
       XYZ const & getPosition( std::size_t iSpk ) const { return m_position[iSpk]; };
 
+      /**
+      * Return the position of a loudspeaker given its string id
+      *
+      */
+      XYZ & getPosition( std::string id ) { return m_position[m_id.at( id )]; };
+
+      XYZ const & getPosition( std::string id ) const { return m_position[m_id.at( id )]; };
+
+
+
       XYZ* getPositions() { return m_position.data(); };
 
       XYZ const * getPositions() const { return m_position.data(); };
+
+
 
       /**
        * Return the loudspeaker index associated with a loudspeaker at a given
@@ -102,9 +114,15 @@ namespace visr
        * That means that there is a fixed relation between the two indices.
        * @TODO Allow arbitrary inices (or labels), maybe of different types.
        */
-      LoudspeakerIndexType getLoudspeakerIndex( std::size_t arrayIndex ) const;
-
+      //LoudspeakerIndexType getLoudspeakerIndex( std::size_t arrayIndex ) const;
       ChannelIndex channelIndex( std::size_t spkIndex ) const { return m_channel[spkIndex]; }
+
+      LoudspeakerIndexType getSpeakerIndexFromId( std::string id ) const { return m_id.at(id); };
+      LoudspeakerIndexType getSpeakerIndexFromChn( ChannelIndex chn ) const { return m_id.at(mIdsOrder.at(chn)); };
+
+      ChannelIndex getSpeakerChannel( std::size_t spkIndex ) const { return m_channel[spkIndex]; }
+      ChannelIndex getSpeakerChannelFromId( std::string id ) const { return m_channel[m_id.at( id )]; }
+
 
       int setTriplet( int iTri, int l1, int l2, int l3 )
       {
@@ -128,6 +146,8 @@ namespace visr
        * Retrieve the number of regular loudspeakers, excluding virtual loudspeakers and subwoofers.
        */
       std::size_t getNumRegularSpeakers() const { return m_channel.size(); }
+
+      ChannelIndex const * getLoudspeakerChannels() const { return &m_channel[0]; }
 
       std::size_t getNumTriplets() const { return m_triplet.size(); };
 
@@ -269,7 +289,7 @@ namespace visr
 
       std::vector<ChannelIndex> m_channel;
       std::map<std::string, LoudspeakerIndexType> m_id;
-
+      std::map<ChannelIndex,std::string> mIdsOrder;
       /**
       * Subwoofer configuration support.
       */

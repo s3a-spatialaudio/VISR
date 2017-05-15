@@ -10,7 +10,7 @@
 #include <boost/filesystem.hpp>
 
 #include <boost/test/unit_test.hpp>
-
+#include <boost/test/included/unit_test.hpp>
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -18,6 +18,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <vector>
+#include <array>
 
 // Text format will be removed soon.
 #if 0
@@ -59,7 +60,7 @@ BOOST_AUTO_TEST_CASE( LoudspeakerArrayLoadTextFormat )
 }
 #endif
 
-
+#if 0
 BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlString ){
   using namespace visr;
   using namespace visr::panning;
@@ -111,15 +112,16 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlString ){
 
   std::vector<SampleType> vbapGains;
   std::fill( vbapGains.begin(), vbapGains.end(), 0.0f );
-  vbapGains.resize( vbap.getNumSpeakers() );
+  vbapGains.resize( array.getNumRegularSpeakers() );
   vbap.calculateGains( 2.08f, 1.0f, -5.0f, vbapGains.data() );
   //vbap.calculateGains( 1.0f, 1.0f, 0.0f, vbapGains.data() );
-  std::size_t const numCols = vbap.getNumSpeakers();
+  std::size_t const numCols = array.getNumRegularSpeakers();
 
   std::cout << "VBAP gain for source : ";
   std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, ", " ) );
   std::cout << std::endl;
 }
+#endif
 
 BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
 {
@@ -131,23 +133,64 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
 
   // Alternatively, load the config file in XML format.
-  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
+
+    boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_stereo_1sub_with_rerouting.xml" );
+
+    //boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
   BOOST_ASSERT( exists( configFileXml ) );
   BOOST_CHECK_NO_THROW( array.loadXmlFile( configFileXml.string() ) );
   
   
-  VBAP vbap(array, 0.0f, 0.0f, 0.0f);
-  
-  std::vector<SampleType> vbapGains;
-  std::fill( vbapGains.begin(), vbapGains.end(), 0.0f );
-  vbapGains.resize(vbap.getNumSpeakers());
-  vbap.calculateGains( 2.08f, 1.0f, -5.0f, vbapGains.data());
-  //vbap.calculateGains( 1.0f, 1.0f, 0.0f, vbapGains.data() );
-  std::size_t const numCols = vbap.getNumSpeakers();
+  std::vector<int> chan ( array.getLoudspeakerChannels(), array.getLoudspeakerChannels()+ array.getNumRegularSpeakers());
+  std::vector<LoudspeakerArray::ChannelIndex>::iterator pos = std::adjacent_find( chan.begin(), chan.end(), std::greater<int>() );
+  BOOST_CHECK( pos == chan.end() );
+  for(int w=0; w< array.getNumRegularSpeakers();w++){
+    int ch = array.getSpeakerChannel( w );
+    //std::cout<<"w: "<<w<< " chn: "<< array.getSpeakerChannel( w )<<" spk: "<< array.getSpeakerIndexFromChn(ch+1)<<std::endl;
+    BOOST_CHECK( w == array.getSpeakerIndexFromChn(array.getSpeakerChannel(w)+1));
+  }
 
-  std::cout << "VBAP gain for source : ";
-  std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, ", " ) );
-  std::cout << std::endl;
+  std::size_t numberOfSources = 8;
+  std::vector<XYZ> sourcePos( numberOfSources );
+  sourcePos[0].set( 2.08f, 1.0f, -5.0f, true );
+  //    sourcePos[0].set(-1.0f,	0.0, 0.0f, true);     // plane wave from front/back
+  //    sourcePos[0].set(0.0f, -1.0f, 0.0f, true);     // plane wave from left/right
+  //    sourcePos[0].set(0.0f, 0.0f, -1.0f, true);     // plane wave from below
+  //    sourcePos[0].set(1.78f, 1.73f, -0.86f, false);
+
+  //    vbap.setNumSources( numberOfSources );
+  //    sourcePos[0].set(1.0, 1.0, 1.0, false);
+  //    sourcePos[0].set(1.0,	0.3, -0.2, false); // for 9.1_audiolab.txt jumps between triplet 11 and 10 as z reduced
+  //    sourcePos[0].set(0.0, 1.0, -0.9, false);
+  sourcePos[1].set( 1.0f, 0.0f, 0.0f, false );
+  sourcePos[2].set( 0.0f, 1.0f, 0.0f, false );
+  sourcePos[3].set( 0.0f, 0.0f, 1.0f, false );
+  sourcePos[4].set( -1.0f, 0.0f, 0.0f, false );
+  sourcePos[5].set( 0.0f, -1.0f, 0.0f, false );
+  sourcePos[6].set( 0.0f, 0.0f, -1.0f, false );
+  sourcePos[7].set( -1.0f, -1.0f, -1.0f, false );
+
+
+  VBAP vbap( array, 0.0f, 0.0f, 0.0f );
+  std::vector<SampleType> vbapGains;
+  vbapGains.resize( array.getNumRegularSpeakers() );
+
+  for(size_t i =0; i<sourcePos.size();i++){
+    std::fill( vbapGains.begin(), vbapGains.end(), 0.0f );
+    vbap.calculateGains( sourcePos[i].x, sourcePos[i].y, sourcePos[i].z, vbapGains.data() );
+    //vbap.calculateGains( 1.0f, 1.0f, 0.0f, vbapGains.data() );
+    std::size_t const numCols = array.getNumRegularSpeakers();
+
+    std::cout << "VBAP calculated loudspeaker gains with source's position ("<< sourcePos[i].x<<", " << sourcePos[i].y << ", " << sourcePos[i].z << ") : ";
+    std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, ", " ) );
+    std::cout << std::endl;
+  }
+
+
+
+  
+  
+  
  
 
  //BOOST_CHECK_NO_THROW( vbap.setLoudspeakerArray( &array ) );
