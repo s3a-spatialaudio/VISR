@@ -70,7 +70,7 @@ namespace visr
       m_triplet = rhs.m_triplet;
       m_channel = rhs.m_channel;
       m_id = rhs.m_id;
-      m_reRoutingCoeff.resize( m_reRoutingCoeff.numberOfRows(), m_reRoutingCoeff.numberOfColumns() );
+      m_reRoutingCoeff.resize( rhs.m_reRoutingCoeff.numberOfRows(), rhs.m_reRoutingCoeff.numberOfColumns() );
       m_reRoutingCoeff.copy( rhs.m_reRoutingCoeff );
       m_subwooferChannels = rhs.m_subwooferChannels;
       m_subwooferGains.resize( rhs.m_subwooferGains.numberOfRows(), rhs.m_subwooferGains.numberOfColumns() );
