@@ -49,7 +49,7 @@ void ChannelObjectRoutingCalculator::setup( std::size_t numberOfObjectChannels,
   {
     // Use the translation function of the loudspeaker array.
     panning::LoudspeakerArray::LoudspeakerIndexType const lspIndex
-      = config.getLoudspeakerIndex( channelIndex );
+      = config.getSpeakerIndexFromChn( config.getSpeakerChannel( channelIndex ) + 1 );
     bool insertRes;
     std::tie(std::ignore, insertRes) = mLookup.insert(
       std::make_pair(static_cast<objectmodel::ChannelObject::OutputChannelId>(lspIndex), channelIndex) );

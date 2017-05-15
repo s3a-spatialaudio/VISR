@@ -23,22 +23,31 @@ namespace visr
 
     VBAP::VBAP( const LoudspeakerArray &lsarray, SampleType x, SampleType y, SampleType z )
     {
+
+
+      numTotLoudspeakers = lsarray.getNumSpeakers();
+      numRegLoudspeakers = lsarray.getNumRegularSpeakers();
+      numVirtLoudspeakers = numTotLoudspeakers - numRegLoudspeakers;
+      numTriplets = lsarray.getNumTriplets();
+
       is2D = lsarray.is2D();
       isInfinite = lsarray.isInfinite();
-      mInvMatrix.resize( lsarray.getNumTriplets(), 9 );
-      mPositions.resize( lsarray.getNumSpeakers(), 3 );
-      mGain.resize( lsarray.getNumSpeakers() );
-      mTriplets.resize( lsarray.getNumTriplets() );
-      mReroutingMatrix.resize( lsarray.getNumSpeakers() - lsarray.getNumRegularSpeakers(), lsarray.getNumRegularSpeakers() );
+      mInvMatrix.resize( numTriplets, 9 );
+      mPositions.resize( numTotLoudspeakers, 3 );
+      mGain.resize( numTotLoudspeakers );
+      mTriplets.resize( numTriplets );
+      mReroutingMatrix.resize( numVirtLoudspeakers, numRegLoudspeakers );
+
+
       //mPositions 
-      for( int i = 0; i < lsarray.getNumSpeakers(); i++ )
+      for( int i = 0; i < numTotLoudspeakers; i++ )
       {
         mPositions( i, 0 ) = lsarray.getPosition( i ).x;
         mPositions( i, 1 ) = lsarray.getPosition( i ).y;
         mPositions( i, 2 ) = lsarray.getPosition( i ).z;
       }
 
-      for( int i = 0; i < lsarray.getNumTriplets(); i++ )
+      for( int i = 0; i < numTriplets; i++ )
       {
         mTriplets[i][0] = lsarray.getTriplet( i )[0];
         mTriplets[i][1] = lsarray.getTriplet( i )[1];
@@ -48,9 +57,9 @@ namespace visr
       mListenerPos[1] = y;
       mListenerPos[2] = z;
 
-      for( int i = 0; i < mReroutingMatrix.numberOfRows(); i++ )
+      for( int i = 0; i < numVirtLoudspeakers; i++ )
       {
-        for( int j = 0; j < mReroutingMatrix.numberOfColumns(); j++ )
+        for( int j = 0; j < numRegLoudspeakers; j++ )
         {
           mReroutingMatrix( i, j ) = lsarray.getReroutingCoefficient( i, j );
         }
@@ -69,7 +78,7 @@ namespace visr
         efl::ErrorCode res = efl::vectorMultiplyConstant( normFactor, in, out, numberOfElements, 0/*alignment*/ );
         if( res != efl::noError )
         {
-          throw std::runtime_error( "VBAP: error diuring power normalisation." );
+          throw std::runtime_error( "VBAP: error during power normalisation." );
         }
       }
     } // unnamed namespace
@@ -78,7 +87,7 @@ namespace visr
     {
       calcPlainVBAP( XYZ( x, y, z ) );
       applyRerouting();
-      powerNormalisation( &mGain[0], gains, getNumSpeakers() );
+      powerNormalisation( &mGain[0], gains, numRegLoudspeakers );
     }
 
     void VBAP::setListenerPosition( SampleType x, SampleType y, SampleType z )
@@ -251,13 +260,11 @@ namespace visr
 
     void VBAP::applyRerouting() const
     {
-      size_t numRegularSpeakers = mReroutingMatrix.numberOfColumns();
-      size_t numVirtualSpeakers = getNumSpeakers() - numRegularSpeakers;
-      for( int i = 0; i < numRegularSpeakers; i++ )
+      for( int i = 0; i < numRegLoudspeakers; i++ )
       {
-        for( int j = 0; j < numVirtualSpeakers; j++ )
+        for( int j = 0; j < numVirtLoudspeakers; j++ )
         {
-          mGain[i] = mGain[i] + mReroutingMatrix( j, i ) * mGain[numRegularSpeakers + j];
+          mGain[i] = mGain[i] + mReroutingMatrix( j, i ) * mGain[numRegLoudspeakers + j];
         }
       }
     }

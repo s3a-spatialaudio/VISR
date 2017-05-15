@@ -458,11 +458,13 @@ namespace visr
       LoudspeakerIndexType const maxSpeakerIndexOneOffset
         = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
       int i = 0;
+
+      // parsing the loudspeaker ids and channels
       for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt, i++ )
       {
         ptree const childTree = treeIt->second;
         std::string id = childTree.get<std::string>( "<xmlattr>.id" );
-        boost::regex expr{ "^[A-za-z0-9@&()+/:-_ ]*$" };
+        boost::regex expr{ "^[A-za-z0-9@&()+-_ ]*$" };
         if( m_id.find( id ) != m_id.end() or id.empty() or !boost::regex_match( id, expr ) )
         {
           throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
@@ -479,23 +481,46 @@ namespace visr
         {
           throw std::invalid_argument( "LoudspeakerArray::loadXml(): The channel id must be greater or equal than one." );
         }
-        m_id[id] = i;
+        m_id[id] = 0; //just to have the id as a key in the map, to search for duplicates
         m_channel[i] = chIdx - 1;
-        m_position[i] = parseCoordNode( childTree, m_isInfinite );
+        mIdsOrder[chIdx] = id;
+      }
 
-        parseGainDelayAdjustments( childTree, m_gainAdjustment[i], m_delayAdjustment[i] );
+      // Reordering by progressive channel number
+      std::sort( m_channel.begin(), m_channel.end() );
+      int k = 0;
+      for( std::map<ChannelIndex, std::string>::iterator it = mIdsOrder.begin(); it != mIdsOrder.end(); it++, k++ )
+      {
+      /*  std::cout << it->second << " => " << m_id[it->second] << '\n';
+        std::cout << it->first << " => " << it->second << '\n';*/
+        m_id[it->second] = k;
+       /* std::cout << it->second << " => " << m_id[it->second] << '\n';*/
+      }
+      
+
+      // reparsing the xml with ordered channels 
+      for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt )
+      {
+        ptree const childTree = treeIt->second;
+        std::string id = childTree.get<std::string>( "<xmlattr>.id" );
+        ChannelIndex const chIdx = childTree.get<ChannelIndex>( "<xmlattr>.channel" );
+        m_position[m_id[id]] = parseCoordNode( childTree, m_isInfinite );
+
+        parseGainDelayAdjustments( childTree, m_gainAdjustment[m_id[id]], m_delayAdjustment[m_id[id]] );
 
         if( eqConfigPresent )
         {
-          parseEqFilter( childTree, eqLookupTable, i, *mOutputEqs );
+          parseEqFilter( childTree, eqLookupTable, m_id[id], *mOutputEqs );
         }
       }
+
+
       // Same for the virtual speaker nodes, except there is no 'channel' field and no gain/delay adjustments.
       for( ptree::const_assoc_iterator treeIt( virtualSpeakerNodes.first ); treeIt != virtualSpeakerNodes.second; ++treeIt, i++ )
       {
         ptree const childTree = treeIt->second;
         std::string id = childTree.get<std::string>( "<xmlattr>.id" );
-        boost::regex expr{ "^[A-za-z0-9@&()+/:-_ ]*$" };
+        boost::regex expr{ "^[A-za-z0-9@&()+-_ ]*$" };
         if( m_id.find( id ) != m_id.end() or id.empty() or !boost::regex_match( id, expr ) )
         {
           throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
@@ -520,6 +545,7 @@ namespace visr
           {
             throw std::invalid_argument( "LoudspeakerArray::loadXml(): Cannot find loudspeaker id in virtual speaker routing." );
           }
+          //std::cout <<"RER: "<< i - numRegularSpeakers << " => " << m_id[lspId] << '\n';
           m_reRoutingCoeff( i - numRegularSpeakers, m_id[lspId] ) = efl::dB2linear( gainDB );
         }
         /**************print rerouting matrix*******************/
@@ -536,6 +562,7 @@ namespace visr
       }
       // The checks above (all speaker indices are between 1 and numTotalSpeakers && the indices are unique) are 
       // sufficient to ensure that the speaker indices are consecutive.
+
 
       // parse the triplet config
       auto const  tripletNodes = treeRoot.equal_range( "triplet" );
@@ -697,11 +724,11 @@ namespace visr
       return *mOutputEqs;
     }
 
-    LoudspeakerArray::LoudspeakerIndexType
-    LoudspeakerArray::getLoudspeakerIndex( std::size_t arrayIndex ) const
+    /*LoudspeakerArray::LoudspeakerIndexType
+   LoudspeakerArray::getLoudspeakerIndex( std::size_t arrayIndex ) const
     {
       return static_cast<LoudspeakerIndexType>(arrayIndex + 1);
-    }
+    }*/
 
   } // namespace panning
 } // namespace visr
