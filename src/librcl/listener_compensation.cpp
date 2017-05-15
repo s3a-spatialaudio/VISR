@@ -1,7 +1,7 @@
 //
 //  LoudspeakerArray.h
 //
-//  Created by Marcos F. Simón Gálvez on 02/02/2015.
+//  Created by Marcos F. Simï¿½n Gï¿½lvez on 02/02/2015.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
@@ -47,6 +47,9 @@ namespace rcl
   : AtomicComponent( context, name, parent )
   , m_listenerPos( 0.0f, 0.0f, 0.0f )
   , mNumberOfLoudspeakers( 0 )
+  , mPositionInput( "positionInput", *this, pml::EmptyParameterConfig() )
+  , mGainOutput( "gainOutput", *this )
+  , mDelayOutput( "delayOutput", *this)
 {
 }
 
@@ -57,41 +60,45 @@ void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig 
 
   pml::VectorParameterConfig const vectorConfig( mNumberOfLoudspeakers );
 
-  mPositionInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::ListenerPosition >
-    ( "positionInput", *this, pml::EmptyParameterConfig() ) );
-  mGainOutput.reset( new ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "gainOutput", *this, vectorConfig) );
-  mDelayOutput.reset( new ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> >( "delayOutput", *this, vectorConfig ) );
+  mGainOutput.setParameterConfig( vectorConfig );
+  mDelayOutput.setParameterConfig( vectorConfig );
 }
 
 void ListenerCompensation::process()
 {
-  pml::ListenerPosition const & pos( mPositionInput->data());
-  efl::BasicVector<SampleType> & gains( mGainOutput->data());
-  efl::BasicVector<SampleType> & delays( mDelayOutput->data());
+  if( mPositionInput.changed() )
+  {
+    pml::ListenerPosition const & pos( mPositionInput.data());
+    efl::BasicVector<SampleType> & gains( mGainOutput.data());
+    efl::BasicVector<SampleType> & delays( mDelayOutput.data());
 
-  if (gains.size() != mNumberOfLoudspeakers or delays.size() != mNumberOfLoudspeakers)
-  {
-    throw std::invalid_argument("ListenerCompensation::process(): The size of the gain or delay vector does not match the number of loudspeaker channels.");
-  }
+    if (gains.size() != mNumberOfLoudspeakers or delays.size() != mNumberOfLoudspeakers)
+    {
+      throw std::invalid_argument("ListenerCompensation::process(): The size of the gain or delay vector does not match the number of loudspeaker channels.");
+    }
 
-  // At the moment, the gains are computed in every cycle.
-  setListenerPosition(pos.x(), pos.y(), pos.z());
-  if( calcGainComp( gains ) != 0 )
-  {
-    throw std::runtime_error("ListenerCompensation::process(): calcGainComp() failed.");
-  }
-  if (calcDelayComp( delays ) != 0)
-  {
-    throw std::runtime_error("ListenerCompensation::process(): calcDelayComp() failed.");
-  }
+    setListenerPosition(pos.x(), pos.y(), pos.z());
+    if( calcGainComp( gains ) != 0 )
+    {
+      throw std::runtime_error("ListenerCompensation::process(): calcGainComp() failed.");
+    }
+    if (calcDelayComp( delays ) != 0)
+    {
+      throw std::runtime_error("ListenerCompensation::process(): calcDelayComp() failed.");
+    }
 
 #ifdef DEBUG_LISTENER_COMPENSATION
-  std::cout << "DelayVector Source Gain: ";
-  std::copy( gains.data(), gains.data()+gains.size(), std::ostream_iterator<float>(std::cout, " ") );
-  std::cout << "Delay [s]: ";
-  std::copy( delays.data(), delays.data()+delays.size(), std::ostream_iterator<float>(std::cout, " ") );
-  std::cout << std::endl;
+    std::cout << "DelayVector Source Gain: ";
+    std::copy( gains.data(), gains.data()+gains.size(), std::ostream_iterator<float>(std::cout, " ") );
+    std::cout << "Delay [s]: ";
+    std::copy( delays.data(), delays.data()+delays.size(), std::ostream_iterator<float>(std::cout, " ") );
+    std::cout << std::endl;
 #endif // DEBUG_LISTENER_COMPENSATION
+
+    mPositionInput.resetChanged();
+    mGainOutput.swapBuffers();
+    mDelayOutput.swapBuffers();
+  }
 }
 
 int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )
