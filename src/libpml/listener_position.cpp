@@ -28,6 +28,38 @@ ListenerPosition::~ListenerPosition()
 {
 }
 
+void ListenerPosition::set( float newX, float newY, float newZ /*= 0.0f*/ )
+{
+  mX = newX;
+  mY = newY;
+  mZ = newZ;
+}
+
+void ListenerPosition::setX( float newX )
+{
+  mX = newX;
+}
+
+void ListenerPosition::setY( float newY )
+{
+  mY = newY;
+}
+
+void ListenerPosition::setZ( float newZ )
+{
+  mZ = newZ;
+}
+
+void ListenerPosition::setTimeNs( TimeType timeNs )
+{
+  mTimeNs = timeNs;
+}
+
+void ListenerPosition::setFaceID( IdType faceID )
+{
+  mFaceID = faceID;
+}
+
 void ListenerPosition::parse(std::istream &  inputStream)
 {
   namespace pt = boost::property_tree;
