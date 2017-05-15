@@ -10,32 +10,41 @@
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
+#include <librcl/channel_object_routing_calculator.hpp>
 #include <librcl/delay_vector.hpp>
 #include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
+#include <librcl/gain_vector.hpp>
+#include <librcl/hoa_allrad_gain_calculator.hpp>
 #include <librcl/listener_compensation.hpp>
+#include <librcl/object_gain_eq_calculator.hpp>
 #include <librcl/null_source.hpp>
 #include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
-#include <librcl/scene_decoder.hpp>
 #include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
-#include <librcl/udp_receiver.hpp>
 
-#include <libefl/basic_matrix.hpp>
+//#include <libefl/basic_matrix.hpp>
 
 #include <libpml/listener_position.hpp>
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/object_vector.hpp>
 
-#include <libobjectmodel/object_vector.hpp>
+//#include <libobjectmodel/object_vector.hpp>
 
 #include <memory>
 #include <string>
 
 namespace visr
 {
+
+// Forward declarations
+namespace rsao
+{
+class ReverbObjectRenderer;
+}
+
 namespace signalflows
 {
 
@@ -73,7 +82,10 @@ public:
                          std::size_t numberOfOutputs,
                          std::size_t interpolationPeriod,
                          efl::BasicMatrix<SampleType> const & diffusionFilters,
-                         std::string const & trackingConfiguration );
+                         std::string const & trackingConfiguration,
+                         std::size_t numberOfObjectEqSections,
+                         std::string const & reverbConfig,
+                         bool frequencyDependentPanning );
 
   ~CoreRenderer();
 
@@ -82,7 +94,7 @@ private:
 
   AudioOutput mLoudspeakerOutput;
 
-  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
+  ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
 
   /**
    * Parameter input for the listener position.
@@ -90,11 +102,27 @@ private:
    */
   std::unique_ptr<ParameterInput< pml::MessageQueueProtocol, pml::ListenerPosition > > mListenerPositionPort;
 
-  efl::BasicMatrix<SampleType> const & mDiffusionFilters;
+
+  rcl::ObjectGainEqCalculator mObjectInputGainEqCalculator;
+
+  /**
+   * Apply the 'level' setting of the object.
+   * @note This signal flow assumes that each signal input is used only by a single object. Otherwise the settings would
+   * be overwritten
+   */
+  rcl::GainVector mObjectGain;
+
+  rcl::BiquadIirFilter mObjectEq;
+
+  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
+
+  rcl::SignalRouting mChannelObjectRouting;
 
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningCalculator mGainCalculator;
+
+  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
@@ -121,14 +149,29 @@ private:
    */
   //@{
 
+  using TrackingPositionInput = ParameterInput< pml::DoubleBufferingProtocol, pml::ListenerPosition >;
+
+  std::unique_ptr<TrackingPositionInput> mTrackingPositionInput;
+
   std::unique_ptr<rcl::ListenerCompensation> mListenerCompensation;
 
-  std::unique_ptr<rcl::DelayVector>  mSpeakerCompensation;
+  std::unique_ptr<rcl::DelayVector> mListenerGainDelayCompensation;
 
-  std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
   //@}
 
+
+  std::unique_ptr<rsao::ReverbObjectRenderer> mReverbRenderer;
+
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
+
+  /**
+   * Preliminary support for low-frequency adaptive panning.
+   */
+  //@{
+  std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
+
+  std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
+  //@}
 };
 
 } // namespace signalflows
