@@ -61,9 +61,10 @@ void HoaAllRadGainCalculator::setup( panning::LoudspeakerArray const & regularAr
   mRegularDecodeMatrix.resize( numHarmonicSignals, numRegularSpeakers );
   mRegularDecodeMatrix.copy( decodeMatrix );
 
+#if 0
   mVbapCalculator.setLoudspeakerArray( &mRealSpeakerArray );
   mVbapCalculator.setNumSources( static_cast<int>(numRegularSpeakers) );
-
+#endif
   mAllRadCalculator.reset( new panning::AllRAD(&mRegularSpeakerArray, mRegularDecodeMatrix, static_cast<int>(hoaOrder) ) );
 
   // set the default initial listener position. 
@@ -73,7 +74,9 @@ void HoaAllRadGainCalculator::setup( panning::LoudspeakerArray const & regularAr
 
 void HoaAllRadGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
+#if 0
   mVbapCalculator.setListenerPosition( x, y, z );
+#endif
   precalculate();
 }
 
@@ -84,11 +87,13 @@ void HoaAllRadGainCalculator::setListenerPosition( pml::ListenerPosition const &
 
 void HoaAllRadGainCalculator::precalculate()
 {
+#if 0
   if( mVbapCalculator.calcInvMatrices( ) != 0 )
   {
     throw std::invalid_argument( "HoaAllRadGainCalculator::setup(): Calculation of inverse matrices failed." );
   }
   mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
+#endif
 }
 
 void HoaAllRadGainCalculator::process()
