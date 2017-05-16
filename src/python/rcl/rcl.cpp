@@ -1,10 +1,22 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include "add.hpp"
-#include "delay_vector.hpp"
-
 #include <pybind11/pybind11.h>
+
+// Forward declarations
+namespace visr
+{
+namespace python
+{
+namespace rcl
+{
+  void exportAdd( pybind11::module & m );
+  void exportDelayVector( pybind11::module & m );
+  void exportFirFilterMatrix( pybind11::module & m );
+  void exportPanningCalculator( pybind11::module & m );
+}
+}
+}
 
 PYBIND11_PLUGIN(rcl)
 {
@@ -16,5 +28,7 @@ PYBIND11_PLUGIN(rcl)
   using namespace visr::python::rcl;
   exportAdd( m );
   exportDelayVector( m );
+  exportFirFilterMatrix( m );
+  exportPanningCalculator( m );
   return m.ptr();
 }

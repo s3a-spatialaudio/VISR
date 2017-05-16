@@ -24,8 +24,9 @@
 
 #include <libpanning/LoudspeakerArray.h>
 #include <libpanning/VBAP.h>
-#include <libpanning/XYZ.h>
+//#include <libpanning/XYZ.h>
 
+#include <memory>
 #include <vector>
 
 namespace visr
@@ -101,15 +102,21 @@ private:
 
   std::size_t mNumberOfPanningLoudspeakers;
 
-  /**
-   * A vector to hold the source position data.
-   */
-  std::vector<panning::XYZ> mSourcePositions;
+  ///**
+  // * A vector to hold the source position data.
+  // */
+  //std::vector<panning::XYZ> mSourcePositions;
 
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  panning::VBAP mVbapCalculator;
+  std::unique_ptr<panning::VBAP> mVbapCalculator;
+
+  /**
+   * Temporary data buffer for returning the calculated panning gains.
+   * Size: mNumberOfPanningSpeakers
+   */
+  mutable efl::BasicVector<SampleType> mTmpPanningGains;
 
   /**
    * An object holding sensible default values for the late reverb part that

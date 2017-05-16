@@ -94,12 +94,7 @@ void GainMatrix<ElementType>::process( ElementType const * const * input, Elemen
     throw std::invalid_argument( "GainMatrix::process(): Dimension of new gain matrix does not match." );
   }
   setGainsInternal( newGains );
-  processAudio( input, output );
-  // advance the interpolation counter
-  if( mInterpolationCounter < mInterpolationPeriods )
-  {
-    ++mInterpolationCounter;
-  }
+  process( input, output );
 }
 
 template< typename ElementType >
@@ -122,7 +117,7 @@ void GainMatrix<ElementType>::processAudio( ElementType const * const * input, E
   // since all contained elements are created with the same alignment, we can use this one.
   std::size_t const alignElements = mRamp.alignmentElements();
 
-  // choice: Update the interpolation conter at the end
+  // choice: Update the interpolation counter at the end
   for( std::size_t outputIdx( 0 ); outputIdx < numOutputs; ++outputIdx )
   {
     ElementType * const outVector = output[outputIdx];

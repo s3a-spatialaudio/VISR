@@ -17,8 +17,6 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
-
-
 #include <memory>
 #include <valarray>
 #include <vector>
@@ -152,64 +150,21 @@ private:
    */
   std::size_t mVectorDimension;
 
-  efl::BasicMatrix<CoefficientType> mSourceCoordinates;
-
   efl::BasicMatrix<CoefficientType> mLoudspeakerPositions;
-
-  efl::BasicMatrix<CoefficientType> mPolygonCenters;
-
-  /**
-   * Describe the polygons within the
-   */
-  //@{
-  std::vector<LoudspeakerIndexType> mPolygonIndices;
-
-  std::vector<std::size_t> mPolygonStartOffsets;
-
-
-  std::size_t numberOfPolygons() const;
-
-  std::size_t tripletStartIndex( std::size_t polygonIdx ) const;
-
-  std::size_t tripletEndIndex( std::size_t polygonIdx ) const;
-
-  std::size_t verticesInPolgon( std::size_t polygonIdx ) const;
-
-  LoudspeakerIndexType polygonVertex( std::size_t polygonIdx, std::size_t vertexIndex ) const;
-
-  LoudspeakerIndexType const & polygonVertices( std::size_t polygonIdx ) const;
-  //@}
-
-  efl::BasicVector<CoefficientType> mLoudspeakerDotProducts;
-
-#if 1
-  /**
-   * The loudspeaker array configuration.
-   * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
-   * we make a copy of the reference passed to setup method.
-   */
-  panning::LoudspeakerArray mSpeakerArray;
-  
-  /**
-   * A vector to hold the source position data.
-   * @todo: replace this by a variable-sized vector;
-   */
-  std::vector<panning::XYZ> mSourcePositions;
 
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  panning::VBAP mVbapCalculator;
+  std::unique_ptr<panning::VBAP> mVbapCalculator;
   
   /**
-   * The levels of the object channels in linear scale.
+   * Temporary storage for the computed panning gains of one source.
+   * Dimension: mNumberOfRegularLoudspeakers
    */
-  std::valarray<objectmodel::LevelType> mLevels;
-  //@}
-#endif
+  mutable efl::BasicVector<SampleType> mTmpGains;
 
   /**
-   * Data type of the parmaeter ports for outgoing matrix data.
+   * Data type of the parameter ports for outgoing matrix data.
    */
   using ListenerPositionPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
   using ObjectPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector >;

@@ -33,7 +33,8 @@ BunchRenderer::BunchRenderer( SignalFlowContext const & context,
  , mSceneDecoder( context, "SceneDecoder", this )
  , mCoreRenderer( context, "CoreRenderer", this,
      loudspeakerConfiguration, numberOfInputs, numberOfOutputs,
-     interpolationPeriod, diffusionFilters, trackingConfiguration )
+     interpolationPeriod, diffusionFilters, trackingConfiguration,
+     0, reverbConfig, false )
  , mInput( "input", *this )
  , mOutput( "output", *this )
 {

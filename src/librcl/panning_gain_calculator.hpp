@@ -126,22 +126,29 @@ private:
    */
   panning::LoudspeakerArray mSpeakerArray;
   
-  /**
-   * A vector to hold the source position data.
-   * @todo: replace this by a variable-sized vector;
-   */
-  std::vector<panning::XYZ> mSourcePositions;
+  ///**
+  // * A vector to hold the source position data.
+  // * @todo: replace this by a variable-sized vector;
+  // */
+  //std::vector<panning::XYZ> mSourcePositions;
 
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  panning::VBAP mVbapCalculator;
-  
+  std::unique_ptr<panning::VBAP> mVbapCalculator;
+
   /**
-   * The levels of the object channels in linear scale.
+   * Temporarily used vector for holding the calculated panning gains.
+   * This data member is necessary because the panning gains are not stored contigously in the output vector, 
+   * but as a column in a row-major matrix. This layout results from the shape GainMatrix operation and should not be touched.
    */
-  std::valarray<objectmodel::LevelType> mLevels;
-  //@}
+  mutable efl::BasicVector<SampleType> mTmpGains;
+
+  ///**
+  // * The levels of the object channels in linear scale.
+  // */
+  //std::valarray<objectmodel::LevelType> mLevels;
+  ////@}
 
   /**
    * Data type of the parmaeter ports for outgoing matrix data.

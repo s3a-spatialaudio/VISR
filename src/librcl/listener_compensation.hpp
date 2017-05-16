@@ -1,7 +1,7 @@
 //
 //  LoudspeakerArray.h
 //
-//  Created by Marcos F. Simón Gálvez on 02/02/2015.
+//  Created by Marcos F. Simï¿½n Gï¿½lvez on 02/02/2015.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
@@ -22,9 +22,9 @@
 
 #include <libefl/basic_vector.hpp>
 
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/listener_position.hpp>
 #include <libpml/vector_parameter.hpp>
-#include <libpml/shared_data_protocol.hpp>
 
 //#include <iostream>
 // #include <cstdio>
@@ -94,9 +94,9 @@ private:
   panning::XYZ m_listenerPos; //position of the listener
   std::size_t mNumberOfLoudspeakers;
 
-  std::unique_ptr<  ParameterInput<pml::SharedDataProtocol, pml::ListenerPosition > > mPositionInput;
-  std::unique_ptr< ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mGainOutput;
-  std::unique_ptr< ParameterOutput<pml::SharedDataProtocol, pml::VectorParameter<Afloat> > > mDelayOutput;
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionInput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<Afloat> > mGainOutput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<Afloat> > mDelayOutput;
 };//class Listener Compensation
 
 

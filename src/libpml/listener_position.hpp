@@ -58,9 +58,19 @@ public:
   float y() const { return mY; }
   float z() const { return mZ; }
 
+  void set( float newX, float newY, float newZ = 0.0f );
+
+  void setX( float newX );
+  void setY( float newY );
+  void setZ( float newZ );
+
   TimeType timeNs() const { return mTimeNs; }
 
+  void setTimeNs( TimeType timeNs );
+
   IdType faceID() const { return mFaceID; }
+
+  void setFaceID( IdType faceID );
 
 private:
   float mX;

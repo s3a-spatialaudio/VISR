@@ -20,6 +20,7 @@ namespace python
 namespace pml
 {
 void exportEmptyParameterConfig( pybind11::module & m );
+void exportFilterRoutingParameter( pybind11::module & m );
 void exportIndexedValueParameters( pybind11::module & m );
 }
 }
@@ -41,6 +42,7 @@ PYBIND11_PLUGIN( pml )
   exportMessageQueueProtocol( m );
 
   exportEmptyParameterConfig( m );
+  exportFilterRoutingParameter( m );
   exportIndexedValueParameters( m );
   exportListenerPosition( m );
   exportMatrixParameters( m);
