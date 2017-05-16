@@ -88,6 +88,26 @@ public:
   void process() override;
 
 private:
+  void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+                           efl::BasicVector<SampleType> & discreteReflGains,
+                           efl::BasicVector<SampleType> & discreteReflDelays,
+                           pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
+                           efl::BasicMatrix<SampleType> & discretePanningMatrix,
+                           efl::BasicVector<SampleType> & lateReverbGains,
+                           efl::BasicVector<SampleType> & lateReverbDelays );
+
+  /**
+   * Set the data members for given reverb object channel to safe, neutral values such that no sound is rendered.
+   * Used if a render channels is unused.
+   */
+  void clearSingleObject( std::size_t renderChannel,
+                         efl::BasicVector<SampleType> & discreteReflGains,
+                         efl::BasicVector<SampleType> & discreteReflDelays,
+                         pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
+                         efl::BasicMatrix<SampleType> & discretePanningMatrix,
+                         efl::BasicVector<SampleType> & lateReverbGains,
+                         efl::BasicVector<SampleType> & lateReverbDelays );
+
   std::unique_ptr<rbbl::ObjectChannelAllocator> mChannelAllocator;
 
   /**
@@ -102,21 +122,10 @@ private:
 
   std::size_t mNumberOfPanningLoudspeakers;
 
-  ///**
-  // * A vector to hold the source position data.
-  // */
-  //std::vector<panning::XYZ> mSourcePositions;
-
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
   std::unique_ptr<panning::VBAP> mVbapCalculator;
-
-  /**
-   * Temporary data buffer for returning the calculated panning gains.
-   * Size: mNumberOfPanningSpeakers
-   */
-  mutable efl::BasicVector<SampleType> mTmpPanningGains;
 
   /**
    * An object holding sensible default values for the late reverb part that
@@ -136,28 +145,6 @@ private:
    */
   SampleType const cLateReverbParameterComparisonLimit;
 
-  void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
-                            efl::BasicVector<SampleType> & discreteReflGains,
-                            efl::BasicVector<SampleType> & discreteReflDelays,
-                            pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
-                            efl::BasicMatrix<SampleType> & discretePanningMatrix,
-                            efl::BasicVector<SampleType> & lateReverbGains,
-                            efl::BasicVector<SampleType> & lateReverbDelays );
-
-  // void processInternal( objectmodel::ObjectVector const & objects );
-
-/**
-* Set the data members for given reverb object channel to safe, neutral values such that no sound is rendered.
-* Used if a render channels is unused.
-*/
-  void clearSingleObject( std::size_t renderChannel,
-                          efl::BasicVector<SampleType> & discreteReflGains,
-                          efl::BasicVector<SampleType> & discreteReflDelays,
-                          pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
-                          efl::BasicMatrix<SampleType> & discretePanningMatrix,
-                          efl::BasicVector<SampleType> & lateReverbGains,
-                          efl::BasicVector<SampleType> & lateReverbDelays );
-
   ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectInput;
   ParameterOutput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mSignalRoutingOutput;
   ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mDiscreteReflectionGainOutput;
@@ -167,6 +154,12 @@ private:
   ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mLateReflectionGainOutput;
   ParameterOutput< pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > mLateReflectionDelayOutput;
   ParameterOutput< pml::MessageQueueProtocol, LateReverbParameter > mLateSubbandOutput;
+
+  /**
+   * Temporary data buffer for returning the calculated panning gains.
+   * Size: mNumberOfPanningSpeakers
+   */
+  mutable efl::BasicVector<SampleType> mTmpPanningGains;
 };
 
 } // namespace rsao
