@@ -47,9 +47,6 @@ private:
   AudioNetworkEncoder mEncoder;
 
   std::vector< std::unique_ptr<rcl::UdpSender> > mSenders;
-
-  std::size_t mNumberOfSignals;
-
 };
 
 } // namespace audio_network_streamer
