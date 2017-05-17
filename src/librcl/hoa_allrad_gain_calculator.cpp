@@ -87,12 +87,13 @@ void HoaAllRadGainCalculator::setListenerPosition( pml::ListenerPosition const &
 // Not necessary anymore i
 void HoaAllRadGainCalculator::precalculate()
 {
-//
-//  if( mVbapCalculator.calcInvMatrices( ) != 0 )
-//  {
-//    throw std::invalid_argument( "HoaAllRadGainCalculator::setup(): Calculation of inverse matrices failed." );
-//  }
-//  mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
+#if 0
+  if( mVbapCalculator.calcInvMatrices( ) != 0 )
+  {
+    throw std::invalid_argument( "HoaAllRadGainCalculator::setup(): Calculation of inverse matrices failed." );
+  }
+  mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
+#endif
 }
 
 void HoaAllRadGainCalculator::process()

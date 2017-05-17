@@ -132,11 +132,14 @@ private:
 //   */
 //  panning::LoudspeakerArray mRegularSpeakerArray;
 
+// Temporality disabled for refactoring.
+#if 0
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-//  panning::VBAP mVbapCalculator;
-  
+  panning::VBAP mVbapCalculator;
+#endif
+
   std::unique_ptr<panning::AllRAD> mAllRadCalculator;
 
   efl::BasicMatrix<Afloat> mRealDecodeMatrix;
