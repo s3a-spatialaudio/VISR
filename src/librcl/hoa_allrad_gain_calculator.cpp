@@ -37,15 +37,13 @@ HoaAllRadGainCalculator::~HoaAllRadGainCalculator()
 {
 }
 
-void HoaAllRadGainCalculator::setup( panning::LoudspeakerArray const & regularArrayConfig,
+void HoaAllRadGainCalculator::setup( std::size_t numberOfObjectChannels,
+                                     panning::LoudspeakerArray const & regularArrayConfig,
                                      panning::LoudspeakerArray const & realArrayConfig,
                                      efl::BasicMatrix<Afloat> const & decodeMatrix,
                                      pml::ListenerPosition const & listenerPosition /*= pml::ListenerPosition()*/ )
 {
-  mRegularSpeakerArray = regularArrayConfig;
-  mRealSpeakerArray = realArrayConfig;
-
-  std::size_t const numRegularSpeakers = mRegularSpeakerArray.getNumSpeakers( );
+  std::size_t const numRegularSpeakers = regularArrayConfig.getNumSpeakers( );
   std::size_t const numHarmonicSignals = decodeMatrix.numberOfRows();
   // Deduce the Ambisonics order from the number of harmonic signals
   std::size_t const hoaOrder = static_cast<std::size_t>(std::ceil( std::sqrt( numHarmonicSignals ) ))-1;
@@ -61,20 +59,24 @@ void HoaAllRadGainCalculator::setup( panning::LoudspeakerArray const & regularAr
   mRegularDecodeMatrix.resize( numHarmonicSignals, numRegularSpeakers );
   mRegularDecodeMatrix.copy( decodeMatrix );
 
-  mVbapCalculator.setLoudspeakerArray( &mRealSpeakerArray );
-  mVbapCalculator.setNumSources( static_cast<int>(numRegularSpeakers) );
+  mAllRadCalculator.reset( new panning::AllRAD( regularArrayConfig,
+                                                realArrayConfig,
+                                                mRegularDecodeMatrix,
+                                                hoaOrder ) );
 
-  mAllRadCalculator.reset( new panning::AllRAD(&mRegularSpeakerArray, mRegularDecodeMatrix, static_cast<int>(hoaOrder) ) );
+
+  mRealDecodeMatrix.resize( numHarmonicSignals, realArrayConfig.getNumRegularSpeakers() );
 
   // set the default initial listener position. 
   // This also initialises the internal data members (e.g., the VBAP calculator and the calculation of the VBAP decode matrix)
   setListenerPosition( listenerPosition );
+
 }
 
 void HoaAllRadGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
-  mVbapCalculator.setListenerPosition( x, y, z );
-  precalculate();
+  mAllRadCalculator->setListenerPosition( x, y, z );
+  precalculate(); // Required anymore?
 }
 
 void HoaAllRadGainCalculator::setListenerPosition( pml::ListenerPosition const & pos )
@@ -82,13 +84,15 @@ void HoaAllRadGainCalculator::setListenerPosition( pml::ListenerPosition const &
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
 
+// Not necessary anymore i
 void HoaAllRadGainCalculator::precalculate()
 {
-  if( mVbapCalculator.calcInvMatrices( ) != 0 )
-  {
-    throw std::invalid_argument( "HoaAllRadGainCalculator::setup(): Calculation of inverse matrices failed." );
-  }
-  mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
+//
+//  if( mVbapCalculator.calcInvMatrices( ) != 0 )
+//  {
+//    throw std::invalid_argument( "HoaAllRadGainCalculator::setup(): Calculation of inverse matrices failed." );
+//  }
+//  mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
 }
 
 void HoaAllRadGainCalculator::process()
@@ -101,18 +105,12 @@ void HoaAllRadGainCalculator::process( objectmodel::ObjectVector const & objects
   std::size_t const numRealSpeakers = gainMatrix.numberOfRows();
   std::size_t const numChannels = gainMatrix.numberOfColumns();
 
-  if( numRealSpeakers != mRealSpeakerArray.getNumRegularSpeakers() )
-  {
-    throw std::invalid_argument( "HoaAllRadGainCalculator::process(): The size of the gain matrix does not match the number of real loudspeakers." );
-  }
-  // Do not reset the gain matrix, as we will write on top of the standard VBAP source gains.
-
-  efl::BasicMatrix<Afloat> const & decodeGains = mAllRadCalculator->getDecodeGains();
+  efl::BasicMatrix<Afloat> const & decodeGains = mAllRadCalculator->decodingGains();
   // NOTE: Currently, the gain matrix returned by the AllRAD object
   // also contains the gains of the imaginary speakers.
   // TODO: Reconsider the design of the VBAP objects to hide these
   // speakers from the outside.
-  assert( decodeGains.numberOfRows() >= numRealSpeakers );
+  // assert( decodeGains.numberOfRows() >= numRealSpeakers );
 
   // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
   // Any potential re-routing will be added later.

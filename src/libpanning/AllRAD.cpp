@@ -20,28 +20,22 @@ namespace visr
 namespace panning
 {
 
-AllRAD::AllRAD()
- : m_regDecode( 0 )
- , m_decode( 0 )
- , m_nHarms( 0 )
- , m_nSpkSources( 0 )
-    , m_regArray( 0 )
+AllRAD::AllRAD(LoudspeakerArray const & regularArray,
+               LoudspeakerArray const & realArray,
+               efl::BasicMatrix<Afloat> const & decodeCoeffs,
+               unsigned int maxHoaOrder )
+ : mRegularDecoder( regularArray )
+ , mRealDecoder( realArray )
+ , mRegularDecodeCoefficients( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
+ , mRealDecodeCoefficients( mNumberOfHarmonics, realArray.getNumRegularSpeakers(), decodeCoeffs.alignmentElements() )
+ , mNumberOfHarmonics( (maxHoaOrder + 1) * (maxHoaOrder + 1) )
+ , mRegularArraySize( regularArray.getNumSpeakers( ) )
 {
+  mRegularDecodeCoefficients.copy( decodeCoeffs );
+  updateDecodingCoefficients();
 }
 
-AllRAD::AllRAD( LoudspeakerArray const * regularArray,
-                efl::BasicMatrix<Afloat> const & decodeCoeffs,
-                unsigned int hoaOrder )
- // Note: No copy construction of BasicMatrix objects, so we copy afterwards.
- : m_regDecode( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
- , m_decode( decodeCoeffs.alignmentElements() ) // The required size of this matrix is not known yet (see below)
- , m_nHarms( (hoaOrder + 1) * (hoaOrder + 1) )
- , m_nSpkSources( regularArray->getNumSpeakers( ) )
- , m_regArray( regularArray )
-{
-  m_regDecode.copy( decodeCoeffs );
-}
-
+#if 0
 int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
     
     int const nHarms = (order+1)*(order+1);
@@ -63,11 +57,26 @@ int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
     
     return 0;
 }
+#endif
+
+void AllRAD::setListenerPosition( SampleType x, SampleType y, SampleType z )
+{
+  mRealDecoder.setListenerPosition( x, y, z );
+  updateDecodingCoefficients();
+}
+
+void AllRAD::setListenerPosition( XYZ const & newPosition )
+{
+  setListenerPosition( newPosition.x, newPosition.y, newPosition.z );
+}
 
 
+void AllRAD::updateDecodingCoefficients()
+{
 
+}
 
-
+#if 0
 int AllRAD::calcDecodeGains(VBAP* vbap){
     
     // In vbap first do externally: setListenerPosition, then calcInvMatrix.
@@ -105,6 +114,7 @@ int AllRAD::calcDecodeGains(VBAP* vbap){
 #endif
     return 0;
 }
+#endif
 
 } // namespace panning
 } // namespace visr

@@ -13,7 +13,9 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
 
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/listener_position.hpp>
+#include <libpml/matrix_parameter.hpp>
 
 #include <vector>
 
@@ -67,21 +69,25 @@ public:
 
   /**
    * Method to initialise the component.
+   * @param numberOfObjectChannels The totl number of object signal channels. Basically this defines the size of the gain matrices processed.
    * @param regularArrayConfig The array configuration object for the virtual, regular array used for decoding the HOA signals.
    * @param realArrayConfig The array configuration object for the real, physical array to which the soundfield is panned.
    * @param decodeMatrix Matrix coefficients for decoding the HOA signals to the regular, virtual array. Dimension (hoaOrder+1)^2 x number of regular loudspeakers.
    * The row dimension determines the (maximum) HOA order and must be a square number.
    * @param listenerPosition The initial listener position used for VBAP panning. Optional argument, default is (0,0,0).
    */
-  void setup( panning::LoudspeakerArray const & regularArrayConfig,
+  void setup( std::size_t numberOfObjectChannels,
+              panning::LoudspeakerArray const & regularArrayConfig,
               panning::LoudspeakerArray const & realArrayConfig,
               efl::BasicMatrix<Afloat> const & decodeMatrix, 
               pml::ListenerPosition const & listenerPosition = pml::ListenerPosition() );
 
   void process() override;
 
+private:
+
   /**
-   * The process function. 
+   * Internal process function.
    * It takes a vector of objects as input and calculates a vector of output gains.
    */
   void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
@@ -108,7 +114,6 @@ public:
   */
   void setListenerPosition( pml::ListenerPosition const & pos );
 
-private:
   /**
    * Implementation method to update the internal state.
    * Must be called after one of the loudspeaker arrays or the listener position has changed.
@@ -119,26 +124,31 @@ private:
    * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
    * we make a copy of the reference passed to the setup method.
    */
-  panning::LoudspeakerArray mRealSpeakerArray;
-  
-  /**
-   * The physical loudspeaker array configuration.
-   * Local copy of the array configuration passed to the setup() method.
-   */
-  panning::LoudspeakerArray mRegularSpeakerArray;
+//  panning::LoudspeakerArray mRealSpeakerArray;
+//
+//  /**
+//   * The physical loudspeaker array configuration.
+//   * Local copy of the array configuration passed to the setup() method.
+//   */
+//  panning::LoudspeakerArray mRegularSpeakerArray;
 
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  panning::VBAP mVbapCalculator;
+//  panning::VBAP mVbapCalculator;
   
   std::unique_ptr<panning::AllRAD> mAllRadCalculator;
+
+  efl::BasicMatrix<Afloat> mRealDecodeMatrix;
 
   /**
    * Decoding matrix from HOA signal components to the loudspeakers of the (virtual) regular array.
    * Dimension: #HOA signal components * # loudspeakers in the virtual array.
    */
   efl::BasicMatrix<Afloat> mRegularDecodeMatrix;
+
+
+
 };
 
 } // namespace rcl
