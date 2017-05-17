@@ -187,7 +187,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     ;
   pml::MatrixParameter<Afloat> const allRadDecoderGains
     = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
-  mAllradGainCalculator.setup( allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
+  mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
 
   //////////////////////////////////////////////////////////////////////////////////////
 

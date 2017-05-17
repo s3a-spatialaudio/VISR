@@ -5,6 +5,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <vector>
+
 namespace visr
 {
 using panning::LoudspeakerArray;
@@ -13,6 +15,23 @@ namespace python
 {
 namespace panning
 {
+
+namespace
+{
+
+/** Internal function to create the array of channel indices */
+std::vector<LoudspeakerArray::ChannelIndex> getChannelIndices( LoudspeakerArray const & array)
+{
+  std::vector<LoudspeakerArray::ChannelIndex> ret( array.getNumRegularSpeakers() );
+  for( std::size_t chIdx(0); chIdx < ret.size(); ++chIdx )
+  {
+    ret[chIdx] = array.channelIndex( chIdx );
+  }
+  return ret;
+}
+
+}
+
 void exportLoudspeakerArray( pybind11::module & m)
 {
 	pybind11::class_<LoudspeakerArray>(m, "LoudspeakerArray")
@@ -52,7 +71,9 @@ void exportLoudspeakerArray( pybind11::module & m)
 		.def("getDelayAdjustments", &LoudspeakerArray::getDelayAdjustment)
 		.def("isOutputEqualisationPresent", &LoudspeakerArray::outputEqualisationPresent)
 		.def("outputEqualisationNumberOfBiquads", &LoudspeakerArray::outputEqualisationNumberOfBiquads)
-		.def("outputEqualisationBiquads", &LoudspeakerArray::outputEqualisationBiquads);
+		.def("outputEqualisationBiquads", &LoudspeakerArray::outputEqualisationBiquads)
+        .def( "channelIndices", &getChannelIndices )
+          ;
 }
 } // namepace panning
 } // namespace python
