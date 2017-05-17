@@ -240,6 +240,35 @@ void PanningCalculator::process()
           }
         }
       }
+      if( separateLowpassPanning() ) // If there
+      {
+        // First compute the LF gains by re-normalising to the coherent sound pressure (sum of gains)
+        // In case of nonnegative gains this is equivalent to the l1 norm.
+        // If this cannot be ensured, we need to decide whether we want to normalise for the l1 norm or the sound pressure.
+        SampleType const sum = std::accumulate( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
+                                                static_cast<SampleType>(0.0),
+                                                [](SampleType acc, SampleType val ){ return acc + val; } );
+        SampleType const scaleFactor = static_cast<SampleType>(1.0) / sum;
+        pml::MatrixParameter<SampleType> & lfGains = mLowFrequencyGainOutput->data();
+        for( std::size_t lspIdx(0); lspIdx < mNumberOfRegularLoudspeakers; ++lspIdx )
+        {
+          lfGains( lspIdx, channelId ) = scaleFactor * mTmpGains[lspIdx];
+        }
+
+        // Now compute the VBIP (HF) gains
+        std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
+                       // Safeguard against potentially negative values that would yield NaNs
+                       [](SampleType & val ){ val = std::sqrt( std::min( val, static_cast<SampleType>(0.0) ) ); });
+        // Re-normalise with l2 (power) norm.
+        SampleType const l2Sqr = std::accumulate( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
+                                                  static_cast<SampleType>(0.0),
+                                                  [](SampleType acc, SampleType val ){ return acc + val*val; } );
+        // l2Sqr should be identical to 'sum' provided that the gains are nonnegative.
+        SampleType const l2ScaleFactor = static_cast<SampleType>(1.0)/ std::sqrt(l2Sqr);
+        std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
+                       [l2ScaleFactor](SampleType & val ){ val = l2ScaleFactor * val; } );
+        // Fall through to copy the HF gains
+      }
       //  We need to copy the data explicitly into a matrix column of a row-major matrix.
       efl::ErrorCode const res = efl::vectorCopyStrided( mTmpGains.data(), &gainMatrix( 0, channelId ), 1, gainMatrix.stride(),
                                                          mNumberOfRegularLoudspeakers, 0/*no assumptions about alignment possible*/ );
@@ -248,10 +277,6 @@ void PanningCalculator::process()
         status( StatusMessage::Error, "Error while copying panning gains: ", efl::errorMessage(res) );
         return;
       }
-    }
-    if( separateLowpassPanning() ) // If there
-    {
-
     }
     mObjectVectorInput->resetChanged();
   }
