@@ -14,6 +14,7 @@ PointSource::PointSource( )
  , mXPos( static_cast<Coordinate>(0.0) )
  , mYPos( static_cast<Coordinate>(0.0f) )
  , mZPos( static_cast<Coordinate>(0.0f) )
+ , mChannelLockDistance( static_cast<Coordinate>(cNoChannelLock) )
 {
 }
 
@@ -23,6 +24,7 @@ PointSource::PointSource( ObjectId id )
  , mXPos( static_cast<Coordinate>(0.0) )
  , mYPos( static_cast<Coordinate>(0.0f) )
  , mZPos( static_cast<Coordinate>(0.0f) )
+ , mChannelLockDistance( static_cast<Coordinate>(cNoChannelLock) )
 {
 }
 
@@ -59,8 +61,7 @@ void PointSource::setZ( Coordinate newZ )
 
 /*static*/ const Object::Coordinate PointSource::cAlwaysChannelLock
 = std::numeric_limits<Object::Coordinate>::infinity();
-/*static*/ const Object::Coordinate PointSource::cNoChannelLock
-  = std::numeric_limits<Object::Coordinate>::infinity();
+/*static*/ const Object::Coordinate PointSource::cNoChannelLock = 0.0;
 
 } // namespace objectmodel
 } // namespace visr
