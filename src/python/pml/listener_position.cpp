@@ -1,7 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "listener_position.hpp"
-
 #include <libpml/listener_position.hpp>
 
 #include <pybind11/pybind11.h>

@@ -10,17 +10,11 @@ matrix_parameter.cpp
 message_queue_protocol.cpp
 object_vector.cpp
 pml.cpp
+shared_data_protocol.cpp
 vector_parameter.cpp
 )
 
 set( HEADERS
-double_buffering_protocol.hpp
-empty_parameter_config.hpp
-listener_position.hpp
-matrix_parameter.hpp
-message_queue_protocol.hpp
-object_vector.hpp
-vector_parameter.hpp
 )
 
 set(PROJECT_NAME pmlpython)
@@ -53,4 +47,4 @@ target_link_libraries( ${PROJECT_NAME} pml )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ../python)
+install(TARGETS ${PROJECT_NAME} DESTINATION python)

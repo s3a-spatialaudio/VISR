@@ -1,6 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "object_vector.hpp"
 
 #include <libpml/object_vector.hpp>
 

@@ -1,7 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "double_buffering_protocol.hpp"
-
 #include <libpml/double_buffering_protocol.hpp>
 
 #include <pybind11/pybind11.h>
