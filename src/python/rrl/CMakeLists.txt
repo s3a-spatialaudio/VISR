@@ -44,4 +44,4 @@ target_link_libraries( ${PROJECT_NAME} rrl )
 target_link_libraries( ${PROJECT_NAME} pml ) # Preliminary solution (vulgo 'hack')
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ../python)
+install(TARGETS ${PROJECT_NAME} DESTINATION python)

@@ -62,4 +62,4 @@ target_link_libraries( ${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
 # ??? Correct? THE LIBRARY_OUTPUT_DIRECTORY should be enough for the compilation.
 # Packaging has to be handled specifically.
-# install(TARGETS ${PROJECT_NAME} DESTINATION ../python)
+install(TARGETS ${PROJECT_NAME} DESTINATION python)

@@ -48,4 +48,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PRO
 target_link_libraries( ${PROJECT_NAME} objectmodel ) 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ../python)
+install(TARGETS ${PROJECT_NAME} DESTINATION python)

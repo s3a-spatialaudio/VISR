@@ -40,4 +40,4 @@ target_link_libraries( ${PROJECT_NAME} rcl )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ../python)
+install(TARGETS ${PROJECT_NAME} DESTINATION python)
