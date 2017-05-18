@@ -258,7 +258,7 @@ void PanningCalculator::process()
         // Now compute the VBIP (HF) gains
         std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                        // Safeguard against potentially negative values that would yield NaNs
-                       [](SampleType & val ){ val = std::sqrt( std::min( val, static_cast<SampleType>(0.0) ) ); });
+                       [](SampleType & val ){ val = std::sqrt( std::max( val, static_cast<SampleType>(0.0) ) ); });
         // Re-normalise with l2 (power) norm.
         SampleType const l2Sqr = std::accumulate( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                                                   static_cast<SampleType>(0.0),
