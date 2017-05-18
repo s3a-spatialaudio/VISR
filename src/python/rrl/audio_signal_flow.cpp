@@ -66,7 +66,10 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
     outPtr += outChannelStride;
   }
 
-  flow.process( &inPtrs[0], &outPtrs[0] );
+  SampleType const * const * inPtrBuffer = flow.numberOfCaptureChannels() > 0 ? &inPtrs[0] : nullptr;
+  SampleType * const * outPtrBuffer = flow.numberOfPlaybackChannels() > 0 ? &outPtrs[0] : nullptr;
+
+  flow.process( inPtrBuffer, outPtrBuffer );
 
   return outputSignal;
 }
