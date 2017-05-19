@@ -18,11 +18,15 @@
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
-#include <libefl/basic_vector.hpp>
-
 #include <libril/signal_flow_context.hpp>
+#include <libril/parameter_output.hpp>
 
-#include <libsignalflows/delay_vector.hpp>
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/vector_parameter.hpp>
+
+#include <librcl/delay_vector.hpp>
+
+#include <librrl/audio_signal_flow.hpp>
 
 #include <cstddef>
 #include <limits>
@@ -63,16 +67,23 @@ private:
   rcl::DelayVector::InterpolationType mInterpolationType;
 
   /**
-   * Context object to provide initialisation information and to provide a runt-time interface for the components.
-   * Must be a pointer, as it can be instantiated only in the initiDSP() method.
+   * Context object to provide initialisation information and to provide a run-time interface for the components.
+   * Must be a pointer, as it can be instantiated only in the initDSP() method.
    */
   std::unique_ptr<SignalFlowContext> mContext;
 
-  std::unique_ptr<signalflows::DelayVector> mFlow;
+  std::unique_ptr<rcl::DelayVector> mComp;
+ 
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;
 
-  efl::BasicVector<SampleType> mGains;
-  efl::BasicVector<SampleType> mDelays;
+  std::unique_ptr<rrl::AudioSignalFlow> mFlow;
+
+  using ParameterType = pml::VectorParameter<SampleType>;
+
+  using ParameterPortType = ParameterOutput<pml::DoubleBufferingProtocol, ParameterType >;
+  
+  ParameterPortType* mGainInput;
+  ParameterPortType* mDelayInput;
 };
 
 } // namespace maxmsp

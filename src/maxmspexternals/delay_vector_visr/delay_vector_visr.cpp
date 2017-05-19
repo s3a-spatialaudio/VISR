@@ -19,6 +19,10 @@
 #endif
 #endif
 
+#include <libpml/initialise_parameter_library.hpp>
+
+// Required for Windows to signal that we don't use the Max-provided runtime libraries.
+// @TODO Check whether this is still required with the Max7 SDK
 #define MAXAPI_USE_MSCRT
 #include "ext.h"
 #include "z_dsp.h"
@@ -33,6 +37,16 @@ namespace visr
 {
 namespace maxmsp
 {
+
+class PmlInitialiser
+{
+public:
+  PmlInitialiser()
+  {
+    pml::initialiseParameterLibrary();
+  }
+};
+static PmlInitialiser sPmlInitGuard;
 
 DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
  : ExternalBase( maxProxy )
@@ -58,10 +72,10 @@ DelayVector::DelayVector( t_pxobject & maxProxy, short argc, t_atom *argv )
   float gain = 1.0f;
   atom_arg_getfloat( &gain, 2, argc, argv );
 
-  mGains.resize( mNumberOfChannels );
-  mGains.fillValue( gain );
-  mDelays.resize( mNumberOfChannels );
-  mDelays.fillValue( delay );
+  //mGains.resize( mNumberOfChannels );
+  //mGains.fillValue( gain );
+  //mDelays.resize( mNumberOfChannels );
+  //mDelays.fillValue( delay );
 }
 
 DelayVector::~DelayVector()
@@ -83,10 +97,11 @@ DelayVector::~DelayVector()
   switch( inlet )
   {
   case 0:
-    mDelays.fillValue( static_cast<SampleType>(f) );
     if( mFlow ) // check whether the DSP part has already been initialised
     {
-      mFlow->setDelay( mDelays );
+      pml::VectorParameter<SampleType> & delays  = mDelayInput->data();
+      delays.fillValue( static_cast<float>(f) );
+      mDelayInput->swapBuffers();
     }
     break;
   case 1:
@@ -96,11 +111,9 @@ DelayVector::~DelayVector()
     }
     else
     {
-      mGains.fillValue( static_cast<SampleType>(f) );
-      if( mFlow ) // check whether the DSP part has already been initialised
-      {
-        mFlow->setGain( mGains );
-      }
+      pml::VectorParameter<SampleType> & gains = mGainInput->data();
+      gains.fillValue( static_cast<float>(f) );
+      mGainInput->swapBuffers();
     }
     break;
   default:
@@ -127,10 +140,14 @@ DelayVector::~DelayVector()
 
     mContext.reset( new SignalFlowContext(static_cast<std::size_t>(mPeriod), samplingFrequency) );
 
-    mFlow.reset( new signalflows::DelayVector( *mContext, "", nullptr, mNumberOfChannels, mInterpolationSteps,
-                                              mInterpolationType ) );
-    mFlow->setup();
-    mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
+    mComp.reset( new rcl::DelayVector( *mContext, "", nullptr ) );
+    mComp->setup( mNumberOfChannels, mInterpolationSteps, 1.0f, mInterpolationType, true );
+
+
+    mFlow.reset( new rrl::AudioSignalFlow(*mComp )  );
+
+    CommunicationProtocolBase::Output & gainInput = mFlow->externalParameterReceivePort("gainInput" );
+    CommunicationProtocolBase::Output & delayInput = mFlow->externalParameterReceivePort( "delayInput" );
   }
   catch (std::exception const & e )
   {
@@ -153,7 +170,7 @@ DelayVector::~DelayVector()
   }
   try
   {
-    mFlowWrapper->processBlock( ins, outs );
+//    mFlowWrapper->processBlock( ins, outs );
   }
   catch (std::exception const & e )
   {

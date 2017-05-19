@@ -8,8 +8,7 @@
 
 #include <libril/component.hpp>
 
-#include <librrl/audio_interface.hpp>
-#include <librrl/audio_signal_flow.hpp>
+// #include <librrl/audio_interface.hpp>
 
 #include <cassert>
 #include <ciso646>
@@ -18,16 +17,16 @@ namespace visr
 {
 namespace maxmsp
 {
-  
+
 template<typename ExternalSampleType>
 SignalFlowWrapper<ExternalSampleType>::SignalFlowWrapper( Component & comp )
-  : mFlow( new rrl::AudioSignalFlow( comp ) )
+ : mFlow( comp )
  , mPeriodSize( comp.period( ) )
  , mConvertedSamples( 
-  new efl::BasicMatrix<SampleType>( mFlow->numberOfAudioCapturePorts( ) + mFlow->numberOfAudioPlaybackPorts( ),
-                                         comp.period(), cVectorAlignmentSamples ) )
- , mInputBufferPtrs( mFlow->numberOfAudioCapturePorts( ) )
- , mOutputBufferPtrs( mFlow->numberOfAudioPlaybackPorts( ) )
+  new efl::BasicMatrix<SampleType>( mFlow.numberOfAudioCapturePorts( ) + mFlow.numberOfAudioPlaybackPorts( ),
+                                    comp.period(), cVectorAlignmentSamples ) )
+ , mInputBufferPtrs( mFlow.numberOfAudioCapturePorts( ) )
+ , mOutputBufferPtrs( mFlow.numberOfAudioPlaybackPorts( ) )
 {
   std::size_t index = 0;
   std::generate( mInputBufferPtrs.begin(), mInputBufferPtrs.end(), [&index, this] { return this->mConvertedSamples->row(index++); } );
@@ -43,25 +42,24 @@ template<typename ExternalSampleType>
 void SignalFlowWrapper<ExternalSampleType>::processBlock( ExternalSampleType const * const * inputSamples,
                                                           ExternalSampleType * const * outputSamples )
 {
-  rrl::AudioInterface::CallbackResult processResult;
-  transferInputSamples( inputSamples );
-  // Note: We should not call the free function here because it directly casts back from void* inside.
-  // AudioSignalFlow (or an appropriately renamed class) should not implement the callback interface directly, 
-  // but should leave it to another wrapper.
-  rrl::AudioSignalFlow::processFunction( mFlow.get(),
-                                         &mInputBufferPtrs[0],
-                                         &mOutputBufferPtrs[0], processResult );
-  if( processResult != 0 ) //todo: Lookup error codes
+  try
   {
-    throw std::runtime_error( "Error while processing the signal flow." );
+    transferInputSamples( inputSamples );
+    SampleType const * const * convertedInputSamples = mInputBufferPtrs.empty() ? nullptr : &mInputBufferPtrs[0];
+    SampleType * const * convertedOutputSamples = mOutputBufferPtrs.empty() ? nullptr : &mOutputBufferPtrs[0];
+    mFlow.process( convertedInputSamples, convertedOutputSamples );
+    transferOutputSamples( outputSamples );
   }
-  transferOutputSamples( outputSamples );
+  catch( std::exception const & ex )
+  {
+    throw( detail::composeMessageString("Error while processing the signal flow: ", ex.what() ) );
+  }
 }
 
 template<typename ExternalSampleType>
 void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSampleType const * const * inputSamples )
 {
-  std::size_t const numberOfCaptureSignals = mFlow->numberOfAudioCapturePorts();
+  std::size_t const numberOfCaptureSignals = mFlow.numberOfAudioCapturePorts();
   std::size_t const inputStride = 1;
   for( std::size_t inChanIdx( 0 ); inChanIdx < numberOfCaptureSignals; ++inChanIdx )
   {
@@ -78,8 +76,8 @@ void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSample
 template<typename ExternalSampleType >
 void SignalFlowWrapper<ExternalSampleType>::transferOutputSamples( ExternalSampleType * const * outputSamples )
 {
-  std::size_t const startIdx = mFlow->numberOfAudioCapturePorts();
-  std::size_t const numberOfPlaybackSignals = mFlow->numberOfAudioPlaybackPorts();
+  std::size_t const startIdx = mFlow.numberOfAudioCapturePorts();
+  std::size_t const numberOfPlaybackSignals = mFlow.numberOfAudioPlaybackPorts();
   for( std::size_t outChanIdx( 0 ); outChanIdx < numberOfPlaybackSignals; ++outChanIdx )
   {
     ExternalSampleType * const firstOutSample = outputSamples[ outChanIdx ];

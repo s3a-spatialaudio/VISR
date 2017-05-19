@@ -90,7 +90,7 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
           object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "The initalisation file for the gain matrix does not exist." );
           return;
         }
-        pml::MatrixParameter<ril::SampleType> initGains = pml::MatrixParameter<ril::SampleType>::fromTextFile( filePath.string( ) );
+        pml::MatrixParameter<SampleType> initGains = pml::MatrixParameter<SampleType>::fromTextFile( filePath.string( ) );
         if( (initGains.numberOfRows( ) != mNumberOfOutputs) or( initGains.numberOfColumns( ) != mNumberOfInputs ) )
         {
           object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "The dimensions of the initalisation matrix do not match." );
@@ -100,7 +100,7 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
       }
       else
       {
-        pml::MatrixParameter<ril::SampleType> initGains = pml::MatrixParameter<ril::SampleType>::fromString( initString );
+        pml::MatrixParameter<SampleType> initGains = pml::MatrixParameter<SampleType>::fromString( initString );
         if( (initGains.numberOfRows() != mNumberOfOutputs) or( initGains.numberOfColumns() != mNumberOfInputs ) )
         {
           object_error( reinterpret_cast<t_object *>(getMaxProxy()), "The dimensions of the initalisation matrix do not match." );

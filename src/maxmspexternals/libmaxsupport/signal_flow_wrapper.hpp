@@ -5,6 +5,8 @@
 
 #include <libril/constants.hpp>
 
+#include <librrl/audio_signal_flow.hpp>
+
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -17,11 +19,6 @@ namespace efl
 {
 template<typename ElementType>
 class BasicMatrix;
-}
-namespace rrl
-{
-template<typename SampleType> class CommunicationArea;
-class AudioSignalFlow;
 }
 
 namespace maxmsp
@@ -49,7 +46,7 @@ private:
   */
   void transferOutputSamples( ExternalSampleType * const * outputSamples );
   
-  std::unique_ptr<rrl::AudioSignalFlow> mFlow;
+  rrl::AudioSignalFlow mFlow;
 
   std::size_t const mPeriodSize;
 

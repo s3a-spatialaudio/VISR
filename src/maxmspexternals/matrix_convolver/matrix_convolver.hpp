@@ -67,7 +67,7 @@ private:
   std::unique_ptr<signalflows::MatrixConvolver> mFlow;
   std::unique_ptr<SignalFlowWrapper<double> > mFlowWrapper;
 
-  pml::MatrixParameter<ril::SampleType> mGains;
+  pml::MatrixParameter<SampleType> mGains;
 };
 
 } // namespace matrix_convolver
