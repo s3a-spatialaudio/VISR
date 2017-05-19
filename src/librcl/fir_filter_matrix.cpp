@@ -67,7 +67,7 @@ void FirFilterMatrix::process()
       }
       catch( std::exception const & ex )
       {
-        status( StatusMessage::Error, "FirFilterMatrix: Error while setting new filter." );
+        status( StatusMessage::Error, "FirFilterMatrix: Error while setting new filter: ", ex.what() );
       }
     }
   }

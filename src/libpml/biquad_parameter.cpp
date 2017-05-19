@@ -2,6 +2,8 @@
 
 #include "biquad_parameter.hpp"
 
+#include <libril/detail/compose_message_string.hpp>
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -75,7 +77,7 @@ void BiquadParameter<CoeffType>::loadJson( std::basic_istream<char> & stream )
   }
   catch( std::exception const & ex )
   {
-    throw std::invalid_argument( std::string( "Error while parsing a json BiquadParameter node: " ) + ex.what( ) );
+    throw std::invalid_argument( detail::composeMessageString( "Error while parsing a json BiquadParameter node: " , ex.what( )) );
   }
   loadJson( tree );
 }
@@ -137,7 +139,7 @@ void BiquadParameter<CoeffType>::writeJson( std::basic_ostream<char> & stream ) 
     write_json( stream, tree);
   } catch (std::exception const & ex)
   {
-    throw( "Error while writing BiquadParameter message to JSON" );
+    throw( detail::composeMessageString( "Error while writing BiquadParameter message to JSON: ", ex.what() ) );
   }
 }
 
