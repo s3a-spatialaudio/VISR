@@ -10,7 +10,7 @@ ELSE( APPLE )
   ADD_DEFINITIONS( -DWIN_VERSION )
 ENDIF( APPLE )
 
-SET( EXTERNAL_NAME delay_vector )
+SET( EXTERNAL_NAME delay_vector~ )
 
 SET( PROJECT_NAME delay_vector_visr_max_external )
 

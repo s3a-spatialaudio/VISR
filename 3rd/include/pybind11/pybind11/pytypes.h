@@ -1157,7 +1157,7 @@ class memoryview : public object {
 public:
     explicit memoryview(const buffer_info& info) {
         static Py_buffer buf { };
-        // Py_buffer uses signed sizes, strides and shape!..
+        // Py_buffer uses signed sizes, strides an          d shape!..
         static std::vector<Py_ssize_t> py_strides { };
         static std::vector<Py_ssize_t> py_shape { };
         buf.buf = info.ptr;

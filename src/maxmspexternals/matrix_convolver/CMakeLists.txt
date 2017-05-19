@@ -10,7 +10,7 @@ ELSE( APPLE )
   ADD_DEFINITIONS( -DWIN_VERSION )
 ENDIF( APPLE )
 
-SET( EXTERNAL_NAME matrix_convolver )
+SET( EXTERNAL_NAME matrix_convolver~ )
 
 SET( PROJECT_NAME matrix_convolver_max_external )
 

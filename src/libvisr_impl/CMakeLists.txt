@@ -45,9 +45,12 @@ add_definitions( -DVISR_BUILD_CORE_LIBRARIES=1 )
 
 ADD_LIBRARY( visr_impl SHARED ${SOURCES} ${HEADERS} )
 set_target_properties(visr_impl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/shlib" )
+set_target_properties(visr_impl PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Mutual dependeny between ril and vir_impl. This might be problematic when one of them is a shared library.
 target_link_libraries( visr_impl ril )
+
+INSTALL( TARGETS visr_impl DESTINATION lib	 )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
