@@ -60,14 +60,6 @@ int main( int argc, char const * const * argv )
 
     SignalFlowContext context( period, samplingRate );
 
-    //ril::SignalFlowContext & context,
-    //  char const * name,
-    //  ril::CompositeComponent * parent,
-    //  std::size_t numberOfChannels,
-    //  std::size_t dftSize,
-    //  std::size_t windowLength,
-    //  std::size_t hopSize )
-
     signalflows::TimeFrequencyFeedthrough flow( context,
                                         "", nullptr,
                                         numberOfChannels,
