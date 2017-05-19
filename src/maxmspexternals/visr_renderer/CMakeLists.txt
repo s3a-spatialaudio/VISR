@@ -14,7 +14,7 @@ IF( WIN32 )
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 ENDIF( WIN32 )
 
-SET( EXTERNAL_NAME visr_renderer )
+SET( EXTERNAL_NAME visr_renderer~ )
 
 SET( PROJECT_NAME visr_renderer_max_external )
 

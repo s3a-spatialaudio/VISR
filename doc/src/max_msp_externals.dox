@@ -3,4 +3,6 @@
  *
  * @tableofcontents
  *
+ * @section Externals Usage
+ * In order to use the externals first of all it’s necessary to run Max/Msp in 64-bit mode. To do so just go to the Max/Msp application icon, right-click on it and choose "Get Info" (or select the icon and hit command+I). Uncheck the "Open in 32-bit mode" option.
  */
