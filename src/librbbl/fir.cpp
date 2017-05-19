@@ -73,7 +73,7 @@ int FIR::createWhiteTristateFIRs(Afloat density){
             }
             else m_B(i,j) = 0;
         }
-        m_gain[i] = 1/sqrt(m_nBplus[i] + m_nBminus[i]); // normalization
+        m_gain[i] = 1.0f/std::sqrt(static_cast<float>(m_nBplus[i] + m_nBminus[i])); // normalization
     }
     
     return 0;

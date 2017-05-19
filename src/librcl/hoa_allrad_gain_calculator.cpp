@@ -62,7 +62,7 @@ void HoaAllRadGainCalculator::setup( std::size_t numberOfObjectChannels,
   mAllRadCalculator.reset( new panning::AllRAD( regularArrayConfig,
                                                 realArrayConfig,
                                                 mRegularDecodeMatrix,
-                                                hoaOrder ) );
+                                                static_cast<unsigned int>(hoaOrder) ) );
 
 
   mRealDecodeMatrix.resize( numHarmonicSignals, realArrayConfig.getNumRegularSpeakers() );
