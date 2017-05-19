@@ -6,6 +6,8 @@
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
+#include <libpanning/LoudspeakerArray.h>
+
 #include <pybind11/pybind11.h>
 
 namespace visr
@@ -18,11 +20,6 @@ namespace rcl
 void exportPanningCalculator( pybind11::module & m )
 {
   using visr::rcl::PanningCalculator;
-
-  //std::size_t numberOfObjects,
-  //  panning::LoudspeakerArray const & arrayConfig,
-  //  bool adaptiveListenerPosition /*= false*/,
-  //  bool separateLowpassPanning /*= false*/
 
   pybind11::class_<PanningCalculator, visr::AtomicComponent>( m, "PanningCalculator" )
    .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
