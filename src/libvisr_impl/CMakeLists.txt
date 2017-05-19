@@ -1,4 +1,5 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
+SET(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 
 SET( HEADERS
 audio_connection_descriptor.hpp
@@ -50,4 +51,5 @@ set_target_properties(visr_impl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_B
 target_link_libraries( visr_impl ril )
 
 # Add the unit test directory.
+ INSTALL( TARGETS visr_impl DESTINATION lib	 )
 ADD_SUBDIRECTORY( test )

@@ -25,6 +25,10 @@ ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
 
+
+
+
+
 # Add support for unit tests
 INCLUDE( CTest )
 
@@ -50,7 +54,25 @@ SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 # Create a system string.
 SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
 IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
-  SET( VISR_SYSTEM_NAME MacOS )
+
+
+SET(CMAKE_INSTALL_PREFIX /Applications/VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}-${VISR_SYSTEM_NAME} )
+ 
+
+#SET( MACOSX_RPATH ON)
+# use, i.e. don't skip the full RPATH for the build tree
+#SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+# when building, don't use the install RPATH already
+# (but later on when installing)
+#SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+   SET( VISR_SYSTEM_NAME MacOS )
+#  SET(CMAKE_INSTALL_PREFIX /Applications )
 ENDIF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
 SET( VISR_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} )
