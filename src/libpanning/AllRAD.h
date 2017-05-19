@@ -95,6 +95,11 @@ private:
 
     VBAP mRealDecoder;
 
+    /**
+     * Number of harmonics, i.e., (hoaOrder+1)^2
+     */
+    std::size_t const mNumberOfHarmonics;
+
     // Harmonic ordering is "Ambisonic Channel Numbering" (ACN) i = n^2 + n + m for Y_i = Y_{n m}
     efl::BasicMatrix<Afloat> mRegularDecodeCoefficients;
 
@@ -102,11 +107,6 @@ private:
      * Matrix of decode coefficients for the real loudspeaker
      */
     efl::BasicMatrix<Afloat> mRealDecodeCoefficients;
-
-    /**
-     * Number of harmonics, i.e., (hoaOrder+1)^2
-     */
-    std::size_t const mNumberOfHarmonics;
 
     /**
      * Number of loudspeakers in the regular array.

@@ -92,7 +92,7 @@ namespace visr
 
     void VBAP::setListenerPosition( SampleType x, SampleType y, SampleType z )
     {
-      mListenerPos = std::array<SampleType, 3>{ x, y, z };
+      mListenerPos = std::array<SampleType, 3>{ {x, y, z} };
       calcInvMatrices();
     }
 
