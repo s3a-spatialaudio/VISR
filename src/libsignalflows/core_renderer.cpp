@@ -260,9 +260,14 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     audioConnection( mDirectDiffuseMix.audioPort("out"), mSubwooferMix.audioPort("in") );
     if( outputEqSupport )
     {
-      audioConnection( mDirectDiffuseMix.audioPort("out"), mOutputEqualisationFilter->audioPort("in") );
-      audioConnection( mSubwooferMix.audioPort("out"), ChannelRange( 0, numberOfSubwoofers ),
-                       mOutputEqualisationFilter->audioPort("in"), ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
+      audioConnection( mDirectDiffuseMix.audioPort("out"),
+                      ChannelRange( 0, numberOfLoudspeakers ),
+                      mOutputEqualisationFilter->audioPort("in"),
+                      ChannelRange( 0, numberOfLoudspeakers ) );
+      audioConnection( mSubwooferMix.audioPort("out"),
+                      ChannelRange( 0, numberOfSubwoofers ),
+                      mOutputEqualisationFilter->audioPort("in"),
+                      ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
       audioConnection( mOutputEqualisationFilter->audioPort("out"), mOutputAdjustment.audioPort("in") );
     }
     else

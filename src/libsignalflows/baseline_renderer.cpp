@@ -56,6 +56,7 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 {
   audioConnection( mInput, mCoreRenderer.audioPort( "audioIn") );
   audioConnection( mCoreRenderer.audioPort( "audioOut"), mOutput );
+  parameterConnection( mSceneReceiver.parameterPort("messageOutput"), mSceneDecoder.parameterPort("datagramInput") );
   parameterConnection( mSceneDecoder.parameterPort("objectVectorOutput"), mCoreRenderer.parameterPort("objectDataInput") );
 
   if( not trackingConfiguration.empty() )
