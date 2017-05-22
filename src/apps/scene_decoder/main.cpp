@@ -7,7 +7,7 @@
 #include <libril/signal_flow_context.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -32,13 +32,13 @@ int main( int argc, char const * const * argv )
 
   try 
   {
-    rrl::PortaudioInterface::Config interfaceConfig;
+    audiointerfaces::PortaudioInterface::Config interfaceConfig;
     interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfLoudspeakers;
     interfaceConfig.mPeriodSize = periodSize;
     interfaceConfig.mSampleRate = samplingRate;
     interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "default";
 
     boost::filesystem::path const decoderDir( CMAKE_SOURCE_DIR );
@@ -53,7 +53,7 @@ int main( int argc, char const * const * argv )
 
     std::size_t udpPort = 8888;
     
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
 
     const std::size_t cInterpolationLength = periodSize;
 

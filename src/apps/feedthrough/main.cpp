@@ -5,9 +5,9 @@
 // #define FEEDTHROUGH_NATIVE_JACK
 
 #ifdef FEEDTHROUGH_NATIVE_JACK
-#include <librrl/jack_interface.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
 #else
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 
 #include <librrl/audio_signal_flow.hpp>
@@ -33,9 +33,9 @@ int main( int argc, char const * const * argv )
   try 
   {
 #ifdef FEEDTHROUGH_NATIVE_JACK
-    rrl::JackInterface::Config interfaceConfig;
+    audiointerfaces::JackInterface::Config interfaceConfig;
 #else
-    rrl::PortaudioInterface::Config interfaceConfig;
+    audiointerfaces::PortaudioInterface::Config interfaceConfig;
 #endif
     interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfLoudspeakers;
@@ -47,14 +47,14 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mClientName = "VISR_feedthrough";
 #else
     interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "default";
 #endif
 
 #ifdef FEEDTHROUGH_NATIVE_JACK
-    rrl::JackInterface audioInterface( interfaceConfig );
+    audiointerfaces::JackInterface audioInterface( interfaceConfig );
 #else
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
     SignalFlowContext context( periodSize, samplingRate );

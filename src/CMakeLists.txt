@@ -5,6 +5,9 @@
 # Common functionalties for realtime applications
 ADD_SUBDIRECTORY( libapputilities )
 
+# Audio interfaces library
+ADD_SUBDIRECTORY( libaudiointerfaces )
+
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 

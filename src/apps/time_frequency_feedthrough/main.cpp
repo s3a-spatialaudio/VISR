@@ -7,9 +7,9 @@
 #include <libefl/denormalised_number_handling.hpp>
 
 #ifdef NATIVE_JACK
-#include <librrl/jack_interface.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
 #else
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 #include <librrl/audio_signal_flow.hpp>
 
@@ -40,9 +40,9 @@ int main( int argc, char const * const * argv )
     SamplingFrequencyType const samplingRate = 48000;
 
 #ifdef NATIVE_JACK
-    rrl::JackInterface::Config interfaceConfig;
+    audiointerfaces::JackInterface::Config interfaceConfig;
 #else
-    rrl::PortaudioInterface::Config interfaceConfig;
+    audiointerfaces::PortaudioInterface::Config interfaceConfig;
 #endif
     interfaceConfig.mNumberOfCaptureChannels = numberOfChannels;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfChannels;
@@ -54,7 +54,7 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mClientName = "BaselineRenderer";
 #else
     interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "default";
 #endif
 
@@ -70,9 +70,9 @@ int main( int argc, char const * const * argv )
     rrl::AudioSignalFlow audioFlow( flow );
 
 #ifdef NATIVE_JACK
-    rrl::JackInterface audioInterface( interfaceConfig );
+    audiointerfaces::JackInterface audioInterface( interfaceConfig );
 #else
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
     audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );

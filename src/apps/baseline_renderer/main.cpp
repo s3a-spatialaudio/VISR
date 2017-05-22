@@ -14,9 +14,9 @@
 
 #include <librrl/audio_signal_flow.hpp>
 #ifdef VISR_JACK_SUPPORT
-#include <librrl/jack_interface.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
 #endif
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 
 #include <libsignalflows/baseline_renderer.hpp>
 
@@ -133,7 +133,7 @@ int main( int argc, char const * const * argv )
 #ifdef VISR_JACK_SUPPORT
     if (useNativeJack)
     {
-      rrl::JackInterface::Config interfaceConfig;
+      audiointerfaces::JackInterface::Config interfaceConfig;
       interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
       interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
       interfaceConfig.mPeriodSize = periodSize;
@@ -141,20 +141,20 @@ int main( int argc, char const * const * argv )
       interfaceConfig.setCapturePortNames("input_", 0, numberOfObjects - 1);
       interfaceConfig.setPlaybackPortNames("output_", 0, numberOfOutputChannels - 1);
       interfaceConfig.mClientName = "VisrRenderer";
-      audioInterface.reset(new rrl::JackInterface(interfaceConfig));
+      audioInterface.reset(new audiointerfaces::JackInterface(interfaceConfig));
     }
     else
     {
 #endif
-      rrl::PortaudioInterface::Config interfaceConfig;
+      audiointerfaces::PortaudioInterface::Config interfaceConfig;
       interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
       interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
       interfaceConfig.mPeriodSize = periodSize;
       interfaceConfig.mSampleRate = samplingRate;
       interfaceConfig.mInterleaved = false;
-      interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+      interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
       interfaceConfig.mHostApi = audioBackend;
-      audioInterface.reset( new rrl::PortaudioInterface(interfaceConfig) );
+      audioInterface.reset( new audiointerfaces::PortaudioInterface(interfaceConfig) );
 #ifdef VISR_JACK_SUPPORT
     }
 #endif

@@ -6,7 +6,7 @@
 
 #include <libril/signal_flow_context.hpp>
 
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 
 #include <libsignalflows/gain_matrix.hpp>
 
@@ -87,16 +87,16 @@ int main( int argc, char const * const * argv )
       }
     }
 
-    rrl::PortaudioInterface::Config interfaceConfig;
+    audiointerfaces::PortaudioInterface::Config interfaceConfig;
     interfaceConfig.mNumberOfCaptureChannels = numberOfInputs;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputs;
     interfaceConfig.mPeriodSize = periodSize;
     interfaceConfig.mSampleRate = samplingRate;
     interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = cAudioBackend;
 
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
 
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;

@@ -9,9 +9,9 @@
 #include <libril/signal_flow_context.hpp>
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
-#include <librrl/jack_interface.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
 #else
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 #include <librrl/audio_signal_flow.hpp>
 
@@ -106,9 +106,9 @@ int main( int argc, char const * const * argv )
     const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", std::string() );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
-    rrl::JackInterface::Config interfaceConfig;
+    audiointerfaces::JackInterface::Config interfaceConfig;
 #else
-    rrl::PortaudioInterface::Config interfaceConfig;
+    audiointerfaces::PortaudioInterface::Config interfaceConfig;
 #endif
     interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
     interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
@@ -120,7 +120,7 @@ int main( int argc, char const * const * argv )
     interfaceConfig.mClientName = "BunchRenderer";
 #else
     interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
+    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = audioBackend;
 #endif
 
@@ -160,9 +160,9 @@ int main( int argc, char const * const * argv )
     rrl::AudioSignalFlow audioFlow( flow );
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
-    rrl::JackInterface audioInterface( interfaceConfig );
+    audiointerfaces::JackInterface audioInterface( interfaceConfig );
 #else
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
 #endif
 
     audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );

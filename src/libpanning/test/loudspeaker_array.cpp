@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   for(int w=0; w< array.getNumRegularSpeakers();w++){
     int ch = array.getSpeakerChannel( w );
     //std::cout<<"w: "<<w<< " chn: "<< array.getSpeakerChannel( w )<<" spk: "<< array.getSpeakerIndexFromChn(ch+1)<<std::endl;
-    BOOST_CHECK( w == array.getSpeakerIndexFromChn(array.getSpeakerChannel(w)+1));
+    BOOST_CHECK( w == array.getSpeakerIndexFromChn(ch+1));
   }
 
   std::size_t numberOfSources = 8;

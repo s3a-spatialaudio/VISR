@@ -3,7 +3,7 @@
 #include "portaudio_interface.hpp"
 
 // TODO: Eliminate this dependency!
-#include "communication_area.hpp"
+#include <librrl/communication_area.hpp>
 
 #include <libril/constants.hpp>
 
@@ -18,11 +18,12 @@
 
 namespace visr
 {
-namespace rrl
+namespace audiointerfaces
 {
 
   namespace // unnamed
   {
+    using namespace rrl;
     using TranslateSampleFormatMapType = std::map<PortaudioInterface::Config::SampleFormat::Type, PaSampleFormat >;
     TranslateSampleFormatMapType const cTranslateSampleFormatMap = {
       { PortaudioInterface::Config::SampleFormat::signedInt8Bit, paInt8 },

@@ -506,7 +506,7 @@ namespace visr
       {
         ptree const childTree = treeIt->second;
         std::string id = childTree.get<std::string>( "<xmlattr>.id" );
-        ChannelIndex const chIdx = childTree.get<ChannelIndex>( "<xmlattr>.channel" );
+       
         m_position[m_id[id]] = parseCoordNode( childTree, m_isInfinite );
 
         parseGainDelayAdjustments( childTree, m_gainAdjustment[m_id[id]], m_delayAdjustment[m_id[id]] );

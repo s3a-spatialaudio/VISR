@@ -15,7 +15,7 @@
 
 namespace visr
 {
-namespace rrl
+namespace audiointerfaces
 {
 
 /******************************************************************************/
