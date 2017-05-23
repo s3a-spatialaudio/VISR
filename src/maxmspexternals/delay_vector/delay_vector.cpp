@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "delay_vector_visr.hpp"
+#include "delay_vector.hpp"
 
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 

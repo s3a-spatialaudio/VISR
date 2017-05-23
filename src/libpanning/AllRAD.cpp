@@ -26,9 +26,9 @@ AllRAD::AllRAD(LoudspeakerArray const & regularArray,
                unsigned int maxHoaOrder )
  : mRegularDecoder( regularArray )
  , mRealDecoder( realArray )
+ , mNumberOfHarmonics( (maxHoaOrder + 1) * (maxHoaOrder + 1) )
  , mRegularDecodeCoefficients( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
  , mRealDecodeCoefficients( mNumberOfHarmonics, realArray.getNumRegularSpeakers(), decodeCoeffs.alignmentElements() )
- , mNumberOfHarmonics( (maxHoaOrder + 1) * (maxHoaOrder + 1) )
  , mRegularArraySize( regularArray.getNumSpeakers( ) )
 {
   mRegularDecodeCoefficients.copy( decodeCoeffs );

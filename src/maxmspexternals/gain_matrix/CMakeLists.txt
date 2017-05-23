@@ -10,7 +10,7 @@ ELSE( APPLE )
   ADD_DEFINITIONS( -DWIN_VERSION )
 ENDIF( APPLE )
 
-SET( EXTERNAL_NAME gain_matrix )
+SET( EXTERNAL_NAME gain_matrix~ )
 
 SET( PROJECT_NAME gain_matrix_max_external )
 

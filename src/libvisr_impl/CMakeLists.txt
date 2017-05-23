@@ -45,12 +45,10 @@ signal_flow_context.cpp
 add_library( visr_impl SHARED ${SOURCES} ${HEADERS} )
 target_compile_definitions( visr_impl PRIVATE -DVISR_BUILD_CORE_LIBRARIES=1 )
 set_target_properties(visr_impl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/shlib" )
+set_target_properties(visr_impl PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Mutual dependeny between ril and vir_impl. This might be problematic when one of them is a shared library.
 target_link_libraries( visr_impl ril )
-
-# add_library( visr_impl_shared STATIC ${SOURCES} ${HEADERS} )
-# target_link_libraries( visr_impl_static ril )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

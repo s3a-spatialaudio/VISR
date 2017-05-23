@@ -10,11 +10,11 @@ ELSE( APPLE )
   ADD_DEFINITIONS( -DWIN_VERSION )
 ENDIF( APPLE )
 
-SET( EXTERNAL_NAME delay_vector )
+SET( EXTERNAL_NAME delay_vector~ )
 
-SET( PROJECT_NAME delay_vector_visr_max_external )
+SET( PROJECT_NAME delay_vector_max_external )
 
-ADD_LIBRARY( ${PROJECT_NAME} MODULE delay_vector_visr.hpp delay_vector_visr.cpp )
+ADD_LIBRARY( ${PROJECT_NAME} MODULE delay_vector.hpp delay_vector.cpp )
 
 SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES
     PREFIX ""
