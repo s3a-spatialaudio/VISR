@@ -230,7 +230,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                                                            numberOfInputs ) );
 
     audioConnection( mObjectEq.audioPort("out"), mReverbRenderer->audioPort("in") );
-    char const * diffuseInPort = frequencyDependentPanning ? "in2" : "in3";
+    char const * diffuseInPort = frequencyDependentPanning ? "in4" : "in3";
     audioConnection( mReverbRenderer->audioPort("out"), mDirectDiffuseMix.audioPort( diffuseInPort) );
 
     parameterConnection( mObjectVectorInput, mReverbRenderer->parameterPort("objectIn") );
