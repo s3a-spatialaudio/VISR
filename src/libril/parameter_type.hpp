@@ -40,7 +40,7 @@ using ParameterType = uint64_t;
  * enumerator 'id' initialised to the type id.
  * In addition, it must define a type alias "Type" to the config type of this
  * parameter type.
- * (using ConfigType = <insert config class name here>)
+ * (using ConfigType = XXX)
  * @note the enum trick is to avoid undefined references.
  * @see macro DEFINE_PARAMETER_TYPE
  */
@@ -51,7 +51,7 @@ struct ParameterToId {};
  * Type trait for compile-time translation between parameter type id
  * types and the corresponding class type.
  * Template specializations must define a type alias "Type" to the
- * class, e.g., "using Type = <insert parameter class name here>
+ * class, e.g., "using Type = XXX
  * @see macro DEFINE_PARAMETER_TYPE
  */ 
 template< ParameterType Id >

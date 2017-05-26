@@ -22,14 +22,15 @@ class CompositeComponentImplementation;
 }
 
 /**
- *
- *
+ * Base class for processing components that are composed of other components (atomic and composite).
+ * In this way, processing components can be structured hierarchically.
+ * Composite components store the contained sub-components, external audio and parameter ports, and conenctions between the ports.
  */
 class  VISR_CORE_LIBRARY_SYMBOL CompositeComponent: public Component
 {
 public:
   /**
-   * Making the type known inside CompositeConponent and derived classes
+   * Making the types for defining audio connections known inside CompositeConponent and derived classes
    * These are convenience aliases to make the syntax in derived signal flows more concise.
    * @note: This also means that we include the ChannelList/ChannelRange definition in this header, as these classes become part 
    * the CompositeComponent interface.
@@ -98,6 +99,11 @@ public:
    void parameterConnection( ParameterPortBase & sender,
                             ParameterPortBase & receiver );
 
+  /**
+   * Register an audio connection between a sending and a receiving audio port.
+   * This overload uses C strings to denote both the names of the components holding the ports and the output ports itself.
+   * @param sendComponent 
+   */
   void audioConnection( char const * sendComponent,
                         char const * sendPort,
                         ChannelList const & sendIndices,
