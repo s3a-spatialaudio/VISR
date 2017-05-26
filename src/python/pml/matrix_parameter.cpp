@@ -96,7 +96,8 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
       }
     }
   }, pybind11::arg("data"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
-  .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples ) 
+  .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
+  .def_static( "fromTextFile", &MatrixParameter<DataType>::fromTextFile, pybind11::arg( "file" ), pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples )
   ;
 }
 
