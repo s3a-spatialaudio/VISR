@@ -4,6 +4,7 @@ set( SOURCES
 add.cpp
 delay_vector.cpp
 fir_filter_matrix.cpp
+gain_vector.cpp
 panning_calculator.cpp
 rcl.cpp
 )

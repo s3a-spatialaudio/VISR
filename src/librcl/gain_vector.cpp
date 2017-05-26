@@ -65,8 +65,25 @@ void GainVector::setup( std::size_t numberOfChannels,
 
   mInterpolationPeriods = ( (interpolationSteps+period()-1) / period() ); // integer ceil() function
   mInterpolationCounter = 0;
-  mRamp.resize( (mInterpolationPeriods+1)*period() );
-
+  // Initialise the interpolation ramp
+  mRamp.resize( (mInterpolationPeriods + 1)*period() );
+  if( mInterpolationPeriods > 0 ) // there is a ramp only if the interpolation period is larger than one.
+  {
+    efl::ErrorCode const res = efl::vectorRamp( mRamp.data(), interpolationSteps,
+      static_cast<SampleType>(0.0), static_cast<SampleType>(1.0),
+      false /*startInclusive*/, true /*endInclusive*/, cVectorAlignmentSamples );
+    if( res != efl::noError )
+    {
+      throw std::logic_error( "GainVector: Creation of interpolation ramp failed" );
+    }
+  }
+  efl::ErrorCode const res = efl::vectorFill( static_cast<SampleType>(1.0),
+    mRamp.data() + interpolationSteps,
+    mRamp.size() - interpolationSteps, 0 /*We cannot make assumptions about the alignment*/ );
+  if( res != efl::noError )
+  {
+    throw std::logic_error( "GainVector: Creation of interpolation ramp failed" );
+  }
 }
 
 void GainVector::process()
