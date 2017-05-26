@@ -93,7 +93,6 @@ void GainVector::process()
       status( StatusMessage::Error, "Error during vector multiplication: ", efl::errorMessage(res) );
     }
 
-
     SampleType const gainDiff = nextGain - oldGain;
     SampleType const * const rampPartition = mRamp.data() + blockLength * mInterpolationCounter;
     res = efl::vectorMultiplyConstantAddInplace( gainDiff, rampPartition, outPtr, blockLength, align );
@@ -113,7 +112,10 @@ void GainVector::setGain( efl::BasicVector< SampleType > const & newGains )
   }
 
   // Copy the current gain value to the previous gain value.
-
+  if( efl::vectorCopy( mNextGains.data(), mCurrentGains.data(), mNumberOfChannels ) != efl::noError )
+  {
+    throw std::runtime_error( "GainVector::setGain(): Copying of the vector elements failed." );
+  }
 
   if (efl::vectorCopy(newGains.data(), mNextGains.data(), mNumberOfChannels) != efl::noError)
   {

@@ -1,14 +1,24 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-
-#include "object.hpp"
-#include "object_type.hpp"
-#include "object_vector.hpp"
-#include "point_source.hpp"
-#include "plane_wave.hpp"
-
 #include <pybind11/pybind11.h>
 
+namespace visr
+{
+namespace objectmodel
+{
+namespace python
+{
+
+void exportObject( pybind11::module & m );
+void exportObjectType( pybind11::module & m );
+void exportObjectVector( pybind11::module & m );
+void exportPointSource( pybind11::module & m );
+void exportPointSourceWithReverb( pybind11::module & m );
+void exportPlaneWave( pybind11::module & m );
+
+} // namespace python
+} // namespace objectmodel
+} // namespace visr
 
 PYBIND11_PLUGIN(objectmodel)
 {
