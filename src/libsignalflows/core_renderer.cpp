@@ -155,11 +155,9 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
     parameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
 
-    audioConnection( "VbapGainMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
-
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( numberOfInputs, 2*numberOfInputs ) );
-    audioConnection( mPanningFilterbank->audioPort("out"), mVbapMatrix.audioPort("in") );
+    audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( 0, numberOfInputs ), mVbapMatrix.audioPort("in"), ChannelRange( 0, numberOfInputs ) );
     audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( numberOfInputs, 2*numberOfInputs ), mLowFrequencyPanningMatrix->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
 
     audioConnection( mLowFrequencyPanningMatrix->audioPort("out"), mDirectDiffuseMix.audioPort("in2") );
