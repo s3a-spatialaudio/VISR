@@ -12,6 +12,7 @@ namespace python
 void exportObject( pybind11::module & m );
 void exportObjectType( pybind11::module & m );
 void exportObjectVector( pybind11::module & m );
+void exportHoaSource( pybind11::module & m );
 void exportPointSource( pybind11::module & m );
 void exportPointSourceWithReverb( pybind11::module & m );
 void exportPlaneWave( pybind11::module & m );
@@ -29,7 +30,11 @@ PYBIND11_PLUGIN(objectmodel)
   exportObject( m );
   exportObjectType( m );
   exportObjectVector( m );
+
+  // Concrete object types after base classes.
+  exportHoaSource( m );
   exportPointSource( m );
+  exportPointSourceWithReverb( m );
   exportPlaneWave( m );
 
   return m.ptr();
