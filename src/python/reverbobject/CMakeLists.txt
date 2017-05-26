@@ -1,7 +1,9 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
+late_reverb_filter_calculator.cpp
 reverb_object_renderer.cpp
+reverb_parameter_calculator.cpp
 reverbobject.cpp
 )
 
