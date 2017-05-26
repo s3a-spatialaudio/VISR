@@ -13,6 +13,8 @@ namespace rcl
   void exportAdd( pybind11::module & m );
   void exportDelayVector( pybind11::module & m );
   void exportFirFilterMatrix( pybind11::module & m );
+  void exportGainVector( pybind11::module & m );
+  void exportHoaAllRadGainCalculator( pybind11::module & m );
   void exportPanningCalculator( pybind11::module & m );
 }
 }
@@ -29,6 +31,8 @@ PYBIND11_PLUGIN(rcl)
   exportAdd( m );
   exportDelayVector( m );
   exportFirFilterMatrix( m );
+  exportGainVector( m );
+  exportHoaAllRadGainCalculator( m );
   exportPanningCalculator( m );
   return m.ptr();
 }
