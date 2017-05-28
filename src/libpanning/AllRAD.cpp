@@ -1,19 +1,16 @@
 //
 //  AllRAD.cpp
 //
-//  Created by Dylan Menzies on 12/12/2014.
+// Created by Dylan Menzies on 12/12/2014.
 // Modified: Andreas Franck 23/09/2015
-//  Copyright (c) ISVR, University of Southampton. All rights reserved.
+// Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
-
-// avoid annoying warning about unsafe STL functions.
-#ifdef _MSC_VER 
-#pragma warning(disable: 4996)
-#endif
 
 #include "AllRAD.h"
 
-#include <libefl/basic_matrix.hpp>
+#include "LoudspeakerArray.h"
+
+#include <libefl/matrix_functions.hpp>
 
 namespace visr
 {
@@ -24,40 +21,32 @@ AllRAD::AllRAD(LoudspeakerArray const & regularArray,
                LoudspeakerArray const & realArray,
                efl::BasicMatrix<Afloat> const & decodeCoeffs,
                unsigned int maxHoaOrder )
- : mRegularDecoder( regularArray )
+ : mRegularLoudspeakerPositions( regularArray.getNumRegularSpeakers(), 3, decodeCoeffs.alignmentElements() )
  , mRealDecoder( realArray )
  , mNumberOfHarmonics( (maxHoaOrder + 1) * (maxHoaOrder + 1) )
  , mRegularDecodeCoefficients( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
  , mRealDecodeCoefficients( mNumberOfHarmonics, realArray.getNumRegularSpeakers(), decodeCoeffs.alignmentElements() )
  , mRegularArraySize( regularArray.getNumSpeakers( ) )
+ , mRegularToRealDecodeCoefficients( mNumberOfHarmonics, mRegularArraySize, decodeCoeffs.alignmentElements() )
 {
+  if( decodeCoeffs.numberOfRows() != mNumberOfHarmonics )
+  {
+    throw std::invalid_argument( "AllRad coefficient calculator: The size (number of rows) of the decode coefficient matrix does not match the specified maximum HOA order.");
+  }
+  if( decodeCoeffs.numberOfColumns() != mRegularArraySize )
+  {
+    throw std::invalid_argument( "AllRad coefficient calculator: The size (number of columns) of the decode coefficient matrix does not match the size or the regular loudspeaker array.");
+  }
+  for( std::size_t regSpkIdx(0); regSpkIdx < regularArray.getNumRegularSpeakers(); ++regSpkIdx )
+  {
+    XYZ const & pos = regularArray.getPosition( regSpkIdx );
+    mRegularLoudspeakerPositions( regSpkIdx, 0 ) = pos.x;
+    mRegularLoudspeakerPositions( regSpkIdx, 1 ) = pos.y;
+    mRegularLoudspeakerPositions( regSpkIdx, 2 ) = pos.z;
+  }
   mRegularDecodeCoefficients.copy( decodeCoeffs );
   updateDecodingCoefficients();
 }
-
-#if 0
-int AllRAD::loadRegDecodeGains(FILE* file, int order, int nSpks){
-    
-    int const nHarms = (order+1)*(order+1);
-
-    m_regDecode.resize( nHarms, nSpks );
-    m_decode.resize( nHarms, nSpks );
-
-    for( int i = 0; i < nHarms; i++ ) {
-        for( int j = 0; j < nSpks; j++ ) {
-            if (feof(file) == -1) {
-                return -1;
-            }
-            fscanf(file, "%f", &(m_regDecode(i,j)));
-        }
-    }
-    
-    m_nHarms = nHarms;
-    m_nSpkSources = nSpks;
-    
-    return 0;
-}
-#endif
 
 void AllRAD::setListenerPosition( SampleType x, SampleType y, SampleType z )
 {
@@ -65,56 +54,38 @@ void AllRAD::setListenerPosition( SampleType x, SampleType y, SampleType z )
   updateDecodingCoefficients();
 }
 
-void AllRAD::setListenerPosition( XYZ const & newPosition )
-{
-  setListenerPosition( newPosition.x, newPosition.y, newPosition.z );
-}
-
+//void AllRAD::setListenerPosition( XYZ const & newPosition )
+//{
+//  setListenerPosition( newPosition.x, newPosition.y, newPosition.z );
+//}
 
 void AllRAD::updateDecodingCoefficients()
 {
-
+  for( std::size_t regSpeakerIdx(0); regSpeakerIdx < mRegularArraySize; ++regSpeakerIdx )
+  {
+    mRealDecoder.calculateGains( mRegularLoudspeakerPositions(regSpeakerIdx,0),
+                                 mRegularLoudspeakerPositions(regSpeakerIdx,1),
+                                 mRegularLoudspeakerPositions(regSpeakerIdx,2),
+                                 mRegularToRealDecodeCoefficients.row( regSpeakerIdx ) );
+  }
+  efl::ErrorCode const res = efl::product( mRegularDecodeCoefficients.data(),
+                                      mRegularToRealDecodeCoefficients.data(),
+                                      mRealDecodeCoefficients.data(),
+                                      mNumberOfHarmonics /*numResultRows*/,
+                                      mRealDecodeCoefficients.numberOfColumns() /*numResultColumns*/,
+                                      mRegularArraySize /*numOp1Columns*/,
+                                      mRegularDecodeCoefficients.stride() /*op1RowStride*/,
+                                      1 /*op1ColumnStride*/,
+                                      mRegularToRealDecodeCoefficients.stride() /*op2RowStride*/,
+                                      1 /*op2ColumnStride*/,
+                                      mRealDecodeCoefficients.stride() /*resRowStride*/,
+                                      1 /*resColumnStride*/ );
+  if( res != efl::noError )
+  {
+    throw std::runtime_error( std::string("AllRad coefficient calculator: Numeric error while calculating the final decode oefficients:.")
+    + efl::errorMessage(res) );
+  }
 }
-
-#if 0
-int AllRAD::calcDecodeGains(VBAP* vbap){
-    
-    // In vbap first do externally: setListenerPosition, then calcInvMatrix.
-#if 0
-    vbap->setSourcePositions( m_regArray->getPositions()  );
-    
-    vbap->setNumSources(m_regArray->getNumSpeakers());
-    
-    //! Make sure the isAtInfinity flag is set for all regArray speakers
-    
-    vbap->calcGains();
-    
-    efl::BasicMatrix<Afloat> const & vbapGain = vbap->getGains( );
-    
-    std::size_t const nSpks = vbap->getNumSpeakers();
-    
-    // NOTE: The size of the final gain matrix depends on the VBAP
-    // configuration, which is not known beforehand. So the gain
-    // matrix has to be resized within this call.
-    // TODO: Change interface either to make the configuration known
-    // beforehand, or to pass a matrix of matching size.
-    m_decode.resize( m_nHarms, nSpks );
-
-    // Find decode gains by matrix multiplication
-    
-    for( std::size_t i = 0; i < m_nHarms; i++) {
-      for( std::size_t j = 0; j < nSpks; j++) {
-            Afloat sum = 0.0f;
-            for( std::size_t k = 0; k < m_nSpkSources; k++) {
-                sum += m_regDecode( i, k ) * vbapGain( k, j );
-            }
-            m_decode( i, j ) = sum;
-        }
-    }
-#endif
-    return 0;
-}
-#endif
 
 } // namespace panning
 } // namespace visr
