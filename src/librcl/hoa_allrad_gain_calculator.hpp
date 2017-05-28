@@ -19,6 +19,7 @@
 #include <libpml/listener_position.hpp>
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/object_vector.hpp>
+#include <libpml/shared_data_protocol.hpp>
 
 #include <vector>
 
@@ -118,34 +119,14 @@ private:
    * Must be called after one of the loudspeaker arrays or the listener position has changed.
    */
   void precalculate();
-  /**
-   * The loudspeaker array configuration for the 'virtual', regular array 
-   * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
-   * we make a copy of the reference passed to the setup method.
-   */
-//  panning::LoudspeakerArray mRealSpeakerArray;
-//
-//  /**
-//   * The physical loudspeaker array configuration.
-//   * Local copy of the array configuration passed to the setup() method.
-//   */
-//  panning::LoudspeakerArray mRegularSpeakerArray;
 
   ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector> mObjectInput;
 
-  ParameterInput<pml::DoubleBufferingProtocol, pml::MatrixParameter<SampleType> > mGainMatrixInput;
+  ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixInput;
 
   std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > > mListenerInput;
 
-  ParameterOutput<pml::DoubleBufferingProtocol, pml::MatrixParameter<SampleType> > mGainMatrixOutput;
-
-// Temporality disabled for refactoring.
-#if 0
-  /**
-   * The calculator object to generate the panning matrix coefficients.
-   */
-  panning::VBAP mVbapCalculator;
-#endif
+  ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixOutput;
 
   std::unique_ptr<panning::AllRAD> mAllRadCalculator;
 

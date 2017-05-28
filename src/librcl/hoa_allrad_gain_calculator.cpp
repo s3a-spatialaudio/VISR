@@ -1,10 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-// avoid annoying warning about unsafe STL functions.
-#ifdef _MSC_VER 
-#pragma warning(disable: 4996)
-#endif
-
 #include "hoa_allrad_gain_calculator.hpp"
 
 #include <libefl/basic_matrix.hpp>
@@ -49,7 +44,7 @@ void HoaAllRadGainCalculator::setup( std::size_t numberOfObjectChannels,
 {
   std::size_t const numRegularSpeakers = regularArrayConfig.getNumSpeakers( );
   std::size_t const numHarmonicSignals = decodeMatrix.numberOfRows();
-  pml::MatrixParameterConfig const gainMtxConfig( numRegularSpeakers, numberOfObjectChannels );
+  pml::MatrixParameterConfig const gainMtxConfig( realArrayConfig.getNumRegularSpeakers(), numberOfObjectChannels );
   mGainMatrixInput.setParameterConfig( gainMtxConfig );
   mGainMatrixOutput.setParameterConfig( gainMtxConfig );
 
@@ -108,71 +103,65 @@ void HoaAllRadGainCalculator::precalculate()
 
 void HoaAllRadGainCalculator::process()
 {
-  bool recalcNeeded = false;
   if( mListenerInput and mListenerInput->changed() )
   {
     pml::ListenerPosition const & pos = mListenerInput->data();
     mAllRadCalculator->setListenerPosition( pos.x(), pos.y(), pos.z() );
     mListenerInput->resetChanged();
-    recalcNeeded;
   }
-  if( recalcNeeded or mObjectInput.changed() or mGainMatrixInput.changed() )
+
+  // Because of the SharedData protocol of the gain input, we must always copy the input and
+  // handle the HOA objects.
+  pml::ObjectVector const & objects =  mObjectInput.data();
+  pml::MatrixParameter<SampleType> const & inMtx = mGainMatrixInput.data();
+  pml::MatrixParameter<SampleType> & outMtx = mGainMatrixOutput.data();
+  outMtx.copy( inMtx );
+
+  std::size_t const numChannels = outMtx.numberOfColumns();
+  std::size_t const numLoudspeakers = outMtx.numberOfRows();
+
+  efl::BasicMatrix<Afloat> const & decodeGains = mAllRadCalculator->decodingGains();
+
+  // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
+  // Any potential re-routing will be added later.
+  for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
-    pml::ObjectVector const & objects =  mObjectInput.data();
-    pml::MatrixParameter<SampleType> const & inMtx = mGainMatrixInput.data();
-    pml::MatrixParameter<SampleType> & outMtx = mGainMatrixOutput.data();
-    outMtx.copy( inMtx );
+    objectmodel::Object const & obj = *(objEntry.second);
 
-    std::size_t const numChannels = outMtx.numberOfColumns();
-    std::size_t const numLoudspeakers = outMtx.numberOfRows();
-
-    efl::BasicMatrix<Afloat> const & decodeGains = mAllRadCalculator->decodingGains();
-
-    // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
-    // Any potential re-routing will be added later.
-    for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+    // Note: This does not allow object types derived from HoaSource.
+    objectmodel::ObjectTypeId const ti = obj.type();
+    if( ti != objectmodel::ObjectTypeId::HoaSource )
     {
-      objectmodel::Object const & obj = *(objEntry.second);
-
-      // Note: This does not allow object types derived from HoaSource.
-      objectmodel::ObjectTypeId const ti = obj.type();
-      if( ti != objectmodel::ObjectTypeId::HoaSource )
+      continue;
+    }
+    try
+    {
+      objectmodel::HoaSource const & hoaSrc = dynamic_cast<objectmodel::HoaSource const &>(obj);
+      std::size_t const numHoaSignals = hoaSrc.numberOfChannels();
+      if( numHoaSignals != (hoaSrc.order() + 1)*(hoaSrc.order() + 1) )
       {
-        continue;
+        throw std::runtime_error( "The number of harmonic signals is inconsistent with the HOA order." );
       }
-      try
+      for( std::size_t sigIdx( 0 ); sigIdx < numHoaSignals; ++sigIdx )
       {
-        objectmodel::HoaSource const & hoaSrc = dynamic_cast<objectmodel::HoaSource const &>(obj);
-        std::size_t const numHoaSignals = hoaSrc.numberOfChannels();
-        if( numHoaSignals != (hoaSrc.order() + 1)*(hoaSrc.order() + 1) )
+        std::size_t const chIdx = hoaSrc.channelIndex( sigIdx );
+        if( chIdx >= numChannels )
         {
-          throw std::runtime_error( "The number of harmonic signals is inconsistent with the HOA order." );
+          throw std::runtime_error( "Channel index exceeds maximum admissible value." );
         }
-        for( std::size_t sigIdx( 0 ); sigIdx < numHoaSignals; ++sigIdx )
+        for( std::size_t spkIdx( 0 ); spkIdx < numLoudspeakers; ++spkIdx )
         {
-          std::size_t const chIdx = hoaSrc.channelIndex( sigIdx );
-          if( chIdx >= numChannels )
-          {
-            throw std::runtime_error( "Channel index exceeds maximum admissible value." );
-          }
-          for( std::size_t spkIdx( 0 ); spkIdx < numLoudspeakers; ++spkIdx )
-          {
-            outMtx( spkIdx, chIdx ) = decodeGains( sigIdx, spkIdx );
-          }
+          outMtx( spkIdx, chIdx ) = decodeGains( sigIdx, spkIdx );
         }
       }
-      catch( std::exception const & ex )
-      {
-        status( StatusMessage::Error, "Error decoding HOA source: ",  ex.what() );
-        return;
-      }
-    } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
-
-
-    mObjectInput.resetChanged();
-    mGainMatrixInput.resetChanged();
-    mGainMatrixOutput.swapBuffers();
-  }
+    }
+    catch( std::exception const & ex )
+    {
+      status( StatusMessage::Error, "Error decoding HOA source: ",  ex.what() );
+      return;
+    }
+  } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  mObjectInput.resetChanged(); // Always reset.
 }
 
 } // namespace rcl
