@@ -133,7 +133,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   parameterConnection( mChannelObjectRoutingCalculator.parameterPort("routingOut"), mChannelObjectRouting.parameterPort("controlInput") );
 
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
   audioConnection( mVbapMatrix.audioPort("out"), mDirectDiffuseMix.audioPort("in1") );
   if( frequencyDependentPanning )
   {
@@ -185,7 +184,13 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     ;
   pml::MatrixParameter<Afloat> const allRadDecoderGains
     = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
-  mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
+  mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains,
+                               pml::ListenerPosition(), mTrackingEnabled );
+
+  parameterConnection( mObjectVectorInput, mAllradGainCalculator.parameterPort("objectInput") );
+  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mAllradGainCalculator.parameterPort( "gainInput" ) );
+  parameterConnection( mAllradGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
+
 
   //////////////////////////////////////////////////////////////////////////////////////
 
