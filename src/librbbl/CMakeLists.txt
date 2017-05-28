@@ -6,6 +6,7 @@ circular_buffer.cpp
 fir.cpp
 fft_wrapper_factory.cpp
 ffts_wrapper.cpp
+gain_fader.cpp
 gain_matrix.cpp
 kiss_fft_wrapper_double.cpp
 kiss_fft_wrapper_float.cpp
@@ -21,6 +22,7 @@ fir.hpp
 fft_wrapper_base.hpp
 fft_wrapper_factory.hpp
 ffts_wrapper.hpp
+gain_fader.hpp
 gain_matrix.hpp
 kiss_fft_wrapper.hpp
 multichannel_convolver_uniform.hpp

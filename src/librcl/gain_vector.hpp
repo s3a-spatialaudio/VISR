@@ -19,6 +19,13 @@
 namespace visr
 {
 
+// forward declaration
+namespace rbbl
+{
+template<typename ElementType>
+class GainFader;
+}
+
 namespace rcl
 {
 
@@ -45,7 +52,14 @@ public:
   explicit GainVector( SignalFlowContext const & context,
                        char const * name,
                        CompositeComponent * parent = nullptr );
-    
+
+  /**
+   * Destructor.
+   * Instantiated (default) in the implementation file.
+   */
+  ~GainVector();
+
+
   /**
    * Setup method to initialise the object and set the parameters.
    * @param numberOfChannels The number of single audio waveforms in
@@ -128,15 +142,21 @@ private:
   */
   efl::BasicVector< SampleType > mNextGains;
 
+  /**
+   * The number of interpolation periods until the final gain value is reached.
+   */
   std::size_t mInterpolationPeriods;
 
+  /**
+   * Current interpolation block count.
+   * It is set to zero when the gain value changes and counted until mInterpolationPeriods is reached.
+   * It stays there to signal that the steady value is reached.
+   */
   std::size_t mInterpolationCounter;
 
-  /**
-   * Precomputed ramp for fading the waveforms.
-   */
-  efl::BasicVector< SampleType > mRamp;
-};
+  std::unique_ptr<rbbl::GainFader< SampleType > > mFader;
+
+  };
 
 } // namespace rcl
 } // namespace visr
