@@ -2,7 +2,7 @@
 
 SET( APPLICATION_NAME efl_test )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} test_main.cpp  complex_multiply.cpp )
+ADD_EXECUTABLE( ${APPLICATION_NAME} test_main.cpp complex_multiply.cpp lagrange_interpolator.cpp )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rbbl efl)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
