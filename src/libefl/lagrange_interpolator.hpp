@@ -10,18 +10,32 @@
 
 #include <array>
 
+// #define LAGRANGE_INTERPOLATOR_GENERATE_STAGE_TABLES
+
 namespace visr
 {
 namespace efl
 {
 
-template< typename DataType, std::size_t N>
+/**
+ * Class template to calculate the parameters of a Lagrange interpolator.
+ * @param DataType The numerical type of the sequence samples to be interpolated.
+ * @param N The order of Lagrange interpolation
+ * @tparam reverseOrder Whether the output coefficients are stored in normal FIR filter order (false) or reversed (true).
+ * The latter  enables filtering via a dot product without reversing one of the sequences.
+ */
+template< typename DataType, std::size_t N, bool reverseCoeffs = false >
 class LagrangeInterpolator
 {
 public:
+  /**
+   * Default constructor, initialises the constant coefficients.
+   */
   LagrangeInterpolator();
 
-
+  /**
+   * Calculation function.
+   */
   void calculateCoefficients( DataType mu, std::array<DataType,N+1> & result ) const;
 
 
@@ -39,7 +53,6 @@ private:
     return numberOfStagesImpl( N+1 );
   }
 
-#if 1
   static constexpr std::size_t stageSize( std::size_t stage )
   {
     return stage == 0 ? N+1 : stageSize( stage - 1 ) / 2;
@@ -49,32 +62,31 @@ private:
   {
     return stage == 0 ? 0 : stageOffset( stage - 1 ) + stageSize( stage - 1 );
   }
-#endif
 
   template<std::size_t length>
-  void multiplyAndShuffle( DataType * coeffs )
-  {
-    std::array<DataType, (length+1)/2> prod; // integer ceil(length/2)
-    std::size_t const pairs = length / 2;
-    for( std::size_t idx(0); idx < pairs; ++idx )
-    {
-      prod[idx] = coeffs[2*idx] * coeffs[2*idx]+1;
-    }
-    // If there is a single coefficient at the last position, leave it as it is.
-    if( length % 2 != 0 )
-    {
-      prod[pairs] = coeffs[length-2];
-    }
-    multiplyAndShuffle(length+1)/2>( &prod[0] );
+  void multiplyAndShuffle( DataType * coeffs ) const;
+  //{
+  //  static constexpr bool oddLength = (length % 2) != 0;
+  //  std::array<DataType, length/2> prod;
+  //  static std::size_t constexpr pairs = length / 2;
+  //  for( std::size_t idx(0); idx < pairs; ++idx )
+  //  {
+  //    prod[idx] = coeffs[2*idx] * coeffs[2*idx]+1;
+  //  }
+  //  // If there is a single coefficient at the last position, leave it as it is.
+  //  if( length % 2 != 0 )
+  //  {
+  //    prod[pairs] = coeffs[length-2];
+  //  }
+  //  multiplyAndShuffle<(length+1)/2>( &prod[0] );
+  //}
 
-  }
+  //template<>
+  //void multiplyAndShuffle<2>(  DataType * coeffs )
+  //{
+  //  std::swap( coeffs[0], coeffs[1] );
+  //}
 
-//  template<>
-//  void multiplyAndShuffle<2>(  DataType * coeffs )
-//  {
-//    std::swap( coeffs[0], coeffs[1] );
-//  }
-//
 //  template<>
 //  void multiplyAndShuffle<1>(  DataType * coeffs )
 //  {
@@ -94,10 +106,10 @@ private:
 
   static std::array<DataType, N+1> generateScaleFactors();
 
-#if 1
-  static std::array<std::size_t, /*LagrangeInterpolator<DataType,N>::*/numberOfStages()> generateStageSizes();
+#if LAGRANGE_INTERPOLATOR_GENERATE_STAGE_TABLES
+  static std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> generateStageSizes();
 
-  static std::array<std::size_t, /*LagrangeInterpolator<DataType,N>::*/numberOfStages()> generateStageOffsets();
+  static std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> generateStageOffsets();
 #endif
   mutable std::array<DataType, internalStorageSize(N+1)> mInternalCoeffs;
 
@@ -105,7 +117,7 @@ private:
 
   const std::array<DataType, N+1> cScaleFactors;
 
-#if 1
+#if LAGRANGE_INTERPOLATOR_GENERATE_STAGE_TABLES
   static const std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> cStageSizes;
 
   static const std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> cStageOffsets;

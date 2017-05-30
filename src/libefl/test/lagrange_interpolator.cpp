@@ -26,11 +26,18 @@ BOOST_AUTO_TEST_CASE( instantiateL7 )
 {
   constexpr std::size_t order = 7;
 
-  using InterType = efl::LagrangeInterpolator<float, order>;
+  bool const reverseCoefficients = true;
+
+  using InterType = efl::LagrangeInterpolator<float, order, reverseCoefficients>;
 
   InterType lagInt;
 
-  BOOST_CHECK( InterType::storageSize() == 15 );
+  float const mu = -0.25;
+
+  std::array<float, order+1> res;
+  lagInt.calculateCoefficients( mu, res );
+
+  std::cout << "storage size: " << InterType::storageSize() << std::endl;
 }
 
 } // namespace test
