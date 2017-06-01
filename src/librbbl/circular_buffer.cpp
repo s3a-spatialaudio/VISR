@@ -144,7 +144,7 @@ void CircularBuffer<DataType>::write( DataType const * writeData,
                                       std::size_t channelStrideElements,
                                       std::size_t numberOfChannels,
                                       std::size_t numberOfSamples,
-                                      std::size_t alignmentElements = 0 )
+                                      std::size_t alignmentElements /*= 0*/ )
 {
   // TODO: Check minimum alignment, also taking into account the the write head position and the stride.
   std::size_t minAlignment = std::min<std::size_t>( alignmentElements, 1 ); // for now, use the worst-case alignment.

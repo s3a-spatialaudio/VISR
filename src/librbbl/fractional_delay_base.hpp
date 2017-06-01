@@ -69,7 +69,7 @@ private:
 
     static std::unique_ptr<FractionalDelayBase<SampleType> > construct( std::size_t maxNumSamples )
     {
-      return std::unique_ptr<FractionalDelayBase<SampleType> >( new InterpolatorType( std::size_t maxNumSamples ) );
+      return std::unique_ptr<FractionalDelayBase<SampleType> >( new InterpolatorType( maxNumSamples ) );
     }
   };
 

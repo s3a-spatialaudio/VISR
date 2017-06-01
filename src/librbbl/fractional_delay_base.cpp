@@ -21,9 +21,9 @@ class TableInitializer: public FractionalDelayFactory<SampleType>::CreatorTable
 public:
   TableInitializer()
   {
-    registerAlgorithm<LagrangeInterpolator<SampleType,1> >("lagrangeOrder1");
-    registerAlgorithm<LagrangeInterpolator<SampleType, 2> >( "lagrangeOrder2" );
-    registerAlgorithm<LagrangeInterpolator<SampleType, 3> >( "lagrangeOrder3" );
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType,1> >("lagrangeOrder1");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 2> >( "lagrangeOrder2" );
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 3> >( "lagrangeOrder3" );
   }
 };
 
@@ -32,7 +32,7 @@ public:
 template< class SampleType >
 typename FractionalDelayFactory<SampleType>::CreatorTable & FractionalDelayFactory<SampleType>::creatorTable()
 {
-  static typename CreatorTable sTable{}; // TableInitializer() };
+  static CreatorTable sTable{}; // TableInitializer() };
   return sTable;
 }
 
@@ -43,7 +43,7 @@ template <typename SampleType>
 std::unique_ptr<FractionalDelayBase<SampleType> > FractionalDelayFactory<SampleType>::create( std::string const & name,
                                                                                               std::size_t maxNumSamples )
 {
-  CreatorTable::const_iterator findIt = creatorTable().find( name );
+  typename CreatorTable::const_iterator findIt = creatorTable().find( name );
   return findIt == creatorTable().end()
     ? std::unique_ptr<FractionalDelayBase<SampleType> >( nullptr )
     : findIt->second.create( maxNumSamples );
