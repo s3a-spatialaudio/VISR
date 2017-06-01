@@ -8,7 +8,7 @@
 #include <libpml/index_sequence.hpp>
 
 #include <librbbl/fft_wrapper_factory.hpp>
-
+//#include <librrl/audio_interface.hpp>
 #include <libril/signal_flow_context.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
@@ -18,7 +18,7 @@
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
-
+#include <librrl/audio_interface.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <cstdlib>
@@ -122,32 +122,24 @@ int main( int argc, char const * const * argv )
 #endif
 
     std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
-
+   rrl::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,periodSize,samplingFrequency);
 #ifdef VISR_JACK_SUPPORT
     if( useNativeJack )
     {
       audiointerfaces::JackInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
       interfaceConfig.setCapturePortNames( "input_", 0, numberOfInputChannels - 1 );
       interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels - 1 );
       interfaceConfig.mClientName = "MatrixConvolver";
-      audioInterface.reset( new audiointerfaces::JackInterface( interfaceConfig ));
+      audioInterface.reset( new audiointerfaces::JackInterface( baseConfig, interfaceConfig  ));
     }
     else
 #endif
     {
       audiointerfaces::PortaudioInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
       interfaceConfig.mInterleaved = false;
       interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
       interfaceConfig.mHostApi = audioBackend;
-      audioInterface.reset( new audiointerfaces::PortaudioInterface( interfaceConfig ) );
+      audioInterface.reset( new audiointerfaces::PortaudioInterface( baseConfig, interfaceConfig  ) );
     }
 
     audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );

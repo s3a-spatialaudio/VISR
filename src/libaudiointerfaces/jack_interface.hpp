@@ -13,80 +13,93 @@
 
 namespace visr
 {
-namespace audiointerfaces
-{
-
-class JackInterface: public rrl::AudioInterface
-{
-public:
-  /**
-   * Structure to hold all configuration arguments for a PortAudioInterface instance.
-   */
-  struct Config
-  {
-  public:
-    /** Default contructor to initialise elements to defined values. */
-    Config()
-      : mNumberOfCaptureChannels( 0 )
-      , mNumberOfPlaybackChannels( 0 )
-      , mPeriodSize( 0 )
-      , mSampleRate( 0 )
-      , mClientName("")
-      , mServerName("")
-    {}
-
-    void setCapturePortNames( std::string const baseName,
-			      std::size_t startIndex,
-			      std::size_t endIndex );
-
-    void setPlaybackPortNames( std::string const baseName,
-			       std::size_t startIndex,
-			       std::size_t endIndex );
-
-    std::size_t mNumberOfCaptureChannels;
-    std::size_t mNumberOfPlaybackChannels;
-
-    std::size_t mPeriodSize;
-
-    using SamplingRateType = std::size_t;
-    SamplingRateType mSampleRate;
-
-    std::string mClientName;
-
-    std::string mServerName;
-
-    std::vector< std::string > mCapturePortNames;
-
-    std::vector< std::string > mPlaybackPortNames;
-
-  };
-
-  using Base = AudioInterface;
-
-  explicit JackInterface( Config const & config );
-
-  ~JackInterface( );
-
-  /* virtual */ void start() override;
-
-  /* virtual */ void stop() override;
-
-  /*virtual*/ bool registerCallback( AudioCallback callback, void* userData ) override;
-
-  /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
-private:
-  /**
-   * Private implementation class to avoid dependencies to the Portaudio library in the public interface.
-   */
-  class Impl;
-
-  /**
-   * Private implementation object according to the "pointer to implementation" (pimpl) idiom.
-   */
-  std::unique_ptr<Impl> mImpl;
-};
-
-} // namespace rrl
+    namespace audiointerfaces
+    {
+        
+        class JackInterface: public rrl::AudioInterface
+        {
+        public:
+            /**
+             * Structure to hold all configuration arguments for a PortAudioInterface instance.
+             */
+            struct Config
+            {
+            public:
+                /** Default contructor to initialise elements to defined values. */
+//                Config()
+//                : mClientName("")
+//                , mServerName("")
+//                , mPortJSONConfig("")
+//                {}
+                
+                Config(std::string cliName, std::string servName, std::string portsConfig)
+                : mClientName(cliName)
+                , mServerName(servName)
+                , mPortJSONConfig(portsConfig)
+                {
+                    
+                }
+                
+                void loadJson( std::string const & str, int numCapt, int numPlay );
+                
+                void setCapturePortNames( std::string const baseName,
+                                         std::size_t startIndex,
+                                         std::size_t endIndex );
+                
+                void setPlaybackPortNames( std::string const baseName,
+                                          std::size_t startIndex,
+                                          std::size_t endIndex );
+                
+                std::string mClientName;
+                
+                std::string mServerName;
+                
+                std::string mPortJSONConfig;
+                
+                std::vector< std::string > mCapturePortNames;
+                
+                std::vector< std::string > mPlaybackPortNames;
+                
+            };
+            
+            using Base = AudioInterface;
+            
+            explicit JackInterface(  Configuration const & baseConfig, std::string const & config);
+            
+            ~JackInterface( );
+            
+            /* virtual */ void start() override;
+            
+            /* virtual */ void stop() override;
+            
+            /*virtual*/ bool registerCallback( AudioCallback callback, void* userData ) override;
+            
+            /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
+            
+//            std::size_t mNumberOfCaptureChannels;
+//            std::size_t mNumberOfPlaybackChannels;
+//            
+//            std::size_t mPeriodSize;
+//            
+//            using SamplingRateType = std::size_t;
+//            SamplingRateType mSampleRate;
+            
+        private:
+            /**
+             * Private implementation class to avoid dependencies to the Portaudio library in the public interface.
+             */
+            class Impl;
+            
+        
+//            JackInterface::Config parseSpecificConf( std::string const & config );
+            
+            /**
+             * Private implementation object according to the "pointer to implementation" (pimpl) idiom.
+             */
+            std::unique_ptr<Impl> mImpl;
+        };
+        
+    } // namespace rrl
 } // namespace visr
 
 #endif // #ifndef VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED

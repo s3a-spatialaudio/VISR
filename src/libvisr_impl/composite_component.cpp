@@ -3,6 +3,9 @@
 #include <libril/composite_component.hpp>
 
 #include <libvisr_impl/composite_component_implementation.hpp>
+#include <cstdio> // for getc(), for testing purposes
+#include <iostream>
+
 
 namespace visr
 {
@@ -55,6 +58,7 @@ void CompositeComponent::audioConnection( AudioPortBase & sendPort,
                                           ChannelList const & receiveIndices )
 {
   implementation().audioConnection( sendPort, sendIndices, receivePort, receiveIndices );
+//    std::cout<<implementation().audioConnections()<<std::endl;
 }
 
 

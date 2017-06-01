@@ -8,6 +8,7 @@
 
 #include <librrl/audio_signal_flow.hpp>
 #include <libaudiointerfaces/portaudio_interface.hpp>
+#include <librrl/audio_interface.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -52,8 +53,9 @@ int main( int argc, char const * const * argv )
     }
 
     std::size_t udpPort = 8888;
-    
-    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
+    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
+      
+    audiointerfaces::PortaudioInterface audioInterface(baseConfig, interfaceConfig );
 
     const std::size_t cInterpolationLength = periodSize;
 

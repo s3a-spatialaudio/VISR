@@ -2,10 +2,12 @@
 
 SET( SOURCES
 portaudio_interface.cpp
+audio_interface_factory.cpp
 )
 
 SET( HEADERS
 portaudio_interface.hpp
+audio_interface_factory.hpp
 )
 
 IF( BUILD_USE_JACK )
@@ -22,13 +24,10 @@ ADD_LIBRARY( audiointerfaces STATIC ${SOURCES} ${HEADERS} )
 target_link_libraries( audiointerfaces rrl)
 
 
-#target_link_libraries( rrl ril )
-#target_link_libraries( rrl visr_impl ) # implicitly contained in ril dependency.
-#target_link_libraries( rrl efl )
 target_link_libraries( audiointerfaces ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces ${JACK_LIBRARY} )
 endif( BUILD_USE_JACK )
-
+target_link_libraries( audiointerfaces pml )
 # Add the unit test directory.
-#add_subdirectory( test )
+add_subdirectory( test )

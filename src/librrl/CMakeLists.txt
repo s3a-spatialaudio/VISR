@@ -3,6 +3,7 @@
 SET( SOURCES
 audio_connection_map.cpp
 audio_signal_flow.cpp
+audio_interface.cpp
 communication_area.cpp
 integrity_checking.cpp
 parameter_connection_graph.cpp

@@ -7,7 +7,7 @@
 #include <libril/signal_flow_context.hpp>
 
 #include <libaudiointerfaces/portaudio_interface.hpp>
-
+#include <librrl/audio_interface.hpp>
 #include <libsignalflows/gain_matrix.hpp>
 
 #include <boost/filesystem/operations.hpp>
@@ -86,17 +86,15 @@ int main( int argc, char const * const * argv )
         initialMtx->at( outputIdx, inputIdx ) *= gainAdjustLinear;
       }
     }
-
+      
+    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfInputs,numberOfOutputs,periodSize,samplingRate);
+      
     audiointerfaces::PortaudioInterface::Config interfaceConfig;
-    interfaceConfig.mNumberOfCaptureChannels = numberOfInputs;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputs;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingRate;
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = cAudioBackend;
 
-    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( baseConfig, interfaceConfig );
 
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;

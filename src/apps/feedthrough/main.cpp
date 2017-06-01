@@ -2,7 +2,8 @@
 
 #include "signal_flow.hpp"
 
-// #define FEEDTHROUGH_NATIVE_JACK
+ #define FEEDTHROUGH_NATIVE_JACK
+
 
 #ifdef FEEDTHROUGH_NATIVE_JACK
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -10,8 +11,10 @@
 #include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 
+
 #include <librrl/audio_signal_flow.hpp>
 #include <libril/signal_flow_context.hpp>
+#include <librrl/audio_interface.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -22,39 +25,31 @@ int main( int argc, char const * const * argv )
 {
   using namespace visr;
   using namespace visr::apps::feedthrough;
+  
 
   // define fixed parameters for rendering
   const std::size_t numberOfObjects = 2;
   const std::size_t numberOfLoudspeakers = 2;
 
   const std::size_t periodSize = 128;
-  const std::size_t samplingRate = 48000;
-
-  try 
+  const std::size_t samplingRate = 44100;
+  try
   {
+      rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
+      
+
 #ifdef FEEDTHROUGH_NATIVE_JACK
     audiointerfaces::JackInterface::Config interfaceConfig;
-#else
-    audiointerfaces::PortaudioInterface::Config interfaceConfig;
-#endif
-    interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfLoudspeakers;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingRate;
-#ifdef FEEDTHROUGH_NATIVE_JACK
     interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
     interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfLoudspeakers-1 );
     interfaceConfig.mClientName = "VISR_feedthrough";
+    audiointerfaces::JackInterface audioInterface( baseConfig, interfaceConfig );
 #else
+    audiointerfaces::PortaudioInterface::Config interfaceConfig;
     interfaceConfig.mInterleaved = false;
     interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
     interfaceConfig.mHostApi = "default";
-#endif
-
-#ifdef FEEDTHROUGH_NATIVE_JACK
-    audiointerfaces::JackInterface audioInterface( interfaceConfig );
-#else
-    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( baseConfig, interfaceConfig );
 #endif
 
     SignalFlowContext context( periodSize, samplingRate );
@@ -72,7 +67,7 @@ int main( int argc, char const * const * argv )
 
     audioInterface.stop( );
 
-     audioInterface.unregisterCallback( &rrl::AudioSignalFlow::processFunction );
+    audioInterface.unregisterCallback( &rrl::AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {

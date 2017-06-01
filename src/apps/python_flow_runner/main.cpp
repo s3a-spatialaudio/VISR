@@ -6,13 +6,16 @@
 
 #include "options.hpp"
 
-#include <libril/signal_flow_context.hpp>
+
+#include <librrl/audio_interface.hpp>
 
 #ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
 #include <librrl/audio_signal_flow.hpp>
+#include <libril/signal_flow_context.hpp>
+
 
 #include <libpythonsupport/python_wrapper.hpp>
 #include <libpythonsupport/initialisation_guard.hpp>
@@ -101,32 +104,25 @@ int main( int argc, char const * const * argv )
 #endif
 
     std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
+    visr::rrl::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,periodSize,samplingRate);
 
 #ifdef VISR_JACK_SUPPORT
     if( useNativeJack )
     {
       audiointerfaces::JackInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numInputs;
-      interfaceConfig.mNumberOfPlaybackChannels = numOutputs;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingRate;
       interfaceConfig.setCapturePortNames( "input_", 0, numInputs - 1 );
       interfaceConfig.setPlaybackPortNames( "output_", 0, numOutputs - 1 );
       interfaceConfig.mClientName = objectName;
-      audioInterface.reset( new audiointerfaces::JackInterface( interfaceConfig ) );
+      audioInterface.reset( new audiointerfaces::JackInterface( baseConfig, interfaceConfig ) );
     }
     else
     {
 #endif
       audiointerfaces::PortaudioInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numInputs;
-      interfaceConfig.mNumberOfPlaybackChannels = numOutputs;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingRate;
       interfaceConfig.mInterleaved = false;
       interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
       interfaceConfig.mHostApi = audioBackend;
-      audioInterface.reset( new audiointerfaces::PortaudioInterface( interfaceConfig ) );
+      audioInterface.reset( new audiointerfaces::PortaudioInterface( baseConfig, interfaceConfig  ) );
 #ifdef VISR_JACK_SUPPORT
     }
 #endif

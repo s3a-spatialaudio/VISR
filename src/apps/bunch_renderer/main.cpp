@@ -14,7 +14,7 @@
 #include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 #include <librrl/audio_signal_flow.hpp>
-
+#include <librrl/audio_interface.hpp>
 #include <libsignalflows/bunch_renderer.hpp>
 
 #include <libefl/denormalised_number_handling.hpp>
@@ -158,11 +158,12 @@ int main( int argc, char const * const * argv )
                                      reverbConfiguration );
 
     rrl::AudioSignalFlow audioFlow( flow );
-
+    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,periodSize,samplingRate);
+      
 #ifdef BASELINE_RENDERER_NATIVE_JACK
-    audiointerfaces::JackInterface audioInterface( interfaceConfig );
+    audiointerfaces::JackInterface audioInterface( baseConfig, interfaceConfig );
 #else
-    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( baseConfig, interfaceConfig );
 #endif
 
     audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );

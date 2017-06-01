@@ -10,6 +10,7 @@
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
+#include <librrl/audio_interface.hpp>
 
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
@@ -79,30 +80,23 @@ int main( int argc, char const * const * argv )
     std::size_t const numberOfSignals = flow.numberOfCaptureChannels();
 
     std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
-
+    rrl::AudioInterface::Configuration baseConfig(numberOfSignals,0,blockSize,samplingFrequency);
 #ifdef VISR_JACK_SUPPORT
     if (useNativeJack)
     {
       audiointerfaces::JackInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfSignals;
-      interfaceConfig.mNumberOfPlaybackChannels = 0;
-      interfaceConfig.mPeriodSize = blockSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
       interfaceConfig.setCapturePortNames("input_", 0, numberOfSignals - 1);
       interfaceConfig.mClientName = "S3A network audio streamer";
-      audioInterface.reset(new audiointerfaces::JackInterface(interfaceConfig));
+      audioInterface.reset(new audiointerfaces::JackInterface(baseConfig, interfaceConfig ));
     }
     else
     {
 #endif
       audiointerfaces::PortaudioInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfSignals;
-      interfaceConfig.mNumberOfPlaybackChannels = 0;
-      interfaceConfig.mSampleRate = samplingFrequency;
       interfaceConfig.mInterleaved = false;
       interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
       interfaceConfig.mHostApi = audioBackend;
-      audioInterface.reset( new audiointerfaces::PortaudioInterface(interfaceConfig) );
+      audioInterface.reset( new audiointerfaces::PortaudioInterface(baseConfig, interfaceConfig ) );
 #ifdef VISR_JACK_SUPPORT
     }
 #endif

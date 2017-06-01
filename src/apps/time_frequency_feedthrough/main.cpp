@@ -12,7 +12,8 @@
 #include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 #include <librrl/audio_signal_flow.hpp>
-
+#include <librrl/audio_interface.hpp>
+#include <librrl/audio_interface.hpp>
 #include <libsignalflows/time_frequency_feedthrough.hpp>
 
 #include <algorithm>
@@ -38,16 +39,14 @@ int main( int argc, char const * const * argv )
     std::size_t const dftSize = 2 * windowLength;
 
     SamplingFrequencyType const samplingRate = 48000;
+      visr::rrl::AudioInterface::Configuration baseConfig(numberOfChannels,numberOfChannels,period,samplingRate);
 
 #ifdef NATIVE_JACK
     audiointerfaces::JackInterface::Config interfaceConfig;
 #else
     audiointerfaces::PortaudioInterface::Config interfaceConfig;
 #endif
-    interfaceConfig.mNumberOfCaptureChannels = numberOfChannels;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfChannels;
-    interfaceConfig.mPeriodSize = period;
-    interfaceConfig.mSampleRate = samplingRate;
+   
 #ifdef BASELINE_RENDERER_NATIVE_JACK
     interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
     interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels-1 );
@@ -70,9 +69,9 @@ int main( int argc, char const * const * argv )
     rrl::AudioSignalFlow audioFlow( flow );
 
 #ifdef NATIVE_JACK
-    audiointerfaces::JackInterface audioInterface( interfaceConfig );
+    audiointerfaces::JackInterface audioInterface(  baseConfig, interfaceConfig );
 #else
-    audiointerfaces::PortaudioInterface audioInterface( interfaceConfig );
+    audiointerfaces::PortaudioInterface audioInterface( baseConfig, interfaceConfig );
 #endif
 
     audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
