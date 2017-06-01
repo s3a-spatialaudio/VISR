@@ -88,7 +88,11 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mListenerGainDelayCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay,
+#ifdef USE_MC_DELAY_LINE
+"lagrangeOrder1",
+#else
                                          rcl::DelayVector::InterpolationType::NearestSample,
+#endif
                                          true /* activate control inputs*/,
                                          0.0f, 1.0f );
     mTrackingPositionInput.reset( new TrackingPositionInput( "trackingPositionInput", *this, pml::EmptyParameterConfig() ) );
@@ -217,7 +221,11 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   Afloat const maxDelay = std::ceil( *maxEl ); // Sufficient for nearestSample even if there is no particular compensation for the interpolation method's delay inside.
 
   mOutputAdjustment.setup( numberOfOutputSignals, period(), maxDelay,
-                           rcl::DelayVector::InterpolationType::NearestSample,
+#ifdef USE_MC_DELAY_LINE
+    "lagrangeOrder1",
+#else
+    rcl::DelayVector::InterpolationType::NearestSample,
+#endif
                            false /*No control inputs*/,
                            outputDelays, outputGains );
 

@@ -28,7 +28,12 @@ DelayVector::DelayVector( SignalFlowContext const & context,
 {
   // Initialise and configure audio components
   mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-    0.02f, cInterpolationMethod,
+    0.02f,
+#ifdef USE_MC_DELAY_LINE
+    "lagrangeOrder1",
+#else
+    cInterpolationMethod,
+#endif
     0.0f, 1.0f );
 
   mInput.setWidth( cNumberOfChannels );

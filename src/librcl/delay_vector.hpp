@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 #define VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 
-#define USE_CIRCULAR_BUFFER
+#define USE_MC_DELAY_LINE 1
 
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
@@ -16,10 +16,10 @@
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/vector_parameter.hpp>
 
-#ifdef USE_CIRCULAR_BUFFER
-#include <librbbl/circular_buffer.hpp>
+#ifdef USE_MC_DELAY_LINE
+#include <librbbl/multichannel_delay_line.hpp>
 #else
-#include <libefl/basic_matrix.hpp>
+#include <librbbl/circular_buffer.hpp>
 #endif
 
 #include <cstddef> // for std::size_t
@@ -28,13 +28,12 @@
 
 namespace visr
 {
-
 namespace rcl
 {
 
 /**
  * Audio Component for applying channel-specific delays and gains to a
- * multichanel audio signal.
+ * multichannel audio signal.
  * The delays and gains can be changed at runtime. Optionally, the class
  * features smooth transitions if gains and/or delays are changed.
  * This class has one input port named "in" and one output port named "out".
@@ -54,8 +53,14 @@ public:
   enum class InterpolationType
   {
     NearestSample, /**< Round the delay value to the next integer sample value (zero order interpolation) */
+    LagrangeOrder0 = NearestSample, 
     Linear,        /**< Perform linear interpolation */
-    CubicLagrange  /**< Apply 3rd-order Lagrange interpolation */
+    LagrangeOrder1 = Linear,
+    CubicLagrange,  /**< Apply 3rd-order Lagrange interpolation */
+    LagrangeOrder3 = CubicLagrange,
+    LagrangeOrder5,
+    LagrangeOrder7,
+    LagrangeOrder9
   };
 
   /**
@@ -87,8 +92,12 @@ public:
   void setup( std::size_t numberOfChannels, 
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
+#ifdef USE_MC_DELAY_LINE
+              const char * interpolationMethod,
+#else
               InterpolationType interpolationMethod,
-	      bool controlInputs = false,
+#endif
+              bool controlInputs = false,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
   /**
@@ -111,8 +120,12 @@ public:
   void setup( std::size_t numberOfChannels,
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
+#ifdef USE_MC_DELAY_LINE
+              const char * interpolationMethod,
+#else
               InterpolationType interpolationMethod,
-	      bool controlInputs,
+#endif
+              bool controlInputs,
               efl::BasicVector< SampleType > const & initialDelaysSeconds,
               efl::BasicVector< SampleType > const & initialGainsLinear );
 
@@ -229,38 +242,22 @@ private:
 
   std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > > mGainInput;
 
-#ifdef USE_CIRCULAR_BUFFER
+  /**
+  * The number of simultaneous audio channels.
+  */
+  std::size_t mNumberOfChannels;
+
+#ifdef USE_MC_DELAY_LINE
+  std::unique_ptr<rbbl::MultichannelDelayLine<SampleType> > mDelayLine;
+#else
   /**
    * Vector to hold the pointers to input channel data.
    * At the moment this is required because the implementing rbbl::CircularBuffer class requires this as input.
    * @todo consider (additional) stride-based input format for rbbl::CircularBuffer
    */
   std::valarray<SampleType const * > mInputChannels;
-#endif
 
-  /**
-   * The number of simultaneous audio channels.
-   */
-  std::size_t mNumberOfChannels;
-
-#ifdef USE_CIRCULAR_BUFFER
   std::unique_ptr<rbbl::CircularBuffer<SampleType> > mRingBuffer;
-#else
-  /**
-   * The ring buffer.
-   */
-  efl::BasicMatrix< SampleType > mRingBuffer;
-
-  /**
-   * The current write position in the ring buffer.
-   * @note This value is intentionally positive, because we use it for index calculations.
-   */
-  int mWriteIndex;
-
-  /**
-  * The total length of the ring buffer.
-  */
-  std::size_t mRingbufferLength;
 #endif
 
   /**

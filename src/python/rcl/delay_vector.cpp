@@ -30,9 +30,14 @@ void exportDelayVector( pybind11::module & m )
   dVec.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
     .def( "setup", static_cast<void(DelayVector::*)( std::size_t, std::size_t, SampleType, 
-                                                     DelayVector::InterpolationType, bool, SampleType, SampleType)>(&DelayVector::setup), pybind11::arg("numberOfChannels"),
+#ifdef USE_MC_DELAY_LINE
+      const char *
+#else
+      DelayVector::InterpolationType
+#endif
+                                                     , bool, SampleType, SampleType)>(&DelayVector::setup), pybind11::arg("numberOfChannels"),
       pybind11::arg( "interpolationSteps" ) = 1024, pybind11::arg( "maxDelay" ) = 3.0f,
-      pybind11::arg( "interpolationType" ) = DelayVector::InterpolationType::CubicLagrange,
+      pybind11::arg( "interpolationType" ) /*= DelayVector::InterpolationType::CubicLagrange*/,
           pybind11::arg("controlInputs") = false,
           pybind11::arg( "initialDelay" ) = 0.0f,
       pybind11::arg( "initialGain" ) = 1.0f )

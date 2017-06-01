@@ -35,9 +35,9 @@ BOOST_AUTO_TEST_CASE( instantiateL7 )
   float const mu = -0.25;
 
   std::array<float, order+1> res;
-  lagInt.calculateCoefficients( mu, res );
+  lagInt.calculateCoefficients( mu, &res[0] );
 
-  std::cout << "storage size: " << InterType::storageSize() << std::endl;
+//  std::cout << "storage size: " << InterType::storageSize() << std::endl;
 }
 
 } // namespace test
