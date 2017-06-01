@@ -35,13 +35,13 @@ public:
 
   /**
    * Calculation function.
+   * @param mu The intersample position. Negative values are further into the past (left of the sample), smaller values mean less delay.
+   * @param result Buffer to hold the result, must provide space for \p N+1 elements.
    */
-  void calculateCoefficients( DataType mu, std::array<DataType,N+1> & result ) const;
+  void calculateCoefficients( DataType mu, DataType * result ) const;
 
-
-  static constexpr std::size_t storageSize() { return internalStorageSize(N+1); }
 private:
-
+  static constexpr std::size_t storageSize() { return internalStorageSize( N + 1 ); }
 
   static constexpr std::size_t internalStorageSize( size_t length )
   {

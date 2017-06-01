@@ -83,13 +83,13 @@ void LagrangeInterpolator< DataType, N, reverseCoeffs>::multiplyAndShuffle( Data
 
 template< typename DataType, std::size_t N, bool reverseCoeffs >
 void LagrangeInterpolator<DataType, N, reverseCoeffs>::
-calculateCoefficients( DataType mu, std::array<DataType,N+1> & result ) const
+calculateCoefficients( DataType mu, DataType * result ) const
 {
   std::transform( cOffsets.begin(), cOffsets.end(), mInternalCoeffs.begin(), [mu]( DataType val ) { return val - mu; } );
 
   multiplyAndShuffle< N+1 >( &mInternalCoeffs[0] );
 
-  std::transform( cScaleFactors.begin(), cScaleFactors.end(), mInternalCoeffs.begin(), result.begin(), 
+  std::transform( cScaleFactors.begin(), cScaleFactors.end(), mInternalCoeffs.begin(), result, 
     []( DataType lhs, DataType rhs ) { return lhs * rhs; } );
 }
 
