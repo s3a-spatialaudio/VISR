@@ -332,8 +332,7 @@ namespace visr
             
             if(sampleF) sampleFormat = static_cast<Config::SampleFormat::Type>(*sampleF);
             if(interl) interleaved = *interl;
-            if(mHostA)
-                mHostApi = *mHostA;
+            if(mHostA) mHostApi = *mHostA;
             
             return Config(sampleFormat, interleaved, mHostApi);
             

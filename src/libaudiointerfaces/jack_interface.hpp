@@ -67,7 +67,7 @@ namespace visr
             explicit JackInterface(  Configuration const & baseConfig, std::string const & config);
             
             ~JackInterface( );
-            
+    
             /* virtual */ void start() override;
             
             /* virtual */ void stop() override;
@@ -75,6 +75,8 @@ namespace visr
             /*virtual*/ bool registerCallback( AudioCallback callback, void* userData ) override;
             
             /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
+            
+      
             
 //            std::size_t mNumberOfCaptureChannels;
 //            std::size_t mNumberOfPlaybackChannels;

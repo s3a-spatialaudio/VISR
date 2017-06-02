@@ -102,7 +102,7 @@ public:
 
   virtual bool unregisterCallback( AudioCallback callbackPtr ) = 0;
 
-//  virtual void parseSpecificConf( std::string const & config ) = 0;
+
     
   /**
    * Start the audio interface, i.e., reacting to callbacks and passing them to the registered callback

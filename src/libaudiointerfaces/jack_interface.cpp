@@ -33,8 +33,8 @@ namespace visr
             explicit Impl( Configuration const & baseConfig, std::string const & config );
             
             ~Impl( );
-           
-             
+            
+            
             void start();
             
             void stop();
@@ -42,8 +42,9 @@ namespace visr
             bool registerCallback( AudioCallback callback, void* userData );
             
             bool unregisterCallback( AudioCallback audioCallback );
+            
         private:
-           
+            
             JackInterface::Config parseSpecificConf( std::string const & config );
             
             void process( jack_nframes_t numFrames );
@@ -85,6 +86,8 @@ namespace visr
             std::size_t const mPeriodSize;
             std::size_t mSampleRate;
             
+            
+            
             Base::AudioCallback mCallback;
             
             void* mCallbackUserData;
@@ -108,8 +111,11 @@ namespace visr
             
             jack_client_t* mClient;
             
+            
             bool mInitialised;
             
+            
+            std::string mClientName;
             std::vector<std::string>  mCapturePortNames;
             std::vector<std::string>  mPlaybackPortNames;
             
@@ -137,8 +143,10 @@ namespace visr
         , mPlaybackPorts( mNumPlaybackChannels, nullptr )
         {
             JackInterface::Config config = parseSpecificConf(conf);
-            if(!config.mPortJSONConfig.empty())
-                config.loadJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
+            
+            config.loadJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
+            if(!config.mClientName.empty()) mClientName = config.mClientName;
+            else mClientName = "JackClient";
             mCapturePortNames = config.mCapturePortNames;
             mPlaybackPortNames = config.mPlaybackPortNames;
             
@@ -152,8 +160,10 @@ namespace visr
             {
                 throw std::invalid_argument( "JackInterface: The list of playback port names must have the same number of elements as the playback width." );
             }
+            
             char const * const serverName = config.mServerName.empty() ? "default" : config.mServerName.c_str();
-            char const * const clientName = config.mClientName.c_str();
+            char const * const clientName = mClientName.c_str();
+            
             jack_status_t status;
             jack_options_t options = static_cast<jack_options_t>(JackNoStartServer | JackServerName | JackUseExactName);
             mClient = jack_client_open( clientName, options, &status, serverName );
@@ -191,7 +201,6 @@ namespace visr
             {
                 throw std::logic_error( "JackInterface: The sample rate of the server differs from the requested sample rate of the client." );
             }
-            
         }
         
         JackInterface::Impl::~Impl()
@@ -235,14 +244,14 @@ namespace visr
             if(servN) servName = *servN;
             if(portsC){
                 
-//                std::ostringstream oss;
-//                boost::property_tree::ptree ports = *portsC;
-//                boost::property_tree::ini_parser::write_ini(oss, ports);
-//            portsConfig = oss.str();
+                //                std::ostringstream oss;
+                //                boost::property_tree::ptree ports = *portsC;
+                //                boost::property_tree::ini_parser::write_ini(oss, ports);
+                //            portsConfig = oss.str();
                 portsConfig = *portsC;
-            
+                
             }
-//            std::cout<<"CLI: "<<cliName<<" SERV: "<<servName<<" PORTCONF: "<<std::endl;
+            //            std::cout<<"CLI: "<<cliName<<" SERV: "<<servName<<" PORTCONF: "<<std::endl;
             return Config(cliName, servName, portsConfig);
             
         }
@@ -317,6 +326,45 @@ namespace visr
         
         void JackInterface::Impl::connectPorts()
         {
+            const char **ports;
+            std::cout<<"Connections: "<<std::endl;
+            
+            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
+                fprintf(stderr, "Cannot find any physical capture ports\n");
+                exit(1);
+            }
+            
+            
+            for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
+            {
+                char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
+                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+                
+               
+                if (jack_connect (mClient, ports[captureIdx], name)){
+                    fprintf (stderr, "cannot connect input ports\n");
+                }
+            }
+            
+            free (ports);
+            
+            
+            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
+                fprintf(stderr, "Cannot find any physical playback ports\n");
+                exit(1);
+            }
+            
+            
+            for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
+            {
+                char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
+                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
+                
+                if (jack_connect (mClient, name, ports[playbackIdx])) {
+                    fprintf (stderr, "cannot connect output ports\n");
+                }
+            }
+            free (ports);
             // not implemented yet.
         }
         
@@ -517,29 +565,30 @@ namespace visr
         void JackInterface::Config::loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
         {
             //            std::basic_istream<char> stream
-//            std::stringstream stream(str);
-//            //            std::cout<< "STREAM: "<<stream<<std::endl;
-//            boost::property_tree::ptree tree;
-//            try
-//            {
-//                read_json( stream, tree );
-//            }
-//            catch( std::exception const & ex )
-//            {
-//                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
-//            }
+            //            std::stringstream stream(str);
+            //            //            std::cout<< "STREAM: "<<stream<<std::endl;
+            //            boost::property_tree::ptree tree;
+            //            try
+            //            {
+            //                read_json( stream, tree );
+            //            }
+            //            catch( std::exception const & ex )
+            //            {
+            //                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
+            //            }
             
-//            boost::property_tree::ptree ctree = tree.get_child( "ports");
-
+            //            boost::property_tree::ptree ctree = tree.get_child( "ports");
+            
             int i = 0;
             boost::optional<std::string> captBaseName;
             boost::optional<std::string> inIdxStr;
             boost::optional<std::string> playBaseName;
             boost::optional<std::string> outIdxStr;
+            if(!tree.empty()){
             for(boost::property_tree::ptree::value_type &temp : tree.get_child( "ports")){
                 for(boost::property_tree::ptree::value_type &t2 : temp.second){
                     //                      std::cout<<t2.first<< ": "<<t2.second.data()<<std::endl;
-//                std::cout<<t2.first<<std::endl;
+                    //                std::cout<<t2.first<<std::endl;
                     if(t2.first == "captbasename"){
                         captBaseName = temp.second.get_optional<std::string>( "captbasename" );
                         
@@ -553,7 +602,7 @@ namespace visr
                     i++;
                 }
             }
-            
+            }
             if(!captBaseName){
                 captBaseName ="capture" ;
                 if(inIdxStr){

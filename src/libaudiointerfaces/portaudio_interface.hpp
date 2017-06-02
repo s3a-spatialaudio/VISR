@@ -91,6 +91,7 @@ public:
     
   ~PortaudioInterface( );
 
+    
   /* virtual */ void start() override;
 
   /* virtual */ void stop() override;
@@ -98,6 +99,8 @@ public:
   /*virtual*/ bool registerCallback( AudioCallback callback, void* userData ) override;
 
   /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
+    
+    
 private:
   /**
    * Private implementation class to avoid dependencies to the Portaudio library in the public interface.
