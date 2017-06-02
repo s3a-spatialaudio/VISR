@@ -8,7 +8,7 @@ ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} 
-jack_audio_ports_parser.cpp
+audio_interface_configuration.cpp
 )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} audiointerfaces )

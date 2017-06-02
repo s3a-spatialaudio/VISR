@@ -4,7 +4,7 @@
 #define VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 
 #include <librrl/audio_interface.hpp>
-
+#include <boost/property_tree/ptree.hpp>
 #include <libril/constants.hpp>
 
 #include <memory>
@@ -32,7 +32,7 @@ namespace visr
 //                , mPortJSONConfig("")
 //                {}
                 
-                Config(std::string cliName, std::string servName, std::string portsConfig)
+                Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig)
                 : mClientName(cliName)
                 , mServerName(servName)
                 , mPortJSONConfig(portsConfig)
@@ -40,7 +40,7 @@ namespace visr
                     
                 }
                 
-                void loadJson( std::string const & str, int numCapt, int numPlay );
+                void loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay );
                 
                 void setCapturePortNames( std::string const baseName,
                                          std::size_t startIndex,
@@ -54,7 +54,7 @@ namespace visr
                 
                 std::string mServerName;
                 
-                std::string mPortJSONConfig;
+                boost::property_tree::ptree mPortJSONConfig;
                 
                 std::vector< std::string > mCapturePortNames;
                 

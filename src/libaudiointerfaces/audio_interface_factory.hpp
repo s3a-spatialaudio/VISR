@@ -39,7 +39,7 @@ namespace visr
         static std::unique_ptr<rrl::AudioInterface> create(std::string const & interfaceName, rrl::AudioInterface::Configuration const & baseConfig, std::string const & config);
         
         template< class ConcreteAudioInterface >
-        static void registerParameterType( std::string const & interfaceName );
+        static void registerAudioInterfaceType( std::string const & interfaceName );
         
         
         /**
@@ -90,7 +90,7 @@ namespace visr
     };
     
     template< class ConcreteAudioInterface >
-    void AudioInterfaceFactory::registerParameterType( std::string const & interfaceName )
+    void AudioInterfaceFactory::registerAudioInterfaceType( std::string const & interfaceName )
     {
         creatorTable().insert( std::make_pair( interfaceName, TCreator<ConcreteAudioInterface>() ) );
     }

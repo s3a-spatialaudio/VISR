@@ -2,6 +2,8 @@
 
 #include <librrl/audio_interface.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 
 //#include <libril/parameter_config_base.hpp>
 
@@ -41,4 +43,23 @@ namespace visr
         return std::unique_ptr<rrl::AudioInterface>( findIt->second.create( baseConfig, config ) );
     }
     
+    
+    
+    /**
+     * A helper class with whole purpose is to register the different object types in the factory.
+     */
+    struct InstantiateAudioInterfaceFactory
+    {
+        InstantiateAudioInterfaceFactory()
+        {
+            AudioInterfaceFactory::registerAudioInterfaceType<audiointerfaces::JackInterface>("Jack" );
+            AudioInterfaceFactory::registerAudioInterfaceType<audiointerfaces::PortaudioInterface>("PortAudio" );
+           
+        }
+    };
+    
+    /**
+     * Object which is used to initialise the object factory.
+     */
+    InstantiateAudioInterfaceFactory const cInstantiationHelper;
 } // namespace visr

@@ -9,6 +9,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
 
 
 #include <cassert>
@@ -136,7 +137,8 @@ namespace visr
         , mPlaybackPorts( mNumPlaybackChannels, nullptr )
         {
             JackInterface::Config config = parseSpecificConf(conf);
-            if(!config.mPortJSONConfig.empty()) config.loadJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
+            if(!config.mPortJSONConfig.empty())
+                config.loadJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
             mCapturePortNames = config.mCapturePortNames;
             mPlaybackPortNames = config.mPlaybackPortNames;
             
@@ -217,20 +219,30 @@ namespace visr
             }
             boost::optional<std::string> cliN;
             boost::optional<std::string> servN;
-            boost::optional<std::string> portsC;
+            boost::optional<const boost::property_tree::ptree&> portsC;
             std::string cliName="";
             std::string servName="";
-            std::string portsConfig="";
+            boost::property_tree::ptree portsConfig;
             
             
             cliN = tree.get_optional<std::string>( "clientname" );
             servN = tree.get_optional<std::string>( "servername" );
-            portsC = tree.get_optional<std::string>( "portsconfig" );
+            portsC = tree.get_child_optional("portsconfig");
+            
+            
             
             if(cliN) cliName = *cliN;
             if(servN) servName = *servN;
-            if(portsC) portsConfig = *portsC;
+            if(portsC){
+                
+//                std::ostringstream oss;
+//                boost::property_tree::ptree ports = *portsC;
+//                boost::property_tree::ini_parser::write_ini(oss, ports);
+//            portsConfig = oss.str();
+                portsConfig = *portsC;
             
+            }
+//            std::cout<<"CLI: "<<cliName<<" SERV: "<<servName<<" PORTCONF: "<<std::endl;
             return Config(cliName, servName, portsConfig);
             
         }
@@ -502,22 +514,22 @@ namespace visr
             return mImpl->unregisterCallback( callback );
         }
         
-        void JackInterface::Config::loadJson(std::string const & str, int numCapt, int numPlay )
+        void JackInterface::Config::loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
         {
             //            std::basic_istream<char> stream
-            std::stringstream stream(str);
-            //            std::cout<< "STREAM: "<<stream<<std::endl;
-            boost::property_tree::ptree tree;
-            try
-            {
-                read_json( stream, tree );
-            }
-            catch( std::exception const & ex )
-            {
-                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
-            }
+//            std::stringstream stream(str);
+//            //            std::cout<< "STREAM: "<<stream<<std::endl;
+//            boost::property_tree::ptree tree;
+//            try
+//            {
+//                read_json( stream, tree );
+//            }
+//            catch( std::exception const & ex )
+//            {
+//                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
+//            }
             
-            boost::property_tree::ptree ctree = tree.get_child( "ports");
+//            boost::property_tree::ptree ctree = tree.get_child( "ports");
 
             int i = 0;
             boost::optional<std::string> captBaseName;

@@ -323,16 +323,17 @@ namespace visr
             
             Config::SampleFormat::Type sampleFormat =  Config::SampleFormat::float32Bit ;
             bool interleaved= false;
-            std::string mHostApi="";
+            std::string mHostApi="default";
             
             
-            sampleF = tree.get_optional<int >( "clientname" );
-            interl = tree.get_optional<bool>( "servername" );
-            mHostA = tree.get_optional<std::string>( "portsconfig" );
+            sampleF = tree.get_optional<int >( "sampleformat" );
+            interl = tree.get_optional<bool>( "interleaved" );
+            mHostA = tree.get_optional<std::string>( "hostapi" );
             
             if(sampleF) sampleFormat = static_cast<Config::SampleFormat::Type>(*sampleF);
             if(interl) interleaved = *interl;
-            if(mHostA) mHostApi = *mHostA;
+            if(mHostA)
+                mHostApi = *mHostA;
             
             return Config(sampleFormat, interleaved, mHostApi);
             
