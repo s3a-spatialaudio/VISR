@@ -1,6 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
+#include <boost/algorithm/string.hpp> // case-insensitive string compare
+#include <boost/filesystem.hpp>
+
 // TODO: Eliminate this dependency!
 //#include <librrl/communication_area.hpp>
 
@@ -74,6 +77,10 @@ namespace visr
             std::size_t samplingRate = 44100; // gives error if it's not the same as JackServer
             
             static void init(std::string type, std::string conf){
+                
+                
+                
+                
                 rrl::AudioInterface::Configuration baseConfig(numberOfSources,numberOfLoudspeakers,samplingRate,periodSize);
                 std::cout<<type<<" Specific Configuration: \n"<<conf<<std::endl;
                 std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, conf);
@@ -115,8 +122,20 @@ namespace visr
                 std::string const defSpecConfigJack = "{\"clientname\": \"JackInterface\", \"servername\": \"\", \"portsconfig\" : "+defConfig+"}";
                 std::string const noPortsSpecConfigJack = "{\"clientname\": \"\", \"servername\": \"\", \"portsconfig\" : \"\"}";
                 
+//                init("Jack",defSpecConfigJack);
                 
-                init("Jack",defSpecConfigJack);
+                // alternative way, take configuration from file
+                std::string specConf;
+                const std::string audioIfcConf = "/Users/gc1y17/VISR/visr/config/isvr/audioIfc/jackConf.json";
+                std::ifstream file(audioIfcConf);
+                if(file){
+                    std::ostringstream tmp;
+                    tmp<<file.rdbuf();
+                    specConf = tmp.str();
+                    //            std::cout<<specConf<<std::endl;
+                }
+                init("Jack",specConf);
+                
             }
             
             BOOST_AUTO_TEST_CASE( PortAudioInterfaceTest )
