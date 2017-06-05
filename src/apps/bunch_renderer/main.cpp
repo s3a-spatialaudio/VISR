@@ -7,6 +7,7 @@
 #include "options.hpp"
 
 #include <libril/signal_flow_context.hpp>
+#include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #ifdef BASELINE_RENDERER_NATIVE_JACK
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -105,25 +106,7 @@ int main( int argc, char const * const * argv )
     }
     const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", std::string() );
 
-#ifdef BASELINE_RENDERER_NATIVE_JACK
-    audiointerfaces::JackInterface::Config interfaceConfig;
-#else
-    audiointerfaces::PortaudioInterface::Config interfaceConfig;
-#endif
-    interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingRate;
-#ifdef BASELINE_RENDERER_NATIVE_JACK
-    interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
-    interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels-1 );
-    interfaceConfig.mClientName = "BunchRenderer";
-#else
-    interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = audioBackend;
-#endif
-
+   
     // Assume a fixed length for the interpolation period.
     // Ideally, this roughly matches the update rate of the scene sender.
     const std::size_t cInterpolationLength = 2048;
@@ -158,18 +141,27 @@ int main( int argc, char const * const * argv )
                                      reverbConfiguration );
 
     rrl::AudioSignalFlow audioFlow( flow );
-    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,periodSize,samplingRate);
+    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,samplingRate,periodSize);
+      std::string type;
+      std::string specConf;
       
 #ifdef BASELINE_RENDERER_NATIVE_JACK
-    audiointerfaces::JackInterface audioInterface( baseConfig, interfaceConfig );
+      std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
+      specConf = "{\"clientname\": \"BunchRenderer\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
+      
+      type = "Jack";
 #else
-    audiointerfaces::PortaudioInterface audioInterface( baseConfig, interfaceConfig );
+      specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
+      type = "PortAudio";
 #endif
+      
+    std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+      
 
-    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
+    audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
 
     // should there be a separate start() method for the audio interface?
-    audioInterface.start( );
+    audioInterface->start( );
 
     // Rendering runs until q<Return> is entered on the console.
     std::cout << "S3A baseline renderer running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
@@ -180,11 +172,11 @@ int main( int argc, char const * const * argv )
     }
     while( c != 'q' );
 
-    audioInterface.stop( );
+    audioInterface->stop( );
 
    // Should there be an explicit stop() method for the sound interface?
 
-//    audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
+//    audioInterface->unregisterCallback( &AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

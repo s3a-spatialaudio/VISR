@@ -5,6 +5,7 @@
 // #define NATIVE_JACK
 
 #include <libefl/denormalised_number_handling.hpp>
+#include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #ifdef NATIVE_JACK
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -25,80 +26,74 @@
 
 int main( int argc, char const * const * argv )
 {
-  using namespace visr;
-
-  try
-  {
-    efl::DenormalisedNumbers::State const oldDenormNumbersState
-    = efl::DenormalisedNumbers::setDenormHandling();
-
-    std::size_t const numberOfChannels = 2;
-    std::size_t const period = 256;
-    std::size_t const windowLength = 2 * period;
-    std::size_t const hopSize = period;
-    std::size_t const dftSize = 2 * windowLength;
-
-    SamplingFrequencyType const samplingRate = 48000;
-      visr::rrl::AudioInterface::Configuration baseConfig(numberOfChannels,numberOfChannels,period,samplingRate);
-
-#ifdef NATIVE_JACK
-    audiointerfaces::JackInterface::Config interfaceConfig;
-#else
-    audiointerfaces::PortaudioInterface::Config interfaceConfig;
-#endif
-   
-#ifdef BASELINE_RENDERER_NATIVE_JACK
-    interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
-    interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels-1 );
-    interfaceConfig.mClientName = "BaselineRenderer";
-#else
-    interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = audiointerfaces::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = "default";
-#endif
-
-    SignalFlowContext context( period, samplingRate );
-
-    signalflows::TimeFrequencyFeedthrough flow( context,
-                                        "", nullptr,
-                                        numberOfChannels,
-                                        dftSize,
-                                        windowLength,
-                                        hopSize );
-
-    rrl::AudioSignalFlow audioFlow( flow );
-
-#ifdef NATIVE_JACK
-    audiointerfaces::JackInterface audioInterface(  baseConfig, interfaceConfig );
-#else
-    audiointerfaces::PortaudioInterface audioInterface( baseConfig, interfaceConfig );
-#endif
-
-    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
-
-    // should there be a separate start() method for the audio interface?
-    audioInterface.start( );
-
-    // Rendering runs until q<Return> is entered on the console.
-    std::cout << "S3A time-frequency feedthrough renderer running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
-    char c;
-    do
+    using namespace visr;
+    
+    try
     {
-      c = std::getc( stdin );
+        efl::DenormalisedNumbers::State const oldDenormNumbersState
+        = efl::DenormalisedNumbers::setDenormHandling();
+        
+        std::size_t const numberOfChannels = 2;
+        std::size_t const period = 256;
+        std::size_t const windowLength = 2 * period;
+        std::size_t const hopSize = period;
+        std::size_t const dftSize = 2 * windowLength;
+        
+        SamplingFrequencyType const samplingRate = 48000;
+        visr::rrl::AudioInterface::Configuration baseConfig(numberOfChannels,numberOfChannels,samplingRate,period);
+        
+        std::string type;
+        std::string specConf;
+        
+#ifdef NATIVE_JACK
+        std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
+        specConf = "{\"clientname\": \"BaselineRenderer\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
+        
+        type = "Jack";
+#else
+        specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
+        type = "PortAudio";
+#endif
+        
+        std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        
+        
+        SignalFlowContext context( period, samplingRate );
+        
+        signalflows::TimeFrequencyFeedthrough flow( context,
+                                                   "", nullptr,
+                                                   numberOfChannels,
+                                                   dftSize,
+                                                   windowLength,
+                                                   hopSize );
+        
+        rrl::AudioSignalFlow audioFlow( flow );
+        
+        audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
+        
+        // should there be a separate start() method for the audio interface?
+        audioInterface->start( );
+        
+        // Rendering runs until q<Return> is entered on the console.
+        std::cout << "S3A time-frequency feedthrough renderer running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+        char c;
+        do
+        {
+            c = std::getc( stdin );
+        }
+        while( c != 'q' );
+        
+        audioInterface->stop( );
+        
+        audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
+        
+        efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
     }
-    while( c != 'q' );
-
-    audioInterface.stop( );
-
-    audioInterface.unregisterCallback( &rrl::AudioSignalFlow::processFunction );
-
-    efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
-  }
-  catch( std::exception const & ex )
-  {
-    std::cout << "Exception caught on top level: " << ex.what() << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+    catch( std::exception const & ex )
+    {
+        std::cout << "Exception caught on top level: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    
+    return EXIT_SUCCESS;
 }

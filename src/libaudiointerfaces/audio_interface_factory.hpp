@@ -16,7 +16,7 @@
 
 #include <libril/export_symbols.hpp>
 //#include "parameter_type.hpp"
-//#include <librrl/audio_interface.hpp>
+#include <librrl/audio_interface.hpp>
 
 #include <functional>
 #include <map>

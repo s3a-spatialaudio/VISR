@@ -216,7 +216,7 @@ namespace visr
         JackInterface::Config JackInterface::Impl::parseSpecificConf( std::string const & config ){
             //            std::basic_istream<char> stream
             std::stringstream stream(config);
-            //            std::cout<< "STREAM: "<<stream<<std::endl;
+//            std::cout<< "STREAM: "<<stream.str()<<std::endl;
             boost::property_tree::ptree tree;
             try
             {
@@ -224,7 +224,7 @@ namespace visr
             }
             catch( std::exception const & ex )
             {
-                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
+                throw std::invalid_argument( std::string( "Error while parsing a json node: " ) + ex.what( ) );
             }
             boost::optional<std::string> cliN;
             boost::optional<std::string> servN;
@@ -327,7 +327,7 @@ namespace visr
         void JackInterface::Impl::connectPorts()
         {
             const char **ports;
-            std::cout<<"Connections: "<<std::endl;
+//            std::cout<<"Connections: "<<std::endl;
             
             if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
                 fprintf(stderr, "Cannot find any physical capture ports\n");
@@ -338,11 +338,55 @@ namespace visr
             for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
             {
                 char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
-                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+//                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
                 
                
                 if (jack_connect (mClient, ports[captureIdx], name)){
                     fprintf (stderr, "cannot connect input ports\n");
+                }
+            }
+            
+            free (ports);
+        
+            
+            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
+                fprintf(stderr, "Cannot find any physical playback ports\n");
+                exit(1);
+            }
+            
+            
+            for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
+            {
+                char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
+//                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
+                
+                if (jack_connect (mClient, name, ports[playbackIdx])) {
+                    fprintf (stderr, "cannot connect output ports\n");
+                }
+            }
+            free (ports);
+            
+        }
+        
+        void JackInterface::Impl::disconnectPorts()
+        {
+            const char **ports;
+            std::cout<<"Disconnections: "<<std::endl;
+            
+            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
+                fprintf(stderr, "Cannot find any physical capture ports\n");
+                exit(1);
+            }
+            
+            
+            for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
+            {
+                char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
+//                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+                
+                
+                if (jack_disconnect (mClient, ports[captureIdx], name)){
+                    fprintf (stderr, "cannot disconnect input ports\n");
                 }
             }
             
@@ -358,19 +402,14 @@ namespace visr
             for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
             {
                 char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
-                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
+//                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
                 
-                if (jack_connect (mClient, name, ports[playbackIdx])) {
-                    fprintf (stderr, "cannot connect output ports\n");
+                if (jack_disconnect (mClient, name, ports[playbackIdx])) {
+                    fprintf (stderr, "cannot disconnect output ports\n");
                 }
             }
             free (ports);
-            // not implemented yet.
-        }
-        
-        void JackInterface::Impl::disconnectPorts()
-        {
-            // not implemented yet.
+
         }
         
         void JackInterface::Impl::start()

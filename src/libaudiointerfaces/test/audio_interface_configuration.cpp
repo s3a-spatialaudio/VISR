@@ -80,17 +80,17 @@ namespace visr
                 
                 
                 /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
-                                SignalFlowContext context( periodSize, samplingRate );
-                                Feedthrough topLevel( context, "feedthrough" );
-                                rrl::AudioSignalFlow flow( topLevel );
-                                audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
+                SignalFlowContext context( periodSize, samplingRate );
+                Feedthrough topLevel( context, "feedthrough" );
+                rrl::AudioSignalFlow flow( topLevel );
+                audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
                 /*******************************************************************/
                 
                 audioInterface->start( );
                 // Rendering runs until <Return> is entered on the console.
                 std::getc( stdin );
                 audioInterface->stop( );
-                //                audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
+                audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
             }
             
             
