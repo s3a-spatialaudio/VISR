@@ -20,11 +20,17 @@ class TableInitializer
 public:
   TableInitializer()
   {
-    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType,0> >("nearestSample");
-    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType,0> >("lagrangeOrder0");
-    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType,1> >("lagrangeOrder1");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 0> >( "nearestSample");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 0> >( "lagrangeOrder0");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 1> >( "lagrangeOrder1");
     FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 2> >( "lagrangeOrder2" );
     FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 3> >( "lagrangeOrder3" );
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 4> >( "lagrangeOrder4");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 5> >( "lagrangeOrder5");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 6> >( "lagrangeOrder6");
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 7> >( "lagrangeOrder7" );
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 8> >( "lagrangeOrder8" );
+    FractionalDelayFactory<SampleType>::template registerAlgorithm<LagrangeInterpolator<SampleType, 9> >( "lagrangeOrder9" );
   }
 };
 

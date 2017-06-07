@@ -101,6 +101,8 @@ template class LagrangeInterpolator<float, 4>;
 template class LagrangeInterpolator<float, 5>;
 template class LagrangeInterpolator<float, 6>;
 template class LagrangeInterpolator<float, 7>;
+template class LagrangeInterpolator<float, 8>;
+template class LagrangeInterpolator<float, 9>;
 
 template class LagrangeInterpolator<double, 0>;
 template class LagrangeInterpolator<double, 1>;
@@ -110,6 +112,8 @@ template class LagrangeInterpolator<double, 4>;
 template class LagrangeInterpolator<double, 5>;
 template class LagrangeInterpolator<double, 6>;
 template class LagrangeInterpolator<double, 7>;
+template class LagrangeInterpolator<double, 8>;
+template class LagrangeInterpolator<double, 9>;
 
 } // namespace rbbl
 } // namespace visr
