@@ -7,6 +7,7 @@ fir.cpp
 fft_wrapper_factory.cpp
 ffts_wrapper.cpp
 fractional_delay_base.cpp
+fractional_delay_factory.cpp
 gain_fader.cpp
 gain_matrix.cpp
 kiss_fft_wrapper_double.cpp
@@ -25,7 +26,8 @@ fir.hpp
 fft_wrapper_base.hpp
 fft_wrapper_factory.hpp
 ffts_wrapper.hpp
-fractional_delay_base.cpp
+fractional_delay_base.hpp
+fractional_delay_factory.hpp
 gain_fader.hpp
 gain_matrix.hpp
 kiss_fft_wrapper.hpp
