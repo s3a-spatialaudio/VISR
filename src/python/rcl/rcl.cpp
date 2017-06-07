@@ -12,6 +12,7 @@ namespace rcl
 {
   void exportAdd( pybind11::module & m );
   void exportDelayVector( pybind11::module & m );
+  void exportDelayMatrix( pybind11::module & m );
   void exportFirFilterMatrix( pybind11::module & m );
   void exportGainVector( pybind11::module & m );
   void exportHoaAllRadGainCalculator( pybind11::module & m );
@@ -29,6 +30,7 @@ PYBIND11_PLUGIN(rcl)
   pybind11::module m( "rcl", "VISR atomic component library" );
   using namespace visr::python::rcl;
   exportAdd( m );
+  exportDelayMatrix( m );
   exportDelayVector( m );
   exportFirFilterMatrix( m );
   exportGainVector( m );

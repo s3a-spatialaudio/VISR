@@ -21,12 +21,10 @@ void exportDelayVector( pybind11::module & m )
 
   pybind11::class_<DelayVector, visr::AtomicComponent> dVec( m, "DelayVector" );
 
-  pybind11::enum_<DelayVector::MethodDelayPolicy>( dVec, "MethodDelayPolicy" )
-    .value( "Add", DelayVector::MethodDelayPolicy::Add)
-    .value( "Limit", DelayVector::MethodDelayPolicy::Limit)
-    .value( "Reject", DelayVector::MethodDelayPolicy::Reject )
-    ;
-
+  // Note: We rely that rbbl::MultichannelDelayLine::MethodDelayPolicy (the type behind the alias DelayVector::MethodDelayPolicy)
+  // is already bound in python/rcl/delay_matrix.cpp (this call has to happen before exportDelayVector)
+  // TODO: Consider creating a Python module for librbbl, bind rbbl::MultichannelDelayLine::MethodDelayPolicy there and add
+  // it to the import dependencies of the rcl module
 
   dVec.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )

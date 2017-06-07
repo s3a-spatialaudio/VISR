@@ -2,6 +2,7 @@
 
 set( SOURCES
 add.cpp
+delay_matrix.cpp
 delay_vector.cpp
 fir_filter_matrix.cpp
 gain_vector.cpp
