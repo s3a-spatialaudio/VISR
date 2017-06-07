@@ -10,7 +10,7 @@ ENDIF( BUILD_USE_IPP )
 SET( SOURCES
 denormalised_number_handling.cpp
 error_codes.cpp
-lagrange_interpolator.cpp
+lagrange_coefficient_calculator.cpp
 matrix_functions.cpp
 vector_conversions.cpp
 vector_functions_reference.cpp
@@ -27,7 +27,7 @@ db_linear_conversion.hpp
 degree_radian_conversion.hpp
 denormalised_number_handling.hpp
 error_codes.hpp
-lagrange_interpolator.hpp
+lagrange_coefficient_calculator.hpp
 matrix_functions.hpp
 vector_conversions.hpp
 vector_functions.hpp

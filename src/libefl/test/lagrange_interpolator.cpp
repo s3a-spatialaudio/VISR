@@ -1,13 +1,12 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libefl/lagrange_interpolator.hpp>
-
 #include <libefl/vector_functions.hpp>
 #include <libefl/vector_functions_reference.hpp>
 
 #include <libefl/aligned_array.hpp>
 
 #include <boost/test/unit_test.hpp>
+#include <libefl/lagrange_coefficient_calculator.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -28,7 +27,7 @@ BOOST_AUTO_TEST_CASE( instantiateL7 )
 
   bool const reverseCoefficients = true;
 
-  using InterType = efl::LagrangeInterpolator<float, order, reverseCoefficients>;
+  using InterType = efl::LagrangeCoefficientCalculator<float, order, reverseCoefficients>;
 
   InterType lagInt;
 

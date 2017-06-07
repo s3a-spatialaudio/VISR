@@ -5,12 +5,12 @@
 * @author Andreas Franck a.franck@soton.ac.uk
 */
 
-#ifndef VISR_LIBEFL_LAGRANGE_INTERPOLATOR_HPP_INCLUDED
-#define VISR_LIBEFL_LAGRANGE_INTERPOLATOR_HPP_INCLUDED
+#ifndef VISR_LIBEFL_LAGRANGE_COEFFICIENT_CALCULATOR_HPP_INCLUDED
+#define VISR_LIBEFL_LAGRANGE_COEFFICIENT_CALCULATOR_HPP_INCLUDED
 
 #include <array>
 
-// #define LAGRANGE_INTERPOLATOR_GENERATE_STAGE_TABLES
+// #define LAGRANGE_COEFFICIENT_CALCULATOR_GENERATE_STAGE_TABLES
 
 namespace visr
 {
@@ -25,13 +25,13 @@ namespace efl
  * The latter  enables filtering via a dot product without reversing one of the sequences.
  */
 template< typename DataType, std::size_t N, bool reverseCoeffs = false >
-class LagrangeInterpolator
+class LagrangeCoefficientCalculator
 {
 public:
   /**
    * Default constructor, initialises the constant coefficients.
    */
-  LagrangeInterpolator();
+  LagrangeCoefficientCalculator();
 
   /**
    * Calculation function.
@@ -65,33 +65,6 @@ private:
 
   template<std::size_t length>
   void multiplyAndShuffle( DataType * coeffs ) const;
-  //{
-  //  static constexpr bool oddLength = (length % 2) != 0;
-  //  std::array<DataType, length/2> prod;
-  //  static std::size_t constexpr pairs = length / 2;
-  //  for( std::size_t idx(0); idx < pairs; ++idx )
-  //  {
-  //    prod[idx] = coeffs[2*idx] * coeffs[2*idx]+1;
-  //  }
-  //  // If there is a single coefficient at the last position, leave it as it is.
-  //  if( length % 2 != 0 )
-  //  {
-  //    prod[pairs] = coeffs[length-2];
-  //  }
-  //  multiplyAndShuffle<(length+1)/2>( &prod[0] );
-  //}
-
-  //template<>
-  //void multiplyAndShuffle<2>(  DataType * coeffs )
-  //{
-  //  std::swap( coeffs[0], coeffs[1] );
-  //}
-
-//  template<>
-//  void multiplyAndShuffle<1>(  DataType * coeffs )
-//  {
-//    // nothing to do
-//  }
 
   static DataType offset( std::size_t idx );
 
@@ -106,10 +79,10 @@ private:
 
   static std::array<DataType, N+1> generateScaleFactors();
 
-#if LAGRANGE_INTERPOLATOR_GENERATE_STAGE_TABLES
-  static std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> generateStageSizes();
+#if LAGRANGE_COEFFICIENT_CALCULATOR_GENERATE_STAGE_TABLES
+  static std::array<std::size_t, LagrangeCoefficientCalculator<DataType,N>::numberOfStages()> generateStageSizes();
 
-  static std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> generateStageOffsets();
+  static std::array<std::size_t, LagrangeCoefficientCalculator<DataType,N>::numberOfStages()> generateStageOffsets();
 #endif
   mutable std::array<DataType, internalStorageSize(N+1)> mInternalCoeffs;
 
@@ -117,14 +90,14 @@ private:
 
   const std::array<DataType, N+1> cScaleFactors;
 
-#if LAGRANGE_INTERPOLATOR_GENERATE_STAGE_TABLES
-  static const std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> cStageSizes;
+#if LAGRANGE_COEFFICIENT_CALCULATOR_GENERATE_STAGE_TABLES
+  static const std::array<std::size_t, LagrangeCoefficientCalculator<DataType,N>::numberOfStages()> cStageSizes;
 
-  static const std::array<std::size_t, LagrangeInterpolator<DataType,N>::numberOfStages()> cStageOffsets;
+  static const std::array<std::size_t, LagrangeCoefficientCalculator<DataType,N>::numberOfStages()> cStageOffsets;
 #endif
 };
 
 } // namespace efl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBEFL_LAGRANGE_INTERPOLATOR_HPP_INCLUDED
+#endif // #ifndef VISR_LIBEFL_LAGRANGE_COEFFICIENT_CALCULATOR_HPP_INCLUDED
