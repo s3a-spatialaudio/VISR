@@ -3,7 +3,7 @@
 #include "multichannel_delay_line.hpp"
 
 #include <librbbl/circular_buffer.hpp>
-#include <librbbl/fractional_delay_base.hpp>
+#include <librbbl/fractional_delay_factory.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -24,19 +24,21 @@ MultichannelDelayLine<SampleType>::MultichannelDelayLine( std::size_t numberOfCh
                                                           std::size_t blockLength,
                                                           SampleType maxDelaySeconds,
                                                           char const * interpolationMethod,
+                                                          MethodDelayPolicy methodDelayPolicy,
                                                           std::size_t alignment /*= 0*/ )
-  : mNumberOfChannels( numberOfChannels )
-  , mBlockLength( blockLength )
-  , mSamplingFrequency( static_cast<SampleType>(samplingFrequency) )
-  , mMaxDelaySamples( std::ceil( maxDelaySeconds * samplingFrequency ) )
-  , mRingbuffer( numberOfChannels, static_cast<std::size_t>(mMaxDelaySamples)+blockLength, alignment ) // Ideally this would include the implementation delay.
+  : cNumberOfChannels( numberOfChannels )
+  , cBlockLength( blockLength )
+  , cSamplingFrequency( static_cast<SampleType>(samplingFrequency) )
+  , cMaxDelaySamples( std::ceil( maxDelaySeconds * samplingFrequency ) )
+  , cMethodDelayPolicy( methodDelayPolicy )
+  , mRingbuffer( numberOfChannels, static_cast<std::size_t>(cMaxDelaySamples)+blockLength, alignment ) // Ideally this would include the implementation delay.
+  , mInterpolator( FractionalDelayFactory<SampleType>::create( interpolationMethod, blockLength ) )
+  , cMethodDelay( mInterpolator ? mInterpolator->methodDelay() : static_cast<SampleType>(0.0) )
 {
-  mInterpolator =  FractionalDelayFactory<SampleType>::create( interpolationMethod, blockLength );
   if( not mInterpolator )
   {
     throw std::invalid_argument( "MultichannelDelayLine: interpolator type not implemented.");
   }
-  mImplementationDelay = mInterpolator->methodDelay();
 }
 
 template< typename SampleType >
@@ -45,11 +47,14 @@ MultichannelDelayLine<SampleType>::~MultichannelDelayLine() = default;
 template< typename SampleType >
 std::size_t MultichannelDelayLine<SampleType>::numberOfChannels() const
 {
-  return mBlockLength;
+  return cNumberOfChannels;
 }
 
 template< typename SampleType >
-std::size_t MultichannelDelayLine<SampleType>::blockLength() const { return mBlockLength; }
+std::size_t MultichannelDelayLine<SampleType>::blockLength() const
+{
+  return cBlockLength;
+}
 
 template< typename SampleType >
 void MultichannelDelayLine<SampleType>::write( SampleType const * input,
@@ -57,7 +62,7 @@ void MultichannelDelayLine<SampleType>::write( SampleType const * input,
                                                std::size_t numberOfChannels,
                                                std::size_t alignment )
 {
-  mRingbuffer.write( input, channelStride, mNumberOfChannels, mBlockLength, alignment );
+  mRingbuffer.write( input, channelStride, cNumberOfChannels, cBlockLength, alignment );
 }
 
 template< typename SampleType >
@@ -67,17 +72,43 @@ void MultichannelDelayLine<SampleType>::interpolate( SampleType * output,
                                                      SampleType startDelay, SampleType endDelay,
                                                      SampleType startGain, SampleType endGain )
 {
-  if( channelIdx >= mNumberOfChannels )
+  if( channelIdx >= cNumberOfChannels )
   {
     throw std::invalid_argument( "MultichannelDelayLine<SampleType>::interpolate()" );
   }
 
-  mInterpolator->interpolate( mRingbuffer.getReadPointer(channelIdx, 0 ),
+  mInterpolator->interpolate( mRingbuffer.getReadPointer(channelIdx, 1 ), // The '0' position is one past the the last written sample, so we have to get the '1' position.
     output,
     numberOfSamples,
-    startDelay * mSamplingFrequency, endDelay * mSamplingFrequency,
+    adjustDelay(startDelay), adjustDelay(endDelay),
     startGain, endGain );
 }
+
+template <typename SampleType >
+SampleType MultichannelDelayLine<SampleType>::
+adjustDelay( SampleType rawDelay ) const
+{
+  rawDelay *= cSamplingFrequency; // Scale from seconds to samples.
+  if( rawDelay > cMaxDelaySamples )
+  {
+    throw std::out_of_range( "LagrangeInterpolator::interpolate(): Delay exceeds the maximum admissible value." );
+  }
+  switch( cMethodDelayPolicy )
+  {
+    case MethodDelayPolicy::Add:
+      return rawDelay; // method delay is added automatically
+    case MethodDelayPolicy::Limit:
+      return std::max( rawDelay - cMethodDelay, static_cast<SampleType>(0.0) );
+    case MethodDelayPolicy::Reject:
+      if( rawDelay < cMethodDelay )
+      {
+        throw std::out_of_range( "LagrangeInterpolator::interpolate(): Delay is smaller than the method delay and the \"Reject\" strategy is selected." );
+      }
+      return rawDelay - cMethodDelay;
+  }
+  throw std::logic_error( "LagrangeInterpolator::interpolate(): Unhandled method delay adjustment policy type" );
+}
+
 
 // Explicit instantiations
 template class MultichannelDelayLine<float>;

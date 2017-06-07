@@ -3,7 +3,8 @@
 #ifndef VISR_LIBRBBL_MULTICHANNEL_DELAY_LINE_HPP_INCLUDED
 #define VISR_LIBRBBL_MULTICHANNEL_DELAY_LINE_HPP_INCLUDED
 
-#include <librbbl/circular_buffer.hpp>
+#include "circular_buffer.hpp"
+#include "fractional_delay_base.hpp"
 
 #include <libril/constants.hpp>
 
@@ -16,8 +17,6 @@ namespace visr
 {
 namespace rbbl
 {
-template< typename SampleType >
-class FractionalDelayBase;
 
 /**
  * Generic class for MIMO convolution using a uniformly partioned fast convolution algorithm.
@@ -29,6 +28,18 @@ template< typename SampleType >
 class MultichannelDelayLine
 {
 public:
+  /**
+   * Enumeration for how to incorporate the implementation delay of the method into the interpolation.
+   * The implementation (or method) delay is the delay introduced by the fractional delay algorithm itself.
+   */
+  enum class MethodDelayPolicy: char
+  {
+    Add, /**< Always add the implementation delay to the nominal amount of delay. */
+    Limit, /**< Compensate the implementation delay, but limit to the minimum admissible delay if the nominal delay
+    is smaller than the implementation delay */
+    Reject /**< Throw an exception if the nominal delay value is lower than the method delay. */
+  };
+
   /**
   * Constructor.
   * @param numberOfInputs The number of input signals processed.
@@ -49,6 +60,7 @@ public:
                                   std::size_t blockLength,
                                   SampleType maxDelaySeconds,
                                   char const * interpolationMethod,
+                                  MethodDelayPolicy methodDelayPolicy = MethodDelayPolicy::Add,
                                   std::size_t alignment = 0 );
 
   ~MultichannelDelayLine();
@@ -69,20 +81,28 @@ public:
                     SampleType startGain, SampleType endGain );
 
 private:
+  /**
+   * Adjust the delay for the method delay of the interpolator depending on the chosen policy.
+   * @throw std::out_of_range if the
+   * @throw std::out_of_range if the delay value is lower than the method delay and the "reject" policy is chosen.
+   */
+  SampleType adjustDelay( SampleType rawDelay ) const;
 
-  std::size_t const mNumberOfChannels;
+  std::size_t const cNumberOfChannels;
 
-  std::size_t const mBlockLength;
+  std::size_t const cBlockLength;
 
-  SampleType const mSamplingFrequency;
+  SampleType const cSamplingFrequency;
 
-  SampleType const mMaxDelaySamples;
+  SampleType const cMaxDelaySamples;
 
-  SampleType mImplementationDelay;
+  MethodDelayPolicy const cMethodDelayPolicy;
 
   rbbl::CircularBuffer<SampleType> mRingbuffer;
 
   std::unique_ptr<FractionalDelayBase<SampleType> > mInterpolator;
+
+  SampleType cMethodDelay;
 };
 
 } // namespace rbbl
