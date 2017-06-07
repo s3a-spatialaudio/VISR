@@ -23,10 +23,10 @@ void exportDelayVector( pybind11::module& m )
 {
   pybind11::class_<::visr::signalflows::DelayVector, CompositeComponent>( m, "DelayVector" )
     .def( pybind11::init<SignalFlowContext const &, const char *, CompositeComponent *,
-      std::size_t, std::size_t, rcl::DelayVector::InterpolationType>(),
+      std::size_t, std::size_t, char const *>(),
       pybind11::arg("context"), pybind11::arg( "name"), pybind11::arg( "parent"),
       pybind11::arg( "numberOfChannels"), pybind11::arg( "interpolationPeriod"),
-      pybind11::arg( "interpolationMethod")=rcl::DelayVector::InterpolationType::Linear)
+      pybind11::arg( "interpolationMethod")= "lagrangeOrder3" )
     ;
 }
 

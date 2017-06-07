@@ -3,8 +3,6 @@
 #ifndef VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 #define VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED
 
-#define USE_MC_DELAY_LINE 1
-
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -16,11 +14,7 @@
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/vector_parameter.hpp>
 
-#ifdef USE_MC_DELAY_LINE
 #include <librbbl/multichannel_delay_line.hpp>
-#else
-#include <librbbl/circular_buffer.hpp>
-#endif
 
 #include <cstddef> // for std::size_t
 #include <memory>
@@ -28,6 +22,7 @@
 
 namespace visr
 {
+
 namespace rcl
 {
 
@@ -46,22 +41,7 @@ class DelayVector: public AtomicComponent
 {
   using SampleType = visr::SampleType;
 public:
-  /**
-   * Enumeration to denote the type of fractional-delay filtering used.
-   * TODO: Add more methods as appropriate.
-   */
-  enum class InterpolationType
-  {
-    NearestSample, /**< Round the delay value to the next integer sample value (zero order interpolation) */
-    LagrangeOrder0 = NearestSample, 
-    Linear,        /**< Perform linear interpolation */
-    LagrangeOrder1 = Linear,
-    CubicLagrange,  /**< Apply 3rd-order Lagrange interpolation */
-    LagrangeOrder3 = CubicLagrange,
-    LagrangeOrder5,
-    LagrangeOrder7,
-    LagrangeOrder9
-  };
+  using MethodDelayPolicy = rbbl::MultichannelDelayLine<SampleType>::MethodDelayPolicy;
 
   /**
    * Constructor.
@@ -92,11 +72,8 @@ public:
   void setup( std::size_t numberOfChannels, 
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
-#ifdef USE_MC_DELAY_LINE
               const char * interpolationMethod,
-#else
-              InterpolationType interpolationMethod,
-#endif
+              MethodDelayPolicy methodDelayPolicy,
               bool controlInputs = false,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
@@ -110,7 +87,7 @@ public:
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
   * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
-   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
+  * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
   * @param initialDelaysSeconds The delays for all channels in
   * seconds. The number of elements of this vector must match the channel number of this object.
   * @param initialGainsLinear The initial gain values for all
@@ -120,11 +97,8 @@ public:
   void setup( std::size_t numberOfChannels,
               std::size_t interpolationSteps,
               SampleType maximumDelaySeconds,
-#ifdef USE_MC_DELAY_LINE
               const char * interpolationMethod,
-#else
-              InterpolationType interpolationMethod,
-#endif
+              MethodDelayPolicy methodDelayPolicy,
               bool controlInputs,
               efl::BasicVector< SampleType > const & initialDelaysSeconds,
               efl::BasicVector< SampleType > const & initialGainsLinear );
@@ -140,7 +114,7 @@ public:
    * This method triggers a new fading process for a smooth transition
    * between the current and the new gain and delay values.
    * The semantics of the smooth transition are as follows:
-   * - If the component is currently not in a transistion process
+   * - If the component is currently not in a transition process
    * (i.e., at least <b>interpolationSteps</b> samples after the
    * previous parameter change), a new transition process is started.
    * - If component is currently within a transition process, a new
@@ -195,38 +169,6 @@ public:
   void setGain( efl::BasicVector< SampleType > const & newGains );
 
 private:
-  /**
-   * Internal implementation method to apply zero-order delay filtering (round to nearest sample)
-   * to a vector of samples.
-   * @param startDelay The delay (in samples) for the first sample.
-   * @param endDelay The delay (in samples) for the sample following the last in the buffer.
-   * @param startGain The delay (linear scale) for the first sample.
-   * @param endGain The gain (linear scale) for the sample following the last in the buffer.
-   * @param numberOfSamples the number of samples to be processed.
-   */
-  void delayNearestSample( SampleType startDelay, SampleType endDelay,
-                           SampleType startGain, SampleType endGain,
-                           SampleType const * ringBuffer,
-                           SampleType * output, std::size_t numberOfSamples );
-
-  /**
-   * Internal implementation method to apply first-order delay filtering (linear interpolation)
-   * to a vector of samples.
-   * @param startDelay The delay (in samples) for the first sample.
-   * @param endDelay The delay (in samples) for the sample following the last in the buffer.
-   * @param startGain The delay (linear scale) for the first sample.
-   * @param endGain The gain (linear scale) for the sample following the last in the buffer.
-   * @param numberOfSamples the number of samples to be processed.
-   */
-  void delayLinearInterpolation( SampleType startDelay, SampleType endDelay,
-                                 SampleType startGain, SampleType endGain,
-                                 SampleType const * ringBuffer,
-                                 SampleType * output, std::size_t numberOfSamples );
-
-  /**
-   * The delay filtering method to be applied.
-   */
-  InterpolationType mInterpolationMethod;
 
   /**
    * The audio input port for this component.
@@ -247,18 +189,21 @@ private:
   */
   std::size_t mNumberOfChannels;
 
-#ifdef USE_MC_DELAY_LINE
   std::unique_ptr<rbbl::MultichannelDelayLine<SampleType> > mDelayLine;
-#else
-  /**
-   * Vector to hold the pointers to input channel data.
-   * At the moment this is required because the implementing rbbl::CircularBuffer class requires this as input.
-   * @todo consider (additional) stride-based input format for rbbl::CircularBuffer
-   */
-  std::valarray<SampleType const * > mInputChannels;
 
-  std::unique_ptr<rbbl::CircularBuffer<SampleType> > mRingBuffer;
-#endif
+  std::size_t mDelayInterpolationCounter;
+
+  /**
+   * Counter specifying the current state of the transition between 'old' and 'new' gain and delay values.
+   * Is in the range between 0 (start of transition) and \p mInterpolationBlocks (transition finished).
+   */
+  std::size_t mGainInterpolationCounter;
+
+  /**
+   * Number of process() iterations it takes to interpolate between the start and end value.
+   * Set in the setup() method an remains constant during runtime.
+   */
+  std::size_t mInterpolationBlocks;
 
   /**
   * The current gain value.

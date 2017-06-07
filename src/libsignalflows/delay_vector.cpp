@@ -15,11 +15,8 @@ DelayVector::DelayVector( SignalFlowContext const & context,
                           CompositeComponent * parent, 
                           std::size_t numberOfChannels,
                           std::size_t interpolationPeriod,
-                          rcl::DelayVector::InterpolationType interpolationMethod )
+                          char const * interpolationMethod )
   : CompositeComponent( context, "", parent )
-  , cNumberOfChannels( numberOfChannels )
-  , cInterpolationSteps( interpolationPeriod )
-  , cInterpolationMethod( interpolationMethod )
   , mDelay( context, "DelayVector", this )
   , mInput( "input", *this )
   , mOutput( "output", *this )
@@ -27,17 +24,10 @@ DelayVector::DelayVector( SignalFlowContext const & context,
   , mDelayInput( "globalDelayInput", *this, pml::VectorParameterConfig( numberOfChannels ) )
 {
   // Initialise and configure audio components
-  mDelay.setup( cNumberOfChannels, cInterpolationSteps,
-    0.02f,
-#ifdef USE_MC_DELAY_LINE
-    "lagrangeOrder1",
-#else
-    cInterpolationMethod,
-#endif
-    0.0f, 1.0f );
-
-  mInput.setWidth( cNumberOfChannels );
-  mOutput.setWidth( cNumberOfChannels );
+  mDelay.setup( numberOfChannels, interpolationPeriod, 0.02f, interpolationMethod,
+                rcl::DelayVector::MethodDelayPolicy::Limit, 0.0f, 1.0f );
+  mInput.setWidth( numberOfChannels );
+  mOutput.setWidth( numberOfChannels );
 
   audioConnection( mInput, mDelay.audioPort("in") );
   audioConnection( mDelay.audioPort( "out" ), mOutput );

@@ -28,17 +28,11 @@ public:
                         CompositeComponent * parent,
                         std::size_t cNumberOfChannels,
                         std::size_t interpolationPeriod,
-                        rcl::DelayVector::InterpolationType interpolationMethod );
+                        char const * interpolationMethod );
 
   ~DelayVector();
 
 private:
-  const std::size_t cNumberOfChannels;
-
-  const std::size_t cInterpolationSteps;
-
-  rcl::DelayVector::InterpolationType const cInterpolationMethod;
-
   rcl::DelayVector mDelay;
 
   AudioInput mInput;
