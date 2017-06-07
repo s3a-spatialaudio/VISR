@@ -128,7 +128,7 @@ bool DoubleBufferingProtocol::disconnectOutput( CommunicationProtocolBase::Outpu
 
 DoubleBufferingProtocol::InputBase::InputBase()
   : mProtocol( nullptr )
-  , mChanged( true ) // Mark the data as changed for the first iteration
+  , mChanged( false ) // Do not signal changed values on startup (unless they are explicitly set)
 {
 }
 
