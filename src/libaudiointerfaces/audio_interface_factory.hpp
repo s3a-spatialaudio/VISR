@@ -33,7 +33,8 @@ namespace visr
 //    class ParameterConfigBase;
 //    template<class ConcreteType, class ParameterConfig, ParameterType> class TypedParameterBase;
     
-    class VISR_CORE_LIBRARY_SYMBOL AudioInterfaceFactory
+    class //VISR_CORE_LIBRARY_SYMBOL 
+      AudioInterfaceFactory
     {
     public:
         static std::unique_ptr<rrl::AudioInterface> create(std::string const & interfaceName, rrl::AudioInterface::Configuration const & baseConfig, std::string const & config);

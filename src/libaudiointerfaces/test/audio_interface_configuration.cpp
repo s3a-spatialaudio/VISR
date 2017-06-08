@@ -14,7 +14,7 @@
 
 
 
-#include <libaudiointerfaces/jack_interface.hpp>
+//#include <libaudiointerfaces/jack_interface.hpp>
 
 
 #include <libaudiointerfaces/portaudio_interface.hpp>
@@ -71,9 +71,9 @@ namespace visr
                 rcl::Add mSum;
             };
             
-            std::size_t numberOfSources = 4;
+            std::size_t numberOfSources = 2;
             std::size_t numberOfLoudspeakers = 2;
-            std::size_t periodSize = 516;
+            std::size_t periodSize = 512;
             std::size_t samplingRate = 44100; // gives error if it's not the same as JackServer
             
             static void init(std::string type, std::string conf){
@@ -97,7 +97,7 @@ namespace visr
                 audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
             }
             
-            
+#ifdef VISR_JACK_SUPPORT
             BOOST_AUTO_TEST_CASE( JackInterfaceTest )
             {
                 /********************************* JACK PORT CONFIGURATION STRINGS ********************************************************/
@@ -140,31 +140,33 @@ namespace visr
                 init("Jack",specConf);
                 
             }
-            
+#endif       
             BOOST_AUTO_TEST_CASE( PortAudioInterfaceTest )
             {
                 
                 /********************************* PORTAUDIO SPECIFIC CONFIGURATION  ********************************************************/
-                std::string const defSpecConfigPortAudio = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
+                std::string const defSpecConfigPortAudio = "{\"sampleformat\": \"float32Bit\", \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
                 
                 std::string specConf;
-                boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
-                boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/audioIfc/portAudioDefConf.json" );
-                
-                BOOST_CHECK_MESSAGE( exists(bfile), "Audio Interface configuration json file does not exist." );
-                
-                //                const std::string audioIfcConf = "visr/config/isvr/audioIfc/jackConf.json";
-                std::ifstream file(bfile.c_str());
-                
-                if(file){
-                    std::ostringstream tmp;
-                    tmp<<file.rdbuf();
-                    specConf = tmp.str();
-                    //            std::cout<<specConf<<std::endl;
-                }
+               /* boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
+                boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/audioIfc/portAudioDefConf.json" );*/
+                boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "\config" );
+                boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr\audioIfc\portAudioDefConf.json" );
+                /*std::cout << bfile.parent_path().c_str() << std::endl;*/
+                //BOOST_CHECK_MESSAGE( exists(bfile), "Audio Interface configuration json file does not exist." );
+                //
+                ////                const std::string audioIfcConf = "visr/config/isvr/audioIfc/jackConf.json";
+                //std::ifstream file(bfile.c_str());
+                //
+                //if(file){
+                //    std::ostringstream tmp;
+                //    tmp<<file.rdbuf();
+                //    specConf = tmp.str();
+                //             std::cout<<specConf<<std::endl;
+                //}
 
                 
-                init("PortAudio",specConf);
+                init("PortAudio", defSpecConfigPortAudio );
             }
         }
     } // namespace rrl

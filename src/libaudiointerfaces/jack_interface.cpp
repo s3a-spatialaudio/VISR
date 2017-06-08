@@ -268,7 +268,7 @@ namespace visr
             boost::optional<std::string> cliN;
             boost::optional<std::string> servN;
             boost::optional<bool> autoC;
-            boost::optional<const boost::property_tree::ptree&> portsC;
+            boost::optional<boost::property_tree::ptree> portsC;
             std::string cliName="";
             std::string servName="";
             bool autoConn = false;

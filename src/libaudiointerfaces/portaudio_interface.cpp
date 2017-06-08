@@ -315,7 +315,7 @@ namespace visr
             }
             catch( std::exception const & ex )
             {
-                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
+                throw std::invalid_argument( std::string( "Error while parsing a json portaudio configuration string: " ) + ex.what( ) );
             }
             boost::optional<std::string> sampleF;
             boost::optional<bool> interl;
