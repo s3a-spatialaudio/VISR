@@ -45,6 +45,10 @@ void exportBasicMatrix( pybind11::module & m, char const * className )
     {
       throw std::invalid_argument( "efl::BasicMatrix from numpy ndarray: Input array must be 2D" );
     }
+    if( data.dtype() != pybind11::dtype::of<DataType>() )
+    {
+      throw std::invalid_argument( "efl::BasicMatrix from numpy ndarray: Input matrix has a different data type (dtype)." );
+    }
     std::size_t const numRows = data.shape()[0];
     std::size_t const numCols = data.shape()[1];
     new (&inst) efl::BasicMatrix<DataType>( numRows, numCols, alignment);
@@ -89,6 +93,10 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
     if( data.ndim() != 2 )
     {
       throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input array must be 2D" );
+    }
+    if( data.dtype() != pybind11::dtype::of<DataType>() )
+    {
+      throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input matrix has a different data type (dtype)." );
     }
     std::size_t const numRows = data.shape()[0];
     std::size_t const numCols = data.shape()[1];
