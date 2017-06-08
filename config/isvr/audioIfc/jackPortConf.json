@@ -1,0 +1,15 @@
+{ "ports":[  
+	{ 
+		"captbasename": "Baseinput_", 
+		“captindexes": "0:1"
+		"inputbasename": "system:capture_" 
+		"inputindexes": "0:1"
+	},
+	{ 
+		"playbasename": "Baseoutput_", 
+		“playindexes": "0:1"
+		“outputbasename": "system:playback_", 
+		"outputindexes": "0:1"
+	} 
+]
+}";

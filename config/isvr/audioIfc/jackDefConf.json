@@ -1,0 +1,49 @@
+{
+    "clientname": "BaseRenderer",
+    "servername": "",
+    "autoconnect" : "true",
+    "portconfig":
+    {
+        "capture":
+        {
+            "autoconnect" : "true",
+            "port":
+             [{
+               "basename" : "Baseinput_" ,
+               "indices": "0:1",
+               "externalport" :
+               {
+               "client" : "system",
+               "portname": "capture_",
+               "indices": "1:2"
+               }
+             },
+              {
+              "basename" : "Baseinput_" ,
+              "indices": "2:3",
+              "externalport" :
+              {
+              "client" : "system",
+              "portname": "capture_",
+              "indices": "4:5"
+              }
+              }
+              ]
+        },
+        "playback":
+        {
+            "autoconnect" : "true",
+            "port":
+             [{
+               "basename" : "Baseoutput_" ,
+               "indices": "0:1",
+              "externalport" :
+              {
+               "client" : "system",
+               "portname": "playback_",
+               "indices": "4:5"
+               }
+             }]
+        }
+    }
+}

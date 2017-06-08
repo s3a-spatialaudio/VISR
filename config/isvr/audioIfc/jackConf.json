@@ -1,0 +1,12 @@
+{
+  "clientname": "BaseRenderer", 
+  "servername": "", 
+  "portsconfig" : 
+  { 
+    "ports":
+    [
+      {"captbasename": "Baseinput_"},
+      {"playbasename": "Baseoutput_"} 
+    ]
+  }
+}
