@@ -109,7 +109,7 @@ int main( int argc, char const * const * argv )
         const std::size_t numberOfObjects = cmdLineOptions.getOption<std::size_t>("input-channels");
         const std::size_t periodSize = cmdLineOptions.getDefaultedOption<std::size_t>("period", 1024);
         const std::size_t numberOfEqSections = cmdLineOptions.getDefaultedOption<std::size_t>("object-eq-sections", 0);
-        const std::size_t samplingRate = cmdLineOptions.getDefaultedOption<std::size_t>("sampling-frequency", 48000);
+        const std::size_t samplingRate = cmdLineOptions.getDefaultedOption<std::size_t>("sampling-frequency", 44100);
         
         const std::string audioBackend = cmdLineOptions.getDefaultedOption<std::string>("audio-backend", "default");
         

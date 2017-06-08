@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
+#include <iostream>
 
 namespace visr
 {
@@ -41,6 +43,28 @@ public:
           };
       };
       SampleFormat::Type mSampleFormat;
+      
+      using TranslateSampleFormatMapTypeString = std::map<std::string, SampleFormat::Type >;
+      TranslateSampleFormatMapTypeString const cTranslateSampleFormatMapString = {
+          {"signedInt8Bit", SampleFormat::signedInt8Bit },
+          {"unsignedInt8Bit", SampleFormat::unsignedInt8Bit },
+          {"signedInt16Bit", SampleFormat::signedInt16Bit },
+          {"unsignedInt16Bit", SampleFormat::unsignedInt16Bit },
+          {"signedInt24Bit", SampleFormat::signedInt24Bit },
+          {"unsignedInt24Bit", SampleFormat::unsignedInt24Bit },
+          {"signedInt32Bit", SampleFormat::signedInt32Bit },
+          {"unsignedInt32Bit", SampleFormat::unsignedInt32Bit },
+          {"float32Bit", SampleFormat::float32Bit }
+      };
+
+      SampleFormat::Type translateToSampleFormat( std::string format)
+      {
+          auto const findIt = cTranslateSampleFormatMapString.find( format );
+          if( findIt == cTranslateSampleFormatMapString.end() ) {
+              throw std::invalid_argument( "The given sample format does not match a sample format in portaudio." );
+          }
+          return findIt->second;
+      }
 
 //    /** Default contructor to initialise elements to defined values. */
 //    Config()
@@ -50,12 +74,12 @@ public:
 //    {}
 // 
       
-      Config( SampleFormat::Type sampleFormat, bool interleaved, std::string mHostApi)
-      : mSampleFormat(sampleFormat)
-      , mInterleaved(interleaved)
+      Config( std::string sampleFormat, bool interleaved, std::string mHostApi)
+      : mInterleaved(interleaved)
       , mHostApi(mHostApi)
       {
-
+ 
+          mSampleFormat = translateToSampleFormat(sampleFormat);
       }
 
     std::size_t mNumberOfCaptureChannels;

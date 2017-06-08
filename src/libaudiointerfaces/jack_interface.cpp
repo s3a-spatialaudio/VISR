@@ -83,6 +83,8 @@ namespace visr
             
             std::size_t const mNumCaptureChannels;
             std::size_t const mNumPlaybackChannels;
+            
+            
             std::size_t const mPeriodSize;
             std::size_t mSampleRate;
             
@@ -118,6 +120,13 @@ namespace visr
             std::string mClientName;
             std::vector<std::string>  mCapturePortNames;
             std::vector<std::string>  mPlaybackPortNames;
+            std::vector<std::string>  mInExternalPortNames;
+            std::vector<std::string>  mOutExternalPortNames;
+            
+            std::string mInExtClientName;
+            std::string mOutExtClientName;
+            bool mInAutoConnect;
+            bool mOutAutoConnect;
             
             std::vector<jack_port_t*> mCapturePorts;
             
@@ -144,12 +153,41 @@ namespace visr
         {
             JackInterface::Config config = parseSpecificConf(conf);
             
-            config.loadJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
+            //            config.loadPortConfigJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
+            
+            if(!config.mPortJSONConfig.empty()){
+                boost::property_tree::ptree ptype;
+                ptype = config.mPortJSONConfig.get_child("capture");
+                config.loadPortConfig(ptype, config.mInExtClientName, config.mCapturePortNames, mInExternalPortNames, mNumCaptureChannels, config.mInAutoConnect);
+                ptype = config.mPortJSONConfig.get_child("playback");
+                config.loadPortConfig(ptype, config.mOutExtClientName, config.mPlaybackPortNames, mOutExternalPortNames, mNumPlaybackChannels, config.mOutAutoConnect);
+            }
             if(!config.mClientName.empty()) mClientName = config.mClientName;
             else mClientName = "JackClient";
+            
+            
+            std::sort(config.mCapturePortNames.begin(),config.mCapturePortNames.end());
+            std::sort(config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end());
+            if(std::adjacent_find(config.mCapturePortNames.begin(),config.mCapturePortNames.end())!=config.mCapturePortNames.end())
+            {
+                std::cout<<"mCapPorts: "<< mCapturePortNames.size()<<" mCapChan: "<< mNumCaptureChannels<< std::endl;
+                throw std::invalid_argument( "JackInterface: Duplicate port names are not allowed, as well as overlapping indices" );
+            }
+            if(std::adjacent_find(config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end())!=config.mPlaybackPortNames.end())
+            {
+                throw std::invalid_argument( "JackInterface: Duplicate port names are not allowed, as well as overlapping indices" );
+            }
+            
+            
+            
+
             mCapturePortNames = config.mCapturePortNames;
             mPlaybackPortNames = config.mPlaybackPortNames;
             
+            mInExtClientName = config.mInExtClientName;
+            mOutExtClientName = config.mOutExtClientName;
+            mInAutoConnect = config.mInAutoConnect;
+            mOutAutoConnect = config.mOutAutoConnect;
             
             if( mCapturePortNames.size() != mNumCaptureChannels )
             {
@@ -160,6 +198,7 @@ namespace visr
             {
                 throw std::invalid_argument( "JackInterface: The list of playback port names must have the same number of elements as the playback width." );
             }
+            
             
             char const * const serverName = config.mServerName.empty() ? "default" : config.mServerName.c_str();
             char const * const clientName = mClientName.c_str();
@@ -216,7 +255,7 @@ namespace visr
         JackInterface::Config JackInterface::Impl::parseSpecificConf( std::string const & config ){
             //            std::basic_istream<char> stream
             std::stringstream stream(config);
-//            std::cout<< "STREAM: "<<stream.str()<<std::endl;
+            //            std::cout<< "STREAM: "<<stream.str()<<std::endl;
             boost::property_tree::ptree tree;
             try
             {
@@ -228,16 +267,18 @@ namespace visr
             }
             boost::optional<std::string> cliN;
             boost::optional<std::string> servN;
+            boost::optional<bool> autoC;
             boost::optional<const boost::property_tree::ptree&> portsC;
             std::string cliName="";
             std::string servName="";
+            bool autoConn = false;
             boost::property_tree::ptree portsConfig;
             
             
             cliN = tree.get_optional<std::string>( "clientname" );
             servN = tree.get_optional<std::string>( "servername" );
-            portsC = tree.get_child_optional("portsconfig");
-            
+            portsC = tree.get_child_optional("portconfig");
+            autoC = tree.get_optional<bool>( "autoconnect" );
             
             
             if(cliN) cliName = *cliN;
@@ -251,8 +292,9 @@ namespace visr
                 portsConfig = *portsC;
                 
             }
+            if(autoC) autoConn = *autoC;
             //            std::cout<<"CLI: "<<cliName<<" SERV: "<<servName<<" PORTCONF: "<<std::endl;
-            return Config(cliName, servName, portsConfig);
+            return Config(cliName, servName, portsConfig, autoConn);
             
         }
         
@@ -260,6 +302,7 @@ namespace visr
         {
             for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
             {
+//                std::cout<< "REGISTERING PORTNAME: "<<mCapturePortNames[captureIdx].c_str()<<std::endl;
                 jack_port_t * newPort = jack_port_register( mClient,
                                                            mCapturePortNames[captureIdx].c_str(),
                                                            JACK_DEFAULT_AUDIO_TYPE,
@@ -326,90 +369,92 @@ namespace visr
         
         void JackInterface::Impl::connectPorts()
         {
-            const char **ports;
-//            std::cout<<"Connections: "<<std::endl;
             
-            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
-                fprintf(stderr, "Cannot find any physical capture ports\n");
-                exit(1);
-            }
-            
-            
-            for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
-            {
-                char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
-//                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+            //            std::cout<<"Connections: "<<std::endl;
+            if(mInAutoConnect){
                 
-               
-                if (jack_connect (mClient, ports[captureIdx], name)){
-                    fprintf (stderr, "cannot connect input ports\n");
-                }
-            }
-            
-            free (ports);
-        
-            
-            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
-                fprintf(stderr, "Cannot find any physical playback ports\n");
-                exit(1);
-            }
-            
-            
-            for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
-            {
-                char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
-//                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
                 
-                if (jack_connect (mClient, name, ports[playbackIdx])) {
-                    fprintf (stderr, "cannot connect output ports\n");
+                //                const char **ports;
+                //                if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
+                //                    fprintf(stderr, "Cannot find any physical capture ports\n");
+                //                    exit(1);
+                //                }
+                //
+                
+                for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
+                {
+                    char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
+                    //                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+                    
+                    char const * nameExt = (mInExtClientName +":"+ mInExternalPortNames[captureIdx]).c_str();
+                    //                    std::cout<<nameExt << " ----> "<<name << std::endl;
+                    if (jack_connect (mClient, nameExt, name)){
+                        fprintf (stderr, "cannot connect input ports\n");
+                    }
+                    //                    if (jack_connect (mClient, ports[captureIdx], name)){
+                    //                        fprintf (stderr, "cannot connect input ports\n");
+                    //                    }
                 }
+                
+                //                free (ports);
             }
-            free (ports);
-            
+            if(mOutAutoConnect){
+                //                const char **ports;
+                
+                //                if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
+                //                    fprintf(stderr, "Cannot find any physical playback ports\n");
+                //                    exit(1);
+                //                }
+                //
+                
+                for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
+                {
+                    char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
+                    //                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
+                    char const * nameExt = (mOutExtClientName +":"+ mOutExternalPortNames[playbackIdx]).c_str();
+                    
+                    //                    std::cout<<nameExt << " ----> "<<name << std::endl;
+                    
+                    if (jack_connect (mClient, name, nameExt)) {
+                        fprintf (stderr, "cannot connect output ports\n");
+                    }
+                    //                    if (jack_connect (mClient, name, ports[playbackIdx])) {
+                    //                        fprintf (stderr, "cannot connect output ports\n");
+                    //                    }
+                }
+                //                free (ports);
+            }
         }
         
         void JackInterface::Impl::disconnectPorts()
         {
-            const char **ports;
-            std::cout<<"Disconnections: "<<std::endl;
-            
-            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
-                fprintf(stderr, "Cannot find any physical capture ports\n");
-                exit(1);
-            }
-            
-            
-            for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
-            {
-                char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
-//                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+            if(mInAutoConnect){
                 
-                
-                if (jack_disconnect (mClient, ports[captureIdx], name)){
-                    fprintf (stderr, "cannot disconnect input ports\n");
+                for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
+                {
+                    char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
+                    //                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
+                    char const * nameExt = (mInExtClientName +":"+ mInExternalPortNames[captureIdx]).c_str();
+                    
+                    if (jack_disconnect (mClient, nameExt, name)){
+                        fprintf (stderr, "cannot disconnect input ports\n");
+                    }
                 }
             }
             
-            free (ports);
-            
-            
-            if ((ports = jack_get_ports (mClient, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
-                fprintf(stderr, "Cannot find any physical playback ports\n");
-                exit(1);
-            }
-            
-            
-            for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
-            {
-                char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
-//                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
-                
-                if (jack_disconnect (mClient, name, ports[playbackIdx])) {
-                    fprintf (stderr, "cannot disconnect output ports\n");
+            if(mOutAutoConnect){
+                for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
+                {
+                    char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
+                    //                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
+                    char const * nameExt = (mOutExtClientName +":"+ mOutExternalPortNames[playbackIdx]).c_str();
+                    
+                    if (jack_disconnect (mClient, name, nameExt)) {
+                        fprintf (stderr, "cannot disconnect output ports\n");
+                    }
                 }
             }
-            free (ports);
-
+            
         }
         
         void JackInterface::Impl::start()
@@ -601,106 +646,225 @@ namespace visr
             return mImpl->unregisterCallback( callback );
         }
         
-        void JackInterface::Config::loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
+        //        void JackInterface::Config::loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
+        //        {
+        //
+        //            int i = 0;
+        //            boost::optional<std::string> captBaseName;
+        //            boost::optional<std::string> inIdxStr;
+        //            boost::optional<std::string> playBaseName;
+        //            boost::optional<std::string> outIdxStr;
+        //            if(!tree.empty()){
+        //            for(boost::property_tree::ptree::value_type &temp : tree.get_child( "ports")){
+        //                for(boost::property_tree::ptree::value_type &t2 : temp.second){
+        //                    //                      std::cout<<t2.first<< ": "<<t2.second.data()<<std::endl;
+        //                    //                std::cout<<t2.first<<std::endl;
+        //                    if(t2.first == "captbasename"){
+        //                        captBaseName = temp.second.get_optional<std::string>( "captbasename" );
+        //
+        //                        inIdxStr = temp.second.get_optional<std::string>( "inindexes" );
+        //
+        //                    }else if(t2.first =="playbasename"){
+        //                        playBaseName = temp.second.get_optional<std::string>( "playbasename" );
+        //
+        //                        outIdxStr = temp.second.get_optional<std::string>( "outindexes" );
+        //                    }
+        //                    i++;
+        //                }
+        //            }
+        //            }
+        //            if(!captBaseName){
+        //                captBaseName ="capture" ;
+        //                if(inIdxStr){
+        //                    //err?
+        //                }
+        //            }
+        //
+        //            if(inIdxStr){
+        //                visr::pml::IndexSequence const inIndices( *inIdxStr );
+        //                std::size_t const inNumEntries = inIndices.size( );
+        //                mCapturePortNames.resize( inNumEntries );
+        //
+        //                for( std::size_t entryIdx( 0 ); entryIdx < inNumEntries; ++entryIdx )
+        //                {
+        //                    std::stringstream str;
+        //                    str << *captBaseName << inIndices[entryIdx];
+        //                    mCapturePortNames[entryIdx] = str.str();
+        //                }
+        //            }else{
+        //                mCapturePortNames.resize( numCapt );
+        //                for( std::size_t entryIdx( 0 ); entryIdx < numCapt; ++entryIdx )
+        //                {
+        //                    std::stringstream str;
+        //                    str << *captBaseName << entryIdx;
+        //                    mCapturePortNames[entryIdx] = str.str();
+        //                }
+        //            }
+        //
+        //
+        //            if(!playBaseName){
+        //                playBaseName = "playback";
+        //                if (outIdxStr){
+        //                    //err?
+        //                }
+        //            }
+        //
+        //            if (outIdxStr){
+        //                visr::pml::IndexSequence const outIndices( *outIdxStr );
+        //                std::size_t const outNumEntries = outIndices.size( );
+        //                mPlaybackPortNames.resize( outNumEntries );
+        //
+        //                for( std::size_t entryIdx( 0 ); entryIdx < outNumEntries; ++entryIdx )
+        //                {
+        //                    std::stringstream str;
+        //                    str << *playBaseName << outIndices[entryIdx];
+        //                    mPlaybackPortNames[entryIdx] = str.str();
+        //                }
+        //
+        //            }else{
+        //                mPlaybackPortNames.resize( numPlay );
+        //                for( std::size_t entryIdx( 0 ); entryIdx < numPlay; ++entryIdx )
+        //                {
+        //                    std::stringstream str;
+        //                    str << *playBaseName << entryIdx;
+        //                    mPlaybackPortNames[entryIdx] = str.str();
+        //                }
+        //            }
+        //        }
+        //        }
+        
+        void JackInterface::Config::loadPortConfigJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
         {
-            //            std::basic_istream<char> stream
-            //            std::stringstream stream(str);
-            //            //            std::cout<< "STREAM: "<<stream<<std::endl;
-            //            boost::property_tree::ptree tree;
-            //            try
-            //            {
-            //                read_json( stream, tree );
-            //            }
-            //            catch( std::exception const & ex )
-            //            {
-            //                throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
-            //            }
             
-            //            boost::property_tree::ptree ctree = tree.get_child( "ports");
-            
-            int i = 0;
-            boost::optional<std::string> captBaseName;
-            boost::optional<std::string> inIdxStr;
-            boost::optional<std::string> playBaseName;
-            boost::optional<std::string> outIdxStr;
             if(!tree.empty()){
-            for(boost::property_tree::ptree::value_type &temp : tree.get_child( "ports")){
-                for(boost::property_tree::ptree::value_type &t2 : temp.second){
-                    //                      std::cout<<t2.first<< ": "<<t2.second.data()<<std::endl;
-                    //                std::cout<<t2.first<<std::endl;
-                    if(t2.first == "captbasename"){
-                        captBaseName = temp.second.get_optional<std::string>( "captbasename" );
+                //                for(boost::property_tree::ptree::value_type &root : tree.get_child("portconfig")){
+                ////                    for(boost::property_tree::ptree::value_type &t2 : temp.second){
+                //                                              std::cout<<root.first<< ": "<<root.second.data()<<std::endl;
+                //                    std::string porttype = root.first;
+                //                for(boost::property_tree::ptree::value_type &ptype : root.second){
+                //                boost::property_tree::ptree ptype;
+                //                ptype = tree.get_child("capture");
+                //                loadPorts(ptype,"capture",numCapt,numPlay);
+                //                ptype = tree.get_child("playback");
+                //                loadPorts(ptype,"playback",numCapt,numPlay);
+                //
+                //                                        std::cout<<temp.first<<std::endl;
+                //                        if(t2.first == "captbasename"){
+                //                            captBaseName = temp.second.get_optional<std::string>( "captbasename" );
+                //
+                //                            inIdxStr = temp.second.get_optional<std::string>( "inindexes" );
+                //
+                //                        }else if(t2.first =="playbasename"){
+                //                            playBaseName = temp.second.get_optional<std::string>( "playbasename" );
+                //
+                //                            outIdxStr = temp.second.get_optional<std::string>( "outindexes" );
+                //                        }
+                //                        i++;
+                //                    }
+                //                }
+            }
+            
+        }
+        
+        void JackInterface::Config::loadPortConfig(boost::property_tree::ptree tree, std::string & extClientName, std::vector< std::string > & portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn){
+            if(!tree.empty()){
+                boost::optional<bool> autoConnect;
+                boost::optional<std::string> baseName;
+                boost::optional<std::string> indicesStr;
+                boost::optional<std::string> extBaseName;
+                boost::optional<std::string> extIndicesStr;
+                boost::optional<std::string> extClient;
+                
+                boost::property_tree::ptree port, extPort;
+                
+                //                for(boost::property_tree::ptree::value_type &root : tree.get_child(type)){
+                //                    for(boost::property_tree::ptree::value_type &t2 : temp.second){
+                //                    std::cout<<root.first<< ": "<<root.second.data()<<std::endl;
+                autoConnect = tree.get_optional<bool>( "autoconnect" );
+                if(autoConnect) autoConn = *autoConnect;
+                
+                
+                 portNames.resize( numPorts );
+                extPortNames.resize( numPorts );
+                 std::size_t globalIdx( 0 );
+                std::size_t extGlobalIdx( 0 );
+               
+                for(boost::property_tree::ptree::value_type &pconf : tree.get_child("port")){
+                    //                    std::cout<<pconf.first<< ": "<<pconf.second.data()<<std::endl;
+                    baseName = pconf.second.get_optional<std::string>( "basename" );
+                    indicesStr = pconf.second.get_optional<std::string>( "indices" );
+                    extPort = pconf.second.get_child("externalport");
+                    //                    std::cout<<baseName<< ", "<<indicesStr<<std::endl;
+                    if(indicesStr && baseName){
+                        visr::pml::IndexSequence const inIndices( *indicesStr );
+                        std::size_t const inNumEntries = inIndices.size( );
+//                        portNames.resize( inNumEntries );
                         
-                        inIdxStr = temp.second.get_optional<std::string>( "inindexes" );
-                        
-                    }else if(t2.first =="playbasename"){
-                        playBaseName = temp.second.get_optional<std::string>( "playbasename" );
-                        
-                        outIdxStr = temp.second.get_optional<std::string>( "outindexes" );
+                        for( std::size_t entryIdx( 0 ) ; entryIdx < inNumEntries; ++entryIdx, ++globalIdx )
+                        {
+                            std::stringstream str;
+                            str << *baseName << inIndices[entryIdx];
+//                            std::cout<<"PORTNAMES: "<<str.str()<<" GLOB: "<<globalIdx<<std::endl;
+
+                            portNames[globalIdx] = str.str();
+                        }
+                    }else{
+                        if(!baseName){
+                            baseName ="visr" ;
+                        }
+                       
+                        for(std::size_t entryIdx( 0 ); entryIdx < numPorts; ++entryIdx, ++globalIdx)
+                        {
+                            std::stringstream str;
+                            str << *baseName << entryIdx;
+                            portNames[globalIdx] = str.str();
+                        }
                     }
-                    i++;
-                }
-            }
-            }
-            if(!captBaseName){
-                captBaseName ="capture" ;
-                if(inIdxStr){
-                    //err?
-                }
-            }
-            
-            if(inIdxStr){
-                visr::pml::IndexSequence const inIndices( *inIdxStr );
-                std::size_t const inNumEntries = inIndices.size( );
-                mCapturePortNames.resize( inNumEntries );
-                
-                for( std::size_t entryIdx( 0 ); entryIdx < inNumEntries; ++entryIdx )
-                {
-                    std::stringstream str;
-                    str << *captBaseName << inIndices[entryIdx];
-                    mCapturePortNames[entryIdx] = str.str();
-                }
-            }else{
-                mCapturePortNames.resize( numCapt );
-                for( std::size_t entryIdx( 0 ); entryIdx < numCapt; ++entryIdx )
-                {
-                    std::stringstream str;
-                    str << *captBaseName << entryIdx;
-                    mCapturePortNames[entryIdx] = str.str();
-                }
-            }
-            
-            
-            if(!playBaseName){
-                playBaseName = "playback";
-                if (outIdxStr){
-                    //err?
-                }
-            }
-            
-            if (outIdxStr){
-                visr::pml::IndexSequence const outIndices( *outIdxStr );
-                std::size_t const outNumEntries = outIndices.size( );
-                mPlaybackPortNames.resize( outNumEntries );
-                
-                for( std::size_t entryIdx( 0 ); entryIdx < outNumEntries; ++entryIdx )
-                {
-                    std::stringstream str;
-                    str << *playBaseName << outIndices[entryIdx];
-                    mPlaybackPortNames[entryIdx] = str.str();
+                    
+                    
+                    if(autoConn){
+                        extClient = extPort.get_optional<std::string>( "client" );
+                        extBaseName = extPort.get_optional<std::string>( "portname" );
+                        extIndicesStr = extPort.get_optional<std::string>( "indices" );
+                        //                                        std::cout<<"TREEDATA: "<< ", "<<tree.data()<<std::endl;
+                        if(!extClient){
+                            throw std::invalid_argument( "JackInterface: if autoconnect is true you must specify external client's name" );
+                        }
+                        if(!extBaseName){
+                            throw std::invalid_argument( "JackInterface: if autoconnect is true you must specify external client's port basename" );
+                        }
+                        extClientName = *extClient;
+                        if(extIndicesStr){
+                            visr::pml::IndexSequence const extInIndices( *extIndicesStr );
+                            std::size_t const extInNumEntries = extInIndices.size( );
+                            
+                            
+                            for( std::size_t extEntryIdx( 0 ); extEntryIdx < extInNumEntries; ++extEntryIdx,++extGlobalIdx )
+                            {
+                                std::stringstream str;
+                                str << *extBaseName << extInIndices[extEntryIdx];
+//                               std::cout<<"EXTPORTNAMES: "<<str.str()<<" GLOB: "<<extGlobalIdx<<std::endl;
+                                extPortNames[extGlobalIdx] = str.str();
+                            }
+                        }else{
+                            
+                            for( std::size_t extEntryIdx( 0 ); extEntryIdx < numPorts; ++extEntryIdx,++extGlobalIdx )
+                            {
+                                std::stringstream str;
+                                str << *extBaseName << extEntryIdx;
+                                extPortNames[extGlobalIdx] = str.str();
+                            }
+                        }
+                    }
                 }
                 
-            }else{
-                mPlaybackPortNames.resize( numPlay );
-                for( std::size_t entryIdx( 0 ); entryIdx < numPlay; ++entryIdx )
-                {
-                    std::stringstream str;
-                    str << *playBaseName << entryIdx;
-                    mPlaybackPortNames[entryIdx] = str.str();
-                }
+                //                for(boost::property_tree::ptree::value_type &pconf : tree.get_child("externalport")){
+                //                    //                    std::cout<<pconf.first<< ": "<<pconf.second.data()<<std::endl;
+                //
+                //                }
+                
             }
         }
-        //        }
         
         
         void JackInterface::Config::setCapturePortNames( std::string const baseName,

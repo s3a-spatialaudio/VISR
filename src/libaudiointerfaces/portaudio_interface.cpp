@@ -35,8 +35,7 @@ namespace visr
                 { PortaudioInterface::Config::SampleFormat::signedInt32Bit, paInt32 },
                 { PortaudioInterface::Config::SampleFormat::float32Bit, paFloat32 }
             };
-            
-            /**
+                        /**
              * Translate the format enumeration into the portaudio type.
              * @throw std::invalid_argument if the sample format does not exist in portaudio
              */
@@ -56,6 +55,7 @@ namespace visr
                     return (findIt->second) bitor paNonInterleaved;
                 }
             }
+            
             
             using TranslateHostApiNameToTypeMapType = std::map< std::string, PaHostApiTypeId >;
             TranslateHostApiNameToTypeMapType const cTranslateHostApiNameToType =
@@ -80,7 +80,7 @@ namespace visr
                 auto const findIt = cTranslateHostApiNameToType.find( apiName );
                 if( findIt == cTranslateHostApiNameToType.end( ) )
                 {
-                    throw std::invalid_argument( "The given API name does not a supported portaudio API." );
+                    throw std::invalid_argument( "The given API name is not a supported portaudio API." );
                 }
                 return findIt->second;
             }
@@ -145,7 +145,7 @@ namespace visr
             
             
             Config::SampleFormat::Type mSampleFormat;
-            
+//            std::string mSampleFormat;
             
             
             bool mInterleaved;
@@ -317,20 +317,20 @@ namespace visr
             {
                 throw std::invalid_argument( std::string( "Error while parsing a json ParametricIirCoefficient node: " ) + ex.what( ) );
             }
-            boost::optional<int> sampleF;
+            boost::optional<std::string> sampleF;
             boost::optional<bool> interl;
             boost::optional<std::string> mHostA;
             
-            Config::SampleFormat::Type sampleFormat =  Config::SampleFormat::float32Bit ;
+            std::string sampleFormat =  "Float32" ;
             bool interleaved= false;
             std::string mHostApi="default";
             
             
-            sampleF = tree.get_optional<int >( "sampleformat" );
+            sampleF = tree.get_optional<std::string>( "sampleformat" );
             interl = tree.get_optional<bool>( "interleaved" );
             mHostA = tree.get_optional<std::string>( "hostapi" );
             
-            if(sampleF) sampleFormat = static_cast<Config::SampleFormat::Type>(*sampleF);
+            if(sampleF) sampleFormat = *sampleF;
             if(interl) interleaved = *interl;
             if(mHostA) mHostApi = *mHostA;
             

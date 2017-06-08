@@ -26,21 +26,24 @@ namespace visr
             {
             public:
                 /** Default contructor to initialise elements to defined values. */
-//                Config()
-//                : mClientName("")
-//                , mServerName("")
-//                , mPortJSONConfig("")
-//                {}
+                //                Config()
+                //                : mClientName("")
+                //                , mServerName("")
+                //                , mPortJSONConfig("")
+                //                {}
                 
-                Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig)
+                Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect = false)
                 : mClientName(cliName)
                 , mServerName(servName)
+                , mInAutoConnect(autoConnect)
+                , mOutAutoConnect(autoConnect)
                 , mPortJSONConfig(portsConfig)
                 {
                     
                 }
                 
-                void loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay );
+                void loadPortConfigJson(boost::property_tree::ptree tree, int numCapt, int numPlay );
+                void loadPortConfig(boost::property_tree::ptree tree, std::string & extClient, std::vector< std::string > &portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn );
                 
                 void setCapturePortNames( std::string const baseName,
                                          std::size_t startIndex,
@@ -51,6 +54,10 @@ namespace visr
                                           std::size_t endIndex );
                 
                 std::string mClientName;
+                std::string mInExtClientName;
+                std::string mOutExtClientName;
+                bool mInAutoConnect;
+                bool mOutAutoConnect;
                 
                 std::string mServerName;
                 
@@ -67,7 +74,7 @@ namespace visr
             explicit JackInterface(  Configuration const & baseConfig, std::string const & config);
             
             ~JackInterface( );
-    
+            
             /* virtual */ void start() override;
             
             /* virtual */ void stop() override;
@@ -76,15 +83,15 @@ namespace visr
             
             /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
             
-      
             
-//            std::size_t mNumberOfCaptureChannels;
-//            std::size_t mNumberOfPlaybackChannels;
-//            
-//            std::size_t mPeriodSize;
-//            
-//            using SamplingRateType = std::size_t;
-//            SamplingRateType mSampleRate;
+            
+            //            std::size_t mNumberOfCaptureChannels;
+            //            std::size_t mNumberOfPlaybackChannels;
+            //
+            //            std::size_t mPeriodSize;
+            //
+            //            using SamplingRateType = std::size_t;
+            //            SamplingRateType mSampleRate;
             
         private:
             /**
@@ -92,8 +99,8 @@ namespace visr
              */
             class Impl;
             
-        
-//            JackInterface::Config parseSpecificConf( std::string const & config );
+            
+            //            JackInterface::Config parseSpecificConf( std::string const & config );
             
             /**
              * Private implementation object according to the "pointer to implementation" (pimpl) idiom.
