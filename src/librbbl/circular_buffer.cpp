@@ -140,6 +140,38 @@ void CircularBuffer<DataType>::write( DataType const * const * writeData,
 }
 
 template< typename DataType >
+void CircularBuffer<DataType>::write( DataType const * writeData,
+                                      std::size_t channelStrideElements,
+                                      std::size_t numberOfChannels,
+                                      std::size_t numberOfSamples,
+                                      std::size_t alignmentElements /*= 0*/ )
+{
+  // TODO: Check minimum alignment, also taking into account the the write head position and the stride.
+  std::size_t minAlignment = std::min<std::size_t>( alignmentElements, 1 ); // for now, use the worst-case alignment.
+
+  if( numberOfChannels != mNumberOfChannels )
+  {
+    throw std::invalid_argument( "CircularBuffer::write(): The number of data channels differs from the number of channels in the circular buffer" );
+  }
+  if( numberOfSamples > mLength )
+  {
+    throw std::invalid_argument( "CircularBuffer::write(): The number samples to be written exceeds the length of the circular buffer" );
+  }
+  // TODO: Consider using a 'strided' copy function.
+  for( std::size_t chIdx( 0 ); chIdx < mNumberOfChannels; ++chIdx )
+  {
+    DataType const * srcPtr = writeData + chIdx * channelStrideElements;
+    DataType * destPtr = mBasePointer + chIdx * mStride + mWriteHeadIndex;
+    efl::ErrorCode res = efl::vectorCopy( srcPtr, destPtr, numberOfSamples, minAlignment );
+    if( res != efl::noError )
+    {
+      throw std::invalid_argument( "CircularBuffer::write( ): Copying of data vector failed." );
+    }
+  }
+  mWriteHeadIndex = mImpl->advanceWriteIndex( mWriteHeadIndex, numberOfSamples );
+}
+
+template< typename DataType >
 void CircularBuffer<DataType>::write( efl::BasicMatrix<DataType> const & writeData )
 {
   // TODO: Check minimum alignment, also taking into account the the write head position and the stride.

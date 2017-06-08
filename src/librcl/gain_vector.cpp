@@ -6,6 +6,8 @@
 
 #include <libpml/vector_parameter_config.hpp>
 
+#include <librbbl/gain_fader.hpp>
+
 #include <cassert>
 #include <ciso646>
 #include <cmath>
@@ -15,17 +17,19 @@ namespace visr
 namespace rcl
 {
 
-  GainVector::GainVector( SignalFlowContext const & context,
-                            char const * name,
-                            CompositeComponent * parent /*= nullptr*/ )
+GainVector::GainVector( SignalFlowContext const & context,
+                        char const * name,
+                        CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
  , mCurrentGains(cVectorAlignmentSamples)
  , mNextGains(cVectorAlignmentSamples)
- , mRamp(cVectorAlignmentSamples)
 {
 }
+
+
+GainVector::~GainVector() = default;
 
 void GainVector::setup( std::size_t numberOfChannels,
                          std::size_t interpolationSteps,
@@ -65,8 +69,10 @@ void GainVector::setup( std::size_t numberOfChannels,
 
   mInterpolationPeriods = ( (interpolationSteps+period()-1) / period() ); // integer ceil() function
   mInterpolationCounter = 0;
-  mRamp.resize( (mInterpolationPeriods+1)*period() );
 
+  mFader.reset( new rbbl::GainFader<SampleType>( period() /*blockSize*/,
+                                                 interpolationSteps,
+                                                 cVectorAlignmentSamples ) );
 }
 
 void GainVector::process()
@@ -77,8 +83,6 @@ void GainVector::process()
     mGainInput->resetChanged();
   }
 
-  std::size_t const blockLength = period();
-  std::size_t const align = cVectorAlignmentSamples;
   for( std::size_t chIdx(0); chIdx < mNumberOfChannels; ++chIdx )
   {
     SampleType const * inPtr = mInput[chIdx];
@@ -87,20 +91,7 @@ void GainVector::process()
     SampleType const oldGain = mCurrentGains[chIdx];
     SampleType const nextGain = mNextGains[chIdx];
 
-    efl::ErrorCode res = efl::vectorMultiplyConstant( oldGain, inPtr, outPtr, blockLength, align );
-    if( res != efl::noError )
-    {
-      status( StatusMessage::Error, "Error during vector multiplication: ", efl::errorMessage(res) );
-    }
-
-
-    SampleType const gainDiff = nextGain - oldGain;
-    SampleType const * const rampPartition = mRamp.data() + blockLength * mInterpolationCounter;
-    res = efl::vectorMultiplyConstantAddInplace( gainDiff, rampPartition, outPtr, blockLength, align );
-    if( res != efl::noError )
-    {
-      status( StatusMessage::Error, "Error during ramp multiplication: ", efl::errorMessage(res) );
-    }
+    mFader->process( inPtr, outPtr, oldGain, nextGain, mInterpolationCounter );
   }
   mInterpolationCounter = std::min( mInterpolationCounter+1, mInterpolationPeriods );
 }
@@ -113,7 +104,10 @@ void GainVector::setGain( efl::BasicVector< SampleType > const & newGains )
   }
 
   // Copy the current gain value to the previous gain value.
-
+  if( efl::vectorCopy( mNextGains.data(), mCurrentGains.data(), mNumberOfChannels ) != efl::noError )
+  {
+    throw std::runtime_error( "GainVector::setGain(): Copying of the vector elements failed." );
+  }
 
   if (efl::vectorCopy(newGains.data(), mNextGains.data(), mNumberOfChannels) != efl::noError)
   {

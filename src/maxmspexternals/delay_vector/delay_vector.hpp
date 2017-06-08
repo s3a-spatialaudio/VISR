@@ -1,20 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-/* Super-safe determination of the MAX define for setting the operating system. */
-#ifdef __APPLE_CC__
-#ifndef MAC_VERSION 
-#define MAC_VERSION
-#undef WIN_VERSION
-#endif
-#else
-#ifdef _MSC_VER
-#ifndef WIN_VERSION 
-#define WIN_VERSION
-#endif
-#undef MAC_VERSION
-#endif
-#endif
-
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 

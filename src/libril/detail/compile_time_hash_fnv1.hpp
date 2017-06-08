@@ -20,7 +20,7 @@ namespace detail
   * This function is 'constexpr, i.e., can be used at compile time.
   * Adapted from https://github.com/elbeno/constexpr
   * Licence of original code: MIT
-  * @param String to be hashed. Must be a compile-time literal to enabl use as a constexpr function.
+  * @param s String to be hashed. Must be a compile-time literal to enable use as a constexpr function.
   */
   constexpr uint64_t compileTimeHashFNV1( const char* s )
   {

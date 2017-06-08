@@ -1,0 +1,103 @@
+/* Copyright Institute of Sound and Vibration Research - All rights reserved */
+
+#ifndef VISR_LIBRBBL_GAIN_FADER_HPP_INCLUDED
+#define VISR_LIBRBBL_GAIN_FADER_HPP_INCLUDED
+
+#include<libefl/aligned_array.hpp>
+#include<libefl/basic_matrix.hpp>
+
+namespace visr
+{
+namespace rbbl
+{
+
+/**
+ * Low-level Utility class to apply a linearly interpolated gain change to an audio signal.
+ * The class itself is stateless, i.e., it can be used for an arbitrary number of audio signals.
+ * @tparam ElementType The data type used for the audio samples and the gain values. 
+ * The class template is explicitly instantiated for element types float and double.
+ */
+template< typename ElementType >
+class GainFader
+{
+public:
+  /**
+   * Constructor, sets all matrix gains to common value (default: 0.0)
+  * @param numberOfInputs The number of input channels of the audio processor, i.e., the number of columns of the matrix.
+  * @param numberOfOutputs The number of output channels of the audio processor, i.e., the number of rows of the matrix.
+  * @param blockLength The number of samples in each input or output channel processed in each invocation of process()
+  * @param interpolationSteps The duration of a transition to a new set of gain value, specified in samples. Must be
+  * an integer multiple of the \p blockLength parameter.
+  * @param initialValue The initial value (linear scale) for all gain values in the matrix.
+  * @param alignment the minimum alignment for the input and output vectors as well as the internally stored data members,
+  * given as a  number of samples.
+   */
+  explicit GainFader( std::size_t blockSize,
+                      std::size_t interpolationSteps,
+                      std::size_t alignment = 0 );
+
+  /**
+   * Destructor.
+   */
+  ~GainFader();
+
+  /**
+   * Process \p mBlockSize samples of a single audio signal. The gain trajectory depends on the start end end gain
+   * values and the time into the current transition (denoted by \p blockIndex). This method does not alter the state of the fader (and is therefore const).
+   * @param input a buffer containing input samples. Must provide \p mBlockSize elements.
+   * sample vector must contain at least \p blockLength elements.
+   * @param[out] output Array to write the scaled output signals. Must provide space for \p mBlockSize samples.
+   * @param startGain Gain value at the begin of the transition (the complete transition, not the current block)
+   * @param endGain Gain value at the end of the transition (the complete transition, not the current block)
+   * @param blockIndex block number denoting the current position within the current transition. In this invocation of process(), the section
+   * [blockIndex*mBlockSize..(blockIndex+1)*mBlockSize] of the interpolation ramp is applied. A value equal or larger than \p mInterpolationPeriods
+   * means that the signal is scaled by the constant value \p endGain.
+   */
+  void process( ElementType const * input, ElementType * output,
+                ElementType startGain,
+                ElementType endGain,
+                std::size_t blockIndex ) const;
+
+private:
+
+  /**
+   * Private implementation method to set up the interpolation ramp.
+   * This array is initialised as a linear sequence from 0.0 (not included) to 1.0 over the course of interpolationStep samples.
+   * * the remainder of the ramp is filled with value 1.0 to enforce a constant scaling with the gain end value after the
+   * transition is complete.
+   */
+  void setupRamp( std::size_t blockSize,
+                  std::size_t interpolationSteps );
+
+  /**
+   * The number of samples processed in each invocation of process.
+   */
+  std::size_t const mBlockSize;
+
+  /**
+   * The number of process() invocations needed to perform a complete transition of gain values(),
+   * i.e., the first number of blocks that contain interpolationSteps samples.
+   * 0 denotes an immediate application of a new gain matrix.
+   */
+  std::size_t const mInterpolationPeriods;
+
+  /**
+   * Precomputed vector of scaling values for computing the output values using interpolated gains.
+   * It consists of a linear ramp from 0 to 1 over \p interpolationSteps samples, followed by
+   * at least \p mBlockSize values of '1' for the static gain after the transition has finished.
+   * Length: \p (mInterpolationSteps+1)*mBlockSize
+   */
+  efl::AlignedArray< ElementType > mInterpolationRamp;
+
+  /**
+   * Sample array used for temporary results within a process() call.
+   * Length: blockSize
+   */
+  mutable efl::AlignedArray< ElementType > mTempBuffer;
+
+};
+
+} // namespace rbbl
+} // namespace visr
+  
+#endif // #ifndef VISR_LIBRBBL_GAIN_FADER_HPP_INCLUDED

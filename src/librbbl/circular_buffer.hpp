@@ -86,6 +86,12 @@ public:
               std::size_t numberOfSamples,
               std::size_t alignmentElements = 0 );
 
+  void write( DataType const * writeData,
+              std::size_t channelStrideElements,
+              std::size_t numberOfChannels,
+              std::size_t numberOfSamples,
+              std::size_t alignmentElements = 0 );
+
   /**
    * Write samples from a matrix object into the circular buffer and advance the write index afterwards.
    * @param writeData A matrix containing the samples to be written.

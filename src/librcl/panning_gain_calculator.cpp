@@ -119,8 +119,7 @@ void PanningGainCalculator::process()
         // Other non-matching types will be skipped later on.
         continue;
       }
-      
-      objectmodel::ObjectTypeId const ti = obj.type();
+
       objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
 
       // Use C++ type information to check whether the source is a pointsource.
@@ -135,6 +134,11 @@ void PanningGainCalculator::process()
         if( psdSrc )
         {
           efl::ErrorCode res = efl::vectorMultiplyConstantInplace( 1.0f-psdSrc->diffuseness(), mTmpGains.data(), mNumberOfLoudspeakers );
+          if( res != efl::noError )
+          {
+            status( StatusMessage::Error, "Error while adjusting panning gain of a point source with diffuseness: ", efl::errorMessage(res) );
+            return;
+          }
         }
         // We need to copy the data explicitly into a matrix column of a row-major matrix.
         // This could be replaced by a copy function with a stride argument.

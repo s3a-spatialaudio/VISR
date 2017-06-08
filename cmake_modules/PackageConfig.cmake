@@ -57,7 +57,7 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
   
   #SET( CPACK_PACKAGE_INSTALL_DIRECTORY ”/Applications” )
 
-  # SET( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/resources/s3a_logo.png )
+  SET( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/cmake_modules/resources/s3a_logo.png )
   SET( CPACK_BUNDLE_NAME "VISR" )
   SET( CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/resources/s3a_logo.png )
   SET( CPACK_BUNDLE_PLIST ${CMAKE_SOURCE_DIR}/cmake_modules/Info.plist )

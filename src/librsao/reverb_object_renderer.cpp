@@ -122,7 +122,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
     mDiscreteReverbDelay.setup( maxNumReverbObjects * numDiscreteReflectionsPerObject,
                                 interpolationSteps,
                                 maxDiscreteReflectionDelay,
-                                rcl::DelayVector::InterpolationType::Linear,
+                                "lagrangeOrder3",
+                                rcl::DelayVector::MethodDelayPolicy::Limit,
                                 true /* controlInputs */, 0.0f, 0.0f );
     mDiscreteReverbReflFilters.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject, numWallReflBiquads, true /*controlInputs*/ );
     mDiscreteReverbPanningMatrix.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
@@ -136,7 +137,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
     mLateReverbGainDelay.setup( maxNumReverbObjects,
                                 period(),
                                 maxDiscreteReflectionDelay, // For the moment, use the same max. delay as for discretes.
-                                rcl::DelayVector::InterpolationType::Linear,
+                                "lagrangeOrder3",
+                                rcl::DelayVector::MethodDelayPolicy::Limit,
                                 true /* controlInputs */,
                                 0.0f, 0.0f );
 

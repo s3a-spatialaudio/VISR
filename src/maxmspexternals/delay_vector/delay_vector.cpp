@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "delay_vector_visr.hpp"
+#include "delay_vector.hpp"
 
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
@@ -141,7 +141,13 @@ DelayVector::~DelayVector()
     mContext.reset( new SignalFlowContext(static_cast<std::size_t>(mPeriod), samplingFrequency) );
 
     mComp.reset( new rcl::DelayVector( *mContext, "", nullptr ) );
-    mComp->setup( mNumberOfChannels, mInterpolationSteps, 1.0f, mInterpolationType, true );
+    mComp->setup( mNumberOfChannels, mInterpolationSteps, 1.0f, 
+#ifdef USE_MC_DELAY_LINE
+      "lagrangeOrder1",
+#else
+      mInterpolationType,
+#endif
+      true );
 
 
     mFlow.reset( new rrl::AudioSignalFlow(*mComp )  );
