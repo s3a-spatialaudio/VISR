@@ -332,14 +332,22 @@ template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::
 setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
 {
+  if( filterIdx >= maxNumberOfFilterEntries() )
+  {
+    throw std::invalid_argument( "MultichannelConvolverUniform::setImpulseResponse(): filter index exceeds number of filters" );
+  }
   transformImpulseResponse( ir, filterLength,
-			    mFilterPartitionsFrequencyDomain.row( filterIdx ),
-			    std::min( mAlignment, alignment ) );
+                            mFilterPartitionsFrequencyDomain.row( filterIdx ),
+                            std::min( mAlignment, alignment ) );
 }
 
 template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
 {
+  if( filterIdx >= maxNumberOfFilterEntries() )
+  {
+    throw std::invalid_argument( "MultichannelConvolverUniform::setFilter(): filter index exceeds number of filters" );
+  }
   efl::vectorCopy( transformedFilter, mFilterPartitionsFrequencyDomain.row( filterIdx ),
                    mFilterPartitionsFrequencyDomain.numberOfColumns(),
                    std::min( alignment, mComplexAlignment ) );
