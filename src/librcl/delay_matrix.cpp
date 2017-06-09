@@ -141,7 +141,7 @@ void DelayMatrix::process()
   std::size_t const numberOfInputs = mInput.width();
   std::size_t const numberOfOutputs = mOutput.width();
 
-  mDelayLine->write( mInput.data(), mInput.channelStrideSamples(), mNumberOfChannels, mInput.alignmentSamples() );
+  mDelayLine->write( mInput.data(), mInput.channelStrideSamples(), numberOfInputs, mInput.alignmentSamples() );
 
   SampleType const currentGainRatio =
       static_cast<SampleType>(mGainInterpolationCounter)

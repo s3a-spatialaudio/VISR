@@ -206,11 +206,6 @@ private:
 
   std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
 
-  /**
-  * The number of simultaneous audio channels.
-  */
-  std::size_t mNumberOfChannels;
-
   std::unique_ptr<rbbl::MultichannelDelayLine<SampleType> > mDelayLine;
 
   std::size_t mDelayInterpolationCounter;
