@@ -55,7 +55,9 @@ private:
 
 /**
  * Stream operator to print an audio channel.
- * Format <full port name>:<channel index>
+ * Format [full port name]:[channel index]
+ * @param str The stream object
+ * @param channel the AudioChannel object to be printed.
  */
 std::ostream& operator<<( std::ostream & str, AudioChannel const & channel );
 
@@ -124,7 +126,7 @@ private:
 /**
  * Stream operator to print an audio connection map.
  * Output format: the contained connection entries in the format 
- * <send audio channel>-><receive audio channel> separated by line ends.
+ * [send audio channel]->[receive audio channel] separated by line ends.
  */
 std::ostream & operator<<( std::ostream & stream, AudioConnectionMap const & connections );
 

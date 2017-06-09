@@ -23,18 +23,24 @@ namespace pythonsupport
 {
 
 /**
- * Wrapper component that encapsulates arbitrary components (atomic or composite) to be instantiated and called from C++.
+ * Wrapper component that encapsulates arbitrary Python components (atomic or composite) to be 
+ * instantiated and called from C++.
  */
 class PythonWrapper: public CompositeComponent
 {
 public:
 
   /**
-   * Constructor.
-   * @param context The signal flow context object containing 
+   * Constructor, creates a PythonWrapper object.
+   * @param context Configuration parameter containing information as period length and sampling frequency.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
-   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
-   * @param numInputs The number of signal vectors to be added.
+   * @param parent Pointer to a containing component, if there is one. A value of \p nullptr signals that this is a top-level component.
+   * @param modulePath Full directory path (and filename) including extension to the Python module containing the component class definition.
+   * @param componentClassName The class name of the Python component to be instantiated. The class must inherited from visr::Component, that is, 
+   * either from CompositeComponent or AtomicComponent.
+   * @param positionalArguments Comma-separated list of positional arguments to be passed to the constructor of the Python component. 
+   * This list must not include the \p context, \p name, and \p parent arguments which are provided automatically.
+   * @param keywordArguments Optional, comma-separated key-value pairs of the form "key:value" to provide keyword arguments to the Python component.
    */
   explicit PythonWrapper( SignalFlowContext const & context,
                           char const * name,

@@ -27,6 +27,8 @@ public:
   /**
    * Constructor, initialises internal data structures.
    * @param maxNumSamples The maximum number o samples that shall be processed in one call to interpolate().
+   * @param alignmentElements The minimum alignment of the internal data structures and for the result 
+   * buffer of the interpolate() call.
    */
   explicit LagrangeInterpolator( std::size_t maxNumSamples,
                                  std::size_t alignmentElements = 0);
@@ -53,8 +55,8 @@ private:
   efl::LagrangeCoefficientCalculator<SampleType, order, true> const mCoeffCalculator;
 
   /**
-   * @note a special case is needed for order == 0 (nearest sample interpolation to avoid underflow and access to future values.
-   */
+   * The method delay in samples, in samples. Literal constant. 
+   * @note order == 0 means nearest sample interpolation    */
   static constexpr SampleType cMethodDelay = static_cast<SampleType>(0.5) * static_cast<SampleType>(order);
 };
 

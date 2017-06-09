@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 /**
-* @file libefl/lagrange_interpolator.hpp
+* @file libefl/lagrange_coefficient_calculator.hpp
 * @author Andreas Franck a.franck@soton.ac.uk
 */
 

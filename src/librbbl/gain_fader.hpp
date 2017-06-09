@@ -22,15 +22,11 @@ class GainFader
 {
 public:
   /**
-   * Constructor, sets all matrix gains to common value (default: 0.0)
-  * @param numberOfInputs The number of input channels of the audio processor, i.e., the number of columns of the matrix.
-  * @param numberOfOutputs The number of output channels of the audio processor, i.e., the number of rows of the matrix.
-  * @param blockLength The number of samples in each input or output channel processed in each invocation of process()
-  * @param interpolationSteps The duration of a transition to a new set of gain value, specified in samples. Must be
-  * an integer multiple of the \p blockLength parameter.
-  * @param initialValue The initial value (linear scale) for all gain values in the matrix.
-  * @param alignment the minimum alignment for the input and output vectors as well as the internally stored data members,
-  * given as a  number of samples.
+   * Constructor, sets up the internal data structures
+   * @param blockSize The number of samples processed in a single process() call.
+   * @param interpolationSteps The number of samples used to interpolate to the end value.
+   * @param alignment the minimum alignment for the input and output vectors as well as the internally stored data members,
+   * given as a number of samples.
    */
   explicit GainFader( std::size_t blockSize,
                       std::size_t interpolationSteps,
@@ -63,8 +59,11 @@ private:
   /**
    * Private implementation method to set up the interpolation ramp.
    * This array is initialised as a linear sequence from 0.0 (not included) to 1.0 over the course of interpolationStep samples.
-   * * the remainder of the ramp is filled with value 1.0 to enforce a constant scaling with the gain end value after the
+   * the remainder of the ramp is filled with value 1.0 to enforce a constant scaling with the gain end value after the
    * transition is complete.
+   * @param blockSize Number of samples processed in one process() call.
+   * @param interpolationSteps Number of samples it takes to transistion 
+   * to the new gain value. Not required to be a multiple of \p blockSize.
    */
   void setupRamp( std::size_t blockSize,
                   std::size_t interpolationSteps );

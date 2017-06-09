@@ -40,7 +40,7 @@ namespace visr
        * @param x Cartesian x coordinate of the source position
        * @param y Cartesian y coordinate of the source position
        * @param z Cartesian z coordinate of the source position
-       * @param gains[out] array holding the panning gains for the regular (non-virtual) loudspeakers).
+       * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
        * Buffer must provide space for at least getNumSpeakers() values.
        */
       void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;

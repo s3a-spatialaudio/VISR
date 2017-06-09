@@ -60,8 +60,8 @@ public:
 
   /**
    * Constructor, populate the different port tables.
-   * @param The component to analyse.
-   * @param hierarchical whether to analyse the complete hierarchical signal flow (true) or just the current level of the hierarchy (false).
+   * @param comp The component to analyse.
+   * @param recurse Whether to analyse the complete hierarchical signal flow (true) or just the current level of the hierarchy (false).
    */
   explicit PortLookup( impl::ComponentImplementation const & comp, bool recurse = true );
 

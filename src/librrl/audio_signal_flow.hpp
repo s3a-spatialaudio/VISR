@@ -56,10 +56,7 @@ public:
 
   /**
    * Constructor.
-   * @param period The number of samples processed in each invocation
-   * of the process() function.
-   * @param samplingFrequency The sampling frequency associated with
-   * the discrete-time signals to be processed.
+   * @param flow The component (composite or atomic) containing the processing functionality.
    */
   explicit AudioSignalFlow( Component & flow );
 
@@ -96,7 +93,7 @@ public:
    * @param callbackResult A enumeration type to hold the result of
    * the process() function. Typically used to signal error conditions
    * or to request termination.
-   * @TODO After the redesign, the translation to a callback function (and discarding the object pointer) needs to be done somewhere else!
+   * @todo After the redesign, the translation to a callback function (and discarding the object pointer) needs to be done somewhere else!
    */
   static void  processFunction( void* userData,
                                 SampleType const * const * captureSamples,

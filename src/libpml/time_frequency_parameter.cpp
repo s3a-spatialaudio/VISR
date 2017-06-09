@@ -42,13 +42,6 @@ TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( TimeFrequencyParame
 
 }
 
-  /**
-  * Construct a parameter matrix with the given dimensions.
-  * The matrix is zero-initialised.
-  * @param numRows The number of matrix rows.
-  * @param numColumns The number of columns.
-  * @param alignment The alignment of the data, given in in multiples of the eleement size.
-  */
 template< typename ElementType >
 TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( std::size_t dftSize,
                                                              std::size_t numDftSamples,
@@ -59,18 +52,6 @@ TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( std::size_t dftSize
 {
   // Zero-initialise
   mData.zeroFill();
-}
-
-template< typename ElementType >
-TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( std::size_t dftSize,
-                                                             std::size_t numDftSamples,
-                                                             std::size_t numChannels,
-                                                             std::initializer_list<std::complex< ElementType> > const & initMtx,
-                                                             std::size_t alignment /*= 0*/ )
-  : mData( numDftSamples * numChannels, dftSize, alignment )
-  , mNumberOfChannels( numChannels )
-{
-  // TODO: Copy the initialiser list
 }
 
 template< typename ElementType >

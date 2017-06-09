@@ -37,8 +37,13 @@ class SignalRoutingInternal: public AtomicComponent
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object holding basic execution parameters.
+   * @param name Name of the component.
+   * @param parent Pointer to a containing component (if there is one). A value of \p nullptr signals that this is a top-level component.
+   * @param inputWidth The width of the input port, i.e., the total span 
+   * of the channels indices of the outside signal vector that are routed through this component.
+   * @param signalIndices The channel indices within the input port that are routed to the channels of the output port (in increasing order).
+   * The number of elements determines the number of signals routed through this component.
    */
   explicit SignalRoutingInternal( SignalFlowContext const & context,
                                   char const * name,

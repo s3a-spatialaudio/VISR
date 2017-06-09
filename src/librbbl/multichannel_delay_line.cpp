@@ -26,8 +26,7 @@ MultichannelDelayLine<SampleType>::MultichannelDelayLine( std::size_t numberOfCh
                                                           char const * interpolationMethod,
                                                           MethodDelayPolicy methodDelayPolicy,
                                                           std::size_t alignment /*= 0*/ )
-  : cNumberOfChannels( numberOfChannels )
-  , cBlockLength( blockLength )
+  : cBlockLength( blockLength )
   , cSamplingFrequency( static_cast<SampleType>(samplingFrequency) )
   , cMaxDelaySamples( std::ceil( maxDelaySeconds * samplingFrequency ) )
   , cMethodDelayPolicy( methodDelayPolicy )
@@ -47,7 +46,7 @@ MultichannelDelayLine<SampleType>::~MultichannelDelayLine() = default;
 template< typename SampleType >
 std::size_t MultichannelDelayLine<SampleType>::numberOfChannels() const
 {
-  return cNumberOfChannels;
+  return mRingbuffer.numberOfChannels();
 }
 
 template< typename SampleType >
@@ -57,12 +56,28 @@ std::size_t MultichannelDelayLine<SampleType>::blockLength() const
 }
 
 template< typename SampleType >
+SampleType MultichannelDelayLine<SampleType>::methodDelaySeconds() const
+{
+  return cMaxDelaySamples / cSamplingFrequency;
+}
+
+template< typename SampleType >
+SampleType MultichannelDelayLine<SampleType>::methodDelaySamples() const
+{
+  return cMaxDelaySamples;
+}
+
+template< typename SampleType >
 void MultichannelDelayLine<SampleType>::write( SampleType const * input,
                                                std::size_t channelStride,
-                                               std::size_t numberOfChannels,
+                                               std::size_t pNumberOfChannels,
                                                std::size_t alignment )
 {
-  mRingbuffer.write( input, channelStride, cNumberOfChannels, cBlockLength, alignment );
+  if( pNumberOfChannels != numberOfChannels() )
+  {
+    throw std::invalid_argument( "MultichannelDelayLine::write(): the number of channels passed differs from the channel number of the delay line." );
+  }
+  mRingbuffer.write( input, channelStride, pNumberOfChannels, cBlockLength, alignment );
 }
 
 template< typename SampleType >
@@ -72,7 +87,7 @@ void MultichannelDelayLine<SampleType>::interpolate( SampleType * output,
                                                      SampleType startDelay, SampleType endDelay,
                                                      SampleType startGain, SampleType endGain )
 {
-  if( channelIdx >= cNumberOfChannels )
+  if( channelIdx >= numberOfChannels() )
   {
     throw std::invalid_argument( "MultichannelDelayLine<SampleType>::interpolate()" );
   }

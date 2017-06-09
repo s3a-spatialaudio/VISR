@@ -33,8 +33,9 @@ class AudioNetworkEncoder: public AtomicComponent
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
+   * @param context Configuration object containing basic parameters.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param parent Pointer to a containing component, or \p nullptr if it is the top-level component.
    */
   explicit AudioNetworkEncoder( SignalFlowContext const & context,
                                 char const * name,
@@ -50,8 +51,10 @@ public:
    */ 
   void setup( std::size_t width, std::size_t blockLength );
 
+  /**
+   * Virtual process method overloaded from AtomicComponent.
+   */
   void process() override;
-
 
 private:
 

@@ -30,7 +30,7 @@ namespace rrl
  * This is a convenience function that accepts impl::Component objects.
  * @param component The signal flow component to check.
  * @param hierarchical Whether only the component is checked locally (value: false) or whether all contained sub-components are also checked recursively ((true)
- * @param messages[out] A stream object returning explanatory and diagnostic messages.
+ * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's connections are valid.
  */
 bool checkConnectionIntegrity( Component const & component, bool hierarchical, std::ostream & messages );
@@ -40,7 +40,7 @@ bool checkConnectionIntegrity( Component const & component, bool hierarchical, s
  * This is a convenience function that accepts impl::Component objects.
  * @param component The signal flow component to check.
  * @param hierarchical Whether only the component is checked locally (value: false) or whether all contained sub-components are also checked recursively ((true)
- * @param messages[out] A stream object returning explanatory and diagnostic messages.
+ * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's audio connections are valid.
  */
 bool checkAudioConnectionIntegrity( Component const & component, bool hierarchical, std::ostream & messages );
@@ -50,7 +50,7 @@ bool checkAudioConnectionIntegrity( Component const & component, bool hierarchic
  * This is a convenience function that accepts impl::Component objects.
  * @param component The signal flow component to check.
  * @param hierarchical Whether only the component is checked locally (value: false) or whether all contained sub-components are also checked recursively ((true)
- * @param messages[out] A stream object returning explanatory and diagnostic messages.
+ * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's parameter connections are valid.
  */
 bool checkParameterConnectionIntegrity( Component const & component, bool hierarchical, std::ostream & messages );
@@ -59,7 +59,7 @@ bool checkParameterConnectionIntegrity( Component const & component, bool hierar
  * Check both audio and parameter connections  for validity and completeness.
  * @param component The signal flow component to check.
  * @param hierarchical Whether only the component is checked locally (value: false) or whether all contained sub-components are also checked recursively ((true)
- * @param messages[out] A stream object returning explanatory and diagnostic messages.
+ * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's connections are valid.
  */
 bool checkConnectionIntegrity( impl::ComponentImplementation const & component, bool hierarchical, std::ostream & messages );
@@ -68,7 +68,7 @@ bool checkConnectionIntegrity( impl::ComponentImplementation const & component, 
  * Check the audio connections of a component  for validity and completeness.
  * @param component The signal flow component to check.
  * @param hierarchical Whether only the component is checked locally (value: false) or whether all contained sub-components are also checked recursively ((true)
- * @param messages[out] A stream object returning explanatory and diagnostic messages.
+ * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's audio connections are valid.
  */
 bool checkAudioConnectionIntegrity( impl::ComponentImplementation const & component, bool hierarchical, std::ostream & messages );
@@ -78,7 +78,7 @@ bool checkAudioConnectionIntegrity( impl::ComponentImplementation const & compon
  * This is a convenience function that accepts impl::Component objects.
  * @param component The signal flow component to check.
  * @param hierarchical Whether only the component is checked locally (value: false) or whether all contained sub-components are also checked recursively ((true)
- * @param messages[out] A stream object returning explanatory and diagnostic messages.
+ * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's parameter connections are valid.
  */
 bool checkParameterConnectionIntegrity( impl::ComponentImplementation const & component, bool hierarchical, std::ostream & messages );
