@@ -37,7 +37,12 @@ public:
 
   /**
    * Constructor, constructs a component.
-   * @param context Ob
+   * @param context Configuration object containing basic execution parameters
+   * (such as sampling frequency and period (block length))
+   * @param componentName The name of the component. If this component is contained
+   * in a higher-level parent component, the name must be unique within that parent component
+   * @param parent Pointer to the containing composite component, if there is one. Otherwise,
+   * that is, if the present component is at the top level, pass \p nullptr.
    */
   explicit Component( SignalFlowContext const & context,
                       char const * componentName,
@@ -46,6 +51,12 @@ public:
   /**
    * Constructor.
    * Convenvience function, accepts a standard string instead of a C chararacter pointer.
+   * @param context Configuration object containing basic execution parameters
+   * (such as sampling frequency and period (block length))
+   * @param componentName The name of the component. If this component is contained
+   * in a higher-level parent component, the name must be unique within that parent component.
+   * @param parent Pointer to the containing composite component, if there is one. Otherwise,
+   * that is, if the present component is at the top level, pass \p nullptr.
    */
   explicit Component( SignalFlowContext const & context,
                       std::string const & componentName,
@@ -100,15 +111,16 @@ public:
    */
   void status( StatusMessage::Kind status, char const * message );
 
-
   /**
   * Signal informational messages or the error conditions where the message string is 
   * constructed from an arbitrary sequence of arguments.
   * Depending on the value of the \p status parameter, this might result
   * in a message conveyed to the user or abortion of the audio processing.
-  * @tparam MessageArgs List of arguments to be printed.
+  * @tparam MessageArgs List of argument types to be printed. Normally they are automatically 
+  * determined by the compiler, so there is no need to specify them.
   * @param status The class of the status message
-  * @param message An informational message string.
+  * @param args Comma-seprated list of parameters with unspecified types. The main requirement 
+  * is that all types support an "<<" operator.
   */
   template<typename ... MessageArgs >
   void status( StatusMessage::Kind status, MessageArgs ... args );
@@ -183,6 +195,8 @@ private:
   impl::ComponentImplementation* mImpl;
 };
 
+/**
+ */
 template<typename ... MessageArgs >
 inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... args )
 {

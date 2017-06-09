@@ -24,7 +24,7 @@ class ParameterConfigBase;
 
 /**
  * Class encapsulating functionality to retrieve information about and to create communication protocol objects and related objects.
-
+ *
  */
 class VISR_CORE_LIBRARY_SYMBOL CommunicationProtocolFactory
 {

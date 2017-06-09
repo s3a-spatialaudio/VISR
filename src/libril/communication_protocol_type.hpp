@@ -39,7 +39,8 @@ struct IdToCommunicationProtocol {};
 
 } // namespace visr
 
-
+/**
+ */
 #define DEFINE_COMMUNICATION_PROTOCOL( CommunicationProtocolClassType, CommunicationProtocolId, CommunicationProtocolName )\
 namespace visr \
 { \

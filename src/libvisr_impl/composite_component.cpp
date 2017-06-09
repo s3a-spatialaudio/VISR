@@ -59,7 +59,7 @@ void CompositeComponent::audioConnection( AudioPortBase & sendPort,
 
 
 void CompositeComponent::audioConnection( AudioPortBase & sendPort,
-                                                  AudioPortBase & receivePort )
+                                          AudioPortBase & receivePort )
 {
   implementation().audioConnection( sendPort, receivePort );
 }

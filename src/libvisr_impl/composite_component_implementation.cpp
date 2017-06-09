@@ -194,7 +194,7 @@ void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort
 }
 
 void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
-                                                                AudioPortBase & receivePort )
+                                                        AudioPortBase & receivePort )
 {
   AudioPortBaseImplementation & sendPortImpl = sendPort.implementation();
   AudioPortBaseImplementation & receivePortImpl = receivePort.implementation();

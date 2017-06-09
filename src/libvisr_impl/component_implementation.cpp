@@ -280,9 +280,19 @@ typename TypedPortContainer<PortType>::const_iterator ComponentImplementation::f
     = std::find_if( portBegin<PortType>(), portEnd<PortType>(), ComparePorts( portName ) );
   return findIt;
 }
-// Explicit instantiations
+// Explicit instantiations for findPortEntry.
+// Note: The individual documentations are necessary to avoid doxygen warnings.
+
+/**
+ * @relates ComponentImplementation
+ * Explicit instantiation of template findPortEntry for port type AudioPortBaseImplementation, const variant..
+ */
 template ComponentImplementation::PortContainer<AudioPortBaseImplementation>::const_iterator
 ComponentImplementation::findPortEntry<AudioPortBaseImplementation>( char const * portName ) const;
+/**
+ * @relates ComponentImplementation
+ * Explicit instantiation of template findPortEntry for port type ParameterPortBaseImplementation, const variant..
+ */
 template ComponentImplementation::PortContainer<ParameterPortBaseImplementation>::const_iterator
 ComponentImplementation::findPortEntry<ParameterPortBaseImplementation>( char const * portName ) const;
 
@@ -294,7 +304,15 @@ typename TypedPortContainer<PortType>::iterator ComponentImplementation::findPor
   return findIt;
 }
 // Explicit instantiations
+/**
+ * @relates ComponentImplementation
+ * Explicit instantiation of template findPortEntry for port type AudioPortBaseImplementation, non-const variant.
+ */
 template ComponentImplementation::PortContainer<AudioPortBaseImplementation>::iterator ComponentImplementation::findPortEntry<AudioPortBaseImplementation>( const char* portName );
+/**
+ * @relates ComponentImplementation
+ * Explicit instantiation of template findPortEntry for port type ParameterPortBaseImplementation, non-const variant..
+ */
 template ComponentImplementation::PortContainer<ParameterPortBaseImplementation>::iterator ComponentImplementation::findPortEntry<ParameterPortBaseImplementation>( char const * portName );
 
 } // namespace impl

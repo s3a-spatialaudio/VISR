@@ -44,6 +44,7 @@ public:
   * @param container The component to contain that port.
   * @param sampleType Enumeration value denoting the data type of the samples used by this port.
   * @param direction The direction of the port (either input or output)
+  * @param width The width, i.e., the number of separate audio channels. This value can be changed before runtime.
   */
   /*VISR_CORE_LIBRARY_SYMBOL*/ explicit AudioPortBase( char const * name, Component& container, AudioSampleType::Id sampleType, PortBase::Direction direction, std::size_t width );
 

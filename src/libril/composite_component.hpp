@@ -40,12 +40,19 @@ public:
   using ChannelList = visr::ChannelList;
   //@}
 
+  /**
+   * Constructor.
+   * @param context Reference to a signal flow context object providing basic runtime parameters as period length or sampling frequency.
+   * @param name "the name of the component. Used to address the component inside other components and for status reporting.
+   * @param parent Reference (pointer) to a parent component if the present object is part of a containing signal flow.
+   * If \p nullptr is passed, this component is the top level.
+   */
   explicit CompositeComponent( SignalFlowContext const & context,
                                char const * name,
                                CompositeComponent * parent = nullptr );
 
   /**
-   * Destructor
+   * Destructor.
    */
   ~CompositeComponent();
 
@@ -70,12 +77,6 @@ public:
   */
   impl::CompositeComponentImplementation const & implementation() const;
 
-// protected:
-
-  /**
-   * TODO: Should we add an explicit addComponent() method instead of the implicit registration?
-   */
-  
   /**
    * Register a connection between parameter ports (both real ports of contained components or external placeholder ports).
    * @param sendComponent The name of the component holding the send port (local name, not the 
@@ -93,32 +94,59 @@ public:
 
   /**
    * Register a connection between parameter ports (both real ports of contained components or external placeholder ports).
-   * @param sender Reference to the sendig port (retrieved, for example using \p Component::audioPort() )
-   * @param receiver Reference to the sendig port (retrieved, for example using \p Component::audioPort() )
+   * @param sender Reference to the sendig port (retrieved, for example using \p Component::parameterPort() )
+   * @param receiver Reference to the sendig port (retrieved, for example using \p Component::parameterPort() )
    */
    void parameterConnection( ParameterPortBase & sender,
-                            ParameterPortBase & receiver );
+                             ParameterPortBase & receiver );
 
   /**
    * Register an audio connection between a sending and a receiving audio port.
    * This overload uses C strings to denote both the names of the components holding the ports and the output ports itself.
-   * @param sendComponent 
+   * @param sendComponent Name of the component holding the sending audio port. If the send port is an external input of this component, use "" or "this"
+   * @param sendPort The name of the sending port.
+   * @param sendIndices A list of channel indices denoting the send channels of the sending side.
+   * @param receiveComponent Name of the component holding the receiving audio port. If the receive port is an external 
+   * output of the present component, use "" or "this"
+   * @param receivePort The name of the receiving port.
+   * @param receiveIndices A list of channel indices denoting the receive channels within the receiver port.
+   * @throw std::invalid_argument if a specified component or port does not exist.
+   * @see ChannelList for the syntax to specify the channel index lists.
+   * @deprecated The overloads using audio ports should be preferred over this variant using component names.
    */
   void audioConnection( char const * sendComponent,
                         char const * sendPort,
                         ChannelList const & sendIndices,
                         char const * receiveComponent,
                         char const * receivePort,
-                                ChannelList const & receiveIndices );
+                        ChannelList const & receiveIndices );
 
+  /**
+  * Register an audio connection between a sending and a receiving audio port.
+  * This overload uses audio ports (either directly referencing external in- and output of 
+  * this components or retrieving ports of contained components using the Component::audioPort() method).
+  * @param sendPort The send port object.
+  * @param sendIndices A list of channel indices denoting the send channels of the sending side.
+  * @param receivePort The receive port object.
+  * @param receiveIndices A list of channel indices denoting the receive channels within the receiver port.
+  * @see ChannelList for the syntax to specify the channel index lists.
+  */
   void audioConnection( AudioPortBase & sendPort,
-                                ChannelList const & sendIndices,
-                                AudioPortBase & receivePort,
-                                ChannelList const & receiveIndices );
+                        ChannelList const & sendIndices,
+                        AudioPortBase & receivePort,
+                        ChannelList const & receiveIndices );
 
+  /**
+  * Register an audio connection between all channels of a sending and a receiving audio port.
+  * This overload uses audio ports (either directly referencing external in- and output of
+  * this components or retrieving ports of contained components using the Component::audioPort() method).
+  * It establishes one-to-one connections between the channels of the sender and the receiver.
+  * @param sendPort The send port object.
+  * @param receivePort The receive port object.
+  * @throw std::invalid_argument if the port widths do not match.
+  */
   void audioConnection( AudioPortBase & sendPort,
-                                AudioPortBase & receivePort );
-private:
+                        AudioPortBase & receivePort );
 };
 
 } // namespace visr
