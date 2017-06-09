@@ -575,7 +575,7 @@ namespace audiointerfaces
     {
       setCaptureBuffers( numFrames );
       setPlaybackBuffers( numFrames );
-      CallbackResult res;
+      bool res;
       // Exceptions are caught by the calling static function.
       (*mCallback)(mCallbackUserData, &mCaptureSampleBuffers[0], &mPlaybackSampleBuffers[0], res);
     }

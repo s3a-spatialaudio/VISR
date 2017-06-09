@@ -5,7 +5,7 @@
 
 namespace visr
 {
-namespace rrl
+namespace audiointerfaces
 {
   AudioInterface::Configuration::Configuration( std::size_t numCaptureChannels,
                                                std::size_t numPlaybackChannels,

@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRRL_AUDIO_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_LIBRRL_AUDIO_SIGNAL_FLOW_HPP_INCLUDED
 
-#include "audio_interface.hpp"
+
 
 // TODO: Replace by forward declarations if possible
 #include "audio_connection_map.hpp"
@@ -74,7 +74,7 @@ public:
    * Called from processFunction(). For a parameter description
    * (except userData), see @see processFunction().
    */
-  AudioInterface::CallbackResult
+  bool 
   process( SampleType const * const * captureSamples,
                         SampleType * const * playbackSamples );
 
@@ -93,7 +93,7 @@ public:
    * @param playbackSamples  A pointer array to arrays of output samples
    * to hold the results of the operation. The pointer array must hold numberOfPlaybackChannels()
    * elements, and each sample array must hold period() samples.
-   * @param callbackResult A enumeration type to hold the result of
+   * @param status A enumeration type to hold the result of
    * the process() function. Typically used to signal error conditions
    * or to request termination.
    * @TODO After the redesign, the translation to a callback function (and discarding the object pointer) needs to be done somewhere else!
@@ -101,7 +101,7 @@ public:
   static void  processFunction( void* userData,
                                 SampleType const * const * captureSamples,
                                 SampleType * const * playbackSamples,
-                                AudioInterface::CallbackResult& callbackResult );
+                                bool & status );
 
   /**
    * Query methods.

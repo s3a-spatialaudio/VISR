@@ -20,7 +20,7 @@
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/baseline_renderer.hpp>
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
@@ -130,7 +130,7 @@ int main( int argc, char const * const * argv )
 #endif
         
         
-        visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,samplingRate,periodSize);
+        visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,samplingRate,periodSize);
         const bool lowFrequencyPanning = cmdLineOptions.getDefaultedOption("low-frequency-panning", false );
         
         std::string type;
@@ -165,7 +165,7 @@ int main( int argc, char const * const * argv )
 //            std::cout<<specConf<<std::endl;
         }
         
-        std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
+        std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
 //        audioInterface.reset(AudioInterfaceFactory::create( type, baseConfig, specConf).get());
         audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
         

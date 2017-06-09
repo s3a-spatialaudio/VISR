@@ -13,8 +13,8 @@
 #include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 #include <librrl/audio_signal_flow.hpp>
-#include <librrl/audio_interface.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
+
 #include <libsignalflows/time_frequency_feedthrough.hpp>
 
 #include <algorithm>
@@ -40,7 +40,7 @@ int main( int argc, char const * const * argv )
         std::size_t const dftSize = 2 * windowLength;
         
         SamplingFrequencyType const samplingRate = 48000;
-        visr::rrl::AudioInterface::Configuration baseConfig(numberOfChannels,numberOfChannels,samplingRate,period);
+        visr::audiointerfaces::AudioInterface::Configuration baseConfig(numberOfChannels,numberOfChannels,samplingRate,period);
         
         std::string type;
         std::string specConf;
@@ -55,7 +55,7 @@ int main( int argc, char const * const * argv )
         type = "PortAudio";
 #endif
         
-        std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
         
         
         SignalFlowContext context( period, samplingRate );

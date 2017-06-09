@@ -8,7 +8,7 @@
 
 namespace visr
 {
-namespace rrl
+namespace audiointerfaces
 {
 
 /**
@@ -80,15 +80,7 @@ public:
   using InternalSampleType = float;
   //@}
 
-  /** 
-<<<<<<< HEAD:src/libril/audio_interface.hpp
-   * Status returned by the callback initialised by the audio interface
-=======
-   * Status returned by the callback initialed by the audio interface
->>>>>>> 3b8f1889c6e66d81bd3c390bfd7f720dbfdacaa7:src/librrl/audio_interface.hpp
-   * Maybe we replace this by an enumeration later 
-   */
-  using CallbackResult = int;
+  
 
   /**
    * The type of the callback function that can be registered to be called if sufficient data is available 
@@ -96,7 +88,7 @@ public:
   typedef void ( *AudioCallback )( void* /* userData */,
                                  ExternalSampleType const * const * /*captureBuffer*/,
                                  ExternalSampleType * const * /*playbackBuffer*/,
-                                 CallbackResult& /*errorCode*/);
+                                 bool& /*errorCode*/);
 
   virtual bool registerCallback( AudioCallback callbackPtr, void* userData ) = 0;
 

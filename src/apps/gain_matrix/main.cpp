@@ -8,7 +8,7 @@
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #include <libaudiointerfaces/portaudio_interface.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/gain_matrix.hpp>
 
 #include <boost/filesystem/operations.hpp>
@@ -88,14 +88,14 @@ int main( int argc, char const * const * argv )
       }
     }
       
-    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfInputs,numberOfOutputs,samplingRate,periodSize);
+    visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfInputs,numberOfOutputs,samplingRate,periodSize);
       std::string type;
       std::string specConf;
       
       specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+cAudioBackend+"}";
       type = "PortAudio";
       
-      std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+      std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
 
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;

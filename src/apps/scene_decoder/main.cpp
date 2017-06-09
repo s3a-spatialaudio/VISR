@@ -9,7 +9,7 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #include <libaudiointerfaces/portaudio_interface.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -45,14 +45,14 @@ int main( int argc, char const * const * argv )
         }
         
         std::size_t udpPort = 8888;
-        visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
+        visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
         std::string type;
         std::string specConf;
         
         specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
         type = "PortAudio";
         
-        std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
         
         
         const std::size_t cInterpolationLength = periodSize;

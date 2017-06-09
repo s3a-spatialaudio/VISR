@@ -7,7 +7,7 @@
 #include "options.hpp"
 
 
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -103,13 +103,13 @@ int main( int argc, char const * const * argv )
         bool const useNativeJack = boost::iequals( audioBackend, "NATIVE_JACK" );
 #endif
         
-        //    std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
-        visr::rrl::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
+        //    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
+        visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
        
         std::string type;
         std::string specConf;
         
-        std::unique_ptr<rrl::AudioInterface> audioInterface;// = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface;// = AudioInterfaceFactory::create( type, baseConfig, specConf);
         
 #ifdef VISR_JACK_SUPPORT
         if( useNativeJack )

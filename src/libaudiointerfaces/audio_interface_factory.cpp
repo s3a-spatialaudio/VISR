@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <librrl/audio_interface.hpp>
+//#include <librrl/audio_interface.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -19,10 +19,10 @@ namespace visr
     {
     }
     
-    std::unique_ptr<rrl::AudioInterface >
-    AudioInterfaceFactory::Creator::create( rrl::AudioInterface::Configuration const & baseConfig, std::string const & config ) const
+    std::unique_ptr<audiointerfaces::AudioInterface >
+    AudioInterfaceFactory::Creator::create( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config ) const
     {
-        return std::unique_ptr< rrl::AudioInterface >( mCreateFunction( baseConfig, config ) );
+        return std::unique_ptr< audiointerfaces::AudioInterface >( mCreateFunction( baseConfig, config ) );
     }
     
     /*static*/ AudioInterfaceFactory::CreatorTable &
@@ -32,8 +32,8 @@ namespace visr
         return sCreatorTable;
     }
     
-    /*static*/ std::unique_ptr<rrl::AudioInterface>
-    AudioInterfaceFactory::create(std::string const & interfaceName, rrl::AudioInterface::Configuration const & baseConfig, std::string const & config)
+    /*static*/ std::unique_ptr<audiointerfaces::AudioInterface>
+    AudioInterfaceFactory::create(std::string const & interfaceName, audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config)
     {
         CreatorTable::const_iterator findIt
         = creatorTable().find( interfaceName );
@@ -42,7 +42,7 @@ namespace visr
             throw std::invalid_argument( "ParameterFactory: No creator function for requested parameter type " );
         }
         // todo: Need to catch construction errors?
-        return std::unique_ptr<rrl::AudioInterface>( findIt->second.create( baseConfig, config ) );
+        return std::unique_ptr<audiointerfaces::AudioInterface>( findIt->second.create( baseConfig, config ) );
     }
     
     

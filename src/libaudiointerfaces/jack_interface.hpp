@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 #define VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <libril/constants.hpp>
 
@@ -15,7 +15,7 @@ namespace visr
 {
 namespace audiointerfaces
 {
-  class JackInterface: public rrl::AudioInterface
+  class JackInterface: public audiointerfaces::AudioInterface
   {
   public:
     /**

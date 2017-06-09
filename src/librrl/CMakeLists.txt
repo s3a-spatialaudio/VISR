@@ -3,7 +3,6 @@
 SET( SOURCES
 audio_connection_map.cpp
 audio_signal_flow.cpp
-audio_interface.cpp
 communication_area.cpp
 integrity_checking.cpp
 parameter_connection_graph.cpp
@@ -16,7 +15,6 @@ signal_routing_internal.cpp
 
 SET( HEADERS
 audio_connection_map.hpp
-audio_interface.hpp
 audio_signal_flow.hpp
 communication_area.hpp
 integrity_checking.hpp

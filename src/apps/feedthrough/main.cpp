@@ -15,7 +15,7 @@
 
 #include <librrl/audio_signal_flow.hpp>
 #include <libril/signal_flow_context.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -36,7 +36,7 @@ int main( int argc, char const * const * argv )
     const std::size_t samplingRate = 48000;
     try
     {
-        rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
+        audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
         
         std::string type;
         std::string specConf;
@@ -51,7 +51,7 @@ int main( int argc, char const * const * argv )
         type = "PortAudio";
 #endif
         
-        std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
         
         /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
         SignalFlowContext context( periodSize, samplingRate );

@@ -16,7 +16,7 @@
 
 #include <libril/export_symbols.hpp>
 //#include "parameter_type.hpp"
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 
 #include <functional>
 #include <map>
@@ -37,7 +37,7 @@ namespace visr
       AudioInterfaceFactory
     {
     public:
-        static std::unique_ptr<rrl::AudioInterface> create(std::string const & interfaceName, rrl::AudioInterface::Configuration const & baseConfig, std::string const & config);
+        static std::unique_ptr<audiointerfaces::AudioInterface> create(std::string const & interfaceName, audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config);
         
         template< class ConcreteAudioInterface >
         static void registerAudioInterfaceType( std::string const & interfaceName );
@@ -60,11 +60,11 @@ namespace visr
     private:
         struct Creator
         {
-            using CreateFunction = std::function< rrl::AudioInterface* ( rrl::AudioInterface::Configuration const & baseConfig, std::string const & config  ) >;
+            using CreateFunction = std::function< audiointerfaces::AudioInterface* ( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config  ) >;
             
             VISR_CORE_LIBRARY_SYMBOL explicit Creator( CreateFunction fcn );
             
-            VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<rrl::AudioInterface> create( rrl::AudioInterface::Configuration const & baseConfig, std::string const & config) const;
+            VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<audiointerfaces::AudioInterface> create( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config) const;
         private:
             CreateFunction mCreateFunction;
         };
@@ -78,9 +78,9 @@ namespace visr
             {
             }
             
-            static rrl::AudioInterface* construct( rrl::AudioInterface::Configuration const & baseConfig, std::string const & config )
+            static audiointerfaces::AudioInterface* construct( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config )
             {
-                rrl::AudioInterface* obj = new ConcreteAudioInterface(baseConfig, config );
+                audiointerfaces::AudioInterface* obj = new ConcreteAudioInterface(baseConfig, config );
                 return obj;
             }
         };

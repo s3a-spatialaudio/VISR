@@ -15,7 +15,7 @@
 #include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
 #include <librrl/audio_signal_flow.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/bunch_renderer.hpp>
 
 #include <libefl/denormalised_number_handling.hpp>
@@ -141,7 +141,7 @@ int main( int argc, char const * const * argv )
                                      reverbConfiguration );
 
     rrl::AudioSignalFlow audioFlow( flow );
-    visr::rrl::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,samplingRate,periodSize);
+    visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,samplingRate,periodSize);
       std::string type;
       std::string specConf;
       
@@ -155,7 +155,7 @@ int main( int argc, char const * const * argv )
       type = "PortAudio";
 #endif
       
-    std::unique_ptr<rrl::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+    std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
       
 
     audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );

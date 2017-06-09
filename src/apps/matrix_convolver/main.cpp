@@ -8,7 +8,7 @@
 #include <libpml/index_sequence.hpp>
 
 #include <librbbl/fft_wrapper_factory.hpp>
-//#include <librrl/audio_interface.hpp>
+
 #include <libril/signal_flow_context.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
@@ -20,7 +20,7 @@
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <cstdlib>
@@ -123,8 +123,8 @@ int main( int argc, char const * const * argv )
     bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
 #endif
 
-    std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
-   rrl::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,samplingFrequency,periodSize);
+    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
+   audiointerfaces::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,samplingFrequency,periodSize);
       
       std::string type;
       std::string specConf;

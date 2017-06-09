@@ -11,7 +11,7 @@
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
@@ -81,13 +81,13 @@ int main( int argc, char const * const * argv )
         std::size_t const numberOfSignals = flow.numberOfCaptureChannels();
         
         
-        rrl::AudioInterface::Configuration baseConfig(numberOfSignals,0,samplingFrequency,blockSize);
+        audiointerfaces::AudioInterface::Configuration baseConfig(numberOfSignals,0,samplingFrequency,blockSize);
         
         
         std::string type;
         std::string specConf;
         
-        std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
+        std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
         
         
 #ifdef VISR_JACK_SUPPORT

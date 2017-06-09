@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
 #define VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
 
-#include <librrl/audio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libril/constants.hpp>
 
 #include <memory>
@@ -17,7 +17,7 @@ namespace visr
 namespace audiointerfaces
 {
 
-class PortaudioInterface: public rrl::AudioInterface
+class PortaudioInterface: public audiointerfaces::AudioInterface
 {
 public:
   /**
@@ -108,7 +108,7 @@ public:
 
   };
 
-  using Base = rrl::AudioInterface;
+  using Base = audiointerfaces::AudioInterface;
   
   explicit PortaudioInterface( Configuration const & baseConfig,  std::string const & config);
   

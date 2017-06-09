@@ -417,7 +417,7 @@ namespace // unnamed
     if( mCallback )
     {
       transferCaptureBuffers( input );
-      CallbackResult res;
+      bool res;
       try
       {
         (*mCallback)(mCallbackUserData, &mCaptureSampleBuffers[0], &mPlaybackSampleBuffers[0], res);
