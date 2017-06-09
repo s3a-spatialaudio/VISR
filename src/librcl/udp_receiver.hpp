@@ -46,8 +46,9 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
   explicit UdpReceiver( SignalFlowContext const & context,
                         char const * name,
@@ -64,7 +65,7 @@ public:
    * @param mode The mode how data is received. See documantation of
    * enumeration Mode.
    * @param externalIoService An externally provided IO service
-   * object. Must be non-zero if and only if mode == ExternalServiceObject
+   * object. Must be non-zero if and only if mode == Mode::ExternalServiceObject
    */ 
   void setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService = nullptr );
 

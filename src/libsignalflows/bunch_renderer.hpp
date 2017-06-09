@@ -31,6 +31,9 @@ class BunchRenderer: public CompositeComponent
 public:
   /**
    * Constructor to create, initialise and interconnect all processing components.
+   * @param context Configuration object holding basic execution parameters.
+   * @param name Name of the component.
+   * @param parent Pointer to containing component (if there is one). A value of \p nullptr signals that this is a top-level component.
    * @param loudspeakerConfiguration The configuration of the reproduction array, including the routing to physical output channels,
    * potentially virtual loudspeakers and subwoofer configuration.
    * @param numberOfInputs The number of inputs, i.e., the number of audio object signals
@@ -46,20 +49,18 @@ public:
    *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
    *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV) 
    *          containing the filter coefficients for the decorrelation of the late part.
-   * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
-   * @param samplingFrequency The sampling frequency of the processing (in Hz)
    */
   explicit BunchRenderer( SignalFlowContext const & context,
-                             char const * name,
-                             CompositeComponent * parent,
-                             panning::LoudspeakerArray const & loudspeakerConfiguration,
-                             std::size_t numberOfInputs,
-                             std::size_t numberOfOutputs,
-                             std::size_t interpolationPeriod,
-                             efl::BasicMatrix<SampleType> const & diffusionFilters,
-                             std::string const & trackingConfiguration,
-                             std::size_t sceneReceiverPort,
-                             std::string const & reverbConfig );
+                          char const * name,
+                          CompositeComponent * parent,
+                          panning::LoudspeakerArray const & loudspeakerConfiguration,
+                          std::size_t numberOfInputs,
+                          std::size_t numberOfOutputs,
+                          std::size_t interpolationPeriod,
+                          efl::BasicMatrix<SampleType> const & diffusionFilters,
+                          std::string const & trackingConfiguration,
+                          std::size_t sceneReceiverPort,
+                          std::string const & reverbConfig );
 
   ~BunchRenderer();
 

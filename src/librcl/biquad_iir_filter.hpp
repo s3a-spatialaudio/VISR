@@ -37,8 +37,9 @@ class BiquadIirFilter: public AtomicComponent
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within tdefhe containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
   explicit BiquadIirFilter( SignalFlowContext const & context,
                             char const * name,
@@ -49,13 +50,11 @@ public:
    * @param numberOfChannels The number of single audio waveforms in
    * the multichannel input and output waveforms. .
    * @param numberOfBiquads The number of biquads per audio channel.
-   * @param initialBiquad The initial setting for the filter characteristics. All biquads in all channels are set
-   * to this coefficient set. The default is a flat, direct-feedthrough filter
+   * @param controlInput Flag whether to instantiate a parameter port for receiving filter update commands.
    */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
               bool controlInput = false );
-
 
   /**
    * Setup method to initialise the object and set the parameters.
@@ -64,6 +63,7 @@ public:
    * @param numberOfBiquads The number of biquads per audio channel.
    * @param initialBiquad The initial setting for the filter characteristics. All biquads in all channels are set 
    * to this coefficient set. The default is a flat, direct-feedthrough filter
+   * @param controlInput Flag whether to instantiate a parameter port for receiving filter update commands.
    */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
@@ -76,17 +76,19 @@ public:
   * @param numberOfBiquads The number of biquad sections for each channel.
   * @param coeffs The initial biquad coefficients, which are set identically for all channels.
   * The number of biquad coefficient sets in this parameter must equal the \p numberOfBiquads parameter.
+  * @param controlInput Flag whether to instantiate a parameter port for receiving filter update commands.
   */
   void setup( std::size_t numberOfChannels,
-    std::size_t numberOfBiquads,
-    pml::BiquadParameterList< SampleType > const & coeffs,
-    bool controlInput = false );
+              std::size_t numberOfBiquads,
+              pml::BiquadParameterList< SampleType > const & coeffs,
+              bool controlInput = false );
 
   /**
   * Setup method to initialise the object and set the biquad filters individually for each filter channel and biquad section.
   * @param numberOfChannels The number of signals in the input signal.
   * @param numberOfBiquads The number of biquad sections for each channel.
   * @param coeffs The initial biquad coefficients as a matrix of size \p numberOfChannels x \p numberOfBiquads
+  * @param controlInput Flag whether to instantiate a parameter port for receiving filter update commands.
   */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,

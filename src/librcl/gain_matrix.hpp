@@ -51,8 +51,9 @@ class GainMatrix: public AtomicComponent
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
   explicit GainMatrix( SignalFlowContext const & context,
                        char const * name,
@@ -67,6 +68,7 @@ public:
    * immediate application of the new gain value.
    * @param initialGain The initial entries of the the gain matrix (linear scale). All entries are initialised to 
    * this value (default: 0.0)
+   * @param controlInput Flag controlling whether to instantiate a parameter input to receive gain matrix updates.
    * @todo Describe the complete semantics of the transition.
    */
   void setup( std::size_t numberOfInputs, 
@@ -83,6 +85,7 @@ public:
   * immediate application of the new gain value.
   * @param initialGains The initial entries of the the gain matrix (linear scale). The row and column
   * numbers of the matrix must match the arguments numberOfOutputs and numberOfInputs, respectively.
+  * @param controlInput Flag controlling whether to instantiate a parameter input to receive gain matrix updates.
   */
   void setup( std::size_t numberOfInputs,
               std::size_t numberOfOutputs,

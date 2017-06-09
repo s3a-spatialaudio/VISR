@@ -33,13 +33,26 @@ namespace rsao
 {
 
 /**
- * Audio signal graph object for the VISR baseline renderer.
+ * Rendering subgraph for reverb objects.
+ * Usually used as part of a larger renderer that handles object
+ * volume + EQ, signal routing and the direct part of the renderer.
  */
 class ReverbObjectRenderer: public CompositeComponent
 {
 public:
   /**
-   * Constructor to create, initialise and interconnect all processing components.
+   * Constructor to create, initialise and interconnect the processing components.
+   * @param context Configuration object holding basic execution parameters.
+   * @param name Name of the component.
+   * @param parent Pointer to containing component (if there is one). A value of \p nullptr signals that this is a top-level component.
+   * @param reverbConfig JSON-formatted string to hold the reverb-specific configuration.
+   *        - numReverbObjects (integer) The maximum number of reverb objects (at a given time)
+   *        - lateReverbFilterLength (floating-point) The length of the late reverberation filter (in seconds)
+   *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
+   *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV)
+   *          containing the filter coefficients for the decorrelation of the late part.
+   * @param arrayConfig Array configuration object to describe the reproduction system.
+   * @param numberOfObjectSignals Total number of object audio signals that might carry reverb objects.
    */
   explicit ReverbObjectRenderer( SignalFlowContext const & context,
                                  char const * name,

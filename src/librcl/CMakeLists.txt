@@ -41,6 +41,7 @@ gain_matrix.hpp
 gain_vector.cpp
 hoa_allrad_gain_calculator.hpp
 listener_compensation.hpp
+null_source.hpp
 object_gain_eq_calculator.hpp
 panning_calculator.hpp
 panning_gain_calculator.hpp

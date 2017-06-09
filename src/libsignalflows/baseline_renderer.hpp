@@ -54,8 +54,7 @@ public:
    *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
    *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV) 
    *          containing the filter coefficients for the decorrelation of the late part.
-   * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
-   * @param samplingFrequency The sampling frequency of the processing (in Hz)
+   * @param frequencyDependentPanning Flag specifiying whether the frequency-dependent VBAP algorithm shall be activated (true) or not (false)
    */
   explicit BaselineRenderer( SignalFlowContext const & context,
                              char const * name,

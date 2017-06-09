@@ -27,20 +27,17 @@ namespace rsao
 {
 
 /**
- * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
+ * Audio component for computing signal processing parameters from 
+ * PointSoureWithReverb objects.
  */
 class LateReverbFilterCalculator: public AtomicComponent
 {
 public:
   /**
-   * Type of the gain coefficients. We use the same type as the audio samples (typically float, may
-   */
-  using CoefficientType = SampleType;
-
-  /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
+   * @param context Configuration object holding basic execution parameters.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param parent Pointer to containing component (if there is one). A value of \p nullptr signals that this is a top-level component.
    */
   explicit LateReverbFilterCalculator( SignalFlowContext const & context,
                                        char const * name,
@@ -59,9 +56,9 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param numberOfObjects
-   * @param lateReflectionLengthSeconds
-   * @param numLateReflectionSubBandLevels Teh e
+   * @param numberOfObjects The maximum number of reverb objects that can be rendered simultaneously.
+   * @param lateReflectionLengthSeconds Maximum length of the late reverb tail.
+   * @param numLateReflectionSubBandLevels The number of frequency bands for the late reverberation.
    * @param maxUpdatesPerPeriod The maximum number of filter updates calculated in a single period. Defaults to 0
    * (all new filter are updated immediately,).
    * @todo Consider making lateReflectionSubbandLevels optional.

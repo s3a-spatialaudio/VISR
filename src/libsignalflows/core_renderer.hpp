@@ -49,13 +49,17 @@ namespace signalflows
 {
 
 /**
- * Audio signal graph object for the VISR baseline renderer.
+ * Audio signal graph object VISR renderer, excluding external network I/O.
+ * Depending on the environment, the core renderer is being encapsulated in other graphs.
  */
 class CoreRenderer: public CompositeComponent
 {
 public:
   /**
-   * Constructor to create, initialise and interconnect all processing components.
+   * Constructor to create, initialise and interconnect the processing components of the core renderer.
+   * @param context Configuration object holding basic execution parameters.
+   * @param name Name of the component.
+   * @param parent Pointer to containing component (if there is one). A value of \p nullptr signals that this is a top-level component.
    * @param loudspeakerConfiguration The configuration of the reproduction array, including the routing to physical output channels,
    * potentially virtual loudspeakers and subwoofer configuration.
    * @param numberOfInputs The number of inputs, i.e., the number of audio object signals
@@ -64,15 +68,14 @@ public:
    * @param interpolationPeriod The interpolation period used in the VBAP gain matrix, i.e., the number of samples it takes to fade to a new gain value. Must be multiple of \p period.
    * @param diffusionFilters A matrix of floating-point values containing the the FIR coefficients of the decorrelation filter that creates diffuse sound components.
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
-   * @param sceneReceiverPort The UDP port for receiving the scene data messages.
+   * @param numberOfObjectEqSections The number of parametric IIR filter sections provided for each object signal.
    * @param reverbConfig A JSON message containing configuration options for the late reverberation part.
    *        - numReverbObjects (integer) The maximum number of reverb objects (at a given time)
    *        - lateReverbFilterLength (floating-point) The length of the late reverberation filter (in seconds)
    *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
    *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV) 
    *          containing the filter coefficients for the decorrelation of the late part.
-   * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
-   * @param samplingFrequency The sampling frequency of the processing (in Hz)
+   * @param frequencyDependentPanning Flag specifiying whether the frequency-dependent VBAP algorithm shall be activated (true) or not (false)
    */
   explicit CoreRenderer( SignalFlowContext const & context,
                          char const * name,

@@ -45,9 +45,9 @@ public:
   using CoefficientType = SampleType;
 
   /**
-   * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
   explicit PanningGainCalculator( SignalFlowContext const & context,
                                   char const * name,
@@ -68,6 +68,7 @@ public:
    * Method to initialise the component.
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
+   * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener.
    */ 
   void setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig,
               bool adaptiveListenerPosition=false );

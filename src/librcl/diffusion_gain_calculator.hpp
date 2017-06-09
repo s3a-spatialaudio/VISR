@@ -36,8 +36,9 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
   explicit DiffusionGainCalculator( SignalFlowContext const & context,
                                     char const * name,
@@ -62,11 +63,8 @@ public:
 
   /**
   * The process function.
-  * It takes a vector of objects as input and calculates a vector of output gains.
-  * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
-  * @param[out] gainVector The vector of diffusion gains for the audio channels. Must be a vector of size numberOfChannelObjects.
   */
-  void process();
+  void process() override;
 
 private:
   /**

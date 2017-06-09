@@ -45,8 +45,9 @@ class FirFilterMatrix: public AtomicComponent
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
   explicit FirFilterMatrix( SignalFlowContext const & context,
                             char const * name,
@@ -72,6 +73,7 @@ public:
    * all filters are zero-initialised.
    * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
    * active initially.
+   * @param controlInputs Whether to instantiate a parameter port receiving filter update commands.
    * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
    * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */

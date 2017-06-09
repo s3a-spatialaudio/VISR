@@ -172,16 +172,23 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   // At the time being, these are compiled into the binaries.
   // To this end, ".cpp" files are created by adding quote pairs to each line and
   // replacing quotes by \". THis is done manually at the moment, but should be automated in the build system.
+
+  // Workaround to prevent doxygen from searching for this include file (which it is not supposed to see)
+  ///@cond NEVER
   static std::string const cRegularArrayConfigStr =
 #include "libpanning/test/matlab/arrays/t-design_t8_P40.xml.cpp"
     ;
+  ///@endcond NEVER
   panning::LoudspeakerArray allRadRegArray;
   std::stringstream cRegularArrayConfigStream( cRegularArrayConfigStr );
   allRadRegArray.loadXmlStream( cRegularArrayConfigStream );
 
+  // Workaround to prevent doxygen from searching for this include file (which it is not supposed to see)
+  ///@cond NEVER
   static std::string const allRadDecoderGainMatrixString =
 #include "libpanning/test/matlab/arrays/decode_N8_P40_t-design_t8_P40.txt.cpp"
     ;
+  ///@endcond NEVER
   pml::MatrixParameter<Afloat> const allRadDecoderGains
     = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
   mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains,

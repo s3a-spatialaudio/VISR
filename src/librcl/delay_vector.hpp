@@ -45,8 +45,9 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
   explicit DelayVector( SignalFlowContext const & context,
                         char const * name,
@@ -62,7 +63,10 @@ public:
    * immediate application of the new settings.
    * @param maximumDelaySeconds The maximal delay value supported by this
    * object (in seconds)
-   * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
+   * @param interpolationMethod The interpolation method to be applied. The string must correspond to a algorithm registered in
+   * rbbl::FractionalDelayFactory.
+   * @param methodDelayPolicy Enumeration value governing how the method delay of the interpolation method is incorporated into the delay values
+   * applied to the signals.
    * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
    * @param initialDelaySeconds The initial delay value for all
    * channels (in seconds, default: 0.0)
@@ -86,7 +90,10 @@ public:
   * immediate application of the new delay/gain values.
   * @param maximumDelaySeconds The maximal delay value supported by this
   * object (in seconds)
-  * @param interpolationMethod The interpolation method to be applied (see enumeration InterpolationType)
+  * @param interpolationMethod The interpolation method to be applied. The string must correspond to a algorithm registered in
+  * rbbl::FractionalDelayFactory
+  * @param methodDelayPolicy Enumeration value governing how the method delay of the interpolation method is incorporated into the delay values
+  * applied to the signals.
   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
   * @param initialDelaysSeconds The delays for all channels in
   * seconds. The number of elements of this vector must match the channel number of this object.
