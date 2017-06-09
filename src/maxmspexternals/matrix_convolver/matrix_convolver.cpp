@@ -7,6 +7,8 @@
 #undef error
 #include "options.hpp"
 
+#include <libril/detail/compose_message_string.hpp>
+
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
 /* Super-safe determination of the MAX define for setting the operating system. */
@@ -111,7 +113,8 @@ MatrixConvolver::MatrixConvolver( t_pxobject & maxProxy, short argc, t_atom *arg
   }
   catch( std::exception const & ex )
   {
-    object_error( reinterpret_cast<t_object *>(getMaxProxy()), "Error in constructor: ", ex.what() );
+    object_error( reinterpret_cast<t_object *>(getMaxProxy()), 
+      detail::composeMessageString("Error in constructor: ", ex.what()).c_str() );
   }
 }
 

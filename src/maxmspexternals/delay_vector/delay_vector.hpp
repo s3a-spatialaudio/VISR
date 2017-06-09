@@ -49,7 +49,7 @@ private:
   long mPeriod;
   std::size_t mNumberOfChannels;
   std::size_t mInterpolationSteps;
-  rcl::DelayVector::InterpolationType mInterpolationType;
+  std::string mInterpolationMethod;
 
   /**
    * Context object to provide initialisation information and to provide a run-time interface for the components.

@@ -132,7 +132,7 @@ DelayVector::~DelayVector()
   *count = static_cast<short>(mPeriod); // I'm guessing again;
   mInterpolationSteps = mPeriod;
   // For the moment, use a fixed setting for the interpolation type.
-  mInterpolationType = rcl::DelayVector::InterpolationType::Linear;
+  mInterpolationMethod = "lagrangeOrder3";
 
   try
   {
@@ -142,13 +142,9 @@ DelayVector::~DelayVector()
 
     mComp.reset( new rcl::DelayVector( *mContext, "", nullptr ) );
     mComp->setup( mNumberOfChannels, mInterpolationSteps, 1.0f, 
-#ifdef USE_MC_DELAY_LINE
-      "lagrangeOrder1",
-#else
-      mInterpolationType,
-#endif
+      mInterpolationMethod.c_str(),
+      rcl::DelayVector::MethodDelayPolicy::Add,
       true );
-
 
     mFlow.reset( new rrl::AudioSignalFlow(*mComp )  );
 
