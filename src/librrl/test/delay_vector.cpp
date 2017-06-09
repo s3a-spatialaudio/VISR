@@ -29,15 +29,8 @@ BOOST_AUTO_TEST_CASE( CheckDelayVector )
 
   SignalFlowContext context( blockSize, 48000 );
 
-  //SignalFlowContext & context,
-  //  const char * name,
-  //  CompositeComponent * parent,
-  //  std::size_t cNumberOfChannels,
-  //  std::size_t interpolationPeriod,
-  //  rcl::DelayVector::InterpolationType interpolationMethod
-
   signalflows::DelayVector comp( context, "topLevel", nullptr, numChannels,
-    1024, rcl::DelayVector::InterpolationType::Linear );
+    1024, "lagrangeOrder3" );
 
   rrl::AudioSignalFlow flow( comp );
 

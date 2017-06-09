@@ -5,6 +5,8 @@
 
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
@@ -16,6 +18,8 @@
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/listener_position.hpp>
 #include <libpml/matrix_parameter.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/shared_data_protocol.hpp>
 
 #include <vector>
 
@@ -79,18 +83,14 @@ public:
   void setup( std::size_t numberOfObjectChannels,
               panning::LoudspeakerArray const & regularArrayConfig,
               panning::LoudspeakerArray const & realArrayConfig,
-              efl::BasicMatrix<Afloat> const & decodeMatrix, 
-              pml::ListenerPosition const & listenerPosition = pml::ListenerPosition() );
+              efl::BasicMatrix<Afloat> const & decodeMatrix,
+              pml::ListenerPosition const & listenerPosition = pml::ListenerPosition(),
+              bool adaptiveListenerPosition = false );
 
+  /**/
   void process() override;
 
 private:
-
-  /**
-   * Internal process function.
-   * It takes a vector of objects as input and calculates a vector of output gains.
-   */
-  void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
 
   /**
    * Set the reference listener position. This overload accepts three Cartesian coordinates.
@@ -119,26 +119,14 @@ private:
    * Must be called after one of the loudspeaker arrays or the listener position has changed.
    */
   void precalculate();
-  /**
-   * The loudspeaker array configuration for the 'virtual', regular array 
-   * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
-   * we make a copy of the reference passed to the setup method.
-   */
-//  panning::LoudspeakerArray mRealSpeakerArray;
-//
-//  /**
-//   * The physical loudspeaker array configuration.
-//   * Local copy of the array configuration passed to the setup() method.
-//   */
-//  panning::LoudspeakerArray mRegularSpeakerArray;
 
-// Temporality disabled for refactoring.
-#if 0
-  /**
-   * The calculator object to generate the panning matrix coefficients.
-   */
-  panning::VBAP mVbapCalculator;
-#endif
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector> mObjectInput;
+
+  ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixInput;
+
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > > mListenerInput;
+
+  ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixOutput;
 
   std::unique_ptr<panning::AllRAD> mAllRadCalculator;
 

@@ -18,7 +18,7 @@ namespace objectmodel
 /**
  * A class representing a set of audio objects of potentially different types.
  */
-class VISR_CORE_LIBRARY_SYMBOL ObjectVector
+class ObjectVector
 {
 public:
   /**

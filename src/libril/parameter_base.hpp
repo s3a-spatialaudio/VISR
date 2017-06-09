@@ -22,12 +22,21 @@ class VISR_CORE_LIBRARY_SYMBOL ParameterBase
 {
 public:
 
-  ParameterBase() {}
+  ParameterBase();
+
+  /**
+   * Copy constructor.
+   * This uses the default implementation.
+   * THis function needs to be implemented explicitly because the class is exported.
+   */
+  ParameterBase( const ParameterBase & );
+
+  ParameterBase& operator=( const ParameterBase & );
 
   /**
    *
    */
-  virtual ~ParameterBase() {}
+  virtual ~ParameterBase();
 
   /**
    * Return the dynamic type of the parameter object.

@@ -87,10 +87,10 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 
     mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
-    mListenerGainDelayCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay,
-                                         rcl::DelayVector::InterpolationType::NearestSample,
-                                         true /* activate control inputs*/,
-                                         0.0f, 1.0f );
+    mListenerGainDelayCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay, "lagrangeOrder0",
+                                           rcl::DelayVector::MethodDelayPolicy::Limit,
+                                           true /* activate control inputs*/,
+                                           0.0f, 1.0f );
     mTrackingPositionInput.reset( new TrackingPositionInput( "trackingPositionInput", *this, pml::EmptyParameterConfig() ) );
     parameterConnection( *mTrackingPositionInput, mListenerCompensation->parameterPort("positionInput") );
     parameterConnection( *mTrackingPositionInput, mGainCalculator.parameterPort("listenerPosition") );
@@ -133,7 +133,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   parameterConnection( mChannelObjectRoutingCalculator.parameterPort("routingOut"), mChannelObjectRouting.parameterPort("controlInput") );
 
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
   audioConnection( mVbapMatrix.audioPort("out"), mDirectDiffuseMix.audioPort("in1") );
   if( frequencyDependentPanning )
   {
@@ -155,11 +154,9 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
     parameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
 
-    audioConnection( "VbapGainMatrix", "out", ChannelRange( 0, numberOfLoudspeakers ), "DirectDiffuseMixer", "in0", ChannelRange( 0, numberOfLoudspeakers ) );
-
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( numberOfInputs, 2*numberOfInputs ) );
-    audioConnection( mPanningFilterbank->audioPort("out"), mVbapMatrix.audioPort("in") );
+    audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( 0, numberOfInputs ), mVbapMatrix.audioPort("in"), ChannelRange( 0, numberOfInputs ) );
     audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( numberOfInputs, 2*numberOfInputs ), mLowFrequencyPanningMatrix->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
 
     audioConnection( mLowFrequencyPanningMatrix->audioPort("out"), mDirectDiffuseMix.audioPort("in2") );
@@ -187,7 +184,13 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     ;
   pml::MatrixParameter<Afloat> const allRadDecoderGains
     = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
-  mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains );
+  mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains,
+                               pml::ListenerPosition(), mTrackingEnabled );
+
+  parameterConnection( mObjectVectorInput, mAllradGainCalculator.parameterPort("objectInput") );
+  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mAllradGainCalculator.parameterPort( "gainInput" ) );
+  parameterConnection( mAllradGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
+
 
   //////////////////////////////////////////////////////////////////////////////////////
 
@@ -214,7 +217,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   Afloat const maxDelay = std::ceil( *maxEl ); // Sufficient for nearestSample even if there is no particular compensation for the interpolation method's delay inside.
 
   mOutputAdjustment.setup( numberOfOutputSignals, period(), maxDelay,
-                           rcl::DelayVector::InterpolationType::NearestSample,
+                           "lagrangeOrder0",
+                           rcl::DelayVector::MethodDelayPolicy::Limit,
                            false /*No control inputs*/,
                            outputDelays, outputGains );
 
@@ -230,7 +234,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                                                            numberOfInputs ) );
 
     audioConnection( mObjectEq.audioPort("out"), mReverbRenderer->audioPort("in") );
-    char const * diffuseInPort = frequencyDependentPanning ? "in2" : "in3";
+    char const * diffuseInPort = frequencyDependentPanning ? "in4" : "in3";
     audioConnection( mReverbRenderer->audioPort("out"), mDirectDiffuseMix.audioPort( diffuseInPort) );
 
     parameterConnection( mObjectVectorInput, mReverbRenderer->parameterPort("objectIn") );
@@ -260,9 +264,14 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     audioConnection( mDirectDiffuseMix.audioPort("out"), mSubwooferMix.audioPort("in") );
     if( outputEqSupport )
     {
-      audioConnection( mDirectDiffuseMix.audioPort("out"), mOutputEqualisationFilter->audioPort("in") );
-      audioConnection( mSubwooferMix.audioPort("out"), ChannelRange( 0, numberOfSubwoofers ),
-                       mOutputEqualisationFilter->audioPort("in"), ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
+      audioConnection( mDirectDiffuseMix.audioPort("out"),
+                      ChannelRange( 0, numberOfLoudspeakers ),
+                      mOutputEqualisationFilter->audioPort("in"),
+                      ChannelRange( 0, numberOfLoudspeakers ) );
+      audioConnection( mSubwooferMix.audioPort("out"),
+                      ChannelRange( 0, numberOfSubwoofers ),
+                      mOutputEqualisationFilter->audioPort("in"),
+                      ChannelRange( numberOfLoudspeakers, numberOfLoudspeakers + numberOfSubwoofers ) );
       audioConnection( mOutputEqualisationFilter->audioPort("out"), mOutputAdjustment.audioPort("in") );
     }
     else

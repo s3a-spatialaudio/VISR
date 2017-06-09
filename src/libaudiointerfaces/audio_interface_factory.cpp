@@ -2,7 +2,9 @@
 
 #include <librrl/audio_interface.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
+#ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
+#endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
 
 //#include <libril/parameter_config_base.hpp>
@@ -52,7 +54,9 @@ namespace visr
     {
         InstantiateAudioInterfaceFactory()
         {
+#ifdef VISR_JACK_SUPPORT
             AudioInterfaceFactory::registerAudioInterfaceType<audiointerfaces::JackInterface>("Jack" );
+#endif
             AudioInterfaceFactory::registerAudioInterfaceType<audiointerfaces::PortaudioInterface>("PortAudio" );
            
         }

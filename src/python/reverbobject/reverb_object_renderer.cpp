@@ -17,14 +17,6 @@ namespace python
 namespace reverbobject
 {
 
-//  explicit ReverbObjectRenderer( SignalFlowContext const & context,
-//                                 char const * name,
-//                                 CompositeComponent * parent,
-//                                 std::string const & reverbConfig,
-//                                 panning::LoudspeakerArray const & arrayConfig,
-//                                 std::size_t numberOfObjectSignals );
-
-
 void exportReverbObjectRenderer( pybind11::module& m )
 {
   pybind11::class_<::visr::rsao::ReverbObjectRenderer, CompositeComponent>( m, "ReverbObjectRenderer" )

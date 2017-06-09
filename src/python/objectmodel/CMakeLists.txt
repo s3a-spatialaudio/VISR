@@ -1,20 +1,17 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
+hoa_source.cpp
 object.cpp
 object_type.cpp
 object_vector.cpp
 objectmodel.cpp
 plane_wave.cpp
 point_source.cpp
+point_source_with_reverb.cpp
 )
 
 set( HEADERS
-object.hpp
-object_type.hpp
-object_vector.hpp
-plane_wave.hpp
-point_source.hpp
 )
 
 # We don't need header files
