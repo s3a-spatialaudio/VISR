@@ -17,6 +17,7 @@ namespace rcl
   void exportGainVector( pybind11::module & m );
   void exportHoaAllRadGainCalculator( pybind11::module & m );
   void exportPanningCalculator( pybind11::module & m );
+  void exportScalarOscDecoder( pybind11::module & m );
 }
 }
 }
@@ -36,5 +37,6 @@ PYBIND11_PLUGIN(rcl)
   exportGainVector( m );
   exportHoaAllRadGainCalculator( m );
   exportPanningCalculator( m );
+  exportScalarOscDecoder( m );
   return m.ptr();
 }

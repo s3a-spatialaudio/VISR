@@ -1,19 +1,16 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRCL_SWITCH_DECODER_HPP_INCLUDED
-#define VISR_LIBRCL_SWITCH_DECODER_HPP_INCLUDED
+#ifndef VISR_LIBRCL_SCALAR_OSC_DECODER_HPP_INCLUDED
+#define VISR_LIBRCL_SCALAR_OSC_DECODER_HPP_INCLUDED
 
-#include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
-#include <libril/audio_output.hpp>
 
 #include <libril/parameter_input.hpp>
 #include <libril/parameter_output.hpp>
 
 #include <libpml/string_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
-#include <libpml/double_buffering_protocol.hpp>
-#include <libpml/signal_routing_parameter.hpp>
+#include <libpml/scalar_parameter.hpp>
 
 #include <memory> // for std::unique_ptr
 #include <vector>
@@ -26,11 +23,6 @@ namespace oscpkt
 
 namespace visr
 {
-// forward declarations
-namespace pml
-{
-class SignalRoutingParameter;
-}
 
 namespace rcl
 {
@@ -38,34 +30,44 @@ namespace rcl
 /**
  * Component to decode OSC messages containing a single integer and to fill a signal routing parameter list accordingly.
  */
-class SwitchDecoder: public AtomicComponent
+class ScalarOscDecoder: public AtomicComponent
 {
 public:
+  enum class DataType
+  {
+    Boolean,
+    Integer,
+    UnsignedInteger,
+    Float,
+    Double
+    // complex types don't make sense here.
+  };
+
   /**
    * Constructor.
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
-  explicit SwitchDecoder( SignalFlowContext const & context,
+  explicit ScalarOscDecoder( SignalFlowContext const & context,
                          char const * name,
                          CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
    */
-  SwitchDecoder( SwitchDecoder const & ) = delete;
+  ScalarOscDecoder( ScalarOscDecoder const & ) = delete;
 
 
   /**
    * Destructor.
    */
-  ~SwitchDecoder();
+  ~ScalarOscDecoder();
 
   /**
    * Method to initialise the component.
    */ 
-  void setup( std::size_t numInputs, std::size_t numOutputs, std::size_t initialInput );
+  void setup( char const * dataType );
 
   /**
    * The process function. 
@@ -75,18 +77,16 @@ public:
 private:
   ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mDatagramInput;
 
-  ParameterOutput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > mRoutingOutput;
-
-  std::size_t mNumberOfInputs;
-
-  std::size_t mNumberOfOutputs;
-
-  std::size_t mInitialInputIndex;
-
   std::unique_ptr<oscpkt::PacketReader> mOscParser;
+
+  std::unique_ptr<ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<bool> > > mBoolOutput;
+  std::unique_ptr<ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<int> > > mIntOutput;
+  std::unique_ptr<ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<unsigned int> > > mUIntOutput;
+  std::unique_ptr<ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<float> > > mFloatOutput;
+  std::unique_ptr<ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<double> > > mDoubleOutput;
 };
 
 } // namespace rcl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRCL_SWITCH_DECODER_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRCL_SCALAR_OSC_DECODER_HPP_INCLUDED

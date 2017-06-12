@@ -9,6 +9,7 @@ gain_vector.cpp
 hoa_allrad_gain_calculator.cpp
 panning_calculator.cpp
 rcl.cpp
+scalar_osc_decoder.cpp
 )
 
 # We don't need header files
