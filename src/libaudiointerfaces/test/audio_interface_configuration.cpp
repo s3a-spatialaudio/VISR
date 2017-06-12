@@ -80,8 +80,11 @@ namespace test
     AudioInterface::Configuration baseConfig(numberOfSources,numberOfLoudspeakers,samplingRate,periodSize);
     std::cout<<type<<" Specific Configuration: \n"<<conf<<std::endl;
     std::unique_ptr<AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, conf);
-    
-    
+    std::vector <std::string> audioifcs = AudioInterfaceFactory::audioInterfacesList();
+    std::cout<<"AVAILABLE INTERFACES: ";
+    for (auto i = audioifcs.begin(); i != audioifcs.end(); ++i)
+      std::cout<< *i << ' ';
+    std::cout<<std::endl;
     /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
     SignalFlowContext context( periodSize, samplingRate );
     Feedthrough topLevel( context, "feedthrough" );
@@ -121,9 +124,13 @@ namespace test
     //                init("Jack",defSpecConfigJack);
     
     // alternative way, take configuration from file
+    std::string path1 = "isvr/audioIfc/jackDefConf.json" ;
+    std::string path2 = "isvr/audioIfc/jackSimpleConf.json";
+    std::string path3 = "isvr/audioIfc/jackComplexConf.json";
+    
     std::string specConf;
     boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
-    boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/audioIfc/jackDefConf.json" );
+    boost::filesystem::path bfile = configDir / boost::filesystem::path( path3 );
     
     BOOST_CHECK_MESSAGE( exists(bfile), "Audio Interface configuration json file does not exist." );
     
@@ -147,6 +154,8 @@ namespace test
     std::string const defSpecConfigPortAudio = "{\"sampleformat\": \"float32Bit\", \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
     
     std::string specConf;
+    
+    
     /* boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
      boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/audioIfc/portAudioDefConf.json" );*/
     boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );

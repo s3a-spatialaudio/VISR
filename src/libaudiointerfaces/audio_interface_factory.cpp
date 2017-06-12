@@ -18,20 +18,35 @@ namespace visr
     : mCreateFunction( fcn )
     {
     }
-    
     std::unique_ptr<audiointerfaces::AudioInterface >
     AudioInterfaceFactory::Creator::create( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config ) const
     {
         return std::unique_ptr< audiointerfaces::AudioInterface >( mCreateFunction( baseConfig, config ) );
     }
-    
+  /**
+   ** Returns alist of all the instantiable audio interfaces.
+   */
+   std::vector<std::string> AudioInterfaceFactory::audioInterfacesList(){
+     std::vector <std::string> audioifcs;
+     for( CreatorTable::const_iterator it = creatorTable().begin(); it != creatorTable().end(); ++it ) {
+       audioifcs.push_back( it->first );
+     }
+     return audioifcs;
+  }
+  
     /*static*/ AudioInterfaceFactory::CreatorTable &
     AudioInterfaceFactory::creatorTable()
     {
         static AudioInterfaceFactory::CreatorTable sCreatorTable;
         return sCreatorTable;
     }
-    
+
+  /**
+   ** Creates an istance of the specified audio interface. This is done at runtime, following the factory pattern.
+   * @param interfaceName Identifier to specify the audio interface to instantiate
+   * @param baseConfig Configuration parameters which are common to all audio interfaces
+   * @param config Configuration parameters which are specific for the given audio interface
+   */
     /*static*/ std::unique_ptr<audiointerfaces::AudioInterface>
     AudioInterfaceFactory::create(std::string const & interfaceName, audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config)
     {

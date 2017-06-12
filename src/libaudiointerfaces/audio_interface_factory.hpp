@@ -22,6 +22,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace visr
 {
@@ -37,8 +38,22 @@ namespace visr
       AudioInterfaceFactory
     {
     public:
+      /**
+       ** Creates an istance of the specified audio interface. This is done at runtime, following the factory pattern.
+       * @param interfaceName Identifier to specify the audio interface to instantiate
+       * @param baseConfig Configuration parameters which are common to all audio interfaces
+       * @param config Configuration parameters which are specific for the given audio interface
+       */
         static std::unique_ptr<audiointerfaces::AudioInterface> create(std::string const & interfaceName, audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config);
-        
+      
+      /**
+       ** Returns alist of all the instantiable audio interfaces.
+       */
+      static std::vector<std::string> audioInterfacesList();
+      
+      /**
+       ** Registers a new instantiable audio interface in the factory.
+       */
         template< class ConcreteAudioInterface >
         static void registerAudioInterfaceType( std::string const & interfaceName );
         
@@ -95,18 +110,6 @@ namespace visr
     {
         creatorTable().insert( std::make_pair( interfaceName, TCreator<ConcreteAudioInterface>() ) );
     }
-//    
-//    template< class TypedParameterType >
-//    void AudioInterfaceFactory::registerParameterType()
-//    {
-//        registerParameterType<TypedParameterType>( TypedParameterType::staticType() );
-//    }
-//    
-    
-    // The macro does not work for multiple uses in the same .cpp file
-    // (multiple definitions of 'maker'), stringization of names difficult
-    // because of template brackets and namespace names.
-    // #define REGISTER_PARAMETER( type, id ) namespace { static ParameterFactory::Registrar< type > maker( id ); }
     
 } // namespace visr
 

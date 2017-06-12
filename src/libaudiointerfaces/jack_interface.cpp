@@ -155,11 +155,12 @@ namespace audiointerfaces
     //            config.loadPortConfigJson(config.mPortJSONConfig, mNumCaptureChannels, mNumPlaybackChannels);
     
     if(!config.mPortJSONConfig.empty()){
-      boost::property_tree::ptree ptype;
-      ptype = config.mPortJSONConfig.get_child("capture");
-      config.loadPortConfig(ptype, config.mInExtClientName, config.mCapturePortNames, mInExternalPortNames, mNumCaptureChannels, config.mInAutoConnect);
-      ptype = config.mPortJSONConfig.get_child("playback");
-      config.loadPortConfig(ptype, config.mOutExtClientName, config.mPlaybackPortNames, mOutExternalPortNames, mNumPlaybackChannels, config.mOutAutoConnect);
+      boost::property_tree::ptree ptree;
+      
+      ptree = config.mPortJSONConfig.get_child("capture");
+      config.loadPortConfig(ptree, config.mInExtClientName, config.mCapturePortNames, mInExternalPortNames, mNumCaptureChannels, config.mInAutoConnect, "in_");
+      ptree = config.mPortJSONConfig.get_child("playback");
+      config.loadPortConfig(ptree, config.mOutExtClientName, config.mPlaybackPortNames, mOutExternalPortNames, mNumPlaybackChannels, config.mOutAutoConnect, "out_");
     }
     if(!config.mClientName.empty()) mClientName = config.mClientName;
     else mClientName = "JackClient";
@@ -167,14 +168,20 @@ namespace audiointerfaces
     
     std::sort(config.mCapturePortNames.begin(),config.mCapturePortNames.end());
     std::sort(config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end());
+    //    for( auto it = config.mCapturePortNames.begin(); it != config.mCapturePortNames.end(); ++it ) {
+    //      std::cout<<" "<<*it<<std::endl;
+    //    }
     if(std::adjacent_find(config.mCapturePortNames.begin(),config.mCapturePortNames.end())!=config.mCapturePortNames.end())
     {
       std::cout<<"mCapPorts: "<< mCapturePortNames.size()<<" mCapChan: "<< mNumCaptureChannels<< std::endl;
-      throw std::invalid_argument( "JackInterface: Duplicate port names are not allowed, as well as overlapping indices" );
+      throw std::invalid_argument( "JackInterface: Duplicate capture port names are not allowed, as well as overlapping indices" );
     }
+    //    for( auto it = config.mPlaybackPortNames.begin(); it != config.mPlaybackPortNames.end(); ++it ) {
+    //      std::cout<<" "<<*it<<std::endl;
+    //    }
     if(std::adjacent_find(config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end())!=config.mPlaybackPortNames.end())
     {
-      throw std::invalid_argument( "JackInterface: Duplicate port names are not allowed, as well as overlapping indices" );
+      throw std::invalid_argument( "JackInterface: Duplicate playback port names are not allowed, as well as overlapping indices" );
     }
     
     
@@ -301,9 +308,10 @@ namespace audiointerfaces
   {
     for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
     {
+//      std::cout<<"REGCAPT "<<mCapturePortNames[captureIdx].substr(mCapturePortNames[captureIdx].find(":") + 1).c_str()<<std::endl;
       //                std::cout<< "REGISTERING PORTNAME: "<<mCapturePortNames[captureIdx].c_str()<<std::endl;
       jack_port_t * newPort = jack_port_register( mClient,
-                                                 mCapturePortNames[captureIdx].c_str(),
+                                                 mCapturePortNames[captureIdx].substr(mCapturePortNames[captureIdx].find(":") + 1).c_str(),
                                                  JACK_DEFAULT_AUDIO_TYPE,
                                                  JackPortIsInput,
                                                  0 /* buffer size is ignored for built-in types */ );
@@ -319,8 +327,9 @@ namespace audiointerfaces
     }
     for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
     {
+//      std::cout<<"REGPLAY "<<mPlaybackPortNames[playbackIdx].substr(mPlaybackPortNames[playbackIdx].find(":") + 1).c_str()<<std::endl;
       jack_port_t * newPort = jack_port_register( mClient,
-                                                 mPlaybackPortNames[playbackIdx].c_str(),
+                                                 mPlaybackPortNames[playbackIdx].substr(mPlaybackPortNames[playbackIdx].find(":") + 1).c_str(),
                                                  JACK_DEFAULT_AUDIO_TYPE,
                                                  JackPortIsOutput,
                                                  0 /* buffer size is ignored for built-in types */ );
@@ -334,6 +343,9 @@ namespace audiointerfaces
         mPlaybackPorts[playbackIdx] = newPort;
       }
     }
+    
+    
+    
   }
   
   void JackInterface::Impl::unregisterPorts()
@@ -382,11 +394,11 @@ namespace audiointerfaces
       
       for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
       {
-        char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
+        char const * name = (mCapturePortNames[captureIdx]).c_str();
         //                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
         
-        char const * nameExt = (mInExtClientName +":"+ mInExternalPortNames[captureIdx]).c_str();
-        //                    std::cout<<nameExt << " ----> "<<name << std::endl;
+        char const * nameExt = (mInExternalPortNames[captureIdx]).c_str();
+        std::cout<<nameExt << " ----> "<<name << std::endl;
         if (jack_connect (mClient, nameExt, name)){
           fprintf (stderr, "cannot connect input ports\n");
         }
@@ -408,11 +420,11 @@ namespace audiointerfaces
       
       for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
       {
-        char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
+        char const * name = (mPlaybackPortNames[playbackIdx]).c_str();
         //                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
-        char const * nameExt = (mOutExtClientName +":"+ mOutExternalPortNames[playbackIdx]).c_str();
+        char const * nameExt = (mOutExternalPortNames[playbackIdx]).c_str();
         
-        //                    std::cout<<nameExt << " ----> "<<name << std::endl;
+        std::cout<<nameExt << " ----> "<<name << std::endl;
         
         if (jack_connect (mClient, name, nameExt)) {
           fprintf (stderr, "cannot connect output ports\n");
@@ -765,7 +777,7 @@ namespace audiointerfaces
     
   }
   
-  void JackInterface::Config::loadPortConfig(boost::property_tree::ptree tree, std::string & extClientName, std::vector< std::string > & portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn){
+  void JackInterface::Config::loadPortConfig(boost::property_tree::ptree tree, std::string & extClientName, std::vector< std::string > & portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn,  std::string porttype){
     if(!tree.empty()){
       boost::optional<bool> autoConnect;
       boost::optional<std::string> baseName;
@@ -798,24 +810,27 @@ namespace audiointerfaces
           visr::pml::IndexSequence const inIndices( *indicesStr );
           std::size_t const inNumEntries = inIndices.size( );
           //                        portNames.resize( inNumEntries );
-          
+          if(inNumEntries > numPorts)
+          {
+            throw std::invalid_argument( "JackInterface: the number of "+porttype+" ports addressed with indices cannot be greater than the requested number of "+porttype+" ports" );
+          }
           for( std::size_t entryIdx( 0 ) ; entryIdx < inNumEntries; ++entryIdx, ++globalIdx )
           {
             std::stringstream str;
-            str << *baseName << inIndices[entryIdx];
+            str << mClientName <<":"<< *baseName << inIndices[entryIdx];
             //                            std::cout<<"PORTNAMES: "<<str.str()<<" GLOB: "<<globalIdx<<std::endl;
             
             portNames[globalIdx] = str.str();
           }
         }else{
           if(!baseName){
-            baseName ="visr" ;
+            baseName ="visr_"+porttype;
           }
           
           for(std::size_t entryIdx( 0 ); entryIdx < numPorts; ++entryIdx, ++globalIdx)
           {
             std::stringstream str;
-            str << *baseName << entryIdx;
+            str << mClientName <<":"<< *baseName << entryIdx;
             portNames[globalIdx] = str.str();
           }
         }
@@ -827,10 +842,11 @@ namespace audiointerfaces
           extIndicesStr = extPort.get_optional<std::string>( "indices" );
           //                                        std::cout<<"TREEDATA: "<< ", "<<tree.data()<<std::endl;
           if(!extClient){
-            throw std::invalid_argument( "JackInterface: if autoconnect is true you must specify external client's name" );
+            extClient="system";
           }
           if(!extBaseName){
-            throw std::invalid_argument( "JackInterface: if autoconnect is true you must specify external client's port basename" );
+            if(porttype=="in_") extBaseName="capture_";
+            else extBaseName="playback_";
           }
           extClientName = *extClient;
           if(extIndicesStr){
@@ -841,7 +857,7 @@ namespace audiointerfaces
             for( std::size_t extEntryIdx( 0 ); extEntryIdx < extInNumEntries; ++extEntryIdx,++extGlobalIdx )
             {
               std::stringstream str;
-              str << *extBaseName << extInIndices[extEntryIdx];
+              str << extClientName <<":"<< *extBaseName << extInIndices[extEntryIdx];
               //                               std::cout<<"EXTPORTNAMES: "<<str.str()<<" GLOB: "<<extGlobalIdx<<std::endl;
               extPortNames[extGlobalIdx] = str.str();
             }
@@ -850,18 +866,20 @@ namespace audiointerfaces
             for( std::size_t extEntryIdx( 0 ); extEntryIdx < numPorts; ++extEntryIdx,++extGlobalIdx )
             {
               std::stringstream str;
-              str << *extBaseName << extEntryIdx;
+              str << extClientName <<":"<< *extBaseName << extEntryIdx;
               extPortNames[extGlobalIdx] = str.str();
             }
           }
         }
       }
-      
-      //                for(boost::property_tree::ptree::value_type &pconf : tree.get_child("externalport")){
-      //                    //                    std::cout<<pconf.first<< ": "<<pconf.second.data()<<std::endl;
-      //
-      //                }
-      
+      if(globalIdx != numPorts)
+      {
+        throw std::invalid_argument( "JackInterface: the total number of "+porttype+" ports addressed with indices must be equal to the requested number of "+porttype+" ports" );
+      }
+      if(extGlobalIdx != numPorts)
+      {
+        throw std::invalid_argument( "JackInterface: the total number of external "+porttype+" ports addressed with indices must be equal to the requested number of external "+porttype+" ports" );
+      }
     }
   }
   
