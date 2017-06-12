@@ -33,9 +33,9 @@ namespace audiointerfaces
       
       Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect = false)
       : mClientName(cliName)
-      , mServerName(servName)
       , mInAutoConnect(autoConnect)
       , mOutAutoConnect(autoConnect)
+      , mServerName(servName)
       , mPortJSONConfig(portsConfig)
       {
         
