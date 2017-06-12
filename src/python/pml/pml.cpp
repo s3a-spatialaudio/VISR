@@ -20,6 +20,7 @@ void exportIndexedValueParameters( pybind11::module & m );
 void exportListenerPosition( pybind11::module & m );
 void exportMatrixParameters( pybind11::module & m );
 void exportObjectVector( pybind11::module & m );
+void exportScalarParameters( pybind11::module & m );
 void exportVectorParameters( pybind11::module & m );
 }
 }
@@ -47,6 +48,7 @@ PYBIND11_PLUGIN( pml )
   exportListenerPosition( m );
   exportMatrixParameters( m);
   exportObjectVector( m );
+  exportScalarParameters( m );
   exportVectorParameters( m );
 
   return m.ptr();
