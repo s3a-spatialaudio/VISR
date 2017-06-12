@@ -13,6 +13,7 @@
 
 namespace visr
 {
+
 namespace rcl
 {
 
@@ -63,6 +64,7 @@ private:
 };
 
 } // namespace rcl
+
 } // namespace visr
 
 #endif // #ifndef VISR_LIBRCL_ADD_HPP_INCLUDED

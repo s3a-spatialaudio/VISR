@@ -6,6 +6,7 @@ TARGET_LINK_LIBRARIES(gain_matrix_app signalflows)
 TARGET_LINK_LIBRARIES(gain_matrix_app rcl)
 TARGET_LINK_LIBRARIES(gain_matrix_app rbbl)
 TARGET_LINK_LIBRARIES(gain_matrix_app rrl)
+TARGET_LINK_LIBRARIES(gain_matrix_app audiointerfaces)
 TARGET_LINK_LIBRARIES(gain_matrix_app visr_impl)
 TARGET_LINK_LIBRARIES(gain_matrix_app pml)
 TARGET_LINK_LIBRARIES(gain_matrix_app objectmodel) # newly pulled-in dependency of libpml

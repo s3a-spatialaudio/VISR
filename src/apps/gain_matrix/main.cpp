@@ -6,8 +6,9 @@
 
 #include <libril/signal_flow_context.hpp>
 
-#include <librrl/portaudio_interface.hpp>
-
+#include <libaudiointerfaces/audio_interface_factory.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/gain_matrix.hpp>
 
 #include <boost/filesystem/operations.hpp>
@@ -86,17 +87,15 @@ int main( int argc, char const * const * argv )
         initialMtx->at( outputIdx, inputIdx ) *= gainAdjustLinear;
       }
     }
-
-    rrl::PortaudioInterface::Config interfaceConfig;
-    interfaceConfig.mNumberOfCaptureChannels = numberOfInputs;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputs;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingRate;
-    interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = cAudioBackend;
-
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+      
+    visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfInputs,numberOfOutputs,samplingRate,periodSize);
+      std::string type;
+      std::string specConf;
+      
+      specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+cAudioBackend+"}";
+      type = "PortAudio";
+      
+      std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
 
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;
@@ -111,12 +110,12 @@ int main( int argc, char const * const * argv )
     // audioInterface.registerCallback( &AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
-    audioInterface.start( );
+    audioInterface->start( );
 
     // Rendering runs until <Return> is entered on the console.
     std::getc( stdin );
 
-    audioInterface.stop( );
+    audioInterface->stop( );
 
     // audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
   }

@@ -1163,7 +1163,8 @@ HTML_EXTRA_STYLESHEET  =
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = 
+HTML_EXTRA_FILES       = /Users/gc1y17/VISR/visr/doc/src/jackexample.jpeg \
+			 /Users/gc1y17/VISR/visr/doc/src/jacksimpleexample.jpeg
 
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the stylesheet and background images according to

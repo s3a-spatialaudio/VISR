@@ -115,14 +115,14 @@ std::size_t AudioSignalFlow::period() const
 AudioSignalFlow::processFunction( void* userData,
                                   SampleType const * const * captureSamples,
                                   SampleType * const * playbackSamples,
-                                  AudioInterface::CallbackResult& callbackResult )
+                                  bool& status )
 {
   AudioSignalFlow* flowObj = reinterpret_cast<AudioSignalFlow*>( userData );
-  callbackResult = flowObj->process( captureSamples, playbackSamples );
+  status = flowObj->process( captureSamples, playbackSamples );
 }
 
 
-AudioInterface::CallbackResult
+bool
 AudioSignalFlow::process( SampleType const * const * captureSamples,
                           SampleType * const * playbackSamples )
 {

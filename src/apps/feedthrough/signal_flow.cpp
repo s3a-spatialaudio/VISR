@@ -18,13 +18,13 @@ Feedthrough::Feedthrough( SignalFlowContext & context,
  : CompositeComponent( context, name, parent )
  , mInput( "input", *this, 2 )
  , mOutput( "output", *this, 2 )
- , mSum( context, "Add", this, 2, 2 )
+ , mSum( context, "Add", this, 2, 2)
 {
   audioConnection( mInput, {0,1},
-                   mSum.audioPort( "input0" ), { 0, 1 } );
+                   mSum.audioPort( "in0" ), { 0, 1 } );
   audioConnection( mInput, { 0, 1 },
-                   mSum.audioPort( "input0" ), { 1, 0 } );
-  audioConnection( mSum.audioPort( "output"), { 0, 1 },
+                   mSum.audioPort( "in0" ), { 1, 0 } );
+  audioConnection( mSum.audioPort( "out0"), { 0, 1 },
                    mOutput, { 0, 1 } );
 }
 

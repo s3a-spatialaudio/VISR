@@ -2,8 +2,9 @@
 
 ADD_EXECUTABLE( feedthrough_app main.cpp signal_flow.cpp )
 
+TARGET_LINK_LIBRARIES(feedthrough_app audiointerfaces)
 TARGET_LINK_LIBRARIES(feedthrough_app rcl)
-TARGET_LINK_LIBRARIES(feedthrough_app rrl)
+#TARGET_LINK_LIBRARIES(feedthrough_app rrl)
 TARGET_LINK_LIBRARIES(feedthrough_app visr_impl)
 TARGET_LINK_LIBRARIES(feedthrough_app objectmodel)
 TARGET_LINK_LIBRARIES(feedthrough_app pml)

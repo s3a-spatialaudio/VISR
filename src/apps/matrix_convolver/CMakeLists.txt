@@ -16,3 +16,4 @@ SET_TARGET_PROPERTIES( matrix_convolver_app PROPERTIES OUTPUT_NAME matrix_convol
 TARGET_LINK_LIBRARIES(matrix_convolver_app apputilities)
 TARGET_LINK_LIBRARIES(matrix_convolver_app signalflows)
 TARGET_LINK_LIBRARIES(matrix_convolver_app rrl)
+TARGET_LINK_LIBRARIES(matrix_convolver_app audiointerfaces)

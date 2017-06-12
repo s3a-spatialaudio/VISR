@@ -1,0 +1,17 @@
+{
+  "clientname": "BaseRenderer",
+  "autoconnect" : "true",
+  "portconfig":
+  {
+    "capture":
+    {
+      "port":
+      [{ "externalport" : {"indices": "1:4"} }]
+    },
+    "playback":
+    {
+      "port":
+      [{ "externalport" : {"indices": "5:8"} }]
+    }
+  }
+}

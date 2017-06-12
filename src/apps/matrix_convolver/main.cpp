@@ -14,11 +14,13 @@
 #include <librcl/fir_filter_matrix.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
-#ifdef VISR_JACK_SUPPORT
-#include <librrl/jack_interface.hpp>
-#endif
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/audio_interface_factory.hpp>
 
+#ifdef VISR_JACK_SUPPORT
+#include <libaudiointerfaces/jack_interface.hpp>
+#endif
+#include <libaudiointerfaces/portaudio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <cstdlib>
@@ -121,35 +123,33 @@ int main( int argc, char const * const * argv )
     bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
 #endif
 
-    std::unique_ptr<visr::rrl::AudioInterface> audioInterface;
-
+    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
+   audiointerfaces::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,samplingFrequency,periodSize);
+      
+      std::string type;
+      std::string specConf;
+      
+      
+      
 #ifdef VISR_JACK_SUPPORT
-    if( useNativeJack )
-    {
-      rrl::JackInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
-      interfaceConfig.setCapturePortNames( "input_", 0, numberOfInputChannels - 1 );
-      interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels - 1 );
-      interfaceConfig.mClientName = "MatrixConvolver";
-      audioInterface.reset( new rrl::JackInterface( interfaceConfig ));
-    }
-    else
+      if( useNativeJack )
+      {
+          std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
+          specConf = "{\"clientname\": \"MatrixConvolver\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
+          
+          type = "Jack";
+      }
+      else
+      {
 #endif
-    {
-      rrl::PortaudioInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
-      interfaceConfig.mInterleaved = false;
-      interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-      interfaceConfig.mHostApi = audioBackend;
-      audioInterface.reset( new rrl::PortaudioInterface( interfaceConfig ) );
-    }
-
+          specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
+          type = "PortAudio";
+#ifdef VISR_JACK_SUPPORT
+      }
+#endif
+      
+    audioInterface.reset(AudioInterfaceFactory::create( type, baseConfig, specConf).get());
+      
     audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?

@@ -9,7 +9,7 @@
 
 #include <librcl/add.hpp>
 
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 
 namespace visr
 {

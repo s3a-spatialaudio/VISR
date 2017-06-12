@@ -2,16 +2,20 @@
 
 #include "signal_flow.hpp"
 
-// #define FEEDTHROUGH_NATIVE_JACK
+#define FEEDTHROUGH_NATIVE_JACK
+
+#include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #ifdef FEEDTHROUGH_NATIVE_JACK
-#include <librrl/jack_interface.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
 #else
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 #endif
+
 
 #include <librrl/audio_signal_flow.hpp>
 #include <libril/signal_flow_context.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -20,64 +24,53 @@
 
 int main( int argc, char const * const * argv )
 {
-  using namespace visr;
-  using namespace visr::apps::feedthrough;
-
-  // define fixed parameters for rendering
-  const std::size_t numberOfObjects = 2;
-  const std::size_t numberOfLoudspeakers = 2;
-
-  const std::size_t periodSize = 128;
-  const std::size_t samplingRate = 48000;
-
-  try 
-  {
+    using namespace visr;
+    using namespace visr::apps::feedthrough;
+    
+    
+    // define fixed parameters for rendering
+    const std::size_t numberOfObjects = 2;
+    const std::size_t numberOfLoudspeakers = 2;
+    
+    const std::size_t periodSize = 128;
+    const std::size_t samplingRate = 48000;
+    try
+    {
+        audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfLoudspeakers,samplingRate,periodSize);
+        
+        std::string type;
+        std::string specConf;
+        
 #ifdef FEEDTHROUGH_NATIVE_JACK
-    rrl::JackInterface::Config interfaceConfig;
+        std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
+        specConf = "{\"clientname\": \"VISR_feedthrough\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
+        
+        type = "Jack";
 #else
-    rrl::PortaudioInterface::Config interfaceConfig;
+        specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
+        type = "PortAudio";
 #endif
-    interfaceConfig.mNumberOfCaptureChannels = numberOfObjects;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfLoudspeakers;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingRate;
-#ifdef FEEDTHROUGH_NATIVE_JACK
-    interfaceConfig.setCapturePortNames( "input_", 0, numberOfObjects-1 );
-    interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfLoudspeakers-1 );
-    interfaceConfig.mClientName = "VISR_feedthrough";
-#else
-    interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = "default";
-#endif
-
-#ifdef FEEDTHROUGH_NATIVE_JACK
-    rrl::JackInterface audioInterface( interfaceConfig );
-#else
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
-#endif
-
-    SignalFlowContext context( periodSize, samplingRate );
-    Feedthrough topLevel( context, "feedthrough" );
-
-    rrl::AudioSignalFlow flow( topLevel );
-
-    audioInterface.registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
-
-    // should there be a separate start() method for the audio interface?
-    audioInterface.start( );
-
-    // Rendering runs until <Return> is entered on the console.
-    std::getc( stdin );
-
-    audioInterface.stop( );
-
-     audioInterface.unregisterCallback( &rrl::AudioSignalFlow::processFunction );
-  }
-  catch( std::exception const & ex )
-  {
-    std::cout << "Exception caught on top level: " << ex.what() << std::endl;
-    return EXIT_FAILURE;
-  }
-  return EXIT_SUCCESS;
+        
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        
+        /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
+        SignalFlowContext context( periodSize, samplingRate );
+        Feedthrough topLevel( context, "feedthrough" );
+        rrl::AudioSignalFlow flow( topLevel );
+        audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
+        /*******************************************************************/
+        
+        audioInterface->start( );
+        // Rendering runs until <Return> is entered on the console.
+        std::getc( stdin );
+        audioInterface->stop( );
+        
+        audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
+    }
+    catch( std::exception const & ex )
+    {
+        std::cout << "Exception caught on top level: " << ex.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }

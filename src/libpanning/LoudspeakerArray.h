@@ -28,17 +28,18 @@ namespace visr
 {
 
   // Forward declaration
-  namespace pml
-  {
-    template<typename CoeffType>
-    class BiquadParameterMatrix;
-  }
+namespace pml
+{
+  template<typename CoeffType>
+  class BiquadParameterMatrix;
+}
 
-  namespace panning
-  {
+namespace panning
+{
 
-    class LoudspeakerArray
-    {
+  class LoudspeakerArray
+  {
+ 
     public:
       /**
        * Type for specifying loudspeaker indices in triplets.
@@ -313,9 +314,9 @@ namespace visr
       efl::BasicVector<Afloat> m_delayAdjustment;
 
       std::unique_ptr<pml::BiquadParameterMatrix<Afloat> > mOutputEqs;
-    };
+  };
 
-  } // namespace panning
+} // namespace panning
 } // namespace visr
 
 #endif /* defined(__S3A_renderer_dsp__LoudspeakerArray__) */
