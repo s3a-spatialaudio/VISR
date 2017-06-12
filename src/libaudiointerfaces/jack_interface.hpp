@@ -31,15 +31,7 @@ namespace audiointerfaces
       //                , mPortJSONConfig("")
       //                {}
       
-      Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect = false)
-      : mClientName(cliName)
-      , mServerName(servName)
-      , mInAutoConnect(autoConnect)
-      , mOutAutoConnect(autoConnect)
-      , mPortJSONConfig(portsConfig)
-      {
-        
-      }
+      Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect = false);
       
       void loadPortConfigJson(boost::property_tree::ptree tree, int numCapt, int numPlay );
       void loadPortConfig(boost::property_tree::ptree tree, std::string & extClient, std::vector< std::string > &portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn, std::string porttype);
