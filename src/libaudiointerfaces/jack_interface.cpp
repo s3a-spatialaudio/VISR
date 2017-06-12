@@ -443,9 +443,10 @@ namespace audiointerfaces
       
       for( std::size_t captureIdx(0); captureIdx < mNumCaptureChannels; ++captureIdx )
       {
-        char const * name = (mClientName +":"+ mCapturePortNames[captureIdx]).c_str();
+        char const * name = (mCapturePortNames[captureIdx]).c_str();
         //                std::cout<<ports[captureIdx] << " ----> "<<name << std::endl;
-        char const * nameExt = (mInExtClientName +":"+ mInExternalPortNames[captureIdx]).c_str();
+        
+        char const * nameExt = (mInExternalPortNames[captureIdx]).c_str();
         
         if (jack_disconnect (mClient, nameExt, name)){
           fprintf (stderr, "cannot disconnect input ports\n");
@@ -456,9 +457,10 @@ namespace audiointerfaces
     if(mOutAutoConnect){
       for( std::size_t playbackIdx(0); playbackIdx < mNumPlaybackChannels; ++playbackIdx )
       {
-        char const * name = (mClientName +":"+ mPlaybackPortNames[playbackIdx]).c_str();
+        char const * name = (mPlaybackPortNames[playbackIdx]).c_str();
         //                std::cout<<ports[playbackIdx] << " <---- "<<name << std::endl;
-        char const * nameExt = (mOutExtClientName +":"+ mOutExternalPortNames[playbackIdx]).c_str();
+        char const * nameExt = (mOutExternalPortNames[playbackIdx]).c_str();
+        
         
         if (jack_disconnect (mClient, name, nameExt)) {
           fprintf (stderr, "cannot disconnect output ports\n");
@@ -656,6 +658,18 @@ namespace audiointerfaces
   {
     return mImpl->unregisterCallback( callback );
   }
+  
+  
+  JackInterface::Config::Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect)
+  : mClientName(cliName)
+  , mInAutoConnect(autoConnect)
+  , mOutAutoConnect(autoConnect)
+  , mServerName(servName)
+  , mPortJSONConfig(portsConfig)
+  {
+    
+  }
+
   
   //        void JackInterface::Config::loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
   //        {

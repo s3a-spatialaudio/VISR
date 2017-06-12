@@ -521,5 +521,13 @@ namespace // unnamed
     return mImpl->unregisterCallback( callback );
   }
   
+  PortaudioInterface::Config::Config( std::string sampleFormat, bool interleaved, std::string mHostApi)
+  : mInterleaved(interleaved)
+  , mHostApi(mHostApi)
+  {
+    
+    mSampleFormat = translateToSampleFormat(sampleFormat);
+  }
+
 } // namespace rrl
 } // namespace visr
