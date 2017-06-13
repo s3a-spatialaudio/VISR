@@ -51,7 +51,6 @@ scene_decoder.hpp
 scene_encoder.hpp
 signal_routing.hpp
 single_to_multi_channel_diffusion.hpp
-switch_decoder.hpp
 time_frequency_inverse_transform.hpp
 time_frequency_transform.hpp
 udp_receiver.hpp
