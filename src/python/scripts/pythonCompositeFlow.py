@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 
 class PythonComposite( visr.CompositeComponent ):
     def __init__( self, context, name, parent, numInputs, width ):
-        super(PythonAdder,self).__init__( context, name, parent )
+        super(PythonComposite,self).__init__( context, name, parent )
         self.output = visr.AudioOutput( name, self, width )
         self.width = width
         self.inputs = []

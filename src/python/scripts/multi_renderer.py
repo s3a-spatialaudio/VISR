@@ -38,7 +38,7 @@ class OutputSwitch( visr.AtomicComponent ):
         protocolIn = self.controlInput.protocolInput()
         if not protocolIn.empty():
             while not protocolIn.empty():
-                newInput = protocolIn.front()
+                newInput = protocolIn.front().value
                 protocolIn.pop()
             if newInput >= len(self.inputs):
                 raise IndexError("Control input exceeds number of ports")

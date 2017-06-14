@@ -5,6 +5,8 @@ Created on Sun Feb 26 16:41:01 2017
 @author: andi
 """
 
+# exec(open("/home/andi/dev/visr/src/python/scripts/instantiate_multi_renderer.py").read())
+
 import visr
 import pml
 import panning
@@ -13,9 +15,14 @@ import rrl
 
 # from multi_renderer import OutputSwitch
 from multi_renderer import MultiRenderer
+from realtime_multi_renderer import RealTimeMultiRenderer
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import os.path
+
+visrBaseDirectory = '/home/andi/dev/visr'
 
 def sph2cart(az,el,r):
     x = r*np.cos(az)*np.cos(el)
@@ -40,21 +47,36 @@ ctxt = visr.SignalFlowContext(blockSize, fs )
 numberOfObjects = 2
 numberOfOutputs = 41
 
-lc1 = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-lc2 = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_22speakers_1subwoofer.xml' )
+lc1 = panning.LoudspeakerArray( os.path.join( visrBaseDirectory, 'config/isvr/audiolab_39speakers_1subwoofer.xml') )
+lc2 = panning.LoudspeakerArray( os.path.join( visrBaseDirectory, 'config/isvr/audiolab_22speakers_1subwoofer.xml') )
+
+configFiles = [os.path.join( visrBaseDirectory, 'config/isvr/audiolab_39speakers_1subwoofer.xml'),
+                            os.path.join( visrBaseDirectory, 'config/isvr/audiolab_22speakers_1subwoofer.xml')]
+
+#lc1 = panning.LoudspeakerArray( os.path.join( visrBaseDirectory, 'config/generic/bs2051-0+5+0.xml') )
+#lc2 = panning.LoudspeakerArray( os.path.join( visrBaseDirectory, 'config/generic/bs2051-0+2+0.xml') )
+
 
 configs = [lc1, lc2]
+# configs = [lc1]
 
-# Slightly convoluted way to get the diffusion filters.
-diffFilters = np.array(pml.MatrixParameterFloat.fromAudioFile( 'c:/local/visr/config/filters/random_phase_allpass_64ch_128taps.wav'))
+diffFilterFile = os.path.join( visrBaseDirectory, 'config/filters/random_phase_allpass_64ch_128taps.wav')
+diffFilters = np.array(pml.MatrixParameterFloat.fromAudioFile( diffFilterFile ))
 
-mr = MultiRenderer( ctxt, "MultiRenderer", None,
-                   loudspeakerConfigs=configs,
+if False:
+    mr = MultiRenderer( ctxt, "MultiRenderer", None,
+                   loudspeakerConfigFiles=configFiles,
                    numberOfInputs=numberOfObjects,
                    numberOfOutputs=numberOfOutputs,
                    interpolationPeriod=1024,
                    diffusionFilters=diffFilters )
-
+else:
+    mr = RealTimeMultiRenderer( ctxt, "MultiRenderer", None,
+                   loudspeakerConfigFiles=configFiles,
+                   numberOfInputs=numberOfObjects,
+                   numberOfOutputs=numberOfOutputs,
+                   interpolationPeriod=1024,
+                   diffusionFilterFile=diffFilterFile )
 
 flow = rrl.AudioSignalFlow( mr )
 
@@ -100,5 +122,13 @@ for blockIdx in range(0,numBlocks):
 
 
 plt.figure(1)
-plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'rx-' )
+plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'yx-',  t, outputSignal[2,:], 'gs-', t, outputSignal[3,:], 'bx-', t, outputSignal[4,:], 'm.-' )
 plt.show()
+
+
+#gridX,gridY = np.meshgrid( t, np.arange(0,numberOfOutputs) ) 
+#fig = plt.figure(1)
+#ax = fig.add_subplot(111, projection='3d')
+#ax.plot_wireframe( gridX, gridY, outputSignal )
+#plt.show()
+
