@@ -5,7 +5,7 @@ Created on Tue Feb 14 15:59:11 2017
 @author: af5u13
 """
 
-#exec(open("/home/andi/dev/visr/src/python/scripts/instantiateCoreRenderer.py").read())
+#exec(open("/home/andi/dev/visr/src/python/scripts/testPanningCalculator.py").read())
 
 
 import visr
@@ -14,6 +14,8 @@ import panning
 import pml
 import rrl
 import objectmodel
+
+from python_panner import PythonPanner
 
 import numpy as np;
 import matplotlib.pyplot as plt
@@ -24,7 +26,7 @@ def sph2cart(az,el,r):
     z = r*np.sin(el)
     return x,y,z
 
-hfLfPanning = True
+hfLfPanning = False
 
 blockSize = 128
 samplingFrequency = 48000
@@ -41,14 +43,19 @@ ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 # lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3_linear.xml' )
 # lc = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 # lc = panning.LoudspeakerArray( 'c:/local/visr/config/generic/bs2051-9+10+3.xml' )
-lc = panning.LoudspeakerArray( 'c:/local/visr/config/bbc/bs2051-4+5+0.xml' )
+lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/bbc/bs2051-4+5+0.xml' )
 
 numSpeakers = lc.numberOfRegularLoudspeakers
-
-calc = rcl.PanningCalculator( ctxt, 'calc', None )
-calc.setup( numberOfObjects=numObjectChannels,
-           arrayConfig=lc,
-           separateLowpassPanning=hfLfPanning )
+r
+if False:
+    calc = PythonPanner( ctxt, 'calc', None,
+                        numberOfObjects=numObjectChannels,
+                        arrayConfig=lc )
+else:
+    calc = rcl.PanningCalculator( ctxt, 'calc', None )
+    calc.setup( numberOfObjects=numObjectChannels,
+               arrayConfig=lc,
+               separateLowpassPanning=hfLfPanning )
 
 flow = rrl.AudioSignalFlow( calc )
 
@@ -94,7 +101,7 @@ for blockIdx in range(0,gridSize):
 
 plt.figure(1)
 plt.subplot(121)
-plt.plot( azGrid *180/np.pi, hfGains )
+plt.plot( azGrid *180/np.pi, hfGains, 'b.-' )
 plt.title( 'HF gains' )
 plt.xlabel( 'azimuth (deg)' )
 plt.subplot(122)
