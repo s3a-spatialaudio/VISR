@@ -69,8 +69,16 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
   SampleType const * const * inPtrBuffer = flow.numberOfCaptureChannels() > 0 ? &inPtrs[0] : nullptr;
   SampleType * const * outPtrBuffer = flow.numberOfPlaybackChannels() > 0 ? &outPtrs[0] : nullptr;
 
-  flow.process( inPtrBuffer, outPtrBuffer );
-
+  try
+  {
+    flow.process( inPtrBuffer, outPtrBuffer );
+  }
+  catch( std::exception const & ex )
+  {
+    // For the time being we are using std::invalid_argument because it is recognised by pybind11 and translated to a proper Python exeption
+    // todo: register a more fitting exception, e.g., std::runtime_error
+    throw std::invalid_argument( detail::composeMessageString( "Exception while execution signal flow:", ex.what() ) );
+  }
   return outputSignal;
 }
 

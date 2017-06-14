@@ -31,6 +31,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio> // for getc(), for testing purposes
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>

@@ -12,6 +12,7 @@
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <stdexcept>
 #include <vector>
 
@@ -55,6 +56,8 @@ private:
   void addAudioDependency( AudioChannel const & sender, AudioChannel const & receiver );
 
   void addParameterDependency( impl::ParameterPortBaseImplementation const * sender, impl::ParameterPortBaseImplementation const * receiver );
+
+  bool checkCycles( std::ostream & messages ) const;
 
   enum class NodeType
   {
@@ -119,7 +122,7 @@ private:
   };
 
 // Unused at the moment
-// Todo: Reactive with proper set of information when parameter transmission is included in the scheduling.
+// Todo: Reactivate with proper set of information when parameter transmission is included in the scheduling.
 #if 0
   struct EdgeNode
   {
@@ -142,6 +145,10 @@ private:
   GraphType mDependencyGraph;
 
   using VertexMap = std::map<ProcessingNode, GraphType::vertex_descriptor, CompareProcessingNodes >;
+
+  ProcessingNode const & getNode( GraphType::vertex_descriptor vertex ) const;
+
+  std::string nodeName( ProcessingNode const & node ) const;
 
   VertexMap mVertexLookup;
 

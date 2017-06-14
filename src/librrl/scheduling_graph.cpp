@@ -167,9 +167,87 @@ void SchedulingGraph::addParameterDependency( impl::ParameterPortBaseImplementat
   }
 }
 
+
+namespace //unnamed
+{
+
+
+}
+
+SchedulingGraph::ProcessingNode const & SchedulingGraph::getNode( GraphType::vertex_descriptor vertex ) const
+{
+  VertexMap::const_iterator findIt = std::find_if( mVertexLookup.begin(), mVertexLookup.end(),
+                                                   [vertex](VertexMap::value_type const & entry ){ return entry.second == vertex; } );
+  if( findIt == mVertexLookup.end() )
+  {
+    throw std::invalid_argument( "Node lookup for graph vertex failed.");
+  }
+  return findIt->first;
+}
+
+std::string SchedulingGraph::nodeName( ProcessingNode const & node ) const
+{
+  switch( node.type() )
+  {
+    case NodeType::Source:
+      return "Source";
+    case NodeType::Sink:
+      return "Sink";
+    case NodeType::Processor:
+      return node.node()->fullName();
+  }
+  throw(-1); // Can't happen
+}
+
 std::vector<AtomicComponent *> SchedulingGraph::sequentialSchedule() const
 {
   // TODO: check against cycles. (there seems to be no ready-made algorithm, so we have to implement a visitor ourselves)
+
+  class CycleDetector: public boost::default_dfs_visitor
+  {
+  public:
+    explicit CycleDetector( std::vector<GraphType::edge_descriptor> & out )
+     : mOut( out )
+    {}
+
+    void back_edge( GraphType::edge_descriptor e, GraphType const & g )
+    {
+      mOut.push_back( e );
+    }
+
+  private:
+    std::vector<GraphType::edge_descriptor> & mOut;
+  };
+
+  std::vector<boost::default_color_type> colorMap( boost::num_vertices(mDependencyGraph));
+  std::vector<GraphType::edge_descriptor> backEdges;
+  CycleDetector visitor{ backEdges };
+
+  // Find the source node
+  VertexMap::const_iterator sourceIt = mVertexLookup.find( ProcessingNode( NodeType::Source ) );
+  if( sourceIt == mVertexLookup.end() )
+  {
+    throw std::logic_error( "Dependency graph does not have a source." );
+  }
+  GraphType::vertex_descriptor const sourceVertex = sourceIt->second;
+
+  auto  visitorMap = boost::make_iterator_property_map(colorMap.begin(), get(boost::vertex_index, mDependencyGraph ));
+  boost::depth_first_visit( mDependencyGraph, sourceVertex, visitor, visitorMap );
+
+  if( not backEdges.empty())
+  {
+    std::stringstream msg;
+    msg << "SchedulingGraph: Graph contains cycles: ";
+    for( auto e : backEdges )
+    {
+      GraphType::vertex_descriptor const startEdge = source( e, mDependencyGraph );
+      GraphType::vertex_descriptor const endEdge = target( e, mDependencyGraph );
+      ProcessingNode const startNode = getNode( startEdge );
+      ProcessingNode const endNode = getNode( endEdge );
+      msg << nodeName(startNode) << "->" << nodeName( endNode ) << ", ";
+    }
+    throw std::invalid_argument( msg.str() );
+  }
 
   std::vector<GraphType::vertex_descriptor> topoSort;
   topological_sort( mDependencyGraph, std::back_inserter( topoSort ) );

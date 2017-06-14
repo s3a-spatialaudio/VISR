@@ -74,13 +74,7 @@ public:
 //    {}
 // 
       
-      Config( std::string sampleFormat, bool interleaved, std::string mHostApi)
-      : mInterleaved(interleaved)
-      , mHostApi(mHostApi)
-      {
- 
-          mSampleFormat = translateToSampleFormat(sampleFormat);
-      }
+    Config( std::string sampleFormat, bool interleaved, std::string mHostApi);
 
     std::size_t mNumberOfCaptureChannels;
     std::size_t mNumberOfPlaybackChannels;

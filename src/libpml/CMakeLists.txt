@@ -16,6 +16,7 @@ SET( SOURCES
  message_queue_protocol.cpp
  object_vector.cpp
  parametric_iir_coefficient.cpp
+ scalar_parameter.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
@@ -43,6 +44,7 @@ SET( HEADERS
  message_queue_protocol.hpp
  object_vector.hpp
  parametric_iir_coefficient.hpp
+ scalar_parameter.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
  string_parameter.hpp

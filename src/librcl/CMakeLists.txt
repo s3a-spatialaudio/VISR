@@ -17,11 +17,11 @@ object_gain_eq_calculator.cpp
 panning_calculator.cpp
 panning_gain_calculator.cpp
 position_decoder.cpp
+scalar_osc_decoder.cpp
 scene_decoder.cpp
 scene_encoder.cpp
 signal_routing.cpp
 single_to_multi_channel_diffusion.cpp
-switch_decoder.cpp
 time_frequency_inverse_transform.cpp
 time_frequency_transform.cpp
 udp_receiver.cpp
@@ -46,11 +46,11 @@ object_gain_eq_calculator.hpp
 panning_calculator.hpp
 panning_gain_calculator.hpp
 position_decoder.hpp
+scalar_osc_decoder.hpp
 scene_decoder.hpp
 scene_encoder.hpp
 signal_routing.hpp
 single_to_multi_channel_diffusion.hpp
-switch_decoder.hpp
 time_frequency_inverse_transform.hpp
 time_frequency_transform.hpp
 udp_receiver.hpp
