@@ -35,19 +35,19 @@ void ScalarOscDecoder::setup( char const * dataType )
   {
     mBoolOutput.reset( new ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<bool> >( "dataOut", *this, pml::EmptyParameterConfig() ) );
   }
-  if( strcmp( dataType, "int" ) == 0 )
+  else if( strcmp( dataType, "int" ) == 0 )
   {
     mIntOutput.reset( new ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<int> >("dataOut", *this, pml::EmptyParameterConfig()) );
   }
-  if( strcmp( dataType, "uint" ) == 0 )
+  else if( strcmp( dataType, "uint" ) == 0 )
   {
     mUIntOutput.reset( new ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<unsigned int> >("dataOut", *this, pml::EmptyParameterConfig()) );
   }
-  if( strcmp( dataType, "uint" ) == 0 )
+  else if( strcmp( dataType, "float" ) == 0 )
   {
     mFloatOutput.reset( new ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<float> >( "dataOut", *this, pml::EmptyParameterConfig() ) );
   }
-  if( strcmp( dataType, "float" ) == 0 )
+  else if( strcmp( dataType, "double" ) == 0 )
   {
     mDoubleOutput.reset( new ParameterOutput< pml::MessageQueueProtocol, pml::ScalarParameter<double> >("dataOut", *this, pml::EmptyParameterConfig()) );
   }
