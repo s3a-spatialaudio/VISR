@@ -11,6 +11,7 @@
 #include "matrix_parameter.hpp"
 #include "listener_position.hpp"
 #include "object_vector.hpp"
+#include "scalar_parameter.hpp"
 #include "string_parameter.hpp"
 #include "signal_routing_parameter.hpp"
 #include "time_frequency_parameter.hpp"
@@ -31,10 +32,6 @@ void initialiseParameterLibrary()
   {
     return;
   }
-  
-  //CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >( DoubleBufferingProtocol::staticType(), DoubleBufferingProtocol::staticName() );
-  //CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >( MessageQueueProtocol::staticType(), DoubleBufferingProtocol::staticName() );
-  //CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >( SharedDataProtocol::staticType(), DoubleBufferingProtocol::staticName() );
 
   CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >();
   CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >();
@@ -58,6 +55,14 @@ void initialiseParameterLibrary()
   ParameterFactory::registerParameterType< ObjectVector >(ObjectVector::staticType() );
 
   ParameterFactory::registerParameterType< ListenerPosition >( );
+
+  ParameterFactory::registerParameterType< ScalarParameter<bool> >();
+  ParameterFactory::registerParameterType< ScalarParameter<int> >();
+  ParameterFactory::registerParameterType< ScalarParameter<unsigned int> >();
+  ParameterFactory::registerParameterType< ScalarParameter<float> >();
+  ParameterFactory::registerParameterType< ScalarParameter<double> >();
+  ParameterFactory::registerParameterType< ScalarParameter<std::complex<float> > >();
+  ParameterFactory::registerParameterType< ScalarParameter<std::complex<double> > >();
 
   ParameterFactory::registerParameterType< SignalRoutingParameter >();
 
