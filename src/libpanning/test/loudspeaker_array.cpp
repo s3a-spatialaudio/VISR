@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
 
   // Alternatively, load the config file in XML format.
 
-    boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_stereo_1sub_with_rerouting.xml" );
+    boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "bbc/bs2051-4+5+0.xml" );
 
     //boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
   BOOST_ASSERT( exists( configFileXml ) );
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
 
   std::size_t numberOfSources = 8;
   std::vector<XYZ> sourcePos( numberOfSources );
-  sourcePos[0].set( 2.08f, 1.0f, -5.0f, true );
+  sourcePos[0].set( 1, -0.25f, 0.2f, false );
   //    sourcePos[0].set(-1.0f,	0.0, 0.0f, true);     // plane wave from front/back
   //    sourcePos[0].set(0.0f, -1.0f, 0.0f, true);     // plane wave from left/right
   //    sourcePos[0].set(0.0f, 0.0f, -1.0f, true);     // plane wave from below
@@ -181,8 +181,8 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
     //vbap.calculateGains( 1.0f, 1.0f, 0.0f, vbapGains.data() );
     std::size_t const numCols = array.getNumRegularSpeakers();
 
-    std::cout << "VBAP calculated loudspeaker gains with source's position ("<< sourcePos[i].x<<", " << sourcePos[i].y << ", " << sourcePos[i].z << ") : ";
-    std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, ", " ) );
+//    std::cout << "VBAP calculated loudspeaker gains with source's position ("<< sourcePos[i].x<<", " << sourcePos[i].y << ", " << sourcePos[i].z << ") : ";
+    std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, "\t\t" ) );
     std::cout << std::endl;
   }
 

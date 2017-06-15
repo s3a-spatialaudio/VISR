@@ -80,6 +80,16 @@ namespace panning
         throw std::runtime_error( "VBAP: error during power normalisation." );
       }
     }
+    void normalise( SampleType &a1, SampleType &a2, SampleType &a3)
+    {
+      Afloat l = std::sqrt(a1*a1 + a2*a2 + a3*a3);
+      if (l != 0.0f ) {
+        a1 /= l;
+        a2 /= l;
+        a3 /= l;
+      }
+      
+    }
   } // unnamed namespace
   
   void VBAP::calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const
@@ -114,7 +124,7 @@ namespace panning
     {
       
       LoudspeakerArray::TripletType const & triplet = mTriplets[i];
-      if( triplet[0] == -1 ) continue;  //  triplet unused
+     
       
       l1X = mPositions( triplet[0], 0 );
       l1Y = mPositions( triplet[0], 1 );
@@ -146,26 +156,9 @@ namespace panning
       l3Y = l3Y - mListenerPos[1];
       l3Z = l3Z - mListenerPos[2];
       
-      Afloat l = std::sqrt(l1X*l1X + l1Y*l1Y + l1Z*l1Z);
-      if (l != 0.0f ) {
-        l1X /= l;
-        l1Y /= l;
-        l1Z /= l;
-      }
-      
-      l = std::sqrt(l2X*l2X + l2Y*l2Y + l2Z*l2Z);
-      if (l != 0.0f ) {
-        l2X /= l;
-        l2Y /= l;
-        l2Z /= l;
-      }
-      
-      l = std::sqrt(l3X*l3X + l3Y*l3Y + l3Z*l3Z);
-      if (l != 0.0f ) {
-        l3X /= l;
-        l3Y /= l;
-        l2Z /= l;
-      }
+      normalise(l1X,l1Y,l1Z);
+      normalise(l2X,l2Y,l2Z);
+      normalise(l3X,l3Y,l3Z);
       
       temp = (l1X * ((l2Y * l3Z) - (l2Z * l3Y))
               - l1Y * ((l2X * l3Z) - (l2Z * l3X))
@@ -226,7 +219,7 @@ namespace panning
     for( std::size_t j = 0; j < mTriplets.size(); j++ )
     {
       
-      if( mTriplets[j][0] == -1 ) continue;  //  triplet unused
+      
       
       SampleType const * inv = mInvMatrix.row( j );
       g1 = x*inv[0] + y*inv[1] + z*inv[2];
@@ -296,31 +289,6 @@ namespace panning
     }
   }
   
-  void normalise( std::vector<SampleType> &gains )
-  {
-    SampleType g = 0.0;
-    for( size_t i = 0; i < gains.size(); i++ )
-    {
-      g += std::pow( gains[i], 2 );
-    }
-    
-    g = sqrt( g );
-    // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
-    if( g > 0 )
-    {
-      for( size_t i = 0; i < gains.size(); i++ )
-      {
-        gains[i] /= g;
-      }
-    }
-    
-    // Remove -ve gain if present, moves image to edge of triplet.
-    // after normalization: gains fade with distance from boundary edge.
-    // before normalization: gain fixed whether on or off a boundary edge.
-    for( size_t i = 0; i < gains.size(); i++ )
-    {
-      if( gains[i] < 0 ) gains[i] = 0;
-    }
-  }
+ 
 } // namespace panning
 } // namespace visr
