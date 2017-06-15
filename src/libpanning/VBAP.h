@@ -100,7 +100,7 @@ private:
   /**
    * Calculates the inverse matrix required for VBAP gain calculation.
    */
-  int calcInvMatrices();
+  void calcInvMatrices();
   
   /**
    * Perform the basic VBAP gain calculation.
