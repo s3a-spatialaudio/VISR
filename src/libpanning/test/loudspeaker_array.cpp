@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   std::tie(px0, py0, pz0) = pos0;
 //  sourcePos[0].set(px0, py0,pz0, false );
   
-  sourcePos[0].set( 1, -0.25f, 0.2f, true ); // source position not normalised
+  sourcePos[0].set( 1, -0.25f, 0.2f, false ); // source position not normalised
 //  sourcePos[0].set( 2.08f, 1.0f, -5.0f, true );
   sourcePos[1].set( 1.0f, 0.0f, 0.0f, false );
   sourcePos[2].set( 0.0f, 1.0f, 0.0f, false );
