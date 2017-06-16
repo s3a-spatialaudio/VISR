@@ -42,6 +42,11 @@
 #include <sstream>
 #include <utility> // for std::pair and std::make_pair
 
+// Preliminary solution agains potential additional audio dependencies if new infrastructure elements (such as input routing blocks)
+// are introduced.
+// Needs to be tested more thoroughly.
+#define WORKAROUND_CYCLIC_DEPENDENCIES 1
+
 namespace visr
 {
 namespace rrl
@@ -81,6 +86,7 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
     throw std::runtime_error( "AudioSignalFlow: Audio connections could not be initialised." );
   }
 
+  std::cout << adjustedAudioConnections << std::endl << std::endl;
 
   ParameterConnectionMap adjustedParameterConnections;
   bool const initParamResult = initialiseParameterInfrastructure( checkMessages, flatParameterConnections,
@@ -175,8 +181,7 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
   }
   catch( std::exception const & ex )
   {
-    throw( std::string( "Error during execution of processing schedule: ") + ex.what() );
-    return 1;
+    throw std::invalid_argument( detail::composeMessageString("Error during execution of processing schedule: ", ex.what()) );
   }
 #if 1
   // This assumes that all capture ports have the default sample type "SampleType"
@@ -734,6 +739,32 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
           impl::AudioPortBaseImplementation& routingIn = routingCompImpl.findAudioPort( "in" )->implementation();
           impl::AudioPortBaseImplementation& routingOut = routingCompImpl.findAudioPort( "out" )->implementation();
 
+// Problem: By connecting all the input channels of the routing component we create additional dependencies which potentially make the signal flow
+// cyclic or reduce the usable degree of parallelism
+#ifdef WORKAROUND_CYCLIC_DEPENDENCIES
+          for( std::size_t inputIdx( 0 ); inputIdx < routingInputWidth; ++inputIdx )
+          {
+            std::size_t const channelIndex = minIndex + inputIdx;
+            PortOffsetLookup::const_iterator findPortIt = std::find_if( sendOffsets.cbegin(), sendOffsets.cend(),
+              [channelIndex]( PortOffsetLookup::value_type const & entry )
+            {
+              return (channelIndex >= entry.second) and (channelIndex < entry.second + entry.first->width());
+            } );
+            if( findPortIt == sendOffsets.end() )
+            {
+              throw std::logic_error( "AudioSignalFlow::initialiseAudio(): Internal logic error"
+                  "Send port needed for a contiguous send range of an internal routing port found in offset table." );
+            }
+            std::size_t const finalSendIndex = channelIndex - findPortIt->second;
+
+            bool const usedChannel = std::find( sendIndices.begin(), sendIndices.end(), inputIdx ) != sendIndices.end();
+            if( usedChannel )
+            {
+              tmpConnections.insert( AudioChannel( findPortIt->first, finalSendIndex ),
+                                     AudioChannel( &routingIn, inputIdx ) );
+            }
+          }
+#else
           for( std::size_t inputIdx( 0 ); inputIdx < routingInputWidth; ++inputIdx )
           {
             std::size_t const channelIndex = minIndex + inputIdx;
@@ -751,7 +782,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
             tmpConnections.insert( AudioChannel( findPortIt->first, finalSendIndex ),
                                    AudioChannel( &routingIn, inputIdx ) );
           }
-
+#endif
           for( std::size_t sigIdx( 0 ); sigIdx < receiveWidth; ++sigIdx )
           {
             tmpConnections.insert( AudioChannel( &routingOut, sigIdx ), AudioChannel( receivePort, sigIdx ) );
@@ -815,6 +846,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
     // Same for receive ports.
     for( auto const receiveEntry : receiveOffsets )
     {
+#ifndef WORKAROUND_CYCLIC_DEPENDENCIES
       impl::AudioPortBaseImplementation * port = receiveEntry.first;
       // Extra sanity checking whether the insertion of internal signal routing primitives has been successful.
       // Makes sense (and can be done) only for composite top-level flows.
@@ -827,6 +859,7 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
             "Non-contiguous port input range despite previous modification stage." );
         }
       }
+#endif
       std::size_t const channelOffset = receiveEntry.second;
       std::size_t finalByteOffset = typeOffset + channelSizeBytes * channelOffset;
       receiveEntry.first->setBufferConfig( mAudioSignalPool->basePointer() + finalByteOffset, channelSizeSamples );

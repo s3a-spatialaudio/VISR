@@ -30,7 +30,7 @@ void exportDelayMatrix( pybind11::module & m )
     ;
 
   pybind11::enum_<DelayMatrix::ControlPortConfig>( dVec, "ControlPortConfig" )
-    .value( "None", DelayMatrix::ControlPortConfig::None )
+    .value( "No", DelayMatrix::ControlPortConfig::None ) // Cannot use 'None' because that is recognised as keyword in Python.
     .value( "Delay", DelayMatrix::ControlPortConfig::Delay )
     .value( "Gain", DelayMatrix::ControlPortConfig::Gain )
     .value( "All", DelayMatrix::ControlPortConfig::All )
@@ -52,7 +52,8 @@ void exportDelayMatrix( pybind11::module & m )
         const char *, DelayMatrix::MethodDelayPolicy, DelayMatrix::ControlPortConfig, efl::BasicMatrix<SampleType> const &, efl::BasicMatrix<SampleType>  const &)>(&DelayMatrix::setup),
         pybind11::arg( "numberOfInputs" ),
         pybind11::arg( "numberOfOutputs"),
-        pybind11::arg( "interpolationSteps" ) = 1024, pybind11::arg( "maxDelay" ) = 3.0f,
+        pybind11::arg( "interpolationSteps" ) = 1024,
+        pybind11::arg( "maxDelay" ) = 3.0f,
         pybind11::arg( "interpolationType" ) /*= DelayMatrix::InterpolationType::CubicLagrange*/,
         pybind11::arg( "methodDelayPolicy") = DelayMatrix::MethodDelayPolicy::Add,
         pybind11::arg( "controlInputs") = DelayMatrix::ControlPortConfig::None,

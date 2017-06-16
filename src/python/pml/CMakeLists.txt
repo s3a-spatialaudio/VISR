@@ -10,6 +10,7 @@ matrix_parameter.cpp
 message_queue_protocol.cpp
 object_vector.cpp
 pml.cpp
+scalar_parameter.cpp
 shared_data_protocol.cpp
 vector_parameter.cpp
 )

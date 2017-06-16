@@ -94,7 +94,7 @@ MexWrapper::~MexWrapper( )
 
 void MexWrapper::process( )
 {
-  rrl::AudioInterface::CallbackResult processResult;
+  bool processResult;
   for( std::size_t blockIdx( 0 ); blockIdx < mNumberOfBlocks; ++blockIdx )
   { 
     // Transfer the input signal from the Matlab matrix to the capture buffers off the signal flow.

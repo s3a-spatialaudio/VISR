@@ -240,7 +240,6 @@ namespace panning
     SampleType g1, g2, g3;
     for( std::size_t j = 0; j < mTriplets.size(); j++ )
     {
-      
       SampleType const * inv = mInvMatrix.row( j );
       g1 = x*inv[0] + y*inv[1] + z*inv[2];
       g2 = x*inv[3] + y*inv[4] + z*inv[5];

@@ -71,15 +71,13 @@ namespace visr
                 creatorTable().insert( std::make_pair( interfaceName, TCreator<ConcreteAudioInterface>() ) );
             }
         };
-        
     private:
         struct Creator
         {
             using CreateFunction = std::function< audiointerfaces::AudioInterface* ( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config  ) >;
-            
-            VISR_CORE_LIBRARY_SYMBOL explicit Creator( CreateFunction fcn );
-            
-            VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<audiointerfaces::AudioInterface> create( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config) const;
+            explicit Creator( CreateFunction fcn );
+
+            std::unique_ptr<audiointerfaces::AudioInterface> create( audiointerfaces::AudioInterface::Configuration const & baseConfig, std::string const & config) const;
         private:
             CreateFunction mCreateFunction;
         };

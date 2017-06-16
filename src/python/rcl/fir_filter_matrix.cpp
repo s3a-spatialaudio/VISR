@@ -15,18 +15,6 @@ namespace python
 namespace rcl
 {
 
-#if 0
-  void setup( std::size_t numberOfInputs,
-              std::size_t numberOfOutputs,
-              std::size_t filterLength,
-              std::size_t maxFilters,
-              std::size_t maxRoutings,
-              efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
-              pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
-              bool controlInputs = false,
-              char const * fftImplementation = "default" );
-#endif
-
 void exportFirFilterMatrix( pybind11::module & m )
 {
   using visr::rcl::FirFilterMatrix;
