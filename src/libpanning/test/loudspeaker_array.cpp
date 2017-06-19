@@ -8,6 +8,8 @@
 #include <libpanning/VBAP.h>
 #include <libpanning/AllRAD.h>
 #include <boost/filesystem.hpp>
+#include <libefl/cartesian_spherical_conversion.hpp>
+#include <libefl/degree_radian_conversion.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -134,25 +136,24 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
 
   // Alternatively, load the config file in XML format.
 
-    boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_stereo_1sub_with_rerouting.xml" );
+    boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "bbc/bs2051-4+5+0.xml" );
 
     //boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
   BOOST_ASSERT( exists( configFileXml ) );
   BOOST_CHECK_NO_THROW( array.loadXmlFile( configFileXml.string() ) );
   
   
-  std::vector<int> chan ( array.getLoudspeakerChannels(), array.getLoudspeakerChannels()+ array.getNumRegularSpeakers());
-  std::vector<LoudspeakerArray::ChannelIndex>::iterator pos = std::adjacent_find( chan.begin(), chan.end(), std::greater<int>() );
+  std::vector<std::size_t> chan ( array.getLoudspeakerChannels(), array.getLoudspeakerChannels()+ array.getNumRegularSpeakers());
+  std::vector<LoudspeakerArray::ChannelIndex>::iterator pos = std::adjacent_find( chan.begin(), chan.end(), std::greater<std::size_t>() );
   BOOST_CHECK( pos == chan.end() );
-  for(int w=0; w< array.getNumRegularSpeakers();w++){
-    int ch = array.getSpeakerChannel( w );
+  for(std::size_t w=0; w< array.getNumRegularSpeakers();w++){
+    std::size_t ch = array.getSpeakerChannel( w );
     //std::cout<<"w: "<<w<< " chn: "<< array.getSpeakerChannel( w )<<" spk: "<< array.getSpeakerIndexFromChn(ch+1)<<std::endl;
-    BOOST_CHECK( w == array.getSpeakerIndexFromChn(ch+1));
+    BOOST_CHECK( w == array.getSpeakerIndexFromChn(ch));
   }
 
   std::size_t numberOfSources = 8;
   std::vector<XYZ> sourcePos( numberOfSources );
-  sourcePos[0].set( 2.08f, 1.0f, -5.0f, true );
   //    sourcePos[0].set(-1.0f,	0.0, 0.0f, true);     // plane wave from front/back
   //    sourcePos[0].set(0.0f, -1.0f, 0.0f, true);     // plane wave from left/right
   //    sourcePos[0].set(0.0f, 0.0f, -1.0f, true);     // plane wave from below
@@ -162,6 +163,14 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   //    sourcePos[0].set(1.0, 1.0, 1.0, false);
   //    sourcePos[0].set(1.0,	0.3, -0.2, false); // for 9.1_audiolab.txt jumps between triplet 11 and 10 as z reduced
   //    sourcePos[0].set(0.0, 1.0, -0.9, false);
+  
+  std::tuple<float,float,float> pos0 = visr::efl::spherical2cartesian(visr::efl::degree2radian(-40), visr::efl::degree2radian(15), 1);
+  float px0,py0,pz0;
+  std::tie(px0, py0, pz0) = pos0;
+//  sourcePos[0].set(px0, py0,pz0, false );
+  
+  sourcePos[0].set( 1, -0.25f, 0.2f, false ); // source position not normalised
+//  sourcePos[0].set( 2.08f, 1.0f, -5.0f, true );
   sourcePos[1].set( 1.0f, 0.0f, 0.0f, false );
   sourcePos[2].set( 0.0f, 1.0f, 0.0f, false );
   sourcePos[3].set( 0.0f, 0.0f, 1.0f, false );
@@ -181,8 +190,8 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
     //vbap.calculateGains( 1.0f, 1.0f, 0.0f, vbapGains.data() );
     std::size_t const numCols = array.getNumRegularSpeakers();
 
-    std::cout << "VBAP calculated loudspeaker gains with source's position ("<< sourcePos[i].x<<", " << sourcePos[i].y << ", " << sourcePos[i].z << ") : ";
-    std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, ", " ) );
+//    std::cout << "VBAP calculated loudspeaker gains with source's position ("<< sourcePos[i].x<<", " << sourcePos[i].y << ", " << sourcePos[i].z << ") : ";
+    std::copy( vbapGains.data(), vbapGains.data() + numCols, std::ostream_iterator<Afloat>( std::cout, "\t\t" ) );
     std::cout << std::endl;
   }
 
@@ -323,7 +332,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   file = fopen( bfile.string().c_str(), "w" );
   if( file )
   {
-    for( int k = 0; k < 9; k++ )
+    for( std::size_t k = 0; k < 9; k++ )
     { // 9 harms - 2nd order only
       for( std::size_t j = 0; j < vbap.getNumSpeakers(); j++ )
       {

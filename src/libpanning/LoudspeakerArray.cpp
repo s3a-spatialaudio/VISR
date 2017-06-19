@@ -84,14 +84,14 @@ namespace panning
   {
   }
   
-  int LoudspeakerArray::load( FILE *file )
+  std::size_t LoudspeakerArray::load( FILE *file )
   {
-    int n, i, chan;
+    std::size_t n, i, chan;
     char c;
     SampleType x, y, z;
     SampleType az, el, r;
-    int l1, l2, l3;
-    int nSpk, nTri;
+    std::size_t l1, l2, l3;
+    std::size_t nSpk, nTri;
     
     i = nSpk = nTri = 0;
     
@@ -460,7 +460,7 @@ namespace panning
     // i.e., one-offset.
     LoudspeakerIndexType const maxSpeakerIndexOneOffset
     = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
-    int i = 0;
+    std::size_t i = 0;
     
     // parsing the loudspeaker ids and channels
     for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt, i++ )
@@ -474,7 +474,7 @@ namespace panning
       }
       
       boost::trim_if( id, boost::is_any_of( "\t " ) );
-      int idZeroOffset = i;
+      std::size_t idZeroOffset = i;
       if( m_channel[idZeroOffset] != cInvalidChannel )
       {
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): Each channel id must be used exactly once." );
@@ -485,13 +485,13 @@ namespace panning
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): The channel id must be greater or equal than one." );
       }
       m_id[id] = 0; //just to have the id as a key in the map, to search for duplicates
-      m_channel[i] = chIdx - 1;
+      m_channel[i] = chIdx;
       mIdsOrder[chIdx] = id;
     }
     
     // Reordering by progressive channel number
     std::sort( m_channel.begin(), m_channel.end() );
-    int k = 0;
+    std::size_t k = 0;
     for( std::map<ChannelIndex, std::string>::iterator it = mIdsOrder.begin(); it != mIdsOrder.end(); it++, k++ )
     {
       /*  std::cout << it->second << " => " << m_id[it->second] << '\n';
@@ -534,7 +534,7 @@ namespace panning
       
       auto const routeNodes = childTree.equal_range( "route" );
       
-      int w = 0;
+      std::size_t w = 0;
       for( ptree::const_assoc_iterator routeIt( routeNodes.first ); routeIt != routeNodes.second; ++routeIt, w++ )
       {
         ptree const childTree = routeIt->second;
@@ -572,7 +572,14 @@ namespace panning
     m_triplet.reserve( numTriplets );
     // The maximim admissible index in a triplet. These are zero-offset values
     LoudspeakerIndexType const maxSpeakerIndex = maxSpeakerIndexOneOffset - 1;
-    int j = 0;
+    std::size_t j = 0;
+    
+    
+//    /*PRINTS OUT THE CORRESPONDENCE OF CHAN -> ID -> INDEX(idx of the loudspeaker in the channel-number-sorted loudspeaker array) */
+//     for ( std::map<ChannelIndex,std::string>::const_iterator it = mIdsOrder.cbegin(); it != mIdsOrder.cend(); ++it)  std::cout << "i: "<< j  <<" CHAN: " << it->first << " ID " << it->second << " IDX: "<<m_id[it->second]<<std::endl;
+//    std::cout<<std::endl;
+
+    
     for( ptree::const_assoc_iterator tripletIt( tripletNodes.first ); tripletIt != tripletNodes.second; ++tripletIt, j++ )
     {
       ptree const childTree = tripletIt->second;
@@ -588,7 +595,7 @@ namespace panning
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): Cannot find triplet loudspeaker id." );
       }
       
-      //for ( std::map<std::string, int>::const_iterator it = m_id.cbegin(); it != m_id.cend(); ++it)  std::cout << "i: "<< j  <<" MKEY: " << it->first << " MVAL " << it->second << std::endl;
+      
       triplet[0] = m_id[tid1];
       triplet[1] = m_id[tid2];
       if( m_is2D )
@@ -606,6 +613,7 @@ namespace panning
         triplet[2] = m_id[tid3];
         
       }
+      
       if( (triplet[0] < 0) or (triplet[0] > maxSpeakerIndex)
          or (triplet[1] < 0) or (triplet[1] > maxSpeakerIndex)
          or ((not m_is2D) and ((triplet[2] < 0) or (triplet[2] > maxSpeakerIndex))) )
@@ -613,8 +621,11 @@ namespace panning
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): Triplet references non-existing speaker index." );
       }
       m_triplet.push_back( triplet );
+//      std::cout<<" "<<m_triplet[j][0]<<"\t"<<m_triplet[j][1]<<"\t"<<m_triplet[j][2]<<std::endl;
     }
     assert( m_triplet.size() == numTriplets );
+    
+    std::cout<<std::endl;
     
     // Subwoofer configuration
     m_subwooferChannels.resize( numSubwoofers );
@@ -623,7 +634,7 @@ namespace panning
     for( ptree::const_assoc_iterator subIt( subwooferNodes.first ); subIt != subwooferNodes.second; ++subIt, ++subIdx )
     {
       ptree const subNode = subIt->second;
-      ChannelIndex const subChannel = subNode.get<int>( "<xmlattr>.channel" ) - 1;
+      ChannelIndex const subChannel = subNode.get<std::size_t>( "<xmlattr>.channel" ) - 1;
       m_subwooferChannels[subIdx] = subChannel;
       
       std::string speakerIndicesStr = subNode.get<std::string>( "<xmlattr>.assignedLoudspeakers" );

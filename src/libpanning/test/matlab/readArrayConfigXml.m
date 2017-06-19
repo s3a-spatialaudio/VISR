@@ -74,6 +74,24 @@ for tripletIdx = 1: numTriplets
     triplets( tripletIdx, : ) = [l1 l2 l3];
 end % tripletIdx loop
 
+sourceDir = zeros(8,3);
+sph2cart( deg2rad(-40), deg2rad(15), 1 );
+%sourceDir(1,:) = sph2cart( deg2rad(-40), deg2rad(15), 1 );
+sourceDir(1,:) = [1 -0.25 0.2];
+%sourceDir(1,:) = [2.08 1.0 -5.0];
+ sourceDir(2,:) = [1.0 0.0 0.0 ];
+  sourceDir(3,:) = [0.0 1.0 0.0];
+  sourceDir(4,:) = [0.0 0.0 1.0];
+  sourceDir(5,:) = [-1.0 0.0 0.0];
+  sourceDir(6,:) = [0.0 -1.0 0.0];
+  sourceDir(7,:) = [0.0 0.0 -1.0];
+  sourceDir(8,:) = [-1.0 -1.0 -1.0];
+
+  
+disp(vbapGains( spkPos.', triplets, sourceDir, 2)); %normalisation here is performed with virtual loudspeakers included
+
+
+
 end % function readArrayConfigXml
 
 function [pos, chIdx ] = parseSpeaker( domNode, isVirtual )

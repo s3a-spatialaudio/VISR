@@ -39,32 +39,30 @@ namespace panning
     
     
     //mPositions
-    for( int i = 0; i < numTotLoudspeakers; i++ )
+    for( std::size_t i = 0; i < numTotLoudspeakers; i++ )
     {
       mPositions( i, 0 ) = lsarray.getPosition( i ).x;
       mPositions( i, 1 ) = lsarray.getPosition( i ).y;
       mPositions( i, 2 ) = lsarray.getPosition( i ).z;
+      
     }
     
-    for( int i = 0; i < numTriplets; i++ )
+    for( std::size_t i = 0; i < numTriplets; i++ )
     {
       mTriplets[i][0] = lsarray.getTriplet( i )[0];
       mTriplets[i][1] = lsarray.getTriplet( i )[1];
       mTriplets[i][2] = lsarray.getTriplet( i )[2];
     }
-    mListenerPos[0] = x;
-    mListenerPos[1] = y;
-    mListenerPos[2] = z;
     
-    for( int i = 0; i < numVirtLoudspeakers; i++ )
+    for( std::size_t i = 0; i < numVirtLoudspeakers; i++ )
     {
-      for( int j = 0; j < numRegLoudspeakers; j++ )
+      for( std::size_t j = 0; j < numRegLoudspeakers; j++ )
       {
         mReroutingMatrix( i, j ) = lsarray.getReroutingCoefficient( i, j );
       }
     }
-    
-    calcInvMatrices();
+    // calls also the calcInverseMatrices
+    setListenerPosition(x, y, z);
   }
   
   namespace
@@ -80,12 +78,26 @@ namespace panning
         throw std::runtime_error( "VBAP: error during power normalisation." );
       }
     }
+    void normalise( SampleType &a1, SampleType &a2, SampleType &a3)
+    {
+      SampleType l = std::sqrt(a1*a1 + a2*a2 + a3*a3);
+      if (l != 0.0f ) {
+        a1 /= l;
+        a2 /= l;
+        a3 /= l;
+      }
+    }
   } // unnamed namespace
   
   void VBAP::calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const
   {
     calcPlainVBAP( x, y, z);
     applyRerouting();
+//    for( size_t i = 0; i < mGain.size(); i++ )
+//    {
+//      gains[i] = mGain[i];
+//    }
+
     powerNormalisation( &mGain[0], gains, numRegLoudspeakers );
   }
   
@@ -93,11 +105,24 @@ namespace panning
   {
     mListenerPos = std::array<SampleType, 3>{{x,y,z}};
     calcInvMatrices();
+
+//    /* prints inverse matrices */
+//    for( size_t row = 0; row < mInvMatrix.numberOfRows(); row++ )
+//    {
+//      std::cout<<"idx: "<<row+1<<std::endl;
+//      std::cout << std::endl;
+//      for( size_t columns = 0; columns < mInvMatrix.numberOfColumns(); columns++ ){
+//        std::cout << mInvMatrix.at( row, columns ) << "\t\t";
+//        if((columns+1) % 3==0) std::cout << std::endl;
+//      }
+//       std::cout << std::endl;
+//    }
+    
   }
   
   
   
-  int VBAP::calcInvMatrices()
+  void VBAP::calcInvMatrices()
   {
     
     
@@ -114,7 +139,7 @@ namespace panning
     {
       
       LoudspeakerArray::TripletType const & triplet = mTriplets[i];
-      if( triplet[0] == -1 ) continue;  //  triplet unused
+     
       
       l1X = mPositions( triplet[0], 0 );
       l1Y = mPositions( triplet[0], 1 );
@@ -123,7 +148,7 @@ namespace panning
       l2X = mPositions( triplet[1], 0 );
       l2Y = mPositions( triplet[1], 1 );
       l2Z = mPositions( triplet[1], 2 );
-      
+     
       if( is2D )
       {
         l3X = 0; l3Y = 0; l3Z = 1;
@@ -134,7 +159,7 @@ namespace panning
         l3Y = mPositions( triplet[2], 1 );
         l3Z = mPositions( triplet[2], 2 );
       }
-      
+   
       // calc speaker positions relative to listener.
       l1X = l1X - mListenerPos[0];
       l1Y = l1Y - mListenerPos[1];
@@ -145,34 +170,22 @@ namespace panning
       l3X = l3X - mListenerPos[0];
       l3Y = l3Y - mListenerPos[1];
       l3Z = l3Z - mListenerPos[2];
-      
-      Afloat l = std::sqrt(l1X*l1X + l1Y*l1Y + l1Z*l1Z);
-      if (l != 0.0f ) {
-        l1X /= l;
-        l1Y /= l;
-        l1Z /= l;
-      }
-      
-      l = std::sqrt(l2X*l2X + l2Y*l2Y + l2Z*l2Z);
-      if (l != 0.0f ) {
-        l2X /= l;
-        l2Y /= l;
-        l2Z /= l;
-      }
-      
-      l = std::sqrt(l3X*l3X + l3Y*l3Y + l3Z*l3Z);
-      if (l != 0.0f ) {
-        l3X /= l;
-        l3Y /= l;
-        l2Z /= l;
-      }
-      
+
+      normalise(l1X,l1Y,l1Z);
+      normalise(l2X,l2Y,l2Z);
+      normalise(l3X,l3Y,l3Z);
+
+//      std::cout<<"AAFTERi"<<i<<std::endl;
+//      std::cout<<"\t\t"<<l1X<<"\t\t"<<l1Y<<"\t\t"<<l1Z<<std::endl;
+//      std::cout<<"\t\t"<<l2X<<"\t\t"<<l2Y<<"\t\t"<<l2Z<<std::endl;
+//      std::cout<<"\t\t"<<l3X<<"\t\t"<<l3Y<<"\t\t"<<l3Z<<std::endl;
       temp = (l1X * ((l2Y * l3Z) - (l2Z * l3Y))
               - l1Y * ((l2X * l3Z) - (l2Z * l3X))
               + l1Z * ((l2X * l3Y) - (l2Y * l3X)));
       
       if( temp != 0.0f ) det = 1.0f / temp;
       else det = 1.0f;
+      
       
       inv = mInvMatrix.row( i );
       inv[0] = ((l2Y * l3Z) - (l2Z * l3Y)) * det;
@@ -185,24 +198,26 @@ namespace panning
       inv[5] = ((l1X * l3Y) - (l1Y * l3X)) * -det;
       inv[8] = ((l1X * l2Y) - (l1Y * l2X)) * det;
     }
-    return 0;
+   
   }
   
   
   void VBAP::calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ ) const
   {
     
-    
+//     std::cout<<"l1X: "<<posX<<" l1Y: "<<posY<<" l1Z: "<<posZ<<std::endl;
     std::fill( mGain.begin(), mGain.end(), 0.0f );
-    
+//    std::copy( mGain.data(), mGain.data() + 10, std::ostream_iterator<Afloat>( std::cout, ",\t\t " ) );
+//    std::cout << std::endl;
+
     //! Slow triplet search
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
     
     
     SampleType  gmin, g1min, g2min, g3min;
     SampleType x, y, z;
-    int invalid = std::numeric_limits<int>::max();
-    int jmin = invalid;// indicate currently no triplet candidate.
+    static constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
+    std::size_t jmin = invalid;// indicate currently no triplet candidate.
     
 #ifdef VBAP_DEBUG_MESSAGES
     printf( "setListenerPosition %f %f %f\n", mListenerPos[0], mListenerPos[1], mListenerPos[2] );
@@ -221,13 +236,10 @@ namespace panning
     }
     if( is2D ) z = 0; //! temp fix. no fade from 2D plane.
     
-    int l1, l2, l3;
+    std::size_t l1, l2, l3;
     SampleType g1, g2, g3;
     for( std::size_t j = 0; j < mTriplets.size(); j++ )
     {
-      
-      if( mTriplets[j][0] == -1 ) continue;  //  triplet unused
-      
       SampleType const * inv = mInvMatrix.row( j );
       g1 = x*inv[0] + y*inv[1] + z*inv[2];
       g2 = x*inv[3] + y*inv[4] + z*inv[5];
@@ -277,8 +289,9 @@ namespace panning
     
     mGain[l1] = g1;
     mGain[l2] = g2;
-    if( !is2D )  mGain[l3] = g3;     // l3 undefined in 2D case
-    
+    if( !is2D )
+      mGain[l3] = g3;     // l3 undefined in 2D case
+  
 #ifdef VBAP_DEBUG_MESSAGES
     printf( "%d  %f %f %f   %d  %d %d %d  %f %f %f \n", i, x, y, z, jmin, l1, l2, l3, g1, g2, g3 );
 #endif
@@ -287,40 +300,17 @@ namespace panning
   
   void VBAP::applyRerouting() const
   {
-    for( int i = 0; i < numRegLoudspeakers; i++ )
+    for( std::size_t i = 0; i < numRegLoudspeakers; i++ )
     {
-      for( int j = 0; j < numVirtLoudspeakers; j++ )
+      for( std::size_t j = 0; j < numVirtLoudspeakers; j++ )
       {
+//        std::cout<<"G"<<mGain[i]<<std::endl;
+        
         mGain[i] = mGain[i] + mReroutingMatrix( j, i ) * mGain[numRegLoudspeakers + j];
       }
     }
   }
   
-  void normalise( std::vector<SampleType> &gains )
-  {
-    SampleType g = 0.0;
-    for( size_t i = 0; i < gains.size(); i++ )
-    {
-      g += std::pow( gains[i], 2 );
-    }
-    
-    g = sqrt( g );
-    // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
-    if( g > 0 )
-    {
-      for( size_t i = 0; i < gains.size(); i++ )
-      {
-        gains[i] /= g;
-      }
-    }
-    
-    // Remove -ve gain if present, moves image to edge of triplet.
-    // after normalization: gains fade with distance from boundary edge.
-    // before normalization: gain fixed whether on or off a boundary edge.
-    for( size_t i = 0; i < gains.size(); i++ )
-    {
-      if( gains[i] < 0 ) gains[i] = 0;
-    }
-  }
+ 
 } // namespace panning
 } // namespace visr

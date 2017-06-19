@@ -45,10 +45,10 @@ namespace panning
        * Type for specifying loudspeaker indices in triplets.
        * At the moment, we use 'int' to let negative numbers denote invalid/unused triplets.
        */
-      using LoudspeakerIndexType = int;
+      using LoudspeakerIndexType = std::size_t;
       using SampleType = visr::SampleType;
       using TripletType = std::array<LoudspeakerIndexType, 3>;
-      using ChannelIndex = int;
+      using ChannelIndex = std::size_t;
 
     public:
       /**
@@ -76,7 +76,7 @@ namespace panning
        */
       ~LoudspeakerArray();
 
-      int load( FILE *file );
+      std::size_t load( FILE *file );
 
       /**
        *
@@ -126,7 +126,7 @@ namespace panning
       ChannelIndex getSpeakerChannelFromId( std::string id ) const { return m_channel[m_id.at( id )]; }
 
 
-      int setTriplet( int iTri, int l1, int l2, int l3 )
+      std::size_t setTriplet( std::size_t iTri, std::size_t l1, std::size_t l2, std::size_t l3 )
       {
         m_triplet[iTri][0] = l1;
         m_triplet[iTri][1] = l2;
@@ -271,13 +271,13 @@ namespace panning
 
     private:
 
-      int setPosition( int id, Afloat x, Afloat y, Afloat z, bool inf )
+      std::size_t setPosition( std::size_t id, Afloat x, Afloat y, Afloat z, bool inf )
       {
         m_position[id - 1].set( x, y, z, inf );
         return 0;
       };
 
-      int setChannel( int id, int chan )
+      std::size_t setChannel( std::size_t id, std::size_t chan )
       {
         m_channel[id - 1] = chan;
         return 0;
