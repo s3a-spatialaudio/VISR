@@ -30,12 +30,10 @@ void exportVectorParameters( pybind11::module & m );
 PYBIND11_PLUGIN( pml )
 {
   pybind11::module::import( "visr" );
+  pybind11::module::import( "objectmodel" );
 
   pybind11::module m( "pml", "VISR parameter message module" );
   using namespace visr::python::pml;
-
-  // Register parameter types and communication protocols
-  visr::pml::initialiseParameterLibrary();
 
   // Export the communication protocols
   exportDoubleBufferingProtocol( m );
@@ -50,6 +48,9 @@ PYBIND11_PLUGIN( pml )
   exportObjectVector( m );
   exportScalarParameters( m );
   exportVectorParameters( m );
+
+  // Register parameter types and communication protocols
+  visr::pml::initialiseParameterLibrary();
 
   return m.ptr();
 }
