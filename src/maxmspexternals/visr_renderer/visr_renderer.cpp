@@ -96,7 +96,6 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
         << arrayConfigPath.string( ) << "\" does not exist.";
       throw std::invalid_argument( err.str() );
     }
-    // We do not support the legacy text format for Max externals
     mArrayConfiguration->loadXmlFile( arrayConfigPath.string() );
 
     /* Set up the filter matrix for the diffusion filters. */

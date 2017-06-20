@@ -76,15 +76,23 @@ namespace panning
        */
       ~LoudspeakerArray();
 
-      std::size_t load( FILE *file );
-
       /**
-       *
+       * Initialise the loudspeaker array object from a file containing an array configuration in XML format
+       * @param filePath Full file path(including path and file extension).
        */
       void loadXmlFile( std::string const & filePath );
 
+      /**
+       * Initialise the loudspeaker array object from a stream holding the array configuration in XML format.
+       * @param stream Initialised stream object holding an XML configuration.
+       */
       void loadXmlStream( std::istream & stream );
-      void loadXmlString( std::string xmlString );
+
+      /**
+       * Initialise the loudspeaker array object from a string containg the array configuration in XML format.
+       * @param xmlString String containing a XML array configuration as the top-level node.
+       */
+      void loadXmlString( std::string const & xmlString );
 
       /**
        * Return the position of a loudspeaker based on its sorted position.

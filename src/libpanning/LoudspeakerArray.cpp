@@ -5,11 +5,6 @@
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
-// avoid annoying warning about unsafe STL functions.
-#ifdef _MSC_VER 
-#pragma warning(disable: 4996)
-#endif
-
 #include "LoudspeakerArray.h"
 
 #include <libefl/degree_radian_conversion.hpp>
@@ -80,170 +75,8 @@ namespace panning
     return *this;
   }
   
-  LoudspeakerArray::~LoudspeakerArray()
-  {
-  }
-  
-  std::size_t LoudspeakerArray::load( FILE *file )
-  {
-    std::size_t n, i, chan;
-    char c;
-    SampleType x, y, z;
-    SampleType az, el, r;
-    std::size_t l1, l2, l3;
-    std::size_t nSpk, nTri;
-    
-    i = nSpk = nTri = 0;
-    
-    struct SpkStruct
-    {
-      LoudspeakerIndexType id;
-      XYZ pos;
-      ChannelIndex channel;
-    };
-    struct CmpSpkStruct
-    {
-      bool operator()( SpkStruct const & lhs, SpkStruct const & rhs ) const
-      {
-        return lhs.id < rhs.id;
-      }
-    };
-    std::set<SpkStruct, CmpSpkStruct>  tmpSpeakers;
-    std::vector< TripletType > tmpTriplets;
-    
-    m_is2D = false;
-    m_isInfinite = false;
-    
-    if( file == 0 ) return -1;
-    
-    std::size_t numRegularSpeakers = 0; // Counter that excludes virtual loudspeakers
-    
-    do
-    {
-      c = fgetc( file );
-      
-      if( c == 'c' )
-      {        // cartesians
-        n = fscanf( file, "%d %d %f %f %f\n", &i, &chan, &x, &y, &z );
-        if( n != 5 )
-        {
-          return -1;
-        }
-        SpkStruct newSpk;
-        newSpk.id = i;
-        newSpk.pos.set( x, y, z, m_isInfinite );
-        newSpk.channel = chan;
-        // Insert the new speaker description
-        bool insRet;
-        std::tie( std::ignore, insRet ) = tmpSpeakers.insert( newSpk );
-        if( !insRet )
-        {
-          return -1; // Insertion failed, i.e., duplicated index
-        }
-        if( chan > 0 )
-        {
-          ++numRegularSpeakers;
-        }
-      }
-      else if( c == 'p' )
-      {   // polars, using degrees
-        n = fscanf( file, "%d %d %f %f %f\n", &i, &chan, &az, &el, &r );
-        if( n != 5 )
-        {
-          return -1;
-        }
-        std::tie( x, y, z ) = efl::spherical2cartesian( efl::degree2radian( az ),
-                                                       efl::degree2radian( el ),
-                                                       r );
-        SpkStruct newSpk;
-        newSpk.id = i;
-        newSpk.pos.set( x, y, z, m_isInfinite );
-        newSpk.channel = chan;
-        // Insert the new speaker description
-        bool insRet;
-        std::tie( std::ignore, insRet ) = tmpSpeakers.insert( newSpk );
-        if( !insRet )
-        {
-          return -1; // Insertion failed, i.e., duplicated index
-        }
-        if( chan > 0 )
-        {
-          ++numRegularSpeakers;
-        }
-      }
-      else if( c == 't' )
-      {    // tuplet - triplet or duplet
-        n = fscanf( file, "%d %d %d %d\n", &i, &l1, &l2, &l3 );
-        if( n < 3 || n > 4 )
-        {
-          return -1;
-        }
-        // The triplet index does not matter.
-        std::array<LoudspeakerIndexType, 3> triplet{ { l1, l2, l3 } };
-        tmpTriplets.push_back( triplet );
-      }
-      else if( c == '2' )
-      {    // switch to '2D' mode
-        m_is2D = true;
-      }
-      else if( c == 'i' )
-      {    // switch to 'infinite' mode
-        m_isInfinite = true;
-      }
-      else if( c == '%' )
-      {    // comment
-        while( fgetc( file ) != '\n' && !feof( file ) );
-      }
-      
-    }
-    while( !feof( file ) );
-    
-    std::size_t const numSpeakers = tmpSpeakers.size(); // including virtual speakers
-    m_position.resize( numSpeakers );
-    m_channel.resize( numRegularSpeakers );
-    m_subwooferGains.resize( 0, numRegularSpeakers );
-    m_subwooferChannels.clear();
-    
-    // As the txt configuration file does not support these features, set them to neutral default values.
-    m_gainAdjustment.resize( numRegularSpeakers );
-    m_gainAdjustment.fillValue( 1.0f );
-    m_delayAdjustment.resize( numRegularSpeakers );
-    m_delayAdjustment.fillValue( 0.0f );
-    
-    // The plain text configuration does not support an equalisation configuration, so we reset the configuration data
-    // to an empty state..
-    mOutputEqs.reset();
-    
-    LoudspeakerIndexType spkIdx = 0;
-    for( auto const & v : tmpSpeakers )
-    {
-      // Check that the (ordered) speakers are consecutively ordered from 1.
-      if( v.id != spkIdx + 1 ) // Speakers are still one-indexed.
-      {
-        return -1;
-      }
-      if( v.channel > 0 )
-      {
-        m_channel[spkIdx] = v.channel;
-      }
-      m_position[spkIdx] = v.pos;
-      ++spkIdx;
-    }
-    
-    std::size_t const numTriplets = tmpTriplets.size();
-    m_triplet.resize( numTriplets );
-    for( std::size_t tripletIdx( 0 ); tripletIdx < numTriplets; ++tripletIdx )
-    {
-      std::array<LoudspeakerIndexType, 3> const & src = tmpTriplets[tripletIdx];
-      TripletType & dest = getTriplet( tripletIdx );
-      dest[0] = src[0] - 1; // the collected indices are one-offset, so we need to convert them.
-      dest[1] = src[1] - 1;
-      dest[2] = src[2] - 1;
-    }
-    
-    return 0;
-  }
-  
+  LoudspeakerArray::~LoudspeakerArray() = default;
+
   namespace // unnamed
   {
     
@@ -702,10 +535,12 @@ namespace panning
       throw std::invalid_argument( "LoudspeakerArray::loadXml(): Loudspeaker and subwoofer channels indices are not exclusive." );
     }
   }
-  void LoudspeakerArray::loadXmlString( std::string xmlString ){
+
+  void LoudspeakerArray::loadXmlString( std::string const & xmlString ){
     std::istringstream iss( xmlString );
     loadXmlStream(iss);
   }
+
   bool LoudspeakerArray::outputEqualisationPresent() const
   {
     return bool( mOutputEqs ); // Operator bool checks whether pointer is assigned.

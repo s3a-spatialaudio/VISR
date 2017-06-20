@@ -82,25 +82,8 @@ int main( int argc, char const * const * argv )
             << arrayConfigPath.string() << "\" does not exist." << std::endl;
             return EXIT_FAILURE;
         }
-        std::string const arrayConfigFileName = arrayConfigPath.string();
-        panning::LoudspeakerArray loudspeakerArray;
-        // As long as we have two different config formats, we decide based on the file extention.
-        std::string::size_type lastDotIdx = arrayConfigFileName.rfind('.');
-        std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string() : arrayConfigFileName.substr(lastDotIdx + 1);
-        if (boost::iequals(configfileExtension, std::string("xml")))
-        {
-            loudspeakerArray.loadXmlFile(arrayConfigFileName);
-        }
-        else
-        {
-            FILE* hFile = fopen(arrayConfigFileName.c_str(), "r");
-            if (loudspeakerArray.load(hFile) < 0)
-            {
-                throw std::invalid_argument("Error while parsing the loudspeaker array configuration file \""
-                                            + arrayConfigFileName + "\".");
-            }
-        }
-        
+        panning::LoudspeakerArray loudspeakerArray( arrayConfigPath.string() );
+
         const std::size_t numberOfLoudspeakers = loudspeakerArray.getNumRegularSpeakers();
         const std::size_t numberOfSpeakersAndSubs = numberOfLoudspeakers + loudspeakerArray.getNumSubwoofers();
         

@@ -62,23 +62,7 @@ SignalFlow::setup()
   mInput.setWidth( cNumberOfInputs );
   mOutput.setWidth( cNumberOfOutputs );
 
-  panning::LoudspeakerArray loudspeakerArray;
-  // As long as we have two different config formats, we decide based on the file extention.
-  std::string::size_type lastDotIdx = mConfigFileName.rfind( '.' );
-  std::string const configfileExtension = lastDotIdx == std::string::npos ? std::string( ) : mConfigFileName.substr( lastDotIdx + 1 );
-  if( boost::iequals( configfileExtension, std::string( "xml" ) ) )
-  {
-    loudspeakerArray.loadXmlFile( mConfigFileName );
-  }
-  else
-  {
-    FILE* hFile = fopen( mConfigFileName.c_str( ), "r" );
-    if( loudspeakerArray.load( hFile ) < 0 )
-    {
-      throw std::invalid_argument( "Error while parsing the loudspeaker array configuration file \""
-        + mConfigFileName + "\"." );
-    }
-  }
+  panning::LoudspeakerArray loudspeakerArray( mConfigFileName );
 
   // Initialise and configure audio components
 
