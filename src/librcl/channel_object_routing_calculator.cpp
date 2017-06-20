@@ -48,11 +48,11 @@ void ChannelObjectRoutingCalculator::setup( std::size_t numberOfObjectChannels,
   for (std::size_t channelIndex(0); channelIndex < numSpeakers; ++channelIndex)
   {
     // Use the translation function of the loudspeaker array.
-    panning::LoudspeakerArray::LoudspeakerIndexType const lspIndex
-      = config.getSpeakerIndexFromChn( config.getSpeakerChannel( channelIndex ) + 1 );
+    panning::LoudspeakerArray::LoudspeakerIdType const lspId
+      = config.loudspeakerId( channelIndex );
     bool insertRes;
     std::tie(std::ignore, insertRes) = mLookup.insert(
-      std::make_pair(static_cast<objectmodel::ChannelObject::OutputChannelId>(lspIndex), channelIndex) );
+      std::make_pair(static_cast<objectmodel::ChannelObject::OutputChannelId>(lspId), channelIndex) );
     if (not insertRes)
     {
       throw std::invalid_argument( "Insertion of channel index routing failed." );

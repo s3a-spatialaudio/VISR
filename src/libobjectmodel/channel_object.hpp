@@ -20,10 +20,9 @@ class ChannelObject: public Object
 public:
   /**
    * The data type used to represent the channels to which the contained audio signals are routed.
-   * At the moment, this is an unsigned int (same as for the loudspeaker ids in the panning configuration, 
-   * but this could be changed to another type (string label?)
+   * This corresponds to the loudspeaker IDs used in the array configuration file, i.e., a string.
    */
-  using OutputChannelId = std::size_t;
+  using OutputChannelId = std::string;
 
   /**
    * Container type for holding the output channel indices.

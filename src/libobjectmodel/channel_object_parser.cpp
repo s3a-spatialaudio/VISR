@@ -7,6 +7,9 @@
 #include <libpml/index_sequence.hpp>
 
 #include <boost/property_tree/ptree.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <algorithm>
 #include <iterator>
@@ -25,14 +28,16 @@ parse( boost::property_tree::ptree const & tree, Object & obj ) const
     ObjectParser::parse( tree, obj );
 
     std::string const outChannelStr = tree.get<std::string>( "outputChannels" );
-    pml::IndexSequence const outChannels{ outChannelStr };
+    ChannelObject::OutputChannelContainer channelIds;
+    boost::algorithm::split( channelIds, outChannelStr, boost::algorithm::is_any_of(",; "), boost::algorithm::token_compress_on );
+    std::for_each( channelIds.begin(), channelIds.end(), []( std::string & str ){ boost::algorithm::trim(str); } );
 
-    if( outChannels.size() != obj.numberOfChannels())
+    if( channelIds.size() != obj.numberOfChannels())
     {
       throw std::invalid_argument("ChannelObjectParser::parse() Number of output channels does not match the number of object channels.");
     }
     ChannelObject & chObj = dynamic_cast<ChannelObject &>(obj);
-    chObj.setOutputChannels( &outChannels[0], outChannels.size() );
+    chObj.setOutputChannels( channelIds );
   }
   // TODO: distinguish between boost property_tree parse errors and bad dynamic casts.
   catch( std::exception const & ex )
