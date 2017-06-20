@@ -38,10 +38,6 @@
 #include <set>
 #include <tuple>
 
-//#include <regex>
-
-#define PI 3.1412659f
-
 namespace visr
 {
 namespace panning
@@ -571,11 +567,16 @@ namespace panning
     return *mOutputEqs;
   }
   
-  /*LoudspeakerArray::LoudspeakerIndexType
-   LoudspeakerArray::getLoudspeakerIndex( std::size_t arrayIndex ) const
-   {
-   return static_cast<LoudspeakerIndexType>(arrayIndex + 1);
-   }*/
+  LoudspeakerArray::LoudspeakerIdType const &
+  LoudspeakerArray::loudspeakerId( LoudspeakerIndexType const & index ) const
+  {
+    auto const findIt = mIdsOrder.find(index);
+    if( findIt == mIdsOrder.end() )
+    {
+      throw std::out_of_range( "LoudspeakerArray::loudspeakerId(): The given numeric loudspeaker id is outside the admissible range." );
+    }
+    return findIt->second;
+  }
 
 } // namespace panning
 } // namespace visr

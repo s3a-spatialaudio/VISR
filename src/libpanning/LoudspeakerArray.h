@@ -40,14 +40,31 @@ namespace panning
   class LoudspeakerArray
   {
  
-    public:
+      public:
+
+      /**
+       * Id type to denote loudspeakers by name. This name is also used in the triplet
+       *  (or polygon) specifications to define the VBAP triangulation.
+       */
+      using LoudspeakerIdType = std::string;
+
       /**
        * Type for specifying loudspeaker indices in triplets.
        * At the moment, we use 'int' to let negative numbers denote invalid/unused triplets.
        */
       using LoudspeakerIndexType = std::size_t;
+
+      /**
+       * Typ used for all numeric quantities such as as positions coordinates.
+       */
       using SampleType = visr::SampleType;
+
       using TripletType = std::array<LoudspeakerIndexType, 3>;
+
+      /**
+       * Type to denote the output signal channels for a regular loudspeaker.
+       * @Note the channels are assumed to be specified and stored as one-offset numbers.
+       */
       using ChannelIndex = std::size_t;
 
     public:
@@ -105,34 +122,59 @@ namespace panning
       * Return the position of a loudspeaker given its string id
       *
       */
-      XYZ & getPosition( std::string id ) { return m_position[m_id.at( id )]; };
+      XYZ & getPosition( LoudspeakerIdType const & id ) { return m_position[m_id.at( id )]; };
 
-      XYZ const & getPosition( std::string id ) const { return m_position[m_id.at( id )]; };
-
-
+      XYZ const & getPosition( LoudspeakerIdType const & id ) const { return m_position[m_id.at( id )]; };
 
       XYZ* getPositions() { return m_position.data(); };
 
       XYZ const * getPositions() const { return m_position.data(); };
 
-
+      /**
+       * Return the loudspeaker id (a string label) corresponding to the given (sorted) loudspeaker label.
+       * @param index zero-offset index into the loudspeaker array.
+       * @throw std::out_of_range If \p index exceeds the range of regular and virt ual loudspeakers.
+       */
+      LoudspeakerIdType const & loudspeakerId( LoudspeakerIndexType const & index ) const;
 
       /**
        * Return the loudspeaker index associated with a loudspeaker at a given
        * position in the loudspeaker array.
-       * At the moment, the loudspeaker indices are integers consecutively numbered from 1.
-       * That means that there is a fixed relation between the two indices.
-       * @todo Allow arbitrary indices (or labels), maybe of different types.
+       * @note the indices are assigned to speaker positions during the setup process and do not necessarily the order in which they are
+       * specified in the configuration file.
+       * @throw std::out_of_range If \p index exceeds the number of regular loudspeaker.
        */
-      //LoudspeakerIndexType getLoudspeakerIndex( std::size_t arrayIndex ) const;
       ChannelIndex channelIndex( std::size_t spkIndex ) const { return m_channel[spkIndex]; }
 
-      LoudspeakerIndexType getSpeakerIndexFromId( std::string id ) const { return m_id.at(id); };
+      /**
+       * Return the index into the loudspeaker array for a speaker denoted by its string id.
+       * @param id loudspeaker id for either a regular or virtual loudspeaker.
+       * @throw std::out_of_range If \p index exceeds the range of regular and virtual loudspeakers.
+       */
+      LoudspeakerIndexType getSpeakerIndexFromId( LoudspeakerIdType const & id ) const { return m_id.at(id); };
+
+      /**
+       * Return the index into the loudspeaker array from its output channel number.
+       * @param chn Channel index (one-offset) corresponding to a regular loudspeaker.
+       * @throw std::out_of_range If no regular speaker with this channel id exists.
+       */
       LoudspeakerIndexType getSpeakerIndexFromChn( ChannelIndex chn ) const { return m_id.at(mIdsOrder.at(chn)); };
 
+      /**
+       * Return the output channel index from a the speaker id of a regular loudspeaker.
+       * @param spkIndex The index into the loudspeaker array.
+       * @throw std::out_of_range If \p spkIndex exceeds the number of regular loudspeakers.
+       * @note The indices into the loudspeakers are assigned during construction and do not necessarily
+       * match the order in the configuration file.
+       */
       ChannelIndex getSpeakerChannel( std::size_t spkIndex ) const { return m_channel[spkIndex]; }
-      ChannelIndex getSpeakerChannelFromId( std::string id ) const { return m_channel[m_id.at( id )]; }
 
+      /**
+       * Return the output channel index (one-offset) from a loudspeaker string id.
+       * @param id String id corresponding to an existing regular loudspeaker.
+       * @std::out_of_range If \p id does not correspond to an existing regular loudspeaker.
+       */
+      ChannelIndex getSpeakerChannelFromId( LoudspeakerIdType const & id ) const { return m_channel[m_id.at( id )]; }
 
       std::size_t setTriplet( std::size_t iTri, std::size_t l1, std::size_t l2, std::size_t l3 )
       {
@@ -183,7 +225,7 @@ namespace panning
        * Retrieve the gain matrix for panning loudspeaker signals into the subwoofers.
        * @return Reference to gain matrix, dimension number of subwoofers * number of physical loudspeakers.
        */
-      efl::BasicMatrix<Afloat> const & getSubwooferGains() const { return m_subwooferGains; }
+      efl::BasicMatrix<SampleType> const & getSubwooferGains() const { return m_subwooferGains; }
 
       /**
        * Retrieve the matrix gain from a given loudspeaker to a given subwoofer.
@@ -192,7 +234,7 @@ namespace panning
        * @return Linear-scale gain value (not incorporating gain corrections applied to the channel signal).
        * @throw std::out_of_range if either \p subIdx or \p spkIdx is out of the respective admissible range.
        */
-      Afloat getSubwooferGain( std::size_t subIdx, std::size_t spkIdx ) const { return m_subwooferGains.at( subIdx, spkIdx ); }
+      SampleType getSubwooferGain( std::size_t subIdx, std::size_t spkIdx ) const { return m_subwooferGains.at( subIdx, spkIdx ); }
       //@}
 
       /**
@@ -215,7 +257,7 @@ namespace panning
       * @return Rerouting coefficient as a linear-scale gain value (not incorporating gain corrections applied to the channel signal).
       * @throw std::out_of_range if either \p virtIdx or \p realIdx is out of the respective admissible range.
       */
-      Afloat getReroutingCoefficient( std::size_t virtIdx, std::size_t realIdx ) const { return m_reRoutingCoeff.at( virtIdx, realIdx ); }
+      SampleType getReroutingCoefficient( std::size_t virtIdx, std::size_t realIdx ) const { return m_reRoutingCoeff.at( virtIdx, realIdx ); }
       //@}
 
 
@@ -224,20 +266,20 @@ namespace panning
          * Gain and delay adjustments.
          */
          //@{
-      Afloat getLoudspeakerGainAdjustment( std::size_t spkIdx ) const { return m_gainAdjustment.at( spkIdx ); };
+      SampleType getLoudspeakerGainAdjustment( std::size_t spkIdx ) const { return m_gainAdjustment.at( spkIdx ); };
 
-      Afloat getLoudspeakerDelayAdjustment( std::size_t spkIdx ) const { return m_delayAdjustment.at( spkIdx ); }
+      SampleType getLoudspeakerDelayAdjustment( std::size_t spkIdx ) const { return m_delayAdjustment.at( spkIdx ); }
 
-      Afloat getSubwooferGainAdjustment( std::size_t spkIdx ) const { return m_gainAdjustment.at( spkIdx + getNumRegularSpeakers() ); };
+      SampleType getSubwooferGainAdjustment( std::size_t spkIdx ) const { return m_gainAdjustment.at( spkIdx + getNumRegularSpeakers() ); };
 
-      Afloat getSubwooferDelayAdjustment( std::size_t spkIdx ) const { return m_delayAdjustment.at( spkIdx + getNumRegularSpeakers() ); }
+      SampleType getSubwooferDelayAdjustment( std::size_t spkIdx ) const { return m_delayAdjustment.at( spkIdx + getNumRegularSpeakers() ); }
 
       /**
        * Return the gain adjustment vector (linear scale) holding the gains for all regular loudspeakers and subwoofers.
        * The loudspeaker gains are ordered according to their zero-offset logical speaker numbers, followed by the subwoofers
        * in their order of definition in the configuration file.
        */
-      efl::BasicVector<Afloat> const & getGainAdjustment() const
+      efl::BasicVector<SampleType> const & getGainAdjustment() const
       {
         return m_gainAdjustment;
       }
@@ -247,7 +289,7 @@ namespace panning
       * The loudspeaker delays are ordered according to their zero-offset logical speaker numbers, followed by the subwoofers
       * in their order of definition in the configuration file.
       */
-      efl::BasicVector<Afloat> const & getDelayAdjustment() const { return m_delayAdjustment; }
+      efl::BasicVector<SampleType> const & getDelayAdjustment() const { return m_delayAdjustment; }
 
       //@}
 
@@ -274,12 +316,12 @@ namespace panning
        * \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
        * @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
        */
-      pml::BiquadParameterMatrix<Afloat> const & outputEqualisationBiquads() const;
+      pml::BiquadParameterMatrix<SampleType> const & outputEqualisationBiquads() const;
       //@}
 
     private:
 
-      std::size_t setPosition( std::size_t id, Afloat x, Afloat y, Afloat z, bool inf )
+      std::size_t setPosition( std::size_t id, SampleType x, SampleType y, SampleType z, bool inf )
       {
         m_position[id - 1].set( x, y, z, inf );
         return 0;
@@ -298,15 +340,22 @@ namespace panning
       std::vector< TripletType > m_triplet;
 
       std::vector<ChannelIndex> m_channel;
-      std::map<std::string, LoudspeakerIndexType> m_id;
-      std::map<ChannelIndex,std::string> mIdsOrder;
+
+      std::map<LoudspeakerIdType, LoudspeakerIndexType> m_id;
+
+      /**
+       * Lookup table to translate the sorted loudspeaker indices to their IDs (string labels)
+       * @todo Consider whether this can be a vector because the entries are dense and increasing from zero.
+       */
+      std::map< LoudspeakerIndexType, LoudspeakerIdType > mIdsOrder;
+
       /**
       * Subwoofer configuration support.
       */
       //@{
       std::vector<ChannelIndex> m_subwooferChannels;
 
-      efl::BasicMatrix<Afloat> m_subwooferGains;
+      efl::BasicMatrix<SampleType> m_subwooferGains;
 
       efl::BasicMatrix<SampleType> m_reRoutingCoeff;
       //@}
@@ -317,11 +366,11 @@ namespace panning
        * The gains are stored in order of their zero-offset logical loudspeaker index (not output signal index).
        * The subwoofer gains are after the regular speaker gains.
        */
-      efl::BasicVector<Afloat> m_gainAdjustment;
+      efl::BasicVector<SampleType> m_gainAdjustment;
 
-      efl::BasicVector<Afloat> m_delayAdjustment;
+      efl::BasicVector<SampleType> m_delayAdjustment;
 
-      std::unique_ptr<pml::BiquadParameterMatrix<Afloat> > mOutputEqs;
+      std::unique_ptr<pml::BiquadParameterMatrix<SampleType> > mOutputEqs;
   };
 
 } // namespace panning
