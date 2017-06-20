@@ -299,7 +299,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   std::vector<ChannelList::IndexType> activePlaybackChannels( numberOfLoudspeakers + numberOfSubwoofers, invalidIdx );
   for( std::size_t idx( 0 ); idx < numberOfLoudspeakers; ++idx )
   {
-    panning::LoudspeakerArray::ChannelIndex const chIdx = loudspeakerConfiguration.channelIndex( idx );
+    panning::LoudspeakerArray::ChannelIndex const chIdx = loudspeakerConfiguration.channelIndex( idx ) - 1;
     if( (chIdx < 0) or (chIdx >= static_cast<panning::LoudspeakerArray::ChannelIndex>(numberOfOutputs)) )
     {
       throw std::invalid_argument( "The loudspeakers channel index exceeds the admissible range." );
