@@ -86,8 +86,6 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
     throw std::runtime_error( "AudioSignalFlow: Audio connections could not be initialised." );
   }
 
-  std::cout << adjustedAudioConnections << std::endl << std::endl;
-
   ParameterConnectionMap adjustedParameterConnections;
   bool const initParamResult = initialiseParameterInfrastructure( checkMessages, flatParameterConnections,
                                                                   adjustedParameterConnections);
