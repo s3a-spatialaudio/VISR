@@ -130,8 +130,6 @@ bool
 AudioSignalFlow::process( SampleType const * const * captureSamples,
                           SampleType * const * playbackSamples )
 {
-  // TODO: It needs to be checked beforehand that the widths of the input and output signal vectors match.
-#if 1
   // This assumes that all capture ports have the default sample type "SampleType"
   for( std::size_t chIdx( 0 ); chIdx < numberOfCaptureChannels(); ++chIdx )
   {
@@ -142,37 +140,6 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
       throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
     }
   }
-#else
-  // TODO: Checking should be done during initialisation.
-  if( mTopLevelAudioInputs.size() > 1 )
-  {
-    throw std::runtime_error( "AudioSignalFlow::process(): At the moment at most one top-level audio input is allowed." );
-  }
-  if( mTopLevelAudioOutputs.size() > 1 )
-  {
-    throw std::runtime_error( "AudioSignalFlow::process(): At the moment at most one top-level audio output is allowed." );
-  }
-  if( not mTopLevelAudioInputs.empty() )
-  {
-    impl::AudioPortBaseImplementation & input = *mTopLevelAudioInputs[0];
-    if( input.sampleType() != AudioSampleType::TypeToId<SampleType>::id )
-    {
-      throw std::runtime_error( "AudioSignalFlow::process(): The sample type of the top-level audio input differs from the input sample type." );
-    }
-    std::size_t const width{ input.width() };
-    SampleType * const basePointer{  static_cast<SampleType*>(input.basePointer()) };
-    std::size_t const channelStride{ input.channelStrideSamples() };
-    for( std::size_t chIdx(0); chIdx < width; ++chIdx )
-    {
-      SampleType * const chPtr = basePointer + chIdx * channelStride;
-      efl::ErrorCode const res = efl::vectorCopy( captureSamples[chIdx], chPtr, mFlow.period(), 0 );
-      if( res != efl::noError )
-      {
-        throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
-      }
-    }
-  }
-#endif
   try
   {
     executeComponents();
@@ -181,7 +148,6 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
   {
     throw std::invalid_argument( detail::composeMessageString("Error during execution of processing schedule: ", ex.what()) );
   }
-#if 1
   // This assumes that all capture ports have the default sample type "SampleType"
   for( std::size_t chIdx( 0 ); chIdx < numberOfPlaybackChannels(); ++chIdx )
   {
@@ -192,30 +158,47 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
       throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
     }
   }
-#else
-  if( not mTopLevelAudioOutputs.empty() )
+  // TODO: use a sophisticated enumeration to signal error conditions
+  return true; // Means 'no error'
+}
+
+void AudioSignalFlow::process( SampleType const * captureSamples,
+                               std::size_t captureChannelStride,
+                               std::size_t captureSampleStride,
+                               SampleType * playbackSamples,
+                               std::size_t playbackChannelStride,
+                               std::size_t playbackSampleStride )
+{
+  for( std::size_t chIdx( 0 ); chIdx < numberOfCaptureChannels(); ++chIdx )
   {
-    impl::AudioPortBaseImplementation const & output = *mTopLevelAudioOutputs[0];
-    if( output.sampleType() != AudioSampleType::TypeToId<SampleType>::id )
+    SampleType const * src = captureSamples + chIdx * captureChannelStride;
+    SampleType * dest = reinterpret_cast<SampleType*>(mCaptureChannels[chIdx]);
+
+    efl::ErrorCode const res = efl::vectorCopyStrided( src, dest, captureSampleStride, 1, mFlow.period(), 0 );
+    if( res != efl::noError )
     {
-      throw std::runtime_error( "AudioSignalFlow::process(): The sample type of the top-level audio output differs from the input sample type." );
-    }
-    std::size_t const width{ output.width() };
-    SampleType const * const basePointer{ static_cast<SampleType const* const>(output.basePointer()) };
-    std::size_t const channelStride{ output.channelStrideSamples() };
-    for( std::size_t chIdx( 0 ); chIdx < width; ++chIdx )
-    {
-      SampleType const * const chPtr = basePointer + chIdx * channelStride;
-      efl::ErrorCode const res = efl::vectorCopy( chPtr, playbackSamples[chIdx], mFlow.period(), 0 );
-      if( res != efl::noError )
-      {
-        throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
-      }
+      throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
     }
   }
-#endif
-  // TODO: use a sophisticated enumeration to signal error conditions
-  return 0; // Means 'no error'
+  try
+  {
+    executeComponents();
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::runtime_error( detail::composeMessageString( "Error during execution of processing schedule: ", ex.what() ) );
+  }
+  // This assumes that all capture ports have the default sample type "SampleType"
+  for( std::size_t chIdx( 0 ); chIdx < numberOfPlaybackChannels(); ++chIdx )
+  {
+    SampleType const * src = reinterpret_cast<SampleType const *>(mPlaybackChannels[chIdx]);
+    SampleType * dest = playbackSamples + chIdx * playbackChannelStride;
+    efl::ErrorCode const res = efl::vectorCopyStrided( src, dest, 1, playbackSampleStride, mFlow.period(), 0 );
+    if( res != efl::noError )
+    {
+      throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
+    }
+  }
 }
 
 void AudioSignalFlow::executeComponents()

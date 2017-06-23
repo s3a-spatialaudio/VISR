@@ -39,39 +39,22 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 0 input of the input matrix does not match the block size of the signal flow." );
   }
-  if( input.strides(1) != sizeof(SampleType) )
-  {
-    throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 1 input of the input matrix must be continuous (row-major)." );
-  }
-  std::vector<SampleType const *> inPtrs( flow.numberOfCaptureChannels(), nullptr );
-  std::size_t const inChannelStride = input.strides(0) / sizeof(DataType);
-  SampleType const * inPtr = static_cast<SampleType const *>( input.data() );
-  for( auto & el : inPtrs )
-  {
-    el = inPtr;
-    inPtr += inChannelStride;
-  }
 
-  // Allocate the output array.
   pybind11::array outputSignal( pybind11::dtype::of<SampleType>(),
   { flow.numberOfPlaybackChannels(), flow.period() },
   { sizeof( SampleType )*flow.period(), sizeof( SampleType ) } // TODO: Take care of alignment
                               );
-  std::vector<SampleType *> outPtrs( flow.numberOfPlaybackChannels(), nullptr );
   std::size_t const outChannelStride = outputSignal.strides(0) / sizeof(DataType);
-  SampleType * outPtr = static_cast<SampleType *>( outputSignal.mutable_data() );
-  for( auto & el : outPtrs )
-  {
-    el = outPtr;
-    outPtr += outChannelStride;
-  }
-
-  SampleType const * const * inPtrBuffer = flow.numberOfCaptureChannels() > 0 ? &inPtrs[0] : nullptr;
-  SampleType * const * outPtrBuffer = flow.numberOfPlaybackChannels() > 0 ? &outPtrs[0] : nullptr;
+  std::size_t const outSampleStride = outputSignal.strides( 1 ) / sizeof( DataType );
 
   try
   {
-    flow.process( inPtrBuffer, outPtrBuffer );
+    flow.process( static_cast<SampleType const *>(input.data()),
+                  input.strides(0)/sizeof(SampleType),
+                  input.strides(1)/sizeof(SampleType),
+                  static_cast<SampleType *>(outputSignal.mutable_data()),
+                  outChannelStride,
+                  outSampleStride );
   }
   catch( std::exception const & ex )
   {

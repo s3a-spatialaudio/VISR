@@ -71,9 +71,27 @@ public:
    * Called from processFunction(). For a parameter description
    * (except userData), see @see processFunction().
    */
-  bool 
-  process( SampleType const * const * captureSamples,
-                        SampleType * const * playbackSamples );
+  bool process( SampleType const * const * captureSamples,
+                SampleType * const * playbackSamples );
+
+  /**
+   * Alternative process() function assuming matrices with fixed channel and element strides for the inputs and outputs.
+   * @param captureSamples Pointer to the matrix of input samples.
+   * @param[out] playbackSamples Pointer to the first element of the matrix of output samples filled by the process() call.
+   * @param captureChannelStride Number of samples between consecutive audio channels of the input matrix.
+   * @param captureSampleStride Number of samples between consecutive audio channels of the input matrix. A value of 1
+   * corresponds to consecutively stored samples.
+   * @param playbackChannelStride Number of samples between consecutive audio channels of the output matrix.
+   * @param playbackSampleStride Number of samples between consecutive audio channels of the output matrix. A value of 1
+   * corresponds to consecutively stored samples.
+   * @todo Provide a callback function for interfacing with audio interfaces.
+   */
+  void process( SampleType const * captureSamples,
+                std::size_t captureChannelStride,
+                std::size_t captureSampleStride,
+                SampleType * playbackSamples,
+                std::size_t playbackChannelStride,
+                std::size_t playbackSampleStride );
 
   /**
    * A static, i.e., non-class function which can be registered as a
