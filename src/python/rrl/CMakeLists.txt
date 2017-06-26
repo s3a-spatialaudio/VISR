@@ -6,13 +6,9 @@ integrity_checking.cpp
 rrl.cpp
 )
 
-set( HEADERS
-audio_signal_flow.hpp
-integrity_checking.hpp
-)
-
-
 # We don't need header files
+set( HEADERS
+)
 
 set(PROJECT_NAME rrlpython)
 

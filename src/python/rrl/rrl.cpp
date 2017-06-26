@@ -1,9 +1,19 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "audio_signal_flow.hpp"
-#include "integrity_checking.hpp"
-
 #include <pybind11/pybind11.h>
+
+// Forward declarations
+namespace visr
+{
+namespace python
+{
+namespace rrl
+{
+void exportAudioSignalFlow( pybind11::module & m );
+void exportIntegrityChecking( pybind11::module & m );
+}
+}
+}
 
 PYBIND11_PLUGIN( rrl )
 {
