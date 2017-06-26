@@ -7,7 +7,6 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
-//#include <libril/constants.hpp>
 
 #include <portaudio.h>
 
@@ -182,7 +181,7 @@ namespace // unnamed
   
   PortaudioInterface::Impl::Impl( Configuration const & baseConfig, std::string const & conf )
   : mNumCaptureChannels( baseConfig.numCaptureChannels() )
-  , mNumPlaybackChannels( baseConfig.numPlayChannels() )
+  , mNumPlaybackChannels( baseConfig.numPlaybackChannels() )
   , mPeriodSize( baseConfig.periodSize() )
   , mSampleRate( baseConfig.sampleRate() )
   , mStream( 0 )
@@ -320,7 +319,7 @@ namespace // unnamed
     boost::optional<bool> interl;
     boost::optional<std::string> mHostA;
     
-    std::string sampleFormat =  "Float32" ;
+    std::string sampleFormat =  "float32Bit" ;
     bool interleaved= false;
     std::string mHostApi="default";
     

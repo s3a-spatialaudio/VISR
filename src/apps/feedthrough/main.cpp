@@ -51,7 +51,7 @@ int main( int argc, char const * const * argv )
         type = "PortAudio";
 #endif
         
-        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf);
         
         /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
         SignalFlowContext context( periodSize, samplingRate );

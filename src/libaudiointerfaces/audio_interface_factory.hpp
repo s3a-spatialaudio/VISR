@@ -26,7 +26,8 @@
 
 namespace visr
 {
-    
+namespace audiointerfaces
+{
     // Forward declarations
     class AudioInterface;
     class Configuration;
@@ -108,7 +109,8 @@ namespace visr
     {
         creatorTable().insert( std::make_pair( interfaceName, TCreator<ConcreteAudioInterface>() ) );
     }
-    
+
+} // audiointerfaces
 } // namespace visr
 
 #endif /* audio_interface_factory_h */

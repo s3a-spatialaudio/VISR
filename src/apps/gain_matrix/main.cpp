@@ -95,7 +95,7 @@ int main( int argc, char const * const * argv )
       specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+cAudioBackend+"}";
       type = "PortAudio";
       
-      std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, specConf);
+      std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf);
 
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;

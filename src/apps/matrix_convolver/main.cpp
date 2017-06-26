@@ -148,7 +148,7 @@ int main( int argc, char const * const * argv )
       }
 #endif
       
-    audioInterface.reset(AudioInterfaceFactory::create( type, baseConfig, specConf).get());
+    audioInterface.reset( audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf).get());
       
     audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 

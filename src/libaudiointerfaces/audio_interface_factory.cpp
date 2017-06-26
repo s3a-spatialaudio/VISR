@@ -1,19 +1,18 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-//#include <librrl/audio_interface.hpp>
-#include <libaudiointerfaces/audio_interface_factory.hpp>
+#include "audio_interface_factory.hpp"
+
+#include "audio_interface.hpp""
+
 #ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
 #include <libaudiointerfaces/portaudio_interface.hpp>
 
-//#include <libril/parameter_config_base.hpp>
-
-//#include <stdexcept>
-
 namespace visr
 {
-    
+namespace audiointerfaces
+{
     AudioInterfaceFactory::Creator::Creator( CreateFunction fcn )
     : mCreateFunction( fcn )
     {
@@ -81,4 +80,6 @@ namespace visr
      * Object which is used to initialise the object factory.
      */
     InstantiateAudioInterfaceFactory const cInstantiationHelper;
+
+} // namespace audiointerfaces
 } // namespace visr
