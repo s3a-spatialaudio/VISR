@@ -15,3 +15,5 @@ ADD_SUBDIRECTORY( pml )
 ADD_SUBDIRECTORY( objectmodel )
 
 add_subdirectory( reverbobject )
+
+add_subdirectory( audiointerfaces )
