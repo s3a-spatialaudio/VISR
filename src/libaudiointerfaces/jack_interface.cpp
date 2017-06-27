@@ -138,7 +138,7 @@ namespace audiointerfaces
   
   JackInterface::Impl::Impl( Configuration const & baseConfig, std::string const & conf )
   : mNumCaptureChannels( baseConfig.numCaptureChannels() )
-  , mNumPlaybackChannels( baseConfig.numPlayChannels() )
+  , mNumPlaybackChannels( baseConfig.numPlaybackChannels() )
   , mPeriodSize( baseConfig.periodSize() )
   , mSampleRate( baseConfig.sampleRate() )
   , mCallback( nullptr )
