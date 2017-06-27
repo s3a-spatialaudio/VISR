@@ -66,10 +66,14 @@ std::string ComponentImplementation::fullName() const
 }
 
 void ComponentImplementation::status( StatusMessage::Kind statusId, char const * message )
-// Trivial default implementation, ought to be replaced be a more sophisticated solution
-// (should be passed to the runtime system)
 {
   std::cout << fullName() << ": Message id: " << statusId << ": " << message << std::endl;
+  // Trivial default implementation, ought to be replaced be a more sophisticated solution
+  // (should be passed to the runtime system and handled dependent on the software environment)
+  if( (statusId == StatusMessage::Error) or (statusId == StatusMessage::Critical) )
+  {
+    throw std::runtime_error( detail::composeMessageString( fullName(), ": \"", message, "\"."));
+  }
 }
 
 /*virtual*/ bool ComponentImplementation::isComposite() const

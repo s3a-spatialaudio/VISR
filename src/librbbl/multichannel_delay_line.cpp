@@ -111,6 +111,10 @@ adjustDelay( SampleType rawDelay ) const
   switch( cMethodDelayPolicy )
   {
     case MethodDelayPolicy::Add:
+      if( rawDelay < - std::numeric_limits<SampleType>::epsilon() )
+      {
+        throw std::out_of_range( "LagrangeInterpolator::interpolate(): Delay is negative while the \"Add\" strategy is selected." );
+      }
       return rawDelay; // method delay is added automatically
     case MethodDelayPolicy::Limit:
       return std::max( rawDelay - cMethodDelay, static_cast<SampleType>(0.0) );
