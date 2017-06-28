@@ -6,12 +6,12 @@
     "capture":
     {
       "port":
-      [{ "externalport" : {"indices": "1:4"} }]
+      [{ "externalport" : {"indices": "1:2"} }]
     },
     "playback":
     {
       "port":
-      [{ "externalport" : {"indices": "5:8"} }]
+      [{ "externalport" : {"indices": "1:3"} }]
     }
   }
 }

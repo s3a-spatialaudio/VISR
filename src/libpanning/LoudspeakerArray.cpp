@@ -463,7 +463,7 @@ namespace panning
     for( ptree::const_assoc_iterator subIt( subwooferNodes.first ); subIt != subwooferNodes.second; ++subIt, ++subIdx )
     {
       ptree const subNode = subIt->second;
-      ChannelIndex const subChannel = subNode.get<std::size_t>( "<xmlattr>.channel" ) - 1;
+      ChannelIndex const subChannel = subNode.get<std::size_t>( "<xmlattr>.channel" );
       m_subwooferChannels[subIdx] = subChannel;
       
       std::string speakerIndicesStr = subNode.get<std::string>( "<xmlattr>.assignedLoudspeakers" );

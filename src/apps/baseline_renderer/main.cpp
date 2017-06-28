@@ -16,16 +16,11 @@
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
-#ifdef VISR_JACK_SUPPORT
-#include <libaudiointerfaces/jack_interface.hpp>
-#endif
-#include <libaudiointerfaces/portaudio_interface.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/baseline_renderer.hpp>
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
-//  #include <boost/string/replace.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -113,7 +108,7 @@ int main( int argc, char const * const * argv )
         }
         if( hasAudioInterfaceOptionFile )
         {
-          boost::filesystem::path const audioIfcConfigFile( cmdLineOptions.getOption<boost::filesystem::path>( "audio-ifc-option-file" ) );
+          boost::filesystem::path const audioIfcConfigFile( cmdLineOptions.getOption<std::string>( "audio-ifc-option-file" ) );
           if( not exists( audioIfcConfigFile ) )
           {
             throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" option does not exist.");
@@ -132,14 +127,9 @@ int main( int argc, char const * const * argv )
           specConf = cmdLineOptions.getOption<std::string>( "audio-ifc-options" );
         }
         // TODO: An empty default configuration must be be sufficient.
-        else if( audioBackend == "Jack" )
+        else
         {
-          std::string const pconfig = "{\"capture\":[ { \"basename\": \"input_\"} ], \"playback\": [{ \"basename\": \"output_\"} ] }";
-          specConf = "{\"clientname\": \"VisrRenderer\", \"servername\": \"\", \"portconfig\" : "+pconfig+"}";
-        }
-        else // PortAudio
-        {
-          specConf = "{\"sampleformat\": \"float32Bit\", \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
+          specConf = "{}";
         }
 
         std::unique_ptr<visr::audiointerfaces::AudioInterface>
