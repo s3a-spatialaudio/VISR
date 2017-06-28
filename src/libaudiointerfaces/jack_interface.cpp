@@ -814,7 +814,7 @@ namespace audiointerfaces
       std::size_t globalIdx( 0 );
       std::size_t extGlobalIdx( 0 );
       
-      for(boost::property_tree::ptree::value_type &pconf : tree.get_child("port")){
+      for(boost::property_tree::ptree::value_type &pconf : tree.get_child("")){
         //                    std::cout<<pconf.first<< ": "<<pconf.second.data()<<std::endl;
         baseName = pconf.second.get_optional<std::string>( "basename" );
         indicesStr = pconf.second.get_optional<std::string>( "indices" );
