@@ -33,7 +33,8 @@ Options::Options()
   registerOption<std::size_t>( "scene-port,r", "UDP port for receiving object metadata" );
   registerOption<bool>("low-frequency-panning", "Activates frequency-dependent panning gains and normalisation" );
   
-    registerPositionalOption<std::string>( "audio-ifc-config,g", 1, "Audio interface configuration" );
+  registerOption<std::string>( "audio-ifc-options", "Audio interface optional configuration" );
+  registerOption<std::string>( "audio-ifc-option-file", "Audio interface optional configuration file" );
 }
 
 Options::~Options()
