@@ -129,7 +129,7 @@ int main( int argc, char const * const * argv )
         // TODO: An empty default configuration must be be sufficient.
         else
         {
-          specConf = "{}";
+          specConf = "";
         }
 
         std::unique_ptr<visr::audiointerfaces::AudioInterface>

@@ -10,7 +10,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-
+#include <boost/algorithm/string/trim.hpp>
 
 #include <cassert>
 #include <ciso646> // should not be necessary in C++11, but MSVC is non-compliant here
@@ -264,9 +264,12 @@ namespace visr
     
     JackInterface::Config JackInterface::Impl::parseSpecificConf( std::string const & config ){
       //            std::basic_istream<char> stream
-      std::stringstream stream(config);
-      //            std::cout<< "STREAM: "<<stream.str()<<std::endl;
+      std::string configTr = config;
+      boost::trim_if( configTr, boost::is_any_of( "\t " ) );
+      std::stringstream stream(configTr);
+//                  std::cout<<"config: "<<config <<" STREAM: "<<stream.str()<<std::endl;
       boost::property_tree::ptree tree;
+      if(!configTr.empty()){
       try
       {
         read_json( stream, tree );
@@ -274,6 +277,7 @@ namespace visr
       catch( std::exception const & ex )
       {
         throw std::invalid_argument( std::string( "Error while parsing a json node: " ) + ex.what( ) );
+      }
       }
       boost::optional<std::string> cliN;
       boost::optional<std::string> servN;
