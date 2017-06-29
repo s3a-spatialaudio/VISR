@@ -12,6 +12,7 @@ object_vector.cpp
 pml.cpp
 scalar_parameter.cpp
 shared_data_protocol.cpp
+string_parameter.cpp
 vector_parameter.cpp
 )
 
