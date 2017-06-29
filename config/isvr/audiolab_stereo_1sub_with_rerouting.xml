@@ -8,10 +8,10 @@
       <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
     </filterSpec>
   </outputEqConfiguration>
-  <loudspeaker channel="17" delay="0" eq="highpass" gainDB="0" id="T-030">
+  <loudspeaker channel="1" delay="0" eq="highpass" gainDB="0" id="T-030">
     <cart x="2.17" y="1.36" z="0"/>
   </loudspeaker>
-  <loudspeaker channel="27" delay="9.8764e-05" eq="highpass" gainDB="-0.35712" id="T+030">
+  <loudspeaker channel="2" delay="9.8764e-05" eq="highpass" gainDB="-0.35712" id="T+030">
     <cart x="2.15" y="-1.22" z="0.01"/>
   </loudspeaker>
   <virtualspeaker eq="highpass" id="3">
@@ -19,7 +19,7 @@
     <route lspId="T-030" gainDB="0"/>
     <route lspId="T+030" gainDB="0"/>
   </virtualspeaker>
-  <subwoofer assignedLoudspeakers="T-030, T+030" channel="41" delay="0" eq="lowpass" gainDB="0" weights="1.000000, 1.000000"/>
+  <subwoofer assignedLoudspeakers="T-030, T+030" channel="3" delay="0" eq="lowpass" gainDB="0" weights="1.000000, 1.000000"/>
   <triplet l1="T+030" l2="3"/>
   <triplet l1="T-030" l2="T+030"/>
   <triplet l1="3" l2="T-030"/>

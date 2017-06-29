@@ -2,7 +2,7 @@
 
 #include "audio_interface_factory.hpp"
 
-#include "audio_interface.hpp""
+#include "audio_interface.hpp"
 
 #ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -41,7 +41,7 @@ namespace audiointerfaces
     }
 
   /**
-   ** Creates an istance of the specified audio interface. This is done at runtime, following the factory pattern.
+   * Creates an instance of the specified audio interface. This is done at runtime, following the factory pattern.
    * @param interfaceName Identifier to specify the audio interface to instantiate
    * @param baseConfig Configuration parameters which are common to all audio interfaces
    * @param config Configuration parameters which are specific for the given audio interface
@@ -53,7 +53,7 @@ namespace audiointerfaces
         = creatorTable().find( interfaceName );
         if( findIt == creatorTable().end() )
         {
-            throw std::invalid_argument( "ParameterFactory: No creator function for requested parameter type " );
+            throw std::invalid_argument( std::string("AudioInterfaceFactory: Audio interface with name \"") + interfaceName + "\" is not registered." );
         }
         // todo: Need to catch construction errors?
         return std::unique_ptr<audiointerfaces::AudioInterface>( findIt->second.create( baseConfig, config ) );

@@ -14,9 +14,7 @@
 
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/export_symbols.hpp>
-//#include "parameter_type.hpp"
-#include <libaudiointerfaces/audio_interface.hpp>
+#include "audio_interface.hpp"
 
 #include <functional>
 #include <map>
@@ -28,15 +26,7 @@ namespace visr
 {
 namespace audiointerfaces
 {
-    // Forward declarations
-    class AudioInterface;
-    class Configuration;
-//    class Config;
-//    class ParameterConfigBase;
-//    template<class ConcreteType, class ParameterConfig, ParameterType> class TypedParameterBase;
-    
-    class //VISR_CORE_LIBRARY_SYMBOL 
-      AudioInterfaceFactory
+    class AudioInterfaceFactory
     {
     public:
       /**

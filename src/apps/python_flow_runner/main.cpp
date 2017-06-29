@@ -99,36 +99,21 @@ int main( int argc, char const * const * argv )
         
         // TODO: Check for dangling parameter ports.
         
-#ifdef VISR_JACK_SUPPORT
-        bool const useNativeJack = boost::iequals( audioBackend, "NATIVE_JACK" );
-#endif
-        
-        //    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
         visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
        
-        std::string type;
         std::string specConf;
         
-        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface;// = AudioInterfaceFactory::create( type, baseConfig, specConf);
-        
-#ifdef VISR_JACK_SUPPORT
-        if( useNativeJack )
+        if( audioBackend == "Jack" )
         {
-            std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
-            specConf = "{\"clientname\": "+objectName+", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
-            
-            type = "Jack";
+          std::string pconfig = "{}"; // \"capture\": [{\"basename\": \"in_\"}], \"playback\": [{\"basename\": \"out_\" }] }";
+          specConf = "{\"clientname\": \""+objectName+"\", \"portconfig\" : "+pconfig+"}";
         }
         else
         {
-#endif
-            specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
-            type = "PortAudio";
-#ifdef VISR_JACK_SUPPORT
+           specConf = "{\"sampleformat\": \"float32Bit\", \"interleaved\": \"false\", \"hostapi\": \"default\" }";
         }
-#endif
         
-        audioInterface.reset( audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf).get());
+        std::unique_ptr<audiointerfaces::AudioInterface> audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf) );
         
         
         audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );

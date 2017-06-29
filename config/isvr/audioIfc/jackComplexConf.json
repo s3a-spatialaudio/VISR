@@ -35,12 +35,12 @@
       "port":
       [{
         "basename" : "Baseoutput_" ,
-        "indices": "0:1",
+        "indices": "0:2",
         "externalport" :
          {
           "client" : "system",
           "portname": "playback_",
-          "indices": "4:5"
+          "indices": "4:6"
          }
        }]
     }

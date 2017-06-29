@@ -16,16 +16,11 @@
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
-#ifdef VISR_JACK_SUPPORT
-#include <libaudiointerfaces/jack_interface.hpp>
-#endif
-#include <libaudiointerfaces/portaudio_interface.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/baseline_renderer.hpp>
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
-//  #include <boost/string/replace.hpp>
 
 #include <algorithm>
 #include <cstddef>
@@ -35,11 +30,6 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
-
-// avoid annoying warning about unsafe standard library functions.
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
 
 int main( int argc, char const * const * argv )
 {
@@ -105,52 +95,45 @@ int main( int argc, char const * const * argv )
         // rendering path with zero reverb object 'slots'
         const std::string reverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", "{}" );
         
-        // Selection of audio interface:
-        // For the moment we check for the name 'NATIVE_JACK' and select the specialized audio interface and fall
-        // back to PortAudio in all other cases.
-        // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
-#ifdef VISR_JACK_SUPPORT
-        bool const useNativeJack = boost::iequals(audioBackend, "NATIVE_JACK");
-#endif
-        
-        
         visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfObjects,numberOfOutputChannels,samplingRate,periodSize);
         const bool lowFrequencyPanning = cmdLineOptions.getDefaultedOption("low-frequency-panning", false );
         
-        std::string type;
+
         std::string specConf;
-        
-        
-        
-#ifdef VISR_JACK_SUPPORT
-        if( useNativeJack )
+        bool const hasAudioInterfaceOptionString = cmdLineOptions.hasOption("audio-ifc-options");
+        bool const hasAudioInterfaceOptionFile = cmdLineOptions.hasOption("audio-ifc-option-file");
+        if( hasAudioInterfaceOptionString and hasAudioInterfaceOptionFile )
         {
-            std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
-            specConf = "{\"clientname\": \"VisrRenderer\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
-            
-            type = "Jack";
+          throw std::invalid_argument( "The options \"--audio-ifc-options\" and \"--audio-ifc-option-file\" cannot both be given.");
         }
+        if( hasAudioInterfaceOptionFile )
+        {
+          boost::filesystem::path const audioIfcConfigFile( cmdLineOptions.getOption<std::string>( "audio-ifc-option-file" ) );
+          if( not exists( audioIfcConfigFile ) )
+          {
+            throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" option does not exist.");
+          }
+          std::ifstream cfgStream( audioIfcConfigFile.string() );
+          if( not cfgStream )
+          {
+            throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" could not be read.");
+          }
+          std::ostringstream fileContent;
+          fileContent << cfgStream.rdbuf();
+          specConf = fileContent.str();
+        }
+        else if( hasAudioInterfaceOptionString )
+        {
+          specConf = cmdLineOptions.getOption<std::string>( "audio-ifc-options" );
+        }
+        // TODO: An empty default configuration must be be sufficient.
         else
         {
-#endif
-            specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
-            type = "PortAudio";
-#ifdef VISR_JACK_SUPPORT
+          specConf = "";
         }
-#endif
-        
-        
-        const std::string audioIfcConf = cmdLineOptions.getDefaultedOption<std::string>( "audio-ifc-config", "{}" );
-        std::ifstream file(audioIfcConf);
-        if(file){
-            std::ostringstream tmp;
-            tmp<<file.rdbuf();
-            specConf = tmp.str();
-//            std::cout<<specConf<<std::endl;
-        }
-        
-        std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
-        audioInterface = audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf);
+
+        std::unique_ptr<visr::audiointerfaces::AudioInterface>
+          audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf));
 
         /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
         // Assume a fixed length for the interpolation period.
