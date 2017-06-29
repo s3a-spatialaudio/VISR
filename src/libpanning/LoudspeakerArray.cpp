@@ -573,7 +573,10 @@ namespace panning
     auto const findIt = mIdsOrder.find(index);
     if( findIt == mIdsOrder.end() )
     {
-      throw std::out_of_range( "LoudspeakerArray::loudspeakerId(): The given numeric loudspeaker id is outside the admissible range." );
+      std::stringstream msg;
+      msg << "LoudspeakerArray::loudspeakerId(): The given numeric loudspeaker id(" << index
+        << ") is outside the admissible range.";
+      throw std::out_of_range( msg.str() );
     }
     return findIt->second;
   }
