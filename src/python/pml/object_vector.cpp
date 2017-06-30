@@ -3,6 +3,8 @@
 
 #include <libpml/object_vector.hpp>
 
+#include <libobjectmodel/object_vector.hpp>
+
 #include <pybind11/pybind11.h>
 
 namespace visr

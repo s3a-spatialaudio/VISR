@@ -44,7 +44,7 @@ if( PYTHON_EXTERNAL_SUFFIX )
 endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
-target_link_libraries( ${PROJECT_NAME} pml )
+target_link_libraries( ${PROJECT_NAME} pml_shared )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
