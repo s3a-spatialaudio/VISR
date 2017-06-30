@@ -3,6 +3,8 @@
 #ifndef VISR_PML_FILTER_ROUTING_PARAMETER_HPP_INCLUDED
 #define VISR_PML_FILTER_ROUTING_PARAMETER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <climits>
 #include <iosfwd>
 #include <initializer_list>
@@ -17,7 +19,7 @@ namespace pml
  * Class for defining a routing entry for a multichannel filter engine.
  * A routing entry consists of a input channel index, an output channel index, an index for the used filter coefficient, and a gain value.
  */
-struct FilterRoutingParameter
+struct VISR_PML_LIBRARY_SYMBOL FilterRoutingParameter
 {
   friend class FilterRoutingList;
 public:
@@ -76,7 +78,7 @@ public:
 /**
  * Class to contain and manipulate a list of routing entries.
  */
-class FilterRoutingList
+class VISR_PML_LIBRARY_SYMBOL FilterRoutingList
 {
 public:
   using IndexType = FilterRoutingParameter::IndexType;

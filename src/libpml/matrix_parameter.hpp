@@ -3,6 +3,7 @@
 #ifndef VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED
 #define VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 #include "matrix_parameter_config.hpp"
 
 #include <libefl/basic_matrix.hpp>
@@ -48,8 +49,8 @@ template<> struct MatrixParameterType<std::complex<double> >
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType >
-class MatrixParameter: public efl::BasicMatrix<ElementType>,
-                       public TypedParameterBase<MatrixParameter<ElementType>, MatrixParameterConfig, MatrixParameterType<ElementType>::ptype() >
+class VISR_PML_LIBRARY_SYMBOL MatrixParameter: public efl::BasicMatrix<ElementType>,
+                                               public TypedParameterBase<MatrixParameter<ElementType>, MatrixParameterConfig, MatrixParameterType<ElementType>::ptype() >
 {
 public:
 

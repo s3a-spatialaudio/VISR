@@ -4,6 +4,7 @@
 #define VISR_PML_LISTENER_POSITION_HPP_INCLUDED
 
 #include "empty_parameter_config.hpp"
+#include "export_symbols.hpp"
 
 #include <libril/detail/compile_time_hash_fnv1.hpp>
 #include <libril/parameter_type.hpp>
@@ -24,7 +25,7 @@ namespace pml
  */
 static constexpr const char* sListenerPositionParameterName = "ListenerPosition";
 
-class ListenerPosition: public TypedParameterBase<ListenerPosition, EmptyParameterConfig, detail::compileTimeHashFNV1(sListenerPositionParameterName) >
+class VISR_PML_LIBRARY_SYMBOL ListenerPosition: public TypedParameterBase<ListenerPosition, EmptyParameterConfig, detail::compileTimeHashFNV1(sListenerPositionParameterName) >
 {
 public:
   using TimeType = std::uint64_t;

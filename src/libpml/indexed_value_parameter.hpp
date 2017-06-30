@@ -4,6 +4,7 @@
 #define VISR_PML_INDEXED_STRING_PARAMETER_HPP_INCLUDED
 
 #include "empty_parameter_config.hpp"
+#include "export_symbols.hpp"
 #include "string_parameter.hpp"
 
 #include <libril/parameter_type.hpp>
@@ -39,7 +40,7 @@ template<> struct IndexedValueParameterType<std::string >
  * @note Not sure whether we should introduce parameters to limit 
  */
 template<typename IndexType, typename ValueType >
-class IndexedValueParameter:
+class VISR_PML_LIBRARY_SYMBOL IndexedValueParameter:
   public std::pair< std::size_t, std::string >,
   public TypedParameterBase< IndexedValueParameter<IndexType, ValueType>, EmptyParameterConfig, IndexedValueParameterType<ValueType>::ptype() >
 {

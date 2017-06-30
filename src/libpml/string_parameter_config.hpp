@@ -3,6 +3,8 @@
 #ifndef VISR_PML_STRING_PARAMETER_CONFIG_HPP_INCLUDED
 #define VISR_PML_STRING_PARAMETER_CONFIG_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/parameter_config_base.hpp>
 
 #include <initializer_list>
@@ -18,7 +20,7 @@ namespace pml
 
 /**
  */
-class StringParameterConfig: public ParameterConfigBase
+class VISR_PML_LIBRARY_SYMBOL StringParameterConfig: public ParameterConfigBase
 {
 public:
   explicit StringParameterConfig( std::size_t maxLength );

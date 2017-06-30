@@ -3,6 +3,7 @@
 #ifndef VISR_PML_STRING_PARAMETER_HPP_INCLUDED
 #define VISR_PML_STRING_PARAMETER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 #include "string_parameter_config.hpp"
 
 #include <libefl/basic_matrix.hpp>
@@ -21,32 +22,32 @@ namespace pml
 
 static constexpr const char * sStringParameterName = "String"; 
 
-    /**
-     * A type for passing strings between processing components.
-     */
-    class StringParameter: public std::string,
-                           public TypedParameterBase<StringParameter, StringParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
-    {
-    public:
-      explicit StringParameter( std::size_t maxLength = 0 );
+/**
+ * A type for passing strings between processing components.
+ */
+class VISR_PML_LIBRARY_SYMBOL StringParameter: public std::string,
+                                               public TypedParameterBase<StringParameter, StringParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
+{
+public:
+  explicit StringParameter( std::size_t maxLength = 0 );
 
-      explicit StringParameter( ParameterConfigBase const & config );
+  explicit StringParameter( ParameterConfigBase const & config );
 
-      explicit StringParameter( StringParameterConfig const & config );
+  explicit StringParameter( StringParameterConfig const & config );
 
-      /**
-       * @note Reconsider and possibly remove.
-       */
-      explicit StringParameter( std::string const & initStr );
+  /**
+   * @note Reconsider and possibly remove.
+   */
+  explicit StringParameter( std::string const & initStr );
 
-      /**
-       * Return the maximum length.
-       */
-      std::size_t maxLength() const { return mMaxLength; }
+  /**
+   * Return the maximum length.
+   */
+  std::size_t maxLength() const { return mMaxLength; }
 
-    private:
-      std::size_t mMaxLength;
-    };
+private:
+  std::size_t mMaxLength;
+};
 
 } // namespace pml
 } // namespace visr

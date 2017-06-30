@@ -5,6 +5,8 @@
 
 #include "empty_parameter_config.hpp"
 
+#include "export_symbols.hpp"
+
 #include <libobjectmodel/object_vector.hpp>
 
 #include <libril/parameter_type.hpp>
@@ -20,8 +22,8 @@ namespace visr
 namespace pml
 {
 
-class ObjectVector: public objectmodel::ObjectVector,
-                    public TypedParameterBase<ObjectVector, EmptyParameterConfig, detail::compileTimeHashFNV1("ObjectVector") >
+class VISR_PML_LIBRARY_SYMBOL ObjectVector: public objectmodel::ObjectVector,
+                                            public TypedParameterBase<ObjectVector, EmptyParameterConfig, detail::compileTimeHashFNV1("ObjectVector") >
 {
 public:
   /**

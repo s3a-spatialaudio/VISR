@@ -4,6 +4,7 @@
 #define VISR_PML_SCALAR_PARAMETER_HPP_INCLUDED
 
 #include "empty_parameter_config.hpp"
+#include "export_symbols.hpp"
 
 #include <libril/parameter_type.hpp>
 #include <libril/typed_parameter_base.hpp>
@@ -56,7 +57,7 @@ template<> struct ScalarParameterType<std::complex<double> >
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType >
-class ScalarParameter: public TypedParameterBase<ScalarParameter<ElementType>, EmptyParameterConfig, ScalarParameterType<ElementType>::ptype() >
+class VISR_PML_LIBRARY_SYMBOL ScalarParameter: public TypedParameterBase<ScalarParameter<ElementType>, EmptyParameterConfig, ScalarParameterType<ElementType>::ptype() >
 {
 public:
   /**

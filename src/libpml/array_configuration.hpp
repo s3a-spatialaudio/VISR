@@ -3,6 +3,8 @@
 #ifndef VISR_PML_ARRAY_CONFIGURATION_HPP_INCLUDED
 #define VISR_PML_ARRAY_CONFIGURATION_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
 #include <algorithm>
@@ -23,7 +25,7 @@ template< typename ValueType > class BasicVector;
 namespace pml
 {
 
-class ArrayConfiguration
+class VISR_PML_LIBRARY_SYMBOL ArrayConfiguration
 {
 public:
   struct Speaker

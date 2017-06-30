@@ -3,6 +3,8 @@
 #ifndef VISR_PML_MATRIX_PARAMETER_CONFIG_HPP_INCLUDED
 #define VISR_PML_MATRIX_PARAMETER_CONFIG_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/parameter_config_base.hpp>
 
 #include <initializer_list>
@@ -21,7 +23,7 @@ namespace pml
  * The template class is explicitly instantiated for the element types float and double.
  * @tparam ElementType The data type of the elements of the matrix.
  */
-class MatrixParameterConfig: public ParameterConfigBase
+class VISR_PML_LIBRARY_SYMBOL MatrixParameterConfig: public ParameterConfigBase
 {
 public:
   MatrixParameterConfig( std::size_t numberOfRows, std::size_t numberOfColumns );

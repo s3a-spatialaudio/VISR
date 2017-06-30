@@ -3,6 +3,7 @@
 #ifndef VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED
 #define VISR_PML_MESSAGE_QUEUE_PROTOCOL_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_type.hpp>
@@ -27,7 +28,7 @@ namespace pml
  * I.e., calling code from different thread must ensure that concurrent accesses
  * to the same instances are appropriately secured against race conditions.
  */
-class MessageQueueProtocol: public CommunicationProtocolBase
+class VISR_PML_LIBRARY_SYMBOL MessageQueueProtocol: public CommunicationProtocolBase
 {
 public:
   /**

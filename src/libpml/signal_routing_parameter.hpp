@@ -4,6 +4,7 @@
 #define VISR_PML_SIGNAL_ROUTING_PARAMETER_HPP_INCLUDED
 
 #include "empty_parameter_config.hpp"
+#include "export_symbols.hpp"
 
 #include <libril/detail/compile_time_hash_fnv1.hpp>
 #include <libril/parameter_type.hpp>
@@ -28,7 +29,7 @@ namespace pml
  * An output index can be routed to zero or one input index, while an input index can be connected to zer, one, or multiple outputs.
  * @note Not sure whether we should introduce parameters to limit
  */
-class SignalRoutingParameter: public TypedParameterBase<SignalRoutingParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1("SignalRouting") >
+class VISR_PML_LIBRARY_SYMBOL SignalRoutingParameter: public TypedParameterBase<SignalRoutingParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1("SignalRouting") >
 {
 public:
   using IndexType = std::size_t;

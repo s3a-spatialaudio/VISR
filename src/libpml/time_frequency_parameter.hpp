@@ -3,6 +3,7 @@
 #ifndef VISR_PML_TIME_FREQUENCY_PARAMETER_HPP_INCLUDED
 #define VISR_PML_TIME_FREQUENCY_PARAMETER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 #include "time_frequency_parameter_config.hpp"
 
 #include <libefl/basic_matrix.hpp>
@@ -42,7 +43,7 @@ namespace // unnamed
  * @tparam ElementType The data type of the elements of the matrix.
  */
 template<typename ElementType >
-class TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameter<ElementType>, TimeFrequencyParameterConfig, TimeFrequencyParameterType<ElementType>::ptype() >
+class VISR_PML_LIBRARY_SYMBOL TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameter<ElementType>, TimeFrequencyParameterConfig, TimeFrequencyParameterType<ElementType>::ptype() >
 {
 public:
   /**

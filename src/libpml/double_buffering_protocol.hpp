@@ -3,6 +3,8 @@
 #ifndef VISR_PML_DOUBLE_BUFFERING_PROTOCOL_HPP_INCLUDED
 #define VISR_PML_DOUBLE_BUFFERING_PROTOCOL_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/communication_protocol_base.hpp>
 #include <libril/communication_protocol_type.hpp>
 
@@ -23,7 +25,7 @@ namespace pml
 /**
  * 
  */
-class DoubleBufferingProtocol: public CommunicationProtocolBase
+class VISR_PML_LIBRARY_SYMBOL DoubleBufferingProtocol: public CommunicationProtocolBase
 {
 public:
   /**

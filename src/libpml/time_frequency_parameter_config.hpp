@@ -3,6 +3,8 @@
 #ifndef VISR_PML_TIME_FREQUENCY_PARAMETER_CONFIG_HPP_INCLUDED
 #define VISR_PML_TIME_FREQUENCY_PARAMETER_CONFIG_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/parameter_config_base.hpp>
 
 #include <initializer_list>
@@ -15,7 +17,7 @@ namespace pml
 
 /**
  */
-class TimeFrequencyParameterConfig: public ParameterConfigBase
+class VISR_PML_LIBRARY_SYMBOL TimeFrequencyParameterConfig: public ParameterConfigBase
 {
 public:
   TimeFrequencyParameterConfig( std::size_t dftSize, 
