@@ -28,15 +28,6 @@ public:
 
   void process() override
   {
-    // NOTE: Workaround against a deadlock if this method is called in a thread different from the main thread (e.g., a PortAudio or Jack callback)
-    // In this case, the Python global interpreter lock (GIL) appears to be locked at this point. 
-    // In order to prevent a deadlock in the gil_scoped_acquire invoked by 
-    // PYBIND11_OVERLOAD_PURE, we release the lock first.
-    // TODO: CHeck whether this workaround also works in other contexts (called
-    // within a Python script, or single-threaded execution in general)
-    // TODO: Investigate the causes for the locked GIL
-    pybind11::gil_scoped_release realeaseGuard;
-
     PYBIND11_OVERLOAD_PURE( void, AtomicComponent, process, );
   }
 };
