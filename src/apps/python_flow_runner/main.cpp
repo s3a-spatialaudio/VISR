@@ -25,6 +25,8 @@
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
 
+#include <pybind11/pybind11.h>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
@@ -43,7 +45,11 @@ int main( int argc, char const * const * argv )
         = efl::DenormalisedNumbers::setDenormHandling();
         
         pythonsupport::InitialisationGuard::initialise();
-        
+        // InitialisationGuard::initialise() returns with the Python GIL
+        // (global interpreter lock) locked.
+        // We keep it locked for the intialisation of the signal flow
+        // (which is performed in Python)
+
         Options cmdLineOptions;
         std::stringstream errMsg;
         switch( cmdLineOptions.parse( argc, argv, errMsg ) )
@@ -61,15 +67,6 @@ int main( int argc, char const * const * argv )
             case Options::ParseResult::Success:
                 break; // carry on
         }
-        //registerOption<std::string>( "audio-backend,D", "The audio backend." );
-        //registerOption<std::size_t>( "sampling-frequency,f", "Sampling frequency [Hz]" );
-        //registerOption<std::size_t>( "period,p", "Period (blocklength) [Number of samples per audio block]" );
-        
-        //registerOption<std::string>( "module-path,m", "Full pathe of the Python module to be loaded." );
-        //registerOption<std::size_t>( "python-class-name,c", "Name of the Python class (must be a subclass of visr.Component)." );
-        //registerOption<std::size_t>( "positional-arguments,p", "Comma-separated list of positional options passed to the class constructor." );
-        //registerOption<std::size_t>( "keyword-arguments,k", "Comma-separated list of named (keyword) options passed to the class constructor." );
-        
         std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
         const std::size_t periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
         const std::size_t samplingRate = cmdLineOptions.getDefaultedOption<std::size_t>( "sampling-frequency", 48000 );
@@ -101,28 +98,27 @@ int main( int argc, char const * const * argv )
         
         visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
        
-        std::string specConf;
-        
-        if( audioBackend == "Jack" )
-        {
-          std::string pconfig = "{}"; // \"capture\": [{\"basename\": \"in_\"}], \"playback\": [{\"basename\": \"out_\" }] }";
-          specConf = "{\"clientname\": \""+objectName+"\", \"portconfig\" : "+pconfig+"}";
-        }
-        else
-        {
-           specConf = "{\"sampleformat\": \"float32Bit\", \"interleaved\": \"false\", \"hostapi\": \"default\" }";
-        }
-        
+        // TODO: Add a command-line option for the backend-specific audio
+        // interface options.
+        std::string const specConf(""); // Default backend-specific options
+
         std::unique_ptr<audiointerfaces::AudioInterface> audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf) );
-        
         
         audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
         
-        // should there be a separate start() method for the audio interface?
-        audioInterface->start( );
+        // Release the Python GIL before starting the audio processing.
+        // This is done because most audio interfaces execute the
+        // callback function in a separate thread.
+        // If this callback comprises Python functions, these will attempt to
+        //  acquire the GIL from this thread, which would deadlock if the GIL
+        // is still held here.
+        pybind11::gil_scoped_release gilReleaseGuard;
+
+        audioInterface->start();
         
         // Rendering runs until q<Return> is entered on the console.
         std::cout << "S3A Python signal flow runner. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+
         char c;
         do
         {
