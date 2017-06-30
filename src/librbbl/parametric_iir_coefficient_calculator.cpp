@@ -2,10 +2,11 @@
 
 #include "parametric_iir_coefficient_calculator.hpp"
 
+#include "biquad_coefficient.hpp"
+#include "parametric_iir_coefficient.hpp"
+
 #include <libefl/db_linear_conversion.hpp>
 
-#include <libpml/biquad_parameter.hpp>
-#include <libpml/parametric_iir_coefficient.hpp>
 
 #include <boost/math/constants/constants.hpp>
 
@@ -18,18 +19,9 @@ namespace rbbl
 namespace ParametricIirCoefficientCalculator
 {
 
-//namespace
-//{
-//  template<typename  T>
-//  T alpha( T w0, T q )
-//  {
-//    return ;
-//  }
-//} // unnamed namespace
-
 template< typename T >
-void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
-                               pml::BiquadParameter<T> & coeffs,
+void calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
+                               BiquadCoefficient<T> & coeffs,
                                T samplingFrequency )
 {
   T const w0 = static_cast<T>(2.0) * boost::math::constants::pi<T>()*param.frequency() / samplingFrequency;
@@ -38,7 +30,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
 
   switch( param.type() )
   {
-    case pml::ParametricIirCoefficientBase::Type::lowpass:
+    case ParametricIirCoefficientBase::Type::lowpass:
     {
       // b0 = (1 - cos( w0 )) / 2
       // b1 = 1 - cos( w0 )
@@ -54,7 +46,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = (static_cast<T>(1.0) - alpha) / a0;
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::highpass:
+    case ParametricIirCoefficientBase::Type::highpass:
     {
       //b0 = (1 + cos( w0 )) / 2
       //b1 = -(1 + cos( w0 ))
@@ -70,7 +62,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = (static_cast<T>(1.0) - alpha) / a0;
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::bandpass:
+    case ParametricIirCoefficientBase::Type::bandpass:
     {
       // "Constant 0 dB gain" variant.
       // b0 = alpha
@@ -87,7 +79,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = (static_cast<T>(1.0) - alpha) / a0;
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::bandstop:
+    case ParametricIirCoefficientBase::Type::bandstop:
     {
       // b0 = 1
       //  b1 = -2 * cos( w0 )
@@ -103,7 +95,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = (static_cast<T>(1.0) - alpha) / a0;
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::allpass:
+    case ParametricIirCoefficientBase::Type::allpass:
     {
       // b0 = 1 - alpha
       // b1 = -2 * cos( w0 )
@@ -119,7 +111,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = coeffs.b0();
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::peak:
+    case ParametricIirCoefficientBase::Type::peak:
     {
       // b0 = 1 + alpha*A
       // b1 = -2 * cos( w0 )
@@ -136,7 +128,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = (static_cast<T>(1.0) - alpha/A) / a0;
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::lowshelf:
+    case ParametricIirCoefficientBase::Type::lowshelf:
     {
       // b0 = A*((A + 1) - (A - 1)*cos( w0 ) + 2 * sqrt( A )*alpha)
       //  b1 = 2 * A*((A - 1) - (A + 1)*cos( w0 ))
@@ -154,7 +146,7 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
       coeffs.a2() = ((A + static_cast<T>(1.0)) + (A - static_cast<T>(1.0))*cw0 - static_cast<T>(2.0) * Asqrt*alpha) / a0;
       break;
     }
-    case pml::ParametricIirCoefficientBase::Type::highshelf:
+    case ParametricIirCoefficientBase::Type::highshelf:
     {
       //  b0 = A*((A + 1) + (A - 1)*cos( w0 ) + 2 * sqrt( A )*alpha)
       //  b1 = -2 * A*((A - 1) + (A + 1)*cos( w0 ))
@@ -175,30 +167,30 @@ void calculateIirCoefficients( pml::ParametricIirCoefficient<T> const & param,
   }
 }
 
-template void calculateIirCoefficients<float>( pml::ParametricIirCoefficient<float> const &,
-                                               pml::BiquadParameter<float> &, float );
-template void calculateIirCoefficients<double>( pml::ParametricIirCoefficient<double> const &,
-                                                pml::BiquadParameter<double> &, double );
+template void calculateIirCoefficients<float>( ParametricIirCoefficient<float> const &,
+                                               BiquadCoefficient<float> &, float );
+template void calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
+                                                BiquadCoefficient<double> &, double );
 
 template< typename CoefficientType >
-void calculateIirCoefficients( pml::ParametricIirCoefficientList<CoefficientType> const & params,
-  pml::BiquadParameterList<CoefficientType> & coeffs,
+void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
+  BiquadCoefficientList<CoefficientType> & coeffs,
   CoefficientType samplingFrequency )
 {
   if( params.size() > coeffs.size() )
   {
     throw std::invalid_argument( "calculateIirCoefficients(): The output argument list \"coeffs\" holds less elements than the input list \"params\"." );
   }
-  typename pml::BiquadParameterList<CoefficientType>::iterator it = std::transform( params.begin(), params.end(), coeffs.begin(),
-    [samplingFrequency] (typename pml::ParametricIirCoefficient<CoefficientType> const & params ) { return calculateIirCoefficients<CoefficientType>( params, samplingFrequency ); } );
+  typename BiquadCoefficientList<CoefficientType>::iterator it = std::transform( params.begin(), params.end(), coeffs.begin(),
+     [samplingFrequency]( ParametricIirCoefficient<CoefficientType> const & params ) { return calculateIirCoefficients<CoefficientType>( params, samplingFrequency ); } );
   // Fill the remaining entries in coeffs with default (flat) biquad parameters.
-  std::fill( it, coeffs.end(), pml::BiquadParameter<CoefficientType>() );
+  std::fill( it, coeffs.end(), BiquadCoefficient<CoefficientType>() );
 }
 
 template void
-calculateIirCoefficients<float>( pml::ParametricIirCoefficientList<float> const &, pml::BiquadParameterList<float> &, float );
+calculateIirCoefficients<float>( ParametricIirCoefficientList<float> const &, BiquadCoefficientList<float> &, float );
 template void
-calculateIirCoefficients<double>( pml::ParametricIirCoefficientList<double> const &, pml::BiquadParameterList<double> &, double );
+calculateIirCoefficients<double>( ParametricIirCoefficientList<double> const &, BiquadCoefficientList<double> &, double );
 
 
 } // ParametricIirCoefficientCalculator

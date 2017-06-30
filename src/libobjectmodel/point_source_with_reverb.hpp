@@ -9,7 +9,7 @@
 
 #include "point_source.hpp"
 
-#include <libpml/biquad_parameter.hpp>
+#include <librbbl/biquad_coefficient.hpp>
 
 #include <libril/constants.hpp>
 
@@ -82,14 +82,14 @@ namespace objectmodel
       /**
        * Return the wall reflection coefficients for this discrete reflection.
        */
-      pml::BiquadParameterList<SampleType> const & reflectionFilters() const { return mDiscreteReflectionFilters; }
+      rbbl::BiquadCoefficientList<SampleType> const & reflectionFilters() const { return mDiscreteReflectionFilters; }
 
       /**
        * Return a specific biquad section of the wall reflection filter.
        * @param biquadIdx The index of the biquad to be returned.
        * @throw std::out_of_range If \p biquadIdx exceeds the number of biquads (\p cNumDiscreteReflectionBiquads)
        */
-      pml::BiquadParameter<SampleType> const & reflectionFilter( std::size_t biquadIdx ) const;
+      rbbl::BiquadCoefficient<SampleType> const & reflectionFilter( std::size_t biquadIdx ) const;
 
       /**
        * Set the position of the discrete reflection.
@@ -117,7 +117,7 @@ namespace objectmodel
        * @param newFilters a set of biquad parameter coefficients. It must contain at most cNumDiscreteReflectionBiquads entries.
        * @throw std::invalid_argument If the size of \p newFilters exceeds cNumDiscreteReflectionBiquads
        */
-      void setReflectionFilters( pml::BiquadParameterList<SampleType> const & newFilters );
+      void setReflectionFilters( rbbl::BiquadCoefficientList<SampleType> const & newFilters );
 
       /**
        * Set a specific biquad of the wall reflection filter for this reflections
@@ -125,7 +125,7 @@ namespace objectmodel
        * @param newFilter The new biquad parameters
        * @throw std::out_of_range If the index \p biquadIdx exceeds the range of available biquads (\p cNumDiscreteReflectionBiquads)
        */
-      void setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<SampleType> const & newFilter );
+      void setReflectionFilter( std::size_t biquadIdx, rbbl::BiquadCoefficient<SampleType> const & newFilter );
     private:
       /** Cartesion x coordinate. */
       Coordinate mX;
@@ -147,7 +147,7 @@ namespace objectmodel
       /**
        * A set of biquad IIR filters to model the frequency response of this discrete reflection.
        */
-      pml::BiquadParameterList<SampleType> mDiscreteReflectionFilters;
+      rbbl::BiquadCoefficientList<SampleType> mDiscreteReflectionFilters;
     };
 
     /**

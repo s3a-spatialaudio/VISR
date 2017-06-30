@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PML_FLOAT_SEQUENCE_HPP_INCLUDED
-#define VISR_PML_FLOAT_SEQUENCE_HPP_INCLUDED
+#ifndef VISR_RBBL_FLOAT_SEQUENCE_HPP_INCLUDED
+#define VISR_RBBL_FLOAT_SEQUENCE_HPP_INCLUDED
 
 #include <algorithm>
 #include <ciso646>
@@ -12,7 +12,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 
 /**
@@ -136,8 +136,8 @@ private:
   ContainerType mValues;
 };
 
-} // namespace pml
+} // namespace rbbl
 } // namespace visr
 
 
-#endif // VISR_PML_FLOAT_SEQUENCE_HPP_INCLUDED
+#endif // VISR_RBBL_FLOAT_SEQUENCE_HPP_INCLUDED

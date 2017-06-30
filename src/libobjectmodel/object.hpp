@@ -5,7 +5,7 @@
 
 #include "object_type.hpp"
 
-#include <libpml/parametric_iir_coefficient.hpp>
+#include <librbbl/parametric_iir_coefficient.hpp>
 
 #include <climits>
 #include <cstdint>
@@ -122,9 +122,9 @@ public:
   void setChannelIndex( std::size_t index, ChannelIndex channelIndex );
   //@}
 
-  pml::ParametricIirCoefficientList<Coordinate> const & eqCoefficients() const;
+  rbbl::ParametricIirCoefficientList<Coordinate> const & eqCoefficients() const;
 
-  void setEqCoefficients( pml::ParametricIirCoefficientList<Coordinate>  const & newCoeffs );
+  void setEqCoefficients( rbbl::ParametricIirCoefficientList<Coordinate>  const & newCoeffs );
 
 
   /**
@@ -146,7 +146,7 @@ private:
 
   std::valarray<ChannelIndex> mChannelIndices;
 
-  pml::ParametricIirCoefficientList<Coordinate> mEqCoefficients;
+  rbbl::ParametricIirCoefficientList<Coordinate> mEqCoefficients;
 };
 
 } // namespace objectmodel

@@ -6,8 +6,6 @@ SET( SOURCES
  double_buffering_protocol.cpp
  empty_parameter_config.cpp
  filter_routing_parameter.cpp
- float_sequence.cpp
- index_sequence.cpp
  indexed_value_parameter.cpp
  initialise_parameter_library.cpp
  listener_position.cpp
@@ -15,7 +13,6 @@ SET( SOURCES
  matrix_parameter_config.cpp
  message_queue_protocol.cpp
  object_vector.cpp
- parametric_iir_coefficient.cpp
  scalar_parameter.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
@@ -34,8 +31,6 @@ SET( HEADERS
  double_buffering_protocol.hpp
  empty_parameter_config.hpp
  filter_routing_parameter.hpp
- float_sequence.hpp
- index_sequence.hpp
  indexed_value_parameter.hpp
  initialise_parameter_library.hpp
  listener_position.hpp
@@ -43,7 +38,6 @@ SET( HEADERS
  matrix_parameter_config.hpp
  message_queue_protocol.hpp
  object_vector.hpp
- parametric_iir_coefficient.hpp
  scalar_parameter.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
@@ -60,9 +54,8 @@ INCLUDE_DIRECTORIES( ${SNDFILE_INCLUDE_DIRS} )
 ADD_LIBRARY( pml STATIC ${SOURCES} ${HEADERS} )
 
 target_link_libraries( pml objectmodel )
-target_link_libraries( pml ril )
 target_link_libraries( pml visr_impl )
-target_link_libraries( pml efl )
+target_link_libraries( pml ril )
 target_link_libraries( pml ${SNDFILE_LIBRARY} )
 TARGET_LINK_LIBRARIES( pml ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES( pml ${Boost_SYSTEM_LIBRARY} )

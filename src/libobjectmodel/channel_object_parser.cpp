@@ -4,8 +4,6 @@
 
 #include "channel_object.hpp"
 
-#include <libpml/index_sequence.hpp>
-
 #include <boost/property_tree/ptree.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>

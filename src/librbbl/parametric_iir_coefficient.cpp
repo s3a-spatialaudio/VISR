@@ -16,7 +16,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 
 class ParametricIirCoefficientBase::TypeIdTranslator
@@ -485,6 +485,5 @@ template class ParametricIirCoefficientList< float >;
 template class ParametricIirCoefficientList< double >;
 
 
-} // namespace pml
+} // namespace rbbl
 } // namespace visr
-

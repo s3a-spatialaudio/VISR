@@ -1,6 +1,6 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
-#include <libpml/parametric_iir_coefficient.hpp>
+#include <librbbl/parametric_iir_coefficient.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem/path.hpp>
@@ -14,7 +14,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 namespace test
 {
@@ -85,5 +85,5 @@ BOOST_AUTO_TEST_CASE( InstantiateIirParameterListFromXml )
 
 
 } // namespace test
-} // namespace pml
+} // namespace rbbl
 } // namespace visr

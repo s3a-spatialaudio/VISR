@@ -3,7 +3,7 @@
 #include "jack_interface.hpp"
 
 #include <libril/constants.hpp>
-#include <libpml/index_sequence.hpp>
+#include <librbbl/index_sequence.hpp>
 
 #include <jack/jack.h>
 
@@ -846,7 +846,7 @@ namespace visr
         
         //                    std::cout<<baseName<< ", "<<indicesStr<<std::endl;
         if(indicesStr && baseName){
-          visr::pml::IndexSequence const inIndices( *indicesStr );
+          rbbl::IndexSequence const inIndices( *indicesStr );
           std::size_t const inNumEntries = inIndices.size( );
           //                        portNames.resize( inNumEntries );
           if(inNumEntries > numPorts)
@@ -891,7 +891,7 @@ namespace visr
           }
           extClientName = *extClient;
           if(extIndicesStr){
-            visr::pml::IndexSequence const extInIndices( *extIndicesStr );
+            rbbl::IndexSequence const extInIndices( *extIndicesStr );
             std::size_t const extInNumEntries = extInIndices.size( );
             
             

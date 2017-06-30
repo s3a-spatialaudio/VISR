@@ -22,7 +22,18 @@
 namespace visr
 {
 
-namespace rcl
+// Forward declarationa
+namespace rbbl
+{
+template< typename CoefficientType>
+class BiquadCoefficient;
+template< typename CoefficientType>
+class BiquadCoefficientList;
+template< typename CoefficientType>
+class BiquadCoefficientMatrix;
+}
+
+namespace rcl 
 {
 
 /**
@@ -67,7 +78,7 @@ public:
    */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameter<SampleType> const & initialBiquad,
+              rbbl::BiquadCoefficient<SampleType> const & initialBiquad,
               bool controlInput = false );
 
   /**
@@ -80,7 +91,7 @@ public:
   */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameterList< SampleType > const & coeffs,
+              rbbl::BiquadCoefficientList< SampleType > const & coeffs,
               bool controlInput = false );
 
   /**
@@ -92,7 +103,7 @@ public:
   */
   void setup( std::size_t numberOfChannels,
               std::size_t numberOfBiquads,
-              pml::BiquadParameterMatrix< SampleType > const & coeffs,
+              rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs,
               bool controlInput = false );
 
   /**
@@ -115,7 +126,7 @@ public:
    * @throw std::out_of_range If \p biquadIndex exceeds the number of biquad sections of this component.
    */
   void setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
-                        pml::BiquadParameter< SampleType > const & coeffs );
+                        rbbl::BiquadCoefficient< SampleType > const & coeffs );
 
   /**
   * Set the biquad coefficients for a filter channel.
@@ -125,14 +136,14 @@ public:
   * @throw std::invalid_argument If the number of biquads in \p coeffs does not match the number of biquad sections in this component.
   */
   void setChannelCoefficients( std::size_t channelIndex,
-                               pml::BiquadParameterList< SampleType > const & coeffs );
+                               rbbl::BiquadCoefficientList< SampleType > const & coeffs );
 
   /**
   * Set the biquad coefficients for a filter channel.
   * @param coeffs The matrix of biquad coefficients, dimension \p numberOfChannels x \p numberOfBiquadSections
   * @throw std::invalid_argument If the matrix dimension differs from \p numberOfChannels x \p numberOfBiquadSections
   */
-  void setCoefficientMatrix( pml::BiquadParameterMatrix< SampleType > const & coeffs );
+  void setCoefficientMatrix( rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs );
 
   //@}
 private:
@@ -150,7 +161,7 @@ private:
    * @see setCoefficients
    */
   void setCoefficientsInternal( std::size_t channelIndex, std::size_t biquadIndex,
-                                pml::BiquadParameter< SampleType > const & coeffs );
+                                rbbl::BiquadCoefficient< SampleType > const & coeffs );
 
   /**
    * Internal method to set the biquad coefficients for a filter channel.
@@ -160,14 +171,14 @@ private:
    * @see setChannelCoefficients
    */
   void setChannelCoefficientsInternal( std::size_t channelIndex,
-                                       pml::BiquadParameterList< SampleType > const & coeffs );
+                                       rbbl::BiquadCoefficientList< SampleType > const & coeffs );
 
   /**
   * Internal method to set the complete coefficient matrix.
   * No range checks performed.
   * @see setCoefficientMatrix
   */
-  void setCoefficientMatrixInternal( pml::BiquadParameterMatrix< SampleType > const & coeffs );
+  void setCoefficientMatrixInternal( rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs );
 
   /**
    * The audio input port for this component.

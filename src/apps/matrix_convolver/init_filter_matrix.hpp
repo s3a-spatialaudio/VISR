@@ -14,7 +14,7 @@ namespace efl
 template< typename DataType >
 class BasicMatrix;
 }
-namespace pml
+namespace rbbl
 {
 class IndexSequence;
 }
@@ -43,7 +43,7 @@ template< typename DataType >
 void initFilterMatrix( std::string const & filterList,
                        std::size_t maxFilterLength,
                        std::size_t maxFilterEntries,
-                       pml::IndexSequence const & indexOffsets,
+                       rbbl::IndexSequence const & indexOffsets,
                        efl::BasicMatrix<DataType> & matrix );
 
 } // namespace matrix_convolver

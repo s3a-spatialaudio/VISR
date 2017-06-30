@@ -2,8 +2,8 @@
 
 #include "filter_routing_parameter.hpp"
 
-#include "float_sequence.hpp"
-#include "index_sequence.hpp"
+#include <librbbl/float_sequence.hpp>
+#include <librbbl/index_sequence.hpp>
 
 #include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -51,6 +51,8 @@ FilterRoutingList::FilterRoutingList( std::initializer_list<FilterRoutingParamet
   FilterRoutingList newList;
 
   using ptree = boost::property_tree::ptree;
+  using rbbl::IndexSequence;
+  using rbbl::FloatSequence;
 
   ptree propTree;
   try

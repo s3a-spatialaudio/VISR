@@ -6,7 +6,7 @@
 
 #include <libobjectmodel/object_vector.hpp>
 
-#include <libpml/biquad_parameter.hpp>
+#include <librbbl/biquad_coefficient.hpp>
 #include <librbbl/parametric_iir_coefficient_calculator.hpp>
 
 #include <ciso646>
@@ -48,7 +48,7 @@ void ObjectGainEqCalculator::process()
   {
     pml::ObjectVector const & ov = mObjectInput.data();
     pml::VectorParameter<CoefficientType> & gains = mGainOutput.data();
-    pml::BiquadParameterMatrix<CoefficientType> & eqMatrix = mEqOutput.data();
+    rbbl::BiquadCoefficientMatrix<CoefficientType> & eqMatrix = mEqOutput.data();
     process( ov, gains, eqMatrix );
     mGainOutput.swapBuffers();
     mEqOutput.swapBuffers();
@@ -59,10 +59,10 @@ void ObjectGainEqCalculator::process()
 
 void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
                                       efl::BasicVector<CoefficientType> & objectSignalGains,
-                                      pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs )
+                                      rbbl::BiquadCoefficientMatrix<CoefficientType> & objectChannelEqs )
 {
   using namespace objectmodel;
-  pml::BiquadParameter<SampleType> defaultEq; // Neutral EQ parameters
+  rbbl::BiquadCoefficient<SampleType> defaultEq; // Neutral EQ parameters
   if( objectSignalGains.size() != mNumberOfObjectChannels )
   {
     throw std::invalid_argument( "ObjectGainEqCalculator::process(): The parameter \"objectSignalGains\" must hold numberOfObjectChannels elements" );

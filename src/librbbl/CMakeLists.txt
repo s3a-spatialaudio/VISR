@@ -2,39 +2,47 @@
 
 
 SET( SOURCES 
+biquad_coefficient.cpp
 circular_buffer.cpp 
 fir.cpp
 fft_wrapper_factory.cpp
 ffts_wrapper.cpp
 fractional_delay_base.cpp
 fractional_delay_factory.cpp
+float_sequence.cpp
 gain_fader.cpp
 gain_matrix.cpp
+index_sequence.cpp
 kiss_fft_wrapper_double.cpp
 kiss_fft_wrapper_float.cpp
 lagrange_interpolator.cpp
 multichannel_convolver_uniform.cpp
 multichannel_delay_line.cpp
 object_channel_allocator.cpp
+ parametric_iir_coefficient.cpp
 parametric_iir_coefficient_calculator.cpp
 )
 
 # Basically, this makes the headers show up in the Visual studio project.
 SET( HEADERS
+biquad_coefficient.hpp
 circular_buffer.hpp
 fir.hpp
 fft_wrapper_base.hpp
 fft_wrapper_factory.hpp
 ffts_wrapper.hpp
+float_sequence.hpp
 fractional_delay_base.hpp
 fractional_delay_factory.hpp
 gain_fader.hpp
 gain_matrix.hpp
+index_sequence.hpp
 kiss_fft_wrapper.hpp
 lagrange_interpolator.hpp
 multichannel_convolver_uniform.hpp
 multichannel_delay_line.hpp
 object_channel_allocator.hpp
+parametric_iir_coefficient.hpp
 parametric_iir_coefficient_calculator.hpp
 )
 
@@ -58,6 +66,7 @@ ENDIF( BUILD_USE_IPP )
 
 ADD_LIBRARY( rbbl STATIC ${SOURCES} ${HEADERS} )
 
+target_link_libraries( rbbl efl )
 target_link_libraries( rbbl ${FFTS_LIBRARY} )
 target_link_libraries( rbbl ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )

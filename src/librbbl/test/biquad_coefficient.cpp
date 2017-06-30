@@ -1,6 +1,6 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
-#include <libpml/biquad_parameter.hpp>
+#include <librbbl/biquad_coefficient.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem/path.hpp>
@@ -14,17 +14,17 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 namespace test
 {
 
 BOOST_AUTO_TEST_CASE( InstantiateBiquadDefault )
 {
-  using namespace visr::pml;
+  using namespace visr::rbbl;
   using CoeffType = float;
 
-  BiquadParameter<CoeffType> const biq;
+  BiquadCoefficient<CoeffType> const biq;
 
   BOOST_CHECK_CLOSE( biq.b0( ), 1.0f, std::numeric_limits<CoeffType>::epsilon() );
   BOOST_CHECK_CLOSE( biq.b1( ), 0.0f, std::numeric_limits<CoeffType>::epsilon( ) );
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadDefault )
 
 BOOST_AUTO_TEST_CASE( InstantiateBiquadInitList )
 {
-  using namespace visr::pml;
+  using namespace visr::rbbl;
   using CoeffType = float;
 
   CoeffType const b0 = 0.1f;
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadInitList )
   CoeffType const a1 = 0.5f;
   CoeffType const a2 = 0.25f;
 
-  BiquadParameter<CoeffType> const biq( { b0, b1, b2, a1, a2 } );
+  BiquadCoefficient<CoeffType> const biq( { b0, b1, b2, a1, a2 } );
   BOOST_CHECK_CLOSE( biq.b0( ), b0, std::numeric_limits<CoeffType>::epsilon( ) );
   BOOST_CHECK_CLOSE( biq.b1( ), b1, std::numeric_limits<CoeffType>::epsilon( ) );
   BOOST_CHECK_CLOSE( biq.b2( ), b2, std::numeric_limits<CoeffType>::epsilon( ) );
@@ -54,13 +54,13 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadInitList )
 
 BOOST_AUTO_TEST_CASE( InstantiateBiquadFromXml )
 {
-  using namespace visr::pml;
+  using namespace visr::rbbl;
   using CoeffType = float;
 
   std::string const xmlRepr = "<biquad b0=\"0.2713121e-4\" b1=\"0.5426241e-4\" b2=\"0.2713121e-4\" a1=\"-1.9792\" a2=\"0.9793\" />";
   std::stringstream str( xmlRepr );
 
-  BiquadParameter<CoeffType> const biq = BiquadParameter<CoeffType>::fromXml( str );
+  BiquadCoefficient<CoeffType> const biq = BiquadCoefficient<CoeffType>::fromXml( str );
 
   CoeffType const b0 = 0.2713121e-4f;
   CoeffType const b1 = 0.5426241e-4f;
@@ -77,13 +77,13 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadFromXml )
 
 BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJson )
 {
-  using namespace visr::pml;
+  using namespace visr::rbbl;
   using CoeffType = float;
 
   std::string const jsonRepr = "{ \"b0\":0.2713121e-4, \"b1\":0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\":-1.9792, \"a2\":0.9793 }";
   std::stringstream str( jsonRepr );
 
-  BiquadParameter<CoeffType> const biq = BiquadParameter<CoeffType>::fromJson( str );
+  BiquadCoefficient<CoeffType> const biq = BiquadCoefficient<CoeffType>::fromJson( str );
 
   CoeffType const b0 = 0.2713121e-4f;
   CoeffType const b1 = 0.5426241e-4f;
@@ -100,13 +100,13 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJson )
 
 BOOST_AUTO_TEST_CASE( InstantiateBiquadFromJsonNonStandardA0 )
 {
-  using namespace visr::pml;
+  using namespace visr::rbbl;
   using CoeffType = float;
 
   std::string const jsonRepr = "{ \"b0\":0.2713121e-4, \"b1\":0.5426241e-4, \"b2\": 0.2713121e-4, \"a0\": 0.3333333, \"a1\":-1.9792, \"a2\":0.9793 }";
   std::stringstream str( jsonRepr );
 
-  BiquadParameter<CoeffType> const biq = BiquadParameter<CoeffType>::fromJson( str );
+  BiquadCoefficient<CoeffType> const biq = BiquadCoefficient<CoeffType>::fromJson( str );
 
   CoeffType const a0 = 0.3333333f;
   CoeffType const b0 = 0.2713121e-4f;
@@ -132,11 +132,11 @@ BOOST_AUTO_TEST_CASE( InstantiateListFromXml )
    "<biquad b0=\"0.2713121e-2\" b1=\"0.5426241e-2\" b2=\"0.2713121e-2\" a1=\"1.9792\" a2=\"-0.9793\" />"
    "</filterSpec>" );
 
-  visr::pml::BiquadParameterList<CoeffType> const biqList = visr::pml::BiquadParameterList<CoeffType>::fromXml( xmlStr );
+  visr::rbbl::BiquadCoefficientList<CoeffType> const biqList = visr::rbbl::BiquadCoefficientList<CoeffType>::fromXml( xmlStr );
 
   BOOST_CHECK( biqList.size() == 2 );
-  visr::pml::BiquadParameter<CoeffType> const & bi0 = biqList[0];
-  visr::pml::BiquadParameter<CoeffType> const & bi1 = biqList[1];
+  visr::rbbl::BiquadCoefficient<CoeffType> const & bi0 = biqList[0];
+  visr::rbbl::BiquadCoefficient<CoeffType> const & bi1 = biqList[1];
 
   CoeffType const b00 = 0.2713121e-4f;
   CoeffType const b01 = 0.5426241e-4f;
@@ -171,11 +171,11 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadListFromJson )
     "{ \"b0\": 0.2713121e-2, \"b1\": 0.5426241e-2, \"b2\": 0.2713121e-2, \"a1\": 1.9792, \"a2\": -0.9793 }"
     "]"  );
 
-  visr::pml::BiquadParameterList<CoeffType> const biqList = visr::pml::BiquadParameterList<CoeffType>::fromJson( jsonStr );
+  visr::rbbl::BiquadCoefficientList<CoeffType> const biqList = visr::rbbl::BiquadCoefficientList<CoeffType>::fromJson( jsonStr );
 
   BOOST_CHECK( biqList.size( ) == 2 );
-  visr::pml::BiquadParameter<CoeffType> const & bi0 = biqList[0];
-  visr::pml::BiquadParameter<CoeffType> const & bi1 = biqList[1];
+  visr::rbbl::BiquadCoefficient<CoeffType> const & bi0 = biqList[0];
+  visr::rbbl::BiquadCoefficient<CoeffType> const & bi1 = biqList[1];
 
   CoeffType const b00 = 0.2713121e-4f;
   CoeffType const b01 = 0.5426241e-4f;
@@ -202,5 +202,5 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadListFromJson )
 
 
 } // namespace test
-} // namespace pml
+} // namespace rbbl
 } // namespace visr

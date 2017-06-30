@@ -27,11 +27,11 @@
 namespace visr
 {
 
-  // Forward declaration
-namespace pml
+// Forward declaration
+namespace rbbl
 {
   template<typename CoeffType>
-  class BiquadParameterMatrix;
+  class BiquadCoefficientMatrix;
 }
 
 namespace panning
@@ -316,7 +316,7 @@ namespace panning
        * \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
        * @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
        */
-      pml::BiquadParameterMatrix<SampleType> const & outputEqualisationBiquads() const;
+      rbbl::BiquadCoefficientMatrix<SampleType> const & outputEqualisationBiquads() const;
       //@}
 
     private:
@@ -370,7 +370,7 @@ namespace panning
 
       efl::BasicVector<SampleType> m_delayAdjustment;
 
-      std::unique_ptr<pml::BiquadParameterMatrix<SampleType> > mOutputEqs;
+      std::unique_ptr<rbbl::BiquadCoefficientMatrix<SampleType> > mOutputEqs;
   };
 
 } // namespace panning

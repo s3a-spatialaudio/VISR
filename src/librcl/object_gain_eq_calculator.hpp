@@ -25,9 +25,10 @@ namespace efl
 {
 template< typename SampleType > class BasicVector;
 }
-namespace pml
+namespace rbbl
 {
-template< typename SampleType > class BiquadParameterMatrix;
+template< typename SampleType > class BiquadCoefficient;
+template< typename SampleType > class BiquadCoefficientMatrix;
 }
   
 namespace rcl
@@ -85,7 +86,7 @@ private:
    */
   void process( objectmodel::ObjectVector const & objects,
                 efl::BasicVector<CoefficientType> & objectSignalGains,
-                pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs );
+                rbbl::BiquadCoefficientMatrix<CoefficientType> & objectChannelEqs );
 
   ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector> mObjectInput;
   ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<CoefficientType> > mGainOutput;

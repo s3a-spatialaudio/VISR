@@ -35,7 +35,7 @@ namespace
  */
 template<typename SampleType>
 efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
-                            pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { {0.0f, 0.0f} }, std::array<SampleType, 2> const & initialState = { {0.0f, 0.0f} } )
+                            rbbl::BiquadCoefficient<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { {0.0f, 0.0f} }, std::array<SampleType, 2> const & initialState = { {0.0f, 0.0f} } )
 {
   std::array<SampleType, 2> state( initialState);
   std::array<SampleType, 3> inputBuffer = { {0.0f, pastInputs[0], pastInputs[1]} };
@@ -57,9 +57,9 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
 
 // Explicit instantiations
 template efl::ErrorCode filterBiquad( float const * const input, float * const output, std::size_t numSamples,
-  pml::BiquadParameter<float> const & iir, std::array<float, 2> const &, std::array<float, 2> const & );
+  rbbl::BiquadCoefficient<float> const & iir, std::array<float, 2> const &, std::array<float, 2> const & );
 template efl::ErrorCode filterBiquad( double const * const input, double * const output, std::size_t numSamples,
-  pml::BiquadParameter<double> const & iir, std::array<double, 2> const &, std::array<double, 2> const &);
+  rbbl::BiquadCoefficient<double> const & iir, std::array<double, 2> const &, std::array<double, 2> const &);
 
 /**
  * Hard-coded IIR coefficients for a fixed set of 9 octave bands: { 62.5 Hz, 125 Hz, 250 Hz, 500 Hz, 1 kHz, 2 kHz, 4 kHz, 8 kHz, 16 kHz }.
@@ -67,7 +67,7 @@ template efl::ErrorCode filterBiquad( double const * const input, double * const
  * TODO: Add biquad coefficient calculation library functions to the framework(based on RBJ's audio EQ cookbook formulas)
  * and calculate the filters on the fly.
  */
-static const pml::BiquadParameterList<SampleType> cOctaveBandFilters={
+static const rbbl::BiquadCoefficientList<SampleType> cOctaveBandFilters={
  { 0.000016684780519f,  0.000033369561037f,  0.000016684780519f, -1.994164939377186f, 0.994231678499260f },
  { 0.005751740181735f,  0.000000000000000f, -0.005751740181735f, -1.988230335335583f, 0.988496519636531f },
  { 0.011437753858235f,  0.000000000000000f, -0.011437753858235f, -1.976065915069578f, 0.977124492283531f },
@@ -127,7 +127,7 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
       createWhiteNoiseSequence( noiseSequence.size(), noiseSequence.data(), mAlignment );
 
       // filterBiquad( SampleType const * const input, SampleType * const output, std::size_t numSamples,
-      // pml::BiquadParameter<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
+      // rbbl::BiquadCoefficient<SampleType> const & iir, std::array<SampleType, 2> const & pastInputs = { 0.0f, 0.0f }, std::array<SampleType, 2> const & initialState = { 0.0f, 0.0f } )
       filterSequence( noiseLength, noiseSequence.data( ), filteredSequence.data( ), cOctaveBandFilters.at(bandIdx ) );
 
       // Copy the last mFilterLength samples to the right position in the matrix.
@@ -245,7 +245,7 @@ calculateImpulseResponse( std::size_t objectIdx,
 }
 
 /*static*/ void LateReverbFilterCalculator::filterSequence( std::size_t numSamples, SampleType const * const input, SampleType * output,
-  pml::BiquadParameter<SampleType> const & filter )
+  rbbl::BiquadCoefficient<SampleType> const & filter )
 {
 
   filterBiquad(input, output, numSamples, filter);

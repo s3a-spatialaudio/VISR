@@ -8,9 +8,9 @@
 namespace visr
 {
 
-// Forward declarations
-namespace pml
+namespace rbbl
 {
+// Forward declarations
 template <typename CoefficientType >
 class ParametricIirCoefficient;
 
@@ -18,30 +18,27 @@ template <typename CoefficientType >
 class ParametricIirCoefficientList;
 
 template <typename CoefficientType >
-class BiquadParameter;
+class BiquadCoefficient;
 
 template <typename CoefficientType >
-class BiquadParameterList;
+class BiquadCoefficientList;
 
 template <typename CoefficientType >
-class BiquadParameterMatrix;
-}
+class BiquadCoefficientMatrix;
 
-namespace rbbl
-{
 
 namespace ParametricIirCoefficientCalculator
 {
 template< typename CoefficientType >
-void calculateIirCoefficients( pml::ParametricIirCoefficient<CoefficientType> const & param, 
-                               pml::BiquadParameter<CoefficientType> & coeffs,
+void calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param, 
+                               BiquadCoefficient<CoefficientType> & coeffs,
                                CoefficientType samplingFrequency );
 
 template< typename CoefficientType >
-pml::BiquadParameter<CoefficientType> calculateIirCoefficients( pml::ParametricIirCoefficient<CoefficientType> const & param,
+BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
                                                                    CoefficientType samplingFrequency )
 {
-  typename pml::BiquadParameter<CoefficientType> res;
+  BiquadCoefficient<CoefficientType> res;
   calculateIirCoefficients( param, res, samplingFrequency );
   // Return value optimization avoids copy operation (normally)
   return res;
@@ -56,8 +53,8 @@ pml::BiquadParameter<CoefficientType> calculateIirCoefficients( pml::ParametricI
  * @param samplingFrequency
  */
 template< typename CoefficientType >
-void calculateIirCoefficients( pml::ParametricIirCoefficientList<CoefficientType> const & params,
-  pml::BiquadParameterList<CoefficientType> & coeffs,
+void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
+  BiquadCoefficientList<CoefficientType> & coeffs,
   CoefficientType samplingFrequency );
 
 }

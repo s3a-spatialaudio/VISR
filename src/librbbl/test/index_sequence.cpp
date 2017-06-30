@@ -1,7 +1,6 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
-
-#include <libpml/index_sequence.hpp>
+#include <librbbl/index_sequence.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,7 +14,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 namespace test
 {
@@ -101,5 +100,5 @@ BOOST_AUTO_TEST_CASE( initIndexSequenceFromStringWeirdWhiteSpace )
 }
 
 } // namespace test
-} // namespace pml
+} // namespace rbbl
 } // namespace visr

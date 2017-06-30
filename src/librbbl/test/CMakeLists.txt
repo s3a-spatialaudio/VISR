@@ -4,8 +4,18 @@ SET( APPLICATION_NAME rbbl_test )
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES circular_buffer.cpp ffts_wrapper.cpp kiss_fft_wrapper.cpp test_main.cpp test_FIR.cpp multichannel_convolver.cpp 
-     object_channel_allocator.cpp)
+SET( SOURCES
+ biquad_coefficient.cpp
+ circular_buffer.cpp
+ ffts_wrapper.cpp
+ float_sequence.cpp index_sequence.cpp
+ kiss_fft_wrapper.cpp
+ parametric_iir_coefficient.cpp
+ test_main.cpp
+ test_FIR.cpp
+ multichannel_convolver.cpp
+ object_channel_allocator.cpp
+)
 
 IF( BUILD_USE_FFTW )
   LIST( APPEND SOURCES fftw_wrapper.cpp)
@@ -18,8 +28,9 @@ ENDIF( BUILD_USE_IPP )
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rbbl)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} efl)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml)
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_impl)
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )

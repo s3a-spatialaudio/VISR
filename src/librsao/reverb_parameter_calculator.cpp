@@ -270,10 +270,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   }
 
   // Fill the remaining discrete reflections with neutral values.
-#if 0
-  static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
-#endif
-  static const pml::BiquadParameter<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
+  static const rbbl::BiquadCoefficient<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
   for( std::size_t srcIdx( rsao.numberOfDiscreteReflections() ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
     std::size_t const matrixIdx = startIdx + srcIdx;
@@ -336,7 +333,7 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
   std::size_t const startRow = renderChannel * mNumberOfDiscreteReflectionsPerSource;
 
   static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
-  static const pml::BiquadParameter<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
+  static const rbbl::BiquadCoefficient<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
 #if 0
   std::fill( mSourcePositions.begin( ), mSourcePositions.end( ), defaultPosition );
 #endif

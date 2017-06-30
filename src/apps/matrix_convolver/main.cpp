@@ -5,9 +5,8 @@
 
 #include <libefl/denormalised_number_handling.hpp>
 
-#include <libpml/index_sequence.hpp>
-
 #include <librbbl/fft_wrapper_factory.hpp>
+#include <librbbl/index_sequence.hpp>
 
 #include <libril/signal_flow_context.hpp>
 
@@ -91,7 +90,7 @@ int main( int argc, char const * const * argv )
     std::size_t const maxFilterOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filters", std::numeric_limits<std::size_t>::max( ) ); // max() denotes
     std::string const filterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
     std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string( ) );
-    pml::IndexSequence const indexOffsets( indexOffsetString );
+    rbbl::IndexSequence const indexOffsets( indexOffsetString );
     efl::BasicMatrix<SampleType> initialFilters( cVectorAlignmentSamples );
     initFilterMatrix( filterList, maxFilterLengthOption, maxFilterOption, indexOffsets, initialFilters );
 

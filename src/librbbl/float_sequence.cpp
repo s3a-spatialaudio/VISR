@@ -12,7 +12,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 
 template< typename ElementType>
@@ -157,5 +157,5 @@ std::string FloatSequence<ElementType>::toString( std::string const & separator 
 template class FloatSequence<float>;
 template class FloatSequence<double>;
 
-} // namespace pml
+} // namespace rbbl
 } // namespace visr

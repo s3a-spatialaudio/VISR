@@ -10,7 +10,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 
 IndexSequence::IndexSequence()
@@ -132,5 +132,5 @@ void IndexSequence::clear()
   mIndices.clear();
 }
 
-} // namespace pml
+} // namespace rbbl
 } // namespace visr

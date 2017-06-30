@@ -22,6 +22,12 @@
 
 namespace visr
 {
+// Forward declaration
+namespace rbbl
+{
+template< typename CoefficientType > 
+class BiquadCoefficient;
+}
 
 namespace rsao
 {
@@ -106,7 +112,7 @@ private:
    * @param filter Biquad coefficients.
    */
   static void filterSequence( std::size_t numSamples, SampleType const * const input, SampleType * output,
-                              pml::BiquadParameter<SampleType> const & filter );
+                              rbbl::BiquadCoefficient<SampleType> const & filter );
 
   /**
    * Create an envelope.

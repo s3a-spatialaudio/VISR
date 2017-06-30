@@ -57,7 +57,7 @@ PointSourceWithReverb::DiscreteReflection::DiscreteReflection()
 
 PointSourceWithReverb::DiscreteReflection::DiscreteReflection( DiscreteReflection const & ) = default;
 
-pml::BiquadParameter<SampleType> const & 
+rbbl::BiquadCoefficient<SampleType> const & 
 PointSourceWithReverb::DiscreteReflection::reflectionFilter( std::size_t biquadIdx ) const
 { 
   if( biquadIdx >= cNumDiscreteReflectionBiquads )
@@ -84,7 +84,7 @@ void PointSourceWithReverb::DiscreteReflection::setLevel( LevelType newLevel )
   mLevel = newLevel;
 }
 
-void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( pml::BiquadParameterList<SampleType> const & newFilters )
+void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( rbbl::BiquadCoefficientList<SampleType> const & newFilters )
 {
   assert( mDiscreteReflectionFilters.size() == cNumDiscreteReflectionBiquads );
   if( newFilters.size() >= cNumDiscreteReflectionBiquads )
@@ -97,11 +97,11 @@ void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( pml::Biqua
   }
   for( std::size_t idx( newFilters.size() ); idx < mDiscreteReflectionFilters.size( ); ++idx )
   {
-    mDiscreteReflectionFilters[idx] = pml::BiquadParameter<SampleType>(); // fill remaining filters with flat default value.
+    mDiscreteReflectionFilters[idx] = rbbl::BiquadCoefficient<SampleType>(); // fill remaining filters with flat default value.
   }
 }
 
-void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t biquadIdx, pml::BiquadParameter<SampleType> const & newFilter )
+void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t biquadIdx, rbbl::BiquadCoefficient<SampleType> const & newFilter )
 {
   if( biquadIdx >= mDiscreteReflectionFilters.size() )
   {

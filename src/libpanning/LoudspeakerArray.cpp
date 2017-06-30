@@ -12,9 +12,9 @@
 #include <libefl/db_linear_conversion.hpp>
 
 
-#include <libpml/biquad_parameter.hpp>
-#include <libpml/index_sequence.hpp>
-#include <libpml/float_sequence.hpp>
+#include <librbbl/biquad_coefficient.hpp>
+
+#include <librbbl/float_sequence.hpp>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -147,7 +147,7 @@ namespace panning
       delay = delayOpt ? *delayOpt : 0.0f;
     }
     
-    using ChannelEqLookupTable = std::map<std::string, pml::BiquadParameterList<Afloat> >;
+    using ChannelEqLookupTable = std::map<std::string, rbbl::BiquadCoefficientList<Afloat> >;
     
     /**
      * Local function to parse the optional node "outputEqConfiguration"
@@ -162,7 +162,7 @@ namespace panning
       {
         ptree const nodeTree = nodeIt->second;
         std::string const specName = nodeTree.get<std::string>( "<xmlattr>.name" );
-        pml::BiquadParameterList<Afloat> biqList = pml::BiquadParameterList<Afloat>::fromXml( nodeTree );
+        rbbl::BiquadCoefficientList<Afloat> biqList = rbbl::BiquadCoefficientList<Afloat>::fromXml( nodeTree );
         
         bool insertRes;
         std::tie( std::ignore, insertRes ) = table.insert( std::make_pair( specName, biqList ) );
@@ -172,7 +172,7 @@ namespace panning
     void parseEqFilter( boost::property_tree::ptree const & tree,
                        ChannelEqLookupTable const & table,
                        std::size_t channelIndex,
-                       pml::BiquadParameterMatrix<Afloat> & eqMatrix )
+                       rbbl::BiquadCoefficientMatrix<Afloat> & eqMatrix )
     {
       boost::optional<std::string> const eqId = tree.get_optional<std::string>( "<xmlattr>.eq" );
       if( eqId )
@@ -186,7 +186,7 @@ namespace panning
       }
       else
       {
-        eqMatrix.setFilter( channelIndex, pml::BiquadParameterList<Afloat>() );
+        eqMatrix.setFilter( channelIndex, rbbl::BiquadCoefficientList<Afloat>() );
       }
     }
     
@@ -273,7 +273,7 @@ namespace panning
       ptree const eqNode = treeRoot.get_child( "outputEqConfiguration" );
       numEqSections = eqNode.get<std::size_t>( "<xmlattr>.numberOfBiquads" );
       parseChannelLookup( treeRoot.get_child( "outputEqConfiguration" ), eqLookupTable, numEqSections );
-      mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers + numSubwoofers, numEqSections ) );
+      mOutputEqs.reset( new rbbl::BiquadCoefficientMatrix<Afloat>( numRegularSpeakers + numSubwoofers, numEqSections ) );
     }
     else
     {
@@ -283,7 +283,7 @@ namespace panning
     // will always be present, albeit with zero biquad sections. However, the
     // renderer should work in this case as well (and currently does).
     // The current setting distinguished between the cases.
-    // mOutputEqs.reset( new pml::BiquadParameterMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
+    // mOutputEqs.reset( new rbbl::BiquadCoefficientMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
     
     // The maximum admissible loudspeaker index as used in the file,
     // i.e., one-offset.
@@ -479,7 +479,7 @@ namespace panning
       boost::optional<std::string> const weightStr = subNode.get_optional<std::string>( "<xmlattr>.weights" );
       if( weightStr )
       {
-        pml::FloatSequence<SampleType> speakerWeights( *weightStr );
+        rbbl::FloatSequence<SampleType> speakerWeights( *weightStr );
         if( speakerWeights.size() != speakerIndices.size() )
         {
           throw std::invalid_argument( "The loudspeaker index list and the weight vector must have the same length." );
@@ -557,7 +557,7 @@ namespace panning
    * \p (numRegularSpeakers()+getNumSubwoofers()) x outputEqualisationNumberOfBiquads()
    * @throw std::logic_error if no output EQ configuration is present, i.e., outputEqualisationPresent() is \b false.
    */
-  pml::BiquadParameterMatrix<SampleType> const &
+  rbbl::BiquadCoefficientMatrix<SampleType> const &
   LoudspeakerArray::outputEqualisationBiquads() const
   {
     if( not outputEqualisationPresent() )

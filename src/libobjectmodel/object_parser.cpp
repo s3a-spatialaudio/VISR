@@ -3,7 +3,7 @@
 #include "object_parser.hpp"
 #include "object_type.hpp"
 
-#include <libpml/index_sequence.hpp>
+#include <librbbl/index_sequence.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -21,7 +21,7 @@ namespace objectmodel
   try
   {
     std::string const channelString = tree.get<std::string>( "channels" );
-    pml::IndexSequence const channelIndices( channelString );
+    rbbl::IndexSequence const channelIndices( channelString );
     // Todo: Consider more convenient set method.
     obj.resetNumberOfChannels( channelIndices.size() );
     for( std::size_t idx( 0 ); idx < obj.numberOfChannels(); ++idx )
@@ -39,7 +39,7 @@ namespace objectmodel
   obj.setLevel( tree.get<LevelType>( "level" ) );
   obj.setPriority( tree.get<Object::Priority>( "priority" ) );
 
-  pml::ParametricIirCoefficientList<Object::Coordinate> eqCoeffs;
+  rbbl::ParametricIirCoefficientList<Object::Coordinate> eqCoeffs;
   boost::property_tree::ptree::const_assoc_iterator eqIt =  tree.find( "eq");
   if( eqIt != tree.not_found() )
   {

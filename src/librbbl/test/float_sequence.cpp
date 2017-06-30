@@ -1,6 +1,6 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
-#include <libpml/float_sequence.hpp>
+#include <librbbl/float_sequence.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -14,7 +14,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 namespace test
 {
@@ -108,5 +108,5 @@ BOOST_AUTO_TEST_CASE( initFloatSequenceFromStringWeirdWhiteSpace )
 }
 
 } // namespace test
-} // namespace pml
+} // namespace rbbl
 } // namespace visr

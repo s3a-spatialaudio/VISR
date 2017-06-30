@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_PML_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
-#define VISR_PML_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
+#ifndef VISR_RBBL_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
+#define VISR_RBBL_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
@@ -12,7 +12,7 @@
 
 namespace visr
 {
-namespace pml
+namespace rbbl
 {
 
 class ParametricIirCoefficientBase
@@ -240,7 +240,7 @@ private:
   Container mCoeffs;
 };
 
-} // namespace pml
+} // namespace rbbl
 } // namespace visr
 
-#endif // VISR_PML_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
+#endif // VISR_RBBL_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED

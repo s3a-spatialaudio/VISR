@@ -9,7 +9,7 @@
 #include <libpanning/XYZ.h>
 #include <libpanning/LoudspeakerArray.h>
 
-#include <libpml/biquad_parameter.hpp>
+#include <librbbl/biquad_coefficient.hpp>
 
 #include <librcl/biquad_iir_filter.hpp>
 
@@ -102,7 +102,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   if( outputEqSupport )
   {
     std::size_t const outputEqSections = loudspeakerConfiguration.outputEqualisationNumberOfBiquads();
-    pml::BiquadParameterMatrix<Afloat> const & eqConfig = loudspeakerConfiguration.outputEqualisationBiquads();
+    rbbl::BiquadCoefficientMatrix<Afloat> const & eqConfig = loudspeakerConfiguration.outputEqualisationBiquads();
     if( numberOfOutputSignals != eqConfig.numberOfFilters() )
     {
       throw std::invalid_argument( "BaselineRenderer: Size of the output EQ configuration config differs from "
@@ -137,13 +137,13 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   if( frequencyDependentPanning )
   {
     // Static crossover pair (2nd-order Linkwitz-Riley with cutoff 700 Hz @ fs=48 kHz)
-    static pml::BiquadParameter<SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
+    static rbbl::BiquadCoefficient<SampleType> const lowpass{ 0.001921697757295f, 0.003843395514590f, 0.001921697757295f,
         -1.824651307057289f, 0.832338098086468f };
     // Numerator coeffs are negated to account for the 180 degree phase shift of the original design.
-    static pml::BiquadParameter<SampleType> const highpass{ -0.914247351285939f, 1.828494702571878f, -0.914247351285939f,
+    static rbbl::BiquadCoefficient<SampleType> const highpass{ -0.914247351285939f, 1.828494702571878f, -0.914247351285939f,
         -1.824651307057289f, 0.832338098086468f };
 
-    pml::BiquadParameterMatrix<SampleType> coeffMatrix( 2*numberOfInputs, 1 );
+    rbbl::BiquadCoefficientMatrix<SampleType> coeffMatrix( 2*numberOfInputs, 1 );
     for( std::size_t chIdx(0); chIdx < numberOfInputs; ++chIdx )
     {
       coeffMatrix( chIdx, 0 ) = highpass;

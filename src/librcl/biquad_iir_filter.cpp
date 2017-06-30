@@ -6,6 +6,8 @@
 
 #include <libpml/matrix_parameter_config.hpp>
 
+#include <librbbl/biquad_coefficient.hpp>
+
 #include <libril/constants.hpp>
 
 #include <ciso646>
@@ -30,7 +32,7 @@ namespace rcl
 }
 
 void BiquadIirFilter::setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
-                                       pml::BiquadParameter< SampleType > const & coeffs )
+                                       rbbl::BiquadCoefficient< SampleType > const & coeffs )
 {
   if( channelIndex >= mNumberOfChannels )
   {
@@ -44,9 +46,9 @@ void BiquadIirFilter::setCoefficients( std::size_t channelIndex, std::size_t biq
 }
 
 void BiquadIirFilter::setCoefficientsInternal( std::size_t channelIndex, std::size_t biquadIndex,
-                                               pml::BiquadParameter< SampleType > const & coeffs )
+                                               rbbl::BiquadCoefficient< SampleType > const & coeffs )
 {
-  static const std::size_t cNumCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
+  static const std::size_t cNumCoeffs = rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
   for( std::size_t coeffIdx( 0 ); coeffIdx < cNumCoeffs; ++coeffIdx )
   {
     mCoefficients( biquadIndex * cNumCoeffs + coeffIdx, channelIndex ) = coeffs[coeffIdx];
@@ -55,7 +57,7 @@ void BiquadIirFilter::setCoefficientsInternal( std::size_t channelIndex, std::si
 
 
 void BiquadIirFilter::setChannelCoefficients( std::size_t channelIndex,
-                                              pml::BiquadParameterList< SampleType > const & coeffs )
+                                              rbbl::BiquadCoefficientList< SampleType > const & coeffs )
 {
   if( channelIndex >= mNumberOfChannels )
   {
@@ -69,7 +71,7 @@ void BiquadIirFilter::setChannelCoefficients( std::size_t channelIndex,
 }
 
 void BiquadIirFilter::setChannelCoefficientsInternal( std::size_t channelIndex,
-                                                      pml::BiquadParameterList< SampleType > const & coeffs )
+                                                      rbbl::BiquadCoefficientList< SampleType > const & coeffs )
 {
   for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
   {
@@ -77,7 +79,7 @@ void BiquadIirFilter::setChannelCoefficientsInternal( std::size_t channelIndex,
   }
 }
 
-void BiquadIirFilter::setCoefficientMatrix( pml::BiquadParameterMatrix< SampleType > const & coeffs )
+void BiquadIirFilter::setCoefficientMatrix( rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs )
 {
   if( coeffs.numberOfFilters() != mNumberOfChannels )
   {
@@ -91,7 +93,7 @@ void BiquadIirFilter::setCoefficientMatrix( pml::BiquadParameterMatrix< SampleTy
   setCoefficientMatrixInternal( coeffs );
 }
 
-void BiquadIirFilter::setCoefficientMatrixInternal( pml::BiquadParameterMatrix< SampleType > const & coeffs )
+void BiquadIirFilter::setCoefficientMatrixInternal( rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs )
 {
   for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
   {
@@ -108,7 +110,7 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::setup( std::size_t numberOfChannels,
                              std::size_t numberOfBiquads,
-                             pml::BiquadParameter<SampleType> const & defaultBiquad,
+                             rbbl::BiquadCoefficient<SampleType> const & defaultBiquad,
                              bool controlInput /*= false*/ )
 {
   setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
@@ -123,7 +125,7 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::setup( std::size_t numberOfChannels,
                              std::size_t numberOfBiquads,
-                             pml::BiquadParameterList< SampleType > const & coeffs,
+                             rbbl::BiquadCoefficientList< SampleType > const & coeffs,
                              bool controlInput )
 {
   if( coeffs.size() != numberOfBiquads )
@@ -139,7 +141,7 @@ void BiquadIirFilter::setup( std::size_t numberOfChannels,
 
 void BiquadIirFilter::setup( std::size_t numberOfChannels,
                              std::size_t numberOfBiquads,
-                             pml::BiquadParameterMatrix< SampleType > const & coeffs,
+                             rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs,
                              bool controlInput )
 {
   if( (coeffs.numberOfFilters() != numberOfChannels) or ( coeffs.numberOfSections() != numberOfBiquads ) )
@@ -160,7 +162,7 @@ void BiquadIirFilter::process()
 
   mInput.getChannelPointers( &mInputChannels[0] );
 
-  static const std::size_t cNumBiquadCoeffs = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
+  static const std::size_t cNumBiquadCoeffs = rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
   std::size_t const blockSamples = period( );
   for( std::size_t sampleIdx( 0 ); sampleIdx < blockSamples; ++sampleIdx )
   {
@@ -246,7 +248,7 @@ void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
                                         std::size_t numberOfBiquads,
                                         bool controlInput )
 {
-  static const std::size_t cCoeffsPerBiquad = pml::BiquadParameter< SampleType >::cNumberOfCoeffs;
+  static const std::size_t cCoeffsPerBiquad = rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
 
   mNumberOfChannels = numberOfChannels;
   mNumberOfBiquadSections = numberOfBiquads;
