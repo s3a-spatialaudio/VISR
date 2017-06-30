@@ -14,8 +14,6 @@
 #ifdef VISR_BUILD_PML_LIBRARY
 #define VISR_PML_LIBRARY_SYMBOL __declspec(dllexport)
 #else
-// Does create undefined symbols if the library is built statically, therefore the attributes are commented out.
-// @note logic add logic to add these attributes only if the core library is built dynamically.
 #define VISR_PML_LIBRARY_SYMBOL __declspec(dllimport)
 #endif // #ifdef VISR_BUILD_PML_LIBRARIES
 #elif defined(__GNUC__)
