@@ -2,8 +2,9 @@
 
 #include "init_filter_matrix.hpp"
 
-#include <libpml/index_sequence.hpp>
 #include <libpml/matrix_parameter.hpp>
+
+#include <librbbl/index_sequence.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -51,7 +52,7 @@ template< typename DataType >
 void initFilterMatrix( std::string const & filterList,
                        std::size_t maxFilterLength,
                        std::size_t maxFilterEntries,
-                       pml::IndexSequence const & indexOffsets,
+                       rbbl::IndexSequence const & indexOffsets,
                        efl::BasicMatrix<DataType> & matrix )
 {
   std::vector<std::string> const filterNames = stringListToVec( filterList );
@@ -167,9 +168,9 @@ void initFilterMatrix( std::string const & filterList,
 
 // Explicit instantiation
 template void initFilterMatrix<float>( std::string const&, std::size_t, std::size_t,
-                                       pml::IndexSequence const &, efl::BasicMatrix<float> & );
+                                       rbbl::IndexSequence const &, efl::BasicMatrix<float> & );
 template void initFilterMatrix<double>( std::string const&, std::size_t, std::size_t,
-                                        pml::IndexSequence const &, efl::BasicMatrix<double> & );
+                                        rbbl::IndexSequence const &, efl::BasicMatrix<double> & );
 
 
 } // namespace matrix_convolver

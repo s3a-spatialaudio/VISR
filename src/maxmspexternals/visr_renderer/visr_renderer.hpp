@@ -5,7 +5,6 @@
 
 // these parameters could easily go into a private implementation object.
 #include <libpml/filter_routing_parameter.hpp>
-#include <libpml/index_sequence.hpp>
 #include <libpml/matrix_parameter.hpp>
 
 // We have to include these files last because they pull in the Max/MSP headers which do some very nasty 

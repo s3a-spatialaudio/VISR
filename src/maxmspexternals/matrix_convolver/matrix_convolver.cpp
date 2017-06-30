@@ -26,7 +26,7 @@
 #endif
 #endif
 
-#include <libpml/index_sequence.hpp>
+#include <librbbl/index_sequence.hpp>
 
 #include <libril/signal_flow_context.hpp>
 
@@ -97,7 +97,7 @@ MatrixConvolver::MatrixConvolver( t_pxobject & maxProxy, short argc, t_atom *arg
     mNumMaxFilters = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filters", std::numeric_limits<std::size_t>::max() ); // max() denotes
     mFilterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
     std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string() );
-    mIndexOffsets = pml::IndexSequence( indexOffsetString );
+    mIndexOffsets = rbbl::IndexSequence( indexOffsetString );
 
     mFftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
 

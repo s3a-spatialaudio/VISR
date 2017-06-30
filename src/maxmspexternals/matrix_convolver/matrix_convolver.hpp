@@ -6,8 +6,10 @@
 
 // these parameters could easily go into a private implementation object.
 #include <libpml/filter_routing_parameter.hpp>
-#include <libpml/index_sequence.hpp>
 #include <libpml/matrix_parameter.hpp>
+
+#include <librbbl/index_sequence.hpp>
+
 
 #include <libsignalflows/matrix_convolver.hpp>
 
@@ -60,7 +62,7 @@ private:
   pml::FilterRoutingList mRoutings;
 
   std::string mFilterList;
-  pml::IndexSequence mIndexOffsets;
+  rbbl::IndexSequence mIndexOffsets;
 
   std::string mFftLibrary;
 
