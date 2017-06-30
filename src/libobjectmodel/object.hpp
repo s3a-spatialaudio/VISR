@@ -3,6 +3,7 @@
 #ifndef VISR_OBJECTMODEL_OBJECT_HPP_INCLUDED
 #define VISR_OBJECTMODEL_OBJECT_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 #include "object_type.hpp"
 
 #include <librbbl/parametric_iir_coefficient.hpp>
@@ -32,7 +33,7 @@ using LevelType = float;
 /**
  *
  */
-class Object
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL Object
 {
 public:
   /**

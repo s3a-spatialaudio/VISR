@@ -5,6 +5,8 @@
 
 #include "object.hpp"
 
+#include "export_symbols.hpp"
+
 #include <vector>
 
 namespace visr
@@ -15,7 +17,7 @@ namespace objectmodel
 /**
  *
  */
-class ChannelObject: public Object
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL ChannelObject: public Object
 {
 public:
   /**

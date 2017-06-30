@@ -5,6 +5,8 @@
 
 #include "object.hpp"
 
+#include "export_symbols.hpp"
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 namespace visr
@@ -16,7 +18,7 @@ namespace objectmodel
  * @todo revise class hierarchy (does it make sense to let the base of the parser object
  * hierarchy to perform actual work, or should there be an abstract interface class on top of it?
  */
-class ObjectParser
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectParser
 {
 public:
   /**

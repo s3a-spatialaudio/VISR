@@ -5,6 +5,7 @@
 
 #include "object_parser.hpp"
 
+#include "export_symbols.hpp"
 #include "object.hpp"
 
 namespace visr
@@ -15,7 +16,7 @@ namespace objectmodel
 /**
  *
  */
-class PlaneWaveParser: public ObjectParser
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL PlaneWaveParser: public ObjectParser
 {
 public:
   virtual void parse( boost::property_tree::ptree const & tree, Object & src ) const;

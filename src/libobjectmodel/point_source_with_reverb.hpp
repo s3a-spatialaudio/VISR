@@ -9,6 +9,8 @@
 
 #include "point_source.hpp"
 
+#include "export_symbols.hpp"
+
 #include <librbbl/biquad_coefficient.hpp>
 
 #include <libril/constants.hpp>
@@ -26,7 +28,7 @@ namespace objectmodel
  * Audio object representing a monopole point source with corresponding object-based reverberation.
  * Derived from PointSource.
  */
-  class PointSourceWithReverb: public PointSource
+  class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceWithReverb: public PointSource
   {
   public:
     /**

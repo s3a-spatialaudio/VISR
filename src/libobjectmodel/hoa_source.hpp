@@ -5,6 +5,8 @@
 
 #include "object.hpp"
 
+#include "export_symbols.hpp"
+
 namespace visr
 {
 namespace objectmodel
@@ -13,7 +15,7 @@ namespace objectmodel
 /**
  *
  */
-class HoaSource: public Object
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL HoaSource: public Object
 {
 public:
   using Order = unsigned int;

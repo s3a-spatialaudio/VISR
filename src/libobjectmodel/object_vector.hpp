@@ -5,7 +5,7 @@
 
 #include "object.hpp"
 
-#include <libril/export_symbols.hpp>
+#include "export_symbols.hpp"
 
 #include <map>
 #include <memory>
@@ -18,7 +18,7 @@ namespace objectmodel
 /**
  * A class representing a set of audio objects of potentially different types.
  */
-class ObjectVector
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectVector
 {
 public:
   /**

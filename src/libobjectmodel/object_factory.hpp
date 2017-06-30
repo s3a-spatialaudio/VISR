@@ -7,6 +7,8 @@
 #include "object_type.hpp"
 #include "object_parser.hpp" // experimental support for dispatching to the correct parser.
 
+#include "export_symbols.hpp"
+
 #include <boost/function.hpp>
 
 #include <map>
@@ -17,7 +19,7 @@ namespace visr
 namespace objectmodel
 {
 
-class ObjectFactory
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectFactory
 {
 public:
   static std::unique_ptr<Object> create( ObjectTypeId typeId );

@@ -8,6 +8,7 @@
 #include "point_source_parser.hpp"
 
 #include "object.hpp"
+#include "export_symbols.hpp"
 
 namespace visr
 {
@@ -17,7 +18,7 @@ namespace objectmodel
 /**
  *
  */
-class PointSourceWithReverbParser: public PointSourceParser
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceWithReverbParser: public PointSourceParser
 {
 public:
   virtual void parse( boost::property_tree::ptree const & tree, Object & src ) const;

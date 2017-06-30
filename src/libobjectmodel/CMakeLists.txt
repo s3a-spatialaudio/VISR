@@ -54,11 +54,14 @@ point_source_with_reverb.hpp
 point_source_with_reverb_parser.hpp
 )
 
-ADD_LIBRARY( objectmodel STATIC ${SOURCES} ${HEADERS} )
+add_library( objectmodel STATIC ${SOURCES} ${HEADERS} )
 
-target_link_libraries( objectmodel rbbl ) # Most likely a circular dependency at the moment
-# (critical only shared libraries are involved)
-# Incidentally, we are not really using parameter types , but only utility (parsing) functionality from libpml.
+target_link_libraries( objectmodel rbbl )
+
+add_library( objectmodel_shared SHARED ${SOURCES} ${HEADERS} )
+set_target_properties( objectmodel_shared PROPERTIES OUTPUT_NAME objectmodel )
+target_link_libraries( objectmodel_shared rbbl )
+target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
 
 # Add the unit test directory.
-# ADD_SUBDIRECTORY( test )
+add_subdirectory( test )

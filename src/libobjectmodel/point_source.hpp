@@ -5,6 +5,8 @@
 
 #include "object.hpp"
 
+#include "export_symbols.hpp"
+
 namespace visr
 {
 namespace objectmodel
@@ -13,7 +15,7 @@ namespace objectmodel
 /**
  *
  */
-class PointSource: public Object
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSource: public Object
 {
 public:
 

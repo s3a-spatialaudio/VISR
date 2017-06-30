@@ -3,6 +3,8 @@
 #ifndef VISR_OBJECTMODEL_OBJECT_VECTOR_PARSER_HPP_INCLUDED
 #define VISR_OBJECTMODEL_OBJECT_VECTOR_PARSER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 #include <iosfwd>
@@ -17,7 +19,7 @@ namespace objectmodel
 class ObjectVector;
 
 
-class ObjectVectorParser
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectVectorParser
 {
 public:
   static void fillObjectVector( std::string const & message, ObjectVector & res );
