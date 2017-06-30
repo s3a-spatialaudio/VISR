@@ -61,7 +61,8 @@ target_link_libraries( objectmodel rbbl )
 add_library( objectmodel_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( objectmodel_shared PROPERTIES OUTPUT_NAME objectmodel )
 target_link_libraries( objectmodel_shared rbbl )
-target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
+target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 )
+target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
 
 # Add the unit test directory.
 add_subdirectory( test )
