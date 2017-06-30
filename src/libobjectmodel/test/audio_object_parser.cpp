@@ -5,6 +5,8 @@
 #include <libobjectmodel/object_vector_parser.hpp>
 #include <libobjectmodel/point_source.hpp>
 
+#include <librbbl/parametric_iir_coefficient.hpp>
+
 #include <boost/test/unit_test.hpp>
 
 #include <stdexcept>
@@ -140,9 +142,9 @@ BOOST_AUTO_TEST_CASE( ParseObjectEq )
 
   BOOST_CHECK( retrievedObj.numberOfChannels() == 1 );
 
-  pml::ParametricIirCoefficientList<Object::Coordinate> const & eqParams = retrievedObj.eqCoefficients();
+  rbbl::ParametricIirCoefficientList<Object::Coordinate> const & eqParams = retrievedObj.eqCoefficients();
   BOOST_CHECK( eqParams.size() == 3 );
-  BOOST_CHECK( eqParams[0].type() == pml::ParametricIirCoefficientBase::Type::lowpass );
+  BOOST_CHECK( eqParams[0].type() == rbbl::ParametricIirCoefficientBase::Type::lowpass );
   BOOST_CHECK_CLOSE( eqParams[2].gain(), 0.25f, std::numeric_limits < Object::Coordinate >::epsilon() );
 
   Object const & obj2 = scene.at( 5 );
