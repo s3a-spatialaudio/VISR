@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   //    sourcePos[0].set(1.0,	0.3, -0.2, false); // for 9.1_audiolab.txt jumps between triplet 11 and 10 as z reduced
   //    sourcePos[0].set(0.0, 1.0, -0.9, false);
   
-  std::tuple<float,float,float> pos0 = visr::efl::spherical2cartesian(visr::efl::degree2radian(-40), visr::efl::degree2radian(15), 1);
+  std::tuple<float,float,float> pos0 = visr::efl::spherical2cartesian(visr::efl::degree2radian(-40.0f), visr::efl::degree2radian(15.0f), 1.0f);
   float px0,py0,pz0;
   std::tie(px0, py0, pz0) = pos0;
 //  sourcePos[0].set(px0, py0,pz0, false );
