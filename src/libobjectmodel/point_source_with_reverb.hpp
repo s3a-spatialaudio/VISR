@@ -52,7 +52,7 @@ namespace objectmodel
     /**
      * Internal class to represent a single discrete reflection (early reflections)
      */
-    class DiscreteReflection
+    class VISR_OBJECTMODEL_LIBRARY_SYMBOL DiscreteReflection
     {
     public:
       /**
@@ -155,7 +155,7 @@ namespace objectmodel
     /**
      * Internal class to encapsulate the late reverberation-related parts of the reverb object.
      */
-    class LateReverb
+    class VISR_OBJECTMODEL_LIBRARY_SYMBOL LateReverb
     {
     public:
       /**
