@@ -7,6 +7,8 @@
 #ifndef VISR_OBJECTMODEL_OBJECT_TYPE_HPP_INCLUDED
 #define VISR_OBJECTMODEL_OBJECT_TYPE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <cstdint>
 #include <string>
 
@@ -42,14 +44,14 @@ enum class ObjectTypeId: ObjectTypeIntegerRepresentation
  * @throw std::logic_error Happens only in case of an internal inconsistency, i.e.,
  * if the type is not found in the lookup table.
  */
-const std::string& objectTypeToString( ObjectTypeId type );
+VISR_OBJECTMODEL_LIBRARY_SYMBOL std::string const & objectTypeToString( ObjectTypeId type );
 
 /**
  * @param typeString
  * @return The object id of the type correspoonding to the string representation
  * @throw std::invalid_argument If typeStr does not correspond to an existing object type.
  */
-ObjectTypeId stringToObjectType( std::string const & typeString );
+VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectTypeId stringToObjectType( std::string const & typeString );
 
 } // namespace objectmodel
 } // namespace visr

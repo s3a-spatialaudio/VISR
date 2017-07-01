@@ -40,15 +40,14 @@ public:
    * In this case, the sound source is moved to the nearest loudspeaker if the angular distance to the nearest loudspeaker is less than 
    * channelLockDistance().
    */
-  bool channelLock() const { return mChannelLockDistance >= cNoChannelLock; }
+  bool channelLock() const;
 
   /**
    * Return the currently set channel lock distance (angular distance in degree).
    * If the channel lock feature is inactive, 0 is returned.
    * The "always lock" setting returns +inf.
    */
-  Coordinate channelLockDistance() const { return mChannelLockDistance; }
-
+  Coordinate channelLockDistance() const;
   /**
    * Set the channel lock distance. When called with a nonzero value, channel lock is automatically activated.
    * A value >= 180 (degree) or the default value (+inf) corresponds to "always lock".

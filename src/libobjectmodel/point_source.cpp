@@ -59,6 +59,16 @@ void PointSource::setZ( Coordinate newZ )
   mZPos = newZ;
 }
 
+bool PointSource::channelLock() const
+{
+  return mChannelLockDistance >= cNoChannelLock;
+}
+
+PointSource::Coordinate PointSource::channelLockDistance() const
+{
+  return mChannelLockDistance;
+}
+
 /*static*/ const Object::Coordinate PointSource::cAlwaysChannelLock
 = std::numeric_limits<Object::Coordinate>::infinity();
 /*static*/ const Object::Coordinate PointSource::cNoChannelLock = 0.0;
