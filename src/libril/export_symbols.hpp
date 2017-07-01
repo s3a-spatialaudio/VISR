@@ -8,8 +8,10 @@
  *
  */
 
+#ifdef VISR_BUILD_VISR_SHARED_LIBRARY
+
 #ifdef _MSC_VER // Windows platform
-#ifdef VISR_BUILD_CORE_LIBRARIES
+#ifdef VISR_BUILD_VISR_LIBRARY
 #define VISR_CORE_LIBRARY_SYMBOL __declspec(dllexport)
 #define VISR_PLUGIN_SYMBOL __declspec(dllimport)
 #else
@@ -17,7 +19,7 @@
 // @note logic add logic to add these attributes only if the core library is built dynamically.
 #define VISR_CORE_LIBRARY_SYMBOL __declspec(dllimport)
 #define VISR_PLUGIN_SYMBOL __declspec(dllexport)
-#endif // #ifdef VISR_BUILD_CORE_LIBRARIES
+#endif // #ifdef VISR_BUILD_VISR_LIBRARY
 #elif defined(__GNUC__)
 
 // Unix platforms (Linux and Mac OS X)
@@ -28,6 +30,11 @@
 #error "Platform does not support symbol export."
 #endif // #ifdef _WIN32
 
+#else // #ifdef VISR_BUILD_VISR_SHARED_LIBRARY
 
+#define VISR_CORE_LIBRARY_SYMBOL // define as empty
+#define VISR_PLUGIN_SYMBOL // define as empty
+
+#endif // #ifdef VISR_BUILD_VISR_SHARED_LIBRARY
 
 #endif // #ifndef VISR_EXPORT_SYMBOLS_HPP_INCLUDED
