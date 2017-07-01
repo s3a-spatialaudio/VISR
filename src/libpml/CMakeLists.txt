@@ -63,7 +63,7 @@ target_link_libraries( pml ${Boost_SYSTEM_LIBRARY} )
 
 add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
-target_compile_definitions( pml_shared PRIVATE -DVISR_BUILD_PML_SHARED_LIBRARY=1 -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
+target_compile_definitions( pml_shared PRIVATE -DVISR_BUILD_PML_SHARED_LIBRARY=1 -DVISR_BUILD_PML_LIBRARY=1)
 
 target_link_libraries( pml_shared objectmodel_shared )
 target_link_libraries( pml_shared visr_impl )

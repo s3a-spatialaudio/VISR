@@ -108,7 +108,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // Input
 
-class MessageQueueProtocol::InputBase: public CommunicationProtocolBase::Input
+class VISR_PML_LIBRARY_SYMBOL MessageQueueProtocol::InputBase: public CommunicationProtocolBase::Input
 {
 public:
   /**
@@ -180,7 +180,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // Output
 
-class MessageQueueProtocol::OutputBase: public CommunicationProtocolBase::Output
+class VISR_PML_LIBRARY_SYMBOL MessageQueueProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
 public:
   /**

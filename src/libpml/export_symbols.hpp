@@ -27,7 +27,7 @@
 
 #else // VISR_BUILD_PML_SHARED_LIBRARY
 
-#define VISR_PML_LIBRARY_SYMBOL
+#define VISR_PML_LIBRARY_SYMBOL // expand to empty string
 
 #endif // VISR_BUILD_PML_SHARED_LIBRARY
 

@@ -89,7 +89,7 @@ private:
   static constexpr const char * sProtocolName = "DoubleBuffering";
 };
 
-class DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Input
+class VISR_PML_LIBRARY_SYMBOL DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Input
 {
   friend class DoubleBufferingProtocol;
 public:
@@ -141,7 +141,7 @@ private:
 //////////////////////////////////////////////////////////////////
 // Output
 
-class DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Output
+class VISR_PML_LIBRARY_SYMBOL DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
   friend class DoubleBufferingProtocol;
 public:

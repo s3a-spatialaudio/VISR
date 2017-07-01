@@ -78,7 +78,7 @@ private:
   static constexpr const char * sProtocolName = "SharedData";
 };
 
-class SharedDataProtocol::InputBase: public CommunicationProtocolBase::Input
+class VISR_PML_LIBRARY_SYMBOL SharedDataProtocol::InputBase: public CommunicationProtocolBase::Input
 {
 public:
   /**
@@ -124,7 +124,7 @@ public:
 //////////////////////////////////////////////////////////////////
 // Output
 
-class SharedDataProtocol::OutputBase: public CommunicationProtocolBase::Output
+class VISR_PML_LIBRARY_SYMBOL SharedDataProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
 public:
   /**
