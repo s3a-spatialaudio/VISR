@@ -63,7 +63,7 @@ namespace panning
 
       /**
        * Type to denote the output signal channels for a regular loudspeaker.
-       * @Note the channels are assumed to be specified and stored as one-offset numbers.
+       * @note the channels are assumed to be specified and stored as one-offset numbers.
        */
       using ChannelIndex = std::size_t;
 
@@ -172,7 +172,7 @@ namespace panning
       /**
        * Return the output channel index (one-offset) from a loudspeaker string id.
        * @param id String id corresponding to an existing regular loudspeaker.
-       * @std::out_of_range If \p id does not correspond to an existing regular loudspeaker.
+       * @throw std::out_of_range If \p id does not correspond to an existing regular loudspeaker.
        */
       ChannelIndex getSpeakerChannelFromId( LoudspeakerIdType const & id ) const { return m_channel[m_id.at( id )]; }
 
