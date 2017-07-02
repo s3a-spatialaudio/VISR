@@ -3,6 +3,8 @@
 #ifndef VISR_SIGNALFLOWS_TIME_FREQUENCY_FEEDTHROUGH_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_TIME_FREQUENCY_FEEDTHROUGH_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -22,7 +24,7 @@ namespace visr
 namespace signalflows
 {
 
-class TimeFrequencyFeedthrough: public CompositeComponent
+class VISR_SIGNALFLOWS_LIBRARY_SYMBOL TimeFrequencyFeedthrough: public CompositeComponent
 {
 public:
   explicit TimeFrequencyFeedthrough( SignalFlowContext const & context,

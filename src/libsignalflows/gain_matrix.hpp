@@ -3,6 +3,8 @@
 #ifndef VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_GAIN_MATRIX_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/composite_component.hpp>
@@ -16,7 +18,7 @@ namespace visr
 namespace signalflows
 {
 
-class GainMatrix: public CompositeComponent
+class VISR_SIGNALFLOWS_LIBRARY_SYMBOL GainMatrix: public CompositeComponent
 {
 public:
   explicit GainMatrix( SignalFlowContext const & context,

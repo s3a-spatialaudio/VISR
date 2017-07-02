@@ -3,6 +3,8 @@
 #ifndef VISR_MAXMSP_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
 #define VISR_MAXMSP_SIGNAlFLOWS_DELAY_VECTOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/composite_component.hpp>
@@ -20,7 +22,7 @@ namespace visr
 namespace signalflows
 {
 
-class DelayVector: public CompositeComponent
+class VISR_SIGNALFLOWS_LIBRARY_SYMBOL DelayVector: public CompositeComponent
 {
 public:
   explicit DelayVector( SignalFlowContext const & context,

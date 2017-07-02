@@ -4,6 +4,7 @@
 #define VISR_SIGNALFLOWS_BUNCH_RENDERER_HPP_INCLUDED
 
 #include "core_renderer.hpp"
+#include "export_symbols.hpp"
 
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
@@ -26,7 +27,7 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class BunchRenderer: public CompositeComponent
+class VISR_SIGNALFLOWS_LIBRARY_SYMBOL BunchRenderer: public CompositeComponent
 {
 public:
   /**

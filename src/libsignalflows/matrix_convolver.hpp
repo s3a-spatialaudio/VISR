@@ -3,6 +3,8 @@
 #ifndef VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/composite_component.hpp>
@@ -31,7 +33,7 @@ class FilterRoutingList;
 namespace signalflows
 {
 
-class MatrixConvolver: public CompositeComponent
+class VISR_SIGNALFLOWS_LIBRARY_SYMBOL MatrixConvolver: public CompositeComponent
 {
 public:
   explicit MatrixConvolver( SignalFlowContext const & context,
