@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_DELAY_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_DELAY_MATRIX_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -38,7 +40,7 @@ namespace rcl
  * @todo Implement flexible transition length (at the moment, the block length is always used
  * @todo general cleanup (including more comprehensive range checks for the delay)
  */
-class DelayMatrix: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL DelayMatrix: public AtomicComponent
 {
   using SampleType = visr::SampleType;
 public:

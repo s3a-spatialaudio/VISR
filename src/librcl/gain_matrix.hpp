@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_GAIN_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_GAIN_MATRIX_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -27,10 +29,6 @@
 
 namespace visr
 {
-//namespace pml
-//{
-//  template< class ElementType > class MatrixParameter;
-//}
 
 namespace rcl
 {
@@ -45,7 +43,7 @@ namespace rcl
  * The width of these ports is determined by the arguments "numberOfInput" and "numberOfOutputs", respectively,
  * which are passed to the setup() method.
  */
-class GainMatrix: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL GainMatrix: public AtomicComponent
 {
   using SampleType = visr::SampleType;
 public:

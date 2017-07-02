@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_PANNING_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_PANNING_CALCULATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/parameter_input.hpp>
@@ -44,7 +46,7 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class PanningCalculator: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL PanningCalculator: public AtomicComponent
 {
 public:
   /**

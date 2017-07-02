@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRCL_SINGLE_TO_MULTI_CHANNEL_DIFFUSION_HPP_INCLUDED
 #define VISR_LIBRCL_SINGLE_TO_MULTI_CHANNEL_DIFFUSION_HPP_INCLUDED
 
-#define DIFFUSION_USE_FAST_CONVOLVER
+#include "export_symbols.hpp"
 
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
@@ -30,7 +30,7 @@ namespace rcl
 /**
  * Audio Component for creating a set of decorrelated signals out of a single input signal.
  */
-class SingleToMultichannelDiffusion: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL SingleToMultichannelDiffusion: public AtomicComponent
 {
   /**
    * Alias for the type of the audio samples processed by this component.

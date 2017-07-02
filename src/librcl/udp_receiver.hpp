@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 #define VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_output.hpp>
@@ -29,7 +31,7 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL UdpReceiver: public AtomicComponent
 {
 public:
   enum class Mode

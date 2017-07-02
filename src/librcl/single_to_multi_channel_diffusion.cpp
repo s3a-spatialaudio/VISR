@@ -6,11 +6,7 @@
 
 #include <libefl/vector_functions.hpp>
 
-#ifdef DIFFUSION_USE_FAST_CONVOLVER
 #include <librbbl/multichannel_convolver_uniform.hpp>
-#else
-#include <librbbl/fir.hpp>
-#endif
 
 #include <cassert>
 
@@ -25,10 +21,6 @@ namespace rcl
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
-#ifndef DIFFUSION_USE_FAST_CONVOLVER
- , mGainAdjustments( cVectorAlignmentSamples )
- , mFilterOutputs( cVectorAlignmentSamples )
-#endif
 {
 }
 

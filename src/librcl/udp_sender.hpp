@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 #define VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/parameter_input.hpp>
@@ -27,7 +29,7 @@ namespace rcl
  * The message can operate either synchronously (messages are sent when the process() method is called)
  * or asynchronously (the messages queued for sending and then send non-blocking in an extra thread.
  */
-class UdpSender: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL UdpSender: public AtomicComponent
 {
 public:
   enum class Mode

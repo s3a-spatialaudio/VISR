@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_SCENE_DECODER_HPP_INCLUDED
 #define VISR_LIBRCL_SCENE_DECODER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
@@ -34,7 +36,7 @@ namespace rcl
  * Component to decode audio objects from messages (typically received from a network).
  * This component has neither audio inputs or outputs.
  */
-class SceneDecoder: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL SceneDecoder: public AtomicComponent
 {
 public:
   /**

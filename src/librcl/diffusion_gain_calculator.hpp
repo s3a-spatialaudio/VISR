@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_DIFFUSION_GAIN_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_DIFFUSION_GAIN_CALCULATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_input.hpp>
@@ -26,7 +28,7 @@ namespace rcl
 /**
  * Audio component for extracting the diffuseness gain from an object vector.
  */
-class DiffusionGainCalculator: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL DiffusionGainCalculator: public AtomicComponent
 {
 public:
   /**

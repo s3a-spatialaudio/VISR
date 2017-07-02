@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_ADD_HPP_INCLUDED
 #define VISR_LIBRCL_ADD_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
@@ -22,7 +24,7 @@ namespace rcl
  * The number of inputs is set by the \p numInputs argument passed to the setup() method.
  * All input vectors must have the same number of signals given by the \p width argument to setup().
  */
-class Add: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL Add: public AtomicComponent
 {
 public:
   /**

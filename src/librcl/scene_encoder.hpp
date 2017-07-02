@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_SCENE_ENCODER_HPP_INCLUDED
 #define VISR_LIBRCL_SCENE_ENCODER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/parameter_input.hpp>
@@ -25,7 +27,7 @@ namespace rcl
  * Component to encode audio objects to JSON messages (typically to be sent over a network).
  * This component has neither audio inputs or outputs.
  */
-class SceneEncoder: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL SceneEncoder: public AtomicComponent
 {
 public:
   /**

@@ -10,6 +10,8 @@
 
 #define __S3A_renderer_dsp__listenerCompensation__
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
 #include <libril/atomic_component.hpp>
@@ -26,8 +28,6 @@
 #include <libpml/listener_position.hpp>
 #include <libpml/vector_parameter.hpp>
 
-//#include <iostream>
-// #include <cstdio>
 #include <memory>
 
 namespace visr
@@ -36,7 +36,7 @@ namespace visr
 namespace rcl
 {
 
-class ListenerCompensation: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL ListenerCompensation: public AtomicComponent
 {
 public:
   using SampleType = visr::SampleType;

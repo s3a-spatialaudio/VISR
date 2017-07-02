@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_NULL_SOURCE_HPP_INCLUDED
 #define VISR_LIBRCL_NULL_SOURCE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/audio_output.hpp>
 
@@ -18,7 +20,7 @@ namespace rcl
  * because all required null signals can be routed from this single stream. However, from the signal flow point of view, it can be advantageous to provide 
  * dedicated null sources with an appropriate number of channels. At the same time, the performance penalty is minimal.
  */
-class NullSource: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL NullSource: public AtomicComponent
 {
 public:
   /**

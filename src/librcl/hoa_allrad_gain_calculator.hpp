@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_HOA_ALLRAP_GAIN_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_HOA_ALLRAP_GAIN_CALCULATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
 #include <libril/atomic_component.hpp>
 #include <libril/parameter_input.hpp>
@@ -43,7 +45,7 @@ namespace rcl
  * Implementation based on AllRAD, i.e., the HOA signals are decoded to a virtual regular loudspeaker 
  * array, whose loudspeaker signals are panned to the real, physical loudspeaker setup using VBAP.
  */
-class HoaAllRadGainCalculator: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL HoaAllRadGainCalculator: public AtomicComponent
 {
 public:
   /**

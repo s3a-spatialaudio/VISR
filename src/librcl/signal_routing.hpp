@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_SIGNAL_ROUTING_HPP_INCLUDED
 #define VISR_LIBRCL_SIGNAL_ROUTING_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libpml/signal_routing_parameter.hpp>
 #include <libpml/double_buffering_protocol.hpp>
 
@@ -26,7 +28,7 @@ namespace rcl
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
-class SignalRouting: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL SignalRouting: public AtomicComponent
 {
 public:
   /**

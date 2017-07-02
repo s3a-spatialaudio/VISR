@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_TIME_FREQUENCY_TRANSFORM_HPP_INCLUDED
 #define VISR_LIBRCL_TIME_FREQUENCY_TRANSFORM_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/audio_input.hpp>
@@ -36,7 +38,7 @@ class CircularBuffer;
 namespace rcl
 {
 
-class TimeFrequencyTransform: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL TimeFrequencyTransform: public AtomicComponent
 {
   using SampleType = visr::SampleType;
 public:

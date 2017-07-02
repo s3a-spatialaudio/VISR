@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_BIQUAD_IIR_FILTER_HPP_INCLUDED
 #define VISR_LIBRCL_BIQUAD_IIR_FILTER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -42,7 +44,7 @@ namespace rcl
  * The widths of the input and the output port are identical and is
  * set by the argument <b>numberOfChannels</b> in the setup() method.
  */
-class BiquadIirFilter: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL BiquadIirFilter: public AtomicComponent
 {
   using SampleType = visr::SampleType;
 public:

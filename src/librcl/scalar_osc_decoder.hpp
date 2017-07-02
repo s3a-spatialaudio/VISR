@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_SCALAR_OSC_DECODER_HPP_INCLUDED
 #define VISR_LIBRCL_SCALAR_OSC_DECODER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 
 #include <libril/parameter_input.hpp>
@@ -30,7 +32,7 @@ namespace rcl
 /**
  * Component to decode OSC messages containing a single integer and to fill a signal routing parameter list accordingly.
  */
-class ScalarOscDecoder: public AtomicComponent
+class VISR_RCL_LIBRARY_SYMBOL ScalarOscDecoder: public AtomicComponent
 {
 public:
   enum class DataType
