@@ -41,7 +41,7 @@ target_link_libraries( rrl visr_impl )
 target_link_libraries( rrl efl )
 
 add_library( rrl_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME pml )
+set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
 target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1 -DVISR_BUILD_RRL_LIBRARY=1)
