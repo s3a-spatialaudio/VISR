@@ -9,6 +9,7 @@
 #include <libril/audio_port_base.hpp>
 #include <libril/channel_list.hpp>
 #include <libril/parameter_port_base.hpp>
+#include <libril/detail/compose_message_string.hpp>
 
 #include <algorithm>
 #include <ciso646>
@@ -77,7 +78,7 @@ CompositeComponentImplementation::ComponentTable::const_iterator
   return mComponents.end();
 }
 
-CompositeComponentImplementation::ComponentTable::iterator 
+CompositeComponentImplementation::ComponentTable::iterator
 CompositeComponentImplementation::findComponentEntry( char const *componentName )
 {
   ComponentTable::iterator findIt = std::find_if( mComponents.begin(), mComponents.end(),
@@ -135,6 +136,34 @@ ParameterPortBase * CompositeComponentImplementation::findParameterPort( char co
   return comp->findParameterPort( portName );
 }
 
+namespace // unnamed
+{
+/**
+ * Check whether the provided port argument is either an external port of the given composite component \p container or a port of a direct child
+ * of \p container.
+ * @throw std::invalid_argument If this condition does not hold.
+ * @param port The port in question.
+ * @param container The containing component.
+ * @param portType A string describing the port type, e.g., "audio send" that is used to construct a human-readable error message.
+ */
+void checkPortParent( PortBaseImplementation const & port, CompositeComponentImplementation const & container, char const * portType )
+{
+  // An external port of the container.
+  if( &port.parent() == &container )
+  {
+    return;
+  }
+  CompositeComponentImplementation const * parentContainer = port.parent().parent();
+  if( parentContainer != &container )
+  {
+    throw std::invalid_argument( detail::composeMessageString(
+      container.fullName(), ": the component \"", port.parent().fullName(), "\" containing the ", portType ,
+        " port \"", port.name(), "\" is not a direct child of \"", container.fullName(), "\" ." ));
+  }
+}
+
+} // unnamed namespace
+
 void CompositeComponentImplementation::registerParameterConnection( char const * sendComponent,
                                                                     char const * sendPort,
                                                                     char const * receiveComponent,
@@ -150,6 +179,7 @@ void CompositeComponentImplementation::registerParameterConnection( char const *
   {
     throw std::invalid_argument( "CompositeComponent::registerParameterConnection(): receiver port could not be found." );
   }
+
   ParameterConnection newConnection( &(sender->implementation()), &(receiver->implementation()) );
   mParameterConnections.insert( std::move( newConnection ) );
 }
@@ -157,6 +187,9 @@ void CompositeComponentImplementation::registerParameterConnection( char const *
 void CompositeComponentImplementation::registerParameterConnection( ParameterPortBase & sendPort,
                                                                     ParameterPortBase & receivePort )
 {
+  checkPortParent( sendPort.implementation(), *this, "parameter send" );
+  checkPortParent( receivePort.implementation(), *this, "parameter receive" );
+
   ParameterConnection newConnection( &(sendPort.implementation()), &(receivePort.implementation()) );
   mParameterConnections.insert( std::move( newConnection ) );
 }
@@ -188,6 +221,8 @@ void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort
                                                                 AudioPortBase & receivePort,
                                                                 ChannelList const & receiveIndices )
 {
+  checkPortParent( sendPort.implementation(), *this, "audio send" );
+  checkPortParent( receivePort.implementation(), *this, "audio receive" );
   AudioConnection newConnection( &(sendPort.implementation()), sendIndices,
 				 &(receivePort.implementation()), receiveIndices );
   mAudioConnections.insert( std::move( newConnection ) );
