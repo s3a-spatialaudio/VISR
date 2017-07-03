@@ -228,6 +228,18 @@ public:
   bool isTopLevel() const { return mParent == nullptr; }
 
   /**
+   * Return a pointer to the implementation object of the parent component, or nullptr
+   * if this is a top-level component.
+   */
+  CompositeComponentImplementation * parent() { return mParent; }
+
+  /**
+   * Return a const pointer to the implementation object of the parent component, or nullptr
+   * if this is a top-level component.
+   */
+  CompositeComponentImplementation const * parent() const { return mParent; }
+
+  /**
    * Return a reference to the externally visible part of the component.
    * This is required for atomic components to have their (overridden) process() method called.
    * @todo Maybe implement a separate impl::AtomicComponent class for that
