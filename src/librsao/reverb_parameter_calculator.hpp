@@ -8,6 +8,8 @@
 
 #include "late_reverb_parameter.hpp"
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 
@@ -43,7 +45,7 @@ namespace rsao
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class ReverbParameterCalculator: public AtomicComponent
+class VISR_RSAO_LIBRARY_SYMBOL ReverbParameterCalculator: public AtomicComponent
 {
 public:
   /**

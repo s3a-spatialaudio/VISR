@@ -37,7 +37,7 @@ set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$
 # Transitive link dependencies
 target_link_libraries( signalflows_shared rcl_shared )
 target_link_libraries( signalflows_shared pml_shared )
-target_link_libraries( signalflows_shared rsao )
+target_link_libraries( signalflows_shared rsao_shared )
 
 
 # Add the unit test directory.

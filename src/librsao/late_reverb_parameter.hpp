@@ -3,6 +3,7 @@
 #ifndef VISR_RSAO_LATE_REVERB_PARAMETER_HPP_INCLUDED
 #define VISR_RSAO_LATE_REVERB_PARAMETER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 
 #include <libril/detail/compile_time_hash_fnv1.hpp>
 #include <libril/parameter_type.hpp>
@@ -26,7 +27,7 @@ namespace rsao
  */
 static constexpr const char* sLateReverbParameterName = "rsao::LateReverbParameter";
 
-  class LateReverbParameter: public TypedParameterBase<LateReverbParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1(sLateReverbParameterName) >
+class VISR_RSAO_LIBRARY_SYMBOL LateReverbParameter: public TypedParameterBase<LateReverbParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1(sLateReverbParameterName) >
 {
 public:
   LateReverbParameter();

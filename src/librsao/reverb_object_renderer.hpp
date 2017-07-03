@@ -3,6 +3,8 @@
 #ifndef VISR_RSAO_REVERB_OBJECT_RENDERER_HPP_INCLUDED
 #define VISR_RSAO_REVERB_OBJECT_RENDERER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -37,7 +39,7 @@ namespace rsao
  * Usually used as part of a larger renderer that handles object
  * volume + EQ, signal routing and the direct part of the renderer.
  */
-class ReverbObjectRenderer: public CompositeComponent
+class VISR_RSAO_LIBRARY_SYMBOL ReverbObjectRenderer: public CompositeComponent
 {
 public:
   /**

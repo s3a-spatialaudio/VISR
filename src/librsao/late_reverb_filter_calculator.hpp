@@ -5,6 +5,8 @@
 
 #include "late_reverb_parameter.hpp"
 
+#include "export_symbols.hpp"
+
 #include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
 #include <libril/parameter_input.hpp>
@@ -36,7 +38,7 @@ namespace rsao
  * Audio component for computing signal processing parameters from 
  * PointSoureWithReverb objects.
  */
-class LateReverbFilterCalculator: public AtomicComponent
+class VISR_RSAO_LIBRARY_SYMBOL LateReverbFilterCalculator: public AtomicComponent
 {
 public:
   /**
