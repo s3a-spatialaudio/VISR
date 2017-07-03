@@ -3,11 +3,10 @@
 #ifndef VISR_LIBRRL_AUDIO_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_LIBRRL_AUDIO_SIGNAL_FLOW_HPP_INCLUDED
 
-
-
-// TODO: Replace by forward declarations if possible
 #include "audio_connection_map.hpp"
 #include "parameter_connection_map.hpp"
+
+#include "export_symbols.hpp"
 
 #include <libril/audio_port_base.hpp>
 #include <libril/communication_protocol_base.hpp>
@@ -38,7 +37,7 @@ namespace rrl
 
 // Forward declarations
 class AudioSignalPool;
-
+  
 /**
  * Base class for signal flows, i.e., graphs of connected audio
  * components which perform an audio signal processing operation.
@@ -49,7 +48,7 @@ class AudioSignalPool;
  * of samples consumed and generated, respectively.
  * This class is abstract, i.e., cannot be instantiated, but must be subclassed.
  */
-class AudioSignalFlow
+class VISR_RRL_LIBRARY_SYMBOL AudioSignalFlow
 {
 public:
   using SignalIndexType = std::size_t; // TODO: Check whether to introduce a consistently used type alias for indices

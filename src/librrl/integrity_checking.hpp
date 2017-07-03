@@ -11,6 +11,8 @@
  * or all contained components recursively (option hierarchical=true).
  */
 
+#include "export_symbols.hpp"
+
 #include <iosfwd>
 
 namespace visr
@@ -33,7 +35,9 @@ namespace rrl
  * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's connections are valid.
  */
-bool checkConnectionIntegrity( Component const & component, bool hierarchical, std::ostream & messages );
+VISR_RRL_LIBRARY_SYMBOL bool checkConnectionIntegrity( Component const & component,
+						       bool hierarchical,
+						       std::ostream & messages );
 
 /**
  * Check the audio connections of a component  for validity and completeness.
@@ -43,7 +47,9 @@ bool checkConnectionIntegrity( Component const & component, bool hierarchical, s
  * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's audio connections are valid.
  */
-bool checkAudioConnectionIntegrity( Component const & component, bool hierarchical, std::ostream & messages );
+VISR_RRL_LIBRARY_SYMBOL bool checkAudioConnectionIntegrity( Component const & component,
+							    bool hierarchical,
+							    std::ostream & messages );
 
 /**
  * Check the parameter connections of a component for validity and completeness.
@@ -62,7 +68,9 @@ bool checkParameterConnectionIntegrity( Component const & component, bool hierar
  * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's connections are valid.
  */
-bool checkConnectionIntegrity( impl::ComponentImplementation const & component, bool hierarchical, std::ostream & messages );
+VISR_RRL_LIBRARY_SYMBOL bool checkConnectionIntegrity( impl::ComponentImplementation const & component,
+						       bool hierarchical,
+						       std::ostream & messages );
 
 /**
  * Check the audio connections of a component  for validity and completeness.
@@ -71,7 +79,9 @@ bool checkConnectionIntegrity( impl::ComponentImplementation const & component, 
  * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's audio connections are valid.
  */
-bool checkAudioConnectionIntegrity( impl::ComponentImplementation const & component, bool hierarchical, std::ostream & messages );
+VISR_RRL_LIBRARY_SYMBOL bool checkAudioConnectionIntegrity( impl::ComponentImplementation const & component,
+							    bool hierarchical,
+							    std::ostream & messages );
 
 /**
  * Check the parameter connections of a component  for validity and completeness.
@@ -81,7 +91,9 @@ bool checkAudioConnectionIntegrity( impl::ComponentImplementation const & compon
  * @param[out] messages A stream object returning explanatory and diagnostic messages.
  * @return Whether the component's parameter connections are valid.
  */
-bool checkParameterConnectionIntegrity( impl::ComponentImplementation const & component, bool hierarchical, std::ostream & messages );
+VISR_RRL_LIBRARY_SYMBOL bool checkParameterConnectionIntegrity( impl::ComponentImplementation const & component,
+								bool hierarchical,
+								std::ostream & messages );
 
 } // namespace rrl
 } // namespace visr

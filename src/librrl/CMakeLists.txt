@@ -17,6 +17,7 @@ SET( HEADERS
 audio_connection_map.hpp
 audio_signal_flow.hpp
 communication_area.hpp
+export_symbols.hpp
 integrity_checking.hpp
 parameter_connection_graph.hpp
 parameter_connection_map.hpp
@@ -34,15 +35,20 @@ signal_routing_internal.hpp
 
 #INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
-ADD_LIBRARY( rrl STATIC ${SOURCES} ${HEADERS} )
-
+add_library( rrl STATIC ${SOURCES} ${HEADERS} )
 # Transitive link dependencies
 target_link_libraries( rrl visr_impl )
 target_link_libraries( rrl efl )
-#target_link_libraries( rrl ${PORTAUDIO_LIBRARIES} )
-#if( BUILD_USE_JACK )
-#  target_link_libraries( rrl ${JACK_LIBRARY} )
-#endif( BUILD_USE_JACK )
+
+add_library( rrl_shared SHARED ${SOURCES} ${HEADERS} )
+set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME pml )
+# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
+target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1 -DVISR_BUILD_RRL_LIBRARY=1)
+set_target_properties( rrl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+# Transitive link dependencies
+target_link_libraries( rrl_shared visr_impl_shared )
+target_link_libraries( rrl_shared efl )
 
 # Add the unit test directory.
 add_subdirectory( test )
