@@ -3,6 +3,8 @@
 #ifndef VISR_SIGNALFLOWS_CORE_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_CORE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/composite_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
@@ -25,13 +27,9 @@
 #include <librcl/signal_routing.hpp>
 #include <librcl/single_to_multi_channel_diffusion.hpp>
 
-//#include <libefl/basic_matrix.hpp>
-
 #include <libpml/listener_position.hpp>
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/object_vector.hpp>
-
-//#include <libobjectmodel/object_vector.hpp>
 
 #include <memory>
 #include <string>
@@ -52,7 +50,7 @@ namespace signalflows
  * Audio signal graph object VISR renderer, excluding external network I/O.
  * Depending on the environment, the core renderer is being encapsulated in other graphs.
  */
-class CoreRenderer: public CompositeComponent
+class VISR_SIGNALFLOWS_LIBRARY_SYMBOL CoreRenderer: public CompositeComponent
 {
 public:
   /**
