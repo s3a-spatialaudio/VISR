@@ -60,7 +60,7 @@ void exportAudioInterface( pybind11::module & m )
   pybind11::class_<visr::audiointerfaces::AudioInterface::Configuration>( ai, "Configuration" )
     .def( pybind11::init<std::size_t, std::size_t, visr::audiointerfaces::AudioInterface::SampleRateType, std::size_t>(),
       pybind11::arg("numberOfCaptureChannels"),
-      pybind11::arg( "numberOfPlayback" ),
+      pybind11::arg( "numberOfPlaybackChannels" ),
       pybind11::arg( "sampleRate" ) = 0,
       pybind11::arg( "period" ) = 0 )
     .def_property_readonly( "numberOfCaptureChannels", &visr::audiointerfaces::AudioInterface::Configuration::numCaptureChannels )
