@@ -14,6 +14,8 @@
 #include "defs.h"
 #include "LoudspeakerArray.h"
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
 namespace visr
@@ -21,7 +23,7 @@ namespace visr
 namespace panning
 {
   
-class VBAP
+class VISR_PANNING_LIBRARY_SYMBOL VBAP
 {
 public:
   /**

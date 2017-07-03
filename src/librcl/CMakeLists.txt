@@ -83,7 +83,7 @@ set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT
 # Transitive dependencies
 target_link_libraries( rcl_shared pml_shared )
 target_link_libraries( rcl_shared visr_impl_shared )
-target_link_libraries( rcl_shared panning )
+target_link_libraries( rcl_shared panning_shared )
 target_link_libraries( rcl_shared objectmodel_shared )
 target_link_libraries( rcl_shared rbbl )
 target_link_libraries( rcl_shared efl )

@@ -51,8 +51,6 @@ endif(WIN32)
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} apputilities ) # slight misnomer, consider restructuring if the option handling should prove beneficial.
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} panning )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} objectmodel )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rbbl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} pml )

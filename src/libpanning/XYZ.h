@@ -10,6 +10,8 @@
 
 #include "defs.h"
 
+#include "export_symbols.hpp"
+
 #include <iostream>
 #include <cmath>
 
@@ -18,9 +20,7 @@ namespace visr
 namespace panning
 {
 
-class XYZ {
- private:
-
+class VISR_PANNING_LIBRARY_SYMBOL XYZ {
  public:
  /**
   * Default constructor.

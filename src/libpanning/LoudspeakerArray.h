@@ -14,6 +14,8 @@
 #include "defs.h"
 #include "XYZ.h"
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
@@ -37,7 +39,7 @@ namespace rbbl
 namespace panning
 {
 
-  class LoudspeakerArray
+  class VISR_PANNING_LIBRARY_SYMBOL LoudspeakerArray
   {
  
       public:

@@ -13,6 +13,8 @@
 
 #include "VBAP.h"
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
 namespace visr
@@ -23,7 +25,7 @@ namespace panning
 // forward declaration
 class LoudspeakerArray;
 
-class AllRAD
+class VISR_PANNING_LIBRARY_SYMBOL AllRAD
 {
 public:
 
