@@ -15,8 +15,8 @@ StringParameter::StringParameter( std::size_t maxLength /*= 0*/ )
 {
 }
 
-StringParameter::StringParameter(StringParameterConfig const & config)
-  : StringParameter( config.maxLength() )
+StringParameter::StringParameter(EmptyParameterConfig const & config)
+  : StringParameter()
 {
 }
 

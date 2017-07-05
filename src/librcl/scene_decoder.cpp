@@ -5,6 +5,8 @@
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/object_vector_parser.hpp>
 
+#include <libpml/empty_parameter_config.hpp>
+
 #include <iostream>
 
 namespace visr
@@ -16,7 +18,7 @@ namespace rcl
                               char const * name,
                               CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
- , mDatagramInput( "datagramInput", *this, pml::StringParameterConfig( 255 ) )
+ , mDatagramInput( "datagramInput", *this, pml::EmptyParameterConfig() )
  , mObjectVectorOutput( "objectVectorOutput", *this, pml::EmptyParameterConfig() )
 {
 }

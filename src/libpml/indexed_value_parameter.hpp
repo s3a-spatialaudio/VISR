@@ -4,7 +4,6 @@
 #define VISR_PML_INDEXED_STRING_PARAMETER_HPP_INCLUDED
 
 #include "empty_parameter_config.hpp"
-#include "string_parameter.hpp"
 
 #include <libril/parameter_type.hpp>
 #include <libril/typed_parameter_base.hpp>

@@ -20,7 +20,6 @@ SET( SOURCES
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
  string_parameter.cpp
- string_parameter_config.cpp
  time_frequency_parameter.cpp
  time_frequency_parameter_config.cpp
  vector_parameter.cpp
@@ -48,7 +47,6 @@ SET( HEADERS
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
  string_parameter.hpp
- string_parameter_config.hpp
  time_frequency_parameter.hpp
  time_frequency_parameter_config.hpp
  vector_parameter.hpp

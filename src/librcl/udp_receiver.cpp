@@ -2,6 +2,8 @@
 
 #include "udp_receiver.hpp"
 
+#include <libpml/empty_parameter_config.hpp>
+
 #include <boost/asio/placeholders.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/lock_types.hpp>
@@ -21,7 +23,7 @@ namespace rcl
                             CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
- , mDatagramOutput( "messageOutput", *this, pml::StringParameterConfig(255) )
+ , mDatagramOutput( "messageOutput", *this, pml::EmptyParameterConfig() )
 {
 }
 

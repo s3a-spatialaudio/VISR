@@ -2,10 +2,9 @@
 
 #include "udp_sender.hpp"
 
-#include <libpml/string_parameter_config.hpp>
+#include <libpml/empty_parameter_config.hpp>
 
 #include <boost/asio/placeholders.hpp>
-//#include <boost/asio.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/lock_types.hpp>
 
@@ -24,7 +23,7 @@ namespace rcl
                         CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
- , mMessageInput( "messageInput", *this, pml::StringParameterConfig(32768) )
+ , mMessageInput( "messageInput", *this, pml::EmptyParameterConfig() )
 {
 }
 
