@@ -74,6 +74,8 @@ public:
 
   explicit ScalarParameter( ElementType val );
 
+  virtual ~ScalarParameter() override;
+
   ElementType &  operator=(ElementType val );
 
   ElementType value() const;

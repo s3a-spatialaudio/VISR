@@ -19,9 +19,7 @@ MatrixParameterConfig::MatrixParameterConfig( std::size_t numberOfRows, std::siz
 {
 }
 
-MatrixParameterConfig::~MatrixParameterConfig()
-{
-}
+MatrixParameterConfig::~MatrixParameterConfig() = default;
 
 std::unique_ptr< ParameterConfigBase> MatrixParameterConfig::clone() const
 {

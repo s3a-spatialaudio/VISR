@@ -85,6 +85,8 @@ public:
    */
   TimeFrequencyParameter( TimeFrequencyParameter<ElementType> const & rhs );
 
+  virtual ~TimeFrequencyParameter() override;
+
   TimeFrequencyParameter& operator=( TimeFrequencyParameter<ElementType> const & rhs );
 
   /**

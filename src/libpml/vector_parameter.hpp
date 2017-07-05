@@ -58,6 +58,8 @@ public:
   explicit VectorParameter(ParameterConfigBase const & config);
 
   explicit VectorParameter(VectorParameterConfig const & config);
+
+  virtual ~VectorParameter() override;
 };
 
 } // namespace pml

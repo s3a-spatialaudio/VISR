@@ -16,6 +16,8 @@ MessageQueueProtocol::MessageQueueProtocol( ParameterType const & parameterType,
 {
 }
 
+MessageQueueProtocol::~MessageQueueProtocol() = default;
+
 ParameterType MessageQueueProtocol::parameterType() const
 {
   return mParameterType;

@@ -17,9 +17,7 @@ EmptyParameterConfig::EmptyParameterConfig( )
 {
 }
 
-EmptyParameterConfig::~EmptyParameterConfig()
-{
-}
+EmptyParameterConfig::~EmptyParameterConfig() = default;
 
 std::unique_ptr< ParameterConfigBase > EmptyParameterConfig::clone() const
 {

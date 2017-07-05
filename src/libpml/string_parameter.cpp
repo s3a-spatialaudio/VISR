@@ -21,7 +21,7 @@ StringParameter::StringParameter(EmptyParameterConfig const & config)
 }
 
 StringParameter::StringParameter(ParameterConfigBase const & config)
- : StringParameter( dynamic_cast<StringParameter const &>(config) )
+ : StringParameter( dynamic_cast<EmptyParameterConfig const &>(config) )
 {
   // Todo: handle exceptions
 }
@@ -31,6 +31,8 @@ StringParameter::StringParameter( std::string const & initStr )
   , mMaxLength( 0 )
 {
 }
+
+StringParameter::~StringParameter() = default;
 
 } // namespace pml
 } // namespace visr

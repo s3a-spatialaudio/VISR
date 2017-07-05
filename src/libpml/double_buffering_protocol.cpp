@@ -22,6 +22,8 @@ DoubleBufferingProtocol::DoubleBufferingProtocol( ParameterType const & paramete
 {
 }
 
+DoubleBufferingProtocol::~DoubleBufferingProtocol() = default;
+
 ParameterType DoubleBufferingProtocol::parameterType() const
 {
   return mParameterType;

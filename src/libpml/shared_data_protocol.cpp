@@ -21,6 +21,8 @@ SharedDataProtocol::SharedDataProtocol( ParameterType const & parameterType,
 {
 }
 
+SharedDataProtocol::~SharedDataProtocol() = default;
+
 ParameterType SharedDataProtocol::parameterType() const
 {
   return mParameterType;

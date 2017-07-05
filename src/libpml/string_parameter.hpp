@@ -40,6 +40,8 @@ public:
    */
   explicit StringParameter( std::string const & initStr );
 
+  virtual ~StringParameter() override;
+
   /**
    * Return the maximum length.
    */

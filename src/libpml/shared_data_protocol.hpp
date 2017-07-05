@@ -36,6 +36,8 @@ public:
   explicit SharedDataProtocol( ParameterType const & config,
                                ParameterConfigBase const & parameterConfig );
 
+  virtual ~SharedDataProtocol() override;
+
   ParameterType parameterType( ) const override;
 
   virtual CommunicationProtocolType protocolType( ) const override;

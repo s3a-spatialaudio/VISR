@@ -79,6 +79,8 @@ public:
    */
   explicit SignalRoutingParameter( const ParameterConfigBase & rhs );
 
+  virtual ~SignalRoutingParameter() override;
+
   void swap( SignalRoutingParameter& rhs );
 
   bool empty() const { return mRoutings.empty(); }

@@ -34,6 +34,9 @@ VectorParameter<ElementType>::VectorParameter( VectorParameter<ElementType> cons
   }
 }
 
+template< typename ElementType >
+VectorParameter<ElementType>::~VectorParameter() = default;
+
 // Explicit instantiations for element types float and double and the corresponding complex types.
 template class VectorParameter<float>;
 template class VectorParameter<double>;

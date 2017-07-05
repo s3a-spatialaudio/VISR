@@ -44,6 +44,8 @@ public:
   explicit DoubleBufferingProtocol( ParameterType const & parameterType,
                                     ParameterConfigBase const & parameterConfig );
 
+  virtual ~DoubleBufferingProtocol() override;
+
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString(sProtocolName); };
 
   static constexpr char const * staticName() { return sProtocolName; }

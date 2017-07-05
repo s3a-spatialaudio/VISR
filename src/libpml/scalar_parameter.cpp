@@ -38,6 +38,9 @@ ScalarParameter<ElementType>::ScalarParameter( ScalarParameter<ElementType> cons
 }
 
 template< typename ElementType >
+ScalarParameter<ElementType>::~ScalarParameter() = default;
+
+template< typename ElementType >
 ElementType & ScalarParameter<ElementType>::operator=( ElementType val )
 {
   mValue = val;

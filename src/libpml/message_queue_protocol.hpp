@@ -46,6 +46,8 @@ public:
   explicit MessageQueueProtocol( ParameterType const & parameterType,
                                  ParameterConfigBase const & config );
 
+  virtual ~MessageQueueProtocol() override;
+
   ParameterType parameterType() const override;
 
   virtual CommunicationProtocolType protocolType() const override;

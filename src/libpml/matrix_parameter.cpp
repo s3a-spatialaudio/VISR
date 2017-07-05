@@ -70,6 +70,9 @@ MatrixParameter<ElementType>::MatrixParameter( MatrixParameter<ElementType> cons
 }
 
 template< typename ElementType >
+MatrixParameter<ElementType>::~MatrixParameter() = default;
+
+template< typename ElementType >
 MatrixParameter<ElementType>& MatrixParameter<ElementType>::operator=(MatrixParameter<ElementType> const & rhs)
 {
   // TODO: Check compatible dimensions

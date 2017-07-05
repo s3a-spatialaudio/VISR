@@ -42,6 +42,8 @@ SignalRoutingParameter::SignalRoutingParameter( const ParameterConfigBase & )
   // TODO: Check whether the parameter is of type EmptyParameterConfig.
 }
 
+SignalRoutingParameter::~SignalRoutingParameter() = default;
+
 void SignalRoutingParameter::swap( SignalRoutingParameter& rhs )
 {
   mRoutings.swap( rhs.mRoutings );

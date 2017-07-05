@@ -63,6 +63,9 @@ TimeFrequencyParameter<ElementType>::TimeFrequencyParameter( TimeFrequencyParame
 }
 
 template< typename ElementType >
+TimeFrequencyParameter<ElementType>::~TimeFrequencyParameter() = default;
+
+template< typename ElementType >
 TimeFrequencyParameter<ElementType>&
 TimeFrequencyParameter<ElementType>::operator=( TimeFrequencyParameter<ElementType> const & rhs )
 {

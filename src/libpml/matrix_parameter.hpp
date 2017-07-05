@@ -84,6 +84,8 @@ public:
    */
   MatrixParameter( MatrixParameter<ElementType> const & rhs );
 
+  virtual ~MatrixParameter() override;
+
   MatrixParameter& operator=( MatrixParameter<ElementType> const & rhs );
 
 
