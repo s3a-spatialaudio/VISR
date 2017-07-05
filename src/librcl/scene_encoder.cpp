@@ -6,7 +6,6 @@
 #include <libobjectmodel/object_vector_parser.hpp>
 
 #include <libpml/empty_parameter_config.hpp>
-#include <libpml/string_parameter_config.hpp>
 
 #include <ciso646>
 #include <sstream>
@@ -21,7 +20,7 @@ namespace rcl
                               CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mObjectInput( "objectInput", *this, pml::EmptyParameterConfig( ) )
- , mDatagramOutput( "messageOutput", *this, pml::StringParameterConfig( 32768 ) )
+ , mDatagramOutput( "messageOutput", *this, pml::EmptyParameterConfig() )
 {
 }
 

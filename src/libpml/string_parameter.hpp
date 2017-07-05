@@ -4,7 +4,7 @@
 #define VISR_PML_STRING_PARAMETER_HPP_INCLUDED
 
 #include "export_symbols.hpp"
-#include "string_parameter_config.hpp"
+#include "empty_parameter_config.hpp"
 
 #include <libefl/basic_matrix.hpp>
 
@@ -26,14 +26,14 @@ static constexpr const char * sStringParameterName = "String";
  * A type for passing strings between processing components.
  */
 class VISR_PML_LIBRARY_SYMBOL StringParameter: public std::string,
-                                               public TypedParameterBase<StringParameter, StringParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
+                                               public TypedParameterBase<StringParameter, EmptyParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
 {
 public:
   explicit StringParameter( std::size_t maxLength = 0 );
 
   explicit StringParameter( ParameterConfigBase const & config );
 
-  explicit StringParameter( StringParameterConfig const & config );
+  explicit StringParameter( EmptyParameterConfig const & config );
 
   /**
    * @note Reconsider and possibly remove.
@@ -52,6 +52,6 @@ private:
 } // namespace pml
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::pml::StringParameter, visr::pml::StringParameter::staticType(), visr::pml::StringParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::StringParameter, visr::pml::StringParameter::staticType(), visr::pml::EmptyParameterConfig )
 
 #endif // VISR_PML_STRING_PARAMETER_HPP_INCLUDED

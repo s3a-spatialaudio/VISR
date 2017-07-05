@@ -21,6 +21,7 @@ void exportListenerPosition( pybind11::module & m );
 void exportMatrixParameters( pybind11::module & m );
 void exportObjectVector( pybind11::module & m );
 void exportScalarParameters( pybind11::module & m );
+void exportStringParameter( pybind11::module & m );
 void exportVectorParameters( pybind11::module & m );
 }
 }
@@ -47,6 +48,7 @@ PYBIND11_PLUGIN( pml )
   exportMatrixParameters( m);
   exportObjectVector( m );
   exportScalarParameters( m );
+  exportStringParameter( m );
   exportVectorParameters( m );
 
   // Register parameter types and communication protocols

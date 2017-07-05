@@ -2,6 +2,7 @@
 
 #include "position_decoder.hpp"
 
+#include <libpml/empty_parameter_config.hpp>
 #include <libpml/listener_position.hpp>
 #include <libpml/string_parameter.hpp>
 
@@ -21,7 +22,7 @@ namespace rcl
                                     char const * name,
                                     CompositeComponent * parent /*= nullptr*/ )
   : AtomicComponent( context, name, parent )
-  , mDatagramInput( "messageInput", *this, pml::StringParameterConfig( 128 ) )
+  , mDatagramInput( "messageInput", *this, pml::EmptyParameterConfig() )
   , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )
 {
 }

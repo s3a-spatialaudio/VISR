@@ -20,7 +20,7 @@ ScalarOscDecoder::ScalarOscDecoder( SignalFlowContext const & context,
                               char const * name,
                               CompositeComponent * parent /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
- , mDatagramInput( "datagramInput", *this, pml::StringParameterConfig( 255 ) )
+ , mDatagramInput( "datagramInput", *this, pml::EmptyParameterConfig() )
  , mOscParser( new oscpkt::PacketReader() )
 {
 }

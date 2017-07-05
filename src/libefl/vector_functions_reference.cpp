@@ -17,11 +17,13 @@ namespace efl
 
 // using NumericTypesList = boost::mpl::vector<BOOST_PP_SEQ_ENUM(NUMERIC_TYPES)>;
 
+/*
 #define EXPLICIT_INSTANTIATION_FOR_TYPE_LIST( functionName, d, typeList ) \
   BOOST_PP_CAT( template ErrorCode, functionName);
-//   #define __FUNCTION_MACRO__( r, d, __type__ ) template ErrorCode  functionName; \
-//   BOOST_PP_SEQ_FOR_EACH( __FUNCTION_MACRO__, _, types )
-//   #undef __FUNCTION_MACRO__
+   #define __FUNCTION_MACRO__( r, d, __type__ ) template ErrorCode  functionName; \
+   BOOST_PP_SEQ_FOR_EACH( __FUNCTION_MACRO__, _, types )
+   #undef __FUNCTION_MACRO__
+*/
 
 //Here we should use our API macro
 #define EXPLICIT_INSTANTIATION_VECTOR_ZERO(r, d, __type__) \
