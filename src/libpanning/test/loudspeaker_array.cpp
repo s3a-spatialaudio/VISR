@@ -23,16 +23,16 @@
 #include <array>
 
 // Text format will be removed soon.
-#if 0
-BOOST_AUTO_TEST_CASE( LoudspeakerArrayLoadTextFormat )
+
+BOOST_AUTO_TEST_CASE( LoudspeakerArrayLoad)
 {
   using namespace visr;
   using namespace visr::panning;
-
-  LoudspeakerArray array, regArray;
-  VBAP vbap;
-  AllRAD allrad;
-
+  std::size_t numfiles = 4;
+  std::vector<boost::filesystem::path> configFiles(numfiles);
+  
+  LoudspeakerArray regArray;
+  
   std::size_t numberOfSources = 8;
 
   std::vector<XYZ> sourcePos( numberOfSources );
@@ -49,18 +49,42 @@ BOOST_AUTO_TEST_CASE( LoudspeakerArrayLoadTextFormat )
 //  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/9.1_audiolab.txt");
 
 
-  boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/22.1_audiolab.txt" );
+  configFiles[0] = (configDir / boost::filesystem::path( "isvr/audiolab_stereo_1sub_with_rerouting.xml" ));
+  configFiles[1] = (configDir / boost::filesystem::path( "isvr/audiolab_39speakers_1subwoofer.xml" ));
+  configFiles[2] = (configDir / boost::filesystem::path( "bbc/bs2051-9+10+3.xml" ));
+  configFiles[3] = (configDir / boost::filesystem::path( "generic/bs2051-9+10+3.xml" ));
 
-  BOOST_CHECK_MESSAGE( exists(bfile), "Loudspeaker configuration text file dows not exist." );
-
-  file = fopen( bfile.string().c_str(), "r" );
+  
+  
+  
+  
+  for(size_t i =0; i<numfiles; i++){
+    LoudspeakerArray array;
+//  BOOST_CHECK_MESSAGE( exists(configFiles[i]), "Loudspeaker configuration text file dows not exist." );
+  BOOST_ASSERT( exists(configFiles[i] ));
+  file = fopen( configFiles[i].string().c_str(), "r" );
   BOOST_CHECK( file != 0 );
-  BOOST_CHECK( array.load( file ) != -1 );
+  BOOST_CHECK_NO_THROW( array.loadXmlFile( configFiles[i].string() ));
 
   fclose( file );
-  file = 0;
+  
+    std::cout<<"FILE: "<<configFiles[i].string()<<" parsed correctly"<<std::endl;
+  
+  
+//  
+//    std::size_t const numCols = array.getNumRegularSpeakers();
+//    std::cout << "CHNLS:\t";
+//    std::copy( array.getLoudspeakerChannels(), array.getLoudspeakerChannels() + numCols, std::ostream_iterator<Afloat>( std::cout, "\t\t" ) );
+//    std::cout << std::endl;
+//    std::cout << "IDXES:\t";
+//    for(size_t j =0; j<numCols; j++){
+//      
+//      std::cout << a<<"\t\t";
+//    }
+//    std::cout << std::endl;
+  }
 }
-#endif
+
 
 #if 0
 BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlString ){
@@ -125,6 +149,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlString ){
 }
 #endif
 
+#if 0
 BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
 {
   using namespace visr;
@@ -204,7 +229,7 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
 
  //BOOST_CHECK_NO_THROW( vbap.setLoudspeakerArray( &array ) );
 }
-
+#endif
 #if 0
 {
   vbap.setListenerPosition( 0.0f, 0.0f, 0.0f );

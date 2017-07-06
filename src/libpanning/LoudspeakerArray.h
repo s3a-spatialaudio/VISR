@@ -151,16 +151,9 @@ namespace panning
        * @param id loudspeaker id for either a regular or virtual loudspeaker.
        * @throw std::out_of_range If \p index exceeds the range of regular and virtual loudspeakers.
        */
-      LoudspeakerIndexType getSpeakerIndexFromId( LoudspeakerIdType const & id ) const { return m_id.at(id); };
+      LoudspeakerIndexType getSpeakerIndexFromId( LoudspeakerIdType const & id ) const ;
 
-      /**
-       * Return the index into the loudspeaker array from its output channel number.
-       * @param chn Channel index (one-offset) corresponding to a regular loudspeaker.
-       * @throw std::out_of_range If no regular speaker with this channel id exists.
-       */
-      LoudspeakerIndexType getSpeakerIndexFromChn( ChannelIndex chn ) const { return m_id.at(mIdsOrder.at(chn)); };
-
-      /**
+          /**
        * Return the output channel index from a the speaker id of a regular loudspeaker.
        * @param spkIndex The index into the loudspeaker array.
        * @throw std::out_of_range If \p spkIndex exceeds the number of regular loudspeakers.
@@ -342,12 +335,6 @@ namespace panning
       std::vector<ChannelIndex> m_channel;
 
       std::map<LoudspeakerIdType, LoudspeakerIndexType> m_id;
-
-      /**
-       * Lookup table to translate the sorted loudspeaker indices to their IDs (string labels)
-       * @todo Consider whether this can be a vector because the entries are dense and increasing from zero.
-       */
-      std::map< LoudspeakerIndexType, LoudspeakerIdType > mIdsOrder;
 
       /**
       * Subwoofer configuration support.
