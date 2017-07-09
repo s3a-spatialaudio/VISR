@@ -22,12 +22,34 @@ namespace
 /** Internal function to create the array of channel indices */
 std::vector<LoudspeakerArray::ChannelIndex> getChannelIndices( LoudspeakerArray const & array)
 {
-  std::vector<LoudspeakerArray::ChannelIndex> ret( array.getNumRegularSpeakers() );
-  for( std::size_t chIdx(0); chIdx < ret.size(); ++chIdx )
+  std::size_t numCh = array.getNumRegularSpeakers();
+  if( numCh == 0 )
   {
-    ret[chIdx] = array.channelIndex( chIdx );
+    return std::vector<LoudspeakerArray::ChannelIndex>();
   }
-  return ret;
+  else
+  {
+    return std::vector<LoudspeakerArray::ChannelIndex>(
+      array.getLoudspeakerChannels(), array.getLoudspeakerChannels() + numCh );
+  }
+}
+
+/** 
+ * Local function to transform the subwoofer index list into std::vector
+ */
+std::vector<LoudspeakerArray::ChannelIndex> getSubwooferChannelIndices( LoudspeakerArray const & array )
+{
+
+  std::size_t const numSubs = array.getNumSubwoofers();
+  if( numSubs == 0 )
+  {
+    return std::vector<LoudspeakerArray::ChannelIndex>();
+  }
+  else
+  {
+    return std::vector<LoudspeakerArray::ChannelIndex>(
+      array.getSubwooferChannels(), array.getSubwooferChannels() + numSubs );
+  }
 }
 
 }
@@ -42,24 +64,23 @@ void exportLoudspeakerArray( pybind11::module & m)
     .def("getPosition", (visr::panning::XYZ const &(LoudspeakerArray::*)(size_t iSpk) const) &LoudspeakerArray::getPosition)
     .def( "getPosition", (visr::panning::XYZ &(LoudspeakerArray::*)(LoudspeakerArray::LoudspeakerIdType const & iSpk)) &LoudspeakerArray::getPosition )
     .def( "getPosition", (visr::panning::XYZ const &(LoudspeakerArray::*)(LoudspeakerArray::LoudspeakerIdType const &) const)(&LoudspeakerArray::getPosition) )
-    .def("getPositions", (visr::panning::XYZ *(LoudspeakerArray::*)()) &LoudspeakerArray::getPositions)
-    .def("getPositions", (visr::panning::XYZ const *(LoudspeakerArray::*)() const) &LoudspeakerArray::getPositions)
-    .def("getSpeakerChannelIndex", &LoudspeakerArray::channelIndex, pybind11::arg("speakerIndex"))
+    .def( "getPositions", (visr::panning::XYZ *(LoudspeakerArray::*)()) &LoudspeakerArray::getPositions)
+    .def( "getPositions", (visr::panning::XYZ const *(LoudspeakerArray::*)() const) &LoudspeakerArray::getPositions)
+    .def( "getSpeakerChannelIndex", &LoudspeakerArray::channelIndex, pybind11::arg("speakerIndex"))
     .def( "getSpeakerIndexFromId", &LoudspeakerArray::getSpeakerIndexFromId, pybind11::arg( "speakerId" ) )
-    .def( "getSpeakerIndexFromChn", &LoudspeakerArray::getSpeakerIndexFromChn, pybind11::arg( "speakerChannel" ) )
     .def( "getSpeakerChannel", &LoudspeakerArray::getSpeakerChannel, pybind11::arg( "speakerIndex" ) )
     .def( "getSpeakerChannelFromId", &LoudspeakerArray::getSpeakerChannelFromId, pybind11::arg( "speakerId" ) )
-    .def("setTriplet", &LoudspeakerArray::setTriplet, pybind11::arg("tripletIndex"), pybind11::arg("speakerId1"), pybind11::arg("speakerId2"), pybind11::arg("speakerId3"))
-    .def("getTriplet", (LoudspeakerArray::TripletType &(LoudspeakerArray::*)(size_t iTri))&LoudspeakerArray::getTriplet)
-    .def("getTriplet", (LoudspeakerArray::TripletType const &(LoudspeakerArray::*)(size_t iTri) const) &LoudspeakerArray::getTriplet)
+    .def( "setTriplet", &LoudspeakerArray::setTriplet, pybind11::arg("tripletIndex"), pybind11::arg("speakerId1"), pybind11::arg("speakerId2"), pybind11::arg("speakerId3"))
+    .def( "getTriplet", (LoudspeakerArray::TripletType &(LoudspeakerArray::*)(size_t iTri))&LoudspeakerArray::getTriplet)
+    .def( "getTriplet", (LoudspeakerArray::TripletType const &(LoudspeakerArray::*)(size_t iTri) const) &LoudspeakerArray::getTriplet)
     .def_property_readonly("totNumberOfLoudspeakers", &LoudspeakerArray::getNumSpeakers)
     .def_property_readonly("numberOfRegularLoudspeakers", &LoudspeakerArray::getNumRegularSpeakers)
     .def_property_readonly("numberOfTriplets", &LoudspeakerArray::getNumTriplets)
     .def_property_readonly("is2D", &LoudspeakerArray::is2D)
     .def_property_readonly("isInfinite", &LoudspeakerArray::isInfinite)
     .def_property_readonly("numberOfSubwoofers", &LoudspeakerArray::getNumSubwoofers)
-    .def("getSubwooferChannels", &LoudspeakerArray::getSubwooferChannels)
-    .def("getSubwooferChannel", &LoudspeakerArray::getSubwooferChannel, pybind11::arg("subwooferIndex"))
+    .def("subwooferChannelIndices", &getSubwooferChannelIndices )
+    .def("subwooferChannelIndex", &LoudspeakerArray::getSubwooferChannel, pybind11::arg("subwooferIndex"))
     .def("getSubwooferGains", &LoudspeakerArray::getSubwooferGains, pybind11::return_value_policy::reference)
     .def("getReRoutingCoefficients", &LoudspeakerArray::getReroutingCoefficients, pybind11::return_value_policy::reference)
     .def("getReRoutingCoefficient", &LoudspeakerArray::getReroutingCoefficient, pybind11::arg("virtualSpeakerIdx"), pybind11::arg("realSpeakerIdx"))

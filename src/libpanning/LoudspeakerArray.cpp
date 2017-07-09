@@ -72,7 +72,7 @@ namespace panning
   }
   
   LoudspeakerArray::~LoudspeakerArray() = default;
-
+  
   namespace // unnamed
   {
     
@@ -315,26 +315,26 @@ namespace panning
       }
       m_id[id] = 0; //just to have the id as a key in the map, to search for duplicates
       m_channel[i] = chIdx;
-      mIdsOrder[chIdx] = id;
+      
     }
     
     // Reordering by progressive channel number
     std::sort( m_channel.begin(), m_channel.end() );
-    std::size_t k = 0;
-    for( std::map<ChannelIndex, std::string>::iterator it = mIdsOrder.begin(); it != mIdsOrder.end(); it++, k++ )
-    {
-      /*  std::cout << it->second << " => " << m_id[it->second] << '\n';
-       std::cout << it->first << " => " << it->second << '\n';*/
-      m_id[it->second] = k;
-      /* std::cout << it->second << " => " << m_id[it->second] << '\n';*/
-    }
     
     
     // reparsing the xml with ordered channels
-    for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt )
+    
+    std::size_t w=0;
+    for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt, ++w )
     {
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
+      //      if(std::find(m_channel.begin(),m_channel.end(),m_channel[w]) == m_channel.end()) std::cout<<"NOTFIND"<<std::endl;
+      ChannelIndex const chIdx = childTree.get<ChannelIndex>( "<xmlattr>.channel" );
+      size_t offset = std::distance(m_channel.begin(),std::find(m_channel.begin(),m_channel.end(),chIdx));
+      
+      m_id[id] = offset;
+      
       
       m_position[m_id[id]] = parseCoordNode( childTree, m_isInfinite );
       
@@ -404,10 +404,6 @@ namespace panning
     std::size_t j = 0;
     
     
-//    /*PRINTS OUT THE CORRESPONDENCE OF CHAN -> ID -> INDEX(idx of the loudspeaker in the channel-number-sorted loudspeaker array) */
-//     for ( std::map<ChannelIndex,std::string>::const_iterator it = mIdsOrder.cbegin(); it != mIdsOrder.cend(); ++it)  std::cout << "i: "<< j  <<" CHAN: " << it->first << " ID " << it->second << " IDX: "<<m_id[it->second]<<std::endl;
-//    std::cout<<std::endl;
-
     
     for( ptree::const_assoc_iterator tripletIt( tripletNodes.first ); tripletIt != tripletNodes.second; ++tripletIt, j++ )
     {
@@ -450,7 +446,7 @@ namespace panning
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): Triplet references non-existing speaker index." );
       }
       m_triplet.push_back( triplet );
-//      std::cout<<" "<<m_triplet[j][0]<<"\t"<<m_triplet[j][1]<<"\t"<<m_triplet[j][2]<<std::endl;
+      //      std::cout<<" "<<m_triplet[j][0]<<"\t"<<m_triplet[j][1]<<"\t"<<m_triplet[j][2]<<std::endl;
     }
     assert( m_triplet.size() == numTriplets );
     
@@ -531,12 +527,12 @@ namespace panning
       throw std::invalid_argument( "LoudspeakerArray::loadXml(): Loudspeaker and subwoofer channels indices are not exclusive." );
     }
   }
-
+  
   void LoudspeakerArray::loadXmlString( std::string const & xmlString ){
     std::istringstream iss( xmlString );
     loadXmlStream(iss);
   }
-
+  
   bool LoudspeakerArray::outputEqualisationPresent() const
   {
     return bool( mOutputEqs ); // Operator bool checks whether pointer is assigned.
@@ -570,17 +566,21 @@ namespace panning
   LoudspeakerArray::LoudspeakerIdType const &
   LoudspeakerArray::loudspeakerId( LoudspeakerIndexType const & index ) const
   {
-    auto const findIt = mIdsOrder.find(index);
-    if( findIt == mIdsOrder.end() )
+    
+    auto const findIt  = std::find_if( m_id.begin(), m_id.end(), [index](decltype(m_id)::value_type const & val ){ return val.second == index; } );
+    if( findIt == m_id.end() )
     {
       std::stringstream msg;
-      msg << "LoudspeakerArray::loudspeakerId(): The given numeric loudspeaker id(" << index
-        << ") is outside the admissible range.";
+      msg << "LoudspeakerArray::loudspeakerId(): The given numeric loudspeaker id \"" << index << "\" is outside the admissible range.";
       throw std::out_of_range( msg.str() );
     }
-    return findIt->second;
+    return findIt->first;
   }
 
+  LoudspeakerArray::LoudspeakerIndexType LoudspeakerArray::getSpeakerIndexFromId( LoudspeakerIdType const & id ) const {
+    return m_id.at(id);
+  };
+  
 } // namespace panning
 } // namespace visr
 
