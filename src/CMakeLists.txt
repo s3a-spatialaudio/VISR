@@ -8,9 +8,6 @@ ADD_SUBDIRECTORY( libapputilities )
 # Elementary functions library
 ADD_SUBDIRECTORY( libefl )
 
-# Support for conversion from the IOSONO SAW scene protocol
-ADD_SUBDIRECTORY( libsawconvert )
-
 # Object model library.
 ADD_SUBDIRECTORY( libobjectmodel )
 
