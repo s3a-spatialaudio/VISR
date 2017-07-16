@@ -11,8 +11,10 @@ namespace visr
 namespace rcl
 {
 
-FirFilterMatrix::FirFilterMatrix( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
+                                  char const * name,
+                                  CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
  , mConvolver()
@@ -30,21 +32,49 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
                              std::size_t maxRoutings,
                              efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
                              pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/,
+                             bool controlInputs /*= false */,
                              char const * fftImplementation /*= "default" */ )
 {
   mInput.setWidth( numberOfInputs );
   mOutput.setWidth( numberOfOutputs );
+
+  mInputChannels.resize( numberOfInputs, nullptr );
+  mOutputChannels.resize( numberOfOutputs, nullptr );
+
   mConvolver.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
     numberOfInputs, numberOfOutputs, period(),
     filterLength, maxRoutings, maxFilters,
-    routings, filters, ril::cVectorAlignmentSamples, fftImplementation ) );
+    routings, filters, cVectorAlignmentSamples, fftImplementation ) );
+
+  mSetFilterInput.reset( controlInputs
+                         ? new ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > >( "filterInput", *this, pml::EmptyParameterConfig() )
+                         : nullptr );
 }
 
 void FirFilterMatrix::process()
 {
-  SampleType const * const * inputSignals = mInput.getVector();
-  SampleType * const * outputSignals = mOutput.getVector( );
-  mConvolver->process( inputSignals, outputSignals, ril::cVectorAlignmentSamples );
+  if( mSetFilterInput )
+  {
+    while( not mSetFilterInput->empty() )
+    {
+      pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > const newFilter = mSetFilterInput->front();
+
+      try
+      {
+        // Argument checking is done inside the method.
+        setFilter( newFilter.index(), &newFilter.value()[0], newFilter.value().size() );
+        mSetFilterInput->pop();
+      }
+      catch( std::exception const & ex )
+      {
+        status( StatusMessage::Error, "FirFilterMatrix: Error while setting new filter: ", ex.what() );
+      }
+    }
+  }
+
+  mInput.getChannelPointers( &mInputChannels[0] );
+  mOutput.getChannelPointers( &mOutputChannels[0] );
+  mConvolver->process( &mInputChannels[0], &mOutputChannels[0], cVectorAlignmentSamples );
 }
 
 void FirFilterMatrix::clearRoutings()

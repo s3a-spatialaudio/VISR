@@ -4,10 +4,11 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
-#include <libpml/signal_routing_parameter.hpp>
-
 #include <libobjectmodel/object_vector.hpp>
 #include <libobjectmodel/channel_object.hpp>
+
+#include <libpml/object_vector.hpp>
+#include <libpml/signal_routing_parameter.hpp>
 
 #include <cassert>
 #include <ciso646>
@@ -20,8 +21,13 @@ namespace visr
 namespace rcl
 {
 
-ChannelObjectRoutingCalculator::ChannelObjectRoutingCalculator( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+ChannelObjectRoutingCalculator::
+ChannelObjectRoutingCalculator( SignalFlowContext const & context,
+                                char const * name,
+                                CompositeComponent * parent )
+ : AtomicComponent( context, name, parent )
+ , mObjectInput( "objectIn", *this, pml::EmptyParameterConfig() )
+ , mRoutingOutput( "routingOut", *this, pml::EmptyParameterConfig() )
  , mNumberOfObjectChannels( 0 )
 {
 }
@@ -31,7 +37,7 @@ ChannelObjectRoutingCalculator::~ChannelObjectRoutingCalculator()
 }
 
 void ChannelObjectRoutingCalculator::setup( std::size_t numberOfObjectChannels,
-                                           panning::LoudspeakerArray const & config )
+                                            panning::LoudspeakerArray const & config )
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
   mLookup.clear();
@@ -42,11 +48,11 @@ void ChannelObjectRoutingCalculator::setup( std::size_t numberOfObjectChannels,
   for (std::size_t channelIndex(0); channelIndex < numSpeakers; ++channelIndex)
   {
     // Use the translation function of the loudspeaker array.
-    panning::LoudspeakerArray::LoudspeakerIndexType const lspIndex
-      = config.getLoudspeakerIndex( channelIndex );
+    panning::LoudspeakerArray::LoudspeakerIdType const lspId
+      = config.loudspeakerId( channelIndex +1);
     bool insertRes;
     std::tie(std::ignore, insertRes) = mLookup.insert(
-      std::make_pair(static_cast<objectmodel::ChannelObject::OutputChannelId>(lspIndex), channelIndex) );
+      std::make_pair(static_cast<objectmodel::ChannelObject::OutputChannelId>(lspId), channelIndex) );
     if (not insertRes)
     {
       throw std::invalid_argument( "Insertion of channel index routing failed." );
@@ -54,7 +60,19 @@ void ChannelObjectRoutingCalculator::setup( std::size_t numberOfObjectChannels,
   }
 }
 
-void ChannelObjectRoutingCalculator::process( objectmodel::ObjectVector const & objects, pml::SignalRoutingParameter & routings)
+void ChannelObjectRoutingCalculator::process()
+{
+  if( mObjectInput.changed() )
+  {
+    pml::SignalRoutingParameter & routings = mRoutingOutput.data();
+    process( mObjectInput.data(), routings );
+    mRoutingOutput.swapBuffers();
+    mObjectInput.resetChanged();
+  }
+}
+
+void ChannelObjectRoutingCalculator::process( pml::ObjectVector const & objects,
+                                              pml::SignalRoutingParameter & routings)
 {
 
   routings.clear();

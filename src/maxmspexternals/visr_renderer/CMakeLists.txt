@@ -14,7 +14,7 @@ IF( WIN32 )
   ADD_DEFINITIONS( -DWIN32_LEAN_AND_MEAN )
 ENDIF( WIN32 )
 
-SET( EXTERNAL_NAME visr_renderer )
+SET( EXTERNAL_NAME visr_renderer~ )
 
 SET( PROJECT_NAME visr_renderer_max_external )
 
@@ -77,3 +77,5 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 
 # According to the current FindMaxSDK.cmake, there is no crt library for apple.
 # TODO: Verify and improve FindMaxSDK.cmake
+
+install(TARGETS ${PROJECT_NAME} DESTINATION maxmsp )

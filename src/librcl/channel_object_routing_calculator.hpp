@@ -3,10 +3,16 @@
 #ifndef VISR_LIBRCL_CHANNEL_OBJECT_ROUTING_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_CHANNEL_OBJECT_ROUTING_CALCULATOR_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libobjectmodel/channel_object.hpp>
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
+
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/signal_routing_parameter.hpp>
 
 #include <vector>
 #include <map>
@@ -14,17 +20,9 @@
 namespace visr
 {
 // forward declarations
-namespace objectmodel
-{
-class ObjectVector;
-}
 namespace panning
 {
 class LoudspeakerArray;
-}
-namespace pml
-{
-class SignalRoutingParameter;
 }
 
 namespace rcl
@@ -33,20 +31,23 @@ namespace rcl
 /**
  * Audio component for extracting the diffuseness gain from an object vector.
  */
-class ChannelObjectRoutingCalculator: public ril::AudioComponent
+class ChannelObjectRoutingCalculator: public AtomicComponent
 {
 public:
   /**
    * Type of the gain coefficients. We use the same type as the audio samples.
    */
-  using CoefficientType = ril::SampleType;
+  using CoefficientType = SampleType;
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
-  explicit ChannelObjectRoutingCalculator( ril::AudioSignalFlow& container, char const * name );
+  explicit ChannelObjectRoutingCalculator( SignalFlowContext const & context,
+                                           char const * name,
+                                           CompositeComponent * parent);
 
   /**
    * Disabled (deleted) copy constructor
@@ -66,16 +67,20 @@ public:
   void setup( std::size_t numberOfObjectChannels,
               panning::LoudspeakerArray const & config );
 
+  void process() override;
+
+private:
   /**
-   * The process function. 
+   * Internal process function. 
    * It takes a vector of objects as input and calculates a set of signal routings.
    * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
    * @param [out] routings The signal routings from input object signal channels to loudspeaker channel indices.
    */
-  void process( objectmodel::ObjectVector const & objects, pml::SignalRoutingParameter & routings );
+  void process( pml::ObjectVector const & objects, pml::SignalRoutingParameter & routings );
 
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector> mObjectInput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::SignalRoutingParameter> mRoutingOutput;
 
-private:
   /**
    * The number of audio object channels handled by this object.
    */

@@ -12,9 +12,13 @@ namespace mex
 namespace feedthrough
 {
 
-SignalFlow::SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
- : AudioSignalFlow( period, samplingFrequency )
- , mSum( *this, "Add" )
+SignalFlow::SignalFlow( SignalFlowContext& context,
+                        char const * componentName,
+                        CompositeComponent * parent )
+ : CompositeComponent( context, componentName, parent )
+ , mInput( "in", *this )
+ , mOutput( "out", *this )
+ , mSum( context, "Add", this, 2, 2 )
 {
 }
 
@@ -23,39 +27,16 @@ SignalFlow::~SignalFlow( )
 }
  
 /*virtual*/ void 
-SignalFlow::process()
-{
-  // TODO: implement me!
-  mSum.process();
-}
-
-/*virtual*/ void 
 SignalFlow::setup()
 {
+  mInput.setWidth( 2 );
+  mOutput.setWidth( 2 );
   // Initialise and configure audio components
-  mSum.setup( 2, 2 ); // width = 2, numInputs = 2;
 
-  // Define and set the width of the input and output vectors of the graph
+  audioConnection( "this", "in", { 0, 1 }, "Add", "in0", { 1, 0 } );
+  audioConnection( "this", "in", { 0, 1 }, "Add", "in1", { 0, 1 } );
+  audioConnection( "Add", "out", { 0, 1 }, "this", "out", { 0, 1 } );
 
-  // Set up communication area 
-  // the required width of the communication area is determined by the number of capture inputs of the graph plus 
-  // the number of port outputs.
-  // Note: The alignment of the communication area should be fixed to this value with no user options.
-  initCommArea( 4, period( ), ril::cVectorAlignmentSamples );
-
-  // connect the ports
-  assignCommunicationIndices( "Add", "in0", { 0, 1} );
-
-  assignCommunicationIndices( std::string( "Add" ), std::string( "in1" ), { 0, 1 } );
-
-  std::vector<std::size_t> idxList3{ 2, 3 };
-  assignCommunicationIndices( std::string( "Add" ), std::string( "out" ), idxList3.begin( ), idxList3.end( ) );
-
-  // Set the indices for communicating the signals from and to the outside world.
-  assignCaptureIndices( {0, 1} );
-  assignPlaybackIndices( {2, 3} );
-
-  setInitialised( true );
 }
 
 } // namespace feedthrough

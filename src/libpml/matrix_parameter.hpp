@@ -3,8 +3,14 @@
 #ifndef VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED
 #define VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED
 
+#include "matrix_parameter_config.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
+#include <libril/parameter_type.hpp>
+#include <libril/typed_parameter_base.hpp>
+
+#include <complex>
 #include <initializer_list>
 #include <istream>
 
@@ -13,20 +19,49 @@ namespace visr
 namespace pml
 {
 
+namespace // unnamed
+{
+template<typename ElementType> struct MatrixParameterType{};
+
+template<> struct MatrixParameterType<float>
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1("FloatMatrix"); }
+};
+
+template<> struct MatrixParameterType<double>
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "DoubleMatrix" ); }
+};
+template<> struct MatrixParameterType<std::complex<float> >
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "ComplexFloatMatrix" ); }
+};
+template<> struct MatrixParameterType<std::complex<double> >
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "ComplexDoubleMatrix" ); }
+};
+} // unnamed namespace
+
 /**
  * A type for passing matrixes between processing components.
  * The template class is explicitly instantiated for the element types float and double.
  * @tparam ElementType The data type of the elements of the matrix.
  */
-template<typename ElementType>
-class MatrixParameter: public efl::BasicMatrix<ElementType>
+template<typename ElementType >
+class MatrixParameter: public efl::BasicMatrix<ElementType>,
+                       public TypedParameterBase<MatrixParameter<ElementType>, MatrixParameterConfig, MatrixParameterType<ElementType>::ptype() >
 {
 public:
+
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
    * @param alignment The alignment of the data, given in in multiples of the eleement size.
    */
   MatrixParameter( std::size_t alignment = 0 );
+
+  explicit MatrixParameter( ParameterConfigBase const & config );
+
+  explicit MatrixParameter( MatrixParameterConfig const & config );
 
   /**
    * Construct a parameter matrix with the given dimensions.
@@ -47,6 +82,9 @@ public:
    * @param rhs The object to be copied.
    */
   MatrixParameter( MatrixParameter<ElementType> const & rhs );
+
+  MatrixParameter& operator=( MatrixParameter<ElementType> const & rhs );
+
 
   /**
    * Named constructors to create and initialise matrices from various representations. 
@@ -88,5 +126,9 @@ private:
 } // namespace pml
 } // namespace visr
 
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<float>, visr::pml::MatrixParameter<float>::staticType(), visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<double>, visr::pml::MatrixParameter<double>::staticType(), visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<float> >, visr::pml::MatrixParameter<std::complex<float> >::staticType(), visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::MatrixParameter<std::complex<double> >, visr::pml::MatrixParameter<std::complex<double> >::staticType(), visr::pml::MatrixParameterConfig )
 
 #endif // VISR_PML_MATRIX_PARAMETER_HPP_INCLUDED

@@ -3,11 +3,13 @@
 #ifndef VISR_APPS_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_APPS_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+#include <libril/composite_component.hpp>
 
 #include <librcl/add.hpp>
 
-#include <librrl/portaudio_interface.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
 
 namespace visr
 {
@@ -16,18 +18,20 @@ namespace apps
 namespace feedthrough
 {
 
-class SignalFlow: public ril::AudioSignalFlow
+class Feedthrough: public CompositeComponent
 {
 public:
-  explicit SignalFlow( std::size_t period, ril::SamplingFrequencyType samplingFrequency );
+  explicit Feedthrough( SignalFlowContext & context, const char* name, CompositeComponent * parent = nullptr );
 
-  ~SignalFlow();
+  ~Feedthrough();
 
   /*virtual*/ void process( );
 
-  /*virtual*/ void setup( );
-
 private:
+  AudioInput mInput;
+
+  AudioOutput mOutput;
+
   rcl::Add mSum;
 };
 

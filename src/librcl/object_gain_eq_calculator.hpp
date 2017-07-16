@@ -3,11 +3,16 @@
 #ifndef VISR_LIBRCL_OBJECT_GAIN_EQ_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_OBJECT_GAIN_EQ_CALCULATOR_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
-
-// #include <libobjectmodel/object.hpp> // needed basically for type definitions
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <memory>
+
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/biquad_parameter.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/vector_parameter.hpp>
 
 namespace visr
 {
@@ -23,7 +28,6 @@ template< typename SampleType > class BasicVector;
 namespace pml
 {
 template< typename SampleType > class BiquadParameterMatrix;
-// template< typename SampleType > class BiquadParameterList;
 }
   
 namespace rcl
@@ -32,20 +36,23 @@ namespace rcl
 /**
  * Audio component for extracting the diffuseness gain from an object vector.
  */
-class ObjectGainEqCalculator: public ril::AudioComponent
+class ObjectGainEqCalculator: public AtomicComponent
 {
 public:
   /**
    * Type of the gain coefficients. We use the same type as the audio samples.
    */
-  using CoefficientType = ril::SampleType;
+  using CoefficientType = SampleType;
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
-  explicit ObjectGainEqCalculator( ril::AudioSignalFlow& container, char const * name );
+  explicit ObjectGainEqCalculator( SignalFlowContext const & context,
+                                   char const * name,
+                                   CompositeComponent * parent );
 
   /**
    * Disabled (deleted) copy constructor
@@ -66,8 +73,11 @@ public:
   void setup( std::size_t numberOfObjectChannels,
               std::size_t numberOfBiquadSections);
 
+  void process( ) override;
+
+private:
   /**
-   * The process function.
+   * Internal process function.
    * It takes an ObjectVector as input and calculates a vector of output gains and a matrix of EQ settings.
    * @param objects The vector of objects. It must consist only of single-channel objects with channel IDs 0...numberOfChannelObjects-1.
    * @param[out] objectSignalGains A parameter vector to be filled with the object gains (linear scale), dimension: numberOfObjectChannels
@@ -77,7 +87,10 @@ public:
                 efl::BasicVector<CoefficientType> & objectSignalGains,
                 pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs );
 
-private:
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector> mObjectInput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<CoefficientType> > mGainOutput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::BiquadParameterMatrix<CoefficientType> > mEqOutput;
+
   /**
    * The number of audio object channels handled by this object.
    */
@@ -88,7 +101,7 @@ private:
   /**
    *
    */
-  ril::SamplingFrequencyType const cSamplingFrequency;
+  SamplingFrequencyType const cSamplingFrequency;
 };
 
 } // namespace rcl

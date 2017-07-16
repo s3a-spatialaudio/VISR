@@ -5,8 +5,10 @@
 #include <libefl/alignment.hpp>
 #include <libefl/vector_conversions.hpp>
 
-#include <libril/audio_signal_flow.hpp>
-#include <libril/communication_area.hpp>
+#include <libril/signal_flow_context.hpp>
+
+#include <librrl/audio_signal_flow.hpp>
+#include <librrl/communication_area.hpp>
 
 #include <cassert>
 #include <ciso646>
@@ -16,14 +18,15 @@ namespace visr
 namespace mexsupport
 {
 
-MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
+MexWrapper::MexWrapper( Component & flow,
+                        SignalFlowContext const & context,
                         mxArray const * input,
                         mxArray * & output,
                         mxArray const * messages /* = 0 */ )
  : mFlow( flow )
  , mSignalType( mxGetClassID( input ) )
  , mInputMatrix( input )
- , mPeriodSize( flow.period() )
+ , mPeriodSize( context.period() )
 {
   if( (mSignalType != mxDOUBLE_CLASS) and( mSignalType != mxSINGLE_CLASS ) )
   {
@@ -32,8 +35,17 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
   std::size_t const numInputSignalChannels = mxGetM( input );
   std::size_t const inputSignalLength = mxGetN( input );
 
-  std::size_t const numGraphInputs = flow.numberOfCaptureChannels();
-  std::size_t const numGraphOutputs = flow.numberOfPlaybackChannels( );
+  try
+  {
+    mAudioWrapper.reset( new rrl::AudioSignalFlow( mFlow ) );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while setting up runtime infrastructure: " ) + ex.what() );
+  }
+
+  std::size_t const numGraphInputs = mAudioWrapper->numberOfCaptureChannels();
+  std::size_t const numGraphOutputs = mAudioWrapper->numberOfPlaybackChannels( );
 
   if( numInputSignalChannels != numGraphInputs )
   {
@@ -50,6 +62,12 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
   mNumberOfCaptureSignals = numGraphInputs;
   mNumberOfPlaybackSignals = numGraphOutputs;
 
+
+
+  mCommBuffer.reset( new rrl::CommunicationArea<SampleType>( mNumberOfCaptureSignals + mNumberOfPlaybackSignals,
+                     context.period(),
+                     cVectorAlignmentSamples ) );
+
   // create output array
   mOutputMatrix = mxCreateNumericMatrix( numGraphOutputs, inputSignalLength, mSignalType, mxREAL );
   if( !mOutputMatrix )
@@ -57,9 +75,6 @@ MexWrapper::MexWrapper( ril::AudioSignalFlow & flow,
     throw std::runtime_error( "Failed to allocate output signal matrix." );
   }
   output = mOutputMatrix;
-
-  mCommBuffer.reset( new ril::CommunicationArea < ril::SampleType>( numGraphInputs + numGraphOutputs,
-    mPeriodSize, ril::cVectorAlignmentSamples ) );
 
   mInputBufferPtrs.resize( numGraphInputs, nullptr );
   for( std::size_t inIdx( 0 ); inIdx < numGraphInputs; ++inIdx )
@@ -79,7 +94,7 @@ MexWrapper::~MexWrapper( )
 
 void MexWrapper::process( )
 {
-  ril::AudioInterface::CallbackResult processResult;
+  bool processResult;
   for( std::size_t blockIdx( 0 ); blockIdx < mNumberOfBlocks; ++blockIdx )
   { 
     // Transfer the input signal from the Matlab matrix to the capture buffers off the signal flow.
@@ -95,7 +110,7 @@ void MexWrapper::process( )
     default:
       assert( false && "Must not happen, as the type has been checked beforehand." );
     }
-    ril::AudioSignalFlow::processFunction( &mFlow, &mInputBufferPtrs[0], &mOutputBufferPtrs[0],
+    rrl::AudioSignalFlow::processFunction( static_cast<void*>(mAudioWrapper.get() ), &mInputBufferPtrs[0], &mOutputBufferPtrs[0],
         processResult );
     if( processResult != 0 ) //todo: Lookup error codes
     {

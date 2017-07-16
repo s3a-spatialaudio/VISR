@@ -16,11 +16,15 @@ namespace visr
 namespace rcl
 {
 
-ObjectGainEqCalculator::ObjectGainEqCalculator( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
- , mNumberOfObjectChannels( 0 )
- , cSamplingFrequency(container.samplingFrequency() )
-
+ObjectGainEqCalculator::ObjectGainEqCalculator( SignalFlowContext const & context,
+                                                char const * name,
+                                                CompositeComponent * parent )
+  : AtomicComponent( context, name, parent )
+  , mObjectInput( "objectIn", *this, pml::EmptyParameterConfig() )
+  , mGainOutput( "gainOut", *this )
+  , mEqOutput( "eqOut", *this )
+  , mNumberOfObjectChannels( 0 )
+  , cSamplingFrequency(samplingFrequency() )
 {
 }
 
@@ -33,16 +37,32 @@ void ObjectGainEqCalculator::setup( std::size_t numberOfObjectChannels,
 {
   mNumberOfObjectChannels = numberOfObjectChannels;
   mNumberOfBiquadSections = numberOfBiquadSections;
+  mGainOutput.setParameterConfig( pml::VectorParameterConfig( numberOfObjectChannels ) );
+  mEqOutput.setParameterConfig( pml::MatrixParameterConfig( numberOfObjectChannels, 
+                                                            numberOfBiquadSections ) );
 }
+
+void ObjectGainEqCalculator::process()
+{
+  if( mObjectInput.changed() )
+  {
+    pml::ObjectVector const & ov = mObjectInput.data();
+    pml::VectorParameter<CoefficientType> & gains = mGainOutput.data();
+    pml::BiquadParameterMatrix<CoefficientType> & eqMatrix = mEqOutput.data();
+    process( ov, gains, eqMatrix );
+    mGainOutput.swapBuffers();
+    mEqOutput.swapBuffers();
+    mObjectInput.resetChanged();
+  }
+}
+
 
 void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
                                       efl::BasicVector<CoefficientType> & objectSignalGains,
                                       pml::BiquadParameterMatrix<CoefficientType> & objectChannelEqs )
 {
-
-
   using namespace objectmodel;
-  pml::BiquadParameter<ril::SampleType> defaultEq; // Neutral EQ parameters
+  pml::BiquadParameter<SampleType> defaultEq; // Neutral EQ parameters
   if( objectSignalGains.size() != mNumberOfObjectChannels )
   {
     throw std::invalid_argument( "ObjectGainEqCalculator::process(): The parameter \"objectSignalGains\" must hold numberOfObjectChannels elements" );
@@ -61,12 +81,17 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
     for( std::size_t chIdx(0); chIdx < numObjChannels; ++chIdx )
     {
         std::size_t const signalChannelIdx = obj.channelIndex( chIdx );
+        if( signalChannelIdx >= mNumberOfObjectChannels )
+        {
+          status( StatusMessage::Error, "Signal index ", signalChannelIdx, " exceeds number of object signal channels (", mNumberOfObjectChannels, ")" );
+          continue;
+        }
         objectSignalGains[ signalChannelIdx ] = objLevel;
         // Potential minor performance improvement possible: For multichannel objects, compute the coefficients only for the first channel,
         // and copy it to the remaining channels.
-        rbbl::ParametricIirCoefficientCalculator::calculateIirCoefficients<ril::SampleType>( obj.eqCoefficients(),
+        rbbl::ParametricIirCoefficientCalculator::calculateIirCoefficients<SampleType>( obj.eqCoefficients(),
                                                                                              objectChannelEqs[signalChannelIdx],
-                                                                                             static_cast< ril::SampleType>(cSamplingFrequency) );
+                                                                                             static_cast<SampleType>(cSamplingFrequency) );
     }
   }
 }

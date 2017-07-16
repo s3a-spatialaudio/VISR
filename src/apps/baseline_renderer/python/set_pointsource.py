@@ -47,10 +47,14 @@ level = float( args.level )
 
 diffuseness = float( args.diffuseness )
 
+#if (diffuseness == 0.0):
+#  msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"point\", \"group\": %d, \"priority\": %d, \"level\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, posX, posY, posZ )
+#else:
+#  msg = "{ \"objects\":[{\"id\": \"%d\", \"channels\": \"%d\",\n\"type\": \"pointdiffuse\", \"group\": \"%d\", \"priority\": \"%d\", \"level\": %f, \"diffuseness\": \"%f\", \"position\": {\"x\": \"%f\", \"y\": \"%f\", \"z\": \"%f\" } }]  }" % ( objectId, channelId, groupId, priority, level, diffuseness, posX, posY, posZ )
 if (diffuseness == 0.0):
-  msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"point\", \"group\": %d, \"priority\": %d, \"level\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, posX, posY, posZ )
+  msg = "{ \"objects\":[{\"id\": \"%d\", \"channels\": \"%d\",\n\"type\": \"point\", \"group\": \"%d\", \"priority\": \"%d\", \"level\": \"%f\", \"position\": {\"x\": \"%f\", \"y\": \"%f\", \"z\": \"%f\" } }]  }" % ( objectId, channelId, groupId, priority, level, posX, posY, posZ )
 else:
-  msg = "{ \"objects\":[{\"id\": %d, \"channels\": %d,\n\"type\": \"pointdiffuse\", \"group\": %d, \"priority\": %d, \"level\": %f, \"diffuseness\": %f, \"position\": {\"x\": %f, \"y\": %f, \"z\": %f } }]  }" % ( objectId, channelId, groupId, priority, level, diffuseness, posX, posY, posZ )
+  msg = "{ \"objects\":[{\"id\": \"%d\", \"channels\": \"%d\",\n\"type\": \"pointdiffuse\", \"group\": \"%d\", \"priority\": \"%d\", \"level\": \"%f\", \"diffuseness\": \"%f\", \"position\": {\"x\": \"%f\", \"y\": \"%f\", \"z\": \"%f\" } }]  }" % ( objectId, channelId, groupId, priority, level, diffuseness, posX, posY, posZ )
 
 
 udpSocket = socket.socket(socket.AF_INET, # Internet

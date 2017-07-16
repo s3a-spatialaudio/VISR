@@ -6,198 +6,311 @@
 //
 
 // avoid annoying warning about unsafe STL functions.
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
 
 #include "VBAP.h"
 
+#include <cmath>
+#include <numeric>
 #include <limits>
 
 namespace visr
 {
 namespace panning
 {
+  VBAP::VBAP( const LoudspeakerArray &lsarray, SampleType x, SampleType y, SampleType z )
+  {
+    
+    
+    numTotLoudspeakers = lsarray.getNumSpeakers();
+    numRegLoudspeakers = lsarray.getNumRegularSpeakers();
+    numVirtLoudspeakers = numTotLoudspeakers - numRegLoudspeakers;
+    numTriplets = lsarray.getNumTriplets();
+    
+    is2D = lsarray.is2D();
+    isInfinite = lsarray.isInfinite();
+    mInvMatrix.resize( numTriplets, 9 );
+    mPositions.resize( numTotLoudspeakers, 3 );
+    mGain.resize( numTotLoudspeakers );
+    mTriplets.resize( numTriplets );
+    mReroutingMatrix.resize( numVirtLoudspeakers, numRegLoudspeakers );
+    
+    
+    //mPositions
+    for( std::size_t i = 0; i < numTotLoudspeakers; i++ )
+    {
+      mPositions( i, 0 ) = lsarray.getPosition( i ).x;
+      mPositions( i, 1 ) = lsarray.getPosition( i ).y;
+      mPositions( i, 2 ) = lsarray.getPosition( i ).z;
+      
+    }
+    
+    for( std::size_t i = 0; i < numTriplets; i++ )
+    {
+      mTriplets[i][0] = lsarray.getTriplet( i )[0];
+      mTriplets[i][1] = lsarray.getTriplet( i )[1];
+      mTriplets[i][2] = lsarray.getTriplet( i )[2];
+    }
+    
+    for( std::size_t i = 0; i < numVirtLoudspeakers; i++ )
+    {
+      for( std::size_t j = 0; j < numRegLoudspeakers; j++ )
+      {
+        mReroutingMatrix( i, j ) = lsarray.getReroutingCoefficient( i, j );
+      }
+    }
+    // calls also the calcInverseMatrices
+    setListenerPosition(x, y, z);
+  }
   
-VBAP::VBAP()
- : m_array( 0 )
- , m_nSources( 0 )
-{
-}
+  namespace
+  {
+    void powerNormalisation( SampleType const * in, SampleType * out, std::size_t numberOfElements )
+    {
+      SampleType const sigPower = std::accumulate( in, in + numberOfElements, 0.0f,
+                                                  []( SampleType acc, SampleType val ) { return acc + val*val; } );
+      SampleType const normFactor = 1.0f / std::max( std::sqrt( sigPower ), std::numeric_limits<SampleType>::epsilon() );
+      efl::ErrorCode res = efl::vectorMultiplyConstant( normFactor, in, out, numberOfElements, 0/*alignment*/ );
+      if( res != efl::noError )
+      {
+        throw std::runtime_error( "VBAP: error during power normalisation." );
+      }
+    }
+    void normalise( SampleType &a1, SampleType &a2, SampleType &a3)
+    {
+      SampleType l = std::sqrt(a1*a1 + a2*a2 + a3*a3);
+      if (l != 0.0f ) {
+        a1 /= l;
+        a2 /= l;
+        a3 /= l;
+      }
+    }
+  } // unnamed namespace
+  
+  void VBAP::calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const
+  {
+    calcPlainVBAP( x, y, z);
+    applyRerouting();
+//    for( size_t i = 0; i < mGain.size(); i++ )
+//    {
+//      gains[i] = mGain[i];
+//    }
 
-int VBAP::calcInvMatrices(){
-    XYZ l1, l2, l3;
-    Afloat det, temp;
-    Afloat* inv;
- 
+    powerNormalisation( &mGain[0], gains, numRegLoudspeakers );
+  }
+  
+  void VBAP::setListenerPosition( SampleType x, SampleType y, SampleType z )
+  {
+    mListenerPos = std::array<SampleType, 3>{{x,y,z}};
+    calcInvMatrices();
+
+//    /* prints inverse matrices */
+//    for( size_t row = 0; row < mInvMatrix.numberOfRows(); row++ )
+//    {
+//      std::cout<<"idx: "<<row+1<<std::endl;
+//      std::cout << std::endl;
+//      for( size_t columns = 0; columns < mInvMatrix.numberOfColumns(); columns++ ){
+//        std::cout << mInvMatrix.at( row, columns ) << "\t\t";
+//        if((columns+1) % 3==0) std::cout << std::endl;
+//      }
+//       std::cout << std::endl;
+//    }
+    
+  }
+  
+  
+  
+  void VBAP::calcInvMatrices()
+  {
+    
+    
 #ifdef VBAP_DEBUG_MESSAGES
-    printf("calcInvMatrices()\n");   //!
+    printf( "calcInvMatrices()\n" );   //!
 #endif
-        
-    for (std::size_t i = 0 ; i < m_array->getNumTriplets(); i++) {
-
-      LoudspeakerArray::TripletType const & triplet = m_array->getTriplet( i );
-      if( triplet[0] == -1 ) continue;  //  triplet unused
-
-      l1 = m_array->getPosition( triplet[0] );
-      l2 = m_array->getPosition( triplet[1] );
-      if( m_array->is2D() ) { l3.x = 0; l3.y = 0; l3.z = 1; }  // adapt 3D calc for 2D array
-      else l3 = m_array->getPosition( triplet[2] );
-        
+    
+    SampleType l1X, l1Y, l1Z,
+    l2X, l2Y, l2Z,
+    l3X, l3Y, l3Z;
+    SampleType det, temp;
+    SampleType* inv;
+    for( std::size_t i = 0; i < mTriplets.size(); i++ )
+    {
+      
+      LoudspeakerArray::TripletType const & triplet = mTriplets[i];
+     
+      
+      l1X = mPositions( triplet[0], 0 );
+      l1Y = mPositions( triplet[0], 1 );
+      l1Z = mPositions( triplet[0], 2 );
+      
+      l2X = mPositions( triplet[1], 0 );
+      l2Y = mPositions( triplet[1], 1 );
+      l2Z = mPositions( triplet[1], 2 );
+     
+      if( is2D )
+      {
+        l3X = 0; l3Y = 0; l3Z = 1;
+      }  // adapt 3D calc for 2D array
+      else
+      {
+        l3X = mPositions( triplet[2], 0 );
+        l3Y = mPositions( triplet[2], 1 );
+        l3Z = mPositions( triplet[2], 2 );
+      }
+   
       // calc speaker positions relative to listener.
-      l1.x = l1.x - m_listenerPos.x;
-      l1.y = l1.y - m_listenerPos.y;
-      l1.z = l1.z - m_listenerPos.z;
-      l2.x = l2.x - m_listenerPos.x;
-      l2.y = l2.y - m_listenerPos.y;
-      l2.z = l2.z - m_listenerPos.z;
-      l3.x = l3.x - m_listenerPos.x;
-      l3.y = l3.y - m_listenerPos.y;
-      l3.z = l3.z - m_listenerPos.z;
+      l1X = l1X - mListenerPos[0];
+      l1Y = l1Y - mListenerPos[1];
+      l1Z = l1Z - mListenerPos[2];
+      l2X = l2X - mListenerPos[0];
+      l2Y = l2Y - mListenerPos[1];
+      l2Z = l2Z - mListenerPos[2];
+      l3X = l3X - mListenerPos[0];
+      l3Y = l3Y - mListenerPos[1];
+      l3Z = l3Z - mListenerPos[2];
 
-      l1.normalise();
-      l2.normalise();
-      l3.normalise();
+      normalise(l1X,l1Y,l1Z);
+      normalise(l2X,l2Y,l2Z);
+      normalise(l3X,l3Y,l3Z);
 
-      temp = (l1.x * ((l2.y * l3.z) - (l2.z * l3.y))
-                    - l1.y * ((l2.x * l3.z) - (l2.z * l3.x))
-                    + l1.z * ((l2.x * l3.y) - (l2.y * l3.x)) );
-
+//      std::cout<<"AAFTERi"<<i<<std::endl;
+//      std::cout<<"\t\t"<<l1X<<"\t\t"<<l1Y<<"\t\t"<<l1Z<<std::endl;
+//      std::cout<<"\t\t"<<l2X<<"\t\t"<<l2Y<<"\t\t"<<l2Z<<std::endl;
+//      std::cout<<"\t\t"<<l3X<<"\t\t"<<l3Y<<"\t\t"<<l3Z<<std::endl;
+      temp = (l1X * ((l2Y * l3Z) - (l2Z * l3Y))
+              - l1Y * ((l2X * l3Z) - (l2Z * l3X))
+              + l1Z * ((l2X * l3Y) - (l2Y * l3X)));
+      
       if( temp != 0.0f ) det = 1.0f / temp;
       else det = 1.0f;
-
-      inv = m_invMatrix.row( i );
-      inv[0] = ((l2.y * l3.z) - (l2.z * l3.y)) * det;
-      inv[3] = ((l1.y * l3.z) - (l1.z * l3.y)) * -det;
-      inv[6] = ((l1.y * l2.z) - (l1.z * l2.y)) * det;
-      inv[1] = ((l2.x * l3.z) - (l2.z * l3.x)) * -det;
-      inv[4] = ((l1.x * l3.z) - (l1.z * l3.x)) * det;
-      inv[7] = ((l1.x * l2.z) - (l1.z * l2.x)) * -det;
-      inv[2] = ((l2.x * l3.y) - (l2.y * l3.x)) * det;
-      inv[5] = ((l1.x * l3.y) - (l1.y * l3.x)) * -det;
-      inv[8] = ((l1.x * l2.y) - (l1.y * l2.x)) * det;
+      
+      
+      inv = mInvMatrix.row( i );
+      inv[0] = ((l2Y * l3Z) - (l2Z * l3Y)) * det;
+      inv[3] = ((l1Y * l3Z) - (l1Z * l3Y)) * -det;
+      inv[6] = ((l1Y * l2Z) - (l1Z * l2Y)) * det;
+      inv[1] = ((l2X * l3Z) - (l2Z * l3X)) * -det;
+      inv[4] = ((l1X * l3Z) - (l1Z * l3X)) * det;
+      inv[7] = ((l1X * l2Z) - (l1Z * l2X)) * -det;
+      inv[2] = ((l2X * l3Y) - (l2Y * l3X)) * det;
+      inv[5] = ((l1X * l3Y) - (l1Y * l3X)) * -det;
+      inv[8] = ((l1X * l2Y) - (l1Y * l2X)) * det;
     }
-
-    return 0;
-}
-
-
-
-
-int VBAP::calcGains(){
-
-    int jmin,l1,l2,l3;
-    Afloat g1,g2,g3,g,gmin,g1min,g2min,g3min,x,y,z;
-
+   
+  }
+  
+  
+  void VBAP::calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ ) const
+  {
+    
+//     std::cout<<"l1X: "<<posX<<" l1Y: "<<posY<<" l1Z: "<<posZ<<std::endl;
+    std::fill( mGain.begin(), mGain.end(), 0.0f );
+//    std::copy( mGain.data(), mGain.data() + 10, std::ostream_iterator<Afloat>( std::cout, ",\t\t " ) );
+//    std::cout << std::endl;
 
     //! Slow triplet search
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
-
-    jmin = -1; // indicate currently no triplet candidate.
+    
+    
+    SampleType  gmin, g1min, g2min, g3min;
+    SampleType x, y, z;
+    static constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
+    std::size_t jmin = invalid;// indicate currently no triplet candidate.
+    
 #ifdef VBAP_DEBUG_MESSAGES
-    printf("setListenerPosition %f %f %f\n",m_listenerPos.x,m_listenerPos.y,m_listenerPos.z);
+    printf( "setListenerPosition %f %f %f\n", mListenerPos[0], mListenerPos[1], mListenerPos[2] );
 #endif
     gmin = g1min = g2min = g3min = 0.0;
-
-    m_gain.zeroFill();
     
-    for(std::size_t i = 0; i < m_nSources; i++) {
-        
-        x = m_sourcePos[i].x;
-        y = m_sourcePos[i].y;
-        z = m_sourcePos[i].z;
-        
-        if (!m_sourcePos[i].isInfinite) {
-            x -= m_listenerPos.x;
-            y -= m_listenerPos.y;
-            z -= m_listenerPos.z;
-        }
-
-
-        if (m_array->is2D()) z = 0; //! temp fix. no fade from 2D plane.
-        
-        for(std::size_t j = 0; j < m_array->getNumTriplets(); j++) {
-
-            if (m_array->getTriplet(j)[0] == -1) continue;  //  triplet unused
-
-            Afloat const * inv = m_invMatrix.row(j);
-            g1 = x*inv[0] + y*inv[1] + z*inv[2];
-            g2 = x*inv[3] + y*inv[4] + z*inv[5];
-            g3 = x*inv[6] + y*inv[7] + z*inv[8];
-
-            if ( g1 >= 0 && g2 >= 0 && ( g3 >= 0 || m_array->is2D() ) )  // inside triplet, or edge in 2D case.
-            {
-                jmin = j;
-                g1min = g1; g2min = g2; g3min = g3;
-                break;  // should only be at most one triplet with all positive gains.
-            }
-        
-            // Update gmin if lowest gain in triplet is higher than gmin.
-            // Triplet must have at most 1 -ve gain.
-            //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
-            //! better geometric solution needed.
-            //! 'dead'-speakers provide a posssible solution.
-
-            if ( ( (g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&   // at most one negative gain
-                 ( jmin == -1 || (g1 > gmin && g2 > gmin && g3 > gmin)  )
-            ) {
-                jmin = j;
-                g1min = g1; g2min = g2; g3min = g3;
-                gmin = g1;
-                if (g2 < gmin) { gmin = g2; }
-                if (g3 < gmin) { gmin = g3; }
-            }
-        }
-
-        if (jmin == -1) return -1; // failure to find best triplet. No gains set. See //! above
+    x = posX;
+    y = posY;
+    z = posZ;
     
-        // gains of triplet with highest minimum-gain-in-triplet
-        g1 = g1min; g2 = g2min; g3 = g3min;
-        
-
-        // in 2D case g3 != 0 when source is out of 2D plane.
-        // Normalization causes fade with distance from plane unless g3 set to 0 first.
-        //if (m_array->is2D()) g3 = 0;
-        
-
-        // Normalization
-        // normalization first makes negative gain comparisons more reasonable.
-        g = sqrt(g1*g1+g2*g2+g3*g3);
-        // g = g1+g2+g3; //! more appropriate for low freq sounds / close speakers.
-        if (g > 0) {
-          g1 = g1 / g;
-          g2 = g2 / g;
-          g3 = g3 / g;
-        }
-
-
-        // Remove -ve gain if present, moves image to edge of triplet.
-        // after normalization: gains fade with distance from boundary edge.
-        // before normalization: gain fixed whether on or off a boundary edge.
-        if (g1 < 0) g1 = 0;
-        if (g2 < 0) g2 = 0;
-        if (g3 < 0) g3 = 0;
-        
-        // Apply gain limit
-        if (g1 > m_maxGain) g1 = m_maxGain;
-        if (g1 < -m_maxGain) g1 = -m_maxGain;
-        if (g2 > m_maxGain) g2 = m_maxGain;
-        if (g2 < -m_maxGain) g2 = -m_maxGain;
-        if (g3 > m_maxGain) g3 = m_maxGain;
-        if (g3 < -m_maxGain) g3 = -m_maxGain;
-        
-        l1 = m_array->getTriplet(jmin)[0];
-        l2 = m_array->getTriplet(jmin)[1];
-        l3 = m_array->getTriplet(jmin)[2];
-        m_gain(i, l1 ) = g1;
-        m_gain(i, l2 ) = g2;
-        if (!m_array->is2D()) m_gain(i,l3) = g3;     // l3 undefined in 2D case 
-#ifdef VBAP_DEBUG_MESSAGES
-        printf("%d  %f %f %f   %d  %d %d %d  %f %f %f \n",i, x,y,z,  jmin, l1,l2,l3, g1,g2,g3);
-#endif
+    if( isInfinite )
+    {
+      x -= mListenerPos[0];
+      y -= mListenerPos[1];
+      z -= mListenerPos[2];
     }
-    return 0;
-}
-
+    if( is2D ) z = 0; //! temp fix. no fade from 2D plane.
+    
+    std::size_t l1, l2, l3;
+    SampleType g1, g2, g3;
+    for( std::size_t j = 0; j < mTriplets.size(); j++ )
+    {
+      SampleType const * inv = mInvMatrix.row( j );
+      g1 = x*inv[0] + y*inv[1] + z*inv[2];
+      g2 = x*inv[3] + y*inv[4] + z*inv[5];
+      g3 = x*inv[6] + y*inv[7] + z*inv[8];
+      
+      if( g1 >= 0 && g2 >= 0 && (g3 >= 0 || is2D) )  // inside triplet, or edge in 2D case.
+      {
+        jmin = j;
+        g1min = g1; g2min = g2; g3min = g3;
+        break;  // should only be at most one triplet with all positive gains.
+      }
+      
+      // Update gmin if lowest gain in triplet is higher than gmin.
+      // Triplet must have at most 1 -ve gain.
+      //! failure possible: if panning outside a 'naked corner' / large z swapping to other triangles.
+      //! better geometric solution needed.
+      //! 'dead'-speakers provide a posssible solution.
+      
+      if( ((g1 < 0) + (g2 < 0) + (g3 < 0) <= 1) &&   // at most one negative gain
+         (jmin == invalid || (g1 > gmin && g2 > gmin && g3 > gmin))
+         )
+      {
+        jmin = j;
+        g1min = g1; g2min = g2; g3min = g3;
+        gmin = g1;
+        if( g2 < gmin ) { gmin = g2; }
+        if( g3 < gmin ) { gmin = g3; }
+      }
+    }
+    
+    if( jmin == invalid )
+    {
+      throw std::runtime_error( "calcPlainVBAP: no triplet with a correct gain." );
+    }
+    // gains of triplet with highest minimum-gain-in-triplet
+    g1 = g1min; g2 = g2min; g3 = g3min;
+    
+    // in 2D case g3 != 0 when source is out of 2D plane.
+    // Normalization causes fade with distance from plane unless g3 set to 0 first.
+    //if (m_array->is2D()) g3 = 0;
+    
+    l1 = mTriplets[jmin][0];
+    l2 = mTriplets[jmin][1];
+    l3 = mTriplets[jmin][2];
+    // std::cout << "INDX1: " << l1 << "VAL: "<< mGain[l1] << "INDX2: " << l2 << "VAL: " << mGain[l2] << "INDX3: " << l3 << "VAL: " << mGain[l3]<<std::endl;
+    //std::cout << "INDX1: " << l1 << "INDX2: " << l2 <<  "INDX3: " << l3 << std::endl;
+    
+    mGain[l1] = g1;
+    mGain[l2] = g2;
+    if( !is2D )
+      mGain[l3] = g3;     // l3 undefined in 2D case
+  
+#ifdef VBAP_DEBUG_MESSAGES
+    printf( "%d  %f %f %f   %d  %d %d %d  %f %f %f \n", i, x, y, z, jmin, l1, l2, l3, g1, g2, g3 );
+#endif
+    
+  }
+  
+  void VBAP::applyRerouting() const
+  {
+    for( std::size_t i = 0; i < numRegLoudspeakers; i++ )
+    {
+      for( std::size_t j = 0; j < numVirtLoudspeakers; j++ )
+      {
+//        std::cout<<"G"<<mGain[i]<<std::endl;
+        
+        mGain[i] = mGain[i] + mReroutingMatrix( j, i ) * mGain[numRegLoudspeakers + j];
+      }
+    }
+  }
+  
+ 
 } // namespace panning
 } // namespace visr

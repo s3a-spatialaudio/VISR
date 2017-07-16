@@ -4,7 +4,8 @@
 #define VISR_LIBRCL_ADD_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 
 #include <memory> // for std::unique_ptr
@@ -12,11 +13,6 @@
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
 
 namespace rcl
 {
@@ -26,28 +22,27 @@ namespace rcl
  * The number of inputs is set by the \p numInputs argument passed to the setup() method.
  * All input vectors must have the same number of signals given by the \p width argument to setup().
  */
-class Add: public ril::AudioComponent
+class Add: public AtomicComponent
 {
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
+   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
+   * @param numInputs The number of signal vectors to be added.
    */
-  explicit Add( ril::AudioSignalFlow& container, char const * name );
+  explicit Add( SignalFlowContext const & context,
+                char const * name,
+                CompositeComponent * parent,
+                std::size_t width,
+                std::size_t numInputs );
 
   /**
    * Destructor.
    */
   ~Add();
-
-  /**
-   * Method to initialise the component.
-   * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
-   * @param width The width of the input vectors, i.e., the number of single signals transmitted by one port.
-   * @param numInputs The number of signal vectors to be added.
-   */ 
-  void setup( std::size_t width, std::size_t numInputs );
 
   /**
    * The process function. 
@@ -60,15 +55,16 @@ private:
   /**
    * The audio output of the component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
 
   /**
    * A vector holding an arbitrary number of inputs
    */
-  std::vector<std::unique_ptr<ril::AudioInput> > mInputs;
+  std::vector<std::unique_ptr< AudioInput > > mInputs;
 };
 
 } // namespace rcl
+
 } // namespace visr
 
 #endif // #ifndef VISR_LIBRCL_ADD_HPP_INCLUDED

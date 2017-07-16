@@ -76,13 +76,13 @@ namespace test
                 // from a initializer list that is compiled into the program.
                 efl::BasicMatrix<FIR::Afloat> allFirCoeffs( 64, filterLength,
 #include "fir/quasiAllpassFIR_f64_n63_initializer_list.txt"
-                 , ril::cVectorAlignmentSamples );
+                 , cVectorAlignmentSamples );
 
                 // Create a second filter matrix that matches the number of required filters.
-                efl::BasicMatrix<FIR::Afloat> firCoeffs( numOutputs, filterLength, ril::cVectorAlignmentSamples );
+                efl::BasicMatrix<FIR::Afloat> firCoeffs( numOutputs, filterLength, cVectorAlignmentSamples );
                 for( std::size_t idx( 0 ); idx < firCoeffs.numberOfRows(); ++idx )
                 {
-                  efl::vectorCopy( allFirCoeffs.row( idx ), firCoeffs.row( idx ), filterLength, ril::cVectorAlignmentSamples );
+                  efl::vectorCopy( allFirCoeffs.row( idx ), firCoeffs.row( idx ), filterLength, cVectorAlignmentSamples );
                 }
 
                 filter.loadFIRs( firCoeffs );

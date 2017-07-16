@@ -4,6 +4,7 @@
 
 #include <libpml/biquad_parameter.hpp>
 
+#include <libmexsupport/export_symbol.hpp>
 #include <libmexsupport/mex_wrapper.hpp>
 
 #include <libril/constants.hpp>
@@ -19,6 +20,7 @@ static char const * usage()
   return "Usage: output = feedthrough( input [, parameterMessages], blockLength, samplingFrequency )";
 }
 
+VISR_MEXSUPPORT_EXPORT_SYMBOL
 void mexFunction(int nlhs, mxArray *plhs[],int nrhs, const mxArray *prhs[] )
 {
   using namespace visr;

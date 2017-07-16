@@ -18,25 +18,32 @@ PROJECT( VISR CXX C )
 # Define central version numbers for the project
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 8 )
-set( VISR_PATCH_VERSION 2 )
+set( VISR_MINOR_VERSION 9 )
+set( VISR_PATCH_VERSION 0 )
 
 ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
 
 
+
+
+
 # Add support for unit tests
 INCLUDE( CTest )
+
+# Enable C++11 features on Linux platforms
+# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
+# Maybe there is a more general way to configure the different platforms and toolchains
+if(UNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -march=native")
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
-
-# Include files of imported (i.e., 3rd party) libraries must be specified relative to 3rd/include.
-# INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/3rd/include )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
@@ -47,7 +54,23 @@ SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 # Create a system string.
 SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
 IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
-  SET( VISR_SYSTEM_NAME MacOS )
+
+SET(CMAKE_INSTALL_PREFIX /Applications/VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}-${VISR_SYSTEM_NAME} )
+
+#SET( MACOSX_RPATH ON)
+# use, i.e. don't skip the full RPATH for the build tree
+#SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+# when building, don't use the install RPATH already
+# (but later on when installing)
+#SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+   SET( VISR_SYSTEM_NAME MacOS )
+#  SET(CMAKE_INSTALL_PREFIX /Applications )
 ENDIF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
 SET( VISR_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} )
@@ -100,6 +123,13 @@ if( WIN32 ) # Covers 64-bit Windows as well
   add_definitions( -D_WINN32_WINNT=${WIN_VERSION_ID} )
   # Avoid specific compiler warnings of the Visual Studio  compiler.
   add_definitions( -D_SCL_SECURE_NO_WARNINGS ) # STL algorithms with pointers instead of 'real' iterators are perfectly legal.
+  # Avoid complaints about STL members in classes with VISR_CORE_LIBRARY_SYMBOL not having DLL interfaces.
+  add_definitions( "/wd4251" )
+  #
+#   ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /wd4251 /nologo" )
+   add_definitions( "-D_WIN32_WINNT=0x0601" )
+
+
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3" ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 endif( WIN32 )
@@ -123,7 +153,6 @@ endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
-# TODO: Test and fix this fature.
 SET( CMAKE_C_VISIBILITY_PRESET hidden )
 SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
@@ -133,12 +162,16 @@ SET( CMAKE_CXX_VISIBILITY_PRESET hidden )
 OPTION( BUILD_MATLAB_EXTERNALS "Build Matlab externals" OFF )
 
 IF( BUILD_MATLAB_EXTERNALS )
-FIND_PACKAGE(Matlab REQUIRED)
-IF(MATLAB_FOUND)
+  FIND_PACKAGE(Matlab REQUIRED)
+  IF(MATLAB_FOUND)
     MESSAGE( STATUS "Matlab found." )
-  ELSEIF( MATLAB_FOUND )
+  ELSE( MATLAB_FOUND )
     MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
-ENDIF( MATLAB_FOUND )
+  ENDIF( MATLAB_FOUND )
+  # Brute-force way make all the code position-independent if we build Matlab externals.
+  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
+  # SEE: python bindings support
+  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
 ENDIF( BUILD_MATLAB_EXTERNALS )
 
 ################################################################################
@@ -163,6 +196,17 @@ IF( BUILD_PYTHON_BINDINGS )
   # Brute-force way make all the code position-independent if we use python bindings.
   # TODO: Devise more selective solution (separate sets of static libraries, etc.)
   SET( CMAKE_POSITION_INDEPENDENT_CODE True )
+
+  include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+
+  # Enable the pybind11 cmake support
+  # TODO: Decide whether it's worth to use that in the future or remove it
+  # and the implementation files cmake_modules/pybind11Tools.cmake
+  # and cmake_modules/FindPythonLibsNew.cmake
+  # Support is activated in the CMakeLists.txt files of the respective
+  # Python binding modules.
+  include( pybind11Tools )
+
 ENDIF( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
@@ -257,11 +301,7 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
-
-IF( BUILD_PYTHON_BINDINGS )
-  LIST( APPEND VISR_BOOST_LIBRARIES python ) 
-ENDIF( BUILD_PYTHON_BINDINGS )
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework regex )
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.

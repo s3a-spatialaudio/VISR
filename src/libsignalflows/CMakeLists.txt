@@ -1,11 +1,32 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-# Temporarily pass the path to baseline_renderer.cpp to compile in the hard-coded setup decoder configuration for the initial HOA support.
-ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} )
-
-SET( SOURCES baseline_renderer.cpp delay_vector.cpp gain_matrix.cpp matrix_convolver.cpp)
+SET( SOURCES 
+core_renderer.cpp
+baseline_renderer.cpp 
+bunch_renderer.cpp 
+delay_vector.cpp 
+gain_matrix.cpp
+matrix_convolver.hpp
+time_frequency_feedthrough.cpp
+)
 
 # Basically, this makes the headers show up in the Visual studio project.
-SET( HEADERS baseline_renderer.hpp delay_vector.hpp gain_matrix.hpp matrix_convolver.hpp )
+SET( HEADERS 
+baseline_renderer.hpp
+bunch_renderer.hpp
+core_renderer.hpp
+delay_vector.hpp 
+gain_matrix.hpp
+matrix_convolver.cpp
+time_frequency_feedthrough.hpp
+)
 
 ADD_LIBRARY( signalflows STATIC ${SOURCES} ${HEADERS} )
+
+# Transitive link dependencies
+target_link_libraries( signalflows rcl )
+target_link_libraries( signalflows pml )
+target_link_libraries( signalflows rsao )
+
+# Add the unit test directory.
+ADD_SUBDIRECTORY( test )

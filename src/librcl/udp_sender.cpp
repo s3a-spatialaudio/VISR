@@ -2,10 +2,9 @@
 
 #include "udp_sender.hpp"
 
-#include <libpml/message_queue.hpp>
+#include <libpml/empty_parameter_config.hpp>
 
 #include <boost/asio/placeholders.hpp>
-//#include <boost/asio.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/lock_types.hpp>
 
@@ -19,9 +18,12 @@ namespace visr
 namespace rcl
 {
 
-UdpSender::UdpSender( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  UdpSender::UdpSender( SignalFlowContext const & context,
+                        char const * name,
+                        CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
+ , mMessageInput( "messageInput", *this, pml::EmptyParameterConfig() )
 {
 }
 
@@ -69,7 +71,6 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   {
     mIoServiceWork.reset( new  boost::asio::io_service::work( *mIoService ) );
   }
-  mInternalMessageBuffer.reset( new pml::MessageQueue< std::string >( ) );
 
   udp::resolver resolver( *mIoService );
   udp::resolver::query query( udp::v4( ),
@@ -78,7 +79,6 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
                               udp::resolver::query::flags::passive ); /* Override the default values for the flag parameter which includes "address_configured"
     that requires a network conection apart from loopback device. */
   mRemoteEndpoint = *resolver.resolve( query );
-  std::cout << "Remote endpoint: " << mRemoteEndpoint.address().to_string() << ":" << mRemoteEndpoint.port() << std::endl;
   if( mRemoteEndpoint.port() != static_cast<unsigned short>(receiverPort) )
   {
     throw std::logic_error("");
@@ -93,38 +93,38 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   }
 }
 
-void UdpSender::process( pml::MessageQueue<std::string> & msgQueue )
+void UdpSender::process()
 {
   switch( mMode )
   {
   case Mode::Synchronous:
     // we don't operate an internal message queue in this mode.
-    while( !msgQueue.empty( ) )
+    while( !mMessageInput.empty() )
     {
-      std::string const & nextMsg = msgQueue.nextElement( );
+      pml::StringParameter const & nextMsg = mMessageInput.front( );
       // boost::system::error_code err;
       std::size_t bytesSent = mSocket->send_to( boost::asio::buffer(nextMsg.c_str(), nextMsg.size()), mRemoteEndpoint );
       if( bytesSent != nextMsg.size() )
       {
         throw std::runtime_error( "Number of sent bytes differs from message size." );
       }
-      msgQueue.popNextElement( );
+      mMessageInput.pop( );
     }
     break;
   case Mode::Asynchronous:
   case Mode::ExternalServiceObject:
     {
       boost::lock_guard<boost::mutex> lock( mMutex );
-      bool const transmissionPending = not mInternalMessageBuffer->empty();
-      while( !msgQueue.empty() )
+      bool const transmissionPending = not mInternalMessageBuffer.empty();
+      while( not mMessageInput.empty() )
       {
-        std::string const & nextMsg = msgQueue.nextElement();
-        mInternalMessageBuffer->enqueue( nextMsg );
-        msgQueue.popNextElement();
+        std::string const & nextMsg = mMessageInput.front();
+        mInternalMessageBuffer.push_back( pml::StringParameter( nextMsg ) );
+        mMessageInput.pop();
       }
-      if( not mInternalMessageBuffer->empty() and not transmissionPending )
+      if( not mInternalMessageBuffer.empty() and not transmissionPending )
       {
-        std::string const & nextMsg = mInternalMessageBuffer->nextElement( );
+        std::string const & nextMsg = mInternalMessageBuffer.front( );
         mSocket->async_send_to( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
                                 mRemoteEndpoint,
                                 boost::bind( &UdpSender::handleSentData, this,
@@ -143,16 +143,16 @@ void UdpSender::handleSentData( const boost::system::error_code& error,
     throw std::runtime_error( "UdpSender: Asynchronous send operation resulted in an error." );
   }
   boost::lock_guard<boost::mutex> lock( mMutex );
-  assert( not mInternalMessageBuffer->empty() );
-  std::string const & currMsg = mInternalMessageBuffer->nextElement();
+  assert( not mInternalMessageBuffer.empty() );
+  pml::StringParameter & currMsg = mInternalMessageBuffer.front();
   if( currMsg.size() != numBytesTransferred )
   {
     throw std::runtime_error( "UdpSender: Asynchronous send operation transmitted less bytes than the message length." );
   }
-  mInternalMessageBuffer->popNextElement();
-  if( not mInternalMessageBuffer->empty() )
+  mInternalMessageBuffer.pop_front();
+  if( not mInternalMessageBuffer.empty() )
   {
-    std::string const & nextMsg = mInternalMessageBuffer->nextElement();
+    pml::StringParameter const & nextMsg = mInternalMessageBuffer.front();
     mSocket->async_send_to( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
                             mRemoteEndpoint,
                             boost::bind( &UdpSender::handleSentData, this,

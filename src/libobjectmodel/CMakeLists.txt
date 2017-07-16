@@ -16,9 +16,15 @@ object_vector_parser.cpp
 plane_wave.cpp
 plane_wave_parser.cpp
 point_source.cpp
+point_source_extent.cpp
+point_source_extent_parser.cpp
 point_source_parser.cpp
+point_source_with_reverb.cpp
+point_source_with_reverb_parser.cpp
 point_source_with_diffuseness.cpp
 point_source_with_diffuseness_parser.cpp
+point_source_with_reverb.cpp
+point_source_with_reverb_parser.cpp
 )
 
 SET( HEADERS
@@ -37,12 +43,22 @@ object_vector_parser.hpp
 plane_wave.hpp
 plane_wave_parser.hpp
 point_source.hpp
+point_source_extent.hpp
+point_source_extent_parser.hpp
 point_source_parser.hpp
+point_source_with_reverb.hpp
+point_source_with_reverb_parser.hpp
 point_source_with_diffuseness.hpp
 point_source_with_diffuseness_parser.hpp
+point_source_with_reverb.hpp
+point_source_with_reverb_parser.hpp
 )
 
 ADD_LIBRARY( objectmodel STATIC ${SOURCES} ${HEADERS} )
+
+target_link_libraries( objectmodel pml ) # Most likely a circular dependency at the moment
+# (critical only shared libraries are involved)
+# Incidentally, we are not really using parameter types , but only utility (parsing) functionality from libpml.
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

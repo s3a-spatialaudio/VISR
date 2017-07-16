@@ -18,6 +18,15 @@ ObjectVector::~ObjectVector()
 {
 }
 
+void ObjectVector::assign( ObjectVector const & rhs )
+{
+  mObjects.clear();
+  for( ObjectContainer::value_type const & v : rhs.mObjects )
+  {
+    mObjects.insert( std::make_pair( v.first, v.second->clone() ) );
+  }
+}
+
 void ObjectVector::swap( ObjectVector & rhs )
 {
   mObjects.swap( rhs.mObjects );

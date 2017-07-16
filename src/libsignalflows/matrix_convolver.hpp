@@ -3,12 +3,21 @@
 #ifndef VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_MATRIX_CONVOLVER_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+#include <libril/composite_component.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input.hpp>
+
+#include <libpml/indexed_value_parameter.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
 
 #include <libefl/basic_matrix.hpp>
+
+#include <memory>
+#include <vector>
 
 namespace visr
 {
@@ -22,25 +31,30 @@ class FilterRoutingList;
 namespace signalflows
 {
 
-class MatrixConvolver: public ril::AudioSignalFlow
+class MatrixConvolver: public CompositeComponent
 {
 public:
-  explicit MatrixConvolver( std::size_t numberOfInputs, 
-                       std::size_t numberOfOutputs,
-                       std::size_t filterLength,
-                       std::size_t maxFilters,
-                       std::size_t maxRoutings,
-                       efl::BasicMatrix<ril::SampleType> const & initialFilters,
-                       pml::FilterRoutingList const & initialRoutings,
-                       char const * fftImplementation,
-                       std::size_t period,
-                       ril::SamplingFrequencyType samplingFrequency );
+  explicit MatrixConvolver( SignalFlowContext const & context,
+                            char const * name,
+                            CompositeComponent * parent,
+                            std::size_t numberOfInputs,
+                            std::size_t numberOfOutputs,
+                            std::size_t filterLength,
+                            std::size_t maxFilters,
+                            std::size_t maxRoutings,
+                            efl::BasicMatrix<SampleType> const & initialFilters,
+                            pml::FilterRoutingList const & initialRoutings,
+                            bool controlInputs,
+                            char const * fftImplementation );
 
   ~MatrixConvolver();
 
-  /*virtual*/ void process( );
-
 private:
+  AudioInputT<SampleType> mAudioIn;
+  AudioOutputT<SampleType> mAudioOut;
+
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > > mFilterInput;
+
   rcl::FirFilterMatrix mConvolver;
 };
 

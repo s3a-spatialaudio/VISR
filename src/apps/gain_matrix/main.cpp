@@ -4,8 +4,11 @@
 
 #include <libpml/matrix_parameter.hpp>
 
-#include <librrl/portaudio_interface.hpp>
+#include <libril/signal_flow_context.hpp>
 
+#include <libaudiointerfaces/audio_interface_factory.hpp>
+#include <libaudiointerfaces/portaudio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <libsignalflows/gain_matrix.hpp>
 
 #include <boost/filesystem/operations.hpp>
@@ -51,11 +54,11 @@ int main( int argc, char const * const * argv )
       throw std::invalid_argument( "GainMatrix: Exactly one of the options \"--matrix (-m)\" or \"--matrix-file (-f)\" must be provided." );
     }
 
-    std::unique_ptr<pml::MatrixParameter<ril::SampleType> > initialMtx;
+    std::unique_ptr<pml::MatrixParameter<SampleType> > initialMtx;
     if( cmdLineOptions.hasOption( "matrix" ) )
     {
-      initialMtx.reset( new pml::MatrixParameter<ril::SampleType>( pml::MatrixParameter<ril::SampleType>::fromString( cmdLineOptions.getOption<std::string>( "matrix" ),
-                             ril::cVectorAlignmentSamples ) ));
+      initialMtx.reset( new pml::MatrixParameter<SampleType>( pml::MatrixParameter<SampleType>::fromString( cmdLineOptions.getOption<std::string>( "matrix" ),
+                             cVectorAlignmentSamples ) ));
     }
     else
     {
@@ -66,12 +69,12 @@ int main( int argc, char const * const * argv )
         throw std::invalid_argument( std::string("GainMatrix: The file specified by the \"--matrix-file\" argument does not exist." )
           + matrixPath.string() );
       }
-      initialMtx.reset( new pml::MatrixParameter<ril::SampleType>( 
-        pml::MatrixParameter<ril::SampleType>::fromTextFile( matrixPath.string( ), ril::cVectorAlignmentSamples ) ));
+      initialMtx.reset( new pml::MatrixParameter<SampleType>( 
+        pml::MatrixParameter<SampleType>::fromTextFile( matrixPath.string( ), cVectorAlignmentSamples ) ));
     }
-    ril::SampleType const gainAdjustDB = cmdLineOptions.getDefaultedOption<ril::SampleType>( "global-gain", 0.0f );
+    SampleType const gainAdjustDB = cmdLineOptions.getDefaultedOption<SampleType>( "global-gain", 0.0f );
     // TODO: Replace by library function dB2linear
-    ril::SampleType const gainAdjustLinear = std::pow( static_cast<ril::SampleType>(10.0f), gainAdjustDB / static_cast<ril::SampleType>(20.0f) );
+    SampleType const gainAdjustLinear = std::pow( static_cast<SampleType>(10.0f), gainAdjustDB / static_cast<SampleType>(20.0f) );
 
     // define fixed parameters for rendering
     const std::size_t numberOfInputs = initialMtx->numberOfColumns();
@@ -84,39 +87,37 @@ int main( int argc, char const * const * argv )
         initialMtx->at( outputIdx, inputIdx ) *= gainAdjustLinear;
       }
     }
-
-    rrl::PortaudioInterface::Config interfaceConfig;
-    interfaceConfig.mNumberOfCaptureChannels = numberOfInputs;
-    interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputs;
-    interfaceConfig.mPeriodSize = periodSize;
-    interfaceConfig.mSampleRate = samplingRate;
-    interfaceConfig.mInterleaved = false;
-    interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-    interfaceConfig.mHostApi = cAudioBackend;
-
-    rrl::PortaudioInterface audioInterface( interfaceConfig );
+      
+    visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numberOfInputs,numberOfOutputs,samplingRate,periodSize);
+      std::string type;
+      std::string specConf;
+      
+      specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+cAudioBackend+"}";
+      type = "PortAudio";
+      
+      std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf);
 
     // Unused at the moment (no gain changes).
     const std::size_t cInterpolationLength = periodSize;
 
-    visr::signalflows::GainMatrix flow( numberOfInputs, numberOfOutputs,
-                                        *initialMtx,
-                                        cInterpolationLength, periodSize,
-                                        samplingRate );
+    SignalFlowContext context( periodSize, samplingRate );
 
-    audioInterface.registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    visr::signalflows::GainMatrix flow( context, "", nullptr,
+                                        numberOfInputs, numberOfOutputs,
+                                        *initialMtx,
+                                        cInterpolationLength );
+
+    // audioInterface.registerCallback( &AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
-    audioInterface.start( );
+    audioInterface->start( );
 
     // Rendering runs until <Return> is entered on the console.
     std::getc( stdin );
 
-    audioInterface.stop( );
+    audioInterface->stop( );
 
-   // Should there be an explicit stop() method for the sound interface?
-
-    audioInterface.unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    // audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
   }
   catch( std::exception const & ex )
   {

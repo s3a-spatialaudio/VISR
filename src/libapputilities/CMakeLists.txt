@@ -1,6 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( SOURCES options.cpp )
-SET( HEADERS options.hpp )
+set( SOURCES options.cpp )
+set( HEADERS options.hpp )
 
-ADD_LIBRARY( apputilities STATIC ${SOURCES} ${HEADERS} )
+add_library( apputilities STATIC ${SOURCES} ${HEADERS} )
+
+target_link_libraries( apputilities ${Boost_PROGRAM_OPTIONS_LIBRARY})

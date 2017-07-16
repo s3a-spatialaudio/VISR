@@ -3,6 +3,11 @@
 #ifndef VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
 #define VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED
 
+#include "matrix_parameter_config.hpp" // might be a forward declaration
+
+#include <libril/typed_parameter_base.hpp>
+#include <libril/parameter_type.hpp>
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 #include <algorithm>
@@ -45,8 +50,9 @@ public:
   BiquadParameter( BiquadParameter<CoeffType> const & rhs ) = default;
 
   /**
-   * Create a BiquadParameter object from a JSON representation.
+   * Create a BiquadParameter objects from JSON and XML representations.
    */
+  //@{
   static BiquadParameter fromJson( boost::property_tree::ptree const & tree );
 
   static BiquadParameter fromJson( std::basic_istream<char> & stream );
@@ -54,6 +60,7 @@ public:
   static BiquadParameter fromXml( boost::property_tree::ptree const & tree );
 
   static BiquadParameter fromXml( std::basic_istream<char> & stream );
+  //@}
 
   BiquadParameter( CoeffType b0, CoeffType b1, CoeffType b2,
                    CoeffType a1, CoeffType a2 )
@@ -136,6 +143,23 @@ public:
 
   void loadXml( std::basic_istream<char> & );
 
+  /**
+   * 
+   */
+  //@{
+  void writeJson( boost::property_tree::ptree & tree ) const;
+
+  void writeJson( std::basic_ostream<char> & stream ) const;
+
+  void writeJson( std::string & str ) const;
+
+  void writeXml( boost::property_tree::ptree & tree ) const;
+
+  void writeXml ( std::basic_ostream<char> & stream ) const;
+
+  void writeXml ( std::string & str ) const;
+
+  //@}
 private:
   /**
    * The internal data representation.
@@ -228,25 +252,67 @@ public:
   void loadXml( std::basic_istream<char> & stream );
 
   void loadXml( std::string const & str );
+
+  /**
+  *
+  */
+  //@{
+  void writeJson( boost::property_tree::ptree & tree ) const;
+
+  void writeJson( std::basic_ostream<char> & stream ) const;
+
+  void writeJson( std::string & str ) const;
+
+  void writeXml( boost::property_tree::ptree & tree ) const;
+
+  void writeXml( std::basic_ostream<char> & stream ) const;
+
+  void writeXml( std::string & str ) const;
+  //@}
+
+
 private:
   Container mBiquads;
 };
 
-template<typename CoeffType>
-class BiquadParameterMatrix
+namespace // unnamed
+{
+/**
+ * Type trait to assign a unique type to each concrete BiquadParameterMatrix type.
+ */
+template<typename ElementType> struct BiquadMatrixParameterType{};
+
+template<> struct BiquadMatrixParameterType<float>
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "BiquadFloatMatrix" ); }
+};
+template<> struct BiquadMatrixParameterType<double>
+{
+  static constexpr const ParameterType ptype() { return detail::compileTimeHashFNV1( "BiquadDoubleMatrix" ); }
+};
+} // unnamed
+
+template<typename CoeffType >
+class BiquadParameterMatrix: public TypedParameterBase<BiquadParameterMatrix<CoeffType>, MatrixParameterConfig, BiquadMatrixParameterType<CoeffType>::ptype() >
 {
 public:
+  explicit BiquadParameterMatrix( MatrixParameterConfig const & config );
+
+  explicit BiquadParameterMatrix( ParameterConfigBase const & config );
+
   explicit BiquadParameterMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );
 
-  ~BiquadParameterMatrix();
+  virtual ~BiquadParameterMatrix() override;
 
   std::size_t numberOfFilters() const { return mRows.size(); }
   std::size_t numberOfSections() const { return mRows.empty() ? 0 : mRows[0].size(); }
 
   void resize( std::size_t numberOfFilters, std::size_t numberOfBiquads );
-
   BiquadParameterList<CoeffType> const & operator[]( std::size_t rowIdx ) const { return mRows[rowIdx]; }
   BiquadParameterList<CoeffType> & operator[]( std::size_t rowIdx ) { return mRows[rowIdx]; }
+
+  BiquadParameter<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
+  BiquadParameter<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
 
   /**
    * Set the biquad sections for a complete filter specification (a row in the matrix)
@@ -255,9 +321,6 @@ public:
    * @throw std::invalid_argument If \p nnewFilters has more elements than the column number of the matrix.
    */
   void setFilter( std::size_t filterIdx, BiquadParameterList<CoeffType> const & newFilter );
-
-  BiquadParameter<CoeffType> const & operator()( std::size_t rowIdx, std::size_t colIdx ) const { return mRows[rowIdx][colIdx]; }
-  BiquadParameter<CoeffType> & operator()( std::size_t rowIdx, std::size_t colIdx ) { return mRows[rowIdx][colIdx]; }
 
 private:
   using ContainerType = std::vector< BiquadParameterList<CoeffType> >;
@@ -268,5 +331,7 @@ private:
 } // namespace pml
 } // namespace visr
 
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<float>, visr::pml::BiquadParameterMatrix<float>::staticType(), visr::pml::MatrixParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::pml::BiquadParameterMatrix<double>, visr::pml::BiquadParameterMatrix<double>::staticType(), visr::pml::MatrixParameterConfig )
 
 #endif // VISR_PML_BIQUAD_PARAMETER_HPP_INCLUDED

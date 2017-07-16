@@ -17,21 +17,46 @@ class PointSource: public Object
 {
 public:
 
-  PointSource( );
+  PointSource();
 
   explicit PointSource( ObjectId id );
 
   virtual ~PointSource();
 
-  /*virtual*/ ObjectTypeId type() const;
+  /*virtual*/ ObjectTypeId type() const override;
 
-  /*virtual*/ std::unique_ptr<Object> clone() const;
+  /*virtual*/ std::unique_ptr<Object> clone() const override;
 
   Coordinate x() const { return mXPos; }
 
-  Coordinate y( ) const { return mYPos; }
+  Coordinate y() const { return mYPos; }
 
-  Coordinate z( ) const { return mZPos; }
+  Coordinate z() const { return mZPos; }
+
+  /**
+   * Query whether the "channel lock" feature is active.
+   * In this case, the sound source is moved to the nearest loudspeaker if the angular distance to the nearest loudspeaker is less than 
+   * channelLockDistance().
+   */
+  bool channelLock() const { return mChannelLockDistance >= cNoChannelLock; }
+
+  /**
+   * Return the currently set channel lock distance (angular distance in degree).
+   * If the channel lock feature is inactive, 0 is returned.
+   * The "always lock" setting returns +inf.
+   */
+  Coordinate channelLockDistance() const { return mChannelLockDistance; }
+
+  /**
+   * Set the channel lock distance. When called with a nonzero value, channel lock is automatically activated.
+   * A value >= 180 (degree) or the default value (+inf) corresponds to "always lock".
+   */
+  void setChannelLock( Coordinate newDistance = cAlwaysChannelLock ) { mChannelLockDistance = newDistance; }
+
+  /**
+   * Deactivate the channel lock feature. This sets the lock distance to zero.
+   */
+  void unsetChannelLock() { setChannelLock( cNoChannelLock ); }
 
   void setX( Coordinate newX );
 
@@ -54,6 +79,21 @@ private:
 
   Coordinate mRadius;
 #endif
+  /**
+   * Representation of the channel lock distance, in degree.
+   * A value of zero corresponds to "no channel lock", while any value >=180 means "always lock".
+   */
+  Coordinate mChannelLockDistance;
+
+  /**
+   * Special value to denote that the object is in "always lock" mode.
+   */
+  static const Coordinate cAlwaysChannelLock;
+
+  /**
+   * Special value to denote that the object is in "no channel lock" mode.
+   */
+  static const Coordinate cNoChannelLock;
 };
 
 } // namespace objectmodel

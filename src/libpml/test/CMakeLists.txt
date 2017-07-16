@@ -4,16 +4,12 @@ SET( APPLICATION_NAME pml_test )
 
 ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES biquad_parameter.cpp filter_routing_parameter.cpp float_sequence.cpp index_sequence.cpp matrix_parameter.cpp parametric_iir_coefficient.cpp test_main.cpp )
+SET( SOURCES biquad_parameter.cpp filter_routing_parameter.cpp float_sequence.cpp index_sequence.cpp matrix_parameter.cpp parameter_instantiation.cpp parametric_iir_coefficient.cpp  test_main.cpp )
 
 ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml efl)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${SNDFILE_LIBRARIES} )
+TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml )
 TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
-
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

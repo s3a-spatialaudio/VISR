@@ -12,6 +12,8 @@ namespace visr
 namespace efl
 {
 
+void getCpuId();
+
 template <typename T>
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
@@ -182,6 +184,38 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
+/**
+ * Copy a strided sequence of values, i.e., a memory area where the elements have a constant, but not necessarily
+ * unit distance, to another strided sequence
+ * @tparam DataType The data type contained in the sequences. Must provide an assignment operator.
+ * @param src The base pointer of the source sequence (i.e., location of the first element)
+ * @param dest Base pointer of the destination sequence (i.e., location of the first element).
+ * @param srcStrideElements Stride (i.e., distance between the elements) of the source sequence given in number of elements (not bytes).
+ * @param destStrideElements Stride (i.e., distance between the elements) of the destination sequence given in number of elements (not bytes).
+ * @param numberOfElements The number of elements to be copied.
+ * @param alignmentElements Minimum alignment of the source and destination sequences (in number of elements)
+ * @note Consider removing the \p alignmentElements parameter because it is scarcely useful unliess both sequences have stride 1.
+ */
+template<typename DataType>
+ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t srcStrideElements,
+  std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements );
+
+/**
+ * Fill a strided sequence of values, i.e., a memory area where the elements have a constant, but not necessarily
+ * unit distance, with a constant value
+ * @tparam DataType The data type contained in the sequences. Must provide an assignemnt operator.
+ * @param val The constant value to be assigned to the strided locations.
+ * @param dest The base pointer of the strided sequence.
+ * @param destStrideElements Distance between consecutive addressed elements in the target sequence.
+ * @param numberOfElements Number of values to be assigned.
+ * @param alignmentElements The alignment of the target sequence, i.e., of the base pointer.
+ * @note Consider removing the alignmentElements parameter, because it it is scarcely useful for non-unit strides.
+*/
+template<typename DataType>
+efl::ErrorCode vectorFillStrided( DataType val, DataType * dest,
+                                  std::size_t destStrideElements,
+                                  std::size_t numberOfElements,
+                                  std::size_t alignmentElements );
 
 } // namespace efl
 } // namespace visr

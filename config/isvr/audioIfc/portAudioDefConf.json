@@ -1,0 +1,5 @@
+{
+  "sampleformat": "float32Bit", 
+  "interleaved": "false", 
+  "hostapi" : "default"
+}

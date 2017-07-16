@@ -64,9 +64,11 @@ private:
   
   std::unique_ptr<panning::LoudspeakerArray> mArrayConfiguration;
 
-  std::unique_ptr< efl::BasicMatrix<ril::SampleType> > mDiffusionFilters;
+  std::unique_ptr< efl::BasicMatrix<SampleType> > mDiffusionFilters;
 
   std::string mTrackingConfiguration;
+
+  std::string mReverbConfiguration;
 
   std::size_t mSceneReceiverPort;
 

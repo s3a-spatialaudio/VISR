@@ -3,18 +3,23 @@
 #ifndef VISR_LIBRCL_FIR_FILTER_MATRIX_HPP_INCLUDED
 #define VISR_LIBRCL_FIR_FILTER_MATRIX_HPP_INCLUDED
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
 #include <libril/constants.hpp>
+#include <libril/parameter_input.hpp>
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
 #include <libpml/filter_routing_parameter.hpp>
+#include <libpml/indexed_value_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
+
 
 #include <cstddef> // for std::size_t
 #include <memory>
+#include <valarray>
 
 namespace visr
 {
@@ -34,16 +39,19 @@ namespace rcl
  * The widths of the input and the output port are set by the parameters \p 
  * numberOfInputs and \p numberOfOutputs in the setup() method.
  */
-class FirFilterMatrix: public ril::AudioComponent
+class FirFilterMatrix: public AtomicComponent
 {
-  using SampleType = ril::SampleType;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
-  explicit FirFilterMatrix( ril::AudioSignalFlow& container, char const * name );
+  explicit FirFilterMatrix( SignalFlowContext const & context,
+                            char const * name,
+                            CompositeComponent * parent = nullptr );
 
   /**
    * Desctructor
@@ -65,6 +73,7 @@ public:
    * all filters are zero-initialised.
    * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
    * active initially.
+   * @param controlInputs Whether to instantiate a parameter port receiving filter update commands.
    * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
    * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */
@@ -75,6 +84,7 @@ public:
               std::size_t maxRoutings,
               efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
               pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
+              bool controlInputs = false,
               char const * fftImplementation = "default" );
 
   /**
@@ -94,7 +104,7 @@ public:
    * @param inputIdx The input signal index for the routing.
    * @param outputIdx The output signal index for this routing.
    * @param filterIdx The filter index for this routing (pointing to an entry to the filter container of this component)
-   * @param gain Gain factor for this routing, linear scale. OPtional parameter, default is 1.0
+   * @param gain An optional, frequency-independent gain for this routing. Optional argument, defaults to 1.0.
    * @throw std::invalid_argument If \p inputIdx, \p outputIdx, or \p filterIdx exceed their respective admissible ranges
    */
   void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx,
@@ -118,12 +128,24 @@ private:
   /**
    * The audio input port for this component.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output port for this component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
+
+  std::unique_ptr<ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > > > mSetFilterInput;
+
+  /**
+   * Vectors to the channel pointers of the input and output ports.
+   * They are required by the interface of the contained rbbl::MultiChannelConvolverUniform class.
+   * @todo Consider (optional) stride-based interface for rbbl::MultiChannelConvolverUniform.
+   */
+  //@{
+  std::valarray<SampleType const *> mInputChannels;
+  std::valarray<SampleType * > mOutputChannels;
+  //@}
 
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mConvolver;
 };

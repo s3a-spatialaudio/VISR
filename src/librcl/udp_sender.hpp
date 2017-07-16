@@ -3,8 +3,12 @@
 #ifndef VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 #define VISR_LIBRCL_UDP_SENDER_HPP_INCLUDED
 
+#include <libril/atomic_component.hpp>
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/parameter_input.hpp>
+
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/string_parameter.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -15,16 +19,6 @@
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
-namespace pml
-{
-template<typename MessageType> class MessageQueue;
-}
-
 namespace rcl
 {
 
@@ -33,7 +27,7 @@ namespace rcl
  * The message can operate either synchronously (messages are sent when the process() method is called)
  * or asynchronously (the messages queued for sending and then send non-blocking in an extra thread.
  */
-class UdpSender: public ril::AudioComponent
+class UdpSender: public AtomicComponent
 {
 public:
   enum class Mode
@@ -47,10 +41,13 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
-  explicit UdpSender( ril::AudioSignalFlow& container, char const * name );
+  explicit UdpSender( SignalFlowContext const & context,
+                      char const * name,
+                      CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -59,20 +56,20 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param sendPort
-   * @param receiverAddress
-   * @param receiverPort
-   * @param mode
-   * @param externalIoService
+   * @param sendPort Local UDP port number for sending.
+   * @param receiverAddress The name of the reciver (either numeric IP or DNS name)
+   * @param receiverPort Remote UDP port number.
+   * @param mode Asynchronity mode of the network communication
+   * @param externalIoService Pointer to an external network IO service (or nullptr if there is none).
+   * Must be non-null if and only if mode == Mode::ExternalServiceObject
    */ 
   void setup( std::size_t sendPort, std::string const & receiverAddress, std::size_t receiverPort,
               Mode mode, boost::asio::io_service* externalIoService = nullptr );
 
   /**
    * The process function.
-   * @param msgQueue A list of messages to be sent. The container is empty on return.
    */
-  void process( pml::MessageQueue<std::string> & msgQueue);
+  void process() override;
 
 private:
   /**
@@ -107,11 +104,13 @@ private:
   * Internal queue of messages received asynchronously. They will be copied into the output
   *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
   */
-  std::unique_ptr< pml::MessageQueue< std::string > > mInternalMessageBuffer;
+  std::deque< pml::StringParameter > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
 
   boost::mutex mMutex;
+
+  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
 };
 
 } // namespace rcl

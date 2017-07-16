@@ -3,32 +3,20 @@
 #ifndef VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_BASELINE_HPP_INCLUDED
 
-#include <libril/audio_signal_flow.hpp>
+#include "core_renderer.hpp"
 
-#include <librcl/add.hpp>
-#include <librcl/biquad_iir_filter.hpp>
-#include <librcl/channel_object_routing_calculator.hpp>
-#include <librcl/delay_vector.hpp>
-#include <librcl/diffusion_gain_calculator.hpp>
-#include <librcl/gain_matrix.hpp>
-#include <librcl/hoa_allrad_gain_calculator.hpp>
-#include <librcl/listener_compensation.hpp>
-#include <librcl/object_gain_eq_calculator.hpp>
-#include <librcl/null_source.hpp>
-#include <librcl/panning_gain_calculator.hpp>
+#include <libril/composite_component.hpp>
+#include <libril/audio_input.hpp>
+#include <libril/audio_output.hpp>
+
 #include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>
-#include <librcl/signal_routing.hpp>
-#include <librcl/single_to_multi_channel_diffusion.hpp>
 #include <librcl/udp_receiver.hpp>
 
-#include <libefl/basic_matrix.hpp>
-
 #include <libpml/listener_position.hpp>
-#include <libpml/message_queue.hpp>
-#include <libpml/signal_routing_parameter.hpp>
-
-#include <libobjectmodel/object_vector.hpp>
+#include <libpml/object_vector.hpp>
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <memory>
 #include <string>
@@ -42,11 +30,14 @@ namespace signalflows
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class BaselineRenderer: public ril::AudioSignalFlow
+class BaselineRenderer: public CompositeComponent
 {
 public:
   /**
    * Constructor to create, initialise and interconnect all processing components.
+   * @param context The signal flow context object containing information such as sampling frequency and period (block) size.
+   * @param name The name of the component, used for identification and error reporting.
+   * @param parent The containing component, if there is one. Use nullptr to mark this as the toplevel component.
    * @param loudspeakerConfiguration The configuration of the reproduction array, including the routing to physical output channels,
    * potentially virtual loudspeakers and subwoofer configuration.
    * @param numberOfInputs The number of inputs, i.e., the number of audio object signals
@@ -57,114 +48,66 @@ public:
    * @param trackingConfiguration The configuration of the tracker (empty string disables tracking)
    * @param sceneReceiverPort The UDP port for receiving the scene data messages.
    * @param numberOfObjectEqSections The number of biquad sections alocated to each object signal.
-   * @param period The period, block size or block length, i.e., the number of samples processed per invocation of the process() method.
-   * @param samplingFrequency The sampling frequency of the processing (in Hz)
+   * @param reverbConfig A JSON message containing configuration options for the late reverberation part.
+   *        - numReverbObjects (integer) The maximum number of reverb objects (at a given time)
+   *        - lateReverbFilterLength (floating-point) The length of the late reverberation filter (in seconds)
+   *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
+   *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV) 
+   *          containing the filter coefficients for the decorrelation of the late part.
+   * @param frequencyDependentPanning Flag specifiying whether the frequency-dependent VBAP algorithm shall be activated (true) or not (false)
    */
-  explicit BaselineRenderer( panning::LoudspeakerArray const & loudspeakerConfiguration,
+  explicit BaselineRenderer( SignalFlowContext const & context,
+                             char const * name,
+                             CompositeComponent * parent,
+                             panning::LoudspeakerArray const & loudspeakerConfiguration,
                              std::size_t numberOfInputs,
                              std::size_t numberOfOutputs,
                              std::size_t interpolationPeriod,
-                             efl::BasicMatrix<ril::SampleType> const & diffusionFilters,
+                             efl::BasicMatrix<SampleType> const & diffusionFilters,
                              std::string const & trackingConfiguration,
                              std::size_t sceneReceiverPort,
                              std::size_t numberOfObjectEqSections,
-                             std::size_t period,
-                             ril::SamplingFrequencyType samplingFrequency );
+                             std::string const & reverbConfig,
+                             bool frequencyDependentPanning );
+
+  /**
+   * Simplified constructor using default values for several parameters.
+   */
+  explicit BaselineRenderer( SignalFlowContext const & context,
+                             char const * name,
+                             CompositeComponent * parent,
+                             panning::LoudspeakerArray const & loudspeakerConfiguration,
+                             std::size_t numberOfInputs,
+                             std::size_t numberOfOutputs );
 
   ~BaselineRenderer();
 
-  /**
-   * Process function that consumes and produces blocks of \p period() audio samples per input and output channel.
-   */
-  /*virtual*/ void process();
-
 private:
-
-  efl::BasicMatrix<ril::SampleType> const & mDiffusionFilters;
 
   rcl::UdpReceiver mSceneReceiver;
 
   rcl::SceneDecoder mSceneDecoder;
 
-  rcl::ObjectGainEqCalculator mObjectInputGainEqCalculator;
-
-  /**
-   * Apply the the 'level' setting of the object.
-   * We use a DelayVector, which allows also control of the gain, and do not use the delay,
-   * @note This signal flow assumes that each signal input is used only by a single object. Otherwise the settings would
-   * be overwritten
-   */
-  rcl::DelayVector mObjectGain;
-
-  rcl::BiquadIirFilter mObjectEq;
-
-  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
-
-  rcl::SignalRouting mChannelObjectRouting;
-
-  rcl::DelayVector mOutputAdjustment;
-
-  rcl::PanningGainCalculator mGainCalculator;
-
-  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
-
-  rcl::DiffusionGainCalculator mDiffusionGainCalculator;
-
-  bool mTrackingEnabled;
-
-  rcl::GainMatrix mVbapMatrix;
-
-  rcl::GainMatrix mDiffusePartMatrix;
-
-  rcl::SingleToMultichannelDiffusion mDiffusePartDecorrelator;
-
-  rcl::Add mDirectDiffuseMix;
-
-  rcl::GainMatrix mSubwooferMix;
-
-  /**
-   * Source of silence to feed any gaps in the output channels that
-   * are not connected to an input.
-   */
-  rcl::NullSource mNullSource;
-
-  pml::MessageQueue<std::string> mSceneMessages;
-
-  objectmodel::ObjectVector mObjectVector;
-
-  efl::BasicVector<ril::SampleType> mObjectGainParameter;
-
-  pml::BiquadParameterMatrix<ril::SampleType> mObjectEqParameter;
-
-  pml::SignalRoutingParameter mChannelObjectRoutings;
-
-  efl::BasicMatrix<ril::SampleType> mGainParameters;
-
-  efl::BasicMatrix<ril::SampleType> mDiffuseGains;
-
   /**
    * Tracking-related members
    */
   //@{
-  std::unique_ptr<rcl::ListenerCompensation> mListenerCompensation;
-
-  std::unique_ptr<rcl::DelayVector>  mSpeakerCompensation;
-
+  /**
+   * UDP port for receiving listener position updates
+   */
   std::unique_ptr<rcl::UdpReceiver> mTrackingReceiver;
 
-  std::unique_ptr<rcl::PositionDecoder> mPositionDecoder;
-
-  pml::ListenerPosition mListenerPosition;
-
-  pml::MessageQueue<std::string> mTrackingMessages;
-
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationGains;
-
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> mCompensationDelays;
+  /**
+   * Component that transforms JSON strings into the internal listener position format
+   */
+  std::unique_ptr<rcl::PositionDecoder> mTrackingPositionDecoder;
   //@}
 
-  std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
+  CoreRenderer mCoreRenderer;
 
+
+  AudioInput mInput;
+  AudioOutput mOutput;
 };
 
 } // namespace signalflows

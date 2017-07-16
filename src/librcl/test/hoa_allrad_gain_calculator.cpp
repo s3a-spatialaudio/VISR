@@ -2,7 +2,8 @@
 
 #include <librcl/hoa_allrad_gain_calculator.hpp>
 
-#include <libril/audio_signal_flow.hpp>
+#include <libril/signal_flow_context.hpp>
+
 #include <libobjectmodel/object_vector.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -31,6 +32,7 @@ namespace test
 
 using namespace objectmodel;
 
+#if 0
 namespace // unnamed
 {
   class HoaCalc: public ril::AudioSignalFlow
@@ -58,10 +60,11 @@ namespace // unnamed
 
   };
 }
+#endif
 
 BOOST_AUTO_TEST_CASE( InstantiateAllRad )
 {
-  HoaCalc mFlow;
+//  HoaCalc mFlow;
 }
 
 BOOST_AUTO_TEST_CASE( HoaAllradGainCalculatorSetup )

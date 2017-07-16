@@ -1,7 +1,7 @@
 //
 //  LoudspeakerArray.h
 //
-//  Created by Marcos F. Simón Gálvez on 02/02/2015.
+//  Created by Marcos F. Simï¿½n Gï¿½lvez on 02/02/2015.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
@@ -10,12 +10,11 @@
 
 #define __S3A_renderer_dsp__listenerCompensation__
 
-//#include <iostream>
-#include <cstdio>
-
 #include <libefl/basic_matrix.hpp>
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_input.hpp>
+#include <libril/parameter_output.hpp>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
@@ -23,7 +22,13 @@
 
 #include <libefl/basic_vector.hpp>
 
+#include <libpml/double_buffering_protocol.hpp>
 #include <libpml/listener_position.hpp>
+#include <libpml/vector_parameter.hpp>
+
+//#include <iostream>
+// #include <cstdio>
+#include <memory>
 
 namespace visr
 {
@@ -31,21 +36,20 @@ namespace visr
 namespace rcl
 {
 
-class ListenerCompensation: public ril::AudioComponent
+class ListenerCompensation: public AtomicComponent
 {
 public:
-  using SampleType = ril::SampleType;
-private:
-  panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
-  panning::XYZ m_listenerPos; //position of the listener
-  std::size_t mNumberOfLoudspeakers;
+  using SampleType = visr::SampleType;
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
-  explicit ListenerCompensation(ril::AudioSignalFlow& container, char const * name);
+  explicit ListenerCompensation( SignalFlowContext const & context,
+                                 char const * name,
+                                 CompositeComponent * parent = nullptr );
 
   /**
    * Disabled (deleted) copy constructor
@@ -59,15 +63,17 @@ public:
    * The process function.
    * It takes a listener position as input and calculates a gain vector and a delay vector.
    */
-  void process(pml::ListenerPosition const & pos, efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays );
+  void process() override;
 
-
-  std::size_t getNumSpeakers()  const {
-    return m_array.getNumSpeakers();
+private:
+  std::size_t getNumSpeakers( )  const
+  {
+    return m_array.getNumSpeakers( );
   }
 
-  int setListenerPosition(Afloat x, Afloat y, Afloat z){ //assigning the position of the listener
-    m_listenerPos.set(x, y, z);
+  int setListenerPosition( Afloat x, Afloat y, Afloat z )
+  { //assigning the position of the listener
+    m_listenerPos.set( x, y, z );
     return 0;
   }
 
@@ -85,6 +91,13 @@ public:
   */
   int calcDelayComp( efl::BasicVector<Afloat> & delayComp ); // this function calculates the delay compensation
 
+  panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
+  panning::XYZ m_listenerPos; //position of the listener
+  std::size_t mNumberOfLoudspeakers;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionInput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<Afloat> > mGainOutput;
+  ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<Afloat> > mDelayOutput;
 };//class Listener Compensation
 
 

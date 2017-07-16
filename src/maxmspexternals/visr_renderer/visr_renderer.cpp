@@ -12,6 +12,8 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
+#include <libril/signal_flow_context.hpp>
+
 #include <libsignalflows/baseline_renderer.hpp>
 
 #include <boost/filesystem/path.hpp>
@@ -94,28 +96,30 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
         << arrayConfigPath.string( ) << "\" does not exist.";
       throw std::invalid_argument( err.str() );
     }
-    // We do not support the legacy text format for Max externals
     mArrayConfiguration->loadXmlFile( arrayConfigPath.string() );
 
     /* Set up the filter matrix for the diffusion filters. */
     std::size_t const diffusionFilterLength = 63; // fixed filter length of the filters in the compiled-in matrix
     std::size_t const diffusionFiltersInFile = 64; // Fixed number of filters in file.
     // First create a filter matrix containing all filters from a initializer list that is compiled into the program.
-    efl::BasicMatrix<ril::SampleType> allDiffusionCoeffs( diffusionFiltersInFile,
+    efl::BasicMatrix<SampleType> allDiffusionCoeffs( diffusionFiltersInFile,
       diffusionFilterLength,
 #include "../../apps/baseline_renderer/files/quasiAllpassFIR_f64_n63_initializer_list.txt"
-      , ril::cVectorAlignmentSamples );
+      , cVectorAlignmentSamples );
     std::size_t const numberOfLoudspeakers = mArrayConfiguration->getNumRegularSpeakers( );
-    mDiffusionFilters.reset( new efl::BasicMatrix<ril::SampleType>( numberOfLoudspeakers,
+    mDiffusionFilters.reset( new efl::BasicMatrix<SampleType>( numberOfLoudspeakers,
       allDiffusionCoeffs.numberOfColumns(),
-      ril::cVectorAlignmentSamples ) );
+      cVectorAlignmentSamples ) );
     for( std::size_t idx( 0 ); idx < numberOfLoudspeakers; ++idx )
     {
-      efl::vectorCopy( allDiffusionCoeffs.row( idx ), mDiffusionFilters->row( idx ), diffusionFilterLength, ril::cVectorAlignmentSamples );
+      efl::vectorCopy( allDiffusionCoeffs.row( idx ), mDiffusionFilters->row( idx ), diffusionFilterLength, cVectorAlignmentSamples );
     }
 
     mSceneReceiverPort = cmdLineOptions.getDefaultedOption<std::size_t>( "scene-port", 4242 );
     mTrackingConfiguration = cmdLineOptions.getDefaultedOption<std::string>( "tracking", std::string( ) );
+
+    mReverbConfiguration= cmdLineOptions.getDefaultedOption<std::string>( "reverb-config", std::string() );
+
 
     // Creating the inlets
     dsp_setup( getMaxProxy(), (int)mNumberOfObjects );
@@ -167,7 +171,7 @@ VisrRenderer::~VisrRenderer()
 
   try
   {
-    ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
+    SamplingFrequencyType const samplingFrequency = static_cast<SamplingFrequencyType>(std::round( samplerate ));
 
     // Assume a fixed length for the interpolation period.
     // Ideally, this roughly matches the update rate of the scene sender.
@@ -175,15 +179,33 @@ VisrRenderer::~VisrRenderer()
     // In this case the signal flow would produce an exception to avoid a 'staircased' gain trajectory.
     const std::size_t cInterpolationLength = std::max( 2048l, mPeriod );
 
-    mFlow.reset( new signalflows::BaselineRenderer( *mArrayConfiguration,
+    SignalFlowContext const context{ static_cast<std::size_t>(mPeriod), samplingFrequency};
+
+    /*
+    explicit BaselineRenderer( SignalFlowContext const & context,
+      char const * name,
+      CompositeComponent * parent,
+      panning::LoudspeakerArray const & loudspeakerConfiguration,
+      std::size_t numberOfInputs,
+      std::size_t numberOfOutputs,
+      std::size_t interpolationPeriod,
+      efl::BasicMatrix<SampleType> const & diffusionFilters,
+      std::string const & trackingConfiguration,
+      std::size_t sceneReceiverPort,
+      std::size_t numberOfObjectEqSections,
+      std::string const & reverbConfig,
+      bool frequencyDependentPanning );
+*/
+    mFlow.reset( new signalflows::BaselineRenderer( context, "VisrRenderer", nullptr,
+                                                    *mArrayConfiguration,
                                                     mNumberOfObjects, mNumberOfOutputs,
                                                     cInterpolationLength,
                                                     *mDiffusionFilters,
                                                     mTrackingConfiguration,
                                                     mSceneReceiverPort,
                                                     mNumberOfEqSections,
-                                                    mPeriod,
-                                                    samplingFrequency ) );
+                                                    mReverbConfiguration,
+                                                    false /* no frequency-dependent panning */) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>( *mFlow ) );
   }
   catch( std::exception const & e )

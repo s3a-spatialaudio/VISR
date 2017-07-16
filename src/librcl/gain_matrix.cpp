@@ -11,8 +11,10 @@ namespace visr
 namespace rcl
 {
 
-GainMatrix::GainMatrix( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  GainMatrix::GainMatrix( SignalFlowContext const & context,
+                          char const * name,
+                          CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mInput( "in", *this )
  , mOutput( "out", *this )
 {
@@ -21,48 +23,61 @@ GainMatrix::GainMatrix( ril::AudioSignalFlow& container, char const * name )
 void GainMatrix::setup( std::size_t numberOfInputs,
     std::size_t numberOfOutputs,
     std::size_t interpolationSteps,
-    SampleType initialGain /*= static_cast<SampleType>(0.0)*/ )
+    SampleType initialGain /*= static_cast<SampleType>(0.0)*/,
+    bool controlInput /* = true */ )
 {
-  mNumberOfInputs = numberOfInputs;
-  mNumberOfOutputs = numberOfOutputs;
-  mInput.setWidth( mNumberOfInputs );
-  mOutput.setWidth( mNumberOfOutputs );
-  mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period(), interpolationSteps, initialGain, ril::cVectorAlignmentSamples ) );
+  mInput.setWidth( numberOfInputs );
+  mOutput.setWidth( numberOfOutputs );
+  mInputChannels.resize( numberOfInputs, nullptr );
+  mOutputChannels.resize( numberOfOutputs, nullptr );  mMatrix.reset( new rbbl::GainMatrix<SampleType>( numberOfInputs, numberOfOutputs, period(), interpolationSteps, initialGain, cVectorAlignmentSamples ) );
+  if( controlInput )
+  {
+    mGainInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+      pml::MatrixParameterConfig( numberOfOutputs, numberOfInputs ) ) );
+  }
 }
 
 void GainMatrix::setup( std::size_t numberOfInputs,
                         std::size_t numberOfOutputs,
                         std::size_t interpolationSteps,
-                        efl::BasicMatrix< SampleType > const & initialGains )
+                        efl::BasicMatrix< SampleType > const & initialGains,
+                        bool controlInput /* = true */)
 {
   if( (initialGains.numberOfColumns() != numberOfInputs) or( initialGains.numberOfRows() != numberOfOutputs ) )
   {
     throw std::logic_error( "GainMatrix::setup: The matrix of initial gains does not match the dimensions of this object." );
   }
-  mNumberOfInputs = numberOfInputs;
-  mNumberOfOutputs = numberOfOutputs;
-  mInput.setWidth( mNumberOfInputs );
-  mOutput.setWidth( mNumberOfOutputs );
-  mMatrix.reset( new rbbl::GainMatrix<SampleType>( mNumberOfInputs, mNumberOfOutputs, period( ),
-                 interpolationSteps, initialGains, ril::cVectorAlignmentSamples ) );
+  mInput.setWidth( numberOfInputs );
+  mOutput.setWidth( numberOfOutputs );
+  mInputChannels.resize(numberOfInputs, nullptr );
+  mOutputChannels.resize( numberOfOutputs, nullptr );
+  mMatrix.reset( new rbbl::GainMatrix<SampleType>( numberOfInputs, numberOfOutputs, period( ),
+                 interpolationSteps, initialGains, cVectorAlignmentSamples ) );
+  if( controlInput )
+  {
+    mGainInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
+                      pml::MatrixParameterConfig( numberOfOutputs, numberOfInputs ) ) );
+  }
 }
 
 void GainMatrix::process()
 {
+  if( mGainInput )
+  {
+    // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
+    // Thus would be a match for the DoubleBufferingProtocol.
+    mMatrix->setNewGains( mGainInput->data() );
+  }
+
   // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
   if( mInput.width() == 0 or mOutput.width() == 0 )
   {
     return;
   }
-  SampleType const * const * inputVector = mInput.getVector();
-  SampleType * const * outputVector = mOutput.getVector( );
+  mInput.getChannelPointers( &mInputChannels[0] );
+  mOutput.getChannelPointers( &mOutputChannels[0] );
 
-  mMatrix->process( inputVector, outputVector );
-}
-
-void GainMatrix::setGains( efl::BasicMatrix< SampleType > const & newGains )
-{
-  mMatrix->setNewGains( newGains );
+  mMatrix->process( &mInputChannels[0], &mOutputChannels[0] );
 }
 
 } // namespace rcl

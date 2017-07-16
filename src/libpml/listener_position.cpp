@@ -4,18 +4,61 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <libril/parameter_factory.hpp>
+
 namespace visr
 {
 namespace pml
 {
 
-ListenerPosition::ListenerPosition()
+ListenerPosition::ListenerPosition( ParameterConfigBase const & config )
+  : ListenerPosition( dynamic_cast<EmptyParameterConfig const &>(config) )
+{
+}
+
+ListenerPosition::ListenerPosition( EmptyParameterConfig const & /* = EmptyParameterConfig( )*/ )
  : mX( 0.0f )
  , mY( 0.0f )
  , mZ( 0.0f )
  , mTimeNs( 0 )
  , mFaceID( 0 )
 {}
+
+ListenerPosition::~ListenerPosition()
+{
+}
+
+void ListenerPosition::set( float newX, float newY, float newZ /*= 0.0f*/ )
+{
+  mX = newX;
+  mY = newY;
+  mZ = newZ;
+}
+
+void ListenerPosition::setX( float newX )
+{
+  mX = newX;
+}
+
+void ListenerPosition::setY( float newY )
+{
+  mY = newY;
+}
+
+void ListenerPosition::setZ( float newZ )
+{
+  mZ = newZ;
+}
+
+void ListenerPosition::setTimeNs( TimeType timeNs )
+{
+  mTimeNs = timeNs;
+}
+
+void ListenerPosition::setFaceID( IdType faceID )
+{
+  mFaceID = faceID;
+}
 
 void ListenerPosition::parse(std::istream &  inputStream)
 {

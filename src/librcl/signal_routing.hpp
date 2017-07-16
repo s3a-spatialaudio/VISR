@@ -4,12 +4,16 @@
 #define VISR_LIBRCL_SIGNAL_ROUTING_HPP_INCLUDED
 
 #include <libpml/signal_routing_parameter.hpp>
+#include <libpml/double_buffering_protocol.hpp>
 
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
 #include <libril/audio_input.hpp>
 #include <libril/audio_output.hpp>
+#include <libril/parameter_input.hpp>
 
-#include <vector>
+#include <map>
+#include <memory>
+#include <tuple>
 
 namespace visr
 {
@@ -22,15 +26,18 @@ namespace rcl
  * the \p inputWidth and \p outputWidth arguments passed to the setup() method,
  * respectively.
  */
-class SignalRouting: public ril::AudioComponent
+class SignalRouting: public AtomicComponent
 {
 public:
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
    */
-  explicit SignalRouting( ril::AudioSignalFlow& container, char const * name );
+  explicit SignalRouting( SignalFlowContext const & context,
+                          char const * name,
+                          CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -42,8 +49,10 @@ public:
    * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
    * @param inputWidth The width of the input vector, i.e., the number of single signals in this port.
    * @param outputWidth The number of signals channels in the output port.
+   * @param controlPort Whether the component creates a parameter input port (message type: pml::SignalRoutingParameter, protocol: pml::DoubleBufferingProtocol ).
+   * Default: false
    */ 
-  void setup( std::size_t inputWidth, std::size_t outputWidth );
+  void setup( std::size_t inputWidth, std::size_t outputWidth, bool controlPort = false );
 
   /**
    * Method to initialise the component.
@@ -51,10 +60,13 @@ public:
    * @param inputWidth The width of the input vector, i.e., the number of single signals in this port.
    * @param outputWidth The number of signals channels in the output port.
    * @param initialRouting The initial routing connections
+   * @param controlPort Whether the component creates a parameter input port (message type: pml::SignalRoutingParameter, protocol: pml::DoubleBufferingProtocol ).
+   * Default: false
    */
   void setup( std::size_t inputWidth,
               std::size_t outputWidth,
-              pml::SignalRoutingParameter const & initialRouting );
+              pml::SignalRoutingParameter const & initialRouting,
+              bool controlPort = false);
 
   /**
    * The process function.
@@ -91,19 +103,30 @@ private:
   /**
    * The audio input port.
    */
-  ril::AudioInput mInput;
+  AudioInput mInput;
 
   /**
    * The audio output of the component.
    */
-  ril::AudioOutput mOutput;
+  AudioOutput mOutput;
+
+  std::unique_ptr<ParameterInput< pml::DoubleBufferingProtocol, pml::SignalRoutingParameter > > mControlInput;
+
+  /**
+   * Entry type for routings.
+   * Tuples are used because they provide operator<().
+   * Ordering: <outputIndex, inputIndex>
+   */
+  using RoutingEntry = std::tuple<pml::SignalRoutingParameter::IndexType, pml::SignalRoutingParameter::IndexType>;
+
+  using RoutingTable = std::set<RoutingEntry>;
 
   /**
    * Data structure for string the routing information. Eahc vector element corresponds to the respective
    * channel of the output port. It contains the index of the input channel to be routed to this output channel,
    * or pml::SignalRoutingParameter::cInvalidIndex if the output channel shall be filled with zeros.
    */
-  std::vector<pml::SignalRoutingParameter::IndexType> mRoutingVector;
+  RoutingTable mRoutings;
 
   /**
    * Check whether the input and output indices are within the ranges of valid admissible values.

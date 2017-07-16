@@ -1,7 +1,7 @@
 //
 //  LoudspeakerArray.h
 //
-//  Created by Marcos F. Simón Gálvez on 02/02/2015.
+//  Created by Marcos F. Simï¿½n Gï¿½lvez on 02/02/2015.
 //  Copyright (c) 2014 ISVR, University of Southampton. All rights reserved.
 //
 
@@ -11,15 +11,18 @@
 #endif
 
 #include "listener_compensation.hpp"
-#include <cmath>
-#include <algorithm>
 
 #include <cstdio>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>
 
+#include <libpml/vector_parameter_config.hpp>
+
 #include <boost/filesystem.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 // Uncomment to get debug output
 // #define DEBUG_LISTENER_COMPENSATION 1
@@ -38,10 +41,15 @@ namespace visr
 {
 namespace rcl
 {
-ListenerCompensation::ListenerCompensation(ril::AudioSignalFlow& container, char const * name)//constructor
-  : ril::AudioComponent(container, name)
+  ListenerCompensation::ListenerCompensation( SignalFlowContext const & context,
+                                              char const * name,
+                                              CompositeComponent * parent /*= nullptr*/ )//constructor
+  : AtomicComponent( context, name, parent )
   , m_listenerPos( 0.0f, 0.0f, 0.0f )
   , mNumberOfLoudspeakers( 0 )
+  , mPositionInput( "positionInput", *this, pml::EmptyParameterConfig() )
+  , mGainOutput( "gainOutput", *this )
+  , mDelayOutput( "delayOutput", *this)
 {
 }
 
@@ -49,32 +57,48 @@ void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig 
 {
   m_array = arrayConfig;
   mNumberOfLoudspeakers = m_array.getNumRegularSpeakers();
+
+  pml::VectorParameterConfig const vectorConfig( mNumberOfLoudspeakers );
+
+  mGainOutput.setParameterConfig( vectorConfig );
+  mDelayOutput.setParameterConfig( vectorConfig );
 }
 
-void ListenerCompensation::process(pml::ListenerPosition const & pos,
-                                   efl::BasicVector<SampleType> & gains, efl::BasicVector<SampleType> & delays)
+void ListenerCompensation::process()
 {
-  if (gains.size() != mNumberOfLoudspeakers or delays.size() != mNumberOfLoudspeakers)
+  if( mPositionInput.changed() )
   {
-    throw std::invalid_argument("ListenerCompensation::process(): The size of the gain or delay vector does not match the number of loudspeaker channels.");
-  }
-  setListenerPosition(pos.x(), pos.y(), pos.z());
-  if( calcGainComp( gains ) != 0 )
-  {
-    throw std::runtime_error("ListenerCompensation::process(): calcGainComp() failed.");
-  }
-  if (calcDelayComp( delays ) != 0)
-  {
-    throw std::runtime_error("ListenerCompensation::process(): calcDelayComp() failed.");
-  }
+    pml::ListenerPosition const & pos( mPositionInput.data());
+    efl::BasicVector<SampleType> & gains( mGainOutput.data());
+    efl::BasicVector<SampleType> & delays( mDelayOutput.data());
+
+    if (gains.size() != mNumberOfLoudspeakers or delays.size() != mNumberOfLoudspeakers)
+    {
+      throw std::invalid_argument("ListenerCompensation::process(): The size of the gain or delay vector does not match the number of loudspeaker channels.");
+    }
+
+    setListenerPosition(pos.x(), pos.y(), pos.z());
+    if( calcGainComp( gains ) != 0 )
+    {
+      throw std::runtime_error("ListenerCompensation::process(): calcGainComp() failed.");
+    }
+    if (calcDelayComp( delays ) != 0)
+    {
+      throw std::runtime_error("ListenerCompensation::process(): calcDelayComp() failed.");
+    }
 
 #ifdef DEBUG_LISTENER_COMPENSATION
-  std::cout << "DelayVector Source Gain: ";
-  std::copy( gains.data(), gains.data()+gains.size(), std::ostream_iterator<float>(std::cout, " ") );
-  std::cout << "Delay [s]: ";
-  std::copy( delays.data(), delays.data()+delays.size(), std::ostream_iterator<float>(std::cout, " ") );
-  std::cout << std::endl;
+    std::cout << "DelayVector Source Gain: ";
+    std::copy( gains.data(), gains.data()+gains.size(), std::ostream_iterator<float>(std::cout, " ") );
+    std::cout << "Delay [s]: ";
+    std::copy( delays.data(), delays.data()+delays.size(), std::ostream_iterator<float>(std::cout, " ") );
+    std::cout << std::endl;
 #endif // DEBUG_LISTENER_COMPENSATION
+
+    mPositionInput.resetChanged();
+    mGainOutput.swapBuffers();
+    mDelayOutput.swapBuffers();
+  }
 }
 
 int ListenerCompensation::calcGainComp( efl::BasicVector<Afloat> & gainComp )

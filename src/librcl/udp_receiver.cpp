@@ -2,7 +2,7 @@
 
 #include "udp_receiver.hpp"
 
-#include <libpml/message_queue.hpp>
+#include <libpml/empty_parameter_config.hpp>
 
 #include <boost/asio/placeholders.hpp>
 #include <boost/thread/locks.hpp>
@@ -18,9 +18,12 @@ namespace visr
 namespace rcl
 {
 
-UdpReceiver::UdpReceiver( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  UdpReceiver::UdpReceiver( SignalFlowContext const & context,
+                            char const * name,
+                            CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
+ , mDatagramOutput( "messageOutput", *this, pml::EmptyParameterConfig() )
 {
 }
 
@@ -67,7 +70,6 @@ void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* e
   {
     mIoServiceWork.reset( new  boost::asio::io_service::work( *mIoService) );
   }
-  mInternalMessageBuffer.reset( new pml::MessageQueue< std::string >() ) ;
   mSocket.reset( new udp::socket( *mIoService ) );
   boost::system::error_code ec;
   mSocket->open( udp::v4( ), ec );
@@ -91,18 +93,18 @@ void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* e
   }
 }
 
-void UdpReceiver::process( pml::MessageQueue<std::string> & msgQueue )
+void UdpReceiver::process()
 {
   if(  mMode == Mode::Synchronous )
   {
     mIoService->poll();
   }
   boost::lock_guard<boost::mutex> lock( mMutex );
-  while( !mInternalMessageBuffer->empty() )
+  while( not mInternalMessageBuffer.empty() )
   {
-    std::string const & nextMsg = mInternalMessageBuffer->nextElement();
-    msgQueue.enqueue( nextMsg );
-    mInternalMessageBuffer->popNextElement();
+    pml::StringParameter const & nextMsg = mInternalMessageBuffer.front();
+    mDatagramOutput.enqueue( nextMsg  );
+    mInternalMessageBuffer.pop_front();
   }
 }
 
@@ -111,7 +113,7 @@ void UdpReceiver::handleReceiveData( const boost::system::error_code& error,
 {
   {
     boost::lock_guard<boost::mutex> lock( mMutex );
-    mInternalMessageBuffer->enqueue( std::string( &mReceiveBuffer[0], numBytesTransferred ) );
+    mInternalMessageBuffer.push_back( pml::StringParameter( std::string( &mReceiveBuffer[0], numBytesTransferred ) ) );
   }
   mSocket->async_receive_from( boost::asio::buffer(mReceiveBuffer),
                                mRemoteEndpoint,

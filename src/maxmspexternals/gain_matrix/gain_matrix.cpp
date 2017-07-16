@@ -2,6 +2,8 @@
 
 #include "gain_matrix.hpp"
 
+#include <libril/signal_flow_context.hpp>
+
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
 /* Super-safe determination of the MAX define for setting the operating system. */
@@ -88,7 +90,7 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
           object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "The initalisation file for the gain matrix does not exist." );
           return;
         }
-        pml::MatrixParameter<ril::SampleType> initGains = pml::MatrixParameter<ril::SampleType>::fromTextFile( filePath.string( ) );
+        pml::MatrixParameter<SampleType> initGains = pml::MatrixParameter<SampleType>::fromTextFile( filePath.string( ) );
         if( (initGains.numberOfRows( ) != mNumberOfOutputs) or( initGains.numberOfColumns( ) != mNumberOfInputs ) )
         {
           object_error( reinterpret_cast<t_object *>(getMaxProxy( )), "The dimensions of the initalisation matrix do not match." );
@@ -98,7 +100,7 @@ GainMatrix::GainMatrix( t_pxobject & maxProxy, short argc, t_atom *argv )
       }
       else
       {
-        pml::MatrixParameter<ril::SampleType> initGains = pml::MatrixParameter<ril::SampleType>::fromString( initString );
+        pml::MatrixParameter<SampleType> initGains = pml::MatrixParameter<SampleType>::fromString( initString );
         if( (initGains.numberOfRows() != mNumberOfOutputs) or( initGains.numberOfColumns() != mNumberOfInputs ) )
         {
           object_error( reinterpret_cast<t_object *>(getMaxProxy()), "The dimensions of the initalisation matrix do not match." );
@@ -145,7 +147,7 @@ GainMatrix::~GainMatrix()
   switch( inlet )
   {
   case 0:
-    mGains.fillValue( static_cast<ril::SampleType>(f) );
+    mGains.fillValue( static_cast<SampleType>(f) );
     if( mFlow ) // check whether the DSP part has already been initialised
     {
       // the signal flow does not provide a means to alter the gain.
@@ -159,7 +161,7 @@ GainMatrix::~GainMatrix()
 
 /*virtual*/ void GainMatrix::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
-  mPeriod = maxvectorsize; // I'm guessing here.
+  mPeriod = static_cast<std::size_t>(maxvectorsize); // I'm guessing here.
   // Request the actual buffer size
   if( maxvectorsize > std::numeric_limits<short>::max() )
   {
@@ -170,12 +172,11 @@ GainMatrix::~GainMatrix()
 
   try
   {
-    ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
-    mFlow.reset( new signalflows::GainMatrix( mNumberOfInputs, mNumberOfOutputs,
-                                              mGains,
-                                              mInterpolationSteps,
-                                              static_cast<std::size_t>(mPeriod),
-                                              samplingFrequency ) );
+    SamplingFrequencyType const samplingFrequency = static_cast<SamplingFrequencyType>(std::round( samplerate ));
+    mContext.reset( new SignalFlowContext( mPeriod, samplingFrequency ) );
+
+    mFlow.reset( new signalflows::GainMatrix( *mContext, "", nullptr, mNumberOfInputs, mNumberOfOutputs,
+                                              mGains, mInterpolationSteps ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
   }
   catch (std::exception const & e )

@@ -20,74 +20,105 @@ namespace visr
 {
 namespace panning
 {
-
+  
 class VBAP
 {
-private:
-    
-    LoudspeakerArray const * m_array;
-    efl::BasicMatrix<Afloat> m_invMatrix;
-    efl::BasicMatrix<Afloat> m_gain;
-    XYZ m_listenerPos;
-    XYZ const * m_sourcePos;
-    std::size_t m_nSources;
-    Afloat m_maxGain = 10.0f;
-    
-    
-    
 public:
   /**
-   * Default constructor.
-   * Sets object to save values (no array, zero sources).
+   * Construct an initialised VBAP configuration.
+   * @param array array of loudspeakers).
+   * @param x Cartesian x coordinate of the listener position
+   * @param y Cartesian y coordinate of the listener position
+   * @param z Cartesian z coordinate of the listener position
    */
-  VBAP();
-
-    int setLoudspeakerArray(LoudspeakerArray const * array){
-        m_array = array;
-        m_invMatrix.resize( array->getNumTriplets(), 9 );
-        m_gain.resize( m_nSources, array->getNumSpeakers( ) );
-        return 0;
-    }
-
-    int setListenerPosition(Afloat x, Afloat y, Afloat z){
-
-#ifdef VBAP_DEBUG_MESSAGES
-      printf("setListenerPosition %f %f %f\n",x,y,z);
-#endif
-
-        m_listenerPos.set(x, y, z);
-
-        return 0;
-    }
-    
-    int calcInvMatrices();
-    
-    int setSourcePositions(XYZ const *sp ) {
-        m_sourcePos = sp;
-        return 0;
-    }
-    
-    std::size_t setNumSources( std::size_t n) {
-        m_nSources = n;
-	// Take care of the fact that the loudspeaker
-	// array might not been set yet.
-	std::size_t const numSpeakers = m_array ? m_array->getNumSpeakers() : 0;
-        m_gain.resize( m_nSources, numSpeakers );
-        return n;
-    }
-    
-    int setMaxGain(Afloat mg) { m_maxGain = mg; return 0; }
-    
-    std::size_t getNumSpeakers() const { return m_array->getNumSpeakers(); }
-    
-    int calcGains();
-    
-    efl::BasicMatrix<Afloat> const & getGains() const {
-       return m_gain;
-    }
-    
+  explicit VBAP( const LoudspeakerArray &array, SampleType x = 0.0f, SampleType y = 0.0f, SampleType z = 0.0f );
+  VBAP( VBAP const & ) = delete;
+  
+  /**
+   * Calculate the panning gains for a single source position.
+   * @param x Cartesian x coordinate of the source position
+   * @param y Cartesian y coordinate of the source position
+   * @param z Cartesian z coordinate of the source position
+   * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
+   * Buffer must provide space for at least getNumSpeakers() values.
+   */
+  void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;
+  
+  /**
+   * Reset the listener position.
+   * This causes a recalculation of the internal data structures (inverse matrices)
+   * @param x Cartesian x coordinate of the new listener position
+   * @param y Cartesian y coordinate of the new listener position
+   * @param z Cartesian z coordinate of the new listener position
+   */
+  void setListenerPosition( SampleType x, SampleType y, SampleType z );
+  
+private:
+  
+  bool is2D;
+  bool isInfinite;
+  
+  size_t numTotLoudspeakers;
+  size_t numRegLoudspeakers;
+  size_t numVirtLoudspeakers;
+  size_t numTriplets;
+  /**
+   * Inverse matrix of the vector components of loudspeakers positions considering loudspeaker triplets.
+   * Dimension: #triplets(Rows) x #vectorComponents(Columns).
+   */
+  efl::BasicMatrix<SampleType> mInvMatrix;
+  
+  /**
+   * Matrix that contains the positions of the loudspeakers.
+   * Dimension: #realLoudspeakers(Rows) x #3Dcoordinates(Columns).
+   */
+  efl::BasicMatrix<SampleType> mPositions;
+  
+  /**
+   * Matrix that contains the rereouting coefficients from virtual to real loudspeakers.
+   * Dimension: #virtualLoudspeakers(Rows) x #realLoudspeakers(Columns).
+   */
+  efl::BasicMatrix<SampleType> mReroutingMatrix;
+  
+  /**
+   * Vector holding the triplets of loudspeakers for VBAP calculation.
+   */
+  std::vector<LoudspeakerArray::TripletType> mTriplets;
+  
+  /**
+   * Vector holding the cartesian coordinates of the listener.
+   */
+  std::array<SampleType, 3> mListenerPos;
+  /**
+   * Vector holding the VBAP gains for all loudspeakers.
+   * Size: number of regular loudspeakers + number of virtual loudspeakers.
+   * The gains are stored in order of their zero-offset logical loudspeaker index (not output signal index).
+   * The gains of virtual loudspeakers are after the regular loudspeaker gains.
+   */
+  mutable std::vector<SampleType> mGain;
+  
+  /**
+   * Calculates the inverse matrix required for VBAP gain calculation.
+   */
+  void calcInvMatrices();
+  
+  /**
+   * Perform the basic VBAP gain calculation.
+   * @param posX Cartesian x coordinate of the sound source position
+   * @param posY Cartesian y coordinate of the sound source position
+   * @param posZ Cartesian z coordinate of the sound source position
+   
+   
+   */
+  void calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ ) const;
+  
+  /**
+   * Applies rereouting coefficients to VBAP gains
+   */
+  void applyRerouting() const;
+  
 };
-
+  
 } // namespace panning
 } // namespace visr
 

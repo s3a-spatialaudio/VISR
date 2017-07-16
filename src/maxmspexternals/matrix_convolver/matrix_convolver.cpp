@@ -7,6 +7,8 @@
 #undef error
 #include "options.hpp"
 
+#include <libril/detail/compose_message_string.hpp>
+
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
 /* Super-safe determination of the MAX define for setting the operating system. */
@@ -25,6 +27,8 @@
 #endif
 
 #include <libpml/index_sequence.hpp>
+
+#include <libril/signal_flow_context.hpp>
 
 #include <maxmspexternals/libmaxsupport/argument_list.hpp>
 
@@ -109,7 +113,8 @@ MatrixConvolver::MatrixConvolver( t_pxobject & maxProxy, short argc, t_atom *arg
   }
   catch( std::exception const & ex )
   {
-    object_error( reinterpret_cast<t_object *>(getMaxProxy()), "Error in constructor: ", ex.what() );
+    object_error( reinterpret_cast<t_object *>(getMaxProxy()), 
+      detail::composeMessageString("Error in constructor: ", ex.what()).c_str() );
   }
 }
 
@@ -147,9 +152,9 @@ MatrixConvolver::~MatrixConvolver()
 
   try
   {
-    ril::SamplingFrequencyType const samplingFrequency = static_cast<ril::SamplingFrequencyType>(std::round( samplerate ));
+    SamplingFrequencyType const samplingFrequency = static_cast<SamplingFrequencyType>(std::round( samplerate ));
 
-    efl::BasicMatrix<ril::SampleType> initialFilters( ril::cVectorAlignmentSamples );
+    efl::BasicMatrix<SampleType> initialFilters( cVectorAlignmentSamples );
     initFilterMatrix( mFilterList, mMaxFilterLength, mNumMaxFilters, mIndexOffsets, initialFilters );
 
     if( mMaxFilterLength == std::numeric_limits<std::size_t>::max() )
@@ -161,15 +166,18 @@ MatrixConvolver::~MatrixConvolver()
       mNumMaxFilters= initialFilters.numberOfRows( );
     }
 
-    mFlow.reset( new signalflows::MatrixConvolver( mNumberOfInputs, mNumberOfOutputs,
+    // TODO: Livetime must exceed that of the flow.
+    SignalFlowContext const context{ static_cast<std::size_t>(mPeriod), samplingFrequency };
+
+    mFlow.reset( new signalflows::MatrixConvolver( context, "MatrixComvolver", nullptr,
+                                                   mNumberOfInputs, mNumberOfOutputs,
                                                    mMaxFilterLength,
                                                    mNumMaxFilters,
                                                    mRoutings.size(),
                                                    initialFilters,
                                                    mRoutings,
-                                                   mFftLibrary.c_str(),
-                                                   mPeriod,
-                                                   samplingFrequency ) );
+                                                   false /* no control inputs*/,
+                                                   mFftLibrary.c_str() ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>( *mFlow ) );
   }
   catch( std::exception const & e )

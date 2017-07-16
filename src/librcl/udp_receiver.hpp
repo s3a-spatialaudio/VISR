@@ -4,7 +4,11 @@
 #define VISR_LIBRCL_UDP_RECEIVER_HPP_INCLUDED
 
 #include <libril/constants.hpp>
-#include <libril/audio_component.hpp>
+#include <libril/atomic_component.hpp>
+#include <libril/parameter_output.hpp>
+
+#include <libpml/string_parameter.hpp>
+#include <libpml/message_queue_protocol.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio/ip/udp.hpp>
@@ -12,19 +16,10 @@
 
 #include <memory>
 #include <string>
+#include <deque>
 
 namespace visr
 {
-// forward declarations
-namespace ril
-{
-class AudioInput;
-}
-namespace pml
-{
-template<typename MessageType> class MessageQueue;
-}
-
 namespace rcl
 {
 
@@ -34,7 +29,7 @@ namespace rcl
  * or asynchronously (the messages are fetched at an arbitrary time using a thread instantiated by the component). In either case,
  * messages are transmitted further only when the process() method is called for the next time.
  */
-class UdpReceiver: public ril::AudioComponent
+class UdpReceiver: public AtomicComponent
 {
 public:
   enum class Mode
@@ -51,10 +46,13 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
-   * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
-  explicit UdpReceiver( ril::AudioSignalFlow& container, char const * name );
+  explicit UdpReceiver( SignalFlowContext const & context,
+                        char const * name,
+                        CompositeComponent * parent = nullptr );
 
   /**
    * Destructor.
@@ -67,14 +65,14 @@ public:
    * @param mode The mode how data is received. See documantation of
    * enumeration Mode.
    * @param externalIoService An externally provided IO service
-   * object. Must be non-zero if and only if mode == ExternalServiceObject
+   * object. Must be non-zero if and only if mode == Mode::ExternalServiceObject
    */ 
   void setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService = nullptr );
 
   /**
    * The process function. 
    */
-  void process( pml::MessageQueue<std::string> & msgQueue);
+  void process() override;
 
 private:
   void handleReceiveData( const boost::system::error_code& error,
@@ -106,11 +104,13 @@ private:
    * Internal queue of messages received asynchronously. They will be copied into the output
    *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
    */
-  std::unique_ptr< pml::MessageQueue< std::string > > mInternalMessageBuffer;
+  std::deque< pml::StringParameter > mInternalMessageBuffer;
 
   std::unique_ptr< boost::thread > mServiceThread;
 
   boost::mutex mMutex;
+
+  ParameterOutput<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
 };
 
 } // namespace rcl

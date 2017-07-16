@@ -9,13 +9,18 @@
 
 #include <librbbl/fft_wrapper_factory.hpp>
 
-#include <libsignalflows/matrix_convolver.hpp>
+#include <libril/signal_flow_context.hpp>
+
+#include <librcl/fir_filter_matrix.hpp>
+
+#include <librrl/audio_signal_flow.hpp>
+#include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #ifdef VISR_JACK_SUPPORT
-#include <librrl/jack_interface.hpp>
+#include <libaudiointerfaces/jack_interface.hpp>
 #endif
-#include <librrl/portaudio_interface.hpp>
-
+#include <libaudiointerfaces/portaudio_interface.hpp>
+#include <libaudiointerfaces/audio_interface.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <cstdlib>
@@ -53,95 +58,99 @@ int main( int argc, char const * const * argv )
     break; // carry on
   }
 
-  // Query options
-  if( cmdLineOptions.getDefaultedOption<bool>( "list-audio-backends", false ) )
+  try
   {
-    std::cout << "Supported audio backends:" << "TBD" << std::endl;
-    return EXIT_SUCCESS;
-  }
-  if( cmdLineOptions.getDefaultedOption<bool>( "list-fft-libraries", false ) )
-  {
-    std::cout << "Supported FFT libraries:"
-              << rbbl::FftWrapperFactory<ril::SampleType>::listImplementations() << std::endl;
-    return EXIT_SUCCESS;
-  }
-
-  std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
-
-  std::size_t const numberOfInputChannels = cmdLineOptions.getOption<std::size_t>( "input-channels" );
-  std::size_t const numberOfOutputChannels = cmdLineOptions.getOption<std::size_t>( "output-channels" );
-  std::string const routingsString = cmdLineOptions.getDefaultedOption<std::string>( "routings", "[]" );
-  pml::FilterRoutingList const routings( pml::FilterRoutingList::fromJson( routingsString ) );
-  const std::size_t maxFilterRoutings = cmdLineOptions.getDefaultedOption<std::size_t>( "max-routings", routings.size() );
-  if( routings.size() > maxFilterRoutings )
-  {
-    throw std::invalid_argument( "The number of initial filter routings exceeds the value specified in \"--maxRoutings\"." );
-  }
-
-  // Initialise the impulse response matrix
-  // Use max() as special value to denote "no maximum length specified"
-  std::size_t const maxFilterLengthOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filter-length", std::numeric_limits<std::size_t>::max() );
-  std::size_t const maxFilterOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filters", std::numeric_limits<std::size_t>::max( ) ); // max() denotes
-  std::string const filterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
-  std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string( ) );
-  pml::IndexSequence const indexOffsets( indexOffsetString );
-  efl::BasicMatrix<ril::SampleType> initialFilters( ril::cVectorAlignmentSamples );
-  initFilterMatrix( filterList, maxFilterLengthOption, maxFilterOption, indexOffsets, initialFilters );
-
-  // The final values for the number and length of filter slots are determined by the logic of the initialisation function.
-  std::size_t const maxFilters = initialFilters.numberOfRows();
-
-  std::size_t const periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
-  ril::SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<ril::SamplingFrequencyType>( "sampling-frequency", 48000 );
-
-  std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
-
-  signalflows::MatrixConvolver flow( numberOfInputChannels, numberOfOutputChannels,
-                                     initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
-                                     initialFilters, routings,
-                                     fftLibrary.c_str(),
-                                     periodSize, samplingFrequency );
-
-  // Selection of audio interface:
-  // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
-  // back to PortAudio in all other cases.
-  // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
-#ifdef VISR_JACK_SUPPORT
-  bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
-#endif
-
-   std::unique_ptr<visr::ril::AudioInterface> audioInterface;
-
-  try 
-  {
-#ifdef VISR_JACK_SUPPORT
-    if( useNativeJack )
+    // Query options
+    if( cmdLineOptions.getDefaultedOption<bool>( "list-audio-backends", false ) )
     {
-      rrl::JackInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
-      interfaceConfig.setCapturePortNames( "input_", 0, numberOfInputChannels - 1 );
-      interfaceConfig.setPlaybackPortNames( "output_", 0, numberOfOutputChannels - 1 );
-      interfaceConfig.mClientName = "MatrixConvolver";
-      audioInterface.reset( new rrl::JackInterface( interfaceConfig ));
+      std::cout << "Supported audio backends:" << "TBD" << std::endl;
+      return EXIT_SUCCESS;
     }
-    else
-#endif
+    if( cmdLineOptions.getDefaultedOption<bool>( "list-fft-libraries", false ) )
     {
-      rrl::PortaudioInterface::Config interfaceConfig;
-      interfaceConfig.mNumberOfCaptureChannels = numberOfInputChannels;
-      interfaceConfig.mNumberOfPlaybackChannels = numberOfOutputChannels;
-      interfaceConfig.mPeriodSize = periodSize;
-      interfaceConfig.mSampleRate = samplingFrequency;
-      interfaceConfig.mInterleaved = false;
-      interfaceConfig.mSampleFormat = rrl::PortaudioInterface::Config::SampleFormat::float32Bit;
-      interfaceConfig.mHostApi = audioBackend;
-      audioInterface.reset( new rrl::PortaudioInterface( interfaceConfig ) );
+      std::cout << "Supported FFT libraries:"
+          << rbbl::FftWrapperFactory<SampleType>::listImplementations() << std::endl;
+      return EXIT_SUCCESS;
     }
 
-    audioInterface->registerCallback( &ril::AudioSignalFlow::processFunction, &flow );
+    std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
+
+    std::size_t const numberOfInputChannels = cmdLineOptions.getOption<std::size_t>( "input-channels" );
+    std::size_t const numberOfOutputChannels = cmdLineOptions.getOption<std::size_t>( "output-channels" );
+    std::string const routingsString = cmdLineOptions.getDefaultedOption<std::string>( "routings", "[]" );
+    pml::FilterRoutingList const routings( pml::FilterRoutingList::fromJson( routingsString ) );
+    const std::size_t maxFilterRoutings = cmdLineOptions.getDefaultedOption<std::size_t>( "max-routings", routings.size() );
+    if( routings.size() > maxFilterRoutings )
+    {
+      throw std::invalid_argument( "The number of initial filter routings exceeds the value specified in \"--maxRoutings\"." );
+    }
+
+    // Initialise the impulse response matrix
+    // Use max() as special value to denote "no maximum length specified"
+    std::size_t const maxFilterLengthOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filter-length", std::numeric_limits<std::size_t>::max() );
+    std::size_t const maxFilterOption = cmdLineOptions.getDefaultedOption<std::size_t>( "max-filters", std::numeric_limits<std::size_t>::max( ) ); // max() denotes
+    std::string const filterList = cmdLineOptions.getDefaultedOption<std::string>( "filters", std::string() );
+    std::string const indexOffsetString = cmdLineOptions.getDefaultedOption<std::string>( "filter-file-index-offsets", std::string( ) );
+    pml::IndexSequence const indexOffsets( indexOffsetString );
+    efl::BasicMatrix<SampleType> initialFilters( cVectorAlignmentSamples );
+    initFilterMatrix( filterList, maxFilterLengthOption, maxFilterOption, indexOffsets, initialFilters );
+
+    // The final values for the number and length of filter slots are determined by the logic of the initialisation function.
+    std::size_t const maxFilters = initialFilters.numberOfRows();
+
+    std::size_t const periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
+    SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<SamplingFrequencyType>( "sampling-frequency", 48000 );
+
+    std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
+
+    SignalFlowContext const context{ periodSize, samplingFrequency };
+
+    rcl::FirFilterMatrix convolver( context, "MatrixConvolver", nullptr/*instantiate as top-level flow*/ );
+
+    convolver.setup( numberOfInputChannels, numberOfOutputChannels,
+                     initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
+                     initialFilters, routings,
+                     false /*no control inputs*/,
+                     fftLibrary.c_str() );
+
+    rrl::AudioSignalFlow flow( convolver );
+
+    // Selection of audio interface:
+    // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
+    // back to PortAudio in all other cases.
+    // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
+#ifdef VISR_JACK_SUPPORT
+    bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
+#endif
+
+    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
+   audiointerfaces::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,samplingFrequency,periodSize);
+      
+      std::string type;
+      std::string specConf;
+      
+      
+      
+#ifdef VISR_JACK_SUPPORT
+      if( useNativeJack )
+      {
+          std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
+          specConf = "{\"clientname\": \"MatrixConvolver\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
+          
+          type = "Jack";
+      }
+      else
+      {
+#endif
+          specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
+          type = "PortAudio";
+#ifdef VISR_JACK_SUPPORT
+      }
+#endif
+      
+    audioInterface.reset( audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf).get());
+      
+    audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 
     // should there be a separate start() method for the audio interface?
     audioInterface->start( );
@@ -157,8 +166,8 @@ int main( int argc, char const * const * argv )
 
     audioInterface->stop( );
 
-   // Should there be an explicit stop() method for the sound interface?
-    audioInterface->unregisterCallback( &ril::AudioSignalFlow::processFunction );
+    // Should there be an explicit stop() method for the sound interface?
+    audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
 
     efl::DenormalisedNumbers::resetDenormHandling( oldDenormNumbersState );
   }

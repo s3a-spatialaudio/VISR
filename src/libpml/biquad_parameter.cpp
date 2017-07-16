@@ -2,6 +2,8 @@
 
 #include "biquad_parameter.hpp"
 
+#include <libril/detail/compose_message_string.hpp>
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -55,15 +57,14 @@ BiquadParameter<CoeffType>::fromXml( std::basic_istream<char> & stream )
 template< typename CoeffType >
 void BiquadParameter<CoeffType>::loadJson( boost::property_tree::ptree const & tree )
 {
-  boost::property_tree::ptree const biquadTree = tree.get_child( "biquad" );
+  // boost::property_tree::ptree const biquadTree = tree.get_child( "biquad" );
 
-  boost::optional<CoeffType> const a0Optional = biquadTree.get_optional<CoeffType>( "a0" );
-  CoeffType const a0 = a0Optional ? *a0Optional : static_cast<CoeffType>(1.0f);
-  at( 0 ) = biquadTree.get<CoeffType>( "b0" ) / a0;
-  at( 1 ) = biquadTree.get<CoeffType>( "b1" ) / a0;
-  at( 2 ) = biquadTree.get<CoeffType>( "b2" ) / a0;
-  at( 3 ) = biquadTree.get<CoeffType>( "a1" ) / a0;
-  at( 4 ) = biquadTree.get<CoeffType>( "a2" ) / a0;
+  CoeffType const a0 = tree.get<CoeffType>( "a0", static_cast<CoeffType>(1.0f) );
+  at( 0 ) = tree.get<CoeffType>( "b0" ) / a0;
+  at( 1 ) = tree.get<CoeffType>( "b1" ) / a0;
+  at( 2 ) = tree.get<CoeffType>( "b2" ) / a0;
+  at( 3 ) = tree.get<CoeffType>( "a1" ) / a0;
+  at( 4 ) = tree.get<CoeffType>( "a2" ) / a0;
 }
 
 template< typename CoeffType >
@@ -76,7 +77,7 @@ void BiquadParameter<CoeffType>::loadJson( std::basic_istream<char> & stream )
   }
   catch( std::exception const & ex )
   {
-    throw std::invalid_argument( std::string( "Error while parsing a json BiquadParameter node: " ) + ex.what( ) );
+    throw std::invalid_argument( detail::composeMessageString( "Error while parsing a json BiquadParameter node: " , ex.what( )) );
   }
   loadJson( tree );
 }
@@ -116,6 +117,58 @@ void BiquadParameter<CoeffType>::loadXml( std::basic_istream<char> & stream )
     throw std::invalid_argument( std::string( "Error while parsing a XML BiquadParameter node: " ) + ex.what( ) );
   }
   loadXml( tree );
+}
+
+template< typename CoeffType >
+void BiquadParameter<CoeffType>::writeJson( boost::property_tree::ptree & tree ) const
+{
+  tree.put( "b0", b0() );
+  tree.put( "b1", b1( ) );
+  tree.put( "b2", b2( ) );
+  tree.put( "a1", a1( ) );
+  tree.put( "a2", a2( ) );
+}
+
+template< typename CoeffType >
+void BiquadParameter<CoeffType>::writeJson( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree tree;
+  writeJson( tree );
+  try
+  {
+    write_json( stream, tree);
+  } catch (std::exception const & ex)
+  {
+    throw( detail::composeMessageString( "Error while writing BiquadParameter message to JSON: ", ex.what() ) );
+  }
+}
+
+template< typename CoeffType >
+void BiquadParameter<CoeffType>::writeJson( std::string & str ) const
+{
+  std::stringstream stream;
+  writeJson( stream );
+  str = stream.str();
+}
+
+template< typename CoeffType >
+void BiquadParameter<CoeffType>::writeXml( boost::property_tree::ptree & tree ) const
+{
+  // TODO: implement me!
+  assert( false );
+}
+
+template< typename CoeffType >
+void BiquadParameter<CoeffType>::writeXml( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree tree;
+  writeJson( tree );
+
+}
+
+template< typename CoeffType >
+void BiquadParameter<CoeffType>::writeXml( std::string & str ) const
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,14 +231,14 @@ BiquadParameterList<CoeffType>::fromXml( std::string const & str )
 template< typename CoeffType >
 void BiquadParameterList<CoeffType>::loadJson( boost::property_tree::ptree const & tree )
 {
-  auto const biquadNodes = tree.equal_range( "biquad" );
+  auto const biquadNodes = tree.equal_range( "" );
   std::size_t const numBiquads = std::distance( biquadNodes.first, biquadNodes.second );
   resize( numBiquads );
   std::size_t biqIndex = 0;
   for( boost::property_tree::ptree::const_assoc_iterator treeIt( biquadNodes.first ); treeIt != biquadNodes.second; ++treeIt, ++biqIndex )
   {
     boost::property_tree::ptree const childTree = treeIt->second;
-    at( biqIndex ).loadXml( childTree );
+    at( biqIndex ).loadJson( childTree );
   }
 }
 
@@ -195,20 +248,20 @@ void BiquadParameterList<CoeffType>::loadJson( std::basic_istream<char> & stream
   boost::property_tree::ptree tree;
   try
   {
-    read_xml( stream, tree );
+    read_json( stream, tree );
   }
   catch( std::exception const & ex )
   {
-    throw std::invalid_argument( std::string( "Error while parsing a XML BiquadParameter node: " ) + ex.what( ) );
+    throw std::invalid_argument( std::string( "Error while parsing a JSON BiquadParameterList representation: " ) + ex.what( ) );
   }
-  loadXml( tree );
+  loadJson( tree );
 }
 
 template< typename CoeffType >
 void BiquadParameterList<CoeffType>::loadJson( std::string const & str )
 {
   std::stringstream stream( str );
-  loadXml( stream );
+  loadJson( stream );
 }
 
 template< typename CoeffType >
@@ -251,7 +304,84 @@ void BiquadParameterList<CoeffType>::loadXml( std::string const & str )
   loadXml( stream );
 }
 
+template< typename CoeffType >
+void BiquadParameterList<CoeffType>::writeJson( boost::property_tree::ptree & tree ) const
+{
+  for( std::size_t idx( 0 ); idx < size(); ++idx )
+  {
+    boost::property_tree::ptree child;
+    at( idx ).writeJson( child );
+    tree.push_back( std::make_pair( "", child ) );
+  }
+}
+
+template< typename CoeffType >
+void BiquadParameterList<CoeffType>::writeJson( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree tree;
+  writeJson( tree );
+  try
+  {
+    write_json( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while writing a BiquadParameterList to JSON: " ) + ex.what( ) );
+  }
+}
+
+template< typename CoeffType >
+void BiquadParameterList<CoeffType>::writeJson( std::string & str ) const
+{
+  std::stringstream stream;
+  writeJson( stream );
+  str = stream.str();
+}
+
+template< typename CoeffType >
+void BiquadParameterList<CoeffType>::writeXml( boost::property_tree::ptree & tree ) const
+{
+  // TODO: implement me!
+  assert( false );
+}
+
+template< typename CoeffType >
+void BiquadParameterList<CoeffType>::writeXml( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree tree;
+  writeXml( tree );
+  try
+  {
+    write_xml( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while writing BiquadParameterList to XML: " ) + ex.what( ) );
+  }
+}
+
+template< typename CoeffType >
+void BiquadParameterList<CoeffType>::writeXml( std::string & str ) const
+{
+  std::stringstream stream;
+  writeXml( stream );
+  str = stream.str();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename CoeffType>
+BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( MatrixParameterConfig const & config )
+  : BiquadParameterMatrix( config.numberOfRows(), config.numberOfColumns() )
+{
+}
+
+template<typename CoeffType>
+BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( ParameterConfigBase const & config )
+  : BiquadParameterMatrix( dynamic_cast<MatrixParameterConfig const &>( config ) )
+{
+}
+
 template<typename CoeffType>
 BiquadParameterMatrix<CoeffType>::BiquadParameterMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads )
 {
@@ -292,6 +422,9 @@ template class BiquadParameter<float>;
 template class BiquadParameterList<float>;
 template class BiquadParameterMatrix<float>;
 
+template class BiquadParameter<double>;
+template class BiquadParameterList<double>;
+template class BiquadParameterMatrix<double>;
 
 } // namespace pml
 } // namespace visr

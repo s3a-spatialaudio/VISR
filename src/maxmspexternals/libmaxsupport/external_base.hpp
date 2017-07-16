@@ -22,6 +22,10 @@
 #include <ext_obex.h>
 #include <z_dsp.h>
 
+// Obviously Max/MSP is defining macros as max /min. This clashes badly with C++ code if max/min are defined as functions somewhere
+#undef max
+#undef min
+
 namespace visr
 {
 namespace maxmsp

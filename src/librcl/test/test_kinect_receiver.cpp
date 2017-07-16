@@ -5,8 +5,10 @@
 #include <librcl/listener_compensation.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/udp_receiver.hpp>
-#include <libril/audio_signal_flow.hpp>
-#include <libpml/message_queue.hpp>
+
+#include <libril/signal_flow_context.hpp>
+
+// #include <libpml/message_queue.hpp>
 #include <libpml/listener_position.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -27,11 +29,12 @@ namespace rcl
 namespace test
 {
 
-class Flow: public ril::AudioSignalFlow
+#if 0
+class Flow: public AudioSignalFlow
 {
 public:
-  explicit Flow( std::size_t period, ril::SamplingFrequencyType samplingFrequency )
-    : ril::AudioSignalFlow( period, samplingFrequency )
+  explicit Flow( std::size_t period, SamplingFrequencyType samplingFrequency )
+    : AudioSignalFlow( period, samplingFrequency )
   {
   }
 
@@ -52,7 +55,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   rcl::PositionDecoder decoder( flow, "Decoder" );
   rcl::ListenerCompensation listenerComp( flow, "ListenerCompensation");
 
-  pml::MessageQueue<std::string> posMessage; //output position for the Kinect
+  pml::MessageQueue<pml::StringParameter> posMessage; //output position for the Kinect
   const std::size_t kinectNetworkPort=8888;
 
   std::size_t const numSpeakers = 2;
@@ -80,8 +83,8 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
   }
 
   pml::ListenerPosition pos;
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> gains(numSpeakers, ril::cVectorAlignmentSamples );
-  efl::BasicVector<rcl::ListenerCompensation::SampleType> delays(numSpeakers, ril::cVectorAlignmentSamples );
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> gains(numSpeakers, cVectorAlignmentSamples );
+  efl::BasicVector<rcl::ListenerCompensation::SampleType> delays(numSpeakers, cVectorAlignmentSamples );
 
 
   kinect.setup( kinectNetworkPort, rcl::UdpReceiver::Mode::Synchronous ); //setup to listen from th, how to set up mode?
@@ -114,6 +117,7 @@ BOOST_AUTO_TEST_CASE(testKinectReceiver)
     //std::cout << "Gains: " << gains[17] << "Delays: " << delays[17] << std::endl;
   }
 }
+#endif
 
 } // namespace test
 } // namespace rcl

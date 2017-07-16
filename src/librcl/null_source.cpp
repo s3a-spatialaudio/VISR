@@ -10,8 +10,10 @@ namespace rcl
 {
 
 
-NullSource::NullSource( ril::AudioSignalFlow& container, char const * name )
- : AudioComponent( container, name )
+  NullSource::NullSource( SignalFlowContext const & context,
+                          char const * name,
+                          CompositeComponent * parent /*= nullptr*/ )
+ : AtomicComponent( context, name, parent )
  , mOutput( "out", *this )
 {
 }
@@ -30,7 +32,7 @@ void NullSource::process()
   std::size_t const numInputs( mOutput.width() );
   for( std::size_t sigIdx( 0 ); sigIdx < numInputs; ++sigIdx )
   {
-    efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), ril::cVectorAlignmentSamples );
+    efl::ErrorCode res = efl::vectorZero( mOutput[sigIdx], period(), cVectorAlignmentSamples );
     if( res != efl::noError )
     {
       throw std::runtime_error( std::string( "Error during NullSource::process(): " ) + efl::errorMessage( res ) );

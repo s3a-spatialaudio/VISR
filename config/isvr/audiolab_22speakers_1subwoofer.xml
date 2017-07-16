@@ -74,8 +74,12 @@
    <loudspeaker channel="35" delay="0.00032002" eq="highpass" gainDB="-0.35979" id="22">
       <cart x="1.78" y="1.73" z="-0.86"/>
    </loudspeaker>
-   <virtualspeaker eq="highpass" id="23">
+   <virtualspeaker eq="highpass" id="VIRT00">
       <cart x="0" y="0" z="-1"/>
+     <route lspId="1" gainDB="-6"/>
+     <route lspId="2" gainDB="-9"/>
+     <route lspId ="3" gainDB="-6" delay="0"/>
+     <route lspId ="4" gainDB="-12" delay="0"/>
    </virtualspeaker>
    <subwoofer assignedLoudspeakers="1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22" channel="41" delay="0" eq="lowpass" gainDB="0" weights="1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000"/>
    <triplet l1="1" l2="2" l3="9"/>
@@ -109,15 +113,15 @@
    <triplet l1="11" l2="12" l3="21"/>
    <triplet l1="11" l2="21" l3="20"/>
    <triplet l1="12" l2="13" l3="21"/>
-   <triplet l1="13" l2="14" l3="23"/>
-   <triplet l1="13" l2="23" l3="21"/>
-   <triplet l1="14" l2="15" l3="23"/>
-   <triplet l1="15" l2="16" l3="23"/>
-   <triplet l1="16" l2="17" l3="23"/>
+   <triplet l1="13" l2="14" l3="VIRT00"/>
+   <triplet l1="13" l2="VIRT00" l3="21"/>
+   <triplet l1="14" l2="15" l3="VIRT00"/>
+   <triplet l1="15" l2="16" l3="VIRT00"/>
+   <triplet l1="16" l2="17" l3="VIRT00"/>
    <triplet l1="17" l2="18" l3="22"/>
-   <triplet l1="17" l2="22" l3="23"/>
+   <triplet l1="17" l2="22" l3="VIRT00"/>
    <triplet l1="18" l2="19" l3="22"/>
    <triplet l1="19" l2="20" l3="22"/>
-   <triplet l1="20" l2="21" l3="23"/>
-   <triplet l1="20" l2="23" l3="22"/>
+   <triplet l1="20" l2="21" l3="VIRT00"/>
+   <triplet l1="20" l2="VIRT00" l3="22"/>
 </panningConfiguration>

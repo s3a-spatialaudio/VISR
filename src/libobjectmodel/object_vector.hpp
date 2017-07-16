@@ -5,6 +5,8 @@
 
 #include "object.hpp"
 
+#include <libril/export_symbols.hpp>
+
 #include <map>
 #include <memory>
 
@@ -63,6 +65,11 @@ public:
    * @todo Check whether copy construction is sensible for this type of object.
    */
   ObjectVector( ObjectVector const & rhs ) = delete;
+
+  /**
+   * Assign member function as an explicit alternative to an assignment operator.
+   */
+  void assign( ObjectVector const & rhs );
 
   /**
    * Exchange the contents of this object with \p rhs.

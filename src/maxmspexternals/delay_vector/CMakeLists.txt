@@ -10,17 +10,16 @@ ELSE( APPLE )
   ADD_DEFINITIONS( -DWIN_VERSION )
 ENDIF( APPLE )
 
-SET( EXTERNAL_NAME delay_vector_old )
+SET( EXTERNAL_NAME delay_vector~ )
 
 SET( PROJECT_NAME delay_vector_max_external )
 
-ADD_LIBRARY( ${PROJECT_NAME} MODULE delay_vector.cpp )
+ADD_LIBRARY( ${PROJECT_NAME} MODULE delay_vector.hpp delay_vector.cpp )
 
-set_target_properties( ${PROJECT_NAME}  PROPERTIES
+SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES
     PREFIX ""
     OUTPUT_NAME ${EXTERNAL_NAME}
-    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/max"
-)
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/max" )
 
 # <AF> TODO: Move this conditional logic to a centralised location!
 if(WIN32) # 32-bit and 64-bit Windows
@@ -40,7 +39,28 @@ elseif(APPLE)
 endif(WIN32)
 
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} audiointerfaces )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} pml )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} visr_impl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rbbl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} efl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} objectmodel )
+IF( WIN32 )
+  # I need to exclude this library in combination with MAXAPI_USE_MSCRT
+  # defined in the source file in order to avoid crashes when C++
+  # standard library functions are called.  
+  # TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_CRT_P_LIBRARY} )
+  # Still required?
+ENDIF( WIN32 )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_AUDIO_LIBRARY} )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MAXSDK_API_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
+
 # According to the current FindMaxSDK.cmake, there is no crt library for apple.
 # TODO: Verify and improve FindMaxSDK.cmake
+
+install(TARGETS ${PROJECT_NAME} DESTINATION maxmsp )
