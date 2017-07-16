@@ -40,12 +40,7 @@ void DenormalisedNumbers::resetDenormHandling( State stateToRestore )
 DenormalisedNumbers::State DenormalisedNumbers::setDenormHandling( State newState )
 {
 #ifdef INTEL_PLATFORM 
-  ControlWord const oldCW =
-#if 0
-  _mm_getcsr( );
-#else
-  0;
-#endif
+  ControlWord const oldCW = _mm_getcsr( );
   bool const oldDAZ = (oldCW bitand cDenormsAreZeroMask) != 0;
   bool const oldFTZ = (oldCW bitand cFlushToZeroMask) != 0;
 
@@ -58,11 +53,9 @@ DenormalisedNumbers::State DenormalisedNumbers::setDenormHandling( State newStat
   {
     newCW = newCW bitor cFlushToZeroMask;
   }
-#if 0
   _mm_setcsr( newCW );
-#endif
   return State( oldDAZ, oldFTZ );
-#else
+#else // #ifdef INTEL_PLATFORM
   // Do nothing, return default object.
   return State();
 #endif
