@@ -1,3 +1,27 @@
+function(fix_rpath libpath)
+	get_filename_component(libname ${${libpath}} NAME)
+
+	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/shlib/${libname})
+	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+	SET( ${libpath} ${PROJECT_BINARY_DIR}/shlib/${libname})
+	SET( ${libpath} ${PROJECT_BINARY_DIR}/shlib/${libname} PARENT_SCOPE ) 
+
+	set (EXECUTE_COMMAND install_name_tool -id @rpath/${libname} ${${libpath}})
+	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+endfunction()
+
+function(fix_dependencies_of_3rdparty depname libpath)
+
+	set (EXECUTE_COMMAND bash "-c" "${CMAKE_SOURCE_DIR}/cmake_modules/./change_dependency_installname.sh ${depname} ${libpath}" )
+
+	execute_process(COMMAND ${EXECUTE_COMMAND} OUTPUT_VARIABLE rv)
+	#message( STATUS "output "${depname} ": " ${rv} )
+
+endfunction()
+
+
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 # Top-level build configuration for project VISceRal
@@ -40,7 +64,7 @@ if(UNIX)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-
+message( STATUS "output "${CMAKE_MODULE_PATH} )
 # At the moment, all include directories are relative to the source root directory.
 # Therefore it suffices to set this root as the include path.
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
@@ -57,13 +81,15 @@ IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
 SET(CMAKE_INSTALL_PREFIX /Applications/VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}-${VISR_SYSTEM_NAME} )
 
-#SET( MACOSX_RPATH ON)
+
+
+SET( CMAKE_MACOSX_RPATH ON)
 # use, i.e. don't skip the full RPATH for the build tree
-#SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # when building, don't use the install RPATH already
 # (but later on when installing)
-#SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
-#SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -145,6 +171,8 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+
 
 
 ############################################################
@@ -304,6 +332,55 @@ SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thr
 FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 
+#WORKING
+#add_custom_target(comma ALL COMMAND /bin/sh /Users/gc1y17/VISR/visr/cmake_modules/postscript.sh)
+#add_dependencies(comma  rcl)
+############################################################
+# Copy 3rd party libraries and set RPATH for MacOs
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+  FIND_PACKAGE(Flac REQUIRED)
+  FIND_PACKAGE(OggVorbis REQUIRED)
+
+set (EXECUTE_COMMAND mkdir -p ${PROJECT_BINARY_DIR}/shlib)
+execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+set (EXECUTE_COMMAND  chmod -R 777 ${PROJECT_BINARY_DIR}/shlib)
+execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+fix_rpath(FLAC_LIBRARY)
+fix_rpath(OGG_LIBRARY)
+fix_rpath(VORBIS_LIBRARY)
+fix_rpath(VORBISENC_LIBRARY)
+
+fix_rpath(SNDFILE_LIBRARY)
+fix_rpath(PORTAUDIO_LIBRARIES)
+fix_rpath(Boost_SYSTEM_LIBRARY)
+fix_rpath(Boost_THREAD_LIBRARY)
+fix_rpath(Boost_CHRONO_LIBRARY)
+fix_rpath(Boost_DATE_TIME_LIBRARY)
+fix_rpath(Boost_FILESYSTEM_LIBRARY)
+fix_rpath(Boost_PROGRAM_OPTIONS_LIBRARY)
+fix_rpath(Boost_UNIT_TEST_FRAMEWORK_LIBRARY)
+fix_rpath(Boost_REGEX_LIBRARY)
+
+
+get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
+get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
+get_filename_component(VORBIS_LIBRARY_NAME ${VORBIS_LIBRARY} NAME_WE)
+get_filename_component(VORBISENC_LIBRARY_NAME ${VORBISENC_LIBRARY} NAME_WE)
+
+fix_dependencies_of_3rdparty(${FLAC_LIBRARY_NAME} ${SNDFILE_LIBRARY})
+fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${SNDFILE_LIBRARY})
+fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${SNDFILE_LIBRARY})
+fix_dependencies_of_3rdparty(${VORBISENC_LIBRARY_NAME} ${SNDFILE_LIBRARY})
+fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBIS_LIBRARY})
+fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
+fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${VORBISENC_LIBRARY})
+
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+
 ################################################################################
 # Actual software components (subprojects) to be built are
 # contained in the src/ directory
@@ -350,3 +427,4 @@ ENDIF()
 
 # Instructions for packaging are held in a separate file.
 INCLUDE( PackageConfig )
+
