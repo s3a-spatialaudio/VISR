@@ -5,12 +5,6 @@
 
 #include "denormalised_number_handling.hpp"
 
-#if(WIN32)
-#include <xmmintrin.h>
-#else // X86/X86_64 Unix architectures platforms
-#include <xmmintrin.h>
-#endif
-
 #include <cstdint>
 #include <ciso646>
 
