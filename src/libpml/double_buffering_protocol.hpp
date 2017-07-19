@@ -91,7 +91,11 @@ private:
   static constexpr const char * sProtocolName = "DoubleBuffering";
 };
 
-class VISR_PML_LIBRARY_SYMBOL DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Input
+class
+///@cond NEVER
+VISR_PML_LIBRARY_SYMBOL
+///@endcond NEVER
+DoubleBufferingProtocol::InputBase: public CommunicationProtocolBase::Input
 {
   friend class DoubleBufferingProtocol;
 public:
@@ -143,7 +147,12 @@ private:
 //////////////////////////////////////////////////////////////////
 // Output
 
-class VISR_PML_LIBRARY_SYMBOL DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Output
+
+class
+///@cond NEVER
+VISR_PML_LIBRARY_SYMBOL
+///@endcond NEVER
+ DoubleBufferingProtocol::OutputBase: public CommunicationProtocolBase::Output
 {
   friend class DoubleBufferingProtocol;
 public:
