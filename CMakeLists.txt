@@ -1,11 +1,14 @@
 function(fix_rpath libpath)
 	get_filename_component(libname ${${libpath}} NAME)
 
-	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/shlib/${libname})
+	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
 	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
-	SET( ${libpath} ${PROJECT_BINARY_DIR}/shlib/${libname})
-	SET( ${libpath} ${PROJECT_BINARY_DIR}/shlib/${libname} PARENT_SCOPE ) 
+	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname})
+	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname} PARENT_SCOPE ) 
+
+	set (EXECUTE_COMMAND  chmod 777 ${PROJECT_BINARY_DIR}/3rd/${libname})
+	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
 	set (EXECUTE_COMMAND install_name_tool -id @rpath/${libname} ${${libpath}})
 	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
@@ -346,11 +349,9 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   FIND_PACKAGE(Flac REQUIRED)
   FIND_PACKAGE(OggVorbis REQUIRED)
 
-set (EXECUTE_COMMAND mkdir -p ${PROJECT_BINARY_DIR}/shlib)
+set (EXECUTE_COMMAND mkdir -p ${PROJECT_BINARY_DIR}/3rd)
 execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
-set (EXECUTE_COMMAND  chmod -R 777 ${PROJECT_BINARY_DIR}/shlib)
-execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
 fix_rpath(FLAC_LIBRARY)
 fix_rpath(OGG_LIBRARY)
