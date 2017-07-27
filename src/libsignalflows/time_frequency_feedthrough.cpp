@@ -16,8 +16,9 @@ TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext const & co
                                                     std::size_t hopSize )
  : CompositeComponent( context, name, parent )
 #ifndef JUST_FEEDTHROUGH
- , mForwardTransform( context, "ForwardTransform", this )
- , mInverseTransform( context, "InverseTransform", this )
+  // Use default FFT implementation
+ , mForwardTransform( context, "ForwardTransform", this, numberOfChannels, dftSize, windowLength, hopSize )
+ , mInverseTransform( context, "InverseTransform", this, numberOfChannels, dftSize, hopSize )
 #endif
  , mInput( "input", *this )
  , mOutput( "output", *this )
@@ -25,13 +26,10 @@ TimeFrequencyFeedthrough::TimeFrequencyFeedthrough( SignalFlowContext const & co
   mInput.setWidth( numberOfChannels );
   mOutput.setWidth( numberOfChannels );
 #ifndef JUST_FEEDTHROUGH
-  mForwardTransform.setup( numberOfChannels, dftSize, windowLength, hopSize, "kissfft" );
-  mInverseTransform.setup( numberOfChannels, dftSize, hopSize, "kissfft" );
   audioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "ForwardTransform", "in", ChannelRange( 0, numberOfChannels ) );
   audioConnection( "InverseTransform", "out", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
 
   parameterConnection( "ForwardTransform", "out", "InverseTransform", "in" );
-
 #else
   audioConnection( "this", "input", ChannelRange( 0, numberOfChannels ), "this", "output", ChannelRange( 0, numberOfChannels ) );
 #endif
