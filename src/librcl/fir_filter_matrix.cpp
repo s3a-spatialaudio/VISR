@@ -38,9 +38,6 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
   mInput.setWidth( numberOfInputs );
   mOutput.setWidth( numberOfOutputs );
 
-  mInputChannels.resize( numberOfInputs, nullptr );
-  mOutputChannels.resize( numberOfOutputs, nullptr );
-
   mConvolver.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
     numberOfInputs, numberOfOutputs, period(),
     filterLength, maxRoutings, maxFilters,
@@ -72,9 +69,9 @@ void FirFilterMatrix::process()
     }
   }
 
-  mInput.getChannelPointers( &mInputChannels[0] );
-  mOutput.getChannelPointers( &mOutputChannels[0] );
-  mConvolver->process( &mInputChannels[0], &mOutputChannels[0], cVectorAlignmentSamples );
+  mConvolver->process( mInput.data(), mInput.channelStrideSamples(), 
+                       mOutput.data(), mOutput.channelStrideSamples(),
+                       cVectorAlignmentSamples );
 }
 
 void FirFilterMatrix::clearRoutings()

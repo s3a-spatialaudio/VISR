@@ -18,10 +18,8 @@
 #include <libpml/indexed_value_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
 
-
 #include <cstddef> // for std::size_t
 #include <memory>
-#include <valarray>
 
 namespace visr
 {
@@ -138,16 +136,6 @@ private:
   AudioOutput mOutput;
 
   std::unique_ptr<ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > > > mSetFilterInput;
-
-  /**
-   * Vectors to the channel pointers of the input and output ports.
-   * They are required by the interface of the contained rbbl::MultiChannelConvolverUniform class.
-   * @todo Consider (optional) stride-based interface for rbbl::MultiChannelConvolverUniform.
-   */
-  //@{
-  std::valarray<SampleType const *> mInputChannels;
-  std::valarray<SampleType * > mOutputChannels;
-  //@}
 
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mConvolver;
 };

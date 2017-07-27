@@ -101,6 +101,10 @@ public:
                 SampleType * const * output,
                 std::size_t alignment = 0 );
 
+  void process( SampleType const * const input, std::size_t inputStride,
+                SampleType * const output, std::size_t outputStride,
+                std::size_t alignment = 0 );
+
   /**
   * Manipulation of the routing table.
   */
@@ -171,6 +175,10 @@ private:
   void processInput( SampleType const * const * input, std::size_t alignment );
 
   void processOutput( SampleType * const * output, std::size_t alignment );
+
+  void processInput( SampleType const * const input, std::size_t channelStride, std::size_t alignment );
+
+  void processOutput( SampleType * const output, std::size_t channelStride, std::size_t alignment );
 
   void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
 

@@ -11,6 +11,8 @@ panning_calculator.cpp
 rcl.cpp
 scene_decoder.cpp
 scalar_osc_decoder.cpp
+time_frequency_inverse_transform.cpp
+time_frequency_transform.cpp
 udp_receiver.cpp
 )
 

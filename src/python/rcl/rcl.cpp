@@ -19,6 +19,8 @@ namespace rcl
   void exportPanningCalculator( pybind11::module & m );
   void exportScalarOscDecoder( pybind11::module & m );
   void exportSceneDecoder( pybind11::module & m );
+  void exportTimeFrequencyTransform( pybind11::module & m );
+  void exportTimeFrequencyInverseTransform( pybind11::module & m );
   void exportUdpReceiver( pybind11::module & m );
 }
 }
@@ -41,6 +43,8 @@ PYBIND11_PLUGIN(rcl)
   exportPanningCalculator( m );
   exportScalarOscDecoder( m );
   exportSceneDecoder( m );
+  exportTimeFrequencyInverseTransform( m );
+  exportTimeFrequencyTransform( m );
   exportUdpReceiver( m );
   return m.ptr();
 }

@@ -10,16 +10,15 @@
 #include <libril/audio_input.hpp>
 #include <libril/parameter_output.hpp>
 
-#include <libefl/aligned_array.hpp>
+#include <libefl/basic_vector.hpp>
 
 #include <libpml/time_frequency_parameter.hpp>
 #include <libpml/shared_data_protocol.hpp>
 
-//#include <librbbl/circular_buffer.hpp>
+#include <librbbl/circular_buffer.hpp>
 
 #include <cstddef> // for std::size_t
 #include <memory>
-#include <valarray>
 
 namespace visr
 {
@@ -29,10 +28,6 @@ namespace rbbl
 {
 template< typename SampleType >
 class FftWrapperBase;
-
-template< typename SampleType >
-class CircularBuffer;
-
 }
 
 namespace rcl
@@ -40,8 +35,9 @@ namespace rcl
 
 class VISR_RCL_LIBRARY_SYMBOL TimeFrequencyTransform: public AtomicComponent
 {
-  using SampleType = visr::SampleType;
 public:
+  using SampleType = visr::SampleType;
+
   /**
    * Constructor.
    * @param context Configuration object containing basic execution parameters.
@@ -50,8 +46,23 @@ public:
    */
   explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
-                                   CompositeComponent * parent = nullptr );
-  
+                                   CompositeComponent * parent,
+                                   std::size_t numberOfChannels,
+                                   std::size_t dftLength,
+                                   std::size_t windowLength,
+                                   std::size_t hopSize,
+                                   char const * fftImplementation = "default" );
+
+  explicit TimeFrequencyTransform( SignalFlowContext const & context,
+                                   char const * name,
+                                   CompositeComponent * parent,
+                                   std::size_t numberOfChannels,
+                                   std::size_t dftLength,
+                                   efl::BasicVector<SampleType> const & window,
+                                   std::size_t hopSize,
+                                   char const * fftImplementation = "default" );
+
+
   ~TimeFrequencyTransform();
 
   /**
@@ -67,50 +78,50 @@ public:
 
 private:
 
-  AudioInput mInput;
-
   /**
    * Buffer for teporary storage of the input channel pointers.
    * @todo Change if the delay line supports an (optional) stride-based interface.
    */
-  std::valarray<SampleType const *> mInputChannels;
+//  std::valarray<SampleType const *> mInputChannels;
 
-  /**
-   * Port is configured in the setup() 
-   */
-  std::unique_ptr<ParameterOutput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mOutput;
+  std::size_t const mAlignment;
 
   /**
    * 
    */
-  std::size_t mNumberOfChannels;
+  std::size_t const mNumberOfChannels;
 
   /**
    * The length of the Fourier transform;
    */
-  std::size_t mDftlength;
+  std::size_t const mDftlength;
 
-  std::size_t mWindowLength;
+  std::size_t const mWindowLength;
 
   std::size_t mDftSamplesPerPeriod;
 
-  std::size_t mHopSize;
+  std::size_t const mHopSize;
 
-  std::unique_ptr< rbbl::CircularBuffer<SampleType> > mInputBuffer;
+  rbbl::CircularBuffer<SampleType> mInputBuffer;
 
   /**
    * Wrapper for the different FFT libraries
    */
   std::unique_ptr< rbbl::FftWrapperBase<SampleType> > mFftWrapper;
 
-  std::size_t mAlignment;
-
   /**
    * The window 
    */
-  efl::AlignedArray<SampleType> mWindow;
+  efl::BasicVector<SampleType> mWindow;
 
-  efl::AlignedArray<SampleType> mCalcBuffer;
+  efl::BasicVector<SampleType> mCalcBuffer;
+
+  AudioInput mInput;
+
+  /**
+   *
+   */
+  ParameterOutput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > mOutput;
 };
 
 } // namespace rcl

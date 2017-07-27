@@ -17,7 +17,6 @@
 #include <libpml/shared_data_protocol.hpp>
 
 #include <cstddef> // for std::size_t
-#include <memory>
 
 namespace visr
 {
@@ -47,45 +46,33 @@ public:
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
   explicit TimeFrequencyInverseTransform( SignalFlowContext const & context,
-                                   char const * name,
-                                   CompositeComponent * parent = nullptr );
-  ~TimeFrequencyInverseTransform();
+                                          char const * name,
+                                          CompositeComponent * parent,
+                                          std::size_t numberOfChannels,
+                                          std::size_t dftLength,
+                                          std::size_t hopSize,
+                                          char const * fftImplementation = "default" );
 
-  /**
-   * @todo Add parameter to describe the window type.
-   */
-  void setup( std::size_t numberOfChannels, 
-              std::size_t dftLength,
-              std::size_t hopSize,
-              char const * fftImplementation = "default" );
+  ~TimeFrequencyInverseTransform();
 
   void process( );
 
 private:
-  std::size_t mAlignment;
-
-  AudioOutput mOutput;
-
-  /**
-   * Port is configured in the setup() 
-   */
-  std::unique_ptr<ParameterInput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > > mInput;
+  std::size_t const mAlignment;
 
   /**
    * 
    */
-  std::size_t mNumberOfChannels;
+  std::size_t const mNumberOfChannels;
 
   /**
    * The length of the Fourier transform;
    */
-  std::size_t mDftLength;
+  std::size_t const mDftLength;
 
-  std::size_t mDftSamplesPerPeriod;
+  std::size_t const mDftSamplesPerPeriod;
 
-  std::size_t mHopSize;
-
-  // std::unique_ptr< rbbl::CircularBuffer<SampleType> > mAccumulationBuffer;
+  std::size_t const mHopSize;
 
   efl::BasicMatrix<SampleType> mAccumulationBuffer;
 
@@ -95,6 +82,13 @@ private:
   std::unique_ptr< rbbl::FftWrapperBase<SampleType> > mFftWrapper;
 
   efl::AlignedArray<SampleType> mCalcBuffer;
+
+  /**
+  * 
+  */
+  ParameterInput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > mInput;
+
+  AudioOutput mOutput;
 };
 
 } // namespace rcl
