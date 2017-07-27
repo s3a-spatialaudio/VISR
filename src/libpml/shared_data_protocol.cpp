@@ -98,7 +98,12 @@ bool SharedDataProtocol::disconnectOutput( CommunicationProtocolBase::Output* po
 
 ///////////////////////////////////////////////////////////////////////////////
 // InputBase
-
+/**
+ * Suppress Doxygen warnings about "no uniquely matching class member"
+ * These warnings are apparently triggered by the VISR_PML_LIBRARY_SYMBOL macro in the class definition.
+ * Anyway, the functions are properly documented in the .hpp file.
+ * @cond NEVER
+ */
 SharedDataProtocol::InputBase::~InputBase() = default;
 
 void SharedDataProtocol::InputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
@@ -122,10 +127,11 @@ void SharedDataProtocol::OutputBase::setProtocolInstance( CommunicationProtocolB
   SharedDataProtocol * dbp = dynamic_cast<SharedDataProtocol*>(protocol);
   if( not dbp )
   {
-    throw std::invalid_argument( " SharedDataProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
+    throw std::invalid_argument( "SharedDataProtocol::InputBase::setProtocolInstance(): Called with nonmatching protocol. " );
   }
   setProtocolInstance( dbp );
 }
+/// @endcond NEVER
 
 } // namespace pml
 } // namespace visr

@@ -127,7 +127,12 @@ bool DoubleBufferingProtocol::disconnectOutput( CommunicationProtocolBase::Outpu
 
 ///////////////////////////////////////////////////////////////////////////////
 // InputBase
-
+/**
+ * Suppress Doxygen warnings about "no uniquely matching class member"
+ * These warnings are apparently triggered by the VISR_PML_LIBRARY_SYMBOL macro in the class definition.
+ * Anyway, the functions are properly documented in the .hpp file.
+ * @cond NEVER
+ */
 DoubleBufferingProtocol::InputBase::InputBase()
   : mProtocol( nullptr )
   , mChanged( false ) // Do not signal changed values on startup (unless they are explicitly set)
@@ -203,6 +208,7 @@ setProtocolInstance( DoubleBufferingProtocol * protocol )
 {
   mProtocol = protocol;
 }
+/// @endcond NEVER
 
 } // namespace pml
 } // namespace visr
