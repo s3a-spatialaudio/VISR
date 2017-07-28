@@ -33,6 +33,9 @@ class FftWrapperBase;
 namespace rcl
 {
 
+/**
+ * Component to transform a multichannel input audio signal into a sequence of time-frequency parameter data.
+ */
 class VISR_RCL_LIBRARY_SYMBOL TimeFrequencyTransform: public AtomicComponent
 {
 public:
@@ -43,6 +46,7 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
+   * @param numberOfChannels The number of distinct audio waveforms received through the input audio port.
    */
   explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
@@ -77,12 +81,6 @@ public:
   void process( );
 
 private:
-
-  /**
-   * Buffer for teporary storage of the input channel pointers.
-   * @todo Change if the delay line supports an (optional) stride-based interface.
-   */
-//  std::valarray<SampleType const *> mInputChannels;
 
   std::size_t const mAlignment;
 

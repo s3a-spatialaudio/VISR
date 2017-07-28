@@ -36,6 +36,7 @@ TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( SignalFlowContext 
  , mDftSamplesPerPeriod( period() / hopSize )
  , mHopSize( hopSize )
  , mAccumulationBuffer( mNumberOfChannels, mDftLength - mHopSize, mAlignment )
+ , mFftWrapper( rbbl::FftWrapperFactory<SampleType>::create( fftImplementation, dftLength, mAlignment ) )
  , mCalcBuffer(mDftLength, mAlignment )
  , mInput( "in", *this, pml::TimeFrequencyParameterConfig( dftLength, hopSize, numberOfChannels, mDftSamplesPerPeriod ) )
  , mOutput( "out", *this, numberOfChannels )
@@ -47,36 +48,6 @@ TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( SignalFlowContext 
 }
 
 TimeFrequencyInverseTransform::~TimeFrequencyInverseTransform() = default;
-
-#if 0
-void TimeFrequencyInverseTransform::setup( std::size_t numberOfChannels,
-                                           std::size_t dftLength,
-                                           std::size_t hopSize,
-                                           char const * fftImplementation /*= "default"*/ )
-{
-  mNumberOfChannels = numberOfChannels;
-  if( period() % hopSize != 0 )
-  {
-    throw std::invalid_argument( "TimeFrequencyInverseTransform: Invalid hop size (no integer number of hops per audio processing period)." );
-  }
-  mDftLength = dftLength;
-  mDftSamplesPerPeriod = period() / hopSize;
-  mHopSize = hopSize;
-
-  mCalcBuffer.resize( dftLength );
-
-  // NOTE: This relies on the alignment of the output parameters as well.
-  mFftWrapper = rbbl::FftWrapperFactory<SampleType>::create( fftImplementation, dftLength, mAlignment );
-
-
-  // mAccumulationBuffer.reset( new rbbl::CircularBuffer<SampleType>( numberOfChannels, dftLength, mAlignment ) );
-  mAccumulationBuffer.resize( mNumberOfChannels, mDftLength - mHopSize );
-
-  pml::TimeFrequencyParameterConfig const tfParamConfig( dftLength, hopSize, numberOfChannels, mDftSamplesPerPeriod );
-  mOutput.setWidth( mNumberOfChannels );
-  mInput.reset( new ParameterInput < pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> >( "in", *this, tfParamConfig ) ) ;
-}
-#endif
 
 void TimeFrequencyInverseTransform::process()
 {
