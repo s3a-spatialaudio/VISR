@@ -13,15 +13,26 @@ import pml
 import numpy as np
 import matplotlib.pyplot as plt
 
+#exec(open("time_frequency_filtering.py").read())
+#exec(open("/home/andi/dev/visr/src/python/scripts/time_frequency_filtering.py").read())
 
 class TFProcessing( visr.CompositeComponent ):
-    def __init__( self, context, name, parent, numberOfChannels, dftLength, windowLength,
-                 hopSize, fftImplementation = "default" ):
+    def __init__( self, context, name, parent, numberOfChannels, dftLength,
+                 hopSize, window=None, windowLength=None, fftImplementation = "default" ):
         super(TFProcessing, self ).__init__( context, name, parent )
-        self.ForwardTransform = rcl.TimeFrequencyTransform( context, "FwdTransform", self,
+        if not (window is None):
+            self.ForwardTransform = rcl.TimeFrequencyTransform( context, "FwdTransform", self,
+                              numberOfChannels=numberOfChannels,
+                              dftLength=dftLength, window=window, hopSize=hopSize,
+                              fftImplementation=fftImplementation )
+        elif not (windowLength is None):
+            self.ForwardTransform = rcl.TimeFrequencyTransform( context, "FwdTransform", self,
                               numberOfChannels=numberOfChannels,
                               dftLength=dftLength, windowLength=windowLength, hopSize=hopSize,
                               fftImplementation=fftImplementation )
+        else:
+            raise ValueError( "One of the arguments 'window' or 'windowLength' must be given." )
+        
         self.InverseTransform = rcl.TimeFrequencyInverseTransform( context, "InverseTransform", self,
                               numberOfChannels=numberOfChannels,
                               dftLength=dftLength, hopSize=hopSize,
@@ -38,11 +49,17 @@ blockSize = 64
 
 numberOfChannels = 2;
 dftSize = 2*blockSize
-windowSize = blockSize
+windowSize = 2*blockSize
 hopSize = blockSize
 
 context = visr.SignalFlowContext( blockSize, samplingFrequency )
 
+# Design a Hann window that satisfies the COLA (constant overlap-add) property.
+tUnity = np.array( np.arange(0,dftSize) )
+window = np.sin( np.pi/float(dftSize) * tUnity)**2
+
+#cc = TFProcessing( context, "top", None, numberOfChannels=numberOfChannels,
+#                  dftLength=dftSize, window=window, hopSize=hopSize )
 cc = TFProcessing( context, "top", None, numberOfChannels=numberOfChannels,
                   dftLength=dftSize, windowLength=windowSize, hopSize=hopSize )
 
@@ -70,5 +87,5 @@ for blockIdx in range(0,numBlocks):
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
 plt.figure(1)
-plt.plot( t, inputSignal[0,:], 'bo-', t, outputSignal[0,:], 'rx-' )
+plt.plot( t+float(blockSize)/float(samplingFrequency), inputSignal[0,:], 'bo-', t, outputSignal[0,:], 'rx-' )
 plt.show()
