@@ -67,7 +67,7 @@ template< typename SampleType >
 void MultichannelConvolverUniform<SampleType>::
 process( SampleType const * const input, std::size_t inputChannelStride,
          SampleType * const output, std::size_t outputChannelStride,
-         std::size_t alignment = 0 )
+         std::size_t alignment /*= 0*/ )
 {
   processInput( input, inputChannelStride, alignment );
   processOutput( output, outputChannelStride, alignment );
