@@ -93,7 +93,7 @@ TimeFrequencyTransform::TimeFrequencyTransform( SignalFlowContext const & contex
                   [scaleFactor](SampleType val){ return scaleFactor * val;} );
 }
 
-TimeFrequencyTransform::~TimeFrequencyTransform() = default
+TimeFrequencyTransform::~TimeFrequencyTransform() = default;
 
 void TimeFrequencyTransform::process()
 {

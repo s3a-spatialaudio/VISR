@@ -1,18 +1,20 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-ADD_SUBDIRECTORY( visr )
+add_subdirectory( visr )
 
-ADD_SUBDIRECTORY( signalflows )
+add_subdirectory( signalflows )
 
-ADD_SUBDIRECTORY( rcl )
+add_subdirectory( rbbl )
 
-ADD_SUBDIRECTORY( rrl )
+add_subdirectory( rcl )
 
-ADD_SUBDIRECTORY( panning )
+add_subdirectory( rrl )
 
-ADD_SUBDIRECTORY( pml )
+add_subdirectory( panning )
 
-ADD_SUBDIRECTORY( objectmodel )
+add_subdirectory( pml )
+
+add_subdirectory( objectmodel )
 
 add_subdirectory( reverbobject )
 
