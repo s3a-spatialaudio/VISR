@@ -67,6 +67,7 @@ ENDIF( BUILD_USE_IPP )
 ADD_LIBRARY( rbbl STATIC ${SOURCES} ${HEADERS} )
 
 target_link_libraries( rbbl efl )
+target_link_libraries( rbbl pml )
 target_link_libraries( rbbl ${FFTS_LIBRARY} )
 target_link_libraries( rbbl ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )
