@@ -5,6 +5,7 @@
 #include <libefl/basic_matrix.hpp>
 
 #include <libpml/filter_routing_parameter.hpp>
+#include <libpml/matrix_parameter.hpp>
 
 #include <libril/detail/compose_message_string.hpp>
 
@@ -84,8 +85,8 @@ void exportMultichannelConvolverUniform( pybind11::module & m, char const * name
         pybind11::arg( "maxFilterLength " ),
         pybind11::arg( "maxRoutingPoints " ),
         pybind11::arg( "maxFilterEntries " ),
-        pybind11::arg( "initialRoutings " ) /*= pml::FilterRoutingList()*/,
-        pybind11::arg( "initialFilters" ) /*= efl::BasicMatrix<ElementType>()*/,
+        pybind11::arg( "initialRoutings " ) = pml::FilterRoutingList(),
+        pybind11::arg( "initialFilters" ) = pml::MatrixParameter<ElementType>(), // We need to use the subclass pml::MatrixParameter because efl::BasicMatrix does not support copy construction.
         pybind11::arg( "alignment " ) = 0,
         pybind11::arg( "fftImplementation ") = "default" )
     .def_property_readonly_static( "numberOfInputs", &MultichannelConvolverUniform<ElementType>::numberOfInputs )
@@ -119,7 +120,6 @@ void exportMultichannelConvolversUniform( pybind11::module & m )
 {
   exportMultichannelConvolverUniform<float>( m, "MultichannelConvolverUniformFloat" );
   exportMultichannelConvolverUniform<double>( m, "MultichannelConvolverUniformDouble" );
-  // exportMultichannelConvolverUniform<long double>( m, , "MultichannelConvolverUniformLongDouble" );
 }
 
 } // namespace python
