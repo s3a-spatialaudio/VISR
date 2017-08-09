@@ -31,7 +31,7 @@ void exportComponent( pybind11::module& m )
 
   pybind11::class_<Component>( m, "Component" ) 
     .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
-      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
+      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") )
     .def_property_readonly_static( "nameSeparator", &Component::nameSeparator )
     .def_property_readonly( "name", &Component::name )
     .def_property_readonly( "fullName", &Component::fullName, pybind11::return_value_policy::reference )
