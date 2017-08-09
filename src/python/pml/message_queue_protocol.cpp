@@ -2,6 +2,8 @@
 
 #include <libpml/message_queue_protocol.hpp>
 
+#include <libril/communication_protocol_base.hpp>
+
 #include <pybind11/pybind11.h>
 
 namespace visr
@@ -38,27 +40,8 @@ void exportMessageQueueProtocol( pybind11::module & m)
     .def( pybind11::init<>() )
     .def( "empty", &MessageQueueProtocol::OutputBase::empty, "Query whether the queue is empty." )
     .def( "size", &MessageQueueProtocol::OutputBase::size, "Return the number of elements in the queue" )
-//    .def( "enqueue", [](const ParameterBase & param ){ MessageQueueProtocol::OutputBase::enqueue(param.clone()); }, "Place the element the back of the queue" )
     .def( "enqueue", [](MessageQueueProtocol::OutputBase& self, const ParameterBase & param ){ self.enqueue(param.clone()); }, "Place the element the back of the queue" )
     ;
-/*
-  bool empty() const
-  {
-    return mProtocol->empty();
-  }
-
-  std::size_t size() const
-  {
-    return mProtocol->numberOfElements();
-  }
-
-  void enqueue( std::unique_ptr<ParameterBase> && val )
-  {
-    // Move to impl object
-    mProtocol->enqueue( val );
-  }
-
- */
 }
 
 } // namepace pml

@@ -2,6 +2,8 @@
 
 #include <libpml/shared_data_protocol.hpp>
 
+#include <libril/communication_protocol_base.hpp>
+
 #include <pybind11/pybind11.h>
 
 namespace visr
