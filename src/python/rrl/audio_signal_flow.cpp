@@ -19,6 +19,9 @@ namespace python
 namespace rrl
 {
 
+namespace // unnamed
+{
+
 pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, pybind11::array const & input )
 {
   using DataType = SampleType; // Possibly replace by a template parameter later.
@@ -64,6 +67,8 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
   }
   return outputSignal;
 }
+
+} // unnamed namespace
 
 void exportAudioSignalFlow( pybind11::module & m )
 {
