@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRRL_AUDIO_INTERFACE_HPP_INCLUDED
 #define VISR_LIBRRL_AUDIO_INTERFACE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <cstddef>
 #include <string>
 
@@ -14,7 +16,7 @@ namespace audiointerfaces
 /**
  * Abstract interface for various audio interfaces.
  */
-class AudioInterface
+class VISR_AUDIOINTERFACES_LIBRARY_SYMBOL AudioInterface
 {
 public:
 

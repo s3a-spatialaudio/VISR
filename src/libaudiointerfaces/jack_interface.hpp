@@ -3,9 +3,12 @@
 #ifndef VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 #define VISR_LIBRRL_JACK_INTERFACE_HPP_INCLUDED
 
-#include <libaudiointerfaces/audio_interface.hpp>
-#include <boost/property_tree/ptree.hpp>
+#include "audio_interface.hpp"
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include <memory>
 #include <string>

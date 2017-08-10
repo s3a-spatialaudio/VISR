@@ -3,7 +3,9 @@
 #ifndef VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
 #define VISR_LIBRRL_PORTAUDIO_INTERFACE_HPP_INCLUDED
 
-#include <libaudiointerfaces/audio_interface.hpp>
+#include "audio_interface.hpp"
+#include "export_symbols.hpp"
+
 #include <libril/constants.hpp>
 
 #include <memory>
@@ -17,7 +19,8 @@ namespace visr
 namespace audiointerfaces
 {
 
-class PortaudioInterface: public audiointerfaces::AudioInterface
+class VISR_AUDIOINTERFACES_LIBRARY_SYMBOL 
+PortaudioInterface: public audiointerfaces::AudioInterface
 {
 public:
   /**

@@ -11,10 +11,10 @@
 
 
 
-
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "audio_interface.hpp"
+#include "export_symbols.hpp"
 
 #include <functional>
 #include <map>
@@ -26,7 +26,7 @@ namespace visr
 {
 namespace audiointerfaces
 {
-    class AudioInterfaceFactory
+    class VISR_AUDIOINTERFACES_LIBRARY_SYMBOL AudioInterfaceFactory
     {
     public:
       /**
