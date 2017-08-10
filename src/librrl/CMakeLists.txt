@@ -48,7 +48,7 @@ target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1
 set_target_properties( rrl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive link dependencies
 target_link_libraries( rrl_shared visr_impl_shared )
-target_link_libraries( rrl_shared efl )
+target_link_libraries( rrl_shared efl_shared )
 
 # Add the unit test directory.
 add_subdirectory( test )

@@ -3,6 +3,8 @@
 #ifndef VISR_RRL_COMMUNICATION_AREA_HPP_INCLUDED
 #define VISR_RRL_COMMUNICATION_AREA_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libefl/aligned_array.hpp>
 
 #include <stdexcept>
@@ -14,7 +16,7 @@ namespace rrl
 {
 
 
-class AudioSignalPool
+class VISR_RRL_LIBRARY_SYMBOL AudioSignalPool
 {
 public:
   explicit AudioSignalPool( std::size_t size, std::size_t alignment );
@@ -33,7 +35,7 @@ private:
  *
  */
 template<typename SampleType>
-class CommunicationArea
+class VISR_RRL_LIBRARY_SYMBOL CommunicationArea
 {
 public:
   /**
