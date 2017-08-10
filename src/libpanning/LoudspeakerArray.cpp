@@ -25,8 +25,11 @@
 #include <boost/algorithm/string/find_format.hpp>
 #include <boost/algorithm/string/formatter.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#ifdef USE_BOOST_REGEX
 #include <boost/regex.hpp>
-
+#else
+#include <regex>
+#endif
 
 #include <algorithm>
 #include <array>
@@ -290,18 +293,27 @@ namespace panning
     LoudspeakerIndexType const maxSpeakerIndexOneOffset
     = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
     std::size_t i = 0;
-    
+
+#ifndef USE_BOOST_REGEX
+    static std::regex const idExpression{ "^[[:alnum:]@&()+/:-_]+$", std::regex::ECMAScript};
+#endif
     // parsing the loudspeaker ids and channels
     for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt, i++ )
     {
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
-      boost::regex expr{ "^[A-za-z0-9@&()+-_ ]*$" };
+#ifdef USE_BOOST_REGEX
+      boost::regex expr{ "^[A-za-z0-9@&()+/:-_]*$", std::regex::basic };
       if( m_id.find( id ) != m_id.end() or id.empty() or !boost::regex_match( id, expr ) )
       {
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
       }
-      
+#else
+      if( (not std::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()) )
+      {
+        throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
+      }
+#endif
       boost::trim_if( id, boost::is_any_of( "\t " ) );
       std::size_t idZeroOffset = i;
       if( m_channel[idZeroOffset] != cInvalidChannel )
@@ -352,12 +364,18 @@ namespace panning
     {
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
+#ifdef USE_BOOST_REGEX
       boost::regex expr{ "^[A-za-z0-9@&()+-_ ]*$" };
       if( m_id.find( id ) != m_id.end() or id.empty() or !boost::regex_match( id, expr ) )
       {
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
       }
-      
+#else
+      if( m_id.find( id ) != m_id.end() or id.empty() or not std::regex_match( id, idExpression ) )
+      {
+        throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
+      }
+#endif
       boost::trim_if( id, boost::is_any_of( "\t " ) );
       m_id[id] = i;
       
@@ -579,7 +597,7 @@ namespace panning
 
   LoudspeakerArray::LoudspeakerIndexType LoudspeakerArray::getSpeakerIndexFromId( LoudspeakerIdType const & id ) const {
     return m_id.at(id);
-  };
+  }
   
 } // namespace panning
 } // namespace visr
