@@ -51,7 +51,6 @@ pybind11::array_t<DataType> wrapProcess( MultichannelConvolverUniform<DataType> 
       { sizeof( DataType )*convolver.blockLength(), sizeof( DataType ) } // TODO: Take care of alignment
       );
       std::size_t const outChannelStride = outputSignal.strides( 0 ) / sizeof( DataType );
-      std::size_t const outSampleStride = outputSignal.strides( 1 ) / sizeof( DataType );
       try
       {
         convolver.process( static_cast<DataType const *>(input.data()),

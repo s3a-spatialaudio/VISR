@@ -5,6 +5,8 @@
 
 #include <boost/property_tree/ptree_fwd.hpp>
 
+#include "export_symbols.hpp"
+
 #include <algorithm>
 #include <array>
 #include <initializer_list>
@@ -25,7 +27,7 @@ namespace rbbl
  * to the same instances are appropriately secured against race conditions.
  */
 template< typename CoeffType >
-class BiquadCoefficient
+class VISR_RBBL_LIBRARY_SYMBOL BiquadCoefficient
 {
 public:
   /**
@@ -163,7 +165,7 @@ private:
 };
 
 template< class CoeffType >
-class BiquadCoefficientList
+class VISR_RBBL_LIBRARY_SYMBOL BiquadCoefficientList
 {
 public:
   using Container = typename std::vector< BiquadCoefficient< CoeffType > >;
@@ -271,7 +273,7 @@ private:
 };
 
 template<typename CoeffType >
-class BiquadCoefficientMatrix
+class VISR_RBBL_LIBRARY_SYMBOL BiquadCoefficientMatrix
 {
 public:
   explicit BiquadCoefficientMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );

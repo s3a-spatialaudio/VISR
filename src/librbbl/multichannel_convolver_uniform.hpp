@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_MULTICHANNEL_CONVOLVER_UNIFORM_HPP_INCLUDED
 #define VISR_LIBRBBL_MULTICHANNEL_CONVOLVER_UNIFORM_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
@@ -30,7 +32,7 @@ namespace rbbl
  * @tparam SampleType The floating-point type of the signal samples
  */
 template< typename SampleType >
-class MultichannelConvolverUniform
+class VISR_RBBL_LIBRARY_SYMBOL MultichannelConvolverUniform
 {
 public:
   /**

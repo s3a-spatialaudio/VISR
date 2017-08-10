@@ -3,6 +3,8 @@
 #ifndef VISR_RBBL_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
 #define VISR_RBBL_PARAMETRIC_IIR_COEFFICIENT_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 #include <iosfwd>
@@ -15,7 +17,7 @@ namespace visr
 namespace rbbl
 {
 
-class ParametricIirCoefficientBase
+class VISR_RBBL_LIBRARY_SYMBOL ParametricIirCoefficientBase
 {
 public:
   enum class Type
@@ -41,7 +43,7 @@ private:
 };
 
 template< typename CoefficientType = float>
-class ParametricIirCoefficient: public ParametricIirCoefficientBase
+class VISR_RBBL_LIBRARY_SYMBOL ParametricIirCoefficient: public ParametricIirCoefficientBase
 {
 public:
   /**
@@ -143,7 +145,7 @@ private:
 };
 
 template< typename CoefficientType >
-class ParametricIirCoefficientList
+class VISR_RBBL_LIBRARY_SYMBOL ParametricIirCoefficientList
 {
 public:
   using Element = ParametricIirCoefficient< CoefficientType >;

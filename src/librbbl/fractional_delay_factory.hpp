@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_FRACTIONAL_DELAY_FACTORY_HPP_INCLUDED
 #define VISR_LIBRBBL_FRACTIONAL_DELAY_FACTORY_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <functional>
 #include <map>
 #include <memory>
@@ -22,7 +24,7 @@ class FractionalDelayBase;
  *
  */
 template <typename SampleType>
-class FractionalDelayFactory
+class VISR_RBBL_LIBRARY_SYMBOL FractionalDelayFactory
 {
 public:
   static std::unique_ptr<FractionalDelayBase<SampleType> > create( std::string const & name,

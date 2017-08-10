@@ -3,6 +3,8 @@
 #ifndef VISR_RBBL_INDEX_SEQUENCE_HPP_INCLUDED
 #define VISR_RBBL_INDEX_SEQUENCE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <algorithm>
 #include <ciso646>
 #include <initializer_list>
@@ -17,7 +19,7 @@ namespace rbbl
 /**
  *
  */
-class IndexSequence
+class VISR_RBBL_LIBRARY_SYMBOL IndexSequence
 {
 public:
   using IndexType = std::size_t;

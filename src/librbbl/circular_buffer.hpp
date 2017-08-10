@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_CIRCULAR_BUFFER_HPP_INCLUDED
 #define VISR_LIBRBBL_CIRCULAR_BUFFER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
 #include <cassert>
@@ -29,7 +31,7 @@ namespace rbbl
  * @tparam DataType The floating-point element type for the contained samples.
  */
 template< typename DataType >
-class CircularBuffer
+class VISR_RBBL_LIBRARY_SYMBOL CircularBuffer
 {
 public:
   /**

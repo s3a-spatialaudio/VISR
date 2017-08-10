@@ -5,6 +5,7 @@
 
 #include "circular_buffer.hpp"
 #include "fractional_delay_base.hpp"
+#include "export_symbols.hpp"
 
 #include <libril/constants.hpp>
 
@@ -25,7 +26,7 @@ namespace rbbl
  * @tparam SampleType The floating-point type of the signal samples
  */
 template< typename SampleType >
-class MultichannelDelayLine
+class  VISR_RBBL_LIBRARY_SYMBOL MultichannelDelayLine
 {
 public:
   /**

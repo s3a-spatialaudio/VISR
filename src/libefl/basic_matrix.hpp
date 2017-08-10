@@ -11,6 +11,7 @@
 #include "aligned_array.hpp"
 #include "alignment.hpp"
 #include "error_codes.hpp"
+#include "export_symbols.hpp"
 #include "vector_functions.hpp" // for vectorZero
 
 #include <algorithm>
@@ -28,7 +29,7 @@ namespace efl
  * Such operations should be added as free functions.
  */
 template< typename ElementType >
-class BasicMatrix
+class VISR_EFL_LIBRARY_SYMBOL BasicMatrix
 {
 public:
   explicit BasicMatrix( std::size_t alignmentElements = 0 )

@@ -65,7 +65,7 @@ set_target_properties( objectmodel_shared PROPERTIES ARCHIVE_OUTPUT_NAME objectm
 set_target_properties( objectmodel_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_compile_definitions( objectmodel_shared PUBLIC -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 )
 target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
-target_link_libraries( objectmodel_shared rbbl )
+target_link_libraries( objectmodel_shared rbbl_shared )
 
 # Add the unit test directory.
 add_subdirectory( test )

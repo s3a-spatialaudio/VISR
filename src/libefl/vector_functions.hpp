@@ -5,6 +5,8 @@
 
 #include "error_codes.hpp"
 
+#include "export_symbols.hpp"
+
 #include <cstddef>
 
 namespace visr
@@ -14,13 +16,13 @@ namespace efl
 
 void getCpuId();
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
 /**
@@ -37,57 +39,57 @@ ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numEle
  * that the value after the last sample would be endVal (false).
  * @param alignment The aligment of the dest vector, given in numbers of elements.
  */
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
                       bool startInclusive, bool endInclusive, std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorAdd( T const * const op1,
          T const * const op2,
          T * const result,
          std::size_t numElements,
          std::size_t alignment = 0 );
  
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorAddInplace( T const * const op1,
                             T * const op2Result,
                             std::size_t numElements,
                             std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorAddConstant( T constantValue,
            T const * const op,
            T * const result,
            std::size_t numElements,
            std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorAddConstantInplace( T constantValue,
             T * const opResult,
             std::size_t numElements,
             std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorSubtract( T const * const subtrahend,
   T const * const minuend,
   T * const result,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorSubtractInplace( T const * const minuend,
   T * const subtrahendResult,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorSubtractConstant( T constantMinuend,
   T const * const subtrahend,
   T * const result,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorSubConstantInplace( T constantMinuend,
   T * const subtrahendResult,
   std::size_t numElements,
@@ -103,7 +105,7 @@ ErrorCode vectorSubConstantInplace( T constantMinuend,
  * @param numElements The number of elements to be multiplied.
  * @param alignment Assured alignment of all vector arguments (measured in elements).
  */
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiply( T const * const factor1,
                           T const * const factor2,
                           T * const result,
@@ -118,7 +120,7 @@ ErrorCode vectorMultiply( T const * const factor1,
  * @param numElements The number of elements to be multiplied.
  * @param alignment Assured alignment of all vector arguments (measured in elements).
  */
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyInplace( T const * const factor1,
                                  T const *  factor2Result,
                                  std::size_t numElements,
@@ -133,7 +135,7 @@ ErrorCode vectorMultiplyInplace( T const * const factor1,
  * @param numElements The number of elements to be multiplied.
  * @param alignment Assured alignment of all vector arguments (measured in elements).
  */
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstant( T constantValue,
                                   T const * const factor,
                                   T * const result,
@@ -148,13 +150,13 @@ ErrorCode vectorMultiplyConstant( T constantValue,
  * @param numElements The number of elements to be multiplied.
  * @param alignment Assured alignment of all vector arguments (measured in elements).
  */
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantInplace( T constantValue,
                                          T * const factorResult,
                                          std::size_t numElements,
                                          std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyAdd( T const * const factor1,
   T const * const factor2,
   T const * const addend,
@@ -162,14 +164,14 @@ ErrorCode vectorMultiplyAdd( T const * const factor1,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyAddInplace( T const * const factor1,
   T const * const factor2,
   T * const accumulator,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantAdd( T constFactor,
   T const * const factor,
   T const * const addend,
@@ -177,7 +179,7 @@ ErrorCode vectorMultiplyConstantAdd( T constFactor,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   T const * const factor,
   T * const accumulator,
@@ -196,7 +198,7 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
  * @param alignmentElements Minimum alignment of the source and destination sequences (in number of elements)
  * @note Consider removing the \p alignmentElements parameter because it is scarcely useful unliess both sequences have stride 1.
  */
-template<typename DataType>
+template<typename DataType> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t srcStrideElements,
   std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements );
 
@@ -211,7 +213,7 @@ ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t 
  * @param alignmentElements The alignment of the target sequence, i.e., of the base pointer.
  * @note Consider removing the alignmentElements parameter, because it it is scarcely useful for non-unit strides.
 */
-template<typename DataType>
+template<typename DataType> VISR_EFL_LIBRARY_SYMBOL
 efl::ErrorCode vectorFillStrided( DataType val, DataType * dest,
                                   std::size_t destStrideElements,
                                   std::size_t numberOfElements,

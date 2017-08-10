@@ -3,6 +3,8 @@
 #ifndef VISR_RBBL_FLOAT_SEQUENCE_HPP_INCLUDED
 #define VISR_RBBL_FLOAT_SEQUENCE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <algorithm>
 #include <ciso646>
 #include <initializer_list>
@@ -20,7 +22,7 @@ namespace rbbl
  * @tparam The (floating-point) element type. Instantiations existfor float and double.
  */
 template<typename ElementType>
-class FloatSequence
+class VISR_RBBL_LIBRARY_SYMBOL FloatSequence
 {
 public:
   using ContainerType = std::vector<ElementType>;

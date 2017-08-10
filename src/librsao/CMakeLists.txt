@@ -39,7 +39,7 @@ set_target_properties( rsao_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJEC
 target_link_libraries( rsao_shared pml_shared )
 target_link_libraries( rsao_shared rcl_shared )
 target_link_libraries( rsao_shared objectmodel_shared )
-target_link_libraries( rsao_shared efl )
+target_link_libraries( rsao_shared efl_shared )
 target_link_libraries( rsao_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( rsao_shared ${Boost_SYSTEM_LIBRARY} )
 

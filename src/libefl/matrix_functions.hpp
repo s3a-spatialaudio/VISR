@@ -4,6 +4,7 @@
 #define VISR_LIBEFL_MATRIX_FUNCTIONS_HPP_INCLUDED
 
 #include "error_codes.hpp"
+#include "export_symbols.hpp"
 
 #include <cstddef>
 
@@ -12,7 +13,7 @@ namespace visr
 namespace efl
 {
 
-template< typename T>
+template< typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode product( T const * op1,
                    T const * op2,
                    T * res,

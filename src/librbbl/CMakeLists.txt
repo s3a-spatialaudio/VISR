@@ -74,10 +74,30 @@ if( BUILD_USE_FFTW )
   target_link_libraries( rbbl ${FFTW3_LIBRARY} )
   target_link_libraries( rbbl ${FFTW3F_LIBRARY} )
 endif( BUILD_USE_FFTW )
-
 if( BUILD_USE_IPP )
   target_link_libraries( rbbl ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
+
+add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
+set_target_properties( rbbl_shared PROPERTIES OUTPUT_NAME rbbl )
+# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
+target_compile_definitions( rbbl_shared PRIVATE -DVISR_BUILD_RBBL_SHARED_LIBRARY=1 -DVISR_BUILD_RBBL_LIBRARY=1)
+set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+target_link_libraries( rbbl_shared efl_shared )
+# ATTENTION: We cannot add the transitive link dependency to pml_shared here (although it exists), because CMake does not allow cyclic dependencies for shared library targets. Therefore, targets linking to rbbl_shared must add the dependency to pml_shared explicitly.
+# NOTE: Restructure libraries to get rid of this cyclic dependency 
+# target_link_libraries( rbbl_shared pml_shared )
+target_link_libraries( rbbl_shared ${FFTS_LIBRARY} )
+target_link_libraries( rbbl_shared ${KISSFFT_LIBRARY} )
+if( BUILD_USE_FFTW )
+  target_link_libraries( rbbl_shared ${FFTW3_LIBRARY} )
+  target_link_libraries( rbbl_shared ${FFTW3F_LIBRARY} )
+endif( BUILD_USE_FFTW )
+if( BUILD_USE_IPP )
+  target_link_libraries( rbbl_shared ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+endif( BUILD_USE_IPP )
+
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

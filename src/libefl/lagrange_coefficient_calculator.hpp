@@ -8,6 +8,8 @@
 #ifndef VISR_LIBEFL_LAGRANGE_COEFFICIENT_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBEFL_LAGRANGE_COEFFICIENT_CALCULATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <array>
 
 // #define LAGRANGE_COEFFICIENT_CALCULATOR_GENERATE_STAGE_TABLES
@@ -25,7 +27,7 @@ namespace efl
  * The latter  enables filtering via a dot product without reversing one of the sequences.
  */
 template< typename DataType, std::size_t N, bool reverseCoeffs = false >
-class LagrangeCoefficientCalculator
+class VISR_EFL_LIBRARY_SYMBOL LagrangeCoefficientCalculator
 {
 public:
   /**

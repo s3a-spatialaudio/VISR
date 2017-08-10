@@ -4,6 +4,7 @@
 #define VISR_LIBEFL_VECTOR_CONVERSIONS_HPP_INCLUDED
 
 #include "error_codes.hpp"
+#include "export_symbols.hpp"
 
 #include <cstddef>
 
@@ -13,12 +14,14 @@ namespace efl
 {
 
 template< typename InputType, typename OutputType >
+VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvert( InputType const * const src,
                          OutputType * const dest,
                          std::size_t numElements,
                          std::size_t alignment = 0 );
 
 template< typename InputType, typename OutputType >
+VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertInputStride( InputType const * const src,
                                     OutputType * const dest,
                                     std::size_t numElements,
@@ -26,6 +29,7 @@ ErrorCode vectorConvertInputStride( InputType const * const src,
                                     std::size_t alignment = 0 );
 
 template< typename InputType, typename OutputType >
+VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertOutputStride( InputType const * const src,
                                      OutputType * const dest,
                                      std::size_t numElements,
@@ -33,6 +37,7 @@ ErrorCode vectorConvertOutputStride( InputType const * const src,
                                      std::size_t alignment = 0 );
 
 template< typename InputType, typename OutputType >
+VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertInputOutputStride( InputType const * const src,
                                           OutputType * const dest,
                                           std::size_t numElements,

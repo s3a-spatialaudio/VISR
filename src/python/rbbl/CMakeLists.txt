@@ -33,7 +33,12 @@ if( PYTHON_EXTERNAL_SUFFIX )
 endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
-target_link_libraries( ${PROJECT_NAME} rbbl ) 
+target_link_libraries( ${PROJECT_NAME} rbbl_shared )
+
+# Note: Due to a circular dependency, the transitive dependency of
+# rbbl_shared on pml_shared is omitted in rbbl_shared's CMakelists.txt.
+# See comment there. As a result, we need to state it here.
+target_link_libraries( ${PROJECT_NAME} pml_shared )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 

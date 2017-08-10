@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_GAIN_FADER_HPP_INCLUDED
 #define VISR_LIBRBBL_GAIN_FADER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include<libefl/aligned_array.hpp>
 #include<libefl/basic_matrix.hpp>
 
@@ -18,7 +20,7 @@ namespace rbbl
  * The class template is explicitly instantiated for element types float and double.
  */
 template< typename ElementType >
-class GainFader
+class VISR_RBBL_LIBRARY_SYMBOL GainFader
 {
 public:
   /**

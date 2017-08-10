@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_FFT_WRAPPER_FACTORY_HPP_INCLUDED
 #define VISR_LIBRBBL_FFT_WRAPPER_FACTORY_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <map>
 #include <memory>
 #include <string>
@@ -25,7 +27,7 @@ class FftWrapperBase;
  * @tparam DataType The value type for the FFT implementations - generally float or double.
  */
 template<typename SampleType> 
-class FftWrapperFactory
+class VISR_RBBL_LIBRARY_SYMBOL FftWrapperFactory
 {
 public:
   /**

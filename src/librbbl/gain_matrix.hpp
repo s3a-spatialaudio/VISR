@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_GAIN_MATRIX_HPP_INCLUDED
 #define VISR_LIBRBBL_GAIN_MATRIX_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include<libefl/aligned_array.hpp>
 #include<libefl/basic_matrix.hpp>
 
@@ -18,7 +20,7 @@ namespace rbbl
  * Class is explicitly instantiated for element types float and double.
  */
 template< typename ElementType >
-class GainMatrix
+class VISR_RBBL_LIBRARY_SYMBOL GainMatrix
 {
 public:
   /**

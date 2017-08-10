@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_OBJECT_CHANNEL_ALLOCATOR_HPP_INCLUDED
 #define VISR_LIBRBBL_OBJECT_CHANNEL_ALLOCATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libobjectmodel/object.hpp>
 
 #include <exception>
@@ -20,7 +22,7 @@ namespace rbbl
  * The main rationale is that the allocated channel for an object does not change as long as the object exists.
  * Objects are represented by arbitrary, unique objects ids, while channels are denoted by a consecutive set of integers (starting at zero)
  */
-class ObjectChannelAllocator
+class VISR_RBBL_LIBRARY_SYMBOL ObjectChannelAllocator
 {
 public:
   /**

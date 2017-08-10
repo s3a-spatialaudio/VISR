@@ -6,6 +6,7 @@
 #include "aligned_array.hpp"
 #include "alignment.hpp"
 #include "error_codes.hpp"
+#include "export_symbols.hpp"
 #include "vector_functions.hpp" // for vectorZero
 
 #include <algorithm>
@@ -24,7 +25,7 @@ namespace efl
  * implemented in libefl
  */
 template< typename ElementType >
-class BasicVector
+class VISR_EFL_LIBRARY_SYMBOL BasicVector
 {
 public:
   /**

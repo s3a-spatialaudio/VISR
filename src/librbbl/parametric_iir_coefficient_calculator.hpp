@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_PARAMETRIC_IIR_COEFFICIENT_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRBBL_PARAMETRIC_IIR_COEFFICIENT_CALCULATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <utility>
 
 namespace visr
@@ -30,11 +32,13 @@ class BiquadCoefficientMatrix;
 namespace ParametricIirCoefficientCalculator
 {
 template< typename CoefficientType >
+VISR_RBBL_LIBRARY_SYMBOL
 void calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param, 
                                BiquadCoefficient<CoefficientType> & coeffs,
                                CoefficientType samplingFrequency );
 
 template< typename CoefficientType >
+VISR_RBBL_LIBRARY_SYMBOL
 BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
                                                                    CoefficientType samplingFrequency )
 {
@@ -53,6 +57,7 @@ BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoeffi
  * @param samplingFrequency
  */
 template< typename CoefficientType >
+VISR_RBBL_LIBRARY_SYMBOL
 void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
   BiquadCoefficientList<CoefficientType> & coeffs,
   CoefficientType samplingFrequency );

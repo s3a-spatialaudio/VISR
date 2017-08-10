@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_LAGRANGE_INTERPOLATOR_HPP_INCLUDED
 #define VISR_LIBRBBL_LAGRANGE_INTERPOLATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include "fractional_delay_base.hpp"
 
 #include <libefl/basic_vector.hpp>
@@ -20,7 +22,7 @@ namespace rbbl
  * Abstract base class for interpolation algorithms on discrete-time sequences.
  */
 template <typename SampleType, std::size_t order >
-class LagrangeInterpolator: public FractionalDelayBase<SampleType>
+class VISR_RBBL_LIBRARY_SYMBOL LagrangeInterpolator: public FractionalDelayBase<SampleType>
 {
 public:
 

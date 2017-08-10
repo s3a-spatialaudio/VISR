@@ -15,6 +15,8 @@
 #ifndef __VISR__FIR__
 #define __VISR__FIR__
 
+#include "export_symbols.hpp"
+
 #include <libefl/basic_matrix.hpp>
 
 #include <cstdio>
@@ -33,7 +35,7 @@ template<typename ElementType > class BasicMatrix;
 namespace rbbl
 {
 
-class FIR
+class VISR_RBBL_LIBRARY_SYMBOL FIR
 {
 public:
     /**
