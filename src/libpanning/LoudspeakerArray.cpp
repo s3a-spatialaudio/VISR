@@ -288,16 +288,12 @@ namespace panning
     // The current setting distinguished between the cases.
     // mOutputEqs.reset( new rbbl::BiquadCoefficientMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
     
-    // The maximum admissible loudspeaker index as used in the file,
-    // i.e., one-offset.
-    LoudspeakerIndexType const maxSpeakerIndexOneOffset
-    = static_cast<LoudspeakerIndexType>(numTotalSpeakers);
-    std::size_t i = 0;
 
 #ifndef USE_BOOST_REGEX
     static std::regex const idExpression{ "^[[:alnum:]@&()+/:-_]+$", std::regex::ECMAScript};
 #endif
     // parsing the loudspeaker ids and channels
+    std::size_t i = 0;
     for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt, i++ )
     {
       ptree const childTree = treeIt->second;
@@ -417,13 +413,8 @@ namespace panning
     std::size_t const numTriplets = std::distance( tripletNodes.first, tripletNodes.second );
     m_triplet.clear();
     m_triplet.reserve( numTriplets );
-    // The maximim admissible index in a triplet. These are zero-offset values
-    LoudspeakerIndexType const maxSpeakerIndex = maxSpeakerIndexOneOffset - 1;
-    std::size_t j = 0;
     
-    
-    
-    for( ptree::const_assoc_iterator tripletIt( tripletNodes.first ); tripletIt != tripletNodes.second; ++tripletIt, j++ )
+    for( ptree::const_assoc_iterator tripletIt( tripletNodes.first ); tripletIt != tripletNodes.second; ++tripletIt )
     {
       ptree const childTree = tripletIt->second;
       std::array<LoudspeakerIndexType, 3> triplet;
@@ -456,15 +447,7 @@ namespace panning
         triplet[2] = m_id[tid3];
         
       }
-      
-      if( (triplet[0] < 0) or (triplet[0] > maxSpeakerIndex)
-         or (triplet[1] < 0) or (triplet[1] > maxSpeakerIndex)
-         or ((not m_is2D) and ((triplet[2] < 0) or (triplet[2] > maxSpeakerIndex))) )
-      {
-        throw std::invalid_argument( "LoudspeakerArray::loadXml(): Triplet references non-existing speaker index." );
-      }
       m_triplet.push_back( triplet );
-      //      std::cout<<" "<<m_triplet[j][0]<<"\t"<<m_triplet[j][1]<<"\t"<<m_triplet[j][2]<<std::endl;
     }
     assert( m_triplet.size() == numTriplets );
     
