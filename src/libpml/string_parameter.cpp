@@ -16,7 +16,9 @@ StringParameter::StringParameter( std::size_t maxLength /*= 0*/ )
 }
 
 StringParameter::StringParameter(EmptyParameterConfig const & config)
-  : StringParameter()
+  : StringParameter( 0 ) // GCC 4.8 has problems with resolving the
+                         // default parameter of the delegating
+                         // constructor call.
 {
 }
 
