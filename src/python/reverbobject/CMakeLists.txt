@@ -2,6 +2,7 @@
 
 set( SOURCES
 late_reverb_filter_calculator.cpp
+late_reverb_parameter.cpp
 reverb_object_renderer.cpp
 reverb_parameter_calculator.cpp
 reverbobject.cpp

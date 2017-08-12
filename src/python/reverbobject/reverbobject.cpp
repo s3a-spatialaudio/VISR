@@ -10,6 +10,7 @@ namespace python
 namespace reverbobject
 {
 void exportLateReverbFilterCalculator( pybind11::module & m );
+void exportLateReverbParameter( pybind11::module & m );
 void exportReverbObjectRenderer( pybind11::module & m );
 void exportReverbParameterCalculator( pybind11::module & m );
 }
@@ -25,6 +26,9 @@ PYBIND11_PLUGIN( reverbobject )
 
   pybind11::module m( "reverbobject", "VISR reverb object support" );
   using namespace visr::python::reverbobject;
+  exportLateReverbFilterCalculator( m );
+  exportLateReverbParameter( m );
   exportReverbObjectRenderer( m );
+  exportReverbParameterCalculator( m );
   return m.ptr();
 }
