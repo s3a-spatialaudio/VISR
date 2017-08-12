@@ -39,7 +39,7 @@ void exportBasicMatrix( pybind11::module & m, char const * className )
   } )
   .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( pybind11::init<std::size_t, std::size_t, std::size_t>(), pybind11::arg( "numberOfRows" ), pybind11::arg( "numberOfColumns" ), pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples )
-  .def( "__init__", []( efl::BasicMatrix<DataType> & inst, pybind11::array const & data, std::size_t alignment)
+  .def( "__init__", []( efl::BasicMatrix<DataType> & inst, pybind11::array_t<DataType> const & data, std::size_t alignment)
   {
     if( data.ndim() != 2 )
     {

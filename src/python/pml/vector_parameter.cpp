@@ -60,7 +60,7 @@ void exportVectorParameter( pybind11::module & m, char const * className )
   .def( pybind11::init<std::size_t, std::size_t>(), pybind11::arg( "size" ), pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples )
     // Note: See pybind11 documentation for the way the implicit 'self' argument is stripped by using a lambda function.
   .def_property_readonly_static( "staticType", []( pybind11::object /*self*/ ) { return VectorParameter<DataType>::staticType(); } )
-  .def( "__init__", []( VectorParameter<DataType> & inst, pybind11::array const & data, std::size_t alignment)
+  .def( "__init__", []( VectorParameter<DataType> & inst, pybind11::array_t<DataType> const & data, std::size_t alignment)
   {
     if( data.ndim() != 1 )
     {
