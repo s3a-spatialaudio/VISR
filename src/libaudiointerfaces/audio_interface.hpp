@@ -26,7 +26,7 @@ public:
    */
   using SampleRateType = std::size_t;
 
-  class Configuration
+  class VISR_AUDIOINTERFACES_LIBRARY_SYMBOL Configuration
   {
   public:
     explicit Configuration( std::size_t numCaptureChannels,

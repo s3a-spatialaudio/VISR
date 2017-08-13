@@ -18,7 +18,7 @@ namespace visr
 {
 namespace audiointerfaces
 {
-  class JackInterface: public audiointerfaces::AudioInterface
+  class VISR_AUDIOINTERFACES_LIBRARY_SYMBOL  JackInterface: public audiointerfaces::AudioInterface
   {
   public:
     /**
