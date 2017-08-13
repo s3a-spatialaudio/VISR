@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_FRACTIONAL_DELAY_BASE_HPP_INCLUDED
 #define VISR_LIBRBBL_FRACTIONAL_DELAY_BASE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <cstddef>
 
 namespace visr
@@ -18,7 +20,7 @@ class FractionalDelayBase
 {
 public:
 
-  virtual ~FractionalDelayBase();
+  virtual ~FractionalDelayBase() = default;
 
   /**
    * Return the inherent implementation delay of the interpolator (in samples)

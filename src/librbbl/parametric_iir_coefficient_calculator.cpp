@@ -19,7 +19,7 @@ namespace rbbl
 namespace ParametricIirCoefficientCalculator
 {
 
-template< typename T >
+template< typename T > VISR_RBBL_LIBRARY_SYMBOL
 void calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
                                BiquadCoefficient<T> & coeffs,
                                T samplingFrequency )
@@ -167,10 +167,12 @@ void calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
   }
 }
 
-template void calculateIirCoefficients<float>( ParametricIirCoefficient<float> const &,
-                                               BiquadCoefficient<float> &, float );
-template void calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
-                                                BiquadCoefficient<double> &, double );
+template  VISR_RBBL_LIBRARY_SYMBOL
+void calculateIirCoefficients<float>( ParametricIirCoefficient<float> const &,
+                                      BiquadCoefficient<float> &, float );
+template  VISR_RBBL_LIBRARY_SYMBOL
+void calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
+                                       BiquadCoefficient<double> &, double );
 
 template< typename CoefficientType >
 void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
@@ -187,9 +189,9 @@ void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> con
   std::fill( it, coeffs.end(), BiquadCoefficient<CoefficientType>() );
 }
 
-template void
+template VISR_RBBL_LIBRARY_SYMBOL void
 calculateIirCoefficients<float>( ParametricIirCoefficientList<float> const &, BiquadCoefficientList<float> &, float );
-template void
+template VISR_RBBL_LIBRARY_SYMBOL void
 calculateIirCoefficients<double>( ParametricIirCoefficientList<double> const &, BiquadCoefficientList<double> &, double );
 
 

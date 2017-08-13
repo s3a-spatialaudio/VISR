@@ -7,8 +7,8 @@ namespace visr
 namespace rbbl
 {
 
-template <typename SampleType>
-FractionalDelayBase<SampleType>::~FractionalDelayBase() = default;
+//template <typename SampleType>
+//FractionalDelayBase<SampleType>::~FractionalDelayBase() = default;
 
 
 // Explicit instantiations

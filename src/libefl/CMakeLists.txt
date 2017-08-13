@@ -27,6 +27,7 @@ db_linear_conversion.hpp
 degree_radian_conversion.hpp
 denormalised_number_handling.hpp
 error_codes.hpp
+export_symbols.hpp
 lagrange_coefficient_calculator.hpp
 matrix_functions.hpp
 vector_conversions.hpp

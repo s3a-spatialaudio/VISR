@@ -41,10 +41,10 @@ ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t align
 {
   return reference::vectorZero<T>( dest, numElements, alignment );
 }
-template ErrorCode vectorZero<float>( float * const, std::size_t, std::size_t );
-template ErrorCode vectorZero<double>( double * const, std::size_t, std::size_t );
-template ErrorCode vectorZero<std::complex<float> >( std::complex<float> * const, std::size_t, std::size_t );
-template ErrorCode vectorZero<std::complex<double> >( std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorZero<float>( float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorZero<double>( double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorZero<std::complex<float> >( std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorZero<std::complex<double> >( std::complex<double> * const, std::size_t, std::size_t );
 
 
 template <typename T>
@@ -52,10 +52,10 @@ ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, st
 {
   return reference::vectorFill<T>( value, dest, numElements, alignment );
 }
-template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
-template ErrorCode vectorFill<std::complex<float> >( std::complex<float> const, std::complex<float> * const, std::size_t, std::size_t );
-template ErrorCode vectorFill<std::complex<double> >( std::complex<double> const, std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFill<std::complex<float> >( std::complex<float> const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFill<std::complex<double> >( std::complex<double> const, std::complex<double> * const, std::size_t, std::size_t );
 
 
 template <typename T>
@@ -66,18 +66,18 @@ ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T end
 				 startInclusive, endInclusive, alignment );
 }
 // explicit instantiations
-template ErrorCode vectorRamp( float * const, std::size_t, float, float, bool, bool, std::size_t );
-template ErrorCode vectorRamp( double * const, std::size_t, double, double, bool, bool, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorRamp( float * const, std::size_t, float, float, bool, bool, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorRamp( double * const, std::size_t, double, double, bool, bool, std::size_t );
 
 template <typename T>
 ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
   return reference::vectorCopy<T>( source, dest, numElements, alignment );
 }
-template ErrorCode vectorCopy<float>( float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorCopy<double>( double const * const, double * const, std::size_t, std::size_t );
-template ErrorCode vectorCopy<std::complex<float> >( std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
-template ErrorCode vectorCopy<std::complex<double> >( std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<float>( float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<double>( double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<std::complex<float> >( std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<std::complex<double> >( std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorAdd( T const * const op1,
@@ -89,9 +89,9 @@ ErrorCode vectorAdd( T const * const op1,
   return reference::vectorAdd<T>( op1, op2, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorAdd<float>( float const * const, float const * const ,
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAdd<float>( float const * const, float const * const ,
                float * const, std::size_t, std::size_t );
-template ErrorCode vectorAdd<double>( double const * const, double const * const ,
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAdd<double>( double const * const, double const * const ,
           double * const, std::size_t, std::size_t );
 
 template<typename T>
@@ -103,9 +103,9 @@ ErrorCode vectorAddInplace( T const * const op1,
   return reference::vectorAddInplace<T>( op1, op2Result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorAddInplace<float>( float const * const,
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAddInplace<float>( float const * const,
                                             float * const, std::size_t, std::size_t);
-template ErrorCode vectorAddInplace<double>( double const * const,
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAddInplace<double>( double const * const,
                                              double * const, std::size_t, std::size_t);
 
 template<typename T>
@@ -118,9 +118,9 @@ ErrorCode vectorAddConstant( T constantValue,
   return reference::vectorAddConstant<T>( constantValue, op, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorAddConstant<float>( float, float const * const,
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAddConstant<float>( float, float const * const,
                                float * const, std::size_t, std::size_t);
-template ErrorCode vectorAddConstant<double>( double, double const * const,
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAddConstant<double>( double, double const * const,
                                             double * const, std::size_t, std::size_t);
 
 template<typename T>
@@ -132,8 +132,8 @@ ErrorCode vectorAddConstantInplace( T constantValue,
   return reference::vectorAddConstantInplace<T>( constantValue, opResult, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorAddConstantInplace<float>( float, float * const, std::size_t, std::size_t );
-template ErrorCode vectorAddConstantInplace<double>( double, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAddConstantInplace<float>( float, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAddConstantInplace<double>( double, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorSubtract( T const * const subtrahend,
@@ -145,8 +145,8 @@ ErrorCode vectorSubtract( T const * const subtrahend,
   return reference::vectorSubtract<T>( subtrahend, minuend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorSubtract( float const * const, float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorSubtract( double const * const, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubtract( float const * const, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubtract( double const * const, double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorSubtractInplace( T const * const minuend,
@@ -157,8 +157,8 @@ ErrorCode vectorSubtractInplace( T const * const minuend,
   return reference::vectorSubtractInplace<T>( minuend, subtrahendResult, numElements, alignment); 
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorSubtractInplace( float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorSubtractInplace( double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubtractInplace( float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubtractInplace( double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorSubtractConstant( T constantMinuend,
@@ -170,8 +170,8 @@ ErrorCode vectorSubtractConstant( T constantMinuend,
   return reference::vectorSubtractConstant<T>( constantMinuend, subtrahend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorSubtractConstant( float, float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorSubtractConstant( double, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubtractConstant( float, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubtractConstant( double, double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorSubConstantInplace( T constantMinuend,
@@ -182,8 +182,8 @@ ErrorCode vectorSubConstantInplace( T constantMinuend,
   return reference::vectorSubConstantInplace<T>( constantMinuend, subtrahendResult, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorSubConstantInplace( float, float * const, std::size_t, std::size_t );
-template ErrorCode vectorSubConstantInplace( double, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubConstantInplace( float, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorSubConstantInplace( double, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiply( T const * const factor1,
@@ -196,7 +196,7 @@ ErrorCode vectorMultiply( T const * const factor1,
 }
 /** Explicit instantiation for types float and double */
 #if USE_INTEL_INTRINSICS
-template<>
+template<>  VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiply( float const * const factor1,
                           float const * const factor2,
                           float * const result,
@@ -253,10 +253,10 @@ ErrorCode vectorMultiply( float const * const factor1,
   return noError;
 }
 #else
-template ErrorCode vectorMultiply( float const * const, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiply( float const * const, float const * const, float * const, std::size_t, std::size_t );
 #endif
 #if USE_INTEL_INTRINSICS
-template<>
+template<>  VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiply( double const * const factor1,
                           double const * const factor2,
                           double * const result,
@@ -313,12 +313,13 @@ ErrorCode vectorMultiply( double const * const factor1,
   return noError;
 }
 #else
-template ErrorCode vectorMultiply( double const * const, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiply( double const * const, double const * const, double * const, std::size_t, std::size_t );
 #endif
-template ErrorCode vectorMultiply( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiply( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 #if USE_INTEL_INTRINSICS
-template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, std::complex<float> const * const factor2, std::complex<float> * const result, std::size_t numElements, std::size_t alignment )
+template<>  VISR_EFL_LIBRARY_SYMBOL
+ErrorCode vectorMultiply( std::complex<float> const * const factor1, std::complex<float> const * const factor2, std::complex<float> * const result, std::size_t numElements, std::size_t alignment )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;
@@ -416,7 +417,7 @@ template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, 
   return noError;
 }
 #else
-template ErrorCode vectorMultiply( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiply( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 #endif
 
 template<typename T>
@@ -428,8 +429,8 @@ ErrorCode vectorMultiplyInplace( T const * const factor1,
   return reference:: vectorMultiplyInplace<T>( factor1, factor2Result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorMultiplyInplace( float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyInplace( double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyInplace( float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyInplace( double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyConstant( T constantValue,
@@ -441,8 +442,8 @@ ErrorCode vectorMultiplyConstant( T constantValue,
   return reference:: vectorMultiplyConstant<T>( constantValue, factor, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorMultiplyConstant( float, float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyConstant( double, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstant( float, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstant( double, double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyConstantInplace( T constantValue,
@@ -453,8 +454,8 @@ ErrorCode vectorMultiplyConstantInplace( T constantValue,
   return reference::vectorMultiplyConstantInplace<T>( constantValue, factorResult, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorMultiplyConstantInplace( float, float * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyConstantInplace( double, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantInplace( float, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantInplace( double, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyAdd( T const * const factor1,
@@ -467,10 +468,10 @@ ErrorCode vectorMultiplyAdd( T const * const factor1,
   return reference::vectorMultiplyAdd<T>( factor1, factor2, addend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorMultiplyAdd( float const * const, float const * const, float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyAdd( double const * const, double const * const, double const * const, double * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyAdd( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyAdd( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( float const * const, float const * const, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( double const * const, double const * const, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyAddInplace( T const * const factor1,
@@ -484,7 +485,7 @@ ErrorCode vectorMultiplyAddInplace( T const * const factor1,
 /** Explicit instantiation for types float and double */
 #if USE_INTEL_INTRINSICS
 template<>
-ErrorCode vectorMultiplyAddInplace<float>( float const * const factor1,
+ErrorCode  VISR_EFL_LIBRARY_SYMBOL vectorMultiplyAddInplace<float>( float const * const factor1,
                                            float const * const factor2,
                                            float * const accumulator,
                                            std::size_t numElements,
@@ -581,11 +582,11 @@ ErrorCode vectorMultiplyAddInplace<float>( float const * const factor1,
 }
 
 #else
-template ErrorCode vectorMultiplyAddInplace( float const * const, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( float const * const, float const * const, float * const, std::size_t, std::size_t );
 #endif
 #if USE_INTEL_INTRINSICS
 template<>
-ErrorCode vectorMultiplyAddInplace<double>( double const * const factor1,
+ErrorCode  VISR_EFL_LIBRARY_SYMBOL vectorMultiplyAddInplace<double>( double const * const factor1,
                                             double const * const factor2,
                                             double * const accumulator,
                                             std::size_t numElements,
@@ -682,12 +683,12 @@ ErrorCode vectorMultiplyAddInplace<double>( double const * const factor1,
   return noError;
 }
 #else
-template ErrorCode vectorMultiplyAddInplace( double const * const, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( double const * const, double const * const, double * const, std::size_t, std::size_t );
 #endif
 
 #if USE_INTEL_INTRINSICS
 //template<> ErrorCode vectorMultiply( std::complex<float> const * const factor1, std::complex<float> const * const factor2, std::complex<float> * const result, std::size_t numElements, std::size_t alignment )
-template<> ErrorCode vectorMultiplyAddInplace( std::complex<float> const * const factor1,
+template<> VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::complex<float> const * const factor1,
                                                std::complex<float> const * const factor2,
                                                std::complex<float> * const accumulator,
                                                std::size_t numElements,
@@ -797,12 +798,12 @@ template<> ErrorCode vectorMultiplyAddInplace( std::complex<float> const * const
   return noError;
 }
 #else
-template ErrorCode vectorMultiplyAddInplace( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 #endif
 
 
 
-template ErrorCode vectorMultiplyAddInplace( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyConstantAdd( T constFactor,
@@ -815,8 +816,8 @@ ErrorCode vectorMultiplyConstantAdd( T constFactor,
   return reference::vectorMultiplyConstantAdd<T>( constFactor, factor, addend, result, numElements, alignment );
 }
 /** Explicit instantiation for types float and double */
-template ErrorCode vectorMultiplyConstantAdd( float, float const * const, float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyConstantAdd( double, double const * const, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAdd( float, float const * const, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAdd( double, double const * const, double const * const, double * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
@@ -829,7 +830,7 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
 }
 /** Explicit instantiation for types float and double */
 #if USE_INTEL_INTRINSICS
-template<>
+template<> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantAddInplace< float >( float constFactor,
                                                      float const * const factor,
                                                      float * const accumulator,
@@ -921,15 +922,15 @@ ErrorCode vectorMultiplyConstantAddInplace< float >( float constFactor,
   return ErrorCode::noError;
 }
 #else
-template ErrorCode vectorMultiplyConstantAddInplace( float, float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAddInplace( float, float const * const, float * const, std::size_t, std::size_t );
 #endif
-template ErrorCode vectorMultiplyConstantAddInplace( double, double const * const, double * const, std::size_t, std::size_t );
-template ErrorCode vectorMultiplyConstantAddInplace( std::complex<double>, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAddInplace( double, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAddInplace( std::complex<double>, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 #ifndef USE_INTEL_INTRINSICS
-template ErrorCode vectorMultiplyConstantAddInplace( std::complex<float>, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAddInplace( std::complex<float>, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 #else
-template<>
+template<> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantAddInplace<std::complex<float> >( std::complex<float> constFactor,
                                                                   std::complex<float> const * const factor,
                                                                   std::complex<float> * const accumulator,
@@ -1043,8 +1044,8 @@ ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t 
   }
   return noError;
 }
-template ErrorCode vectorCopyStrided( float const *, float *, std::size_t, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorCopyStrided( double const *, double *, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopyStrided( float const *, float *, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopyStrided( double const *, double *, std::size_t, std::size_t, std::size_t, std::size_t );
 
 template<typename DataType>
 ErrorCode vectorFillStrided( DataType val, DataType * dest, std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements )
@@ -1056,8 +1057,8 @@ ErrorCode vectorFillStrided( DataType val, DataType * dest, std::size_t destStri
   }
   return noError;
 }
-template ErrorCode vectorFillStrided( float, float *, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorFillStrided( double, double *, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFillStrided( float, float *, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFillStrided( double, double *, std::size_t, std::size_t, std::size_t );
 
 
 } // namespace efl
