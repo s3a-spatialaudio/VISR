@@ -5,6 +5,7 @@
 
 #include <libpml/biquad_parameter.hpp>
 
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -50,6 +51,12 @@ void setDiscreteReflections( PointSourceWithReverb & obj, std::vector<PointSourc
   }
 }
 
+
+pybind11::array_t<float> getVector( PointSourceWithReverb::LateReverbCoeffs const & coeffs )
+{
+  return pybind11::array_t<float>( coeffs.size(), coeffs.empty() ? nullptr : &coeffs[0] );
+}
+
 } // unnamed ns
 
 void exportPointSourceWithReverb( pybind11::module & m )
@@ -87,13 +94,15 @@ void exportPointSourceWithReverb( pybind11::module & m )
   py::class_<PointSourceWithReverb::LateReverb>( psReverb, "LateReverb" )
   .def( py::init<PointSourceWithReverb::LateReverb const &>(), py::arg( "rhs" ) )
     .def_property( "onsetDelay", &PointSourceWithReverb::LateReverb::onsetDelay, &PointSourceWithReverb::LateReverb::setOnsetDelay )
-    .def_property( "levels", &PointSourceWithReverb::LateReverb::levels, 
+    .def_property( "levels", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.levels() );},
       static_cast<void( PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setLevels),
-      py::return_value_policy::reference )
-    .def_property( "attackTimes", &PointSourceWithReverb::LateReverb::attackTimes,
-      static_cast<void(PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setAttackTimes) )
-    .def_property( "decayCoefficients", &PointSourceWithReverb::LateReverb::decayCoeffs,
-      static_cast<void(PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setDecayCoeffs) )
+      pybind11::return_value_policy::reference )
+    .def_property( "attackTimes", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.attackTimes() );},
+      static_cast<void(PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setAttackTimes),
+      pybind11::return_value_policy::reference )
+    .def_property( "decayCoefficients", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.decayCoeffs() );},
+      static_cast<void(PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setDecayCoeffs),
+      pybind11::return_value_policy::reference  )
     ;
 }
 
