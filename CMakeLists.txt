@@ -290,7 +290,16 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework regex )
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
+
+# Workaround for faulty regex implementation in GCC versions <= 4.8.
+# Normally the C++11 <regex> implementation is preferred, but in this case we switch to boost regex.
+# Boost regex isn't used as default because the additional library can be troublesome, e.g.
+# on Linux using the clang compiler
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
+  list(APPEND VISR_BOOST_LIBRARIES regex )
+endif()
+
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.

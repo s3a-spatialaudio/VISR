@@ -25,7 +25,8 @@
 #include <boost/algorithm/string/find_format.hpp>
 #include <boost/algorithm/string/formatter.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#ifdef USE_BOOST_REGEX
+
+#ifdef VISR_USE_BOOST_REGEX
 #include <boost/regex.hpp>
 #else
 #include <regex>
@@ -37,6 +38,7 @@
 #include <ciso646>
 #include <cstdio>
 #include <iterator>
+#include <iostream>
 #include <map>
 #include <set>
 #include <tuple>
@@ -289,8 +291,10 @@ namespace panning
     // mOutputEqs.reset( new rbbl::BiquadCoefficientMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
     
 
-#ifndef USE_BOOST_REGEX
-    static std::regex const idExpression{ "^[[:alnum:]@&()+/:-_]+$", std::regex::ECMAScript};
+#ifdef VISR_USE_BOOST_REGEX
+    static const boost::regex idExpression{ "^[A-za-z0-9@&()+/:-_]+$" };
+#else
+    static const std::regex idExpression{ "^[[:alnum:]@&()+/:-_]+$", std::regex::ECMAScript};  
 #endif
     // parsing the loudspeaker ids and channels
     std::size_t i = 0;
@@ -298,19 +302,15 @@ namespace panning
     {
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
-#ifdef USE_BOOST_REGEX
-      boost::regex expr{ "^[A-za-z0-9@&()+/:-_]*$", std::regex::basic };
-      if( m_id.find( id ) != m_id.end() or id.empty() or !boost::regex_match( id, expr ) )
-      {
-        throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
-      }
+      boost::trim_if( id, boost::is_any_of( "\t " ) );
+#ifdef VISR_USE_BOOST_REGEX
+      if( (not boost::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()))
 #else
       if( (not std::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()) )
+#endif
       {
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
       }
-#endif
-      boost::trim_if( id, boost::is_any_of( "\t " ) );
       std::size_t idZeroOffset = i;
       if( m_channel[idZeroOffset] != cInvalidChannel )
       {
@@ -360,19 +360,15 @@ namespace panning
     {
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
-#ifdef USE_BOOST_REGEX
-      boost::regex expr{ "^[A-za-z0-9@&()+-_ ]*$" };
-      if( m_id.find( id ) != m_id.end() or id.empty() or !boost::regex_match( id, expr ) )
-      {
-        throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
-      }
-#else
-      if( m_id.find( id ) != m_id.end() or id.empty() or not std::regex_match( id, idExpression ) )
-      {
-        throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
-      }
-#endif
       boost::trim_if( id, boost::is_any_of( "\t " ) );
+#ifdef VISR_USE_BOOST_REGEX
+      if( (not boost::regex_match( id, idExpression) ) or (m_id.find( id ) != m_id.end()) )
+#else
+      if( (not std::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()) )
+#endif
+      {
+        throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
+      }
       m_id[id] = i;
       
       auto const routeNodes = childTree.equal_range( "route" );
