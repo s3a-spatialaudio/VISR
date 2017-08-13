@@ -164,10 +164,6 @@ IF( BUILD_MATLAB_EXTERNALS )
   ELSE( MATLAB_FOUND )
     MESSAGE( FATAL_ERROR, "Matlab not found, cancelling compilation." )
   ENDIF( MATLAB_FOUND )
-  # Brute-force way make all the code position-independent if we build Matlab externals.
-  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
-  # SEE: python bindings support
-  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
 ENDIF( BUILD_MATLAB_EXTERNALS )
 
 ################################################################################
@@ -189,9 +185,6 @@ OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" O
 
 IF( BUILD_PYTHON_BINDINGS )
   FIND_PACKAGE( PythonLibs REQUIRED )
-  # Brute-force way make all the code position-independent if we use python bindings.
-  # TODO: Devise more selective solution (separate sets of static libraries, etc.)
-  SET( CMAKE_POSITION_INDEPENDENT_CODE True )
 
   include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
 
