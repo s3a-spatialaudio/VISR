@@ -27,6 +27,7 @@ parametric_iir_coefficient_calculator.cpp
 SET( HEADERS
 biquad_coefficient.hpp
 circular_buffer.hpp
+export_symbols.hpp
 fir.hpp
 fft_wrapper_base.hpp
 fft_wrapper_factory.hpp

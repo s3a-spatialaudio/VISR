@@ -51,34 +51,14 @@ ErrorCode product( T const * op1,
   }
   return efl::noError;
 }
-  
-template
-ErrorCode product<float>( float const * op1,
-			  float const * op2,
-			  float * res,
-			  std::size_t numResultRows,
-			  std::size_t numResultColumns,
-			  std::size_t numOp1Columns,
-			  std::size_t op1RowStride,
-			  std::size_t op1ColmunStride,
-			  std::size_t op2RowStride,
-			  std::size_t op2ColumnStride,
-			  std::size_t resRowStride,
-			  std::size_t resColumnStride );
-template
-ErrorCode product<double>( double const * op1,
-			   double const * op2,
-			   double * res,
-			   std::size_t numResultRows,
-			   std::size_t numResultColumns,
-			   std::size_t numOp1Columns,
-			   std::size_t op1RowStride,
-			   std::size_t op1ColmunStride,
-			   std::size_t op2RowStride,
-			   std::size_t op2ColumnStride,
-			   std::size_t resRowStride,
-			   std::size_t resColumnStride );
 
-  
+// Explicit instantiations
+template VISR_EFL_LIBRARY_SYMBOL
+ErrorCode product<float>( float const *, float const *, float *, std::size_t, std::size_t, std::size_t, std::size_t,
+                          std::size_t, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL
+ErrorCode product<double>( double const * op1, double const *, double *, std::size_t, std::size_t, std::size_t,
+                           std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t );
+
 } // namespace efl
 } // namespace visr
