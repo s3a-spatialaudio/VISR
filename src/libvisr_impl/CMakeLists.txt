@@ -42,6 +42,12 @@ port_base.cpp
 signal_flow_context.cpp
 )
 
+add_library( visr_impl STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( visr_impl PROPERTIES OUTPUT_NAME visr)
+set_target_properties(visr_impl PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+# Mutual dependency between ril and vir_impl.
+target_link_libraries( visr_impl ril )
+
 add_library( visr_impl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( visr_impl_shared PROPERTIES OUTPUT_NAME visr)
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
@@ -53,14 +59,9 @@ target_compile_definitions( visr_impl_shared PUBLIC -DVISR_BUILD_VISR_SHARED_LIB
 target_compile_definitions( visr_impl_shared PRIVATE -DVISR_BUILD_VISR_LIBRARY=1 )
 set_target_properties(visr_impl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 set_target_properties(visr_impl_shared PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-# Mutual dependeny between ril and vir_impl. This might be problematic when one of them is a shared library.
-target_link_libraries( visr_impl_shared ril )
 
-add_library( visr_impl STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( visr_impl PROPERTIES OUTPUT_NAME visr)
-set_target_properties(visr_impl PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
-# Mutual dependeny between ril and vir_impl.
-target_link_libraries( visr_impl ril )
+# Mutual dependency between ril and vir_impl. This might be problematic when one of them is a shared library.
+target_link_libraries( visr_impl_shared ril )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

@@ -132,9 +132,7 @@ int main( int argc, char const * const * argv )
           specConf = "";
         }
 
-        std::unique_ptr<visr::audiointerfaces::AudioInterface>
-          audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf));
-
+      
         /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
         // Assume a fixed length for the interpolation period.
         // Ideally, this roughly matches the update rate of the scene sender.
@@ -172,7 +170,9 @@ int main( int argc, char const * const * argv )
                                            lowFrequencyPanning );
         
         rrl::AudioSignalFlow audioFlow( flow );
-        
+        std::unique_ptr<visr::audiointerfaces::AudioInterface>
+          audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf ) );
+
         audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &audioFlow );
 
         /*******************************************************************/
