@@ -67,8 +67,7 @@ py::object loadModule( std::string const & module,
   }
   catch( std::exception const & ex )
   {
-    std::cerr << "Error while loading Python module: " << ex.what();
-    return py::object();
+    throw std::runtime_error( detail::composeMessageString( "PythonWrapper: Error while loading Python module: ", ex.what() ));
   }
   return locals["new_module"];
 }
