@@ -25,6 +25,9 @@ Options::Options()
   registerOption<std::string>( "object-name,n", "Name of the Python class (must be a subclass of visr.Component)." );
   registerOption<std::string>( "positional-arguments,a", "Comma-separated list of positional options passed to the class constructor." );
   registerOption<std::string>( "keyword-arguments,k", "Comma-separated list of named (keyword) options passed to the class constructor." );
+
+  registerOption<std::string>( "audio-ifc-options", "Audio interface optional configuration" );
+  registerOption<std::string>( "audio-ifc-option-file", "Audio interface optional configuration file" );
 }
 
 Options::~Options() = default;

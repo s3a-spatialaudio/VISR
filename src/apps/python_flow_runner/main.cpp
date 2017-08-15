@@ -1,26 +1,19 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-// Enable native JACK interface instead of PortAudio
-// TODO: Make this selectable via a command line option.
-// #define BASELINE_RENDERER_NATIVE_JACK
-
 #include "options.hpp"
-
 
 #include <libaudiointerfaces/audio_interface.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
-#ifdef VISR_JACK_SUPPORT
-#include <libaudiointerfaces/jack_interface.hpp>
-#endif
-#include <libaudiointerfaces/portaudio_interface.hpp>
+
 #include <librrl/audio_signal_flow.hpp>
 #include <libril/signal_flow_context.hpp>
-
 
 #include <libpythonsupport/python_wrapper.hpp>
 #include <libpythonsupport/initialisation_guard.hpp>
 
 #include <libefl/denormalised_number_handling.hpp>
+
+#include <libpml/initialise_parameter_library.hpp>
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
@@ -31,6 +24,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio> // for getc(), for testing purposes
+#include <fstream>
 #include <iostream>
 #include <sstream>
 
@@ -38,12 +32,15 @@ int main( int argc, char const * const * argv )
 {
     using namespace visr;
     using namespace visr::apps::pythonflowrunner;
-    
+
     try
     {
         efl::DenormalisedNumbers::State const oldDenormNumbersState
         = efl::DenormalisedNumbers::setDenormHandling();
-        
+
+        // Load all parameters and communication protocols into the respective factories.
+        pml::initialiseParameterLibrary();
+
         pythonsupport::InitialisationGuard::initialise();
         // InitialisationGuard::initialise() returns with the Python GIL
         // (global interpreter lock) locked.
@@ -70,7 +67,7 @@ int main( int argc, char const * const * argv )
         std::string const audioBackend = cmdLineOptions.getDefaultedOption<std::string>( "audio-backend", "default" );
         const std::size_t periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
         const std::size_t samplingRate = cmdLineOptions.getDefaultedOption<std::size_t>( "sampling-frequency", 48000 );
-        
+
         boost::filesystem::path const modulePath( cmdLineOptions.getOption<std::string>( "module-path" ) );
         if( not exists(modulePath) )
         {
@@ -79,8 +76,8 @@ int main( int argc, char const * const * argv )
             return EXIT_FAILURE;
         }
         std::string const pythonClassName = cmdLineOptions.getOption<std::string>( "python-class-name");
-        std::string const objectName = cmdLineOptions.getDefaultedOption<std::string>( "python-class-name", "PythonFlow" );
-        std::string const positionalArgs = cmdLineOptions.getOption<std::string>( "positional-arguments" );
+        std::string const objectName = cmdLineOptions.getDefaultedOption<std::string>( "object-name", "PythonFlow" );
+        std::string const positionalArgs = cmdLineOptions.getDefaultedOption<std::string>( "positional-arguments", "" );
         std::string const kwArgs = cmdLineOptions.getDefaultedOption<std::string>( "keyword-arguments", "" );
         
         SignalFlowContext const ctxt( periodSize, samplingRate );
@@ -98,9 +95,33 @@ int main( int argc, char const * const * argv )
         
         visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
        
-        // TODO: Add a command-line option for the backend-specific audio
-        // interface options.
-        std::string const specConf(""); // Default backend-specific options
+        std::string specConf;
+        bool const hasAudioInterfaceOptionString = cmdLineOptions.hasOption("audio-ifc-options");
+        bool const hasAudioInterfaceOptionFile = cmdLineOptions.hasOption("audio-ifc-option-file");
+        if( hasAudioInterfaceOptionString and hasAudioInterfaceOptionFile )
+        {
+          throw std::invalid_argument( "The options \"--audio-ifc-options\" and \"--audio-ifc-option-file\" cannot both be given.");
+        }
+        if( hasAudioInterfaceOptionFile )
+        {
+          boost::filesystem::path const audioIfcConfigFile( cmdLineOptions.getOption<std::string>( "audio-ifc-option-file" ) );
+          if( not exists( audioIfcConfigFile ) )
+          {
+            throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" option does not exist.");
+          }
+          std::ifstream cfgStream( audioIfcConfigFile.string() );
+          if( not cfgStream )
+          {
+            throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" could not be read.");
+          }
+          std::ostringstream fileContent;
+          fileContent << cfgStream.rdbuf();
+          specConf = fileContent.str();
+        }
+        else
+        {
+          specConf = hasAudioInterfaceOptionString ? cmdLineOptions.getOption<std::string>( "audio-ifc-options" ) : std::string();
+        }
 
         std::unique_ptr<audiointerfaces::AudioInterface> audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf) );
         
