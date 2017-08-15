@@ -122,14 +122,9 @@ int main( int argc, char const * const * argv )
           fileContent << cfgStream.rdbuf();
           specConf = fileContent.str();
         }
-        else if( hasAudioInterfaceOptionString )
-        {
-          specConf = cmdLineOptions.getOption<std::string>( "audio-ifc-options" );
-        }
-        // TODO: An empty default configuration must be be sufficient.
         else
         {
-          specConf = "";
+          specConf = hasAudioInterfaceOptionString ? cmdLineOptions.getOption<std::string>( "audio-ifc-options" ) : std::string();
         }
 
         std::unique_ptr<visr::audiointerfaces::AudioInterface>
