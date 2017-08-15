@@ -11,6 +11,11 @@ namespace audiointerfaces
 {
 void exportAudioInterface( pybind11::module & m );
 void exportAudioInterfaceFactory( pybind11::module & m );
+#ifdef VISR_BUILD_USE_JACK
+  void exportJackInterface( pybind11::module & m );
+#endif
+void exportPortaudioInterface( pybind11::module & m );
+
 }
 }
 }
@@ -25,6 +30,9 @@ PYBIND11_PLUGIN( audiointerfaces )
   using namespace visr::python::audiointerfaces;
   exportAudioInterface( m );
   exportAudioInterfaceFactory( m );
-
+#ifdef VISR_BUILD_USE_JACK
+  exportJackInterface( m );
+#endif
+  exportPortaudioInterface( m );
   return m.ptr();
 }
