@@ -1,30 +1,3 @@
-function(fix_rpath libpath)
-	get_filename_component(libname ${${libpath}} NAME)
-
-	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
-	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname})
-	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname} PARENT_SCOPE ) 
-
-	set (EXECUTE_COMMAND  chmod 777 ${PROJECT_BINARY_DIR}/3rd/${libname})
-	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-	set (EXECUTE_COMMAND install_name_tool -id @rpath/${libname} ${${libpath}})
-	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-endfunction()
-
-function(fix_dependencies_of_3rdparty depname libpath)
-
-	set (EXECUTE_COMMAND bash "-c" "${CMAKE_SOURCE_DIR}/cmake_modules/./change_dependency_installname.sh ${depname} ${libpath}" )
-
-	execute_process(COMMAND ${EXECUTE_COMMAND} OUTPUT_VARIABLE rv)
-	#message( STATUS "output "${depname} ": " ${rv} )
-
-endfunction()
-
-
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 # Top-level build configuration for project VISceRal
@@ -76,6 +49,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
+
+# DEfault destination for shared libraries (not DLLs)
+SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 
 #############################################################
 # Create a system string.
@@ -354,6 +330,31 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
 set (EXECUTE_COMMAND mkdir -p ${PROJECT_BINARY_DIR}/3rd)
 execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
+function(fix_rpath libpath)
+	get_filename_component(libname ${${libpath}} NAME)
+
+	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
+	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname})
+	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname} PARENT_SCOPE ) 
+
+	set (EXECUTE_COMMAND  chmod 777 ${PROJECT_BINARY_DIR}/3rd/${libname})
+	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+	set (EXECUTE_COMMAND install_name_tool -id @rpath/${libname} ${${libpath}})
+	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+
+endfunction()
+
+function(fix_dependencies_of_3rdparty depname libpath)
+
+	set (EXECUTE_COMMAND bash "-c" "${CMAKE_SOURCE_DIR}/cmake_modules/./change_dependency_installname.sh ${depname} ${libpath}" )
+
+	execute_process(COMMAND ${EXECUTE_COMMAND} OUTPUT_VARIABLE rv)
+	#message( STATUS "output "${depname} ": " ${rv} )
+
+endfunction()
 
 fix_rpath(FLAC_LIBRARY)
 fix_rpath(OGG_LIBRARY)
