@@ -42,7 +42,7 @@ ADD_SUBDIRECTORY( libril )
 ADD_SUBDIRECTORY( librrl )
 
 # Data types and components related to the reverb audio object.
-ADD_SUBDIRECTORY( librsao )
+ADD_SUBDIRECTORY( libreverbobject )
 
 
 # Library of implementations of the interface components.
