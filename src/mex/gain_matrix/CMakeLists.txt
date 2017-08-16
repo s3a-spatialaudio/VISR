@@ -22,7 +22,7 @@ add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX ${MATLAB_MEX_SUFFIX} PREFIX "")
 
 # Add any extras dependencies
-target_link_libraries(${PROJECT_NAME} rbbl rcl visr_position_independent_static efl mexsupport ${MATLAB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} rbbl rcl visr_static efl mexsupport ${MATLAB_LIBRARIES})
 
 # Install the .mexXXX file to mex/
 INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION mex)

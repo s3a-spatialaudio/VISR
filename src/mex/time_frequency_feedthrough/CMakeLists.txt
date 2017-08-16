@@ -18,7 +18,6 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 # Add any extras dependencies
 target_link_libraries( ${PROJECT_NAME} signalflows )
 target_link_libraries( ${PROJECT_NAME} rcl )
-target_link_libraries( ${PROJECT_NAME} visr_position_independent_static )
 target_link_libraries( ${PROJECT_NAME} rrl )
 target_link_libraries( ${PROJECT_NAME} mexsupport )
 
