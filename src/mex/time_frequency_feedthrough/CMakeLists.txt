@@ -18,17 +18,9 @@ add_library(${PROJECT_NAME} SHARED ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 # Add any extras dependencies
 target_link_libraries( ${PROJECT_NAME} signalflows )
 target_link_libraries( ${PROJECT_NAME} rcl )
-target_link_libraries( ${PROJECT_NAME} rbbl )
-target_link_libraries( ${PROJECT_NAME} visr_impl )
-target_link_libraries( ${PROJECT_NAME} pml )
-target_link_libraries( ${PROJECT_NAME} objectmodel )
+target_link_libraries( ${PROJECT_NAME} visr_position_independent_static )
 target_link_libraries( ${PROJECT_NAME} rrl )
-target_link_libraries( ${PROJECT_NAME} audiointerfaces )
-target_link_libraries( ${PROJECT_NAME} efl )
 target_link_libraries( ${PROJECT_NAME} mexsupport )
-target_link_libraries( ${PROJECT_NAME} ${MATLAB_LIBRARIES} )
-target_link_libraries( ${PROJECT_NAME} ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.
@@ -38,6 +30,4 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX 
 # Put directly into the mex/ subdirectory
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/mex" )
 
-# <AF> What to do with the install?
-# install to /bin by default
-# install(TARGETS ${PROJECT_NAME} DESTINATION ../bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex)

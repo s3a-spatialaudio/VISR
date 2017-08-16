@@ -65,6 +65,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 ADD_LIBRARY( rcl STATIC ${SOURCES} ${HEADERS} )
 # Transitive dependencies
 target_link_libraries( rcl pml )
+target_link_libraries( rcl visr_static )
 target_link_libraries( rcl ril )
 target_link_libraries( rcl panning )
 target_link_libraries( rcl objectmodel )
@@ -82,7 +83,7 @@ target_compile_definitions( rcl_shared PRIVATE -DVISR_BUILD_RCL_SHARED_LIBRARY=1
 set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive dependencies
 target_link_libraries( rcl_shared pml_shared )
-target_link_libraries( rcl_shared visr_impl_shared )
+target_link_libraries( rcl_shared visr_shared )
 target_link_libraries( rcl_shared panning_shared )
 target_link_libraries( rcl_shared objectmodel_shared )
 target_link_libraries( rcl_shared rbbl_shared )

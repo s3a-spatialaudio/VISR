@@ -38,13 +38,15 @@ elseif(APPLE)
   set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "mxo")
 endif(WIN32)
 
+# TODO: We need either shared libraries or position-independent static libraries!
+# TODO: Remove transitive link dependencies
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} audiointerfaces )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} pml )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} visr_impl )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} visr_position_independent_static )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rbbl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} efl )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} objectmodel )
