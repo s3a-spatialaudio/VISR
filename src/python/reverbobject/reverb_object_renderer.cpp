@@ -5,7 +5,7 @@
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#include <librsao/reverb_object_renderer.hpp> 
+#include <libreverbobject/reverb_object_renderer.hpp> 
 
 #include <pybind11/pybind11.h>
 
@@ -19,7 +19,7 @@ namespace reverbobject
 
 void exportReverbObjectRenderer( pybind11::module& m )
 {
-  pybind11::class_<::visr::rsao::ReverbObjectRenderer, CompositeComponent>( m, "ReverbObjectRenderer" )
+  pybind11::class_<::visr::reverbobject::ReverbObjectRenderer, CompositeComponent>( m, "ReverbObjectRenderer" )
     .def( pybind11::init<SignalFlowContext const &, char const *, CompositeComponent *,
           std::string const &, panning::LoudspeakerArray const &, std::size_t>(),
         pybind11::arg( "context" ), pybind11::arg( "name" ),

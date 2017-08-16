@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRSAO_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
-#define VISR_LIBRSAO_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+#ifndef VISR_LIBREVERBOBJECT_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+#define VISR_LIBREVERBOBJECT_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
 
 #include "late_reverb_parameter.hpp"
 
@@ -31,14 +31,14 @@ template< typename CoefficientType >
 class BiquadCoefficient;
 }
 
-namespace rsao
+namespace reverbobject
 {
 
 /**
  * Audio component for computing signal processing parameters from 
  * PointSoureWithReverb objects.
  */
-class VISR_RSAO_LIBRARY_SYMBOL LateReverbFilterCalculator: public AtomicComponent
+class VISR_REVERBOBJECT_LIBRARY_SYMBOL LateReverbFilterCalculator: public AtomicComponent
 {
 public:
   /**
@@ -173,7 +173,7 @@ private:
   ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mFilterOutput;
 };
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRSAO_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED
+#endif // #ifndef VISR_LIBREVERBOBJECT_LATE_REVERB_FILTER_CALCULATOR_HPP_INCLUDED

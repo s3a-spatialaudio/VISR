@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRSAO_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
-#define VISR_LIBRSAO_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
+#ifndef VISR_LIBREVERBOBJECT_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
+#define VISR_LIBREVERBOBJECT_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
 
 // Preliminary solution, dependencies between components are suboptimal
 #include "late_reverb_filter_calculator.hpp"
@@ -39,13 +39,13 @@ namespace rbbl
   class ObjectChannelAllocator;
 }
 
-namespace rsao
+namespace reverbobject
 {
 
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class VISR_RSAO_LIBRARY_SYMBOL ReverbParameterCalculator: public AtomicComponent
+class VISR_REVERBOBJECT_LIBRARY_SYMBOL ReverbParameterCalculator: public AtomicComponent
 {
 public:
   /**
@@ -91,7 +91,7 @@ public:
   void process() override;
 
 private:
-  void processSingleObject( objectmodel::PointSourceWithReverb const & rsao, std::size_t renderChannel,
+  void processSingleObject( objectmodel::PointSourceWithReverb const & reverbobject, std::size_t renderChannel,
                            efl::BasicVector<SampleType> & discreteReflGains,
                            efl::BasicVector<SampleType> & discreteReflDelays,
                            pml::BiquadParameterMatrix<SampleType> & biquadCoeffs,
@@ -165,7 +165,7 @@ private:
   mutable efl::BasicVector<SampleType> mTmpPanningGains;
 };
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRSAO_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED
+#endif // #ifndef VISR_LIBREVERBOBJECT_REVERB_PARAMETER_CALCULATOR_HPP_INCLUDED

@@ -38,7 +38,7 @@ namespace visr
 {
 
 // Forward declarations
-namespace rsao
+namespace reverbobject
 {
 class ReverbObjectRenderer;
 }
@@ -161,7 +161,7 @@ private:
   //@}
 
 
-  std::unique_ptr<rsao::ReverbObjectRenderer> mReverbRenderer;
+  std::unique_ptr<reverbobject::ReverbObjectRenderer> mReverbRenderer;
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
 

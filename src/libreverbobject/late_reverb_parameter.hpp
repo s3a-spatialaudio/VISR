@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_RSAO_LATE_REVERB_PARAMETER_HPP_INCLUDED
-#define VISR_RSAO_LATE_REVERB_PARAMETER_HPP_INCLUDED
+#ifndef VISR_REVERBOBJECT_LATE_REVERB_PARAMETER_HPP_INCLUDED
+#define VISR_REVERBOBJECT_LATE_REVERB_PARAMETER_HPP_INCLUDED
 
 #include "export_symbols.hpp"
 
@@ -19,15 +19,15 @@
 
 namespace visr
 {
-namespace rsao
+namespace reverbobject
 {
 
 /**
  * Define a unique name for the parameter type.
  */
-static constexpr const char* sLateReverbParameterName = "rsao::LateReverbParameter";
+static constexpr const char* sLateReverbParameterName = "reverbobject::LateReverbParameter";
 
-class VISR_RSAO_LIBRARY_SYMBOL LateReverbParameter: public TypedParameterBase<LateReverbParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1(sLateReverbParameterName) >
+class VISR_REVERBOBJECT_LIBRARY_SYMBOL LateReverbParameter: public TypedParameterBase<LateReverbParameter, pml::EmptyParameterConfig, detail::compileTimeHashFNV1(sLateReverbParameterName) >
 {
 public:
   LateReverbParameter();
@@ -65,9 +65,9 @@ private:
   objectmodel::PointSourceWithReverb::LateReverb mParams;
 };
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr
 
-DEFINE_PARAMETER_TYPE( visr::rsao::LateReverbParameter, visr::rsao::LateReverbParameter::staticType(), visr::pml::EmptyParameterConfig )
+DEFINE_PARAMETER_TYPE( visr::reverbobject::LateReverbParameter, visr::reverbobject::LateReverbParameter::staticType(), visr::pml::EmptyParameterConfig )
 
-#endif // VISR_RSAO_LATE_REVERB_PARAMETER_HPP_INCLUDED
+#endif // VISR_REVERBOBJECT_LATE_REVERB_PARAMETER_HPP_INCLUDED

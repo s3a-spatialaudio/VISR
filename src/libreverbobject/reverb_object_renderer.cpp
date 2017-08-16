@@ -14,7 +14,7 @@
 
 namespace visr
 {
-namespace rsao
+namespace reverbobject
 {
 
 ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
@@ -202,5 +202,5 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
 
 ReverbObjectRenderer::~ReverbObjectRenderer() = default;
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr

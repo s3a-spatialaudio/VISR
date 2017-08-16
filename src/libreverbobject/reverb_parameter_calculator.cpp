@@ -20,7 +20,7 @@
 
 namespace visr
 {
-namespace rsao
+namespace reverbobject
 {
 
 
@@ -367,5 +367,5 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
 
 }
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr

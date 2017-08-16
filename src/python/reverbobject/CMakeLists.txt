@@ -39,7 +39,7 @@ endif( PYTHON_EXTERNAL_SUFFIX )
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/python" )
 
 
-target_link_libraries( ${PROJECT_NAME} rsao_shared ) 
+target_link_libraries( ${PROJECT_NAME} reverbobject_shared ) 
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 

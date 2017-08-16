@@ -6,7 +6,7 @@
 
 namespace visr
 {
-namespace rsao
+namespace reverbobject
 {
 
 LateReverbParameter::LateReverbParameter()
@@ -29,5 +29,5 @@ LateReverbParameter::LateReverbParameter( std::size_t index,
   , mParams( params )
 {}
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr

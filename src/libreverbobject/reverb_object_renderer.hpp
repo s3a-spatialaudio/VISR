@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_RSAO_REVERB_OBJECT_RENDERER_HPP_INCLUDED
-#define VISR_RSAO_REVERB_OBJECT_RENDERER_HPP_INCLUDED
+#ifndef VISR_REVERBOBJECT_REVERB_OBJECT_RENDERER_HPP_INCLUDED
+#define VISR_REVERBOBJECT_REVERB_OBJECT_RENDERER_HPP_INCLUDED
 
 #include "export_symbols.hpp"
 
@@ -31,7 +31,7 @@
 
 namespace visr
 {
-namespace rsao
+namespace reverbobject
 {
 
 /**
@@ -39,7 +39,7 @@ namespace rsao
  * Usually used as part of a larger renderer that handles object
  * volume + EQ, signal routing and the direct part of the renderer.
  */
-class VISR_RSAO_LIBRARY_SYMBOL ReverbObjectRenderer: public CompositeComponent
+class VISR_REVERBOBJECT_LIBRARY_SYMBOL ReverbObjectRenderer: public CompositeComponent
 {
 public:
   /**
@@ -72,7 +72,7 @@ private:
 
   ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
    
-  rsao::ReverbParameterCalculator mReverbParameterCalculator;
+  reverbobject::ReverbParameterCalculator mReverbParameterCalculator;
 
   rcl::SignalRouting mReverbSignalRouting;
 
@@ -82,7 +82,7 @@ private:
 
   rcl::GainMatrix mDiscreteReverbPanningMatrix;
 
-  rsao::LateReverbFilterCalculator mLateReverbFilterCalculator;
+  reverbobject::LateReverbFilterCalculator mLateReverbFilterCalculator;
 
   /**
    * Overall gain and delay for the source signals going into the late
@@ -99,7 +99,7 @@ private:
   rcl::Add mReverbMix;
 };
 
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr
 
-#endif // VISR_RSAO_REVERB_OBJECT_RENDERER_HPP_INCLUDED
+#endif // VISR_REVERBOBJECT_REVERB_OBJECT_RENDERER_HPP_INCLUDED

@@ -16,7 +16,7 @@
 
 namespace visr
 {
-namespace rsao
+namespace reverbobject
 {
 
 namespace
@@ -286,5 +286,5 @@ calculateImpulseResponse( std::size_t objectIdx,
   }
 }
   
-} // namespace rsao
+} // namespace reverbobject
 } // namespace visr

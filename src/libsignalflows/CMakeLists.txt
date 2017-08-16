@@ -26,7 +26,7 @@ add_library( signalflows STATIC ${SOURCES} ${HEADERS} )
 # Transitive link dependencies
 target_link_libraries( signalflows rcl )
 target_link_libraries( signalflows pml )
-target_link_libraries( signalflows rsao )
+target_link_libraries( signalflows reverbobject_static )
 
 add_library( signalflows_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_shared PROPERTIES OUTPUT_NAME signalflows )
@@ -36,9 +36,8 @@ target_compile_definitions( signalflows_shared PRIVATE -DVISR_BUILD_SIGNALFLOWS_
 set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive link dependencies
 target_link_libraries( signalflows_shared rcl_shared )
+target_link_libraries( signalflows_shared reverbobject_shared )
 target_link_libraries( signalflows_shared pml_shared )
-target_link_libraries( signalflows_shared rsao_shared )
-
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

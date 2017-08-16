@@ -13,7 +13,7 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
-#include <librsao/reverb_object_renderer.hpp>
+#include <libreverbobject/reverb_object_renderer.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -236,9 +236,9 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 
   if( not reverbConfig.empty() )
   {
-    mReverbRenderer.reset( new rsao::ReverbObjectRenderer( context, "ReverbObjectRenderer", this,
-                                                           reverbConfig, loudspeakerConfiguration,
-                                                           numberOfInputs ) );
+    mReverbRenderer.reset( new reverbobject::ReverbObjectRenderer( context, "ReverbObjectRenderer", this,
+                                                                   reverbConfig, loudspeakerConfiguration,
+                                                                   numberOfInputs ) );
 
     audioConnection( mObjectEq.audioPort("out"), mReverbRenderer->audioPort("in") );
     char const * diffuseInPort = frequencyDependentPanning ? "in4" : "in3";

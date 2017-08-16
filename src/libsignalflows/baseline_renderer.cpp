@@ -6,8 +6,6 @@
 
 #include <libpml/biquad_parameter.hpp>
 
-#include <librsao/reverb_object_renderer.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <sstream>
