@@ -8,17 +8,13 @@ namespace visr
 SignalFlowContext::SignalFlowContext( std::size_t period, SamplingFrequencyType samplingFrequency )
  : mPeriod( period )
  , mSamplingFrequency( samplingFrequency )
- , mInitialised( false )
 {
 }
 
-SignalFlowContext::~SignalFlowContext()
-{
-}
+SignalFlowContext::~SignalFlowContext() = default;
 
-void SignalFlowContext::setInitialised( bool initialised /*= true*/ )
-{
-  mInitialised = initialised;
-}
+SignalFlowContext::SignalFlowContext( SignalFlowContext const & rhs ) = default;
+
+SignalFlowContext::SignalFlowContext( SignalFlowContext && rhs ) = default;
 
 } // namespace visr

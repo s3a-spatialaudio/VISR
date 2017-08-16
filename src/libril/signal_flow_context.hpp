@@ -9,6 +9,9 @@
 namespace visr
 {
 
+/**
+ * Class encapsulating basic parameters of a signal flow such as sampling rate and audio period size.
+ */
 class VISR_CORE_LIBRARY_SYMBOL SignalFlowContext
 {
 public:
@@ -21,9 +24,20 @@ public:
    */
   explicit SignalFlowContext( std::size_t period, SamplingFrequencyType samplingFrequency );
 
-  ~SignalFlowContext();
+  /**
+   * Copy constructor.
+   */
+  SignalFlowContext( SignalFlowContext const & rhs );
 
-  bool initialised() const { return mInitialised; }
+  /**
+   * Move constructor.
+   */
+  SignalFlowContext( SignalFlowContext && rhs );
+
+  /**
+   * Destructor.
+   */
+  ~SignalFlowContext();
 
   /**
    * Query the period of the signal flow, i.e., the number of samples
@@ -36,8 +50,6 @@ public:
    */
   SamplingFrequencyType samplingFrequency() const { return mSamplingFrequency; }
 
-  void setInitialised( bool initialised = true );
-
 private:
   /**
    * The number of samples processed in one iteration of the signal flow graph.
@@ -49,11 +61,6 @@ private:
    * graph.
    */
   SamplingFrequencyType const mSamplingFrequency;
-
-  /**
-   * Flag stating whether the signal flow is fully initialised.
-   */
-  bool mInitialised;
 };
 
 } // namespace visr
