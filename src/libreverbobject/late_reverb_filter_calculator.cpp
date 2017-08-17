@@ -93,7 +93,7 @@ LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext const 
  , mNumberOfSubBands( numLateReflectionSubBandLevels )
  , mFilterLength( static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) ) )
  , mMaxUpdatesPerIteration( maxUpdatesPerPeriod == 0 ? mNumberOfObjects : maxUpdatesPerPeriod )
- , mSubBandNoiseSequences( numberOfObjects * mNumberOfSubBands, mAlignment )
+ , mSubBandNoiseSequences( numberOfObjects * mNumberOfSubBands, mFilterLength, mAlignment )
  , mSubbandInput( "subbandInput", *this, pml::EmptyParameterConfig( ) )
  , mFilterOutput( "lateFilterOutput", *this, pml::EmptyParameterConfig( ) )
 {
@@ -120,10 +120,11 @@ LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext const 
       filterSequence( noiseLength, noiseSequence.data( ), filteredSequence.data( ), cOctaveBandFilters.at(bandIdx ) );
 
       // Copy the last mFilterLength samples to the right position in the matrix.
-      if( efl::vectorCopy( filteredSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
+      if( efl::vectorCopy( filteredSequence.data() + numberOfExtraSamples,
+                           subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
                            mAlignment ) != efl::noError )
       {
-        throw std::runtime_error( "ReverbParameterCalculator::setup(): Copying of subband noise sequence failed." );
+        throw std::runtime_error( "LateReverbFilterCalculator::setup(): Copying of subband noise sequence failed." );
       }
     }
   }
