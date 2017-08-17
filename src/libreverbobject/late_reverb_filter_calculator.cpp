@@ -82,34 +82,23 @@ static const rbbl::BiquadCoefficientList<SampleType> cOctaveBandFilters={
 
 LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext const & context,
                                                         char const * name,
-                                                        CompositeComponent * parent /*= nullptr*/ )
+                                                        CompositeComponent * parent,
+                                                        std::size_t numberOfObjects,
+                                                        SampleType lateReflectionLengthSeconds,
+                                                        std::size_t numLateReflectionSubBandLevels,
+                                                        std::size_t maxUpdatesPerPeriod /*= 0*/ )
  : AtomicComponent( context, name, parent )
  , mAlignment( cVectorAlignmentSamples )
- , mSubBandNoiseSequences( mAlignment )
+ , mNumberOfObjects( numberOfObjects )
+ , mNumberOfSubBands( numLateReflectionSubBandLevels )
+ , mFilterLength( static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) ) )
+ , mMaxUpdatesPerIteration( maxUpdatesPerPeriod == 0 ? mNumberOfObjects : maxUpdatesPerPeriod )
+ , mSubBandNoiseSequences( numberOfObjects * mNumberOfSubBands, mAlignment )
  , mSubbandInput( "subbandInput", *this, pml::EmptyParameterConfig( ) )
  , mFilterOutput( "lateFilterOutput", *this, pml::EmptyParameterConfig( ) )
 {
-}
-
-LateReverbFilterCalculator::~LateReverbFilterCalculator()
-{
-}
-
-void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
-                                        SampleType lateReflectionLengthSeconds,
-                                        std::size_t numLateReflectionSubBandLevels,
-                                        std::size_t maxUpdatesPerPeriod /* = 0 */ )
-{
-  mNumberOfObjects = numberOfObjects;
-  mNumberOfSubBands = numLateReflectionSubBandLevels;
-  mMaxUpdatesPerIteration = maxUpdatesPerPeriod == 0 ? mNumberOfObjects : maxUpdatesPerPeriod;
-  mFilterLength = static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) );
-
-  // Create a matrix to hold all bandpassed random sequences for all objects.
-  mSubBandNoiseSequences.resize( numberOfObjects * mNumberOfSubBands, mFilterLength );
-
   std::size_t const numberOfExtraSamples = efl::nextAlignedSize( 20, mAlignment); // extra samples at the beginning of the noise
-  // sequence to avoid any 'startup behaviour' of the IIR filter. The aligment magic is to allow us to use an aligned copy 
+  // sequence to avoid any 'startup behaviour' of the IIR filter. The alignment magic is to allow us to use an aligned copy
   // operation to store the cropped result of the filtering.
   std::size_t const noiseLength = mFilterLength + numberOfExtraSamples;
   efl::BasicVector<SampleType> noiseSequence( noiseLength, mAlignment );
@@ -132,12 +121,16 @@ void LateReverbFilterCalculator::setup( std::size_t numberOfObjects,
 
       // Copy the last mFilterLength samples to the right position in the matrix.
       if( efl::vectorCopy( filteredSequence.data() + numberOfExtraSamples, subBandNoiseSequence( objIdx, bandIdx ), mFilterLength,
-          mAlignment ) != efl::noError )
+                           mAlignment ) != efl::noError )
       {
         throw std::runtime_error( "ReverbParameterCalculator::setup(): Copying of subband noise sequence failed." );
       }
     }
   }
+}
+
+LateReverbFilterCalculator::~LateReverbFilterCalculator()
+{
 }
 
 void LateReverbFilterCalculator::process( )

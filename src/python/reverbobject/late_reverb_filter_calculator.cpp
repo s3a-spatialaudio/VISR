@@ -21,10 +21,9 @@ namespace reverbobject
 void exportLateReverbFilterCalculator( pybind11::module& m )
 {
   pybind11::class_<::visr::reverbobject::LateReverbFilterCalculator, AtomicComponent>( m, "LateReverbFilterCalculator" )
-    .def( pybind11::init<SignalFlowContext const &, char const *, CompositeComponent *>(),
+    .def( pybind11::init<SignalFlowContext const &, char const *, CompositeComponent *, std::size_t, float, std::size_t, std::size_t>(),
         pybind11::arg( "context" ), pybind11::arg( "name" ),
-        pybind11::arg( "parent" ) )
-    .def( "setup", &visr::reverbobject::LateReverbFilterCalculator::setup,
+        pybind11::arg( "parent" ),
         pybind11::arg( "numberOfObjects" ),
         pybind11::arg( "lateReflectionLengthSeconds" ),
         pybind11::arg( "numLateReflectionSubBandLevels" ),

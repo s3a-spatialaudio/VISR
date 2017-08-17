@@ -32,7 +32,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   , mDiscreteReverbDelay( context, "discreteReverbDelay", this )
   , mDiscreteReverbReflFilters( context, "discreteReverbReflectionFilters", this )
   , mDiscreteReverbPanningMatrix( context, "discretePanningMatrix", this )
-  , mLateReverbFilterCalculator( context, "lateReverbCalculator", this )
+  , mLateReverbFilterCalculator() //  context, "lateReverbCalculator", this )
   , mLateReverbGainDelay( context, "lateReverbGainDelay", this )
   , mLateReverbFilter( context, "lateReverbFilter", this )
   , mLateDiffusionFilter( context, "decorrelationFilter", this )
@@ -119,19 +119,14 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                       numWallReflBiquads,
                                       lateReverbFilterLengthSeconds,
                                       objectmodel::PointSourceWithReverb::cNumberOfSubBands );
-    mDiscreteReverbDelay.setup( maxNumReverbObjects * numDiscreteReflectionsPerObject,
-                                interpolationSteps,
-                                maxDiscreteReflectionDelay,
-                                "lagrangeOrder3",
-                                rcl::DelayVector::MethodDelayPolicy::Limit,
-                                true /* controlInputs */, 0.0f, 0.0f );
     mDiscreteReverbReflFilters.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject, numWallReflBiquads, true /*controlInputs*/ );
     mDiscreteReverbPanningMatrix.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
                                         arrayConfig.getNumRegularSpeakers(),
                                         interpolationSteps );
-    mLateReverbFilterCalculator.setup( maxNumReverbObjects, lateReverbFilterLengthSeconds,
+    mLateReverbFilterCalculator.reset( new LateReverbFilterCalculator( context, "lateReverbCalculator", this,
+                                       maxNumReverbObjects, lateReverbFilterLengthSeconds,
                                        objectmodel::PointSourceWithReverb::cNumberOfSubBands,
-                                       cLateFilterUpdatesPerPeriod );
+                                       cLateFilterUpdatesPerPeriod ) );
 
     // TODO: Add configuration parameters for maximum delay of the late reverb onset delay.
     mLateReverbGainDelay.setup( maxNumReverbObjects,
@@ -195,8 +190,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   parameterConnection( mReverbParameterCalculator.parameterPort("lateGainOut"), mLateReverbGainDelay.parameterPort( "gainInput" ) );
   parameterConnection( mReverbParameterCalculator.parameterPort("lateDelayOut"), mLateReverbGainDelay.parameterPort( "delayInput" ) );
 
-  parameterConnection( mReverbParameterCalculator.parameterPort("lateSubbandOut"), mLateReverbFilterCalculator.parameterPort("subbandInput") );
-  parameterConnection( mLateReverbFilterCalculator.parameterPort("lateFilterOutput"), mLateReverbFilter.parameterPort("filterInput") );
+  parameterConnection( mReverbParameterCalculator.parameterPort("lateSubbandOut"), mLateReverbFilterCalculator->parameterPort("subbandInput") );
+  parameterConnection( mLateReverbFilterCalculator->parameterPort("lateFilterOutput"), mLateReverbFilter.parameterPort("filterInput") );
 
 }
 

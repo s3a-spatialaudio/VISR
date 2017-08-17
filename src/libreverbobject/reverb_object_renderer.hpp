@@ -72,7 +72,7 @@ private:
 
   ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVector;
    
-  reverbobject::ReverbParameterCalculator mReverbParameterCalculator;
+  ReverbParameterCalculator mReverbParameterCalculator;
 
   rcl::SignalRouting mReverbSignalRouting;
 
@@ -82,7 +82,7 @@ private:
 
   rcl::GainMatrix mDiscreteReverbPanningMatrix;
 
-  reverbobject::LateReverbFilterCalculator mLateReverbFilterCalculator;
+  std::unique_ptr<LateReverbFilterCalculator> mLateReverbFilterCalculator;
 
   /**
    * Overall gain and delay for the source signals going into the late

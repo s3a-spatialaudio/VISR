@@ -46,10 +46,20 @@ public:
    * @param context Configuration object holding basic execution parameters.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    * @param parent Pointer to containing component (if there is one). A value of \p nullptr signals that this is a top-level component.
+   * @param numberOfObjects The maximum number of reverb objects that can be rendered simultaneously.
+   * @param lateReflectionLengthSeconds Maximum length of the late reverb tail.
+   * @param numLateReflectionSubBandLevels The number of frequency bands for the late reverberation.
+   * @param maxUpdatesPerPeriod The maximum number of filter updates calculated in a single period. Defaults to 0
+   * (all new filter are updated immediately,).
+   * @todo Consider making lateReflectionSubbandLevels optional.
    */
   explicit LateReverbFilterCalculator( SignalFlowContext const & context,
                                        char const * name,
-                                       CompositeComponent * parent = nullptr );
+                                       CompositeComponent * parent,
+                                       std::size_t numberOfObjects,
+                                       SampleType lateReflectionLengthSeconds,
+                                       std::size_t numLateReflectionSubBandLevels,
+                                       std::size_t maxUpdatesPerPeriod = 0 );
 
   /**
    * Disabled (deleted) copy constructor
@@ -61,20 +71,6 @@ public:
    * Destructor.
    */
   ~LateReverbFilterCalculator();
-
-  /**
-   * Method to initialise the component.
-   * @param numberOfObjects The maximum number of reverb objects that can be rendered simultaneously.
-   * @param lateReflectionLengthSeconds Maximum length of the late reverb tail.
-   * @param numLateReflectionSubBandLevels The number of frequency bands for the late reverberation.
-   * @param maxUpdatesPerPeriod The maximum number of filter updates calculated in a single period. Defaults to 0
-   * (all new filter are updated immediately,).
-   * @todo Consider making lateReflectionSubbandLevels optional.
-   */ 
-  void setup( std::size_t numberOfObjects,
-              SampleType lateReflectionLengthSeconds,
-              std::size_t numLateReflectionSubBandLevels,
-              std::size_t maxUpdatesPerPeriod = 0  );
 
   /**
    * The process function. 
@@ -131,25 +127,26 @@ private:
                               SampleType samplingFrequency );
 
   /**
-   * The number of reverb objects that can be rendered with this object.
-   */
-  std::size_t mNumberOfObjects;
-
-  std::size_t mNumberOfSubBands;
-
-  std::size_t mFilterLength;
-
-  /**
    * The alignment of the matrices and vectors used internally and of the generated impulse responses.
    */
   std::size_t const mAlignment;
+
+  /**
+   * The number of reverb objects that can be rendered with this object.
+   */
+  std::size_t const mNumberOfObjects;
+
+  std::size_t const mNumberOfSubBands;
+
+  std::size_t const mFilterLength;
+
+  std::size_t const mMaxUpdatesPerIteration;
 
   efl::BasicMatrix<SampleType> mSubBandNoiseSequences;
 
   /**
    * Maximum number of filter updates per process() call.
    */
-  std::size_t mMaxUpdatesPerIteration;
 
   /**
    * Access functions to the subband coefficients, non-const version.
