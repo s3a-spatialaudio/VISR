@@ -119,6 +119,10 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                       numWallReflBiquads,
                                       lateReverbFilterLengthSeconds,
                                       objectmodel::PointSourceWithReverb::cNumberOfSubBands );
+    mDiscreteReverbDelay.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
+                                interpolationSteps, maxDiscreteReflectionDelay, "lagrangeOrder3",
+                                rcl::DelayVector::MethodDelayPolicy::Limit,
+                                true /* controlInputs */, 0.0f, 0.0f );
     mDiscreteReverbReflFilters.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject, numWallReflBiquads, true /*controlInputs*/ );
     mDiscreteReverbPanningMatrix.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
                                         arrayConfig.getNumRegularSpeakers(),
