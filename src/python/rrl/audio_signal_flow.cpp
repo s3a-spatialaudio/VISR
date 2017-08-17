@@ -13,6 +13,7 @@ namespace visr
 {
 
 using rrl::AudioSignalFlow;
+namespace py = pybind11;
 
 namespace python
 {
@@ -22,11 +23,11 @@ namespace rrl
 namespace // unnamed
 {
 
-pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, pybind11::array const & input )
+py::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py::array const & input )
 {
   using DataType = SampleType; // Possibly replace by a template parameter later.
 
-  if( input.dtype() != pybind11::dtype::of<DataType>() )
+  if( input.dtype() != py::dtype::of<DataType>() )
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): The data type input matrix does not match the used sample data type." );
   }
@@ -43,7 +44,7 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
     throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 0 input of the input matrix does not match the block size of the signal flow." );
   }
 
-  pybind11::array outputSignal( pybind11::dtype::of<SampleType>(),
+  py::array outputSignal( py::dtype::of<SampleType>(),
   { flow.numberOfPlaybackChannels(), flow.period() },
   { sizeof( SampleType )*flow.period(), sizeof( SampleType ) } // TODO: Take care of alignment
                               );
@@ -61,7 +62,7 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
   }
   catch( std::exception const & ex )
   {
-    // For the time being we are using std::invalid_argument because it is recognised by pybind11 and translated to a proper Python exeption
+    // For the time being we are using std::invalid_argument because it is recognised by py and translated to a proper Python exeption
     // todo: register a more fitting exception, e.g., std::runtime_error
     throw std::invalid_argument( detail::composeMessageString( "Exception while execution signal flow:", ex.what() ) );
   }
@@ -70,23 +71,29 @@ pybind11::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py
 
 } // unnamed namespace
 
-void exportAudioSignalFlow( pybind11::module & m )
+void exportAudioSignalFlow( py::module & m )
 {
-  pybind11::class_<AudioSignalFlow>( m, "AudioSignalFlow" )
-   .def( pybind11::init<visr::Component&>() )
+  py::class_<AudioSignalFlow>( m, "AudioSignalFlow" )
+   .def( py::init<visr::Component&>() )
    .def_property_readonly( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
    .def_property_readonly( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
    .def_property_readonly( "numberOfCaptureChannels", &AudioSignalFlow::numberOfCaptureChannels )
    .def_property_readonly( "numberOfPlaybackChannels", &AudioSignalFlow::numberOfPlaybackChannels )
    .def_property_readonly( "numberParameterReceivePorts", &AudioSignalFlow::numberExternalParameterReceivePorts )
    .def_property_readonly( "numberParameterSendPorts", &AudioSignalFlow::numberExternalParameterSendPorts )
-   .def( "parameterReceivePort", &AudioSignalFlow::externalParameterReceivePort, pybind11::arg("portName"), pybind11::return_value_policy::reference )
-   .def( "parameterSendPort", &AudioSignalFlow::externalParameterSendPort, pybind11::arg("portName"), pybind11::return_value_policy::reference )
-   .def( "parameterReceivePorts", &AudioSignalFlow::externalParameterReceiveEndpoints, pybind11::return_value_policy::reference )
+   .def( "parameterReceivePort", &AudioSignalFlow::externalParameterReceivePort, py::arg("portName"), py::return_value_policy::reference )
+   .def( "parameterSendPort", &AudioSignalFlow::externalParameterSendPort, py::arg("portName"), py::return_value_policy::reference )
+   .def( "parameterReceivePorts", &AudioSignalFlow::externalParameterReceiveEndpoints, py::return_value_policy::reference )
    .def( "parameterSendPorts", &AudioSignalFlow::externalParameterSendEndpoints )
-   .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, pybind11::arg("index"), pybind11::return_value_policy::reference )
-   .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, pybind11::arg( "index" ), pybind11::return_value_policy::reference )
-   .def( "process", [](visr::rrl::AudioSignalFlow & flow, pybind11::array const & input) /*-> pybind11::array_t<SampleType>*/ { return wrapProcess( flow, input );}, pybind11::return_value_policy::take_ownership )
+   .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, py::arg("index"), py::return_value_policy::reference )
+   .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, py::arg( "index" ), py::return_value_policy::reference )
+  .def( "process", [](visr::rrl::AudioSignalFlow & flow, py::array const & input) /*-> py::array_t<SampleType>*/ { return wrapProcess( flow, input );}, py::arg("audioInput"), py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs" )
+  .def( "process", [](visr::rrl::AudioSignalFlow & flow) /*-> py::array_t<SampleType>*/
+  {
+    std::initializer_list<std::size_t> const shape{ 0, flow.period() };
+    py::array_t<SampleType> dummy( shape, nullptr );
+    return wrapProcess( flow, dummy );},
+    py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs" )
   ;
 }
 
