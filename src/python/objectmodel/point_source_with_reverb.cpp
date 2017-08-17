@@ -57,6 +57,24 @@ pybind11::array_t<float> getVector( PointSourceWithReverb::LateReverbCoeffs cons
   return pybind11::array_t<float>( coeffs.size(), coeffs.empty() ? nullptr : &coeffs[0] );
 }
 
+using CoeffSetter = void (PointSourceWithReverb::LateReverb::* )(PointSourceWithReverb::LateReverbCoeffs const & );
+
+void setArray( PointSourceWithReverb::LateReverb & param,
+               CoeffSetter method,
+               pybind11::array_t<float> const & values )
+{
+  if( values.shape()[0] != PointSourceWithReverb::cNumberOfSubBands )
+  {
+    throw std::invalid_argument( "PointSourceWithReverb::LateReverb::setArray() called with wrong array length." );
+  }
+  PointSourceWithReverb::LateReverbCoeffs coeffs;
+  for( std::size_t idx(0); idx < PointSourceWithReverb::cNumberOfSubBands; ++idx )
+  {
+    coeffs[idx] = * values.data(idx);
+  }
+  (param.*method)( coeffs );
+}
+
 } // unnamed ns
 
 void exportPointSourceWithReverb( pybind11::module & m )
@@ -92,18 +110,22 @@ void exportPointSourceWithReverb( pybind11::module & m )
   ;
 
   py::class_<PointSourceWithReverb::LateReverb>( psReverb, "LateReverb" )
+  .def( py::init<>() ) // Default constructor
   .def( py::init<PointSourceWithReverb::LateReverb const &>(), py::arg( "rhs" ) )
-    .def_property( "onsetDelay", &PointSourceWithReverb::LateReverb::onsetDelay, &PointSourceWithReverb::LateReverb::setOnsetDelay )
-    .def_property( "levels", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.levels() );},
-      static_cast<void( PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setLevels),
-      pybind11::return_value_policy::reference )
-    .def_property( "attackTimes", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.attackTimes() );},
-      static_cast<void(PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setAttackTimes),
-      pybind11::return_value_policy::reference )
-    .def_property( "decayCoefficients", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.decayCoeffs() );},
-      static_cast<void(PointSourceWithReverb::LateReverb::*)(PointSourceWithReverb::LateReverbCoeffs const &)>(&PointSourceWithReverb::LateReverb::setDecayCoeffs),
-      pybind11::return_value_policy::reference  )
-    ;
+  .def( py::init<SampleType, std::initializer_list<SampleType> const &,
+        std::initializer_list<SampleType> const &, std::initializer_list<SampleType> const &>(),
+        py::arg("onsetDelay"), py::arg("levels"), py::arg("attackTimes"), py::arg("decayCoeffs") )
+  .def_property( "onsetDelay", &PointSourceWithReverb::LateReverb::onsetDelay, &PointSourceWithReverb::LateReverb::setOnsetDelay )
+  .def_property( "levels", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.levels() );},
+    [](PointSourceWithReverb::LateReverb & inst, pybind11::array_t<float> const & val ){ setArray( inst, &PointSourceWithReverb::LateReverb::setLevels, val ); },
+    pybind11::return_value_policy::reference )
+  .def_property( "attackTimes", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.attackTimes() );},
+    [](PointSourceWithReverb::LateReverb & inst, pybind11::array_t<float> const & val ){ setArray( inst, &PointSourceWithReverb::LateReverb::setAttackTimes, val ); },
+    pybind11::return_value_policy::reference )
+  .def_property( "decayCoefficients", [](PointSourceWithReverb::LateReverb & inst ){ return getVector( inst.decayCoeffs() );},
+    [](PointSourceWithReverb::LateReverb & inst, pybind11::array_t<float> const & val ){ setArray( inst, &PointSourceWithReverb::LateReverb::setDecayCoeffs, val ); },
+    pybind11::return_value_policy::reference  )
+  ;
 }
 
 } // namespace python
