@@ -166,8 +166,10 @@ private:
     return mSubBandNoiseSequences.row( objectIdx * mNumberOfSubBands + bandIdx );
   }
 
+  using IndexedFilter = pml::IndexedValueParameter<std::size_t, std::vector<SampleType> >;
+
   ParameterInput < pml::MessageQueueProtocol, LateReverbParameter > mSubbandInput;
-  ParameterOutput < pml::MessageQueueProtocol, pml::IndexedValueParameter<std::size_t, std::vector<SampleType> > > mFilterOutput;
+  ParameterOutput < pml::MessageQueueProtocol, IndexedFilter > mFilterOutput;
 };
 
 } // namespace reverbobject

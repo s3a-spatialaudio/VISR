@@ -148,12 +148,12 @@ void LateReverbFilterCalculator::process( )
 
     // As the check for parameter changes is done on the sending end, we do not need to do it here again
     // Anyway, this will not change the impulse responses, as the calculation is deterministic.
-#if 0
+
     // TODO: Fix this code before finalising the merge!!!
-    calculateImpulseResponse( val.first, val.second, &newFilter[0], mFilterLength );
+    calculateImpulseResponse( val.index(), val.getReverbParameters(), &newFilter[0], mFilterLength );
     
-    lateFilters.enqueue( std::make_pair( val.first, newFilter ) );
-#endif
+    mFilterOutput.enqueue( IndexedFilter( val.index(), newFilter ) );
+
     mSubbandInput.pop();
     ++objCnt;
     if( objCnt >= mMaxUpdatesPerIteration )

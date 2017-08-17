@@ -45,7 +45,7 @@ public:
 
   virtual ~LateReverbParameter() override;
 
-  objectmodel::PointSourceWithReverb::LateReverb const & getReverbParameters()
+  objectmodel::PointSourceWithReverb::LateReverb const & getReverbParameters() const
   {
     return mParams;
   }
