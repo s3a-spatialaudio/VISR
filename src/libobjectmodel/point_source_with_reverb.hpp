@@ -166,7 +166,7 @@ namespace objectmodel
       /**
        * Copy constructor, uses default implementation
        */
-      LateReverb( LateReverb const & rhs ) = default;
+      LateReverb( LateReverb const & rhs );
 
       /**
        * Constructor with initial values.

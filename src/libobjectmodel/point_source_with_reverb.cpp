@@ -117,8 +117,12 @@ void PointSourceWithReverb::DiscreteReflection::setReflectionFilter( std::size_t
 PointSourceWithReverb::LateReverb::LateReverb()
  : mOnsetDelay( static_cast<SampleType>(0.0) )
 {
-
+  std::fill( mLevels.begin(), mLevels.end(), static_cast<SampleType>(0.0) );
+  std::fill( mAttackTimes.begin(), mAttackTimes.end(), static_cast<SampleType>(0.0) );
+  std::fill( mDecayCoeffs.begin(), mDecayCoeffs.end(), static_cast<SampleType>(0.0) );
 }
+
+PointSourceWithReverb::LateReverb::LateReverb ( PointSourceWithReverb::LateReverb const & rhs ) = default;
 
 namespace // unnamed
 {
