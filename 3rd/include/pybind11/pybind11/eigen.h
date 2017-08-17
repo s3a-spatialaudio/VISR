@@ -35,7 +35,7 @@
 // of matrices seems highly undesirable.
 static_assert(EIGEN_VERSION_AT_LEAST(3,2,7), "Eigen support in pybind11 requires Eigen >= 3.2.7");
 
-NAMESPACE_BEGIN(pybind11)
+NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
 
 // Provide a convenience alias for easier pass-by-ref usage with fully dynamic strides:
 using EigenDStride = Eigen::Stride<Eigen::Dynamic, Eigen::Dynamic>;
@@ -68,16 +68,22 @@ template <typename T> using is_eigen_other = all_of<
 template <bool EigenRowMajor> struct EigenConformable {
     bool conformable = false;
     EigenIndex rows = 0, cols = 0;
-    EigenDStride stride{0, 0};
+    EigenDStride stride{0, 0};      // Only valid if negativestrides is false!
+    bool negativestrides = false;   // If true, do not use stride!
 
     EigenConformable(bool fits = false) : conformable{fits} {}
     // Matrix type:
     EigenConformable(EigenIndex r, EigenIndex c,
             EigenIndex rstride, EigenIndex cstride) :
-        conformable{true}, rows{r}, cols{c},
-        stride(EigenRowMajor ? rstride : cstride /* outer stride */,
-               EigenRowMajor ? cstride : rstride /* inner stride */)
-        {}
+        conformable{true}, rows{r}, cols{c} {
+        // TODO: when Eigen bug #747 is fixed, remove the tests for non-negativity. http://eigen.tuxfamily.org/bz/show_bug.cgi?id=747
+        if (rstride < 0 || cstride < 0) {
+            negativestrides = true;
+        } else {
+            stride = {EigenRowMajor ? rstride : cstride /* outer stride */,
+                      EigenRowMajor ? cstride : rstride /* inner stride */ };
+        }
+    }
     // Vector type:
     EigenConformable(EigenIndex r, EigenIndex c, EigenIndex stride)
         : EigenConformable(r, c, r == 1 ? c*stride : stride, c == 1 ? r : r*stride) {}
@@ -86,6 +92,7 @@ template <bool EigenRowMajor> struct EigenConformable {
         // To have compatible strides, we need (on both dimensions) one of fully dynamic strides,
         // matching strides, or a dimension size of 1 (in which case the stride value is irrelevant)
         return
+            !negativestrides &&
             (props::inner_stride == Eigen::Dynamic || props::inner_stride == stride.inner() ||
                 (EigenRowMajor ? cols : rows) == 1) &&
             (props::outer_stride == Eigen::Dynamic || props::outer_stride == stride.outer() ||
@@ -138,8 +145,8 @@ template <typename Type_> struct EigenProps {
             EigenIndex
                 np_rows = a.shape(0),
                 np_cols = a.shape(1),
-                np_rstride = a.strides(0) / sizeof(Scalar),
-                np_cstride = a.strides(1) / sizeof(Scalar);
+                np_rstride = a.strides(0) / static_cast<ssize_t>(sizeof(Scalar)),
+                np_cstride = a.strides(1) / static_cast<ssize_t>(sizeof(Scalar));
             if ((fixed_rows && np_rows != rows) || (fixed_cols && np_cols != cols))
                 return false;
 
@@ -149,7 +156,7 @@ template <typename Type_> struct EigenProps {
         // Otherwise we're storing an n-vector.  Only one of the strides will be used, but whichever
         // is used, we want the (single) numpy stride value.
         const EigenIndex n = a.shape(0),
-              stride = a.strides(0) / sizeof(Scalar);
+              stride = a.strides(0) / static_cast<ssize_t>(sizeof(Scalar));
 
         if (vector) { // Eigen type is a compile-time vector
             if (fixed && size != n)
@@ -200,7 +207,7 @@ template <typename Type_> struct EigenProps {
 // Casts an Eigen type to numpy array.  If given a base, the numpy array references the src data,
 // otherwise it'll make a copy.  writeable lets you turn off the writeable flag for the array.
 template <typename props> handle eigen_array_cast(typename props::Type const &src, handle base = handle(), bool writeable = true) {
-    constexpr size_t elem_size = sizeof(typename props::Scalar);
+    constexpr ssize_t elem_size = sizeof(typename props::Scalar);
     array a;
     if (props::vector)
         a = array({ src.size() }, { elem_size * src.innerStride() }, src.data(), base);
@@ -242,8 +249,14 @@ struct type_caster<Type, enable_if_t<is_eigen_dense_plain<Type>::value>> {
     using Scalar = typename Type::Scalar;
     using props = EigenProps<Type>;
 
-    bool load(handle src, bool) {
-        auto buf = array_t<Scalar>::ensure(src);
+    bool load(handle src, bool convert) {
+        // If we're in no-convert mode, only load if given an array of the correct type
+        if (!convert && !isinstance<array_t<Scalar>>(src))
+            return false;
+
+        // Coerce into an array, but don't do type conversion yet; the copy below handles it.
+        auto buf = array::ensure(src);
+
         if (!buf)
             return false;
 
@@ -253,9 +266,19 @@ struct type_caster<Type, enable_if_t<is_eigen_dense_plain<Type>::value>> {
 
         auto fits = props::conformable(buf);
         if (!fits)
-            return false; // Non-comformable vector/matrix types
+            return false;
 
-        value = Eigen::Map<const Type, 0, EigenDStride>(buf.data(), fits.rows, fits.cols, fits.stride);
+        // Allocate the new type, then build a numpy reference into it
+        value = Type(fits.rows, fits.cols);
+        auto ref = reinterpret_steal<array>(eigen_ref_array<props>(value));
+        if (dims == 1) ref = ref.squeeze();
+
+        int result = detail::npy_api::get().PyArray_CopyInto_(ref.ptr(), buf.ptr());
+
+        if (result < 0) { // Copy failed!
+            PyErr_Clear();
+            return false;
+        }
 
         return true;
     }
@@ -318,7 +341,8 @@ public:
 
     operator Type*() { return &value; }
     operator Type&() { return value; }
-    template <typename T> using cast_op_type = cast_op_type<T>;
+    operator Type&&() && { return std::move(value); }
+    template <typename T> using cast_op_type = movable_cast_op_type<T>;
 
 private:
     Type value;
@@ -438,6 +462,7 @@ public:
             if (!fits || !fits.template stride_compatible<props>())
                 return false;
             copy_or_ref = std::move(copy);
+            loader_life_support::add_patient(copy_or_ref);
         }
 
         ref.reset();
@@ -518,7 +543,7 @@ public:
 template<typename Type>
 struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
     typedef typename Type::Scalar Scalar;
-    typedef typename std::remove_reference<decltype(*std::declval<Type>().outerIndexPtr())>::type StorageIndex;
+    typedef remove_reference_t<decltype(*std::declval<Type>().outerIndexPtr())> StorageIndex;
     typedef typename Type::Index Index;
     static constexpr bool rowMajor = Type::IsRowMajor;
 
@@ -531,7 +556,7 @@ struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
         object matrix_type = sparse_module.attr(
             rowMajor ? "csr_matrix" : "csc_matrix");
 
-        if (obj.get_type() != matrix_type.ptr()) {
+        if (!obj.get_type().is(matrix_type)) {
             try {
                 obj = matrix_type(obj);
             } catch (const error_already_set &) {
@@ -561,9 +586,9 @@ struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
         object matrix_type = module::import("scipy.sparse").attr(
             rowMajor ? "csr_matrix" : "csc_matrix");
 
-        array data((size_t) src.nonZeros(), src.valuePtr());
-        array outerIndices((size_t) (rowMajor ? src.rows() : src.cols()) + 1, src.outerIndexPtr());
-        array innerIndices((size_t) src.nonZeros(), src.innerIndexPtr());
+        array data(src.nonZeros(), src.valuePtr());
+        array outerIndices((rowMajor ? src.rows() : src.cols()) + 1, src.outerIndexPtr());
+        array innerIndices(src.nonZeros(), src.innerIndexPtr());
 
         return matrix_type(
             std::make_tuple(data, innerIndices, outerIndices),
@@ -576,7 +601,7 @@ struct type_caster<Type, enable_if_t<is_eigen_sparse<Type>::value>> {
 };
 
 NAMESPACE_END(detail)
-NAMESPACE_END(pybind11)
+NAMESPACE_END(PYBIND11_NAMESPACE)
 
 #if defined(__GNUG__) || defined(__clang__)
 #  pragma GCC diagnostic pop

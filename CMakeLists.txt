@@ -25,10 +25,6 @@ ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
 ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
 
-
-
-
-
 # Add support for unit tests
 INCLUDE( CTest )
 
@@ -67,7 +63,10 @@ SET( CMAKE_MACOSX_RPATH ON)
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # when building, don't use the install RPATH already
 # (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+
+# <af> Temporarily disabled this feature to enable building without installing.
+# <af> This probably breaks the package building mechanism.
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
@@ -356,6 +355,8 @@ function(fix_dependencies_of_3rdparty depname libpath)
 
 endfunction()
 
+
+# TODO: Replace by a loop (foreach)
 fix_rpath(FLAC_LIBRARY)
 fix_rpath(OGG_LIBRARY)
 fix_rpath(VORBIS_LIBRARY)
@@ -370,8 +371,12 @@ fix_rpath(Boost_DATE_TIME_LIBRARY)
 fix_rpath(Boost_FILESYSTEM_LIBRARY)
 fix_rpath(Boost_PROGRAM_OPTIONS_LIBRARY)
 fix_rpath(Boost_UNIT_TEST_FRAMEWORK_LIBRARY)
-fix_rpath(Boost_REGEX_LIBRARY)
 
+# This will never be true for MacOS, but we keep the condition for documentation purposes.
+# See the comment where Boost regex is conditionally selected.
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
+  fix_rpath(Boost_REGEX_LIBRARY)
+endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 
 get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
 get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
