@@ -28,9 +28,9 @@ void exportObjectVector( py::module & m )
     .def( "set", static_cast<void(ObjectVector::*)(ObjectId,Object const&)>(&ObjectVector::set), py::arg("id"), py::arg("obj"), "Set an object given id. If an object with that id already exists, it is replaced." )
     .def( "remove", &ObjectVector::remove, py::arg("objectId"), "Remove an object with a given id, throw an exception if no object exists with that id.")
     .def( "clear", &ObjectVector::clear, "Remove all objects from the vector." )
-    .def( "fillFromJson", [](ObjectVector & vec, char const * jsonMsg ){ ObjectVectorParser::fillObjectVector( jsonMsg, vec ); } )
-    .def( "updateFromJson", [](ObjectVector & vec, char const * jsonMsg ){ ObjectVectorParser::updateObjectVector( jsonMsg, vec ); } )
-    .def( "writeJson", [](ObjectVector const & vec ){ std::stringstream str; ObjectVectorParser::encodeObjectVector( vec, str ); return str.str();} )
+    .def( "fillFromJson", [](ObjectVector & vec, char const * jsonMsg ){ ObjectVectorParser::fillObjectVector( jsonMsg, vec ); }, py::arg("jsonString" ), "Fill the object vector from a JSON representation, clearing all other objects." )
+    .def( "updateFromJson", [](ObjectVector & vec, char const * jsonMsg ){ ObjectVectorParser::updateObjectVector( jsonMsg, vec ); }, py::arg("jsonString" ), "Update the object vector from a JSON representation, keeping existing objects uness overwritten by new objects with the same id." )
+    .def( "writeJson", [](ObjectVector const & vec ){ std::stringstream str; ObjectVectorParser::encodeObjectVector( vec, str ); return str.str();}, "Serialise the object vector to a JSON string." )
 
     ;
 }

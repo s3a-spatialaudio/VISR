@@ -90,6 +90,8 @@ void exportPointSourceWithReverb( pybind11::module & m )
     .def( "discreteReflection", static_cast<PointSourceWithReverb::DiscreteReflection&(PointSourceWithReverb::*)(std::size_t)>(&PointSourceWithReverb::discreteReflection),
       py::arg( "idx" ), py::return_value_policy::reference )
     .def( "setDiscreteReflections", &setDiscreteReflections, py::arg( "newReflections" ) )
+  .def_property_readonly_static("numberOfDiscreteReflectionEqSections", []( py::object self ){ return PointSourceWithReverb::cNumDiscreteReflectionBiquads; }, "Number of wall reflection biquad sections." )
+  .def_property_readonly_static("numberOfLateReflectionSubbands", []( py::object self ){ return PointSourceWithReverb::cNumberOfSubBands; }, "Number of filter subbands for the late reverb filter parameter." )
   ;
 
   py::class_<PointSourceWithReverb::DiscreteReflection>( psReverb, "DiscreteReflection" )
