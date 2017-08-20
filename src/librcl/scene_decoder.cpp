@@ -36,7 +36,7 @@ void SceneDecoder::process()
   objectmodel::ObjectVector & objects = mObjectVectorOutput.data();
   while( not mDatagramInput.empty() )
   {
-    std::string const & nextMsg = mDatagramInput.front();
+    char const * nextMsg = mDatagramInput.front().str();
     try
     {
       objectmodel::ObjectVectorParser::updateObjectVector( nextMsg, objects );

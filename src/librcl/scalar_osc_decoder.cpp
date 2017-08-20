@@ -65,7 +65,7 @@ void ScalarOscDecoder::process()
 
     try
     {
-      mOscParser->init( msg.data(), msg.size() );
+      mOscParser->init( msg.str(), msg.size() );
 
       oscpkt::Message* msgPkt;
       while( (msgPkt = mOscParser->popMessage()) != nullptr )

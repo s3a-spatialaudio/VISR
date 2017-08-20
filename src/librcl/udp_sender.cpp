@@ -103,7 +103,7 @@ void UdpSender::process()
     {
       pml::StringParameter const & nextMsg = mMessageInput.front( );
       // boost::system::error_code err;
-      std::size_t bytesSent = mSocket->send_to( boost::asio::buffer(nextMsg.c_str(), nextMsg.size()), mRemoteEndpoint );
+      std::size_t bytesSent = mSocket->send_to( boost::asio::buffer(nextMsg.str(), nextMsg.size()), mRemoteEndpoint );
       if( bytesSent != nextMsg.size() )
       {
         throw std::runtime_error( "Number of sent bytes differs from message size." );
@@ -118,14 +118,14 @@ void UdpSender::process()
       bool const transmissionPending = not mInternalMessageBuffer.empty();
       while( not mMessageInput.empty() )
       {
-        std::string const & nextMsg = mMessageInput.front();
+        char const * nextMsg = mMessageInput.front().str();
         mInternalMessageBuffer.push_back( pml::StringParameter( nextMsg ) );
         mMessageInput.pop();
       }
       if( not mInternalMessageBuffer.empty() and not transmissionPending )
       {
-        std::string const & nextMsg = mInternalMessageBuffer.front( );
-        mSocket->async_send_to( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
+        pml::StringParameter const & nextMsg = mInternalMessageBuffer.front( );
+        mSocket->async_send_to( boost::asio::buffer( nextMsg.str(), nextMsg.size( ) ),
                                 mRemoteEndpoint,
                                 boost::bind( &UdpSender::handleSentData, this,
                                 boost::asio::placeholders::error,
@@ -153,7 +153,7 @@ void UdpSender::handleSentData( const boost::system::error_code& error,
   if( not mInternalMessageBuffer.empty() )
   {
     pml::StringParameter const & nextMsg = mInternalMessageBuffer.front();
-    mSocket->async_send_to( boost::asio::buffer( nextMsg.c_str( ), nextMsg.size( ) ),
+    mSocket->async_send_to( boost::asio::buffer( nextMsg.str( ), nextMsg.size( ) ),
                             mRemoteEndpoint,
                             boost::bind( &UdpSender::handleSentData, this,
                                          boost::asio::placeholders::error,
