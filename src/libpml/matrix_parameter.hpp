@@ -113,16 +113,6 @@ public:
    */
   void resize( std::size_t numRows, std::size_t numColumns );
 
-  /**
-   * Return the number of matrix columns.
-   */
-  std::size_t numberOfColumns() const { return efl::BasicMatrix<ElementType>::numberOfColumns(); }
-
-  /**
-   * Return the number of matrix rows.
-   */
-  std::size_t numberOfRows( ) const { return efl::BasicMatrix<ElementType>::numberOfRows( ); }
-
 private:
 };
 
