@@ -19,6 +19,16 @@ namespace rbbl
 namespace ParametricIirCoefficientCalculator
 {
 
+template< typename CoefficientType >
+BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
+                                                             CoefficientType samplingFrequency )
+{
+  BiquadCoefficient<CoefficientType> res;
+  calculateIirCoefficients( param, res, samplingFrequency );
+  // Return value optimization avoids copy operation (normally)
+  return res;
+}
+
 template< typename T > VISR_RBBL_LIBRARY_SYMBOL
 void calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
                                BiquadCoefficient<T> & coeffs,

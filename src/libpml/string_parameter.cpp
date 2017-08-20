@@ -10,8 +10,7 @@ namespace pml
 {
 
 StringParameter::StringParameter( std::size_t maxLength /*= 0*/ )
-  : std::string()
-  , mMaxLength( maxLength )
+  : mMaxLength( maxLength )
 {
 }
 
@@ -29,12 +28,43 @@ StringParameter::StringParameter(ParameterConfigBase const & config)
 }
 
 StringParameter::StringParameter( std::string const & initStr )
-  : std::string( initStr )
-  , mMaxLength( 0 )
+  : mMaxLength( 0 )
+  , mStr( initStr )
 {
 }
 
 StringParameter::~StringParameter() = default;
+
+char const * StringParameter::str() const
+{
+  return mStr.c_str();
+}
+
+std::size_t StringParameter::empty() const
+{
+  return mStr.empty();
+}
+
+std::size_t StringParameter::size() const
+{
+  return mStr.size();
+}
+
+void StringParameter::assign( char const * newStr )
+{
+  mStr.assign( newStr );
+}
+
+void StringParameter::assign( std::string const & newStr )
+{
+  mStr.assign( newStr );
+}
+
+StringParameter& StringParameter::operator=( std::string const & newStr )
+{
+  assign( newStr );
+  return *this;
+}
 
 } // namespace pml
 } // namespace visr

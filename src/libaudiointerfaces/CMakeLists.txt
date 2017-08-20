@@ -29,20 +29,19 @@ target_link_libraries( audiointerfaces ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces ${JACK_LIBRARY} )
 endif( BUILD_USE_JACK )
-target_link_libraries( audiointerfaces pml )
 
 add_library( audiointerfaces_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( audiointerfaces_shared PROPERTIES OUTPUT_NAME audiointerfaces )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( audiointerfaces_shared PROPERTIES ARCHIVE_OUTPUT_NAME audiointerfaces_shared )
 target_compile_definitions( audiointerfaces_shared PRIVATE -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1 -DVISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
+target_compile_definitions( audiointerfaces_shared PUBLIC -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1)
 set_target_properties( audiointerfaces_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( audiointerfaces_shared rrl_shared )
 target_link_libraries( audiointerfaces_shared ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_shared ${JACK_LIBRARY} )
 endif( BUILD_USE_JACK )
-target_link_libraries( audiointerfaces_shared pml_shared )
 
 # Add the unit test directory.
 add_subdirectory( test )

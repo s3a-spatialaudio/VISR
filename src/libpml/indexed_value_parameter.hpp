@@ -82,37 +82,6 @@ private:
   DataType mData;
 };
 
-// Inlined implementations (instead of explicit implementations)
-// TODO: Move into seperate header file (_impl.hpp or _inline.hpp)
-template<typename IndexType, typename ValueType >
-inline IndexedValueParameter< IndexType, ValueType >::IndexedValueParameter( )
-  : mData( IndexType( ), ValueType() )
-{
-}
-
-template<typename IndexType, typename ValueType >
-inline IndexedValueParameter< IndexType, ValueType >::IndexedValueParameter( IndexType const & index, ValueType const & value )
-  : mData( index, value )
-{
-}
-
-template<typename IndexType, typename ValueType >
-inline IndexedValueParameter< IndexType, ValueType >::IndexedValueParameter( ParameterConfigBase const & config )
-  : IndexedValueParameter( dynamic_cast<EmptyParameterConfig const &>(config) )
-{
-}
-
-template<typename IndexedType, typename ValueType >
-inline IndexedValueParameter< IndexedType, ValueType >::IndexedValueParameter( const EmptyParameterConfig & config )
-  : IndexedValueParameter() // call default constructor.
-{
-}
-
-template<typename IndexedType, typename ValueType >
-inline IndexedValueParameter< IndexedType, ValueType >::~IndexedValueParameter( )
-{
-}
-
 // For some reason, the DEFINE_PARAMETER_TYPE macro fails if called with the full templated type.
 // Note that the construct works for MatrixParameter (with only one template parameter)
 using IndexedVectorDoubleType = visr::pml::IndexedValueParameter<std::size_t, std::vector<double> >;

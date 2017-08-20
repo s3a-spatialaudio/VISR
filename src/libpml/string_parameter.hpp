@@ -25,7 +25,7 @@ static constexpr const char * sStringParameterName = "String";
 /**
  * A type for passing strings between processing components.
  */
-class VISR_PML_LIBRARY_SYMBOL StringParameter: public std::string,
+class VISR_PML_LIBRARY_SYMBOL StringParameter: // public std::string,
                                                public TypedParameterBase<StringParameter, EmptyParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
 {
 public:
@@ -42,6 +42,20 @@ public:
 
   virtual ~StringParameter() override;
 
+  char const * str() const;
+
+  std::size_t empty() const;
+
+  std::size_t size() const;
+
+  void assign( char const * newStr );
+
+  void assign( std::string const & newStr );
+
+  StringParameter& operator =( std::string const & newStr );
+
+
+
   /**
    * Return the maximum length.
    */
@@ -49,6 +63,8 @@ public:
 
 private:
   std::size_t mMaxLength;
+
+  std::string mStr;
 };
 
 } // namespace pml

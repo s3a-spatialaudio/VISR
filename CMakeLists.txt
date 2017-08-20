@@ -43,11 +43,17 @@ INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
+# Default path for static libraries
+SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
+
 # Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
-# DEfault destination for shared libraries (not DLLs)
+# Default destination for shared libraries (not DLLs)
 SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
+
+# Default path for DLLs on windows
+SET( RUNTIME_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 
 #############################################################
 # Create a system string.
@@ -300,16 +306,9 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework )
-
-# Workaround for faulty regex implementation in GCC versions <= 4.8.
-# Normally the C++11 <regex> implementation is preferred, but in this case we switch to boost regex.
-# Boost regex isn't used as default because the additional library can be troublesome, e.g.
-# on Linux using the clang compiler
-if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-  list(APPEND VISR_BOOST_LIBRARIES regex )
-endif()
-
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework regex )
+# Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
+# However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 # Note: The minimum boost requirement is arbitrarily chosen at the moment. 
 # Todo: Replace by a substantiated version requirement.
@@ -371,12 +370,7 @@ fix_rpath(Boost_DATE_TIME_LIBRARY)
 fix_rpath(Boost_FILESYSTEM_LIBRARY)
 fix_rpath(Boost_PROGRAM_OPTIONS_LIBRARY)
 fix_rpath(Boost_UNIT_TEST_FRAMEWORK_LIBRARY)
-
-# This will never be true for MacOS, but we keep the condition for documentation purposes.
-# See the comment where Boost regex is conditionally selected.
-if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-  fix_rpath(Boost_REGEX_LIBRARY)
-endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
+fix_rpath(Boost_REGEX_LIBRARY)
 
 get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
 get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)

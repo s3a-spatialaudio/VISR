@@ -84,6 +84,7 @@ set_target_properties( rbbl_shared PROPERTIES OUTPUT_NAME rbbl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
 target_compile_definitions( rbbl_shared PRIVATE -DVISR_BUILD_RBBL_SHARED_LIBRARY=1 -DVISR_BUILD_RBBL_LIBRARY=1)
+target_compile_definitions( rbbl_shared PUBLIC -DVISR_BUILD_RBBL_SHARED_LIBRARY=1)
 set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( rbbl_shared efl_shared )
 # ATTENTION: We cannot add the transitive link dependency to pml_shared here (although it exists), because CMake does not allow cyclic dependencies for shared library targets. Therefore, targets linking to rbbl_shared must add the dependency to pml_shared explicitly.

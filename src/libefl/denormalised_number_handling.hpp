@@ -5,6 +5,8 @@
 
 #include "denormalised_number_handling.hpp"
 
+#include "export_symbols.hpp"
+
 #include <cstdint>
 #include <ciso646>
 
@@ -23,7 +25,7 @@ namespace efl
  * and they can be treated as zero without negative effects.
  * @note This could be also implemented as a namespace (just remove the 'static')
  */
-struct DenormalisedNumbers
+struct VISR_EFL_LIBRARY_SYMBOL DenormalisedNumbers
 {
   /**
    * State to abstract from the internal data types for setting, 

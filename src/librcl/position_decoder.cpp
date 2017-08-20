@@ -50,7 +50,7 @@ void PositionDecoder::process()
   pml::ListenerPosition::TimeType latestTimeStamp = 0;
   while( !mDatagramInput.empty() )
   {
-    std::string const & nextMsg = mDatagramInput.front();
+    char const * nextMsg = mDatagramInput.front().str();
     std::stringstream msgStream( nextMsg );
     try
     {

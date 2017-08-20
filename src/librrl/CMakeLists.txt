@@ -21,19 +21,10 @@ export_symbols.hpp
 integrity_checking.hpp
 parameter_connection_graph.hpp
 parameter_connection_map.hpp
-#portaudio_interface.hpp
 port_utilities.hpp
 scheduling_graph.hpp
 signal_routing_internal.hpp
 )
-
-#IF( BUILD_USE_JACK )
-#  INCLUDE_DIRECTORIES( ${JACK_INCLUDE_DIR} ) 
-#  LIST( APPEND HEADERS jack_interface.hpp )
-#  LIST( APPEND SOURCES jack_interface.cpp )
-#ENDIF( BUILD_USE_JACK )
-
-#INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
 add_library( rrl STATIC ${SOURCES} ${HEADERS} )
 # Transitive link dependencies
@@ -45,7 +36,7 @@ set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
 target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1 -DVISR_BUILD_RRL_LIBRARY=1)
-set_target_properties( rrl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+target_compile_definitions( rrl_shared PUBLIC -DVISR_BUILD_RRL_SHARED_LIBRARY=1)
 # Transitive link dependencies
 target_link_libraries( rrl_shared visr_shared )
 target_link_libraries( rrl_shared efl_shared )
