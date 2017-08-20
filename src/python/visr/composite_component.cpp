@@ -49,8 +49,10 @@ void exportCompositeComponent( pybind11::module& m )
    * TODO: Decide whether we want additional inspection methods.
    * This would mean that we access the internal() object (probably adding methods to ComponentsWrapper)
    */
-  pybind11::class_<CompositeComponent, CompositeComponentWrapper, Component >(m, "CompositeComponent" ) // Note: Trampoline class comes second.
-    .def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
+  pybind11::class_<CompositeComponent, CompositeComponentWrapper, Component > cc(m, "CompositeComponent" ); // Note: Trampoline class comes second.
+  // Note: We split the registration of the class and the subsequent method/property registrations
+  // to avoid problems with an unregistered "CompositeComponent" class in the constructor below.
+  cc.def( pybind11::init<SignalFlowContext &, char const*, CompositeComponent *>(),
           pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<CompositeComponent *>(nullptr) )
     .def_property_readonly( "numberOfComponents", &CompositeComponent::numberOfComponents )
     .def( "parameterConnection", static_cast<void(CompositeComponent::*)(char const *, char const *, char const *, char const *)>(&CompositeComponent::parameterConnection),
