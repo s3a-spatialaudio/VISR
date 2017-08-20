@@ -56,7 +56,7 @@ set_target_properties( visr_shared PROPERTIES ARCHIVE_OUTPUT_NAME visr_shared )
 # 'PUBLIC' means that the definition is also activated for other targets that depend on this library.
 target_compile_definitions( visr_shared PUBLIC -DVISR_BUILD_VISR_SHARED_LIBRARY=1 )
 # Set this definition only when building the present target.
-target_compile_definitions( visr_shared PRIVATE -DVISR_BUILD_VISR_LIBRARY=1 )
+target_compile_definitions( visr_shared PRIVATE -DVISR_BUILD_VISR_SHARED_LIBRARY=1 -DVISR_BUILD_VISR_LIBRARY=1 )
 set_target_properties(visr_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 set_target_properties(visr_shared PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 

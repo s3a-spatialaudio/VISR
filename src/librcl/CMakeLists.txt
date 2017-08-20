@@ -79,6 +79,7 @@ add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rcl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rcl_shared )
+target_compile_definitions( rcl_shared PUBLIC -DVISR_BUILD_RCL_SHARED_LIBRARY=1)
 target_compile_definitions( rcl_shared PRIVATE -DVISR_BUILD_RCL_SHARED_LIBRARY=1 -DVISR_BUILD_RCL_LIBRARY=1)
 set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive dependencies

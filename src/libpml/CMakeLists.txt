@@ -64,6 +64,7 @@ set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( pml_shared PROPERTIES ARCHIVE_OUTPUT_NAME pml_shared )
 target_compile_definitions( pml_shared PRIVATE -DVISR_BUILD_PML_SHARED_LIBRARY=1 -DVISR_BUILD_PML_LIBRARY=1)
+target_compile_definitions( pml_shared PUBLIC -DVISR_BUILD_PML_SHARED_LIBRARY=1)
 set_target_properties( pml_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( pml_shared objectmodel_shared )
 target_link_libraries( pml_shared visr_shared )
