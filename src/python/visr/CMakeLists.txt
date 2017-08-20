@@ -10,6 +10,7 @@ component.cpp
 composite_component.cpp
 parameter_base.cpp
 parameter_config_base.cpp
+parameter_factory.cpp
 parameter_port.cpp
 signal_flow_context.cpp
 visr.cpp
