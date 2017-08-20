@@ -40,13 +40,7 @@ void calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const &
 template< typename CoefficientType >
 VISR_RBBL_LIBRARY_SYMBOL
 BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
-                                                                   CoefficientType samplingFrequency )
-{
-  BiquadCoefficient<CoefficientType> res;
-  calculateIirCoefficients( param, res, samplingFrequency );
-  // Return value optimization avoids copy operation (normally)
-  return res;
-}
+                                                                   CoefficientType samplingFrequency );
 
 /**
  * Calculate a list of second-order IIR filter coefficients for a list of parametric descriptions.
