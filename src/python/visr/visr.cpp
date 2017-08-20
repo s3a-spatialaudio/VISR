@@ -1,22 +1,35 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "atomic_component.hpp"
-#include "audio_port.hpp"
-#include "channel_list.hpp"
-#include "communication_protocol.hpp"
-#include "communication_protocol_factory.hpp"
-#include "component.hpp"
-#include "composite_component.hpp"
-#include "parameter_base.hpp"
-#include "parameter_config_base.hpp"
-#include "parameter_port.hpp"
-#include "signal_flow_context.hpp"
-
 #include <pybind11/pybind11.h>
+
+namespace py = pybind11;
+
+namespace visr
+{
+namespace python
+{
+namespace visr
+{
+
+void exportSignalFlowContext(py::module & m);
+void exportParameterConfigBase(py::module & m);
+void exportParameterBase(py::module & m);
+void exportCommunicationProtocol(py::module & m);
+void exportCommunicationProtocolFactory(py::module & m);
+void exportChannelList(py::module & m);
+void exportComponent(py::module & m);
+void exportAudioPort(py::module & m);
+void exportParameterPort(py::module & m);
+void exportCompositeComponent(py::module & m);
+void exportAtomicComponent(py::module & m);
+
+} // namespace visr
+} // namespace python
+} // namespace visr
 
 PYBIND11_PLUGIN( visr )
 {
-  pybind11::module m( "visr", "VISR core API module" );
+  py::module m( "visr", "VISR core API module" );
   using namespace visr::python::visr;
   exportSignalFlowContext( m );
   exportParameterConfigBase( m );

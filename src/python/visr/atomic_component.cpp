@@ -1,8 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-
-#include "atomic_component.hpp"
-
 #include <libril/atomic_component.hpp>
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>

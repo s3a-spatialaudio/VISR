@@ -1,7 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "component.hpp"
-
 #include <libril/audio_port_base.hpp>
 #include <libril/component.hpp>
 #include <libril/composite_component.hpp>

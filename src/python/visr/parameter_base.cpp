@@ -1,7 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "parameter_base.hpp"
-
 #include <libril/parameter_base.hpp>
 #include <libril/parameter_type.hpp>
 

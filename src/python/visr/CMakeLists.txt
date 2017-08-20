@@ -16,17 +16,6 @@ visr.cpp
 )
 
 set( HEADERS
-atomic_component.hpp
-audio_port.hpp
-channel_list.hpp
-communication_protocol.hpp
-communication_protocol_factory.hpp
-component.hpp
-composite_component.hpp
-parameter_base.hpp
-parameter_config_base.hpp
-parameter_port.hpp
-signal_flow_context.hpp
 )
 
 set(PROJECT_NAME visrpython)

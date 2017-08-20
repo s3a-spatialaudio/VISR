@@ -1,6 +1,5 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "channel_list.hpp"
 
 #include <libril/channel_list.hpp>
 

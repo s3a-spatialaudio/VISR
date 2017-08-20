@@ -1,8 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include "communication_protocol_factory.hpp"
-
 #include <libril/communication_protocol_factory.hpp>
 #include <libril/communication_protocol_type.hpp>
 #include <libril/parameter_type.hpp>
