@@ -5,6 +5,8 @@
 
 #include <libril/parameter_config_base.hpp>
 
+#include <algorithm>
+#include <cstring>
 #include <stdexcept>
 
 namespace visr
@@ -39,6 +41,18 @@ ParameterFactory::create(ParameterType const & type, ParameterConfigBase const &
   }
   // todo: Need to catch construction errors?
   return std::unique_ptr<ParameterBase>( findIt->second.create( config ) );
+}
+
+/*static*/ std::size_t ParameterFactory::numberOfParameterTypes() noexcept
+{
+  return creatorTable().size();
+}
+
+
+/*static*/ bool
+ParameterFactory::typeExists( ParameterType type ) noexcept
+{
+  return creatorTable().find( type ) != creatorTable().end();
 }
 
 } // namespace visr

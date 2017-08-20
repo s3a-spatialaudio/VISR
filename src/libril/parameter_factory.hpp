@@ -24,6 +24,17 @@ class VISR_CORE_LIBRARY_SYMBOL ParameterFactory
 public:
   static std::unique_ptr<ParameterBase> create(ParameterType const & type, ParameterConfigBase const & config);
 
+  /**
+   * Return the number of registered parameter types.
+   */
+  static std::size_t numberOfParameterTypes() noexcept;
+
+  /**
+   * Query if a parameter type with the given id is registered in the factory
+   * @return True if the parameter type is registered, false otherwise.
+   */
+  static bool typeExists( ParameterType type ) noexcept;
+
   template< class ConcreteParameterType >
   static void registerParameterType( ParameterType const &  type );
 
