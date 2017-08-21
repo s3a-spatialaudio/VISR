@@ -3,6 +3,8 @@
 #include "jack_interface.hpp"
 
 #include <libril/constants.hpp>
+#include <libril/detail/compose_message_string.hpp>
+
 #include <librbbl/index_sequence.hpp>
 
 #include <jack/jack.h>
@@ -169,27 +171,16 @@ namespace visr
       if(!config.mClientName.empty()) mClientName = config.mClientName;
       else mClientName = "JackClient";
       
-      
-      std::sort(config.mCapturePortNames.begin(),config.mCapturePortNames.end());
-      std::sort(config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end());
-      //    for( auto it = config.mCapturePortNames.begin(); it != config.mCapturePortNames.end(); ++it ) {
-      //      std::cout<<" "<<*it<<std::endl;
-      //    }
-      if(std::adjacent_find(config.mCapturePortNames.begin(),config.mCapturePortNames.end())!=config.mCapturePortNames.end())
+      // Check port name uniqueness (over capture and playback.
+      auto allPortNames( mCapturePortNames );
+      allPortNames.insert( allPortNames.end(), config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end() );
+      std::sort(allPortNames.begin(),allPortNames.end());
+      auto const adjIt = std::adjacent_find(allPortNames.begin(), allPortNames.end());
+      if( adjIt != allPortNames.end())
       {
-        std::cout<<"mCapPorts: "<< mCapturePortNames.size()<<" mCapChan: "<< mNumCaptureChannels<< std::endl;
-        throw std::invalid_argument( "JackInterface: Duplicate capture port names are not allowed, as well as overlapping indices" );
+        throw std::invalid_argument( detail::composeMessageString("JackInterface: Duplicate port names not allowed: \"",
+                                                                  *adjIt, "\".") );
       }
-      //    for( auto it = config.mPlaybackPortNames.begin(); it != config.mPlaybackPortNames.end(); ++it ) {
-      //      std::cout<<" "<<*it<<std::endl;
-      //    }
-      if(std::adjacent_find(config.mPlaybackPortNames.begin(),config.mPlaybackPortNames.end())!=config.mPlaybackPortNames.end())
-      {
-        throw std::invalid_argument( "JackInterface: Duplicate playback port names are not allowed, as well as overlapping indices" );
-      }
-      
-      
-      
       
       mCapturePortNames = config.mCapturePortNames;
       mPlaybackPortNames = config.mPlaybackPortNames;
@@ -678,7 +669,7 @@ namespace visr
       
     }
     
-    
+#if 0
     //        void JackInterface::Config::loadJson(boost::property_tree::ptree tree, int numCapt, int numPlay )
     //        {
     //
@@ -798,8 +789,10 @@ namespace visr
       }
       
     }
-    
-    void JackInterface::Config::loadPortConfig(boost::optional<boost::property_tree::ptree> tree, std::string & extClientName, std::vector< std::string > & portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn,  std::string porttype){
+#endif
+
+    void JackInterface::Config::loadPortConfig(boost::optional<boost::property_tree::ptree> tree, std::string & extClientName, std::vector< std::string > & portNames, std::vector< std::string > & extPortNames,
+                                               std::size_t numPorts, bool & autoConn,  std::string porttype){
       
       boost::optional<bool> autoConnect;
       boost::optional<std::string> baseName;
@@ -928,7 +921,8 @@ namespace visr
       }
     }
     
-    
+
+#if 0
     void JackInterface::Config::setCapturePortNames( std::string const baseName,
                                                     std::size_t startIndex,
                                                     std::size_t endIndex )
@@ -963,5 +957,6 @@ namespace visr
         mPlaybackPortNames[runIdx] = str.str();
       }
     }
+#endif
   } // namespace rrl
 } // namespace visr

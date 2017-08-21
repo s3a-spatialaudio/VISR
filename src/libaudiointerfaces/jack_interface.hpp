@@ -37,10 +37,16 @@ namespace audiointerfaces
 
       Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect = false);
 
-      
+// Unused & commented
+#if 0
       void loadPortConfigJson(boost::property_tree::ptree tree, int numCapt, int numPlay );
-      void loadPortConfig(boost::optional<boost::property_tree::ptree> tree, std::string & extClient, std::vector< std::string > &portNames, std::vector< std::string > & extPortNames, int numPorts, bool & autoConn, std::string porttype);
-      
+#endif
+
+      void loadPortConfig(boost::optional<boost::property_tree::ptree> tree, std::string & extClient, std::vector< std::string > &portNames,
+                          std::vector< std::string > & extPortNames, std::size_t numPorts, bool & autoConn, std::string porttype);
+
+// Unused
+#if 0
       void setCapturePortNames( std::string const baseName,
                                std::size_t startIndex,
                                std::size_t endIndex );
@@ -48,7 +54,7 @@ namespace audiointerfaces
       void setPlaybackPortNames( std::string const baseName,
                                 std::size_t startIndex,
                                 std::size_t endIndex );
-      
+#endif
       std::string mClientName;
       std::string mInExtClientName;
       std::string mOutExtClientName;
@@ -62,14 +68,14 @@ namespace audiointerfaces
       std::vector< std::string > mCapturePortNames;
       
       std::vector< std::string > mPlaybackPortNames;
-      
+
     };
     
     using Base = AudioInterface;
     
     explicit JackInterface(  Configuration const & baseConfig, std::string const & config);
     
-    ~JackInterface( );
+    virtual ~JackInterface() override;
     
     /* virtual */ void start() override;
     
