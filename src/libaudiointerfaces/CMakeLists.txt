@@ -28,6 +28,7 @@ target_link_libraries( audiointerfaces rrl)
 target_link_libraries( audiointerfaces ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces ${JACK_LIBRARY} )
+  target_link_libraries( audiointerfaces rbbl )
 endif( BUILD_USE_JACK )
 
 add_library( audiointerfaces_shared SHARED ${SOURCES} ${HEADERS} )
@@ -41,6 +42,7 @@ target_link_libraries( audiointerfaces_shared rrl_shared )
 target_link_libraries( audiointerfaces_shared ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_shared ${JACK_LIBRARY} )
+  target_link_libraries( audiointerfaces_shared rbbl_shared )
 endif( BUILD_USE_JACK )
 
 # Add the unit test directory.
