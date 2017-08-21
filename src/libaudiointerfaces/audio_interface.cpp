@@ -22,6 +22,8 @@ namespace audiointerfaces
   
   AudioInterface::Configuration::~Configuration()= default;
   
+  AudioInterface::~AudioInterface()= default;
+
 } // namespace rrl
 } // namespace visr
 

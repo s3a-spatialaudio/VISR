@@ -63,6 +63,10 @@ public:
   //@}
 
   /**
+   * Virtual base class destructor, enable destruction of polymorphically instantiated objects
+   */
+  virtual ~AudioInterface();
+  /**
    * The type of the callback function that can be registered to be called if sufficient data is available 
   */
   //typedef void ( *AudioCallback )( void* /* userData */,
