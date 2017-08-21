@@ -20,7 +20,8 @@ namespace reverbobject
 
 void exportLateReverbParameter( pybind11::module& m )
 {
-  pybind11::class_<::visr::reverbobject::LateReverbParameter, ParameterBase>( m, "LateReverbParameter" )
+  pybind11::class_<visr::reverbobject::LateReverbParameter, ParameterBase>( m, "LateReverbParameter" )
+    .def_property_readonly_static( "staticType", [](pybind11::object /*self*/) {return visr::reverbobject::LateReverbParameter::staticType(); } )
     .def( pybind11::init<>() )
     .def( pybind11::init<ParameterConfigBase const &>(),
       pybind11::arg( "config" ) )
