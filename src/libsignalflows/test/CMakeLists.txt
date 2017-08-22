@@ -1,16 +1,17 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME signalflows_test )
+set( APPLICATION_NAME signalflows_test )
 
-ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
+add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} 
+add_executable( ${APPLICATION_NAME} 
 baseline_renderer.cpp
 test_main.cpp )
 
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} signalflows)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(${APPLICATION_NAME} signalflows)
+target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

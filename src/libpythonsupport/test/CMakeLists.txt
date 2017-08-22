@@ -15,6 +15,7 @@ target_link_libraries( ${APPLICATION_NAME} pythonsupport )
 target_link_libraries( ${APPLICATION_NAME} rrl )
 target_link_libraries( ${APPLICATION_NAME} efl )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

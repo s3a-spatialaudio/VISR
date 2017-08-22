@@ -1,10 +1,10 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME rbbl_test )
+set( APPLICATION_NAME rbbl_test )
 
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+add_definitions( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES
+set( SOURCES
  biquad_coefficient.cpp
  circular_buffer.cpp
  ffts_wrapper.cpp
@@ -17,23 +17,24 @@ SET( SOURCES
  object_channel_allocator.cpp
 )
 
-IF( BUILD_USE_FFTW )
-  LIST( APPEND SOURCES fftw_wrapper.cpp)
-ENDIF( BUILD_USE_FFTW )
+if( BUILD_USE_FFTW )
+  list( APPEND SOURCES fftw_wrapper.cpp)
+endif( BUILD_USE_FFTW )
 
-IF( BUILD_USE_IPP )
-  LIST( APPEND SOURCES ipp_fft_wrapper.cpp)
-ENDIF( BUILD_USE_IPP )
+if( BUILD_USE_IPP )
+  list( APPEND SOURCES ipp_fft_wrapper.cpp)
+endif( BUILD_USE_IPP )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
+add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rbbl)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} efl)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_static)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} rbbl)
+target_link_libraries( ${APPLICATION_NAME} efl)
+target_link_libraries( ${APPLICATION_NAME} pml)
+target_link_libraries( ${APPLICATION_NAME} visr_static)
+target_link_libraries( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

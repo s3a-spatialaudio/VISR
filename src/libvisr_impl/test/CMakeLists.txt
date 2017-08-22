@@ -1,8 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME visr_impl_test )
+set( APPLICATION_NAME visr_impl_test )
 
-SET( SOURCES
+set( SOURCES
 audio_connection_descriptor.cpp
 audio_sample_type.cpp
 component_names.cpp
@@ -12,12 +12,13 @@ polymorphic_parameter_port.cpp
 test_main.cpp
 )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
+add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} visr_static)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ril)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} visr_static)
+target_link_libraries( ${APPLICATION_NAME} ril)
+target_link_libraries( ${APPLICATION_NAME} pml )
+target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)
