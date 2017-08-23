@@ -1,22 +1,23 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME rrl_test )
+set( APPLICATION_NAME rrl_test )
 
-SET( SOURCES
+set( SOURCES
 audio_signal_flow_checking.cpp
 delay_vector.cpp
 parameter_connection.cpp
 test_main.cpp
 )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
+add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
 # Note: Consider moving delay_vector somewhere else (if dependency on real component libraries is not desired here.)
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} signalflows )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rcl )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} rrl )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} signalflows )
+target_link_libraries( ${APPLICATION_NAME} rcl )
+target_link_libraries( ${APPLICATION_NAME} rrl )
+target_link_libraries( ${APPLICATION_NAME} pml )
+target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

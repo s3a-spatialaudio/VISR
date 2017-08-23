@@ -1,7 +1,7 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 
-SET( SOURCES 
+set( SOURCES 
 biquad_coefficient.cpp
 circular_buffer.cpp 
 fir.cpp
@@ -24,7 +24,7 @@ parametric_iir_coefficient_calculator.cpp
 )
 
 # Basically, this makes the headers show up in the Visual studio project.
-SET( HEADERS
+set( HEADERS
 biquad_coefficient.hpp
 circular_buffer.hpp
 export_symbols.hpp
@@ -47,22 +47,22 @@ parametric_iir_coefficient.hpp
 parametric_iir_coefficient_calculator.hpp
 )
 
-INCLUDE_DIRECTORIES( ${FFTS_INCLUDE_DIR} )
-INCLUDE_DIRECTORIES( ${KISSFFT_INCLUDE_DIR} )
+include_directories( ${FFTS_INCLUDE_DIR} )
+include_directories( ${KISSFFT_INCLUDE_DIR} )
 
-IF( BUILD_USE_FFTW )
-  ADD_DEFINITIONS( -DBUILD_USE_FFTW )
-  INCLUDE_DIRECTORIES( ${FFTW_INCLUDES} )
-  LIST( APPEND SOURCES fftw_wrapper.cpp )
-  LIST( APPEND HEADERS fftw_wrapper.hpp )
-ENDIF( BUILD_USE_FFTW )
+if( BUILD_USE_FFTW )
+  add_definitions( -DBUILD_USE_FFTW )
+  include_directories( ${FFTW_INCLUDES} )
+  list( APPEND SOURCES fftw_wrapper.cpp )
+  list( APPEND HEADERS fftw_wrapper.hpp )
+endif( BUILD_USE_FFTW )
 
-IF( BUILD_USE_IPP )
-  ADD_DEFINITIONS( -DBUILD_USE_IPP )
-  INCLUDE_DIRECTORIES( ${IPP_INCLUDE_DIR} )
-  LIST( APPEND SOURCES ipp_fft_wrapper.cpp )
-  LIST( APPEND HEADERS ipp_fft_wrapper.hpp )
-ENDIF( BUILD_USE_IPP )
+if( BUILD_USE_IPP )
+  add_definitions( -DBUILD_USE_IPP )
+  include_directories( ${IPP_INCLUDE_DIR} )
+  list( APPEND SOURCES ipp_fft_wrapper.cpp )
+  list( APPEND HEADERS ipp_fft_wrapper.hpp )
+endif( BUILD_USE_IPP )
 
 
 ADD_LIBRARY( rbbl STATIC ${SOURCES} ${HEADERS} )

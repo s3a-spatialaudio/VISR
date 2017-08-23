@@ -32,7 +32,7 @@ INCLUDE( CTest )
 # See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
 # Maybe there is a more general way to configure the different platforms and toolchains
 if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -march=native")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
@@ -108,7 +108,7 @@ ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 if(UNIX)
   # Support for the Raspberry Pi: Enable hardware floating-point arithmetic
   if( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon-vfpv4 -march=armv7-a -mfloat-abi=hard" )
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon -march=armv7-a -mfloat-abi=hard" )
   endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture

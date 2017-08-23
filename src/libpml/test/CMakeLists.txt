@@ -1,20 +1,21 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( APPLICATION_NAME pml_test )
+set( APPLICATION_NAME pml_test )
 
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
+add_definitions( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 
-SET( SOURCES
+set( SOURCES
  filter_routing_parameter.cpp
  matrix_parameter.cpp
  parameter_instantiation.cpp
  test_main.cpp
 )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} ${SOURCES} )
+add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} pml )
-TARGET_LINK_LIBRARIES( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} pml )
+target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)
