@@ -25,20 +25,21 @@ namespace py = pybind11;
 namespace // unnamed
 {
 
-using AudioSampleTypeLookup = std::vector< std::tuple<py::dtype, AudioSampleType::Id> >;
+using AudioSampleTypeLookupEntry = std::tuple<py::dtype, AudioSampleType::Id>;
+using AudioSampleTypeLookup = std::vector< AudioSampleTypeLookupEntry >;
 
 static const  AudioSampleTypeLookup sSampleTypeIdLookup = {
-  { py::dtype::of<float>(), AudioSampleType::floatId },
-  { py::dtype::of<double>(), AudioSampleType::doubleId },
-  { py::dtype::of<long double>(), AudioSampleType::longDoubleId },
-  { py::dtype::of<uint8_t>(), AudioSampleType::uint8Id },
-  { py::dtype::of<int8_t>(), AudioSampleType::int8Id },
-  { py::dtype::of<int16_t>(), AudioSampleType::uint16Id },
-  { py::dtype::of<int16_t>(), AudioSampleType::uint16Id },
-  { py::dtype::of<uint32_t>(), AudioSampleType::uint32Id },
-  { py::dtype::of<int32_t>(), AudioSampleType::int32Id },
-  { py::dtype::of< std::complex<float> >(), AudioSampleType::complexFloatId },
-  { py::dtype::of< std::complex<double> >(), AudioSampleType::complexDoubleId }
+    AudioSampleTypeLookupEntry{ py::dtype::of<float>(), AudioSampleType::floatId },
+    AudioSampleTypeLookupEntry{ py::dtype::of<double>(), AudioSampleType::doubleId },
+    AudioSampleTypeLookupEntry{ py::dtype::of<long double>(), AudioSampleType::longDoubleId },
+    AudioSampleTypeLookupEntry{ py::dtype::of<uint8_t>(), AudioSampleType::uint8Id },
+    AudioSampleTypeLookupEntry{ py::dtype::of<int8_t>(), AudioSampleType::int8Id },
+    AudioSampleTypeLookupEntry{ py::dtype::of<int16_t>(), AudioSampleType::uint16Id },
+    AudioSampleTypeLookupEntry{ py::dtype::of<int16_t>(), AudioSampleType::uint16Id },
+    AudioSampleTypeLookupEntry{ py::dtype::of<uint32_t>(), AudioSampleType::uint32Id },
+    AudioSampleTypeLookupEntry{ py::dtype::of<int32_t>(), AudioSampleType::int32Id },
+    AudioSampleTypeLookupEntry{ py::dtype::of< std::complex<float> >(), AudioSampleType::complexFloatId },
+    AudioSampleTypeLookupEntry{ py::dtype::of< std::complex<double> >(), AudioSampleType::complexDoubleId }
 };
 
 } // unnamed namespace
