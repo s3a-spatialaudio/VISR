@@ -45,7 +45,7 @@ static const  AudioSampleTypeLookup sSampleTypeIdLookup = {
 
 void exportAudioSampleType( py::module & m )
 {
-  py::enum_<AudioSampleType::Id>( m, "AudioSampleType", "Enumeration of type ids for the supported audio sample types. )
+  py::enum_<AudioSampleType::Id>( m, "AudioSampleType", "Enumeration of type ids for the supported audio sample types." )
     .value( "floatId", AudioSampleType::floatId )
     .value( "doubleId", AudioSampleType::doubleId )
     .value( "longDoubleId", AudioSampleType::longDoubleId )
