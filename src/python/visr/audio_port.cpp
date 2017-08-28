@@ -25,61 +25,63 @@ namespace python
 namespace visr
 {
 
+namespace py = pybind11;
+
 namespace // unnamed
 {
 
 template<typename DataType>
-pybind11::array_t<DataType> getInputBuffer( AudioInputT<DataType> & port )
+py::array_t<DataType> getInputBuffer( AudioInputT<DataType> & port )
 {
-  pybind11::buffer_info info ( const_cast<DataType*>(port.data()),
+  py::buffer_info info ( const_cast<DataType*>(port.data()),
     sizeof(DataType),
-    pybind11::format_descriptor<DataType>::format(),
+    py::format_descriptor<DataType>::format(),
     2 /* number of dimensions */,
     { port.width(), port.channelStrideSamples() },
     { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
   );
-  return pybind11::array_t<DataType>( info );
+  return py::array_t<DataType>( info );
 }
 
 template<typename DataType>
-pybind11::array_t<DataType> getOutputBuffer( AudioOutputT<DataType> & port )
+py::array_t<DataType> getOutputBuffer( AudioOutputT<DataType> & port )
 {
-  return pybind11::array_t<DataType>( pybind11::buffer_info( port.data(),
+  return py::array_t<DataType>( py::buffer_info( port.data(),
     sizeof( DataType ),
-    pybind11::format_descriptor<DataType>::format(),
+    py::format_descriptor<DataType>::format(),
     2 /* number of dimensions */,
     { port.width(), port.channelStrideSamples() },
     { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) } ) );
 }
 
 template<typename DataType>
-pybind11::array_t<DataType> getInputChannel( AudioInputT<DataType> & port, std::size_t index )
+py::array_t<DataType> getInputChannel( AudioInputT<DataType> & port, std::size_t index )
 {
-  pybind11::buffer_info info( const_cast<DataType*>(port.at(index)),
+  py::buffer_info info( const_cast<DataType*>(port.at(index)),
     sizeof( DataType ),
-    pybind11::format_descriptor<DataType>::format(),
+    py::format_descriptor<DataType>::format(),
     1 /* number of dimensions */,
     { port.channelStrideSamples() },
     { sizeof( DataType ) }
   );
-  return pybind11::array_t<DataType>( info );
+  return py::array_t<DataType>( info );
 }
 
 template<typename DataType>
-pybind11::array_t<DataType> getOutputChannel( AudioOutputT<DataType> & port, std::size_t index )
+py::array_t<DataType> getOutputChannel( AudioOutputT<DataType> & port, std::size_t index )
 {
-  return pybind11::array_t<DataType>( pybind11::buffer_info( const_cast<DataType*>(port.at( index )),
+  return py::array_t<DataType>( py::buffer_info( const_cast<DataType*>(port.at( index )),
     sizeof( DataType ),
-    pybind11::format_descriptor<DataType>::format(),
+    py::format_descriptor<DataType>::format(),
     1 /* number of dimensions */,
     { port.channelStrideSamples() },
     { sizeof( DataType ) } ) );
 }
 
 template<typename DataType>
-void setOutputBuffer( AudioOutputT<DataType> & port, pybind11::array_t<DataType> & matrix )
+void setOutputBuffer( AudioOutputT<DataType> & port, py::array_t<DataType> & matrix )
 {
-  pybind11::buffer_info info = matrix.request();
+  py::buffer_info info = matrix.request();
   // TODO: check compatibility of matrices.
   std::size_t const numChannels = port.width();
   std::size_t const bufferSize = port.channelStrideSamples();  // Should be blockSize
@@ -105,58 +107,58 @@ void setOutputBuffer( AudioOutputT<DataType> & port, pybind11::array_t<DataType>
 
 /// Bind an audio input of a given sample type to the specified name.
 template<typename DataType >
-void exportAudioInput( pybind11::module & m, char const * name )
+void exportAudioInput( py::module & m, char const * name )
 {
-  pybind11::class_<AudioInputT<DataType>, AudioPortBase >( m, name, pybind11::buffer_protocol() )
-    .def( pybind11::init<char const*, Component &, std::size_t>(),
-      pybind11::arg("name"), pybind11::arg("parent"), pybind11::arg("width") = 0 )
-    .def_buffer( []( AudioInputT<DataType> &port ) -> pybind11::buffer_info
+  py::class_<AudioInputT<DataType>, AudioInputBase >( m, name, py::buffer_protocol() )
+    .def( py::init<char const*, Component &, std::size_t>(),
+      py::arg("name"), py::arg("parent"), py::arg("width") = 0 )
+    .def_buffer( []( AudioInputT<DataType> &port ) -> py::buffer_info
   {
-    return pybind11::buffer_info( const_cast<DataType*>(port.data()),
+    return py::buffer_info( const_cast<DataType*>(port.data()),
       sizeof( DataType ),
-      pybind11::format_descriptor<DataType>::format(),
+      py::format_descriptor<DataType>::format(),
       2 /* number of dimensions */,
       { port.width(), port.channelStrideSamples() },
       { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
     );
   } )
   .def( "data", &getInputBuffer<DataType> )
-  .def( "channel", &getInputChannel<DataType>, pybind11::arg("index") )
-  .def( "__getitem__", &getInputChannel<DataType>, pybind11::arg( "index" ) )
+  .def( "channel", &getInputChannel<DataType>, py::arg("index") )
+  .def( "__getitem__", &getInputChannel<DataType>, py::arg( "index" ) )
     ;
 }
 
 /// Bind an audio output of a given sample type to the specified name.
 template<typename DataType >
-void exportAudioOutput( pybind11::module & m, char const * name )
+void exportAudioOutput( py::module & m, char const * name )
 {
-  pybind11::class_<AudioOutputT<DataType>, AudioPortBase >( m, name, pybind11::buffer_protocol() )
-    .def( pybind11::init<char const*, Component &, std::size_t>(),
-      pybind11::arg( "name" ), pybind11::arg( "parent" ), pybind11::arg( "width" ) = 0 )
-    .def_buffer( []( AudioOutputT<DataType> &port ) -> pybind11::buffer_info
+  py::class_<AudioOutputT<DataType>, AudioOutputBase >( m, name, py::buffer_protocol() )
+    .def( py::init<char const*, Component &, std::size_t>(),
+      py::arg( "name" ), py::arg( "parent" ), py::arg( "width" ) = 0 )
+    .def_buffer( []( AudioOutputT<DataType> &port ) -> py::buffer_info
   {
-    return pybind11::buffer_info( const_cast<DataType*>(port.data()),
+    return py::buffer_info( const_cast<DataType*>(port.data()),
       sizeof( DataType ),
-      pybind11::format_descriptor<DataType>::format(),
+      py::format_descriptor<DataType>::format(),
       2 /* number of dimensions */,
       { port.width(), port.channelStrideSamples() },
       { sizeof( DataType ) * port.channelStrideSamples(), sizeof( DataType ) }
     );
   } )
 
-    .def( "data", &getOutputBuffer<DataType>, pybind11::return_value_policy::reference_internal )
+    .def( "data", &getOutputBuffer<DataType>, py::return_value_policy::reference_internal )
     .def( "set", &setOutputBuffer<DataType> )
     // TODO: can we get an assign operator?
-    .def( "channel", &getOutputChannel<DataType>, pybind11::return_value_policy::reference_internal, pybind11::arg( "index" ) )
-    .def( "__getitem__", &getOutputChannel<DataType>, pybind11::return_value_policy::reference_internal, pybind11::arg( "index" ) )
+    .def( "channel", &getOutputChannel<DataType>, py::return_value_policy::reference_internal, py::arg( "index" ) )
+    .def( "__getitem__", &getOutputChannel<DataType>, py::return_value_policy::reference_internal, py::arg( "index" ) )
     ;
 }
 
 } // unnamed namespace
 
-void exportAudioPort( pybind11::module & m)
+void exportAudioPort( py::module & m)
 {
-  pybind11::enum_<AudioSampleType::Id>(m, "AudioSampleType")
+  py::enum_<AudioSampleType::Id>(m, "AudioSampleType")
     .value( "floatId", AudioSampleType::floatId )
     .value( "doubleId", AudioSampleType::doubleId )
     .value( "longDoubleId", AudioSampleType::longDoubleId )
@@ -174,7 +176,7 @@ void exportAudioPort( pybind11::module & m)
    * Define the common base class for audio ports.
    * Instantiation of this class is not intended, therefore no constructors are exposed.
    */
-  pybind11::class_<AudioPortBase>( m, "AudioPortBase" )
+  py::class_<AudioPortBase>( m, "AudioPortBase" )
     .def_property( "width", &AudioPortBase::width, &AudioPortBase::setWidth )
     .def_property_readonly( "alignmentSamples", &AudioPortBase::alignmentSamples )
     .def_property_readonly( "alignmentBytes", &AudioPortBase::alignmentBytes )
@@ -184,6 +186,29 @@ void exportAudioPort( pybind11::module & m)
     .def_property_readonly( "sampleType", &AudioPortBase::sampleType )
     .def_property_readonly( "initialised", []( AudioPortBase const & port ){ return port.implementation().initialised(); } )
     ;
+
+  /**
+   * Instantiable class for polymorphic audio inputs with a parameterisable sample type.
+   * The name deliberately differs from the C++ class (which is a class template) for a slicker syntax.
+   * It also enables inputs with default sample type (float) using 'AudioInput' by using the default argument for the sample type.
+   */
+  py::class_<AudioInputBase>( m, "AudioInput", "Audio port class with a selectable sample type" )
+    .def( py::init<char const *, Component&, AudioSampleType::Id, std::size_t>(), 
+      py::arg("name"), py::arg("parent"), py::arg("sampleType") = AudioSampleType::floatId, py::arg("width") = 0,
+      "Constructor with choosable sample type")
+  ;
+
+  /**
+  * Instantiable class for polymorphic audio outputs with a parameterisable sample type.
+  * The name deliberately differs from the C++ class (which is a class template) for a slicker syntax.
+  * It also enables inputs with default sample type (float) using 'AudioOutput' by using the default argument for the sample type.
+  */
+  py::class_<AudioOutputBase>( m, "AudioOutput", "Audio output port class with parameterisable sample type" )
+    //.def( py::init<char const *, Component &, AudioSampleType::Id>() )
+    .def( py::init<char const *, Component&, AudioSampleType::Id, std::size_t>(),
+      py::arg( "name" ), py::arg( "parent" ), py::arg( "sampleType" ) = AudioSampleType::floatId, py::arg( "width" ) = 0,
+      "Constructor with choosable sample type" )
+  ;
 
   exportAudioInput<float>( m, "AudioInputFloat" );
   exportAudioInput<double>( m, "AudioInputDouble" );
