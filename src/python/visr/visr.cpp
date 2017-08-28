@@ -18,6 +18,7 @@ void exportCommunicationProtocol(py::module & m);
 void exportCommunicationProtocolFactory(py::module & m);
 void exportChannelList(py::module & m);
 void exportComponent(py::module & m);
+void exportAudioSampleType( py::module & m );
 void exportAudioPort(py::module & m);
 void exportParameterFactory(py::module & m);
 void exportParameterPort(py::module & m);
@@ -40,6 +41,7 @@ PYBIND11_PLUGIN( visr )
   exportParameterFactory( m );
   exportChannelList( m );
   exportComponent( m );
+  exportAudioSampleType( m );
   exportAudioPort( m );
   exportParameterPort(m);
   exportCompositeComponent( m );

@@ -3,6 +3,7 @@
 set( SOURCES
 atomic_component.cpp
 audio_port.cpp
+audio_sample_type.cpp
 channel_list.cpp
 communication_protocol.cpp
 communication_protocol_factory.cpp

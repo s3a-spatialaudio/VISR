@@ -158,20 +158,6 @@ void exportAudioOutput( py::module & m, char const * name )
 
 void exportAudioPort( py::module & m)
 {
-  py::enum_<AudioSampleType::Id>(m, "AudioSampleType")
-    .value( "floatId", AudioSampleType::floatId )
-    .value( "doubleId", AudioSampleType::doubleId )
-    .value( "longDoubleId", AudioSampleType::longDoubleId )
-    .value( "uint8Id", AudioSampleType::uint8Id )
-    .value( "int8Id", AudioSampleType::int8Id )
-    .value( "uint16Id", AudioSampleType::uint16Id )
-    .value( "int16Id", AudioSampleType::int16Id )
-    .value( "uint32Id", AudioSampleType::uint32Id )
-    .value( "int32Id", AudioSampleType::int32Id )
-    .value( "complexFloatId", AudioSampleType::complexFloatId )
-    .value( "complexDoubleId", AudioSampleType::complexDoubleId )
-    ;
-
   /**
    * Define the common base class for audio ports.
    * Instantiation of this class is not intended, therefore no constructors are exposed.
