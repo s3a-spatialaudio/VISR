@@ -37,24 +37,8 @@ namespace audiointerfaces
 
       Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect = false);
 
-// Unused & commented
-#if 0
-      void loadPortConfigJson(boost::property_tree::ptree tree, int numCapt, int numPlay );
-#endif
-
       void loadPortConfig(boost::optional<boost::property_tree::ptree> tree, std::string & extClient, std::vector< std::string > &portNames,
                           std::vector< std::string > & extPortNames, std::size_t numPorts, bool & autoConn, std::string porttype);
-
-// Unused
-#if 0
-      void setCapturePortNames( std::string const baseName,
-                               std::size_t startIndex,
-                               std::size_t endIndex );
-      
-      void setPlaybackPortNames( std::string const baseName,
-                                std::size_t startIndex,
-                                std::size_t endIndex );
-#endif
       std::string mClientName;
       std::string mInExtClientName;
       std::string mOutExtClientName;
