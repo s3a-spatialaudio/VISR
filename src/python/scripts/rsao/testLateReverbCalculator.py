@@ -1,109 +1,74 @@
-     # -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Created on Tue Feb 14 15:59:11 2017
+Created on Wed Aug 16 13:44:46 2017
 
-@author: af5u13
+@author: pdc
 """
-
-#exec(open("/home/andi/dev/visr/src/python/scripts/instantiateCoreRenderer.py").read())
-
 
 import visr
-import signalflows
+import objectmodel as om
+import reverbobject as ro
 import panning
-import pml
 import rrl
-import objectmodel
-
-import numpy as np;
+import rcl
+import numpy as np
 import matplotlib.pyplot as plt
+import os.path
 
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
 
+# Get VISR base directory from rsao subdirectory.
+visrBaseDirectory = os.path.join( os.getcwd(), '../../../..' )
+
+jsonFile = os.path.join( visrBaseDirectory, 'src/libobjectmodel/test/data/point_source_with_reverb_1.json' )
+
+obj_vector=om.ObjectVector() # load the object vector
+obj_str=open(jsonFile).read() # read json object vector as a string
+obj_vector.fillFromJson(obj_str) # populate the object vector
+
+rob = obj_vector[0]
+rob.lateReverb.levels = np.array( [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0 ], dtype = np.float32 )
+rob.lateReverb.decayCoefficients = np.array( [-5.0, 1.0, 1.0, 1.0, -3.0, 1.0, 1.0, 1.0, 1.0 ], dtype = np.float32 )
+
+# create signal flow context and loudspeaker array config
 blockSize = 128
 samplingFrequency = 48000
-parameterUpdatePeriod = 1024
+ctxt = visr.SignalFlowContext( blockSize, samplingFrequency) 
+lc = panning.LoudspeakerArray( os.path.join( visrBaseDirectory, 'config/generic/bs2051-9+10+3.xml' ) )
 
-numBlocks = 1024;
+robj=obj_vector[0]
+lr=robj.lateReverb
 
+lr_param=ro.LateReverbParameter(0,lr)
 
+calc = ro.LateReverbFilterCalculator( ctxt, 'calc', None,
+            numberOfObjects=1,
+            lateReflectionLengthSeconds=1.0,
+            numLateReflectionSubBandLevels=9,
+            maxUpdatesPerPeriod=100)
 
+flow = rrl.AudioSignalFlow( calc )
 
+lr_input=flow.parameterReceivePort("subbandInput")
+filter_out=flow.parameterSendPort("lateFilterOutput")
 
-signalLength = blockSize * numBlocks
-t = 1.0/samplingFrequency * np.arange(0,signalLength)
+lr_input.enqueue(lr_param)
 
-numOutputChannels = 24;
-
-ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
-
-#lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-lc = panning.LoudspeakerArray( '/Users/af5u13/dev/visr/config/generic/bs2051-9+10+3.xml' )
-# lc = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-
-diffFilters = pml.MatrixParameterFloat( 22, 512, 16 )
-#
-#renderer1 = signalflows.CoreRenderer( ctxt, 'renderer1', None, lc, 2, numOutputChannels, parameterUpdatePeriod, diffFilters, '' ) 
-##                                          loudspeakerConfiguration=lc,
-##                                          numberOfInputs=2,
-##                                          numberOfOutputs=41, 
-##                                          interpolationPeriod=1024, 
-##                                          diffusionFilters=diffFilters,
-##                                          tra ckingConfiguration='' )
-
-renderer1 = signalflows.CoreRenderer( ctxt, 'renderer1', None,
-                                      loudspeakerConfiguration=lc,
-                                      numberOfInputs=2,
-                                      numberOfOutputs=numOutputChannels, 
-                                      interpolationPeriod=parameterUpdatePeriod, 
-                                      diffusionFilters=diffFilters,
-                                      trackingConfiguration='' )
-
-
-print( 'Created renderer.' )
-
-flow = rrl.AudioSignalFlow( renderer1 )
-
-
-paramInput = flow.parameterReceivePort('objectDataInput')
-
-inputSignal = np.zeros( (2, signalLength ), dtype=np.float32 )
-inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-
-
-outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
-
-for blockIdx in range(0,numBlocks):
-    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
-        az = 0.025 * blockIdx
-        el = 0.1 * np.sin( 0.025 * blockIdx )
-        r = 1
-        x,y,z = sph2cart( az, el, r )
-        ps1 = objectmodel.PointSource(0)
-        ps1.x = x
-        ps1.y = y
-        ps1.z = z
-        ps1.level = 0.5
-        ps1.groupId = 5
-        ps1.priority = 5
-        ps1.resetNumberOfChannels(1)
-        ps1.setChannelIndex(0,ps1.objectId)
-
-        ov = paramInput.data()
-        ov.clear()
-        ov.set( ps1.objectId, ps1 )
-        paramInput.swapBuffers()
-        
-    inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
-    outputBlock = flow.process( inputBlock )
-    outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
-
+firTaps={}
+flow.process() # Parameter only, no audio signal required.
+while not filter_out.empty():
+    filterStruct = filter_out.front()
+    #print( "Received filter update for index %d in iteration %d." % (filterStruct.index, idx ) )
+    # Retrieve the filter coefficients
+    firTaps[filterStruct.index] = np.array(filterStruct.value)
+    # TODO: Analyse the filters.
+   
+    # Slight oddity: We have to delete the Python variable because it would screw up the memory management
+    # if the underlying C++ object is deleted in pop() while the Python representation is still alive.
+       
+    del filterStruct
+ 
+    filter_out.pop()
 
 plt.figure(1)
-plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'rx-' )
-plt.show()
-
+plt.plot(firTaps[0] )
