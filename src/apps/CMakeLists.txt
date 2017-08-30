@@ -3,7 +3,6 @@
 # Common base directory for all applications.
 
 ADD_SUBDIRECTORY( baseline_renderer )
-ADD_SUBDIRECTORY( bunch_renderer )
 ADD_SUBDIRECTORY( feedthrough )
 ADD_SUBDIRECTORY( gain_matrix )
 ADD_SUBDIRECTORY( matrix_convolver )
