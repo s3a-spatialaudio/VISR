@@ -42,11 +42,16 @@ public:
   using SampleType = visr::SampleType;
 
   /**
-   * Constructor.
+   * Constructor. Creates a time-frequency transformation component with a default window shape.
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    * @param numberOfChannels The number of distinct audio waveforms received through the input audio port.
+   * @param dftLength The size of the DFT transform used. Must be a power of two for most FFT implementations.
+   * @param windowLength The length of the window. A Hann window modified to satisfy the Constant Overlap-Add (COLA) property is used.
+   * @param hopSize Advance (in samples) between successive frames. The component's period size must be an ineger multiple of the hop size.
+   * @param fftImplementation String desribing the FFT implementation to be used. Optional parameter, defaults to the
+   * platform's default FFT implementation.
    */
   explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
@@ -57,6 +62,18 @@ public:
                                    std::size_t hopSize,
                                    char const * fftImplementation = "default" );
 
+  /**
+  * Constructor. Creates a time-frequency transformation component with a user-defined window shape.
+  * @param context Configuration object containing basic execution parameters.
+  * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+  * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
+  * @param numberOfChannels The number of distinct audio waveforms received through the input audio port.
+  * @param dftLength The size of the DFT transform used. Must be a power of two for most FFT implementations.
+  * @param window The coefficients of the window applied to the time-domain input frames.
+  * @param hopSize Advance (in samples) between successive frames. The component's period size must be an ineger multiple of the hop size.
+  * @param fftImplementation String desribing the FFT implementation to be used. Optional parameter, defaults to the
+  * platform's default FFT implementation.
+  */
   explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
                                    CompositeComponent * parent,
@@ -66,26 +83,19 @@ public:
                                    std::size_t hopSize,
                                    char const * fftImplementation = "default" );
 
-
-  ~TimeFrequencyTransform();
-
   /**
-   * @todo Add parameter to describe the window type.
+   * Destructor (virtual)
    */
-  void setup( std::size_t numberOfChannels, 
-              std::size_t dftLength,
-              std::size_t windowLength,
-              std::size_t hopSize,
-              char const * fftImplementation = "default" );
+  ~TimeFrequencyTransform() override;
 
-  void process( );
+  void process( ) override;
 
 private:
 
   std::size_t const mAlignment;
 
   /**
-   * 
+   * The number of simulataneously processed audio channels.
    */
   std::size_t const mNumberOfChannels;
 
@@ -117,7 +127,7 @@ private:
   AudioInput mInput;
 
   /**
-   *
+   * 
    */
   ParameterOutput<pml::SharedDataProtocol, pml::TimeFrequencyParameter<SampleType> > mOutput;
 };

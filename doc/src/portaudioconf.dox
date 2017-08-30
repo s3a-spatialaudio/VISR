@@ -3,7 +3,7 @@
  
   @tableofcontents
  
-  @section audio_interf_conf Audio Interface Configuration
+  @section portaudio_interf_conf Audio Interface Configuration
   The following options can be provided when using PortAudio as our top level component’s Audio Interface:
 
 * * <b>sampleformat</b>: Specifies PortAudio sample format. Possible values are:
@@ -32,7 +32,7 @@
 Other deprecated or unused backends which are available within PortAudio are <tt>SoundManager(MacOs)</tt>, <tt>OSS(Linux)</tt>, <tt>AL</tt>, <tt>BeOS</tt>, <tt>AudioScienceHPI(Linux)</tt>.
 
 
-@section syntax Configuration Syntax
+@section portaudio_configuration_syntax Configuration Syntax
   This is the configuration syntax, expressed in json language:
  
 @code

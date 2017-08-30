@@ -3,7 +3,7 @@
  
   @tableofcontents
  
-  @section audio_interf_conf Audio Interface Configuration
+  @section jack_audio_interf_conf Audio Interface Configuration
   The following options can be provided when using Jack as our top level component’s Audio Interface:
 
 * * <b>clientname</b>: Jack Client name for our top level component.
@@ -34,7 +34,7 @@
              - <b>indices</b>: List of port numbers that together with <tt> portname </tt> describe existing external jack client output ports. It is possible to use Matlab’s colon operator to express a list of numbers.
   
 
-@section syntax Configuration Syntax
+@section jackaudio_configuration_syntax Configuration Syntax
   This is the configuration syntax, expressed in json language:
  
 @code
@@ -107,7 +107,7 @@ This configuration example shows how to auto-connect the ports of our top level 
   }
 }
 @endcode
-@subsubsection jackres Result
+@subsubsection jack_result_simple Result
 @image html jacksimpleexample.jpeg
 
 
@@ -163,6 +163,6 @@ Follow a more complex example where auto-connection of ports is performed specif
   }
 }
 @endcode
-@subsubsection jackres Result
+@subsubsection jack_result_complex Result
 @image html jackexample.jpeg
  */

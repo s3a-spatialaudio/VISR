@@ -9,8 +9,9 @@ CommunicationProtocolBase::CommunicationProtocolBase() = default;
 
 /*virtual*/ CommunicationProtocolBase::~CommunicationProtocolBase() = default;
 
-// Note: The additional documentation is required to suppress Doxygen warnings.
-
+// Note: This code needs to be excluded from Doxygen documentation generation to avoid warnings
+// caused by shared symbol visibility macros in the class definitions.
+/// @cond NEVER
 /**
  * @relates CommunicationProtocolBase::Input
  * Default constructor for CommunicationProtocolBase::Input
@@ -24,16 +25,17 @@ CommunicationProtocolBase::Input::Input() = default;
 /*virtual*/ CommunicationProtocolBase::Input::~Input() = default;
 
 /**
- * @relates CommunicationProtocolBase::Input
+ * @relates CommunicationProtocolBase::Output
  * Default constructor for CommunicationProtocolBase::Output
  */
 CommunicationProtocolBase::Output::Output() = default;
 
 /**
- *@relates CommunicationProtocolBase::Input
+ *@relates CommunicationProtocolBase::Output
  * Default constructor for CommunicationProtocolBase::Output
  */
 /*virtual*/ CommunicationProtocolBase::Output::~Output() = default;
+/// @endcond NEVER
 
 } // namespace visr
 
