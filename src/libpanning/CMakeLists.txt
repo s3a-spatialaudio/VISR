@@ -26,13 +26,14 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
   set_source_files_properties( LoudspeakerArray.cpp PROPERTIES COMPILE_DEFINITIONS VISR_USE_BOOST_REGEX=1 )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 
-add_library( panning STATIC ${SOURCES} ${HEADERS} )
-target_link_libraries( panning rbbl )
+add_library( panning_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( panning_static PROPERTIES OUTPUT_NAME panning )
+target_link_libraries( panning_static rbbl_static )
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-  target_link_libraries( panning ${Boost_REGEX_LIBRARY} )
+  target_link_libraries( panning_static ${Boost_REGEX_LIBRARY} )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-target_link_libraries( panning ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( panning ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( panning_static ${Boost_FILESYSTEM_LIBRARY} )
+target_link_libraries( panning_static ${Boost_SYSTEM_LIBRARY} )
 
 add_library( panning_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( panning_shared PROPERTIES OUTPUT_NAME panning )
@@ -47,6 +48,10 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 target_link_libraries( panning_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( panning_shared ${Boost_SYSTEM_LIBRARY} )
+
+install(TARGETS panning_static ARCHIVE DESTINATION lib )
+install(TARGETS panning_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+
 
 # Add the unit tests.
 ADD_SUBDIRECTORY( test )

@@ -22,13 +22,14 @@ ENDIF( BUILD_USE_JACK )
 
 INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
 
-ADD_LIBRARY( audiointerfaces STATIC ${SOURCES} ${HEADERS} )
+add_library( audiointerfaces_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( audiointerfaces_static PROPERTIES OUTPUT_NAME audiointerfaces )
 # Transitive link dependencies
-target_link_libraries( audiointerfaces rrl)
-target_link_libraries( audiointerfaces ${PORTAUDIO_LIBRARIES} )
+target_link_libraries( audiointerfaces_static rrl_static)
+target_link_libraries( audiointerfaces_static ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
-  target_link_libraries( audiointerfaces ${JACK_LIBRARY} )
-  target_link_libraries( audiointerfaces rbbl )
+  target_link_libraries( audiointerfaces_static ${JACK_LIBRARY} )
+  target_link_libraries( audiointerfaces_static rbbl_static )
 endif( BUILD_USE_JACK )
 
 add_library( audiointerfaces_shared SHARED ${SOURCES} ${HEADERS} )
@@ -44,6 +45,9 @@ if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_shared ${JACK_LIBRARY} )
   target_link_libraries( audiointerfaces_shared rbbl_shared )
 endif( BUILD_USE_JACK )
+
+install(TARGETS audiointerfaces_static ARCHIVE DESTINATION lib )
+install(TARGETS audiointerfaces_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 add_subdirectory( test )

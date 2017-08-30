@@ -54,9 +54,10 @@ point_source_with_reverb.hpp
 point_source_with_reverb_parser.hpp
 )
 
-add_library( objectmodel STATIC ${SOURCES} ${HEADERS} )
+add_library( objectmodel_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( objectmodel_static PROPERTIES OUTPUT_NAME objectmodel )
 
-target_link_libraries( objectmodel rbbl )
+target_link_libraries( objectmodel_static rbbl_static )
 
 add_library( objectmodel_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( objectmodel_shared PROPERTIES OUTPUT_NAME objectmodel )
@@ -66,6 +67,10 @@ set_target_properties( objectmodel_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$
 target_compile_definitions( objectmodel_shared PUBLIC -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 )
 target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
 target_link_libraries( objectmodel_shared rbbl_shared )
+
+install(TARGETS objectmodel_static ARCHIVE DESTINATION lib )
+install(TARGETS objectmodel_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+
 
 # Add the unit test directory.
 add_subdirectory( test )

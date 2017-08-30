@@ -22,10 +22,10 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
 add_library( reverbobject_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive link dependencies
-target_link_libraries( reverbobject_static pml )
-target_link_libraries( reverbobject_static rcl )
-target_link_libraries( reverbobject_static objectmodel )
-target_link_libraries( reverbobject_static efl )
+target_link_libraries( reverbobject_static pml_static )
+target_link_libraries( reverbobject_static rcl_static )
+target_link_libraries( reverbobject_static objectmodel_static )
+target_link_libraries( reverbobject_static efl_static )
 target_link_libraries( reverbobject_static ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( reverbobject_static ${Boost_SYSTEM_LIBRARY} )
 
@@ -42,6 +42,9 @@ target_link_libraries( reverbobject_shared objectmodel_shared )
 target_link_libraries( reverbobject_shared efl_shared )
 target_link_libraries( reverbobject_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( reverbobject_shared ${Boost_SYSTEM_LIBRARY} )
+
+install(TARGETS reverbobject_static ARCHIVE DESTINATION lib )
+install(TARGETS reverbobject_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 # ADD_SUBDIRECTORY( test )

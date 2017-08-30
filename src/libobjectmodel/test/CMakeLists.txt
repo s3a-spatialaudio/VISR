@@ -14,7 +14,7 @@ point_source_with_reverb.cpp
 test_main.cpp 
 )
 
-target_link_libraries( ${APPLICATION_NAME} objectmodel )
+target_link_libraries( ${APPLICATION_NAME} objectmodel_static )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )

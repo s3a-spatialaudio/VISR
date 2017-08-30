@@ -50,14 +50,14 @@ set( HEADERS
 
 include_directories( ${SNDFILE_INCLUDE_DIRS} )
 
-add_library( pml STATIC ${SOURCES} ${HEADERS} )
-
-target_link_libraries( pml objectmodel )
-target_link_libraries( pml visr_static )
-target_link_libraries( pml ril )
-target_link_libraries( pml ${SNDFILE_LIBRARY} )
-target_link_libraries( pml ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( pml ${Boost_SYSTEM_LIBRARY} )
+add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
+target_link_libraries( pml_static objectmodel_static )
+target_link_libraries( pml_static visr_static )
+target_link_libraries( pml_static ril )
+target_link_libraries( pml_static ${SNDFILE_LIBRARY} )
+target_link_libraries( pml_static ${Boost_FILESYSTEM_LIBRARY} )
+target_link_libraries( pml_static ${Boost_SYSTEM_LIBRARY} )
 
 add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
@@ -73,6 +73,8 @@ target_link_libraries( pml_shared ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( pml_shared ${Boost_SYSTEM_LIBRARY} )
 
+install(TARGETS pml_static ARCHIVE DESTINATION lib )
+install(TARGETS pml_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 add_subdirectory( test )

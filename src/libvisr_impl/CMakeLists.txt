@@ -66,4 +66,5 @@ target_link_libraries( visr_shared ril )
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
 
-install(TARGETS visr_static DESTINATION lib )
+install(TARGETS visr_static ARCHIVE DESTINATION lib )
+install(TARGETS visr_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )

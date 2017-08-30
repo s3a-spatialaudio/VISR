@@ -65,18 +65,19 @@ if( BUILD_USE_IPP )
 endif( BUILD_USE_IPP )
 
 
-ADD_LIBRARY( rbbl STATIC ${SOURCES} ${HEADERS} )
+add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
 
-target_link_libraries( rbbl efl )
-target_link_libraries( rbbl pml )
-target_link_libraries( rbbl ${FFTS_LIBRARY} )
-target_link_libraries( rbbl ${KISSFFT_LIBRARY} )
+target_link_libraries( rbbl_static efl_static )
+target_link_libraries( rbbl_static pml_static )
+target_link_libraries( rbbl_static ${FFTS_LIBRARY} )
+target_link_libraries( rbbl_static ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )
-  target_link_libraries( rbbl ${FFTW3_LIBRARY} )
-  target_link_libraries( rbbl ${FFTW3F_LIBRARY} )
+  target_link_libraries( rbbl_static ${FFTW3_LIBRARY} )
+  target_link_libraries( rbbl_static ${FFTW3F_LIBRARY} )
 endif( BUILD_USE_FFTW )
 if( BUILD_USE_IPP )
-  target_link_libraries( rbbl ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+  target_link_libraries( rbbl_static ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
 add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
@@ -100,6 +101,8 @@ if( BUILD_USE_IPP )
   target_link_libraries( rbbl_shared ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
+install(TARGETS rbbl_static ARCHIVE DESTINATION lib )
+install(TARGETS rbbl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

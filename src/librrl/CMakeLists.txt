@@ -26,10 +26,11 @@ scheduling_graph.hpp
 signal_routing_internal.hpp
 )
 
-add_library( rrl STATIC ${SOURCES} ${HEADERS} )
+add_library( rrl_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
 # Transitive link dependencies
-target_link_libraries( rrl visr_static )
-target_link_libraries( rrl efl )
+target_link_libraries( rrl_static visr_static )
+target_link_libraries( rrl_static efl_static )
 
 add_library( rrl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
@@ -40,6 +41,9 @@ target_compile_definitions( rrl_shared PUBLIC -DVISR_BUILD_RRL_SHARED_LIBRARY=1)
 # Transitive link dependencies
 target_link_libraries( rrl_shared visr_shared )
 target_link_libraries( rrl_shared efl_shared )
+
+install(TARGETS rrl_static ARCHIVE DESTINATION lib )
+install(TARGETS rrl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 add_subdirectory( test )

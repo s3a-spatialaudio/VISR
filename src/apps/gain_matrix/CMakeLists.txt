@@ -2,7 +2,7 @@
 
 add_executable( gain_matrix_app main.cpp options.cpp )
 
-target_link_libraries(gain_matrix_app signalflows)
-target_link_libraries(gain_matrix_app rrl)
-target_link_libraries(gain_matrix_app audiointerfaces)
-target_link_libraries(gain_matrix_app apputilities)
+target_link_libraries(gain_matrix_app signalflows_static )
+target_link_libraries(gain_matrix_app rrl_static )
+target_link_libraries(gain_matrix_app audiointerfaces_static )
+target_link_libraries(gain_matrix_app apputilities_static )

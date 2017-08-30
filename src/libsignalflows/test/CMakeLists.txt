@@ -8,7 +8,7 @@ add_executable( ${APPLICATION_NAME}
 baseline_renderer.cpp
 test_main.cpp )
 
-target_link_libraries(${APPLICATION_NAME} signalflows)
+target_link_libraries(${APPLICATION_NAME} signalflows_static )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )

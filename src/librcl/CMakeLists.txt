@@ -62,18 +62,19 @@ udp_sender.hpp
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
 
-ADD_LIBRARY( rcl STATIC ${SOURCES} ${HEADERS} )
+add_library( rcl_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
 # Transitive dependencies
-target_link_libraries( rcl pml )
-target_link_libraries( rcl visr_static )
-target_link_libraries( rcl ril )
-target_link_libraries( rcl panning )
-target_link_libraries( rcl objectmodel )
-target_link_libraries( rcl rbbl )
-target_link_libraries( rcl efl )
-target_link_libraries( rcl ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( rcl ${Boost_THREAD_LIBRARY} )
-target_link_libraries( rcl ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( rcl_static pml_static )
+target_link_libraries( rcl_static visr_static )
+target_link_libraries( rcl_static ril )
+target_link_libraries( rcl_static panning_static )
+target_link_libraries( rcl_static objectmodel_static )
+target_link_libraries( rcl_static rbbl_static )
+target_link_libraries( rcl_static efl_static )
+target_link_libraries( rcl_static ${Boost_FILESYSTEM_LIBRARY} )
+target_link_libraries( rcl_static ${Boost_THREAD_LIBRARY} )
+target_link_libraries( rcl_static ${Boost_SYSTEM_LIBRARY} )
 
 add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
@@ -93,6 +94,8 @@ target_link_libraries( rcl_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( rcl_shared ${Boost_THREAD_LIBRARY} )
 target_link_libraries( rcl_shared ${Boost_SYSTEM_LIBRARY} )
 
+install(TARGETS rcl_static ARCHIVE DESTINATION lib )
+install(TARGETS rcl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

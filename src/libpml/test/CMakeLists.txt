@@ -13,7 +13,7 @@ set( SOURCES
 
 add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
-target_link_libraries( ${APPLICATION_NAME} pml )
+target_link_libraries( ${APPLICATION_NAME} pml_static )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 

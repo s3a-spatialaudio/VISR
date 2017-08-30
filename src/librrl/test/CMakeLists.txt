@@ -12,10 +12,10 @@ test_main.cpp
 add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
 # Note: Consider moving delay_vector somewhere else (if dependency on real component libraries is not desired here.)
-target_link_libraries( ${APPLICATION_NAME} signalflows )
-target_link_libraries( ${APPLICATION_NAME} rcl )
-target_link_libraries( ${APPLICATION_NAME} rrl )
-target_link_libraries( ${APPLICATION_NAME} pml )
+target_link_libraries( ${APPLICATION_NAME} signalflows_static )
+target_link_libraries( ${APPLICATION_NAME} rcl_static )
+target_link_libraries( ${APPLICATION_NAME} rrl_static )
+target_link_libraries( ${APPLICATION_NAME} pml_static )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 

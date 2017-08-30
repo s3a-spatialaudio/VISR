@@ -38,7 +38,8 @@ vector_functions_reference.hpp
 vector_functions_reference_impl.hpp
 )
 
-ADD_LIBRARY( efl STATIC ${SOURCES} ${HEADERS} )
+add_library( efl_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( efl_static PROPERTIES OUTPUT_NAME efl )
 
 add_library( efl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( efl_shared PROPERTIES OUTPUT_NAME efl )
@@ -48,7 +49,8 @@ target_compile_definitions( efl_shared PRIVATE -DVISR_BUILD_EFL_SHARED_LIBRARY=1
 target_compile_definitions( efl_shared PUBLIC -DVISR_BUILD_EFL_SHARED_LIBRARY=1)
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
-
+install(TARGETS efl_static ARCHIVE DESTINATION lib )
+install(TARGETS efl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

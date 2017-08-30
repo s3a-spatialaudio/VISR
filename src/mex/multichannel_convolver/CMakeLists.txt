@@ -23,7 +23,7 @@ add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${C
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} )
 
 # Add any extras dependencies
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} rbbl pml rcl visr_static efl ${MATLAB_LIBRARIES})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} rcl_shared ${MATLAB_LIBRARIES})
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently
 # of the project name.

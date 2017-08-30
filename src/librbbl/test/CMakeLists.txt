@@ -27,9 +27,9 @@ endif( BUILD_USE_IPP )
 
 add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
-target_link_libraries( ${APPLICATION_NAME} rbbl)
-target_link_libraries( ${APPLICATION_NAME} efl)
-target_link_libraries( ${APPLICATION_NAME} pml)
+target_link_libraries( ${APPLICATION_NAME} rbbl_static)
+#target_link_libraries( ${APPLICATION_NAME} efl_static)
+#target_link_libraries( ${APPLICATION_NAME} pml_static)
 target_link_libraries( ${APPLICATION_NAME} visr_static)
 target_link_libraries( ${APPLICATION_NAME} ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_SYSTEM_LIBRARY} )
