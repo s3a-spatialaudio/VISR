@@ -3,6 +3,7 @@
 #ifndef VISR_LIBPYTHONSUPPORT_INITIALISATION_GUARD_HPP_INCLUDED
 #define VISR_LIBPYTHONSUPPORT_INITIALISATION_GUARD_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 
 namespace visr
 {
@@ -13,7 +14,7 @@ namespace pythonsupport
 /**
  * Wrapper component that encapsulates arbitrary components (atomic or composite) to be instantiated and called from C++.
  */
-class InitialisationGuard
+class VISR_PYTHONSUPPORT_LIBRARY_SYMBOL InitialisationGuard
 {
 public:
   /**

@@ -3,6 +3,8 @@
 #ifndef VISR_APPUTILITIES_OPTIONS_HPP_INCLUDED
 #define VISR_APPUTILITIES_OPTIONS_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <boost/program_options.hpp>
 
 #include <iosfwd>
@@ -13,7 +15,7 @@ namespace visr
 namespace apputilities
 {
 
-class Options
+class VISR_APPUTILITIES_LIBRARY_SYMBOL Options
 {
 public:
   Options();

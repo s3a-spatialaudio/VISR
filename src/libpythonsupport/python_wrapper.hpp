@@ -3,6 +3,8 @@
 #ifndef VISR_LIBPYTHONSUPPORT_PYTHON_WRAPPER_HPP_INCLUDED
 #define VISR_LIBPYTHONSUPPORT_PYTHON_WRAPPER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libril/composite_component.hpp>
 
 #include <memory>
@@ -26,7 +28,7 @@ namespace pythonsupport
  * Wrapper component that encapsulates arbitrary Python components (atomic or composite) to be 
  * instantiated and called from C++.
  */
-class PythonWrapper: public CompositeComponent
+class VISR_PYTHONSUPPORT_LIBRARY_SYMBOL PythonWrapper: public CompositeComponent
 {
 public:
 
