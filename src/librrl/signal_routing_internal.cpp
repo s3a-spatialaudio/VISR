@@ -2,7 +2,7 @@
 
 #include "signal_routing_internal.hpp"
 
-#include <libefl/vector_functions.cpp>
+#include <libefl/vector_functions.hpp>
 
 #include <algorithm>
 #include <stdexcept>
