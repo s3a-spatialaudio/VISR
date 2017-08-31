@@ -32,8 +32,7 @@ class ReverbToBinaural( visr.CompositeComponent ):
                  brirRouting,
                  brirFilters,
                  scenePort = 4242,
-                 reverbConfiguration='',
-                 skipConvolver = False):
+                 reverbConfiguration=''):
         super(ReverbToBinaural,self).__init__( context, name, parent )
         self.coreRenderer = signalflows.BaselineRenderer( ctxt, 'renderer', self,
                                       loudspeakerConfig=loudspeakerConfig,
@@ -45,41 +44,31 @@ class ReverbToBinaural( visr.CompositeComponent ):
                                       sceneReceiverPort=scenePort,
                                       trackingConfiguration=trackingConfiguration 
                                       )
-        if not skipConvolver:
-            numFilters = brirFilters.numberOfRows
-            firLength = brirFilters.numberOfColumns
-            numRoutings = brirRouting.size
-            self.convolver = rcl.FirFilterMatrix( ctxt, 'convolver', self )
-            self.convolver.setup( numberOfInputs=rendererOutputs,
-                                 numberOfOutputs=2,
-                                 maxFilters=numFilters,
-                                 filterLength=firLength,
-                                 maxRoutings=numRoutings,
-                                 filters=brirFilters,
-                                 routings=brirRouting,
-                                 controlInputs=False
-                                 )
+        numFilters = brirFilters.numberOfRows
+        firLength = brirFilters.numberOfColumns
+        numRoutings = brirRouting.size
+        self.convolver = rcl.FirFilterMatrix( ctxt, 'convolver', self )
+        self.convolver.setup( numberOfInputs=rendererOutputs,
+                             numberOfOutputs=2,
+                             maxFilters=numFilters,
+                             filterLength=firLength,
+                             maxRoutings=numRoutings,
+                             filters=brirFilters,
+                             routings=brirRouting,
+                             controlInputs=False
+                             )
         self.audioIn = visr.AudioInputFloat( "audioIn", self, numberOfInputs )
-        if skipConvolver:
-            self.audioOut = visr.AudioOutputFloat( "audioOut", self, rendererOutputs )
-        else:
-            self.audioOut = visr.AudioOutputFloat( "audioOut", self, 2 )
+        self.audioOut = visr.AudioOutputFloat( "audioOut", self, 2 )
         self.audioConnection( self.audioIn, self.coreRenderer.audioPort("input"))
-        if skipConvolver:
-            self.audioConnection( self.coreRenderer.audioPort("output"),
-                                 self.audioOut )
-        else:
-            self.audioConnection( self.coreRenderer.audioPort("output"),
-                                 self.convolver.audioPort("in"))
-            self.audioConnection( self.convolver.audioPort("out"), self.audioOut )
+        self.audioConnection( self.coreRenderer.audioPort("output"),
+                            self.convolver.audioPort("in"))
+        self.audioConnection( self.convolver.audioPort("out"), self.audioOut )
         if len(trackingConfiguration) > 0:
             self.posIn = visr.ParameterInput( "posIn", self,
                                              pml.ListenerPosition.staticType,
                                              pml.DoubleBufferingProtocol.staticType,
                                              pml.EmptyParameterConfig() )
             self.parameterConnection( self.posIn, self.coreRenderer.parameterPort("trackingPositionInput") )
-
-
 
 # Get VISR base directory from rsao subdirectory.
 visrBaseDirectory = os.path.normpath(os.path.join( os.getcwd(), '../../../..' )).replace('\\','/')
@@ -88,15 +77,15 @@ blockSize = 1024
 samplingFrequency = 48000
 parameterUpdatePeriod = 1024
 
-numBlocks = 128
+numBlocks = 8
 signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
 
-numObjects = 5;
+numObjects = 1;
 
 ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 
-lspConfigFile  = os.path.join( visrBaseDirectory, 'config/bbc/bs2051-4+5+0.xml')
+lspConfigFile  = os.path.join( visrBaseDirectory, 'config/bbc/bs2051-4+5+0.xml').replace('\\','/')
 # lspConfigFile  = os.path.join( visrBaseDirectory, 'config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
 lc = panning.LoudspeakerArray( lspConfigFile )
@@ -130,7 +119,7 @@ for idx in range(0, numBrirSpeakers ):
 
 renderer = ReverbToBinaural( ctxt, 'top', None,
                           loudspeakerConfig=lc,
-                          numberOfInputs=2,
+                          numberOfInputs=numObjects,
                           rendererOutputs=numBrirSpeakers, 
                           interpolationPeriod=parameterUpdatePeriod, 
                           diffusionFilters=diffFilters,
@@ -145,33 +134,25 @@ print( 'Created renderer.' )
 
 flow = rrl.AudioSignalFlow( renderer )
 
-## Create the object vector
-#jsonFile = os.path.join( visrBaseDirectory, 'src/libobjectmodel/test/data/point_source_with_reverb_1.json' )
-#obj_vector=om.ObjectVector() # load the object vector
-#obj_str=open(jsonFile).read() # read json object vector as a string
-#obj_vector.fillFromJson(obj_str) # populate the object vector
-#ro = obj_vector[0]
-#                       
-#paramInput = flow.parameterReceivePort('objectDataInput')
-
-inputSignal = np.zeros( (1, signalLength ), dtype=np.float32 )
-# inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-inputSignal[ 0, 100 ] = 1
-
-outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
-
-for blockIdx in range(0,numBlocks):
-#    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
-#        ov = paramInput.data()
-#        ov.clear()
-#        ov.set(  ro.objectId, ro )
-#        paramInput.swapBuffers()
-        
-    inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
-    outputBlock = flow.process( inputBlock )
-    outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
-
-
-plt.figure(1)
-plt.plot( t, outputSignal[2,:], 'bo-', t, outputSignal[6,:], 'rx-',  t, outputSignal[21,:], 'm.-' )
-plt.show( block = False )
+## Non-realtime code
+#inputSignal = np.zeros( (numObjects, signalLength ), dtype=np.float32 )
+## inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
+#inputSignal[ 0, 100 ] = 1
+#
+#outputSignal = np.zeros( (2, signalLength ), dtype=np.float32 )
+#
+#for blockIdx in range(0,numBlocks):
+##    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
+##        ov = paramInput.data()
+##        ov.clear()
+##        ov.set(  ro.objectId, ro )
+##        paramInput.swapBuffers()
+#        
+#    inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
+#    outputBlock = flow.process( inputBlock )
+#    outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
+#
+#
+#plt.figure(1)
+#plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'rx-' )
+#plt.show( block = False )
