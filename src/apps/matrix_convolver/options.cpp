@@ -20,7 +20,9 @@ Options::Options()
 
 
   registerOption<std::string>( "audio-backend,D", "The audio backend. JACK_NATIVE activates the native Jack driver insteat of the PortAudio implementation." );
-  registerOption<std::string>( "audio-options,O", "options passed to the audio backend" );
+  registerOption<std::string>( "audio-ifc-options", "Audio interface optional configuration" );
+  registerOption<std::string>( "audio-ifc-option-file", "Audio interface optional configuration file" );
+
 
   registerOption<bool>( "list-audio-backends", "List the supported audio backends that can be passed to the the \"--audio-backend\" (\"-D\") option." );
   registerOption<bool>( "list-fft-libraries", "List the supported FFT implementations that can be selected using the \"--fftLibrary\" option." );

@@ -15,15 +15,14 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
-#ifdef VISR_JACK_SUPPORT
-#include <libaudiointerfaces/jack_interface.hpp>
-#endif
-#include <libaudiointerfaces/portaudio_interface.hpp>
-#include <libaudiointerfaces/audio_interface.hpp>
-#include <boost/algorithm/string/predicate.hpp>
+#include <libaudiointerfaces/audio_interface_factory.hpp>
+
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include <cstdlib>
-#include <cstdio> // for getc(), for testing purposes
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -114,40 +113,38 @@ int main( int argc, char const * const * argv )
 
     rrl::AudioSignalFlow flow( convolver );
 
-    // Selection of audio interface:
-    // FOr the moment we check for the name 'JACK' and select the specialized audio interface and fall
-    // back to PortAudio in all other cases.
-    // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
-#ifdef VISR_JACK_SUPPORT
-    bool const useNativeJack = boost::iequals(audioBackend, "JACK_NATIVE" );
-#endif
+    std::string specConf;
+    bool const hasAudioInterfaceOptionString = cmdLineOptions.hasOption("audio-ifc-options");
+    bool const hasAudioInterfaceOptionFile = cmdLineOptions.hasOption("audio-ifc-option-file");
+    if( hasAudioInterfaceOptionString and hasAudioInterfaceOptionFile )
+    {
+      throw std::invalid_argument( "The options \"--audio-ifc-options\" and \"--audio-ifc-option-file\" cannot both be given.");
+    }
+    if( hasAudioInterfaceOptionFile )
+    {
+      boost::filesystem::path const audioIfcConfigFile( cmdLineOptions.getOption<std::string>( "audio-ifc-option-file" ) );
+      if( not exists( audioIfcConfigFile ) )
+      {
+        throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" option does not exist.");
+      }
+      std::ifstream cfgStream( audioIfcConfigFile.string() );
+      if( not cfgStream )
+      {
+        throw std::invalid_argument( "The file specified by the \"--audio-ifc-option-file\" could not be read.");
+      }
+      std::ostringstream fileContent;
+      fileContent << cfgStream.rdbuf();
+      specConf = fileContent.str();
+    }
+    else
+    {
+      specConf = hasAudioInterfaceOptionString ? cmdLineOptions.getOption<std::string>( "audio-ifc-options" ) : std::string();
+    }
 
-    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
-   audiointerfaces::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,samplingFrequency,periodSize);
+    audiointerfaces::AudioInterface::Configuration baseConfig(numberOfInputChannels,numberOfOutputChannels,samplingFrequency,periodSize);
+
       
-      std::string type;
-      std::string specConf;
-      
-      
-      
-#ifdef VISR_JACK_SUPPORT
-      if( useNativeJack )
-      {
-          std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n { \"playbasename\": \"output_\"} ]}";
-          specConf = "{\"clientname\": \"MatrixConvolver\", \"servername\": \"\", \"portsconfig\" : "+pconfig+"}";
-          
-          type = "Jack";
-      }
-      else
-      {
-#endif
-          specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
-          type = "PortAudio";
-#ifdef VISR_JACK_SUPPORT
-      }
-#endif
-      
-    audioInterface.reset( audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf).get());
+    std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf) );
       
     audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
 
