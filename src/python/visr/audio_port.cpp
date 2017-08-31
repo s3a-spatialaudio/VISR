@@ -178,7 +178,7 @@ void exportAudioPort( py::module & m)
    * The name deliberately differs from the C++ class (which is a class template) for a slicker syntax.
    * It also enables inputs with default sample type (float) using 'AudioInput' by using the default argument for the sample type.
    */
-  py::class_<AudioInputBase>( m, "AudioInput", "Audio port class with a selectable sample type" )
+  py::class_<AudioInputBase, AudioPortBase>( m, "AudioInput", "Audio port class with a selectable sample type" )
     .def( py::init<char const *, Component&, AudioSampleType::Id, std::size_t>(), 
       py::arg("name"), py::arg("parent"), py::arg("sampleType") = AudioSampleType::floatId, py::arg("width") = 0,
       "Constructor with choosable sample type")
@@ -189,7 +189,7 @@ void exportAudioPort( py::module & m)
   * The name deliberately differs from the C++ class (which is a class template) for a slicker syntax.
   * It also enables inputs with default sample type (float) using 'AudioOutput' by using the default argument for the sample type.
   */
-  py::class_<AudioOutputBase>( m, "AudioOutput", "Audio output port class with parameterisable sample type" )
+  py::class_<AudioOutputBase, AudioPortBase>( m, "AudioOutput", "Audio output port class with parameterisable sample type" )
     //.def( py::init<char const *, Component &, AudioSampleType::Id>() )
     .def( py::init<char const *, Component&, AudioSampleType::Id, std::size_t>(),
       py::arg( "name" ), py::arg( "parent" ), py::arg( "sampleType" ) = AudioSampleType::floatId, py::arg( "width" ) = 0,
