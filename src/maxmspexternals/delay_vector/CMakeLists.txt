@@ -40,16 +40,9 @@ endif(WIN32)
 
 # TODO: We need either shared libraries or position-independent static libraries!
 # TODO: Remove transitive link dependencies
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows_shared )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl_shared )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} audiointerfaces )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} pml )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} visr_static )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rbbl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} efl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} objectmodel )
 IF( WIN32 )
   # I need to exclude this library in combination with MAXAPI_USE_MSCRT
   # defined in the source file in order to avoid crashes when C++
@@ -65,4 +58,4 @@ TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${Boost_SYSTEM_LIBRARY} )
 # According to the current FindMaxSDK.cmake, there is no crt library for apple.
 # TODO: Verify and improve FindMaxSDK.cmake
 
-install(TARGETS ${PROJECT_NAME} DESTINATION maxmsp )
+install(TARGETS ${PROJECT_NAME} DESTINATION max )

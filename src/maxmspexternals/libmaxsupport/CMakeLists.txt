@@ -24,5 +24,6 @@ INCLUDE_DIRECTORIES( ${MAXSDK_MAX_INCLUDE_DIR} )
 ADD_LIBRARY( maxsupport STATIC ${SOURCES} ${HEADERS} )
 
 # Transitive dependencies
-target_link_libraries( maxsupport rrl )
-target_link_libraries( maxsupport audiointerfaces )
+target_link_libraries( maxsupport rrl_shared )
+target_link_libraries( maxsupport ${MAXSDK_AUDIO_LIBRARY} )
+target_link_libraries( maxsupport ${MAXSDK_API_LIBRARY} )

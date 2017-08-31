@@ -18,9 +18,9 @@ INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${CMAKE_SOURCE_DIR}/cmake_modules/Matlabdef.def )
 
 # Add any extras dependencies
-target_link_libraries( ${PROJECT_NAME} rcl )
-target_link_libraries( ${PROJECT_NAME} visr_static )
-target_link_libraries( ${PROJECT_NAME} rrl )
+target_link_libraries( ${PROJECT_NAME} rcl_shared )
+target_link_libraries( ${PROJECT_NAME} visr_shared )
+target_link_libraries( ${PROJECT_NAME} rrl_shared )
 target_link_libraries( ${PROJECT_NAME} mexsupport )
 
 # Set the name of the mex object (and thus the Matlab function to be called) independently

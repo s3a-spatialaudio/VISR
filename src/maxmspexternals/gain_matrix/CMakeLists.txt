@@ -24,9 +24,9 @@ SET_TARGET_PROPERTIES( ${PROJECT_NAME}  PROPERTIES
 # <AF> TODO: Move this conditional logic to a centralised location!
 if(WIN32) # 32-bit and 64-bit Windows
   if (CMAKE_CL_64)
-      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe64)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe64)
   else(CMAKE_CL_64)
-      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX ~.mxe)
+      SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES SUFFIX .mxe)
   endif(CMAKE_CL_64)
 elseif(APPLE)
   # Force generation of MacOS bundles.
@@ -40,16 +40,10 @@ endif(WIN32)
 
 # TODO: We need either shared libraries or position-independent static libraries!
 # TODO: Remove transitive link dependencies
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows_shared )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl_shared )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} audiointerfaces )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rbbl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} pml )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} visr_static )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} efl )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} objectmodel )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} efl_shared )
 IF( WIN32 )
   # I need to exclude this library in combination with MAXAPI_USE_MSCRT
   # defined in the source file in order to avoid crashes when C++
