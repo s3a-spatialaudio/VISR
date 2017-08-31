@@ -24,7 +24,7 @@ OutputType convert( InputType const & in )
 
 } // unnamed namespace;
 
-template< typename InputType, typename OutputType >
+template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvert( InputType const * const src,
                          OutputType * const dest,
                          std::size_t numElements,
@@ -33,7 +33,7 @@ ErrorCode vectorConvert( InputType const * const src,
   return vectorConvertInputOutputStride( src, dest, numElements, 1, 1, alignment );
 }
 
-template< typename InputType, typename OutputType >
+template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertInputStride( InputType const * const src,
                                     OutputType * const dest,
                                     std::size_t numElements,
@@ -43,7 +43,7 @@ ErrorCode vectorConvertInputStride( InputType const * const src,
   return vectorConvertInputOutputStride( src, dest, numElements, inputStride, 1, alignment );
 }
 
-template< typename InputType, typename OutputType >
+template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertOutputStride( InputType const * const src,
                                      OutputType * const dest,
                                      std::size_t numElements,
@@ -53,7 +53,7 @@ ErrorCode vectorConvertOutputStride( InputType const * const src,
   return vectorConvertInputOutputStride( src, dest, numElements, 1, outputStride, alignment );
 }
 
-template< typename InputType, typename OutputType >
+template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertInputOutputStride( InputType const * const src,
                                           OutputType * const dest,
                                           std::size_t numElements,
@@ -79,25 +79,25 @@ ErrorCode vectorConvertInputOutputStride( InputType const * const src,
  * - Provide functions to deal with general striding constellations
  */
 //@{
-template ErrorCode vectorConvert<float, double>( float const * const, double * const, std::size_t, std::size_t );
-template ErrorCode vectorConvert<float, float>( float const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorConvert<double, float>( double const * const, float * const, std::size_t, std::size_t );
-template ErrorCode vectorConvert<double, double>( double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvert<float, double>( float const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvert<float, float>( float const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvert<double, float>( double const * const, float * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvert<double, double>( double const * const, double * const, std::size_t, std::size_t );
 
-template ErrorCode vectorConvertInputStride<float, double>( float const * const, double * const, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertInputStride<float, float>( float const * const, float * const, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertInputStride<double, float>( double const * const, float * const, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertInputStride<double, double>( double const * const, double * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputStride<float, double>( float const * const, double * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputStride<float, float>( float const * const, float * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputStride<double, float>( double const * const, float * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputStride<double, double>( double const * const, double * const, std::size_t, std::size_t, std::size_t );
 
-template ErrorCode vectorConvertOutputStride<float, double>( float const * const, double * const, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertOutputStride<float, float>( float const * const, float * const, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertOutputStride<double, float>( double const * const, float * const, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertOutputStride<double, double>( double const * const, double * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertOutputStride<float, double>( float const * const, double * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertOutputStride<float, float>( float const * const, float * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertOutputStride<double, float>( double const * const, float * const, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertOutputStride<double, double>( double const * const, double * const, std::size_t, std::size_t, std::size_t );
 
-template ErrorCode vectorConvertInputOutputStride<float, double>( float const * const, double * const, std::size_t, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertInputOutputStride<float, float>( float const * const, float * const, std::size_t, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertInputOutputStride<double, float>( double const * const, float * const, std::size_t, std::size_t, std::size_t, std::size_t );
-template ErrorCode vectorConvertInputOutputStride<double, double>( double const * const, double * const, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputOutputStride<float, double>( float const * const, double * const, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputOutputStride<float, float>( float const * const, float * const, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputOutputStride<double, float>( double const * const, float * const, std::size_t, std::size_t, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorConvertInputOutputStride<double, double>( double const * const, double * const, std::size_t, std::size_t, std::size_t, std::size_t );
 
 //@}
 

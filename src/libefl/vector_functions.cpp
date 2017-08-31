@@ -36,7 +36,7 @@ void getCpuId()
 }
 #endif
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
   return reference::vectorZero<T>( dest, numElements, alignment );
@@ -47,7 +47,7 @@ template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorZero<std::complex<float> >( std
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorZero<std::complex<double> >( std::complex<double> * const, std::size_t, std::size_t );
 
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
   return reference::vectorFill<T>( value, dest, numElements, alignment );
@@ -58,7 +58,7 @@ template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFill<std::complex<float> >( std
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorFill<std::complex<double> >( std::complex<double> const, std::complex<double> * const, std::size_t, std::size_t );
 
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
   bool startInclusive, bool endInclusive, std::size_t alignment /*= 0*/ )
 {
@@ -69,17 +69,24 @@ ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T end
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorRamp( float * const, std::size_t, float, float, bool, bool, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorRamp( double * const, std::size_t, double, double, bool, bool, std::size_t );
 
-template <typename T>
+template <typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment /*= 0*/ )
 {
   return reference::vectorCopy<T>( source, dest, numElements, alignment );
 }
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<float>( float const * const, float * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<double>( double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<long double>( long double const * const, long double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<int8_t>( int8_t const * const, int8_t * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<uint8_t>( uint8_t const * const, uint8_t * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<int16_t>( int16_t const * const, int16_t * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<uint16_t>( uint16_t const * const, uint16_t * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<int32_t>( int32_t const * const, int32_t * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<uint32_t>( uint32_t const * const, uint32_t * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<std::complex<float> >( std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorCopy<std::complex<double> >( std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorAdd( T const * const op1,
 		     T const * const op2,
 		     T * const result,
@@ -88,6 +95,7 @@ ErrorCode vectorAdd( T const * const op1,
 {
   return reference::vectorAdd<T>( op1, op2, result, numElements, alignment );
 }
+
 /** Explicit instantiation for types float and double */
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorAdd<float>( float const * const, float const * const ,
                float * const, std::size_t, std::size_t );
@@ -457,7 +465,7 @@ ErrorCode vectorMultiplyConstantInplace( T constantValue,
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantInplace( float, float * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantInplace( double, double * const, std::size_t, std::size_t );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyAdd( T const * const factor1,
 			     T const * const factor2,
 			     T const * const addend,
@@ -473,7 +481,7 @@ template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( double const * con
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( std::complex<float> const * const, std::complex<float> const * const, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAdd( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyAddInplace( T const * const factor1,
                                     T const * const factor2,
                                     T * const accumulator,
@@ -805,7 +813,7 @@ template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::comple
 
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::complex<double> const * const, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantAdd( T constFactor,
                                      T const * const factor,
                                      T const * const addend,
@@ -819,7 +827,7 @@ ErrorCode vectorMultiplyConstantAdd( T constFactor,
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAdd( float, float const * const, float const * const, float * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstantAdd( double, double const * const, double const * const, double * const, std::size_t, std::size_t );
 
-template<typename T>
+template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   T const * const factor,
   T * const accumulator,
