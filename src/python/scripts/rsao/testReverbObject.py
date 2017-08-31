@@ -5,7 +5,7 @@ Created on Tue Feb 14 15:59:11 2017
 @author: af5u13
 """
 
-# Usage for bebugging from raw Python console
+# Usage for debugging from raw Python console
 #exec(open("/Users/af5u13/dev/visr/src/python/scripts/rsao/testReverbObject.py").read())
 
 import visr
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Get VISR base directory from rsao subdirectory.
-visrBaseDirectory = os.path.join( os.getcwd(), '../../../..' )
+visrBaseDirectory = os.path.normpath(os.path.join( os.getcwd(), '../../../..' )).replace('\\','/')
 
 def sph2cart(az,el,r):
     x = r*np.cos(az)*np.cos(el)
