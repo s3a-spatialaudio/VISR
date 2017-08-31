@@ -768,10 +768,10 @@ template<> VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::comp
       a = _mm_permute_ps( a, 0xF5 /*0b11110101*/ );
       __m128 partRes1 = _mm_mul_ps( b, aHigh );
       b = _mm_permute_ps( b, 0xB1 /*0b10110001*/ );
-      __m128 acc = _mm128_load_ps( pAcc );
+      __m128 acc = _mm_load_ps( pAcc );
       __m128 partRes2 = _mm_mul_ps( b, a );
       __m128 res = _mm_addsub_ps( partRes1, partRes2 );
-      __m128 finalRes = _mm_add_ps( acc, res )
+      __m128 finalRes = _mm_add_ps( acc, res );
       _mm_store_ps( pAcc, finalRes );
       countN -= 2;
       pf1 += 4;
@@ -794,7 +794,7 @@ template<> VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyAddInplace( std::comp
       __m128 acc = _mm_loadl_pi( cReal, yL );
       __m128 bdad = _mm_mul_ps( cImag, ba );
       __m128 res = _mm_addsub_ps( acbc, bdad );
-      __m128 finalRes = _mm_add_ps( res, acc )
+      __m128 finalRes = _mm_add_ps( res, acc );
       _mm_storel_pi( yL, finalRes );
 
       --countN;
