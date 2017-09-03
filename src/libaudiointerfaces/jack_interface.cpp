@@ -17,14 +17,37 @@
 #include <cassert>
 #include <ciso646> // should not be necessary in C++11, but MSVC is non-compliant here
 #include <iostream>
+
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <tuple>
+#include <vector>
 
 namespace visr
 {
   namespace audiointerfaces
   {
+
+    namespace // unnamed
+    {
+      // Lookup table to translate error enums to messages.
+      using JackStatusDesc = std::tuple<jack_status_t, char const *>;
+      static std::vector< JackStatusDesc > const cJackStatusTranslator = {
+          JackStatusDesc{ JackFailure, "Overall operation failed" },
+          JackStatusDesc{ JackInvalidOption, "Invalid or unsupported option" },
+          JackStatusDesc{ JackNameNotUnique, "Client name not unique" },
+          JackStatusDesc{ JackServerStarted, "JACK server was started" },
+          JackStatusDesc{ JackServerFailed, "Unable to connect to the JACK server" },
+          JackStatusDesc{ JackServerError, "Communication error with the JACK server" },
+          JackStatusDesc{ JackNoSuchClient, "Requested client does not exist" },
+          JackStatusDesc{ JackLoadFailure, "Unable to load internal client" },
+          JackStatusDesc{ JackInitFailure, "Unable to initialize client" },
+          JackStatusDesc{ JackShmFailure, "Unable to access shared memory" },
+          JackStatusDesc{ JackVersionError, "Client's protocol version does not match" }
+      };
+    } // unnamed namespace
+
     /******************************************************************************/
     /* Definition of the internal implementation class JackInterface::Impl   */
     
@@ -209,7 +232,24 @@ namespace visr
       mClient = jack_client_open( clientName, options, &status, serverName );
       if( (status & JackFailure) or !mClient )
       {
-        throw std::invalid_argument( "JackInterface: Opening of client failed." );
+        std::stringstream statusMsg;
+        bool first = true; // put a comma before each message except the first
+        for( JackStatusDesc const & v : cJackStatusTranslator )
+        {
+          if( std::get<0>( v ) & status )
+          {
+            if( first )
+            {
+              first = false;
+            }
+            else
+            {
+              statusMsg << ", ";
+            }
+            statusMsg << std::get<1>( v );
+          }
+        }
+        throw std::invalid_argument( detail::composeMessageString( "JackInterface: Opening of client failed: ", statusMsg.str() ) );
       }
       if( jack_set_process_callback( mClient, &Impl::processCallbackFunction, this ) != 0 )
       {
