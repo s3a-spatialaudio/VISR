@@ -50,17 +50,23 @@ class SurroundLoudnessMeter( visr. AtomicComponent ):
     # The process() method implements the runtime operation of the component.
     # It is called regularly (every context.period samples) by the runtime system.
     def process( self ):
-        # Retrieve the new input samples 
+        # Retrieve the new input samples as a Numpy ndarray (dimension numChannels )
         x = self.audioInput.data()
         
+        # Perform K weighting as an IIR filter process with initial state self.filterState
         xk, self.filterState = sig.sosfilt( self.Kweighting, x, axis = 1, zi = self.filterState )
         
+        # Average power per channel
         y1 = np.mean( np.power( xk, 2 ), axis=1 )
                 
+        # Pass the K-weigthed input signal to the audio output
         self.audioOutput.set( xk )
         
         # Compute the ungated loudness
-        Lk = -0.691 + 10*np.log10( np.dot( y1, self.channelWeights ) )
+        combinedPwr = np.dot( y1, self.channelWeights )
+
+        # Avoid divide by zero, limit to ~ -120 dB        
+        Lk = -0.691 + 10*np.log10( np.clip( combinedPwr, 1.0e-12, None ) )
 
         # Create a parameter message holding a single float.
         outParam = pml.Float( Lk )
