@@ -10,15 +10,15 @@ import rrl
 import pml
 import audiointerfaces as ai
 
-from audio_meter import SurroundLoudnessMeter
+from audio_meter import LoudnessMeter
 
-from PyQt5 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
 import sys
 
 numChannels = 2
-audioInterfaceName = 'Jack'
+audioInterfaceName = 'PortAudio'
 audioBackendOptions = '{}'
 samplingFrequency = 48000
 blockSize = 1024
@@ -69,13 +69,13 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         
         self.context = visr.SignalFlowContext( period = blockSize, 
                                                samplingFrequency = samplingFrequency )
-        self.meter = SurroundLoudnessMeter( self.context, 'meter', None, numChannels, 
-                                           gatingPeriod = 0.4 )
+        self.meter = LoudnessMeter( self.context, 'meter', None, numChannels, 
+                                   gatingPeriod = 0.4, audioOut = True )
         
         audioOptions = ai.AudioInterface.Configuration( numChannels,
-                                                             numChannels,
-                                                             samplingFrequency,
-                                                             blockSize )
+                                                       numChannels,
+                                                       samplingFrequency,
+                                                       blockSize )
         self.audioInterface = ai.AudioInterfaceFactory.create( audioInterfaceName,
                                                               audioOptions,
                                                               audioBackendOptions )
@@ -111,6 +111,7 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
             self.loudnessHist = np.roll( self.loudnessHist, numPoints )
             for idx in range( 0, numPoints ):
                 Lk = self.loudnessPort.front()
+                print( "loudness value %d: %f dB" % (idx,Lk) )
                 self.loudnessPort.pop()
                 self.loudnessHist[idx] = Lk.value
             self.loudnessLabel.setText( '%f dB' % Lk.value )
