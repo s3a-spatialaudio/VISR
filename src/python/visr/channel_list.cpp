@@ -36,9 +36,12 @@ void exportChannelList( pybind11::module& m )
     .def( pybind11::init<std::initializer_list<ChannelList::IndexType > const & >() )
     .def( pybind11::init<std::list<ChannelList::IndexType > const & >() )
     .def( pybind11::init<ChannelRange const & >() )
-//    .def( pybind11::init<std::list<CompositeComponent::ChannelRange> const & >() )
-//    .def( "__init__", []( ChannelList & inst, pybind11:: sequence const & s ) { new (&inst) ChannelList; } )
     .def( "__str__", [](ChannelList const & self ){ std::stringstream outStr; std::copy(self.begin(), self.end(), std::ostream_iterator<std::size_t>(outStr, ",") ); return outStr.str();} )
+    .def_property_readonly( "size", &ChannelList::size)
+    .def_property_readonly( "__len__", &ChannelList::size )
+    .def( "__getitem__", static_cast<ChannelList::IndexType(ChannelList::*)(std::size_t)const>(&ChannelList::at) )
+    .def( "__setitem__", [](ChannelList& cl, std::size_t index, ChannelList::IndexType val ){ cl.at(index) =val; } )
+    .def("__iter__", [](ChannelList &v) { return pybind11::make_iterator(v.begin(), v.end());} )
     ;
 }
 
