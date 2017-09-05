@@ -317,15 +317,15 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
   assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
   if( inputIdx >= numberOfInputs() )
   {
-    std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Input index exceeds the admissible range." );
+    throw std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Input index exceeds the admissible range." );
   }
   if( outputIdx >= numberOfOutputs() )
   {
-    std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Output index exceeds the admissible range." );
+    throw std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Output index exceeds the admissible range." );
   }
   if( filterIdx >= maxNumberOfFilterEntries() )
   {
-    std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
+    throw std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
   }
 
   typename RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
@@ -337,7 +337,7 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
   {
     if( mRoutingTable.size( ) >= maxNumberOfRoutingPoints( ) )
     {
-      std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
+      throw std::invalid_argument( "MultichannelConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
     }
     auto res = mRoutingTable.insert( std::make_pair( RoutingKey( inputIdx, outputIdx ),
       RoutingValue( filterIdx, static_cast<SampleType>(gain) ) ) );
