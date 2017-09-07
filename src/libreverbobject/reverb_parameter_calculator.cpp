@@ -110,23 +110,9 @@ void ReverbParameterCalculator::setup( panning::LoudspeakerArray const & arrayCo
 
   // Configure the VBAP calculator
   mNumberOfPanningLoudspeakers = arrayConfig.getNumRegularSpeakers();
-#if 1
+
   mVbapCalculator.reset( new panning::VBAP( arrayConfig ) );
   mTmpPanningGains.resize( mNumberOfPanningLoudspeakers );
-#else
-  mSourcePositions.resize( mNumberOfDiscreteReflectionsPerSource ); // Process one reverb object at a time.
-  mVbapCalculator.setNumSources( mNumberOfDiscreteReflectionsPerSource /* * mMaxNumberOfObjects */ );
-  if( mMaxNumberOfObjects > 0 ) // avoid MSVC debug assertion if reverb is inactive.
-  {
-    mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
-  }
-  mVbapCalculator.setLoudspeakerArray( &arrayConfig );
-  mVbapCalculator.setListenerPosition( 0.0f, 0.0f, 0.0f ); // Use a default listener position
-  if( mVbapCalculator.calcInvMatrices( ) != 0 )
-  {
-    throw std::invalid_argument( "ReverbParameterCalculator::setup(): Calculation of inverse matrices for VBAP calculatorfailed." );
-  }
-#endif
 
   mPreviousLateReverbs.resize( mMaxNumberOfObjects, cDefaultLateReverbParameter );
   // Set one member to an invalid value to trigger sending of late reverb messages on the first call to process();
@@ -166,7 +152,7 @@ void ReverbParameterCalculator::process()
   pml::ObjectVector const & objects = mObjectInput.data();
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
-    objectmodel::Object const & obj = *(objEntry.second);
+    objectmodel::Object const & obj = *(objEntry.mVal);
     objectmodel::ObjectTypeId const ti = obj.type();
     // Process reverb objects, ignore others
     switch( ti )
@@ -244,7 +230,6 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
     objectmodel::PointSourceWithReverb::DiscreteReflection const & discRefl = rsao.discreteReflection( srcIdx );
     std::size_t const matrixIdx = startIdx + srcIdx;
 
-#if 1
     mVbapCalculator->calculateGains( discRefl.positionX(), discRefl.positionY(), discRefl.positionZ(), mTmpPanningGains.data() );
     efl::ErrorCode const res = efl::vectorCopyStrided( mTmpPanningGains.data(), &discretePanningMatrix(0, matrixIdx ), 1, 
       discretePanningMatrix.stride(), mNumberOfPanningLoudspeakers, 0 /*no assumptions on stride possible*/ );
@@ -253,10 +238,6 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
       status( StatusMessage::Error, "Error while assigning discrete panning gains: ", efl::errorMessage( res ) );
       return;
     }
-#else
-    // Set the position for the VBAP calculator
-    mSourcePositions[srcIdx] = panning::XYZ( discRefl.positionX( ), discRefl.positionY( ), discRefl.positionZ( ) );
-#endif
 
     // Set the biquad filters
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
@@ -274,10 +255,6 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
   for( std::size_t srcIdx( rsao.numberOfDiscreteReflections() ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
     std::size_t const matrixIdx = startIdx + srcIdx;
-#if 1
-#else
-    mSourcePositions[srcIdx] = defaultPosition;
-#endif
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSectionsReflectionFilters; ++biquadIdx )
     {
       biquadCoeffs( matrixIdx, biquadIdx ) = defaultBiquad;
@@ -291,23 +268,6 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
       discretePanningMatrix( lspIdx, matrixIdx ) = 0.0f;
     }
   }
-#if 0
-  std::fill( mSourcePositions.begin() + rsao.numberOfDiscreteReflections(), mSourcePositions.end(), defaultPosition );
-  if( mVbapCalculator.calcGains( ) != 0 )
-  {
-    std::cout << "ReverbParameterCalculator: Error calculating VBAP gains for discrete reflections." << std::endl;
-  }
-  // Fill the used discrete reflections with sensible values.
-  for( std::size_t srcIdx( 0 ); srcIdx < rsao.numberOfDiscreteReflections(); ++srcIdx )
-  {
-    Afloat const * const gainRow = mVbapCalculator.getGains( ).row( srcIdx );
-    std::size_t const matrixIdx = startIdx + srcIdx;
-    for( std::size_t lspIdx(0 ); lspIdx < mNumberOfPanningLoudspeakers; ++lspIdx )
-    {
-      discretePanningMatrix( lspIdx, matrixIdx ) = gainRow[lspIdx];
-    }
-  }
-#endif
   // The unused rows are already zeroed.
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -334,9 +294,6 @@ void ReverbParameterCalculator::clearSingleObject( std::size_t renderChannel,
 
   static const panning::XYZ defaultPosition( 1.0f, 0.0f, 0.0f );
   static const rbbl::BiquadCoefficient<SampleType> defaultBiquad; // Neutral flat biquad (default constructed)
-#if 0
-  std::fill( mSourcePositions.begin( ), mSourcePositions.end( ), defaultPosition );
-#endif
   for( std::size_t srcIdx( 0 ); srcIdx < mNumberOfDiscreteReflectionsPerSource; ++srcIdx )
   {
     std::size_t const matrixRow = startRow + srcIdx;

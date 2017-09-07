@@ -80,12 +80,12 @@ void ChannelObjectRoutingCalculator::process( pml::ObjectVector const & objects,
   // A potential re-routing that can be added later will be handled by the 
   for (objectmodel::ObjectVector::value_type const & objEntry : objects)
   {
-    objectmodel::ObjectTypeId const ti = objEntry.second->type();
+    objectmodel::ObjectTypeId const ti = objEntry.mVal->type();
     if (ti != objectmodel::ObjectTypeId::ChannelObject)
     {
       continue;
     }
-    objectmodel::ChannelObject const & chObj = dynamic_cast<objectmodel::ChannelObject const &>(*(objEntry.second));
+    objectmodel::ChannelObject const & chObj = dynamic_cast<objectmodel::ChannelObject const &>(*(objEntry.mVal));
     std::size_t const numberOfChannelSignals = chObj.numberOfChannels();
     assert(numberOfChannelSignals == chObj.outputChannels().size()); // class invariant
     for( std::size_t chIdx(0); chIdx < numberOfChannelSignals; ++chIdx )

@@ -58,7 +58,7 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
   // Any potential re-routing will be added later.
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
-    objectmodel::Object const & obj = *(objEntry.second);
+    objectmodel::Object const & obj = *(objEntry.mVal);
     // Pre-check to handle only monaural objects here. The fine-grained disambiguation between supported object types happens later.
     if( obj.numberOfChannels() != 1 )
     {
@@ -67,7 +67,7 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
     objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
     if( channelId >= mNumberOfObjectChannels )
     {
-      std::cerr << "DiffusionGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
+      std::cerr << "DiffusionGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.mId
                 << "exceeds number of channels (" << mNumberOfObjectChannels << ")." << std::endl;
       continue;
     }

@@ -23,7 +23,7 @@ void ObjectVector::assign( ObjectVector const & rhs )
   mObjects.clear();
   for( ObjectContainer::value_type const & v : rhs.mObjects )
   {
-    mObjects.insert( std::make_pair( v.first, v.second->clone() ) );
+    mObjects.insert( v );
   }
 }
 
@@ -40,7 +40,7 @@ Object const & ObjectVector::at( ObjectId id ) const
   {
     throw std::invalid_argument( "An audio object with this id does not exist." );
   }
-  return *(findIt->second);
+  return *(findIt->mVal);
 }
 
 Object & ObjectVector::at( ObjectId id )
@@ -50,20 +50,17 @@ Object & ObjectVector::at( ObjectId id )
   {
     throw std::invalid_argument( "An audio object with this id does not exist." );
   }
-  return *(findIt->second);
+  return *(findIt->mVal);
 }
 
 void ObjectVector::set( ObjectId id, Object const &  obj )
 {
-  ObjectContainer::iterator findIt = mObjects.find( id );
-  if( findIt == mObjects.end() )
+  ObjectContainer::iterator findIt = mObjects.find( obj.id() );
+  if( findIt != mObjects.end() )
   {
-    mObjects.insert( findIt, std::make_pair( id, obj.clone() ) );
+    mObjects.erase( findIt );
   }
-  else
-  {
-    findIt->second = obj.clone();
-  }
+  mObjects.insert( obj.clone() );
 }
 
 void ObjectVector::remove( ObjectId id )

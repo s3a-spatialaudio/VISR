@@ -6,8 +6,9 @@
 #include "object.hpp"
 
 #include "export_symbols.hpp"
+#include "diffuse_source.hpp"
 
-#include <map>
+#include <set>
 #include <memory>
 
 namespace visr
@@ -21,10 +22,63 @@ namespace objectmodel
 class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectVector
 {
 public:
+
+  struct Containee
+  {
+    std::unique_ptr<Object> mVal;
+    ObjectId mId;
+
+
+    Containee( ObjectId id )
+    : mId(id)
+    {}
+
+    Containee( Containee const & rhs )
+    : mVal( rhs.mVal->clone() )
+    , mId( mVal->id())
+    {}
+
+    Containee( Containee && rhs )
+    : mVal( std::move(rhs.mVal) )
+    , mId( mVal->id())
+    {}
+
+
+    Containee( std::unique_ptr<Object> && obj )
+    : mVal( std::move(obj) )
+    , mId( mVal->id() )
+    {
+    }
+
+    bool operator<(Containee const & rhs ) const
+    {
+      return mId < rhs.mId;
+    }
+  };
+
+//  struct CompareId
+//  {
+//    using is_transparent = void; // for example with void,
+//    // but could be int or struct CanSearchOnId;
+//    bool operator()( Containee const& object1,
+//                    Containee const& object2 ) const
+//    {
+//      return object1->id() < object2->id();
+//    }
+//    bool operator()( ObjectId id, Containee const& object) const
+//    {
+//      return id < object->id();
+//    }
+//    bool operator()(Containee const& object, ObjectId id) const
+//    {
+//      return object->id() < id;
+//    }
+//  };
+
   /**
    * The type used to store the the different object types polymorphically.
    */
-  using ObjectContainer = std::map< ObjectId, std::unique_ptr<Object > >;
+  using ObjectContainer = std::set< Containee >;
 
   /**
    * Provide a limited subset to the STL-type access functions of the underlying container type (map)
@@ -34,7 +88,7 @@ public:
   using const_iterator = ObjectContainer::const_iterator;
 
   using key_type = ObjectContainer::key_type;
-  using mapped_type = ObjectContainer::mapped_type;
+//  using mapped_type = ObjectContainer::mapped_type;
   using value_type = ObjectContainer::value_type;
 
   iterator begin() { return mObjects.begin(); }

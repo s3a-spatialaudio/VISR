@@ -110,8 +110,8 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
 
   // This implementation requires the construction of a new object even if a matching object is found, but provides exception,
   // safety, i.e., resets the original state of the object to be by modified, which is thus unchanged if the parser throws
-  std::unique_ptr< Object > newObj( (found and (findIt->second->type() == objTypeId))
-                                   ? findIt->second->clone()
+  std::unique_ptr< Object > newObj( (found and (findIt->mVal->type() == objTypeId))
+                                   ? findIt->mVal->clone()
                                    : ObjectFactory::create(objTypeId) );
 
   objParser.parse( subtree, *newObj );
@@ -127,7 +127,7 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
   for( ObjectVector::const_iterator runIt( objects.begin()); runIt != objects.end(); ++runIt )
   {
     boost::property_tree::ptree objTree;
-    Object const & obj( *(runIt->second) );
+    Object const & obj( *(runIt->mVal) );
 
     // Create a parser for this type
     ObjectParser const & objParser = ObjectFactory::parser( obj.type() );

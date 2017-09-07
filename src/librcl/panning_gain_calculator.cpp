@@ -111,7 +111,7 @@ void PanningGainCalculator::process()
     // Any potential re-routing will be added later.
     for( objectmodel::ObjectVector::value_type const & objEntry : objects )
     {
-      objectmodel::Object const & obj = *(objEntry.second);
+      objectmodel::Object const & obj = *(objEntry.mVal);
       if( obj.numberOfChannels() != 1 )
       {
         // Panning is implemented only for single-channel objects.

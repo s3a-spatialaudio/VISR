@@ -145,7 +145,7 @@ void PanningCalculator::process()
     // Any potential re-routing will be added later.
     for( objectmodel::ObjectVector::value_type const & objEntry : objects )
     {
-      objectmodel::Object const & obj = *(objEntry.second);
+      objectmodel::Object const & obj = *(objEntry.mVal);
       if( obj.numberOfChannels( ) != 1 )
       {
         std::cerr << "PanningCalculator: Only monaural object types are supported at the moment." << std::endl;
@@ -155,7 +155,7 @@ void PanningCalculator::process()
       objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
       if( channelId >= mNumberOfObjects )
       {
-        std::cerr << "PanningCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
+        std::cerr << "PanningCalculator: Channel index \"" << channelId << "\" of object id#" << obj.id()
             << "exceeds number of channels (" << mNumberOfObjects << ")." << std::endl;
         continue;
       }

@@ -26,7 +26,6 @@
 
 #include <libpanning/LoudspeakerArray.h>
 #include <libpanning/VBAP.h>
-//#include <libpanning/XYZ.h>
 
 #include <memory>
 #include <vector>

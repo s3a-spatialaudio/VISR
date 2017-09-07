@@ -126,7 +126,7 @@ void HoaAllRadGainCalculator::process()
   // Any potential re-routing will be added later.
   for( objectmodel::ObjectVector::value_type const & objEntry : objects )
   {
-    objectmodel::Object const & obj = *(objEntry.second);
+    objectmodel::Object const & obj = *(objEntry.mVal);
 
     // Note: This does not allow object types derived from HoaSource.
     objectmodel::ObjectTypeId const ti = obj.type();
