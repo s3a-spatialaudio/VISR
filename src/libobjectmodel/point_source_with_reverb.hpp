@@ -276,7 +276,7 @@ namespace objectmodel
      * Default constructor.
      * Construct a PointSourceWithReverb with all data members set to default values.
      */
-    PointSourceWithReverb();
+    PointSourceWithReverb() = delete;
 
     /**
      * Construct a PointSourceWithReverb with a given object id and all data members set to default values.

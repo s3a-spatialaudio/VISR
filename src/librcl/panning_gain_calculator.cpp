@@ -109,9 +109,8 @@ void PanningGainCalculator::process()
     // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
     // As not every source object in the VBAP calculator component might correspond to a concrete source, we have to set them to safe position beforehand.
     // Any potential re-routing will be added later.
-    for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+    for( objectmodel::Object const & obj : objects )
     {
-      objectmodel::Object const & obj = *(objEntry.mVal);
       if( obj.numberOfChannels() != 1 )
       {
         // Panning is implemented only for single-channel objects.

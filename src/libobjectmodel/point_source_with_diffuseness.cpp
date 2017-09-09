@@ -7,22 +7,13 @@ namespace visr
 namespace objectmodel
 {
 
-PointSourceWithDiffuseness::PointSourceWithDiffuseness( )
- : PointSource( )
- , mDiffuseness( 0.0f )
-{
-}
-
-
 PointSourceWithDiffuseness::PointSourceWithDiffuseness( ObjectId id )
  : PointSource( id )
  , mDiffuseness( 0.0f )
 {
 }
 
-/*virtual*/ PointSourceWithDiffuseness::~PointSourceWithDiffuseness()
-{
-}
+/*virtual*/ PointSourceWithDiffuseness::~PointSourceWithDiffuseness() default;
 
 /*virtual*/ ObjectTypeId
 PointSourceWithDiffuseness::type() const

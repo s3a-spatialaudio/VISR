@@ -80,8 +80,8 @@ void setArray( PointSourceWithReverb::LateReverb & param,
 void exportPointSourceWithReverb( pybind11::module & m )
 {
   py::class_<PointSourceWithReverb, PointSource> psReverb( m, "PointSourceWithReverb" );
-  psReverb.def( py::init<>(), "Default constructor" )
-    .def( py::init<ObjectId>() )
+  psReverb
+    .def( py::init<ObjectId>(), py::arg("objectId") )
     .def_property_readonly( "lateReverb",
       static_cast<PointSourceWithReverb::LateReverb const&(PointSourceWithReverb::*)()const>(&PointSourceWithReverb::lateReverb),
       py::return_value_policy::reference )

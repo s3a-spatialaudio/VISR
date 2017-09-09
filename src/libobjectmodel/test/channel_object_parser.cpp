@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(WriteChannelObject)
     throw std::invalid_argument(std::string("Error while parsing a json object message: ") + ex.what());
   }
 
-  ChannelObject co;
+  ChannelObject co( 23 ); // Fake id
   ChannelObjectParser coParser;
   BOOST_CHECK_NO_THROW( coParser.parse( propTree, co ) );
 

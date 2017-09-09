@@ -94,6 +94,7 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
 {
   // properties common to all source types
   std::string const objTypeStr = subtree.get<std::string>( "type" );
+  ObjectId const objId = subtree.get<ObjectId>( "id" );
 
   // might throw (if the string does not match a recognised object type
   ObjectTypeId const objTypeId = stringToObjectType( objTypeStr );
@@ -108,15 +109,15 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
   ObjectVector::iterator findIt = res.find( newId );
   bool const found = findIt != res.end();
 
-  // This implementation requires the construction of a new object even if a matching object is found, but provides exception,
+  // This implementation requires the construction of a new object even if a matching object is found, but provides exception
   // safety, i.e., resets the original state of the object to be by modified, which is thus unchanged if the parser throws
-  std::unique_ptr< Object > newObj( (found and (findIt->mVal->type() == objTypeId))
-                                   ? findIt->mVal->clone()
-                                   : ObjectFactory::create(objTypeId) );
+  std::unique_ptr< Object > newObj( (found and (findIt->type() == objTypeId))
+                                   ? findIt->clone()
+                                   : ObjectFactory::create(objTypeId, objId ) );
 
   objParser.parse( subtree, *newObj );
 
-  res.set( newObj->id(), *newObj );
+  res.insert( std::move(newObj) );
 }
 
 /*static*/ void ObjectVectorParser::encodeObjectVector( ObjectVector const & objects,
@@ -124,10 +125,10 @@ parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res )
 {
   boost::property_tree::ptree vecTree;  // new empty tree;
   boost::property_tree::ptree objListTree;
-  for( ObjectVector::const_iterator runIt( objects.begin()); runIt != objects.end(); ++runIt )
+  for( ObjectVector::const_iterator runIt( objects.cbegin()); runIt != objects.cend(); ++runIt )
   {
     boost::property_tree::ptree objTree;
-    Object const & obj( *(runIt->mVal) );
+    Object const & obj( *runIt );
 
     // Create a parser for this type
     ObjectParser const & objParser = ObjectFactory::parser( obj.type() );

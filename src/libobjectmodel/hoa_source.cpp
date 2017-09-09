@@ -7,22 +7,13 @@ namespace visr
 namespace objectmodel
 {
 
-HoaSource::HoaSource( )
- : Object( )
- , mOrder( 0 )
-{
-}
-
-
 HoaSource::HoaSource( ObjectId id )
  : Object( id )
  , mOrder( 0 )
 {
 }
 
-/*virtual*/ HoaSource::~HoaSource()
-{
-}
+/*virtual*/ HoaSource::~HoaSource() = default;
 
 /*virtual*/ ObjectTypeId
 HoaSource::type() const

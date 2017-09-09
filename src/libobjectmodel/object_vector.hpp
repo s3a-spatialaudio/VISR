@@ -21,93 +21,52 @@ namespace objectmodel
  */
 class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectVector
 {
-public:
-
+private:
+  /**
+   * Internal data structure to enable storing of the object vectoes in a set.
+   * * An wrapper is necessary to store polymorphic objects.
+   * * Provides a means to search by Id without constructing a new object for the search.
+   */
   struct Containee
   {
     std::unique_ptr<Object> mVal;
     ObjectId mId;
 
-
     Containee( ObjectId id )
-    : mId(id)
-    {}
-
-    Containee( Containee const & rhs )
-    : mVal( rhs.mVal->clone() )
-    , mId( mVal->id())
-    {}
-
-    Containee( Containee && rhs )
-    : mVal( std::move(rhs.mVal) )
-    , mId( mVal->id())
-    {}
-
-
-    Containee( std::unique_ptr<Object> && obj )
-    : mVal( std::move(obj) )
-    , mId( mVal->id() )
+      : mId( id )
     {
     }
 
-    bool operator<(Containee const & rhs ) const
+    Containee( Containee const & rhs )
+      : mVal( rhs.mVal->clone() )
+      , mId( mVal->id() )
+    {
+    }
+
+    Containee( Containee && rhs )
+      : mVal( std::move( rhs.mVal ) )
+      , mId( mVal->id() )
+    {
+    }
+
+    Containee( std::unique_ptr<Object> && obj )
+      : mVal( std::move( obj ) )
+      , mId( mVal->id() )
+    {
+    }
+
+    bool operator<( Containee const & rhs ) const
     {
       return mId < rhs.mId;
     }
   };
 
-//  struct CompareId
-//  {
-//    using is_transparent = void; // for example with void,
-//    // but could be int or struct CanSearchOnId;
-//    bool operator()( Containee const& object1,
-//                    Containee const& object2 ) const
-//    {
-//      return object1->id() < object2->id();
-//    }
-//    bool operator()( ObjectId id, Containee const& object) const
-//    {
-//      return id < object->id();
-//    }
-//    bool operator()(Containee const& object, ObjectId id) const
-//    {
-//      return object->id() < id;
-//    }
-//  };
-
   /**
-   * The type used to store the the different object types polymorphically.
-   */
+  * The type used to store the the different object types polymorphically.
+  */
   using ObjectContainer = std::set< Containee >;
 
-  /**
-   * Provide a limited subset to the STL-type access functions of the underlying container type (map)
-   */
-  //@{
-  using iterator = ObjectContainer::iterator;
-  using const_iterator = ObjectContainer::const_iterator;
-
-  using key_type = ObjectContainer::key_type;
-//  using mapped_type = ObjectContainer::mapped_type;
-  using value_type = ObjectContainer::value_type;
-
-  iterator begin() { return mObjects.begin(); }
-
-  iterator end() { return mObjects.end(); }
-
-  const_iterator begin() const { return mObjects.begin(); }
-
-  const_iterator end() const { return mObjects.end(); }
-
-  const_iterator find( ObjectId id ) const { return mObjects.find( id ); }
-
-  /**
-   * Return a non-const iterator to the element with key \p id
-   * @note In the object dereferenced by <tt>return value</tt>->second, the id must not be changed, as it would destroy the integrity between the
-   * id in the key value and the id of the contained object.
-   */
-  iterator find( ObjectId id ) { return mObjects.find( id ); }
-  //@}
+public:
 
   /**
    * Default constructor, creates an empty object vector
@@ -115,10 +74,30 @@ public:
   ObjectVector();
 
   /**
-   * Explicitly defined default copy constructor.
-   * @todo Check whether copy construction is sensible for this type of object.
-   */
-  ObjectVector( ObjectVector const & rhs ) = delete;
+  * Copy constructor.
+  * Made explicit to prevent unintentially copying
+  */
+  explicit ObjectVector( ObjectVector const & rhs );
+
+  /**
+  * Explicitly defined move constructor.
+  */
+  ObjectVector( ObjectVector && rhs );
+
+  /**
+  * Explicit definition of default assignment operator.
+  */
+  ObjectVector& operator=( ObjectVector const & rhs );
+
+  /**
+  * Explicit definition of move assignment operator.
+  */
+  ObjectVector& operator=( ObjectVector && rhs );
+
+  /**
+  * Destructor.
+  */
+  ~ObjectVector();
 
   /**
    * Assign member function as an explicit alternative to an assignment operator.
@@ -130,27 +109,6 @@ public:
    * Invalidates all iterators into this and \p rhs
    */
   void swap( ObjectVector & rhs );
-
-  /**
-   * Explicitly defined default copy constructor, move constructor flavour.
-   * @todo Check whether copy construction is sensible for this object.
-   */
-//  ObjectVector( ObjectVector && rhs ) = default;
-
-  /**
-   * Explicit definition of default assignment operator.
-   */
-  ObjectVector& operator=( ObjectVector const & rhs ) = delete;
-
-  /**
-   * Explicit definition of default assignment operator, move constructor flavour.
-   */
-//  ObjectVector& operator=( ObjectVector && rhs ) = default;
-
-  /**
-   * Destructor.
-   */
-  ~ObjectVector();
 
   /**
    * Return the number of contained audio objects.
@@ -176,6 +134,158 @@ public:
    */
   Object const & at( ObjectId id ) const;
 
+  /**
+  * Iterator class for ObjectVector.
+  * It models the BidirectionalIterator concept (like std::set iterators)
+  */
+  class iterator
+  {
+  public:
+    friend class ObjectVector;
+    using value_type = Object&;
+    using pointer = Object*;
+    value_type operator*() const { return *(mImpl->mVal); }
+
+    iterator() = default;
+    iterator( iterator const & rhs ) = default;
+    iterator( iterator && rhs ) = default;
+
+    pointer operator->() const { return mImpl->mVal.get(); };
+    bool operator==( const iterator& rhs ) const { return mImpl == rhs.mImpl; }
+    bool operator!=( const iterator& rhs ) const { return mImpl != rhs.mImpl; }
+
+    /**
+    * Pre-increment operator
+    */
+    iterator& operator++() { ++mImpl; return *this; }
+
+    /**
+    * Post-increment operator
+    */
+    iterator operator++( int )
+    {
+      iterator ret( *this );
+      mImpl++;
+      return ret;
+    }
+
+    /**
+    * Pre-increment operator
+    */
+    iterator & operator--() { --mImpl; return *this; }
+
+    /**
+    * Post-decrement operator
+    */
+    iterator operator--( int )
+    {
+      iterator ret( *this );
+      mImpl--;
+      return ret;
+    }
+  private:
+    explicit iterator( ObjectContainer::iterator const & internal )
+      : mImpl( internal )
+    {
+    }
+    explicit iterator( ObjectContainer::iterator && internal )
+      : mImpl( internal )
+    {
+    }
+
+    ObjectContainer::iterator mImpl;
+  };
+
+  /**
+  * Constant iterator class for ObjectVector
+  * It models the BidirectionalIterator concept (like std::set iterators)
+  */
+  class const_iterator
+  {
+  public:
+    friend class ObjectVector;
+    using value_type = Object&;
+    using pointer = Object*;
+
+    const_iterator() = default;
+    const_iterator( const_iterator const & rhs ) = default;
+    value_type operator*() const { return *(mImpl->mVal); }
+    pointer operator->() const { return mImpl->mVal.get(); };
+    bool operator==( const const_iterator& rhs ) const { return mImpl == rhs.mImpl; }
+    bool operator!=( const const_iterator& rhs ) const { return mImpl != rhs.mImpl; }
+
+    /**
+    * Pre-increment operator
+    */
+    const_iterator& operator++() { ++mImpl; return *this; }
+
+    /**
+    * Post-increment operator
+    */
+    const_iterator operator++( int )
+    {
+      const_iterator ret( *this );
+      mImpl++;
+      return ret;
+    }
+
+    /**
+    * Pre-increment operator
+    */
+    const_iterator & operator--() { --mImpl; return *this; }
+
+    /**
+    * Post-decrement operator
+    */
+    const_iterator operator--( int )
+    {
+      const_iterator ret( *this );
+      mImpl--;
+      return ret;
+    }
+
+  private:
+    const_iterator( ObjectContainer::const_iterator const & internal )
+      : mImpl( internal )
+    {
+    }
+
+    const_iterator( ObjectContainer::const_iterator && internal )
+      : mImpl( internal )
+    {
+    }
+
+    ObjectContainer::const_iterator mImpl;
+  };
+
+  iterator begin() { return iterator( mObjects.begin() ); }
+
+  iterator end() { return iterator( mObjects.end() ); }
+
+  /**
+  * Iterator begin/end for const objects.
+  * @note For range-based for loops over constant object vectors, cbegin/cend are not sufficient.
+  */
+  //@{
+  const_iterator begin() const { return mObjects.cbegin(); }
+
+  const_iterator end() const { return mObjects.cend(); }
+  //@} h
+
+  const_iterator cbegin() const { return mObjects.cbegin(); }
+
+  const_iterator cend() const { return mObjects.cend(); }
+
+  const_iterator find( ObjectId id ) const { return mObjects.find( id ); }
+
+  /**
+  * Return a non-const iterator to the element with key \p id
+  * @note In the object dereferenced by <tt>return value</tt>->second, the id must not be changed, as it would destroy the integrity between the
+  * id in the key value and the id of the contained object.
+  */
+  iterator find( ObjectId id ) { return iterator( mObjects.find( id ) ); }
+  //@}
+
 
   /**
    * Add a new audio object to the vector, possibly replacing an existing one with the same id.
@@ -183,7 +293,7 @@ public:
    * @param id The object id of the audio object.
    * @param obj The object to be inserted (copied).
    */
-  void set( ObjectId id, Object const &  obj );
+  void insert( Object const &  obj );
 
   /**
    * Add a new audio object to the vector, possibly replacing an existing one with the same id, move constructor flavour.
@@ -191,7 +301,7 @@ public:
    * @param id The object id of the audio object.
    * @param obj The object to be inserted (copied).
    */
-  void set( ObjectId id, Object &&  obj );
+  void insert( std::unique_ptr<Object> &&  obj );
   
   /**
    * Erase an object with a given object id from the vector.

@@ -37,9 +37,9 @@ ObjectFactory::Creator::Creator( CreateFunction fcn, ObjectParser * parser )
 {
 }
 
-Object* ObjectFactory::Creator::create() const
+Object* ObjectFactory::Creator::create( ObjectId id ) const
 {
-  return mCreateFunction();
+  return mCreateFunction( id );
 }
 
 ObjectParser const & ObjectFactory::Creator::parser( ) const
@@ -57,14 +57,14 @@ ObjectFactory::creatorTable()
 
 
 /*static*/ std::unique_ptr<Object> 
-ObjectFactory::create( ObjectTypeId typeId )
+ObjectFactory::create( ObjectTypeId typeId, ObjectId objectId )
 {
   CreatorTable::const_iterator findIt = creatorTable().find( typeId );
   if( findIt == creatorTable().end() )
   {
     throw std::invalid_argument( "ObjectFactory: The specified object type is not registered." );
   }
-  return std::unique_ptr<Object>( findIt->second.create( ) );
+  return std::unique_ptr<Object>( findIt->second.create( objectId ) );
 }
 
 /*static*/ const ObjectParser & 

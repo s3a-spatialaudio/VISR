@@ -7,15 +7,6 @@ namespace visr
 namespace objectmodel
 {
 
-PointSourceExtent::PointSourceExtent( )
- : PointSource( )
- , mWidth( static_cast<Coordinate>(0.0) )
- , mHeight( static_cast<Coordinate>(0.0f) )
- , mDepth( static_cast<Coordinate>(0.0f) )
-{
-}
-
-
 PointSourceExtent::PointSourceExtent( ObjectId id )
  : PointSource( id )
  , mWidth( static_cast<Coordinate>(0.0) )
@@ -24,9 +15,7 @@ PointSourceExtent::PointSourceExtent( ObjectId id )
 {
 }
 
-/*virtual*/ PointSourceExtent::~PointSourceExtent()
-{
-}
+/*virtual*/ PointSourceExtent::~PointSourceExtent() = default;
 
 /*virtual*/ ObjectTypeId
 PointSourceExtent::type() const

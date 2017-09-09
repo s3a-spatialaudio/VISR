@@ -10,20 +10,12 @@ namespace visr
 namespace objectmodel
 {
 
-PointSourceWithReverb::PointSourceWithReverb( )
- : PointSource( )
-{
-}
-
-
 PointSourceWithReverb::PointSourceWithReverb( ObjectId id )
  : PointSource( id )
 {
 }
 
-/*virtual*/ PointSourceWithReverb::~PointSourceWithReverb()
-{
-}
+/*virtual*/ PointSourceWithReverb::~PointSourceWithReverb() = default;
 
 /*virtual*/ ObjectTypeId
 PointSourceWithReverb::type() const

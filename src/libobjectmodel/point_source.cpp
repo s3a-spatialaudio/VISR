@@ -9,16 +9,6 @@ namespace visr
 namespace objectmodel
 {
 
-PointSource::PointSource( )
- : Object( )
- , mXPos( static_cast<Coordinate>(0.0) )
- , mYPos( static_cast<Coordinate>(0.0f) )
- , mZPos( static_cast<Coordinate>(0.0f) )
- , mChannelLockDistance( static_cast<Coordinate>(cNoChannelLock) )
-{
-}
-
-
 PointSource::PointSource( ObjectId id )
  : Object( id )
  , mXPos( static_cast<Coordinate>(0.0) )
@@ -28,9 +18,7 @@ PointSource::PointSource( ObjectId id )
 {
 }
 
-/*virtual*/ PointSource::~PointSource()
-{
-}
+/*virtual*/ PointSource::~PointSource() = default;
 
 /*virtual*/ ObjectTypeId
 PointSource::type() const

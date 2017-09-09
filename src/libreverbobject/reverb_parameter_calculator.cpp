@@ -150,9 +150,8 @@ void ReverbParameterCalculator::process()
 
   std::vector<objectmodel::ObjectId> foundReverbObjects;
   pml::ObjectVector const & objects = mObjectInput.data();
-  for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  for( objectmodel::Object const & obj : objects )
   {
-    objectmodel::Object const & obj = *(objEntry.mVal);
     objectmodel::ObjectTypeId const ti = obj.type();
     // Process reverb objects, ignore others
     switch( ti )

@@ -19,7 +19,7 @@ class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSource: public Object
 {
 public:
 
-  PointSource();
+  PointSource() = delete;
 
   explicit PointSource( ObjectId id );
 

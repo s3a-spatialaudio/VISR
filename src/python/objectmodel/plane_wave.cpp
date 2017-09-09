@@ -16,8 +16,7 @@ namespace python
 void exportPlaneWave( pybind11::module & m )
 {
   py::class_<PlaneWave, Object>( m, "PlaneWave" )
-    .def( py::init<>(), "Default constructor" )
-    .def( py::init<ObjectId>() )
+    .def( py::init<ObjectId>(), py::arg("objectId") )
     .def_property( "azimuth", &PlaneWave::incidenceAzimuth, &PlaneWave::setIncidenceAzimuth )
     .def_property( "elevation", &PlaneWave::incidenceElevation, &PlaneWave::setIncidenceElevation )
     .def_property( "referenceDistance", &PlaneWave::referenceDistance, &PlaneWave::setReferenceDistance )

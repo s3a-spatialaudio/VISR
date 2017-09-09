@@ -20,7 +20,7 @@ class VISR_OBJECTMODEL_LIBRARY_SYMBOL HoaSource: public Object
 public:
   using Order = unsigned int;
 
-  HoaSource( );
+  HoaSource( ) = delete;
 
   explicit HoaSource( ObjectId id );
 

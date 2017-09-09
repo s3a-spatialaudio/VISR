@@ -19,7 +19,7 @@ class  VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceWithDiffuseness: public PointS
 {
 public:
 
-  PointSourceWithDiffuseness( );
+  PointSourceWithDiffuseness( ) = delete;
 
   explicit PointSourceWithDiffuseness( ObjectId id );
 

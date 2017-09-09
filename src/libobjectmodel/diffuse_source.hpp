@@ -19,7 +19,7 @@ class VISR_OBJECTMODEL_LIBRARY_SYMBOL DiffuseSource: public Object
 {
 public:
 
-  DiffuseSource( );
+  DiffuseSource( ) = delete;
 
   explicit DiffuseSource( ObjectId id );
 

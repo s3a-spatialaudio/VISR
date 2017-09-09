@@ -73,9 +73,8 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
   }
   objectSignalGains.zeroFill();
   // TODO: Make sure that the EQs of unused channels are set to a neutral value.
-  for( ObjectVector::const_iterator objIt( objects.begin()); objIt != objects.end(); ++objIt )
+  for( Object const & obj : objects )
   {
-    Object const & obj = *(objIt->mVal);
     LevelType const objLevel = obj.level();
     std::size_t const numObjChannels = obj.numberOfChannels();
     for( std::size_t chIdx(0); chIdx < numObjChannels; ++chIdx )

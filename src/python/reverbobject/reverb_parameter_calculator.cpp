@@ -23,6 +23,37 @@ void exportReverbParameterCalculator( pybind11::module& m )
     .def( pybind11::init<SignalFlowContext const &, char const *, CompositeComponent *>(),
         pybind11::arg( "context" ), pybind11::arg( "name" ),
         pybind11::arg( "parent" ) )
+    .def( "__init__", 
+      []( ::visr::reverbobject::ReverbParameterCalculator & inst,
+          SignalFlowContext const & context, char const * name, CompositeComponent * parent,
+          panning::LoudspeakerArray const & arrayConfig,
+          std::size_t numberOfObjects,
+          std::size_t numberOfDiscreteReflectionsPerSource,
+          std::size_t numBiquadSectionsReflectionFilters,
+          SampleType lateReflectionLengthSeconds,
+          std::size_t numLateReflectionSubBandFilters )
+      {
+        new (&inst) ::visr::reverbobject::ReverbParameterCalculator( context, name, parent );
+        inst.setup( arrayConfig, numberOfObjects, numberOfDiscreteReflectionsPerSource,
+                    numBiquadSectionsReflectionFilters, lateReflectionLengthSeconds, numLateReflectionSubBandFilters );
+      },
+      pybind11::arg( "context" ), pybind11::arg( "name" ),
+      pybind11::arg( "parent" ),
+      pybind11::arg( "arrayConfig" ),
+      pybind11::arg( "numberOfObjects" ),
+      pybind11::arg( "discreteReflectionsPerSource" ),
+      pybind11::arg( "discreteReflectionBiquadSections" ),
+      pybind11::arg( "lateReflectionLengthseconds" ),
+      pybind11::arg( "lateReflectionSubbands" ) )
+    .def( "setup", &visr::reverbobject::ReverbParameterCalculator::setup,
+      pybind11::arg( "arrayConfig" ),
+      pybind11::arg( "numberOfObjects" ),
+      pybind11::arg( "discreteReflectionsPerSource" ),
+      pybind11::arg( "discreteReflectionBiquadSections" ),
+      pybind11::arg( "lateReflectionLengthseconds" ),
+      pybind11::arg( "lateReflectionSubbands" )
+    )
+
     .def( "setup", &visr::reverbobject::ReverbParameterCalculator::setup,
         pybind11::arg( "arrayConfig"),
         pybind11::arg( "numberOfObjects" ),

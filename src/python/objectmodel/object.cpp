@@ -50,7 +50,7 @@ void exportObject( pybind11::module & m )
   py::class_<Object>( m, "Object" )
     // Do not export the constructor because the base class is abstract
     .def_property_readonly( "type", &Object::type )
-    .def_property( "objectId", &Object::id, &Object::setObjectId )
+    .def_property_readonly( "objectId", &Object::id )
     .def_property( "groupId", &Object::groupId, &Object::setGroupId )
     .def_property( "level", &Object::level, &Object::setLevel )
     .def_property( "priority", &Object::priority, &Object::setPriority )

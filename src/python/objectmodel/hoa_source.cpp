@@ -17,8 +17,7 @@ namespace python
 void exportHoaSource( pybind11::module & m )
 {
   py::class_<HoaSource, Object>( m, "HoaSource" )
-    .def( py::init<>(), "Default constructor" )
-    .def( py::init<ObjectId>() )
+    .def( py::init<ObjectId>(), py::arg("objectId"), "Constructor" )
     .def_property( "order", &HoaSource::order, &HoaSource::setOrder )
     ;
   ;

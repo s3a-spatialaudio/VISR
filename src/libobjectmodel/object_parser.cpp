@@ -34,7 +34,6 @@ namespace objectmodel
     std::cerr << "ObjectParser: Parsing of channel indices failed: " << ex.what() << std::endl;
   }
 
-  obj.setObjectId( tree.get<ObjectId>( "id" ) );
   obj.setGroupId( tree.get<GroupId>( "group" ) );
   obj.setLevel( tree.get<LevelType>( "level" ) );
   obj.setPriority( tree.get<Object::Priority>( "priority" ) );

@@ -10,20 +10,12 @@ namespace visr
 namespace objectmodel
 {
 
-ChannelObject::ChannelObject( )
- : Object( )
-{
-}
-
-
 ChannelObject::ChannelObject( ObjectId id )
  : Object( id )
 {
 }
 
-/*virtual*/ ChannelObject::~ChannelObject()
-{
-}
+/*virtual*/ ChannelObject::~ChannelObject() = default;
 
 /*virtual*/ ObjectTypeId
 ChannelObject::type() const

@@ -7,20 +7,12 @@ namespace visr
 namespace objectmodel
 {
 
-DiffuseSource::DiffuseSource( )
- : Object( )
-{
-}
-
-
 DiffuseSource::DiffuseSource( ObjectId id )
  : Object( id )
 {
 }
 
-/*virtual*/ DiffuseSource::~DiffuseSource()
-{
-}
+/*virtual*/ DiffuseSource::~DiffuseSource() = default;
 
 /*virtual*/ ObjectTypeId
 DiffuseSource::type() const

@@ -19,7 +19,7 @@ class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceExtent: public PointSource
 {
 public:
 
-  PointSourceExtent( );
+  PointSourceExtent( ) = delete;
 
   explicit PointSourceExtent( ObjectId id );
 

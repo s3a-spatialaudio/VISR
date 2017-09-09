@@ -68,7 +68,7 @@ public:
    */
   static const ChannelIndex cInvalidChannelIndex = UINT_MAX; // should be std::numeric_limits<ChannelIndex>::max();
 
-  Object();
+  Object() = delete;
 
   explicit Object( ObjectId id );
 
@@ -79,8 +79,6 @@ public:
   ObjectId id() const { return mObjectId; }
 
   GroupId groupId() const { return mGroupId; }
-
-  void setObjectId( ObjectId newId );
 
   void setGroupId( ObjectId newId );
 
@@ -137,7 +135,7 @@ public:
 protected:
 
 private:
-  ObjectId mObjectId;
+  ObjectId const mObjectId;
 
   GroupId mGroupId;
 

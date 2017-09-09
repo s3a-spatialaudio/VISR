@@ -23,7 +23,7 @@ public:
   /**
    * Default constructor, creates a source with invalid object id and default group id.
    */
-  PlaneWave();
+  PlaneWave() = delete;
 
   explicit PlaneWave( ObjectId id );
 

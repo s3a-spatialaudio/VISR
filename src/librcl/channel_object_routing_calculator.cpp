@@ -78,14 +78,14 @@ void ChannelObjectRoutingCalculator::process( pml::ObjectVector const & objects,
   routings.clear();
   // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
   // A potential re-routing that can be added later will be handled by the 
-  for (objectmodel::ObjectVector::value_type const & objEntry : objects)
+  for( auto const & objEntry : objects )
   {
-    objectmodel::ObjectTypeId const ti = objEntry.mVal->type();
+    objectmodel::ObjectTypeId const ti = objEntry.type();
     if (ti != objectmodel::ObjectTypeId::ChannelObject)
     {
       continue;
     }
-    objectmodel::ChannelObject const & chObj = dynamic_cast<objectmodel::ChannelObject const &>(*(objEntry.mVal));
+    objectmodel::ChannelObject const & chObj = dynamic_cast<objectmodel::ChannelObject const &>(objEntry);
     std::size_t const numberOfChannelSignals = chObj.numberOfChannels();
     assert(numberOfChannelSignals == chObj.outputChannels().size()); // class invariant
     for( std::size_t chIdx(0); chIdx < numberOfChannelSignals; ++chIdx )

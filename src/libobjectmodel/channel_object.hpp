@@ -31,7 +31,7 @@ public:
    */
   using OutputChannelContainer = std::vector<OutputChannelId>;
 
-  ChannelObject( );
+  ChannelObject( ) = delete;
 
   explicit ChannelObject( ObjectId id );
 

@@ -26,13 +26,13 @@ BOOST_AUTO_TEST_CASE( ObjectVectorAssign )
 
   ObjectId const id1 = 1;
   PointSource s1( id1 );
-  BOOST_CHECK_NO_THROW( scene->set( id1, s1 ) );
+  BOOST_CHECK_NO_THROW( scene->insert( s1 ) );
 
   BOOST_CHECK( scene->size() == 1 );
 
   ObjectId const id2 = 2;
   PointSource s2( id2 );
-  BOOST_CHECK_NO_THROW( scene->set( id2, s2 ) );
+  BOOST_CHECK_NO_THROW( scene->insert( s2 ) );
   BOOST_CHECK( scene->size() == 2 );
 
   std::unique_ptr<ObjectVector> newVec( new ObjectVector() );

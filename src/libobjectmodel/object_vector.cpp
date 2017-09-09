@@ -9,14 +9,19 @@ namespace visr
 namespace objectmodel
 {
 
-ObjectVector::ObjectVector()
-{
+ObjectVector::ObjectVector() = default;
 
-}
+ObjectVector::~ObjectVector() = default;
 
-ObjectVector::~ObjectVector()
-{
-}
+ObjectVector::ObjectVector( ObjectVector && rhs ) = default;
+
+ObjectVector& ObjectVector::operator=( ObjectVector const & rhs ) = default;
+
+/**
+* Explicit definition of move assignment operator.
+*/
+ObjectVector& ObjectVector::operator=( ObjectVector && rhs ) = default;
+
 
 void ObjectVector::assign( ObjectVector const & rhs )
 {
@@ -53,7 +58,7 @@ Object & ObjectVector::at( ObjectId id )
   return *(findIt->mVal);
 }
 
-void ObjectVector::set( ObjectId id, Object const &  obj )
+void ObjectVector::insert( Object const &  obj )
 {
   ObjectContainer::iterator findIt = mObjects.find( obj.id() );
   if( findIt != mObjects.end() )
@@ -61,6 +66,16 @@ void ObjectVector::set( ObjectId id, Object const &  obj )
     mObjects.erase( findIt );
   }
   mObjects.insert( obj.clone() );
+}
+
+void ObjectVector::insert( std::unique_ptr<Object> &&  obj )
+{
+  ObjectContainer::iterator findIt = mObjects.find( obj->id() );
+  if( findIt != mObjects.end() )
+  {
+    mObjects.erase( findIt );
+  }
+  mObjects.insert( Containee( std::move(obj)) );
 }
 
 void ObjectVector::remove( ObjectId id )

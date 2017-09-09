@@ -22,7 +22,7 @@ namespace objectmodel
 class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectFactory
 {
 public:
-  static std::unique_ptr<Object> create( ObjectTypeId typeId );
+  static std::unique_ptr<Object> create( ObjectTypeId typeId, ObjectId objectId );
 
   static const ObjectParser & parser( ObjectTypeId typeId );
 
@@ -32,11 +32,11 @@ public:
 private:
   struct Creator
   {
-    using CreateFunction = boost::function< Object* ()>;
+    using CreateFunction = boost::function< Object* ( ObjectId id )>;
 
     explicit Creator( CreateFunction fcn, ObjectParser * parser );
 
-    Object* create() const;
+    Object* create( ObjectId id ) const;
 
     ObjectParser const & parser() const;
   private:
@@ -54,9 +54,9 @@ private:
     {
     }
 
-    static Object* construct()
+    static Object* construct( ObjectId objectId )
     {
-      return new ObjectType();
+      return new ObjectType( objectId );
     }
   };
 

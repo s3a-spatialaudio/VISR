@@ -56,9 +56,8 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
 {
   // For the moment, we assume that the audio channels of the objects are identical to the final channel numbers.
   // Any potential re-routing will be added later.
-  for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  for( objectmodel::Object const & obj : objects )
   {
-    objectmodel::Object const & obj = *(objEntry.mVal);
     // Pre-check to handle only monaural objects here. The fine-grained disambiguation between supported object types happens later.
     if( obj.numberOfChannels() != 1 )
     {
@@ -67,7 +66,7 @@ void DiffusionGainCalculator::processInternal( objectmodel::ObjectVector const &
     objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
     if( channelId >= mNumberOfObjectChannels )
     {
-      std::cerr << "DiffusionGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.mId
+      std::cerr << "DiffusionGainCalculator: Channel index \"" << channelId << "\" of object id#" << obj.id()
                 << "exceeds number of channels (" << mNumberOfObjectChannels << ")." << std::endl;
       continue;
     }

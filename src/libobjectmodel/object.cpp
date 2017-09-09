@@ -25,11 +25,6 @@ namespace objectmodel
 
 #endif
 //@}
-    
-Object::Object( )
- : Object(cInvalidObjectId )
-{
-}
 
 Object::Object( ObjectId id )
  : mObjectId( id )
@@ -37,14 +32,7 @@ Object::Object( ObjectId id )
 {
 }
 
-/*virtual*/ Object::~Object()
-{
-}
-
-void Object::setObjectId( ObjectId newId )
-{
-  mObjectId = newId;
-}
+/*virtual*/ Object::~Object() = default;
 
 void Object::setGroupId( ObjectId newId )
 {

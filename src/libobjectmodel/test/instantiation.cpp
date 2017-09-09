@@ -24,13 +24,13 @@ BOOST_AUTO_TEST_CASE( InstantiatePointSources )
 
   ObjectId const id1 = 1;
   PointSource s1( id1 );
-  BOOST_CHECK_NO_THROW( scene.set( id1, s1 ) );
+  BOOST_CHECK_NO_THROW( scene.insert( s1 ) );
 
   BOOST_CHECK( scene.size() == 1 );
 
   ObjectId const id2 = 2;
   PointSource s2( id2 );
-  BOOST_CHECK_NO_THROW( scene.set( id2, s2 ) );
+  BOOST_CHECK_NO_THROW( scene.insert( s2 ) );
   BOOST_CHECK( scene.size() == 2 );
 
   BOOST_CHECK_NO_THROW( scene.at( id1 ) );
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( InstantiatePointSources )
 
   PointSource s3( id1 );
 
-  BOOST_CHECK_NO_THROW( scene.set( id1, s3 ) ); // Replacing object at existing ID is legal
+  BOOST_CHECK_NO_THROW( scene.insert( s3 ) ); // Replacing object at existing ID is legal
   BOOST_CHECK( scene.size() == 2 ); // s3 replaces s1 at id1, size remains unchanged
 }
 

@@ -7,20 +7,12 @@ namespace visr
 namespace objectmodel
 {
 
-PlaneWave::PlaneWave( )
- : Object( )
-  {
-  }
-
-
 PlaneWave::PlaneWave( ObjectId id )
  : Object( id )
 {
 }
 
-/*virtual*/ PlaneWave::~PlaneWave()
-{
-}
+/*virtual*/ PlaneWave::~PlaneWave() = default;
 
 /*virtual*/ ObjectTypeId
 PlaneWave::type() const
