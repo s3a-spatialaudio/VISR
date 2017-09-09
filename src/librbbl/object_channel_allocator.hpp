@@ -56,7 +56,7 @@ public:
    * @return The object id of the object to which this channel is allocated, or \p objectmodel::cInvalidObjectId if the channel is not allocated.
    * @throw std::invalid_argument If \p channelId exceeds the number of rendering channels.
    */
-  objectmodel::ObjectId getObjectForChannel( std::size_t channelId );
+  objectmodel::ObjectId getObjectForChannel( std::size_t channelId ) const;
 
 private:
   /**

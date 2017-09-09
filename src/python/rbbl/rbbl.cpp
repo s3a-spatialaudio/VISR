@@ -11,6 +11,7 @@ namespace rbbl
 namespace python
 {
   void exportMultichannelConvolversUniform( pybind11::module & m );
+  void exportObjectChannelAllocator( pybind11::module & m );
 }
 }
 }
@@ -23,5 +24,6 @@ PYBIND11_PLUGIN(rbbl)
   pybind11::module m( "rbbl", "VISR renderer building block library" );
   using namespace visr::rbbl::python;
   exportMultichannelConvolversUniform( m );
+  exportObjectChannelAllocator( m );
   return m.ptr();
 }

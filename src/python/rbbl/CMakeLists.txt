@@ -2,6 +2,7 @@
 
 set( SOURCES
 multichannel_convolver_uniform.cpp
+object_channel_allocator.cpp
 rbbl.cpp
 )
 

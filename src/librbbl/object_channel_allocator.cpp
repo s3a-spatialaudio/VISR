@@ -99,7 +99,7 @@ setObjects( std::vector<objectmodel::ObjectId > const & objectIds )
 /**
 */
 objectmodel::ObjectId ObjectChannelAllocator::
-getObjectForChannel( std::size_t channelId )
+getObjectForChannel( std::size_t channelId ) const
 {
   assert( mLookup.size() == numberUsedChannels() );
   ObjectChannelLookup::const_iterator const findIt =
