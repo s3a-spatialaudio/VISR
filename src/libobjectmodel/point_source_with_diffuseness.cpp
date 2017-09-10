@@ -13,7 +13,7 @@ PointSourceWithDiffuseness::PointSourceWithDiffuseness( ObjectId id )
 {
 }
 
-/*virtual*/ PointSourceWithDiffuseness::~PointSourceWithDiffuseness() default;
+/*virtual*/ PointSourceWithDiffuseness::~PointSourceWithDiffuseness() = default;
 
 /*virtual*/ ObjectTypeId
 PointSourceWithDiffuseness::type() const
