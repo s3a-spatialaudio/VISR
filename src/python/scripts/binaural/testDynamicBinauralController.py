@@ -24,7 +24,7 @@ numBinauralObjects = 12
 
 context = visr.SignalFlowContext( period=bufferSize, samplingFrequency=fs)
 
-hrirFile = 'c:/local/s3a_af/subprojects/binaural/dtf b_nh172.sofa'
+hrirFile = '/home/andi/dev/binaural/dtf b_nh169.sofa'
 
 [ hrirPos, hrirData ] = readSofaFile( hrirFile )
 
@@ -59,7 +59,7 @@ for blockIdx in range(0,numPos):
     ps2 = om.PointSource( 1 )
     ps2.position = [x,-y,z]
     ps2.level = 0.25
-    ps2.channels = [0]
+    ps2.channels = [1]
     
     objectInput.data().assign( om.ObjectVector([ps1, ps2]) )
     objectInput.swapBuffers()

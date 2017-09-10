@@ -86,7 +86,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
         
         # %% Dynamic allocation of objects to channels
         self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
-        
+        self.usedChannels = set()
         
     def process( self ):
         if self.objectInputProtocol.changed():
@@ -96,9 +96,18 @@ class DynamicBinauralController( visr.AtomicComponent ):
                           if isinstance( x, (om.PointSource, om.PlaneWave) ) ]
             self.channelAllocator.setObjects( objIndicesRaw )
             objIndices = self.channelAllocator.getObjectChannels()
-            for objIdx in objIndices:
-                src = ov[objIdx]
-                
+            numObjects = len(objIndices)
+            src = np.zeros( (numObjects,3), dtype=np.float32 )
+            levels = np.zeros( (numObjects), dtype=np.float32 )
+            
+            for chIdx in range(0, objIdx):
+                objIdx = objIndices[chIdx]
+                src[chIdx,:] = ov[objIdx].position
+                levels[chIdx] = ov[objIdx].level
+            
+            srcNorms = np.sqrt(np.sum(np.square(src), axis = 1))
+            srcNormed = src * np.repeat(1.0/srcNorms, 3, axis = 1 ) 
+            
             
             
             self.objectInputProtocol.resetChanged()
