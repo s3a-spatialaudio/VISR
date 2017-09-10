@@ -290,7 +290,6 @@ public:
   /**
    * Add a new audio object to the vector, possibly replacing an existing one with the same id.
    * The object is copied, and the ObjectVector takes ownership of the copy.
-   * @param id The object id of the audio object.
    * @param obj The object to be inserted (copied).
    */
   void insert( Object const &  obj );
@@ -298,7 +297,6 @@ public:
   /**
    * Add a new audio object to the vector, possibly replacing an existing one with the same id, move constructor flavour.
    * The object is copied, and the ObjectVector takes ownership of the copy.
-   * @param id The object id of the audio object.
    * @param obj The object to be inserted (copied).
    */
   void insert( std::unique_ptr<Object> &&  obj );
