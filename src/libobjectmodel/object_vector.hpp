@@ -29,9 +29,7 @@ private:
    */
   struct Containee
   {
-    std::unique_ptr<Object> mVal;
-    ObjectId mId;
-
+  public:
     Containee( ObjectId id )
       : mId( id )
     {
@@ -55,10 +53,21 @@ private:
     {
     }
 
+    Containee& operator=(Containee const & rhs )
+    {
+      mVal = rhs.mVal->clone();
+      mId = mVal->id();
+      return *this;
+    }
+
     bool operator<( Containee const & rhs ) const
     {
       return mId < rhs.mId;
     }
+
+    std::unique_ptr<Object> mVal;
+
+    ObjectId mId;
   };
 
   /**
