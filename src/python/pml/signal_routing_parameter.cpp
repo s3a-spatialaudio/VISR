@@ -34,6 +34,7 @@ void exportSignalRoutingParameter( py::module & m)
   ;
 
   sigParam
+    .def_property_readonly_static( "staticType", []( pybind11::object /*self*/ ) { return SignalRoutingParameter::staticType(); } )
    .def( py::init<>() )
    .def( py::init<std::initializer_list<SignalRoutingParameter::Entry> const &>(), py::arg("initList"))
    .def( "__init__", []( SignalRoutingParameter & inst, std::vector<SignalRoutingParameter::Entry> const & val )
@@ -47,7 +48,7 @@ void exportSignalRoutingParameter( py::module & m)
    .def( "__iter__", [](SignalRoutingParameter& sr){ return py::make_iterator(sr.begin(), sr.end()); }, "Return a Python iterator over the contained routings." )
    .def_property_readonly("size", &SignalRoutingParameter::size )
    .def( "swap", &SignalRoutingParameter::swap )
-//   .def_poperty_readonly("empty", &SignalRoutingParameter::empty )
+   .def_property_readonly("empty", &SignalRoutingParameter::empty )
    .def( "addRouting", static_cast<void(SignalRoutingParameter::*)(SignalRoutingParameter::IndexType, SignalRoutingParameter::IndexType)>(&SignalRoutingParameter::addRouting),
          py::arg("input"), py::arg("output") )
    .def( "addRouting", static_cast<void(SignalRoutingParameter::*)(SignalRoutingParameter::Entry const &)>(&SignalRoutingParameter::addRouting),
