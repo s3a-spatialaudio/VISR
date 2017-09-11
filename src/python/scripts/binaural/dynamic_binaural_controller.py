@@ -31,7 +31,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
                   useHeadTracking = False,  # Whether head tracking data is provided via a self.headOrientation port.
                   dynamicITD = False,       # Whether ITD delays are calculated and sent via a "delays" port.
                   dynamicILD = False,       # Whether ILD gains are calculated and sent via a "gains" port.
-                  hrirInterpolation = False # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
+                  hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
+                  channelAllocation = False  # Whether to allocate object channels dynamically
                   ):
         # Call base class (AtomicComponent) constructor
         super( DynamicBinauralController, self ).__init__( context, name, parent )
@@ -63,19 +64,32 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                                 pml.VectorParameterFloat.staticType,
                                                 pml.DoubleBufferingProtocol.staticType,
                                                 pml.VectorParameterConfig( 2*self.numberOfObjects) )
+            self.delayOutputProtocol = self.delayOutput.protocolOutput()
         else:
-            self.delayOutput = None
-            
-        if dynamicILD:
-            self.gainOutput = visr.ParameterOutput( "gainOutput", self,
-                                                pml.VectorParameterFloat.staticType,
-                                                pml.DoubleBufferingProtocol.staticType,
-                                                pml.VectorParameterConfig( 2*self.numberOfObjects) )
+            self.delayOutputProtocol = None
+
+        # We are always using the gain oputput matrix to set set the level, even if we do not use a loudness model.
+        self.gainOutput = visr.ParameterOutput( "gainOutput", self,
+                                               pml.VectorParameterFloat.staticType,
+                                               pml.DoubleBufferingProtocol.staticType,
+                                               pml.VectorParameterConfig( 2*self.numberOfObjects) )
+        self.gainOutputProtocol = self.gainOutput.protocolOutput()
+
+        if channelAllocation:
+            self.routingOutput = visr.ParameterOutput( "routingOutput", self,
+                                                     pml.SignalRoutingParameter.staticType,
+                                                     pml.DoubleBufferingProtocol.staticType,
+                                                     pml.EmptyParameterConfig() )
+            self.routingOutputProtocol = self.routingOutput.protocolOutput()
         else:
-            self.gainOutput = None
-            
+            self.routingOutputProtocol = None
+
         # HRIR selection and interpolation data
         self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
+        
+        # Normalise the hrir positions to unit radius (to let the k-d tree 
+        # lookup work as expected.)
+        hrirPositions[:,2] = 1.0
         self.hrirPos = sph2cart(np.array( hrirPositions, copy = True, dtype = np.float32 ))
         self.hrirInterpolation = hrirInterpolation
         if self.hrirInterpolation:
@@ -85,8 +99,13 @@ class DynamicBinauralController( visr.AtomicComponent ):
         self.hrirLookup = KDTree( self.hrirPos )
         
         # %% Dynamic allocation of objects to channels
-        self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
-        self.usedChannels = set()
+        if channelAllocation:
+            self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
+            self.usedChannels = set()
+        else:
+            self.channelAllocator = None
+            self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]]), self.numberOfObjects, axis = 0 )
+            self.levels = np.zeros( (self.numberOfObjects), dtype = np.float32 )
         
     def process( self ):
         if self.objectInputProtocol.changed():
@@ -94,20 +113,54 @@ class DynamicBinauralController( visr.AtomicComponent ):
             
             objIndicesRaw = [x.objectId for x in ov
                           if isinstance( x, (om.PointSource, om.PlaneWave) ) ]
-            self.channelAllocator.setObjects( objIndicesRaw )
-            objIndices = self.channelAllocator.getObjectChannels()
-            numObjects = len(objIndices)
-            src = np.zeros( (numObjects,3), dtype=np.float32 )
-            levels = np.zeros( (numObjects), dtype=np.float32 )
+            if self.channelAllocator is not None:
+                self.channelAllocator.setObjects( objIndicesRaw )
+                objIndices = self.channelAllocator.getObjectChannels()
+                numObjects = len(objIndices)
+                self.sourcePos = np.zeros( (numObjects,3), dtype=np.float32 )
+                self.levels = np.zeros( (numObjects), dtype=np.float32 )
+                
+                for chIdx in range(0, numObjects):
+                    objIdx = objIndices[chIdx]
+                    self.sourcePos[chIdx,:] = ov[objIdx].position
+                    self.levels[chIdx] = ov[objIdx].level
+            else:
+                self.levels[:] = 0.0
+                for src in ov:
+                    pos = np.asarray(src.position, dtype=np.float32 )
+                    posNormed = 1.0/np.sqrt(np.sum(np.square(pos))) * pos
+                    ch = src.channels[0]
+                    self.sourcePos[ch,:] = posNormed
+                    self.levels[ch] = src.level
+                               
+            if self.hrirInterpolation:
+                [ d,indices ] = self.hrirLookup.query( self.sourcePos, 3, p =2 )
+            else:
+                [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
+
+            # Retrieve the output gain vector for setting the object level and potentially
+            # applying dynamically computed 
+            gainVec = self.gainOutputProtocol.data()
+            for chIdx in range(0,self.numberOfObjects):
+                gain = self.levels[chIdx]
+                # Set the object for both ears.
+                # Note: Incorporate dynamically computed ILD is selected.
+                gainVec[chIdx] = gain
+                gainVec[chIdx+self.numberOfObjects] = gain
             
-            for chIdx in range(0, objIdx):
-                objIdx = objIndices[chIdx]
-                src[chIdx,:] = ov[objIdx].position
-                levels[chIdx] = ov[objIdx].level
+                # If the source is silent (probably inactive), don't change filters
+                if gain >= 1.0e-7:
+                    if self.hrirInterpolation:
+                        raise ValueError( 'HRIR interpolation not implemented yet' )
+                    else:
+                        if self.lastFilters[chIdx] != indices[chIdx]:
+                            leftCmd  = pml.IndexedVectorFloat( chIdx,
+                                                              self.hrirs[indices[chIdx],0,:])
+                            rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
+                                                              self.hrirs[indices[chIdx],1,:])
+                            self.filterOutputProtocol.enqueue( leftCmd )
+                            self.filterOutputProtocol.enqueue( rightCmd )
+                            self.lastFilters[chIdx] = indices[chIdx]
             
-            srcNorms = np.sqrt(np.sum(np.square(src), axis = 1))
-            srcNormed = src * np.repeat(1.0/srcNorms, 3, axis = 1 ) 
-            
-            
-            
+            self.gainOutputProtocol.swapBuffers()
             self.objectInputProtocol.resetChanged()

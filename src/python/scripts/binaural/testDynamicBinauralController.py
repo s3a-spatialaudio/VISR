@@ -16,6 +16,8 @@ import rrl
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+from urllib.request import urlretrieve
 
 fs = 48000
 bufferSize = 256
@@ -24,9 +26,15 @@ numBinauralObjects = 12
 
 context = visr.SignalFlowContext( period=bufferSize, samplingFrequency=fs)
 
-hrirFile = '/home/andi/dev/binaural/dtf b_nh169.sofa'
+sofaFile = './data/dtf b_nh169.sofa'
 
-[ hrirPos, hrirData ] = readSofaFile( hrirFile )
+if not os.path.exists( sofaFile ):
+    urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
+                       sofaFile )
+
+# hrirFile = 'c:/local/s3a_af/subprojects/binaural/dtf b_nh169.sofa'
+
+[ hrirPos, hrirData ] = readSofaFile( sofaFile )
 
 controller = DynamicBinauralController( context, "Controller", None,
                   numBinauralObjects,
@@ -43,6 +51,9 @@ objectInput = flow.parameterReceivePort( "objectVector" )
 
 filterOutput = flow.parameterSendPort("filterOutput")
 
+gainOutput = flow.parameterSendPort("gainOutput")
+
+
 numPos = 72
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
 
@@ -57,7 +68,7 @@ for blockIdx in range(0,numPos):
     ps1.channels = [0]
     
     ps2 = om.PointSource( 1 )
-    ps2.position = [x,-y,z]
+    ps2.position = [-x,-y,z]
     ps2.level = 0.25
     ps2.channels = [1]
     
@@ -68,6 +79,11 @@ for blockIdx in range(0,numPos):
     
     while not filterOutput.empty():
         filterSet = filterOutput.front()
+        print( "Received filter update for filter index %d." % filterSet.index )
         filterOutput.pop()
-        del filterSet
+        del filterSet # Python garbage collection is somewhat subtle, so we try to
+        # remove the reference explicitly.
 
+    if gainOutput.changed():
+        print( "Updated hrir gains: %s." % str(np.array(gainOutput.data()) ))
+        gainOutput.resetChanged()
