@@ -2,11 +2,15 @@
 
 #include <libpml/listener_position.hpp>
 
+#include <libpml/empty_parameter_config.hpp>
+
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include <ciso646>
 #include <vector>
+#include <sstream>
 
 namespace visr
 {
@@ -18,43 +22,36 @@ namespace python
 namespace pml
 {
 
-namespace // unnamed
-{
-
-std::vector<float> getPosition( ListenerPosition const & lp )
-{
-  return std::vector<float>({lp.x(), lp.y(), lp.z() });
-}
-
-void setPosition( ListenerPosition & lp, std::vector<float> const & newPos )
-{
-  if( newPos.size() ==  2)
-  {
-    lp.set( newPos[0], newPos[1] ); // uses default argument of set for z coordinate
-  }
-  else if( newPos.size() == 3 )
-  {
-    lp.set( newPos[0], newPos[1], newPos[2] );
-  }
-  else
-  {
-    throw std::invalid_argument( "ListenerPosition::setPosition(): Input argument must be a 2- or 3-element vector. ");
-  }
-}
-
-}
+namespace py = pybind11;
 
 void exportListenerPosition( pybind11::module & m)
 {
-  pybind11::class_<ListenerPosition, ParameterBase>( m, "ListenerPosition" )
-    .def_property_readonly_static( "staticType", [](pybind11::object /*self*/) {return ListenerPosition::staticType(); } )
-    .def( pybind11::init<float, float, float>() )
+  py::class_<ListenerPosition, ParameterBase>( m, "ListenerPosition" )
+    .def_property_readonly_static( "staticType", [](py::object /*self*/) {return ListenerPosition::staticType(); } )
+    .def( py::init<visr::pml::EmptyParameterConfig const &>(), py::arg("config") = visr::pml::EmptyParameterConfig() )
+    .def( py::init<ListenerPosition::Coordinate, ListenerPosition::Coordinate, ListenerPosition::Coordinate,
+      ListenerPosition::Coordinate, ListenerPosition::Coordinate, ListenerPosition::Coordinate>(), py::arg("x"), py::arg("y"), py::arg("z") = 0.0f,
+      py::arg("yaw")=0.0f, py::arg("pitch")=0.0f, py::arg("roll") = 0.0f)
+    .def( py::init<ListenerPosition::PositionType const &, ListenerPosition::OrientationType const &>(), py::arg("position"),
+      py::arg("orientation") = ListenerPosition::OrientationType{0.0f,0.0f,0.0f} )
+    .def( py::init<ListenerPosition const &>() ) // Copy constructor
     .def_property( "x", &ListenerPosition::x, &ListenerPosition::setX )
     .def_property( "y", &ListenerPosition::y, &ListenerPosition::setY )
     .def_property( "z", &ListenerPosition::z, &ListenerPosition::setZ )
-    .def_property( "position", &getPosition, &setPosition )
+    .def_property( "position", &ListenerPosition::position, &ListenerPosition::setPosition )
+    .def_property( "yaw", &ListenerPosition::yaw, &ListenerPosition::setYaw )
+    .def_property( "pitch", &ListenerPosition::pitch, &ListenerPosition::setPitch )
+    .def_property( "roll", &ListenerPosition::roll, &ListenerPosition::setRoll )
+    .def_property( "orientation", &ListenerPosition::orientation, 
+                   static_cast<void(ListenerPosition::*)(ListenerPosition::OrientationType const &)>(&ListenerPosition::setOrientation) )
     .def_property( "timeNs", &ListenerPosition::timeNs, &ListenerPosition::setTimeNs )
     .def_property( "faceId", &ListenerPosition::faceID, &ListenerPosition::setFaceID )
+    .def("__str__", []( ListenerPosition const & pos )
+         {
+           std::stringstream desc;
+           desc << pos;
+           return desc.str();
+         }, "Create a printable representation" )
     ;
 }
 

@@ -8,6 +8,9 @@
 
 #include <libril/parameter_type.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <limits>
@@ -42,6 +45,31 @@ void PositionDecoder::setup( panning::XYZ const &offsetKinect, float qw /*=1.0f*
 }
 
 
+namespace // unnamed
+{
+/**
+ * Parse a listener ID from a JSON representation
+ * @param inputStream The test stream to be parsed.
+ * @param pos [out] Object returning the parsed position data.
+ */
+void parseJSON(std::istream &  inputStream, pml::ListenerPosition & pos)
+{
+  namespace pt = boost::property_tree;
+
+  pt::ptree tree;
+  pt::read_json( inputStream, tree );
+
+  pos.setTimeNs( tree.get<pml::ListenerPosition::TimeType>( "nTime" ) * 100 );
+  pos.setFaceID( tree.get<pml::ListenerPosition::IdType>( "iFace" ) );
+  pos.set( tree.get<pml::ListenerPosition::Coordinate>( "headJoint.X" ),
+          tree.get<pml::ListenerPosition::Coordinate>( "headJoint.Y" ),
+          tree.get<pml::ListenerPosition::Coordinate>( "headJoint.Z" ) );
+  // TODO: Implement parsing of orientation
+  pos.setOrientation( 0.0f, 0.0f, 0.0f );
+}
+
+}
+
 void PositionDecoder::process()
 {
   pml::ListenerPosition newPos;
@@ -54,7 +82,7 @@ void PositionDecoder::process()
     std::stringstream msgStream( nextMsg );
     try
     {
-      newPos.parse( msgStream );
+      parseJSON( msgStream, newPos );
       // within each iteration, use only the position with the samllest timestamp (i.e., the face which has been within the view 
       // of the tracker for the longest time.
       if( newPos.faceID() <= smallestFaceId )
