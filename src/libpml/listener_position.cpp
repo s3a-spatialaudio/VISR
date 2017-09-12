@@ -17,37 +17,86 @@ ListenerPosition::ListenerPosition( ParameterConfigBase const & config )
 }
 
 ListenerPosition::ListenerPosition( EmptyParameterConfig const & /* = EmptyParameterConfig( )*/ )
- : mX( 0.0f )
- , mY( 0.0f )
- , mZ( 0.0f )
- , mTimeNs( 0 )
- , mFaceID( 0 )
+  : ListenerPosition{ {0.0f, 0.0f, 0.0f},{ 0.0f, 0.0f, 0.0f } }
 {}
 
-ListenerPosition::~ListenerPosition()
+ListenerPosition::ListenerPosition( ListenerPosition const & rhs ) = default;
+
+ListenerPosition::ListenerPosition( Coordinate x, Coordinate y, Coordinate z,
+  Coordinate yaw /*= 0.0f*/, Coordinate pitch /*= 0.0f*/, Coordinate roll /*= 0.0f*/ )
+  : ListenerPosition{ {x, y, z },  { yaw, pitch, roll } }
 {
 }
 
-void ListenerPosition::set( float newX, float newY, float newZ /*= 0.0f*/ )
+ListenerPosition::ListenerPosition( PositionType const & position, OrientationType const & orientation )
+  : mPosition{ position}
+  , mOrientation{ orientation }
+  , mTimeNs{ 0 }
+  , mFaceID{ 0 }
 {
-  mX = newX;
-  mY = newY;
-  mZ = newZ;
 }
 
-void ListenerPosition::setX( float newX )
+ListenerPosition::ListenerPosition( ListenerPosition && rhs ) = default;
+
+ListenerPosition & ListenerPosition::operator=( ListenerPosition const & rhs ) = default;
+
+ListenerPosition & ListenerPosition::operator=( ListenerPosition && rhs ) = default;
+
+ListenerPosition::~ListenerPosition() = default;
+
+void ListenerPosition::set( Coordinate newX, Coordinate newY, Coordinate newZ /*= 0.0f*/ )
 {
-  mX = newX;
+  mPosition[0] = newX;
+  mPosition[1] = newY;
+  mPosition[2] = newZ;
 }
 
-void ListenerPosition::setY( float newY )
+void ListenerPosition::setPosition( PositionType const & position )
 {
-  mY = newY;
+  mPosition = position;
 }
 
-void ListenerPosition::setZ( float newZ )
+void ListenerPosition::setX( Coordinate newX )
 {
-  mZ = newZ;
+  mPosition[0] = newX;
+}
+
+void ListenerPosition::setY( Coordinate newY )
+{
+  mPosition[1] = newY;
+}
+
+void ListenerPosition::setZ( Coordinate newZ )
+{
+  mPosition[2] = newZ;
+}
+
+void ListenerPosition::setOrientation( Coordinate yaw, Coordinate pitch, Coordinate roll )
+{
+  mOrientation[0] = yaw;
+  mOrientation[1] = pitch;
+  mOrientation[2] = roll;
+}
+
+void ListenerPosition::setYaw( Coordinate yaw )
+{
+  mOrientation[0] = yaw;
+}
+
+void ListenerPosition::setPitch( Coordinate pitch )
+{
+  mOrientation[1] = pitch;
+}
+
+void ListenerPosition::setRoll( Coordinate roll )
+{
+  mOrientation[2] = roll;
+}
+
+
+void ListenerPosition::setOrientation( OrientationType const & orientation )
+{
+  mOrientation = orientation;
 }
 
 void ListenerPosition::setTimeNs( TimeType timeNs )
@@ -69,14 +118,15 @@ void ListenerPosition::parse(std::istream &  inputStream)
 
   mTimeNs = tree.get<TimeType>( "nTime" ) * 100;
   mFaceID = tree.get<IdType>( "iFace" );
-  mX = tree.get<float>( "headJoint.X" );
-  mY = tree.get<float>( "headJoint.Y" );
-  mZ = tree.get<float>( "headJoint.Z" );
+  mPosition[0] = tree.get<Coordinate>( "headJoint.X" );
+  mPosition[1] = tree.get<Coordinate>( "headJoint.Y" );
+  mPosition[2] = tree.get<Coordinate>( "headJoint.Z" );
 }
 
 std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)
 {
-  stream << "time: " << static_cast<double>(pos.timeNs())/1.0e9 << " s, face ID " << pos.faceID() << ", pos: (" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")";
+  stream << "time: " << static_cast<double>(pos.timeNs())/1.0e9 << " s, face ID " << pos.faceID() << ", pos: (" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")"
+    << ", orientation: (" << pos.yaw() << ", " << pos.pitch() << ", " << pos.roll() << " )";
   return stream;
 }
 
