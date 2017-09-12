@@ -1,8 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "listener_position.hpp"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 #include <libril/parameter_factory.hpp>
 
@@ -107,20 +105,6 @@ void ListenerPosition::setTimeNs( TimeType timeNs )
 void ListenerPosition::setFaceID( IdType faceID )
 {
   mFaceID = faceID;
-}
-
-void ListenerPosition::parse(std::istream &  inputStream)
-{
-  namespace pt = boost::property_tree;
-
-  pt::ptree tree;
-  pt::read_json( inputStream, tree );
-
-  mTimeNs = tree.get<TimeType>( "nTime" ) * 100;
-  mFaceID = tree.get<IdType>( "iFace" );
-  mPosition[0] = tree.get<Coordinate>( "headJoint.X" );
-  mPosition[1] = tree.get<Coordinate>( "headJoint.Y" );
-  mPosition[2] = tree.get<Coordinate>( "headJoint.Z" );
 }
 
 std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)

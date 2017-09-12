@@ -122,12 +122,6 @@ public:
   ListenerPosition & operator=( ListenerPosition && rhs );
 
   /**
-   * Parse a listener ID from a JSON representation
-   * @todo Move outside the class and make it a free function.
-   */
-  void parse( std::istream &  inputStream );
-
-  /**
    * Return the x coordinate [m]
    */
   Coordinate x() const { return mPosition[0]; }
