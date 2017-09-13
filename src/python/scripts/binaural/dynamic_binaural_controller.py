@@ -49,10 +49,15 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             self.trackingInputProtocol = self.trackingInput.protocolInput()
-
+            
+            self.trackingInputOrientation = visr.ParameterInput( "orientation", self, pml.ListenerPosition.staticType,
+                                              pml.DoubleBufferingProtocol.staticType,
+                                              pml.EmptyParameterConfig() )
+            self.trackingInputProtocolOrientation = self.trackingInput.protocolInput()
         else:
             self.trackingInputProtocol = None # Flag that head tracking is not used.
-        
+            self.trackingInputProtocolOrientation = None
+            
         self.filterOutput = visr.ParameterOutput( "filterOutput", self,
                                                 pml.IndexedVectorFloat.staticType,
                                                 pml.MessageQueueProtocol.staticType,
@@ -110,7 +115,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
     def process( self ):
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
-            
+            orient = self.trackingInputProtocol.data()
+            print(orient)
             objIndicesRaw = [x.objectId for x in ov
                           if isinstance( x, (om.PointSource, om.PlaneWave) ) ]
             if self.channelAllocator is not None:
