@@ -50,10 +50,10 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                               pml.EmptyParameterConfig() )
             self.trackingInputProtocol = self.trackingInput.protocolInput()
             
-            self.trackingInputOrientation = visr.ParameterInput( "orientation", self, pml.ListenerPosition.staticType,
+            self.trackingInputOrientation = visr.ParameterInput( "headOrientation", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
-            self.trackingInputProtocolOrientation = self.trackingInput.protocolInput()
+            self.trackingInputProtocolOrientation = self.trackingInputOrientation.protocolInput()
         else:
             self.trackingInputProtocol = None # Flag that head tracking is not used.
             self.trackingInputProtocolOrientation = None

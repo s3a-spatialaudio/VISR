@@ -25,22 +25,24 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
     
         def __init__( self,
                      context, name, parent, 
-                     numberOfObjects,
-                     interpolationPeriod, 
-                     diffusionFilters, 
-                     trackingConfiguration='', 
-                     sceneReceiverPort=4242,
-                     frequencyDependentPanning=False ):
+                     numberOfObjects
+                     ):
             super( DynamicBinauralRenderer, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-            self.objectVectorInput = visr.ParameterInput( "objectDataInput", self, pml.ObjectVector.staticType,
+            self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
                                                          pml.DoubleBufferingProtocol.staticType,
                                                          pml.EmptyParameterConfig() )
     
-   
+            self.trackingInput = visr.ParameterInput( "position", self, pml.ListenerPosition.staticType,
+                                              pml.DoubleBufferingProtocol.staticType,
+                                              pml.EmptyParameterConfig() )
+            
+            self.trackingInputOrientation = visr.ParameterInput( "orientation", self, pml.ListenerPosition.staticType,
+                                              pml.DoubleBufferingProtocol.staticType,
+                                              pml.EmptyParameterConfig() )
+         
             sofaFile = './data/dtf b_nh169.sofa'
-
             if not os.path.exists( sofaFile ):
                 urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
                        sofaFile )
@@ -51,14 +53,16 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", None,
                                                                       numberOfObjects,
                                                                       hrirPos, hrirData,
-                                                                      useHeadTracking = False,
+                                                                      useHeadTracking = True,
                                                                       dynamicITD = True,
                                                                       dynamicILD = True,
                                                                       hrirInterpolation = False
                                                                       )
             
-            self.parameterConnection( self.objectVectorInput, self.dynamicBinauraController.parameterPort("objectDataInput"))
-
+            self.parameterConnection( self.objectVectorInput, self.dynamicBinauraController.parameterPort("objectVector"))
+            self.parameterConnection( self.trackingInput, self.dynamicBinauraController.parameterPort("headPosition"))
+            self.parameterConnection( self.trackingInputOrientation, self.dynamicBinauraController.parameterPort("headOrientation"))
+            
             ## Load the BBC BRIR dataset
             brirFile = os.path.join( os.getcwd(), 'BBC_BRIR.mat' )
             brirMat =  h5py.File( brirFile )
@@ -89,15 +93,15 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                              controlInputs=False
                              )
             self.audioConnection(self.objectSignalInput, self.convolver.audioPort("in") )
-            
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
 
             blockSize = 16
             self.delayVector = rcl.DelayVector( context, "delayVector" )
             self.delayVector.setup(2, interpolationType="lagrangeOrder3", initialDelay=0,
              controlInputs=True, initialGain=1.0, interpolationSteps=3*blockSize)
 
-            self.adder = rcl.Add( context, 'add', numInputs = numberOfObjects, width=2)
-            
-            self.audioConnection( self.adder.audioPort("out"), self.binauralOutput)
-            
-            
+            self.audioConnection( self.convolver.audioPort("out"), self.delayVector.audioPort("in"))
+            self.audioConnection( self.delayVector.audioPort("out"), self.binauralOutput)
+#            self.adder = rcl.Add( context, 'add', numInputs = numberOfObjects, width=2)            
+ #           self.audioConnection( self.adder.audioPort("out"), self.binauralOutput)
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )

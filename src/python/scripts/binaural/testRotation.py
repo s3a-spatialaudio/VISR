@@ -1,12 +1,8 @@
 from serial_reader import serialReader
+import visr
 import math
 import numpy as np
 import rrl
-
-connected = False
-port = '/dev/cu.usbserial-AJ03GSC8'
-baud = 57600
-idMatrix = np.identity(3)
 
 def calcRotationMatrix(ypr):  
   if ypr.size == 3 :
@@ -35,24 +31,37 @@ def calcRotationMatrix(ypr):
   else:
     return idMatrix
  
-controller = serialReader(port,baud)
-print("ciao + ")  
+
+fs = 48000
+bufferSize = 256
+
+context = visr.SignalFlowContext( period=bufferSize, samplingFrequency=fs)
+
+connected = False
+port = "/dev/cu.usbserial-AJ03GSC8"
+baud = 57600
+idMatrix = np.identity(3)
+
+
+controller = serialReader(context, "Controller", None,port, baud )
+
 flow = rrl.AudioSignalFlow( controller )
 
 orientation = flow.parameterSendPort("orientation")
 
-numPos = 72
+numPos = 100
 
 for blockIdx in range(0,numPos):
+    print("rotation matrix #"+str(blockIdx)+":" )
     flow.process()
     
     if orientation.changed():
-        print( "Updated hrir gains: %s." % str(np.array(orientation.data()) ))
-        orientation.resetChanged()
+       print( calcRotationMatrix(np.array(orientation.data().orientation)))
+       orientation.resetChanged()
 
 
-
-
+#ser = serial.Serial('/dev/cu.usbserial-AJ03GSC8', 57600, timeout=0)   
+#print(ser.readline())
 
 
 """OFFLINE TEST
