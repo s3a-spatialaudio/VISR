@@ -35,12 +35,12 @@ if not os.path.exists( sofaFile ):
 # hrirFile = 'c:/local/s3a_af/subprojects/binaural/dtf b_nh169.sofa'
 
 [ hrirPos, hrirData ] = readSofaFile( sofaFile )
-print( "positions: %s." % str(np.array(hrirPos)))
+#print( "positions: %s." % str(np.array(hrirPos)))
 
 controller = DynamicBinauralController( context, "Controller", None,
                   numBinauralObjects,
                   hrirPos, hrirData,
-                  useHeadTracking = False,
+                  useHeadTracking = True,
                   dynamicITD = True,
                   dynamicILD = True,
                   hrirInterpolation = False

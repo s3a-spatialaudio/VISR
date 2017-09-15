@@ -10,6 +10,7 @@ Created on Wed Sep  6 22:02:40 2017
 """
 
 from readSofa import sph2cart
+from rotationFunctions import calcRotationMatrix
 
 import visr
 import pml
@@ -45,18 +46,15 @@ class DynamicBinauralController( visr.AtomicComponent ):
         self.objectInputProtocol = self.objectInput.protocolInput()
         
         if useHeadTracking:
-            self.trackingInput = visr.ParameterInput( "headPosition", self, pml.ListenerPosition.staticType,
+            self.useHeadTracking = True
+            self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             self.trackingInputProtocol = self.trackingInput.protocolInput()
-            
-            self.trackingInputOrientation = visr.ParameterInput( "headOrientation", self, pml.ListenerPosition.staticType,
-                                              pml.DoubleBufferingProtocol.staticType,
-                                              pml.EmptyParameterConfig() )
-            self.trackingInputProtocolOrientation = self.trackingInputOrientation.protocolInput()
+
         else:
+            self.useHeadTracking = False
             self.trackingInputProtocol = None # Flag that head tracking is not used.
-            self.trackingInputProtocolOrientation = None
             
         self.filterOutput = visr.ParameterOutput( "filterOutput", self,
                                                 pml.IndexedVectorFloat.staticType,
@@ -115,8 +113,14 @@ class DynamicBinauralController( visr.AtomicComponent ):
     def process( self ):
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
-            orient = self.trackingInputProtocol.data()
-            print(orient)
+
+            if self.useHeadTracking:
+                 if self.trackingInputProtocol.changed():
+                     htrack = self.trackingInputProtocol.data()
+                     ypr = htrack.orientation
+                     rotationMatrix = calcRotationMatrix(np.array(ypr))
+                     print(rotationMatrix)
+
             objIndicesRaw = [x.objectId for x in ov
                           if isinstance( x, (om.PointSource, om.PlaneWave) ) ]
             if self.channelAllocator is not None:
@@ -170,3 +174,5 @@ class DynamicBinauralController( visr.AtomicComponent ):
             
             self.gainOutputProtocol.swapBuffers()
             self.objectInputProtocol.resetChanged()
+            if self.useHeadTracking:
+                self.trackingInputProtocol.resetChanged()

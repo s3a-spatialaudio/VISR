@@ -32,7 +32,7 @@ class serialReader(visr.AtomicComponent ):
     def send_data(self,newdata):
         self.sent = True
         data = newdata
-        data = data.replace("#YPR=","").rstrip()
+        data = data.replace("#","").replace("Y","").replace("P","").replace("R","").replace("=","").rstrip()
         ypr = self.trackingOutput.protocolOutput().data()
         ypr.orientation = [float(i) for i in data.split(',')]
         self.trackingOutput.protocolOutput().swapBuffers()

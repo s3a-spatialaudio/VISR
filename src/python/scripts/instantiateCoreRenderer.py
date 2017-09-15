@@ -37,15 +37,15 @@ numBlocks = 1024;
 signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
 
-numOutputChannels = 24;
+numOutputChannels = 2;
 
 ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 
 #lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
-lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3_linear.xml' )
+lc = panning.LoudspeakerArray( '/Users/gc1y17/VISR/visr/config/generic/bs2051-0+2+0.xml' )
 # lc = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 
-diffFilters = pml.MatrixParameterFloat( 22, 512, 16 )
+diffFilters = pml.MatrixParameterFloat( 2, 512, 16 )
 #
 #renderer1 = signalflows.CoreRenderer( ctxt, 'renderer1', None, lc, 2, numOutputChannels, parameterUpdatePeriod, diffFilters, '' ) 
 ##                                          loudspeakerConfiguration=lc,

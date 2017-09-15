@@ -6,32 +6,25 @@ Created on Thu Sep 14 14:55:25 2017
 @author: gc1y17
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep  8 08:16:32 2017
 
-@author: af5u13
-"""
-
-from readSofa import readSofaFile, sph2cart
-
-from dynamic_binaural_controller import DynamicBinauralController
+from readSofa import sph2cart
 from dynamic_binaural_renderer import DynamicBinauralRenderer
+from serial_reader import serialReader
 
 import visr
 import pml
-import objectmodel as om
 import rrl
+import objectmodel
 
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-from urllib.request import urlretrieve
 
 class DynamicBinauralRendererSerial(visr.CompositeComponent ):    
         def __init__( self,
                      context, name, parent, 
-                     numberOfObjects
+                     numberOfObjects,
+                     port,
+                     baud
                      ):
             super( DynamicBinauralRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -39,19 +32,75 @@ class DynamicBinauralRendererSerial(visr.CompositeComponent ):
             self.objectVectorInput = visr.ParameterInput( "objectDataInput", self, pml.ObjectVector.staticType,
                                                          pml.DoubleBufferingProtocol.staticType,
                                                          pml.EmptyParameterConfig() )
+            self.dynamicBinauralRenderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", self, numBinauralObjects)
+            self.serialReader = serialReader(context, "Controller", self,port, baud )
             #to be completed
-            
+            self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
 
 #to be completed
 fs = 48000
 bufferSize = 256
 
 numBinauralObjects = 12
+port = "/dev/cu.usbserial-AJ03GSC8"
+baud = 57600
+idMatrix = np.identity(3)
+
+blockSize = 128
+samplingFrequency = 48000
+parameterUpdatePeriod = 1024
+numBlocks = 1024;
+signalLength = blockSize * numBlocks
+t = 1.0/samplingFrequency * np.arange(0,signalLength)
+numOutputChannels = 2;
+
+
 
 context = visr.SignalFlowContext( period=bufferSize, samplingFrequency=fs)
 
-
-controller = DynamicBinauralRenderer( context, "Controller", None,
-                  numBinauralObjects
-                  )
+controller = DynamicBinauralRendererSerial( context, "Controller", None, numBinauralObjects, port, baud)
 #to be completed
+
+result,messages = rrl.checkConnectionIntegrity(controller)
+if not result:
+   print(messages)
+
+flow = rrl.AudioSignalFlow( controller )
+
+paramInput = flow.parameterReceivePort('objectDataInput')
+
+inputSignal = np.zeros( (2, signalLength ), dtype=np.float32 )
+inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
+
+
+outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
+
+for blockIdx in range(0,numBlocks):
+    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
+        az = 0.025 * blockIdx
+        el = 0.1 * np.sin( 0.025 * blockIdx )
+        r = 1
+        x,y,z = sph2cart( az, el, r )
+        ps1 = objectmodel.PointSource(0)
+        ps1.x = x
+        ps1.y = y
+        ps1.z = z
+        ps1.level = 0.5
+        ps1.groupId = 5
+        ps1.priority = 5
+        ps1.resetNumberOfChannels(1)
+        ps1.setChannelIndex(0,ps1.objectId)
+        
+        ov = paramInput.data()
+        ov.clear()
+        ov.insert( ps1 )
+        paramInput.swapBuffers()
+        
+    inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
+    outputBlock = flow.process( inputBlock )
+    outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
+
+
+plt.figure(1)
+plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'rx-' )
+plt.show()
