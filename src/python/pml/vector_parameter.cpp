@@ -28,7 +28,7 @@ void setData( VectorParameter<DataType> & param, pybind11::array_t<DataType> & v
 {
   pybind11::buffer_info info = vec.request();
   std::size_t const numElements = param.size();
-  if( (info.ndim != 1) or (info.shape[0] != numElements) )
+  if( (info.ndim != 1) or (info.shape[0] != static_cast<long int>(numElements)) )
   {
     throw std::invalid_argument( "VectorParameter.set(): array length does not match." );
   }
@@ -56,8 +56,13 @@ void exportVectorParameter( pybind11::module & m, char const * className )
      pybind11::format_descriptor<DataType>::format(),
      1, { vp.size() }, { sizeof( DataType ) } );
   } )
-  .def( pybind11::init<std::size_t>(), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
-  .def( pybind11::init<std::size_t, std::size_t>(), pybind11::arg( "size" ), pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples )
+    .def( pybind11::init<ParameterConfigBase const &>() )
+    .def( pybind11::init<VectorParameterConfig const &>() )
+    .def( "__init__", [](VectorParameter<DataType> & inst, std::size_t alignment )
+          { new (&inst) VectorParameter<DataType>( alignment ); }, pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
+    // Note: Clang compilers throw a 'narrowing conversion" error when following two constructors are bound with the pybind11::init<>() method. Therefore we use the explicit form.
+    .def( "__init__", [](VectorParameter<DataType> & inst, std::size_t size, std::size_t alignment )
+          { new (&inst) VectorParameter<DataType>( size, alignment ); }, pybind11::arg( "size" ), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
     // Note: See pybind11 documentation for the way the implicit 'self' argument is stripped by using a lambda function.
   .def_property_readonly_static( "staticType", []( pybind11::object /*self*/ ) { return VectorParameter<DataType>::staticType(); } )
   .def( "__init__", []( VectorParameter<DataType> & inst, pybind11::array_t<DataType> const & data, std::size_t alignment)
