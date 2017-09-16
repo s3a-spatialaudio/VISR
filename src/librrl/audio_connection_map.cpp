@@ -121,7 +121,7 @@ bool AudioConnectionMap::fillRecursive( impl::ComponentImplementation const & co
     {
       messages << "Audio signal flow connection check: The channel index vectors of the connection \""
         << qualifiedName( *connection.sender() ) << "->" << qualifiedName( *connection.receiver() )
-        << "are different." << std::endl;
+        << " have different sizes." << std::endl;
       result = false;
       continue;
     }
