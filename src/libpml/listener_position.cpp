@@ -15,14 +15,14 @@ ListenerPosition::ListenerPosition( ParameterConfigBase const & config )
 }
 
 ListenerPosition::ListenerPosition( EmptyParameterConfig const & /* = EmptyParameterConfig( )*/ )
-  : ListenerPosition{ {0.0f, 0.0f, 0.0f},{ 0.0f, 0.0f, 0.0f } }
+  : ListenerPosition{ {{0.0f, 0.0f, 0.0f}},{{ 0.0f, 0.0f, 0.0f }} }
 {}
 
 ListenerPosition::ListenerPosition( ListenerPosition const & rhs ) = default;
 
 ListenerPosition::ListenerPosition( Coordinate x, Coordinate y, Coordinate z,
   Coordinate yaw /*= 0.0f*/, Coordinate pitch /*= 0.0f*/, Coordinate roll /*= 0.0f*/ )
-  : ListenerPosition{ {x, y, z },  { yaw, pitch, roll } }
+  : ListenerPosition{ {{x, y, z }},  {{ yaw, pitch, roll }} }
 {
 }
 
