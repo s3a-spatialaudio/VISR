@@ -10,6 +10,9 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/operators.h>
+
+#include <ciso646>
 
 namespace visr
 {
@@ -24,8 +27,19 @@ void exportFirFilterMatrix( py::module & m )
 {
   using visr::rcl::FirFilterMatrix;
 
-  py::class_<FirFilterMatrix, visr::AtomicComponent>( m, "FirFilterMatrix" )
-    .def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
+  py::class_<FirFilterMatrix, visr::AtomicComponent> ffm( m, "FirFilterMatrix" );
+
+  py::enum_<FirFilterMatrix::ControlInput>( ffm, "ControlInput" )
+    .value( "None", FirFilterMatrix::ControlInput::None )
+    .value( "Filters", FirFilterMatrix::ControlInput::Filters )
+    .value( "Routings", FirFilterMatrix::ControlInput::Routings )
+    .value( "All", FirFilterMatrix::ControlInput::All )
+    .def( py::self | py::self )
+    .def( py::self & py::self )
+   ;
+
+  ffm
+   .def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       py::arg("context"), py::arg("name"), py::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
    .def( "setup", &FirFilterMatrix::setup, py::arg("numberOfInputs"),
       py::arg("numberOfOutputs"),
@@ -34,12 +48,13 @@ void exportFirFilterMatrix( py::module & m )
       py::arg("maxRoutings"),
       py::arg("filters") = pml::MatrixParameter<SampleType>(),
       py::arg("routings") = pml::FilterRoutingList(),
-      py::arg( "controlInputs" ) = false,
+      py::arg( "controlInputs" ) = FirFilterMatrix::ControlInput::None,
       py::arg( "fftImplementation" ) = "default" )
    .def( "__init__", 
      [](FirFilterMatrix & inst, visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        efl::BasicMatrix<SampleType> const & filters, pml::FilterRoutingList const & routings, bool controlInputs, char const * fftImplementation )
+        efl::BasicMatrix<SampleType> const & filters, pml::FilterRoutingList const & routings,
+        FirFilterMatrix::ControlInput controlInputs, char const * fftImplementation )
      {
        new (&inst) FirFilterMatrix( context, name, parent );
        inst.setup( numberOfInputs, numberOfOutputs, filterLength, maxFilters, maxRoutings,
@@ -53,12 +68,13 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "maxRoutings" ),
       py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),
       py::arg( "routings" ) = pml::FilterRoutingList(),
-      py::arg( "controlInputs" ) = false,
+      py::arg( "controlInputs" ) =  FirFilterMatrix::ControlInput::None,
       py::arg( "fftImplementation" ) = "default" )
     .def( "__init__",
       []( FirFilterMatrix & inst, visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        py::array const & filters, pml::FilterRoutingList const & routings, bool controlInputs, char const * fftImplementation )
+        py::array const & filters, pml::FilterRoutingList const & routings,
+        FirFilterMatrix::ControlInput controlInputs, char const * fftImplementation )
      {
        new (&inst) FirFilterMatrix( context, name, parent );
        // Todo: Consider moving the matrix parameter creation from Numpy arrays to a library.
@@ -66,7 +82,7 @@ void exportFirFilterMatrix( py::module & m )
        {
          throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input array must be 2D" );
        }
-       if( filters.dtype() != py::dtype::of<SampleType>() )
+       if( not filters.dtype().is( py::dtype::of<SampleType>() ) )
        {
          throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input matrix has a different data type (dtype)." );
        }
@@ -91,7 +107,7 @@ void exportFirFilterMatrix( py::module & m )
        py::arg( "maxRoutings" ),
        py::arg( "filters" ),
        py::arg( "routings" ) = pml::FilterRoutingList(),
-       py::arg( "controlInputs" ) = false,
+       py::arg( "controlInputs" ) =  FirFilterMatrix::ControlInput::None,
        py::arg( "fftImplementation" ) = "default" )
 
   ;

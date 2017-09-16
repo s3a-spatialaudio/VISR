@@ -108,7 +108,7 @@ int main( int argc, char const * const * argv )
     convolver.setup( numberOfInputChannels, numberOfOutputChannels,
                      initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
                      initialFilters, routings,
-                     false /*no control inputs*/,
+                     rcl::FirFilterMatrix::ControlInput::None /*no control inputs*/,
                      fftLibrary.c_str() );
 
     rrl::AudioSignalFlow flow( convolver );

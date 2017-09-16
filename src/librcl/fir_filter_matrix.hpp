@@ -43,6 +43,18 @@ class VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix: public AtomicComponent
 {
   using SampleType = visr::SampleType;
 public:
+
+  /**
+   * Enumeration to select the instantiated control ports.
+   */
+  enum class ControlInput
+  {
+    None = 0,                ///< No control inputs
+    Filters = 1 << 0,        ///< Filter control input active
+    Routings = 1 << 1,       ///< Routing control input active
+    All = Filters | Routings ///< All control inputs active
+  };
+
   /**
    * Constructor.
    * @param context Configuration object containing basic execution parameters.
@@ -73,7 +85,7 @@ public:
    * all filters are zero-initialised.
    * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
    * active initially.
-   * @param controlInputs Whether to instantiate a parameter port receiving filter update commands.
+   * @param controlInputs Enumeration to select which parameter update ports are instantiated. Default: ControlInput::None
    * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
    * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */
@@ -84,7 +96,7 @@ public:
               std::size_t maxRoutings,
               efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
               pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
-              bool controlInputs = false,
+              ControlInput controlInputs = ControlInput::None,
               char const * fftImplementation = "default" );
 
   /**
@@ -139,6 +151,18 @@ private:
 
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mConvolver;
 };
+
+/**
+ * Bitwise operator to combine control input flags.
+ */
+VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix::ControlInput operator|( FirFilterMatrix::ControlInput lhs,
+                                                                 FirFilterMatrix::ControlInput rhs );
+
+/**
+ * Bitwise operator to extract mask control input flags.
+ */
+VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix::ControlInput operator&( FirFilterMatrix::ControlInput lhs,
+                                                                 FirFilterMatrix::ControlInput rhs );
 
 } // namespace rcl
 } // namespace visr

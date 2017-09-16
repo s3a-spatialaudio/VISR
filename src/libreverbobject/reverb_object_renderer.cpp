@@ -151,7 +151,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                              maxNumReverbObjects, maxNumReverbObjects,
                              efl::BasicMatrix<SampleType>(), // No initial filters provided.
                              lateReverbRouting,
-                             true /* controlInputs */ );
+                             rcl::FirFilterMatrix::ControlInput::Filters );
 
     // Create a routing from 1 to #loudspeakers signals, each filtered with an individual filter
     pml::FilterRoutingList lateDecorrelationRouting;

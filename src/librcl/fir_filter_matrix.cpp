@@ -5,11 +5,27 @@
 #include <librbbl/multichannel_convolver_uniform.hpp>
 
 #include <ciso646>
+#include <type_traits>
+
 
 namespace visr
 {
 namespace rcl
 {
+
+FirFilterMatrix::ControlInput operator&(FirFilterMatrix::ControlInput lhs,
+                                        FirFilterMatrix::ControlInput rhs )
+{
+  using T = std::underlying_type<FirFilterMatrix::ControlInput>::type;
+  return static_cast<FirFilterMatrix::ControlInput>( static_cast<T>(lhs) & static_cast<T>(rhs) );
+}
+
+FirFilterMatrix::ControlInput operator|(FirFilterMatrix::ControlInput lhs,
+                                        FirFilterMatrix::ControlInput rhs )
+{
+  using T = std::underlying_type<FirFilterMatrix::ControlInput>::type;
+  return static_cast<FirFilterMatrix::ControlInput>( static_cast<T>(lhs) | static_cast<T>(rhs) );
+}
 
 FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
                                   char const * name,
@@ -32,7 +48,7 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
                              std::size_t maxRoutings,
                              efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
                              pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/,
-                             bool controlInputs /*= false */,
+                             ControlInput controlInputs /*= ControlInput::None*/,
                              char const * fftImplementation /*= "default" */ )
 {
   mInput.setWidth( numberOfInputs );
@@ -43,7 +59,8 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
     filterLength, maxRoutings, maxFilters,
     routings, filters, cVectorAlignmentSamples, fftImplementation ) );
 
-  mSetFilterInput.reset( controlInputs
+  bool const filterInput = (controlInputs & ControlInput::Filters) != ControlInput::None;
+  mSetFilterInput.reset( filterInput
                          ? new ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > >( "filterInput", *this, pml::EmptyParameterConfig() )
                          : nullptr );
 }

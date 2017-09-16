@@ -29,7 +29,8 @@ MatrixConvolver::MatrixConvolver( SignalFlowContext const & context,
 {
   mConvolver.setup( numberOfInputs, numberOfOutputs, filterLength, 
                     maxFilters, maxRoutings, initialFilters, initialRoutings,
-                    controlInputs, fftImplementation );
+                    controlInputs ? rcl::FirFilterMatrix::ControlInput::All : rcl::FirFilterMatrix::ControlInput::None,
+                    fftImplementation );
   audioConnection( mAudioIn, mConvolver.audioPort("in") );
   audioConnection( mConvolver.audioPort("out"), mAudioOut );
 
