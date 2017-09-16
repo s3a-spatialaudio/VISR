@@ -216,6 +216,20 @@ void CompositeComponentImplementation::audioConnection( char const * sendCompone
   mAudioConnections.insert( std::move( newConnection ) );
 }
 
+namespace // unnamed
+{
+  // Local function to retrieve the maximum channel index
+  ChannelList::IndexType maxChannelIndex( ChannelList const & list )
+  {
+    ChannelList::const_iterator findIt = std::max_element( list.begin(), list.end() );
+    if( findIt == list.end() )
+    {
+      return 0;
+    }
+    return *findIt;
+  }
+} // unnamed namespace
+
 void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
                                                                 ChannelList const & sendIndices,
                                                                 AudioPortBase & receivePort,
@@ -223,8 +237,20 @@ void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort
 {
   checkPortParent( sendPort.implementation(), *this, "audio send" );
   checkPortParent( receivePort.implementation(), *this, "audio receive" );
+  if( sendIndices.size() != receiveIndices.size() )
+  {
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): send and receive index lists have different sizes." );
+  }
+  if( maxChannelIndex( sendIndices ) >= sendPort.width() )
+  {
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): A send channel index exceeds the port width." );
+  }
+  if( maxChannelIndex( receiveIndices ) >= receivePort.width() )
+  {
+    throw std::invalid_argument( "CompositeComponent::audioConnection(): A receive channel index exceeds the port width." );
+  }
   AudioConnection newConnection( &(sendPort.implementation()), sendIndices,
-				 &(receivePort.implementation()), receiveIndices );
+                                 &(receivePort.implementation()), receiveIndices );
   mAudioConnections.insert( std::move( newConnection ) );
 }
 
