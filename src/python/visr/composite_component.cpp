@@ -7,6 +7,7 @@
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <ciso646>
 #include <iostream> // For debugging purposes only.
@@ -64,11 +65,11 @@ void exportCompositeComponent( pybind11::module& m )
     .def( "audioConnection", static_cast<void(CompositeComponent::*)(AudioPortBase &, AudioPortBase &)>(&CompositeComponent::audioConnection),
       pybind11::arg( "sendPort" ), pybind11::arg( "receivePort" ) )
 // Simplified syntax, not working yet.
-//    .def( "audioConnection", [](CompositeComponent & self, AudioPortBase & sendPort, std::list<ChannelList::IndexType> const & sendIndices, AudioPortBase & receivePort, std::list<ChannelList::IndexType> const & receiveIndices )
-//       {
-//         self.audioConnection( sendPort, ChannelList(sendIndices), receivePort, ChannelList(receiveIndices) );
-//       },
-//       pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ), "Create an audio connection from a Python sequence (a list or range)." )
+    .def( "audioConnection", [](CompositeComponent & self, AudioPortBase & sendPort, std::list<ChannelList::IndexType> const & sendIndices, AudioPortBase & receivePort, std::list<ChannelList::IndexType> const & receiveIndices )
+       {
+         self.audioConnection( sendPort, ChannelList(sendIndices), receivePort, ChannelList(receiveIndices) );
+       },
+       pybind11::arg( "sendPort" ), pybind11::arg( "sendIndices" ), pybind11::arg( "receivePort" ), pybind11::arg( "receiveIndices" ), "Create an audio connection from a Python sequence (a list or range)." )
     ;
 }
 
