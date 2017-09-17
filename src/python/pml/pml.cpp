@@ -31,6 +31,7 @@ void exportVectorParameters( pybind11::module & m );
 
 PYBIND11_MODULE( pml, m )
 {
+  pybind11::module::import( "efl" );
   pybind11::module::import( "visr" );
   pybind11::module::import( "objectmodel" );
 

@@ -20,13 +20,15 @@ namespace python
 namespace pml
 {
 
+namespace py = pybind11;
+
 namespace // unnamed
 {
 
 template<typename DataType>
-void setData( VectorParameter<DataType> & param, pybind11::array_t<DataType> & vec )
+void setData( VectorParameter<DataType> & param, py::array_t<DataType> & vec )
 {
-  pybind11::buffer_info info = vec.request();
+  py::buffer_info info = vec.request();
   std::size_t const numElements = param.size();
   if( (info.ndim != 1) or (info.shape[0] != static_cast<long int>(numElements)) )
   {
@@ -46,55 +48,56 @@ void setData( VectorParameter<DataType> & param, pybind11::array_t<DataType> & v
 } // unnamed namespace
 
 template<typename DataType>
-void exportVectorParameter( pybind11::module & m, char const * className )
+void exportVectorParameter( py::module & m, char const * className )
 {
-  pybind11::class_<VectorParameter< DataType>, ParameterBase >(m, className, pybind11::buffer_protocol() )
-  .def_buffer([](VectorParameter<DataType> &vp) -> pybind11::buffer_info
+  py::class_<VectorParameter< DataType>, ParameterBase >(m, className, py::buffer_protocol() )
+  .def_buffer([](VectorParameter<DataType> &vp) -> py::buffer_info
   {
-    return pybind11::buffer_info( vp.data(),
+    return py::buffer_info( vp.data(),
      sizeof( DataType ),
-     pybind11::format_descriptor<DataType>::format(),
+     py::format_descriptor<DataType>::format(),
      1, { vp.size() }, { sizeof( DataType ) } );
   } )
-    .def( pybind11::init<ParameterConfigBase const &>() )
-    .def( pybind11::init<VectorParameterConfig const &>() )
-    .def( "__init__", [](VectorParameter<DataType> & inst, std::size_t alignment )
-          { new (&inst) VectorParameter<DataType>( alignment ); }, pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
-    // Note: Clang compilers throw a 'narrowing conversion" error when following two constructors are bound with the pybind11::init<>() method. Therefore we use the explicit form.
-    .def( "__init__", [](VectorParameter<DataType> & inst, std::size_t size, std::size_t alignment )
-          { new (&inst) VectorParameter<DataType>( size, alignment ); }, pybind11::arg( "size" ), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
+    .def( py::init<ParameterConfigBase const &>() )
+    .def( py::init<VectorParameterConfig const &>() )
+    // Note: Clang compilers throw a 'narrowing conversion" error when following two constructors are bound with the py::init<>() method. Therefore we use the explicit form.
+    .def( py::init( []( std::size_t alignment )
+          { return new VectorParameter<DataType>( alignment ); }), py::arg("alignment") = visr::cVectorAlignmentSamples )
+    .def( py::init( [](std::size_t size, std::size_t alignment )
+          { return new VectorParameter<DataType>( size, alignment ); }), py::arg( "size" ), py::arg("alignment") = visr::cVectorAlignmentSamples )
     // Note: See pybind11 documentation for the way the implicit 'self' argument is stripped by using a lambda function.
-  .def_property_readonly_static( "staticType", []( pybind11::object /*self*/ ) { return VectorParameter<DataType>::staticType(); } )
-  .def( "__init__", []( VectorParameter<DataType> & inst, pybind11::array_t<DataType> const & data, std::size_t alignment)
+  .def_property_readonly_static( "staticType", []( py::object /*self*/ ) { return VectorParameter<DataType>::staticType(); } )
+  .def( py::init( []( py::array_t<DataType> const & data, std::size_t alignment)
   {
     if( data.ndim() != 1 )
     {
-      throw std::invalid_argument( "VectorParameter from numpy ndarray: Input array must be 1D" );
+      throw std::invalid_argument( "VectorParameter from numpy::ndarray: Input array must be 1D" );
     }
     std::size_t const numElements = data.shape()[0];
-    new (&inst) VectorParameter<DataType>( numElements, alignment);
+    VectorParameter<DataType> * inst = new VectorParameter<DataType>( numElements, alignment);
     for( std::size_t elIdx(0); elIdx < numElements; ++elIdx )
     {
-      inst[elIdx] = *static_cast<DataType const *>(data.data( elIdx ));
+      inst->at(elIdx) = *static_cast<DataType const *>(data.data( elIdx ));
     }
-  }, pybind11::arg("data"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
+    return inst;
+  } ), py::arg("data"), py::arg("alignment") = visr::cVectorAlignmentSamples )
   .def_property_readonly( "size", []( VectorParameter<DataType> const & vp ){ return vp.size(); } )
-//  .def( "resize", &VectorParameter<DataType>::resize, pybind11::arg("numberOfElements") )
-  .def( "resize", []( VectorParameter<DataType> & vp, std::size_t newSize ) { vp.resize(newSize); }, pybind11::arg( "numberOfElements" ) )
+//  .def( "resize", &VectorParameter<DataType>::resize, py::arg("numberOfElements") )
+  .def( "resize", []( VectorParameter<DataType> & vp, std::size_t newSize ) { vp.resize(newSize); }, py::arg( "numberOfElements" ) )
   .def( "zeroFill", []( VectorParameter<DataType> & vp ) { vp.zeroFill(); } )
   .def( "set", &setData<DataType> )
-  .def( "__getitem__", []( VectorParameter<DataType> const & vp, std::size_t idx ) { return vp.at( idx ); }, pybind11::arg( "index" ) )
-  .def( "__setitem__", []( VectorParameter<DataType> & vp, std::size_t idx, DataType val ) { vp.at( idx ) = val; }, pybind11::arg( "index" ), pybind11::arg( "value" ) )
+  .def( "__getitem__", []( VectorParameter<DataType> const & vp, std::size_t idx ) { return vp.at( idx ); }, py::arg( "index" ) )
+  .def( "__setitem__", []( VectorParameter<DataType> & vp, std::size_t idx, DataType val ) { vp.at( idx ) = val; }, py::arg( "index" ), py::arg( "value" ) )
   ;
 }
 
-void exportVectorParameters( pybind11::module & m)
+void exportVectorParameters( py::module & m)
 {
-  pybind11::class_<VectorParameterConfig, ParameterConfigBase >( m, "VectorParameterConfig" )
-    .def( pybind11::init<std::size_t>(), pybind11::arg("numberOfElements" ) )
+  py::class_<VectorParameterConfig, ParameterConfigBase >( m, "VectorParameterConfig" )
+    .def( py::init<std::size_t>(), py::arg("numberOfElements" ) )
     .def_property_readonly( "numberOfElements", &VectorParameterConfig::numberOfElements )
-    .def( "compare", static_cast<bool(VectorParameterConfig::*)(VectorParameterConfig const&) const>(&VectorParameterConfig::compare),  pybind11::arg("rhs") )
-    .def( "compare", static_cast<bool(VectorParameterConfig::*)(ParameterConfigBase const&) const>(&VectorParameterConfig::compare),  pybind11::arg("rhs") )
+    .def( "compare", static_cast<bool(VectorParameterConfig::*)(VectorParameterConfig const&) const>(&VectorParameterConfig::compare),  py::arg("rhs") )
+    .def( "compare", static_cast<bool(VectorParameterConfig::*)(ParameterConfigBase const&) const>(&VectorParameterConfig::compare),  py::arg("rhs") )
   ;
 
   exportVectorParameter<float>( m, "VectorParameterFloat" );
