@@ -6,7 +6,7 @@
 #include <libril/composite_component.hpp>
 #include <libril/signal_flow_context.hpp>
 
-#include <libpml/matrix_parameter.hpp>
+#include <libpml/vector_parameter.hpp>
 
 #include <pybind11/pybind11.h>
 
@@ -75,8 +75,9 @@ void exportDelayVector( py::module & m )
       py::arg( "interpolationType" ) = "lagrangeOrder3",
       py::arg( "methodDelayPolicy" ) = DelayVector::MethodDelayPolicy::Add,
       py::arg( "controlInputs" ) = false,
-      py::arg( "initialDelay" ) = pml::MatrixParameter<SampleType>(),
-      py::arg( "initialGain" ) = pml::MatrixParameter<SampleType>() )
+      py::arg( "initialDelay" ) = pml::VectorParameter<SampleType>{}, // Use the pml type, because BasicVector does not provide a copy ctor
+      py::arg( "initialGain" ) = pml::VectorParameter<SampleType>{}   // Use the pml type, because BasicVector does not provide a copy ctor
+     )
     ;
 }
 
