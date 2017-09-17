@@ -53,9 +53,10 @@ void exportBasicVector( py::module & m, char const * className )
      py::format_descriptor<DataType>::format(),
      1, { vp.size() }, { sizeof( DataType ) } );
   } )
+
+  // Note: Clang compilers throw a 'narrowing conversion" error when following two constructors are bound with the py::init<>() method. Therefore we use the explicit form.
   //.def( py::init<std::size_t>() )
   //.def( py::init<std::size_t, std::size_t>() )
-  // Note: Clang compilers throw a 'narrowing conversion" error when following two constructors are bound with the py::init<>() method. Therefore we use the explicit form.
   .def( py::init( []( std::size_t alignment ) { return new BasicVector<DataType>( alignment ); }), py::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( py::init( [](std::size_t size, std::size_t alignment ) { return new BasicVector<DataType>( size, alignment ); }), py::arg( "size" ), py::arg("alignment") = visr::cVectorAlignmentSamples )
   .def( py::init( [](py::array_t<DataType> const & data, std::size_t alignment)
@@ -71,7 +72,7 @@ void exportBasicVector( py::module & m, char const * className )
       inst->at(elIdx) = *static_cast<DataType const *>(data.data( elIdx ));
     }
     return inst;
-  }), py::arg("data"), py::arg("alignment") = visr::cVectorAlignmentSamples )
+  }), py::arg("data"), py::arg("alignment") = visr::cVectorAlignmentSamples, "Construct a BasicVector from a 1D Numpy array." )
   .def( py::init( []( std::vector<DataType> const & v, std::size_t alignment )
         {
           std::size_t const sz = v.size();
