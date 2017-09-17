@@ -29,11 +29,11 @@ void exportFirFilterMatrix( py::module & m )
 
   py::class_<FirFilterMatrix, visr::AtomicComponent> ffm( m, "FirFilterMatrix" );
 
-  py::enum_<FirFilterMatrix::ControlInput>( ffm, "ControlInput" ) // py::arithmetic() does not seem to work with this scoped enum with user-defined & and | operators.
-    .value( "NoInputs", FirFilterMatrix::ControlInput::None ) // "None" appears to be a reserved keyword in Python
-    .value( "Filters", FirFilterMatrix::ControlInput::Filters )
-    .value( "Routings", FirFilterMatrix::ControlInput::Routings )
-    .value( "All", FirFilterMatrix::ControlInput::All )
+  py::enum_<FirFilterMatrix::ControlPortConfig>( ffm, "ControlPortConfig" ) // py::arithmetic() does not seem to work with this scoped enum with user-defined & and | operators.
+    .value( "NoInputs", FirFilterMatrix::ControlPortConfig::None ) // "None" appears to be a reserved keyword in Python
+    .value( "Filters", FirFilterMatrix::ControlPortConfig::Filters )
+    .value( "Routings", FirFilterMatrix::ControlPortConfig::Routings )
+    .value( "All", FirFilterMatrix::ControlPortConfig::All )
     .def( py::self | py::self )
     .def( py::self & py::self )
    ;
@@ -48,12 +48,12 @@ void exportFirFilterMatrix( py::module & m )
       py::arg("maxRoutings"),
       py::arg("filters") = pml::MatrixParameter<SampleType>(), // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
       py::arg("routings") = pml::FilterRoutingList(),
-      py::arg( "controlInputs" ) = FirFilterMatrix::ControlInput::None,
+      py::arg( "controlInputs" ) = FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
    .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
         efl::BasicMatrix<SampleType> const & filters, pml::FilterRoutingList const & routings,
-        FirFilterMatrix::ControlInput controlInputs, char const * fftImplementation )
+        FirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
        FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
        inst->setup( numberOfInputs, numberOfOutputs, filterLength, maxFilters, maxRoutings,
@@ -68,12 +68,12 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "maxRoutings" ),
       py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),  // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
       py::arg( "routings" ) = pml::FilterRoutingList(),
-      py::arg( "controlInputs" ) =  FirFilterMatrix::ControlInput::None,
+      py::arg( "controlInputs" ) =  FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
     .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        py::array_t<SampleType> const & filters, pml::FilterRoutingList const & routings,
-        FirFilterMatrix::ControlInput controlInputs, char const * fftImplementation )
+        py::array const & filters, pml::FilterRoutingList const & routings,
+        FirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
        FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
        // Todo: Consider moving the matrix parameter creation from Numpy arrays to a library.
@@ -107,7 +107,7 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "maxRoutings" ),
       py::arg( "filters" ),
       py::arg( "routings" ) = pml::FilterRoutingList(),
-      py::arg( "controlInputs" ) =  FirFilterMatrix::ControlInput::None,
+      py::arg( "controlInputs" ) =  FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
   ;
 }
