@@ -29,8 +29,8 @@ void exportFirFilterMatrix( py::module & m )
 
   py::class_<FirFilterMatrix, visr::AtomicComponent> ffm( m, "FirFilterMatrix" );
 
-  py::enum_<FirFilterMatrix::ControlInput>( ffm, "ControlInput" )
-    .value( "None", FirFilterMatrix::ControlInput::None )
+  py::enum_<FirFilterMatrix::ControlInput>( ffm, "ControlInput" ) // py::arithmetic() does not seem to work with this scoped enum with user-defined & and | operators.
+    .value( "NoInputs", FirFilterMatrix::ControlInput::None ) // "None" appears to be a reserved keyword in Python
     .value( "Filters", FirFilterMatrix::ControlInput::Filters )
     .value( "Routings", FirFilterMatrix::ControlInput::Routings )
     .value( "All", FirFilterMatrix::ControlInput::All )
@@ -46,7 +46,7 @@ void exportFirFilterMatrix( py::module & m )
       py::arg("filterLength"),
       py::arg("maxFilters"),
       py::arg("maxRoutings"),
-      py::arg("filters") = pml::MatrixParameter<SampleType>(),
+      py::arg("filters") = pml::MatrixParameter<SampleType>(), // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
       py::arg("routings") = pml::FilterRoutingList(),
       py::arg( "controlInputs" ) = FirFilterMatrix::ControlInput::None,
       py::arg( "fftImplementation" ) = "default" )
@@ -66,28 +66,28 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "filterLength" ),
       py::arg( "maxFilters" ),
       py::arg( "maxRoutings" ),
-      py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),
+      py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),  // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
       py::arg( "routings" ) = pml::FilterRoutingList(),
       py::arg( "controlInputs" ) =  FirFilterMatrix::ControlInput::None,
       py::arg( "fftImplementation" ) = "default" )
     .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        py::array const & filters, pml::FilterRoutingList const & routings,
+        py::array_t<SampleType> const & filters, pml::FilterRoutingList const & routings,
         FirFilterMatrix::ControlInput controlInputs, char const * fftImplementation )
      {
        FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
        // Todo: Consider moving the matrix parameter creation from Numpy arrays to a library.
        if( filters.ndim() != 2 )
        {
-         throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input array must be 2D" );
+         throw std::invalid_argument( "FirFilterMatrix: Parameter \"filters\" must be a 2D Numpy array." );
        }
        if( not filters.dtype().is( py::dtype::of<SampleType>() ) )
        {
-         throw std::invalid_argument( "MatrixParameter from numpy ndarray: Input matrix has a different data type (dtype)." );
+         throw std::invalid_argument( "FirFilterMatrix: The data type (dtype) of parameter \"filters\" must match the sample type." );
        }
        std::size_t const numRows = filters.shape()[0];
        std::size_t const numCols = filters.shape()[1];
-       pml::MatrixParameter<SampleType> filterMtxParam( numRows, numCols, cVectorAlignmentSamples );
+       efl::BasicMatrix<SampleType> filterMtxParam( numRows, numCols, cVectorAlignmentSamples );
        for( std::size_t rowIdx( 0 ); rowIdx < numRows; ++rowIdx )
        {
          for( std::size_t colIdx( 0 ); colIdx < numCols; ++colIdx )
