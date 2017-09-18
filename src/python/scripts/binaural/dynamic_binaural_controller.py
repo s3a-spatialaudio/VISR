@@ -114,12 +114,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
 
-            if self.useHeadTracking:
-                 if self.trackingInputProtocol.changed():
-                     htrack = self.trackingInputProtocol.data()
-                     ypr = htrack.orientation
-                     rotationMatrix = calcRotationMatrix(np.array(ypr))
-                     print(rotationMatrix)
+           
 
             objIndicesRaw = [x.objectId for x in ov
                           if isinstance( x, (om.PointSource, om.PlaneWave) ) ]
@@ -142,6 +137,15 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     ch = src.channels[0]
                     self.sourcePos[ch,:] = posNormed
                     self.levels[ch] = src.level
+                           
+            if self.useHeadTracking:
+                 if self.trackingInputProtocol.changed():
+                     htrack = self.trackingInputProtocol.data()
+                     ypr = htrack.orientation
+                     rotationMatrix = calcRotationMatrix(np.array(ypr))
+                     self.sourcePos = self.sourcePos*rotationMatrix
+                     print(self.sourcePos)
+                               
                                
             if self.hrirInterpolation:
                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 3, p =2 )

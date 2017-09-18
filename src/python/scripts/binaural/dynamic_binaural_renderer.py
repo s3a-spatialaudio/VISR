@@ -75,15 +75,16 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                              filterLength=firLength,
                              maxRoutings=2*numberOfObjects,
                              routings=filterRouting,
-                             controlInputs=True
+                             controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
                              )
             self.audioConnection(self.objectSignalInput, self.convolver.audioPort("in") )
             self.parameterConnection(self.dynamicBinauraController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
 
-            blockSize = 16
+
             self.delayVector = rcl.DelayVector( context, "delayVector", self )
             self.delayVector.setup(numberOfObjects*2, interpolationType="lagrangeOrder3", initialDelay=0,
              controlInputs=True, 
+             methodDelayPolicy=rcl.DelayMatrix.MethodDelayPolicy.Add,
              initialGain=1.0, 
              interpolationSteps=context.period)
 
@@ -98,3 +99,4 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 
             self.audioConnection( self.adder.audioPort("out"), self.binauralOutput)
             self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
