@@ -46,7 +46,7 @@ elseif(APPLE)
 endif(WIN32)
 
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} apputilities_shared ) # slight misnomer, consider restructuring if the option handling should prove beneficial.
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows_shared )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl_shared )
 target_link_libraries( ${PROJECT_NAME} rrl_shared )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
 
