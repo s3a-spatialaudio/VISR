@@ -11,7 +11,7 @@
 #include <librbbl/index_sequence.hpp>
 
 
-#include <libsignalflows/matrix_convolver.hpp>
+#include <librcl/fir_filter_matrix.hpp>
 
 // We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
 // stuff such as defining macros min and max.
@@ -66,7 +66,7 @@ private:
 
   std::string mFftLibrary;
 
-  std::unique_ptr<signalflows::MatrixConvolver> mFlow;
+  std::unique_ptr<rcl::FirFilterMatrix> mFlow;
   std::unique_ptr<SignalFlowWrapper<double> > mFlowWrapper;
 
   pml::MatrixParameter<SampleType> mGains;
