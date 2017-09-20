@@ -109,4 +109,8 @@ INSTALL( DIRECTORY config DESTINATION share/visr )
 INSTALL( FILES ${CMAKE_SOURCE_DIR}/licence.txt DESTINATION share/visr )
 SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/licence.txt )
 
+# Install Python example scripts and templates
+INSTALL( DIRECTORY src/python/scripts DESTINATION python )
+INSTALL( DIRECTORY src/python/scripts DESTINATION templates )
+
 INCLUDE( CPack )
