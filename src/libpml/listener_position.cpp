@@ -27,8 +27,8 @@ ListenerPosition::ListenerPosition( Coordinate x, Coordinate y, Coordinate z,
 }
 
 ListenerPosition::ListenerPosition( PositionType const & position, OrientationType const & orientation )
-  : mPosition{ position}
-  , mOrientation{ orientation }
+  : mPosition( position )
+  , mOrientation( orientation )
   , mTimeNs{ 0 }
   , mFaceID{ 0 }
 {
