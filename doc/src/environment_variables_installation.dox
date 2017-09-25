@@ -59,7 +59,7 @@ This configuration file sets:
   There are 3 steps to install the environment variables.
 * *  <b>1. (optional)</b> - You can change the values of the environment variables in the .plist file if you need them to address different folders. 
 It is not needed if you have already installed the VISR framework with the installer and have installed python's anaconda distribution.
-* *  <b>2.</b> - Copy <tt>VISR_environment_build_install_X.X.X.plist</tt> into <tt><username>/Library/LauncAgents</tt>
+* *  <b>2.</b> - Copy <tt>VISR_environment_build_install_X.X.X.plist</tt> into <tt>&lt;username&gt;/Library/LauncAgents</tt>
 * *  <b>3.</b> - Open the <b>Terminal</b> application from <tt>/Applications/Utilities</tt>
 * *  <b>4.</b> - Write @code launchctl load VISR_environment_build_install_X.X.X.plist @endcode and press Enter
  */
