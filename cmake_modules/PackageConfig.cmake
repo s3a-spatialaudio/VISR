@@ -1,4 +1,4 @@
-﻿# Package generation coefiguraton
+# Package generation configuration
 SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Franck A.Franck@soton.ac.uk" )
 #SET( CPACK_PACKAGE_NAME "VISR" )
 SET( CPACK_PACKAGE_VENDOR "ISVR")
@@ -71,7 +71,7 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
   #SET( CPACK_GENERATOR PackageMaker )
   SET( CPACK_GENERATOR DragNDrop ZIP TBZ2 )
   #SET( CPACK_GENERATOR Bundle )
-  #SET( CPACK_PACKAGE_INSTALL_DIRECTORY ”/Applications” )
+  #SET( CPACK_PACKAGE_INSTALL_DIRECTORY "/Applications" )
 
   SET( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/cmake_modules/resources/s3a_logo.jpg )
 #  SET( CPACK_BUNDLE_NAME "VISR-0.9.0-Darwin/VISR" )
@@ -108,5 +108,9 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 INSTALL( DIRECTORY config DESTINATION share/visr )
 INSTALL( FILES ${CMAKE_SOURCE_DIR}/licence.txt DESTINATION share/visr )
 SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/licence.txt )
+
+# Install Python example scripts and templates
+INSTALL( DIRECTORY src/python/scripts DESTINATION python )
+INSTALL( DIRECTORY src/python/scripts DESTINATION templates )
 
 INCLUDE( CPack )

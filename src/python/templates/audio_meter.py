@@ -13,6 +13,7 @@ Created on Fri Sep  1 15:22:13 2017
 import visr   # Core VISR module, defines components and ports
 import pml    # Parameter message library, defines standard parameter types and communication protocols.
 
+# Python standard library calls.
 import numpy as np
 import scipy.signal as sig
 
@@ -23,7 +24,7 @@ class LoudnessMeter( visr. AtomicComponent ):
     # Defines the constructor that creates an SurroundLoudnessMeter. 
     def __init__( self, context, name, parent, 
                   numberOfChannels,
-                  gatingPeriod = 0.4,
+                  measurePeriod = 0.4,
                   channelWeights = None,
                   audioOut = False ):
         # Call the base class constructor
@@ -31,19 +32,25 @@ class LoudnessMeter( visr. AtomicComponent ):
         # Define an audio input port with name "audioIn" and width (number of signal waveforms) numberOfChannels
         self.audioInput = visr.AudioInputFloat( "audioIn", self, numberOfChannels )
  
-        # If the ption is set, add an audio output to put out the K-weigth input signals
+        # If the option is set, add an audio output to put out the K-weigth input signals
         # Some audio interfaces don't like configs with no outputs.
         if audioOut:
             self.audioOutput = visr.AudioOutputFloat( "audioOut", self, numberOfChannels )
         else:
             self.audioOutput = None
-
         
-        # Define a parameter output port with typgit diff src/pythe "Float" and communication protocol "MessageQueue"
+        # Define a parameter output port with type "Float" and communication protocol "MessageQueue"
+        # MessageQueue means that all computed data are hold in a first-in-first-out queue,
+        # which decouples the parameter update rate from the buffer size.
         self.loudnessOut = visr.ParameterOutput( "loudnessOut", self, pml.Float.staticType, pml.MessageQueueProtocol.staticType, pml.EmptyParameterConfig() )
         
-        # Setup data used in the process() function.
+        # %% Setup data used in the process() function.
         
+        # Round the measurement period to the next multiple of the buffer period
+        numMeanBlocks = int(np.ceil( (measurePeriod*context.samplingFrequency) 
+                                  /context.period )) 
+        self.pastPower = np.zeros( numMeanBlocks, dtype = np.float32  )
+                               
         # IIR filter state to be saved in betweem
         self.filterState = np.zeros( (2,numberOfChannels,2), dtype = np.float32 )
         
@@ -52,6 +59,8 @@ class LoudnessMeter( visr. AtomicComponent ):
         self.Kweighting = np.asarray( [[1.53512485958697, -2.69169618940638, 1.19839281085285, 1.0, -1.69065929318241, 0.73248077421585],
                                        [ 1.0, -2.0, 1.0, 1.0, -1.99004745483398, 0.99007225036621 ]], dtype = np.float32 )
 
+        # Initialise weightings for the channels.
+        # Use unit weighting if none are given
         if channelWeights is not None:
             self.channelWeights = np.asarray( channelWeights, dtype = np.float32 )
             if self.channelWeights.shape[0] != numberOfChannels:
@@ -68,21 +77,33 @@ class LoudnessMeter( visr. AtomicComponent ):
         # Perform K weighting as an IIR filter process with initial state self.filterState
         xk, self.filterState = sig.sosfilt( self.Kweighting, x, axis = 1, zi = self.filterState )
         
-        if self.audioOutput is not None:
-            self.audioOutput.set( xk )
-
         # Average power per channel
         y1 = np.mean( np.power( xk, 2 ), axis=1 )
 
-        # Compute the ungated loudness
-        combinedPwr = np.dot( y1, self.channelWeights )
+        # Compute the loudness for this block
+        blockPwr = np.dot( y1, self.channelWeights )
+
+        # Update the array of block powers
+        self.pastPower =  np.roll( self.pastPower, 1 )
+        self.pastPower[0] = blockPwr
+              
+        # Compute the mean over the blocks. We could do that by 
+        # subtracting the oldest and adding the newest instead,
+        # but this is likely not worth the effort.
+        meanPower = np.mean( self.pastPower )
 
         # Avoid divide by zero, limit to ~ -120 dB        
-        Lk = -0.691 + 10*np.log10( np.clip( combinedPwr, 1.0e-12, None ) )
-        
-        # print( "loudness: %f dB" % Lk )
+        Lk = -0.691 + 10*np.log10( np.clip( meanPower, 1.0e-12, None ) )
 
+        # Uncomment for debug output
+        # print( "loudness: %f dB" % Lk )
+        
         # Create a parameter message holding a single float.
         outParam = pml.Float( Lk )
-        
+
+        # Send the computed loudness value to the output.
         self.loudnessOut.protocolOutput().enqueue( outParam )
+        
+        # Send the filtered data to the audio output if this option has been chosen.
+        if self.audioOutput is not None:
+            self.audioOutput.set( xk )
