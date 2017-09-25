@@ -12,13 +12,13 @@ import audiointerfaces as ai
 
 from audio_meter import LoudnessMeter
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
 import sys
 
 numChannels = 2
-audioInterfaceName = 'PortAudio'
+audioInterfaceName = 'Jack'
 audioBackendOptions = '{}'
 samplingFrequency = 48000
 blockSize = 1024
@@ -31,26 +31,19 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         super( LoudnessGui, self ).__init__( None )
         self.audioRunning = False
         self.setGeometry( 0, 0, 800, 600 )
-        # self.setWindowLabel( "Loudness meter" ) # Only for QMainWindow
-        
-#        self.centralWidget = QtGui.QWidget( self )
-#        self.layout = QtGui.QGridLayout( self.centralWidget )
+
         self.layout = QtGui.QGridLayout( self )
-        
-#        self.layout.setColumnStretch(1, 4)
-#        self.layout.setColumnStretch(2, 4)
-        
-        
+
         self.startButton = QtGui.QPushButton( "Start Audio" ) # , self.centralWidget )
         #self.startButton.setMinimumSize( 200, 60 )
         self.stopButton = QtGui.QPushButton( "Stop Audio" ) # , self.centralWidget )
         #self.stopButton.setMinimumSize( 200, 60 )
         self.layout.addWidget( self.startButton, 0, 0 ) # , QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter )
         self.layout.addWidget( self.stopButton, 0, 1 ) # , QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter )
-        
+
         self.loudnessLabel = QtGui.QLabel( '--- dB' ) # , self.centralWidget )
         #self.loudnessLabel.setMinimumSize( 200, 60 )
-        
+
         self.layout.addWidget( self.loudnessLabel, 0, 2 ) # , QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter )
         
         self.startButton.clicked.connect( self.startAudio )
@@ -110,18 +103,11 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         if numPoints > 0:
             self.loudnessHist = np.roll( self.loudnessHist, numPoints )
             for idx in range( 0, numPoints ):
-                Lk = self.loudnessPort.front()
-                print( "loudness value %d: %f dB" % (idx,Lk) )
+                Lk = self.loudnessPort.front().value
+                self.loudnessHist[idx] = Lk
                 self.loudnessPort.pop()
-                self.loudnessHist[idx] = Lk.value
-            self.loudnessLabel.setText( '%f dB' % Lk.value )
+            self.loudnessLabel.setText( '%f dB' % Lk )
             self.loudnessPlot.setData( self.loudnessHist )
-                
-        
-#        while not self.loudnessPort.empty():
-#            Lk = self.loudnessPort.front()
-#            self.loudnessLabel.setText( '%f dB' % Lk.value )
-#            self.loudnessPort.pop()
 
 app = QtGui.QApplication( sys.argv )
 mainWnd = LoudnessGui()
