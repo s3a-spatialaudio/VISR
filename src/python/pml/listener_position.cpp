@@ -33,7 +33,7 @@ void exportListenerPosition( pybind11::module & m)
       ListenerPosition::Coordinate, ListenerPosition::Coordinate, ListenerPosition::Coordinate>(), py::arg("x"), py::arg("y"), py::arg("z") = 0.0f,
       py::arg("yaw")=0.0f, py::arg("pitch")=0.0f, py::arg("roll") = 0.0f)
     .def( py::init<ListenerPosition::PositionType const &, ListenerPosition::OrientationType const &>(), py::arg("position"),
-      py::arg("orientation") = ListenerPosition::OrientationType{0.0f,0.0f,0.0f} )
+          py::arg("orientation") = ListenerPosition::OrientationType{ {0.0f,0.0f,0.0f} } )
     .def( py::init<ListenerPosition const &>() ) // Copy constructor
     .def_property( "x", &ListenerPosition::x, &ListenerPosition::setX )
     .def_property( "y", &ListenerPosition::y, &ListenerPosition::setY )
