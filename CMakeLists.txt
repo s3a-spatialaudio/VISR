@@ -306,7 +306,7 @@ ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
 
 # Define the boost libraries that must be present.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework regex )
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework regex timer)
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
@@ -371,12 +371,23 @@ fix_rpath(Boost_FILESYSTEM_LIBRARY)
 fix_rpath(Boost_PROGRAM_OPTIONS_LIBRARY)
 fix_rpath(Boost_UNIT_TEST_FRAMEWORK_LIBRARY)
 fix_rpath(Boost_REGEX_LIBRARY)
+fix_rpath(Boost_TIMER_LIBRARY)
 
 get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
 get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
 get_filename_component(VORBIS_LIBRARY_NAME ${VORBIS_LIBRARY} NAME_WE)
 get_filename_component(VORBISENC_LIBRARY_NAME ${VORBISENC_LIBRARY} NAME_WE)
+get_filename_component(Boost_SYSTEM_LIBRARY_NAME ${Boost_SYSTEM_LIBRARY} NAME_WE)
+get_filename_component(Boost_TIMER_LIBRARY_NAME ${Boost_TIMER_LIBRARY} NAME_WE)
+get_filename_component(Boost_CHRONO_LIBRARY_NAME ${Boost_CHRONO_LIBRARY} NAME_WE)
 
+fix_dependencies_of_3rdparty(${Boost_SYSTEM_LIBRARY_NAME} ${Boost_FILESYSTEM_LIBRARY})
+fix_dependencies_of_3rdparty(${Boost_SYSTEM_LIBRARY_NAME} ${Boost_THREAD_LIBRARY})
+fix_dependencies_of_3rdparty(${Boost_SYSTEM_LIBRARY_NAME} ${Boost_CHRONO_LIBRARY})
+fix_dependencies_of_3rdparty(${Boost_SYSTEM_LIBRARY_NAME} ${Boost_TIMER_LIBRARY})
+fix_dependencies_of_3rdparty(${Boost_CHRONO_LIBRARY_NAME} ${Boost_TIMER_LIBRARY})
+fix_dependencies_of_3rdparty(${Boost_SYSTEM_LIBRARY_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+fix_dependencies_of_3rdparty(${Boost_TIMER_LIBRARY_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 fix_dependencies_of_3rdparty(${FLAC_LIBRARY_NAME} ${SNDFILE_LIBRARY})
 fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${SNDFILE_LIBRARY})
 fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${SNDFILE_LIBRARY})
