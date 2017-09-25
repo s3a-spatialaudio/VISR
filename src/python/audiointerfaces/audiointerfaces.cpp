@@ -20,12 +20,10 @@ void exportPortaudioInterface( pybind11::module & m );
 }
 }
 
-PYBIND11_PLUGIN( audiointerfaces )
+PYBIND11_MODULE( audiointerfaces, m )
 {
   pybind11::module::import( "visr" );
   pybind11::module::import( "rrl" );
-
-  pybind11::module m( "audiointerfaces", "VISR audio interfaces library" );
 
   using namespace visr::python::audiointerfaces;
   exportAudioInterface( m );
@@ -34,5 +32,4 @@ PYBIND11_PLUGIN( audiointerfaces )
   exportJackInterface( m );
 #endif
   exportPortaudioInterface( m );
-  return m.ptr();
 }

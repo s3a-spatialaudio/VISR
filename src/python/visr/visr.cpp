@@ -29,9 +29,8 @@ void exportAtomicComponent(py::module & m);
 } // namespace python
 } // namespace visr
 
-PYBIND11_PLUGIN( visr )
+PYBIND11_MODULE( visr, m )
 {
-  py::module m( "visr", "VISR core API module" );
   using namespace visr::python::visr;
   exportSignalFlowContext( m );
   exportParameterConfigBase( m );
@@ -46,5 +45,4 @@ PYBIND11_PLUGIN( visr )
   exportParameterPort(m);
   exportCompositeComponent( m );
   exportAtomicComponent( m );
-  return m.ptr();
 }

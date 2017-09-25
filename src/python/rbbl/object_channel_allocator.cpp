@@ -29,7 +29,7 @@ void exportObjectChannelAllocator( pybind11::module & m )
       {
         std::size_t const numChannels = self.numberUsedChannels();
         std::vector<visr::objectmodel::ObjectId> ret( numChannels );
-        for( std::size_t(idx); idx < numChannels; ++idx )
+        for( std::size_t idx = 0; idx < numChannels; ++idx )
         {
           ret[idx] = self.getObjectForChannel( idx );
         }
