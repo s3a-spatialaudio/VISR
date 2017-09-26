@@ -27,8 +27,8 @@ void exportSignalRoutingParameter( py::module & m)
   py::class_<SignalRoutingParameter> sigParam( m, "SignalRoutingParameter");
 
   py::class_<SignalRoutingParameter::Entry>( sigParam, "Entry" )
-    .def( "__init__", []( SignalRoutingParameter::Entry & inst, std::size_t in, std::size_t out )
-          { new (&inst) SignalRoutingParameter::Entry{ in, out }; } )
+    .def( py::init( []( std::size_t in, std::size_t out )
+          { return new SignalRoutingParameter::Entry{ in, out }; }), py::arg("inputIndex"), py::arg("outputIndex") )
     .def_readwrite( "input", &SignalRoutingParameter::Entry::input )
     .def_readwrite( "output", &SignalRoutingParameter::Entry::output )
   ;
@@ -37,14 +37,15 @@ void exportSignalRoutingParameter( py::module & m)
     .def_property_readonly_static( "staticType", []( pybind11::object /*self*/ ) { return SignalRoutingParameter::staticType(); } )
    .def( py::init<>() )
    .def( py::init<std::initializer_list<SignalRoutingParameter::Entry> const &>(), py::arg("initList"))
-   .def( "__init__", []( SignalRoutingParameter & inst, std::vector<SignalRoutingParameter::Entry> const & val )
+   .def( py::init( []( std::vector<SignalRoutingParameter::Entry> const & val )
                      {
-                       new (&inst) SignalRoutingParameter();
+                       SignalRoutingParameter * inst = new SignalRoutingParameter();
                        for( SignalRoutingParameter::Entry const & e : val )
                        {
-                         inst.addRouting( e );
+                         inst->addRouting( e );
                        }
-                     }, py::arg("initList") )
+                       return inst;
+                     } ), py::arg("initList") )
    .def( "__iter__", [](SignalRoutingParameter& sr){ return py::make_iterator(sr.begin(), sr.end()); }, "Return a Python iterator over the contained routings." )
    .def_property_readonly("size", &SignalRoutingParameter::size )
    .def( "swap", &SignalRoutingParameter::swap )

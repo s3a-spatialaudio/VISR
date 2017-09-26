@@ -17,15 +17,17 @@ namespace python
 namespace reverbobject
 {
 
-void exportReverbParameterCalculator( pybind11::module& m )
+namespace py = pybind11;
+
+using visr::reverbobject::ReverbParameterCalculator;
+
+void exportReverbParameterCalculator( py::module& m )
 {
-  pybind11::class_<::visr::reverbobject::ReverbParameterCalculator, AtomicComponent>( m, "ReverbParameterCalculator" )
-    .def( pybind11::init<SignalFlowContext const &, char const *, CompositeComponent *>(),
-        pybind11::arg( "context" ), pybind11::arg( "name" ),
-        pybind11::arg( "parent" ) )
-    .def( "__init__", 
-      []( ::visr::reverbobject::ReverbParameterCalculator & inst,
-          SignalFlowContext const & context, char const * name, CompositeComponent * parent,
+  py::class_<ReverbParameterCalculator, AtomicComponent>( m, "ReverbParameterCalculator" )
+    .def( py::init<SignalFlowContext const &, char const *, CompositeComponent *>(),
+        py::arg( "context" ), py::arg( "name" ),
+        py::arg( "parent" ) )
+    .def( py::init( []( SignalFlowContext const & context, char const * name, CompositeComponent * parent,
           panning::LoudspeakerArray const & arrayConfig,
           std::size_t numberOfObjects,
           std::size_t numberOfDiscreteReflectionsPerSource,
@@ -33,34 +35,35 @@ void exportReverbParameterCalculator( pybind11::module& m )
           SampleType lateReflectionLengthSeconds,
           std::size_t numLateReflectionSubBandFilters )
       {
-        new (&inst) ::visr::reverbobject::ReverbParameterCalculator( context, name, parent );
-        inst.setup( arrayConfig, numberOfObjects, numberOfDiscreteReflectionsPerSource,
-                    numBiquadSectionsReflectionFilters, lateReflectionLengthSeconds, numLateReflectionSubBandFilters );
-      },
-      pybind11::arg( "context" ), pybind11::arg( "name" ),
-      pybind11::arg( "parent" ),
-      pybind11::arg( "arrayConfig" ),
-      pybind11::arg( "numberOfObjects" ),
-      pybind11::arg( "discreteReflectionsPerSource" ),
-      pybind11::arg( "discreteReflectionBiquadSections" ),
-      pybind11::arg( "lateReflectionLengthseconds" ),
-      pybind11::arg( "lateReflectionSubbands" ) )
+        ReverbParameterCalculator * inst = new ReverbParameterCalculator( context, name, parent );
+        inst->setup( arrayConfig, numberOfObjects, numberOfDiscreteReflectionsPerSource,
+                     numBiquadSectionsReflectionFilters, lateReflectionLengthSeconds, numLateReflectionSubBandFilters );
+        return inst;
+      }),
+      py::arg( "context" ), py::arg( "name" ),
+      py::arg( "parent" ),
+      py::arg( "arrayConfig" ),
+      py::arg( "numberOfObjects" ),
+      py::arg( "discreteReflectionsPerSource" ),
+      py::arg( "discreteReflectionBiquadSections" ),
+      py::arg( "lateReflectionLengthseconds" ),
+      py::arg( "lateReflectionSubbands" ) )
     .def( "setup", &visr::reverbobject::ReverbParameterCalculator::setup,
-      pybind11::arg( "arrayConfig" ),
-      pybind11::arg( "numberOfObjects" ),
-      pybind11::arg( "discreteReflectionsPerSource" ),
-      pybind11::arg( "discreteReflectionBiquadSections" ),
-      pybind11::arg( "lateReflectionLengthseconds" ),
-      pybind11::arg( "lateReflectionSubbands" )
+      py::arg( "arrayConfig" ),
+      py::arg( "numberOfObjects" ),
+      py::arg( "discreteReflectionsPerSource" ),
+      py::arg( "discreteReflectionBiquadSections" ),
+      py::arg( "lateReflectionLengthseconds" ),
+      py::arg( "lateReflectionSubbands" )
     )
 
     .def( "setup", &visr::reverbobject::ReverbParameterCalculator::setup,
-        pybind11::arg( "arrayConfig"),
-        pybind11::arg( "numberOfObjects" ),
-        pybind11::arg( "discreteReflectionsPerSource" ),
-        pybind11::arg( "discreteReflectionBiquadSections" ),
-        pybind11::arg( "lateReflectionLengthseconds" ),
-        pybind11::arg( "lateReflectionSubbands" )
+        py::arg( "arrayConfig"),
+        py::arg( "numberOfObjects" ),
+        py::arg( "discreteReflectionsPerSource" ),
+        py::arg( "discreteReflectionBiquadSections" ),
+        py::arg( "lateReflectionLengthseconds" ),
+        py::arg( "lateReflectionSubbands" )
       )
     ;
 }
