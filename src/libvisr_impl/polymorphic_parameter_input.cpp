@@ -2,7 +2,7 @@
 
 #include "polymorphic_parameter_input.hpp"
 
-#include <libril/communication_protocol_factory.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
 
 namespace visr
 {

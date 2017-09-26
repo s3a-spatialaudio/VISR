@@ -2,7 +2,7 @@
 
 #include "shared_data_protocol.hpp"
 
-#include <libril/parameter_factory.hpp>
+#include <libvisr/parameter_factory.hpp>
 
 #include <algorithm>
 

@@ -3,11 +3,11 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <librrl/integrity_checking.hpp>
 
-#include <libril/atomic_component.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/matrix_parameter.hpp>

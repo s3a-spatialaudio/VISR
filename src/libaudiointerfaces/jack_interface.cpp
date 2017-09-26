@@ -2,8 +2,8 @@
 
 #include "jack_interface.hpp"
 
-#include <libril/constants.hpp>
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <librbbl/index_sequence.hpp>
 

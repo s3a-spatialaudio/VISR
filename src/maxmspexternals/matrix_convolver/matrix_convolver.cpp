@@ -7,7 +7,7 @@
 #undef error
 #include "options.hpp"
 
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 
@@ -28,7 +28,7 @@
 
 #include <librbbl/index_sequence.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <maxmspexternals/libmaxsupport/argument_list.hpp>
 

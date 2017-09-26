@@ -6,10 +6,10 @@
 #include "parameter_port_base_implementation.hpp"
 #include "composite_component_implementation.hpp"
 
-#include <libril/audio_port_base.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/parameter_port_base.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/audio_port_base.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/parameter_port_base.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <algorithm>
 #include <ciso646>

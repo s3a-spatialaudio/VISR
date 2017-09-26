@@ -6,7 +6,7 @@
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libpythonsupport/python_wrapper.hpp>
 #include <libpythonsupport/initialisation_guard.hpp>

@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "port_utilities.hpp"
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <libvisr_impl/audio_port_base_implementation.hpp>
 #include <libvisr_impl/component_implementation.hpp>

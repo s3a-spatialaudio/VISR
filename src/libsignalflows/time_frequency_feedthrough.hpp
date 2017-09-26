@@ -5,9 +5,9 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/composite_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
 
 #include <librcl/time_frequency_transform.hpp>
 #include <librcl/time_frequency_inverse_transform.hpp>

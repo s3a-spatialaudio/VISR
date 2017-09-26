@@ -8,10 +8,10 @@
 #include <libpml/signal_routing_parameter.hpp>
 #include <libpml/double_buffering_protocol.hpp>
 
-#include <libril/atomic_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/parameter_input.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/parameter_input.hpp>
 
 #include <map>
 #include <memory>

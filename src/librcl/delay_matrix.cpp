@@ -2,7 +2,7 @@
 
 #include "delay_matrix.hpp"
 
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <libefl/vector_functions.hpp>
 

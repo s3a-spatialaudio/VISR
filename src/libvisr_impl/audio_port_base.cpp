@@ -1,8 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/audio_port_base.hpp>
+#include <libvisr/audio_port_base.hpp>
 
-#include <libril/component.hpp>
+#include <libvisr/component.hpp>
 
 #include <libvisr_impl/audio_port_base_implementation.hpp>
 

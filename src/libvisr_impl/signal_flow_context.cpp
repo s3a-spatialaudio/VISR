@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 namespace visr
 {

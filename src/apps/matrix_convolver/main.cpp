@@ -8,7 +8,7 @@
 #include <librbbl/fft_wrapper_factory.hpp>
 #include <librbbl/index_sequence.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
 

@@ -5,9 +5,9 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/detail/compile_time_hash_fnv1.hpp>
-#include <libril/parameter_type.hpp>
-#include <libril/typed_parameter_base.hpp>
+#include <libvisr/detail/compile_time_hash_fnv1.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/typed_parameter_base.hpp>
 
 #include <libpml/empty_parameter_config.hpp>
 

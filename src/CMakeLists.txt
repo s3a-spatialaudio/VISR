@@ -34,16 +34,14 @@ ADD_SUBDIRECTORY( librbbl )
 # Rendering component library
 ADD_SUBDIRECTORY( librcl )
 
-# Rendering infrastructure library
-# Nothing to build here
-ADD_SUBDIRECTORY( libril )
-
 # Rendering runtime library 
 ADD_SUBDIRECTORY( librrl )
 
 # Data types and components related to the reverb audio object.
 ADD_SUBDIRECTORY( libreverbobject )
 
+# VISR main library
+ADD_SUBDIRECTORY( libvisr )
 
 # Library of implementations of the interface components.
 ADD_SUBDIRECTORY( libvisr_impl )

@@ -6,10 +6,10 @@
 #include "audio_port_base_implementation.hpp"
 #include "parameter_port_base_implementation.hpp"
 
-#include <libril/audio_port_base.hpp>
-#include <libril/channel_list.hpp>
-#include <libril/parameter_port_base.hpp>
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/audio_port_base.hpp>
+#include <libvisr/channel_list.hpp>
+#include <libvisr/parameter_port_base.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <algorithm>
 #include <ciso646>

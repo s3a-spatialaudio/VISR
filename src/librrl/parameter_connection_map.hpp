@@ -3,7 +3,7 @@
 #ifndef VISR_LIBRRL_PARAMETER_CONNECTION_MAP_HPP_INCLUDED
 #define VISR_LIBRRL_PARAMETER_CONNECTION_MAP_HPP_INCLUDED
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <iosfwd>
 #include <map>

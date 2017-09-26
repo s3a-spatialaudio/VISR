@@ -1,9 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/parameter_base.hpp>
-#include <libril/parameter_factory.hpp>
+#include <libvisr/parameter_base.hpp>
+#include <libvisr/parameter_factory.hpp>
 
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <algorithm>
 #include <cstring>

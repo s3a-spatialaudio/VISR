@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/parameter_output.hpp>
-#include <libril/port_base.hpp> // for PortBase::Direction
+#include <libvisr/parameter_output.hpp>
+#include <libvisr/port_base.hpp> // for PortBase::Direction
 
 namespace visr
 {

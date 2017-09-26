@@ -1,14 +1,14 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/audio_port_base.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/audio_sample_type.hpp>
-#include <libril/constants.hpp>
+#include <libvisr/audio_port_base.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/audio_sample_type.hpp>
+#include <libvisr/constants.hpp>
 
-#include <libril/component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 // Extend the interface beyond the audio ports visible in the C++ API
 #include <libvisr_impl/audio_port_base_implementation.hpp>

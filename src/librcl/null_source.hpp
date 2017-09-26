@@ -5,8 +5,8 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/audio_output.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/audio_output.hpp>
 
 namespace visr
 {

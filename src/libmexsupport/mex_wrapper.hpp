@@ -3,7 +3,7 @@
 #ifndef VISR_MEXSUPPORT_MEX_WRAPPER_HPP_INCLUDED
 #define VISR_MEXSUPPORT_MEX_WRAPPER_HPP_INCLUDED
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <matrix.h>
 

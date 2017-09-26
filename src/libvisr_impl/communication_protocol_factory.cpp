@@ -1,10 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/communication_protocol_factory.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
 
-#include <libril/communication_protocol_type.hpp>
-#include <libril/detail/compose_message_string.hpp>
-#include <libril/parameter_type.hpp>
+#include <libvisr/communication_protocol_type.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
+#include <libvisr/parameter_type.hpp>
 
 #include <algorithm>
 #include <ciso646>

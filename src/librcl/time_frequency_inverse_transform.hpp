@@ -5,10 +5,10 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/constants.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/parameter_input.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/parameter_input.hpp>
 
 #include <libefl/aligned_array.hpp>
 #include <libefl/basic_matrix.hpp>

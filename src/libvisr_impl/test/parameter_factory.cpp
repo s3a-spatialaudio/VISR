@@ -1,8 +1,8 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
-#include <libril/parameter_factory.hpp>
-#include <libril/parameter_type.hpp>
+#include <libvisr/parameter_factory.hpp>
+#include <libvisr/parameter_type.hpp>
 
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/matrix_parameter_config.hpp>

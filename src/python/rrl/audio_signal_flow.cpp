@@ -2,7 +2,7 @@
 
 #include <librrl/audio_signal_flow.hpp> 
 
-#include <libril/component.hpp>
+#include <libvisr/component.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

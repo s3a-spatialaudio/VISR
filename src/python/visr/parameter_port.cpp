@@ -1,11 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/component.hpp>
-#include <libril/parameter_config_base.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
-#include <libril/parameter_port_base.hpp>
+#include <libvisr/component.hpp>
+#include <libvisr/parameter_config_base.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
+#include <libvisr/parameter_port_base.hpp>
 
 #include <libvisr_impl/polymorphic_parameter_input.hpp>
 #include <libvisr_impl/polymorphic_parameter_output.hpp>

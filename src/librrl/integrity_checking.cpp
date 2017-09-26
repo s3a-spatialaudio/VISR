@@ -5,7 +5,7 @@
 #include "audio_connection_map.hpp"
 #include "port_utilities.hpp"
 
-#include <libril/component.hpp>
+#include <libvisr/component.hpp>
 
 #include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>

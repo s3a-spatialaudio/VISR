@@ -1,7 +1,7 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
-#include <libril/channel_list.hpp>
+#include <libvisr/channel_list.hpp>
 
 #include <boost/test/unit_test.hpp>
 

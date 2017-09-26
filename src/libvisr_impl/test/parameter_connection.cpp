@@ -2,9 +2,9 @@
 
 #include <librcl/scene_decoder.hpp>
 
-#include <libril/communication_protocol_base.hpp>
-#include <libril/communication_protocol_factory.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/parameter_port_base_implementation.hpp>

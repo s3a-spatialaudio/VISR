@@ -1,11 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/atomic_component.hpp>
-#include <libril/communication_protocol_base.hpp>
-#include <libril/communication_protocol_factory.hpp>
-#include <libril/signal_flow_context.hpp>
-#include <libril/atomic_component.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
+#include <libvisr/signal_flow_context.hpp>
+#include <libvisr/atomic_component.hpp>
 
 #include <libvisr_impl/component_implementation.hpp>
 #include <libvisr_impl/polymorphic_parameter_input.hpp>

@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/parameter_input.hpp>
+#include <libvisr/parameter_input.hpp>
 
 namespace visr
 {

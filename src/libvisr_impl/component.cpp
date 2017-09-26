@@ -1,9 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/component.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/component.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libvisr_impl/component_implementation.hpp>
 

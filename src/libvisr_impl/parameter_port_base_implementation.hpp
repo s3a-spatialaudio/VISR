@@ -5,9 +5,9 @@
 
 #include "port_base_implementation.hpp"
 
-#include <libril/export_symbols.hpp>
-#include <libril/parameter_type.hpp>
-#include <libril/communication_protocol_type.hpp>
+#include <libvisr/export_symbols.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/communication_protocol_type.hpp>
  
 #include <memory>
 #include <string>

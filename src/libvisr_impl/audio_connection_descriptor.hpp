@@ -3,7 +3,7 @@
 #ifndef VISR_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 #define VISR_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
-#include <libril/channel_list.hpp>
+#include <libvisr/channel_list.hpp>
 
 #include <ciso646>
 #include <cstddef>

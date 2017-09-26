@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/audio_input.hpp>
+#include <libvisr/audio_input.hpp>
 
 namespace visr
 {

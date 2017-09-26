@@ -1,9 +1,9 @@
 /* Copyright Institue of Sound and Vibration Research - All rights reserved. */
 
 
-#include <libril/atomic_component.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <boost/test/unit_test.hpp>
 

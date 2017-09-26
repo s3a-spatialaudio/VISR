@@ -3,9 +3,9 @@
 #ifndef VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 #define VISR_IMPL_COMPONENT_IMPLEMENTATION_HPP_INCLUDED
 
-#include <libril/constants.hpp>
-#include <libril/export_symbols.hpp>
-#include <libril/status_message.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/export_symbols.hpp>
+#include <libvisr/status_message.hpp>
 
 #include <cstddef>
 #include <string>

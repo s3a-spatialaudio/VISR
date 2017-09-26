@@ -1,9 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/audio_port_base.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/parameter_port_base.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/audio_port_base.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/parameter_port_base.hpp>
+#include <libvisr/signal_flow_context.hpp>
 #include <libvisr_impl/audio_connection_descriptor.hpp>
 
 #include <pybind11/pybind11.h>

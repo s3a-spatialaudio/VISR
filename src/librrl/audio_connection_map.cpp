@@ -4,7 +4,7 @@
 
 #include "port_utilities.hpp"
 
-#include <libril/channel_list.hpp>
+#include <libvisr/channel_list.hpp>
 
 #include <libvisr_impl/audio_port_base_implementation.hpp>
 #include <libvisr_impl/composite_component_implementation.hpp>

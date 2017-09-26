@@ -5,7 +5,7 @@
 #include <libmexsupport/export_symbol.hpp>
 #include <libmexsupport/mex_wrapper.hpp>
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 // for the moment, do some basic tests in the main mex function
 #include <libefl/basic_vector.hpp>

@@ -3,9 +3,9 @@
 #ifndef VISR_POLYMORPHIC_PARAMETER_OUTPUT_HPP_INCLUDED
 #define VISR_POLYMORPHIC_PARAMETER_OUTPUT_HPP_INCLUDED
 
-#include <libril/export_symbols.hpp>
-#include <libril/parameter_output.hpp>
-#include <libril/communication_protocol_base.hpp>
+#include <libvisr/export_symbols.hpp>
+#include <libvisr/parameter_output.hpp>
+#include <libvisr/communication_protocol_base.hpp>
 
 #include <memory>
 

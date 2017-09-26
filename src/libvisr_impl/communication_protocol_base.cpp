@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_base.hpp>
 
 namespace visr
 {

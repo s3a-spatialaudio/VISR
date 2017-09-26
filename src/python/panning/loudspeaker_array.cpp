@@ -4,6 +4,7 @@
 #include <libpml/biquad_parameter.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 
 #include <vector>
 
@@ -15,6 +16,8 @@ namespace python
 {
 namespace panning
 {
+
+namespace py = pybind11;
 
 namespace
 {
@@ -52,7 +55,25 @@ std::vector<LoudspeakerArray::ChannelIndex> getSubwooferChannelIndices( Loudspea
   }
 }
 
+py::array getPositions( LoudspeakerArray const & la )
+{
+  int const len = static_cast<int>(la.getNumSpeakers());
+  py::array ret( py::dtype::of<float>(),
+  py::array::ShapeContainer( {len, 3 }),
+  { sizeof( Afloat )*3, sizeof( Afloat ) }
+  );
+  for( std::size_t lspIdx(0); lspIdx < len; ++lspIdx )
+  {
+    visr::panning::XYZ const pos = la.getPosition(lspIdx);
+
+    *(static_cast<Afloat*>(ret.mutable_data( lspIdx, 0 ))) = pos.x;
+    *(static_cast<Afloat*>(ret.mutable_data( lspIdx, 1 ))) = pos.y;
+    *(static_cast<Afloat*>(ret.mutable_data( lspIdx, 2 ))) = pos.z;
+  }
+  return ret;
 }
+
+} // namespace unnamed
 
 void exportLoudspeakerArray( pybind11::module & m)
 {
@@ -60,12 +81,11 @@ void exportLoudspeakerArray( pybind11::module & m)
     .def(pybind11::init<std::string const &>(), pybind11::arg("xmlFile"))
     .def("loadXmlFile", &LoudspeakerArray::loadXmlFile)
     .def( "loadXmlString", &LoudspeakerArray::loadXmlString)
-    .def("getPosition", (visr::panning::XYZ &(LoudspeakerArray::*)(size_t iSpk)) &LoudspeakerArray::getPosition)
-    .def("getPosition", (visr::panning::XYZ const &(LoudspeakerArray::*)(size_t iSpk) const) &LoudspeakerArray::getPosition)
-    .def( "getPosition", (visr::panning::XYZ &(LoudspeakerArray::*)(LoudspeakerArray::LoudspeakerIdType const & iSpk)) &LoudspeakerArray::getPosition )
-    .def( "getPosition", (visr::panning::XYZ const &(LoudspeakerArray::*)(LoudspeakerArray::LoudspeakerIdType const &) const)(&LoudspeakerArray::getPosition) )
-    .def( "getPositions", (visr::panning::XYZ *(LoudspeakerArray::*)()) &LoudspeakerArray::getPositions)
-    .def( "getPositions", (visr::panning::XYZ const *(LoudspeakerArray::*)() const) &LoudspeakerArray::getPositions)
+    //.def("getPosition", (visr::panning::XYZ &(LoudspeakerArray::*)(size_t iSpk)) &LoudspeakerArray::getPosition)
+    //.def("getPosition", (visr::panning::XYZ const &(LoudspeakerArray::*)(size_t iSpk) const) &LoudspeakerArray::getPosition)
+    //.def( "getPosition", (visr::panning::XYZ &(LoudspeakerArray::*)(LoudspeakerArray::LoudspeakerIdType const & iSpk)) &LoudspeakerArray::getPosition )
+    .def( "position", (visr::panning::XYZ const &(LoudspeakerArray::*)(LoudspeakerArray::LoudspeakerIdType const &) const)(&LoudspeakerArray::getPosition) )
+    .def( "positions", &getPositions, "Return the loudspeaker positions (real and imaginary) as a Numpy array." )
     .def( "getSpeakerChannelIndex", &LoudspeakerArray::channelIndex, pybind11::arg("speakerIndex"))
     .def( "getSpeakerIndexFromId", &LoudspeakerArray::getSpeakerIndexFromId, pybind11::arg( "speakerId" ) )
     .def( "getSpeakerChannel", &LoudspeakerArray::getSpeakerChannel, pybind11::arg( "speakerIndex" ) )

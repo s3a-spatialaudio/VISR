@@ -8,8 +8,8 @@
 #include "audio_connection_descriptor.hpp"
 #include "parameter_connection_descriptor.hpp"
 
-#include <libril/composite_component.hpp>
-#include <libril/export_symbols.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/export_symbols.hpp>
 
 #include <vector>
 

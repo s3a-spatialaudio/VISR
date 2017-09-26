@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/audio_sample_type.hpp>
+#include <libvisr/audio_sample_type.hpp>
 
 #include <initializer_list>
 #include <map>

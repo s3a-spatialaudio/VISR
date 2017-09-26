@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/channel_list.hpp>
+#include <libvisr/channel_list.hpp>
 
 #include <ciso646>
 #include <iterator>
