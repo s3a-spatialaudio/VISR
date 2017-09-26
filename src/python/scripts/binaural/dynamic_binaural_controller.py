@@ -10,14 +10,17 @@ Created on Wed Sep  6 22:02:40 2017
 """
 
 from readSofa import sph2cart
-from rotationFunctions import calcRotationMatrix
-
+from rotationFunctions import calcRotationMatrix, cart2sph, rad2deg
+import matplotlib.pyplot as plt
 import visr
 import pml
 import rbbl
 import objectmodel as om
 
 import numpy as np
+
+
+
 from scipy.spatial import KDTree
 
 class DynamicBinauralController( visr.AtomicComponent ):
@@ -100,7 +103,28 @@ class DynamicBinauralController( visr.AtomicComponent ):
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
         self.hrirLookup = KDTree( self.hrirPos )
+
+#        plt.figure(1)            
+#        for vec in self.hrirPos:
+#            
+#            plt.plot(vec[0], vec[1], '+')
+#
+#        plt.show() # or savefig(<filename>)
+#
+#        plt.figure(2)            
+#        for vec in self.hrirPos:
+#
+#            plt.plot(vec[0], vec[2], '+')
+#
+#        plt.show() # or savefig(<filename>)
+#        np.set_printoptions(threshold=np.nan)
+        #print(self.hrirPos)
         
+#        f = open('workfile.txt', 'w')
+#        for index, g in enumerate(self.hrirPos):
+#            sph = cart2sph(g[0],g[1],g[2])
+#            f.write('%d [%d %d]\n' % (index,rad2deg(sph[0]),rad2deg(sph[1])))
+#            
         # %% Dynamic allocation of objects to channels
         if channelAllocation:
             self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
@@ -142,16 +166,35 @@ class DynamicBinauralController( visr.AtomicComponent ):
                  if self.trackingInputProtocol.changed():
                      htrack = self.trackingInputProtocol.data()
                      ypr = htrack.orientation
-                     rotationMatrix = calcRotationMatrix(np.array(ypr))
+                     
+                     # np.negative is to obtain the opposite rotation of the head rotation
+                     rotationMatrix = calcRotationMatrix(np.negative(ypr))
+
+                     #print("before rotation: "+str(self.sourcePos[0]))   
+ 
                      self.sourcePos = self.sourcePos*rotationMatrix
-                     print(self.sourcePos)
-                               
+
+                     print(" after rotation: "+str(self.sourcePos[0]))
                                
             if self.hrirInterpolation:
                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 3, p =2 )
             else:
                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
 
+                
+                indices2 = np.zeros( (self.numberOfObjects), dtype = np.float32 )
+
+
+                for srcIndex, nsrc in enumerate(self.sourcePos):         
+                    minDistOld=10000000000000000000000000000                    
+                    for hrirIndex, nhrir in enumerate(self.hrirPos):
+                        minDist = np.linalg.norm(nsrc-nhrir)
+                        if minDist < minDistOld :
+                            indices2[srcIndex] = hrirIndex
+                            minDistOld = minDist
+                #print(indices2)
+                                    
+                
             # Retrieve the output gain vector for setting the object level and potentially
             # applying dynamically computed 
             gainVec = self.gainOutputProtocol.data()
@@ -167,7 +210,15 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     if self.hrirInterpolation:
                         raise ValueError( 'HRIR interpolation not implemented yet' )
                     else:
+                        sph0 = cart2sph(self.sourcePos[chIdx][0],self.sourcePos[chIdx][1],self.sourcePos[chIdx][2])
+                        print('p%d [%d %d]' % (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
+                        sph1 = cart2sph(self.hrirPos[indices[chIdx]][0],self.hrirPos[indices[chIdx]][1],self.hrirPos[indices[chIdx]][2])
+                        sph2 = cart2sph(self.hrirPos[indices2[chIdx]][0],self.hrirPos[indices2[chIdx]][1],self.hrirPos[indices2[chIdx]][2])
+                        #if rad2deg(sph1[0]) != rad2deg(sph2[0]) or rad2deg(sph1[1]) != rad2deg(sph2[1]):
+                        print("kdt %d:[%d %d]   eucld %d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1]),indices2[chIdx],rad2deg(sph2[0]),rad2deg(sph2[1])))
+
                         if self.lastFilters[chIdx] != indices[chIdx]:
+                           
                             leftCmd  = pml.IndexedVectorFloat( chIdx,
                                                               self.hrirs[indices[chIdx],0,:])
                             rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
