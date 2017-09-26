@@ -25,8 +25,7 @@ static constexpr const char * sStringParameterName = "String";
 /**
  * A type for passing strings between processing components.
  */
-class VISR_PML_LIBRARY_SYMBOL StringParameter: // public std::string,
-                                               public TypedParameterBase<StringParameter, EmptyParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
+class VISR_PML_LIBRARY_SYMBOL StringParameter: public TypedParameterBase<StringParameter, EmptyParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >
 {
 public:
   explicit StringParameter( std::size_t maxLength = 0 );
@@ -47,6 +46,8 @@ public:
   std::size_t empty() const;
 
   std::size_t size() const;
+
+  using TypedParameterBase<StringParameter, EmptyParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >::assign;
 
   void assign( char const * newStr );
 
