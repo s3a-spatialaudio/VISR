@@ -43,9 +43,6 @@ ADD_SUBDIRECTORY( libreverbobject )
 # VISR main library
 ADD_SUBDIRECTORY( libvisr )
 
-# Library of implementations of the interface components.
-ADD_SUBDIRECTORY( libvisr_impl )
-
 # Hold applications in a separate subdirectory
 ADD_SUBDIRECTORY( apps )
 
