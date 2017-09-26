@@ -12,7 +12,6 @@ combined arbitrarily):
  * Extending and creating new signal flows by combining existing components in Python
  * Implementing new components in Python, which can be freely mixed and composed with other components.
 
-
 @section python_support_installation_and_setup  Installation and Setup
 To use the Python integration, a working Python environment must be installed both on a development system and on systems which use installed VISR binaries.
  * We highly recommend Python 3 (although the code should compile and run with Python 2 (provided that it is
@@ -81,9 +80,10 @@ that the build configuration Debug or Release matches that used in the PYTHONPAT
 @section python_support_python_runner Running Python Components as Standalone Application: python_runner
 
 While it is possible to run Python components directly from a Python interpreter, there are also use cases where a signal flow defined in Python is preferably run as a standalone audio application.
-The application <tt>python_runner<tt>, installed as part of the VISR package, can be used. This binary is started as a command-line application and runs the specified VISR component as a real-time rendering process using a specified audio interface.
+The application <tt>python_runner</tt>, installed as part of the VISR package, can be used. This binary is started as a command-line application and runs the specified VISR component as a real-time rendering process using a specified audio interface.
 
 The command line arguments are displayed by the <tt>--help</tt> option:
+
 @code
 $ ./python_runner --help
   -h [ --help ]                     Show help and usage information.
