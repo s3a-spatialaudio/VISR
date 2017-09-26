@@ -67,7 +67,6 @@ set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
 # Transitive dependencies
 target_link_libraries( rcl_static pml_static )
 target_link_libraries( rcl_static visr_static )
-target_link_libraries( rcl_static ril )
 target_link_libraries( rcl_static panning_static )
 target_link_libraries( rcl_static objectmodel_static )
 target_link_libraries( rcl_static rbbl_static )

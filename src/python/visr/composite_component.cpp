@@ -4,7 +4,6 @@
 #include <libvisr/composite_component.hpp>
 #include <libvisr/parameter_port_base.hpp>
 #include <libvisr/signal_flow_context.hpp>
-#include <libvisr_impl/audio_connection_descriptor.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

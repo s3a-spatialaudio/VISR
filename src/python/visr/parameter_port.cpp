@@ -7,8 +7,8 @@
 #include <libvisr/parameter_output.hpp>
 #include <libvisr/parameter_port_base.hpp>
 
-#include <libvisr_impl/polymorphic_parameter_input.hpp>
-#include <libvisr_impl/polymorphic_parameter_output.hpp>
+#include <libvisr/polymorphic_parameter_input.hpp>
+#include <libvisr/polymorphic_parameter_output.hpp>
 
 #include <pybind11/pybind11.h>
 

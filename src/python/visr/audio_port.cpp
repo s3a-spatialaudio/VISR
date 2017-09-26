@@ -11,7 +11,7 @@
 #include <libvisr/signal_flow_context.hpp>
 
 // Extend the interface beyond the audio ports visible in the C++ API
-#include <libvisr_impl/audio_port_base_implementation.hpp>
+#include <libvisr/impl/audio_port_base_implementation.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

@@ -1,18 +1,21 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-set( APPLICATION_NAME audiointerfaces_test )
+set( APPLICATION_NAME visr_library_test )
 
-# Make the current source directory known to the source code to create absolute file paths.
-add_definitions( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
-add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
-
-
-add_executable( ${APPLICATION_NAME} 
-audio_interface_configuration.cpp
+set( SOURCES
+audio_connection_descriptor.cpp
+audio_sample_type.cpp
+component_names.cpp
+parameter_factory.cpp
+parameter_connection.cpp
+polymorphic_parameter_port.cpp
+test_main.cpp
 )
 
-target_link_libraries( ${APPLICATION_NAME} audiointerfaces_static )
-target_link_libraries( ${APPLICATION_NAME} rcl_static )
+add_executable( ${APPLICATION_NAME} ${SOURCES} )
+
+target_link_libraries( ${APPLICATION_NAME} visr_static)
+target_link_libraries( ${APPLICATION_NAME} pml_static )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 

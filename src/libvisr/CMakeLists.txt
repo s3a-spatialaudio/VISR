@@ -1,7 +1,7 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-# Basically, this makes the headers show up in the Visual studio project.
-SET( HEADERS 
+# Define the header files that should be installed to the directory include/visr/visr.
+SET( PUBLIC_HEADERS 
 atomic_component.hpp 
 audio_input.hpp
 audio_output.hpp
@@ -22,6 +22,8 @@ parameter_factory.hpp
 parameter_output.hpp
 parameter_port_base.hpp
 parameter_type.hpp
+polymorphic_parameter_input.hpp
+polymorphic_parameter_output.hpp
 port_base.hpp
 signal_flow_context.hpp
 status_message.hpp
@@ -31,10 +33,71 @@ detail/compile_time_hash_fnv1.hpp
 detail/compose_message_string.hpp
 )
 
-SET( SOURCES
-version.cpp
+# Header files used internally, not to be installed.
+set( INTERNAL_HEADERS
+impl/audio_connection_descriptor.hpp
+impl/component_implementation.hpp
+impl/composite_component_implementation.hpp
+impl/parameter_connection_descriptor.hpp
+impl/port_base_implementation.hpp
+impl/audio_port_base_implementation.hpp
+impl/parameter_port_base_implementation.hpp
 )
 
-# Essentially empty library (Decide what to do with that!)
-add_library( ril STATIC ${HEADERS} ${SOURCES} )
-target_compile_definitions( ril PRIVATE -DVISR_BUILD_CORE_LIBRARIES )
+set( SOURCES
+atomic_component.cpp
+audio_input.cpp
+audio_output.cpp
+audio_port_base.cpp
+audio_sample_type.cpp
+channel_list.cpp
+communication_protocol_base.cpp
+communication_protocol_factory.cpp
+component.cpp
+composite_component.cpp
+parameter_config_base.cpp
+parameter_factory.cpp
+parameter_input.cpp
+parameter_output.cpp
+parameter_base.cpp
+parameter_port_base.cpp
+polymorphic_parameter_input.cpp
+polymorphic_parameter_output.cpp
+port_base.cpp
+signal_flow_context.cpp
+version.cpp
+impl/audio_connection_descriptor.cpp
+impl/audio_port_base_implementation.cpp
+impl/component_implementation.cpp
+impl/composite_component_implementation.cpp
+impl/parameter_connection_descriptor.cpp
+impl/parameter_port_base_implementation.cpp
+impl/port_base_implementation.cpp
+)
+
+add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
+set_target_properties( visr_static PROPERTIES OUTPUT_NAME visr)
+set_target_properties(visr_static PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+
+add_library( visr_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
+set_target_properties( visr_shared PROPERTIES OUTPUT_NAME visr)
+# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+set_target_properties( visr_shared PROPERTIES ARCHIVE_OUTPUT_NAME visr_shared )
+# Specify that this library is built as a dynamic library.
+# 'PUBLIC' means that the definition is also activated for other targets that depend on this library.
+target_compile_definitions( visr_shared PUBLIC -DVISR_BUILD_VISR_SHARED_LIBRARY=1 )
+# Set this definition only when building the present target.
+target_compile_definitions( visr_shared PRIVATE -DVISR_BUILD_VISR_SHARED_LIBRARY=1 -DVISR_BUILD_VISR_LIBRARY=1 )
+set_target_properties(visr_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+set_target_properties(visr_shared PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+
+# Set public headers to be installed for the shared library target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties(visr_shared PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
+
+install(TARGETS visr_static ARCHIVE DESTINATION lib )
+install(TARGETS visr_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libvisr )
+
+# Add the unit test directory.
+ADD_SUBDIRECTORY( test )

@@ -7,11 +7,11 @@
 
 #include <libvisr/component.hpp>
 
-#include <libvisr_impl/component_implementation.hpp>
-#include <libvisr_impl/composite_component_implementation.hpp>
-#include <libvisr_impl/audio_port_base_implementation.hpp>
-#include <libvisr_impl/parameter_port_base_implementation.hpp>
-#include <libvisr_impl/composite_component_implementation.hpp>
+#include <libvisr/impl/component_implementation.hpp>
+#include <libvisr/impl/composite_component_implementation.hpp>
+#include <libvisr/impl/audio_port_base_implementation.hpp>
+#include <libvisr/impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/composite_component_implementation.hpp>
 
 #include <algorithm>
 #include <cassert>
