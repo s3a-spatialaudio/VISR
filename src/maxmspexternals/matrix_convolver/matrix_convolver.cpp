@@ -169,15 +169,15 @@ MatrixConvolver::~MatrixConvolver()
     // TODO: Livetime must exceed that of the flow.
     SignalFlowContext const context{ static_cast<std::size_t>(mPeriod), samplingFrequency };
 
-    mFlow.reset( new signalflows::MatrixConvolver( context, "MatrixComvolver", nullptr,
-                                                   mNumberOfInputs, mNumberOfOutputs,
-                                                   mMaxFilterLength,
-                                                   mNumMaxFilters,
-                                                   mRoutings.size(),
-                                                   initialFilters,
-                                                   mRoutings,
-                                                   false /* no control inputs*/,
-                                                   mFftLibrary.c_str() ) );
+    mFlow.reset( new rcl::FirFilterMatrix( context, "MatrixComvolver", nullptr ) );
+    mFlow->setup( mNumberOfInputs, mNumberOfOutputs,
+                  mMaxFilterLength,
+                  mNumMaxFilters,
+                  mRoutings.size(),
+                  initialFilters,
+                  mRoutings,
+                  rcl::FirFilterMatrix::ControlPortConfig::None,
+                  mFftLibrary.c_str() );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>( *mFlow ) );
   }
   catch( std::exception const & e )

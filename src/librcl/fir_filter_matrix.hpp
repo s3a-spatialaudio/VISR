@@ -47,7 +47,7 @@ public:
   /**
    * Enumeration to select the instantiated control ports.
    */
-  enum class ControlInput
+  enum class ControlPortConfig
   {
     None = 0,                ///< No control inputs
     Filters = 1 << 0,        ///< Filter control input active
@@ -85,7 +85,7 @@ public:
    * all filters are zero-initialised.
    * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
    * active initially.
-   * @param controlInputs Enumeration to select which parameter update ports are instantiated. Default: ControlInput::None
+   * @param controlInputs Enumeration to select which parameter update ports are instantiated. Default: ControlPortConfig::None
    * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
    * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */
@@ -96,7 +96,7 @@ public:
               std::size_t maxRoutings,
               efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
               pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
-              ControlInput controlInputs = ControlInput::None,
+              ControlPortConfig controlInputs = ControlPortConfig::None,
               char const * fftImplementation = "default" );
 
   /**
@@ -155,14 +155,14 @@ private:
 /**
  * Bitwise operator to combine control input flags.
  */
-VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix::ControlInput operator|( FirFilterMatrix::ControlInput lhs,
-                                                                 FirFilterMatrix::ControlInput rhs );
+VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix::ControlPortConfig operator|( FirFilterMatrix::ControlPortConfig lhs,
+                                                                 FirFilterMatrix::ControlPortConfig rhs );
 
 /**
  * Bitwise operator to extract mask control input flags.
  */
-VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix::ControlInput operator&( FirFilterMatrix::ControlInput lhs,
-                                                                 FirFilterMatrix::ControlInput rhs );
+VISR_RCL_LIBRARY_SYMBOL FirFilterMatrix::ControlPortConfig operator&( FirFilterMatrix::ControlPortConfig lhs,
+                                                                 FirFilterMatrix::ControlPortConfig rhs );
 
 } // namespace rcl
 } // namespace visr

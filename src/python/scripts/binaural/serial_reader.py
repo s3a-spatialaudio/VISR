@@ -38,28 +38,37 @@ class serialReader(visr.AtomicComponent ):
         self.trackingOutput.protocolOutput().swapBuffers()
         
     def parse_message (self, read, isLast): 
-                 last = read.rfind("\n")
+                 last = read.rfind("\r\n")
                  if last == -1:
                       self.message+=read
-                      ##print(" no endl: "+repr(self.message))
+                      #print(" no endl: "+repr(self.message))
                  else:     
-                     ndlast = read.rfind("\n", 0, last)
+                     ndlast = read.rfind("\r\n", 0, last)
                      if ndlast == -1:                        
-                         self.message+= read[:last+1]
-                         ##print(" just one endl: "+repr(self.message))
-                         if self.message.count('\n') >= 2:
-                                 lastM = self.message.rfind("\n")
-                                 ndlastM = self.message.rfind("\n", 0, lastM)
-                                 #print(" message sent: "+repr(self.message[ndlastM+1:lastM+1]))
-                                 self.send_data(self.message[ndlastM+1:lastM+1])
+                         #print(" just one endl bef: "+repr(self.message))
+                         self.message+= read[:last+2]
+                         #print(" just one endl: "+repr(self.message))
+                         if self.message.count('\r\n') >= 2:
+                                 lastM = self.message.rfind("\r\n")
+                                 ndlastM = self.message.rfind("\r\n", 0, lastM)
+                                 lastN = self.message[ndlastM+2:lastM].rfind("\n")
+                                 lastR = self.message[ndlastM+2:lastM].rfind("\r")
+                                 if lastN != -1:
+                                     ndlastM = lastN
+                                 if lastR != -1:
+                                     ndlastM = lastR
+                                 #print(" message sent: "+repr(self.message[ndlastM+2:lastM+2]))
+                                 self.send_data(self.message[ndlastM+2:lastM+2])
                                  self.message = read[last:]
                          else: 
-                            self.message+= read[last+1:]
+                            self.message+= read[last+2:]
+                            #print(" not sent: "+repr(self.message))
                      else:
                           if isLast:
-                              #print(" message sent: "+repr(read[ndlast+1:last+1])+" ( in mem "+repr(read[last:])+" ) over total "+(repr(read)))
-                              self.send_data(read[ndlast+1:last+1])
+                              #print(" message sent: "+repr(read[ndlast+2:last+2]))#+" ( in mem "+repr(read[last:])+" ) over total "+(repr(read)))
+                              self.send_data(read[ndlast+2:last+2])
                           self.message = read[last:]
+                          #print(" message: "+repr(self.message))
                                   
     def process( self ):
 #    while not connected:

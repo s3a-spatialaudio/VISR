@@ -7,7 +7,12 @@ Created on Thu Sep 14 14:55:25 2017
 """
 
 
-from readSofa import sph2cart
+def sph2cart(az,el,r):
+    x = r*np.cos(az)*np.cos(el)
+    y = r*np.sin(az)*np.cos(el)
+    z = r*np.sin(el)
+    return x,y,z
+
 from dynamic_binaural_renderer import DynamicBinauralRenderer
 from serial_reader import serialReader
 
@@ -34,10 +39,13 @@ class DynamicBinauralRendererSerial(visr.CompositeComponent ):
                                                          pml.EmptyParameterConfig() )
             self.dynamicBinauralRenderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", self, numBinauralObjects)
             self.serialReader = serialReader(context, "Controller", self,port, baud )
-            #to be completed
-            self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
 
-#to be completed
+            self.parameterConnection( self.objectVectorInput, self.dynamicBinauralRenderer.parameterPort("objectVector"))
+            self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
+            self.audioConnection(  self.objectSignalInput, self.dynamicBinauralRenderer.audioPort("audioIn"))
+            self.audioConnection( self.dynamicBinauralRenderer.audioPort("audioOut"), self.binauralOutput)
+
+
 fs = 48000
 bufferSize = 256
 
@@ -56,7 +64,7 @@ numOutputChannels = 2;
 
 
 
-context = visr.SignalFlowContext( period=bufferSize, samplingFrequency=fs)
+context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 controller = DynamicBinauralRendererSerial( context, "Controller", None, numBinauralObjects, port, baud)
 #to be completed
@@ -69,9 +77,9 @@ flow = rrl.AudioSignalFlow( controller )
 
 paramInput = flow.parameterReceivePort('objectDataInput')
 
-inputSignal = np.zeros( (2, signalLength ), dtype=np.float32 )
+inputSignal = np.zeros( (numBinauralObjects, signalLength ), dtype=np.float32 )
 inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-
+print(str(inputSignal.shape))
 
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
@@ -97,6 +105,7 @@ for blockIdx in range(0,numBlocks):
         paramInput.swapBuffers()
         
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
+    #print(str(inputBlock.shape))
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 

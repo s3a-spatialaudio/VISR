@@ -70,7 +70,7 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         self.context = visr.SignalFlowContext( period = blockSize, 
                                                samplingFrequency = samplingFrequency )
         self.meter = LoudnessMeter( self.context, 'meter', None, numChannels, 
-                                   gatingPeriod = 0.4, audioOut = True )
+                                   measurePeriod = 0.4, audioOut = True )
         
         audioOptions = ai.AudioInterface.Configuration( numChannels,
                                                        numChannels,
@@ -106,6 +106,7 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         self.loudnessLabel.setText( '--- dB' )
         return
     def getMeterValues( self ):
+        print("getMeterValues")
         numPoints = self.loudnessPort.size()
         if numPoints > 0:
             self.loudnessHist = np.roll( self.loudnessHist, numPoints )
@@ -128,5 +129,3 @@ mainWnd = LoudnessGui()
 
 mainWnd.show()
 appReturnValue =  app.exec_()
-#sys.exit( appReturnValue )
-#sys.exit( app.exec_() )

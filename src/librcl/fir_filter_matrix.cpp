@@ -13,18 +13,18 @@ namespace visr
 namespace rcl
 {
 
-FirFilterMatrix::ControlInput operator&(FirFilterMatrix::ControlInput lhs,
-                                        FirFilterMatrix::ControlInput rhs )
+FirFilterMatrix::ControlPortConfig operator&(FirFilterMatrix::ControlPortConfig lhs,
+                                        FirFilterMatrix::ControlPortConfig rhs )
 {
-  using T = std::underlying_type<FirFilterMatrix::ControlInput>::type;
-  return static_cast<FirFilterMatrix::ControlInput>( static_cast<T>(lhs) & static_cast<T>(rhs) );
+  using T = std::underlying_type<FirFilterMatrix::ControlPortConfig>::type;
+  return static_cast<FirFilterMatrix::ControlPortConfig>( static_cast<T>(lhs) & static_cast<T>(rhs) );
 }
 
-FirFilterMatrix::ControlInput operator|(FirFilterMatrix::ControlInput lhs,
-                                        FirFilterMatrix::ControlInput rhs )
+FirFilterMatrix::ControlPortConfig operator|(FirFilterMatrix::ControlPortConfig lhs,
+                                        FirFilterMatrix::ControlPortConfig rhs )
 {
-  using T = std::underlying_type<FirFilterMatrix::ControlInput>::type;
-  return static_cast<FirFilterMatrix::ControlInput>( static_cast<T>(lhs) | static_cast<T>(rhs) );
+  using T = std::underlying_type<FirFilterMatrix::ControlPortConfig>::type;
+  return static_cast<FirFilterMatrix::ControlPortConfig>( static_cast<T>(lhs) | static_cast<T>(rhs) );
 }
 
 FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
@@ -48,7 +48,7 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
                              std::size_t maxRoutings,
                              efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
                              pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/,
-                             ControlInput controlInputs /*= ControlInput::None*/,
+                             ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
                              char const * fftImplementation /*= "default" */ )
 {
   mInput.setWidth( numberOfInputs );
@@ -59,7 +59,7 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
     filterLength, maxRoutings, maxFilters,
     routings, filters, cVectorAlignmentSamples, fftImplementation ) );
 
-  bool const filterInput = (controlInputs & ControlInput::Filters) != ControlInput::None;
+  bool const filterInput = (controlInputs & ControlPortConfig::Filters) != ControlPortConfig::None;
   mSetFilterInput.reset( filterInput
                          ? new ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > >( "filterInput", *this, pml::EmptyParameterConfig() )
                          : nullptr );
