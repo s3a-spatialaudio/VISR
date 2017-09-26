@@ -7,6 +7,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+#include <ciso646>
 #include <vector>
 
 namespace visr
@@ -27,7 +28,7 @@ py::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py::arra
 {
   using DataType = SampleType; // Possibly replace by a template parameter later.
 
-  if( input.dtype() != py::dtype::of<DataType>() )
+  if( not input.dtype().is( py::dtype::of<DataType>() ) )
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): The data type input matrix does not match the used sample data type." );
   }
@@ -35,11 +36,11 @@ py::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py::arra
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): The input matrix is not 2D" );
   }
-  if( input.shape(0) != flow.numberOfCaptureChannels() )
+  if( input.shape(0) != static_cast<py::ssize_t>(flow.numberOfCaptureChannels()) )
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 1 input of the input matrix does not match the number of capture channels." );
   }
-  if( input.shape(1) != flow.period() )
+  if( input.shape(1) != static_cast<py::ssize_t>(flow.period()) )
   {
     throw std::invalid_argument( "AudioSignalFlow::process(): Dimension 0 input of the input matrix does not match the block size of the signal flow." );
   }

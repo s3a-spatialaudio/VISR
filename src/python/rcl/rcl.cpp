@@ -29,13 +29,12 @@ namespace rcl
 }
 }
 
-PYBIND11_PLUGIN(rcl)
+PYBIND11_MODULE(rcl, m)
 {
   pybind11::module::import( "visr" );
   pybind11::module::import( "panning" );
   pybind11::module::import( "pml" );
 
-  pybind11::module m( "rcl", "VISR atomic component library" );
   using namespace visr::python::rcl;
   exportAdd( m );
   exportBiquadIirFilter( m );
@@ -52,5 +51,4 @@ PYBIND11_PLUGIN(rcl)
   exportTimeFrequencyInverseTransform( m );
   exportTimeFrequencyTransform( m );
   exportUdpReceiver( m );
-  return m.ptr();
 }

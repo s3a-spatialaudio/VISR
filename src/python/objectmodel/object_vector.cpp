@@ -21,14 +21,15 @@ void exportObjectVector( py::module & m )
 {
   py::class_<ObjectVector>( m, "ObjectVector" )
     .def( py::init<>(), "Default constructor" )
-    .def( "__init__", [](ObjectVector & inst, std::vector<Object const *> vec )
+    .def( py::init( []( std::vector<Object const *> vec )
      {
-       new (&inst) ObjectVector();
+       ObjectVector * inst = new ObjectVector();
        for( Object const * obj : vec )
        {
-         inst.insert( *obj );
+         inst->insert( *obj );
        }
-     } )
+       return inst;
+     }), py::arg("objects"), "Create an object vector out of a Pyhon list of objects." )
     .def( "__iter__", [](ObjectVector& ov){ return py::make_iterator(ov.begin(), ov.end() ); }, py::return_value_policy::reference_internal, "Return a Python iterator over all contained objects." )
     .def_property_readonly( "size", &ObjectVector::size, "Return the number of objects in the vector" )
     .def_property_readonly( "empty", &ObjectVector::empty, "Return whether the object vector is empty." )

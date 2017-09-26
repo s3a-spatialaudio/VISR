@@ -15,11 +15,9 @@ void exportIntegrityChecking( pybind11::module & m );
 }
 }
 
-PYBIND11_PLUGIN( rrl )
+PYBIND11_MODULE( rrl, m )
 {
-  pybind11::module m( "rrl", "VISR renderer runtime module" );
   using namespace visr::python::rrl;
   exportAudioSignalFlow( m );
   exportIntegrityChecking( m );
-  return m.ptr();
 }
