@@ -5,7 +5,7 @@
 
 #include "export_symbols.hpp"
 #include "parameter_output.hpp"
-#include "communication_protocol_base.hpp""
+#include "communication_protocol_base.hpp"
 
 #include <memory>
 
