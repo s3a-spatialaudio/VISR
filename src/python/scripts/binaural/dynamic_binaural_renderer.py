@@ -8,14 +8,10 @@ Created on Wed Sep 13 12:56:27 2017
 
 import visr
 import pml
-import objectmodel as om
-import rrl
-import h5py
 import rcl
 
 #import objectmodel as om
 
-import numpy as np;
 import os
 from readSofa import readSofaFile
 from dynamic_binaural_controller import DynamicBinauralController
@@ -44,9 +40,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
                        sofaFile )
 
-# hrirFile = 'c:/local/s3a_af/subprojects/binaural/dtf b_nh169.sofa'
-
             [ hrirPos, hrirData ] = readSofaFile( sofaFile )
+            print(hrirPos[0])
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,
                                                                       numberOfObjects,
                                                                       hrirPos, hrirData,

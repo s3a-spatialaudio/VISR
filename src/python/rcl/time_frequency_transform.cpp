@@ -18,23 +18,24 @@ namespace python
 namespace rcl
 {
 
-void exportTimeFrequencyTransform( pybind11::module & m )
+namespace py = pybind11;
+
+void exportTimeFrequencyTransform( py::module & m )
 {
   using visr::rcl::TimeFrequencyTransform;
 
-  pybind11::class_<TimeFrequencyTransform, visr::AtomicComponent>( m, "TimeFrequencyTransform" )
-   .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
+  py::class_<TimeFrequencyTransform, visr::AtomicComponent>( m, "TimeFrequencyTransform" )
+   .def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
          std::size_t, std::size_t, std::size_t, std::size_t, char const *>(),
-     pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
-     pybind11::arg( "numberOfChannels" ), pybind11::arg( "dftLength" ), pybind11::arg( "windowLength" ), pybind11::arg( "hopSize" ),
-     pybind11::arg( "fftImplementation" ) = "default" )
-   .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
+     py::arg("context"), py::arg("name"), py::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
+     py::arg( "numberOfChannels" ), py::arg( "dftLength" ), py::arg( "windowLength" ), py::arg( "hopSize" ),
+     py::arg( "fftImplementation" ) = "default" )
+   .def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
      std::size_t, std::size_t, efl::BasicVector<visr::rcl::TimeFrequencyTransform::SampleType> const &, std::size_t, char const *>(),
-     pybind11::arg( "context" ), pybind11::arg( "name" ), pybind11::arg( "parent" ) = static_cast<visr::CompositeComponent*>(nullptr),
-     pybind11::arg( "numberOfChannels" ), pybind11::arg( "dftLength" ), pybind11::arg( "window" ), pybind11::arg( "hopSize" ), pybind11::arg( "fftImplementation" ) = "default" )
+     py::arg( "context" ), py::arg( "name" ), py::arg( "parent" ) = static_cast<visr::CompositeComponent*>(nullptr),
+     py::arg( "numberOfChannels" ), py::arg( "dftLength" ), py::arg( "window" ), py::arg( "hopSize" ), py::arg( "fftImplementation" ) = "default" )
 
-   .def( "__init__",
-      []( TimeFrequencyTransform &instance, SignalFlowContext const & context,
+   .def( py::init( []( SignalFlowContext const & context,
           char const * name, CompositeComponent * parent, std::size_t numberOfChannels, std::size_t dftLength,
          std::vector<TimeFrequencyTransform::SampleType> const & window, std::size_t hopSize, char const * fftImplementation )
      {
@@ -43,11 +44,11 @@ void exportTimeFrequencyTransform( pybind11::module & m )
        {
          std::copy(window.begin(), window.end(), windowVec.data() );
        }
-       new (&instance) TimeFrequencyTransform( context, name, parent, numberOfChannels, dftLength,
-                                               windowVec, hopSize,fftImplementation );
-    }, pybind11::arg( "context" ), pybind11::arg( "name" ), pybind11::arg( "parent" ) = static_cast<visr::CompositeComponent*>(nullptr),
-      pybind11::arg( "numberOfChannels" ), pybind11::arg( "dftLength" ), pybind11::arg( "window" ), pybind11::arg( "hopSize" ),
-      pybind11::arg( "fftImplementation" ) = "default"
+       return new TimeFrequencyTransform( context, name, parent, numberOfChannels, dftLength,
+                                          windowVec, hopSize,fftImplementation );
+    }), py::arg( "context" ), py::arg( "name" ), py::arg( "parent" ) = static_cast<visr::CompositeComponent*>(nullptr),
+      py::arg( "numberOfChannels" ), py::arg( "dftLength" ), py::arg( "window" ), py::arg( "hopSize" ),
+      py::arg( "fftImplementation" ) = "default"
    )
   ;
 }

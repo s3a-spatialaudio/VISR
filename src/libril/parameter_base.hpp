@@ -11,12 +11,9 @@
 namespace visr
 {
 
-// Forward declarations
-class ParameterConfig;
-
 /**
- *
- *
+ * Base class for parameter data types.
+ * Abstract base class.
  */
 class VISR_CORE_LIBRARY_SYMBOL ParameterBase
 {
@@ -27,7 +24,7 @@ public:
   /**
    * Copy constructor.
    * This uses the default implementation.
-   * THis function needs to be implemented explicitly because the class is exported.
+   * This function needs to be implemented explicitly because the class is exported.
    */
   ParameterBase( const ParameterBase & );
 
@@ -48,6 +45,14 @@ public:
    * to a copy of the derived object.
    */
   virtual std::unique_ptr<ParameterBase> clone() const = 0;
+
+  /**
+   * Virtual assingment operator.
+   * Pure virtual member function, must be implemented in derived classes.
+   * @param rhs The object to be copied.
+   * @throw std::invalid_argument if the type of \p rhs does not match the type of this object.
+   */
+  virtual void assign( ParameterBase const & rhs ) = 0;
 };
 
 } // namespace visr

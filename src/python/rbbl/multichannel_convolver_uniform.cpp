@@ -25,7 +25,7 @@ namespace // unnamed
 template<typename DataType>
 pybind11::array_t<DataType> wrapProcess( MultichannelConvolverUniform<DataType> & convolver, pybind11::array const & input )
 {
-  if( input.dtype() != pybind11::dtype::of<DataType>() )
+  if( not input.dtype().is( pybind11::dtype::of<DataType>() ) )
   {
     throw std::invalid_argument( "MultichannelConvolverUniform::process(): The data type input matrix does not match the used sample data type." );
   }
@@ -33,11 +33,11 @@ pybind11::array_t<DataType> wrapProcess( MultichannelConvolverUniform<DataType> 
   {
     throw std::invalid_argument( "MultichannelConvolverUniform::process(): The input matrix is not 2D" );
   }
-  if( input.shape( 0 ) != convolver.numberOfInputs() )
+  if( input.shape( 0 ) != static_cast<pybind11::ssize_t>(convolver.numberOfInputs()) )
   {
     throw std::invalid_argument( "MultichannelConvolverUniform::process(): Dimension 1 input of the input matrix does not match the number of capture channels." );
   }
-  if( input.shape( 1 ) != convolver.blockLength() )
+  if( input.shape( 1 ) != static_cast<pybind11::ssize_t>(convolver.blockLength()) )
   {
     throw std::invalid_argument( "MultichannelConvolverUniform::process(): Dimension 0 input of the input matrix does not match the block size of the convolver." );
   }

@@ -2,6 +2,8 @@
 
 add_subdirectory( visr )
 
+add_subdirectory( efl )
+
 add_subdirectory( signalflows )
 
 add_subdirectory( rbbl )

@@ -33,9 +33,17 @@ class serialReader(visr.AtomicComponent ):
         self.sent = True
         data = newdata
         data = data.replace("#","").replace("Y","").replace("P","").replace("R","").replace("=","").rstrip()
-        ypr = self.trackingOutput.protocolOutput().data()
-        ypr.orientation = [float(i) for i in data.split(',')]
-        self.trackingOutput.protocolOutput().swapBuffers()
+        try:
+          yprvec = [float(i) for i in data.split(',')]
+          if np.array(yprvec).size != 3:
+            raise ValueError( 'yaw pitch roll bad format:'+str(np.array(yprvec)))
+          ypr = self.trackingOutput.protocolOutput().data()
+          ypr.orientation = yprvec
+          self.trackingOutput.protocolOutput().swapBuffers() 
+
+        except ValueError:
+          print ("Parsing went wrong because of a wrongly formatted string...")
+
         
     def parse_message (self, read, isLast): 
                  last = read.rfind("\r\n")

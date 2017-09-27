@@ -16,6 +16,7 @@ def sph2cart(az,el,r):
 from dynamic_binaural_renderer import DynamicBinauralRenderer
 from serial_reader import serialReader
 
+import random
 import visr
 import pml
 import rrl
@@ -57,7 +58,8 @@ idMatrix = np.identity(3)
 blockSize = 128
 samplingFrequency = 48000
 parameterUpdatePeriod = 1024
-numBlocks = 1024;
+#numBlocks = 1024;
+numBlocks = 64;
 signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
 numOutputChannels = 2;
@@ -85,8 +87,10 @@ outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 for blockIdx in range(0,numBlocks):
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
-        az = 0.025 * blockIdx
-        el = 0.1 * np.sin( 0.025 * blockIdx )
+        #az = 0.025 * blockIdx
+        #el = 0.1 * np.sin( 0.025 * blockIdx )
+        az = 0.025
+        el = 0.1 * np.sin( 0.025)
         r = 1
         x,y,z = sph2cart( az, el, r )
         ps1 = objectmodel.PointSource(0)
@@ -110,6 +114,6 @@ for blockIdx in range(0,numBlocks):
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
 
-plt.figure(1)
+plt.figure(random.randint(1, 1000))
 plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'rx-' )
 plt.show()
