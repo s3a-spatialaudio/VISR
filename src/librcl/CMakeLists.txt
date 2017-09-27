@@ -99,7 +99,7 @@ target_link_libraries( rcl_shared ${Boost_SYSTEM_LIBRARY} )
 set_target_properties(rcl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
 install(TARGETS rcl_static ARCHIVE DESTINATION lib )
-install(TARGETS rcl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libpml )
+install(TARGETS rcl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librcl )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

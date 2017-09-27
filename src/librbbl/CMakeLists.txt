@@ -4,6 +4,7 @@
 set( SOURCES 
 biquad_coefficient.cpp
 circular_buffer.cpp 
+crossfading_convolver_uniform.cpp
 fir.cpp
 fft_wrapper_factory.cpp
 ffts_wrapper.cpp
@@ -27,6 +28,7 @@ parametric_iir_coefficient_calculator.cpp
 set( HEADERS
 biquad_coefficient.hpp
 circular_buffer.hpp
+crossfading_convolver_uniform.hpp
 export_symbols.hpp
 fir.hpp
 fft_wrapper_base.hpp
@@ -101,8 +103,14 @@ if( BUILD_USE_IPP )
   target_link_libraries( rbbl_shared ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
+
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installled once.
+set_target_properties( rbbl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS rbbl_static ARCHIVE DESTINATION lib )
-install(TARGETS rbbl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS rbbl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librbbl)
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
