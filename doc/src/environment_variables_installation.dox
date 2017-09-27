@@ -1,0 +1,65 @@
+/**
+  @page python_variables_installation Python's Environment Variables Installation
+ 
+  @tableofcontents
+
+We need to set those two environment variables:
+
+  <b>PYTHONPATH</b> environment variable is needed for all the applications that need to acces VISR's python extension modules. That includes also python scripts that use VISR framework.
+To set the value of the variable you should consider:* * If the VISR has been installed, the Python modules are in <tt>$VISR_INSTALLATION_ROOT/python</tt>
+* * If the code has been built, the extensions are located in <tt>$VISR_BUILD_DIRECTORY/python</tt>. In development environments that support multiple configurations, their is a subdirectory  Debug/ or Release/ within python. Choose the build configuration you want to use (Release/ is typically faster, but does not yield sensible information when used with a debugger). 
+
+  <b>PYTHONHOME</b> environment variable is mainly needed by VSTs that use some components written in Python.
+The value should be set to the path where the python distribution is. An example is <tt>$HOME/anaconda</tt>. 
+
+
+@section linux_envvar Linux
+Add the following setting to <tt> $HOME/.profile </tt>
+
+@code export PYTHONPATH=<path_to_extension_modules>:$PYTHONPATH @endcode
+
+@section windows_envvar Windows
+Set the two environment variables in "Control Center"->"System"->"Advanced system settings"->"Environment Variables".
+
+Setting it as a user variable is preferred if you want to use the VISR only as the current user.
+
+@section macos_envvar MacOS X
+  There's no standard way of setting up environment variables for GUI Applications on MacOS X. In MacOS X 10.9 and earlier, adding the environment variables to <tt>/etc/launchd.conf</tt> file was enough, but now it is no longer supported. The following setup procedure works for both MacOS X 10.9 and erlier, and for MacOS X 10.10+.
+
+  The <tt>VISR_environment_build_install_X.X.X.plist</tt> file is a MacOS X <tt>LaunchAgent</tt> which is activated when the user logs in, and which sets and load the desired variables. If you don't have that file already, create a file with that name and with the following content:
+
+@code
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>my.startup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>sh</string>
+    <string>-c</string>
+    <string>
+    launchctl setenv PYTHONPATH ..path_to_extension_modules..
+    launchctl setenv PYTHONHOME ${HOME}/anaconda
+    </string>
+
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+@endcode
+
+
+This configuration file sets:
+* * <b>PYTHONPATH</b>: <tt>path_to_extension_modules</tt>  
+* * <b>PYTHONHOME</b>: <tt>${HOME}/anaconda</tt>
+  
+  There are 3 steps to install the environment variables.
+* *  <b>1. (optional)</b> - You can change the values of the environment variables in the .plist file if you need them to address different folders. 
+It is not needed if you have already installed the VISR framework with the installer and have installed python's anaconda distribution.
+* *  <b>2.</b> - Copy <tt>VISR_environment_build_install_X.X.X.plist</tt> into <tt>&lt;username&gt;/Library/LauncAgents</tt>
+* *  <b>3.</b> - Open the <b>Terminal</b> application from <tt>/Applications/Utilities</tt>
+* *  <b>4.</b> - Write @code launchctl load VISR_environment_build_install_X.X.X.plist @endcode and press Enter
+ */

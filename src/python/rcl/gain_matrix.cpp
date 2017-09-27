@@ -24,28 +24,30 @@ void exportGainMatrix( pybind11::module & m )
   using visr::rcl::GainMatrix;
 
   pybind11::class_<GainMatrix, visr::AtomicComponent>( m, "GainMatrix" )
-    .def( "__init__", []( GainMatrix& inst, SignalFlowContext const & context, char const * name,
+    .def( py::init( []( SignalFlowContext const & context, char const * name,
                           CompositeComponent * parent, std::size_t numberOfInputs,
-			                    std::size_t numberOfOutputs,
-			                    std::size_t interpolationSteps,
+                          std::size_t numberOfOutputs,
+                          std::size_t interpolationSteps,
                           SampleType initialGain,
                           bool controlInput )
       {
-       	new (&inst) GainMatrix( context, name, parent );
-	      inst.setup( numberOfInputs, numberOfOutputs, interpolationSteps, initialGain, controlInput );
-      },  py::arg("context"), py::arg("name"), py::arg("parent"), py::arg("numberOfInputs"),
-	  py::arg("numberOfOutputs"), py::arg("interpolationSteps"), py::arg("initialGains"),
-	  py::arg("controlInput") = true )
-  .def( "__init__", []( GainMatrix& inst, SignalFlowContext const & context, char const * name,
+        GainMatrix * inst = new GainMatrix( context, name, parent );
+        inst->setup( numberOfInputs, numberOfOutputs, interpolationSteps, initialGain, controlInput );
+        return inst;
+      }),  py::arg("context"), py::arg("name"), py::arg("parent"), py::arg("numberOfInputs"),
+        py::arg( "numberOfOutputs" ), py::arg( "interpolationSteps" ), py::arg( "initialGains" ),
+        py::arg( "controlInput" ) = true )
+      .def( py::init( []( SignalFlowContext const & context, char const * name,
                        CompositeComponent * parent, std::size_t numberOfInputs,
                        std::size_t numberOfOutputs,
                        std::size_t interpolationSteps,
                        efl::BasicMatrix< SampleType > const & initialGains,
                        bool controlInput )
        {
-         new (&inst) GainMatrix( context, name, parent );
-         inst.setup( numberOfInputs, numberOfOutputs, interpolationSteps, initialGains, controlInput );
-       },  py::arg("context"), py::arg("name"), py::arg("parent"), py::arg("numberOfInputs"),
+         GainMatrix * inst = new GainMatrix( context, name, parent );
+         inst->setup( numberOfInputs, numberOfOutputs, interpolationSteps, initialGains, controlInput );
+         return inst;
+       }),  py::arg("context"), py::arg("name"), py::arg("parent"), py::arg("numberOfInputs"),
        py::arg("numberOfOutputs"), py::arg("interpolationSteps"), py::arg("initialGains"),
        py::arg("controlInput") = true )
     ;

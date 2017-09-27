@@ -85,8 +85,8 @@ void setOutputBuffer( AudioOutputT<DataType> & port, py::array_t<DataType> & mat
   // TODO: check compatibility of matrices.
   std::size_t const numChannels = port.width();
   std::size_t const bufferSize = port.channelStrideSamples();  // Should be blockSize
-  if( (info.ndim != 2) or (info.shape[0] != numChannels)
-    or (info.shape[1] != bufferSize ) )  {
+  if( (info.ndim != 2) or (info.shape[0] != static_cast<py::ssize_t>(numChannels))
+      or (info.shape[1] != static_cast<py::ssize_t>(bufferSize) ) )  {
     throw std::invalid_argument( "AudioOutputPort.set(): matrix shape does not match." );
   }
   // Perform copying

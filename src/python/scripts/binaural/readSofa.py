@@ -9,7 +9,6 @@ import os
 import numpy as np
 import h5py
 from scipy.spatial import KDTree
-import scipy.spatial
 
 def sph2cart( sph ):
     elFactor = np.cos( sph[:,1] )
