@@ -33,7 +33,7 @@ if not os.path.exists( sofaFile ):
 [ hrirPos, hrirData ] = readSofaFile( sofaFile )
 #print( "positions: %s." % str(np.array(hrirPos)))
 
-headTrackEnabled = False
+headTrackEnabled = True
 
 controller = DynamicBinauralController( context, "Controller", None,
                   numBinauralObjects,
@@ -41,7 +41,7 @@ controller = DynamicBinauralController( context, "Controller", None,
                   useHeadTracking = headTrackEnabled,
                   dynamicITD = True,
                   dynamicILD = True,
-                  hrirInterpolation = False
+                  hrirInterpolation = True
                   )
 
 flow = rrl.AudioSignalFlow( controller )
@@ -91,7 +91,7 @@ for blockIdx in range(0,numPos):
       headrotation =  np.pi/2;
       print("it num"+str(blockIdx)+", deg shift: "+str(rad2deg(azSequence[blockIdx]))+" head rotation: "+str(rad2deg(headrotation)))
    
-      trackingInput.data().orientation = [0,0, headrotation] #rotates over the z axis, that means that the rotation is on the xy plane
+      trackingInput.data().orientation = [0,0, -headrotation] #rotates over the z axis, that means that the rotation is on the xy plane
       trackingInput.swapBuffers()                      
     posSph1 = cart2sph(x,y,z)
     posSph2 = cart2sph(-x,-y,-z)
@@ -101,7 +101,7 @@ for blockIdx in range(0,numPos):
     
     while not filterOutput.empty():
         filterSet = filterOutput.front()
-        #print( "Received filter update for filter index %d." % filterSet.index )
+#        print( "Received filter update for filter index %d." % filterSet.index )
         filterOutput.pop()
         del filterSet # Python garbage collection is somewhat subtle, so we try to
         # remove the reference explicitly.

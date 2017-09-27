@@ -8,7 +8,7 @@ Created on Wed Sep  6 22:02:40 2017
 
 @author: Andreas Franck a.franck@soton.ac.uk 
 """
-
+from numpy.linalg import inv 
 from readSofa import sph2cart
 from rotationFunctions import calcRotationMatrix, cart2sph, rad2deg
 import matplotlib.pyplot as plt
@@ -104,27 +104,26 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
         self.hrirLookup = KDTree( self.hrirPos )
 
+##      plot the hrir positions on xy plane
 #        plt.figure(1)            
 #        for vec in self.hrirPos:
 #            
 #            plt.plot(vec[0], vec[1], '+')
 #
 #        plt.show() # or savefig(<filename>)
-#
+
+##      plot the hrir positions on xz plane
 #        plt.figure(2)            
 #        for vec in self.hrirPos:
-#
 #            plt.plot(vec[0], vec[2], '+')
-#
 #        plt.show() # or savefig(<filename>)
-#        np.set_printoptions(threshold=np.nan)
-        #print(self.hrirPos)
         
+##       write polar coordinates of HRIR positions into a file
 #        f = open('workfile.txt', 'w')
 #        for index, g in enumerate(self.hrirPos):
-#            sph = cart2sph(g[0],g[1],g[2])
-#            f.write('%d [%d %d]\n' % (index,rad2deg(sph[0]),rad2deg(sph[1])))
-#            
+#           sph = cart2sph(g[0],g[1],g[2])
+#           f.write('%d [%d %d]\n' % (index,rad2deg(sph[0]),rad2deg(sph[1])))
+            
         # %% Dynamic allocation of objects to channels
         if channelAllocation:
             self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
@@ -173,28 +172,27 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      #print("before rotation: "+str(self.sourcePos[0]))   
  
                      self.sourcePos = self.sourcePos*rotationMatrix
-
-                     print(" after rotation: "+str(self.sourcePos[0]))
+                     for chIdx in range(0,2):
+                       sph0 = cart2sph(self.sourcePos[chIdx].item(0),self.sourcePos[chIdx].item(1),self.sourcePos[chIdx].item(2))
+                       print(" after rotation: p%d [%d %d]"% (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
                                
             if self.hrirInterpolation:
                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 3, p =2 )
+#                np.set_printoptions(threshold=np.nan)
+#                print(self.hrirPos[indices])
             else:
                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
 
-                
-                indices2 = np.zeros( (self.numberOfObjects), dtype = np.float32 )
-
-
-                for srcIndex, nsrc in enumerate(self.sourcePos):         
-                    minDistOld=10000000000000000000000000000                    
-                    for hrirIndex, nhrir in enumerate(self.hrirPos):
-                        minDist = np.linalg.norm(nsrc-nhrir)
-                        if minDist < minDistOld :
-                            indices2[srcIndex] = hrirIndex
-                            minDistOld = minDist
-                #print(indices2)
-                                    
-                
+##               indices calculated with euclidean distance
+#                indices2 = np.zeros( (self.numberOfObjects), dtype = np.float32 )
+#                for srcIndex, nsrc in enumerate(self.sourcePos):         
+#                    minDistOld=10000000000000000000000000000                    
+#                    for hrirIndex, nhrir in enumerate(self.hrirPos):
+#                        minDist = np.linalg.norm(nsrc-nhrir)
+#                        if minDist < minDistOld :
+#                            indices2[srcIndex] = hrirIndex
+#                            minDistOld = minDist
+                                                    
             # Retrieve the output gain vector for setting the object level and potentially
             # applying dynamically computed 
             gainVec = self.gainOutputProtocol.data()
@@ -208,15 +206,51 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 # If the source is silent (probably inactive), don't change filters
                 if gain >= 1.0e-7:
                     if self.hrirInterpolation:
+                        
+                        if not np.array_equal(self.lastPosition[chIdx],indices[chIdx]):
+#                           print(self.hrirPos[indices[chIdx]].T)
+                            threeNeighMatrix = self.hrirPos[indices[chIdx]].T
+#                           threeNeighMatrix = np.concatenate((self.hrirPos[indices[:,0]], self.hrirPos[indices[:,1]], self.hrirPos[indices[:,2]]), axis=1)
+#                           print(threeNeighMatrix.shape)
+                            g = inv(threeNeighMatrix)*self.sourcePos[chIdx].T
+                                   
+                            gnorm = g*1/np.linalg.norm(g,ord=1)
+#                            print(gnorm)
+#                        np.set_printoptions(threshold=np.nan)
+                            leftAccum =  [0]* self.hrirs[indices[0][0]][0].shape[0]
+                            rightAccum = [0]* self.hrirs[indices[0][0]][1].shape[0]
+
+                            leftInterpolator = pml.IndexedVectorFloat( chIdx, leftAccum)
+                            rightInterpolator = pml.IndexedVectorFloat( chIdx, rightAccum)
+                            for neighIdx in range(0,3):
+                                leftCmd  = pml.IndexedVectorFloat( chIdx,
+                                                              self.hrirs[indices[chIdx][neighIdx],0,:])
+                               
+                                rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
+                                                              self.hrirs[indices[chIdx][neighIdx],1,:])
+                                
+#                                print(gnorm[neighIdx])
+#                                print(leftCmd.value)
+                                leftWeighted = gnorm[neighIdx] * np.array(leftCmd.value)
+                                print(leftWeighted.shape)
+                                rightWeighted = gnorm[neighIdx]* np.array(rightCmd.value)
+                                leftInterpolator.value = [x+y for x,y in zip(leftInterpolator.value, leftWeighted)]
+                                rightInterpolator.value = [x+y for x,y in zip(rightInterpolator.value, rightWeighted)]
+                                
+                            self.filterOutputProtocol.enqueue( leftInterpolator )
+                            self.filterOutputProtocol.enqueue( rightInterpolator )
+                            self.lastFilters[chIdx] = indices[chIdx]
+                        
                         raise ValueError( 'HRIR interpolation not implemented yet' )
                     else:
-                        sph0 = cart2sph(self.sourcePos[chIdx][0],self.sourcePos[chIdx][1],self.sourcePos[chIdx][2])
-                        print('p%d [%d %d]' % (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
+##                       debug hrir choice with kdtree and euclidean                       
+#                        sph0 = cart2sph(self.sourcePos[chIdx][0],self.sourcePos[chIdx][1],self.sourcePos[chIdx][2])
+#                        print('p%d [%d %d]' % (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
                         sph1 = cart2sph(self.hrirPos[indices[chIdx]][0],self.hrirPos[indices[chIdx]][1],self.hrirPos[indices[chIdx]][2])
-                        sph2 = cart2sph(self.hrirPos[indices2[chIdx]][0],self.hrirPos[indices2[chIdx]][1],self.hrirPos[indices2[chIdx]][2])
-                        #if rad2deg(sph1[0]) != rad2deg(sph2[0]) or rad2deg(sph1[1]) != rad2deg(sph2[1]):
-                        print("kdt %d:[%d %d]   eucld %d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1]),indices2[chIdx],rad2deg(sph2[0]),rad2deg(sph2[1])))
-
+                        print("%d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1])))
+#                        sph2 = cart2sph(self.hrirPos[indices2[chIdx]][0],self.hrirPos[indices2[chIdx]][1],self.hrirPos[indices2[chIdx]][2])
+##                       if rad2deg(sph1[0]) != rad2deg(sph2[0]) or rad2deg(sph1[1]) != rad2deg(sph2[1]):
+#                        print("kdt %d:[%d %d]   eucld %d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1]),indices2[chIdx],rad2deg(sph2[0]),rad2deg(sph2[1])))
                         if self.lastFilters[chIdx] != indices[chIdx]:
                            
                             leftCmd  = pml.IndexedVectorFloat( chIdx,

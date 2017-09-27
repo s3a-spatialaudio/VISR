@@ -115,5 +115,5 @@ for blockIdx in range(0,numBlocks):
 
 
 plt.figure(random.randint(1, 1000))
-plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'rx-' )
+plt.plot( t, outputSignal[0,:], 'bo-')
 plt.show()
