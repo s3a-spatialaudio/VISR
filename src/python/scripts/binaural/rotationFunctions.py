@@ -19,7 +19,6 @@ def calcRotationMatrix(ypr):
    # print(type(the))
     phi = np.float32(ypr.item(2))
 
-
     a11 = math.cos(the) * math.cos(phi)
     a12 = np.math.cos(the) * np.math.sin(phi)
     a13 = -np.math.sin(the)
@@ -37,3 +36,27 @@ def calcRotationMatrix(ypr):
   else:
     return idMatrix
  
+    
+def cart2sph(x,y,z):
+    radius = math.sqrt( x*x + y*y + z*z );
+    az = math.atan2( y, x );
+    el = math.asin( z / radius );
+    #print('%f %f %f'%(az,el,radius))
+    sph = np.stack( (az, el, radius) )
+
+    return sph;
+
+def deg2rad( phi ):
+    return (np.pi/180.0) * phi
+
+def rad2deg( phi ):
+    return (180.0/np.pi) * phi
+
+def sph2cart( sph ):
+    elFactor = np.cos( sph[:,1] )
+    x = np.cos( sph[:,1] ) * elFactor * sph[:,2] 
+    y = np.sin( sph[:,1] ) * elFactor * sph[:,2]
+    z = np.sin( sph[:,1] ) * sph[:,2]
+    cart = np.stack( (x,y,z), 1 )
+    return cart
+    

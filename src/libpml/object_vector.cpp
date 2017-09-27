@@ -19,12 +19,12 @@ ObjectVector::ObjectVector( ParameterConfigBase const & config )
 
 ObjectVector::ObjectVector( const ObjectVector & rhs )
 {
-  assign( rhs );
+  objectmodel::ObjectVector::assign( rhs );
 }
 
 ObjectVector & ObjectVector::operator=(const ObjectVector & rhs)
 {
-  assign( rhs );
+  objectmodel::ObjectVector::assign( rhs );
   return *this;
 }
 

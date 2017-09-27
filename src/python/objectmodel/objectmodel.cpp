@@ -21,9 +21,8 @@ void exportPlaneWave( pybind11::module & m );
 } // namespace objectmodel
 } // namespace visr
 
-PYBIND11_PLUGIN(objectmodel)
+PYBIND11_MODULE( objectmodel, m )
 {
-  pybind11::module m( "objectmodel", "VISR object model library" );
   
   using namespace visr::objectmodel::python;
 
@@ -36,6 +35,4 @@ PYBIND11_PLUGIN(objectmodel)
   exportPointSource( m );
   exportPointSourceWithReverb( m );
   exportPlaneWave( m );
-
-  return m.ptr();
 }

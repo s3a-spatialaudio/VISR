@@ -16,14 +16,12 @@ namespace python
 }
 }
 
-PYBIND11_PLUGIN(rbbl)
+PYBIND11_MODULE( rbbl, m )
 {
   // MultichannelConvolverUniform uses pml parameter types MatrixParameter and FilterRoutingParameter
   pybind11::module::import( "pml" );
 
-  pybind11::module m( "rbbl", "VISR renderer building block library" );
   using namespace visr::rbbl::python;
   exportMultichannelConvolversUniform( m );
   exportObjectChannelAllocator( m );
-  return m.ptr();
 }
