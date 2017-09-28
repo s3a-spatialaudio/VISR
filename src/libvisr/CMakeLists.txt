@@ -29,6 +29,9 @@ signal_flow_context.hpp
 status_message.hpp
 typed_parameter_base.hpp
 version.hpp
+)
+
+SET( PUBLIC_HEADERS_DETAIL
 detail/compile_time_hash_fnv1.hpp
 detail/compose_message_string.hpp
 )
@@ -75,11 +78,11 @@ impl/parameter_port_base_implementation.cpp
 impl/port_base_implementation.cpp
 )
 
-add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
+add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
 set_target_properties( visr_static PROPERTIES OUTPUT_NAME visr)
 set_target_properties(visr_static PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 
-add_library( visr_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
+add_library( visr_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
 set_target_properties( visr_shared PROPERTIES OUTPUT_NAME visr)
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( visr_shared PROPERTIES ARCHIVE_OUTPUT_NAME visr_shared )
@@ -98,6 +101,7 @@ set_target_properties(visr_shared PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
 
 install(TARGETS visr_static ARCHIVE DESTINATION lib )
 install(TARGETS visr_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libvisr )
+install( FILES ${PUBLIC_HEADERS_DETAIL} DESTINATION include/visr/libvisr/detail )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
