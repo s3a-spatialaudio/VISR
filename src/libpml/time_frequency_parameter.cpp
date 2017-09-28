@@ -2,8 +2,8 @@
 
 #include "time_frequency_parameter.hpp"
 
-#include <libril/constants.hpp>
-#include <libril/parameter_factory.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_factory.hpp>
 
 #include <ciso646>
 #include <complex>

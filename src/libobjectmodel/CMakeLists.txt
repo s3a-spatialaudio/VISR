@@ -68,8 +68,14 @@ target_compile_definitions( objectmodel_shared PUBLIC -DVISR_BUILD_OBJECTMODEL_S
 target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
 target_link_libraries( objectmodel_shared rbbl_shared )
 
+# Set public headers to be installed for the shared library target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties( objectmodel_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
+
 install(TARGETS objectmodel_static ARCHIVE DESTINATION lib )
-install(TARGETS objectmodel_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS objectmodel_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libobjectmodel )
 
 
 # Add the unit test directory.

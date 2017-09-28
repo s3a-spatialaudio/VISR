@@ -5,8 +5,8 @@
 
 #include "parameter_connection_map.hpp"
 
-#include <libril/constants.hpp>
-// #include <libril/parameter_port_base.hpp> // Temporary fix (otherwise 
+#include <libvisr/constants.hpp>
+// #include <libvisr/parameter_port_base.hpp> // Temporary fix (otherwise 
 
 #include <ciso646>
 #include <iosfwd>

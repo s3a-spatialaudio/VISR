@@ -5,12 +5,12 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/communication_protocol_base.hpp>
-#include <libril/communication_protocol_type.hpp>
+#include <libvisr/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_type.hpp>
 
-#include <libril/parameter_port_base.hpp>
-#include <libril/parameter_type.hpp>
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_port_base.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <ciso646>
 #include <deque>

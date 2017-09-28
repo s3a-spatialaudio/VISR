@@ -5,7 +5,7 @@
 
 #include "parameter_connection_map.hpp"
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <ciso646>
 #include <iosfwd>

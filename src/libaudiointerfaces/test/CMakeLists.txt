@@ -13,7 +13,6 @@ audio_interface_configuration.cpp
 
 target_link_libraries( ${APPLICATION_NAME} audiointerfaces_static )
 target_link_libraries( ${APPLICATION_NAME} rcl_static )
-target_link_libraries( ${APPLICATION_NAME} ril )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 

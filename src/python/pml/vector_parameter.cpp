@@ -3,8 +3,8 @@
 #include <libpml/vector_parameter.hpp> 
 #include <libpml/vector_parameter_config.hpp> 
 
-#include <libril/constants.hpp>
-#include <libril/parameter_base.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_base.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

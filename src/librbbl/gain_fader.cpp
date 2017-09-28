@@ -4,7 +4,7 @@
 
 #include <libefl/vector_functions.hpp>
 
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 namespace visr
 {

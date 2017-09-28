@@ -6,8 +6,8 @@
 #include "empty_parameter_config.hpp"
 #include "export_symbols.hpp"
 
-#include <libril/parameter_type.hpp>
-#include <libril/typed_parameter_base.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/typed_parameter_base.hpp>
 
 #include <complex>
 

@@ -6,7 +6,7 @@
 #include <libefl/basic_matrix.hpp>
 #include <libefl/vector_conversions.hpp>
 
-#include <libril/component.hpp>
+#include <libvisr/component.hpp>
 
 // #include <librrl/audio_interface.hpp>
 

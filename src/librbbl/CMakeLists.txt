@@ -101,8 +101,14 @@ if( BUILD_USE_IPP )
   target_link_libraries( rbbl_shared ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
+
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installled once.
+set_target_properties( rbbl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS rbbl_static ARCHIVE DESTINATION lib )
-install(TARGETS rbbl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS rbbl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librbbl)
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

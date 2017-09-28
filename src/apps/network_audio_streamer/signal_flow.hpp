@@ -5,9 +5,9 @@
 
 #include "audio_network_encoder.hpp"
 
-#include <libril/composite_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <memory>
 #include <vector>

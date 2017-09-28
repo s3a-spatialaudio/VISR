@@ -17,8 +17,8 @@
 #include "time_frequency_parameter.hpp"
 #include "vector_parameter.hpp"
 
-#include <libril/parameter_factory.hpp>
-#include <libril/communication_protocol_factory.hpp>
+#include <libvisr/parameter_factory.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
 
 namespace visr
 {

@@ -1,10 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/atomic_component.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/parameter_base.hpp>
-#include <libril/parameter_factory.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/parameter_base.hpp>
+#include <libvisr/parameter_factory.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libreverbobject/late_reverb_parameter.hpp> 
 

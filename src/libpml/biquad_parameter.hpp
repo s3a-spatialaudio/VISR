@@ -7,8 +7,8 @@
 
 #include <librbbl/biquad_coefficient.hpp>
 
-#include <libril/typed_parameter_base.hpp>
-#include <libril/parameter_type.hpp>
+#include <libvisr/typed_parameter_base.hpp>
+#include <libvisr/parameter_type.hpp>
 
 #include <boost/property_tree/ptree_fwd.hpp>
 

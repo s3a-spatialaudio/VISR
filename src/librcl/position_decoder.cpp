@@ -6,7 +6,7 @@
 #include <libpml/listener_position.hpp>
 #include <libpml/string_parameter.hpp>
 
-#include <libril/parameter_type.hpp>
+#include <libvisr/parameter_type.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>

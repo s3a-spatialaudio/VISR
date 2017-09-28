@@ -7,7 +7,7 @@
 // TODO: Eliminate this dependency!
 //#include <librrl/communication_area.hpp>
 
-//#include <libril/constants.hpp>
+//#include <libvisr/constants.hpp>
 #ifndef BOOST_AUTO_TEST_MAIN
 #define BOOST_AUTO_TEST_MAIN
 //#include <boost/test/auto_unit_test.hpp>
@@ -22,7 +22,7 @@
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 
 
@@ -36,9 +36,9 @@
 
 
 
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/composite_component.hpp>
 #include <librcl/add.hpp>
 
 

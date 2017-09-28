@@ -5,10 +5,10 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/composite_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/parameter_input.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/parameter_input.hpp>
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
