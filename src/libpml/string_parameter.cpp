@@ -2,7 +2,7 @@
 
 #include "string_parameter.hpp"
 
-#include <libril/parameter_factory.hpp>
+#include <libvisr/parameter_factory.hpp>
 
 namespace visr
 {

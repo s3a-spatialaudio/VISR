@@ -15,21 +15,20 @@
 #include <libefl/alignment.hpp>
 #include <libefl/vector_functions.hpp>
 
-#include <libril/atomic_component.hpp>
-#include <libril/audio_sample_type.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
-#include <libril/communication_protocol_base.hpp>
-#include <libril/communication_protocol_factory.hpp>
-#include <libril/communication_protocol_type.hpp>
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/audio_sample_type.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
+#include <libvisr/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
+#include <libvisr/communication_protocol_type.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
-
-#include <libvisr_impl/audio_connection_descriptor.hpp>
-#include <libvisr_impl/audio_port_base_implementation.hpp>
-#include <libvisr_impl/component_implementation.hpp>
-#include <libvisr_impl/composite_component_implementation.hpp>
-#include <libvisr_impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/audio_connection_descriptor.hpp>
+#include <libvisr/impl/audio_port_base_implementation.hpp>
+#include <libvisr/impl/component_implementation.hpp>
+#include <libvisr/impl/composite_component_implementation.hpp>
+#include <libvisr/impl/parameter_port_base_implementation.hpp>
 
 #include <algorithm>
 #include <cassert>

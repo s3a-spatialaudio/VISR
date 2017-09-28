@@ -3,8 +3,8 @@
 #include <maxmspexternals/libmaxsupport/external_base.hpp>
 #include <maxmspexternals/libmaxsupport/signal_flow_wrapper.hpp>
 
-#include <libril/signal_flow_context.hpp>
-#include <libril/parameter_output.hpp>
+#include <libvisr/signal_flow_context.hpp>
+#include <libvisr/parameter_output.hpp>
 
 #include <libpml/double_buffering_protocol.hpp>
 #include <libpml/vector_parameter.hpp>

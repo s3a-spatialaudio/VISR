@@ -2,9 +2,9 @@
 
 #include "add.hpp"
 
-#include <libril/audio_input.hpp>
+#include <libvisr/audio_input.hpp>
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <libefl/vector_functions.hpp>
 

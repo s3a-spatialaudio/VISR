@@ -2,7 +2,7 @@
 
 #include "options.hpp"
 
-#include <libril/constants.hpp> // for SampleType
+#include <libvisr/constants.hpp> // for SampleType
 
 #include <cstdint>
 #include <ostream>

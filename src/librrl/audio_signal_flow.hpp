@@ -8,10 +8,10 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/audio_port_base.hpp>
-#include <libril/communication_protocol_base.hpp>
-#include <libril/constants.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/audio_port_base.hpp>
+#include <libvisr/communication_protocol_base.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <iosfwd>
 #include <map>

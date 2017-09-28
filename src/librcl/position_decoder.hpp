@@ -5,10 +5,10 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/parameter_type.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
 
 #include <libpml/listener_position.hpp>
 #include <libpml/message_queue_protocol.hpp>

@@ -2,7 +2,7 @@
 
 #include "gain_matrix.hpp"
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <maxmspexternals/libmaxsupport/class_registrar.hpp>
 

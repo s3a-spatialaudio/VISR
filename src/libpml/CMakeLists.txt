@@ -54,7 +54,6 @@ add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
 target_link_libraries( pml_static objectmodel_static )
 target_link_libraries( pml_static visr_static )
-target_link_libraries( pml_static ril )
 target_link_libraries( pml_static ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_static ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( pml_static ${Boost_SYSTEM_LIBRARY} )
@@ -68,13 +67,17 @@ target_compile_definitions( pml_shared PUBLIC -DVISR_BUILD_PML_SHARED_LIBRARY=1)
 set_target_properties( pml_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( pml_shared objectmodel_shared )
 target_link_libraries( pml_shared visr_shared )
-target_link_libraries( pml_shared ril )
 target_link_libraries( pml_shared ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( pml_shared ${Boost_SYSTEM_LIBRARY} )
 
+# Set public headers to be installed for the shared library target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties(pml_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS pml_static ARCHIVE DESTINATION lib )
-install(TARGETS pml_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS pml_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libpml )
 
 # Add the unit test directory.
 add_subdirectory( test )

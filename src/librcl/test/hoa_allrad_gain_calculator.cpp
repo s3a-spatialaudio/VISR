@@ -2,7 +2,7 @@
 
 #include <librcl/hoa_allrad_gain_calculator.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libobjectmodel/object_vector.hpp>
 

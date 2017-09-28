@@ -3,7 +3,7 @@
 #include <librbbl/circular_buffer.hpp>
 
 #include <libefl/basic_matrix.hpp>
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <boost/test/unit_test.hpp>
 

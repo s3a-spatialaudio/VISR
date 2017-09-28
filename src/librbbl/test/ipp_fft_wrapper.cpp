@@ -4,7 +4,7 @@
 
 #include <libefl/basic_vector.hpp>
 #include <libefl/vector_functions.hpp>
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <boost/test/unit_test.hpp>
 

@@ -14,7 +14,7 @@
 
 
 #include <librrl/audio_signal_flow.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 
 #include <cstddef>

@@ -2,8 +2,8 @@
 
 #include "object_vector.hpp"
 
-#include <libril/parameter_factory.hpp>
-#include <libril/parameter_type.hpp>
+#include <libvisr/parameter_factory.hpp>
+#include <libvisr/parameter_type.hpp>
 
 namespace visr
 {

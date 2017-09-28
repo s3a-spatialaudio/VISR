@@ -1,13 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/audio_port_base.hpp>
-#include <libril/component.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/parameter_port_base.hpp>
-#include <libril/signal_flow_context.hpp>
-#include <libril/status_message.hpp>
-
-#include <libvisr_impl/component_implementation.hpp>
+#include <libvisr/audio_port_base.hpp>
+#include <libvisr/component.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/parameter_port_base.hpp>
+#include <libvisr/signal_flow_context.hpp>
+#include <libvisr/status_message.hpp>
 
 #include <pybind11/pybind11.h>
 
@@ -20,7 +18,7 @@ namespace visr
 
 void exportComponent( pybind11::module& m )
 {
-  pybind11::enum_<::visr::StatusMessage::Kind>( m, "StatusMessage" )
+  pybind11::enum_<StatusMessage::Kind>( m, "StatusMessage" )
     .value( "Information", ::visr::StatusMessage::Information )
     .value( "Warning", ::visr::StatusMessage::Warning )
     .value( "Error", ::visr::StatusMessage::Error )

@@ -7,7 +7,7 @@
 #include <libpml/filter_routing_parameter.hpp>
 #include <libpml/matrix_parameter.hpp>
 
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

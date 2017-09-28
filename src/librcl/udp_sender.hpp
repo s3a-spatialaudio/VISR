@@ -5,9 +5,9 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/constants.hpp>
-#include <libril/parameter_input.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_input.hpp>
 
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/string_parameter.hpp>

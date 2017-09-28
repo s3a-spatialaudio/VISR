@@ -3,11 +3,11 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <librrl/integrity_checking.hpp>
 
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/atomic_component.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <boost/test/unit_test.hpp>
 

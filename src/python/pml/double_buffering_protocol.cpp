@@ -2,7 +2,7 @@
 
 #include <libpml/double_buffering_protocol.hpp>
 
-#include <libril/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_base.hpp>
 
 #include <pybind11/pybind11.h>
 

@@ -5,8 +5,8 @@
 #include <libpml/matrix_parameter.hpp>
 #include <libpml/matrix_parameter_config.hpp>
 
-#include <libril/parameter_type.hpp>
-#include <libril/parameter_factory.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/parameter_factory.hpp>
 
 #include <boost/test/unit_test.hpp>
 

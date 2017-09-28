@@ -49,8 +49,13 @@ target_compile_definitions( efl_shared PRIVATE -DVISR_BUILD_EFL_SHARED_LIBRARY=1
 target_compile_definitions( efl_shared PUBLIC -DVISR_BUILD_EFL_SHARED_LIBRARY=1)
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
+# Set public headers to be installed for the shared library target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties( efl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS efl_static ARCHIVE DESTINATION lib )
-install(TARGETS efl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS efl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libefl )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
