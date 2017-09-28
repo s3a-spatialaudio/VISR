@@ -94,6 +94,9 @@ class LoudnessMeter( visr. AtomicComponent ):
 
         # Avoid divide by zero, limit to ~ -120 dB        
         Lk = -0.691 + 10*np.log10( np.clip( meanPower, 1.0e-12, None ) )
+
+        # Uncomment for debug output
+        # print( "loudness: %f dB" % Lk )
         
         # Create a parameter message holding a single float.
         outParam = pml.Float( Lk )
