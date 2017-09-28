@@ -18,10 +18,13 @@ import rbbl
 import objectmodel as om
 
 import numpy as np
-
-
-
+from scipy.spatial import Delaunay
 from scipy.spatial import KDTree
+from scipy.spatial import ConvexHull
+import plotly
+import plotly.plotly as py
+import plotly.figure_factory as FF
+from plotly.graph_objs import graph_objs
 
 class DynamicBinauralController( visr.AtomicComponent ):
     """ Component to translate an object vector (and optionally head tracking information)
@@ -100,10 +103,23 @@ class DynamicBinauralController( visr.AtomicComponent ):
         self.hrirInterpolation = hrirInterpolation
         if self.hrirInterpolation:
             self.lastPosition = np.repeat( [[np.NaN, np.NaN, np.NaN]], self.numberOfObjects, axis=0 )
+            self.hrirLookup = ConvexHull( self.hrirPos )
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
-        self.hrirLookup = KDTree( self.hrirPos )
+            self.hrirLookup = KDTree( self.hrirPos )
 
+#        np.set_printoptions(threshold=np.nan)
+#        print(self.hrirLookup.simplices)
+
+##      print 3d convex hull result
+#        fig1 = FF.create_trisurf(x=self.hrirPos[:,0],y=self.hrirPos[:,1],z=self.hrirPos[:,2],
+#                         simplices=self.hrirLookup.simplices,
+#                         title="TRI", aspectratio=dict(x=1, y=1, z=1))
+#        plotly.offline.plot(fig1, filename="TRI")
+
+
+#        print(self.hrirLookup.points[self.hrirLookup.simplices])
+#        print(self.hrirLookup.simplices)
 ##      plot the hrir positions on xy plane
 #        plt.figure(1)            
 #        for vec in self.hrirPos:
@@ -160,28 +176,51 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     ch = src.channels[0]
                     self.sourcePos[ch,:] = posNormed
                     self.levels[ch] = src.level
-                           
+#            print(self.sourcePos)               
             if self.useHeadTracking:
                  if self.trackingInputProtocol.changed():
                      htrack = self.trackingInputProtocol.data()
                      ypr = htrack.orientation
                      
-                     # np.negative is to obtain the opposite rotation of the head rotation
+                     # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
+                     
+#                     print(self.sourcePos)
+#                     print(rotationMatrix)                     
+                     for index,column in enumerate(np.matrix(self.sourcePos)):
+#                         print(column.T)
+                         self.sourcePos[index,:] = (rotationMatrix*column.T).T
+                      
+#                     print(self.sourcePos.T)
 
-                     #print("before rotation: "+str(self.sourcePos[0]))   
- 
-                     self.sourcePos = self.sourcePos*rotationMatrix
+#                     print(self.sourcePos.T*rotationMatrix)
+#                     print(self.sourcePos.T*rotationMatrix.T)
+#                     self.sourcePos = self.sourcePos.T*rotationMatrix
+                     
+                     
                      for chIdx in range(0,2):
                        sph0 = cart2sph(self.sourcePos[chIdx].item(0),self.sourcePos[chIdx].item(1),self.sourcePos[chIdx].item(2))
                        print(" after rotation: p%d [%d %d]"% (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
                                
             if self.hrirInterpolation:
-                [ d,indices ] = self.hrirLookup.query( self.sourcePos, 3, p =2 )
+                indices = np.zeros((self.numberOfObjects,3), dtype = np.int ) 
+#                print(self.hrirLookup.points[self.hrirLookup.simplices])
+                for chIdx in range(0,self.numberOfObjects):
+#                     print(np.matrix(self.sourcePos[chIdx]).T)
+                     gtot = inv(self.hrirLookup.points[self.hrirLookup.simplices])*np.matrix(self.sourcePos[chIdx]).T
+#                     f = open('gs.txt', 'w')
+#                     for index, gx in enumerate(g.min(axis=1)):
+#                        f.write('%f\n' % (np.array(gx).item(0)))            
+#                     print(np.array(g))
+#                     print(g.min(axis=1))
+#                     print(np.where(g==g.min(axis=1).max())[0][0])
+                     gMaxIndex = np.where(gtot==gtot.min(axis=1).max())[0][0]
+                     indices[chIdx] = self.hrirLookup.simplices[gMaxIndex]
+#                     print(indices[chIdx])
 #                np.set_printoptions(threshold=np.nan)
 #                print(self.hrirPos[indices])
             else:
-                [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
+                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
 
 ##               indices calculated with euclidean distance
 #                indices2 = np.zeros( (self.numberOfObjects), dtype = np.float32 )
@@ -195,8 +234,10 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                                     
             # Retrieve the output gain vector for setting the object level and potentially
             # applying dynamically computed 
+
             gainVec = self.gainOutputProtocol.data()
             for chIdx in range(0,self.numberOfObjects):
+#                print("object n: "+str(chIdx))
                 gain = self.levels[chIdx]
                 # Set the object for both ears.
                 # Note: Incorporate dynamically computed ILD is selected.
@@ -206,42 +247,44 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 # If the source is silent (probably inactive), don't change filters
                 if gain >= 1.0e-7:
                     if self.hrirInterpolation:
-                        
+                        print(indices[chIdx])
                         if not np.array_equal(self.lastPosition[chIdx],indices[chIdx]):
 #                           print(self.hrirPos[indices[chIdx]].T)
                             threeNeighMatrix = self.hrirPos[indices[chIdx]].T
 #                           threeNeighMatrix = np.concatenate((self.hrirPos[indices[:,0]], self.hrirPos[indices[:,1]], self.hrirPos[indices[:,2]]), axis=1)
-#                           print(threeNeighMatrix.shape)
-                            g = inv(threeNeighMatrix)*self.sourcePos[chIdx].T
-                                   
+                          
+                            print("new simplex points")
+                            print(threeNeighMatrix)
+                            g = inv(threeNeighMatrix)*np.matrix(self.sourcePos[chIdx]).T
+#                            print(np.matrix(self.sourcePos[chIdx]).T)                                   
                             gnorm = g*1/np.linalg.norm(g,ord=1)
-#                            print(gnorm)
-#                        np.set_printoptions(threshold=np.nan)
-                            leftAccum =  [0]* self.hrirs[indices[0][0]][0].shape[0]
-                            rightAccum = [0]* self.hrirs[indices[0][0]][1].shape[0]
 
-                            leftInterpolator = pml.IndexedVectorFloat( chIdx, leftAccum)
-                            rightInterpolator = pml.IndexedVectorFloat( chIdx, rightAccum)
+#                        np.set_printoptions(threshold=np.nan)
+                            leftAccum =  np.zeros((1,self.hrirs[indices[0][0]][0].shape[0]),dtype = np.float32)
+                            rightAccum = np.zeros((1,self.hrirs[indices[0][0]][1].shape[0]),dtype = np.float32)
+
+           
                             for neighIdx in range(0,3):
-                                leftCmd  = pml.IndexedVectorFloat( chIdx,
-                                                              self.hrirs[indices[chIdx][neighIdx],0,:])
-                               
-                                rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
-                                                              self.hrirs[indices[chIdx][neighIdx],1,:])
-                                
+                                leftCmd  = self.hrirs[indices[chIdx][neighIdx],0,:]
+                                rightCmd = self.hrirs[indices[chIdx][neighIdx],1,:]                                
 #                                print(gnorm[neighIdx])
-#                                print(leftCmd.value)
-                                leftWeighted = gnorm[neighIdx] * np.array(leftCmd.value)
-                                print(leftWeighted.shape)
-                                rightWeighted = gnorm[neighIdx]* np.array(rightCmd.value)
-                                leftInterpolator.value = [x+y for x,y in zip(leftInterpolator.value, leftWeighted)]
-                                rightInterpolator.value = [x+y for x,y in zip(rightInterpolator.value, rightWeighted)]
+
+                                leftWeighted = gnorm[neighIdx] * np.array(leftCmd)
+#                                print("neighbor "+str(neighIdx))
+                                rightWeighted = gnorm[neighIdx]* np.array(rightCmd)
+                                leftAccum += leftWeighted
+                                rightAccum += rightWeighted
+#                                rightInterpolator.value = [x+y for x,y in zip(rightInterpolator.value, rightWeighted)]
                                 
+
+#                            print(leftAccum[0])
+                            leftInterpolator = pml.IndexedVectorFloat( chIdx, leftAccum[0].tolist())
+                            rightInterpolator = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, rightAccum[0].tolist())
                             self.filterOutputProtocol.enqueue( leftInterpolator )
                             self.filterOutputProtocol.enqueue( rightInterpolator )
-                            self.lastFilters[chIdx] = indices[chIdx]
+                            self.lastPosition[chIdx] = indices[chIdx]
                         
-                        raise ValueError( 'HRIR interpolation not implemented yet' )
+#                        raise ValueError( 'HRIR interpolation not implemented yet' )
                     else:
 ##                       debug hrir choice with kdtree and euclidean                       
 #                        sph0 = cart2sph(self.sourcePos[chIdx][0],self.sourcePos[chIdx][1],self.sourcePos[chIdx][2])

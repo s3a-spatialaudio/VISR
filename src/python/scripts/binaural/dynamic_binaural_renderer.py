@@ -48,7 +48,7 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                                                                       useHeadTracking = True,
                                                                       dynamicITD = True,
                                                                       dynamicILD = True,
-                                                                      hrirInterpolation = False
+                                                                      hrirInterpolation = True
                                                                       )
             
             self.parameterConnection( self.objectVectorInput, self.dynamicBinauraController.parameterPort("objectVector"))

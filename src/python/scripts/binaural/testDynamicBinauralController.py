@@ -33,7 +33,7 @@ if not os.path.exists( sofaFile ):
 [ hrirPos, hrirData ] = readSofaFile( sofaFile )
 #print( "positions: %s." % str(np.array(hrirPos)))
 
-headTrackEnabled = True
+headTrackEnabled = False
 
 controller = DynamicBinauralController( context, "Controller", None,
                   numBinauralObjects,
@@ -74,7 +74,7 @@ for blockIdx in range(0,numPos):
 #    z = np.cos(el)
     
     
-    ps1 = om.PointSource( 0 )
+    ps1 = om.PointSource( 0 ) 
     ps1.position = [x,y,z]
     ps1.level = 0.25
     ps1.channels = [0]
