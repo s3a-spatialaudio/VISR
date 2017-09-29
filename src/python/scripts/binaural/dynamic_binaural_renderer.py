@@ -41,7 +41,7 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                        sofaFile )
 
             [ hrirPos, hrirData ] = readSofaFile( sofaFile )
-            print(hrirPos[0])
+#            print(hrirPos[0])
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,
                                                                       numberOfObjects,
                                                                       hrirPos, hrirData,

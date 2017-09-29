@@ -33,7 +33,7 @@ if not os.path.exists( sofaFile ):
 [ hrirPos, hrirData ] = readSofaFile( sofaFile )
 #print( "positions: %s." % str(np.array(hrirPos)))
 
-headTrackEnabled = False
+headTrackEnabled = True
 
 controller = DynamicBinauralController( context, "Controller", None,
                   numBinauralObjects,

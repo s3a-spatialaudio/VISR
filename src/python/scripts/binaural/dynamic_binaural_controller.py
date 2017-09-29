@@ -104,6 +104,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
         if self.hrirInterpolation:
             self.lastPosition = np.repeat( [[np.NaN, np.NaN, np.NaN]], self.numberOfObjects, axis=0 )
             self.hrirLookup = ConvexHull( self.hrirPos )
+#            print(self.hrirPos)
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
             self.hrirLookup = KDTree( self.hrirPos )
@@ -118,8 +119,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #        plotly.offline.plot(fig1, filename="TRI")
 
 
-#        print(self.hrirLookup.points[self.hrirLookup.simplices])
-#        print(self.hrirLookup.simplices)
 ##      plot the hrir positions on xy plane
 #        plt.figure(1)            
 #        for vec in self.hrirPos:
@@ -184,39 +183,72 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      
                      # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
-                     
+#                     print("before")
 #                     print(self.sourcePos)
 #                     print(rotationMatrix)                     
                      for index,column in enumerate(np.matrix(self.sourcePos)):
 #                         print(column.T)
                          self.sourcePos[index,:] = (rotationMatrix*column.T).T
                       
-#                     print(self.sourcePos.T)
+#                     print(self.sourcePos)
 
 #                     print(self.sourcePos.T*rotationMatrix)
 #                     print(self.sourcePos.T*rotationMatrix.T)
 #                     self.sourcePos = self.sourcePos.T*rotationMatrix
                      
                      
-                     for chIdx in range(0,2):
-                       sph0 = cart2sph(self.sourcePos[chIdx].item(0),self.sourcePos[chIdx].item(1),self.sourcePos[chIdx].item(2))
-                       print(" after rotation: p%d [%d %d]"% (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
+#                     for chIdx in range(0,self.numberOfObjects):
+#                       gain = self.levels[chIdx]
+#                       if gain >= 1.0e-7: 
+#                         sph0 = cart2sph(self.sourcePos[chIdx].item(0),self.sourcePos[chIdx].item(1),self.sourcePos[chIdx].item(2))
+#                         print(" after rotation: p%d [%d %d]"% (chIdx, round(rad2deg(sph0[0])),round(rad2deg(sph0[1]))))
                                
             if self.hrirInterpolation:
                 indices = np.zeros((self.numberOfObjects,3), dtype = np.int ) 
 #                print(self.hrirLookup.points[self.hrirLookup.simplices])
+#                print("after") 
                 for chIdx in range(0,self.numberOfObjects):
+                    
+#                     print(self.sourcePos[chIdx])
 #                     print(np.matrix(self.sourcePos[chIdx]).T)
-                     gtot = inv(self.hrirLookup.points[self.hrirLookup.simplices])*np.matrix(self.sourcePos[chIdx]).T
+#                     print(self.hrirLookup.points[self.hrirLookup.simplices].shape[0])
+                     triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
+                     inverted = inv(triplets)
+                     gtot = np.zeros((triplets.shape[0],3), dtype = np.float32 ) 
+                     for trip in range(0,triplets.shape[0]):
+                         gtot[trip,:] = np.matmul(inverted[trip,:,:],self.sourcePos[chIdx,:])
+#                         if chIdx == 3 and trip == 3076:
+#                             print(triplets[trip,:,:])
+#                             print(inverted[trip,:,:])
+#                             print(self.sourcePos[chIdx,:])
+#                             print(gtot[trip])                        
+#                     gtot = inv(self.hrirLookup.points[self.hrirLookup.simplices])*self.sourcePos[chIdx,:]
 #                     f = open('gs.txt', 'w')
 #                     for index, gx in enumerate(g.min(axis=1)):
 #                        f.write('%f\n' % (np.array(gx).item(0)))            
 #                     print(np.array(g))
 #                     print(g.min(axis=1))
 #                     print(np.where(g==g.min(axis=1).max())[0][0])
-                     gMaxIndex = np.where(gtot==gtot.min(axis=1).max())[0][0]
+                     gMaxIndex = np.argmax(gtot.min(axis=1))
                      indices[chIdx] = self.hrirLookup.simplices[gMaxIndex]
-#                     print(indices[chIdx])
+                     gain = self.levels[chIdx]
+
+#                     if gain >= 1.0e-7:
+#                         print(self.sourcePos[chIdx,:])
+#                          print(indices[chIdx])
+#                          print(self.lastPosition[chIdx])
+#                          print("min g")
+#                          print(gtot.min(axis=1))
+#                          print(np.argmax(gtot.min(axis=1)))
+#                          print("max of min g: %f index: %d"%(gtot.min(axis=1).max(),gMaxIndex))
+#                          print(gtot[gMaxIndex])
+#                         print(self.hrirPos[indices[chIdx]])
+
+
+
+#                         print(gtot[gMaxIndex]self.hrirPos[indices[chIdx]])                               
+                       
+#                         print(gtot[gMaxIndex])
 #                np.set_printoptions(threshold=np.nan)
 #                print(self.hrirPos[indices])
             else:
@@ -247,14 +279,14 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 # If the source is silent (probably inactive), don't change filters
                 if gain >= 1.0e-7:
                     if self.hrirInterpolation:
-                        print(indices[chIdx])
+#                        print(indices[chIdx])
                         if not np.array_equal(self.lastPosition[chIdx],indices[chIdx]):
-#                           print(self.hrirPos[indices[chIdx]].T)
+#                            print("changed")
                             threeNeighMatrix = self.hrirPos[indices[chIdx]].T
 #                           threeNeighMatrix = np.concatenate((self.hrirPos[indices[:,0]], self.hrirPos[indices[:,1]], self.hrirPos[indices[:,2]]), axis=1)
                           
-                            print("new simplex points")
-                            print(threeNeighMatrix)
+#                            print("new simplex points")
+#                            print(threeNeighMatrix)
                             g = inv(threeNeighMatrix)*np.matrix(self.sourcePos[chIdx]).T
 #                            print(np.matrix(self.sourcePos[chIdx]).T)                                   
                             gnorm = g*1/np.linalg.norm(g,ord=1)
