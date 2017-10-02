@@ -81,7 +81,7 @@ paramInput = flow.parameterReceivePort('objectDataInput')
 
 inputSignal = np.zeros( (numBinauralObjects, signalLength ), dtype=np.float32 )
 inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-print(str(inputSignal.shape))
+#print(str(inputSignal.shape))
 
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 

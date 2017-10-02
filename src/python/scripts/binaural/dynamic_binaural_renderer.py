@@ -59,8 +59,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
             # flat BRIR matrix.
             filterRouting = pml.FilterRoutingList()
             for idx in range(0, numberOfObjects ):
-                filterRouting.addRouting( idx, idx, 2*idx, 1.0 )
-                filterRouting.addRouting( idx, idx+numberOfObjects, 2*idx+1, 1.0 )
+                filterRouting.addRouting( idx, idx, idx, 1.0 )
+                filterRouting.addRouting( idx, idx+numberOfObjects, idx+numberOfObjects, 1.0 )
                 
             firLength = hrirData.shape[1]
             self.convolver = rcl.FirFilterMatrix( context, 'covolutionEngine', self )
@@ -83,6 +83,9 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
              initialGain=1.0, 
              interpolationSteps=context.period)
 
+           
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
             self.audioConnection( self.convolver.audioPort("out"), self.delayVector.audioPort("in"))
 
             self.adder = rcl.Add( context, 'add', self, numInputs = numberOfObjects, width=2)            
@@ -93,5 +96,4 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 
                 
             self.audioConnection( self.adder.audioPort("out"), self.binauralOutput)
-            self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
-            self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
+           

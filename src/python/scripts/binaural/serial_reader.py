@@ -10,6 +10,7 @@ import visr
 import pml
 import numpy as np
 import serial
+from rotationFunctions import deg2rad
 
 class serialReader(visr.AtomicComponent ):
     def __init__( self,
@@ -38,7 +39,8 @@ class serialReader(visr.AtomicComponent ):
           if np.array(yprvec).size != 3:
             raise ValueError( 'yaw pitch roll bad format:'+str(np.array(yprvec)))
           ypr = self.trackingOutput.protocolOutput().data()
-          ypr.orientation = yprvec
+          ypr.orientation = [deg2rad(yprvec[0]),deg2rad(yprvec[1]),deg2rad(yprvec[2])]
+#          print (yprvec)
           self.trackingOutput.protocolOutput().swapBuffers() 
 
         except ValueError:

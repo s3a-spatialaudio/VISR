@@ -7,6 +7,11 @@ Created on Thu Sep 14 14:55:25 2017
 """
 
 from rotationFunctions import sph2cart, cart2sph, rad2deg, deg2rad
+import wave
+import array
+from struct import pack
+from scipy.io.wavfile import write
+import time
 
 def sph2cart(az,el,r):
     x = r*np.cos(az)*np.cos(el)
@@ -27,15 +32,13 @@ import matplotlib.pyplot as plt
 fs = 48000
 bufferSize = 256
 
-numBinauralObjects = 12
-port = "/dev/cu.usbserial-AJ03GSC8"
-baud = 57600
+numBinauralObjects = 4
 idMatrix = np.identity(3)
 
 blockSize = 128
 samplingFrequency = 48000
 parameterUpdatePeriod = 1
-numBlocks = 72;
+numBlocks = 1024;
 #numBlocks = 64;
 signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
@@ -61,19 +64,19 @@ paramInput = flow.parameterReceivePort('objectVector')
 
 inputSignal = np.zeros( (numBinauralObjects, signalLength ), dtype=np.float32 )
 inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-print(str(inputSignal.shape))
+#print(str(inputSignal.shape))
 
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
-numPos = 360/5
+numPos = 360/1
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
-
+start = time.time()
 for blockIdx in range(0,numBlocks):
 #    print("NBl "+str(blockIdx))
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
         #az = 0.025 * blockIdx
         #el = 0.1 * np.sin( 0.025 * blockIdx )
-        az = 0.025
-        el = 0.1 * np.sin( 0.025)   
+        az = 0
+        el = 0
         r = 1
         x,y,z = sph2cart( az, el, r )
         ps1 = objectmodel.PointSource(0)
@@ -94,15 +97,15 @@ for blockIdx in range(0,numBlocks):
           headrotation =  azSequence[blockIdx%numPos];
           print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(azSequence[blockIdx%numPos])))
    
-          trackingInput.data().orientation = [0,0, -headrotation] #rotates over the z axis, that means that the rotation is on the xy plane
+          trackingInput.data().orientation = [0,0,headrotation] #rotates over the z axis, that means that the rotation is on the xy plane
           trackingInput.swapBuffers()      
           
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     #print(str(inputBlock.shape))
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
-
-
+print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
+write('testR.wav', 48000, outputSignal[1,:])
 plt.figure(random.randint(1, 1000))
-plt.plot( t, outputSignal[0,:], 'b-')
+plt.plot( t, outputSignal[0,:], 'b-', t, outputSignal[1,:], 'r-')
 plt.show()

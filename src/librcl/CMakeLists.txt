@@ -39,7 +39,7 @@ diffusion_gain_calculator.hpp
 export_symbols.hpp
 fir_filter_matrix.hpp
 gain_matrix.hpp
-gain_vector.cpp
+gain_vector.hpp
 hoa_allrad_gain_calculator.hpp
 listener_compensation.hpp
 null_source.hpp
