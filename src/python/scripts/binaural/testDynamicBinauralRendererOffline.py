@@ -30,7 +30,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 fs = 48000
-bufferSize = 256
+bufferSize = 512
 
 numBinauralObjects = 4
 idMatrix = np.identity(3)
@@ -67,7 +67,7 @@ inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
 #print(str(inputSignal.shape))
 
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
-numPos = 360/1
+numPos = 360/5
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
 start = time.time()
 for blockIdx in range(0,numBlocks):
@@ -105,7 +105,7 @@ for blockIdx in range(0,numBlocks):
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
-write('testR.wav', 48000, outputSignal[1,:])
+#write('testR.wav', 48000, outputSignal[1,:])
 plt.figure(random.randint(1, 1000))
-plt.plot( t, outputSignal[0,:], 'b-', t, outputSignal[1,:], 'r-')
+plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
 plt.show()

@@ -18,12 +18,12 @@ import audiointerfaces as ai
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+import time
 import pythonAtoms
 
-fs = 48000
+fs = 44100
 
-blockSize = 1024
+blockSize = 512
 
 c = visr.SignalFlowContext(blockSize, fs )
 
@@ -81,7 +81,8 @@ jackCfg = """{ "clientname": "PythonAdder",
     "playback": [{ "basename":"out_", "externalport" : {} }]
   }
 }"""
-                                           
+
+                                      
 aIfc = ai.AudioInterfaceFactory.create("Jack", aiConfig, jackCfg)
 
 aIfc.registerCallback( flow )
@@ -89,7 +90,12 @@ aIfc.registerCallback( flow )
 aIfc.start()
 
 print( "Rendering started." )
-
+time.sleep(1)
+i = input("Enter text (or Enter to quit): ")
+if not i:
+    aIfc.stop()
+    aIfc.unregisterCallback()
+    del aIfc
 #for blockIdx in range(0,numBlocks):
 #    inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
 #    outputBlock = flow.process( inputBlock )

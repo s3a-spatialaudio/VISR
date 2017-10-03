@@ -11,6 +11,7 @@ import pml
 import numpy as np
 import serial
 from rotationFunctions import deg2rad
+import time
 
 class serialReader(visr.AtomicComponent ):
     def __init__( self,
@@ -22,16 +23,19 @@ class serialReader(visr.AtomicComponent ):
         self.yprVec =   np.zeros( 3, dtype = np.float32 )
         self.ser = serial.Serial(port, baud, timeout=0)   
         self.message = ""
-        self.bufSize = 516
+        self.bufSize = 512
         self.sent = False
         self.trackingOutput = visr.ParameterOutput( "orientation", self, 
                                               pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
         self.trackingOutputProtocol = self.trackingOutput.protocolOutput()  
-        
+        self.sentN = 0
+        self.parsedN = 0
+        self.ser.read() #necessary for the .in_waiting to work
+        self.procN =0 
     def send_data(self,newdata):
-        self.sent = True
+       
         data = newdata
         data = data.replace("#","").replace("Y","").replace("P","").replace("R","").replace("=","").rstrip()
         try:
@@ -40,7 +44,8 @@ class serialReader(visr.AtomicComponent ):
             raise ValueError( 'yaw pitch roll bad format:'+str(np.array(yprvec)))
           ypr = self.trackingOutput.protocolOutput().data()
           ypr.orientation = [deg2rad(yprvec[0]),deg2rad(yprvec[1]),deg2rad(yprvec[2])]
-#          print (yprvec)
+          self.sentN = self.sentN+1
+#          print(yprvec)
           self.trackingOutput.protocolOutput().swapBuffers() 
 
         except ValueError:
@@ -69,6 +74,7 @@ class serialReader(visr.AtomicComponent ):
                                      ndlastM = lastR
                                  #print(" message sent: "+repr(self.message[ndlastM+2:lastM+2]))
                                  self.send_data(self.message[ndlastM+2:lastM+2])
+                                 self.sent = True
                                  self.message = read[last:]
                          else: 
                             self.message+= read[last+2:]
@@ -77,21 +83,28 @@ class serialReader(visr.AtomicComponent ):
                           if isLast:
                               #print(" message sent: "+repr(read[ndlast+2:last+2]))#+" ( in mem "+repr(read[last:])+" ) over total "+(repr(read)))
                               self.send_data(read[ndlast+2:last+2])
-                          self.message = read[last:]
-                          #print(" message: "+repr(self.message))
+                              self.sent = True
+                          self.message = read[last:]                          
+                 self.parsedN = self.parsedN+1                 
+#                 print(" message: "+repr(self.message))
                                   
     def process( self ):
 #    while not connected:
 #        #serin = ser.read()
 #        connected = True
+        start = time.time()
         self.sent = False
         totRead=0
-        self.ser.read() #necessary for the .in_waiting to work
 
-        while self.ser.isOpen and not(self.sent) :
+        self.procN=self.procN+1
+        
+        while self.ser.isOpen and not self.sent :
+            
+            
             inBuffer = self.ser.in_waiting
            # print("inBuffer "+str(self.ser.read(self.bufSize)))
             if inBuffer > 0 :
+#               print("%d SENT? %d serial parsing %f sec"%(self.procN,self.sent,time.time()-start)) 
               # print("\n ++ "+ str(inBuffer))  
                read = self.ser.read(self.bufSize).decode() #read the bytes and convert from binary array to ASCII
                totRead+=len(read)
@@ -103,3 +116,4 @@ class serialReader(visr.AtomicComponent ):
                #    print("completed "+str(totRead)+" / "+ str(inBuffer))  
                    totRead=0
                    self.parse_message(read,True)             
+        

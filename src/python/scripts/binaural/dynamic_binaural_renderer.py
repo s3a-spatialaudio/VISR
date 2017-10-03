@@ -21,7 +21,11 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
     
         def __init__( self,
                      context, name, parent, 
-                     numberOfObjects
+                     numberOfObjects,
+                     headTracking = True,
+                     dynITD = True,
+                     dynILD = True,
+                     hrirInterp = True
                      ):
             super( DynamicBinauralRenderer, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -29,8 +33,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
             self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
                                                          pml.DoubleBufferingProtocol.staticType,
                                                          pml.EmptyParameterConfig() )
-    
-            self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
+            if headTracking:
+                self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             
@@ -45,14 +49,15 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,
                                                                       numberOfObjects,
                                                                       hrirPos, hrirData,
-                                                                      useHeadTracking = True,
-                                                                      dynamicITD = True,
-                                                                      dynamicILD = True,
-                                                                      hrirInterpolation = True
+                                                                      useHeadTracking = headTracking,
+                                                                      dynamicITD = dynITD,
+                                                                      dynamicILD = dynILD,
+                                                                      hrirInterpolation = hrirInterp
                                                                       )
             
             self.parameterConnection( self.objectVectorInput, self.dynamicBinauraController.parameterPort("objectVector"))
-            self.parameterConnection( self.trackingInput, self.dynamicBinauraController.parameterPort("headTracking"))
+            if headTracking:
+                self.parameterConnection( self.trackingInput, self.dynamicBinauraController.parameterPort("headTracking"))
             
            
             # Define the routing for the binaural convolver such that it matches the organisation of the

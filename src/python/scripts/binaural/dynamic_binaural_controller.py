@@ -111,14 +111,14 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
             self.hrirLookup = KDTree( self.hrirPos )
 
-##      print 3d convex hull result
+## PRINT 3d convex hull result
 #        fig1 = FF.create_trisurf(x=self.hrirPos[:,0],y=self.hrirPos[:,1],z=self.hrirPos[:,2],
 #                         simplices=self.hrirLookup.simplices,
 #                         title="TRI", aspectratio=dict(x=1, y=1, z=1))
 #        plotly.offline.plot(fig1, filename="TRI")
 
 
-##      plot the hrir positions on xy plane
+## PLOT the hrir positions on xy plane
 #        plt.figure(1)            
 #        for vec in self.hrirPos:
 #            
@@ -126,13 +126,13 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #
 #        plt.show() # or savefig(<filename>)
 
-##      plot the hrir positions on xz plane
+## PLOT the hrir positions on xz plane
 #        plt.figure(2)            
 #        for vec in self.hrirPos:
 #            plt.plot(vec[0], vec[2], '+')
 #        plt.show() # or savefig(<filename>)
         
-##       write polar coordinates of HRIR positions into a file
+## WRITE polar coordinates of HRIR positions into a file
 #        f = open('workfile.txt', 'w')
 #        for index, g in enumerate(self.hrirPos):
 #           sph = cart2sph(g[0],g[1],g[2])
@@ -150,6 +150,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
 
         
     def process( self ):
+        startTot = time.time()
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
                                               
@@ -184,15 +185,25 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
 #                     rotationMatrix = np.identity(3)
 #                     print(self.sourcePos.shape)
-#                     self.sourcePos = np.matmul(self.sourcePos,rotationMatrix)
+
                      self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix.T))
                      
+#PRINT OUT AZIMUTH AND ELEVATION OF FIRST SOURCE AFTER ROTATION                     
+#                     sph1 = cart2sph(self.sourcePos[0][0],self.sourcePos[0][1],self.sourcePos[0][2])
+#                     print("[%d %d]"%(rad2deg(sph1[0]),rad2deg(sph1[1])))   
                      
+
+
+#ALTERNATIVE METHODS TO MULTIPLY SOURCEPOS*ROTATIONMATRIX
+
 #                     self.sourcePos = self.sourcePos.dot(rotationMatrix[:,:3].T)[:,:3]
 #                     print(self.sourcePos.shape)                     
                      
 #                     for index,column in enumerate(np.matrix(self.sourcePos)):
 #                         self.sourcePos[index,:] = (rotationMatrix*column.T).T                      
+
+
+#SOURCEPOS DEBUG AFTER ROTATION
 #                     print(self.sourcePos)
 #                     print(self.sourcePos.shape)
 #                     for srcp in self.sourcePos :
@@ -214,7 +225,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      gMaxIndex = np.argmax(gtot.min(axis=1))
                      indices[chIdx] = self.hrirLookup.simplices[gMaxIndex]
                      gain = self.levels[chIdx]
-                     print("Triplet choice %f sec "%(time.time()-start))
+#                     print("Triplet choice %f sec "%(time.time()-start))
             else:
                  [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
                                                     
@@ -258,7 +269,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             self.filterOutputProtocol.enqueue( leftInterpolator )
                             self.filterOutputProtocol.enqueue( rightInterpolator )
                             self.lastPosition[chIdx] = indices[chIdx]
-                        print("filter out %f sec"%(time.time()-start2))
+#                        print("filter out %f sec"%(time.time()-start2))
                     else:
                         sph1 = cart2sph(self.hrirPos[indices[chIdx]][0],self.hrirPos[indices[chIdx]][1],self.hrirPos[indices[chIdx]][2])
                         print("%d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1])))
@@ -276,3 +287,4 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.objectInputProtocol.resetChanged()
             if self.useHeadTracking:
                 self.trackingInputProtocol.resetChanged()
+#        print("TOT controller time %f sec"%(time.time()-startTot))
