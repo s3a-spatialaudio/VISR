@@ -1,8 +1,9 @@
 # Package generation configuration
+
 SET( CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Franck A.Franck@soton.ac.uk" )
-#SET( CPACK_PACKAGE_NAME "VISR" )
+SET( CPACK_PACKAGE_NAME "VISR" )
 SET( CPACK_PACKAGE_VENDOR "ISVR")
-# SET( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
+
 # Use the version numbers centrally defined for the VISR project
 set( CPACK_PACKAGE_VERSION_MAJOR ${VISR_MAJOR_VERSION} )
 set( CPACK_PACKAGE_VERSION_MINOR ${VISR_MINOR_VERSION} )
