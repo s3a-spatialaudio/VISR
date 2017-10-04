@@ -21,7 +21,11 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
     
         def __init__( self,
                      context, name, parent, 
-                     numberOfObjects
+                     numberOfObjects,
+                     headTracking = True,
+                     dynITD = True,
+                     dynILD = True,
+                     hrirInterp = True
                      ):
             super( DynamicBinauralRenderer, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -29,8 +33,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
             self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
                                                          pml.DoubleBufferingProtocol.staticType,
                                                          pml.EmptyParameterConfig() )
-    
-            self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
+            if headTracking:
+                self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             
@@ -41,26 +45,27 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                        sofaFile )
 
             [ hrirPos, hrirData ] = readSofaFile( sofaFile )
-            print(hrirPos[0])
+#            print(hrirPos[0])
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,
                                                                       numberOfObjects,
                                                                       hrirPos, hrirData,
-                                                                      useHeadTracking = True,
-                                                                      dynamicITD = True,
-                                                                      dynamicILD = True,
-                                                                      hrirInterpolation = False
+                                                                      useHeadTracking = headTracking,
+                                                                      dynamicITD = dynITD,
+                                                                      dynamicILD = dynILD,
+                                                                      hrirInterpolation = hrirInterp
                                                                       )
             
             self.parameterConnection( self.objectVectorInput, self.dynamicBinauraController.parameterPort("objectVector"))
-            self.parameterConnection( self.trackingInput, self.dynamicBinauraController.parameterPort("headTracking"))
+            if headTracking:
+                self.parameterConnection( self.trackingInput, self.dynamicBinauraController.parameterPort("headTracking"))
             
            
             # Define the routing for the binaural convolver such that it matches the organisation of the
             # flat BRIR matrix.
             filterRouting = pml.FilterRoutingList()
             for idx in range(0, numberOfObjects ):
-                filterRouting.addRouting( idx, idx, 2*idx, 1.0 )
-                filterRouting.addRouting( idx, idx+numberOfObjects, 2*idx+1, 1.0 )
+                filterRouting.addRouting( idx, idx, idx, 1.0 )
+                filterRouting.addRouting( idx, idx+numberOfObjects, idx+numberOfObjects, 1.0 )
                 
             firLength = hrirData.shape[1]
             self.convolver = rcl.FirFilterMatrix( context, 'covolutionEngine', self )
@@ -83,6 +88,9 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
              initialGain=1.0, 
              interpolationSteps=context.period)
 
+           
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
+            self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
             self.audioConnection( self.convolver.audioPort("out"), self.delayVector.audioPort("in"))
 
             self.adder = rcl.Add( context, 'add', self, numInputs = numberOfObjects, width=2)            
@@ -93,5 +101,4 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 
                 
             self.audioConnection( self.adder.audioPort("out"), self.binauralOutput)
-            self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
-            self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
+           
