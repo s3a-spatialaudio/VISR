@@ -2,7 +2,7 @@
 
 #include <libpml/empty_parameter_config.hpp> 
 
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

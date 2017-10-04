@@ -2,7 +2,7 @@
 
 #include <librrl/integrity_checking.hpp> 
 
-#include <libril/component.hpp>
+#include <libvisr/component.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

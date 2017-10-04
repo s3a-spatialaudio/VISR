@@ -4,7 +4,7 @@
 
 #include <libefl/denormalised_number_handling.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
 #include <libaudiointerfaces/audio_interface_factory.hpp>

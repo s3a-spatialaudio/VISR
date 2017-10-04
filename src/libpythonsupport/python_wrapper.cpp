@@ -6,20 +6,19 @@
 // As we are currently experiencing problems to retrieve the contained classes from a py::module, we use the 'full path' variant for the time being.
 #define PYTHON_WRAPPER_FULL_MODULE_PATH 1
 
-#include <libril/detail/compose_message_string.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
+#include <libvisr/polymorphic_parameter_input.hpp>
+#include <libvisr/polymorphic_parameter_output.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
-#include <libvisr_impl/polymorphic_parameter_input.hpp>
-#include <libvisr_impl/polymorphic_parameter_output.hpp>
-
-#include <libvisr_impl/component_implementation.hpp>
-#include <libvisr_impl/audio_port_base_implementation.hpp>
-#include <libvisr_impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/component_implementation.hpp>
+#include <libvisr/impl/audio_port_base_implementation.hpp>
+#include <libvisr/impl/parameter_port_base_implementation.hpp>
 
 // Not needed if modules loaded by name (provided that they are on the path)
 // In this case we only use pybind11 functionality.

@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/channel_list.hpp>
+#include <libvisr/channel_list.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>

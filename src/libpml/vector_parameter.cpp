@@ -2,8 +2,8 @@
 
 #include "vector_parameter.hpp"
 
-#include <libril/constants.hpp>
-#include <libril/parameter_factory.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_factory.hpp>
 
 #include <libefl/vector_functions.hpp>
 

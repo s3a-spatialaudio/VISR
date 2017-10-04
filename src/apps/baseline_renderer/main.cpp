@@ -10,7 +10,7 @@
 
 #include <libpml/initialise_parameter_library.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
 

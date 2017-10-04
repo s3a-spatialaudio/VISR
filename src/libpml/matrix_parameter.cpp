@@ -2,9 +2,9 @@
 
 #include "matrix_parameter.hpp"
 
-#include <libril/constants.hpp>
-#include <libril/parameter_factory.hpp>
-#include <libril/parameter_type.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_factory.hpp>
+#include <libvisr/parameter_type.hpp>
 
 #include <sndfile.h>
 

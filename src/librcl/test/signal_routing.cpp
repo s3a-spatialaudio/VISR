@@ -2,8 +2,8 @@
 
 #include <librcl/signal_routing.hpp>
 
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 #include <libpml/signal_routing_parameter.hpp>
 
 #include <boost/test/unit_test.hpp>

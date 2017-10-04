@@ -46,8 +46,13 @@ if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_shared rbbl_shared )
 endif( BUILD_USE_JACK )
 
+# Set public headers to be installed for the shared library target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties( audiointerfaces_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS audiointerfaces_static ARCHIVE DESTINATION lib )
-install(TARGETS audiointerfaces_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS audiointerfaces_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libaudiointerfaces )
 
 # Add the unit test directory.
 add_subdirectory( test )

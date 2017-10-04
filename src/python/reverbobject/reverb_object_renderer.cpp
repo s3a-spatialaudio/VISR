@@ -2,8 +2,8 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libreverbobject/reverb_object_renderer.hpp> 
 

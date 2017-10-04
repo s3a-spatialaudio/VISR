@@ -2,7 +2,7 @@
 
 #include "single_to_multi_channel_diffusion.hpp"
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <libefl/vector_functions.hpp>
 

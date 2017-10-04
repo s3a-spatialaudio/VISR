@@ -3,10 +3,10 @@
 #ifndef VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_APPS_SCENE_DECODER_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/composite_component.hpp>
+#include <libvisr/composite_component.hpp>
 
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
 
 #include <librcl/gain_matrix.hpp>
 #include <librcl/panning_gain_calculator.hpp>

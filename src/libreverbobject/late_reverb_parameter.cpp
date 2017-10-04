@@ -2,7 +2,7 @@
 
 #include "late_reverb_parameter.hpp"
 
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 namespace visr
 {

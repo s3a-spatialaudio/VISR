@@ -4,7 +4,7 @@
 
 #include <libpml/matrix_parameter.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #include <libaudiointerfaces/portaudio_interface.hpp>

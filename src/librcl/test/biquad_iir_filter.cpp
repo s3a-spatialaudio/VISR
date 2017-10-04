@@ -2,7 +2,7 @@
 
 #include <librcl/biquad_iir_filter.hpp>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libpml/biquad_parameter.hpp>
 

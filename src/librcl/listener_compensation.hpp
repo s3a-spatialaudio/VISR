@@ -14,9 +14,9 @@
 
 #include <libefl/basic_matrix.hpp>
 
-#include <libril/atomic_component.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
 
 #include <libpanning/defs.h>
 #include <libpanning/XYZ.h>

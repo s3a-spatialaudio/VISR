@@ -6,9 +6,9 @@
 #include "core_renderer.hpp"
 #include "export_symbols.hpp"
 
-#include <libril/composite_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
 
 #include <librcl/position_decoder.hpp>
 #include <librcl/scene_decoder.hpp>

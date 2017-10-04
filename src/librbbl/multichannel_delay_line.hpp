@@ -7,7 +7,7 @@
 #include "fractional_delay_base.hpp"
 #include "export_symbols.hpp"
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <cassert>
 #include <complex>

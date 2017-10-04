@@ -2,7 +2,7 @@
 
 #include <libpml/message_queue_protocol.hpp>
 
-#include <libril/communication_protocol_base.hpp>
+#include <libvisr/communication_protocol_base.hpp>
 
 #include <pybind11/pybind11.h>
 

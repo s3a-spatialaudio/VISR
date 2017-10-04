@@ -39,8 +39,14 @@ target_link_libraries( signalflows_shared rcl_shared )
 target_link_libraries( signalflows_shared reverbobject_shared )
 target_link_libraries( signalflows_shared pml_shared )
 
+
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installled once.
+set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS signalflows_static ARCHIVE DESTINATION lib )
-install(TARGETS signalflows_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS signalflows_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libsignalflows )
 
 
 # Add the unit test directory.

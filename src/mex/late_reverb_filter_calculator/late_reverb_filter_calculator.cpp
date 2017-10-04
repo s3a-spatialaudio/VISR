@@ -8,7 +8,7 @@
 // Access the default subband number
 #include <libobjectmodel/point_source_with_reverb.hpp>
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 
 #include <mex.h> 

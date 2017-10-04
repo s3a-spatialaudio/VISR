@@ -5,7 +5,7 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/composite_component.hpp>
+#include <libvisr/composite_component.hpp>
 
 #include <memory>
 #include <vector>

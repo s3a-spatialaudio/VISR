@@ -1,8 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/audio_sample_type.hpp>
-#include <libril/constants.hpp>
+#include <libvisr/audio_sample_type.hpp>
+#include <libvisr/constants.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

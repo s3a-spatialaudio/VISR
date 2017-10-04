@@ -2,9 +2,9 @@
 
 #include <librcl/time_frequency_transform.hpp>
 
-#include <libril/atomic_component.hpp>
-#include <libril/composite_component.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/composite_component.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <libefl/basic_vector.hpp>
 

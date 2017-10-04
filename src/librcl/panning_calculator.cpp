@@ -2,7 +2,7 @@
 
 #include "panning_calculator.hpp"
 
-#include <libril/status_message.hpp>
+#include <libvisr/status_message.hpp>
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>

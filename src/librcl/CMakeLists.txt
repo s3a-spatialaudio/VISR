@@ -39,7 +39,7 @@ diffusion_gain_calculator.hpp
 export_symbols.hpp
 fir_filter_matrix.hpp
 gain_matrix.hpp
-gain_vector.cpp
+gain_vector.hpp
 hoa_allrad_gain_calculator.hpp
 listener_compensation.hpp
 null_source.hpp
@@ -67,7 +67,6 @@ set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
 # Transitive dependencies
 target_link_libraries( rcl_static pml_static )
 target_link_libraries( rcl_static visr_static )
-target_link_libraries( rcl_static ril )
 target_link_libraries( rcl_static panning_static )
 target_link_libraries( rcl_static objectmodel_static )
 target_link_libraries( rcl_static rbbl_static )
@@ -94,8 +93,13 @@ target_link_libraries( rcl_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( rcl_shared ${Boost_THREAD_LIBRARY} )
 target_link_libraries( rcl_shared ${Boost_SYSTEM_LIBRARY} )
 
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installled once.
+set_target_properties(rcl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS rcl_static ARCHIVE DESTINATION lib )
-install(TARGETS rcl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS rcl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librcl )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
