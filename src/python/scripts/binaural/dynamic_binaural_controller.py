@@ -150,7 +150,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.channelAllocator = None
             self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]]), self.numberOfObjects, axis = 0 )
             self.levels = np.zeros( (self.numberOfObjects), dtype = np.float32 )
-        # self.f = open('srcpAllinone.txt', 'w')
+#        self.f = open('srcpAllinone.txt', 'w')
 
         
     def process( self ):
