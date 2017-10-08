@@ -26,12 +26,12 @@ def rad2deg( phi ):
 
 def sph2cart( sph ):
     elFactor = np.cos( sph[:,1] )
-    x = np.cos( sph[:,1] ) * elFactor * sph[:,2] 
-    y = np.sin( sph[:,1] ) * elFactor * sph[:,2]
+    x = np.cos( sph[:,0] ) * elFactor * sph[:,2]
+    y = np.sin( sph[:,0] ) * elFactor * sph[:,2]
     z = np.sin( sph[:,1] ) * sph[:,2]
     cart = np.stack( (x,y,z), 1 )
     return cart
-    
+
 def calcRotationMatrix(ypr):  
   if ypr.size == 3 :
 #    print(ypr)
