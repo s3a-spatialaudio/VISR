@@ -11,6 +11,7 @@ Created on Fri 06 Oct 2017
 import visr
 import pml
 import objectmodel as om
+import rbbl
 # import time
 
 from rotationFunctions import cart2sph
@@ -38,14 +39,16 @@ class HoaEncoder( visr.AtomicComponent ):
                                               pml.EmptyParameterConfig() )
         self.objectInputProtocol = self.objectInput.protocolInput()
 
-        matrixConfig = pml.MatrixParameterConfig(self.numberOfObjects, self.numHoaCoeffs)
+        matrixConfig = pml.MatrixParameterConfig( self.numHoaCoeffs, self.numberOfObjects )
         self.coefficientOutput = visr.ParameterOutput( "coefficientOutput", self,
                                                 pml.MatrixParameterFloat.staticType,
-                                                pml.DoubleBufferingProtocol.staticType,
+                                                pml.SharedDataProtocol.staticType,
                                                 matrixConfig )
         self.coefficientOutputProtocol = self.coefficientOutput.protocolOutput()
 
         if channelAllocation:
+            self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
+            self.usedChannels = set()
             self.routingOutput = visr.ParameterOutput( "routingOutput", self,
                                                      pml.SignalRoutingParameter.staticType,
                                                      pml.DoubleBufferingProtocol.staticType,
@@ -53,13 +56,14 @@ class HoaEncoder( visr.AtomicComponent ):
             self.routingOutputProtocol = self.routingOutput.protocolOutput()
         else:
             self.routingOutputProtocol = None
+            self.channelAllocator = None
 
     def process( self ):
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
             
             coeffOut = np.array( self.coefficientOutputProtocol.data(), copy=False )
-            if coeffOut.shape != (self.numberOfObjects, self.numHoaCoeffs ):
+            if coeffOut.shape != ( self.numHoaCoeffs, self.numberOfObjects ):
                 raise ValueError( 'The dimensions of the output coefficient matrix does not match the expected shape.' )
             coeffOut[...] = 0.0
 
@@ -75,13 +79,10 @@ class HoaEncoder( visr.AtomicComponent ):
                     src = ov[objIdx]
                     sph = cart2sph( src.x, src.y, src.z )
                     pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
-                    coeffOut[chIdx, : ] = pwCoeffs * src.level # encode the object level in the coefficients
+                    coeffOut[ :, chIdx] = pwCoeffs * src.level # encode the object level in the coefficients
             else:
-                self.levels[:] = 0.0
                 for src in ov:
-                    ch = src.channels[0]
+                    chIdx = src.channels[0]
                     sph = cart2sph( src.x, src.y, src.z )
                     pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
-                    coeffOut[ch, : ] = pwCoeffs * src.level # encode the object level in the coefficients
-            
-            self.coefficientOutputProtocol.swapBuffers()
+                    coeffOut[ :, chIdx ] = pwCoeffs * src.level # encode the object level in the coefficients

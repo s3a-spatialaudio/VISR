@@ -30,26 +30,20 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
         self.numberOfObjects = numberOfObjects
         self.hoaOrder = hoaOrder
         self.numHoaCoeffs = (self.hoaOrder+1)**2
-        self.coeffMatrix = np.zeros( (self.numberOfObjects, self.numHoaCoeffs), dtype = np.float32 )
         self.rotationMatrix = np.identity( 3, dtype = np.float32 ) # TODO: decide whether to use xyz or ACN (yzx) order
 
         # %% Define parameter ports
-        self.objectInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
-                                              pml.DoubleBufferingProtocol.staticType,
-                                              pml.EmptyParameterConfig() )
-        self.objectInputProtocol = self.objectInput.protocolInput()
-
-        matrixConfig = pml.MatrixParameterConfig(self.numberOfObjects, self.numHoaCoeffs)
+        matrixConfig = pml.MatrixParameterConfig( self.numHoaCoeffs, self.numberOfObjects )
         self.coefficientInput = visr.ParameterInput( "coefficientInput", self,
                                                 pml.MatrixParameterFloat.staticType,
-                                                pml.DoubleBufferingProtocol.staticType,
+                                                pml.SharedDataProtocol.staticType,
                                                 matrixConfig )
-        self.coefficientInputProtocol = self.coeffcientInput.protocolInput()
+        self.coefficientInputProtocol = self.coefficientInput.protocolInput()
         self.coefficientOutput = visr.ParameterOutput( "coefficientOutput", self,
                                                 pml.MatrixParameterFloat.staticType,
-                                                pml.DoubleBufferingProtocol.staticType,
+                                                pml.SharedDataProtocol.staticType,
                                                 matrixConfig )
-        self.coefficientOutputProtocol = self.coeffcientOutput.protocolOutput()
+        self.coefficientOutputProtocol = self.coefficientOutput.protocolOutput()
         
         # Instantiate the head tracker input.
         self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
@@ -58,33 +52,25 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
         self.trackingInputProtocol = self.trackingInput.protocolInput()
 
     def process( self ):
-        recompute = False
-        if self.coefficientInputProtocol.changed():
-            self.coeffMatrix[...] = self.coefficientInputProtocol.data()
-            recompute = True
-            self.coefficientInputProtocol.resetChanged()
 
         if self.trackingInputProtocol.changed():
             head = self.trackingInputProtocol.data()
-            ypr = - head.orientation # negative because we rotate the sound field in the opposite 
+            ypr = - np.array(head.orientation, dtype = np.float32 ) # negative because we rotate the sound field in the opposite 
             # direction of the head orientation.
-            # TODO
             self.rotationMatrix[...] = calcRotationMatrix( ypr )
-            recompute = True
             self.trackingInputProtocol.resetChanged()
 
-        if recompute:
-            coeffOut = np.array( self.coefficientOutputProtocol.data(), copy = False )
-            # Order 0 remains unchanged
-            coeffOut[0,:] = self.coeffMatrix[0,:]
+        coeffIn = np.array( self.coefficientInputProtocol.data(), copy = False )
+        coeffOut = np.array( self.coefficientOutputProtocol.data(), copy = False )
 
-            # TODO: If not done before, translate the rotation matrix to ACN format
+        # Order 0 remains unchanged
+        coeffOut[0,:] = coeffIn[0,:]
 
-            # Compute order order by order
-            for order in range(1, self.hoaOrder+1):
-                # TODO: Compute the transformation matrix for order 'order'
-                rot = np.identity( 2*order + 1, dtype = coeffOut.dtype ) # Dummy rotation matrix
+        # TODO: If not done before, translate the rotation matrix to ACN format
 
-                coeffOut[:,(order**2):((order+1)**2) ] = np.matmul( self.coeffMatrix[:,(order**2):((order+1)**2) ], rot )
+        # Compute order order by order
+        for order in range(1, self.hoaOrder+1):
+            # TODO: Compute the transformation matrix for order 'order'
+            rot = np.identity( 2*order + 1, dtype = coeffOut.dtype ) # Dummy rotation matrix
 
-            self.coefficientOutputProtocol.swapBuffers()
+            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot, coeffIn[ (order**2):((order+1)**2), : ] )

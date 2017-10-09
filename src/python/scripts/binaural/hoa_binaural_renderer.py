@@ -58,14 +58,14 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
                                              interpolationSteps = interpolationSteps,
                                              initialGains = 0.0,
                                              controlInput = True )
-        self.audioConnection( self.objectSignalInput, self.encoderMatrix.audioport("in") )
+        self.audioConnection( self.objectSignalInput, self.encoderMatrix.audioPort("in") )
 
         filterMtx = np.concatenate( (filters[0:numHoaCoeffs,0,:], filters[0:numHoaCoeffs,1,:]) )
 
         routings = pml.FilterRoutingList()
         for idx in range(0,numHoaCoeffs):
-            routings.addRouting( idx, idx, idx )
-            routings.addRouting( idx, idx+numHoaCoeffs, idx+numHoaCoeffs )
+            routings.addRouting( idx, 0, idx, 1.0 )
+            routings.addRouting( idx, 1, idx+numHoaCoeffs, 1.0 )
 
         self.binauralFilterBank = rcl.FirFilterMatrix( context, 'binauralFilterBank', self,
                                                     numberOfInputs = numHoaCoeffs,
@@ -77,11 +77,11 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
                                                     routings = routings,
                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.NoInputs )
 
-        self.audioConnection( self.encoderMatrix.audioport("out"), self.binauralFilterBank.audioport("in") )
-        self.audioConnection( self.binauralFilterBank.audioport("out"), self.binauralOutput )
+        self.audioConnection( self.encoderMatrix.audioPort("out"), self.binauralFilterBank.audioPort("in") )
+        self.audioConnection( self.binauralFilterBank.audioPort("out"), self.binauralOutput )
 
         if headTracking:
-            self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
+            self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             self.coefficientRotator = HoaCoefficientRotation( context, 'coefficientRotator', self,
