@@ -20,8 +20,8 @@ import numpy as np
 import audiointerfaces as ai
 
 fs = 44100
-blockSize = 2048
-numBinauralObjects = 1
+blockSize = 1024
+numBinauralObjects = 40
 numOutputChannels = 2
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
@@ -82,9 +82,9 @@ aIfc.start()
 
 print( "Rendering started." )
 #
-#time.sleep(1)
-#i = input("Enter text (or Enter to quit): ")
-#if not i:
-#    aIfc.stop()
-#    aIfc.unregisterCallback()
-#    del aIfc
+time.sleep(1)
+i = input("Enter text (or Enter to quit): ")
+if not i:
+    aIfc.stop()
+    aIfc.unregisterCallback()
+    del aIfc

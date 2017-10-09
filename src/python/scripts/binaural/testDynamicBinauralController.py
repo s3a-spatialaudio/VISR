@@ -8,12 +8,17 @@ Created on Fri Sep  8 08:16:32 2017
 from readSofa import readSofaFile
 from dynamic_binaural_controller import DynamicBinauralController
 from rotationFunctions import sph2cart, cart2sph, rad2deg, deg2rad
+from extractDelayInSofaFile import extractDelayInSofaFile
 import visr
 import objectmodel as om
 import rrl
 import numpy as np
 import os
 from urllib.request import urlretrieve
+
+# Flag whether to use dynamic ITD application (ATM this is hardcoded to use )
+# a delay matrix contained in the (therefore nonstandard) SOFA file.
+dynamicITD = True
 
 fs = 48000
 bufferSize = 256
@@ -28,9 +33,15 @@ if not os.path.exists( sofaFile ):
     urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
                        sofaFile )
 
-# hrirFile = 'c:/local/s3a_af/subprojects/binaural/dtf b_nh169.sofa'
+if dynamicITD:
+    sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
+    if not os.path.exists( sofaFileTD ):
+        extractDelayInSofaFile( sofaFile, sofaFileTD )
+    sofaFile = sofaFileTD        
 
-[ hrirPos, hrirData ] = readSofaFile( sofaFile )
+[ hrirPos, hrirData, delays ] = readSofaFile( sofaFile )
+
+
 #print( "positions: %s." % str(np.array(hrirPos)))
 
 headTrackEnabled = True
@@ -39,9 +50,10 @@ controller = DynamicBinauralController( context, "Controller", None,
                   numBinauralObjects,
                   hrirPos, hrirData,
                   useHeadTracking = headTrackEnabled,
-                  dynamicITD = True,
+                  dynamicITD = dynamicITD,
                   dynamicILD = True,
-                  hrirInterpolation = True
+                  hrirInterpolation = True,
+                  delays = delays
                   )
 
 flow = rrl.AudioSignalFlow( controller )

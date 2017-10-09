@@ -94,10 +94,10 @@ for blockIdx in range(0,numBlocks):
         ov.insert( ps1 )
         paramInput.swapBuffers()
         if headTrackEnabled:
-          headrotation =  azSequence[blockIdx%numPos];
+          headrotation =  np.pi#azSequence[blockIdx%numPos];
           print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(azSequence[blockIdx%numPos])))
    
-          trackingInput.data().orientation = [0,0,headrotation] #rotates over the z axis, that means that the rotation is on the xy plane
+          trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
           trackingInput.swapBuffers()      
           
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]

@@ -39,7 +39,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
                   dynamicITD = False,       # Whether ITD delays are calculated and sent via a "delays" port.
                   dynamicILD = False,       # Whether ILD gains are calculated and sent via a "gains" port.
                   hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
-                  channelAllocation = False  # Whether to allocate object channels dynamically
+                  channelAllocation = False, # Whether to allocate object channels dynamically
+                  delays = None,             # Matrix of delays associated with filter dataset. Dimension: # filters * 2
                   ):
         # Call base class (AtomicComponent) constructor
         super( DynamicBinauralController, self ).__init__( context, name, parent )
@@ -74,9 +75,12 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                                 pml.DoubleBufferingProtocol.staticType,
                                                 pml.VectorParameterConfig( 2*self.numberOfObjects) )
             self.delayOutputProtocol = self.delayOutput.protocolOutput()
+            if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
+                raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
+            self.dynamicDelays = np.array(delays, copy=True)
         else:
             self.delayOutputProtocol = None
-
+            self.dynamicDelays = None
         # We are always using the gain oputput matrix to set set the level, even if we do not use a loudness model.
         self.gainOutput = visr.ParameterOutput( "gainOutput", self,
                                                pml.VectorParameterFloat.staticType,
@@ -146,11 +150,11 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.channelAllocator = None
             self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]]), self.numberOfObjects, axis = 0 )
             self.levels = np.zeros( (self.numberOfObjects), dtype = np.float32 )
-        self.f = open('srcpAllinone.txt', 'w')
+#        self.f = open('srcpAllinone.txt', 'w')
 
         
     def process( self ):
-        startTot = time.time()
+#        startTot = time.time()
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
                                               
@@ -183,8 +187,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      
                      # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
-#                     rotationMatrix = np.identity(3)
-#                     print(self.sourcePos.shape)
 
                      self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix.T))
                      
@@ -213,7 +215,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
               
                 indices = np.zeros((self.numberOfObjects,3), dtype = np.int ) 
                 for chIdx in range(0,self.numberOfObjects):
-                     start = time.time()
+#                     start = time.time()
 #                     gtot = np.zeros((self.triplets.shape[0],3), dtype = np.float32 ) 
                      gtot = np.matmul(self.inverted,self.sourcePos[chIdx,:])
 #                     for trip in range(0,self.triplets.shape[0]):
@@ -233,11 +235,13 @@ class DynamicBinauralController( visr.AtomicComponent ):
             # applying dynamically computed 
 
             gainVec = self.gainOutputProtocol.data()
+            if not self.delayOutput is None:
+                delayVec = self.delayOutputProtocol.data()
             for chIdx in range(0,self.numberOfObjects):
 #                print("object n: "+str(chIdx))
                 gain = self.levels[chIdx]
                 # Set the object for both ears.
-                # Note: Incorporate dynamically computed ILD is selected.
+                # Note: Incorporate dynamically computed ILD if selected.
                 gainVec[chIdx] = gain
                 gainVec[chIdx+self.numberOfObjects] = gain
             
@@ -252,13 +256,20 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             g = inv(threeNeighMatrix)*np.matrix(self.sourcePos[chIdx]).T
                             gnorm = g*1/np.linalg.norm(g,ord=1)
 
+#                            # Vectorised filter interpolation code
+#                            interpFilters = np.dot( self.hrirs[indices[chIdx],:,:], gnorm )
+#                            leftInterpolator = pml.IndexedVectorFloat( chIdx, interpFilters[:,0] )
+#                            rightInterpolator = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, interpFilters[:,1] )
+#                            self.filterOutputProtocol.enqueue( leftInterpolator )
+#                            self.filterOutputProtocol.enqueue( rightInterpolator )
+
+                            # Scalar filter interpolation code
                             leftAccum =  np.zeros((1,self.hrirs[indices[0][0]][0].shape[0]),dtype = np.float32)
                             rightAccum = np.zeros((1,self.hrirs[indices[0][0]][1].shape[0]),dtype = np.float32)
            
                             for neighIdx in range(0,3):
                                 leftCmd  = self.hrirs[indices[chIdx][neighIdx],0,:]
-                                rightCmd = self.hrirs[indices[chIdx][neighIdx],1,:]                                
-
+                                rightCmd = self.hrirs[indices[chIdx][neighIdx],1,:]
                                 leftWeighted = gnorm[neighIdx] * np.array(leftCmd)
                                 rightWeighted = gnorm[neighIdx]* np.array(rightCmd)
                                 leftAccum += leftWeighted
@@ -270,6 +281,10 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             self.filterOutputProtocol.enqueue( rightInterpolator )
                             self.lastPosition[chIdx] = indices[chIdx]
 #                        print("filter out %f sec"%(time.time()-start2))
+                            if not self.delayOutput is None:
+                                delays = np.dot( self.dynamicDelays[indices[chIdx],:], gnorm )
+                                delayVec[ chIdx, chIdx + self.numberOfObjects ] = delays
+
                     else:
                         sph1 = cart2sph(self.hrirPos[indices[chIdx]][0],self.hrirPos[indices[chIdx]][1],self.hrirPos[indices[chIdx]][2])
                         print("%d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1])))
@@ -282,6 +297,10 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             self.filterOutputProtocol.enqueue( leftCmd )
                             self.filterOutputProtocol.enqueue( rightCmd )
                             self.lastFilters[chIdx] = indices[chIdx]
+
+                            if not self.delayOutput is None:
+                                delays = self.dynamicDelays[indices[chIdx],:]
+                                delayVec[ chIdx, chIdx + self.numberOfObjects ] = delays
             
             self.gainOutputProtocol.swapBuffers()
             self.objectInputProtocol.resetChanged()
