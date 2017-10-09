@@ -15,6 +15,7 @@ import rcl
 import os
 from readSofa import readSofaFile
 from dynamic_binaural_controller import DynamicBinauralController
+from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 
 class DynamicBinauralRenderer( visr.CompositeComponent ):
@@ -44,7 +45,16 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
                        sofaFile )
 
-            [ hrirPos, hrirData ] = readSofaFile( sofaFile )
+#            print(dynITD)
+            if dynITD:
+                sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
+                if not os.path.exists( sofaFileTD ):
+                    extractDelayInSofaFile( sofaFile, sofaFileTD )
+                sofaFile = sofaFileTD        
+
+            [ hrirPos, hrirData, delays ] = readSofaFile( sofaFile )            
+#            print(delays)
+            
 #            print(hrirPos[0])
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,
                                                                       numberOfObjects,
@@ -52,7 +62,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                                                                       useHeadTracking = headTracking,
                                                                       dynamicITD = dynITD,
                                                                       dynamicILD = dynILD,
-                                                                      hrirInterpolation = hrirInterp
+                                                                      hrirInterpolation = hrirInterp,
+                                                                      delays = delays
                                                                       )
             
             self.parameterConnection( self.objectVectorInput, self.dynamicBinauraController.parameterPort("objectVector"))

@@ -46,7 +46,11 @@ numOutputChannels = 2;
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
-controller = DynamicBinauralRenderer( context, "Controller", None, numBinauralObjects)
+controller = DynamicBinauralRenderer( context, "Controller", None, numBinauralObjects,
+                                      headTracking = True,
+                                      dynITD = False,
+                                      dynILD = False,
+                                      hrirInterp = True)
 #to be completed
 
 result,messages = rrl.checkConnectionIntegrity(controller)
@@ -94,7 +98,8 @@ for blockIdx in range(0,numBlocks):
         ov.insert( ps1 )
         paramInput.swapBuffers()
         if headTrackEnabled:
-          headrotation =  np.pi#azSequence[blockIdx%numPos];
+#          headrotation =  np.pi
+          headrotation =  azSequence[blockIdx%numPos]
           print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(azSequence[blockIdx%numPos])))
    
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane

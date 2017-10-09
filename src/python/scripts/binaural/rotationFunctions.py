@@ -61,8 +61,6 @@ def calcRotationMatrix(ypr):
     return rotation
   else:
     return idMatrix
-#"""
-
 
 def delta(m, n):
 	# Kronecker Delta
@@ -72,8 +70,7 @@ def P(i, l, m, n, R_lm1, R_1):
     # all the indices of the formulation are translated from bipolar to positive
 #    print(" bef i%d l%d [%d,%d]"%(i,l,m,n))
     adj=1 #just to make clear it is an adjustment for positive indices
-    i+=adj
-    
+    i+=adj    
     sz = l-1
     m+=sz
 
@@ -119,18 +116,12 @@ def W(l, m, n, R_lm1, R_1):
 
 def uvw(l, m, n):
     d = delta(m, 0)
-    abs_m = abs(m)
+    _m = abs(m)
+    den = (2 * l) * (2 * l - 1) if abs(n) == l else (l + n) * (l - n)
 
-    # Only calculate the required denominator once
-    if abs(n) == l :
-        denom = (2 * l) * (2 * l - 1)
-    else :
-        denom = (l + n) * (l - n)
-
-    # Now just calculate the scalars
-    u = math.sqrt((l + m) * (l - m) / denom)
-    v = 0.5 * math.sqrt((1 + d) * (l + abs_m - 1) * (l + abs_m) / denom) * (1 - 2 * d)
-    w = -0.5 * math.sqrt((l - abs_m - 1) * (l - abs_m) / denom) * (1 - d)
+    u = math.sqrt((l + m) * (l - m) / den)
+    v = 0.5 * math.sqrt((1 + d) * (l + _m - 1) * (l + _m) / den) * (1 - 2 * d)
+    w = -0.5 * math.sqrt((l - _m - 1) * (l - _m) / den) * (1 - d)
     return u,v,w
 
  
@@ -149,6 +140,7 @@ def Rmatrix(l, m, n, R_lm1, R_1):
 
 def HOARotationMatrixCalc(l, R_lm1, R_1):  
     size = 2*l+1
+#    print(R_1)    
     r = np.zeros( (size,size), dtype=np.float32 )
 # the correct spherical harmonics indices should span from -l to l (included),
 # here in the output matrix it is translated by l, to have only positive indices
@@ -158,19 +150,28 @@ def HOARotationMatrixCalc(l, R_lm1, R_1):
             r[m][n] = Rmatrix(l, m-l, n-l, R_lm1, R_1);
     
     return r
-#"""
 
+def rotationMatrixReorderingACN(r):
+    #a permutation of the 3x3 rotation matrix is done to move rows and columns from xyz ordering to yzx,
+    # which is the spherical harmonics ACN ordering
+    perm = [1,2,0]
+    r = r[:,perm]
+    r = r[perm,:]
+    return r
 
-np.set_printoptions(linewidth=10000)
-np.set_printoptions(threshold=np.nan)
-R_1 = calcRotationMatrix(np.array([0,0,np.pi/2]))
-print(R_1)
-print()
-
-R_2 = HOARotationMatrixCalc(2,R_1,R_1)
-print(R_2)
-print()
-
-R_3 = HOARotationMatrixCalc(3,R_2,R_1)
-print(R_3)
-print()
+##testing 
+#np.set_printoptions(linewidth=10000)
+#np.set_printoptions(threshold=np.nan)
+#R_1 = calcRotationMatrix(np.array([0,0,np.pi/2]))
+#R_1 = rotationMatrixReorderingACN(R_1)
+#
+#print(R_1)
+#print()
+#
+#R_2 = HOARotationMatrixCalc(2,R_1,R_1)
+#print(R_2)
+#print()
+#
+#R_3 = HOARotationMatrixCalc(3,R_2,R_1)
+#print(R_3)
+#print()

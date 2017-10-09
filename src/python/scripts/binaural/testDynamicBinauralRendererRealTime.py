@@ -21,7 +21,7 @@ import audiointerfaces as ai
 
 fs = 44100
 blockSize = 1024
-numBinauralObjects = 40
+numBinauralObjects = 60
 numOutputChannels = 2
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
@@ -31,6 +31,8 @@ enableTracking = True
 enableInterpolation = True
 controller = DynamicBinauralRendererSerial( context, "Controller", None, numBinauralObjects, port, baud, 
                                            enableSerial = enableTracking, 
+                                           dynamicITD = True,
+                                           dynamicILD = False,
                                            hrirInterpolation = enableInterpolation)
 #to be completed
 

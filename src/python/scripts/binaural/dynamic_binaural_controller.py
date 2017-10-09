@@ -45,7 +45,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
         # Call base class (AtomicComponent) constructor
         super( DynamicBinauralController, self ).__init__( context, name, parent )
         self.numberOfObjects = numberOfObjects
-        
+        self.dynamicITD = dynamicITD
         # %% Define parameter ports
         self.objectInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
@@ -69,18 +69,24 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                                 pml.EmptyParameterConfig() )
         self.filterOutputProtocol = self.filterOutput.protocolOutput()
         
-        if dynamicITD:
-            self.delayOutput = visr.ParameterOutput( "delayOutput", self,
+        
+            
+        self.delayOutput = visr.ParameterOutput( "delayOutput", self,
                                                 pml.VectorParameterFloat.staticType,
                                                 pml.DoubleBufferingProtocol.staticType,
                                                 pml.VectorParameterConfig( 2*self.numberOfObjects) )
-            self.delayOutputProtocol = self.delayOutput.protocolOutput()
+        self.delayOutputProtocol = self.delayOutput.protocolOutput()
+
+        if self.dynamicITD:
             if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
                 raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
-            self.dynamicDelays = np.array(delays, copy=True)
-        else:
-            self.delayOutputProtocol = None
-            self.dynamicDelays = None
+            
+#        if self.dynamicITD:
+        self.dynamicDelays = np.array(delays, copy=True)
+#        else:
+#        
+#            self.delayOutputProtocol = None
+#            self.dynamicDelays = None
         # We are always using the gain oputput matrix to set set the level, even if we do not use a loudness model.
         self.gainOutput = visr.ParameterOutput( "gainOutput", self,
                                                pml.VectorParameterFloat.staticType,
@@ -213,7 +219,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     
             if self.hrirInterpolation:
               
-                indices = np.zeros((self.numberOfObjects,3), dtype = np.int ) 
+              
+                tripletnum = np.zeros((self.numberOfObjects,1), dtype = np.int ) 
                 for chIdx in range(0,self.numberOfObjects):
 #                     start = time.time()
 #                     gtot = np.zeros((self.triplets.shape[0],3), dtype = np.float32 ) 
@@ -225,7 +232,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                         self.f.write('[%f %f %f]\n' % (gtt.item(0),gtt.item(1),gtt.item(2)))
                
                      gMaxIndex = np.argmax(gtot.min(axis=1))
-                     indices[chIdx] = self.hrirLookup.simplices[gMaxIndex]
+                     tripletnum[chIdx] = gMaxIndex
                      gain = self.levels[chIdx]
 #                     print("Triplet choice %f sec "%(time.time()-start))
             else:
@@ -235,8 +242,10 @@ class DynamicBinauralController( visr.AtomicComponent ):
             # applying dynamically computed 
 
             gainVec = self.gainOutputProtocol.data()
-            if not self.delayOutput is None:
+            if not self.delayOutputProtocol is None :
                 delayVec = self.delayOutputProtocol.data()
+                
+            indices = np.zeros((self.numberOfObjects,3), dtype = np.int ) 
             for chIdx in range(0,self.numberOfObjects):
 #                print("object n: "+str(chIdx))
                 gain = self.levels[chIdx]
@@ -252,9 +261,20 @@ class DynamicBinauralController( visr.AtomicComponent ):
                         start2 = time.time()
                         if not np.array_equal(self.lastPosition[chIdx],indices[chIdx]):
 #                            print("changed")
-                            threeNeighMatrix = self.hrirPos[indices[chIdx]].T                          
-                            g = inv(threeNeighMatrix)*np.matrix(self.sourcePos[chIdx]).T
+#                            threeNeighMatrix = self.hrirPos[indices[chIdx]].T  
+#                            print(inv(threeNeighMatrix))
+#                            print(self.inverted[tripletnum[chIdx]])
+#                            g = inv(threeNeighMatrix)*np.matrix(self.sourcePos[chIdx]).T
+#                            temp = self.inverted[tripletnum[chIdx],:,:][0]
+#                            print(temp)       
+#                            print(self.sourcePos[chIdx,:])       
+                            g = np.dot(self.inverted[tripletnum[chIdx],:,:][0], self.sourcePos[chIdx,:])
+#                            print(g)
+#                            print(galt)
+#                            gnorm = g*1/np.linalg.norm(g,ord=1)
                             gnorm = g*1/np.linalg.norm(g,ord=1)
+#                            print(gnorm)
+#                            print(gnormalt)
 
 #                            # Vectorised filter interpolation code
 #                            interpFilters = np.dot( self.hrirs[indices[chIdx],:,:], gnorm )
@@ -262,28 +282,52 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                            rightInterpolator = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, interpFilters[:,1] )
 #                            self.filterOutputProtocol.enqueue( leftInterpolator )
 #                            self.filterOutputProtocol.enqueue( rightInterpolator )
-
                             # Scalar filter interpolation code
-                            leftAccum =  np.zeros((1,self.hrirs[indices[0][0]][0].shape[0]),dtype = np.float32)
-                            rightAccum = np.zeros((1,self.hrirs[indices[0][0]][1].shape[0]),dtype = np.float32)
+#                            leftAccum =  np.zeros((1,self.hrirs[indices[0][0]][0].shape[0]),dtype = np.float32)
+                            leftAccum =  np.zeros(self.hrirs.shape[2],dtype = np.float32)
+                            rightAccum = np.zeros(self.hrirs.shape[2],dtype = np.float32)
            
+                            indices[chIdx] = self.hrirLookup.simplices[tripletnum[chIdx]]
+
                             for neighIdx in range(0,3):
                                 leftCmd  = self.hrirs[indices[chIdx][neighIdx],0,:]
+#                                print(leftCmd.shape)
                                 rightCmd = self.hrirs[indices[chIdx][neighIdx],1,:]
                                 leftWeighted = gnorm[neighIdx] * np.array(leftCmd)
+#                                leftWeightedAlt = gnormalt[neighIdx] * np.array(leftCmd)                              
+#                                print(leftWeighted)
+#                                print(leftWeightedAlt)
+                                
                                 rightWeighted = gnorm[neighIdx]* np.array(rightCmd)
                                 leftAccum += leftWeighted
-                                rightAccum += rightWeighted
+#                                leftAccumAlt += leftWeightedAlt
 
-                            leftInterpolator = pml.IndexedVectorFloat( chIdx, leftAccum[0].tolist())
-                            rightInterpolator = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, rightAccum[0].tolist())
+                                rightAccum += rightWeighted
+#                            print(leftAccum[0])
+#                            print(leftAccum)
+                            leftInterpolator = pml.IndexedVectorFloat( chIdx, leftAccum.tolist())
+                            rightInterpolator = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, rightAccum.tolist())
                             self.filterOutputProtocol.enqueue( leftInterpolator )
                             self.filterOutputProtocol.enqueue( rightInterpolator )
+                            
+                            
+                            
                             self.lastPosition[chIdx] = indices[chIdx]
-#                        print("filter out %f sec"%(time.time()-start2))
-                            if not self.delayOutput is None:
-                                delays = np.dot( self.dynamicDelays[indices[chIdx],:], gnorm )
-                                delayVec[ chIdx, chIdx + self.numberOfObjects ] = delays
+#                            print("filter out %f sec"%(time.time()-start2))
+                            if self.dynamicITD:
+#                                gnorm = np.reshape(gnorm,(3,1))
+#                                print(self.dynamicDelays[indices[chIdx],:].T)
+#                                print(gnorm)
+                                delays = np.dot( self.dynamicDelays[indices[chIdx],:].T,gnorm )
+#                                print(delays)
+                                delayVec[ chIdx] = delays[0]
+                                delayVec[ chIdx + self.numberOfObjects ] = delays[1]
+                            else:
+                                delayVec[ chIdx] = 0.
+                                delayVec[ chIdx + self.numberOfObjects ] = 0.
+
+#                            print(delayVec[chIdx])
+#                            
 
                     else:
                         sph1 = cart2sph(self.hrirPos[indices[chIdx]][0],self.hrirPos[indices[chIdx]][1],self.hrirPos[indices[chIdx]][2])
@@ -298,10 +342,13 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             self.filterOutputProtocol.enqueue( rightCmd )
                             self.lastFilters[chIdx] = indices[chIdx]
 
-                            if not self.delayOutput is None:
-                                delays = self.dynamicDelays[indices[chIdx],:]
+                            if self.dynamicITD:
+                                delays = self.dynamicDelays[indices[chIdx],:]                            
                                 delayVec[ chIdx, chIdx + self.numberOfObjects ] = delays
-            
+                            else:
+                                delayVec[ chIdx] = 0.
+                                delayVec[ chIdx + self.numberOfObjects ] = 0.
+                                
             self.gainOutputProtocol.swapBuffers()
             self.objectInputProtocol.resetChanged()
             if self.useHeadTracking:

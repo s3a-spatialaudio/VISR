@@ -41,8 +41,7 @@ numOutputChannels = 2;
 
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
-
-controller = DynamicBinauralRendererSerial( context, "Controller", None, numBinauralObjects, port, baud)
+controller = DynamicBinauralRendererSerial( context, "Controller", None, numBinauralObjects, port, baud,True,True,False,True)
 #to be completed
 
 result,messages = rrl.checkConnectionIntegrity(controller)
@@ -88,6 +87,6 @@ for blockIdx in range(0,numBlocks):
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
 
-plt.figure(random.randint(1, 1000))
+plt.figure(1)
 plt.plot( t, outputSignal[0,:], 'b-',t, outputSignal[1,:], 'r-')
 plt.show()
