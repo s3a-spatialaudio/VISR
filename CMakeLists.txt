@@ -117,7 +117,9 @@ if(UNIX)
   # Avoid super-picky 'nested anon types' warning
   if (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang") # Matches regular Clang and AppleClang (XCode)
     # message( STATUS "Detected LLVM C++ compiler" )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nested-anon-types" )
+    # Remove nonsensical warnings due to unknown pragmas introduced by -pedantic
+    # (as pragmas are compiler-specific, unknown ones should be ignored silently anyway)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nested-anon-types -Wno-unknown-pragmas" )
   endif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)

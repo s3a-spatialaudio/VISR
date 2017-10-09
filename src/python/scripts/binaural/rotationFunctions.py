@@ -8,9 +8,10 @@ Created on Fri Sep 15 16:50:56 2017
 import math
 import numpy as np
 
-idMatrix = np.identity(3)
+# note: the input format is inconsistent with the return value and with sph2cart
+# (individual values vs single matrix)
 def cart2sph(x,y,z):
-    radius = math.math.sqrt( x*x + y*y + z*z );
+    radius = math.sqrt( x*x + y*y + z*z );
     az = math.atan2( y, x );
     el = math.asin( z / radius );
     #print('%f %f %f'%(az,el,radius))
@@ -60,7 +61,7 @@ def calcRotationMatrix(ypr):
 #    print(rotation)
     return rotation
   else:
-    return idMatrix
+    return np.identity(3)
 
 def delta(m, n):
 	# Kronecker Delta
@@ -150,6 +151,7 @@ def HOARotationMatrixCalc(l, R_lm1, R_1):
             r[m][n] = Rmatrix(l, m-l, n-l, R_lm1, R_1);
     
     return r
+
 
 def rotationMatrixReorderingACN(r):
     #a permutation of the 3x3 rotation matrix is done to move rows and columns from xyz ordering to yzx,

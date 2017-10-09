@@ -54,5 +54,5 @@ if __name__ == '__main__':
     # 3D positions in the renderer coordinate system.
     pos = sph2cart( posSph )
 
-    # Construct a KD tree to enable fast nearest-neighbout and interpolant 
+    # Construct a KD tree to enable fast nearest-neighbour and interpolation
     kd = KDTree( pos )
