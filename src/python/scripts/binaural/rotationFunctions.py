@@ -11,7 +11,7 @@ import numpy as np
 # note: the input format is inconsistent with the return value and with sph2cart
 # (individual values vs single matrix)
 def cart2sph(x,y,z):
-    radius = math.math.sqrt( x*x + y*y + z*z );
+    radius = math.sqrt( x*x + y*y + z*z );
     az = math.atan2( y, x );
     el = math.asin( z / radius );
     #print('%f %f %f'%(az,el,radius))
