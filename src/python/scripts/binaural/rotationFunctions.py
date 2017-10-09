@@ -8,7 +8,8 @@ Created on Fri Sep 15 16:50:56 2017
 import math
 import numpy as np
 
-idMatrix = np.identity(3)
+# note: the input format is inconsistent with the return value and with sph2cart
+# (individual values vs single matrix)
 def cart2sph(x,y,z):
     radius = math.math.sqrt( x*x + y*y + z*z );
     az = math.atan2( y, x );
@@ -60,7 +61,7 @@ def calcRotationMatrix(ypr):
 #    print(rotation)
     return rotation
   else:
-    return idMatrix
+    return np.identity(3)
 #"""
 
 
@@ -160,17 +161,17 @@ def HOARotationMatrixCalc(l, R_lm1, R_1):
     return r
 #"""
 
+if __name__ == '__main__':
+    np.set_printoptions(linewidth=10000)
+    np.set_printoptions(threshold=np.nan)
+    R_1 = calcRotationMatrix(np.array([0,0,np.pi/2]))
+    print(R_1)
+    print()
 
-np.set_printoptions(linewidth=10000)
-np.set_printoptions(threshold=np.nan)
-R_1 = calcRotationMatrix(np.array([0,0,np.pi/2]))
-print(R_1)
-print()
+    R_2 = HOARotationMatrixCalc(2,R_1,R_1)
+    print(R_2)
+    print()
 
-R_2 = HOARotationMatrixCalc(2,R_1,R_1)
-print(R_2)
-print()
-
-R_3 = HOARotationMatrixCalc(3,R_2,R_1)
-print(R_3)
-print()
+    R_3 = HOARotationMatrixCalc(3,R_2,R_1)
+    print(R_3)
+    print()
