@@ -260,21 +260,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                        print(indices[chIdx])
                         start2 = time.time()
                         if not np.array_equal(self.lastPosition[chIdx],indices[chIdx]):
-#                            print("changed")
-#                            threeNeighMatrix = self.hrirPos[indices[chIdx]].T  
-#                            print(inv(threeNeighMatrix))
-#                            print(self.inverted[tripletnum[chIdx]])
-#                            g = inv(threeNeighMatrix)*np.matrix(self.sourcePos[chIdx]).T
-#                            temp = self.inverted[tripletnum[chIdx],:,:][0]
-#                            print(temp)       
-#                            print(self.sourcePos[chIdx,:])       
                             g = np.dot(self.inverted[tripletnum[chIdx],:,:][0], self.sourcePos[chIdx,:])
-#                            print(g)
-#                            print(galt)
-#                            gnorm = g*1/np.linalg.norm(g,ord=1)
                             gnorm = g*1/np.linalg.norm(g,ord=1)
-#                            print(gnorm)
-#                            print(gnormalt)
 
 #                            # Vectorised filter interpolation code
 #                            interpFilters = np.dot( self.hrirs[indices[chIdx],:,:], gnorm )
@@ -283,7 +270,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                            self.filterOutputProtocol.enqueue( leftInterpolator )
 #                            self.filterOutputProtocol.enqueue( rightInterpolator )
                             # Scalar filter interpolation code
-#                            leftAccum =  np.zeros((1,self.hrirs[indices[0][0]][0].shape[0]),dtype = np.float32)
                             leftAccum =  np.zeros(self.hrirs.shape[2],dtype = np.float32)
                             rightAccum = np.zeros(self.hrirs.shape[2],dtype = np.float32)
            
@@ -291,44 +277,25 @@ class DynamicBinauralController( visr.AtomicComponent ):
 
                             for neighIdx in range(0,3):
                                 leftCmd  = self.hrirs[indices[chIdx][neighIdx],0,:]
-#                                print(leftCmd.shape)
                                 rightCmd = self.hrirs[indices[chIdx][neighIdx],1,:]
                                 leftWeighted = gnorm[neighIdx] * np.array(leftCmd)
-#                                leftWeightedAlt = gnormalt[neighIdx] * np.array(leftCmd)                              
-#                                print(leftWeighted)
-#                                print(leftWeightedAlt)
-                                
                                 rightWeighted = gnorm[neighIdx]* np.array(rightCmd)
                                 leftAccum += leftWeighted
-#                                leftAccumAlt += leftWeightedAlt
-
                                 rightAccum += rightWeighted
-#                            print(leftAccum[0])
-#                            print(leftAccum)
                             leftInterpolator = pml.IndexedVectorFloat( chIdx, leftAccum.tolist())
                             rightInterpolator = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, rightAccum.tolist())
                             self.filterOutputProtocol.enqueue( leftInterpolator )
                             self.filterOutputProtocol.enqueue( rightInterpolator )
-                            
-                            
-                            
                             self.lastPosition[chIdx] = indices[chIdx]
 #                            print("filter out %f sec"%(time.time()-start2))
                             if self.dynamicITD:
-#                                gnorm = np.reshape(gnorm,(3,1))
-#                                print(self.dynamicDelays[indices[chIdx],:].T)
-#                                print(gnorm)
-                                delays = np.dot( self.dynamicDelays[indices[chIdx],:].T,gnorm )
+                                delays = np.dot( self.dynamicDelays[indices[chIdx],:].T,gnorm)
 #                                print(delays)
                                 delayVec[ chIdx] = delays[0]
                                 delayVec[ chIdx + self.numberOfObjects ] = delays[1]
                             else:
                                 delayVec[ chIdx] = 0.
                                 delayVec[ chIdx + self.numberOfObjects ] = 0.
-
-#                            print(delayVec[chIdx])
-#                            
-
                     else:
                         sph1 = cart2sph(self.hrirPos[indices[chIdx]][0],self.hrirPos[indices[chIdx]][1],self.hrirPos[indices[chIdx]][2])
                         print("%d:[%d %d]"%(indices[chIdx],rad2deg(sph1[0]),rad2deg(sph1[1])))
