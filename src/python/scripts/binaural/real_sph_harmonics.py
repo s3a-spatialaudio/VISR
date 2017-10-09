@@ -47,7 +47,5 @@ def allSphHarmRealACN( N, theta, phi, dtype = None ):
     Y = np.NaN * np.ones( (numCoeffs,)+argShape, dtype = dtype )
     for n in range(0,N+1):
         for m in range(-n,n+1):
-            Y[n**2+n+m,:] = sphHarmReal( n, m, theta, phi, dtype )
+            Y[n**2+n+m,...] = sphHarmReal( n, m, theta, phi, dtype )
     return Y
-    
-    
