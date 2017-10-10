@@ -36,7 +36,7 @@ maxHoaOrder = 9
 
 blockSize = 512
 
-numBlocks = 2; # One for 
+numBlocks = 5; # First block to avoid initial transients, rest for improving the frequency resolution.
 #numBlocks = 64;
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
