@@ -22,9 +22,6 @@ import numpy as np
 from scipy.spatial import Delaunay
 from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
-import plotly.plotly as py
-import plotly.figure_factory as FF
-from plotly.graph_objs import graph_objs
 
 class DynamicBinauralController( visr.AtomicComponent ):
     """ Component to translate an object vector (and optionally head tracking information)
@@ -333,9 +330,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.gainOutputProtocol.swapBuffers()
             self.delayOutputProtocol.swapBuffers()
             self.objectInputProtocol.resetChanged()
-            # Tracking down a suspected bug in the change notification.
-            if self.objectInputProtocol.changed():
-                print("Reset of object vector input changed status not working." )
             if self.useHeadTracking:
                 self.trackingInputProtocol.resetChanged()
 #        print("TOT controller time %f sec"%(time.time()-startTot))

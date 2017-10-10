@@ -31,7 +31,7 @@ void exportDoubleBufferingProtocol( pybind11::module & m)
     .def( pybind11::init<>() )
     .def( "data", &DoubleBufferingProtocol::InputBase::data, pybind11::return_value_policy::reference )
     .def( "changed", &DoubleBufferingProtocol::InputBase::changed )
-    .def( "resetChanged", &DoubleBufferingProtocol::InputBase::changed )
+    .def( "resetChanged", &DoubleBufferingProtocol::InputBase::resetChanged )
     ;
 
   pybind11::class_<DoubleBufferingProtocol::OutputBase, CommunicationProtocolBase::Output>( doubleBuffering, "OutputBase" )
