@@ -76,7 +76,7 @@ outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 for blockIdx in range(0,numBlocks):
 
     az = 0.1 * blockIdx
-    el = 0.1 * np.sin( 0.05 * blockIdx )
+    el = 0
     x,y,z = sph2cart( az, el, 1.0 )
     ps1 = objectmodel.PointSource(0)
     ps1.x = x
@@ -92,9 +92,9 @@ for blockIdx in range(0,numBlocks):
     paramInput.swapBuffers()
 
     if useTracking:
-        yaw = (0.05 * blockIdx) % (2*np.pi)
-        pitch = 0.1 * np.sin( -0.05 * blockIdx )
-        trackingInput.data().orientation = [yaw, pitch, 0]
+#        yaw = (0.05 * blockIdx) % (2*np.pi)
+#        pitch = 0.1 * np.sin( -0.05 * blockIdx )
+        trackingInput.data().orientation = [-az, 0, 0]
         trackingInput.swapBuffers()
 
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
