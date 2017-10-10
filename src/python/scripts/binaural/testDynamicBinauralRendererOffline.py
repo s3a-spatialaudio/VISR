@@ -99,8 +99,8 @@ for blockIdx in range(0,numBlocks):
         paramInput.swapBuffers()
         if headTrackEnabled:
 #          headrotation =  np.pi
-          headrotation =  azSequence[blockIdx%numPos]
-          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(azSequence[blockIdx%numPos])))
+          headrotation =  azSequence[int(blockIdx%numPos)]
+          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
    
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
           trackingInput.swapBuffers()      
