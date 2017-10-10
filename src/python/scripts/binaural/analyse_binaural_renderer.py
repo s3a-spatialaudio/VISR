@@ -36,7 +36,7 @@ maxHoaOrder = 9
 
 blockSize = 512
 
-numBlocks = 5; # First block to avoid initial transients, rest for improving the frequency resolution.
+numBlocks = 1 + 16; # First block to avoid initial transients, rest for improving the frequency resolution.
 #numBlocks = 64;
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
@@ -57,7 +57,7 @@ elevations = np.ones( azimuths.shape, dtype = np.float32 ) * 0.0
 
 numTestSignals = azimuths.size
 
-savedHrirs = np.zeros( (numTestSignals, 2, blockSize*(numBlocks-1) ), dtype = np.float32 )
+HRIRs = np.zeros( (numTestSignals, 2, blockSize*(numBlocks-1) ), dtype = np.float32 )
 
 
 for testIdx in range(0,numTestSignals):
@@ -100,4 +100,23 @@ for testIdx in range(0,numTestSignals):
         outputBlock = flow.process( inputBlock )
         outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
-    savedHrirs[testIdx,:,:] = outputSignal[:, blockSize:]
+    HRIRs[testIdx,:,:] = outputSignal[:, blockSize:]
+
+
+# Filter analysis
+
+H = np.fft.rfft( HRIRs, axis = - 1 )
+
+fGrid = np.arange(0, H.shape[-1]) * fs/HRIRs.shape[-1]
+fGridAngular = np.arange(0, H.shape[-1]) * 2*np.pi/HRIRs.shape[-1]
+
+Hmag = np.abs( H )
+Hphase = np.angle( H )
+Hunwrapped = np.unwrap( Hphase, axis = -1 )
+
+# Phase delay in samples
+phaseDelay = Hunwrapped / np.tile( fGridAngular, Hmag.shape[0:2]+(1,) )
+
+IPD = (phaseDelay[:,0,:] - phaseDelay[:,1,:]) / fs
+
+
