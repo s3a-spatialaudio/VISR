@@ -7,7 +7,7 @@
 #include <cstdio>
 #include <stdlib.h>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 #include <libobjectmodel/object_vector.hpp>
 
 #include <boost/test/unit_test.hpp>

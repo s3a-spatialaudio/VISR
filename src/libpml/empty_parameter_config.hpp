@@ -5,7 +5,7 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <initializer_list>
 #include <istream>

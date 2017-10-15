@@ -2,7 +2,7 @@
 
 #include "biquad_parameter.hpp"
 
-#include <libril/detail/compose_message_string.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>

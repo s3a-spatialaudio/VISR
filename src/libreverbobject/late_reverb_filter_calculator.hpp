@@ -7,10 +7,10 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/constants.hpp>
-#include <libril/parameter_input.hpp>
-#include <libril/parameter_output.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
 
 #include <libobjectmodel/point_source_with_reverb.hpp>
 

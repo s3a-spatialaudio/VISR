@@ -31,10 +31,6 @@ for blockIdx in range(0,numPos):
        orientation.resetChanged()
 
 
-#ser = serial.Serial('/dev/cu.usbserial-AJ03GSC8', 57600, timeout=0)   
-#print(ser.readline())
-
-
 """OFFLINE TEST
 controller = serialReader(port,baud)
 numPos = 20
@@ -46,24 +42,4 @@ for blockIdx in range(0,numPos):
    print()
   
 """
-   
-   
-##controller.send_data(usb.readline())
-  # print(controller.yprVec)
-#print(usb.readline())
-#controller.parse_message(stri)
-
-
-#print(controller.get_data())
-#print(calcRotationMatrix(np.array(controller.get_data())))
-
-
-#thread = threading.Thread(target=read_from_port, args=(serial_port,))
-#thread.daemon = True
-#thread.start()
-#try:
-#   while True:
-#     thread.join(1)
-#except KeyboardInterrupt:
-#   print ("^C is caught, exiting")
    

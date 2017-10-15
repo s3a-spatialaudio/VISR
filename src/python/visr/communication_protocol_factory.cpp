@@ -1,10 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 
-#include <libril/communication_protocol_factory.hpp>
-#include <libril/communication_protocol_type.hpp>
-#include <libril/parameter_type.hpp>
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/communication_protocol_factory.hpp>
+#include <libvisr/communication_protocol_type.hpp>
+#include <libvisr/parameter_type.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <pybind11/pybind11.h>
 

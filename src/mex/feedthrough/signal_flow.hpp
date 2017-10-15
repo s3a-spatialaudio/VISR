@@ -3,9 +3,9 @@
 #ifndef VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_MEX_FEEDTHROUGH_SIGNAL_FLOW_HPP_INCLUDED
 
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/composite_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/composite_component.hpp>
 
 #include <librcl/add.hpp>
 

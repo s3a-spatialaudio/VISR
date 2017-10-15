@@ -6,7 +6,7 @@
 #include "audio_interface.hpp"
 #include "export_symbols.hpp"
 
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 

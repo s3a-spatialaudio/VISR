@@ -6,7 +6,7 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem/path.hpp>

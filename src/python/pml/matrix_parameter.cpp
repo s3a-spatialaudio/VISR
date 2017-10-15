@@ -5,8 +5,8 @@
 
 #include <libefl/basic_matrix.hpp> 
 
-#include <libril/constants.hpp>
-#include <libril/parameter_base.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_base.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>

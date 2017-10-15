@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libril/parameter_config_base.hpp>
+#include <libvisr/parameter_config_base.hpp>
 
 #include <pybind11/pybind11.h>
 

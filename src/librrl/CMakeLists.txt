@@ -13,26 +13,26 @@ scheduling_graph.cpp
 signal_routing_internal.cpp
 )
 
-SET( HEADERS
-audio_connection_map.hpp
+SET( PUBLIC_HEADERS
 audio_signal_flow.hpp
-communication_area.hpp
 export_symbols.hpp
 integrity_checking.hpp
-parameter_connection_graph.hpp
-parameter_connection_map.hpp
-port_utilities.hpp
-scheduling_graph.hpp
-signal_routing_internal.hpp
 )
 
-add_library( rrl_static STATIC ${SOURCES} ${HEADERS} )
+SET( INTERNAL_HEADERS
+audio_connection_map.hpp
+export_symbols.hpp
+integrity_checking.hpp
+)
+
+
+add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
 # Transitive link dependencies
 target_link_libraries( rrl_static visr_static )
 target_link_libraries( rrl_static efl_static )
 
-add_library( rrl_shared SHARED ${SOURCES} ${HEADERS} )
+add_library( rrl_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
@@ -42,8 +42,13 @@ target_compile_definitions( rrl_shared PUBLIC -DVISR_BUILD_RRL_SHARED_LIBRARY=1)
 target_link_libraries( rrl_shared visr_shared )
 target_link_libraries( rrl_shared efl_shared )
 
+# Set public headers to be installed for the shared library target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties(rrl_shared PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
+
 install(TARGETS rrl_static ARCHIVE DESTINATION lib )
-install(TARGETS rrl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS rrl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
 
 # Add the unit test directory.
 add_subdirectory( test )

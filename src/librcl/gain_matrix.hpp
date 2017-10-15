@@ -5,11 +5,11 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/constants.hpp>
-#include <libril/parameter_input.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/parameter_input.hpp>
 
 // TODO: make it a forward declaration
 #include <librbbl/gain_matrix.hpp>

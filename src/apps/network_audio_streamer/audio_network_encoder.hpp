@@ -3,10 +3,10 @@
 #ifndef VISR_APPS_AUDIO_NETWORK_STREAMER_AUDIO_NETWORK_ENCODER_HPP_INCLUDED
 #define VISR_APPS_AUDIO_NETWORK_STREAMER_AUDIO_NETWORK_ENCODER_HPP_INCLUDED
 
-#include <libril/constants.hpp>
-#include <libril/atomic_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/parameter_output.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/parameter_output.hpp>
 
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/string_parameter.hpp>

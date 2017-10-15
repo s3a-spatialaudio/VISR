@@ -18,7 +18,7 @@ import numpy as np
 import sys
 
 numChannels = 2
-audioInterfaceName = 'PortAudio'
+audioInterfaceName = 'Jack'
 audioBackendOptions = '{}'
 samplingFrequency = 48000
 blockSize = 1024
@@ -31,26 +31,19 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         super( LoudnessGui, self ).__init__( None )
         self.audioRunning = False
         self.setGeometry( 0, 0, 800, 600 )
-        # self.setWindowLabel( "Loudness meter" ) # Only for QMainWindow
-        
-#        self.centralWidget = QtGui.QWidget( self )
-#        self.layout = QtGui.QGridLayout( self.centralWidget )
+
         self.layout = QtGui.QGridLayout( self )
-        
-#        self.layout.setColumnStretch(1, 4)
-#        self.layout.setColumnStretch(2, 4)
-        
-        
+
         self.startButton = QtGui.QPushButton( "Start Audio" ) # , self.centralWidget )
         #self.startButton.setMinimumSize( 200, 60 )
         self.stopButton = QtGui.QPushButton( "Stop Audio" ) # , self.centralWidget )
         #self.stopButton.setMinimumSize( 200, 60 )
         self.layout.addWidget( self.startButton, 0, 0 ) # , QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter )
         self.layout.addWidget( self.stopButton, 0, 1 ) # , QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter )
-        
+
         self.loudnessLabel = QtGui.QLabel( '--- dB' ) # , self.centralWidget )
         #self.loudnessLabel.setMinimumSize( 200, 60 )
-        
+
         self.layout.addWidget( self.loudnessLabel, 0, 2 ) # , QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter )
         
         self.startButton.clicked.connect( self.startAudio )

@@ -43,8 +43,14 @@ target_link_libraries( reverbobject_shared efl_shared )
 target_link_libraries( reverbobject_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( reverbobject_shared ${Boost_SYSTEM_LIBRARY} )
 
+
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installled once.
+set_target_properties( reverbobject_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 install(TARGETS reverbobject_static ARCHIVE DESTINATION lib )
-install(TARGETS reverbobject_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS reverbobject_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libreverbobject )
 
 # Add the unit test directory.
 # ADD_SUBDIRECTORY( test )

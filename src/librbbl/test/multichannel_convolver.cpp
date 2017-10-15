@@ -3,7 +3,7 @@
 #include <librbbl/multichannel_convolver_uniform.hpp>
 
 #include <libefl/basic_matrix.hpp>
-#include <libril/constants.hpp>
+#include <libvisr/constants.hpp>
 #include <libpml/matrix_parameter.hpp>
 
 #include <boost/test/unit_test.hpp>

@@ -5,7 +5,7 @@
 #include "parameter_connection_map.hpp"
 #include "port_utilities.hpp"
 
-#include <libvisr_impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/parameter_port_base_implementation.hpp>
 
 #include <boost/graph/connected_components.hpp>
 

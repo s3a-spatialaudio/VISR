@@ -3,8 +3,8 @@
 #include <libpythonsupport/initialisation_guard.hpp>
 #include <libpythonsupport/python_wrapper.hpp>
 
-#include <libril/constants.hpp>
-#include <libril/signal_flow_context.hpp>
+#include <libvisr/constants.hpp>
+#include <libvisr/signal_flow_context.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
 

@@ -10,8 +10,8 @@
 
 #include "export_symbols.hpp"
 
-#include <libril/atomic_component.hpp>
-#include <libril/constants.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/constants.hpp>
 
 #include <libpml/biquad_parameter.hpp>
 #include <libpml/double_buffering_protocol.hpp>

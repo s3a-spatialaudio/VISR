@@ -4,10 +4,10 @@
 #define VISR_LIBRRL_SIGNAL_ROUTING_INTERNAL_HPP_INCLUDED
 
 
-#include <libril/atomic_component.hpp>
-#include <libril/audio_input.hpp>
-#include <libril/audio_output.hpp>
-#include <libril/audio_sample_type.hpp>
+#include <libvisr/atomic_component.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/audio_sample_type.hpp>
 
 #include <memory>
 #include <vector>
