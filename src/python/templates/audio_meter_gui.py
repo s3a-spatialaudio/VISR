@@ -12,7 +12,7 @@ import audiointerfaces as ai
 
 from audio_meter import LoudnessMeter
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
 import sys
@@ -106,26 +106,25 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         self.loudnessLabel.setText( '--- dB' )
         return
     def getMeterValues( self ):
-        print("getMeterValues")
-        numPoints = self.loudnessPort.size()
-        if numPoints > 0:
-            self.loudnessHist = np.roll( self.loudnessHist, numPoints )
-            for idx in range( 0, numPoints ):
-                Lk = self.loudnessPort.front()
-                print( "loudness value %d: %f dB" % (idx,Lk) )
-                self.loudnessPort.pop()
-                self.loudnessHist[idx] = Lk.value
-            self.loudnessLabel.setText( '%f dB' % Lk.value )
-            self.loudnessPlot.setData( self.loudnessHist )
-                
-        
-#        while not self.loudnessPort.empty():
-#            Lk = self.loudnessPort.front()
-#            self.loudnessLabel.setText( '%f dB' % Lk.value )
-#            self.loudnessPort.pop()
+        try:
+            numPoints = self.loudnessPort.size()
+            # print("getMeterValues: %d data packets received" % numPoints )
+            if numPoints > 0:
+                self.loudnessHist = np.roll( self.loudnessHist, numPoints )
+                for idx in range( 0, numPoints ):
+                    Lk = self.loudnessPort.front()
+                    # print( "loudness value %d: %f dB" % (idx,Lk.value) )
+                    self.loudnessPort.pop()
+                    self.loudnessHist[numPoints-1-idx] = Lk.value
+                #print("getMeterValues: %d data packets in queue:" % self.loudnessPort.size() )
+                self.loudnessLabel.setText( '%f dB' % Lk.value )
+                self.loudnessPlot.setData( self.loudnessHist )
+        except Exception as ex:
+            print( "Exception in inner loop: %s" % ex )
 
 app = QtGui.QApplication( sys.argv )
 mainWnd = LoudnessGui()
 
 mainWnd.show()
 appReturnValue =  app.exec_()
+
