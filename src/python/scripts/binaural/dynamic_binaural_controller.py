@@ -306,7 +306,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             self.lastPosition[chIdx] = indices
 #                            print("filter out %f sec"%(time.time()-start2))
                             if self.dynamicITD:
-                                delays = np.dot( self.dynamicDelays[indices[chIdx],:].T,gnorm )
+                                delays = np.dot(self.dynamicDelays[indices,:].T,gnorm)
                                 delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
                             else:
                                 delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.

@@ -12,17 +12,15 @@ import rcl
 
 #import objectmodel as om
 
-import os
 from readSofa import readSofaFile
 from dynamic_binaural_controller import DynamicBinauralController
-from extractDelayInSofaFile import extractDelayInSofaFile
-from urllib.request import urlretrieve
+import numpy as np
 
 class DynamicBinauralRenderer( visr.CompositeComponent ):
     
         def __init__( self,
                      context, name, parent, 
-                     numberOfObjects,
+                     numberOfObjects,sofaFile,
                      headTracking = True,
                      dynITD = True,
                      dynILD = True,
@@ -40,20 +38,15 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                                               pml.EmptyParameterConfig() )
             
          
-            sofaFile = './data/dtf b_nh169.sofa'
-            if not os.path.exists( sofaFile ):
-                urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
-                       sofaFile )
-
-#            print(dynITD)
+           
+            [ hrirPos, hrirData, delays ] = readSofaFile( sofaFile )  
+            
             if dynITD:
-                sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
-                if not os.path.exists( sofaFileTD ):
-                    extractDelayInSofaFile( sofaFile, sofaFileTD )
-                sofaFile = sofaFileTD        
-
-            [ hrirPos, hrirData, delays ] = readSofaFile( sofaFile )            
-#            print(delays)
+                if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
+                    raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
+            
+            print(hrirPos)
+            print(delays)
             
 #            print(hrirPos[0])
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,

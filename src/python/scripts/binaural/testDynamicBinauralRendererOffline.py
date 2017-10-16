@@ -12,6 +12,9 @@ import array
 from struct import pack
 from scipy.io.wavfile import write
 import time
+from extractDelayInSofaFile import extractDelayInSofaFile
+from urllib.request import urlretrieve
+import os
 
 def sph2cart(az,el,r):
     x = r*np.cos(az)*np.cos(el)
@@ -28,7 +31,8 @@ import objectmodel
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+      
+        
 fs = 48000
 bufferSize = 512
 
@@ -44,13 +48,29 @@ signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
 numOutputChannels = 2;
 
+sofaFile = './data/dtf b_nh169.sofa'
+if not os.path.exists( sofaFile ):
+    urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
+
+dynITD = True
+
+if dynITD:
+    sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
+    if not os.path.exists( sofaFileTD ):
+        extractDelayInSofaFile( sofaFile, sofaFileTD )
+    sofaFile = sofaFileTD        
+
+
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
-controller = DynamicBinauralRenderer( context, "Controller", None, numBinauralObjects,
+controller = DynamicBinauralRenderer( context, "Controller", None, 
+                                      numBinauralObjects, 
+                                      sofaFile,
                                       headTracking = True,
-                                      dynITD = False,
+                                      dynITD = dynITD,
                                       dynILD = False,
-                                      hrirInterp = True)
+                                      hrirInterp = True,
+                                      )
 #to be completed
 
 result,messages = rrl.checkConnectionIntegrity(controller)
