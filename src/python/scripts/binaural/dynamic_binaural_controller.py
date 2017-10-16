@@ -190,8 +190,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
 
-                     self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix.T))
-                     
+                     self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix))
 #PRINT OUT AZIMUTH AND ELEVATION OF FIRST SOURCE AFTER ROTATION                     
 #                     sph1 = cart2sph(self.sourcePos[0][0],self.sourcePos[0][1],self.sourcePos[0][2])
 #                     print("[%d %d]"%(rad2deg(sph1[0]),rad2deg(sph1[1])))   

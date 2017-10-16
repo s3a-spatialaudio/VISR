@@ -67,7 +67,7 @@ flow = rrl.AudioSignalFlow( controller )
 
 paramInput = flow.parameterReceivePort('objectVector')
 
-az = -30
+az = 0
 el = 0
 r = 1
 x,y,z = sph2cart( deg2rad(az), deg2rad(el), r )

@@ -36,7 +36,7 @@ class DynamicBinauralRendererSerial(visr.CompositeComponent ):
                                                                      hrirInterp = hrirInterp
                                                                    )
             if enableSerial:
-                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=90, yawRightHand=True )
+                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True )
                 self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
 
             self.parameterConnection( self.objectVectorInput, self.dynamicBinauralRenderer.parameterPort("objectVector"))
