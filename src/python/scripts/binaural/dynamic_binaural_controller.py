@@ -17,8 +17,11 @@ import pml
 import rbbl
 import objectmodel as om
 import time
-
+import cProfile, pstats, io
 import numpy as np
+import warnings
+
+
 from scipy.spatial import Delaunay
 from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
@@ -155,8 +158,14 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #        self.f = open('srcpAllinone.txt', 'w')
 
     def process( self ):
-#        startTot = time.time()
 
+##PROFILING                    
+##        startTot = time.time()
+#        pr = cProfile.Profile()
+#        pr.enable()
+        
+        
+        
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
             objIndicesRaw = [x.objectId for x in ov
@@ -174,12 +183,17 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     self.sourcePos[chIdx,:] = ov[objIdx].position
                     self.levels[chIdx] = ov[objIdx].level
             else:
-                for src in ov:
-                    pos = np.asarray(src.position, dtype=np.float32 )
-                    posNormed = 1.0/np.sqrt(np.sum(np.square(pos))) * pos
-                    ch = src.channels[0]
-                    self.sourcePos[ch,:] = posNormed
-                    self.levels[ch] = src.level
+                for index,src in enumerate(ov):
+                    if index < self.numberOfObjects :
+                        pos = np.asarray(src.position, dtype=np.float32 )
+                        posNormed = 1.0/np.sqrt(np.sum(np.square(pos))) * pos
+                        ch = src.channels[0]
+                        self.sourcePos[ch,:] = posNormed
+                        self.levels[ch] = src.level
+                    else:
+                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')                            
+                        break              
+#                        print(index)
 
             # TODO: This belongs somewhere else in the recompute logic.
             if self.useHeadTracking:
@@ -238,7 +252,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                     print("Triplet choice %f sec "%(time.time()-start))
 
 #Vectorised replacement
-                allGains = np.matmul( self.inverted, np.transpose(self.sourcePos) )
+                allGains =  self.inverted @ self.sourcePos.T
+#                allGains = np.matmul( self.inverted, np.transpose(self.sourcePos) )
                 minGains = np.min( allGains, axis = 1 ) # Minimum over last axis
                 matchingTriplet = np.argmax( minGains, axis = 0 )
 
@@ -247,8 +262,11 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
                 normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
             else:
-                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
-
+#                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
+                 dotprod = self.hrirPos @ self.sourcePos.T
+                 indices = np.argmax( dotprod, axis = 0 )
+##                 print(found)
+                 
             # Retrieve the output gain vector for setting the object level and potentially
             # applying dynamically computed gain adjustement (e.g., nearfield)
 
@@ -307,9 +325,11 @@ class DynamicBinauralController( visr.AtomicComponent ):
                             if self.dynamicITD:
                                 delays = np.dot(self.dynamicDelays[indices,:].T,gnorm)
                                 delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
+#                                print(delays*1000)
+#                                print("[%f %f]"%(delayVec[0],delayVec[1]))
                             else:
                                 delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
-
+                                        
                     else: # hrirInterpolation == False
                         if self.lastFilters[chIdx] != indices[chIdx]:
                             leftCmd  = pml.IndexedVectorFloat( chIdx,
@@ -331,4 +351,14 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.objectInputProtocol.resetChanged()
             if self.useHeadTracking:
                 self.trackingInputProtocol.resetChanged()
+          
+##PROFILING            
+#            pr.disable()
+#            s = io.StringIO()
+#            sortby = 'cumulative'
+#            ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+##            ps.print_stats()
+#            ps.sort_stats('time').print_stats(10)
+#            print(s.getvalue())
+
 #        print("TOT controller time %f sec"%(time.time()-startTot))

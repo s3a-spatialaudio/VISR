@@ -65,9 +65,9 @@ def sph2cart(az,el,r):
     return x,y,z
 
 
-fs = 48000
+fs = 48000  
 blockSize = 1024
-numBinauralObjects = 2
+numBinauralObjects = 12
 numOutputChannels = 2
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
@@ -75,14 +75,14 @@ baud = 57600
 context = visr.SignalFlowContext(blockSize, fs )
 enableTracking = True
 enableInterpolation = True
-dynamicITD = True
+dynITD = True
 sofaFile = './data/dtf b_nh169.sofa'
 
 if not os.path.exists( sofaFile ):
     urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
                        sofaFile )
 
-if dynamicITD:
+if dynITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
         extractDelayInSofaFile( sofaFile, sofaFileTD )
@@ -94,7 +94,7 @@ controller = DynamicBinauralRendererSAW( context, "Controller", None,
                                             baud, 
                                             sofaFile,
                                             enableSerial = enableTracking, 
-                                            dynamicITD = dynamicITD,
+                                            dynamicITD = dynITD,
                                             dynamicILD = False,
                                             hrirInterpolation = enableInterpolation)
 #to be completed

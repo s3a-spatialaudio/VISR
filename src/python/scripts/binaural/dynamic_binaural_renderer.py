@@ -45,9 +45,9 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
                     raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
             
-            print(hrirPos)
-            print(delays)
-            
+#            print(hrirPos)
+#            print(delays)
+#            
 #            print(hrirPos[0])
             self.dynamicBinauraController = DynamicBinauralController( context, "DynamicBinauralController", self,
                                                                       numberOfObjects,

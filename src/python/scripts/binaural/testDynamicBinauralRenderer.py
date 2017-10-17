@@ -17,6 +17,7 @@ import random
 import visr
 import rrl
 import objectmodel
+import time
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,7 +28,7 @@ import os
 
 fs = 44100
 
-numBinauralObjects = 12
+numBinauralObjects = 128
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
 idMatrix = np.identity(3)
@@ -35,7 +36,7 @@ idMatrix = np.identity(3)
 blockSize = 512
 
 parameterUpdatePeriod = 1
-numBlocks = 1024;
+numBlocks = 128;
 #numBlocks = 64;
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
@@ -46,7 +47,7 @@ if not os.path.exists( sofaFile ):
     urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
 
 dynamicITD = True
-
+tracking = True
 if dynamicITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
@@ -57,7 +58,7 @@ context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 controller = DynamicBinauralRendererSerial( context, "Controller", None, 
                                            numBinauralObjects, 
                                            port, baud, sofaFile,
-                                           enableSerial = True,
+                                           enableSerial = tracking,
                                            dynITD = dynamicITD,
                                            dynILD = False,
                                            hrirInterp = True
@@ -96,7 +97,7 @@ ov = paramInput.data()
 ov.clear()
 ov.insert( ps1 )
 paramInput.swapBuffers()
-
+startTot = time.time()
 for blockIdx in range(0,numBlocks):
     
         #az = 0.025 * blockIdx
@@ -106,7 +107,7 @@ for blockIdx in range(0,numBlocks):
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
-
-plt.figure(1)
+print("TOT controller time %f sec"%(time.time()-startTot))
+plt.figure()
 plt.plot( t, outputSignal[0,:], 'b-',t, outputSignal[1,:], 'r-')
 plt.show()

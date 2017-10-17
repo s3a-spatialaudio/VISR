@@ -71,7 +71,7 @@ class serialReader(visr.AtomicComponent ):
         
           self.sentN = self.sentN+1
 #          print("%d serial parsing %f sec"%(self.procN,time.time()-self.start)) 
-          print("[%d,%d,%d]"%(yprvec[0]+self.yawOffset,yprvec[1]+self.pitchOffset,yprvec[2]+self.rollOffset))
+#          print("[%d,%d,%d]"%(yprvec[0]+self.yawOffset,yprvec[1]+self.pitchOffset,yprvec[2]+self.rollOffset))
           self.trackingOutput.protocolOutput().swapBuffers() 
           
         except ValueError:

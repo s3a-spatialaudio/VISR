@@ -36,13 +36,13 @@ import matplotlib.pyplot as plt
 fs = 48000
 bufferSize = 512
 
-numBinauralObjects = 4
+numBinauralObjects = 128
 idMatrix = np.identity(3)
 
-blockSize = 128
+blockSize = 512
 samplingFrequency = 48000
 parameterUpdatePeriod = 1
-numBlocks = 1024;
+numBlocks = 128;
 #numBlocks = 64;
 signalLength = blockSize * numBlocks
 t = 1.0/samplingFrequency * np.arange(0,signalLength)
@@ -53,6 +53,8 @@ if not os.path.exists( sofaFile ):
     urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
 
 dynITD = True
+headTrackEnabled = True
+
 
 if dynITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
@@ -66,10 +68,10 @@ context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 controller = DynamicBinauralRenderer( context, "Controller", None, 
                                       numBinauralObjects, 
                                       sofaFile,
-                                      headTracking = True,
+                                      headTracking = headTrackEnabled,
                                       dynITD = dynITD,
                                       dynILD = False,
-                                      hrirInterp = True,
+                                      hrirInterp = False,
                                       )
 #to be completed
 
@@ -79,7 +81,7 @@ if not result:
 
 flow = rrl.AudioSignalFlow( controller )
 
-headTrackEnabled = True
+
 
 if headTrackEnabled:
     trackingInput = flow.parameterReceivePort( "tracking" )
@@ -120,7 +122,7 @@ for blockIdx in range(0,numBlocks):
         if headTrackEnabled:
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]
-          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
+#          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
    
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
           trackingInput.swapBuffers()      
@@ -131,6 +133,8 @@ for blockIdx in range(0,numBlocks):
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
 #write('testR.wav', 48000, outputSignal[1,:])
-plt.figure(random.randint(1, 1000))
-plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
-plt.show()
+
+
+#plt.figure()
+#plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
+#plt.show()
