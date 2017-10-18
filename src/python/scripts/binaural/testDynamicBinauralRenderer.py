@@ -29,16 +29,16 @@ import matplotlib.pyplot as plt
 ############ CONFIG ###############        
 fs = 48000
 blockSize = 128
-numBinauralObjects = 64
+numBinauralObjects = 1
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 72;
 
 useSourceAutoMovement = False
-useTracking = False
+useTracking = True
 useDynamicITD = True
 useDynamicILD = False
-useHRIRinterpolation = True
+useHRIRinterpolation = False
 useSerialPort = False
 ###################################
 

@@ -81,4 +81,4 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
             if order > 1:                 
                 rot = HOARotationMatrixCalc(order,rot,self.R_1)  
 #                print(rot)
-            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot, coeffIn[ (order**2):((order+1)**2), : ] )
+            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot.T, coeffIn[ (order**2):((order+1)**2), : ] )

@@ -29,14 +29,14 @@ blockSize = 128
 numBinauralObjects = 1
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
-numBlocks = 720;
+numBlocks = 72;
 # datasets are provided for odd orders 1,3,5,7,9
 maxHoaOrder = 3
 
 useSourceAutoMovement = False
 # switch dynamic tracking on and off.
 useTracking = True
-useSerialPort = True
+useSerialPort = False
 ###################################
 
 
@@ -139,5 +139,5 @@ for blockIdx in range(0,numBlocks):
                  
 print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
 plt.figure()
-plt.plot( t, outputSignal[0,:], 'bo-',t, outputSignal[1,:], 'r-')
+plt.plot( t, outputSignal[0,:], 'bo-',t, outputSignal[1,:], 'ro-')
 plt.show()

@@ -1,5 +1,5 @@
 <!DOCTYPE patchbay>
-<patchbay version="0.3.6" name="ADMPplay_+_hoaBinRend_scene">
+<patchbay version="0.3.6" name="ADMPplay_scene">
  <output-sockets>
   <socket exclusive="off" client="system" type="audio" name="system">
    <plug>capture_1</plug>
@@ -67,6 +67,10 @@
    <plug>output_59</plug>
    <plug>output_60</plug>
   </socket>
+  <socket exclusive="off" client="BinRendererSAW" type="audio" name="BinRendererSAW">
+   <plug>visr_out_0</plug>
+   <plug>visr_out_1</plug>
+  </socket>
   <socket exclusive="off" client="HOABinRendererSAW" type="audio" name="HOABinRendererSAW">
    <plug>visr_out_0</plug>
    <plug>visr_out_1</plug>
@@ -76,6 +80,72 @@
   <socket exclusive="off" client="system" type="audio" name="system">
    <plug>playback_1</plug>
    <plug>playback_2</plug>
+  </socket>
+  <socket exclusive="off" client="BinRendererSAW" type="audio" name="BinRendererSAW">
+   <plug>visr_in_0</plug>
+   <plug>visr_in_1</plug>
+   <plug>visr_in_2</plug>
+   <plug>visr_in_3</plug>
+   <plug>visr_in_4</plug>
+   <plug>visr_in_5</plug>
+   <plug>visr_in_6</plug>
+   <plug>visr_in_7</plug>
+   <plug>visr_in_8</plug>
+   <plug>visr_in_9</plug>
+   <plug>visr_in_10</plug>
+   <plug>visr_in_11</plug>
+   <plug>visr_in_12</plug>
+   <plug>visr_in_13</plug>
+   <plug>visr_in_14</plug>
+   <plug>visr_in_15</plug>
+   <plug>visr_in_16</plug>
+   <plug>visr_in_17</plug>
+   <plug>visr_in_18</plug>
+   <plug>visr_in_19</plug>
+   <plug>visr_in_20</plug>
+   <plug>visr_in_21</plug>
+   <plug>visr_in_22</plug>
+   <plug>visr_in_23</plug>
+   <plug>visr_in_24</plug>
+   <plug>visr_in_25</plug>
+   <plug>visr_in_26</plug>
+   <plug>visr_in_27</plug>
+   <plug>visr_in_28</plug>
+   <plug>visr_in_29</plug>
+   <plug>visr_in_30</plug>
+   <plug>visr_in_31</plug>
+   <plug>visr_in_32</plug>
+   <plug>visr_in_33</plug>
+   <plug>visr_in_34</plug>
+   <plug>visr_in_35</plug>
+   <plug>visr_in_36</plug>
+   <plug>visr_in_37</plug>
+   <plug>visr_in_38</plug>
+   <plug>visr_in_39</plug>
+   <plug>visr_in_40</plug>
+   <plug>visr_in_41</plug>
+   <plug>visr_in_42</plug>
+   <plug>visr_in_43</plug>
+   <plug>visr_in_44</plug>
+   <plug>visr_in_45</plug>
+   <plug>visr_in_46</plug>
+   <plug>visr_in_47</plug>
+   <plug>visr_in_48</plug>
+   <plug>visr_in_49</plug>
+   <plug>visr_in_50</plug>
+   <plug>visr_in_51</plug>
+   <plug>visr_in_52</plug>
+   <plug>visr_in_53</plug>
+   <plug>visr_in_54</plug>
+   <plug>visr_in_55</plug>
+   <plug>visr_in_56</plug>
+   <plug>visr_in_57</plug>
+   <plug>visr_in_58</plug>
+   <plug>visr_in_59</plug>
+   <plug>visr_in_60</plug>
+   <plug>visr_in_61</plug>
+   <plug>visr_in_62</plug>
+   <plug>visr_in_63</plug>
   </socket>
   <socket exclusive="off" client="HOABinRendererSAW" type="audio" name="HOABinRendererSAW">
    <plug>visr_in_0</plug>
@@ -147,6 +217,8 @@
  <slots/>
  <cables>
   <cable output="admplayer" input="HOABinRendererSAW"/>
+  <cable output="admplayer" input="BinRendererSAW"/>
+  <cable output="BinRendererSAW" input="system"/>
   <cable output="HOABinRendererSAW" input="system"/>
  </cables>
 </patchbay>

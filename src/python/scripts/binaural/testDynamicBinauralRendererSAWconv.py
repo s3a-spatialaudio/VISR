@@ -67,8 +67,8 @@ def sph2cart(az,el,r):
 
 ############ CONFIG ###############  
 fs = 48000
-blockSize = 128
-numBinauralObjects = 64
+blockSize = 1024
+numBinauralObjects = 1
 numOutputChannels = 2;
 
 # switch dynamic tracking on and off.

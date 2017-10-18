@@ -64,11 +64,11 @@ def sph2cart(az,el,r):
 ############ CONFIG ###############  
 fs = 48000
 blockSize = 1024
-numBinauralObjects = 60
+numBinauralObjects = 1
 numOutputChannels = 2;
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 1
+maxHoaOrder = 5
 
 # switch dynamic tracking on and off.
 useTracking = True
@@ -99,28 +99,7 @@ if not result:
    print(messages)
 
 flow = rrl.AudioSignalFlow( controller )
-
-#paramInput = flow.parameterReceivePort('objectDataInput')
-#
-#az = 0
-#el = 0
-#r = 1
-#x,y,z = sph2cart( az, el, r )
-#ps1 = objectmodel.PointSource(0)
-#ps1.x = x
-#ps1.y = y
-#ps1.z = z
-#ps1.level = 0.5
-#ps1.groupId = 5
-#ps1.priority = 5
-#ps1.resetNumberOfChannels(1)
-#ps1.setChannelIndex(0,ps1.objectId)
-#
-#ov = paramInput.data()
-#ov.clear()
-#ov.insert( ps1 )
-#paramInput.swapBuffers()
-                          
+                        
 aiConfig = ai.AudioInterface.Configuration( flow.numberOfCaptureChannels,
                                            flow.numberOfPlaybackChannels,
                                            fs,
