@@ -28,8 +28,8 @@ import matplotlib.pyplot as plt
       
 ############ CONFIG ###############        
 fs = 48000
-blockSize = 128
-numBinauralObjects = 1
+blockSize = 512
+numBinauralObjects = 64
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 72;
@@ -38,8 +38,8 @@ useSourceAutoMovement = False
 useTracking = True
 useDynamicITD = True
 useDynamicILD = False
-useHRIRinterpolation = False
-useSerialPort = False
+useHRIRinterpolation = True
+useSerialPort = True
 ###################################
 
 idMatrix = np.identity(3)
@@ -148,8 +148,8 @@ for blockIdx in range(0,numBlocks):
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
-
-print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
-plt.figure()
-plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
-plt.show()
+print("fs: %d\t #obj: %d\t ITD-intrp: %d-%d\t #blocks: %d\t blocksize: %d\t expected:%f sec.\t\t Got %f sec"%(fs,numBinauralObjects,useDynamicITD,useHRIRinterpolation,numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
+#print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
+#plt.figure()
+#plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
+#plt.show()

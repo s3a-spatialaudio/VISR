@@ -25,25 +25,23 @@ def sph2cart(az,el,r):
 
 ############ CONFIG ###############  
 fs = 48000
-blockSize = 128
-numBinauralObjects = 1
+blockSize = 512
+numBinauralObjects = 64
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 72;
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 3
+maxHoaOrder = 5
 
 useSourceAutoMovement = False
 # switch dynamic tracking on and off.
 useTracking = True
-useSerialPort = False
+useSerialPort = True
 ###################################
-
-
 
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
-numOutputChannels = 2;
+
 #numOutputChannels = (maxHoaOrder+1)**2
 
 currDir = os.getcwd()
@@ -137,7 +135,7 @@ for blockIdx in range(0,numBlocks):
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
                  
-print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
-plt.figure()
-plt.plot( t, outputSignal[0,:], 'bo-',t, outputSignal[1,:], 'ro-')
-plt.show()
+print("fs: %d\t #obj: %d\t order: %d\t #blocks: %d\t blocksize: %d\t expected:%f sec.\t\t Got %f sec"%(fs,numBinauralObjects,maxHoaOrder,numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
+#plt.figure()
+#plt.plot( t, outputSignal[0,:], 'bo-',t, outputSignal[1,:], 'ro-')
+#plt.show()

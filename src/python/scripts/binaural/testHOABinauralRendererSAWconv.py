@@ -64,11 +64,11 @@ def sph2cart(az,el,r):
 ############ CONFIG ###############  
 fs = 48000
 blockSize = 1024
-numBinauralObjects = 1
+numBinauralObjects = 60
 numOutputChannels = 2;
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 5
+maxHoaOrder = 1
 
 # switch dynamic tracking on and off.
 useTracking = True
