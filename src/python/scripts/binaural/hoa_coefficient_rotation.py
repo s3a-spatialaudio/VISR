@@ -52,6 +52,9 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
         self.trackingInputProtocol = self.trackingInput.protocolInput()
         np.set_printoptions(linewidth=10000)
         np.set_printoptions(threshold=np.nan)
+        
+        self.R_1 = np.identity(3)
+        
     def process( self ):
 
         if self.trackingInputProtocol.changed():
@@ -59,7 +62,7 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
             ypr = - np.array(head.orientation, dtype = np.float32 ) # negative because we rotate the sound field in the opposite 
             # direction of the head orientation.
             self.rotationMatrix[...] = calcRotationMatrix( ypr )
-            R_1 = rotationMatrixReorderingACN(self.rotationMatrix)
+            self.R_1 = rotationMatrixReorderingACN(self.rotationMatrix)
             self.trackingInputProtocol.resetChanged()
 
         coeffIn = np.array( self.coefficientInputProtocol.data(), copy = False )
@@ -71,11 +74,11 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
         # TODO: If not done before, translate the rotation matrix to ACN format
 
         # Compute order order by order
-        rot = R_1
+        rot = self.R_1
         for order in range(1, self.hoaOrder+1):
             # TODO: Compute the transformation matrix for order 'order'
 #            rot = np.identity( 2*order + 1, dtype = coeffOut.dtype ) # Dummy rotation matrix
             if order > 1:                 
-                rot = HOARotationMatrixCalc(order,rot,R_1)  
+                rot = HOARotationMatrixCalc(order,rot,self.R_1)  
 #                print(rot)
-            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot, coeffIn[ (order**2):((order+1)**2), : ] )
+            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot.T, coeffIn[ (order**2):((order+1)**2), : ] )

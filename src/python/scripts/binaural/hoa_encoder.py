@@ -18,6 +18,7 @@ from rotationFunctions import cart2sph
 from real_sph_harmonics import allSphHarmRealACN
 
 import numpy as np
+import warnings
 
 class HoaEncoder( visr.AtomicComponent ):
     """ Component encode point sources and plane waves contained in an object vector into a spherical harmonic coefficients """
@@ -81,8 +82,12 @@ class HoaEncoder( visr.AtomicComponent ):
                     pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
                     coeffOut[ :, chIdx] = pwCoeffs * src.level # encode the object level in the coefficients
             else:
-                for src in ov:
-                    chIdx = src.channels[0]
-                    sph = cart2sph( src.x, src.y, src.z )
-                    pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
-                    coeffOut[ :, chIdx ] = pwCoeffs * src.level # encode the object level in the coefficients
+                for index,src in enumerate(ov):
+                    if index < self.numberOfObjects :
+                        chIdx = src.channels[0]
+                        sph = cart2sph( src.x, src.y, src.z )
+                        pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
+                        coeffOut[ :, chIdx ] = pwCoeffs * src.level # encode the object level in the coefficients
+                    else:
+                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')                            
+                        break       

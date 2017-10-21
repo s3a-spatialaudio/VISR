@@ -1,0 +1,42 @@
+___________________________________________________________________________________________________________________________________
+test_hoa_binaural_renderer.py
+
+default:
+useSourceAutoMovement = False
+useTracking = True
+useSerialPort = False
+
+fs: 48000        #obj: 1         order: 1        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.052910 sec
+fs: 48000        #obj: 1         order: 3        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.166453 sec
+fs: 48000        #obj: 1         order: 5        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.463248 sec
+
+fs: 48000        #obj: 64        order: 1        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.071673 sec
+fs: 48000        #obj: 64        order: 3        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.210480 sec
+fs: 48000        #obj: 64        order: 5        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.575541 sec
+
+
+useSerialPort = True
+fs: 48000        #obj: 64        order: 5        #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.555132 sec
+
+___________________________________________________________________________________________________________________________________
+testDynamicBinauralRenderer.py
+
+default:
+useSourceAutoMovement = False
+useTracking = True
+useSerialPort = False
+useDynamicILD = False
+
+fs: 48000        #obj: 1         ITD-intrp: 0-0  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.033237 sec
+fs: 48000        #obj: 1         ITD-intrp: 1-0  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.036206 sec
+fs: 48000        #obj: 1         ITD-intrp: 0-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.061621 sec
+fs: 48000        #obj: 1         ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.063292 sec
+
+fs: 48000        #obj: 64        ITD-intrp: 0-0  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.663483 sec
+fs: 48000        #obj: 64        ITD-intrp: 1-0  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 0.423743 sec
+fs: 48000        #obj: 64        ITD-intrp: 0-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 1.085419 sec
+fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 1.118111 sec
+
+
+useSerialPort = True
+fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 1.116276 sec
