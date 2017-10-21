@@ -3,6 +3,7 @@
 #ifndef VISR_LIBRBBL_MULTICHANNEL_CONVOLVER_UNIFORM_HPP_INCLUDED
 #define VISR_LIBRBBL_MULTICHANNEL_CONVOLVER_UNIFORM_HPP_INCLUDED
 
+#include "core_convolver_uniform.hpp"
 #include "export_symbols.hpp"
 
 #include <libefl/basic_matrix.hpp>
@@ -36,25 +37,6 @@ class VISR_RBBL_LIBRARY_SYMBOL MultichannelConvolverUniform
 {
 public:
   /**
-   * The representation for the complex frequency-domain elements.
-   * Note: The used FFT libraries depend on the fact that arrays of this type
-   * can be cast into arrays of the corresponding real types with interleaved
-   * real and imaginary elements.
-   * SampleType arrays with interleaved real and imaginary components.
-   */
-  using FrequencyDomainType = typename FftWrapperBase<SampleType>::FrequencyDomainType;
-
-  /**
-   * The data type for specifying routing points.
-   */
-  using RoutingEntry = pml::FilterRoutingParameter;
-
-  /**
-    The data type for setting sets of routing points.
-   */
-  using RoutingList = pml::FilterRoutingList;
-
-  /**
    * Constructor.
    * @param numberOfInputs The number of input signals processed.
    * @param numberOfOutputs The number of output channels produced.
@@ -75,7 +57,7 @@ public:
                                          std::size_t maxFilterLength,
                                          std::size_t maxRoutingPoints,
                                          std::size_t maxFilterEntries,
-                                         RoutingList const & initialRoutings = RoutingList(),
+                                         pml::FilterRoutingList const & initialRoutings = pml::FilterRoutingList(),
                                          efl::BasicMatrix<SampleType> const & initialFilters = efl::BasicMatrix<SampleType>(),
                                          std::size_t alignment = 0,
                                          char const * fftImplementation = "default" );
@@ -85,19 +67,19 @@ public:
    */
   ~MultichannelConvolverUniform();
 
-  std::size_t numberOfInputs() const { return mNumberOfInputs; }
+  std::size_t numberOfInputs() const { return mCoreConvolver.numberOfInputs(); }
 
-  std::size_t numberOfOutputs() const { return mNumberOfOutputs; }
+  std::size_t numberOfOutputs() const { return mCoreConvolver.numberOfOutputs(); }
 
-  std::size_t blockLength() const { return mBlockLength; }
+  std::size_t blockLength() const { return mCoreConvolver.blockLength(); }
 
-  std::size_t maxNumberOfRoutingPoints() const { return mMaxNumberOfRoutingPoints; }
+  std::size_t maxNumberOfRoutingPoints() const { return mCoreConvolver.maxNumberOfRoutingPoints(); }
 
-  std::size_t maxNumberOfFilterEntries() const { return mFilterPartitionsFrequencyDomain.numberOfRows(); }
+  std::size_t maxNumberOfFilterEntries() const { return mCoreConvolver.maxNumberOfFilterEntries(); }
 
-  std::size_t maxFilterLength() const { return mMaxFilterLength; }
+  std::size_t maxFilterLength() const { return mCoreConvolver.maxFilterLength(); }
 
-  std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
+  std::size_t numberOfRoutingPoints( ) const { return mCoreConvolver.numberOfRoutingPoints(); }
 
   void process( SampleType const * const input, std::size_t inputStride,
                 SampleType * const output, std::size_t outputStride,
@@ -119,21 +101,21 @@ public:
   * @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void initRoutingTable( RoutingList const & routings );
+  void initRoutingTable( pml::FilterRoutingList const & routings );
 
   /**
   * Add a new routing to the routing table.
   * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void setRoutingEntry( RoutingEntry const & routing );
+  void setRoutingEntry( pml::FilterRoutingParameter const & routing );
 
   /**
   * Add a new routing to the routing table.
   * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, RoutingEntry::GainType gain );
+  void setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, pml::FilterRoutingParameter::GainType gain );
 
   /**
   * @return \p true if the entry was removes, \p false if not (i.e., the entry did not exist).
@@ -143,7 +125,7 @@ public:
   /**
   * Query the currently active number of routings.
   */
-  std::size_t numberOfRoutings( ) const { return mRoutingTable.size( ); }
+  std::size_t numberOfRoutings( ) const { return mCoreConvolver.numberOfRoutings(); }
   //@}
 
   /**
@@ -170,212 +152,8 @@ public:
 
 private:
 
-  void processInput( SampleType const * const input, std::size_t channelStride, std::size_t alignment );
-
-  void processOutput( SampleType * const output, std::size_t channelStride, std::size_t alignment );
-
-  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
-
-  /**
-   * Helper functions to calculate the parameters of the partitioned convolution algorithm.
-   */
-  //@{
-  /**
-   * Calculate the number of filter partitions for the nonuniformly partitioned convolution algorithm.
-   */
-  static std::size_t calculateNumberOfPartitions( std::size_t filterLength, std::size_t blockLength );
-
-  /** 
-   * Return the size of the DFT, i.e., the number of real inputs samples passed to each forward FFT call.
-   */
-  static std::size_t calculateDftSize( std::size_t blockLength );
-
-  /**
-   * Return the number of complex values to represent the frequency-domain DFT representation.
-   */
-  static std::size_t calculateDftRepresentationSize( std::size_t blockLength );
-
-  /**
-  * Return the number of complex values to represent the frequency-domain DFT representation when padded to the requested alignment.
-  * @param blockLength The number of values consumed and produced in each process() call.
-  * @param alignment The alignment (in number of complex elements)
-  */
-  static std::size_t calculateDftRepresentationSizePadded( std::size_t blockLength, std::size_t alignment );
-
-  /**
-   * Calculate the scaling factor to be applied to the transformed input filters.
-   * This factor is necessary to account for the different normalisation strategies used in different FFT libraries 
-   * (i.e., whether normalization is done in the forward or the inverse transform, distributed between the two (unitary transform), or not at all.
-   * @throw std::logic_error If the Fft representation object has not been initialised.
-   */
-  SampleType calculateFilterScalingFactor() const;
-  //@}
-
-  inline FrequencyDomainType * getFdlBlock( std::size_t inputIdx, std::size_t blockIdx );
-
-  inline FrequencyDomainType const * getFdlBlock( std::size_t inputIdx, std::size_t blockIdx ) const;
-
-  inline FrequencyDomainType * getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx );
-
-  inline FrequencyDomainType const * getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx ) const;
-
-  /**
-   * Assign an already transformed filter to a specific index of the the filter matrix.
-   * @param transformedFilter The frequency-domain representation of the filter.
-   * @param filterIdx The filter index to which the filter is assigned.
-   * @param alignment The guaranteed alignment of the transformedFilter argument (as a multiple of the size of the complex data type FrequencyDomainType.
-   */
-  void setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment = 0 );
-  //@}
-
-  /**
-   * The alignment used in all data members.
-   * Also used for the representation of the FDL and the frequency-domain filter representation, which stores all partitions in a single matrix row, 
-   * possibly using zero padding to enforce the required alignment for each partition.
-   */
-  std::size_t const mAlignment;
-
-  std::size_t const mComplexAlignment;
-
-  std::size_t const mNumberOfInputs;
-
-  std::size_t const mNumberOfOutputs;
-
-  std::size_t const mBlockLength;
-
-  std::size_t const mMaxNumberOfRoutingPoints;
-
-  std::size_t const mMaxFilterLength;
-
-  std::size_t const mNumberOfFilterPartitions;
-
-  /**
-   * The size of a single DFT transform.
-   */
-  std::size_t const mDftSize;
-
-  std::size_t const mDftRepresentationSize;
-
-  std::size_t const mDftRepresentationSizePadded;
-
-  struct RoutingKey
-  {
-    explicit RoutingKey( std::size_t in, std::size_t out )
-    : inputIdx( in ), outputIdx( out )
-    {
-    }
-    std::size_t inputIdx;
-    std::size_t outputIdx;
-  };
-  /**
-   * Function object for ordering the routings within the routing table.
-   * By grouping the entries according to the output indices, the ordering is 
-   * specifically tailored to the execution of the process() function.
-   */
-  struct CompareRoutings
-  {
-    bool operator()( RoutingKey const & lhs, RoutingKey const & rhs ) const
-    {
-      if( lhs.outputIdx == rhs.outputIdx )
-      {
-        return lhs.inputIdx < rhs.inputIdx;
-      }
-      else
-      {
-        return lhs.outputIdx < rhs.outputIdx;
-      }
-    }
-  };
-
-  struct RoutingValue
-  {
-    RoutingValue( std::size_t idx, SampleType gain )
-    : filterIdx( idx ), gainLinear( gain ) {}
-    std::size_t filterIdx;
-    SampleType gainLinear;
-  };
-  using RoutingTable = std::map<RoutingKey, RoutingValue, CompareRoutings>;
-
-  RoutingTable mRoutingTable;
-
-  rbbl::CircularBuffer<SampleType> mInputBuffers;
-
-  efl::BasicMatrix<std::complex<SampleType> > mInputFDL;
-  
-  /**
-   * Cyclic counter denoting the current block offset of the zeroth 
-   * frequency-domain input block within the rows of \p mInputFDL.
-   */
-  std::size_t mFdlCycleOffset;
-  
-  /**
-   * Temporary memory buffer for transforming filter partitions and holding the results of
-   * the inverse transformation.
-   */
-  mutable efl::BasicVector<SampleType> mTimeDomainTransformBuffer;
-
-
-  efl::BasicMatrix<std::complex<SampleType> > mFilterPartitionsFrequencyDomain;
-
-  /**
-   * Temporarily used buffer to accumulate the results of a frequency-domain block convolution.
-   */
-  efl::BasicVector<std::complex<SampleType> > mFrequencyDomainAccumulator;
-
-  /**
-   * Temporarily used buffer to combine all contributions to an output.
-   */
-  efl::BasicVector<std::complex<SampleType> > mFrequencyDomainSum;
-
-  std::unique_ptr<rbbl::FftWrapperBase<SampleType> > mFftRepresentation;
-
-  /**
-   * Scaling factor applied to the frequency-domain representation of the filters to compensate
-   * for the normalisation strategy of the FFT implementation in use.
-   */
-  SampleType const mFilterScalingFactor;
+  CoreConvolverUniform<SampleType> mCoreConvolver;
 };
-
-template<typename SampleType>
-/*inline*/ typename MultichannelConvolverUniform<SampleType>::FrequencyDomainType * 
-MultichannelConvolverUniform<SampleType>::getFdlBlock( std::size_t inputIdx, std::size_t blockIdx )
-{
-  assert( inputIdx < mNumberOfInputs );
-  assert( blockIdx < mNumberOfFilterPartitions );
-  std::size_t const columnIdx = ((mFdlCycleOffset + blockIdx) % mNumberOfFilterPartitions) * mDftRepresentationSizePadded;
-  return mInputFDL.row( inputIdx ) + columnIdx;
-}
-
-template<typename SampleType>
-/*inline*/ typename MultichannelConvolverUniform<SampleType>::FrequencyDomainType const * 
-MultichannelConvolverUniform<SampleType>::getFdlBlock( std::size_t inputIdx, std::size_t blockIdx ) const
-{
-  assert( inputIdx < mNumberOfInputs );
-  assert( blockIdx < mNumberOfFilterPartitions );
-  std::size_t const columnIdx = ((mFdlCycleOffset + blockIdx) % mNumberOfFilterPartitions) * mDftRepresentationSizePadded;
-  return mInputFDL.row( inputIdx) + columnIdx;
-}
-
-template<typename SampleType>
-/*inline*/ typename MultichannelConvolverUniform<SampleType>::FrequencyDomainType * 
-MultichannelConvolverUniform<SampleType>::
-getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx )
-{
-  assert( filterIdx < maxNumberOfFilterEntries() );
-  assert( blockIdx < mNumberOfFilterPartitions );
-  std::size_t const columnIdx = blockIdx * mDftRepresentationSizePadded;
-  return mFilterPartitionsFrequencyDomain.row( filterIdx ) + columnIdx;
-}
-
-template<typename SampleType>
-/*inline*/ typename MultichannelConvolverUniform<SampleType>::FrequencyDomainType const * 
-MultichannelConvolverUniform<SampleType>::getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx ) const
-{
-  assert( filterIdx < maxNumberOfFilterEntries( ) );
-  assert( blockIdx < mNumberOfFilterPartitions );
-  std::size_t const columnIdx = blockIdx * mDftRepresentationSizePadded;
-  return mFilterPartitionsFrequencyDomain.row( filterIdx ) + columnIdx;
-}
 
 } // namespace rbbl
 } // namespace visr

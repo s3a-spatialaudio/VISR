@@ -4,6 +4,8 @@
 set( SOURCES 
 biquad_coefficient.cpp
 circular_buffer.cpp 
+crossfading_convolver_uniform.cpp
+core_convolver_uniform.cpp
 fir.cpp
 fft_wrapper_factory.cpp
 ffts_wrapper.cpp
@@ -19,7 +21,7 @@ lagrange_interpolator.cpp
 multichannel_convolver_uniform.cpp
 multichannel_delay_line.cpp
 object_channel_allocator.cpp
- parametric_iir_coefficient.cpp
+parametric_iir_coefficient.cpp
 parametric_iir_coefficient_calculator.cpp
 )
 
@@ -27,6 +29,8 @@ parametric_iir_coefficient_calculator.cpp
 set( HEADERS
 biquad_coefficient.hpp
 circular_buffer.hpp
+core_convolver_uniform.hpp
+crossfading_convolver_uniform.hpp
 export_symbols.hpp
 fir.hpp
 fft_wrapper_base.hpp
