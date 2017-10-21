@@ -7,7 +7,6 @@ Created on Tue Sep 12 10:28:06 2017
 """
 
 import visr
-import re
 import pml
 import numpy as np
 import serial
@@ -18,7 +17,13 @@ class serialReader(visr.AtomicComponent ):
     def __init__( self,
                   context, name, parent,
                   port,
-                  baud
+                  baud,
+                  yawOffset=0,
+                  pitchOffset=0,
+                  rollOffset=0,
+                  yawRightHand=False,
+                  pitchRightHand=False,
+                  rollRightHand=False
                   ):
         super( serialReader, self ).__init__( context, name, parent )
         self.yprVec =   np.zeros( 3, dtype = np.float32 )
@@ -34,11 +39,26 @@ class serialReader(visr.AtomicComponent ):
         self.parsedN = 0
         self.ser.read() #necessary for the .in_waiting to work
         self.procN =0 
+        self.yawOffset = yawOffset
+        self.pitchOffset = pitchOffset
+        self.rollOffset = rollOffset
+        self.yawRightHand = yawRightHand
+        self.pitchRightHand = pitchRightHand
+        self.rollRightHand= rollRightHand
+        
     def send_data(self,newdata):
         data = newdata
         data = data.replace("#","").replace("Y","").replace("P","").replace("R","").replace("=","").rstrip()
         try:
           yprvec = [float(i) for i in data.split(',')]
+          if self.yawRightHand:
+#              print(ypr.orientation[0])
+              yprvec[0]*= -1
+#              print(ypr.orientation[0])
+          if self.pitchRightHand:
+              yprvec[1]*= -1
+          if self.rollRightHand:
+              yprvec[2]*= -1
 
 #          yprvec = [float(i) for i in data]
 #          print(yprvec)
@@ -46,12 +66,14 @@ class serialReader(visr.AtomicComponent ):
           if np.array(yprvec).size != 3:
             raise ValueError( 'yaw pitch roll bad format:'+str(np.array(yprvec)))
           ypr = self.trackingOutput.protocolOutput().data()
-          ypr.orientation = [deg2rad(yprvec[0]),deg2rad(yprvec[1]),deg2rad(yprvec[2])]
+          ypr.orientation = [deg2rad(yprvec[0]+self.yawOffset),deg2rad(yprvec[1]+self.pitchOffset),deg2rad(yprvec[2]+self.rollOffset)]
+          
+        
           self.sentN = self.sentN+1
 #          print("%d serial parsing %f sec"%(self.procN,time.time()-self.start)) 
-#          print(yprvec)
+#          print("[%d,%d,%d]"%(yprvec[0]+self.yawOffset,yprvec[1]+self.pitchOffset,yprvec[2]+self.rollOffset))
           self.trackingOutput.protocolOutput().swapBuffers() 
-
+          
         except ValueError:
           print ("Parsing went wrong because of a wrongly formatted string...")
 
