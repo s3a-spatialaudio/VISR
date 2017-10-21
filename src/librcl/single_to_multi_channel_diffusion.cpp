@@ -40,7 +40,6 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
   mNumberOfOutputs = numberOfOutputs;
   mInput.setWidth( 1 );
   mOutput.setWidth( mNumberOfOutputs );
-  mOutputChannels.resize( mNumberOfOutputs, nullptr );
 
   std::size_t const filterLength = diffusionFilters.numberOfColumns();
   pml::FilterRoutingList routings;
@@ -80,10 +79,11 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
 void SingleToMultichannelDiffusion::process()
 {
   SampleType const * const input = mInput[ 0 ];
-  mOutput.getChannelPointers( &mOutputChannels[0] );
 
 // Diffusion processing
-  mDiffusionFilter->process( &input, &mOutputChannels[0], cVectorAlignmentSamples );
+  mDiffusionFilter->process( mInput.data(), mInput.channelStrideSamples(),
+                             mOutput.data(), mOutput.channelStrideSamples(),
+                             cVectorAlignmentSamples );
 }
 
 } // namespace rcl
