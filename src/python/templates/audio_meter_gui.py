@@ -19,7 +19,7 @@ import sys
 
 numChannels = 2
 audioInterfaceName = 'Jack'
-audioBackendOptions = '{}'
+audioBackendOptions = '{"clientname": "LoudnessMeter", "autoconnect" : "true" }'
 samplingFrequency = 48000
 blockSize = 1024
 
@@ -57,7 +57,7 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         
         self.loudnessHist = -120.0 * np.ones( numPlotPoints, dtype=np.float32 )
         self.loudnessPlot.setData( self.loudnessHist )
-        
+
         # %% Setup the DSP part
         
         self.context = visr.SignalFlowContext( period = blockSize, 
