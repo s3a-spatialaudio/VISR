@@ -24,8 +24,11 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
                               std::size_t alignment /*= 0*/,
                               char const * fftImplementation /*= "default"*/ )
  : mCoreConvolver( numberOfInputs, numberOfOutputs, blockLength, maxFilterLength,
-                   maxRoutingPoints, maxFilterEntries, initialRoutings, initialFilters, alignment, fftImplementation)
+                   maxFilterEntries, initialFilters, alignment, fftImplementation)
+  , mMaxNumberOfRoutingPoints( maxRoutingPoints )
+  , mFrequencyDomainOutput( numberOfOutputs, mCoreConvolver.dftRepresentationSize() )
 {
+  initRoutingTable( initialRoutings );
 }
 
 template< typename SampleType >
@@ -38,9 +41,24 @@ process( SampleType const * const input, std::size_t inputChannelStride,
          std::size_t alignment /*= 0*/ )
 {
   mCoreConvolver.processInputs( input, inputChannelStride, alignment );
-  mCoreConvolver.processOutputs( output, outputChannelStride, alignment );
+  processOutputs( output, outputChannelStride, alignment );
 }
 
+template< typename SampleType >
+void MultichannelConvolverUniform<SampleType>::
+processOutputs( SampleType * const output, std::size_t outputChannelStride,
+                std::size_t alignment /*= 0*/ )
+{
+  mFrequencyDomainOutput.zeroFill();
+  for( RoutingEntry const & routing : mRoutingTable )
+  {
+    mCoreConvolver.processFilter( routing.inputIdx, routing.filterIdx, routing.gainLinear, mFrequencyDomainOutput.row(routing.outputIdx), true /* add flag */ );
+  }
+  for( std::size_t outputIdx(0); outputIdx < numberOfOutputs(); ++outputIdx )
+  {
+    mCoreConvolver.transformOutput( mFrequencyDomainOutput.row( outputIdx ), output + outputIdx * outputChannelStride );
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Manipulation of the routing table
@@ -48,34 +66,70 @@ process( SampleType const * const input, std::size_t inputChannelStride,
 template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::clearRoutingTable( )
 {
-  mCoreConvolver.clearRoutingTable();
+  mRoutingTable.clear();
 }
 
 template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::initRoutingTable( pml::FilterRoutingList const & routings )
 {
-  mCoreConvolver.initRoutingTable( routings );
+  clearRoutingTable();
+  if( routings.size() > maxNumberOfRoutingPoints() )
+  {
+    throw std::invalid_argument( "MultichannelConvolverUniform:initRoutingTable() exceeds the maximum admissible number of elements " );
+  }
+  for( pml::FilterRoutingParameter const & v : routings )
+  {
+    setRoutingEntry( v );
+  }
+  assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
 }
 
 template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::setRoutingEntry( pml::FilterRoutingParameter const & routing )
 {
-  mCoreConvolver.setRoutingEntry( routing );
+  setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, static_cast<SampleType>(routing.gainLinear) );
 }
 
 template< typename SampleType>
 void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx,
                                                                 std::size_t outputIdx,
                                                                 std::size_t filterIdx,
-                                                                pml::FilterRoutingParameter::GainType gain )
+                                                                SampleType gain )
 {
-  mCoreConvolver.setRoutingEntry( inputIdx, outputIdx, filterIdx, gain );
+  assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
+  if( inputIdx >= numberOfInputs() )
+  {
+    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Input index exceeds the admissible range." );
+  }
+  if( outputIdx >= numberOfOutputs() )
+  {
+    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Output index exceeds the admissible range." );
+  }
+  if( filterIdx >= maxNumberOfFilterEntries() )
+  {
+    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
+  }
+  RoutingEntry newEntry( inputIdx, outputIdx, filterIdx, gain );
+  typename RoutingTable::iterator findIt = mRoutingTable.find( newEntry );
+  if( findIt != mRoutingTable.end() )
+  {
+    mRoutingTable.erase( findIt );
+  }
+  if( mRoutingTable.size() >= maxNumberOfRoutingPoints() )
+  {
+    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
+  }
+  auto res = mRoutingTable.insert( std::move(newEntry) );
+  assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
 }
 
 template< typename SampleType>
 bool MultichannelConvolverUniform<SampleType>::removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx )
 {
-  return mCoreConvolver.removeRoutingEntry( inputIdx, outputIdx );
+  RoutingEntry const testEntry( inputIdx, outputIdx, 0, 0.0f );
+  auto const eraseRange = mRoutingTable.equal_range( testEntry );
+  mRoutingTable.erase( eraseRange.first, eraseRange.second );
+  return eraseRange.first != mRoutingTable.end();
 }
 
 template< typename SampleType>

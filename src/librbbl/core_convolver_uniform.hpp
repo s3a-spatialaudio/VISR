@@ -47,12 +47,12 @@ public:
   /**
    * The data type for specifying routing points.
    */
-  using RoutingEntry = pml::FilterRoutingParameter;
+  //using RoutingEntry = pml::FilterRoutingParameter;
 
-  /**
-    The data type for setting sets of routing points.
-   */
-  using RoutingList = pml::FilterRoutingList;
+  ///**
+  //  The data type for setting sets of routing points.
+  // */
+  //using RoutingList = pml::FilterRoutingList;
 
   /**
    * Constructor.
@@ -73,9 +73,7 @@ public:
                                          std::size_t numberOfOutputs,
                                          std::size_t blockLength,
                                          std::size_t maxFilterLength,
-                                         std::size_t maxRoutingPoints,
                                          std::size_t maxFilterEntries,
-                                         RoutingList const & initialRoutings = RoutingList(),
                                          efl::BasicMatrix<SampleType> const & initialFilters = efl::BasicMatrix<SampleType>(),
                                          std::size_t alignment = 0,
                                          char const * fftImplementation = "default" );
@@ -91,58 +89,64 @@ public:
 
   std::size_t blockLength() const { return mBlockLength; }
 
-  std::size_t maxNumberOfRoutingPoints() const { return mMaxNumberOfRoutingPoints; }
+  /**
+   * Return the size of a DFT block.
+   * @todo do we need to query the padded size as well?
+   */
+  std::size_t dftRepresentationSize() const { return mDftRepresentationSize; }
+
+  //std::size_t maxNumberOfRoutingPoints() const { return mMaxNumberOfRoutingPoints; }
 
   std::size_t maxNumberOfFilterEntries() const { return mFilterPartitionsFrequencyDomain.numberOfRows(); }
 
   std::size_t maxFilterLength() const { return mMaxFilterLength; }
 
-  std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
+  //std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
 
   // Note: No overall process() method is provided.
 
-  /**
-  * Manipulation of the routing table.
-  */
-  //@{
-  /**
-  * Remove all entries from the routing table.
-  */
-  void clearRoutingTable( );
+  ///**
+  //* Manipulation of the routing table.
+  //*/
+  ////@{
+  ///**
+  //* Remove all entries from the routing table.
+  //*/
+  //void clearRoutingTable( );
 
-  /**
-  * Initialize the routing table from a set of entries.
-  * All pre-existing entries are cleared beforehand.
-  * @param routings A vector of routing entries
-  * @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
-  * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
-  */
-  void initRoutingTable( RoutingList const & routings );
+  ///**
+  //* Initialize the routing table from a set of entries.
+  //* All pre-existing entries are cleared beforehand.
+  //* @param routings A vector of routing entries
+  //* @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
+  //* @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
+  //*/
+  //void initRoutingTable( RoutingList const & routings );
 
-  /**
-  * Add a new routing to the routing table.
-  * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
-  * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
-  */
-  void setRoutingEntry( RoutingEntry const & routing );
+  ///**
+  //* Add a new routing to the routing table.
+  //* @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
+  //* @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
+  //*/
+  //void setRoutingEntry( RoutingEntry const & routing );
 
-  /**
-  * Add a new routing to the routing table.
-  * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
-  * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
-  */
-  void setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, RoutingEntry::GainType gain );
+  ///**
+  //* Add a new routing to the routing table.
+  //* @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
+  //* @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
+  //*/
+  //void setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, RoutingEntry::GainType gain );
 
-  /**
-  * @return \p true if the entry was removes, \p false if not (i.e., the entry did not exist).
-  */
-  bool removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx );
+  ///**
+  //* @return \p true if the entry was removes, \p false if not (i.e., the entry did not exist).
+  //*/
+  //bool removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx );
 
-  /**
-  * Query the currently active number of routings.
-  */
-  std::size_t numberOfRoutings( ) const { return mRoutingTable.size( ); }
-  //@}
+  ///**
+  //* Query the currently active number of routings.
+  //*/
+  //std::size_t numberOfRoutings( ) const { return mRoutingTable.size( ); }
+  ////@}
 
   /**
   * Manipulation of the contained filter representation.
@@ -168,28 +172,36 @@ public:
 
   void processInputs( SampleType const * const input, std::size_t channelStride, std::size_t alignment );
 
-  void processOutputs( SampleType * const output, std::size_t channelStride, std::size_t alignment );
-
-private:
-  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
+  /**
+   * Perform the filtering and output calculation for all outputs.
+   */
+//   void processOutputs( SampleType * const output, std::size_t channelStride, std::size_t alignment );
 
   /**
-   * Helper functions to calculate the parameters of the partitioned convolution algorithm.
+   * Perform the frequency-domain block convolution for the combination of an input and a filter.
    */
+  void processFilter( std::size_t inputIndex, std::size_t filterIndex, SampleType gain,
+                      FrequencyDomainType * result, bool add );
+
+  void transformOutput( FrequencyDomainType const * fdBlock, SampleType * tdResult );
+
+  /**
+  * Helper functions to calculate the parameters of the partitioned convolution algorithm.
+  */
   //@{
   /**
-   * Calculate the number of filter partitions for the nonuniformly partitioned convolution algorithm.
-   */
+  * Calculate the number of filter partitions for the nonuniformly partitioned convolution algorithm.
+  */
   static std::size_t calculateNumberOfPartitions( std::size_t filterLength, std::size_t blockLength );
 
-  /** 
-   * Return the size of the DFT, i.e., the number of real inputs samples passed to each forward FFT call.
-   */
+  /**
+  * Return the size of the DFT, i.e., the number of real inputs samples passed to each forward FFT call.
+  */
   static std::size_t calculateDftSize( std::size_t blockLength );
 
   /**
-   * Return the number of complex values to represent the frequency-domain DFT representation.
-   */
+  * Return the number of complex values to represent the frequency-domain DFT representation.
+  */
   static std::size_t calculateDftRepresentationSize( std::size_t blockLength );
 
   /**
@@ -200,11 +212,11 @@ private:
   static std::size_t calculateDftRepresentationSizePadded( std::size_t blockLength, std::size_t alignment );
 
   /**
-   * Calculate the scaling factor to be applied to the transformed input filters.
-   * This factor is necessary to account for the different normalisation strategies used in different FFT libraries 
-   * (i.e., whether normalization is done in the forward or the inverse transform, distributed between the two (unitary transform), or not at all.
-   * @throw std::logic_error If the Fft representation object has not been initialised.
-   */
+  * Calculate the scaling factor to be applied to the transformed input filters.
+  * This factor is necessary to account for the different normalisation strategies used in different FFT libraries
+  * (i.e., whether normalization is done in the forward or the inverse transform, distributed between the two (unitary transform), or not at all.
+  * @throw std::logic_error If the Fft representation object has not been initialised.
+  */
   SampleType calculateFilterScalingFactor() const;
   //@}
 
@@ -216,14 +228,29 @@ private:
 
   inline FrequencyDomainType const * getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx ) const;
 
+  std::size_t alignment() const { return mAlignment; }
+
+  std::size_t complexAlignment() const { return mComplexAlignment; }
+
   /**
-   * Assign an already transformed filter to a specific index of the the filter matrix.
-   * @param transformedFilter The frequency-domain representation of the filter.
-   * @param filterIdx The filter index to which the filter is assigned.
-   * @param alignment The guaranteed alignment of the transformedFilter argument (as a multiple of the size of the complex data type FrequencyDomainType.
-   */
+  * Advance the freuquency-domain delay line by one block.
+  * @post The zero-indexed block contains the "oldest" data, to be overwritten.
+  */
+  void advanceFDL();
+
+  /**
+  * Assign an already transformed filter to a specific index of the the filter matrix.
+  * @param transformedFilter The frequency-domain representation of the filter.
+  * @param filterIdx The filter index to which the filter is assigned.
+  * @param alignment The guaranteed alignment of the transformedFilter argument (as a multiple of the size of the complex data type FrequencyDomainType.
+  */
   void setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment = 0 );
   //@}
+
+
+
+private:
+  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
 
   /**
    * The alignment used in all data members.
@@ -240,8 +267,6 @@ private:
 
   std::size_t const mBlockLength;
 
-  std::size_t const mMaxNumberOfRoutingPoints;
-
   std::size_t const mMaxFilterLength;
 
   std::size_t const mNumberOfFilterPartitions;
@@ -255,45 +280,45 @@ private:
 
   std::size_t const mDftRepresentationSizePadded;
 
-  struct RoutingKey
-  {
-    explicit RoutingKey( std::size_t in, std::size_t out )
-    : inputIdx( in ), outputIdx( out )
-    {
-    }
-    std::size_t inputIdx;
-    std::size_t outputIdx;
-  };
-  /**
-   * Function object for ordering the routings within the routing table.
-   * By grouping the entries according to the output indices, the ordering is 
-   * specifically tailored to the execution of the process() function.
-   */
-  struct CompareRoutings
-  {
-    bool operator()( RoutingKey const & lhs, RoutingKey const & rhs ) const
-    {
-      if( lhs.outputIdx == rhs.outputIdx )
-      {
-        return lhs.inputIdx < rhs.inputIdx;
-      }
-      else
-      {
-        return lhs.outputIdx < rhs.outputIdx;
-      }
-    }
-  };
+  //struct RoutingKey
+  //{
+  //  explicit RoutingKey( std::size_t in, std::size_t out )
+  //  : inputIdx( in ), outputIdx( out )
+  //  {
+  //  }
+  //  std::size_t inputIdx;
+  //  std::size_t outputIdx;
+  //};
+  ///**
+  // * Function object for ordering the routings within the routing table.
+  // * By grouping the entries according to the output indices, the ordering is 
+  // * specifically tailored to the execution of the process() function.
+  // */
+  //struct CompareRoutings
+  //{
+  //  bool operator()( RoutingKey const & lhs, RoutingKey const & rhs ) const
+  //  {
+  //    if( lhs.outputIdx == rhs.outputIdx )
+  //    {
+  //      return lhs.inputIdx < rhs.inputIdx;
+  //    }
+  //    else
+  //    {
+  //      return lhs.outputIdx < rhs.outputIdx;
+  //    }
+  //  }
+  //};
 
-  struct RoutingValue
-  {
-    RoutingValue( std::size_t idx, SampleType gain )
-    : filterIdx( idx ), gainLinear( gain ) {}
-    std::size_t filterIdx;
-    SampleType gainLinear;
-  };
-  using RoutingTable = std::map<RoutingKey, RoutingValue, CompareRoutings>;
+  //struct RoutingValue
+  //{
+  //  RoutingValue( std::size_t idx, SampleType gain )
+  //  : filterIdx( idx ), gainLinear( gain ) {}
+  //  std::size_t filterIdx;
+  //  SampleType gainLinear;
+  //};
+  //using RoutingTable = std::map<RoutingKey, RoutingValue, CompareRoutings>;
 
-  RoutingTable mRoutingTable;
+  //RoutingTable mRoutingTable;
 
   rbbl::CircularBuffer<SampleType> mInputBuffers;
 

@@ -17,9 +17,9 @@ CoreConvolverUniform( std::size_t numberOfInputs,
                               std::size_t numberOfOutputs,
                               std::size_t blockLength,
                               std::size_t maxFilterLength,
-                              std::size_t maxRoutingPoints,
+//                            std::size_t maxRoutingPoints,
                               std::size_t maxFilterEntries,
-                              RoutingList const & initialRoutings,
+//                              RoutingList const & initialRoutings,
                               efl::BasicMatrix<SampleType> const & initialFilters,
                               std::size_t alignment /*= 0*/,
                               char const * fftImplementation /*= "default"*/ )
@@ -28,7 +28,6 @@ CoreConvolverUniform( std::size_t numberOfInputs,
  , mNumberOfInputs( numberOfInputs )
  , mNumberOfOutputs( numberOfOutputs )
  , mBlockLength( blockLength )
- , mMaxNumberOfRoutingPoints( maxRoutingPoints )
  , mMaxFilterLength( maxFilterLength )
  , mNumberOfFilterPartitions( calculateNumberOfPartitions( maxFilterLength, blockLength ) )
  , mDftSize( calculateDftSize( blockLength ) )
@@ -44,170 +43,168 @@ CoreConvolverUniform( std::size_t numberOfInputs,
  , mFftRepresentation( FftWrapperFactory<SampleType>::create( fftImplementation, mDftSize, alignment ) )
  , mFilterScalingFactor( calculateFilterScalingFactor() )
 {
-  initRoutingTable( initialRoutings );
+//  initRoutingTable( initialRoutings );
   initFilters( initialFilters );
 }
 
 template< typename SampleType >
-CoreConvolverUniform<SampleType>::~CoreConvolverUniform()
-{
-}
-
-//template< typename SampleType >
-//void CoreConvolverUniform<SampleType>::
-//processInput( SampleType const * const * input, std::size_t alignment )
-//{
-//  mInputBuffers.write( input, numberOfInputs(), blockLength(), alignment );
-//  // decrease the current cycle index pointing to the zeroeth partition (with wraparound).
-//  mFdlCycleOffset = (mFdlCycleOffset + mNumberOfFilterPartitions - 1) % mNumberOfFilterPartitions; // The '+ mNumberOfFilterPartitions' is to avoid pecularities of % when the argument is negative.
-//  for( std::size_t chIdx( 0 ); chIdx < mNumberOfInputs; ++chIdx )
-//  {
-//    mFftRepresentation->forwardTransform( mInputBuffers.getReadPointer( chIdx, mDftSize ), getFdlBlock( chIdx, 0 ) );
-//  }
-//}
-//
-//template< typename SampleType >
-//void CoreConvolverUniform<SampleType>::
-//processOutput( SampleType * const * output, std::size_t alignment )
-//{
-//  for( std::size_t outputIdx( 0 ); outputIdx < mNumberOfOutputs; ++outputIdx )
-//  {
-//    if( efl::vectorZero( mFrequencyDomainSum.data(), mDftRepresentationSizePadded, mComplexAlignment ) != efl::noError )
-//    {
-//      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Clearing FD accumulator failed." );
-//    }
-//    // get an iterator pair containing all routings for the current output.
-//    // Not that this depends on the comparison function for the map
-//    // keys, which orders all routings for a given output cosecutively.
-//    typename RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx ) );
-//    typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx+1 ) );
-//    for( typename RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
-//    {
-//      std::size_t const  inputIdx = routingIt->first.inputIdx;
-//      std::size_t const  filterIdx = routingIt->second.filterIdx;
-//
-//      if( efl::vectorMultiply( getFdlBlock( inputIdx, 0 ),
-//        getFdFilterPartition( filterIdx, 0 ),
-//        mFrequencyDomainAccumulator.data( ),
-//        mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
-//        mComplexAlignment ) != efl::noError )
-//      {
-//        throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-//      }
-//      for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
-//      {
-//        if( efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, blockIdx ),
-//              getFdFilterPartition( filterIdx, blockIdx ),
-//              mFrequencyDomainAccumulator.data(),
-//              mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
-//              mComplexAlignment ) != efl::noError )
-//        {
-//          throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-//        }
-//      } // Calculated convolution for a given filter.
-//      // Scale and add to the sum vector for this output.
-//      SampleType const scaleFactor = routingIt->second.gainLinear;
-//      // Note that there is no dedicated function for scaling a complex vector by a real-valued constant at the moment, so we use a complex-complex variant.
-//      // (which is slightly inefficient)
-//      // Another option would be to cast the complex vectors to real-valued ones, and to do a real-valued scale and add for 2 time the length.
-//      if( efl::vectorMultiplyConstantAddInplace( static_cast<FrequencyDomainType>(scaleFactor),
-//                                                 mFrequencyDomainAccumulator.data(),
-//                                                 mFrequencyDomainSum.data(),
-//                                                 mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
-//                                                 mComplexAlignment ) != efl::noError )
-//      {
-//        throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-//      }
-//    } // iterate through all routings for a given output port.
-//    // Perform the inverse transformation
-//    // TODO: revise error handling for the transform wrapper.
-//    mFftRepresentation->inverseTransform( mFrequencyDomainSum.data(), mTimeDomainTransformBuffer.data() );
-//    // discard the time-domain aliasing and copy the remaining samaples to the output
-//    // TODO: Establish a computation for the guaranteed alignment (0 at the moment).
-//    if( efl::vectorCopy( mTimeDomainTransformBuffer.data() + blockLength(), output[outputIdx], mDftSize - blockLength(), 0 ) != efl::noError )
-//    {
-//      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Copying of output samples failed." );
-//    }
-//  }
-//}
-
+CoreConvolverUniform<SampleType>::~CoreConvolverUniform() = default;
 
 template< typename SampleType >
 void CoreConvolverUniform<SampleType>::
 processInputs( SampleType const * const input, std::size_t channelStride, std::size_t alignment )
 {
   mInputBuffers.write( input, channelStride, numberOfInputs(), blockLength(), alignment );
-  // decrease the current cycle index pointing to the zeroeth partition (with wraparound).
-  mFdlCycleOffset = (mFdlCycleOffset + mNumberOfFilterPartitions - 1) % mNumberOfFilterPartitions; // The '+ mNumberOfFilterPartitions' is to avoid pecularities of % when the argument is negative.
+  advanceFDL();
   for( std::size_t chIdx( 0 ); chIdx < mNumberOfInputs; ++chIdx )
   {
     mFftRepresentation->forwardTransform( mInputBuffers.getReadPointer( chIdx, mDftSize ), getFdlBlock( chIdx, 0 ) );
   }
 }
 
+#if 1
+//// 'old' implementation
+//template< typename SampleType >
+//void CoreConvolverUniform<SampleType>::
+//processOutputs( SampleType * const output, std::size_t channelStride, std::size_t alignment )
+//{
+//  for( std::size_t outputIdx( 0 ); outputIdx < mNumberOfOutputs; ++outputIdx )
+//  {
+//    // get an iterator pair containing all routings for the current output.
+//    // Not that this depends on the comparison function for the map
+//    // keys, which orders all routings for a given output cosecutively.
+//    typename RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx ) );
+//    typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx + 1 ) );
+//
+//    bool addFlag = false; 
+//    for( typename RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
+//    {
+//      std::size_t const inputIdx = routingIt->first.inputIdx;
+//      std::size_t const filterIdx = routingIt->second.filterIdx;
+//      SampleType const scaleFactor = routingIt->second.gainLinear;
+//
+//      processFilter( inputIdx, filterIdx, scaleFactor, mFrequencyDomainSum.data(), addFlag );
+//      addFlag = true;
+//    } // iterate through all routings for a given output port.
+//    // Perform the inverse transformation
+//    transformOutput( outputIdx, mFrequencyDomainSum.data(), output + channelStride * outputIdx );
+//  }
+//}
+#else
 template< typename SampleType >
 void CoreConvolverUniform<SampleType>::
 processOutputs( SampleType * const output, std::size_t channelStride, std::size_t alignment )
 {
+  std::size_t currOut = 0;
+  std::size_t filtersAtCurrOutput = 0;
+  for( typename RoutingTable::const_iterator tableIt = mRoutingTable.begin(); tableIt != mRoutingTable.end(); ++tableIt )
+  {
+    std::size_t thisOut = tableIt->outputIdx;
+    if( thisOut == currOut )
+    {
+      bool const addFlag = (filtersAtCurrOutput > 0 );
+      processFilter( tableIt->second->inputIdx, tableIt->second->filterIdx, tableIt->second->gainLinear, addFlag );
+    }
+    else if( thisOut == currOut + 1 )
+    {
+    }
+  }
+
+  typename RoutingTable::const_iterator tableIt = mRoutingTable.begin();
   for( std::size_t outputIdx( 0 ); outputIdx < mNumberOfOutputs; ++outputIdx )
   {
-    if( efl::vectorZero( mFrequencyDomainSum.data(), mDftRepresentationSizePadded, mComplexAlignment ) != efl::noError )
-    {
-      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Clearing FD accumulator failed." );
-    }
     // get an iterator pair containing all routings for the current output.
     // Not that this depends on the comparison function for the map
     // keys, which orders all routings for a given output cosecutively.
     typename RoutingTable::const_iterator start = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx ) );
     typename RoutingTable::const_iterator nextStart = mRoutingTable.lower_bound( RoutingKey( 0, outputIdx + 1 ) );
+
+    bool addFlag = false;
     for( typename RoutingTable::const_iterator routingIt( start ); routingIt != nextStart; ++routingIt )
     {
       std::size_t const  inputIdx = routingIt->first.inputIdx;
       std::size_t const  filterIdx = routingIt->second.filterIdx;
-
-      if( efl::vectorMultiply( getFdlBlock( inputIdx, 0 ),
-        getFdFilterPartition( filterIdx, 0 ),
-        mFrequencyDomainAccumulator.data(),
-        mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
-        mComplexAlignment ) != efl::noError )
-      {
-        throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-      }
-      for( std::size_t blockIdx( 1 ); blockIdx < mNumberOfFilterPartitions; ++blockIdx )
-      {
-        if( efl::vectorMultiplyAddInplace( getFdlBlock( inputIdx, blockIdx ),
-          getFdFilterPartition( filterIdx, blockIdx ),
-          mFrequencyDomainAccumulator.data(),
-          mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
-          mComplexAlignment ) != efl::noError )
-        {
-          throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-        }
-      } // Calculated convolution for a given filter.
-        // Scale and add to the sum vector for this output.
       SampleType const scaleFactor = routingIt->second.gainLinear;
-      // Note that there is no dedicated function for scaling a complex vector by a real-valued constant at the moment, so we use a complex-complex variant.
-      // (which is slightly inefficient)
-      // Another option would be to cast the complex vectors to real-valued ones, and to do a real-valued scale and add for 2 time the length.
-      if( efl::vectorMultiplyConstantAddInplace( static_cast<FrequencyDomainType>(scaleFactor),
-        mFrequencyDomainAccumulator.data(),
-        mFrequencyDomainSum.data(),
-        mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
-        mComplexAlignment ) != efl::noError )
-      {
-        throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
-      }
+
+      processFilter( inputIdx, filterIdx, scaleFactor, mFrequencyDomainSum.data(), addFlag );
+      addFlag = true;
     } // iterate through all routings for a given output port.
       // Perform the inverse transformation
-      // TODO: revise error handling for the transform wrapper.
-    mFftRepresentation->inverseTransform( mFrequencyDomainSum.data(), mTimeDomainTransformBuffer.data() );
-    // discard the time-domain aliasing and copy the remaining samaples to the output
-    // TODO: Establish a computation for the guaranteed alignment (0 at the moment).
-    SampleType * const outputPtr = output + channelStride * outputIdx;
-    if( efl::vectorCopy( mTimeDomainTransformBuffer.data() + blockLength(), outputPtr, mDftSize - blockLength(), 0 ) != efl::noError )
+    transformOutput( outputIdx, mFrequencyDomainSum.data(), output + channelStride * outputIdx );
+  }
+}
+#endif
+
+template< typename SampleType >
+void CoreConvolverUniform<SampleType>::processFilter( std::size_t inputIndex, std::size_t filterIndex, 
+                                                      SampleType gain, FrequencyDomainType * result, bool addFlag )
+{
+  if( efl::vectorMultiply( getFdlBlock( inputIndex, 0 ),
+    getFdFilterPartition( filterIndex, 0 ),
+    mFrequencyDomainAccumulator.data(),
+    mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
+    mComplexAlignment ) != efl::noError )
+  {
+    throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+  }
+  for( std::size_t blockIndex( 1 ); blockIndex < mNumberOfFilterPartitions; ++blockIndex )
+  {
+    if( efl::vectorMultiplyAddInplace( getFdlBlock( inputIndex, blockIndex ),
+      getFdFilterPartition( filterIndex, blockIndex ),
+      mFrequencyDomainAccumulator.data(),
+      mDftRepresentationSizePadded, // slightly more operations, but likely faster due to better use of vectorized operations.
+      mComplexAlignment ) != efl::noError )
     {
-      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Copying of output samples failed." );
+      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
     }
+  }
+  // Scale to the output vector.
+  // Note that there is no dedicated function for scaling a complex vector by a real-valued constant at the moment, so we use a complex-complex variant.
+  // (which is slightly inefficient)
+  // Another option would be to cast the complex vectors to real-valued ones, and to do a real-valued scale and add for 2 time the length.
+  if( addFlag )
+  {
+    if( efl::vectorMultiplyConstantAddInplace( static_cast<FrequencyDomainType>( gain ),
+      mFrequencyDomainAccumulator.data(),
+      mFrequencyDomainSum.data(),
+      mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
+      mComplexAlignment ) != efl::noError )
+      //if( efl::vectorMultiplyConstantAddInplace<SampleType>( static_cast<SampleType>(gain),
+      //  reinterpret_cast<SampleType const * const>(mFrequencyDomainAccumulator.data()),
+      //  reinterpret_cast<SampleType *>(mFrequencyDomainSum.data()),
+      //  2*mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
+      //  mComplexAlignment ) != efl::noError )
+    {
+      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+    }
+  }
+  else
+  {
+    if( efl::vectorMultiplyConstant( static_cast<FrequencyDomainType>( gain ),
+      mFrequencyDomainAccumulator.data(),
+      mFrequencyDomainSum.data(),
+      mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
+      mComplexAlignment ) != efl::noError )
+      //if( efl::vectorMultiplyConstantAddInplace<SampleType>( static_cast<SampleType>(gain),
+      //  reinterpret_cast<SampleType const * const>(mFrequencyDomainAccumulator.data()),
+      //  reinterpret_cast<SampleType *>(mFrequencyDomainSum.data()),
+      //  2*mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
+      //  mComplexAlignment ) != efl::noError )
+    {
+      throw std::runtime_error( "CoreConvolverUniform::processOutput(): Frequency-domain block convolution failed." );
+    }
+  }
+}
+
+template< typename SampleType >
+void CoreConvolverUniform<SampleType>::transformOutput( FrequencyDomainType const * fdBlock, SampleType * tdResult )
+{
+  mFftRepresentation->inverseTransform( fdBlock, mTimeDomainTransformBuffer.data() );
+  // discard the time-domain aliasing and copy the remaining samples to the output
+  // TODO: Establish a computation for the guaranteed alignment (0 at the moment).
+  if( efl::vectorCopy( mTimeDomainTransformBuffer.data() + blockLength(), tdResult, mDftSize - blockLength(), 0 ) != efl::noError )
+  {
+    throw std::runtime_error( "CoreConvolverUniform::transformOutput(): Copying of output samples failed." );
   }
 }
 
@@ -257,83 +254,89 @@ SampleType CoreConvolverUniform<SampleType>::calculateFilterScalingFactor() cons
   return static_cast<SampleType>(1.0) / (fwdConst*invConst*static_cast<SampleType>(mDftSize));
 }
 
+template< typename SampleType>
+void CoreConvolverUniform<SampleType>::advanceFDL()
+{
+  mFdlCycleOffset = (mFdlCycleOffset + mNumberOfFilterPartitions - 1) % mNumberOfFilterPartitions; // The '+ mNumberOfFilterPartitions' is to avoid pecularities of % when the argument is negative.
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Manipulation of the routing table
 
-template< typename SampleType>
-void CoreConvolverUniform<SampleType>::clearRoutingTable( )
-{
-  mRoutingTable.clear();
-}
-
-template< typename SampleType>
-void CoreConvolverUniform<SampleType>::initRoutingTable( RoutingList const & routings )
-{
-  clearRoutingTable();
-  if( routings.size() > maxNumberOfRoutingPoints() )
-  {
-    throw std::invalid_argument( "CoreConvolverUniform:initRoutingTable() exceeds the maximum admissible number of elements " );
-  }
-  for( RoutingEntry const & v : routings )
-  {
-    setRoutingEntry( v );
-  }
-  assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
-}
-
-template< typename SampleType>
-void CoreConvolverUniform<SampleType>::setRoutingEntry( RoutingEntry const & routing )
-{
-  setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, routing.gainLinear );
-}
-
-template< typename SampleType>
-void CoreConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx,
-                                                                std::size_t outputIdx,
-                                                                std::size_t filterIdx,
-                                                                RoutingEntry::GainType gain )
-{
-  assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
-  if( inputIdx >= numberOfInputs() )
-  {
-    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Input index exceeds the admissible range." );
-  }
-  if( outputIdx >= numberOfOutputs() )
-  {
-    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Output index exceeds the admissible range." );
-  }
-  if( filterIdx >= maxNumberOfFilterEntries() )
-  {
-    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
-  }
-
-  typename RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
-  if( findIt != mRoutingTable.end() )
-  {
-    findIt->second = RoutingValue( filterIdx, static_cast<SampleType>(gain) );
-  }
-  else
-  {
-    if( mRoutingTable.size( ) >= maxNumberOfRoutingPoints( ) )
-    {
-      throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
-    }
-    auto res = mRoutingTable.insert( std::make_pair( RoutingKey( inputIdx, outputIdx ),
-      RoutingValue( filterIdx, static_cast<SampleType>(gain) ) ) );
-    if( !res.second )
-    {
-      throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Adding new routing point failed." );
-    }
-  }
-  assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
-}
-
-template< typename SampleType>
-bool CoreConvolverUniform<SampleType>::removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx )
-{
-  std::size_t numErased = mRoutingTable.erase( RoutingKey( inputIdx, outputIdx ) );
-  return (numErased > 0);
-}
+//template< typename SampleType>
+//void CoreConvolverUniform<SampleType>::clearRoutingTable( )
+//{
+//  mRoutingTable.clear();
+//}
+//
+//template< typename SampleType>
+//void CoreConvolverUniform<SampleType>::initRoutingTable( RoutingList const & routings )
+//{
+//  clearRoutingTable();
+//  if( routings.size() > maxNumberOfRoutingPoints() )
+//  {
+//    throw std::invalid_argument( "CoreConvolverUniform:initRoutingTable() exceeds the maximum admissible number of elements " );
+//  }
+//  for( RoutingEntry const & v : routings )
+//  {
+//    setRoutingEntry( v );
+//  }
+//  assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
+//}
+//
+//template< typename SampleType>
+//void CoreConvolverUniform<SampleType>::setRoutingEntry( RoutingEntry const & routing )
+//{
+//  setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, routing.gainLinear );
+//}
+//
+//template< typename SampleType>
+//void CoreConvolverUniform<SampleType>::setRoutingEntry( std::size_t inputIdx,
+//                                                                std::size_t outputIdx,
+//                                                                std::size_t filterIdx,
+//                                                                RoutingEntry::GainType gain )
+//{
+//  assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
+//  if( inputIdx >= numberOfInputs() )
+//  {
+//    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Input index exceeds the admissible range." );
+//  }
+//  if( outputIdx >= numberOfOutputs() )
+//  {
+//    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Output index exceeds the admissible range." );
+//  }
+//  if( filterIdx >= maxNumberOfFilterEntries() )
+//  {
+//    throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Filter index exceeds the admissible range." );
+//  }
+//
+//  typename RoutingTable::iterator findIt = mRoutingTable.find( RoutingKey( inputIdx, outputIdx ) );
+//  if( findIt != mRoutingTable.end() )
+//  {
+//    findIt->second = RoutingValue( filterIdx, static_cast<SampleType>(gain) );
+//  }
+//  else
+//  {
+//    if( mRoutingTable.size( ) >= maxNumberOfRoutingPoints( ) )
+//    {
+//      throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
+//    }
+//    auto res = mRoutingTable.insert( std::make_pair( RoutingKey( inputIdx, outputIdx ),
+//      RoutingValue( filterIdx, static_cast<SampleType>(gain) ) ) );
+//    if( !res.second )
+//    {
+//      throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Adding new routing point failed." );
+//    }
+//  }
+//  assert( mRoutingTable.size( ) <= maxNumberOfRoutingPoints( ) );
+//}
+//
+//template< typename SampleType>
+//bool CoreConvolverUniform<SampleType>::removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx )
+//{
+//  std::size_t numErased = mRoutingTable.erase( RoutingKey( inputIdx, outputIdx ) );
+//  return (numErased > 0);
+//}
 
 template< typename SampleType>
 void CoreConvolverUniform<SampleType>::clearFilters()
