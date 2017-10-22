@@ -98,12 +98,12 @@ void FirFilterMatrix::clearRoutings()
 
 void FirFilterMatrix::addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, SampleType const gain )
 {
-  mConvolver->setRoutingEntry( rbbl::MultichannelConvolverUniform<SampleType>::RoutingEntry( inputIdx, outputIdx, filterIdx, gain ) );
+  mConvolver->setRoutingEntry( inputIdx, outputIdx, filterIdx, gain );
 }
 
 void FirFilterMatrix::addRouting( pml::FilterRoutingParameter const & routing )
 {
-  mConvolver->setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, routing.gainLinear );
+  mConvolver->setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, static_cast<SampleType>(routing.gainLinear) );
 }
 
 void FirFilterMatrix::addRoutings( pml::FilterRoutingList const & routings )

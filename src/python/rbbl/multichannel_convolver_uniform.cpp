@@ -95,13 +95,13 @@ void exportMultichannelConvolverUniform( pybind11::module & m, char const * name
     .def_property_readonly_static( "maxNumberOfFilterEntries", &MultichannelConvolverUniform<ElementType>::maxNumberOfFilterEntries )
     .def_property_readonly_static( "maxFilterLength", &MultichannelConvolverUniform<ElementType>::maxFilterLength )
     .def_property_readonly_static( "numberOfRoutingPoints", &MultichannelConvolverUniform<ElementType>::numberOfRoutingPoints )
-    .def_property_readonly_static( "numberOfRoutings", &MultichannelConvolverUniform<ElementType>::numberOfRoutings )
+//    .def_property_readonly_static( "numberOfRoutings", &MultichannelConvolverUniform<ElementType>::numberOfRoutings )
     .def( "process", []( MultichannelConvolverUniform<ElementType> & convolver, pybind11::array const & input ) 
        { return wrapProcess( convolver, input ); }, pybind11::arg("input") )
     .def( "clearRoutingTable", &MultichannelConvolverUniform<ElementType>::clearRoutingTable )
     .def( "initRoutingTable", &MultichannelConvolverUniform<ElementType>::initRoutingTable, pybind11::arg( "routings" ) )
     .def( "setRoutingEntry", static_cast<void(MultichannelConvolverUniform<ElementType>::*)(pml::FilterRoutingParameter const &)>(&MultichannelConvolverUniform<ElementType>::setRoutingEntry), pybind11::arg("routing") )
-    .def( "setRoutingEntry", static_cast<void(MultichannelConvolverUniform<ElementType>::*)(std::size_t, std::size_t, std::size_t, pml::FilterRoutingParameter::GainType)>
+    .def( "setRoutingEntry", static_cast<void(MultichannelConvolverUniform<ElementType>::*)(std::size_t, std::size_t, std::size_t, ElementType)>
       (&MultichannelConvolverUniform<ElementType>::setRoutingEntry),
       pybind11::arg( "inputIndex"), pybind11::arg( "outputIndex"), pybind11::arg( "filterIndex"), pybind11::arg( "gain") = 1.0 )
     .def( "removeRoutingEntry", static_cast<bool(MultichannelConvolverUniform<ElementType>::*)(std::size_t, std::size_t)>(&MultichannelConvolverUniform<ElementType>::removeRoutingEntry),

@@ -1,6 +1,7 @@
 # Python bindings for the standard VISR interface component
 
 set( SOURCES
+core_convolver_uniform.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 rbbl.cpp
