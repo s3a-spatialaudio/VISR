@@ -78,9 +78,7 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
 
 void SingleToMultichannelDiffusion::process()
 {
-  SampleType const * const input = mInput[ 0 ];
-
-// Diffusion processing
+  // Diffusion processing
   mDiffusionFilter->process( mInput.data(), mInput.channelStrideSamples(),
                              mOutput.data(), mOutput.channelStrideSamples(),
                              cVectorAlignmentSamples );
