@@ -36,10 +36,9 @@ CoreConvolverUniform( std::size_t numberOfInputs,
  , mInputBuffers( numberOfInputs, mDftSize, alignment )
  , mInputFDL( numberOfInputs, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
  , mFdlCycleOffset( 0 )
- ,  mTimeDomainTransformBuffer( mDftSize, mAlignment )
+ , mTimeDomainTransformBuffer( mDftSize, mAlignment )
  , mFilterPartitionsFrequencyDomain( maxFilterEntries, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
  , mFrequencyDomainAccumulator( mDftRepresentationSizePadded, mComplexAlignment )
- , mFrequencyDomainSum( mDftRepresentationSizePadded, mComplexAlignment )
  , mFftRepresentation( FftWrapperFactory<SampleType>::create( fftImplementation, mDftSize, alignment ) )
  , mFilterScalingFactor( calculateFilterScalingFactor() )
 {
@@ -166,7 +165,7 @@ void CoreConvolverUniform<SampleType>::processFilter( std::size_t inputIndex, st
   {
     if( efl::vectorMultiplyConstantAddInplace( static_cast<FrequencyDomainType>( gain ),
       mFrequencyDomainAccumulator.data(),
-      mFrequencyDomainSum.data(),
+      result,
       mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
       mComplexAlignment ) != efl::noError )
       //if( efl::vectorMultiplyConstantAddInplace<SampleType>( static_cast<SampleType>(gain),
@@ -182,7 +181,7 @@ void CoreConvolverUniform<SampleType>::processFilter( std::size_t inputIndex, st
   {
     if( efl::vectorMultiplyConstant( static_cast<FrequencyDomainType>( gain ),
       mFrequencyDomainAccumulator.data(),
-      mFrequencyDomainSum.data(),
+      result,
       mDftRepresentationSizePadded, // slightly more arithmetic operations than required, but likely faster due to better use of vectorized operations.
       mComplexAlignment ) != efl::noError )
       //if( efl::vectorMultiplyConstantAddInplace<SampleType>( static_cast<SampleType>(gain),

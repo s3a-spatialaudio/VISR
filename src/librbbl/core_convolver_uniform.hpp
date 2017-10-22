@@ -344,11 +344,6 @@ private:
    */
   efl::BasicVector<std::complex<SampleType> > mFrequencyDomainAccumulator;
 
-  /**
-   * Temporarily used buffer to combine all contributions to an output.
-   */
-  efl::BasicVector<std::complex<SampleType> > mFrequencyDomainSum;
-
   std::unique_ptr<rbbl::FftWrapperBase<SampleType> > mFftRepresentation;
 
   /**
