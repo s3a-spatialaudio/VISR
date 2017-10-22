@@ -452,6 +452,8 @@ ErrorCode vectorMultiplyConstant( T constantValue,
 /** Explicit instantiation for types float and double */
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstant( float, float const * const, float * const, std::size_t, std::size_t );
 template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstant( double, double const * const, double * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstant( std::complex<float>, std::complex<float> const * const, std::complex<float> * const, std::size_t, std::size_t );
+template VISR_EFL_LIBRARY_SYMBOL ErrorCode vectorMultiplyConstant( std::complex<double>, std::complex<double> const * const, std::complex<double> * const, std::size_t, std::size_t );
 
 template<typename T>
 ErrorCode vectorMultiplyConstantInplace( T constantValue,
