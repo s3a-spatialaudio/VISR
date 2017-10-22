@@ -15,27 +15,28 @@ class DynamicBinauralRendererSerial(visr.CompositeComponent ):
                      context, name, parent, 
                      numberOfObjects,
                      port,
-                     baud,
+                     baud, 
+                     sofaFile,
                      enableSerial = True,
-                     dynamicITD = True,
-                     dynamicILD = True,
-                     hrirInterpolation = True
+                     dynITD = True,
+                     dynILD = True,
+                     hrirInterp = True
                      ):
             super( DynamicBinauralRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-            self.objectVectorInput = visr.ParameterInput( "objectDataInput", self, pml.ObjectVector.staticType,
+            self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
                                                          pml.DoubleBufferingProtocol.staticType,
                                                          pml.EmptyParameterConfig() )
 
-            self.dynamicBinauralRenderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", self, numberOfObjects, 
+            self.dynamicBinauralRenderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", self, numberOfObjects, sofaFile,
                                                                      headTracking = enableSerial,
-                                                                     dynITD = dynamicITD,
-                                                                     dynILD = dynamicILD,
-                                                                     hrirInterp = hrirInterpolation
+                                                                     dynITD = dynITD,
+                                                                     dynILD = dynILD,
+                                                                     hrirInterp = hrirInterp
                                                                    )
             if enableSerial:
-                self.serialReader = serialReader(context, "Controller", self,port, baud )
+                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True )
                 self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
 
             self.parameterConnection( self.objectVectorInput, self.dynamicBinauralRenderer.parameterPort("objectVector"))

@@ -15,25 +15,54 @@ from dynamic_binaural_renderer_serial import DynamicBinauralRendererSerial
 import time
 import visr
 import rrl
+from rotationFunctions import deg2rad
 import objectmodel
 import numpy as np
 import audiointerfaces as ai
+import os
+from urllib.request import urlretrieve
+from extractDelayInSofaFile import extractDelayInSofaFile
 
-fs = 44100
+############ CONFIG ###############  
+fs = 48000
 blockSize = 1024
-numBinauralObjects = 60
-numOutputChannels = 2
+numBinauralObjects = 1
+numOutputChannels = 2;
+
+# switch dynamic tracking on and off.
+useTracking = True
+useDynamicITD = True
+useDynamicILD = False
+useHRIRinterpolation = True
+
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
+###################################
+
 
 context = visr.SignalFlowContext(blockSize, fs )
-enableTracking = True
-enableInterpolation = True
-controller = DynamicBinauralRendererSerial( context, "Controller", None, numBinauralObjects, port, baud, 
-                                           enableSerial = enableTracking, 
-                                           dynamicITD = True,
-                                           dynamicILD = False,
-                                           hrirInterpolation = enableInterpolation)
+
+sofaFile = './data/dtf b_nh169.sofa'
+
+if not os.path.exists( sofaFile ):
+    urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',
+                       sofaFile )
+
+if useDynamicITD:
+    sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
+    if not os.path.exists( sofaFileTD ):
+        extractDelayInSofaFile( sofaFile, sofaFileTD )
+    sofaFile = sofaFileTD        
+
+controller = DynamicBinauralRendererSerial( context, "Controller", None, 
+                                           numBinauralObjects, 
+                                           port, 
+                                           baud, 
+                                           sofaFile,
+                                           enableSerial = useTracking, 
+                                           dynITD = useDynamicITD,
+                                           dynILD = False,
+                                           hrirInterp = useHRIRinterpolation)
 #to be completed
 
 result,messages = rrl.checkConnectionIntegrity(controller)
@@ -42,17 +71,21 @@ if not result:
 
 flow = rrl.AudioSignalFlow( controller )
 
-paramInput = flow.parameterReceivePort('objectDataInput')
+paramInput = flow.parameterReceivePort('objectVector')
 
 az = 0
 el = 0
 r = 1
-x,y,z = sph2cart( az, el, r )
+x,y,z = sph2cart( deg2rad(az), deg2rad(el), r )
 ps1 = objectmodel.PointSource(0)
 ps1.x = x
 ps1.y = y
 ps1.z = z
-ps1.level = 0.5
+#same level as HRIR renderer
+#ps1.level = 0.8
+
+#same level as HOA renderer
+ps1.level = 5
 ps1.groupId = 5
 ps1.priority = 5
 ps1.resetNumberOfChannels(1)

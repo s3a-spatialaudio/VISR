@@ -164,7 +164,7 @@ def rotationMatrixReorderingACN(r):
 ##testing 
 #np.set_printoptions(linewidth=10000)
 #np.set_printoptions(threshold=np.nan)
-#R_1 = calcRotationMatrix(np.array([0,0,np.pi/2]))
+#R_1 = calcRotationMatrix(np.array([np.pi/2,0,0]))
 #R_1 = rotationMatrixReorderingACN(R_1)
 #
 #print(R_1)
