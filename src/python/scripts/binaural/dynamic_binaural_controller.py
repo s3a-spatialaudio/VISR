@@ -161,8 +161,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
                         self.sourcePos[ch,:] = posNormed
                         self.levels[ch] = src.level
                     else:
-                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')                            
-                        break              
+                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
+                        break
 #                        print(index)
 
             # TODO: This belongs somewhere else in the recompute logic.
@@ -312,12 +312,12 @@ class DynamicBinauralController( visr.AtomicComponent ):
                         self.filterOutputProtocol.enqueue( leftCmd )
                         self.filterOutputProtocol.enqueue( rightCmd )
                         self.lastFilters[chIdx] = indices[chIdx]
-    
-                        if self.dynamicITD:
-                            delays = self.dynamicDelays[indices[chIdx],:]
-                            delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
-                        else:
-                            delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
+                if self.dynamicITD:
+                    delays = self.dynamicDelays[indices,:]
+                    delayVec[ 0:self.numberOfObjects ] = delays[:,0]
+                    delayVec[ self.numberOfObjects: ] = delays[:,1]
+                else:
+                    delayVec[...] = 0.
 
             self.gainOutputProtocol.swapBuffers()
             self.delayOutputProtocol.swapBuffers()
