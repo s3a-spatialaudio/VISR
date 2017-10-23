@@ -99,12 +99,6 @@ private:
    * A one-to-N FIR filter for diffusion.
    */
   std::unique_ptr<rbbl::MultichannelConvolverUniform<SampleType> > mDiffusionFilter;
-
-  /**
-   * Buffer to hold the pointers to the channels of the output port.
-   * @todo Change if the MultichannelConvolver class offers a stride-based interface
-   */
-  std::valarray<SampleType*> mOutputChannels;
 };
 
 } // namespace rcl

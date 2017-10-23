@@ -99,10 +99,6 @@ public:
 
   std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
 
-  void process( SampleType const * const * input,
-                SampleType * const * output,
-                std::size_t alignment = 0 );
-
   void process( SampleType const * const input, std::size_t inputStride,
                 SampleType * const output, std::size_t outputStride,
                 std::size_t alignment = 0 );
@@ -173,10 +169,6 @@ public:
   void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
 
 private:
-
-  void processInput( SampleType const * const * input, std::size_t alignment );
-
-  void processOutput( SampleType * const * output, std::size_t alignment );
 
   void processInput( SampleType const * const input, std::size_t channelStride, std::size_t alignment );
 

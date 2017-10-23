@@ -238,6 +238,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                        print(self.hrirs[_indices,:,:].shape)
 #                        print(transp.shape)
 #                        print(np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T)).shape)
+                # _interpFilters = np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T))
+                # TODO: Check whether the explicit np.array() construction is necessary (incurs a copy)
                 _interpFilters = np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T))
                 
                 for chIdx in range(0,self.numberOfObjects):
@@ -247,10 +249,13 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     self.filterOutputProtocol.enqueue( _rightInterpolant )
                  
                 if self.dynamicITD:
-                    delays = np.dot(self.dynamicDelays[_indices,:].T,_gnorm)
-                    delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
-    #                                print(delays*1000)
-    #                                print("[%f %f]"%(delayVec[0],delayVec[1]))
+                    # Apparently not working
+                    # delays = np.dot(self.dynamicDelays[_indices,:].T,_gnorm)
+                    # delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
+                    # Note: matmul() adds a third (singleton) dimension to the result, therefore we have to squeeze it.
+                    delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), _gnorm[...,np.newaxis] ))
+                    delayVec[0:self.numberOfObjects] = delays[:,0]
+                    delayVec[self.numberOfObjects:] = delays[:,1]
                 else:
                     delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
         

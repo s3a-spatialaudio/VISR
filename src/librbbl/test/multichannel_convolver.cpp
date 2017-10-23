@@ -52,23 +52,13 @@ BOOST_AUTO_TEST_CASE( MultichannelConvolver )
   Conv convolver( cNumberOfInputs, cNumberOfOutputs, cBlockLength, cFilterLength, cMaxRoutings,
     cNumFilters, routings, filters, alignment, "kissfft" );
 
-  std::vector<SampleType const *> inputSignalPtr( cNumberOfInputs );
-  std::vector<SampleType *> outputSignalPtr( cNumberOfOutputs );
-
   BOOST_CHECK_MESSAGE( cSignalLength % cBlockLength == 0 , "The signal length must be an integral multiple of the block size." );
   std::size_t const cNumBlocks = cSignalLength / cBlockLength;
   for( std::size_t blockIdx( 0 ); blockIdx < cNumBlocks; ++blockIdx )
   {
     const std::size_t signalIdx = blockIdx * cBlockLength;
-    for( std::size_t inIdx( 0 ); inIdx < cNumberOfInputs; ++inIdx )
-    {
-      inputSignalPtr[inIdx] = inputSignal.row( inIdx ) + signalIdx;
-    }
-    for( std::size_t outIdx( 0 ); outIdx < cNumberOfOutputs; ++outIdx )
-    {
-      outputSignalPtr[outIdx] = outputSignal.row( outIdx ) + signalIdx;
-    }
-    convolver.process( &inputSignalPtr[0], &outputSignalPtr[0] );
+    convolver.process( inputSignal.data() + signalIdx, inputSignal.stride(),
+                       outputSignal.data() + signalIdx, outputSignal.stride() );
   }
 
   for( std::size_t chIdx( 0 ); chIdx < cNumberOfOutputs; ++chIdx )
