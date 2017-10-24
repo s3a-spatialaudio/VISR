@@ -24,7 +24,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                      headTracking = True,
                      dynITD = True,
                      dynILD = True,
-                     hrirInterp = True
+                     hrirInterp = True,
+                     filterCrossfading = False, # Use a crossfading FIR filter matrix to avoid switching artifacts.
                      ):
             super( DynamicBinauralRenderer, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -71,16 +72,28 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                 filterRouting.addRouting( idx, idx, idx, 1.0 )
                 filterRouting.addRouting( idx, idx+numberOfObjects, idx+numberOfObjects, 1.0 )
                 
-            firLength = hrirData.shape[1]
-            self.convolver = rcl.FirFilterMatrix( context, 'covolutionEngine', self )
-            self.convolver.setup( numberOfInputs=numberOfObjects,
-                             numberOfOutputs=2*numberOfObjects,
-                             maxFilters=2*numberOfObjects,
-                             filterLength=firLength,
-                             maxRoutings=2*numberOfObjects,
-                             routings=filterRouting,
-                             controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
-                             )
+            firLength = hrirData.shape[-1]
+            if filterCrossfading:
+                self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=numberOfObjects,
+                                                     numberOfOutputs=2*numberOfObjects,
+                                                     maxFilters=2*numberOfObjects,
+                                                     filterLength=firLength,
+                                                     transitionSamples=context.period,
+                                                     maxRoutings=2*numberOfObjects,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.CrossfadingFirFilterMatrix.ControlPortConfig.Filters
+                                                     )
+            else:
+                self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=numberOfObjects,
+                                                     numberOfOutputs=2*numberOfObjects,
+                                                     maxFilters=2*numberOfObjects,
+                                                     filterLength=firLength,
+                                                     maxRoutings=2*numberOfObjects,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                     )
             self.audioConnection(self.objectSignalInput, self.convolver.audioPort("in") )
             self.parameterConnection(self.dynamicBinauraController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
 

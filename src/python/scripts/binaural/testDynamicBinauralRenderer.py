@@ -28,18 +28,19 @@ import matplotlib.pyplot as plt
       
 ############ CONFIG ###############        
 fs = 48000
-blockSize = 512
+blockSize = 1024
 numBinauralObjects = 64
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 72;
 
-useSourceAutoMovement = False
+useSourceAutoMovement = True
 useTracking = True
 useDynamicITD = True
 useDynamicILD = False
 useHRIRinterpolation = True
-useSerialPort = True
+useFilterCrossfading = False
+useSerialPort = False
 ###################################
 
 idMatrix = np.identity(3)
@@ -61,7 +62,8 @@ if useDynamicITD:
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 if useSerialPort:
-    port = "/dev/cu.usbserial-AJ03GSC8"
+    port = "/dev/ttyUSB0"
+
     baud = 57600
     controller = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None, 
                                            numBinauralObjects, 
@@ -81,6 +83,7 @@ else:
                                       dynITD = useDynamicITD,
                                       dynILD = useDynamicILD,
                                       hrirInterp = useHRIRinterpolation,
+                                      filterCrossfading = useFilterCrossfading
                                       )
 #to be completed
 
@@ -143,13 +146,18 @@ for blockIdx in range(0,numBlocks):
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]
 #          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
-          trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
+          trackingInput.data().orientation = [-headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
           trackingInput.swapBuffers()                
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 print("fs: %d\t #obj: %d\t ITD-intrp: %d-%d\t #blocks: %d\t blocksize: %d\t expected:%f sec.\t\t Got %f sec"%(fs,numBinauralObjects,useDynamicITD,useHRIRinterpolation,numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
 #print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
-#plt.figure()
-#plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
-#plt.show()
+plt.figure()
+plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
+plt.show()
+
+plt.figure()
+plt.plot( t[:-1], np.diff(outputSignal[0,:]), 'bo-', t[:-1], np.diff(outputSignal[1,:]), 'ro-')
+plt.show()
+plt.title( 'Finite differences' )
