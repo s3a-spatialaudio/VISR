@@ -254,7 +254,7 @@ private:
 
   /**
    * The alignment used in all data members.
-   * Also used for the representation of the FDL and the frequency-domain filter representation, which stores all partitions in a single matrix row, 
+   * Also used for the representation of the FDL and the frequency-domain filter representation, which stores all partitions in a single matrix row,
    * possibly using zero padding to enforce the required alignment for each partition.
    */
   std::size_t const mAlignment;
@@ -280,56 +280,16 @@ private:
 
   std::size_t const mDftRepresentationSizePadded;
 
-  //struct RoutingKey
-  //{
-  //  explicit RoutingKey( std::size_t in, std::size_t out )
-  //  : inputIdx( in ), outputIdx( out )
-  //  {
-  //  }
-  //  std::size_t inputIdx;
-  //  std::size_t outputIdx;
-  //};
-  ///**
-  // * Function object for ordering the routings within the routing table.
-  // * By grouping the entries according to the output indices, the ordering is 
-  // * specifically tailored to the execution of the process() function.
-  // */
-  //struct CompareRoutings
-  //{
-  //  bool operator()( RoutingKey const & lhs, RoutingKey const & rhs ) const
-  //  {
-  //    if( lhs.outputIdx == rhs.outputIdx )
-  //    {
-  //      return lhs.inputIdx < rhs.inputIdx;
-  //    }
-  //    else
-  //    {
-  //      return lhs.outputIdx < rhs.outputIdx;
-  //    }
-  //  }
-  //};
-
-  //struct RoutingValue
-  //{
-  //  RoutingValue( std::size_t idx, SampleType gain )
-  //  : filterIdx( idx ), gainLinear( gain ) {}
-  //  std::size_t filterIdx;
-  //  SampleType gainLinear;
-  //};
-  //using RoutingTable = std::map<RoutingKey, RoutingValue, CompareRoutings>;
-
-  //RoutingTable mRoutingTable;
-
   rbbl::CircularBuffer<SampleType> mInputBuffers;
 
   efl::BasicMatrix<std::complex<SampleType> > mInputFDL;
-  
+
   /**
-   * Cyclic counter denoting the current block offset of the zeroth 
+   * Cyclic counter denoting the current block offset of the zeroth
    * frequency-domain input block within the rows of \p mInputFDL.
    */
   std::size_t mFdlCycleOffset;
-  
+
   /**
    * Temporary memory buffer for transforming filter partitions and holding the results of
    * the inverse transformation.
@@ -354,7 +314,7 @@ private:
 };
 
 template<typename SampleType>
-/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType * 
+/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType *
 CoreConvolverUniform<SampleType>::getFdlBlock( std::size_t inputIdx, std::size_t blockIdx )
 {
   assert( inputIdx < mNumberOfInputs );
@@ -364,7 +324,7 @@ CoreConvolverUniform<SampleType>::getFdlBlock( std::size_t inputIdx, std::size_t
 }
 
 template<typename SampleType>
-/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType const * 
+/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType const *
 CoreConvolverUniform<SampleType>::getFdlBlock( std::size_t inputIdx, std::size_t blockIdx ) const
 {
   assert( inputIdx < mNumberOfInputs );
@@ -374,7 +334,7 @@ CoreConvolverUniform<SampleType>::getFdlBlock( std::size_t inputIdx, std::size_t
 }
 
 template<typename SampleType>
-/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType * 
+/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType *
 CoreConvolverUniform<SampleType>::
 getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx )
 {
@@ -385,7 +345,7 @@ getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx )
 }
 
 template<typename SampleType>
-/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType const * 
+/*inline*/ typename CoreConvolverUniform<SampleType>::FrequencyDomainType const *
 CoreConvolverUniform<SampleType>::getFdFilterPartition( std::size_t filterIdx, std::size_t blockIdx ) const
 {
   assert( filterIdx < maxNumberOfFilterEntries( ) );

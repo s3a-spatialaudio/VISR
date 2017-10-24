@@ -376,9 +376,9 @@ template< typename SampleType >
 void CoreConvolverUniform<SampleType>::
 transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment /*= 0*/ ) const
 {
-  if( irLength >= maxFilterLength() )
+  if( irLength > maxFilterLength() )
   {
-    std::invalid_argument( "CoreConvolverUniform::transformImpulseResponse(): impulse response length exceeds maximum admissible values." );
+    throw std::invalid_argument( "CoreConvolverUniform::transformImpulseResponse(): impulse response length exceeds maximum admissible values." );
   }
   for( std::size_t partitionIdx( 0 ); partitionIdx < mNumberOfFilterPartitions; ++partitionIdx )
   {
@@ -388,7 +388,7 @@ transformImpulseResponse( SampleType const * ir, std::size_t irLength, Frequency
     if( endIdx > startIdx )
     {
       // The following multiply calls assumes that the blocklength is a multiple of the alignment.
-      // Multiply the the filter by the computed scaling constants to compendate for the FFT normalisation.
+      // Multiply the the filter by the computed scaling constants to compensate for the FFT normalisation.
       if( efl::vectorMultiplyConstant( mFilterScalingFactor, ir + startIdx, mTimeDomainTransformBuffer.data(), endIdx - startIdx, std::min( mAlignment, alignment ) ) != efl::noError )
       {
         std::runtime_error( "CoreConvolverUniform::transformImpulseResponse(): Error while copying data." );
