@@ -26,7 +26,7 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
  : mCoreConvolver( numberOfInputs, numberOfOutputs, blockLength, maxFilterLength,
                    maxFilterEntries, initialFilters, alignment, fftImplementation)
   , mMaxNumberOfRoutingPoints( maxRoutingPoints )
-  , mFrequencyDomainOutput( numberOfOutputs, mCoreConvolver.dftRepresentationSize() )
+  , mFrequencyDomainOutput( numberOfOutputs, mCoreConvolver.dftRepresentationSize(), mCoreConvolver.complexAlignment() )
 {
   initRoutingTable( initialRoutings );
 }
@@ -119,7 +119,7 @@ void MultichannelConvolverUniform<SampleType>::setRoutingEntry( std::size_t inpu
   {
     throw std::invalid_argument( "CoreConvolverUniform::setRoutingEntry(): Maximum number of routing points already reached." );
   }
-  auto res = mRoutingTable.insert( std::move(newEntry) );
+  mRoutingTable.insert( std::move(newEntry) );
   assert( mRoutingTable.size() <= maxNumberOfRoutingPoints() );
 }
 
