@@ -122,7 +122,7 @@ ErrorCode vectorMultiply( T const * const factor1,
  */
 template<typename T> VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorMultiplyInplace( T const * const factor1,
-                                 T const *  factor2Result,
+                                 T * const factor2Result,
                                  std::size_t numElements,
                                  std::size_t alignment = 0 );
 
