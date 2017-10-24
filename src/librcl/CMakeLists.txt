@@ -4,6 +4,7 @@ SET( SOURCES
 add.cpp
 biquad_iir_filter.cpp
 channel_object_routing_calculator.cpp
+crossfading_fir_filter_matrix.cpp
 delay_matrix.cpp
 delay_vector.cpp
 diffusion_gain_calculator.cpp
@@ -33,6 +34,7 @@ SET( HEADERS
 add.hpp
 biquad_iir_filter.hpp
 channel_object_routing_calculator.hpp
+crossfading_fir_filter_matrix.hpp
 delay_matrix.hpp
 delay_vector.hpp
 diffusion_gain_calculator.hpp

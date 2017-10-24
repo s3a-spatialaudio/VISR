@@ -3,6 +3,7 @@
 set( SOURCES
 add.cpp
 biquad_iir_filter.cpp
+crossfading_fir_filter_matrix.cpp
 delay_matrix.cpp
 delay_vector.cpp
 fir_filter_matrix.cpp

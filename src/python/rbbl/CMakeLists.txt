@@ -2,6 +2,7 @@
 
 set( SOURCES
 core_convolver_uniform.cpp
+crossfading_convolver_uniform.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 rbbl.cpp

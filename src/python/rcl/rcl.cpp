@@ -12,6 +12,7 @@ namespace rcl
 {
   void exportAdd( pybind11::module & m );
   void exportBiquadIirFilter( pybind11::module & m );
+  void exportCrossfadingFirFilterMatrix( pybind11::module & m );
   void exportDelayVector( pybind11::module & m );
   void exportDelayMatrix( pybind11::module & m );
   void exportFirFilterMatrix( pybind11::module & m );
@@ -38,6 +39,7 @@ PYBIND11_MODULE(rcl, m)
   using namespace visr::python::rcl;
   exportAdd( m );
   exportBiquadIirFilter( m );
+  exportCrossfadingFirFilterMatrix( m );
   exportDelayMatrix( m );
   exportDelayVector( m );
   exportFirFilterMatrix( m );
