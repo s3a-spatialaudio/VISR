@@ -3,15 +3,22 @@
 #ifndef VISR_LIBRBBL_CROSSFADING_CONVOLVER_UNIFORM_HPP_INCLUDED
 #define VISR_LIBRBBL_CROSSFADING_CONVOLVER_UNIFORM_HPP_INCLUDED
 
+#include "core_convolver_uniform.hpp"
 #include "export_symbols.hpp"
 
-#include "multichannel_convolver_uniform.hpp"
-
-#include "libefl/basic_matrix.hpp"
-#include "libefl/basic_vector.hpp"
+#include <libefl/basic_matrix.hpp>
+#include <libefl/basic_vector.hpp>
 
 #include <libpml/filter_routing_parameter.hpp>
 
+#include <librbbl/circular_buffer.hpp>
+#include <librbbl/fft_wrapper_base.hpp>
+
+#include <cassert>
+#include <complex>
+#include <initializer_list>
+#include <map>
+#include <memory>
 #include <vector>
 
 namespace visr
@@ -30,25 +37,6 @@ class VISR_RBBL_LIBRARY_SYMBOL CrossfadingConvolverUniform
 {
 public:
   /**
-   * The representation for the complex frequency-domain elements.
-   * Note: The used FFT libraries depend on the fact that arrays of this type
-   * can be cast into arrays of the corresponding real types with interleaved
-   * real and imaginary elements.
-   * SampleType arrays with interleaved real and imaginary components.
-   */
-  using FrequencyDomainType = typename FftWrapperBase<SampleType>::FrequencyDomainType;
-
-  /**
-   * The data type for specifying routing points.
-   */
-  using RoutingEntry = pml::FilterRoutingParameter;
-
-  /**
-    The data type for setting sets of routing points.
-   */
-  using RoutingList = pml::FilterRoutingList;
-
-  /**
    * Constructor.
    * @param numberOfInputs The number of input signals processed.
    * @param numberOfOutputs The number of output channels produced.
@@ -64,35 +52,35 @@ public:
    * @param fftImplementation A string to determine the FFT wrapper to be used. The default value results in using the default FFT implementation for the given data type.
    */
   explicit CrossfadingConvolverUniform( std::size_t numberOfInputs,
-                                        std::size_t numberOfOutputs,
-                                        std::size_t blockLength,
-                                        std::size_t maxFilterLength,
-                                        std::size_t maxRoutingPoints,
-                                        std::size_t maxFilterEntries,
-                                        std::size_t numCrossfadingSamples,
-                                        RoutingList const & initialRoutings = RoutingList(),
-                                        efl::BasicMatrix<SampleType> const & initialFilters = efl::BasicMatrix<SampleType>(),
-                                        std::size_t alignment = 0,
-                                        char const * fftImplementation = "default" );
+                                         std::size_t numberOfOutputs,
+                                         std::size_t blockLength,
+                                         std::size_t maxFilterLength,
+                                         std::size_t maxRoutingPoints,
+                                         std::size_t maxFilterEntries,
+                                         std::size_t transitionSamples,
+                                         pml::FilterRoutingList const & initialRoutings = pml::FilterRoutingList(),
+                                         efl::BasicMatrix<SampleType> const & initialFilters = efl::BasicMatrix<SampleType>(),
+                                         std::size_t alignment = 0,
+                                         char const * fftImplementation = "default" );
 
   /**
    * Destructor.
    */
   ~CrossfadingConvolverUniform();
 
-  std::size_t numberOfInputs() const { return mCore.numberOfInputs(); }
+  std::size_t numberOfInputs() const { return mCoreConvolver.numberOfInputs(); }
 
-  std::size_t numberOfOutputs() const { return mCore.numberOfOutputs() / 2; }
+  std::size_t numberOfOutputs() const { return mCoreConvolver.numberOfOutputs(); }
 
-  std::size_t blockLength() const { return mCore.blockLength(); }
+  std::size_t blockLength() const { return mCoreConvolver.blockLength(); }
 
-  std::size_t maxNumberOfRoutingPoints() const { return mCore.maxNumberOfRoutingPoints(); }
+  std::size_t maxNumberOfRoutingPoints() const { return mMaxNumberOfRoutingPoints; }
 
-  std::size_t maxNumberOfFilterEntries() const { return mCore.maxNumberOfFilterEntries() / 2; }
+  std::size_t maxNumberOfFilterEntries() const { return mCoreConvolver.maxNumberOfFilterEntries(); }
 
-  std::size_t maxFilterLength() const { return mCore.maxFilterLength(); }
+  std::size_t maxFilterLength() const { return mCoreConvolver.maxFilterLength(); }
 
-  std::size_t numberOfRoutingPoints( ) const { return mCore.numberOfRoutingPoints() / 2;  }
+  std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
 
   void process( SampleType const * const input, std::size_t inputStride,
                 SampleType * const output, std::size_t outputStride,
@@ -114,14 +102,14 @@ public:
   * @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void initRoutingTable( RoutingList const & routings );
+  void initRoutingTable( pml::FilterRoutingList const & routings );
 
   /**
   * Add a new routing to the routing table.
   * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void setRoutingEntry( RoutingEntry const & routing );
+  void setRoutingEntry( pml::FilterRoutingParameter const & routing );
 
   /**
   * Add a new routing to the routing table.
@@ -138,11 +126,7 @@ public:
   /**
   * Query the currently active number of routings.
   */
-  std::size_t numberOfRoutings( ) const
-  {
-    // assert( mCore.numberOfRoutings() % 2 == 0 );
-    return 0; //  mCore.numberOfRoutings() / 2;
-  }
+//  std::size_t numberOfRoutings( ) const { return mCoreConvolver.numberOfRoutings(); }
   //@}
 
   /**
@@ -168,25 +152,74 @@ public:
   void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
 
 private:
-  void processInput( SampleType const * const input, std::size_t channelStride, std::size_t alignment );
+  /**
+   * Internal function to apply the filters and to set the oputputs.
+   */
+  void processOutputs( SampleType * const output, std::size_t outputChannelStride,
+                       std::size_t alignment );
 
-  void processOutput( SampleType * const output, std::size_t channelStride, std::size_t alignment );
+  CoreConvolverUniform<SampleType> mCoreConvolver;
 
-  std::size_t const mNumTransitionBlocks;
+  struct RoutingEntry
+  {
+    explicit RoutingEntry( std::size_t in, std::size_t out, std::size_t filter, SampleType gain = 1.0f )
+      : inputIdx( in ), outputIdx( out ), filterIdx( filter ), gainLinear( gain )
+    {
+    }
+    std::size_t inputIdx;
+    std::size_t outputIdx;
+    std::size_t filterIdx;
+    SampleType gainLinear;
+  };
+  /**
+  * Function object for ordering the routings within the routing table.
+  * By grouping the entries according to the output indices, the ordering is
+  * specifically tailored to the execution of the process() function.
+  */
+  struct CompareRoutings
+  {
+    bool operator()( RoutingEntry const & lhs, RoutingEntry const & rhs ) const
+    {
+      if( lhs.outputIdx == rhs.outputIdx )
+      {
+        return lhs.inputIdx < rhs.inputIdx;
+      }
+      else
+      {
+        return lhs.outputIdx < rhs.outputIdx;
+      }
+    }
+  };
 
-  std::vector<std::size_t> mCurrentTransitionBlock;
+  using RoutingTable = std::multiset<RoutingEntry, CompareRoutings>;
 
-  std::vector<std::size_t> mStartFilterSetIndex;
+  RoutingTable mRoutingTable;
 
-  std::vector<std::size_t> mFinalFilterSetIndex;
+  std::size_t const mMaxNumberOfRoutingPoints;
 
-  efl::BasicVector<SampleType> mCrossfadingRamp;
+  /**
+   * Dimension: 2 x dftRepresentationSize
+   */
+  efl::BasicMatrix< typename CoreConvolverUniform<SampleType>::FrequencyDomainType > mFrequencyDomainOutput;
 
-  efl::BasicMatrix<SampleType> mRawFilterOutputs;
+  efl::BasicMatrix<SampleType> mTimeDomainTempOutput;
 
-  MultichannelConvolverUniform<SampleType> mCore;
-}; 
+  /**
+   * Crossfading-related data members
+   */
+  //@{
 
+  std::size_t const mMaxNumFilters;
+
+  std::size_t const mNumRampBlocks;
+
+  std::vector<std::size_t> mCurrentFilterOutput;
+
+  std::vector<std::size_t> mCurrentRampBlock;
+
+  efl::BasicMatrix<SampleType> mCrossoverRamps;
+  //@}
+};
 } // namespace rbbl
 } // namespace visr
   
