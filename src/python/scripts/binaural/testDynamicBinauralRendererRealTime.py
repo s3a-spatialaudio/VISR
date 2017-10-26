@@ -26,7 +26,7 @@ from extractDelayInSofaFile import extractDelayInSofaFile
 ############ CONFIG ###############  
 fs = 48000
 blockSize = 1024
-numBinauralObjects = 1
+numBinauralObjects = 64
 numOutputChannels = 2;
 
 # switch dynamic tracking on and off.

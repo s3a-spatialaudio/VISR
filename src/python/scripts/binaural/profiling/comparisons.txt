@@ -40,3 +40,43 @@ fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512 
 
 useSerialPort = True
 fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 1.116276 sec
+
+
+vectorisation
+fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 1.170192 sec
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 2.158524 sec
+fs: 48000        #obj: 64        ITD-intrp: 1-1  #blocks: 72     blocksize: 512  expected:0.768000 sec.          Got 1.339489 sec
+
