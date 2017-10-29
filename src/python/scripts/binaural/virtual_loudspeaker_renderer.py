@@ -12,8 +12,11 @@ import rcl
 
 #import objectmodel as om
 
-from readSofa import readSofaFileBRIR
+from readSofa import readSofaFile
+
 from virtual_loudspeaker_controller import VirtualLoudspeakerController
+
+import numpy as np
 
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
     
@@ -23,8 +26,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                      sofaFile,
                      headTracking = True,
                      dynITD = False,
-                     dynILD = False,
-                     hrirInterp = False
+                     hrirInterp = False,
+                     irTruncationLength = None
                      ):
             super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
@@ -34,27 +37,29 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
-            
-         
-           
-            [ hrirPos, hrirData, delays ] = readSofaFileBRIR( sofaFile )  
-            
+
+            [ hrirPos, hrirData, hrirDelays ] = readSofaFile( sofaFile,
+                                                             truncationLength=irTruncationLength,
+                                                             truncationWindowLength=16 )
+
+            # Additional safety check (is tested in the controller anyway)
             if dynITD:
-                if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
-                    raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
-            
-#            print(hrirPos)
-#            print(delays)
-#            
-#            print(hrirPos[0])
+                if (hrirDelays is None) or (hrirDelays.ndim != hrirData.ndim-1) or (hrirDelays.shape != hrirData.shape[0:-1] ):
+                    raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must match the first dimensions of the hrir data matrix.' )
+
+            # The HRIR positions contained in the SOFA file are not the different head rotations, but the loudspeaker positions.
+            # Therefore we assume a equidistant grid in the horizontal plane (conventions as in the Sound Scape Renderer)
+            numHrirPos = hrirData.shape[0];
+            hrirAz = np.arange( 0, 2*np.pi, (2.0*np.pi)/numHrirPos )
+            hrirPos = np.stack( (hrirAz, np.ones(numHrirPos)), 1 )
+
             self.virtualLoudspeakerController = VirtualLoudspeakerController( context, "VirtualLoudspeakerController", self,
                                                                       numberOfLoudspeakers,
                                                                       hrirPos, hrirData,
                                                                       useHeadTracking = headTracking,
                                                                       dynamicITD = dynITD,
-                                                                      dynamicILD = dynILD,
                                                                       hrirInterpolation = hrirInterp,
-                                                                      delays = delays
+                                                                      delays = hrirDelays
                                                                       )
             
             if headTracking:
@@ -68,27 +73,25 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 filterRouting.addRouting( idx, idx, idx, 1.0 )
                 filterRouting.addRouting( idx, idx+numberOfLoudspeakers, idx+numberOfLoudspeakers, 1.0 )
                 
-            firLength = hrirData.shape[1]
-            self.convolver = rcl.FirFilterMatrix( context, 'covolutionEngine', self )
-            self.convolver.setup( numberOfInputs=numberOfLoudspeakers,
-                                 numberOfOutputs=2*numberOfLoudspeakers,
-                                 maxFilters=2*numberOfLoudspeakers,
-                                 filterLength=firLength,
-                                 maxRoutings=2*numberOfLoudspeakers,
-                                 routings=filterRouting,
-                                 controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
-                                 )
-          
+            firLength = hrirData.shape[-1]
+            self.convolver = rcl.FirFilterMatrix( context, 'covolutionEngine', self,
+                                                 numberOfInputs=numberOfLoudspeakers,
+                                                 numberOfOutputs=2*numberOfLoudspeakers,
+                                                 maxFilters=2*numberOfLoudspeakers,
+                                                 filterLength=firLength,
+                                                 maxRoutings=2*numberOfLoudspeakers,
+                                                 routings=filterRouting,
+                                                 controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                 )
+
             self.audioConnection(self.objectSignalInput, self.convolver.audioPort("in") )
             self.parameterConnection(self.virtualLoudspeakerController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
 
-
-            self.delayVector = rcl.DelayVector( context, "delayVector", self )
-            self.delayVector.setup(numberOfLoudspeakers*2, interpolationType="lagrangeOrder3", initialDelay=0,
-             controlInputs=True, 
-             methodDelayPolicy=rcl.DelayMatrix.MethodDelayPolicy.Add,
-             initialGain=1.0, 
-             interpolationSteps=context.period)
+            self.delayVector = rcl.DelayVector( context, "delayVector", self, 
+                                               numberOfLoudspeakers*2, interpolationType="lagrangeOrder3", initialDelay=0,
+                                               controlInputs=True, methodDelayPolicy=rcl.DelayMatrix.MethodDelayPolicy.Add,
+                                               initialGain=1.0, 
+                                               interpolationSteps=context.period)
 
            
             self.parameterConnection(self.virtualLoudspeakerController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )

@@ -66,10 +66,9 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
             # have already undergone.
 
             hrirAdjust = np.zeros( hrir.shape, dtype=hrir.dtype )
-            for fIdx in range(0,hrir.shape[0]):
-                for eIdx in range(0,hrir.shape[1]):
-                    shift = int(tdAdjusted[fIdx,eIdx])
-                    hrirAdjust[fIdx,eIdx,0:hrirLen-shift] = hrir[fIdx,eIdx,shift:]
+            for irIndex in np.ndindex( hrir.shape[:-1] ):
+                shift = int(tdAdjusted[irIndex])
+                hrirAdjust[irIndex][0:hrirLen-shift] = hrir[irIndex][shift:]
 
         tdSeconds = tdAdjusted * 1.0/fs
 

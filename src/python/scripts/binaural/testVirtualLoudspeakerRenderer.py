@@ -19,10 +19,8 @@ def sph2cart(az,el,r):
     return x,y,z
 
 from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
-from dynamic_binaural_renderer_serial import DynamicBinauralRendererSerial
 import visr
 import rrl
-import objectmodel
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -52,10 +50,10 @@ if not os.path.exists( sofaFile ):
     urlretrieve( 'http://data.bbcarp.org.uk/sbsbrir/sofa/SBSBRIR_x0y0.sofa',sofaFile )
 
 if useDynamicITD:
-    sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
+    sofaFileTD = './data/SBSBRIR_x0y0_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
         extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD        
+    sofaFile = sofaFileTD
 
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
@@ -79,7 +77,6 @@ else:
                                       sofaFile,
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
-                                      dynILD = useDynamicILD,
                                       hrirInterp = useHRIRinterpolation,
                                       )
 #to be completed
