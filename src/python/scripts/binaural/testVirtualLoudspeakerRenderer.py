@@ -11,13 +11,6 @@ import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 import os
-
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
-
 from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 import visr
 import rrl
@@ -96,45 +89,11 @@ outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 numPos = 360/5
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
-
-#az = 0.025 * blockIdx
-#el = 0.1 * np.sin( 0.025 * blockIdx )
-#az = 0
-#el = 0
-#r = 1
-#x,y,z = sph2cart( az, el, r )
-#ps1 = objectmodel.PointSource(0)
-#ps1.x = x
-#ps1.y = y
-#ps1.z = z
-#ps1.level = 0.5
-#ps1.groupId = 5
-#ps1.priority = 5
-#ps1.resetNumberOfChannels(1)
-#ps1.setChannelIndex(0,ps1.objectId)
-#
-#ov = paramInput.data()
-#ov.clear()
-#ov.insert( ps1 )
-#paramInput.swapBuffers()
-
 start = time.time()
 
 for blockIdx in range(0,numBlocks):
 #   print("NBl "+str(blockIdx))
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:   
-#        if useSourceAutoMovement:
-#            az = azSequence[int(blockIdx%numPos)]
-#            el = 0
-#            x,y,z = sph2cart( az, el, r )
-#            ps1.x = x
-#            ps1.y = y
-#            ps1.z = z
-#            ov = paramInput.data()  
-#            ov.clear()
-#            ov.insert( ps1 )
-#            paramInput.swapBuffers()
-        
         if not useSerialPort and useTracking:
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]

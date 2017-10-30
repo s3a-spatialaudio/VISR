@@ -6,32 +6,16 @@ Created on Thu Oct  5 12:51:14 2017
 """
 
 from real_sph_harmonics import sphHarmReal, allSphHarmRealACN
-
+from rotationFunctions import sph2cart3inp, cart2sph
 import numpy as np
 import matplotlib.pyplot as plt
-
-def cart2sph(x,y,z):
-    radius = np.sqrt( x*x + y*y + z*z );
-    az = np.arctan2( y, x );
-    el = np.arcsin( z / radius );
-    #print('%f %f %f'%(az,el,radius))
-    return (az,el,radius)
-
-def sph2cart( az, el, r = 1.0 ):
-    [az,el,r] = np.broadcast_arrays( az,el, r )
-    elFactor = np.cos( el )
-    x = np.cos( az ) * elFactor * r
-    y = np.sin( az ) * elFactor * r
-    z = np.sin( el ) * r
-    cart = np.stack( (x,y,z), 1 )
-    return cart
 
 phi = np.arange( 0, 2*np.pi, np.pi/180 )
 
 theta = 0.1 * np.sin( phi )
 
 # Desired direction ("velocity") vectors
-Pdes = sph2cart( phi, theta ).T
+Pdes = sph2cart3inp( phi, theta ).T
 
 N = 3
 

@@ -55,11 +55,6 @@ class HoaBinauralRendererSAW( visr.CompositeComponent ):
 
 
 
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
 
 ############ CONFIG ###############  
 fs = 48000

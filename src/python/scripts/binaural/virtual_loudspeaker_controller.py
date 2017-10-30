@@ -27,11 +27,6 @@ from scipy.spatial import Delaunay
 from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
 
-def sph2cart3inp(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return np.stack((x,y,z),0)
 
 class VirtualLoudspeakerController( visr.AtomicComponent ):
     """ Component to translate an object vector (and optionally head tracking information)

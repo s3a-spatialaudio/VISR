@@ -10,12 +10,7 @@ import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 import os
-
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
+from rotationFunctions import sph2cart3inp
 
 from dynamic_binaural_renderer import DynamicBinauralRenderer
 from dynamic_binaural_renderer_serial import DynamicBinauralRendererSerial
@@ -106,7 +101,7 @@ azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
 az = 0
 el = 0
 r = 1
-x,y,z = sph2cart( az, el, r )
+x,y,z = sph2cart3inp( az, el, r )
 ps1 = objectmodel.PointSource(0)
 ps1.x = x
 ps1.y = y
@@ -130,7 +125,7 @@ for blockIdx in range(0,numBlocks):
         if useSourceAutoMovement:
             az = azSequence[int(blockIdx%numPos)]
             el = 0
-            x,y,z = sph2cart( az, el, r )
+            x,y,z = sph2cart3inp( az, el, r )
             ps1.x = x
             ps1.y = y
             ps1.z = z

@@ -10,13 +10,6 @@ import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 import os
-
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
-
 from dynamic_binaural_renderer import DynamicBinauralRenderer
 from dynamic_binaural_renderer_serial import DynamicBinauralRendererSerial
 import visr

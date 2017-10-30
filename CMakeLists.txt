@@ -46,7 +46,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 # Default path for static libraries
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
 
-# Copy the executables to the binary directory
+# Copy the executabl  es to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 # Default destination for shared libraries (not DLLs)
@@ -60,9 +60,10 @@ SET( RUNTIME_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
 IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
-SET(CMAKE_INSTALL_PREFIX /Applications/VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}-${VISR_SYSTEM_NAME} )
+SET( VISR_TOPLEVEL_NAME VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION})
+SET(CMAKE_INSTALL_PREFIX /Applications/${VISR_TOPLEVEL_NAME})
 
-
+MESSAGE( STATUS "VISR inst prefix: " ${z\} )
 
 SET( CMAKE_MACOSX_RPATH ON)
 # use, i.e. don't skip the full RPATH for the build tree
