@@ -397,6 +397,19 @@ fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
 
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
+################################################################################
+# Set the install directories of special output types.
+# For Linux this adjusts the path to put the items under /usr/share/visr
+
+if( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( PYTHON_MODULE_INSTALL_DIRECTORY "share/visr/python" )
+  set( DOCUMENTATION_INSTALL_DIRECTORY "share/visr/doc" )
+  set( CONFIGURATION_INSTALL_DIRECTORY "share/visr" ) # Directory under CMAKE_INSTALL_PREFIX where config/ is placed.
+else( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( PYTHON_MODULE_INSTALL_DIRECTORY "python" )
+  set( DOCUMENTATION_INSTALL_DIRECTORY "doc" )
+  set( CONFIGURATION_INSTALL_DIRECTORY "" ) # Directory under CMAKE_INSTALL_PREFIX where config/ is placed.
+endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 
 ################################################################################
 # Actual software components (subprojects) to be built are
@@ -439,7 +452,8 @@ IF(BUILD_DOCUMENTATION)
  
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
  
-  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc )
+  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
+
 ENDIF()
 
 # Instructions for packaging are held in a separate file.
