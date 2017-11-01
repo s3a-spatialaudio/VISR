@@ -5,7 +5,7 @@ Created on Thu Oct 26 15:13:59 2017
 
 @author: gc1y17
 """
-from readSofa import readSofaFile
+from readSofa import readSofaFileBRIR
 import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
@@ -45,7 +45,7 @@ if not os.path.exists( sofaFile ):
     urlretrieve( 'http://data.bbcarp.org.uk/sbsbrir/sofa/SBSBRIR_x0y0.sofa',sofaFile )
 
 
-[ hrirPos, hrirData, delays ] = readSofaFile( sofaFile )  
+[ hrirPos, hrirData, delays ] = readSofaFileBRIR( sofaFile )  
 print(hrirPos.shape)
 print(hrirData.shape)
 #print(delays.shape)

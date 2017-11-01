@@ -65,8 +65,9 @@ def readSofaFileBRIR( fileName, dtype = np.float32,
 #        print(name)
     try:
         sofaPos = np.asarray( h.get('SourcePosition'), dtype=dtype )
-#        ldspPos= np.asarray( h.get('EmitterPosition'), dtype=dtype )
-#        print(ldspPos.shape)
+        ldspPos= np.asarray( h.get('EmitterPosition'), dtype=dtype )
+#        np.set_printoptions(threshold=np.nan)
+#        print(ldspPos)
 #        maxAz = 360
         el = np.zeros((360), dtype=dtype)
         r = np.repeat( sofaPos[:,2] ,(360),)        

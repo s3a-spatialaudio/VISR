@@ -8,7 +8,7 @@ Created on Thu Oct 26 16:46:32 2017
 
 from numpy.linalg import inv 
 from readSofa import sph2cart
-from rotationFunctions import calcRotationMatrix, cart2sph, sph2cart, rad2deg
+from rotationFunctions import calcRotationMatrix, cart2sph, sph2cart3inp, rad2deg
 import matplotlib.pyplot as plt
 import visr
 import pml
@@ -113,7 +113,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
             self.inverted = inv(self.triplets)
-            print(self.triplets )
+#            print(self.triplets )
         else:
             self.lastHrirIndex = -1
 

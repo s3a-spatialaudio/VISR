@@ -12,6 +12,7 @@ from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 import os
 from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+from virtual_loudspeaker_renderer_serial import VirtualLoudspeakerRendererSerial
 import visr
 import rrl
 
@@ -25,13 +26,16 @@ numLoudspeakers = 12
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 512;
+BRIRtruncationLength = 2048
 
 useSourceAutoMovement = False
 useTracking = True
 useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
-useSerialPort = False
+useSerialPort = True
+
+
 ###################################
 
 idMatrix = np.identity(3)
@@ -54,6 +58,16 @@ context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 if useSerialPort:
     port = "/dev/cu.usbserial-AJ03GSC8"
     baud = 57600
+    controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None, 
+                                      numLoudspeakers, 
+                                      port, 
+                                      baud, 
+                                      sofaFile,
+                                      enableSerial = useTracking,
+                                      dynITD = useDynamicITD,
+                                      hrirInterp = useHRIRinterpolation,
+                                      irTruncationLength = BRIRtruncationLength
+                                      )
 #    controller = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None, 
 #                                           numBinauralObjects, 
 #                                           port, 
@@ -71,6 +85,7 @@ else:
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
+                                      irTruncationLength = BRIRtruncationLength
                                       )
 #to be completed
 

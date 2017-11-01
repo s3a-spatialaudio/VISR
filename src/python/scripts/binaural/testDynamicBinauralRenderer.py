@@ -27,7 +27,7 @@ blockSize = 512
 numBinauralObjects = 1
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
-numBlocks = 72;
+numBlocks = 4096;
 
 useSourceAutoMovement = False
 useTracking = True
@@ -145,6 +145,6 @@ for blockIdx in range(0,numBlocks):
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 print("fs: %d\t #obj: %d\t ITD-intrp: %d-%d\t #blocks: %d\t blocksize: %d\t expected:%f sec.\t\t Got %f sec"%(fs,numBinauralObjects,useDynamicITD,useHRIRinterpolation,numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
 #print("numblocks %d blocksize %d expected:%f sec. Got %f sec"%(numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
-#plt.figure()
-#plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
-#plt.show()
+plt.figure()
+plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
+plt.show()
