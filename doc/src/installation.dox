@@ -4,9 +4,7 @@
   @tableofcontents
  
   @section packages_installation Packages Installation
-  The installation packages are hosted here: http://cvssp.org/data/s3a/private/visr_installers/0.8.3/
-* * <b>User name</b>: 	s3aprivate
-* * <b>Password</b>: 	InternalData14
+  The installation packages are provided in the S3A wiki http://s3a-spatialaudio.org/wiki/index.php/Software#Installation
 
   @subsection linux_installation Linux Installation
   Type the following on a shell:
@@ -33,8 +31,10 @@
   Double-click on <tt>VISR-X.X.X-Darwin.dmg</tt> installer and follow the instructions. 
 
   When the image is mounted, a new window should appear with a link to the <tt>Applications</tt> folder and a <tt>VISR-X.X.X-Darwin</tt> floder. Just drag that folder into <tt>Applications</tt> and the installation is completed.
-  
-  If you need to use the VISR framework as python packages, follow the instructions to @ref python_variables_installation 
+
+  @section installation_instructions_python_setup Using VISR Python components
+
+  If you want to use the VISR framework as python packages, follow the instructions in @ref python_support_setting_up_runtime_env to set up the runtime environment variables.
  */
 
 
