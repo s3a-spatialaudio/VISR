@@ -402,14 +402,14 @@ endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 # For Linux this adjusts the path to put the items under /usr/share/visr
 
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( PYTHON_MODULE_INSTALL_DIRECTORY "share/visr/python" )
-  set( DOCUMENTATION_INSTALL_DIRECTORY "share/visr/doc" )
-  set( CONFIGURATION_INSTALL_DIRECTORY "share/visr" ) # Directory under CMAKE_INSTALL_PREFIX where config/ is placed.
+  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "share/visr" ) # Directory under CMAKE_INSTALL_PREFIX where visr-specific content is placed.
 else( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( PYTHON_MODULE_INSTALL_DIRECTORY "python" )
-  set( DOCUMENTATION_INSTALL_DIRECTORY "doc" )
-  set( CONFIGURATION_INSTALL_DIRECTORY "" ) # Directory under CMAKE_INSTALL_PREFIX where config/ is placed.
+  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "./" ) # CMAKE_INSTALL_PREFIX is already OK
 endif( VISR_SYSTEM_NAME MATCHES "Linux" )
+
+set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
+set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
+
 
 ################################################################################
 # Actual software components (subprojects) to be built are
