@@ -37,6 +37,10 @@ class HoaBinauralRendererSerial(visr.CompositeComponent ):
                                                             headTracking = headTracking
                                                             )
             if headTracking:
+                ##                WITH AUDIOLAB ORIENTATION OFFSET
+#                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=220,rollOffset=-180, yawRightHand=True )
+                
+##                WITH MY OFFICE DESK ORIENTATION OFFSET
                 self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True )
                 self.parameterConnection( self.serialReader.parameterPort("orientation"), self.hoaBinauralRenderer.parameterPort("headTracking"))
 

@@ -18,10 +18,10 @@ import numpy as np
 import warnings
 
 
-import plotly.plotly as py
-from matplotlib.patches import Polygon
-import plotly.figure_factory as FF
-from plotly.graph_objs import graph_objs
+#import plotly.plotly as py
+#from matplotlib.patches import Polygon
+#import plotly.figure_factory as FF
+#from plotly.graph_objs import graph_objs
 
 from scipy.spatial import Delaunay
 from scipy.spatial import KDTree
