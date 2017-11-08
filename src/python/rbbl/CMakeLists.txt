@@ -1,6 +1,7 @@
 # Python bindings for the standard VISR interface component
 
 set( SOURCES
+biquad_coefficient.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 rbbl.cpp
