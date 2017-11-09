@@ -55,20 +55,16 @@ class HoaBinauralRendererSAW( visr.CompositeComponent ):
 
 
 
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
 
 ############ CONFIG ###############  
 fs = 48000
-blockSize = 1024
-numBinauralObjects = 60
+blockSize = 2048
+numBinauralObjects = 1
 numOutputChannels = 2;
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 1
+maxHoaOrder = 3
+
 
 # switch dynamic tracking on and off.
 useTracking = True

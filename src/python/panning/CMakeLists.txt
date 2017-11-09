@@ -40,4 +40,4 @@ target_link_libraries( ${PROJECT_NAME} panning_shared )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION python)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY})

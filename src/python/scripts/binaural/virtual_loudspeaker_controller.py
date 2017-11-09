@@ -8,7 +8,7 @@ Created on Thu Oct 26 16:46:32 2017
 
 from numpy.linalg import inv 
 from readSofa import sph2cart
-from rotationFunctions import calcRotationMatrix, cart2sph, sph2cart, rad2deg
+from rotationFunctions import calcRotationMatrix, cart2sph, sph2cart3inp, rad2deg
 import matplotlib.pyplot as plt
 import visr
 import pml
@@ -18,20 +18,15 @@ import numpy as np
 import warnings
 
 
-import plotly.plotly as py
-from matplotlib.patches import Polygon
-import plotly.figure_factory as FF
-from plotly.graph_objs import graph_objs
+#import plotly.plotly as py
+#from matplotlib.patches import Polygon
+#import plotly.figure_factory as FF
+#from plotly.graph_objs import graph_objs
 
 from scipy.spatial import Delaunay
 from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
 
-def sph2cart3inp(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return np.stack((x,y,z),0)
 
 class VirtualLoudspeakerController( visr.AtomicComponent ):
     """ Component to translate an object vector (and optionally head tracking information)
@@ -118,7 +113,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
             self.inverted = inv(self.triplets)
-            print(self.triplets )
+#            print(self.triplets )
         else:
             self.lastHrirIndex = -1
 

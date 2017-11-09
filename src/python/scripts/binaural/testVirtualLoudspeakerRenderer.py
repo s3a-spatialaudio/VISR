@@ -11,14 +11,8 @@ import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 import os
-
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
-
 from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+from virtual_loudspeaker_renderer_serial import VirtualLoudspeakerRendererSerial
 import visr
 import rrl
 
@@ -32,13 +26,16 @@ numLoudspeakers = 12
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 512;
+BRIRtruncationLength = 2048
 
 useSourceAutoMovement = False
 useTracking = True
 useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
-useSerialPort = False
+useSerialPort = True
+
+
 ###################################
 
 idMatrix = np.identity(3)
@@ -61,6 +58,16 @@ context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 if useSerialPort:
     port = "/dev/cu.usbserial-AJ03GSC8"
     baud = 57600
+    controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None, 
+                                      numLoudspeakers, 
+                                      port, 
+                                      baud, 
+                                      sofaFile,
+                                      enableSerial = useTracking,
+                                      dynITD = useDynamicITD,
+                                      hrirInterp = useHRIRinterpolation,
+                                      irTruncationLength = BRIRtruncationLength
+                                      )
 #    controller = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None, 
 #                                           numBinauralObjects, 
 #                                           port, 
@@ -78,6 +85,7 @@ else:
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
+                                      irTruncationLength = BRIRtruncationLength
                                       )
 #to be completed
 
@@ -96,45 +104,11 @@ outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 numPos = 360/5
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
-
-#az = 0.025 * blockIdx
-#el = 0.1 * np.sin( 0.025 * blockIdx )
-#az = 0
-#el = 0
-#r = 1
-#x,y,z = sph2cart( az, el, r )
-#ps1 = objectmodel.PointSource(0)
-#ps1.x = x
-#ps1.y = y
-#ps1.z = z
-#ps1.level = 0.5
-#ps1.groupId = 5
-#ps1.priority = 5
-#ps1.resetNumberOfChannels(1)
-#ps1.setChannelIndex(0,ps1.objectId)
-#
-#ov = paramInput.data()
-#ov.clear()
-#ov.insert( ps1 )
-#paramInput.swapBuffers()
-
 start = time.time()
 
 for blockIdx in range(0,numBlocks):
 #   print("NBl "+str(blockIdx))
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:   
-#        if useSourceAutoMovement:
-#            az = azSequence[int(blockIdx%numPos)]
-#            el = 0
-#            x,y,z = sph2cart( az, el, r )
-#            ps1.x = x
-#            ps1.y = y
-#            ps1.z = z
-#            ov = paramInput.data()  
-#            ov.clear()
-#            ov.insert( ps1 )
-#            paramInput.swapBuffers()
-        
         if not useSerialPort and useTracking:
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]

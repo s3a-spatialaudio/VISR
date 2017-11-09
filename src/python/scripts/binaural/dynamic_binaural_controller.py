@@ -169,8 +169,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
                      self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix))
-                     print("self.sourcePos.shape")
-                     print(self.sourcePos.shape)
+#                     print("self.sourcePos.shape")
+#                     print(self.sourcePos.shape)
             # Obtain access to the output arrays
             gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
             delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
@@ -194,7 +194,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 unNormedGains = allGains[matchingTriplet,:,range(0,self.numberOfObjects)]
                 gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
                 normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
-                print(normedGains.shape)                       
+#                print(normedGains.shape)                       
             else:
 #                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
                  dotprod = self.hrirPos @ self.sourcePos.T
