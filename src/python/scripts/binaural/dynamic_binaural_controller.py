@@ -21,9 +21,6 @@ import cProfile, pstats, io
 import numpy as np
 import warnings
 
-
-from scipy.spatial import Delaunay
-from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
 
 class DynamicBinauralController( visr.AtomicComponent ):
@@ -115,8 +112,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
             print(self.triplets)
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
-            self.hrirLookup = KDTree( self.hrirPos )
-
 
         # %% Dynamic allocation of objects to channels
         if channelAllocation:
@@ -309,7 +304,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                            else:
 #                                delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
 
-                                     
             else: # hrirInterpolation == False
                 for chIdx in range(0,self.numberOfObjects):    
                     if self.lastFilters[chIdx] != indices[chIdx]:
@@ -320,7 +314,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                         self.filterOutputProtocol.enqueue( leftCmd )
                         self.filterOutputProtocol.enqueue( rightCmd )
                         self.lastFilters[chIdx] = indices[chIdx]
-    
+
                         if self.dynamicITD:
                             delays = self.dynamicDelays[indices[chIdx],:]
                             delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
@@ -332,4 +326,3 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.objectInputProtocol.resetChanged()
             if self.useHeadTracking:
                 self.trackingInputProtocol.resetChanged()
-          
