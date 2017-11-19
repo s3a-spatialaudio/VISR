@@ -6,9 +6,9 @@ S3A Binaural toolbox for the VISR framework
 
 Created on Wed Sep  6 22:02:40 2017
 
-@author: Andreas Franck a.franck@soton.ac.uk 
+@author: Andreas Franck a.franck@soton.ac.uk
 """
-from numpy.linalg import inv 
+from numpy.linalg import inv
 from readSofa import sph2cart
 from rotationFunctions import calcRotationMatrix, cart2sph, rad2deg
 import matplotlib.pyplot as plt
@@ -48,24 +48,25 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
         self.objectInputProtocol = self.objectInput.protocolInput()
-        
+
         if useHeadTracking:
             self.useHeadTracking = True
             self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             self.trackingInputProtocol = self.trackingInput.protocolInput()
-
+            self.rotationMatrix = np.identity( (hrirPositions.shape[-1]), dtype=hrirPositions.dtype )
         else:
             self.useHeadTracking = False
             self.trackingInputProtocol = None # Flag that head tracking is not used.
-            
+
+
         self.filterOutput = visr.ParameterOutput( "filterOutput", self,
                                                 pml.IndexedVectorFloat.staticType,
                                                 pml.MessageQueueProtocol.staticType,
                                                 pml.EmptyParameterConfig() )
         self.filterOutputProtocol = self.filterOutput.protocolOutput()
-            
+
         self.delayOutput = visr.ParameterOutput( "delayOutput", self,
                                                 pml.VectorParameterFloat.staticType,
                                                 pml.DoubleBufferingProtocol.staticType,
@@ -98,8 +99,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
 
         # HRIR selection and interpolation data
         self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
-        
-        # Normalise the hrir positions to unit radius (to let the k-d tree 
+
+        # Normalise the hrir positions to unit radius (to let the k-d tree
         # lookup work as expected.)
         hrirPositions[:,2] = 1.0
         self.hrirPos = sph2cart(np.array( hrirPositions, copy = True, dtype = np.float32 ))
@@ -120,17 +121,27 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.channelAllocator = None
             self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]]), self.numberOfObjects, axis = 0 )
             self.levels = np.zeros( (self.numberOfObjects), dtype = np.float32 )
-
-#        self.f = open('srcpAllinone.txt', 'w')
-
     def process( self ):
 
-##PROFILING                    
+##PROFILING
 ##        startTot = time.time()
 #        pr = cProfile.Profile()
 #        pr.enable()
-        
+
+        # Flag triggering whether the interpolation filter are recalculated.
+        # TODO: Consider change to fine-grained per-object recalculation logic
+        triggerRecalculation = False
+
+        if self.useHeadTracking and self.trackingInputProtocol.changed():
+            triggerRecalculation = True
+            htrack = self.trackingInputProtocol.data()
+            ypr = htrack.orientation
+
+            # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
+            self.rotationMatrix = np.asarray(calcRotationMatrix(np.negative(ypr)))
+
         if self.objectInputProtocol.changed():
+            triggerRecalculation = True
             ov = self.objectInputProtocol.data();
             objIndicesRaw = [x.objectId for x in ov
                           if isinstance( x, (om.PointSource, om.PlaneWave) ) ]
@@ -141,7 +152,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 numObjects = len(objIndices)
                 self.sourcePos = np.zeros( (numObjects,3), dtype=np.float32 )
                 self.levels = np.zeros( (numObjects), dtype=np.float32 )
-                
+
                 for chIdx in range(0, numObjects):
                     objIdx = objIndices[chIdx]
                     self.sourcePos[chIdx,:] = ov[objIdx].position
@@ -155,115 +166,114 @@ class DynamicBinauralController( visr.AtomicComponent ):
                         self.sourcePos[ch,:] = posNormed
                         self.levels[ch] = src.level
                     else:
-                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')                            
-                        break              
+                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
+                        break
 #                        print(index)
 
-            # TODO: This belongs somewhere else in the recompute logic.
-            if self.useHeadTracking:
-                 if self.trackingInputProtocol.changed():
-                     htrack = self.trackingInputProtocol.data()
-                     ypr = htrack.orientation
-                     
-                     # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
-                     rotationMatrix = calcRotationMatrix(np.negative(ypr))
-                     self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix))
+        if not triggerRecalculation:
+            return
+
+        if self.useHeadTracking:
+            translatedSourcePos = np.matmul(self.sourcePos, self.rotationMatrix )
+        else:
+            translatedSourcePos = self.sourcePos
+
 #                     print("self.sourcePos.shape")
 #                     print(self.sourcePos.shape)
-            # Obtain access to the output arrays
-            gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
-            delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
+        # Obtain access to the output arrays
+        gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
+        delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
 
-            # Set the object for both ears.
-            # Note: Incorporate dynamically computed ILD if selected or adjust 
-            # the level using an analytic model.
-            gainVec[0:self.numberOfObjects] = self.levels
-            gainVec[self.numberOfObjects:] = self.levels
+        # Set the object for both ears.
+        # Note: Incorporate dynamically computed ILD if selected or adjust
+        # the level using an analytic model.
+        gainVec[0:self.numberOfObjects] = self.levels
+        gainVec[self.numberOfObjects:] = self.levels
 
-            if self.hrirInterpolation:
+        if self.hrirInterpolation:
 
 #Vectorised replacement
-                allGains =  self.inverted @ self.sourcePos.T
-                
-#                allGains = np.matmul( self.inverted, np.transpose(self.sourcePos) )
-                minGains = np.min( allGains, axis = 1 ) # Minimum over last axis
-                matchingTriplet = np.argmax( minGains, axis = 0 )
+            allGains =  self.inverted @ translatedSourcePos.T
 
-                #Select the gains for the matching triplets.
-                unNormedGains = allGains[matchingTriplet,:,range(0,self.numberOfObjects)]
-                gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
-                normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
-#                print(normedGains.shape)                       
-            else:
+#                allGains = np.matmul( self.inverted, np.transpose(self.sourcePos) )
+            minGains = np.min( allGains, axis = 1 ) # Minimum over last axis
+            matchingTriplet = np.argmax( minGains, axis = 0 )
+
+            #Select the gains for the matching triplets.
+            unNormedGains = allGains[matchingTriplet,:,range(0,self.numberOfObjects)]
+            gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
+            normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
+#                print(normedGains.shape)
+        else:
 #                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
-                 dotprod = self.hrirPos @ self.sourcePos.T
-                 indices = np.argmax( dotprod, axis = 0 )
+             dotprod = self.hrirPos @ translatedSourcePos.T
+             indices = np.argmax( dotprod, axis = 0 )
 ##                 print(found)
-                 
-            # Retrieve the output gain vector for setting the object level and potentially
-            # applying dynamically computed gain adjustement (e.g., nearfield)
+
+        # Retrieve the output gain vector for setting the object level and potentially
+        # applying dynamically computed gain adjustement (e.g., nearfield)
 
 # Notice: This spoils the return value of the KD tree query for the non-interpolated case.
-#            indices = np.zeros((self.numberOfObjects,3), dtype = np.int ) 
+#            indices = np.zeros((self.numberOfObjects,3), dtype = np.int )
 
 #
-         
+
 #            for chIdx in range(0,self.numberOfObjects):
 #                print("object n: "+str(chIdx))
 
-                # If the source is silent (probably inactive), don't change filters
+            # If the source is silent (probably inactive), don't change filters
 #            if self.levels[chIdx] >= 1.0e-7:
-            if self.hrirInterpolation:
-#                       
-                _gnorm = normedGains
+        if self.hrirInterpolation:
+#
+            _gnorm = normedGains
 #                        print(_gnorm)
-                
+
 #                        print()
-                _indices = self.hrirLookup.simplices[matchingTriplet,:]
+            _indices = self.hrirLookup.simplices[matchingTriplet,:]
 #                transp = np.moveaxis(self.hrirs[_indices,:,:], 1,-1 )
 #                _interpFilters = np.einsum('ikwj,ij->ikw', transp, _gnorm)
-                _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[_indices,:,:], _gnorm)
+            _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[_indices,:,:], _gnorm)
 #                _interpFilters =  np.matmul(transp, _gnorm.T)
-                
-                
+
+
 #                        print(_indices)
-    #            print(_indices.shape)
-    #            print(np.moveaxis(self.hrirs[_indices,:,:], 0, -1 ))
+#            print(_indices.shape)
+#            print(np.moveaxis(self.hrirs[_indices,:,:], 0, -1 ))
 #                print(_gnorm.shape)
 #                print(self.hrirs[_indices,:,:].shape)
 
-    #            transp = np.moveaxis(self.hrirs[_indices,:,:], [0, 1], [-1, -2] )
-                
+#            transp = np.moveaxis(self.hrirs[_indices,:,:], [0, 1], [-1, -2] )
+
 #                print(transp.shape)
 #                print(np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T)).shape)
 
-                # TODO: Check whether the explicit np.array() construction is necessary (incurs a copy)
+            # TODO: Check whether the explicit np.array() construction is necessary (incurs a copy)
 #                print(_interpFilters[0])
-#                print(aoerab)                
-                for chIdx in range(0,self.numberOfObjects):
-                    _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
-                    _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
+#                print(aoerab)
+            for chIdx in range(0,self.numberOfObjects):
+                _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
+                _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
 #                    _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:,0] )
 #                    _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:,0] )
-                    self.filterOutputProtocol.enqueue( _leftInterpolant )
-                    self.filterOutputProtocol.enqueue( _rightInterpolant )
-                 
-                if self.dynamicITD:
-                    # Apparently not working
-                    # delays = np.dot(self.dynamicDelays[_indices,:].T,_gnorm)
-                    # delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
-                    # Note: matmul() adds a third (singleton) dimension to the result, therefore we have to squeeze it.
+                self.filterOutputProtocol.enqueue( _leftInterpolant )
+                self.filterOutputProtocol.enqueue( _rightInterpolant )
+
+            if self.dynamicITD:
+                # Apparently not working
+                # delays = np.dot(self.dynamicDelays[_indices,:].T,_gnorm)
+                # delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
+                # Note: matmul() adds a third (singleton) dimension to the result, therefore we have to squeeze it.
 #                    print(self.dynamicDelays[_indices,:].shape)
 #                    print(np.moveaxis(self.dynamicDelays[_indices,:],1,2).shape)
-                    delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), _gnorm[...,np.newaxis]),axis=2 )
-                    delayVec[0:self.numberOfObjects] = delays[:,0]
-                    delayVec[self.numberOfObjects:] = delays[:,1]
-                else:
-                    delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
-        
-        #            print(self.hrirs[_indices,:,:])            
-#                        print(_interpFilters.shape)            
-        #            print(erob)
+                delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), _gnorm[...,np.newaxis]),axis=2 )
+                delayVec[0:self.numberOfObjects] = delays[:,0]
+                delayVec[self.numberOfObjects:] = delays[:,1]
+            else:
+                delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
+
+    #            print(self.hrirs[_indices,:,:])
+#                        print(_interpFilters.shape)
+    #            print(erob)
 
 
 
@@ -280,7 +290,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                            # Vectorised filter interpolation code
 ##                            print(self.hrirs[indices,:,:])
 #                            transp = np.moveaxis(self.hrirs[indices,:,:], 0, -1 )
-#                           
+#
 #                            print(gnorm.shape)
 #                            print(self.hrirs[indices,:,:].shape)
 #                            print(transp.shape)
@@ -303,25 +313,25 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                            else:
 #                                delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
 
-            else: # hrirInterpolation == False
-                for chIdx in range(0,self.numberOfObjects):    
-                    if self.lastFilters[chIdx] != indices[chIdx]:
-                        leftCmd  = pml.IndexedVectorFloat( chIdx,
-                                                          self.hrirs[indices[chIdx],0,:])
-                        rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
-                                                          self.hrirs[indices[chIdx],1,:])
-                        self.filterOutputProtocol.enqueue( leftCmd )
-                        self.filterOutputProtocol.enqueue( rightCmd )
-                        self.lastFilters[chIdx] = indices[chIdx]
+        else: # hrirInterpolation == False
+            for chIdx in range(0,self.numberOfObjects):
+                if self.lastFilters[chIdx] != indices[chIdx]:
+                    leftCmd  = pml.IndexedVectorFloat( chIdx,
+                                                      self.hrirs[indices[chIdx],0,:])
+                    rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
+                                                      self.hrirs[indices[chIdx],1,:])
+                    self.filterOutputProtocol.enqueue( leftCmd )
+                    self.filterOutputProtocol.enqueue( rightCmd )
+                    self.lastFilters[chIdx] = indices[chIdx]
 
-                        if self.dynamicITD:
-                            delays = self.dynamicDelays[indices[chIdx],:]
-                            delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
-                        else:
-                            delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
+                    if self.dynamicITD:
+                        delays = self.dynamicDelays[indices[chIdx],:]
+                        delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
+                    else:
+                        delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
 
-            self.gainOutputProtocol.swapBuffers()
-            self.delayOutputProtocol.swapBuffers()
-            self.objectInputProtocol.resetChanged()
-            if self.useHeadTracking:
-                self.trackingInputProtocol.resetChanged()
+        self.gainOutputProtocol.swapBuffers()
+        self.delayOutputProtocol.swapBuffers()
+        self.objectInputProtocol.resetChanged()
+        if self.useHeadTracking:
+            self.trackingInputProtocol.resetChanged()

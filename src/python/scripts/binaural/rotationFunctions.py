@@ -63,7 +63,7 @@ def calcRotationMatrix(ypr):
     a32 = math.cos(psi) * math.sin(the) * math.sin(phi) - math.sin(psi) * math.cos(phi)
     a33 = math.cos(the) * math.cos(psi)
     
-    rotation = np.matrix([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]])
+    rotation = np.asarray([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]])
 #    print(rotation)
     return rotation
   else:
