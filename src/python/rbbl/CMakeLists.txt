@@ -1,6 +1,7 @@
 # Python bindings for the standard VISR interface component
 
 set( SOURCES
+biquad_coefficient.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 rbbl.cpp
@@ -47,4 +48,4 @@ target_link_libraries( ${PROJECT_NAME} pml_shared )
 
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION python)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} )

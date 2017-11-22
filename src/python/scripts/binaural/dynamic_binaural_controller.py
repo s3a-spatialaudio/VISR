@@ -21,9 +21,6 @@ import cProfile, pstats, io
 import numpy as np
 import warnings
 
-
-from scipy.spatial import Delaunay
-from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
 
 class DynamicBinauralController( visr.AtomicComponent ):
@@ -112,11 +109,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
             self.inverted = inv(self.triplets)
-#            print(self.hrirPos)
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
-            self.hrirLookup = KDTree( self.hrirPos )
-
 
         # %% Dynamic allocation of objects to channels
         if channelAllocation:
@@ -174,7 +168,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
                      # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
                      rotationMatrix = calcRotationMatrix(np.negative(ypr))
                      self.sourcePos = np.array(np.matmul(self.sourcePos,rotationMatrix))
-
+#                     print("self.sourcePos.shape")
+#                     print(self.sourcePos.shape)
             # Obtain access to the output arrays
             gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
             delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
@@ -189,6 +184,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
 
 #Vectorised replacement
                 allGains =  self.inverted @ self.sourcePos.T
+                
 #                allGains = np.matmul( self.inverted, np.transpose(self.sourcePos) )
                 minGains = np.min( allGains, axis = 1 ) # Minimum over last axis
                 matchingTriplet = np.argmax( minGains, axis = 0 )
@@ -197,6 +193,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 unNormedGains = allGains[matchingTriplet,:,range(0,self.numberOfObjects)]
                 gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
                 normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
+#                print(normedGains.shape)                       
             else:
 #                 [ d,indices ] = self.hrirLookup.query( self.sourcePos, 1, p =2 )
                  dotprod = self.hrirPos @ self.sourcePos.T
@@ -218,33 +215,36 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #            if self.levels[chIdx] >= 1.0e-7:
             if self.hrirInterpolation:
 #                       
-
-
-
                 _gnorm = normedGains
 #                        print(_gnorm)
                 
 #                        print()
                 _indices = self.hrirLookup.simplices[matchingTriplet,:]
+#                transp = np.moveaxis(self.hrirs[_indices,:,:], 1,-1 )
+#                _interpFilters = np.einsum('ikwj,ij->ikw', transp, _gnorm)
+                _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[_indices,:,:], _gnorm)
+#                _interpFilters =  np.matmul(transp, _gnorm.T)
+                
+                
 #                        print(_indices)
     #            print(_indices.shape)
-    #            interpFilters = np.dot( np.moveaxis(self.hrirs[indices,:,:], 0, -1 ), gnorm )
-    
     #            print(np.moveaxis(self.hrirs[_indices,:,:], 0, -1 ))
-                transp = np.moveaxis(self.hrirs[_indices,:,:], 1,-1 )
+#                print(_gnorm.shape)
+#                print(self.hrirs[_indices,:,:].shape)
+
     #            transp = np.moveaxis(self.hrirs[_indices,:,:], [0, 1], [-1, -2] )
-#                        print(_gnorm.shape)
                 
-#                        print(self.hrirs[_indices,:,:].shape)
-#                        print(transp.shape)
-#                        print(np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T)).shape)
-                # _interpFilters = np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T))
+#                print(transp.shape)
+#                print(np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T)).shape)
+
                 # TODO: Check whether the explicit np.array() construction is necessary (incurs a copy)
-                _interpFilters = np.einsum('ikwj,ji->ikw', transp, np.array(_gnorm.T))
-                
+#                print(_interpFilters[0])
+#                print(aoerab)                
                 for chIdx in range(0,self.numberOfObjects):
                     _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
                     _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
+#                    _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:,0] )
+#                    _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:,0] )
                     self.filterOutputProtocol.enqueue( _leftInterpolant )
                     self.filterOutputProtocol.enqueue( _rightInterpolant )
                  
@@ -253,7 +253,9 @@ class DynamicBinauralController( visr.AtomicComponent ):
                     # delays = np.dot(self.dynamicDelays[_indices,:].T,_gnorm)
                     # delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
                     # Note: matmul() adds a third (singleton) dimension to the result, therefore we have to squeeze it.
-                    delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), _gnorm[...,np.newaxis] ))
+#                    print(self.dynamicDelays[_indices,:].shape)
+#                    print(np.moveaxis(self.dynamicDelays[_indices,:],1,2).shape)
+                    delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), _gnorm[...,np.newaxis]),axis=2 )
                     delayVec[0:self.numberOfObjects] = delays[:,0]
                     delayVec[self.numberOfObjects:] = delays[:,1]
                 else:
@@ -301,7 +303,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
 #                            else:
 #                                delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = 0.
 
-                                     
             else: # hrirInterpolation == False
                 for chIdx in range(0,self.numberOfObjects):    
                     if self.lastFilters[chIdx] != indices[chIdx]:
@@ -312,7 +313,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                         self.filterOutputProtocol.enqueue( leftCmd )
                         self.filterOutputProtocol.enqueue( rightCmd )
                         self.lastFilters[chIdx] = indices[chIdx]
-    
+
                         if self.dynamicITD:
                             delays = self.dynamicDelays[indices[chIdx],:]
                             delayVec[ [chIdx, chIdx + self.numberOfObjects] ] = delays
@@ -324,4 +325,3 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.objectInputProtocol.resetChanged()
             if self.useHeadTracking:
                 self.trackingInputProtocol.resetChanged()
-          

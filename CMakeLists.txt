@@ -46,7 +46,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 # Default path for static libraries
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
 
-# Copy the executables to the binary directory
+# Copy the executabl  es to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 # Default destination for shared libraries (not DLLs)
@@ -60,9 +60,8 @@ SET( RUNTIME_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
 IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
-SET(CMAKE_INSTALL_PREFIX /Applications/VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}-${VISR_SYSTEM_NAME} )
-
-
+SET( VISR_TOPLEVEL_NAME VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION})
+SET(CMAKE_INSTALL_PREFIX /Applications/${VISR_TOPLEVEL_NAME})
 
 SET( CMAKE_MACOSX_RPATH ON)
 # use, i.e. don't skip the full RPATH for the build tree
@@ -398,6 +397,19 @@ fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
 
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
+################################################################################
+# Set the install directories of special output types.
+# For Linux this adjusts the path to put the items under /usr/share/visr
+
+if( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "share/visr" ) # Directory under CMAKE_INSTALL_PREFIX where visr-specific content is placed.
+else( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "./" ) # CMAKE_INSTALL_PREFIX is already OK
+endif( VISR_SYSTEM_NAME MATCHES "Linux" )
+
+set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
+set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
+
 
 ################################################################################
 # Actual software components (subprojects) to be built are
@@ -440,7 +452,8 @@ IF(BUILD_DOCUMENTATION)
  
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
  
-  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc )
+  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
+
 ENDIF()
 
 # Instructions for packaging are held in a separate file.

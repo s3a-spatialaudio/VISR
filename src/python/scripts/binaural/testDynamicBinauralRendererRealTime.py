@@ -5,17 +5,12 @@ Created on Thu Sep 14 14:55:25 2017
 
 @author: gc1y17
 """
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
 
 from dynamic_binaural_renderer_serial import DynamicBinauralRendererSerial
 import time
 import visr
 import rrl
-from rotationFunctions import deg2rad
+from rotationFunctions import deg2rad, sph2cart3inp
 import objectmodel
 import numpy as np
 import audiointerfaces as ai
@@ -26,7 +21,7 @@ from extractDelayInSofaFile import extractDelayInSofaFile
 ############ CONFIG ###############  
 fs = 48000
 blockSize = 1024
-numBinauralObjects = 1
+numBinauralObjects = 64
 numOutputChannels = 2;
 
 # switch dynamic tracking on and off.
@@ -76,7 +71,7 @@ paramInput = flow.parameterReceivePort('objectVector')
 az = 0
 el = 0
 r = 1
-x,y,z = sph2cart( deg2rad(az), deg2rad(el), r )
+x,y,z = sph2cart3inp( deg2rad(az), deg2rad(el), r )
 ps1 = objectmodel.PointSource(0)
 ps1.x = x
 ps1.y = y

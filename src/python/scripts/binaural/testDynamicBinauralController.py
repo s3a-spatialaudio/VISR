@@ -85,7 +85,6 @@ for blockIdx in range(0,numPos):
 #    y = np.sin( az )*np.sin(el)
 #    z = np.cos(el)
     
-    
     ps1 = om.PointSource( 0 ) 
     ps1.position = [x,y,z]
     ps1.level = 0.25
