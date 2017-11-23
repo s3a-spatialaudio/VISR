@@ -8,6 +8,7 @@ set( SOURCES
  filter_routing_parameter.cpp
  indexed_value_parameter.cpp
  initialise_parameter_library.cpp
+ interpolation_parameter.cpp
  listener_position.cpp
  matrix_parameter.cpp
  matrix_parameter_config.cpp
@@ -33,6 +34,7 @@ set( HEADERS
  filter_routing_parameter.hpp
  indexed_value_parameter.hpp
  initialise_parameter_library.hpp
+ interpolation_parameter.hpp
  listener_position.hpp
  matrix_parameter.hpp
  matrix_parameter_config.hpp

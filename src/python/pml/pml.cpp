@@ -17,6 +17,7 @@ void exportSharedDataProtocol( pybind11::module & m );
 void exportEmptyParameterConfig( pybind11::module & m );
 void exportFilterRoutingParameter( pybind11::module & m );
 void exportIndexedValueParameters( pybind11::module & m );
+void exportInterpolationParameter( pybind11::module & m );
 void exportListenerPosition( pybind11::module & m );
 void exportMatrixParameters( pybind11::module & m );
 void exportObjectVector( pybind11::module & m );
@@ -45,6 +46,7 @@ PYBIND11_MODULE( pml, m )
   exportEmptyParameterConfig( m );
   exportFilterRoutingParameter( m );
   exportIndexedValueParameters( m );
+  exportInterpolationParameter( m );
   exportListenerPosition( m );
   exportMatrixParameters( m);
   exportObjectVector( m );

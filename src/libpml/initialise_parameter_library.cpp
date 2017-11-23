@@ -10,6 +10,7 @@
 #include "indexed_value_parameter.hpp"
 #include "matrix_parameter.hpp"
 #include "listener_position.hpp"
+#include "interpolation_parameter.hpp"
 #include "object_vector.hpp"
 #include "scalar_parameter.hpp"
 #include "string_parameter.hpp"
@@ -44,6 +45,8 @@ void initialiseParameterLibrary()
   ParameterFactory::registerParameterType< IndexedVectorDoubleType >( IndexedVectorDoubleType::staticType() );
   ParameterFactory::registerParameterType< IndexedVectorFloatType >( IndexedVectorFloatType::staticType() );
   ParameterFactory::registerParameterType< IndexedStringType >( IndexedStringType::staticType() );
+
+  ParameterFactory::registerParameterType< InterpolationParameter >( InterpolationParameter::staticType() );
 
   ParameterFactory::registerParameterType< ListenerPosition >( ListenerPosition::staticType() );
 
