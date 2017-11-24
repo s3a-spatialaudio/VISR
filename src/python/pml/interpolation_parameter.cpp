@@ -31,24 +31,10 @@ void exportInterpolationParameter( pybind11::module & m)
     .def( "compare", static_cast<bool(InterpolationParameterConfig::*)(ParameterConfigBase const&) const>(&InterpolationParameterConfig::compare), py::arg( "rhs" ) )
     ;
 
-  py::class_<InterpolationParameter, ParameterBase>( m, "InterpolationParameter" )
+  py::class_<InterpolationParameter, ParameterBase, rbbl::InterpolationParameter>( m, "InterpolationParameter" )
     .def_property_readonly_static( "staticType", [](py::object /*self*/) {return InterpolationParameter::staticType(); } )
     .def( py::init<ParameterConfigBase const &>(), py::arg( "config" ) )
     .def( py::init<InterpolationParameterConfig const &>(), py::arg("config") )
-    .def( py::init<InterpolationParameter const &>(), py::arg( "rhs" ) )
-    .def( py::init<std::size_t>(), py::arg( "numberOfInterpolants" ) )
-    .def( py::init<InterpolationParameter::IndexContainer const &, InterpolationParameter::WeightContainer const &>(),
-                   py::arg( "indices" ), py::arg( "weights" ) )
-    .def_property_readonly_static( "invalidIndex", []( InterpolationParameter const &){ return InterpolationParameter::cInvalidIndex; } )
-    .def_property_readonly( "numberOfInterpolants", &InterpolationParameter::numberOfInterpolants )
-    .def( "index", &InterpolationParameter::index, py::arg("idx") )
-    .def( "weight", &InterpolationParameter::weight, py::arg( "idx" ) )
-    .def( "setIndex", &InterpolationParameter::setIndex, py::arg( "idx" ), py::arg("newIndex") )
-    .def( "setWeight", &InterpolationParameter::setWeight, py::arg( "idx" ), py::arg( "newWeight" ) )
-    .def_property( "indices", &InterpolationParameter::indices,
-                   static_cast<void(InterpolationParameter::*)(InterpolationParameter::IndexContainer const &)>(&InterpolationParameter::setIndices), py::arg("indices") )
-    .def_property( "weights", &InterpolationParameter::weights,
-      static_cast<void(InterpolationParameter::*)(InterpolationParameter::WeightContainer const &)>(&InterpolationParameter::setWeights), py::arg( "weights" ) )
     ;
 }
 

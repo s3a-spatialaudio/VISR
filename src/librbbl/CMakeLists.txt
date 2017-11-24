@@ -15,6 +15,7 @@ float_sequence.cpp
 gain_fader.cpp
 gain_matrix.cpp
 index_sequence.cpp
+interpolation_parameter.cpp
 kiss_fft_wrapper_double.cpp
 kiss_fft_wrapper_float.cpp
 lagrange_interpolator.cpp
