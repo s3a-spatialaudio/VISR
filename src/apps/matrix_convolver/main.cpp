@@ -6,6 +6,7 @@
 #include <libefl/denormalised_number_handling.hpp>
 
 #include <librbbl/fft_wrapper_factory.hpp>
+#include <librbbl/filter_routing.hpp>
 #include <librbbl/index_sequence.hpp>
 
 #include <libvisr/signal_flow_context.hpp>
@@ -76,7 +77,7 @@ int main( int argc, char const * const * argv )
     std::size_t const numberOfInputChannels = cmdLineOptions.getOption<std::size_t>( "input-channels" );
     std::size_t const numberOfOutputChannels = cmdLineOptions.getOption<std::size_t>( "output-channels" );
     std::string const routingsString = cmdLineOptions.getDefaultedOption<std::string>( "routings", "[]" );
-    pml::FilterRoutingList const routings( pml::FilterRoutingList::fromJson( routingsString ) );
+    rbbl::FilterRoutingList const routings( rbbl::FilterRoutingList::fromJson( routingsString ) );
     const std::size_t maxFilterRoutings = cmdLineOptions.getDefaultedOption<std::size_t>( "max-routings", routings.size() );
     if( routings.size() > maxFilterRoutings )
     {

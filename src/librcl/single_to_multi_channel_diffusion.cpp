@@ -42,7 +42,7 @@ void SingleToMultichannelDiffusion::setup( std::size_t numberOfOutputs,
   mOutput.setWidth( mNumberOfOutputs );
 
   std::size_t const filterLength = diffusionFilters.numberOfColumns();
-  pml::FilterRoutingList routings;
+  rbbl::FilterRoutingList routings;
   for( std::size_t outIdx( 0 ); outIdx < mNumberOfOutputs; ++outIdx )
   {
     routings.addRouting( 0, outIdx, outIdx, gainAdjustments[ outIdx ] );

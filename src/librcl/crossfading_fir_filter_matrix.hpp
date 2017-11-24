@@ -14,9 +14,10 @@
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
-#include <libpml/filter_routing_parameter.hpp>
 #include <libpml/indexed_value_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
+
+#include <librbbl/filter_routing.hpp>
 
 #include <cstddef> // for std::size_t
 #include <memory>
@@ -71,7 +72,7 @@ public:
                             std::size_t maxRoutings,
                             std::size_t transitionSamples,
                             efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
-                            pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
+                            rbbl::FilterRoutingList const & routings = rbbl::FilterRoutingList(),
                             ControlPortConfig controlInputs = ControlPortConfig::None,
                             char const * fftImplementation = "default" );
 
@@ -123,11 +124,11 @@ public:
   void addRouting( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx,
                    SampleType const gain = static_cast<SampleType>(1.0) );
 
-  void addRouting( pml::FilterRoutingParameter const & routing );
+  void addRouting( rbbl::FilterRouting const & routing );
 
-  void addRoutings( pml::FilterRoutingList const & routings );
+  void addRoutings( rbbl::FilterRoutingList const & routings );
 
-  void setRoutings( pml::FilterRoutingList const & routings );
+  void setRoutings( rbbl::FilterRoutingList const & routings );
 
   bool removeRouting( std::size_t inputIdx, std::size_t outputIdx );
 

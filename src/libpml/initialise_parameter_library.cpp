@@ -7,6 +7,7 @@
 #include "shared_data_protocol.hpp"
 
 #include "biquad_parameter.hpp"
+#include "filter_routing_parameter.hpp"
 #include "indexed_value_parameter.hpp"
 #include "matrix_parameter.hpp"
 #include "listener_position.hpp"
@@ -41,6 +42,9 @@ void initialiseParameterLibrary()
   // Register all supported parameter types.
   ParameterFactory::registerParameterType< BiquadParameterMatrix<float> >( BiquadParameterMatrix<float>::staticType() );
   ParameterFactory::registerParameterType< BiquadParameterMatrix<double> >( BiquadParameterMatrix<double>::staticType() );
+
+  ParameterFactory::registerParameterType< FilterRoutingParameter >( FilterRoutingParameter::staticType() );
+  ParameterFactory::registerParameterType< FilterRoutingListParameter >( FilterRoutingListParameter::staticType() );
 
   ParameterFactory::registerParameterType< IndexedVectorDoubleType >( IndexedVectorDoubleType::staticType() );
   ParameterFactory::registerParameterType< IndexedVectorFloatType >( IndexedVectorFloatType::staticType() );

@@ -8,6 +8,9 @@
 
 #include <libpml/matrix_parameter.hpp>
 
+#include <librbbl/filter_routing.hpp>
+
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
@@ -47,12 +50,12 @@ void exportFirFilterMatrix( py::module & m )
       py::arg("maxFilters"),
       py::arg("maxRoutings"),
       py::arg("filters") = pml::MatrixParameter<SampleType>(), // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
-      py::arg("routings") = pml::FilterRoutingList(),
+      py::arg("routings") = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) = FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
    .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        efl::BasicMatrix<SampleType> const & filters, pml::FilterRoutingList const & routings,
+        efl::BasicMatrix<SampleType> const & filters, rbbl::FilterRoutingList const & routings,
         FirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
        FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
@@ -67,12 +70,12 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "maxFilters" ),
       py::arg( "maxRoutings" ),
       py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),  // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
-      py::arg( "routings" ) = pml::FilterRoutingList(),
+      py::arg( "routings" ) = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) =  FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
     .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        py::array const & filters, pml::FilterRoutingList const & routings,
+        py::array const & filters, rbbl::FilterRoutingList const & routings,
         FirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
        FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
@@ -106,7 +109,7 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "maxFilters" ),
       py::arg( "maxRoutings" ),
       py::arg( "filters" ),
-      py::arg( "routings" ) = pml::FilterRoutingList(),
+      py::arg( "routings" ) = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) =  FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
   ;

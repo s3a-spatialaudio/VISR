@@ -47,7 +47,7 @@ void FirFilterMatrix::setup( std::size_t numberOfInputs,
                              std::size_t maxFilters,
                              std::size_t maxRoutings,
                              efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
-                             pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/,
+                             rbbl::FilterRoutingList const & routings /*= rbbl::FilterRoutingList()*/,
                              ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
                              char const * fftImplementation /*= "default" */ )
 {
@@ -101,20 +101,20 @@ void FirFilterMatrix::addRouting( std::size_t inputIdx, std::size_t outputIdx, s
   mConvolver->setRoutingEntry( inputIdx, outputIdx, filterIdx, gain );
 }
 
-void FirFilterMatrix::addRouting( pml::FilterRoutingParameter const & routing )
+void FirFilterMatrix::addRouting( rbbl::FilterRouting const & routing )
 {
   mConvolver->setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, static_cast<SampleType>(routing.gainLinear) );
 }
 
-void FirFilterMatrix::addRoutings( pml::FilterRoutingList const & routings )
+void FirFilterMatrix::addRoutings( rbbl::FilterRoutingList const & routings )
 {
-  for( pml::FilterRoutingParameter const & entry : routings )
+  for( rbbl::FilterRouting const & entry : routings )
   {
     addRouting( entry );
   }
 }
 
-void FirFilterMatrix::setRoutings( pml::FilterRoutingList const & routings )
+void FirFilterMatrix::setRoutings( rbbl::FilterRoutingList const & routings )
 {
   clearRoutings();
   addRoutings( routings );

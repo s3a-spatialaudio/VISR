@@ -19,7 +19,7 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
                               std::size_t maxFilterLength,
                               std::size_t maxRoutingPoints,
                               std::size_t maxFilterEntries,
-                              pml::FilterRoutingList const & initialRoutings,
+                              FilterRoutingList const & initialRoutings,
                               efl::BasicMatrix<SampleType> const & initialFilters,
                               std::size_t alignment /*= 0*/,
                               char const * fftImplementation /*= "default"*/ )
@@ -70,14 +70,14 @@ void MultichannelConvolverUniform<SampleType>::clearRoutingTable( )
 }
 
 template< typename SampleType>
-void MultichannelConvolverUniform<SampleType>::initRoutingTable( pml::FilterRoutingList const & routings )
+void MultichannelConvolverUniform<SampleType>::initRoutingTable( FilterRoutingList const & routings )
 {
   clearRoutingTable();
   if( routings.size() > maxNumberOfRoutingPoints() )
   {
     throw std::invalid_argument( "MultichannelConvolverUniform:initRoutingTable() exceeds the maximum admissible number of elements " );
   }
-  for( pml::FilterRoutingParameter const & v : routings )
+  for( FilterRouting const & v : routings )
   {
     setRoutingEntry( v );
   }
@@ -85,7 +85,7 @@ void MultichannelConvolverUniform<SampleType>::initRoutingTable( pml::FilterRout
 }
 
 template< typename SampleType>
-void MultichannelConvolverUniform<SampleType>::setRoutingEntry( pml::FilterRoutingParameter const & routing )
+void MultichannelConvolverUniform<SampleType>::setRoutingEntry( FilterRouting const & routing )
 {
   setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, static_cast<SampleType>(routing.gainLinear) );
 }

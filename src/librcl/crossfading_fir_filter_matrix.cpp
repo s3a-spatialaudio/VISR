@@ -37,7 +37,7 @@ CrossfadingFirFilterMatrix::CrossfadingFirFilterMatrix( SignalFlowContext const 
                                                         std::size_t maxRoutings,
                                                         std::size_t transitionSamples,
                                                         efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
-                                                        pml::FilterRoutingList const & routings /*= pml::FilterRoutingList()*/,
+                                                        rbbl::FilterRoutingList const & routings /*= rbbl::FilterRoutingList()*/,
                                                         ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
                                                         char const * fftImplementation /*= "default" */ )
  : AtomicComponent( context, name, parent )
@@ -91,20 +91,20 @@ void CrossfadingFirFilterMatrix::addRouting( std::size_t inputIdx, std::size_t o
   mConvolver->setRoutingEntry( inputIdx, outputIdx, filterIdx, gain );
 }
 
-void CrossfadingFirFilterMatrix::addRouting( pml::FilterRoutingParameter const & routing )
+void CrossfadingFirFilterMatrix::addRouting( rbbl::FilterRouting const & routing )
 {
   mConvolver->setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, static_cast<SampleType>(routing.gainLinear) );
 }
 
-void CrossfadingFirFilterMatrix::addRoutings( pml::FilterRoutingList const & routings )
+void CrossfadingFirFilterMatrix::addRoutings( rbbl::FilterRoutingList const & routings )
 {
-  for( pml::FilterRoutingParameter const & entry : routings )
+  for( rbbl::FilterRouting const & entry : routings )
   {
     addRouting( entry );
   }
 }
 
-void CrossfadingFirFilterMatrix::setRoutings( pml::FilterRoutingList const & routings )
+void CrossfadingFirFilterMatrix::setRoutings( rbbl::FilterRoutingList const & routings )
 {
   clearRoutings();
   addRoutings( routings );

@@ -5,10 +5,10 @@
 
 #include "export_symbols.hpp"
 
+// #include "filter_routing.hpp"
+
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
-
-#include <libpml/filter_routing_parameter.hpp>
 
 #include <librbbl/circular_buffer.hpp>
 #include <librbbl/fft_wrapper_base.hpp>
@@ -43,16 +43,6 @@ public:
    * SampleType arrays with interleaved real and imaginary components.
    */
   using FrequencyDomainType = typename FftWrapperBase<SampleType>::FrequencyDomainType;
-
-  /**
-   * The data type for specifying routing points.
-   */
-  //using RoutingEntry = pml::FilterRoutingParameter;
-
-  ///**
-  //  The data type for setting sets of routing points.
-  // */
-  //using RoutingList = pml::FilterRoutingList;
 
   /**
    * Constructor.

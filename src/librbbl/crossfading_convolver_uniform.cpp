@@ -20,7 +20,7 @@ CrossfadingConvolverUniform( std::size_t numberOfInputs,
                               std::size_t maxRoutingPoints,
                               std::size_t maxFilterEntries,
                               std::size_t transitionSamples,
-                              pml::FilterRoutingList const & initialRoutings,
+                              FilterRoutingList const & initialRoutings,
                               efl::BasicMatrix<SampleType> const & initialFilters,
                               std::size_t alignment /*= 0*/,
                               char const * fftImplementation /*= "default"*/ )
@@ -126,14 +126,14 @@ void CrossfadingConvolverUniform<SampleType>::clearRoutingTable( )
 }
 
 template< typename SampleType>
-void CrossfadingConvolverUniform<SampleType>::initRoutingTable( pml::FilterRoutingList const & routings )
+void CrossfadingConvolverUniform<SampleType>::initRoutingTable( FilterRoutingList const & routings )
 {
   clearRoutingTable();
   if( routings.size() > maxNumberOfRoutingPoints() )
   {
     throw std::invalid_argument( "CrossfadingConvolverUniform:initRoutingTable() exceeds the maximum admissible number of elements " );
   }
-  for( pml::FilterRoutingParameter const & v : routings )
+  for( FilterRouting const & v : routings )
   {
     setRoutingEntry( v );
   }
@@ -141,7 +141,7 @@ void CrossfadingConvolverUniform<SampleType>::initRoutingTable( pml::FilterRouti
 }
 
 template< typename SampleType>
-void CrossfadingConvolverUniform<SampleType>::setRoutingEntry( pml::FilterRoutingParameter const & routing )
+void CrossfadingConvolverUniform<SampleType>::setRoutingEntry( FilterRouting const & routing )
 {
   setRoutingEntry( routing.inputIndex, routing.outputIndex, routing.filterIndex, static_cast<SampleType>(routing.gainLinear) );
 }

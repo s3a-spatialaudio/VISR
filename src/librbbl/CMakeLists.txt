@@ -6,9 +6,10 @@ biquad_coefficient.cpp
 circular_buffer.cpp 
 crossfading_convolver_uniform.cpp
 core_convolver_uniform.cpp
-fir.cpp
 fft_wrapper_factory.cpp
 ffts_wrapper.cpp
+fir.cpp
+filter_routing.cpp
 fractional_delay_base.cpp
 fractional_delay_factory.cpp
 float_sequence.cpp
@@ -33,6 +34,7 @@ circular_buffer.hpp
 core_convolver_uniform.hpp
 crossfading_convolver_uniform.hpp
 export_symbols.hpp
+filter_routing.hpp
 fir.hpp
 fft_wrapper_base.hpp
 fft_wrapper_factory.hpp
@@ -43,6 +45,7 @@ fractional_delay_factory.hpp
 gain_fader.hpp
 gain_matrix.hpp
 index_sequence.hpp
+interpolation_parameter.hpp
 kiss_fft_wrapper.hpp
 lagrange_interpolator.hpp
 multichannel_convolver_uniform.hpp
@@ -74,7 +77,6 @@ add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
 
 target_link_libraries( rbbl_static efl_static )
-target_link_libraries( rbbl_static pml_static )
 target_link_libraries( rbbl_static ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_static ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )
@@ -93,9 +95,6 @@ target_compile_definitions( rbbl_shared PRIVATE -DVISR_BUILD_RBBL_SHARED_LIBRARY
 target_compile_definitions( rbbl_shared PUBLIC -DVISR_BUILD_RBBL_SHARED_LIBRARY=1)
 set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( rbbl_shared efl_shared )
-# ATTENTION: We cannot add the transitive link dependency to pml_shared here (although it exists), because CMake does not allow cyclic dependencies for shared library targets. Therefore, targets linking to rbbl_shared must add the dependency to pml_shared explicitly.
-# NOTE: Restructure libraries to get rid of this cyclic dependency 
-# target_link_libraries( rbbl_shared pml_shared )
 target_link_libraries( rbbl_shared ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_shared ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )

@@ -5,11 +5,10 @@
 
 #include "core_convolver_uniform.hpp"
 #include "export_symbols.hpp"
+#include "filter_routing.hpp"
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
-
-#include <libpml/filter_routing_parameter.hpp>
 
 #include <librbbl/circular_buffer.hpp>
 #include <librbbl/fft_wrapper_base.hpp>
@@ -58,7 +57,7 @@ public:
                                          std::size_t maxRoutingPoints,
                                          std::size_t maxFilterEntries,
                                          std::size_t transitionSamples,
-                                         pml::FilterRoutingList const & initialRoutings = pml::FilterRoutingList(),
+                                         FilterRoutingList const & initialRoutings = FilterRoutingList(),
                                          efl::BasicMatrix<SampleType> const & initialFilters = efl::BasicMatrix<SampleType>(),
                                          std::size_t alignment = 0,
                                          char const * fftImplementation = "default" );
@@ -102,14 +101,14 @@ public:
   * @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void initRoutingTable( pml::FilterRoutingList const & routings );
+  void initRoutingTable( FilterRoutingList const & routings );
 
   /**
   * Add a new routing to the routing table.
   * @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
   * @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
   */
-  void setRoutingEntry( pml::FilterRoutingParameter const & routing );
+  void setRoutingEntry( FilterRouting const & routing );
 
   /**
   * Add a new routing to the routing table.

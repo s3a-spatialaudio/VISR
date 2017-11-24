@@ -3,6 +3,8 @@
 set( SOURCES
 core_convolver_uniform.cpp
 crossfading_convolver_uniform.cpp
+filter_routing.cpp
+interpolation_parameter.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 rbbl.cpp

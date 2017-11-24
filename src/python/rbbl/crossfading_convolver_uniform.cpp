@@ -4,8 +4,7 @@
 
 #include <libefl/basic_matrix.hpp>
 
-#include <libpml/filter_routing_parameter.hpp>
-#include <libpml/matrix_parameter.hpp>
+#include <librbbl/filter_routing.hpp>
 
 #include <libvisr/detail/compose_message_string.hpp>
 
@@ -76,7 +75,7 @@ template<typename ElementType>
 void exportCrossfadingConvolverUniform( pybind11::module & m, char const * name )
 {
   pybind11::class_< CrossfadingConvolverUniform<ElementType> >( m, name )
-    .def( pybind11::init<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, pml::FilterRoutingList const &,
+    .def( pybind11::init<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, rbbl::FilterRoutingList const &,
       efl::BasicMatrix<ElementType> const &, std::size_t, char const *>(),
         pybind11::arg("numberOfInputs " ),
         pybind11::arg( "numberOfOutputs " ),
@@ -85,8 +84,8 @@ void exportCrossfadingConvolverUniform( pybind11::module & m, char const * name 
         pybind11::arg( "maxRoutingPoints " ),
         pybind11::arg( "maxFilterEntries " ),
         pybind11::arg( "transitionSamples"),
-        pybind11::arg( "initialRoutings " ) = pml::FilterRoutingList(),
-        pybind11::arg( "initialFilters" ) = pml::MatrixParameter<ElementType>(), // We need to use the subclass pml::MatrixParameter because efl::BasicMatrix does not support copy construction.
+        pybind11::arg( "initialRoutings " ) = rbbl::FilterRoutingList(),
+        pybind11::arg( "initialFilters" ),
         pybind11::arg( "alignment " ) = 0,
         pybind11::arg( "fftImplementation ") = "default" )
     .def_property_readonly_static( "numberOfInputs", &CrossfadingConvolverUniform<ElementType>::numberOfInputs )
@@ -100,7 +99,7 @@ void exportCrossfadingConvolverUniform( pybind11::module & m, char const * name 
        { return wrapProcess( convolver, input ); }, pybind11::arg("input") )
     .def( "clearRoutingTable", &CrossfadingConvolverUniform<ElementType>::clearRoutingTable )
     .def( "initRoutingTable", &CrossfadingConvolverUniform<ElementType>::initRoutingTable, pybind11::arg( "routings" ) )
-    .def( "setRoutingEntry", static_cast<void(CrossfadingConvolverUniform<ElementType>::*)(pml::FilterRoutingParameter const &)>(&CrossfadingConvolverUniform<ElementType>::setRoutingEntry), pybind11::arg("routing") )
+    .def( "setRoutingEntry", static_cast<void(CrossfadingConvolverUniform<ElementType>::*)(rbbl::FilterRouting const &)>(&CrossfadingConvolverUniform<ElementType>::setRoutingEntry), pybind11::arg("routing") )
     .def( "setRoutingEntry", static_cast<void(CrossfadingConvolverUniform<ElementType>::*)(std::size_t, std::size_t, std::size_t, ElementType)>
       (&CrossfadingConvolverUniform<ElementType>::setRoutingEntry),
       pybind11::arg( "inputIndex"), pybind11::arg( "outputIndex"), pybind11::arg( "filterIndex"), pybind11::arg( "gain") = 1.0 )

@@ -18,156 +18,36 @@ namespace visr
 namespace pml
 {
 
-#ifndef _MSC_VER
-  /**
-  * Provide definition for the static const class member in order to allow their address to be taken.
-  * The value is taken from their declaration within the class.
-  * @note: Microsoft Visual Studio neither allows or requires this standard-compliant explicit definition.
-  */
-  /*static*/ const FilterRoutingParameter::IndexType FilterRoutingParameter::cInvalidIndex;
-#endif
+FilterRoutingParameter::FilterRoutingParameter() = default;
 
-FilterRoutingList::FilterRoutingList( std::initializer_list<FilterRoutingParameter> const & entries )
+FilterRoutingParameter::FilterRoutingParameter( ParameterConfigBase const & config )
+  : rbbl::FilterRouting()  // Call default constructor
 {
-  for( auto e : entries )
+  if( not dynamic_cast<pml::EmptyParameterConfig const *>(&config) )
   {
-    bool result;
-    std::tie( std::ignore, result ) = mRoutings.insert( e );
-    if( not result )
-    {
-      throw std::invalid_argument( "Duplicated output indices are not allowed." );
-    }
+    throw std::invalid_argument( "Configuration object passed to FilterRoutingParameter must be a pml::EmptyParameterConfig" );
   }
 }
 
-/*static*/ FilterRoutingList const FilterRoutingList::fromJson( std::string const & initString )
+FilterRoutingParameter::FilterRoutingParameter( EmptyParameterConfig const & config )
+  : rbbl::FilterRouting() // Call default constructor
 {
-  std::stringstream stream( initString );
-  return FilterRoutingList::fromJson( stream );
 }
 
-/*static*/ FilterRoutingList const FilterRoutingList::fromJson( std::istream & initStream )
+FilterRoutingListParameter::FilterRoutingListParameter() = default;
+
+FilterRoutingListParameter::FilterRoutingListParameter( ParameterConfigBase const & config )
+  : rbbl::FilterRoutingList()  // Call default constructor
 {
-  FilterRoutingList newList;
-
-  using ptree = boost::property_tree::ptree;
-  using rbbl::IndexSequence;
-  using rbbl::FloatSequence;
-
-  ptree propTree;
-  try
+  if( not dynamic_cast<pml::EmptyParameterConfig const *>(&config) )
   {
-    read_json( initStream, propTree );
-  }
-  catch( std::exception const & ex )
-  {
-    throw std::invalid_argument( std::string( "FilterRoutingList::parseJson(): Error while reading JSON data:" ) + ex.what( ) );
-  }
-  // boost::property_map translates elements of arrays into children with empty names.
-  for( auto v : propTree.get_child( "" ) )
-  {
-    ptree const & routingNode = v.second;
-    std::string const inIdxStr = routingNode.get<std::string>( "input" );
-    std::string const outIdxStr = routingNode.get<std::string>( "output" );
-    std::string const filterIdxStr = routingNode.get<std::string>( "filter" );
-    std::string const gain = routingNode.get<std::string>( "gain", "1.0" );
-
-    IndexSequence const inIndices( inIdxStr );
-    IndexSequence const outIndices( outIdxStr );
-    IndexSequence const filterIndices( filterIdxStr );
-    FloatSequence<FilterRoutingParameter::GainType> const gainVector( gain );
-
-    std::size_t numEntries = inIndices.size( );
-    if( outIndices.size( ) != numEntries )
-    {
-      if( numEntries == 1 )
-      {
-        numEntries = outIndices.size( );
-      }
-      else if( outIndices.size( ) != 1 )
-      {
-        throw std::invalid_argument( "FilterRoutingList:parseJson: All non-scalar entries must have the same number of indices" );
-      }
-    }
-    // Special case: If both input and output indices are scalar, the filter cpec cannot be non-scalar, because this would mean multiple
-    // routings for the same (input,output) combination.
-    if( filterIndices.size( ) != numEntries )
-    {
-      if( (numEntries == 1) and( filterIndices.size( ) != 1 ) )
-      {
-        throw std::invalid_argument( "FilterRoutingList:parseJson: All non-scalar entries must have the same number of indices" );
-      }
-    }
-    // The gainVector entry cannot change the width of the filter routing definition, because that would mean that multiple
-    // routings with the same {in,out,filter} but potentially different gains would be created.
-    if( (gainVector.size( ) != 1) and( gainVector.size( ) != numEntries ) )
-    {
-      throw std::invalid_argument( "FilterRoutingList:parseJson: If the \"input\" and/or the \"output\" entry of a routing is non-scalar, the \"gain\" entry must have the same number of indices" );
-    }
-    for( std::size_t entryIdx( 0 ); entryIdx < numEntries; ++entryIdx )
-    {
-      FilterRoutingParameter::IndexType const inIdx = inIndices.size( ) == 1 ? inIndices[0] : inIndices[entryIdx];
-      FilterRoutingParameter::IndexType const outIdx = outIndices.size( ) == 1 ? outIndices[0] : outIndices[entryIdx];
-      FilterRoutingParameter::IndexType const filterIdx = filterIndices.size( ) == 1 ? filterIndices[0] : filterIndices[entryIdx];
-      FilterRoutingParameter::GainType const gain = gainVector.size( ) == 1 ? gainVector[0] : gainVector[entryIdx];
-      newList.addRouting( inIdx, outIdx, filterIdx, gain );
-    }
-  }
-  return newList;
-}
-
-void FilterRoutingList::swap( FilterRoutingList& rhs )
-{
-  mRoutings.swap( rhs.mRoutings );
-}
-
-void FilterRoutingList::addRouting( FilterRoutingParameter const & newEntry )
-{
-  RoutingsType::const_iterator const findIt = mRoutings.find( newEntry );
-  if( findIt != mRoutings.end() )
-  {
-    mRoutings.erase( findIt );
-  }
-  bool res( false );
-  std::tie(std::ignore, res ) = mRoutings.insert( newEntry );
-  if( not res )
-  {
-    throw std::logic_error( "FilterRoutingList::addRouting(): Error inserting element: " );
+    throw std::invalid_argument( "Configuration object passed to FilterRoutingListParameter must be a pml::EmptyParameterConfig" );
   }
 }
 
-bool FilterRoutingList::removeRouting( FilterRoutingParameter const & entry )
+FilterRoutingListParameter::FilterRoutingListParameter( EmptyParameterConfig const & config )
+  : rbbl::FilterRoutingList() // Call default constructor
 {
-  RoutingsType::const_iterator const findIt = mRoutings.find( entry );
-  if( findIt != mRoutings.end() )
-  {
-    mRoutings.erase( findIt );
-    return true;
-  }
-  return false;
-}
-
-bool FilterRoutingList::removeRouting( FilterRoutingParameter::IndexType inputIdx, FilterRoutingParameter::IndexType outputIdx )
-{
-  RoutingsType::const_iterator const findIt = mRoutings.find( FilterRoutingParameter( inputIdx, outputIdx, FilterRoutingParameter::cInvalidIndex ) );
-  if( findIt != mRoutings.end() )
-  {
-    mRoutings.erase( findIt );
-    return true;
-  }
-  return false;
-}
-
-void FilterRoutingList::parseJson( std::string const & encoded )
-{
-  std::stringstream strStr( encoded );
-  parseJson( strStr );
-}
-
-void FilterRoutingList::parseJson( std::istream & encoded )
-{
-  FilterRoutingList newList = FilterRoutingList::fromJson( encoded );
-  swap( newList ); // Ensure strong exception safety.
 }
 
 } // namespace pml

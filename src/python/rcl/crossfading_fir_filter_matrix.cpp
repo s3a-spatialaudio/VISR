@@ -8,6 +8,8 @@
 
 #include <libpml/matrix_parameter.hpp>
 
+#include <librbbl/filter_routing.hpp>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
@@ -42,7 +44,7 @@ void exportCrossfadingFirFilterMatrix( py::module & m )
    .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
         std::size_t transitionSamples,
-        efl::BasicMatrix<SampleType> const & filters, pml::FilterRoutingList const & routings,
+        efl::BasicMatrix<SampleType> const & filters, rbbl::FilterRoutingList const & routings,
         CrossfadingFirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
        CrossfadingFirFilterMatrix * inst
@@ -59,13 +61,13 @@ void exportCrossfadingFirFilterMatrix( py::module & m )
       py::arg( "maxRoutings" ),
       py::arg( "transitionSamples" ),
       py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),  // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
-      py::arg( "routings" ) = pml::FilterRoutingList(),
+      py::arg( "routings" ) = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) =  CrossfadingFirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
     .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
         std::size_t transitionSamples,
-        py::array const & filters, pml::FilterRoutingList const & routings,
+        py::array const & filters, rbbl::FilterRoutingList const & routings,
         CrossfadingFirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
        // Todo: Consider moving the matrix parameter creation from Numpy arrays to a library.
@@ -102,7 +104,7 @@ void exportCrossfadingFirFilterMatrix( py::module & m )
       py::arg( "maxRoutings" ),
       py::arg( "transitionSamples" ),
       py::arg( "filters" ),
-      py::arg( "routings" ) = pml::FilterRoutingList(),
+      py::arg( "routings" ) = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) =  CrossfadingFirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
   ;

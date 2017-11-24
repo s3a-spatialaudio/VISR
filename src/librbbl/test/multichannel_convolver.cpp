@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( MultichannelConvolver )
   BOOST_CHECK( cBlockLength % alignment == 0 );
 
   std::size_t const cMaxRoutings = 12;
-  pml::FilterRoutingList routings = {{ 0, 0, 0, 1.0f }, { 1, 1, 1, 1.0f } };
+  rbbl::FilterRoutingList routings = {{ 0, 0, 0, 1.0f }, { 1, 1, 1, 1.0f } };
 
   efl::BasicMatrix<SampleType> outputSignal( cNumberOfOutputs, cSignalLength, alignment );
 

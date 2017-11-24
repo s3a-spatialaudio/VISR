@@ -5,11 +5,10 @@
 
 
 // these parameters could easily go into a private implementation object.
-#include <libpml/filter_routing_parameter.hpp>
 #include <libpml/matrix_parameter.hpp>
 
 #include <librbbl/index_sequence.hpp>
-
+#include <librbbl/filter_routing.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
 
@@ -59,7 +58,7 @@ private:
   std::size_t mMaxFilterLength;
   std::size_t mNumMaxFilters;
 
-  pml::FilterRoutingList mRoutings;
+  rbbl::FilterRoutingList mRoutings;
 
   std::string mFilterList;
   rbbl::IndexSequence mIndexOffsets;

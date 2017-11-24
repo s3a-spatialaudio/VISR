@@ -142,7 +142,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                 0.0f, 0.0f );
 
     // Create a routing for #reverbObjects signals, each filtered with an individual filter, and summed into a single
-    pml::FilterRoutingList lateReverbRouting;
+    rbbl::FilterRoutingList lateReverbRouting;
     for( std::size_t objIdx( 0 ); objIdx < maxNumReverbObjects; ++objIdx )
     {
       lateReverbRouting.addRouting( objIdx, 0, objIdx, 1.0f );
@@ -154,7 +154,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                              rcl::FirFilterMatrix::ControlPortConfig::Filters );
 
     // Create a routing from 1 to #loudspeakers signals, each filtered with an individual filter
-    pml::FilterRoutingList lateDecorrelationRouting;
+    rbbl::FilterRoutingList lateDecorrelationRouting;
     for( std::size_t lspIdx( 0 ); lspIdx < arrayConfig.getNumRegularSpeakers(); ++lspIdx )
     {
       lateDecorrelationRouting.addRouting( 0, lspIdx, lspIdx, 1.0f );

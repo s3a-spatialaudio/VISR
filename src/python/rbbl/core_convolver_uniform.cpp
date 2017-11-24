@@ -4,8 +4,7 @@
 
 #include <libefl/basic_matrix.hpp>
 
-#include <libpml/filter_routing_parameter.hpp>
-#include <libpml/matrix_parameter.hpp>
+#include <librbbl/filter_routing.hpp>
 
 #include <libvisr/detail/compose_message_string.hpp>
 
@@ -37,7 +36,7 @@ void exportCoreConvolverUniform( pybind11::module & m, char const * name )
         pybind11::arg( "blockLength " ),
         pybind11::arg( "maxFilterLength " ),
         pybind11::arg( "maxFilterEntries " ),
-        pybind11::arg( "initialFilters" ) = pml::MatrixParameter<ElementType>(), // We need to use the subclass pml::MatrixParameter because efl::BasicMatrix does not support copy construction.
+        pybind11::arg( "initialFilters" ),
         pybind11::arg( "alignment " ) = 0,
         pybind11::arg( "fftImplementation ") = "default" )
     .def_property_readonly_static( "numberOfInputs", &CoreConvolverUniform<ElementType>::numberOfInputs )

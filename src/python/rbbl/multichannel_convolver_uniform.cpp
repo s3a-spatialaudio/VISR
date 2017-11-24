@@ -76,7 +76,7 @@ template<typename ElementType>
 void exportMultichannelConvolverUniform( pybind11::module & m, char const * name )
 {
   pybind11::class_< MultichannelConvolverUniform<ElementType> >( m, name )
-    .def( pybind11::init<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, pml::FilterRoutingList const &,
+    .def( pybind11::init<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, rbbl::FilterRoutingList const &,
       efl::BasicMatrix<ElementType> const &, std::size_t, char const *>(),
         pybind11::arg("numberOfInputs " ),
         pybind11::arg( "numberOfOutputs " ),
@@ -84,8 +84,8 @@ void exportMultichannelConvolverUniform( pybind11::module & m, char const * name
         pybind11::arg( "maxFilterLength " ),
         pybind11::arg( "maxRoutingPoints " ),
         pybind11::arg( "maxFilterEntries " ),
-        pybind11::arg( "initialRoutings " ) = pml::FilterRoutingList(),
-        pybind11::arg( "initialFilters" ) = pml::MatrixParameter<ElementType>(), // We need to use the subclass pml::MatrixParameter because efl::BasicMatrix does not support copy construction.
+        pybind11::arg( "initialRoutings " ) = rbbl::FilterRoutingList(),
+        pybind11::arg( "initialFilters" ),
         pybind11::arg( "alignment " ) = 0,
         pybind11::arg( "fftImplementation ") = "default" )
     .def_property_readonly_static( "numberOfInputs", &MultichannelConvolverUniform<ElementType>::numberOfInputs )
@@ -100,7 +100,7 @@ void exportMultichannelConvolverUniform( pybind11::module & m, char const * name
        { return wrapProcess( convolver, input ); }, pybind11::arg("input") )
     .def( "clearRoutingTable", &MultichannelConvolverUniform<ElementType>::clearRoutingTable )
     .def( "initRoutingTable", &MultichannelConvolverUniform<ElementType>::initRoutingTable, pybind11::arg( "routings" ) )
-    .def( "setRoutingEntry", static_cast<void(MultichannelConvolverUniform<ElementType>::*)(pml::FilterRoutingParameter const &)>(&MultichannelConvolverUniform<ElementType>::setRoutingEntry), pybind11::arg("routing") )
+    .def( "setRoutingEntry", static_cast<void(MultichannelConvolverUniform<ElementType>::*)(rbbl::FilterRouting const &)>(&MultichannelConvolverUniform<ElementType>::setRoutingEntry), pybind11::arg("routing") )
     .def( "setRoutingEntry", static_cast<void(MultichannelConvolverUniform<ElementType>::*)(std::size_t, std::size_t, std::size_t, ElementType)>
       (&MultichannelConvolverUniform<ElementType>::setRoutingEntry),
       pybind11::arg( "inputIndex"), pybind11::arg( "outputIndex"), pybind11::arg( "filterIndex"), pybind11::arg( "gain") = 1.0 )
