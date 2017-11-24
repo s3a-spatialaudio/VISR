@@ -127,8 +127,6 @@ private:
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
-  bool mTrackingEnabled;
-
   rcl::GainMatrix mVbapMatrix;
 
   rcl::GainMatrix mDiffusePartMatrix;

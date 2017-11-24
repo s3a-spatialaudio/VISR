@@ -18,28 +18,22 @@ namespace rcl
 
 ObjectGainEqCalculator::ObjectGainEqCalculator( SignalFlowContext const & context,
                                                 char const * name,
-                                                CompositeComponent * parent )
+                                                CompositeComponent * parent,
+                                                std::size_t numberOfObjectChannels,
+                                                std::size_t numberOfBiquadSections )
   : AtomicComponent( context, name, parent )
   , mObjectInput( "objectIn", *this, pml::EmptyParameterConfig() )
-  , mGainOutput( "gainOut", *this )
-  , mEqOutput( "eqOut", *this )
-  , mNumberOfObjectChannels( 0 )
+  , mGainOutput( "gainOut", *this, pml::VectorParameterConfig( numberOfObjectChannels ) )
+  , mEqOutput( "eqOut", *this, pml::MatrixParameterConfig( numberOfObjectChannels,
+                               numberOfBiquadSections ) )
+  , cNumberOfObjectChannels( numberOfObjectChannels )
+  , cNumberOfBiquadSections( numberOfBiquadSections )
   , cSamplingFrequency(samplingFrequency() )
 {
 }
 
 ObjectGainEqCalculator::~ObjectGainEqCalculator()
 {
-}
-
-void ObjectGainEqCalculator::setup( std::size_t numberOfObjectChannels,
-                                    std::size_t numberOfBiquadSections )
-{
-  mNumberOfObjectChannels = numberOfObjectChannels;
-  mNumberOfBiquadSections = numberOfBiquadSections;
-  mGainOutput.setParameterConfig( pml::VectorParameterConfig( numberOfObjectChannels ) );
-  mEqOutput.setParameterConfig( pml::MatrixParameterConfig( numberOfObjectChannels, 
-                                                            numberOfBiquadSections ) );
 }
 
 void ObjectGainEqCalculator::process()
@@ -63,11 +57,12 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
 {
   using namespace objectmodel;
   rbbl::BiquadCoefficient<SampleType> defaultEq; // Neutral EQ parameters
-  if( objectSignalGains.size() != mNumberOfObjectChannels )
+  if( objectSignalGains.size() != cNumberOfObjectChannels )
   {
     throw std::invalid_argument( "ObjectGainEqCalculator::process(): The parameter \"objectSignalGains\" must hold numberOfObjectChannels elements" );
   }
-  if( (objectChannelEqs.numberOfFilters() != mNumberOfObjectChannels) or (objectChannelEqs.numberOfSections() != mNumberOfBiquadSections ) )
+  if( (objectChannelEqs.numberOfFilters() != cNumberOfObjectChannels)
+    or (objectChannelEqs.numberOfSections() != cNumberOfBiquadSections ) )
   {
     throw std::invalid_argument( "ObjectGainEqCalculator::process(): The parameter \"objectChannelEqs\" must have a matrix dimension of numberOfObjectChannels x numberOfBiquadSections" );
   }
@@ -80,9 +75,9 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
     for( std::size_t chIdx(0); chIdx < numObjChannels; ++chIdx )
     {
         std::size_t const signalChannelIdx = obj.channelIndex( chIdx );
-        if( signalChannelIdx >= mNumberOfObjectChannels )
+        if( signalChannelIdx >= cNumberOfObjectChannels )
         {
-          status( StatusMessage::Error, "Signal index ", signalChannelIdx, " exceeds number of object signal channels (", mNumberOfObjectChannels, ")" );
+          status( StatusMessage::Error, "Signal index ", signalChannelIdx, " exceeds number of object signal channels (", cNumberOfObjectChannels, ")" );
           continue;
         }
         objectSignalGains[ signalChannelIdx ] = objLevel;
@@ -94,7 +89,6 @@ void ObjectGainEqCalculator::process( objectmodel::ObjectVector const & objects,
     }
   }
 }
-
 
 } // namespace rcl
 } // namespace visr

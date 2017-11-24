@@ -52,16 +52,19 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param numberOfObjectChannels The number of object channels supported by this calculator.
+   * @param numberOfBiquadSections The number of separate biquad filter sections for each audio channel.
    */
   explicit ObjectGainEqCalculator( SignalFlowContext const & context,
                                    char const * name,
-                                   CompositeComponent * parent );
+                                   CompositeComponent * parent,
+                                   std::size_t numberOfObjectChannels,
+                                   std::size_t numberOfBiquadSections );
 
   /**
    * Disabled (deleted) copy constructor
    */
   ObjectGainEqCalculator( ObjectGainEqCalculator const & ) = delete;
-
 
   /**
    * Destructor.
@@ -70,12 +73,7 @@ public:
 
   /**
    * Method to initialise the component.
-   * @param numberOfObjectChannels The number of object channels supported by this calculator.
-   * @param numberOfBiquadSections The number of separate biquad filter sections for each audio channel.
-   */ 
-  void setup( std::size_t numberOfObjectChannels,
-              std::size_t numberOfBiquadSections);
-
+   */
   void process( ) override;
 
 private:
@@ -97,9 +95,9 @@ private:
   /**
    * The number of audio object channels handled by this object.
    */
-  std::size_t mNumberOfObjectChannels;
+  std::size_t const cNumberOfObjectChannels;
 
-  std::size_t mNumberOfBiquadSections;
+  std::size_t const cNumberOfBiquadSections;
     
   /**
    *

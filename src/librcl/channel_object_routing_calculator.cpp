@@ -24,41 +24,33 @@ namespace rcl
 ChannelObjectRoutingCalculator::
 ChannelObjectRoutingCalculator( SignalFlowContext const & context,
                                 char const * name,
-                                CompositeComponent * parent )
+                                CompositeComponent * parent,
+                                std::size_t numberOfObjectChannels,
+                                panning::LoudspeakerArray const & config )
  : AtomicComponent( context, name, parent )
  , mObjectInput( "objectIn", *this, pml::EmptyParameterConfig() )
  , mRoutingOutput( "routingOut", *this, pml::EmptyParameterConfig() )
- , mNumberOfObjectChannels( 0 )
+ , cNumberOfObjectChannels( numberOfObjectChannels )
 {
-}
-
-ChannelObjectRoutingCalculator::~ChannelObjectRoutingCalculator()
-{
-}
-
-void ChannelObjectRoutingCalculator::setup( std::size_t numberOfObjectChannels,
-                                            panning::LoudspeakerArray const & config )
-{
-  mNumberOfObjectChannels = numberOfObjectChannels;
-  mLookup.clear();
-
   // For the moment, the loudspeaker channels are identical to their channel indices due to limitations of the config format.
   // This might change later when the relation between the VBAP renderer and the config file is redefined.
   std::size_t const numSpeakers = config.getNumRegularSpeakers();
-  for (std::size_t channelIndex(0); channelIndex < numSpeakers; ++channelIndex)
+  for( std::size_t channelIndex( 0 ); channelIndex < numSpeakers; ++channelIndex )
   {
     // Use the translation function of the loudspeaker array.
     panning::LoudspeakerArray::LoudspeakerIdType const lspId
-      = config.loudspeakerId( channelIndex);
+      = config.loudspeakerId( channelIndex );
     bool insertRes;
-    std::tie(std::ignore, insertRes) = mLookup.insert(
-      std::make_pair(static_cast<objectmodel::ChannelObject::OutputChannelId>(lspId), channelIndex) );
-    if (not insertRes)
+    std::tie( std::ignore, insertRes ) = mLookup.insert(
+      std::make_pair( static_cast<objectmodel::ChannelObject::OutputChannelId>(lspId), channelIndex ) );
+    if( not insertRes )
     {
       throw std::invalid_argument( "Insertion of channel index routing failed." );
     }
   }
 }
+
+ChannelObjectRoutingCalculator::~ChannelObjectRoutingCalculator() = default;
 
 void ChannelObjectRoutingCalculator::process()
 {
@@ -90,7 +82,7 @@ void ChannelObjectRoutingCalculator::process( pml::ObjectVector const & objects,
     assert(numberOfChannelSignals == chObj.outputChannels().size()); // class invariant
     for( std::size_t chIdx(0); chIdx < numberOfChannelSignals; ++chIdx )
     {
-      if (chObj.channelIndex(chIdx) > mNumberOfObjectChannels)
+      if (chObj.channelIndex(chIdx) > cNumberOfObjectChannels)
       {
         // TODO: Use error reporting API (when defined)
         std::cerr << "ChannelObjectRoutingCalculator: Object channel index exceeds channel range." << std::endl;
