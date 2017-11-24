@@ -3,6 +3,7 @@
 set( SOURCES
 add.cpp
 biquad_iir_filter.cpp
+channel_object_routing_calculator.cpp
 crossfading_fir_filter_matrix.cpp
 delay_matrix.cpp
 delay_vector.cpp
@@ -11,6 +12,7 @@ gain_matrix.cpp
 gain_vector.cpp
 hoa_allrad_gain_calculator.cpp
 panning_calculator.cpp
+object_gain_eq_calculator.cpp
 rcl.cpp
 scene_decoder.cpp
 scalar_osc_decoder.cpp

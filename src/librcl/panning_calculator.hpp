@@ -60,10 +60,18 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param numberOfObjects The number of VBAP objects to be processed.
+   * @param arrayConfig The array configuration object.
+   * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener.
+   * @param separateLowpassPanning Whether to generate two separate gain matrixes for low and high frequencies.
    */
   explicit PanningCalculator( SignalFlowContext const & context,
                               char const * name,
-                              CompositeComponent * parent = nullptr );
+                              CompositeComponent * parent,
+                              std::size_t numberOfObjects,
+                              panning::LoudspeakerArray const & arrayConfig,
+                              bool adaptiveListenerPosition = false,
+                              bool separateLowpassPanning = false );
 
   /**
    * Disabled (deleted) copy constructor
@@ -75,18 +83,6 @@ public:
    * Destructor.
    */
   ~PanningCalculator();
-
-  /**
-   * Method to initialise the component.
-   * @param numberOfObjects The number of VBAP objects to be processed.
-   * @param arrayConfig The array configuration object.
-   * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener.
-   * @param separateLowpassPanning Whether to generate two separate gain matrixes for low and high frequencies.
-   */ 
-  void setup( std::size_t numberOfObjects,
-              panning::LoudspeakerArray const & arrayConfig,
-              bool adaptiveListenerPosition=false,
-              bool separateLowpassPanning = false );
 
   /**
    * The process function. 
@@ -133,19 +129,19 @@ private:
   /**
    * The number of audio objects handled by this object.
    */
-  std::size_t mNumberOfObjects;
+  std::size_t const mNumberOfObjects;
 
   /**
    * The number of panning loudspeakers.
    * @note This excludes any potential subwoofers (which are not handled by the panning algorithm)
    */
-  std::size_t mNumberOfRegularLoudspeakers;
+  std::size_t const mNumberOfRegularLoudspeakers;
 
   /**
    * Number of all loudspeakers, including virtual (phantom) loudspeakers.
    *
    */
-  std::size_t mNumberOfAllLoudspeakers;
+  std::size_t const mNumberOfAllLoudspeakers;
 
 
   /**

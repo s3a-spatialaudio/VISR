@@ -9,6 +9,11 @@
 #include <libpml/vector_parameter.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+#include <algorithm>
+#include <ciso646>
+#include <vector>
 
 namespace visr
 {
@@ -19,8 +24,27 @@ namespace rcl
 
 namespace py = pybind11;
 
-void exportDelayVector( py::module & m )
+namespace // unnamed
 {
+/**
+ * Helper function to create a BasicVector from a std::vector.
+ * This enables passing Python lists or vectors to VISR bindings.
+ * @todo Consider making this a library function.
+ */
+template< typename ElementType >
+void fillBasicVector( efl::BasicVector<ElementType> & ret, std::vector<ElementType> const & v )
+{
+  ret.resize( v.size() );
+  if( not v.empty() )
+  {
+    std::copy( v.begin(), v.end(), ret.data() );
+  }
+}
+
+} // unnamed namespace
+
+void exportDelayVector( py::module & m )
+{ 
   using visr::rcl::DelayVector;
 
   py::class_<DelayVector, visr::AtomicComponent> dVec( m, "DelayVector" );
@@ -78,6 +102,32 @@ void exportDelayVector( py::module & m )
       py::arg( "initialDelay" ) = pml::VectorParameter<SampleType>{}, // Use the pml type, because BasicVector does not provide a copy ctor
       py::arg( "initialGain" ) = pml::VectorParameter<SampleType>{}   // Use the pml type, because BasicVector does not provide a copy ctor
      )
+     .def( py::init(
+        []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
+            std::size_t numberOfChannels, std::size_t interpolationSteps, SampleType maxDelay, const char * interpolationMethod,
+            DelayVector::MethodDelayPolicy methodDelayPolicy, bool controlInputs, std::vector< SampleType > const & initialDelaysSeconds,
+            std::vector< SampleType > const & initialGainsLinear )
+        {
+          efl::BasicVector<SampleType> delays;
+          efl::BasicVector<SampleType> gains;
+          fillBasicVector<SampleType>( delays, initialDelaysSeconds );
+          fillBasicVector<SampleType>( gains, initialGainsLinear );
+
+          DelayVector * inst = new DelayVector( context, name, parent );
+          inst->setup( numberOfChannels, interpolationSteps, maxDelay, interpolationMethod,
+          methodDelayPolicy, controlInputs, delays, gains );
+          return inst;
+        } ),
+          py::arg( "context" ), py::arg( "name" ), py::arg( "parent" ),
+        py::arg( "numberOfChannels" ),
+        py::arg( "interpolationSteps" ) = 1024, py::arg( "maxDelay" ) = 3.0f,
+        py::arg( "interpolationType" ) = "lagrangeOrder3",
+        py::arg( "methodDelayPolicy" ) = DelayVector::MethodDelayPolicy::Add,
+        py::arg( "controlInputs" ) = false,
+        py::arg( "initialDelay" ),
+        py::arg( "initialGain" ),
+        "Constructor taking Python lists or NumPy arrays as initial gain and delay values."
+        )
     ;
 }
 

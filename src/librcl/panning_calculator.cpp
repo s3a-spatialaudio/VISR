@@ -41,72 +41,63 @@ namespace rcl
 
   PanningCalculator::PanningCalculator( SignalFlowContext const & context,
                                         char const * name,
-                                        CompositeComponent * parent /*= nullptr*/ )
+                                        CompositeComponent * parent,
+                                        std::size_t numberOfObjects,
+                                        panning::LoudspeakerArray const & arrayConfig,
+                                        bool adaptiveListenerPosition /*= false*/,
+                                        bool separateLowpassPanning /*= false*/ )
  : AtomicComponent( context, name, parent )
- , mNumberOfObjects( 0 )
- , mTmpGains( cVectorAlignmentSamples )
  , mHighFrequencyGains(cVectorAlignmentSamples )
-{
+ , mNumberOfObjects( numberOfObjects )
+ , mNumberOfRegularLoudspeakers( arrayConfig.getNumRegularSpeakers() )
+ , mNumberOfAllLoudspeakers( arrayConfig.getNumSpeakers() )
+ , mLoudspeakerPositions( mVectorDimension, mNumberOfAllLoudspeakers )
+ , mVectorDimension( arrayConfig.is2D() ? 2 : 3 )
+ , mTmpGains( mNumberOfRegularLoudspeakers, cVectorAlignmentSamples )
+  {
+    // This contains all loudspeakers.
+    for( std::size_t lspIdx( 0 ); lspIdx < mNumberOfAllLoudspeakers; ++lspIdx )
+    {
+      panning::XYZ pos = arrayConfig.getPosition( lspIdx );
+      pos.normalise();
+      mLoudspeakerPositions( 0, lspIdx ) = pos.x;
+      mLoudspeakerPositions( 1, lspIdx ) = pos.y;
+      if( mVectorDimension > 2 )
+      {
+        mLoudspeakerPositions( 2, lspIdx ) = pos.z;
+      }
+    }
+
+    // Compute the triplet centers
+    efl::BasicMatrix<CoefficientType> tripletCenters( mVectorDimension, arrayConfig.getNumTriplets() );
+    std::vector<bool> tripletProcessed( arrayConfig.getNumTriplets(), false );
+
+    mVbapCalculator.reset( new panning::VBAP( arrayConfig ) );
+
+    // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
+    setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
+
+    mObjectVectorInput.reset( new ObjectPort( "objectVectorInput", *this, pml::EmptyParameterConfig() ) );
+    mGainOutput.reset( new MatrixPort( "gainOutput", *this, pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ) );
+
+    if( adaptiveListenerPosition )
+    {
+      mListenerPositionInput.reset( new ListenerPositionPort( "listenerPosition", *this, pml::EmptyParameterConfig() ) );
+    }
+
+    if( separateLowpassPanning )
+    {
+      mLowFrequencyGainOutput.reset( new MatrixPort( "lowFrequencyGainOutput", *this,
+        pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ) );
+      // What to do with virtual loudspeakers? At the moment, their energy is discarded. Thus computing a normalisation factor afterwards without incorporating them could
+      // result in a very low value, boosting the gains of the real loudspeakers.
+      // TODO: Reconsider after another strategy has been selected for handling virtual loudspeakers (downmix matrices before normalisation?)
+      mHighFrequencyGains.resize( mNumberOfAllLoudspeakers );
+    }
 }
 
 PanningCalculator::~PanningCalculator()
 {
-}
-
-void PanningCalculator::setup( std::size_t numberOfObjects,
-                               panning::LoudspeakerArray const & arrayConfig,
-                               bool adaptiveListenerPosition /*= false*/,
-                               bool separateLowpassPanning /*= false*/ )
-{
-  // mSpeakerArray = arrayConfig;
-  mNumberOfObjects = numberOfObjects;
-  mNumberOfRegularLoudspeakers = arrayConfig.getNumRegularSpeakers();
-  mNumberOfAllLoudspeakers = arrayConfig.getNumSpeakers();
-
-  mVectorDimension = arrayConfig.is2D() ? 2 : 3;
-  // This contains all loudspeakers.
-  mLoudspeakerPositions.resize( mVectorDimension, mNumberOfAllLoudspeakers );
-  for( std::size_t lspIdx( 0 ); lspIdx < mNumberOfAllLoudspeakers; ++lspIdx )
-  {
-    panning::XYZ pos = arrayConfig.getPosition(lspIdx);
-    pos.normalise();
-    mLoudspeakerPositions( 0, lspIdx ) = pos.x;
-    mLoudspeakerPositions( 1, lspIdx ) = pos.y;
-    if( mVectorDimension > 2 )
-    {
-      mLoudspeakerPositions( 2, lspIdx ) = pos.z;
-    }
-  }
-  // mSourceCoordinates.resize( mNumberOfObjects, mVectorDimension );
-
-  // Compute the triplet centers
-  efl::BasicMatrix<CoefficientType> tripletCenters(mVectorDimension, arrayConfig.getNumTriplets() );
-  std::vector<bool> tripletProcessed( arrayConfig.getNumTriplets(), false );
-
-  mTmpGains.resize( mNumberOfRegularLoudspeakers );
-
-  mVbapCalculator.reset( new panning::VBAP( arrayConfig ) );
-
-  // set the default initial listener position. This also initialises the internal data members (e.g. inverse matrices)
-  setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
-
-  mObjectVectorInput.reset( new ObjectPort( "objectVectorInput", *this, pml::EmptyParameterConfig() ) );
-  mGainOutput.reset( new MatrixPort( "gainOutput", *this, pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ) );
-
-  if( adaptiveListenerPosition )
-  {
-    mListenerPositionInput.reset( new ListenerPositionPort( "listenerPosition", *this, pml::EmptyParameterConfig() ) );
-  }
-
-  if( separateLowpassPanning )
-  {
-    mLowFrequencyGainOutput.reset( new MatrixPort( "lowFrequencyGainOutput", *this,
-                                                  pml::MatrixParameterConfig( mNumberOfRegularLoudspeakers, mNumberOfObjects ) ));
-    // What to do with virtual loudspeakers? At the moment, thei energy is discarded. Thus computing a normalisation factor afterwards without incorporating them could
-    // result in a very low value, boosting the gains of the real loudspeakers.
-    // TODO: Reconsider after another strategy has been selected for handling virtual loudspeakers (downmix matrices before normalisation?)
-    mHighFrequencyGains.resize( mNumberOfAllLoudspeakers );
-  }
 }
 
 void PanningCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
