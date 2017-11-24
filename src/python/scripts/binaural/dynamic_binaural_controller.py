@@ -109,7 +109,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
             self.inverted = inv(self.triplets)
-            print(self.triplets)
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
 

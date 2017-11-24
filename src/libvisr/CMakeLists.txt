@@ -92,7 +92,7 @@ target_compile_definitions( visr_shared PUBLIC -DVISR_BUILD_VISR_SHARED_LIBRARY=
 # Set this definition only when building the present target.
 target_compile_definitions( visr_shared PRIVATE -DVISR_BUILD_VISR_SHARED_LIBRARY=1 -DVISR_BUILD_VISR_LIBRARY=1 )
 set_target_properties(visr_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-set_target_properties(visr_shared PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

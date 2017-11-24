@@ -62,8 +62,16 @@ namespace
         []( BiquadCoefficient<CoeffType> & self, CoeffType val ) { self.a1() = val; } )
       .def_property( "a2", static_cast<CoeffType const &(BiquadCoefficient<CoeffType>::*)() const >(&BiquadCoefficient<CoeffType>::a2),
         []( BiquadCoefficient<CoeffType> & self, CoeffType val ) { self.a2() = val; } )
-      .def( "loadJson", []( BiquadCoefficient<CoeffType> & self, std::string const & jsonRep ){ self.loadJson( std::stringstream( jsonRep ) ); } )
-      .def( "loadXml", []( BiquadCoefficient<CoeffType> & self, std::string const & xmlRep ) { self.loadXml( std::stringstream( xmlRep ) ); } )
+      .def( "loadJson", []( BiquadCoefficient<CoeffType> & self, std::string const & jsonRep )
+      {
+        std::stringstream stream( jsonRep );
+        self.loadJson( stream );
+      } )
+      .def( "loadXml", []( BiquadCoefficient<CoeffType> & self, std::string const & xmlRep )
+      {
+        std::stringstream stream( xmlRep );
+        self.loadXml( stream );
+      } )
       .def( "writeJson", []( BiquadCoefficient<CoeffType> & self ){ std::string jsonRep; self.writeJson( jsonRep ); return jsonRep; } )
       .def( "writeXml", []( BiquadCoefficient<CoeffType> & self ) { std::string xmlRep; self.writeXml( xmlRep ); return xmlRep; } )
     ;

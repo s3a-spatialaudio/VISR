@@ -102,7 +102,14 @@ public:
 
   /**
    * Register an audio connection between a sending and a receiving audio port.
-   * This overload uses C strings to denote both the names of the components holding the ports and the output ports itself.
+   * This overload uses C strings to denote both the names of the
+   * components holding the ports and the output ports itself.
+   * Lists of channel indices are to be specified for the sending and
+   * the receiving port. The sizes of these lists must be identical,
+   * and the contained indices must not exceed the width of the send
+   * and receive port, respectively.
+   * Empty lists for both the send and receive indices are permitted
+   * and result in no connection.
    * @param sendComponent Name of the component holding the sending audio port. If the send port is an external input of this component, use "" or "this"
    * @param sendPort The name of the sending port.
    * @param sendIndices A list of channel indices denoting the send channels of the sending side.
@@ -125,6 +132,12 @@ public:
   * Register an audio connection between a sending and a receiving audio port.
   * This overload uses audio ports (either directly referencing external in- and output of 
   * this components or retrieving ports of contained components using the Component::audioPort() method).
+  * Lists of channel indices are to be specified for the sending and
+  * the receiving port. The sizes of these lists must be identical,
+  * and the contained indices must not exceed the width of the send
+  * and receive port, respectively.
+  * Empty lists for both the send and receive indices are permitted
+  * and result in no connection.
   * @param sendPort The send port object.
   * @param sendIndices A list of channel indices denoting the send channels of the sending side.
   * @param receivePort The receive port object.
