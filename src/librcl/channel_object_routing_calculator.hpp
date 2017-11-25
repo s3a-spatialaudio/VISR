@@ -46,10 +46,14 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param numberOfObjectChannels The number of object channels supported by this calculator.
+   * @param config The setup configuration data.
    */
   explicit ChannelObjectRoutingCalculator( SignalFlowContext const & context,
                                            char const * name,
-                                           CompositeComponent * parent);
+                                           CompositeComponent * parent,
+                                           std::size_t numberOfObjectChannels,
+                                           panning::LoudspeakerArray const & config );
 
   /**
    * Disabled (deleted) copy constructor
@@ -60,14 +64,6 @@ public:
    * Destructor.
    */
   ~ChannelObjectRoutingCalculator();
-
-  /**
-   * Method to initialise the component.
-   * @param numberOfObjectChannels The number of object channels supported by this calculator.
-   * @param config The setup configuration data.
-   */ 
-  void setup( std::size_t numberOfObjectChannels,
-              panning::LoudspeakerArray const & config );
 
   void process() override;
 
@@ -86,7 +82,7 @@ private:
   /**
    * The number of audio object channels handled by this object.
    */
-  std::size_t mNumberOfObjectChannels;
+  std::size_t const cNumberOfObjectChannels;
 
   using ChannelLookup = std::map< objectmodel::ChannelObject::OutputChannelId, std::size_t >;
 

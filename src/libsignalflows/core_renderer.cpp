@@ -45,13 +45,14 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
  , mObjectSignalInput( "audioIn", *this, numberOfInputs )
  , mLoudspeakerOutput( "audioOut", *this, numberOfOutputs )
  , mObjectVectorInput( "objectDataInput", *this, pml::EmptyParameterConfig() )
- , mObjectInputGainEqCalculator( context, "ObjectGainEqCalculator", this )
+ , mObjectInputGainEqCalculator( context, "ObjectGainEqCalculator", this, numberOfInputs, numberOfObjectEqSections )
  , mObjectGain( context, "ObjectGain", this )
  , mObjectEq( context, "ObjectEq", this )
- , mChannelObjectRoutingCalculator( context, "ChannelObjectRoutingCalculator", this )
+ , mChannelObjectRoutingCalculator( context, "ChannelObjectRoutingCalculator", this, numberOfInputs, loudspeakerConfiguration )
  , mChannelObjectRouting( context, "ChannelObjectRouting", this )
  , mOutputAdjustment( context, "OutputAdjustment", this )
- , mGainCalculator( context, "VbapGainCalculator", this )
+ , mGainCalculator( context, "VbapGainCalculator", this, numberOfInputs, loudspeakerConfiguration, not trackingConfiguration.empty(),
+                    frequencyDependentPanning /*separate lowpass panning*/ )
  , mAllradGainCalculator( context, "AllRadGainGalculator", this )
  , mDiffusionGainCalculator( context, "DiffusionCalculator", this )
  , mVbapMatrix( context, "VbapGainMatrix", this )
@@ -69,14 +70,12 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
   std::size_t const numberOfOutputSignals = numberOfLoudspeakers + numberOfSubwoofers;
 
-  mTrackingEnabled = not trackingConfiguration.empty( );
+  bool const trackingEnabled = not trackingConfiguration.empty( );
 
-  mGainCalculator.setup( numberOfInputs, loudspeakerConfiguration, mTrackingEnabled,
-                         frequencyDependentPanning /*separate lowpass panning*/ );
   parameterConnection( mObjectVectorInput, mGainCalculator.parameterPort( "objectVectorInput" ) );
 
 
-  if( mTrackingEnabled )
+  if( trackingEnabled )
   {
     // Instantiate the objects.
     mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation", this ) );
@@ -112,7 +111,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     mOutputEqualisationFilter->setup( numberOfOutputSignals, outputEqSections, eqConfig );
   }
 
-  mObjectInputGainEqCalculator.setup( numberOfInputs, numberOfObjectEqSections );
   parameterConnection(mObjectVectorInput, mObjectInputGainEqCalculator.parameterPort("objectIn") );
   mObjectGain.setup( numberOfInputs, interpolationPeriod, true /* controlInputs */ );
   audioConnection( mObjectSignalInput, mObjectGain.audioPort("in") );
@@ -123,8 +121,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   audioConnection( mObjectGain.audioPort("out"), mObjectEq.audioPort("in") );
   parameterConnection( mObjectInputGainEqCalculator.parameterPort("eqOut"), mObjectEq.parameterPort("eqInput"));
 
-
-  mChannelObjectRoutingCalculator.setup( numberOfInputs, loudspeakerConfiguration);
   parameterConnection(mObjectVectorInput, mChannelObjectRoutingCalculator.parameterPort("objectIn") );
 
   mChannelObjectRouting.setup(numberOfInputs, numberOfLoudspeakers, true /* activate control input*/ );
@@ -192,7 +188,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   pml::MatrixParameter<Afloat> const allRadDecoderGains
     = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
   mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains,
-                               pml::ListenerPosition(), mTrackingEnabled );
+                               pml::ListenerPosition(), trackingEnabled );
 
   parameterConnection( mObjectVectorInput, mAllradGainCalculator.parameterPort("objectInput") );
   parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mAllradGainCalculator.parameterPort( "gainInput" ) );
@@ -252,7 +248,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   audioConnection( mDiffusePartDecorrelator.audioPort("out"),
                    mDirectDiffuseMix.audioPort( frequencyDependentPanning ? "in3" : "in2" ) );
 
-  if( mTrackingEnabled )
+  if( trackingEnabled )
   {
     audioConnection( mDirectDiffuseMix.audioPort("out"), mListenerGainDelayCompensation->audioPort("in") );
     audioConnection( mListenerGainDelayCompensation->audioPort("out"), mSubwooferMix.audioPort("in") );

@@ -22,12 +22,12 @@ void exportPanningCalculator( pybind11::module & m )
   using visr::rcl::PanningCalculator;
 
   pybind11::class_<PanningCalculator, visr::AtomicComponent>( m, "PanningCalculator" )
-   .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
-      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
-   .def( "setup", &PanningCalculator::setup, pybind11::arg("numberOfObjects"),
+   .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
+     std::size_t, panning::LoudspeakerArray const &, bool, bool>(),
+      pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
+      pybind11::arg( "numberOfObjects" ),
       pybind11::arg( "arrayConfig" ), pybind11::arg( "adaptiveListener" ) = false,
       pybind11::arg( "separateLowpassPanning" ) = false )
-   // .def( "process", &PanningCalculator::process ) // TODO: Do I need this one, or is the abstract method in AtomicComponent sufficient?
   ; 
 }
 

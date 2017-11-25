@@ -231,15 +231,21 @@ namespace // unnamed
 } // unnamed namespace
 
 void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
-                                                                ChannelList const & sendIndices,
-                                                                AudioPortBase & receivePort,
-                                                                ChannelList const & receiveIndices )
+                                                        ChannelList const & sendIndices,
+                                                        AudioPortBase & receivePort,
+                                                        ChannelList const & receiveIndices )
 {
   checkPortParent( sendPort.implementation(), *this, "audio send" );
   checkPortParent( receivePort.implementation(), *this, "audio receive" );
   if( sendIndices.size() != receiveIndices.size() )
   {
     throw std::invalid_argument( "CompositeComponent::audioConnection(): send and receive index lists have different sizes." );
+  }
+
+  // Allow empty send and receive ranges.
+  if( sendIndices.size() == 0 )
+  {
+    return; // No operation performed
   }
   if( maxChannelIndex( sendIndices ) >= sendPort.width() )
   {
