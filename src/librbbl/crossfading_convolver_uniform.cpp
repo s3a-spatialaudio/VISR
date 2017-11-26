@@ -202,8 +202,17 @@ void CrossfadingConvolverUniform<SampleType>::initFilters( efl::BasicMatrix<Samp
 
 template< typename SampleType >
 void CrossfadingConvolverUniform<SampleType>::
+transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment /*= 0*/ ) const
+{
+  mCoreConvolver.transformImpulseResponse( ir, irLength, result, alignment );
+}
+
+template< typename SampleType >
+void CrossfadingConvolverUniform<SampleType>::
 setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment /*= 0*/ )
 {
+  // TODO: Avoid code duplication in setTransformedFilter().
+
   std::size_t const oldFilterSet = mCurrentFilterOutput[filterIdx];
   std::size_t const newFilterSet = (oldFilterSet == 0) ? 1 : 0;
   std::size_t const newFilterIndex = (newFilterSet == 0) ? filterIdx : filterIdx + mMaxNumFilters;
@@ -218,6 +227,25 @@ setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t
 
   mCurrentFilterOutput[filterIdx] = newFilterSet; // switch the filter set
   mCurrentRampBlock[filterIdx] = 0; // Set the interpolation sequence to the start position.
+}
+
+template< typename SampleType >
+void CrossfadingConvolverUniform<SampleType>::
+setTransformedFilter( FrequencyDomainType const * fdFilter, std::size_t filterIdx, std::size_t alignment )
+{
+  std::size_t const oldFilterSet = mCurrentFilterOutput[filterIdx];
+  std::size_t const newFilterSet = (oldFilterSet == 0) ? 1 : 0;
+  std::size_t const newFilterIndex = (newFilterSet == 0) ? filterIdx : filterIdx + mMaxNumFilters;
+
+  // Note: If the previous transition is not finished by now, the filter switches immediately to the old target
+  // filter to use it as the starting point of the new transition.
+  // Having smooth transition in this case would require an interpolation of the FIR coefficients, and there is
+  // no space to hold additional filtersets in the current implementation.
+
+  mCurrentFilterOutput[filterIdx] = newFilterSet; // switch the filter set
+  mCurrentRampBlock[filterIdx] = 0; // Set the interpolation sequence to the start position.
+
+  mCoreConvolver.setFilter( fdFilter, newFilterIndex, alignment );
 }
 
 // explicit instantiations

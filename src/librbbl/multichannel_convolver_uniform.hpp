@@ -8,10 +8,6 @@
 #include "filter_routing.hpp"
 
 #include <libefl/basic_matrix.hpp>
-#include <libefl/basic_vector.hpp>
-
-#include <librbbl/circular_buffer.hpp>
-#include <librbbl/fft_wrapper_base.hpp>
 
 #include <cassert>
 #include <complex>

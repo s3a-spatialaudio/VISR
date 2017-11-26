@@ -8,10 +8,6 @@
 #include "filter_routing.hpp"
 
 #include <libefl/basic_matrix.hpp>
-#include <libefl/basic_vector.hpp>
-
-#include <librbbl/circular_buffer.hpp>
-#include <librbbl/fft_wrapper_base.hpp>
 
 #include <cassert>
 #include <complex>
@@ -35,6 +31,8 @@ template< typename SampleType >
 class VISR_RBBL_LIBRARY_SYMBOL CrossfadingConvolverUniform
 {
 public:
+  using FrequencyDomainType = typename CoreConvolverUniform<SampleType>::FrequencyDomainType;
+
   /**
    * Constructor.
    * @param numberOfInputs The number of input signals processed.
@@ -72,6 +70,12 @@ public:
   std::size_t numberOfOutputs() const { return mCoreConvolver.numberOfOutputs(); }
 
   std::size_t blockLength() const { return mCoreConvolver.blockLength(); }
+
+  std::size_t dftRepresentationSize() const { return mCoreConvolver.dftRepresentationSize(); }
+
+  std::size_t alignment() const { return mCoreConvolver.alignment(); }
+
+  std::size_t complexAlignment() const { return mCoreConvolver.complexAlignment(); }
 
   std::size_t maxNumberOfRoutingPoints() const { return mMaxNumberOfRoutingPoints; }
 
@@ -133,7 +137,15 @@ public:
   */
   //@{
   /**
-  * Reset all filters to zero.
+  * Transform an impulse response into the partitioned frequency-domain representation
+  * @todo The semantics of the \p alignment parameter would be clearer if it would be in bytes.
+  */
+  void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
+
+  /**
+  * Reset all contained filters to zero.
+  * This also resets the currenly running, interpolated filters, effectively muting the output of the convolution.
+  * @note The semantics of this function differs from setFilters / setImpulseResponse / setTransformedFilter, which 
   */
   void clearFilters( );
 
@@ -142,14 +154,23 @@ public:
    * If there are fewer filters in the matrix than the maximum admissible number, the remaining 
    * filters are set to zero. Likewise, if the length of the new filters is less than the maximum allowed filter length, 
    * the remaining elements are set to zero.
-   * @param newFilters The matrix of new filters, with each row representing a filter.
+   * @param newImpulseReponses The matrix of new filters, with each row representing an impulse response.
    * @throw std::invalid_argument If the number of filters (number of rows) exceeds the maximum admissible number of filters.
    * @throw std::invalid_argumeent If the length of the filters (number of matrix columns) exceeds the maximum admissible length,
+   * @note This function does not affect the currently set (interpolated) filters used in the running convolution.
    */
-  void initFilters( efl::BasicMatrix<SampleType> const & newFilters );
+  void initFilters( efl::BasicMatrix<SampleType> const & newImpulseResponses );
 
+  /**
+   */
   void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
 
+  /**
+   * Set a transformed filter (i.e., in the partitioned, zero-padded representation) to a given filter (routing) slot.
+   * @note The transformed filter should be obtained using transformImpulseResponse(), because the actual format (block size, padding, etc.)
+   * depends on the convolver.
+   */
+  void setTransformedFilter( FrequencyDomainType const * fdFilter, std::size_t filterIdx, std::size_t alignment );
 private:
   /**
    * Internal function to apply the filters and to set the oputputs.
@@ -208,6 +229,9 @@ private:
    */
   //@{
 
+  /**
+   * Redundant with CoreConvolver infoemation, but used in multiple places as the offset to the second filter bank.
+   */
   std::size_t const mMaxNumFilters;
 
   std::size_t const mNumRampBlocks;

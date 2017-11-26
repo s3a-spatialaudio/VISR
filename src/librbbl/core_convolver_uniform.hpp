@@ -5,8 +5,6 @@
 
 #include "export_symbols.hpp"
 
-// #include "filter_routing.hpp"
-
 #include <libefl/basic_matrix.hpp>
 #include <libefl/basic_vector.hpp>
 
@@ -91,53 +89,6 @@ public:
 
   std::size_t maxFilterLength() const { return mMaxFilterLength; }
 
-  //std::size_t numberOfRoutingPoints( ) const { return mRoutingTable.size(); }
-
-  // Note: No overall process() method is provided.
-
-  ///**
-  //* Manipulation of the routing table.
-  //*/
-  ////@{
-  ///**
-  //* Remove all entries from the routing table.
-  //*/
-  //void clearRoutingTable( );
-
-  ///**
-  //* Initialize the routing table from a set of entries.
-  //* All pre-existing entries are cleared beforehand.
-  //* @param routings A vector of routing entries
-  //* @throw std::invalid_argument If the number of new entries exceeds the maximally permitted number of routings
-  //* @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
-  //*/
-  //void initRoutingTable( RoutingList const & routings );
-
-  ///**
-  //* Add a new routing to the routing table.
-  //* @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
-  //* @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
-  //*/
-  //void setRoutingEntry( RoutingEntry const & routing );
-
-  ///**
-  //* Add a new routing to the routing table.
-  //* @throw std::invalid_argument If adding the entry would exceed the maximally permitted number of routings
-  //* @throw std::invalid_argument If any input, output, or filter index exceeds the admissible range for the respective type.
-  //*/
-  //void setRoutingEntry( std::size_t inputIdx, std::size_t outputIdx, std::size_t filterIdx, RoutingEntry::GainType gain );
-
-  ///**
-  //* @return \p true if the entry was removes, \p false if not (i.e., the entry did not exist).
-  //*/
-  //bool removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx );
-
-  ///**
-  //* Query the currently active number of routings.
-  //*/
-  //std::size_t numberOfRoutings( ) const { return mRoutingTable.size( ); }
-  ////@}
-
   /**
   * Manipulation of the contained filter representation.
   */
@@ -161,11 +112,6 @@ public:
   void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
 
   void processInputs( SampleType const * const input, std::size_t channelStride, std::size_t alignment );
-
-  /**
-   * Perform the filtering and output calculation for all outputs.
-   */
-//   void processOutputs( SampleType * const output, std::size_t channelStride, std::size_t alignment );
 
   /**
    * Perform the frequency-domain block convolution for the combination of an input and a filter.
@@ -237,10 +183,12 @@ public:
   void setFilter( FrequencyDomainType const * transformedFilter, std::size_t filterIdx, std::size_t alignment = 0 );
   //@}
 
-
-
-private:
+  /**
+   * Compute the frequency-domain representation of an impulse response.
+   * @param ir
+   */
   void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
+private:
 
   /**
    * The alignment used in all data members.
