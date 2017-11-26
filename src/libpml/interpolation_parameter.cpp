@@ -49,7 +49,7 @@ InterpolationParameter::InterpolationParameter(ParameterConfigBase const & confi
 }
 
 InterpolationParameter::InterpolationParameter( InterpolationParameterConfig const & config )
-  : InterpolationParameter( config.numberOfInterpolants() )
+  : InterpolationParameter( InterpolationParameter::cInvalidId, config.numberOfInterpolants() )
 {
 }
 

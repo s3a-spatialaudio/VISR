@@ -23,11 +23,12 @@ void exportInterpolationParameter( pybind11::module & m)
 
   py::class_<InterpolationParameter>( m, "InterpolationParameter" )
     .def( py::init<InterpolationParameter const &>(), py::arg( "rhs" ) )
-    .def( py::init<std::size_t>(), py::arg( "numberOfInterpolants" ) )
-    .def( py::init<InterpolationParameter::IndexContainer const &, InterpolationParameter::WeightContainer const &>(),
-                   py::arg( "indices" ), py::arg( "weights" ) )
+    .def( py::init<InterpolationParameter::IdType, std::size_t>(), py::arg("id"), py::arg( "numberOfInterpolants" ) )
+    .def( py::init<InterpolationParameter::IdType, InterpolationParameter::IndexContainer const &, InterpolationParameter::WeightContainer const &>(),
+      py::arg( "id" ), py::arg( "indices" ), py::arg( "weights" ) )
     .def_property_readonly_static( "invalidIndex", []( InterpolationParameter const &){ return InterpolationParameter::cInvalidIndex; } )
     .def_property_readonly( "numberOfInterpolants", &InterpolationParameter::numberOfInterpolants )
+    .def_property( "id", &InterpolationParameter::id, &InterpolationParameter::setId )
     .def( "index", &InterpolationParameter::index, py::arg("idx") )
     .def( "weight", &InterpolationParameter::weight, py::arg( "idx" ) )
     .def( "setIndex", &InterpolationParameter::setIndex, py::arg( "idx" ), py::arg("newIndex") )

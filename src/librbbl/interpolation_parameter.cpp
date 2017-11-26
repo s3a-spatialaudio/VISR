@@ -11,15 +11,18 @@ namespace rbbl
 
 InterpolationParameter::InterpolationParameter( InterpolationParameter const & rhs ) = default;
 
-InterpolationParameter::InterpolationParameter( std::size_t numberOfInterpolants )
-  : mIndices( numberOfInterpolants, cInvalidIndex )
+InterpolationParameter::InterpolationParameter( IdType id, std::size_t numberOfInterpolants )
+  : mId( id )
+  , mIndices( numberOfInterpolants, cInvalidIndex )
   , mWeights( numberOfInterpolants, static_cast<WeightType>(0.0) )
 {
 }
 
-InterpolationParameter::InterpolationParameter( IndexContainer const & indices,
+InterpolationParameter::InterpolationParameter( IdType id,
+                                                IndexContainer const & indices,
                                                 WeightContainer const & weights )
-  : mIndices( indices )
+  : mId( id )
+  , mIndices( indices )
   , mWeights( weights )
 {
   if( indices.size() != weights.size() )
@@ -28,15 +31,27 @@ InterpolationParameter::InterpolationParameter( IndexContainer const & indices,
   }
 }
 
-InterpolationParameter::InterpolationParameter( std::initializer_list<IndexType> const & indices,
+InterpolationParameter::InterpolationParameter( IdType id,
+                                                std::initializer_list<IndexType> const & indices,
                                                 std::initializer_list<WeightType> const & weights )
-  : mIndices( indices.begin(), indices.end() )
+  : mId( id )
+  , mIndices( indices.begin(), indices.end() )
   , mWeights( weights.begin(), weights.end() )
 {
   if( indices.size() != weights.size() )
   {
     throw std::invalid_argument( "InterpolationParameter: The \"indices\" and \"weights\" parameter must have the same length." );
   }
+}
+
+InterpolationParameter::IdType InterpolationParameter::id() const
+{
+  return mId;
+}
+
+void InterpolationParameter::setId( IdType newId )
+{
+  mId = newId;
 }
 
 InterpolationParameter::~InterpolationParameter() = default;

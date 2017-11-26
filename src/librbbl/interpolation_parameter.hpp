@@ -10,6 +10,7 @@
 #include <libvisr/typed_parameter_base.hpp>
 
 #include <limits>
+#include <set>
 #include <vector>
 
 namespace visr
@@ -23,6 +24,7 @@ namespace rbbl
 class VISR_RBBL_LIBRARY_SYMBOL InterpolationParameter
 {
 public:
+  using IdType = std::size_t;
   using IndexType = std::size_t;
   using WeightType = float;
   using IndexContainer = std::vector<IndexType>;
@@ -30,13 +32,19 @@ public:
 
   InterpolationParameter( InterpolationParameter const & rhs );
 
-  explicit InterpolationParameter( std::size_t numberOfInterpolants );
+  explicit InterpolationParameter( IdType id, std::size_t numberOfInterpolants );
 
-  explicit InterpolationParameter( IndexContainer const & indices, WeightContainer const & weights );
+  explicit InterpolationParameter( IdType id, IndexContainer const & indices, WeightContainer const & weights );
 
-  explicit InterpolationParameter( std::initializer_list<IndexType> const & indices, std::initializer_list<WeightType> const & weights );
+  explicit InterpolationParameter( IdType id, std::initializer_list<IndexType> const & indices, std::initializer_list<WeightType> const & weights );
 
   ~InterpolationParameter();
+
+  IdType id() const;
+
+  void setId( IdType newId );
+
+  IdType static const cInvalidId = std::numeric_limits<IdType>::max();
 
   IndexType static const cInvalidIndex = std::numeric_limits<IndexType>::max();
 
@@ -63,9 +71,18 @@ public:
   void setWeights( std::initializer_list<WeightType> const & newWeights );
 
 private:
+  IdType mId;
+
   IndexContainer mIndices;
   WeightContainer mWeights;
 };
+
+inline bool VISR_RBBL_LIBRARY_SYMBOL operator<(InterpolationParameter const & lhs, InterpolationParameter const & rhs )
+{
+  return lhs.id() < rhs.id();
+}
+
+using InterpolationParameterSet = std::set<InterpolationParameter>;
 
 } // namespace rbbl
 } // namespace visr
