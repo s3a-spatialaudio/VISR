@@ -44,9 +44,9 @@ public:
 
   void setId( IdType newId );
 
-  IdType static const cInvalidId = std::numeric_limits<IdType>::max();
+  IdType static constexpr cInvalidId = std::numeric_limits<IdType>::max();
 
-  IndexType static const cInvalidIndex = std::numeric_limits<IndexType>::max();
+  IndexType static constexpr cInvalidIndex = std::numeric_limits<IndexType>::max();
 
   std::size_t numberOfInterpolants() const;
 

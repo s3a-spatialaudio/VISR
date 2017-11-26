@@ -35,9 +35,9 @@ InterpolatingConvolverUniform( std::size_t numberOfInputs,
                initialRoutings,
                efl::BasicMatrix<SampleType>( alignment ), // No initial filters (they are set by the interpolants)
                alignment, fftImplementation)
-  , mNumberOfInterpolants( numberOfInterpolants )
   , mFilters( maxFilterEntries, mConvolver.dftRepresentationSize(), mConvolver.complexAlignment() )
   , mTempFilter( mConvolver.dftRepresentationSize(), mConvolver.complexAlignment() )
+  , mNumberOfInterpolants( numberOfInterpolants )
 {
   setInterpolants( initialInterpolants );
 }

@@ -9,6 +9,15 @@ namespace visr
 namespace rbbl
 {
 
+
+/**
+ * Provide definitions for static constepr members.
+ */
+//@{
+InterpolationParameter::IdType constexpr InterpolationParameter::cInvalidId;// = std::numeric_limits<IdType>::max();
+InterpolationParameter::IndexType constexpr InterpolationParameter::cInvalidIndex;// = std::numeric_limits<IndexType>::max();
+//@}
+
 InterpolationParameter::InterpolationParameter( InterpolationParameter const & rhs ) = default;
 
 InterpolationParameter::InterpolationParameter( IdType id, std::size_t numberOfInterpolants )

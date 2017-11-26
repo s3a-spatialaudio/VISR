@@ -32,7 +32,7 @@ struct VISR_PML_LIBRARY_SYMBOL FilterRoutingParameter:
 public:
   using rbbl::FilterRouting::FilterRouting;
 
-  FilterRoutingParameter::FilterRoutingParameter();
+  FilterRoutingParameter();
 
   explicit FilterRoutingParameter( ParameterConfigBase const & config );
 

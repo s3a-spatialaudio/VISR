@@ -57,9 +57,9 @@ std::vector<LoudspeakerArray::ChannelIndex> getSubwooferChannelIndices( Loudspea
 
 py::array getPositions( LoudspeakerArray const & la )
 {
-  int const len = static_cast<int>(la.getNumSpeakers());
+  std::size_t const len = la.getNumSpeakers();
   py::array ret( py::dtype::of<float>(),
-  py::array::ShapeContainer( {len, 3 }),
+                 py::array::ShapeContainer( {static_cast<long int>(len), 3 }), // parameter needs to be signed. pybind11 uses ssize_t, which is not in the C/C++ standard. 
   { sizeof( Afloat )*3, sizeof( Afloat ) }
   );
   for( std::size_t lspIdx(0); lspIdx < len; ++lspIdx )

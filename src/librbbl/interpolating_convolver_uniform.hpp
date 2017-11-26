@@ -217,7 +217,7 @@ private:
   efl::BasicMatrix< typename CoreConvolverUniform<SampleType>::FrequencyDomainType > mFilters;
 
   /**
-   * Temporary storage to hold a
+   * Temporary storage to hold a frequency-domain filter representation during computation.
    */
   efl::BasicVector< typename CoreConvolverUniform<SampleType>::FrequencyDomainType > mTempFilter;
 
