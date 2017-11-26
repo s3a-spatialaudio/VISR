@@ -10,12 +10,7 @@ import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
 import os
-
-def sph2cart(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return x,y,z
+from rotationFunctions import sph2cart3inp
 
 from dynamic_binaural_renderer import DynamicBinauralRenderer
 from dynamic_binaural_renderer_serial import DynamicBinauralRendererSerial
@@ -28,18 +23,18 @@ import matplotlib.pyplot as plt
       
 ############ CONFIG ###############        
 fs = 48000
-blockSize = 1024
-numBinauralObjects = 64
+blockSize = 512
+numBinauralObjects = 1
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
-numBlocks = 72;
+numBlocks = 4096;
 
 useSourceAutoMovement = True
 useTracking = True
 useDynamicITD = True
 useDynamicILD = False
 useHRIRinterpolation = True
-useFilterCrossfading = False
+useFilterCrossfading = True
 useSerialPort = False
 ###################################
 
@@ -109,7 +104,7 @@ azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
 az = 0
 el = 0
 r = 1
-x,y,z = sph2cart( az, el, r )
+x,y,z = sph2cart3inp( az, el, r )
 ps1 = objectmodel.PointSource(0)
 ps1.x = x
 ps1.y = y
@@ -133,7 +128,7 @@ for blockIdx in range(0,numBlocks):
         if useSourceAutoMovement:
             az = azSequence[int(blockIdx%numPos)]
             el = 0
-            x,y,z = sph2cart( az, el, r )
+            x,y,z = sph2cart3inp( az, el, r )
             ps1.x = x
             ps1.y = y
             ps1.z = z
@@ -156,8 +151,3 @@ print("fs: %d\t #obj: %d\t ITD-intrp: %d-%d\t #blocks: %d\t blocksize: %d\t expe
 plt.figure()
 plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
 plt.show()
-
-plt.figure()
-plt.plot( t[:-1], np.diff(outputSignal[0,:]), 'bo-', t[:-1], np.diff(outputSignal[1,:]), 'ro-')
-plt.show()
-plt.title( 'Finite differences' )

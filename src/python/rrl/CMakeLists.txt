@@ -43,4 +43,4 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT
 target_link_libraries( ${PROJECT_NAME} rrl_shared )
 target_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARY} )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION python)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY})

@@ -10,6 +10,7 @@ namespace rbbl
 {
 namespace python
 {
+  void exportBiquadCoefficients( pybind11::module & m );
   void exportCoreConvolversUniform( pybind11::module & m );
   void exportCrossfadingConvolversUniform( pybind11::module & m );
   void exportFilterRouting( pybind11::module & m );
@@ -23,6 +24,7 @@ namespace python
 PYBIND11_MODULE( rbbl, m )
 {
   using namespace visr::rbbl::python;
+  exportBiquadCoefficients( m );
   exportFilterRouting( m ); // Needs to come before the convolvers
   exportInterpolationParameter( m );
   exportCoreConvolversUniform( m );

@@ -33,6 +33,12 @@ def sph2cart( sph ):
     cart = np.stack( (x,y,z), 1 )
     return cart
 
+def sph2cart3inp(az,el,r):
+    x = r*np.cos(az)*np.cos(el)
+    y = r*np.sin(az)*np.cos(el)
+    z = r*np.sin(el)
+    return np.stack((x,y,z),0)
+
 def calcRotationMatrix(ypr):  
   if ypr.size == 3 :
 

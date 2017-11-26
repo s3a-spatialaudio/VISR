@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<panningConfiguration dimension="2" infinite="false">
+   <loudspeaker channel="1" id="1">
+      <polar az="0" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="2" id="2">
+      <polar az="30" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="3" id="3">
+      <polar az="45" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="4" id="4">
+      <polar az="90" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="5" id="5">
+      <polar az="110" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="6" id="6">
+      <polar az="135" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="7" id="7">
+      <polar az="180" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="8" id="8">
+      <polar az="225" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="9" id="9">
+      <polar az="250" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="10" id="10">
+      <polar az="270" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="11" id="11">
+      <polar az="315" el="0" r="2.1"/>
+   </loudspeaker>
+   <loudspeaker channel="12" id="12">
+      <polar az="330" el="0" r="2.1"/>
+   </loudspeaker>
+   <triplet l1="1" l2="2"/>
+   <triplet l1="2" l2="3"/>
+   <triplet l1="3" l2="4"/>
+   <triplet l1="4" l2="5"/>
+   <triplet l1="5" l2="6"/>
+   <triplet l1="6" l2="7"/>
+   <triplet l1="7" l2="8"/>
+   <triplet l1="8" l2="9"/>
+   <triplet l1="9" l2="10"/>
+   <triplet l1="10" l2="11"/>
+   <triplet l1="11" l2="12"/>
+</panningConfiguration>

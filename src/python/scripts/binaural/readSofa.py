@@ -23,7 +23,9 @@ def convertSofaSphToSph( sofaPos ):
 
     return pos
 
-def readSofaFile( fileName, dtype = np.float32 ):
+def readSofaFile( fileName, dtype = np.float32,
+                 truncationLength = None,
+                 truncationWindowLength = 0 ):
     if not os.path.exists( fileName ):
         raise ValueError( "SOFA file does not exist." )
     h = h5py.File( fileName, 'r' )
@@ -33,6 +35,15 @@ def readSofaFile( fileName, dtype = np.float32 ):
         pos = convertSofaSphToSph( sofaPos )
 
         hrir = np.asarray( h.get('Data.IR'), dtype=dtype )
+        hrirLength = hrir.shape[-1]
+        if (not truncationLength is None) and (truncationLength < hrirLength ):
+            windowFcn = np.ones( (truncationLength), dtype=dtype )
+            if truncationWindowLength > hrirLength:
+                raise ValueError( "Transition window length exceeds HRIR length." )
+            if truncationWindowLength > 0:
+                fadeOut = 0.5*(np.cos( np.pi*np.arange(1.0,1.0+truncationWindowLength)/(2.0+truncationWindowLength)) + 1.0)
+                windowFcn[-truncationWindowLength:] = fadeOut
+            hrir = hrir[...,:truncationLength] * windowFcn
 
         if 'Data.DelayAdjustment' in h.keys():
             delays = np.asarray( h.get('Data.DelayAdjustment'), dtype = np.float32 )
