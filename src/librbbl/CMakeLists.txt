@@ -16,6 +16,7 @@ float_sequence.cpp
 gain_fader.cpp
 gain_matrix.cpp
 index_sequence.cpp
+interpolating_convolver_uniform.cpp
 interpolation_parameter.cpp
 kiss_fft_wrapper_double.cpp
 kiss_fft_wrapper_float.cpp
@@ -45,6 +46,7 @@ fractional_delay_factory.hpp
 gain_fader.hpp
 gain_matrix.hpp
 index_sequence.hpp
+interpolating_convolver_uniform.hpp
 interpolation_parameter.hpp
 kiss_fft_wrapper.hpp
 lagrange_interpolator.hpp

@@ -20,6 +20,7 @@ namespace rcl
   void exportGainMatrix( pybind11::module & m );
   void exportGainVector( pybind11::module & m );
   void exportHoaAllRadGainCalculator( pybind11::module & m );
+  void exportInterpolatingFirFilterMatrix( pybind11::module & m );
   void exportObjectGainEqCalculator( pybind11::module & m );
   void exportPanningCalculator( pybind11::module & m );
   void exportScalarOscDecoder( pybind11::module & m );
@@ -49,6 +50,7 @@ PYBIND11_MODULE(rcl, m)
   exportGainMatrix( m );
   exportGainVector( m );
   exportHoaAllRadGainCalculator( m );
+  exportInterpolatingFirFilterMatrix( m );
   exportObjectGainEqCalculator( m );
   exportPanningCalculator( m );
   exportScalarOscDecoder( m );

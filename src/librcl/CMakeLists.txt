@@ -12,6 +12,7 @@ fir_filter_matrix.cpp
 gain_matrix.cpp
 gain_vector.cpp
 hoa_allrad_gain_calculator.cpp
+interpolating_fir_filter_matrix.cpp
 listener_compensation.cpp
 null_source.cpp
 object_gain_eq_calculator.cpp
@@ -43,6 +44,7 @@ fir_filter_matrix.hpp
 gain_matrix.hpp
 gain_vector.hpp
 hoa_allrad_gain_calculator.hpp
+interpolating_fir_filter_matrix.hpp
 listener_compensation.hpp
 null_source.hpp
 object_gain_eq_calculator.hpp

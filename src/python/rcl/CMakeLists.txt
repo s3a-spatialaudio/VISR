@@ -11,6 +11,7 @@ fir_filter_matrix.cpp
 gain_matrix.cpp
 gain_vector.cpp
 hoa_allrad_gain_calculator.cpp
+interpolating_fir_filter_matrix.cpp
 panning_calculator.cpp
 object_gain_eq_calculator.cpp
 rcl.cpp
