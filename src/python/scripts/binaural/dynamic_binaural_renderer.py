@@ -84,21 +84,28 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
             self.audioConnection(self.objectSignalInput, self.convolver.audioPort("in") )
             self.parameterConnection(self.dynamicBinauraController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
 
+            if dynITD:
+                delayControls = rcl.DelayVector.ControlPortConfig.Delay
+            else:
+                delayControls = rcl.DelayVector.ControlPortConfig.No
 
-            self.delayVector = rcl.DelayVector( context, "delayVector", self )
-            self.delayVector.setup(numberOfObjects*2, interpolationType="lagrangeOrder3", initialDelay=0,
-             controlInputs=True, 
+            if dynILD:
+                delayControls |= rcl.DelayVector.ControlPortConfig.Gain
+
+            self.delayVector = rcl.DelayVector( context, "delayVector", self,
+             numberOfObjects*2, interpolationType="lagrangeOrder3", initialDelay=0,
+             controlInputs=delayControls,
              methodDelayPolicy=rcl.DelayMatrix.MethodDelayPolicy.Add,
              initialGain=1.0, 
              interpolationSteps=context.period)
 
-           
-            self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
-            self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
+            if dynITD:
+                self.parameterConnection(self.dynamicBinauraController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
+            if dynILD:
+                self.parameterConnection(self.dynamicBinauraController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
             self.audioConnection( self.convolver.audioPort("out"), self.delayVector.audioPort("in"))
 
             self.adder = rcl.Add( context, 'add', self, numInputs = numberOfObjects, width=2)            
-
 
             for idx in range(0, numberOfObjects ):
                 self.audioConnection( self.delayVector.audioPort("out"), visr.ChannelList([idx,idx+numberOfObjects]), self.adder.audioPort("in%d" % idx), visr.ChannelList([0,1]))                
