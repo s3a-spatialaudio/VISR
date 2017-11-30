@@ -126,12 +126,6 @@ public:
   bool removeRoutingEntry( std::size_t inputIdx, std::size_t outputIdx );
 
   /**
-  * Query the currently active number of routings.
-  */
-  //std::size_t numberOfRoutingPoints( ) const { return mConvolver.numberOfRoutingPoints(); }
-  //@}
-
-  /**
   * Manipulation of the contained filter representations.
   */
   //@{
@@ -171,44 +165,8 @@ public:
   //@}
 
 private:
-  ///**
-  // * Internal function to apply the filters and to set the oputputs.
-  // */
-  //void processOutputs( SampleType * const output, std::size_t outputChannelStride,
-  //                     std::size_t alignment );
 
   CrossfadingConvolverUniform<SampleType> mConvolver;
-
-  //struct RoutingEntry
-  //{
-  //  explicit RoutingEntry( std::size_t in, std::size_t out, std::size_t filter, SampleType gain = 1.0f )
-  //    : inputIdx( in ), outputIdx( out ), filterIdx( filter ), gainLinear( gain )
-  //  {
-  //  }
-  //  std::size_t inputIdx;
-  //  std::size_t outputIdx;
-  //  std::size_t filterIdx;
-  //  SampleType gainLinear;
-  //};
-  ///**
-  //* Function object for ordering the routings within the routing table.
-  //* By grouping the entries according to the output indices, the ordering is
-  //* specifically tailored to the execution of the process() function.
-  //*/
-  //struct CompareRoutings
-  //{
-  //  bool operator()( RoutingEntry const & lhs, RoutingEntry const & rhs ) const
-  //  {
-  //    if( lhs.outputIdx == rhs.outputIdx )
-  //    {
-  //      return lhs.inputIdx < rhs.inputIdx;
-  //    }
-  //    else
-  //    {
-  //      return lhs.outputIdx < rhs.outputIdx;
-  //    }
-  //  }
-  //};
 
   /**
    * Database of transformed filter representations. 
@@ -221,36 +179,8 @@ private:
    */
   efl::BasicVector< typename CoreConvolverUniform<SampleType>::FrequencyDomainType > mTempFilter;
 
-  //using RoutingTable = std::multiset<RoutingEntry, CompareRoutings>;
-
-  //RoutingTable mRoutingTable;
-
-  //std::size_t const mMaxNumberOfRoutingPoints;
-
   std::size_t const mNumberOfInterpolants;
 
-  ///**
-  // * Dimension: 2 x dftRepresentationSize
-  // */
-  //efl::BasicMatrix< typename CoreConvolverUniform<SampleType>::FrequencyDomainType > mFrequencyDomainOutput;
-
-  //efl::BasicMatrix<SampleType> mTimeDomainTempOutput;
-
-  ///**
-  // * Crossfading-related data members
-  // */
-  ////@{
-
-  //std::size_t const mMaxNumFilters;
-
-  //std::size_t const mNumRampBlocks;
-
-  //std::vector<std::size_t> mCurrentFilterOutput;
-
-  //std::vector<std::size_t> mCurrentRampBlock;
-
-  //efl::BasicMatrix<SampleType> mCrossoverRamps;
-  ////@}
 };
 } // namespace rbbl
 } // namespace visr
