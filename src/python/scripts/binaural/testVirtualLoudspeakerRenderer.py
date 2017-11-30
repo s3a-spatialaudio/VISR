@@ -18,27 +18,24 @@ import rrl
 
 import numpy as np
 import matplotlib.pyplot as plt
-      
-############ CONFIG ###############        
+
+############ CONFIG ###############
 fs = 48000
 blockSize = 512
 numLoudspeakers = 12
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 512;
-BRIRtruncationLength = 2048
+BRIRtruncationLength = 4096
 
-useSourceAutoMovement = False
 useTracking = True
 useDynamicITD = False
-useDynamicILD = False
 useHRIRinterpolation = True
-useSerialPort = True
+useSerialPort = False
 
 
 ###################################
 
-idMatrix = np.identity(3)
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
@@ -56,31 +53,22 @@ if useDynamicITD:
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 if useSerialPort:
+    # System-specific serial port address
     port = "/dev/cu.usbserial-AJ03GSC8"
     baud = 57600
-    controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None, 
-                                      numLoudspeakers, 
-                                      port, 
-                                      baud, 
+    renderer = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None,
+                                      numLoudspeakers,
+                                      port,
+                                      baud,
                                       sofaFile,
                                       enableSerial = useTracking,
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
                                       irTruncationLength = BRIRtruncationLength
                                       )
-#    controller = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None, 
-#                                           numBinauralObjects, 
-#                                           port, 
-#                                           baud, 
-#                                           sofaFile,
-#                                           enableSerial = useTracking,
-#                                           dynITD = useDynamicITD,
-#                                           dynILD = useDynamicILD,
-#                                           hrirInterp = useHRIRinterpolation
-#                                           )
-else:    
-    controller = VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", None, 
-                                      numLoudspeakers, 
+else:
+    renderer = VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", None,
+                                      numLoudspeakers,
                                       sofaFile,
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
@@ -89,17 +77,18 @@ else:
                                       )
 #to be completed
 
-result,messages = rrl.checkConnectionIntegrity(controller)
+result,messages = rrl.checkConnectionIntegrity(renderer)
 if not result:
    print(messages)
 
-flow = rrl.AudioSignalFlow( controller )
+flow = rrl.AudioSignalFlow( renderer )
 
 if not useSerialPort and useTracking:
     trackingInput = flow.parameterReceivePort( "tracking" )
 
 inputSignal = np.zeros( (numLoudspeakers, signalLength ), dtype=np.float32 )
 inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
+# inputSignal[0,0] = 1
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 numPos = 360/5
@@ -108,13 +97,13 @@ start = time.time()
 
 for blockIdx in range(0,numBlocks):
 #   print("NBl "+str(blockIdx))
-    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:   
+    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
         if not useSerialPort and useTracking:
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]
 #          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
-          trackingInput.swapBuffers()                
+          trackingInput.swapBuffers()
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
