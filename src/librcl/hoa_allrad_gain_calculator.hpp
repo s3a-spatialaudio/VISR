@@ -120,19 +120,19 @@ private:
 
   ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixInput;
 
-  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > > mListenerInput;
-
   ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixOutput;
 
-  std::unique_ptr<panning::AllRAD> mAllRadCalculator;
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > > mListenerInput;
 
-  efl::BasicMatrix<Afloat> mRealDecodeMatrix;
+  std::unique_ptr<panning::AllRAD> mAllRadCalculator;
 
   /**
    * Decoding matrix from HOA signal components to the loudspeakers of the (virtual) regular array.
    * Dimension: #HOA signal components * # loudspeakers in the virtual array.
    */
   efl::BasicMatrix<Afloat> mRegularDecodeMatrix;
+
+  efl::BasicMatrix<Afloat> mRealDecodeMatrix;
 };
 
 } // namespace rcl
