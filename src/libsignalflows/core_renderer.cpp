@@ -53,7 +53,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
  , mOutputAdjustment( context, "OutputAdjustment", this )
  , mGainCalculator( context, "VbapGainCalculator", this, numberOfInputs, loudspeakerConfiguration, not trackingConfiguration.empty(),
                     frequencyDependentPanning /*separate lowpass panning*/ )
- , mAllradGainCalculator( context, "AllRadGainGalculator", this )
  , mDiffusionGainCalculator( context, "DiffusionCalculator", this )
  , mVbapMatrix( context, "VbapGainMatrix", this )
  , mDiffusePartMatrix( context, "DiffusePartMatrix", this )
@@ -88,7 +87,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mListenerGainDelayCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay, "lagrangeOrder0",
                                            rcl::DelayVector::MethodDelayPolicy::Limit,
-                                           true /* activate control inputs*/,
+                                           rcl::DelayVector::ControlPortConfig::All,
                                            0.0f, 1.0f );
     mTrackingPositionInput.reset( new TrackingPositionInput( "trackingPositionInput", *this, pml::EmptyParameterConfig() ) );
     parameterConnection( *mTrackingPositionInput, mListenerCompensation->parameterPort("positionInput") );
@@ -187,12 +186,13 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   ///@endcond NEVER
   pml::MatrixParameter<Afloat> const allRadDecoderGains
     = pml::MatrixParameter<Afloat>::fromString( allRadDecoderGainMatrixString );
-  mAllradGainCalculator.setup( numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains,
-                               pml::ListenerPosition(), trackingEnabled );
+  mAllradGainCalculator.reset( new rcl::HoaAllRadGainCalculator( context, "AllRadGainGalculator", this,
+                               numberOfInputs, allRadRegArray, loudspeakerConfiguration, allRadDecoderGains,
+                               pml::ListenerPosition(), trackingEnabled ) );
 
-  parameterConnection( mObjectVectorInput, mAllradGainCalculator.parameterPort("objectInput") );
-  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mAllradGainCalculator.parameterPort( "gainInput" ) );
-  parameterConnection( mAllradGainCalculator.parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
+  parameterConnection( mObjectVectorInput, mAllradGainCalculator->parameterPort("objectInput") );
+  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mAllradGainCalculator->parameterPort( "gainInput" ) );
+  parameterConnection( mAllradGainCalculator->parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
 
 
   //////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   mOutputAdjustment.setup( numberOfOutputSignals, period(), maxDelay,
                            "lagrangeOrder0",
                            rcl::DelayVector::MethodDelayPolicy::Limit,
-                           false /*No control inputs*/,
+                           rcl::DelayVector::ControlPortConfig::None,
                            outputDelays, outputGains );
 
   // Note: This assumes that the type 'Afloat' used in libpanning is

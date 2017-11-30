@@ -123,7 +123,7 @@ private:
 
   rcl::PanningCalculator mGainCalculator;
 
-  rcl::HoaAllRadGainCalculator mAllradGainCalculator;
+  std::unique_ptr< rcl::HoaAllRadGainCalculator > mAllradGainCalculator;
 
   rcl::DiffusionGainCalculator mDiffusionGainCalculator;
 
