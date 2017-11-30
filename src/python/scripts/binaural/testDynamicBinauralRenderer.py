@@ -20,14 +20,14 @@ import objectmodel
 
 import numpy as np
 import matplotlib.pyplot as plt
-      
-############ CONFIG ###############        
+
+############ CONFIG ###############
 fs = 48000
 blockSize = 512
-numBinauralObjects = 1
-numOutputChannels = 2;
+numBinauralObjects = 3
+numOutputChannels = 2 # Binaural output
 parameterUpdatePeriod = 1
-numBlocks = 4096;
+numBlocks = 128;
 
 useSourceAutoMovement = False
 useTracking = True
@@ -37,7 +37,6 @@ useHRIRinterpolation = True
 useSerialPort = False
 ###################################
 
-idMatrix = np.identity(3)
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
@@ -50,7 +49,7 @@ if useDynamicITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
         extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD        
+    sofaFile = sofaFileTD
 
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
@@ -58,19 +57,19 @@ context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 if useSerialPort:
     port = "/dev/cu.usbserial-AJ03GSC8"
     baud = 57600
-    controller = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None, 
-                                           numBinauralObjects, 
-                                           port, 
-                                           baud, 
+    renderer = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None,
+                                           numBinauralObjects,
+                                           port,
+                                           baud,
                                            sofaFile,
                                            enableSerial = useTracking,
                                            dynITD = useDynamicITD,
                                            dynILD = useDynamicILD,
                                            hrirInterp = useHRIRinterpolation
                                            )
-else:    
-    controller = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None, 
-                                      numBinauralObjects, 
+else:
+    renderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None,
+                                      numBinauralObjects,
                                       sofaFile,
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
@@ -79,11 +78,11 @@ else:
                                       )
 #to be completed
 
-result,messages = rrl.checkConnectionIntegrity(controller)
+result,messages = rrl.checkConnectionIntegrity(renderer)
 if not result:
    print(messages)
 
-flow = rrl.AudioSignalFlow( controller )
+flow = rrl.AudioSignalFlow( renderer )
 paramInput = flow.parameterReceivePort('objectVector')
 
 if not useSerialPort and useTracking:
@@ -121,7 +120,7 @@ start = time.time()
 
 for blockIdx in range(0,numBlocks):
 #   print("NBl "+str(blockIdx))
-    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:   
+    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
         if useSourceAutoMovement:
             az = azSequence[int(blockIdx%numPos)]
             el = 0
@@ -129,17 +128,17 @@ for blockIdx in range(0,numBlocks):
             ps1.x = x
             ps1.y = y
             ps1.z = z
-            ov = paramInput.data()  
+            ov = paramInput.data()
             ov.clear()
             ov.insert( ps1 )
             paramInput.swapBuffers()
-        
+
         if not useSerialPort and useTracking:
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]
 #          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
-          trackingInput.swapBuffers()                
+          trackingInput.swapBuffers()
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
