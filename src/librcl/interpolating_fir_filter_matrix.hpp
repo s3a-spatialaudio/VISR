@@ -15,6 +15,7 @@
 #include <libefl/basic_vector.hpp>
 
 #include <libpml/indexed_value_parameter.hpp>
+#include <libpml/interpolation_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
 
 #include <librbbl/filter_routing.hpp>
@@ -154,6 +155,9 @@ private:
   AudioOutput mOutput;
 
   std::unique_ptr<ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > > > mSetFilterInput;
+
+  std::unique_ptr<ParameterInput<pml::MessageQueueProtocol, pml::InterpolationParameter > > mInterpolantInput;
+
 
   std::unique_ptr<rbbl::InterpolatingConvolverUniform<SampleType> > mConvolver;
 };

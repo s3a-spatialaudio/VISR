@@ -49,6 +49,10 @@ InterpolatingFirFilterMatrix::InterpolatingFirFilterMatrix( SignalFlowContext co
     ? new ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t,
         std::vector<SampleType > > >( "filterInput", *this, pml::EmptyParameterConfig() )
     : nullptr )
+ , mInterpolantInput( ((controlInputs & ControlPortConfig::Interpolants) != ControlPortConfig::None) ?
+     new ParameterInput<pml::MessageQueueProtocol, pml::InterpolationParameter >( "interpolantInput", *this,
+                                                                                  pml::InterpolationParameterConfig(numberOfInterpolants) )
+ : nullptr )
  , mConvolver( new rbbl::InterpolatingConvolverUniform<SampleType>( numberOfInputs, numberOfOutputs, period(),
                filterLength, maxRoutings, maxFilters, numberOfInterpolants, transitionSamples,
                routings, initialInterpolants, filters, cVectorAlignmentSamples, fftImplementation ) )
@@ -75,6 +79,28 @@ void InterpolatingFirFilterMatrix::process()
       {
         status( StatusMessage::Error, "InterpolatingFirFilterMatrix: Error while setting new filter: ", ex.what() );
       }
+    }
+  }
+
+  // TODO: The routing control input is neither instantiated nor evaluated at the moment.
+
+  if( mInterpolantInput )
+  {
+    while( not mInterpolantInput->empty() )
+    {
+      try
+      {
+        rbbl::InterpolationParameter const & param = mInterpolantInput->front();
+
+        mConvolver->setInterpolant( param );
+        // Argument checking is done inside the method.
+        mInterpolantInput->pop();
+      }
+      catch( std::exception const & ex )
+      {
+        status( StatusMessage::Error, "InterpolatingFirFilterMatrix: Error while setting new interpolant: ", ex.what() );
+      }
+
     }
   }
 
