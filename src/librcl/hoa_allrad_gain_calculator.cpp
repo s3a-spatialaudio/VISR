@@ -35,7 +35,7 @@ HoaAllRadGainCalculator( SignalFlowContext const & context,
   , mGainMatrixInput( "gainInput", *this, pml::MatrixParameterConfig( realArrayConfig.getNumRegularSpeakers(), numberOfObjectChannels ) )
   , mGainMatrixOutput( "gainOutput", *this, pml::MatrixParameterConfig( realArrayConfig.getNumRegularSpeakers(), numberOfObjectChannels ) )
   , mListenerInput( adaptiveListenerPosition ? new ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition>( "listenerInput", *this ) : nullptr )
-  , mRegularDecodeMatrix( decodeMatrix.numberOfRows(), realArrayConfig.getNumRegularSpeakers(), cVectorAlignmentSamples )
+  , mRegularDecodeMatrix( decodeMatrix.numberOfRows(), regularArrayConfig.getNumRegularSpeakers(), cVectorAlignmentSamples )
   , mRealDecodeMatrix( regularArrayConfig.getNumSpeakers(), realArrayConfig.getNumRegularSpeakers(), cVectorAlignmentSamples )
 {
   std::size_t const numRegularSpeakers = regularArrayConfig.getNumSpeakers();
