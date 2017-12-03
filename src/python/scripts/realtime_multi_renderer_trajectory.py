@@ -51,7 +51,8 @@ class RealTimeMultiRendererTrajectory( visr.CompositeComponent ):
                                            numberOfOutputs=numberOfOutputs,
                                            interpolationPeriod=trajectoryUpdateSamples,
                                            diffusionFilters=diffFilters,
-                                           trackingConfiguration='' )
+                                           trackingConfiguration='',
+                                           controlDataType=pml.Float)
         self.audioConnection( self.input, self.multiRenderer.audioPort("in" ) )
         self.audioConnection( self.multiRenderer.audioPort("out" ), self.output )
 

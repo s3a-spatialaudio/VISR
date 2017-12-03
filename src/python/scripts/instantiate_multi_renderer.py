@@ -63,13 +63,14 @@ configs = [lc1, lc2]
 diffFilterFile = os.path.join( visrBaseDirectory, 'config/filters/random_phase_allpass_64ch_128taps.wav')
 diffFilters = np.array(pml.MatrixParameterFloat.fromAudioFile( diffFilterFile ))
 
-if False:
+if True:
     mr = MultiRenderer( ctxt, "MultiRenderer", None,
-                   loudspeakerConfigFiles=configFiles,
+                   loudspeakerConfigs=configs,
                    numberOfInputs=numberOfObjects,
                    numberOfOutputs=numberOfOutputs,
                    interpolationPeriod=1024,
-                   diffusionFilters=diffFilters )
+                   diffusionFilters=diffFilters,
+                   controlDataType=pml.UnsignedInteger)
 else:
     mr = RealTimeMultiRenderer( ctxt, "MultiRenderer", None,
                    loudspeakerConfigFiles=configFiles,
@@ -106,16 +107,16 @@ for blockIdx in range(0,numBlocks):
         ps1.priority = 5
         ps1.resetNumberOfChannels(1)
         ps1.setChannelIndex(0,ps1.objectId)
-        
+
         ov = objectInput.data()
-        ov.clear()
-        ov.set( ps1.objectId, ps1 )
+        # ov.clear()
+        ov.insert( ps1 )
         objectInput.swapBuffers()
 
         renderSelect = int(blockIdx / (parameterUpdatePeriod/blockSize)) % 2
-        
+
         controlInput.enqueue( pml.UnsignedInteger( renderSelect ) )
-        
+
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
@@ -126,7 +127,7 @@ plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'yx-',  t, outputSi
 plt.show()
 
 
-#gridX,gridY = np.meshgrid( t, np.arange(0,numberOfOutputs) ) 
+#gridX,gridY = np.meshgrid( t, np.arange(0,numberOfOutputs) )
 #fig = plt.figure(1)
 #ax = fig.add_subplot(111, projection='3d')
 #ax.plot_wireframe( gridX, gridY, outputSignal )
