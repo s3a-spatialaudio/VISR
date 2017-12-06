@@ -27,6 +27,7 @@ class HoaBinauralRendererSAW( visr.CompositeComponent ):
                      interpolationSteps,
                      headTracking,
                      udpReceivePort=4242,
+                     headTrackingCalibrationPort = None
                      ):
             super( HoaBinauralRendererSAW, self ).__init__( context, name, parent )
             self.hoaBinauralRenderer = HoaBinauralRendererSerial( context, "HoaBinauralRendererSerial", self,
@@ -36,7 +37,8 @@ class HoaBinauralRendererSAW( visr.CompositeComponent ):
                                                                 maxHoaOrder,
                                                                 sofaFile,
                                                                 interpolationSteps,
-                                                                headTracking
+                                                                headTracking,
+                                                                headTrackingCalibrationPort=headTrackingCalibrationPort
                                                                 )
             self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self, 
                                              port=udpReceivePort, 
@@ -53,14 +55,19 @@ class HoaBinauralRendererSAW( visr.CompositeComponent ):
             self.audioConnection(  self.objectSignalInput, self.hoaBinauralRenderer.audioPort("audioIn"))
             self.audioConnection( self.hoaBinauralRenderer.audioPort("audioOut"), self.binauralOutput)
 
+            if headTrackingCalibrationPort is not None:
+                self.calibrationTriggerReceiver = rcl.UdpReceiver( context, "CalibrationTriggerReceiver", self, port = headTrackingCalibrationPort )
+                self.parameterConnection( self.calibrationTriggerReceiver.parameterPort("messageOutput"),
+                                         self.hoaBinauralRenderer.parameterPort("headTrackingCalibration"))
+
 
 
 
 ############ CONFIG ###############  
 fs = 48000
 blockSize = 2048
-numBinauralObjects = 1
-numOutputChannels = 2;
+numBinauralObjects = 32
+numOutputChannels = 2
 
 # datasets are provided for odd orders 1,3,5,7,9
 maxHoaOrder = 3
@@ -68,7 +75,10 @@ maxHoaOrder = 3
 
 # switch dynamic tracking on and off.
 useTracking = True
-
+if useTracking:
+    headTrackingCalibrationPort=8889
+else:
+    headTrackingCalibrationPort=None
 
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
@@ -87,7 +97,8 @@ controller = HoaBinauralRendererSAW( context, "HoaBinauralRendererSerialSAW", No
                                             maxHoaOrder,
                                             sofaFile,
                                             interpolationSteps = blockSize,
-                                            headTracking = useTracking)
+                                            headTracking = useTracking,
+                                            headTrackingCalibrationPort = headTrackingCalibrationPort)
 #to be completed
 
 result,messages = rrl.checkConnectionIntegrity(controller)

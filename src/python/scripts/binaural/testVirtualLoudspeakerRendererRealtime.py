@@ -8,6 +8,7 @@ Created on Tue Oct 31 16:35:10 2017
 
 import audiointerfaces as ai
 
+import rcl
 import time
 from extractDelayInSofaFile import extractDelayInSofaFile
 from urllib.request import urlretrieve
@@ -19,6 +20,7 @@ import rrl
 
 import numpy as np
 import matplotlib.pyplot as plt
+
       
 ############ CONFIG ###############        
 fs = 48000
@@ -38,6 +40,12 @@ useSerialPort = True
 
 port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
+
+
+if useTracking:
+    headTrackingCalibrationPort=8889
+else:
+    headTrackingCalibrationPort=None
 
 ###################################
 
@@ -65,12 +73,15 @@ controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRende
                                   enableSerial = useTracking,
                                   dynITD = useDynamicITD,
                                   hrirInterp = useHRIRinterpolation,
-                                  irTruncationLength = BRIRtruncationLength
+                                  irTruncationLength = BRIRtruncationLength,
+                                  headTrackingCalibrationPort=headTrackingCalibrationPort
                                   )
+
 
 result,messages = rrl.checkConnectionIntegrity(controller)
 if not result:
    print(messages)
+
 
 flow = rrl.AudioSignalFlow( controller )
 

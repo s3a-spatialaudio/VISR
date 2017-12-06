@@ -81,7 +81,7 @@ if useTracking:
 else:
     headTrackingCalibrationPort=None
 
-port = "/dev/ttyUSB0"
+port = "/dev/cu.usbserial-AJ03GSC8"
 baud = 57600
 ###################################
 
