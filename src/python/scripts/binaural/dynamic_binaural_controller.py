@@ -6,11 +6,11 @@ S3A Binaural toolbox for the VISR framework
 
 Created on Wed Sep  6 22:02:40 2017
 
-@author: Andreas Franck a.franck@soton.ac.uk 
+@author: Andreas Franck a.franck@soton.ac.uk
 """
-from numpy.linalg import inv 
-from readSofa import sph2cart
-from rotationFunctions import calcRotationMatrix, cart2sph, rad2deg
+from numpy.linalg import inv
+#from readSofa import sph2cart
+from rotationFunctions import calcRotationMatrix, deg2rad, sph2cart
 import matplotlib.pyplot as plt
 import visr
 import pml
@@ -49,7 +49,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
         self.objectInputProtocol = self.objectInput.protocolInput()
-        
+
         if useHeadTracking:
             self.useHeadTracking = True
             self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
@@ -67,7 +67,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                                 pml.MessageQueueProtocol.staticType,
                                                 pml.EmptyParameterConfig() )
         self.filterOutputProtocol = self.filterOutput.protocolOutput()
-            
+
 
         if self.dynamicITD:
             if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
@@ -100,8 +100,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
 
         # HRIR selection and interpolation data
         self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
-        
-        # Normalise the hrir positions to unit radius (to let the k-d tree 
+
+        # Normalise the hrir positions to unit radius (to let the k-d tree
         # lookup work as expected.)
         hrirPositions[:,2] = 1.0
         self.hrirPos = sph2cart(np.array( hrirPositions, copy = True, dtype = np.float32 ))
@@ -127,7 +127,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
 
     def process( self ):
 
-##PROFILING                    
+##PROFILING
 ##        startTot = time.time()
 #        pr = cProfile.Profile()
 #        pr.enable()
@@ -149,7 +149,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 numObjects = len(objIndices)
                 self.sourcePos = np.zeros( (numObjects,3), dtype=np.float32 )
                 self.levels = np.zeros( (numObjects), dtype=np.float32 )
-                
+
                 for chIdx in range(0, numObjects):
                     objIdx = objIndices[chIdx]
                     self.sourcePos[chIdx,:] = ov[objIdx].position
@@ -157,14 +157,21 @@ class DynamicBinauralController( visr.AtomicComponent ):
             else:
                 for index,src in enumerate(ov):
                     if index < self.numberOfObjects :
-                        pos = np.asarray(src.position, dtype=np.float32 )
+                        if isinstance( src, om.PointSource ):
+                            pos = np.asarray(src.position, dtype=np.float32 )
+                        elif isinstance( src, om.PlaneWave ):
+                            az = deg2rad( src.azimuth )
+                            el = deg2rad( src.elevation )
+                            r = src.referenceDistance
+                            sph = np.asarray([az,el,r])
+                            pos = np.asarray(sph2cart( sph ))
                         posNormed = 1.0/np.sqrt(np.sum(np.square(pos))) * pos
                         ch = src.channels[0]
                         self.sourcePos[ch,:] = posNormed
                         self.levels[ch] = src.level
                     else:
-                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')                            
-                        break              
+                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
+                        break
 
         # Computation performed each iteration
         # @todo Consider changing the recompute logic to compute fewer source per iteration.
@@ -178,13 +185,13 @@ class DynamicBinauralController( visr.AtomicComponent ):
             unNormedGains = allGains[matchingTriplet,:,range(0,self.numberOfObjects)]
             gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
             normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
-            
+
             if self.dynamicILD:
                 # Obtain access to the output arrays
                 gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
 
                 # Set the object for both ears.
-                # Note: Incorporate dynamically computed ILD if selected or adjust 
+                # Note: Incorporate dynamically computed ILD if selected or adjust
                 # the level using an analytic model.
                 gainVec[0:self.numberOfObjects] = self.levels
                 gainVec[self.numberOfObjects:] = self.levels
@@ -199,7 +206,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                 _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
                 self.filterOutputProtocol.enqueue( _leftInterpolant )
                 self.filterOutputProtocol.enqueue( _rightInterpolant )
-             
+
             if self.dynamicITD:
                 delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
                 delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), normedGains[...,np.newaxis]),axis=2 )
