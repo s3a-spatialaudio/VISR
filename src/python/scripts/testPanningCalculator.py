@@ -46,16 +46,16 @@ ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/bbc/bs2051-4+5+0.xml' )
 
 numSpeakers = lc.numberOfRegularLoudspeakers
-r
+
 if False:
     calc = PythonPanner( ctxt, 'calc', None,
                         numberOfObjects=numObjectChannels,
                         arrayConfig=lc )
 else:
-    calc = rcl.PanningCalculator( ctxt, 'calc', None )
-    calc.setup( numberOfObjects=numObjectChannels,
-               arrayConfig=lc,
-               separateLowpassPanning=hfLfPanning )
+    calc = rcl.PanningCalculator( ctxt, 'calc', None,
+                                  numberOfObjects=numObjectChannels,
+                                  arrayConfig=lc,
+                                  separateLowpassPanning=hfLfPanning )
 
 flow = rrl.AudioSignalFlow( calc )
 
@@ -84,10 +84,11 @@ for blockIdx in range(0,gridSize):
     ps1.z = z
     ps1.level = 1
     ps1.channels = [ps1.objectId]
+    ps1.channelLockDistance = 17.50
         
     ov = paramInput.data()
     ov.clear()
-    ov.set( ps1.objectId, ps1 )
+    ov.insert( ps1 )
     paramInput.swapBuffers()
         
     outputBlock = flow.process( inputBlock )
