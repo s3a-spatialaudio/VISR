@@ -84,7 +84,8 @@ for blockIdx in range(0,gridSize):
     ps1.z = z
     ps1.level = 1
     ps1.channels = [ps1.objectId]
-    ps1.channelLockDistance = 17.50
+    # Optional: Check channel lock feature,
+    # ps1.channelLockDistance = 17.50 # maximum distance (in degree)
         
     ov = paramInput.data()
     ov.clear()
