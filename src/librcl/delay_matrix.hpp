@@ -254,6 +254,19 @@ private:
   SampleType const cSamplingFrequency;
 };
 
+/**
+* Bitwise operator to combine control input flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL DelayMatrix::ControlPortConfig operator|( DelayMatrix::ControlPortConfig lhs,
+                                                                  DelayMatrix::ControlPortConfig rhs );
+
+/**
+* Bitwise operator to extract mask control input flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL DelayMatrix::ControlPortConfig operator&( DelayMatrix::ControlPortConfig lhs,
+                                                                  DelayMatrix::ControlPortConfig rhs );
+
+
 } // namespace rcl
 } // namespace visr
   

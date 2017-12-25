@@ -287,5 +287,20 @@ void DelayMatrix::setGain( efl::BasicMatrix< SampleType > const & newGains )
   mGainInterpolationCounter = 0;
 }
 
+DelayMatrix::ControlPortConfig operator&( DelayMatrix::ControlPortConfig lhs,
+  DelayMatrix::ControlPortConfig rhs )
+{
+  using T = std::underlying_type<DelayMatrix::ControlPortConfig>::type;
+  return static_cast<DelayMatrix::ControlPortConfig>(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+DelayMatrix::ControlPortConfig operator|( DelayMatrix::ControlPortConfig lhs,
+  DelayMatrix::ControlPortConfig rhs )
+{
+  using T = std::underlying_type<DelayMatrix::ControlPortConfig>::type;
+  return static_cast<DelayMatrix::ControlPortConfig>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+
 } // namespace rcl
 } // namespace visr

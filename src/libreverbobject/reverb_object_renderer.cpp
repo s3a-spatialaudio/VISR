@@ -122,7 +122,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
     mDiscreteReverbDelay.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
                                 interpolationSteps, maxDiscreteReflectionDelay, "lagrangeOrder3",
                                 rcl::DelayVector::MethodDelayPolicy::Limit,
-                                true /* controlInputs */, 0.0f, 0.0f );
+                                rcl::DelayVector::ControlPortConfig::All, 0.0f, 0.0f );
     mDiscreteReverbReflFilters.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject, numWallReflBiquads, true /*controlInputs*/ );
     mDiscreteReverbPanningMatrix.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
                                         arrayConfig.getNumRegularSpeakers(),
@@ -138,7 +138,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                 maxDiscreteReflectionDelay, // For the moment, use the same max. delay as for discretes.
                                 "lagrangeOrder3",
                                 rcl::DelayVector::MethodDelayPolicy::Limit,
-                                true /* controlInputs */,
+                                rcl::DelayVector::ControlPortConfig::All,
                                 0.0f, 0.0f );
 
     // Create a routing for #reverbObjects signals, each filtered with an individual filter, and summed into a single

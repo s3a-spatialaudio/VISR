@@ -36,7 +36,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
                          SampleType maximumDelaySeconds,
                          const char * interpolationMethod,
                          MethodDelayPolicy methodDelayPolicy,
-                         bool controlInputs,
+                         ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
                          SampleType initialDelaySeconds /* = static_cast<SampleType>(1.0) */,
                          SampleType initialGainLinear /* = static_cast<SampleType>(0.0) */ )
 {
@@ -55,7 +55,7 @@ void DelayVector::setup( std::size_t numberOfChannels,
                           SampleType maximumDelaySeconds,
                           const char * interpolationMethod,
                           MethodDelayPolicy methodDelayPolicy,
-                          bool controlInputs,
+                          ControlPortConfig controlInputs,
                           efl::BasicVector< SampleType > const & initialDelaysSeconds,
                           efl::BasicVector< SampleType > const & initialGainsLinear )
 {
@@ -77,9 +77,13 @@ void DelayVector::setup( std::size_t numberOfChannels,
   mInput.setWidth(numberOfChannels);
   mOutput.setWidth(numberOfChannels);
 
-  if( controlInputs )
+  if( (controlInputs & ControlPortConfig::Gain) != ControlPortConfig::None )
   {
     mGainInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "gainInput", *this, pml::VectorParameterConfig( numberOfChannels ) ) );
+  }
+
+  if( (controlInputs & ControlPortConfig::Delay) != ControlPortConfig::None )
+  {
     mDelayInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >( "delayInput", *this, pml::VectorParameterConfig( numberOfChannels ) ) );
   }
 
@@ -265,6 +269,21 @@ void DelayVector::setGain( efl::BasicVector< SampleType > const & newGains )
   }
   mGainInterpolationCounter = 0;
 }
+
+DelayVector::ControlPortConfig operator&( DelayVector::ControlPortConfig lhs,
+  DelayVector::ControlPortConfig rhs )
+{
+  using T = std::underlying_type<DelayVector::ControlPortConfig>::type;
+  return static_cast<DelayVector::ControlPortConfig>(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+DelayVector::ControlPortConfig operator|( DelayVector::ControlPortConfig lhs,
+  DelayVector::ControlPortConfig rhs )
+{
+  using T = std::underlying_type<DelayVector::ControlPortConfig>::type;
+  return static_cast<DelayVector::ControlPortConfig>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
 
 } // namespace rcl
 } // namespace visr

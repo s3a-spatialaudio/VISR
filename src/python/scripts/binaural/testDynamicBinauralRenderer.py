@@ -6,10 +6,6 @@ Created on Thu Sep 14 14:55:25 2017
 @author: gc1y17
 """
 
-import time
-from extractDelayInSofaFile import extractDelayInSofaFile
-from urllib.request import urlretrieve
-import os
 from rotationFunctions import sph2cart3inp
 
 from dynamic_binaural_renderer import DynamicBinauralRenderer
@@ -20,14 +16,20 @@ import objectmodel
 
 import numpy as np
 import matplotlib.pyplot as plt
-      
-############ CONFIG ###############        
+
+from sys import platform
+import time
+from extractDelayInSofaFile import extractDelayInSofaFile
+from urllib.request import urlretrieve
+import os
+
+############ CONFIG ###############
 fs = 48000
-blockSize = 512
-numBinauralObjects = 1
-numOutputChannels = 2;
+blockSize = 1024
+numBinauralObjects = 32
+numOutputChannels = 2 # Binaural output
 parameterUpdatePeriod = 1
-numBlocks = 4096;
+numBlocks = 128;
 
 useSourceAutoMovement = True
 useTracking = True
@@ -38,7 +40,6 @@ useFilterCrossfading = True
 useSerialPort = False
 ###################################
 
-idMatrix = np.identity(3)
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
@@ -51,28 +52,35 @@ if useDynamicITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
         extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD        
-
+    sofaFile = sofaFileTD
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 if useSerialPort:
-    port = "/dev/ttyUSB0"
+
+    # TODO: Check and adjust port names for the individual system
+    if platform == 'linux' or platform == 'linux2':
+        port = "/dev/ttyUSB0"
+    elif platform == 'darwin':
+        port = "/dev/cu.usbserial-AJ03GSC8"
+    elif platform == 'windows':
+        port = "COM10"
 
     baud = 57600
-    controller = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None, 
-                                           numBinauralObjects, 
-                                           port, 
-                                           baud, 
+    renderer = DynamicBinauralRendererSerial( context, "DynamicBinauralRendererSerial", None,
+                                           numBinauralObjects,
+                                           port,
+                                           baud,
                                            sofaFile,
                                            enableSerial = useTracking,
                                            dynITD = useDynamicITD,
                                            dynILD = useDynamicILD,
-                                           hrirInterp = useHRIRinterpolation
+                                           hrirInterp = useHRIRinterpolation,
+                                           headTrackingCalibrationPort = 8889
                                            )
-else:    
-    controller = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None, 
-                                      numBinauralObjects, 
+else:
+    renderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None,
+                                      numBinauralObjects,
                                       sofaFile,
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
@@ -82,11 +90,11 @@ else:
                                       )
 #to be completed
 
-result,messages = rrl.checkConnectionIntegrity(controller)
+result,messages = rrl.checkConnectionIntegrity(renderer)
 if not result:
    print(messages)
 
-flow = rrl.AudioSignalFlow( controller )
+flow = rrl.AudioSignalFlow( renderer )
 paramInput = flow.parameterReceivePort('objectVector')
 
 if not useSerialPort and useTracking:
@@ -115,16 +123,25 @@ ps1.priority = 5
 ps1.resetNumberOfChannels(1)
 ps1.setChannelIndex(0,ps1.objectId)
 
+pw1 = objectmodel.PlaneWave(1)
+pw1.azimuth = az
+pw1.elevation = el
+pw1.referenceDistance = r
+pw1.level = 0.5
+pw1.groupId = 5
+pw1.priority = 5
+pw1.channels = [pw1.objectId]
+
 ov = paramInput.data()
 ov.clear()
-ov.insert( ps1 )
+ov.insert( [ps1,pw1] )
 paramInput.swapBuffers()
 
 start = time.time()
 
 for blockIdx in range(0,numBlocks):
 #   print("NBl "+str(blockIdx))
-    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:   
+    if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
         if useSourceAutoMovement:
             az = azSequence[int(blockIdx%numPos)]
             el = 0
@@ -132,17 +149,21 @@ for blockIdx in range(0,numBlocks):
             ps1.x = x
             ps1.y = y
             ps1.z = z
-            ov = paramInput.data()  
+            pw1.azimuth = az
+            pw1.elevation = el
+            pw1.referenceDistance = r
+            ov = paramInput.data()
             ov.clear()
-            ov.insert( ps1 )
+            ov.insert( [ps1, pw1] )
             paramInput.swapBuffers()
-        
+
         if not useSerialPort and useTracking:
 #          headrotation =  np.pi
           headrotation =  azSequence[int(blockIdx%numPos)]
 #          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
-          trackingInput.data().orientation = [-headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
-          trackingInput.swapBuffers()                
+          trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
+          trackingInput.swapBuffers()
+
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock

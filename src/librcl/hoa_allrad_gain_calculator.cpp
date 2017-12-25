@@ -23,18 +23,52 @@ namespace rcl
 HoaAllRadGainCalculator::
 HoaAllRadGainCalculator( SignalFlowContext const & context,
                          char const * name,
-                         CompositeComponent * parent )
+                         CompositeComponent * parent,
+                         std::size_t numberOfObjectChannels,
+                         panning::LoudspeakerArray const & regularArrayConfig,
+                         panning::LoudspeakerArray const & realArrayConfig,
+                         efl::BasicMatrix<Afloat> const & decodeMatrix,
+                         pml::ListenerPosition const & listenerPosition /*= pml::ListenerPosition()*/,
+                         bool adaptiveListenerPosition /*= false*/ )
   : AtomicComponent( context, name, parent )
   , mObjectInput( "objectInput", *this, pml::EmptyParameterConfig() )
-  , mGainMatrixInput( "gainInput", *this )
-  , mGainMatrixOutput( "gainOutput", *this )
+  , mGainMatrixInput( "gainInput", *this, pml::MatrixParameterConfig( realArrayConfig.getNumRegularSpeakers(), numberOfObjectChannels ) )
+  , mGainMatrixOutput( "gainOutput", *this, pml::MatrixParameterConfig( realArrayConfig.getNumRegularSpeakers(), numberOfObjectChannels ) )
+  , mListenerInput( adaptiveListenerPosition ? new ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition>( "listenerInput", *this ) : nullptr )
+  , mRegularDecodeMatrix( decodeMatrix.numberOfRows(), regularArrayConfig.getNumRegularSpeakers(), cVectorAlignmentSamples )
+  , mRealDecodeMatrix( regularArrayConfig.getNumSpeakers(), realArrayConfig.getNumRegularSpeakers(), cVectorAlignmentSamples )
 {
+  std::size_t const numRegularSpeakers = regularArrayConfig.getNumSpeakers();
+  std::size_t const numHarmonicSignals = decodeMatrix.numberOfRows();
+
+  // Deduce the Ambisonics order from the number of harmonic signals
+  std::size_t const hoaOrder = static_cast<std::size_t>(std::ceil( std::sqrt( numHarmonicSignals ) )) - 1;
+  if( ((hoaOrder + 1)*(hoaOrder + 1) != numHarmonicSignals) or (numHarmonicSignals == 0) )
+  {
+    throw std::invalid_argument( "The number of rows in the decoder matrix does not correspond to a real-valued HOA order." );
+  }
+  if( decodeMatrix.numberOfColumns() != numRegularSpeakers )
+  {
+    throw std::invalid_argument( "The number of columns in the decoder matrix does not match the size of the regular array." );
+  }
+
+  mRegularDecodeMatrix.copy( decodeMatrix );
+
+  mAllRadCalculator.reset( new panning::AllRAD( regularArrayConfig,
+    realArrayConfig,
+    mRegularDecodeMatrix,
+    static_cast<unsigned int>(hoaOrder) ) );
+
+  // set the default initial listener position. 
+  // This also initialises the internal data members (e.g., the VBAP calculator and the calculation of the VBAP decode matrix)
+  setListenerPosition( listenerPosition );
 }
 
 HoaAllRadGainCalculator::~HoaAllRadGainCalculator()
 {
 }
 
+#if 0
 void HoaAllRadGainCalculator::setup( std::size_t numberOfObjectChannels,
                                      panning::LoudspeakerArray const & regularArrayConfig,
                                      panning::LoudspeakerArray const & realArrayConfig,
@@ -70,14 +104,13 @@ void HoaAllRadGainCalculator::setup( std::size_t numberOfObjectChannels,
 
   mRealDecodeMatrix.resize( numHarmonicSignals, realArrayConfig.getNumRegularSpeakers() );
 
-  mListenerInput.reset( adaptiveListenerPosition
-    ? new ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition>( "listenerInput", *this ) : nullptr );
 
   // set the default initial listener position. 
   // This also initialises the internal data members (e.g., the VBAP calculator and the calculation of the VBAP decode matrix)
   setListenerPosition( listenerPosition );
 
 }
+#endif
 
 void HoaAllRadGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
@@ -89,6 +122,7 @@ void HoaAllRadGainCalculator::setListenerPosition( pml::ListenerPosition const &
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
 
+#if 0
 // Not necessary anymore i
 void HoaAllRadGainCalculator::precalculate()
 {
@@ -100,6 +134,7 @@ void HoaAllRadGainCalculator::precalculate()
   mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
 #endif
 }
+#endif
 
 void HoaAllRadGainCalculator::process()
 {
