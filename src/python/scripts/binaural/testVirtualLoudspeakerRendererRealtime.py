@@ -21,24 +21,27 @@ import rrl
 import numpy as np
 import matplotlib.pyplot as plt
 
-      
-############ CONFIG ###############        
+
+############ CONFIG ###############
 fs = 48000
-blockSize = 512
-numLoudspeakers = 12
+blockSize = 1024
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 72;
-BRIRtruncationLength = 2048
+BRIRtruncationLength = 4096
 
-useSourceAutoMovement = False
 useTracking = True
 useDynamicITD = False
-useDynamicILD = False
 useHRIRinterpolation = True
 useSerialPort = True
 
-port = "/dev/cu.usbserial-AJ03GSC8"
+# TODO: Check and adjust port names for the individual system
+if platform == 'linux' or platform == 'linux2':
+    port = "/dev/ttyUSB0"
+elif platform == 'darwin':
+    port = "/dev/cu.usbserial-AJ03GSC8"
+elif platform == 'windows
+    port = "COM10"
 baud = 57600
 
 
@@ -53,22 +56,17 @@ idMatrix = np.identity(3)
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaFile = './data/SBSBRIR_x0y0.sofa'
-if not os.path.exists( sofaFile ):
-    urlretrieve( 'http://data.bbcarp.org.uk/sbsbrir/sofa/SBSBRIR_x0y0.sofa',sofaFile )
-
-if useDynamicITD:
-    sofaFileTD = './data/SBSBRIR_x0y0_timedelay.sofa'
-    if not os.path.exists( sofaFileTD ):
-        extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD
-
+# TODO: Select the path and the SOFA file.
+sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemD.sofa'
+# Set the number of loudspeakers accordingly.
+numLoudspeakers = 9
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
-controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None, 
-                                  numLoudspeakers, 
-                                  port, 
-                                  baud, 
+
+controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None,
+                                  numLoudspeakers,
+                                  port,
+                                  baud,
                                   sofaFile,
                                   enableSerial = useTracking,
                                   dynITD = useDynamicITD,
@@ -76,7 +74,6 @@ controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRende
                                   irTruncationLength = BRIRtruncationLength,
                                   headTrackingCalibrationPort=headTrackingCalibrationPort
                                   )
-
 
 result,messages = rrl.checkConnectionIntegrity(controller)
 if not result:
@@ -93,12 +90,12 @@ aiConfig = ai.AudioInterface.Configuration( flow.numberOfCaptureChannels,
                                            fs,
                                            blockSize )
 #if client name is too long you get an error
-jackCfg = """{ "clientname": "VirtualLdRendererSerial",
+jackCfg = """{ "clientname": "VirtualLoudspeakerRenderer",
   "autoconnect" : "false",
   "portconfig":
   {
-    "capture":  [{ "basename":"inObj_", "externalport" : {} }],
-    "playback": [{ "basename":"outBin_", "externalport" : {} }]
+    "capture":  [{ "basename":"in", "externalport" : {} }],
+    "playback": [{ "basename":"out", "externalport" : {} }]
   }
 }"""
 aIfc = ai.AudioInterfaceFactory.create("Jack", aiConfig, jackCfg)

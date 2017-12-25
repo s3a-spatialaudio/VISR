@@ -6,11 +6,6 @@ Created on Fri Oct 27 11:17:34 2017
 @author: gc1y17
 """
 
-
-import time
-from extractDelayInSofaFile import extractDelayInSofaFile
-from urllib.request import urlretrieve
-import os
 from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 from virtual_loudspeaker_renderer_serial import VirtualLoudspeakerRendererSerial
 import visr
@@ -18,15 +13,17 @@ import rrl
 
 import numpy as np
 import matplotlib.pyplot as plt
+from system import platform
+import time
+
 
 ############ CONFIG ###############
 fs = 48000
-blockSize = 512
-numLoudspeakers = 12
+blockSize = 1024
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 512;
-BRIRtruncationLength = 4096
+BRIRtruncationLength = 2048
 
 useTracking = True
 useDynamicITD = False
@@ -39,22 +36,25 @@ useSerialPort = False
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaFile = './data/SBSBRIR_x0y0.sofa'
-if not os.path.exists( sofaFile ):
-    urlretrieve( 'http://data.bbcarp.org.uk/sbsbrir/sofa/SBSBRIR_x0y0.sofa',sofaFile )
 
-if useDynamicITD:
-    sofaFileTD = './data/SBSBRIR_x0y0_timedelay.sofa'
-    if not os.path.exists( sofaFileTD ):
-        extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD
+sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_modelled_onsets_early_dynamic.sofa'
+
+numLoudspeakers = 32
 
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 if useSerialPort:
+    # TODO: Check and adkust port names for the individual system
+    if platform == 'linux' or platform == 'linux2':
+        port = "/dev/ttyUSB0"
+    elif platform == 'darwin':
+        port = "/dev/cu.usbserial-AJ03GSC8"
+    elif platform == 'windows':
+        port = "COM10"
+
     # System-specific serial port address
-    port = "/dev/cu.usbserial-AJ03GSC8"
+    port = "/dev/ttyUSB0"
     baud = 57600
     renderer = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None,
                                       numLoudspeakers,
