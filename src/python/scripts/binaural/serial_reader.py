@@ -198,12 +198,15 @@ class serialReader(visr.AtomicComponent ):
             return
  #            print("++ "+ str(inBuffer))
         else :
- #           print("%d serial parsing %f sec"%(self.procN,time.time()-self.start))
-            read = self.ser.read(inBuffer).decode() #read the bytes and convert from binary array to ASCII
-            totRead=len(read)
- #           print(str(totRead)+" / "+ str(inBuffer))
-            if totRead == 0 :
-                return
-            else  :
-                self.parse_message(read)
-            #    print("completed "+str(totRead)+" / "+ str(inBuffer))
+            try:
+ #              print("%d serial parsing %f sec"%(self.procN,time.time()-self.start))
+                read = self.ser.read(inBuffer).decode('iso-8859-1') #read the bytes and convert from binary array to ASCII
+                totRead=len(read)
+ #               print(str(totRead)+" / "+ str(inBuffer))
+                if totRead == 0 :
+                    return
+                else  :
+                    self.parse_message(read)
+            # print("completed "+str(totRead)+" / "+ str(inBuffer))
+            except BaseException as ex:
+                print( "Error while decoding tracking data message: %s" % str(ex) )

@@ -42,23 +42,22 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
 
         minDelay = np.min( tdSamples )
 
-        tdAdjusted = tdSamples - minDelay
+        # Truncate to the integer part to avoid fractional delay interpolation.            
+        tdAdjusted = np.floor(tdSamples - minDelay)
 
         tdRep = tdAdjusted.reshape( tdAdjusted.shape + (1,) ).repeat( fGridSize, axis=-1)
 
-        # Adjust the phases 
-        adjustedPhase = unwrappedPhase + tdRep * freqGridRad
-
-        fs = np.array(h.get('Data.SamplingRate'),dtype=np.float32)[0]
-
-                                   
+        # Whether to adjust
         if fdAdjust:
+            # Adjust the phases 
+            adjustedPhase = unwrappedPhase + tdRep * freqGridRad
+
+            # FD adjust causes a circular shift, which might create artifacts at
+            # the end of the IR.
             HRTFadjust = np.abs(HRTF) * np.exp( -1j*adjustedPhase )
 
             hrirAdjust = np.fft.irfft( HRTFadjust )
         else:
-            # Truncate to integer part to avoid fractional delay interpolation.            
-            tdAdjusted = np.floor(tdAdjusted)
             
             # We don't use windowing here, because the end of the IR remains the same as in the original hrir
             # (only the end of the active filter is no longer aligned with the taps array.)
@@ -70,13 +69,17 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
                 shift = int(tdAdjusted[irIndex])
                 hrirAdjust[irIndex][0:hrirLen-shift] = hrir[irIndex][shift:]
 
-        tdSeconds = tdAdjusted * 1.0/fs
+        # We need to remove an existing Delay field.
+        if 'Data.Delay' in h.keys():
+            del h['Data.Delay']
 
-        h.create_dataset( 'Data.DelayAdjustment', tdSeconds.shape,
-                         tdSeconds.dtype, data=tdSeconds, compression="gzip" )
+        # Create the new dataset/
+        h.create_dataset( 'Data.Delay', tdAdjusted.shape,
+                         tdAdjusted.dtype, data=tdAdjusted, compression="gzip" )
 
-        hrirRef = h['Data.IR'] 
-        hrirRef[...] = hrirAdjust
+        # Alter the IRs
+        hrirRef = h['Data.IR'] # We need to get an explicit reference 
+        hrirRef[...] = hrirAdjust # to avoid a "Name already exists" error.
 
         h.close()
     except Exception as ex:

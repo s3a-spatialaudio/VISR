@@ -11,11 +11,12 @@ import visr
 import rcl
 import time
 import rrl
-import numpy as np
 import audiointerfaces as ai
+from extractDelayInSofaFile import extractDelayInSofaFile
+
 import os
 from urllib.request import urlretrieve
-from extractDelayInSofaFile import extractDelayInSofaFile
+from system import platform
 
 class DynamicBinauralRendererSAW( visr.CompositeComponent ):
          def __init__( self,
@@ -66,13 +67,13 @@ class DynamicBinauralRendererSAW( visr.CompositeComponent ):
 
 ############ CONFIG ###############
 fs = 48000
-blockSize = 2048
-numBinauralObjects = 32
+blockSize = 1024
+numBinauralObjects = 64
 numOutputChannels = 2
 
 # switch dynamic tracking on and off.
 useTracking = True
-useDynamicITD = False
+useDynamicITD = True
 useDynamicILD = False
 useHRIRinterpolation = False
 
@@ -81,7 +82,14 @@ if useTracking:
 else:
     headTrackingCalibrationPort=None
 
-port = "/dev/ttyUSB0"
+# TODO: Check and adjust port names for the individual system
+if platform == 'linux' or platform == 'linux2':
+    port = "/dev/ttyUSB0"
+elif platform == 'darwin':
+    port = "/dev/cu.usbserial-AJ03GSC8"
+elif platform == 'windows':
+    port = "COM10"
+
 baud = 57600
 ###################################
 

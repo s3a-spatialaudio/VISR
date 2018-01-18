@@ -28,13 +28,13 @@ def readSofaFile( fileName, dtype = np.float32,
                  truncationWindowLength = 0 ):
     if not os.path.exists( fileName ):
         raise ValueError( "SOFA file does not exist." )
-    h = h5py.File( fileName, 'r' )
+    fileH = h5py.File( fileName, 'r' )
     try:
-        sofaPos = np.asarray( h.get('SourcePosition'), dtype=dtype )
+        sofaPos = np.asarray( fileH.get('SourcePosition'), dtype=dtype )
 
         pos = convertSofaSphToSph( sofaPos )
 
-        hrir = np.asarray( h.get('Data.IR'), dtype=dtype )
+        hrir = np.asarray( fileH.get('Data.IR'), dtype=dtype )
         hrirLength = hrir.shape[-1]
         if (not truncationLength is None) and (truncationLength < hrirLength ):
             windowFcn = np.ones( (truncationLength), dtype=dtype )
@@ -45,14 +45,16 @@ def readSofaFile( fileName, dtype = np.float32,
                 windowFcn[-truncationWindowLength:] = fadeOut
             hrir = hrir[...,:truncationLength] * windowFcn
 
-        if 'Data.DelayAdjustment' in h.keys():
-            delays = np.asarray( h.get('Data.DelayAdjustment'), dtype = np.float32 )
+        rawDelays = np.asarray( fileH.get('Data.Delay'), dtype=dtype )
+        if rawDelays.shape == hrir.shape[0:-1]: # Check whether delays are per measurement point
+            fs = float( np.asarray( fileH.get('Data.SamplingRate')) )
+            delays  = rawDelays / fs
         else:
             delays = None
 
         return pos, hrir, delays
     finally:
-        h.close()
+        fileH.close()
 
 # Example code:
 if __name__ == '__main__':

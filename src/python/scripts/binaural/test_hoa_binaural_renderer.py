@@ -12,14 +12,14 @@ import visr
 import rrl
 import objectmodel
 import time
-import numpy as np
-import matplotlib.pyplot as plt
 from rotationFunctions import sph2cart3inp
 
+import matplotlib.pyplot as plt
+import numpy as np
 import os
+from system import platform
 
-
-############ CONFIG ###############  
+############ CONFIG ###############
 fs = 48000
 blockSize = 512
 numBinauralObjects = 64
@@ -45,7 +45,14 @@ sofaFile = os.path.join( currDir, './data/bbc_hoa2bin_sofa/Gauss_O%d_ku100_dualb
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 if useSerialPort:
-    port = "/dev/cu.usbserial-AJ03GSC8"
+    # TODO: Check and adjust port names for the individual system
+    if platform == 'linux' or platform == 'linux2':
+        port = "/dev/ttyUSB0"
+    elif platform == 'darwin':
+        port = "/dev/cu.usbserial-AJ03GSC8"
+    elif platform == 'windows':
+        port = "COM10"
+
     baud = 57600
     graph = HoaBinauralRendererSerial( context, "HoaBinauralRendererSerial", None,
                             numBinauralObjects,
@@ -114,7 +121,7 @@ for blockIdx in range(0,numBlocks):
         ps1.x = x
         ps1.y = y
         ps1.z = z
-        ov = paramInput.data()  
+        ov = paramInput.data()
         ov.clear()
         ov.insert( ps1 )
         paramInput.swapBuffers()
@@ -125,12 +132,12 @@ for blockIdx in range(0,numBlocks):
           headrotation =  azSequence[int(blockIdx%numPos)]
 #          print("it num"+str(blockIdx)+" head rotation: "+str(rad2deg(headrotation)))
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
-          trackingInput.swapBuffers()      
-          
+          trackingInput.swapBuffers()
+
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
-                 
+
 print("fs: %d\t #obj: %d\t order: %d\t #blocks: %d\t blocksize: %d\t expected:%f sec.\t\t Got %f sec"%(fs,numBinauralObjects,maxHoaOrder,numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
 #plt.figure()
 #plt.plot( t, outputSignal[0,:], 'bo-',t, outputSignal[1,:], 'ro-')
