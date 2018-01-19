@@ -16,7 +16,7 @@ from extractDelayInSofaFile import extractDelayInSofaFile
 
 import os
 from urllib.request import urlretrieve
-from system import platform
+from sys import platform
 
 class DynamicBinauralRendererSAW( visr.CompositeComponent ):
          def __init__( self,
@@ -30,7 +30,8 @@ class DynamicBinauralRendererSAW( visr.CompositeComponent ):
                      dynamicILD = True,
                      hrirInterpolation = False,
                      udpReceivePort=4242,
-                     headTrackingCalibrationPort = None
+                     headTrackingCalibrationPort = None,
+                     filterCrossfading = False
                      ):
             super( DynamicBinauralRendererSAW, self ).__init__( context, name, parent )
             self.dynamicBinauralRenderer = DynamicBinauralRendererSerial( context, "DynamicBinauralRenderer", self,
@@ -41,7 +42,8 @@ class DynamicBinauralRendererSAW( visr.CompositeComponent ):
                                                                      dynITD = dynamicITD,
                                                                      dynILD = dynamicILD,
                                                                      hrirInterp = hrirInterpolation,
-                                                                     headTrackingCalibrationPort=headTrackingCalibrationPort
+                                                                     headTrackingCalibrationPort=headTrackingCalibrationPort,
+                                                                     filterCrossfading=filterCrossfading
                                                                    )
 
             self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self,
@@ -76,6 +78,7 @@ useTracking = True
 useDynamicITD = True
 useDynamicILD = False
 useHRIRinterpolation = False
+useCrossfading = False
 
 if useTracking:
     headTrackingCalibrationPort=8889
@@ -105,23 +108,24 @@ if useDynamicITD:
         extractDelayInSofaFile( sofaFile, sofaFileTD )
     sofaFile = sofaFileTD
 
-controller = DynamicBinauralRendererSAW( context, "TopLevelRenderer", None,
-                                            numBinauralObjects,
-                                            port,
-                                            baud,
-                                            sofaFile,
-                                            enableSerial = useTracking,
-                                            dynamicITD = useDynamicITD,
-                                            dynamicILD = False,
-                                            hrirInterpolation = useHRIRinterpolation,
-                                            headTrackingCalibrationPort = headTrackingCalibrationPort)
-#to be completed
+renderer = DynamicBinauralRendererSAW( context, "TopLevelRenderer", None,
+                                      numBinauralObjects,
+                                      port,
+                                      baud,
+                                      sofaFile,
+                                      enableSerial = useTracking,
+                                      dynamicITD = useDynamicITD,
+                                      dynamicILD = False,
+                                      hrirInterpolation = useHRIRinterpolation,
+                                      headTrackingCalibrationPort = headTrackingCalibrationPort,
+                                      filterCrossfading=useCrossfading
+                                      )
 
-result,messages = rrl.checkConnectionIntegrity(controller)
+result,messages = rrl.checkConnectionIntegrity( renderer )
 if not result:
    print(messages)
 
-flow = rrl.AudioSignalFlow( controller )
+flow = rrl.AudioSignalFlow( renderer )
 
 aiConfig = ai.AudioInterface.Configuration( flow.numberOfCaptureChannels,
                                            flow.numberOfPlaybackChannels,

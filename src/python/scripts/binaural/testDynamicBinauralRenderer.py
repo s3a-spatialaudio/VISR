@@ -26,18 +26,19 @@ import os
 ############ CONFIG ###############
 fs = 48000
 blockSize = 1024
-numBinauralObjects = 32
+numBinauralObjects = 64
 numOutputChannels = 2 # Binaural output
 parameterUpdatePeriod = 1
 numBlocks = 128;
 
-useSourceAutoMovement = True
+useSourceAutoMovement = False
 useTracking = True
 useDynamicITD = True
 useDynamicILD = False
 useHRIRinterpolation = True
 useFilterCrossfading = True
 useSerialPort = False
+
 ###################################
 
 signalLength = blockSize * numBlocks
@@ -60,7 +61,7 @@ if useSerialPort:
 
     # TODO: Check and adjust port names for the individual system
     if platform == 'linux' or platform == 'linux2':
-        port = "/dev/ttyUSB0"
+        port = "/dev/ttyUSB1"
     elif platform == 'darwin':
         port = "/dev/cu.usbserial-AJ03GSC8"
     elif platform == 'windows':
@@ -76,7 +77,8 @@ if useSerialPort:
                                            dynITD = useDynamicITD,
                                            dynILD = useDynamicILD,
                                            hrirInterp = useHRIRinterpolation,
-                                           headTrackingCalibrationPort = 8889
+                                           headTrackingCalibrationPort = 8889,
+                                           filterCrossfading = useFilterCrossfading
                                            )
 else:
     renderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None,
@@ -88,7 +90,6 @@ else:
                                       hrirInterp = useHRIRinterpolation,
                                       filterCrossfading = useFilterCrossfading
                                       )
-#to be completed
 
 result,messages = rrl.checkConnectionIntegrity(renderer)
 if not result:

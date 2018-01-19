@@ -23,7 +23,8 @@ class DynamicBinauralRendererSerial(visr.CompositeComponent ):
                      dynITD = True,
                      dynILD = True,
                      hrirInterp = True,
-                     headTrackingCalibrationPort = None
+                     headTrackingCalibrationPort = None,
+                     filterCrossfading = False, 
                      ):
             super( DynamicBinauralRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -36,7 +37,8 @@ class DynamicBinauralRendererSerial(visr.CompositeComponent ):
                                                                      headTracking = enableSerial,
                                                                      dynITD = dynITD,
                                                                      dynILD = dynILD,
-                                                                     hrirInterp = hrirInterp
+                                                                     hrirInterp = hrirInterp,
+                                                                     filterCrossfading=filterCrossfading
                                                                    )
             if enableSerial:
 ##                WITH AUDIOLAB ORIENTATION OFFSET

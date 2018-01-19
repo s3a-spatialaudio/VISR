@@ -17,7 +17,7 @@ from extractDelayInSofaFile import extractDelayInSofaFile
 
 import os
 from urllib.request import urlretrieve
-from system import platform
+from sys import platform
 
 ############ CONFIG ###############
 fs = 48000
@@ -30,6 +30,8 @@ useTracking = False
 useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
+useCrossfading = True
+
 
 # TODO: Check and adkust port names for the individual system
 if platform == 'linux' or platform == 'linux2':
@@ -57,22 +59,24 @@ if useDynamicITD:
         extractDelayInSofaFile( sofaFile, sofaFileTD )
     sofaFile = sofaFileTD
 
-controller = DynamicBinauralRendererSerial( context, "Controller", None,
-                                           numBinauralObjects,
-                                           port,
-                                           baud,
-                                           sofaFile,
-                                           enableSerial = useTracking,
-                                           dynITD = useDynamicITD,
-                                           dynILD = False,
-                                           hrirInterp = useHRIRinterpolation)
+renderer = DynamicBinauralRendererSerial( context, "Controller", None,
+                                         numBinauralObjects,
+                                         port,
+                                         baud,
+                                         sofaFile,
+                                         enableSerial = useTracking,
+                                         dynITD = useDynamicITD,
+                                         dynILD = useDynamicITD,
+                                         hrirInterp = useHRIRinterpolation,
+                                         filterCrossfading=useCrossfading
+                                         )
 #to be completed
 
-result,messages = rrl.checkConnectionIntegrity(controller)
+result,messages = rrl.checkConnectionIntegrity(renderer)
 if not result:
    print(messages)
 
-flow = rrl.AudioSignalFlow( controller )
+flow = rrl.AudioSignalFlow( renderer )
 
 paramInput = flow.parameterReceivePort('objectVector')
 

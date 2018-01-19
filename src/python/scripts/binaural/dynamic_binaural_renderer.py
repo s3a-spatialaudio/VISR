@@ -17,6 +17,10 @@ from readSofa import readSofaFile
 from dynamic_binaural_controller import DynamicBinauralController
 import numpy as np
 
+# Whether to use the faster FFTS FFT algorithm
+fftImplementation = 'ffts'
+# fftImplementation = 'default'
+
 class DynamicBinauralRenderer( visr.CompositeComponent ):
 
         def __init__( self,
@@ -85,31 +89,37 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
 
                 # Define the routing for the binaural convolver such that it match the layout of the
                 # flat BRIR matrix.
-                filterRouting = pml.FilterRoutingList()
-                for idx in range(0, numberOfObjects ):
-                    filterRouting.addRouting( idx, 0, idx, 1.0 )
-                    filterRouting.addRouting( idx+numberOfObjects, 1, idx+numberOfObjects, 1.0 )
-                    if filterCrossfading:
-                        self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
-                                                             numberOfInputs=2*numberOfObjects,
-                                                             numberOfOutputs=2,
-                                                             maxFilters=2*numberOfObjects,
-                                                             filterLength=firLength,
-                                                             maxRoutings=2*numberOfObjects,
-                                                             routings=filterRouting,
-                                                             transitionSamples=context.period,
-                                                             controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
-                                                             )
-                    else:
-                        self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
-                                                             numberOfInputs=2*numberOfObjects,
-                                                             numberOfOutputs=2,
-                                                             maxFilters=2*numberOfObjects,
-                                                             filterLength=firLength,
-                                                             maxRoutings=2*numberOfObjects,
-                                                             routings=filterRouting,
-                                                             controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
-                                                             )
+                filterRouting = rbbl.FilterRoutingList( [rbbl.FilterRouting( i, i % 2, i ) for i in range(2*numberOfObjects)] )
+#                filterRouting = rbbl.FilterRoutingList()
+#                for idx in range(0, numberOfObjects ):
+#                    filterRouting.addRouting( idx, 0, idx, 1.0 )
+#                    filterRouting.addRouting( idx+numberOfObjects, 1, idx+numberOfObjects, 1.0 )
+                filterRouting = rbbl.FilterRoutingList( [rbbl.FilterRouting(ear*numberOfObjects + obj, ear, ear*numberOfObjects + obj )
+                                                         for obj in range(numberOfObjects)
+                                                         for ear in range(2) ] )
+                if filterCrossfading:
+                    self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
+                                                         numberOfInputs=2*numberOfObjects,
+                                                         numberOfOutputs=2,
+                                                         maxFilters=2*numberOfObjects,
+                                                         filterLength=firLength,
+                                                         maxRoutings=2*numberOfObjects,
+                                                         routings=filterRouting,
+                                                         transitionSamples=context.period,
+                                                         controlInputs=rcl.CrossfadingFirFilterMatrix.ControlPortConfig.Filters,
+                                                         fftImplementation=fftImplementation
+                                                         )
+                else:
+                    self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
+                                                         numberOfInputs=2*numberOfObjects,
+                                                         numberOfOutputs=2,
+                                                         maxFilters=2*numberOfObjects,
+                                                         filterLength=firLength,
+                                                         maxRoutings=2*numberOfObjects,
+                                                         routings=filterRouting,
+                                                         controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                         fftImplementation=fftImplementation
+                                                         )
                 self.audioConnection(self.delayVector.audioPort("out"), self.convolver.audioPort("in") )
 
                 if dynITD:
@@ -118,10 +128,14 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                     self.parameterConnection(self.dynamicBinauralController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )
             else: # Neither dynILD or dynITD, that means no separate DelayVector
                   # and just numberOfObjects inputs
-                filterRouting = pml.FilterRoutingList()
-                for idx in range(0, numberOfObjects ):
-                    filterRouting.addRouting( idx, 0, idx, 1.0 )
-                    filterRouting.addRouting( idx, 1, idx+numberOfObjects, 1.0 )
+#                filterRouting = rbbl.FilterRoutingList()
+#                for idx in range(0, numberOfObjects ):
+#                    filterRouting.addRouting( idx, 0, idx, 1.0 )
+#                    filterRouting.addRouting( idx, 1, idx+numberOfObjects, 1.0 )
+                # filterRouting = rbbl.FilterRoutingList( [rbbl.FilterRouting(i % numberOfObjects, i % 2, i ) for i in range(2*numberOfObjects)] )
+                filterRouting = rbbl.FilterRoutingList( [rbbl.FilterRouting(obj, ear, ear*numberOfObjects + obj )
+                                                         for obj in range(numberOfObjects)
+                                                         for ear in range(2) ] )
                 if filterCrossfading:
                     self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
                                                                     numberOfInputs=numberOfObjects,
@@ -130,7 +144,9 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                                                                     filterLength=firLength,
                                                                     maxRoutings=2*numberOfObjects,
                                                                     routings=filterRouting,
-                                                                    controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                                    transitionSamples=context.period,
+                                                                    controlInputs=rcl.CrossfadingFirFilterMatrix.ControlPortConfig.Filters,
+                                                                    fftImplementation=fftImplementation
                                                                     )
                 else:
                     self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
@@ -140,7 +156,8 @@ class DynamicBinauralRenderer( visr.CompositeComponent ):
                                                          filterLength=firLength,
                                                          maxRoutings=2*numberOfObjects,
                                                          routings=filterRouting,
-                                                         controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                         controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                         fftImplementation=fftImplementation
                                                          )
             self.parameterConnection(self.dynamicBinauralController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
 
