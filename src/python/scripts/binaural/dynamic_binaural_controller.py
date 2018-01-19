@@ -110,7 +110,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.lastPosition = np.repeat( [[np.NaN, np.NaN, np.NaN]], self.numberOfObjects, axis=0 )
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
-            self.inverted = inv(self.triplets)
+            self.inverted = np.asarray( inv(self.triplets), dtype=np.float32 )
         else:
             self.lastFilters = np.repeat( -1, self.numberOfObjects, axis=0 )
 
@@ -120,7 +120,8 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.usedChannels = set()
         else:
             self.channelAllocator = None
-            self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]]), self.numberOfObjects, axis = 0 )
+            self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]],
+                                        dtype = np.float32 ), self.numberOfObjects, axis = 0 )
             self.levels = np.zeros( (self.numberOfObjects), dtype = np.float32 )
 
 #        self.f = open('srcpAllinone.txt', 'w')
@@ -136,7 +137,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
             htrack = self.trackingInputProtocol.data()
             ypr = htrack.orientation
             # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
-            self.rotationMatrix = calcRotationMatrix(np.negative(ypr))
+            self.rotationMatrix = np.asarray( calcRotationMatrix(np.negative(ypr) ), dtype=np.float32 )
 
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
