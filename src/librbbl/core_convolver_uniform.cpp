@@ -17,9 +17,7 @@ CoreConvolverUniform( std::size_t numberOfInputs,
                               std::size_t numberOfOutputs,
                               std::size_t blockLength,
                               std::size_t maxFilterLength,
-//                            std::size_t maxRoutingPoints,
                               std::size_t maxFilterEntries,
-//                              RoutingList const & initialRoutings,
                               efl::BasicMatrix<SampleType> const & initialFilters,
                               std::size_t alignment /*= 0*/,
                               char const * fftImplementation /*= "default"*/ )
@@ -42,7 +40,6 @@ CoreConvolverUniform( std::size_t numberOfInputs,
  , mFftRepresentation( FftWrapperFactory<SampleType>::create( fftImplementation, mDftSize, alignment ) )
  , mFilterScalingFactor( calculateFilterScalingFactor() )
 {
-//  initRoutingTable( initialRoutings );
   initFilters( initialFilters );
 }
 

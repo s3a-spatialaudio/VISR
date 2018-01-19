@@ -103,7 +103,7 @@ void exportCrossfadingFirFilterMatrix( py::module & m )
       py::arg( "maxFilters" ),
       py::arg( "maxRoutings" ),
       py::arg( "transitionSamples" ),
-      py::arg( "filters" ),
+      py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),
       py::arg( "routings" ) = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) =  CrossfadingFirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )

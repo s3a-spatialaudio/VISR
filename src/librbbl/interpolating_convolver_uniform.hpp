@@ -78,7 +78,7 @@ public:
 
   std::size_t maxNumberOfRoutingPoints() const { return mConvolver.maxNumberOfRoutingPoints(); }
 
-  std::size_t maxNumberOfFilterEntries() const { return mFilters.numberOfRows(); /*mConvolver.maxNumberOfFilterEntries();*/ }
+  std::size_t maxNumberOfFilterEntries() const { return mFilters.numberOfRows(); }
 
   std::size_t maxFilterLength() const { return mConvolver.maxFilterLength(); }
 
@@ -150,17 +150,28 @@ public:
   void setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t filterIdx, std::size_t alignment = 0 );
 
   /**
-   * 
+   * Handling of interpolants (consisting of filter indices and the corresponding interpolation weights.
    */
   //@{
+  /**
+   * Return the number of filters involved in one interpolation process.
+   */
+  std::size_t numberOfInterpolants() const;
 
   /**
-   * Set a new interpolated filter
+   * Set new interpolation weights for a single filter entry.
    */
   void setInterpolant( rbbl::InterpolationParameter const & param );
 
+  /**
+   * Set filter interpolants for a sequence of routing entries
+   * @todo Decide whether to clear the existing interpolants.
+   */
   void setInterpolants( InterpolationParameterSet const & param );
 
+  /**
+   * Set all interpolation weights and filter indices to zero.
+   */
   void clearInterpolants();
   //@}
 

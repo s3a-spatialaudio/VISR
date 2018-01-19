@@ -71,7 +71,9 @@ public:
 
   std::size_t blockLength() const { return mCoreConvolver.blockLength(); }
 
-  std::size_t dftRepresentationSize() const { return mCoreConvolver.dftRepresentationSize(); }
+  std::size_t dftBlockRepresentationSize() const { return mCoreConvolver.dftBlockRepresentationSize(); }
+
+  std::size_t dftFilterRepresentationSize() const { return mCoreConvolver.dftFilterRepresentationSize(); }
 
   std::size_t alignment() const { return mCoreConvolver.alignment(); }
 

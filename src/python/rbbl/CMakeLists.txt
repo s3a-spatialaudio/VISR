@@ -5,6 +5,7 @@ biquad_coefficient.cpp
 core_convolver_uniform.cpp
 crossfading_convolver_uniform.cpp
 filter_routing.cpp
+interpolating_convolver_uniform.cpp
 interpolation_parameter.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp

@@ -2,11 +2,10 @@
 
 #include <librbbl/filter_routing.hpp>
 
-//#include <libvisr/constants.hpp>
-//#include <libvisr/parameter_base.hpp>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <sstream>
 
 namespace visr
 {
@@ -33,13 +32,32 @@ void exportFilterRouting( pybind11::module & m)
   pybind11::class_<FilterRoutingList>( m, "FilterRoutingList" )
     .def( pybind11::init<>() )
     .def( pybind11::init<std::initializer_list<FilterRouting> const &>(), pybind11::arg("entries") )
+    .def( pybind11::init( [](std::vector<FilterRouting> const entries )
+			  {
+			    FilterRoutingList * inst = new FilterRoutingList();
+			    for( auto e : entries )
+			    {
+			      inst->addRouting( e );
+			    }
+			    return inst;
+			  }),
+	  pybind11::arg("entries"), "Constructor from Python list or iterable of type FilterRouting" )
     .def( pybind11::init<const FilterRoutingList &>() )
     .def_static( "fromJson", [](FilterRoutingList &, std::string const & str ){ return FilterRoutingList::fromJson( str ); } )
     .def( "parseJson", static_cast<void(FilterRoutingList::*)(std::string const &)>(&FilterRoutingList::parseJson), pybind11::arg("initString") )
     .def_property_readonly("empty", &FilterRoutingList::empty )
     .def_property_readonly("size", &FilterRoutingList::size )
-    .def("__len__", &FilterRoutingList::size )
+    .def( "__len__", &FilterRoutingList::size )
     .def( "__iter__", [](FilterRoutingList & fr ){ return pybind11::make_iterator(fr.begin(), fr.end() ); } )
+	.def( "__repr__", [](FilterRoutingList const & frl )
+			{
+	  	  	  std::stringstream ret;
+	  	  	  for( auto e : frl )
+	  	  	  {
+                ret << "( i:" << e.inputIndex << " o:" << e.outputIndex << " f:" << e.filterIndex << " g: " << e.gainLinear << "), ";
+	  	  	  }
+	  	  	  return ret.str();
+			} )
     .def( "addRouting", static_cast<void(FilterRoutingList::*)(FilterRouting::IndexType, FilterRouting::IndexType, FilterRouting::IndexType, FilterRouting::GainType)>(&FilterRoutingList::addRouting) )
     .def( "addRouting", static_cast<void(FilterRoutingList::*)(FilterRouting const &)>(&FilterRoutingList::addRouting) )
     .def( "removeRouting", static_cast<bool(FilterRoutingList::*)(FilterRouting const &)>(&FilterRoutingList::removeRouting) )

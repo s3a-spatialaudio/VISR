@@ -82,7 +82,14 @@ inline bool VISR_RBBL_LIBRARY_SYMBOL operator<(InterpolationParameter const & lh
   return lhs.id() < rhs.id();
 }
 
-using InterpolationParameterSet = std::set<InterpolationParameter>;
+class InterpolationParameterSet: public std::set<InterpolationParameter>
+{
+public:
+  using Base = std::set<InterpolationParameter>;
+
+  using std::set<InterpolationParameter>::set;
+  // using Base::Base;
+};
 
 } // namespace rbbl
 } // namespace visr

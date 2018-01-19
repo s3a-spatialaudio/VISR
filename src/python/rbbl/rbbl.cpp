@@ -15,6 +15,7 @@ namespace python
   void exportCrossfadingConvolversUniform( pybind11::module & m );
   void exportFilterRouting( pybind11::module & m );
   void exportInterpolationParameter( pybind11::module & m );
+  void exportInterpolatingConvolversUniform( pybind11::module & m );
   void exportMultichannelConvolversUniform( pybind11::module & m );
   void exportObjectChannelAllocator( pybind11::module & m );
 }
@@ -29,6 +30,7 @@ PYBIND11_MODULE( rbbl, m )
   exportInterpolationParameter( m );
   exportCoreConvolversUniform( m );
   exportCrossfadingConvolversUniform( m );
+  exportInterpolatingConvolversUniform( m );
   exportMultichannelConvolversUniform( m );
   exportObjectChannelAllocator( m );
 }
