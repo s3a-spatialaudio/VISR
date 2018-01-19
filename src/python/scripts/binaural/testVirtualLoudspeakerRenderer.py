@@ -13,7 +13,7 @@ import rrl
 
 import numpy as np
 import matplotlib.pyplot as plt
-from system import platform
+from sys import platform
 import time
 
 
@@ -23,7 +23,7 @@ blockSize = 1024
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 512;
-BRIRtruncationLength = 2048
+BRIRtruncationLength = 4096
 
 useTracking = True
 useDynamicITD = False

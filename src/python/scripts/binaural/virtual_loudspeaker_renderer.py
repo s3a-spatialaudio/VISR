@@ -8,6 +8,7 @@ Created on Thu Oct 26 16:22:24 2017
 
 import visr
 import pml
+import rbbl
 import rcl
 
 #import objectmodel as om
@@ -17,6 +18,10 @@ from readSofa import readSofaFile
 from virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 import numpy as np
+
+fftImplementation = 'ffts'
+#fftImplementation = 'kissfft'
+#fftImplementation = 'default'
 
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
@@ -68,7 +73,7 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
             # Define the routing for the binaural convolver such that it matches the organisation of the
             # flat BRIR matrix.
-            filterRouting = pml.FilterRoutingList()
+            filterRouting = rbbl.FilterRoutingList()
 
             firLength = hrirData.shape[-1]
 
@@ -93,7 +98,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                  filterLength=firLength,
                                                  maxRoutings=2*numberOfLoudspeakers,
                                                  routings=filterRouting,
-                                                 controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                 controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                 fftImplementation=fftImplementation
                                                  )
                 self.audioConnection( self.delayVector.audioPort("out"), self.convolver.audioPort("in"), )
                 self.parameterConnection(self.virtualLoudspeakerController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
@@ -109,7 +115,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                      filterLength=firLength,
                                                      maxRoutings=2*numberOfLoudspeakers,
                                                      routings=filterRouting,
-                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     fftImplementation=fftImplementation
                                                      )
                 self.audioConnection(self.loudspeakerSignalInput,
                                      self.convolver.audioPort("in") )

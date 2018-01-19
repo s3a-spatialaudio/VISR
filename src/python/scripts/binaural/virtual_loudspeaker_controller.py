@@ -134,10 +134,13 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             _interpFilters = np.einsum('jkiw,j->ikw', self.hrirs[_indices,...], normedGains)
 
             for lspIdx in range(0,self.numberOfLoudspeakers):
-                    _leftInterpolant = pml.IndexedVectorFloat( lspIdx, _interpFilters[lspIdx,0,:] )
-                    _rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, _interpFilters[lspIdx,1,:] )
-                    self.filterOutputProtocol.enqueue( _leftInterpolant )
-                    self.filterOutputProtocol.enqueue( _rightInterpolant )
+                leftFilter = np.array(_interpFilters[lspIdx,0,:], dtype=np.float32 )
+                rightFilter = np.array(_interpFilters[lspIdx,1,:], dtype=np.float32 )
+                _leftInterpolant = pml.IndexedVectorFloat( lspIdx, leftFilter )
+                _rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, rightFilter )
+                self.filterOutputProtocol.enqueue( _leftInterpolant )
+                self.filterOutputProtocol.enqueue( _rightInterpolant )
+                pass
 
             if self.dynamicITD:
                 delays = np.dot( np.moveaxis(self.dynamicDelays[_indices,:],0,-1), normedGains)

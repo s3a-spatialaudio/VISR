@@ -21,6 +21,7 @@ import rrl
 import numpy as np
 import matplotlib.pyplot as plt
 
+from sys import platform
 
 ############ CONFIG ###############
 fs = 48000
@@ -30,7 +31,7 @@ parameterUpdatePeriod = 1
 numBlocks = 72;
 BRIRtruncationLength = 4096
 
-useTracking = True
+useTracking = False
 useDynamicITD = False
 useHRIRinterpolation = True
 useSerialPort = True
@@ -40,7 +41,7 @@ if platform == 'linux' or platform == 'linux2':
     port = "/dev/ttyUSB0"
 elif platform == 'darwin':
     port = "/dev/cu.usbserial-AJ03GSC8"
-elif platform == 'windows
+elif platform == 'windows':
     port = "COM10"
 baud = 57600
 
@@ -60,6 +61,14 @@ t = 1.0/fs * np.arange(0,signalLength)
 sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemD.sofa'
 # Set the number of loudspeakers accordingly.
 numLoudspeakers = 9
+#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemA.sofa'
+## Set the number of loudspeakers accordingly.
+#numLoudspeakers = 2
+
+sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemH.sofa'
+# Set the number of loudspeakers accordingly.
+numLoudspeakers = 22
+
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
