@@ -27,7 +27,7 @@ CrossfadingConvolverUniform( std::size_t numberOfInputs,
  : mCoreConvolver( numberOfInputs, numberOfOutputs, blockLength, maxFilterLength,
                    2*maxFilterEntries, initialFilters, alignment, fftImplementation)
   , mMaxNumberOfRoutingPoints( maxRoutingPoints )
-  , mFrequencyDomainOutput( 2, mCoreConvolver.dftRepresentationSize(), mCoreConvolver.complexAlignment() )
+  , mFrequencyDomainOutput( 2, mCoreConvolver.dftBlockRepresentationSize(), mCoreConvolver.complexAlignment() )
   , mTimeDomainTempOutput( 2, blockLength, alignment )
   , mMaxNumFilters( maxFilterEntries )
   , mNumRampBlocks( (maxFilterLength+blockLength-1) / blockLength + 1) // integer ceil()

@@ -77,17 +77,17 @@ void exportCrossfadingConvolverUniform( pybind11::module & m, char const * name 
   pybind11::class_< CrossfadingConvolverUniform<ElementType> >( m, name )
     .def( pybind11::init<std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, rbbl::FilterRoutingList const &,
       efl::BasicMatrix<ElementType> const &, std::size_t, char const *>(),
-        pybind11::arg("numberOfInputs " ),
-        pybind11::arg( "numberOfOutputs " ),
-        pybind11::arg( "blockLength " ),
-        pybind11::arg( "maxFilterLength " ),
-        pybind11::arg( "maxRoutingPoints " ),
-        pybind11::arg( "maxFilterEntries " ),
+        pybind11::arg( "numberOfInputs" ),
+        pybind11::arg( "numberOfOutputs" ),
+        pybind11::arg( "blockLength" ),
+        pybind11::arg( "maxFilterLength" ),
+        pybind11::arg( "maxRoutingPoints" ),
+        pybind11::arg( "maxFilterEntries" ),
         pybind11::arg( "transitionSamples"),
-        pybind11::arg( "initialRoutings " ) = rbbl::FilterRoutingList(),
+        pybind11::arg( "initialRoutings" ) = rbbl::FilterRoutingList(),
         pybind11::arg( "initialFilters" ),
-        pybind11::arg( "alignment " ) = 0,
-        pybind11::arg( "fftImplementation ") = "default" )
+        pybind11::arg( "alignment" ) = 0,
+        pybind11::arg( "fftImplementation" ) = "default" )
     .def_property_readonly_static( "numberOfInputs", &CrossfadingConvolverUniform<ElementType>::numberOfInputs )
     .def_property_readonly_static( "numberOfOutputs", &CrossfadingConvolverUniform<ElementType>::numberOfOutputs )
     .def_property_readonly_static( "blockLength", &CrossfadingConvolverUniform<ElementType>::blockLength )

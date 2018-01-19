@@ -26,7 +26,7 @@ MultichannelConvolverUniform( std::size_t numberOfInputs,
  : mCoreConvolver( numberOfInputs, numberOfOutputs, blockLength, maxFilterLength,
                    maxFilterEntries, initialFilters, alignment, fftImplementation)
   , mMaxNumberOfRoutingPoints( maxRoutingPoints )
-  , mFrequencyDomainOutput( numberOfOutputs, mCoreConvolver.dftRepresentationSize(), mCoreConvolver.complexAlignment() )
+  , mFrequencyDomainOutput( numberOfOutputs, mCoreConvolver.dftBlockRepresentationSize(), mCoreConvolver.complexAlignment() )
 {
   initRoutingTable( initialRoutings );
 }

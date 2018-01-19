@@ -35,10 +35,12 @@ InterpolatingConvolverUniform( std::size_t numberOfInputs,
                initialRoutings,
                efl::BasicMatrix<SampleType>( alignment ), // No initial filters (they are set by the interpolants)
                alignment, fftImplementation)
-  , mFilters( maxFilterEntries, mConvolver.dftRepresentationSize(), mConvolver.complexAlignment() )
-  , mTempFilter( mConvolver.dftRepresentationSize(), mConvolver.complexAlignment() )
+  , mFilters( maxFilterEntries, mConvolver.dftFilterRepresentationSize(), mConvolver.complexAlignment() )
+  , mTempFilter( mConvolver.dftFilterRepresentationSize(), mConvolver.complexAlignment() )
   , mNumberOfInterpolants( numberOfInterpolants )
 {
+  initFilters( initialFilters );
+
   setInterpolants( initialInterpolants );
 }
 
@@ -166,18 +168,18 @@ void InterpolatingConvolverUniform<SampleType>::initFilters( efl::BasicMatrix<Sa
 {
   std::size_t const numFilters{ newImpulseResponses.numberOfRows() };
   std::size_t const irLength{ newImpulseResponses.numberOfColumns() };
-  if( numFilters >= maxNumberOfFilterEntries() )
+  if( numFilters > maxNumberOfFilterEntries() )
   {
     throw std::invalid_argument( "InterpolatingConvolverUniform::initFilters(): Size of new filter matrix exceeds number of filter slots.");
   }
-  if( irLength >= maxFilterLength() )
+  if( irLength > maxFilterLength() )
   {
     throw std::invalid_argument( "InterpolatingConvolverUniform::initFilters(): Size of new filter matrix exceeds maximum filter length." );
   }
   // Compute the minimum alignment: *2 because mFilters is complex. 
   // TODO: revise semantics of transformImpulseResponse
   std::size_t const align( std::min( newImpulseResponses.alignmentElements(), mFilters.alignmentElements() * 2 ) );
-  for( std::size_t filterIdx( numFilters ); filterIdx < numFilters; ++filterIdx )
+  for( std::size_t filterIdx( 0 ); filterIdx < numFilters; ++filterIdx )
   {
     mConvolver.transformImpulseResponse( newImpulseResponses.row(filterIdx),
                                          irLength,
@@ -213,6 +215,13 @@ setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t
 }
 
 template< typename SampleType >
+std::size_t InterpolatingConvolverUniform<SampleType>::
+numberOfInterpolants() const
+{
+  return mNumberOfInterpolants;
+}
+
+template< typename SampleType >
 void InterpolatingConvolverUniform<SampleType>::
 setInterpolant( rbbl::InterpolationParameter const & param )
 {
@@ -228,7 +237,7 @@ setInterpolant( rbbl::InterpolationParameter const & param )
   assert( mNumberOfInterpolants > 0 ); // Normally checked in the constructor
 
   // We use real-valued arithmetics to scale the complex-valued FD representations
-  std::size_t const numRealElements = 2 * mConvolver.dftRepresentationSize();
+  std::size_t const numRealElements = 2 * mConvolver.dftBlockRepresentationSize();
 
   std::size_t align{ mConvolver.alignment() };
 

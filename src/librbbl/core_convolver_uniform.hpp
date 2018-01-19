@@ -81,9 +81,14 @@ public:
    * Return the size of a DFT block.
    * @todo do we need to query the padded size as well?
    */
-  std::size_t dftRepresentationSize() const { return mDftRepresentationSize; }
+  std::size_t dftBlockRepresentationSize() const { return mDftRepresentationSize; }
 
-  //std::size_t maxNumberOfRoutingPoints() const { return mMaxNumberOfRoutingPoints; }
+  std::size_t numberOfFilterPartitions() const { return mNumberOfFilterPartitions; }
+
+  /**
+   * Return the size of the frequency-domain filter representation (in complex elements )
+   */
+  std::size_t dftFilterRepresentationSize() const { return dftBlockRepresentationSize() * numberOfFilterPartitions(); }
 
   std::size_t maxNumberOfFilterEntries() const { return mFilterPartitionsFrequencyDomain.numberOfRows(); }
 
