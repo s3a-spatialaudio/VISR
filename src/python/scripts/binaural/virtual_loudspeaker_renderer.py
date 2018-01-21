@@ -32,7 +32,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                      headTracking = True,
                      dynITD = False,
                      hrirInterp = False,
-                     irTruncationLength = None
+                     irTruncationLength = None,
+                     filterCrossfading = False
                      ):
             super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
             self.loudspeakerSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
@@ -91,16 +92,30 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 for idx in range(0, numberOfLoudspeakers ):
                     filterRouting.addRouting( idx, 0, idx, 1.0 )
                     filterRouting.addRouting( idx+numberOfLoudspeakers, 1, idx+numberOfLoudspeakers, 1.0 )
-                self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
-                                                 numberOfInputs=2*numberOfLoudspeakers,
-                                                 numberOfOutputs=2,
-                                                 maxFilters=2*numberOfLoudspeakers,
-                                                 filterLength=firLength,
-                                                 maxRoutings=2*numberOfLoudspeakers,
-                                                 routings=filterRouting,
-                                                 controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
-                                                 fftImplementation=fftImplementation
-                                                 )
+                if filterCrossfading:
+                    self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=2*numberOfLoudspeakers,
+                                                     numberOfOutputs=2,
+                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     filterLength=firLength,
+                                                     maxRoutings=2*numberOfLoudspeakers,
+                                                     transitionSamples=context.period,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     fftImplementation=fftImplementation
+                                                     )
+                else:
+                    self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
+                                 numberOfInputs=2*numberOfLoudspeakers,
+                                 numberOfOutputs=2,
+                                 maxFilters=2*numberOfLoudspeakers,
+                                 filterLength=firLength,
+                                 maxRoutings=2*numberOfLoudspeakers,
+                                 routings=filterRouting,
+                                 controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                 fftImplementation=fftImplementation
+                                 )
+
                 self.audioConnection( self.delayVector.audioPort("out"), self.convolver.audioPort("in"), )
                 self.parameterConnection(self.virtualLoudspeakerController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
 

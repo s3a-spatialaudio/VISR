@@ -11,35 +11,37 @@ from serial_reader import serialReader
 import visr
 import rcl
 
-class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):    
+class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
         def __init__( self,
-                     context, name, parent, 
+                     context, name, parent,
                      numLoudspeakers,
                      port,
-                     baud, 
+                     baud,
                      sofaFile,
                      enableSerial = True,
                      dynITD = True,
                      hrirInterp = True,
                      irTruncationLength = None,
-                     headTrackingCalibrationPort = None
+                     headTrackingCalibrationPort = None,
+                     filterCrossfading = False
                      ):
             super( VirtualLoudspeakerRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numLoudspeakers )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
 
-            self.virtualLoudspeakerRenderer =  VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", self, 
-                                      numLoudspeakers, 
+            self.virtualLoudspeakerRenderer =  VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", self,
+                                      numLoudspeakers,
                                       sofaFile,
                                       headTracking = enableSerial,
                                       dynITD = dynITD,
                                       hrirInterp = hrirInterp,
-                                      irTruncationLength = irTruncationLength
+                                      irTruncationLength = irTruncationLength,
+                                      filterCrossfading = filterCrossfading
                                       )
             if enableSerial:
 ##                WITH AUDIOLAB ORIENTATION OFFSET
 #                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=220,rollOffset=-180, yawRightHand=True )
-                
+
 ##                WITH MY OFFICE DESK ORIENTATION OFFSET
                 calibrationInputPresent = not headTrackingCalibrationPort is None
                 self.serialReader = serialReader(context, "RazorHeadtrackerReceiver", self, port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True,
@@ -52,7 +54,7 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
 
 
 
-                
+
 
 
 
