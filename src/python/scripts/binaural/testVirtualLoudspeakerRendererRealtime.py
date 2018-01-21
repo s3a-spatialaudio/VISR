@@ -31,10 +31,11 @@ parameterUpdatePeriod = 1
 numBlocks = 72;
 BRIRtruncationLength = 4096
 
-useTracking = False
+useTracking = True
 useDynamicITD = False
 useHRIRinterpolation = True
 useSerialPort = True
+useCrossfading = True
 
 # TODO: Check and adjust port names for the individual system
 if platform == 'linux' or platform == 'linux2':
@@ -61,14 +62,18 @@ t = 1.0/fs * np.arange(0,signalLength)
 sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemD.sofa'
 # Set the number of loudspeakers accordingly.
 numLoudspeakers = 9
+
 #sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemA.sofa'
 ## Set the number of loudspeakers accordingly.
 #numLoudspeakers = 2
 
-sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemH.sofa'
-# Set the number of loudspeakers accordingly.
-numLoudspeakers = 22
-
+#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemH.sofa'
+## Set the number of loudspeakers accordingly.
+#numLoudspeakers = 22
+#
+#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemF.sofa'
+## Set the number of loudspeakers accordingly.
+#numLoudspeakers = 10
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
@@ -81,7 +86,8 @@ controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRende
                                   dynITD = useDynamicITD,
                                   hrirInterp = useHRIRinterpolation,
                                   irTruncationLength = BRIRtruncationLength,
-                                  headTrackingCalibrationPort=headTrackingCalibrationPort
+                                  headTrackingCalibrationPort=headTrackingCalibrationPort,
+                                  filterCrossfading = useCrossfading
                                   )
 
 result,messages = rrl.checkConnectionIntegrity(controller)
