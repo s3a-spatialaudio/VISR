@@ -11,6 +11,7 @@
 #endif
 
 #include <libpanning/VBAP.h>
+#include <libpanning/CAP.h>
 #include <libpanning/AllRAD.h>
 #include <boost/filesystem.hpp>
 
@@ -34,7 +35,9 @@ int main(int argc, const char * argv[])
   std::size_t numberOfSources = 8;
 
   std::vector<XYZ> sourcePos( numberOfSources );
-
+   
+#if 0
+{
   FILE* file;
     
   boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
@@ -47,7 +50,7 @@ int main(int argc, const char * argv[])
 //  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/9.1_audiolab.txt");
 
 
-  boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/22.1_audiolab.txt" );
+  boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/bak/22.1_audiolab.txt" );
 
   file = fopen( bfile.string().c_str(), "r" );
   if( array.load( file ) == -1 )
@@ -58,7 +61,7 @@ int main(int argc, const char * argv[])
   file = 0;
 
   // Alternatively, load the config file in XML format.
-  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/22.1_audiolab_2subwoofers.xml" );
+  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
   array.loadXmlFile( configFileXml.string() );
 
   try
@@ -206,5 +209,49 @@ int main(int argc, const char * argv[])
     }
     fclose( file );
   }
+    
+}
+#endif
+    
+    ////// Test CAP
+    
+    CAP cap;
+    
+    // Speakers
+    //array.setNumSpeakers(2);
+    //array.setPosition( 1, 1.0f, 1.0f, 0.0f, true );   // stereo left
+    //array.setPosition( 2, 1.0f, -1.0f, 0.0f, true );  // stereo right
+    
+    array.setNumSpeakers(3);
+    array.setPosition( 1, 0.0f, 1.0f, 0.0f, true );   // left
+    array.setPosition( 2, 0.0f, -1.0f, 0.0f, true );  // right
+    array.setPosition( 3, 1.0f, 0.0f, 0.0f, true );  // forward
+    
+    cap.setLoudspeakerArray( &array );
+  
+    
+    
+    // Target images
+    //sourcePos[0].set( 1.0f, 0.0f, 0.0f, true );     // image forward
+    sourcePos[0].set( 0.0f, 1.0f, 0.0f, true );     // image left
+    cap.setNumSources(1);
+    cap.setSourcePositions( &sourcePos[0] );
+    
+
+    // Listener
+    cap.setListenerPosition( 0.0f, 0.0f, 0.0f );
+    cap.setListenerAuralAxis( 0.0f, 1.0f, 0.0f );     // head forward (rL left)
+    //cap.setListenerAuralAxis( -1.0f, 0.0f, 0.0f );     // head left (rL back)
+    
+    
+    
+    cap.calcGains();
+    
+    efl::BasicMatrix<Afloat> const & gains = cap.getGains();
+    //Afloat z1 = gains(0,0);
+    //Afloat z2 = gains(0,1);
+    
+    printf("%f %f %f", gains(0,0), gains(0,1), gains(0,2));
+    
   return 0;
 }

@@ -5,7 +5,7 @@
 #pragma warning(disable: 4996)
 #endif
 
-#include "panning_gain_calculator.hpp"
+#include "CAP_gain_calculator.hpp"
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>
@@ -34,17 +34,17 @@ namespace visr
 namespace rcl
 {
 
-PanningGainCalculator::PanningGainCalculator( ril::AudioSignalFlow& container, char const * name )
+CAPGainCalculator::CAPGainCalculator( ril::AudioSignalFlow& container, char const * name )
  : AudioComponent( container, name )
- , mNumberOfObjects( 0 ) 
+ , mNumberOfObjects( 0 )
 {
 }
 
-PanningGainCalculator::~PanningGainCalculator()
+CAPGainCalculator::~CAPGainCalculator()
 {
 }
 
-void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig )
+void CAPGainCalculator::setup( std::size_t numberOfObjects, panning::LoudspeakerArray const & arrayConfig )
 {
   mSpeakerArray = arrayConfig;
   mNumberOfObjects = numberOfObjects;
@@ -59,25 +59,31 @@ void PanningGainCalculator::setup( std::size_t numberOfObjects, panning::Loudspe
   mLevels = 0.0f;
 }
 
-void PanningGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
+void CAPGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
   mVbapCalculator.setListenerPosition( x, y, z );
   if( mVbapCalculator.calcInvMatrices() != 0 )
   {
-    throw std::invalid_argument( "PanningGainCalculator::setup(): Calculation of inverse matrices failed." );
+    throw std::invalid_argument( "CAPGainCalculator::setup(): Calculation of inverse matrices failed." );
   }
 }
 
-void PanningGainCalculator::setListenerPosition( pml::ListenerPosition const & pos )
+void CAPGainCalculator::setListenerPosition( pml::ListenerPosition const & pos )
 {
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
+    
+void CAPGainCalculator::setListenerAuralAxis( CoefficientType x, CoefficientType y, CoefficientType z )
+{
+    mCapCalculator.setListenerAuralAxis( (Afloat) x, (Afloat) y, (Afloat) z );
+}
 
-void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix )
+
+void CAPGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix )
 {
   if( (gainMatrix.numberOfRows() != mNumberOfLoudspeakers) or (gainMatrix.numberOfColumns() != mNumberOfObjects) )
   {
-    throw std::invalid_argument( "PanningGainCalculator::process(): The size of the gain matrix does not match the object/loudspeaker configuration." );
+    throw std::invalid_argument( "CAPGainCalculator::process(): The size of the gain matrix does not match the object/loudspeaker configuration." );
   }
   gainMatrix.zeroFill();
 
@@ -105,7 +111,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
     objectmodel::Object::ChannelIndex const channelId = obj.channelIndex( 0 );
     if( channelId >= mNumberOfObjects )
     {
-      std::cerr << "PanningGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
+      std::cerr << "CAPGainCalculator: Channel index \"" << channelId << "\" of object id#" << objEntry.first
                 << "exceeds number of channels (" << mNumberOfObjects << ")." << std::endl;
       continue;
     }
@@ -149,7 +155,7 @@ void PanningGainCalculator::process( objectmodel::ObjectVector const & objects, 
   mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
   if( mVbapCalculator.calcGains() != 0 )
   {
-    std::cout << "PanningGainCalculator: Error calculating VBAP gains." << std::endl;
+    std::cout << "CAPGainCalculator: Error calculating VBAP gains." << std::endl;
   }
   
   efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();

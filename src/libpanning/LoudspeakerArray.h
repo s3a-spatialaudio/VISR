@@ -80,6 +80,13 @@ namespace panning
       m_position[id - 1].set( x, y, z, inf );
       return 0;
     };
+      
+      
+    int setNumSpeakers( int n)
+      {
+          m_position.resize(n);
+          return 0;
+      };
 
     int setChannel( int id, int chan )
     {
