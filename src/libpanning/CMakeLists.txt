@@ -1,9 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-
-
 SET( SOURCES
  AllRAD.cpp
+ CAP.cpp
  LoudspeakerArray.cpp
  VBAP.cpp
  XYZ.cpp
@@ -14,6 +13,7 @@ SET( HEADERS
  defs.h
  export_symbols.hpp
  AllRAD.h
+ CAP.h
  LoudspeakerArray.h
  VBAP.h
  XYZ.h
@@ -51,7 +51,6 @@ target_link_libraries( panning_shared ${Boost_SYSTEM_LIBRARY} )
 
 install(TARGETS panning_static ARCHIVE DESTINATION lib )
 install(TARGETS panning_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
-
 
 # Add the unit tests.
 ADD_SUBDIRECTORY( test )
