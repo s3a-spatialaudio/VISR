@@ -7,6 +7,7 @@ Created on Thu Oct 26 16:22:24 2017
 """
 
 import visr
+import efl
 import pml
 import rbbl
 import rcl
@@ -33,7 +34,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                      dynITD = False,
                      hrirInterp = False,
                      irTruncationLength = None,
-                     filterCrossfading = False
+                     filterCrossfading = False,
+                     interpolatingConvolver = False
                      ):
             super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
             self.loudspeakerSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
@@ -65,7 +67,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                                       useHeadTracking = headTracking,
                                                                       dynamicITD = dynITD,
                                                                       hrirInterpolation = hrirInterp,
-                                                                      delays = hrirDelays
+                                                                      delays = hrirDelays,
+                                                                      interpolatingConvolver=interpolatingConvolver
                                                                       )
 
             if headTracking:
@@ -92,7 +95,30 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 for idx in range(0, numberOfLoudspeakers ):
                     filterRouting.addRouting( idx, 0, idx, 1.0 )
                     filterRouting.addRouting( idx+numberOfLoudspeakers, 1, idx+numberOfLoudspeakers, 1.0 )
-                if filterCrossfading:
+
+                if interpolatingConvolver:
+                    if filterCrossfading:
+                        interpolationSteps = context.period
+                    else:
+                        interpolationSteps = 0
+
+                    filterReshaped = np.concatenate( (hrirData[:,0,...],hrirData[:,1,...]), axis=1 )
+                    filterMtx = efl.BasicMatrixFloat(filterReshaped)
+                    self.convolver = rcl.InterpolatingFirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=2*numberOfLoudspeakers,
+                                                     numberOfOutputs=2,
+                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     filterLength=firLength,
+                                                     maxRoutings=2*numberOfLoudspeakers,
+                                                     numberOfInterpolants=2, # TODO: Find out from
+                                                     transitionSamples=interpolationSteps,
+                                                     filters = filterMtx,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     fftImplementation=fftImplementation
+                                                     )
+
+                elif filterCrossfading:
                     self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
                                                      numberOfInputs=2*numberOfLoudspeakers,
                                                      numberOfOutputs=2,
@@ -123,7 +149,43 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 for idx in range(0, numberOfLoudspeakers ):
                     filterRouting.addRouting( idx, 0, idx, 1.0 )
                     filterRouting.addRouting( idx, 1, idx+numberOfLoudspeakers, 1.0 )
-                self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
+                if interpolatingConvolver:
+                    if filterCrossfading:
+                        interpolationSteps = context.period
+                    else:
+                        interpolationSteps = 0
+
+                    #filterReshaped = np.concatenate( (hrirData[:,0,...],hrirData[:,1,...]), axis=1 )
+                    numFilters = np.prod(np.array(hrirData.shape[0:-1]))
+                    filterReshaped = np.reshape( hrirData, (numfilters, hrirData.shape[0:-1] ))
+                    filterMtx = efl.BasicMatrixFloat(filterReshaped)
+                    self.convolver = rcl.InterpolatingFirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=numberOfLoudspeakers,
+                                                     numberOfOutputs=2,
+                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     filterLength=firLength,
+                                                     maxRoutings=2*numberOfLoudspeakers,
+                                                     numberOfInterpolants=2, # TODO: Find out from
+                                                     transitionSamples=interpolationSteps,
+                                                     filters = filterMtx,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     fftImplementation=fftImplementation
+                                                     )
+                elif filterCrossfading:
+                    self.convolver = rcl.CrossfadingFirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=numberOfLoudspeakers,
+                                                     numberOfOutputs=2,
+                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     filterLength=firLength,
+                                                     maxRoutings=2*numberOfLoudspeakers,
+                                                     transitionSamples=context.period,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     fftImplementation=fftImplementation
+                                                     )
+                else:
+                    self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
                                                      numberOfInputs=numberOfLoudspeakers,
                                                      numberOfOutputs=2,
                                                      maxFilters=2*numberOfLoudspeakers,
@@ -136,5 +198,8 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 self.audioConnection(self.loudspeakerSignalInput,
                                      self.convolver.audioPort("in") )
 
-            self.parameterConnection(self.virtualLoudspeakerController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
+            if interpolatingConvolver:
+                self.parameterConnection(self.virtualLoudspeakerController.parameterPort("interpolatorOutput"),self.convolver.parameterPort("interpolantInput") )
+            else:
+                self.parameterConnection(self.virtualLoudspeakerController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
             self.audioConnection( self.convolver.audioPort("out"), self.binauralOutput)

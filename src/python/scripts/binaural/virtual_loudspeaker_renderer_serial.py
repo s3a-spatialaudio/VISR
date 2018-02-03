@@ -23,7 +23,8 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
                      hrirInterp = True,
                      irTruncationLength = None,
                      headTrackingCalibrationPort = None,
-                     filterCrossfading = False
+                     filterCrossfading = False,
+                     interpolatingConvolver = False
                      ):
             super( VirtualLoudspeakerRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numLoudspeakers )
@@ -36,7 +37,8 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
                                       dynITD = dynITD,
                                       hrirInterp = hrirInterp,
                                       irTruncationLength = irTruncationLength,
-                                      filterCrossfading = filterCrossfading
+                                      filterCrossfading = filterCrossfading,
+                                      interpolatingConvolver = interpolatingConvolver
                                       )
             if enableSerial:
 ##                WITH AUDIOLAB ORIENTATION OFFSET

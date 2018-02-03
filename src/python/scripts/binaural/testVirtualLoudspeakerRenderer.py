@@ -29,6 +29,7 @@ useTracking = True
 useDynamicITD = False
 useHRIRinterpolation = True
 useSerialPort = False
+useInterpolatingConvolver = True
 
 
 ###################################
@@ -64,7 +65,8 @@ if useSerialPort:
                                       enableSerial = useTracking,
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
-                                      irTruncationLength = BRIRtruncationLength
+                                      irTruncationLength = BRIRtruncationLength,
+                                      interpolatingConvolver=useInterpolatingConvolver
                                       )
 else:
     renderer = VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", None,
@@ -73,7 +75,8 @@ else:
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
-                                      irTruncationLength = BRIRtruncationLength
+                                      irTruncationLength = BRIRtruncationLength,
+                                      interpolatingConvolver=useInterpolatingConvolver
                                       )
 #to be completed
 
