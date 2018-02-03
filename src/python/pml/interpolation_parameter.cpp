@@ -35,6 +35,10 @@ void exportInterpolationParameter( pybind11::module & m)
     .def_property_readonly_static( "staticType", [](py::object /*self*/) {return InterpolationParameter::staticType(); } )
     .def( py::init<ParameterConfigBase const &>(), py::arg( "config" ) )
     .def( py::init<InterpolationParameterConfig const &>(), py::arg("config") )
+    .def( py::init<InterpolationParameter const &>(), py::arg( "rhs" ) )
+    .def( py::init<InterpolationParameter::IdType, std::size_t>(), py::arg("id"), py::arg( "numberOfInterpolants" ) )
+    .def( py::init<InterpolationParameter::IdType, InterpolationParameter::IndexContainer const &, InterpolationParameter::WeightContainer const &>(),
+      py::arg( "id" ), py::arg( "indices" ), py::arg( "weights" ) )
     ;
 }
 
