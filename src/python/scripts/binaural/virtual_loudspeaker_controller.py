@@ -31,6 +31,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
                   dynamicITD = False,       # Whether ITD delays are calculated and sent via a "delays" port.
                   hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
                   delays = None,             # Matrix of delays associated with filter dataset. Dimension: #hrirPos x 2 x #lsp
+                  interpolatingConvolver = False # Whether to transmit interpolation parameters (True) or complete interpolated filters
                   ):
         # Call base class (AtomicComponent) constructor
         super( VirtualLoudspeakerController, self ).__init__( context, name, parent )
@@ -49,11 +50,28 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.useHeadTracking = False
             self.trackingInputProtocol = None # Flag that head tracking is not used.
 
-        self.filterOutput = visr.ParameterOutput( "filterOutput", self,
-                                                pml.IndexedVectorFloat.staticType,
-                                                pml.MessageQueueProtocol.staticType,
-                                                pml.EmptyParameterConfig() )
-        self.filterOutputProtocol = self.filterOutput.protocolOutput()
+        if interpolatingConvolver:
+            self.filterOutputProtocol = None # Used as flag to distinguish between the output modes.
+
+            if not hrirInterpolation:
+                numInterpolants = 1
+            elif hrirPositions.shape[-1] == 2:
+                numInterpolants = 2
+            else:
+                numInterpolants = 3
+
+            self.interpolationOutput = visr.ParameterOutput( "interpolatorOutput", self,
+                                                     pml.InterpolationParameter.staticType,
+                                                     pml.MessageQueueProtocol.staticType,
+                                                     pml.InterpolationParameterConfig(numInterpolants) )
+            self.interpolationOutputProtocol = self.interpolationOutput.protocolOutput()
+        else:
+            self.filterOutput = visr.ParameterOutput( "filterOutput", self,
+                                                     pml.IndexedVectorFloat.staticType,
+                                                     pml.MessageQueueProtocol.staticType,
+                                                     pml.EmptyParameterConfig() )
+            self.filterOutputProtocol = self.filterOutput.protocolOutput()
+            self.interpolationOutputProtocol = None
 
         if self.dynamicITD:
             if (delays is None) or (delays.ndim != 3) or (delays.shape != hrirData.shape[0:-1] ):
@@ -74,8 +92,12 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         # For the time being we assume that it is 2D
         self.headDir = np.array([1.0, 0.0 ], dtype=hrirPositions.dtype )
 
-        # HRIR selection and interpolation data
-        self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
+        # Store HRIR selection and interpolation data unless only interpolation
+        # parameters are transmitted.
+        if interpolatingConvolver:
+            self.hrirs = None
+        else:
+            self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
 
         hrirPosDim = hrirPositions.shape[-1] # Whether we are using a 2D or 3D grid
         if hrirPosDim == 2:
@@ -98,10 +120,6 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.lastHrirIndex = -1
 
     def process( self ):
-##PROFILING
-##        startTot = time.time()
-#        pr = cProfile.Profile()
-#        pr.enable()
         # TODO: This belongs somewhere else in the recompute logic.
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
@@ -130,17 +148,26 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
             normedGains = unNormedGains / gainNorm
 
-            _indices = self.hrirLookup.simplices[matchingSimplex,:]
-            _interpFilters = np.einsum('jkiw,j->ikw', self.hrirs[_indices,...], normedGains)
+            indices = self.hrirLookup.simplices[matchingSimplex,:]
+            if not transmitInterpolationParameters:
+                interpFilters = np.einsum('jkiw,j->ikw', self.hrirs[indices,...], normedGains)
 
             for lspIdx in range(0,self.numberOfLoudspeakers):
-                leftFilter = np.array(_interpFilters[lspIdx,0,:], dtype=np.float32 )
-                rightFilter = np.array(_interpFilters[lspIdx,1,:], dtype=np.float32 )
-                _leftInterpolant = pml.IndexedVectorFloat( lspIdx, leftFilter )
-                _rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, rightFilter )
-                self.filterOutputProtocol.enqueue( _leftInterpolant )
-                self.filterOutputProtocol.enqueue( _rightInterpolant )
-                pass
+                if self.interpolationOutputProtocol is None:
+                    leftInterpParameter = pml.InterpolationParameter( lspIdx, self.hrirs[indices,...].tolist(),
+                                                                     normedGains[lspIdx,...].tolist() )
+                    rightInterpParameter = pml.InterpolationParameter( lspIdx+self.numberOfLoudspeakers, self.hrirs[indices,...].tolist(),
+                                                                     normedGains[lspIdx,...].tolist() )
+
+                else:
+#                   leftFilter = np.array(interpFilters[lspIdx,0,:], dtype=np.float32 )
+#                   rightFilter = np.array(interpFilters[lspIdx,1,:], dtype=np.float32 )
+#                   leftInterpolant = pml.IndexedVectorFloat( lspIdx, leftFilter )
+#                   rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, rightFilter )
+                    leftInterpolant = pml.IndexedVectorFloat( lspIdx, interpFilters[lspIdx,0,:] )
+                    rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, interpFilters[lspIdx,1,:] )
+                    self.filterOutputProtocol.enqueue( leftInterpolant )
+                    self.filterOutputProtocol.enqueue( rightInterpolant )
 
             if self.dynamicITD:
                 delays = np.dot( np.moveaxis(self.dynamicDelays[_indices,:],0,-1), normedGains)
