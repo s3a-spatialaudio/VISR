@@ -29,6 +29,11 @@ ChannelObject::clone() const
   return std::unique_ptr<Object>( new ChannelObject( *this ) );
 }
 
+std::size_t ChannelObject::size() const
+{
+  return mOutputChannels.size();
+}
+
 ChannelObject::OutputChannelContainer const & ChannelObject::outputChannels() const
 {
   return mOutputChannels;
