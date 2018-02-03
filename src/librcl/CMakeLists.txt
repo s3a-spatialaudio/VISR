@@ -16,6 +16,7 @@ null_source.cpp
 object_gain_eq_calculator.cpp
 panning_calculator.cpp
 panning_gain_calculator.cpp
+CAP_gain_calculator.cpp
 position_decoder.cpp
 scalar_osc_decoder.cpp
 scene_decoder.cpp
@@ -46,6 +47,7 @@ null_source.hpp
 object_gain_eq_calculator.hpp
 panning_calculator.hpp
 panning_gain_calculator.hpp
+CAP_gain_calculator.hpp
 position_decoder.hpp
 scalar_osc_decoder.hpp
 scene_decoder.hpp
