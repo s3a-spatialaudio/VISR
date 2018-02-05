@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
 #define VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libvisr/atomic_component.hpp>
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
@@ -36,7 +38,7 @@ namespace rcl
 /**
  * Audio component for calculating the gains for a variety of panning algorithms from a set of audio object descriptions.
  */
-class CAPGainCalculator: public AtomicComponent
+class  VISR_RCL_LIBRARY_SYMBOL CAPGainCalculator: public AtomicComponent
 {
 public:
   /**
@@ -46,8 +48,9 @@ public:
 
   /**
    * Constructor.
-   * @param container A reference to the containing AudioSignalFlow object.
+   * @param context SignalFlowContext object holding parameters as sampling freqequency and period (block size).
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
+   * @param parent A containing composite component, or nullptr in case of a top-level component.
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
    */
@@ -69,8 +72,14 @@ public:
   ~CAPGainCalculator();
 
   /**
+   * Virtual function implementing the processing of the component.
+   */
+  void process() override;
+
+  /**
    * The process function. 
    * It takes a vector of objects as input and calculates a vector of output gains.
+   * @note This is not compatible with the new AtomicComponent interface, which requires a parameter-free method
    */
   void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
 

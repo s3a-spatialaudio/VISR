@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "CAP_gain_calculator.hpp"
+#include "cap_gain_calculator.hpp"
 
 #include <libefl/basic_matrix.hpp>
 #include <libefl/cartesian_spherical_conversion.hpp>
@@ -46,6 +46,15 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
 
 CAPGainCalculator::~CAPGainCalculator()
 {
+}
+
+void CAPGainCalculator::process()
+{
+  // <af> TODO: Implement process() function
+  // - Read object input port
+  // - Read listener position port
+  // - Call internal process()  function
+  // - Assign result to output gain matrix port.
 }
 
 void CAPGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
