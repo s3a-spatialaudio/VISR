@@ -13,6 +13,7 @@
 #include <libpml/message_queue_protocol.hpp>
 
 #include <boost/array.hpp>
+#include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/thread/thread.hpp>
 

@@ -48,13 +48,13 @@ namespace rcl
                                         bool adaptiveListenerPosition /*= false*/,
                                         bool separateLowpassPanning /*= false*/ )
  : AtomicComponent( context, name, parent )
- , mHighFrequencyGains(cVectorAlignmentSamples )
  , mNumberOfObjects( numberOfObjects )
  , mNumberOfRegularLoudspeakers( arrayConfig.getNumRegularSpeakers() )
  , mNumberOfAllLoudspeakers( arrayConfig.getNumSpeakers() )
- , mLoudspeakerPositions( mVectorDimension, mNumberOfAllLoudspeakers )
  , mVectorDimension( arrayConfig.is2D() ? 2 : 3 )
+ , mLoudspeakerPositions( mVectorDimension, mNumberOfAllLoudspeakers )
  , mTmpGains( mNumberOfRegularLoudspeakers, cVectorAlignmentSamples )
+ , mHighFrequencyGains(cVectorAlignmentSamples )
   {
     // This contains all loudspeakers.
     for( std::size_t lspIdx( 0 ); lspIdx < mNumberOfAllLoudspeakers; ++lspIdx )

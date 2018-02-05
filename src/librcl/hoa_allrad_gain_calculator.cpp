@@ -68,50 +68,6 @@ HoaAllRadGainCalculator::~HoaAllRadGainCalculator()
 {
 }
 
-#if 0
-void HoaAllRadGainCalculator::setup( std::size_t numberOfObjectChannels,
-                                     panning::LoudspeakerArray const & regularArrayConfig,
-                                     panning::LoudspeakerArray const & realArrayConfig,
-                                     efl::BasicMatrix<Afloat> const & decodeMatrix,
-                                     pml::ListenerPosition const & listenerPosition /*= pml::ListenerPosition()*/,
-                                     bool adaptiveListenerPosition /*= false*/ )
-{
-  std::size_t const numRegularSpeakers = regularArrayConfig.getNumSpeakers( );
-  std::size_t const numHarmonicSignals = decodeMatrix.numberOfRows();
-  pml::MatrixParameterConfig const gainMtxConfig( realArrayConfig.getNumRegularSpeakers(), numberOfObjectChannels );
-  mGainMatrixInput.setParameterConfig( gainMtxConfig );
-  mGainMatrixOutput.setParameterConfig( gainMtxConfig );
-
-  // Deduce the Ambisonics order from the number of harmonic signals
-  std::size_t const hoaOrder = static_cast<std::size_t>(std::ceil( std::sqrt( numHarmonicSignals ) ))-1;
-  if( ((hoaOrder + 1)*(hoaOrder + 1) != numHarmonicSignals) or (numHarmonicSignals == 0) )
-  {
-    throw std::invalid_argument( "The number of rows in the decoder matrix does not correspond to a real-valued HOA order." );
-  }
-  if( decodeMatrix.numberOfColumns() != numRegularSpeakers )
-  {
-    throw std::invalid_argument( "The number of columns in the decoder matrix does not match the size of the regular array." );
-  }
-
-  mRegularDecodeMatrix.resize( numHarmonicSignals, numRegularSpeakers );
-  mRegularDecodeMatrix.copy( decodeMatrix );
-
-  mAllRadCalculator.reset( new panning::AllRAD( regularArrayConfig,
-                                                realArrayConfig,
-                                                mRegularDecodeMatrix,
-                                                static_cast<unsigned int>(hoaOrder) ) );
-
-
-  mRealDecodeMatrix.resize( numHarmonicSignals, realArrayConfig.getNumRegularSpeakers() );
-
-
-  // set the default initial listener position. 
-  // This also initialises the internal data members (e.g., the VBAP calculator and the calculation of the VBAP decode matrix)
-  setListenerPosition( listenerPosition );
-
-}
-#endif
-
 void HoaAllRadGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
 {
   mAllRadCalculator->setListenerPosition( x, y, z );
@@ -121,20 +77,6 @@ void HoaAllRadGainCalculator::setListenerPosition( pml::ListenerPosition const &
 {
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
-
-#if 0
-// Not necessary anymore i
-void HoaAllRadGainCalculator::precalculate()
-{
-#if 0
-  if( mVbapCalculator.calcInvMatrices( ) != 0 )
-  {
-    throw std::invalid_argument( "HoaAllRadGainCalculator::setup(): Calculation of inverse matrices failed." );
-  }
-  mAllRadCalculator->calcDecodeGains( &mVbapCalculator );
-#endif
-}
-#endif
 
 void HoaAllRadGainCalculator::process()
 {

@@ -27,7 +27,7 @@ AllRAD::AllRAD(LoudspeakerArray const & regularArray,
  , mRegularDecodeCoefficients( decodeCoeffs.numberOfRows( ), decodeCoeffs.numberOfColumns( ), decodeCoeffs.alignmentElements( ) )
  , mRealDecodeCoefficients( mNumberOfHarmonics, realArray.getNumRegularSpeakers(), decodeCoeffs.alignmentElements() )
  , mRegularArraySize( regularArray.getNumSpeakers( ) )
- , mRegularToRealDecodeCoefficients( mNumberOfHarmonics, mRegularArraySize, decodeCoeffs.alignmentElements() )
+ , mRegularToRealDecodeCoefficients( mRegularArraySize, realArray.getNumRegularSpeakers(), decodeCoeffs.alignmentElements() )
 {
   if( decodeCoeffs.numberOfRows() != mNumberOfHarmonics )
   {
