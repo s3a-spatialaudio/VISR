@@ -102,7 +102,9 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                     else:
                         interpolationSteps = 0
 
-                    filterReshaped = np.concatenate( (hrirData[:,0,...],hrirData[:,1,...]), axis=1 )
+                    # filterReshaped = np.concatenate( (hrirData[:,0,...],hrirData[:,1,...]), axis=1 )
+                    numFilters = np.prod( hrirData.shape[:-1])
+                    filterReshaped = np.reshape( hrirData, (numFilters,firLength))
                     filterMtx = efl.BasicMatrixFloat(filterReshaped)
                     self.convolver = rcl.InterpolatingFirFilterMatrix( context, 'convolutionEngine', self,
                                                      numberOfInputs=2*numberOfLoudspeakers,
@@ -114,7 +116,7 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                      transitionSamples=interpolationSteps,
                                                      filters = filterMtx,
                                                      routings=filterRouting,
-                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     controlInputs=rcl.InterpolatingFirFilterMatrix.ControlPortConfig.Filters,
                                                      fftImplementation=fftImplementation
                                                      )
 
@@ -127,7 +129,7 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                      maxRoutings=2*numberOfLoudspeakers,
                                                      transitionSamples=context.period,
                                                      routings=filterRouting,
-                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     controlInputs=rcl.CrossfadingFirFilterMatrix.ControlPortConfig.Filters,
                                                      fftImplementation=fftImplementation
                                                      )
                 else:
@@ -157,19 +159,18 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
                     #filterReshaped = np.concatenate( (hrirData[:,0,...],hrirData[:,1,...]), axis=1 )
                     numFilters = np.prod(np.array(hrirData.shape[0:-1]))
-                    filterReshaped = np.reshape( hrirData, (numfilters, hrirData.shape[0:-1] ))
-                    filterMtx = efl.BasicMatrixFloat(filterReshaped)
+                    filterReshaped = np.reshape( hrirData, (numFilters, firLength ))
                     self.convolver = rcl.InterpolatingFirFilterMatrix( context, 'convolutionEngine', self,
                                                      numberOfInputs=numberOfLoudspeakers,
                                                      numberOfOutputs=2,
-                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     maxFilters=numFilters,
                                                      filterLength=firLength,
                                                      maxRoutings=2*numberOfLoudspeakers,
                                                      numberOfInterpolants=2, # TODO: Find out from
                                                      transitionSamples=interpolationSteps,
-                                                     filters = filterMtx,
+                                                     filters = filterReshaped,
                                                      routings=filterRouting,
-                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     controlInputs=rcl.InterpolatingFirFilterMatrix.ControlPortConfig.Interpolants,
                                                      fftImplementation=fftImplementation
                                                      )
                 elif filterCrossfading:
@@ -181,7 +182,7 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                      maxRoutings=2*numberOfLoudspeakers,
                                                      transitionSamples=context.period,
                                                      routings=filterRouting,
-                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters,
+                                                     controlInputs=rcl.CrossfadingFirFilterMatrix.ControlPortConfig.Filters,
                                                      fftImplementation=fftImplementation
                                                      )
                 else:
