@@ -32,27 +32,31 @@ BOOST_AUTO_TEST_CASE( AllRadInstantiation )
 
   // Initialisation:
   boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
+  boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
   boost::filesystem::path const realArrayPath = configDir / boost::filesystem::path( "generic/octahedron.xml" );
   BOOST_CHECK( exists(realArrayPath) );
   BOOST_CHECK_NO_THROW( array.loadXmlFile(realArrayPath.string().c_str() ) );
   VBAP vbap( array );
 
   // file = fopen("arrays/t-design_t8_P40.txt","r");
-  boost::filesystem::path const regularArrayPath = configDir / boost::filesystem::path( "generic/t-design_t8_P40.xml" );
+  boost::filesystem::path const regularArrayPath = sourceDir / boost::filesystem::path( "matlab/arrays/t-design_t8_P40.xml" );
+  BOOST_CHECK( exists( regularArrayPath ) );
   BOOST_CHECK_NO_THROW( regularArray.loadXmlFile( regularArrayPath.string().c_str() ) );
   //allrad.setRegArray( &regularArray );
 
-  //boost::filesystem::path const coeffFilePath = configDir / boost::filesystem::path( "generic/decode_N8_P40_t-design_t8_P40.txt" );
-  //BOOST_CHECK( exists( coeffFilePath ) );
-  //FILE* file = fopen( coeffFilePath.string().c_str(), "r" );
-  //BOOST_CHECK( file );
-  //BOOST_CHECK( allrad.loadRegDecodeGains( file, 8, 40 ) != -1 );
-  //fclose( file );
+  boost::filesystem::path const coeffFilePath = sourceDir / boost::filesystem::path( "matlab/arrays/decode_N8_P40_t-design_t8_P40.txt" );
+  BOOST_CHECK( exists( coeffFilePath ) );
+
+  pml::MatrixParameter<Afloat> coeffMtx = pml::MatrixParameter<Afloat>::fromTextFile( coeffFilePath.string() );
 
   //explicit AllRAD( LoudspeakerArray const & regularArray,
   //  LoudspeakerArray const & realArray,
   //  efl::BasicMatrix<Afloat> const & decodeCoeffs,
   //  unsigned int maxHoaOrder );
+
+  std::size_t const hoaOrder = 8;
+
+  AllRAD allRAD( regularArray, array, coeffMtx, hoaOrder );
 
   // Initially and every time listener moves:
   vbap.setListenerPosition( 0.0, 0.0, 0.0 );

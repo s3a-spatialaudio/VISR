@@ -80,7 +80,7 @@ std::string const arrayThreeSpeakers =
 "<panningConfiguration dimension = \"3\" infinite = \"false\">"
 "<loudspeaker channel = \"1\" id =\"1\" > <cart x = \"0.0\" y = \"1.0\" z= \"0.0\" /></loudspeaker>"
 "<loudspeaker channel = \"2\" id = \"2\" > <cart x = \"0.0\" y = \"-1.0\" z = \"0.0\" /></loudspeaker>"
-"<loudspeaker channel = \"3\" id = \"2\" > <cart x = \"1.0\" y = \"1.0\" z = \"0.0\" /></loudspeaker>"
+"<loudspeaker channel = \"3\" id = \"3\" > <cart x = \"1.0\" y = \"1.0\" z = \"0.0\" /></loudspeaker>"
 "</panningConfiguration>";
 
 } // Unnamed namespace 
