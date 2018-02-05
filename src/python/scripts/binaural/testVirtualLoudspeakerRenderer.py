@@ -29,7 +29,8 @@ useTracking = True
 useDynamicITD = False
 useHRIRinterpolation = True
 useSerialPort = False
-useInterpolatingConvolver = True
+useFilterCrossfading = True
+useInterpolatingConvolver = False
 
 
 ###################################
@@ -46,7 +47,7 @@ numLoudspeakers = 32
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 if useSerialPort:
-    # TODO: Check and adkust port names for the individual system
+    # TODO: Check and adjust port names for the individual system
     if platform == 'linux' or platform == 'linux2':
         port = "/dev/ttyUSB0"
     elif platform == 'darwin':
@@ -66,6 +67,7 @@ if useSerialPort:
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
                                       irTruncationLength = BRIRtruncationLength,
+                                      filterCrossfading=useFilterCrossfading,
                                       interpolatingConvolver=useInterpolatingConvolver
                                       )
 else:
@@ -76,6 +78,7 @@ else:
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
                                       irTruncationLength = BRIRtruncationLength,
+                                      filterCrossfading=useFilterCrossfading,
                                       interpolatingConvolver=useInterpolatingConvolver
                                       )
 #to be completed

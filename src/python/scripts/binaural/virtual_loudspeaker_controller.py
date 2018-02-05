@@ -86,38 +86,40 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         else:
             self.dynamicDelays = None
 
-        # Initialise the head direction.
-        # TODO: This should be costumisable (especially if head tracking is deactivated)
-        # TODO: make it 2D or 3D depending on the dimension of hrirPositions
-        # For the time being we assume that it is 2D
-        self.headDir = np.array([1.0, 0.0 ], dtype=hrirPositions.dtype )
-
         # Store HRIR selection and interpolation data unless only interpolation
         # parameters are transmitted.
         if interpolatingConvolver:
             self.hrirs = None
+            self.numSpeakers = hrirData.shape[2]
         else:
             self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
 
         hrirPosDim = hrirPositions.shape[-1] # Whether we are using a 2D or 3D grid
         if hrirPosDim == 2:
             # polar->Cartesian plus normalisation to unit radius
-            self.hrirPos = np.stack( ( np.cos(hrirPositions[:,0]), np.sin(hrirPositions[:,0])), axis = 1 )
-            self.headDir = np.array([1.0, 0.0 ], dtype=hrirPositions.dtype )
+            self.hrirPos = np.array(np.stack( ( np.cos(hrirPositions[:,0]), np.sin(hrirPositions[:,0])), axis = 1), dtype=np.float32 )
+            self.headDir = np.array([1.0, 0.0 ], dtype=self.hrirPos.dtype )
         elif hrirPosDim == 3:
             self.hrirPos = sph2cart( hrirPositions[:,0], hrirPositions[:,1], 1.0 )
-            self.headDir = np.array([1.0, 0.0, 0.0 ], dtype=hrirPositions.dtype )
+            self.headDir = np.array([1.0, 0.0, 0.0 ], dtype=self.hrirPos.dtype )
         else:
             raise ValueError( 'HRIR position data has unsupported vector dimension.' )
 
         self.hrirInterpolation = hrirInterpolation
         if self.hrirInterpolation:
             self.hrirLookup = ConvexHull( self.hrirPos )
-            self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
+            self.triplets = np.array(np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1)),
+                                                  dtype=self.hrirPos.dtype)
             self.inverted = inv(self.triplets)
 #            print(self.triplets )
         else:
             self.lastHrirIndex = -1
+
+        # Initialise the head direction.
+        # TODO: This should be costumisable (especially if head tracking is deactivated)
+        # TODO: make it 2D or 3D depending on the dimension of hrirPositions
+        # For the time being we assume that it is 2D
+        self.headDir = np.array([1.0, 0.0 ], dtype=self.hrirPos.dtype )
 
     def process( self ):
         # TODO: This belongs somewhere else in the recompute logic.
@@ -127,11 +129,11 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
 
             if self.hrirPos.shape[-1] == 2:
                 # 2D hrir positions
-                self.headDir = sph2cart3inp(ypr[0],0,1)[:2]
+                self.headDir[...] = sph2cart3inp(ypr[0],0,1)[:2]
             else: # 3D positions
                 # TODO: Check and test this!
                 rotationMatrix = calcRotationMatrix( - ypr)
-                self.headDir = np.array(np.matmul(np.asarray([1.0, 0.0, 0.0], dtype=self.hrirPos.dtype),rotationMatrix))
+                self.headDir[...] = np.array(np.matmul(np.asarray([1.0, 0.0, 0.0], dtype=self.hrirPos.dtype),rotationMatrix))
 
             self.trackingInputProtocol.resetChanged()
 
@@ -149,28 +151,30 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             normedGains = unNormedGains / gainNorm
 
             indices = self.hrirLookup.simplices[matchingSimplex,:]
-            if not transmitInterpolationParameters:
+            if self.interpolationOutputProtocol is None:
                 interpFilters = np.einsum('jkiw,j->ikw', self.hrirs[indices,...], normedGains)
 
             for lspIdx in range(0,self.numberOfLoudspeakers):
-                if self.interpolationOutputProtocol is None:
-                    leftInterpParameter = pml.InterpolationParameter( lspIdx, self.hrirs[indices,...].tolist(),
-                                                                     normedGains[lspIdx,...].tolist() )
-                    rightInterpParameter = pml.InterpolationParameter( lspIdx+self.numberOfLoudspeakers, self.hrirs[indices,...].tolist(),
-                                                                     normedGains[lspIdx,...].tolist() )
-
+                if self.interpolationOutputProtocol is not None:
+                    # Part of computation could be moved outside.
+                    leftIndices = (indices*2+0)*self.numberOfLoudspeakers + lspIdx
+                    rightIndices = (indices*2+1)*self.numberOfLoudspeakers + lspIdx
+                    leftInterpParameter = pml.InterpolationParameter( lspIdx,
+                                                                     leftIndices.tolist(),
+                                                                     normedGains.tolist() )
+                    rightInterpParameter = pml.InterpolationParameter( lspIdx+self.numberOfLoudspeakers,
+                                                                     rightIndices.tolist(),
+                                                                     normedGains.tolist() )
+                    self.interpolationOutputProtocol.enqueue( leftInterpParameter )
+                    self.interpolationOutputProtocol.enqueue( rightInterpParameter )
                 else:
-#                   leftFilter = np.array(interpFilters[lspIdx,0,:], dtype=np.float32 )
-#                   rightFilter = np.array(interpFilters[lspIdx,1,:], dtype=np.float32 )
-#                   leftInterpolant = pml.IndexedVectorFloat( lspIdx, leftFilter )
-#                   rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, rightFilter )
                     leftInterpolant = pml.IndexedVectorFloat( lspIdx, interpFilters[lspIdx,0,:] )
                     rightInterpolant = pml.IndexedVectorFloat( lspIdx+self.numberOfLoudspeakers, interpFilters[lspIdx,1,:] )
                     self.filterOutputProtocol.enqueue( leftInterpolant )
                     self.filterOutputProtocol.enqueue( rightInterpolant )
 
             if self.dynamicITD:
-                delays = np.dot( np.moveaxis(self.dynamicDelays[_indices,:],0,-1), normedGains)
+                delays = np.dot( np.moveaxis(self.dynamicDelays[indices,:],0,-1), normedGains)
                 delayVec[0:self.numberOfLoudspeakers] = delays[0,:]
                 delayVec[self.numberOfLoudspeakers:] = delays[1,:]
 
