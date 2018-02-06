@@ -8,7 +8,6 @@ integrity_checking.cpp
 parameter_connection_graph.cpp
 parameter_connection_map.cpp
 port_utilities.cpp
-#portaudio_interface.cpp
 scheduling_graph.cpp
 signal_routing_internal.cpp
 )
@@ -21,10 +20,13 @@ integrity_checking.hpp
 
 SET( INTERNAL_HEADERS
 audio_connection_map.hpp
-export_symbols.hpp
-integrity_checking.hpp
+communication_area.hpp
+parameter_connection_graph.hpp
+parameter_connection_map.hpp
+port_utilities.hpp
+scheduling_graph.hpp
+signal_routing_internal.hpp
 )
-
 
 add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
