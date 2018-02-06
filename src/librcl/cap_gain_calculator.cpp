@@ -34,14 +34,19 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
                                       panning::LoudspeakerArray const & arrayConfig )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( numberOfObjects )
- , mVbapCalculator( arrayConfig )
+ , mObjectVectorInput( "objectVectorInput", *this, pml::EmptyParameterConfig() )
+ , mListenerPositionInput( "listenerPosition", *this, pml::EmptyParameterConfig() )
+ , mGainOutput( "gainOutput", *this, pml::MatrixParameterConfig( arrayConfig.getNumRegularSpeakers(), mNumberOfObjects ) )
 {
-  mSpeakerArray = arrayConfig;
-  setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
   mLevels.resize( mNumberOfObjects );
   mLevels = 0.0f;
 
-  // <af> TODO: Initialisation of CAP object should go here (ideally it would be initialised in its constructor).
+  mCapCalculator.setLoudspeakerArray( &arrayConfig );
+
+  // Set initial positions
+  mCapCalculator.setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
+  mCapCalculator.setListenerAuralAxis( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(1.0), static_cast<CoefficientType>(0.0) );
+
 }
 
 CAPGainCalculator::~CAPGainCalculator()
@@ -50,42 +55,30 @@ CAPGainCalculator::~CAPGainCalculator()
 
 void CAPGainCalculator::process()
 {
-  // <af> TODO: Implement process() function
-  // - Read object input port
-  // - Read listener position port
-  // - Call internal process()  function
-  // - Assign result to output gain matrix port.
-}
-
-void CAPGainCalculator::setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z )
-{
-  mVbapCalculator.setListenerPosition( x, y, z );
-  // <af> calcInverseMatrices() is called automatically by setListenerPosition.
-  //if( mVbapCalculator.calcInvMatrices() != 0 )
-  //{
-  //  throw std::invalid_argument( "CAPGainCalculator::setup(): Calculation of inverse matrices failed." );
-  //}
-}
-
-void CAPGainCalculator::setListenerPosition( pml::ListenerPosition const & pos )
-{
-  setListenerPosition( pos.x(), pos.y(), pos.z() );
-}
-    
-void CAPGainCalculator::setListenerAuralAxis( CoefficientType x, CoefficientType y, CoefficientType z )
-{
-    mCapCalculator.setListenerAuralAxis( (Afloat) x, (Afloat) y, (Afloat) z );
-}
-
-
-void CAPGainCalculator::process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix )
-{
-  if( (gainMatrix.numberOfRows() != mNumberOfLoudspeakers) or (gainMatrix.numberOfColumns() != mNumberOfObjects) )
+  // TODO: decide whether to always process
+  if( mObjectVectorInput.changed() or mListenerPositionInput.changed() )
   {
-    throw std::invalid_argument( "CAPGainCalculator::process(): The size of the gain matrix does not match the object/loudspeaker configuration." );
+    efl::BasicMatrix<CoefficientType> & gains = mGainOutput.data();
+    assert( (gains.numberOfRows() != mNumberOfLoudspeakers) or (gains.numberOfColumns() != mNumberOfObjects) );
+    process( mObjectVectorInput.data(),
+             mListenerPositionInput.data(),
+             gains );
   }
-  gainMatrix.zeroFill();
+  if( mObjectVectorInput.changed() )
+  {
+    mObjectVectorInput.resetChanged();
+  }
+  if( mListenerPositionInput.changed() )
+  {
+    mListenerPositionInput.resetChanged();
+  }
+}
 
+void CAPGainCalculator::process( objectmodel::ObjectVector const & objects, 
+                                 pml::ListenerPosition const & listener,
+                                 efl::BasicMatrix<CoefficientType> & gainMatrix )
+{
+  gainMatrix.zeroFill(); // Zero the result matrix to get zero gains for all unused source channels.
   mLevels = 0.0f;
   // As not every source object in the VBAP calculator component might correspond to a real source, we have to set them to safe position beforehand.
   panning::XYZ defaultSource( 1.0f, 0.0f, 0.0f );
@@ -150,22 +143,23 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects, efl:
       mLevels[channelId] = static_cast<objectmodel::LevelType>(0.0f);
     }
   } // for( objectmodel::ObjectVector::value_type const & objEntry : objects )
+  mCapCalculator.setSourcePositions( &mSourcePositions[0] );
 
-  // <af> VBAP interface has changed (calculates gains for each source)
-  // <af> Not sure how a VBAP object is to be used here.
-#if 0
+  // Set the listener position and orientation
+  mCapCalculator.setListenerPosition( listener.x(), listener.y(), listener.z() );
+  // TODO: Calculate the listener aural axis from the values listener.yaw(), listener.pitch(), and listener.roll()
+  CoefficientType const auralAxisX = 0.0f; // TODO: Replace by computation
+  CoefficientType const auralAxisY = 0.0f; // TODO: Replace by computation
+  CoefficientType const auralAxisZ = 0.0f; // TODO: Replace by computation
+  mCapCalculator.setListenerAuralAxis( auralAxisX, auralAxisY, auralAxisZ );
 
-  mVbapCalculator.setSourcePositions( &mSourcePositions[0] );
-  if( mVbapCalculator.calcGains() != 0 )
+  if( mCapCalculator.calcGains() != 0 )
   {
     std::cout << "CAPGainCalculator: Error calculating VBAP gains." << std::endl;
   }
   
-  efl::BasicMatrix<Afloat> const & vbapGains = mVbapCalculator.getGains();
-
-  // TODO: Can be replaced by a vector multiplication.
-  // NOTE: vbapGains might have more columns than real loudspeakers,
-  // because it also contains the gains of all imaginary speakers
+  efl::BasicMatrix<Afloat> const & vbapGains = mCapCalculator.getGains();
+  // This is essentially a matrix transposition and a row-wise scalar multiplication.
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
     Afloat const * const gainRow = vbapGains.row( chIdx );
@@ -175,7 +169,6 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects, efl:
       gainMatrix( outIdx, chIdx ) = level * gainRow[ outIdx ];
     }
   }
-#endif
 }
 
 } // namespace rcl

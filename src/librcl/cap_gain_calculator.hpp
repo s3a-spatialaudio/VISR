@@ -1,16 +1,21 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
-#define VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
+#ifndef VISR_LIBRCL_CAP_GAIN_CALCULATOR_HPP_INCLUDED
+#define VISR_LIBRCL_CAP_GAIN_CALCULATOR_HPP_INCLUDED
 
 #include "export_symbols.hpp"
 
 #include <libvisr/atomic_component.hpp>
+#include <libvisr/parameter_input.hpp>
+#include <libvisr/parameter_output.hpp>
 
-#include <libobjectmodel/object.hpp> // needed basically for type definitions
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/shared_data_protocol.hpp>
+#include <libpml/listener_position.hpp>
+#include <libpml/matrix_parameter.hpp>
+#include <libpml/object_vector.hpp>
 
 #include <libpanning/LoudspeakerArray.h>
-#include <libpanning/VBAP.h>
 #include <libpanning/CAP.h>
 #include <libpanning/XYZ.h>
 
@@ -76,38 +81,17 @@ public:
    */
   void process() override;
 
-  /**
-   * The process function. 
-   * It takes a vector of objects as input and calculates a vector of output gains.
-   * @note This is not compatible with the new AtomicComponent interface, which requires a parameter-free method
-   */
-  void process( objectmodel::ObjectVector const & objects, efl::BasicMatrix<CoefficientType> & gainMatrix );
-
-  /**
-   * Set the reference listener position. This overload accepts three cartesian coordinates.
-   * The listener positions are used beginning with the next process() call.
-   * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
-   * @param x The x coordinate [in meters]
-   * @param y The y coordinate [in meters]
-   * @param z The z coordinate [in meters]
-   * @throw std::runtime_error If the recalculation of the internal panning data fails.
-   * @todo Consider extending the interface to multiple listener positions.
-   */
-  void setListenerPosition( CoefficientType x, CoefficientType y, CoefficientType z );
-
-  /**
-  * Set the reference listener position given as a ListenerPosition object.
-  * The listener positions are used beginning with the next process() call.
-  * This method triggers the recalculation of the internal data (e.g., the inverse panning matrices).
-  * @param pos The listener position.
-  * @throw std::runtime_error If the recalculation of the internal panning data fails.
-  * @todo Consider extending the interface to multiple listener positions.
-  */
-  void setListenerPosition( pml::ListenerPosition const & pos );
-    
-  void setListenerAuralAxis( CoefficientType x, CoefficientType y, CoefficientType z );
-
 private:
+  /**
+   * Internal process function, called by the virtual method process()
+   * @param objects The object vector containing the audio scene
+   * @param listener Listener position object holding position and orientation
+   * @param[out] gainMatrix Matrix (numberOfLoudspeakers x numberOfObjects) to hold the computed gains.
+   */
+  void process( objectmodel::ObjectVector const & objects,
+                pml::ListenerPosition const & listener, 
+                efl::BasicMatrix<CoefficientType> & gainMatrix );
+
   /**
    * The number of audio objects handled by this object.
    */
@@ -120,19 +104,6 @@ private:
   std::size_t mNumberOfLoudspeakers;
 
   /**
-   * @todo At the moment, libpanning does not use namespaces.
-   * Change accordingly after the library has been adjusted.
-   */
-  //@{
-  
-  /**
-   * The loudspeaker array configuration.
-   * @note Because this object must persist for the whole lifetime of the \p mVbapCalculator object,
-   * we make a copy of the reference passed to setup method.
-   */
-  panning::LoudspeakerArray mSpeakerArray;
-  
-  /**
    * A vector to hold the source position data.
    * @todo: replace this by a variable-sized vector;
    */
@@ -141,18 +112,21 @@ private:
   /**
    * The calculator object to generate the panning matrix coefficients.
    */
-  panning::VBAP mVbapCalculator;
-    
   panning::CAP mCapCalculator;
   
   /**
    * The levels of the object channels in linear scale.
    */
   std::valarray<objectmodel::LevelType> mLevels;
-  //@}
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
+
+  ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > mListenerPositionInput;
+
+  ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType> > mGainOutput;
 };
 
 } // namespace rcl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBRCL_PANNING_GAIN_CALCULATOR_HPP_INCLUDED
+#endif // #ifndef VISR_LIBRCL_CAP_GAIN_CALCULATOR_HPP_INCLUDED
