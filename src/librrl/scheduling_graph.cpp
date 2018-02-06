@@ -45,6 +45,9 @@ namespace // unnamed
 
 using AtomList = std::vector<impl::ComponentImplementation const * >;
 
+/**
+ * Internal function to collect all atomic components from a (potentially hierarchical) composite component.
+ */
 AtomList collectAllComponents( impl::ComponentImplementation const * comp )
 {
   AtomList ret;
@@ -98,11 +101,13 @@ void SchedulingGraph::initialise( impl::ComponentImplementation const & flow, Au
       continue;
     }
     auto const atom = atomVertex.first.node();
-    assert( atom ); // If it's a processing node, it must no be null.
+    assert( atom ); // If it's a processing node, its atom must no be null.
     std::set< impl::ComponentImplementation const * > predecessors;
-    // We also check whether the atom has outgoing connections.
+    // Check whether the atom has outgoing connections in order to classify it as a sink.
     std::set< impl::ComponentImplementation const * > successors;
-    // Complexity note: This has a O(N^2) total complexity
+    // Complexity note: This has a O(N*M) total complexity (number of atoms times number of elementary 
+    // audio + parameter connections. If necessary, this could by improved by creating a data structure of
+    // successors and predecessors while iterating over the connection maps once.
     for( auto conn : connections )
     {
       // Do not count connections from a composite (which is the top-level component)
@@ -178,122 +183,6 @@ SchedulingGraph::~SchedulingGraph()
   mDependencyGraph.clear(); // Superfluous, but good to see things working
 }
 
-/**
- * @todo Consider making this private
- */
-//void SchedulingGraph::addAudioDependency( AudioChannel const & sender, AudioChannel const & receiver )
-//{
-//  // This assumes that we work on the signal connection map of a 'flattened' graph structure.
-//  // check whether the sender is an external capture port or an internal port
-//  NodeType const senderType = sender.port()->parent().isComposite() ? NodeType::Source : NodeType::Processor;
-//  NodeType const receiverType = receiver.port()->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-//  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender.port()->parent().component())) ) : ProcessingNode( NodeType::Source );
-//  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver.port()->parent().component())) ) : ProcessingNode( NodeType::Sink );
-//
-//  VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
-//  if( senderFindIt == mVertexLookup.end() )
-//  {
-//    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
-//    mDependencyGraph[vertexId] = senderProp;
-//    bool insertRes{ false };
-//    std::tie( senderFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( senderProp, vertexId ) );
-//    if( not insertRes )
-//    {
-//      throw std::logic_error( "SchedulingGraph: Insertion of sender vertex failed." );
-//    }
-//  }
-//  VertexMap::const_iterator receiverFindIt = mVertexLookup.find( receiverProp );
-//  if( receiverFindIt == mVertexLookup.end() )
-//  {
-//    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
-//    mDependencyGraph[vertexId] = receiverProp;
-//    bool insertRes{ false };
-//    std::tie( receiverFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( receiverProp, vertexId ) );
-//    if( not insertRes )
-//    {
-//      throw std::logic_error( "SchedulingGraph: Insertion of receiver vertex failed." );
-//    }
-//  }
-//  GraphType::vertex_descriptor const senderVertex = senderFindIt->second;
-//  GraphType::vertex_descriptor const receiverVertex = receiverFindIt->second;
-//
-//  // Determine whether the edge already exists.
-//  GraphType::edge_descriptor edgeDesc;
-//  bool foundEdge;
-//  std::tie( edgeDesc, foundEdge ) = edge( senderVertex, receiverVertex, mDependencyGraph );
-//  if( not foundEdge )
-//  {
-//    bool insertRes{ false };
-//    std::tie( edgeDesc, insertRes ) = add_edge( senderVertex, receiverVertex, mDependencyGraph );
-//    if( not insertRes )
-//    {
-//      throw std::logic_error( "SchedulingGraph: Insertion of new edge failed." );
-//    }
-//  }
-//}
-//
-//
-//void SchedulingGraph::addParameterDependency( impl::ParameterPortBaseImplementation const * sender,
-//                                              impl::ParameterPortBaseImplementation const * receiver )
-//{
-//  // NOTE: Lots of code duplication with audio connection method.
-//  // TODO: Factor out common code without neglecting type-specific differences (as soon as they are implemented).
-//
-//  // This assumes that we work on the signal connection map of a 'flattened' graph structure.
-//  // check whether the sender is an external capture port or an internal port
-//  NodeType const senderType = sender->parent().isComposite() ? NodeType::Source : NodeType::Processor;
-//  NodeType const receiverType = receiver->parent().isComposite() ? NodeType::Sink : NodeType::Processor;
-//  ProcessingNode const senderProp = senderType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(sender->parent().component())) ) : ProcessingNode( NodeType::Source );
-//  ProcessingNode const receiverProp = receiverType == NodeType::Processor ? ProcessingNode( static_cast<AtomicComponent const *>(&(receiver->parent().component())) ) : ProcessingNode( NodeType::Sink );
-//
-//  VertexMap::const_iterator senderFindIt = mVertexLookup.find( senderProp );
-//  if( senderFindIt == mVertexLookup.end() )
-//  {
-//    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
-//    mDependencyGraph[vertexId] = senderProp;
-//    bool insertRes{ false };
-//    std::tie( senderFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( senderProp, vertexId ) );
-//    if( not insertRes )
-//    {
-//      throw std::logic_error( "SchedulingGraph: Insertion of sender vertex failed." );
-//    }
-//  }
-//  VertexMap::const_iterator receiverFindIt = mVertexLookup.find( receiverProp );
-//  if( receiverFindIt == mVertexLookup.end() )
-//  {
-//    GraphType::vertex_descriptor const vertexId = add_vertex( mDependencyGraph );
-//    mDependencyGraph[vertexId] = receiverProp;
-//    bool insertRes{ false };
-//    std::tie( receiverFindIt, insertRes ) = mVertexLookup.insert( std::make_pair( receiverProp, vertexId ) );
-//    if( not insertRes )
-//    {
-//      throw std::logic_error( "SchedulingGraph: Insertion of receiver vertex failed." );
-//    }
-//  }
-//  GraphType::vertex_descriptor const senderVertex = senderFindIt->second;
-//  GraphType::vertex_descriptor const receiverVertex = receiverFindIt->second;
-//
-//  // Determine whether the edge already exists.
-//  GraphType::edge_descriptor edgeDesc;
-//  bool foundEdge;
-//  std::tie( edgeDesc, foundEdge ) = edge( senderVertex, receiverVertex, mDependencyGraph );
-//  if( not foundEdge )
-//  {
-//    bool insertRes{ false };
-//    std::tie( edgeDesc, insertRes ) = add_edge( senderVertex, receiverVertex, mDependencyGraph );
-//    if( not insertRes )
-//    {
-//      throw std::logic_error( "SchedulingGraph: Insertion of new edge failed." );
-//    }
-//  }
-//}
-
-
-namespace //unnamed
-{
-
-
-}
 
 SchedulingGraph::ProcessingNode const & SchedulingGraph::getNode( GraphType::vertex_descriptor vertex ) const
 {
@@ -386,81 +275,7 @@ std::vector<AtomicComponent *> SchedulingGraph::sequentialSchedule() const
       result.push_back( static_cast<AtomicComponent*>(&(impl->component())) );
       continue;
     }
-
   }
-
-  // TODO: Get rid of the ugly const cast (But we need non-const AtomicComponent pointers for the execution schedule).
-  //std::transform( topoSort.rbegin(), topoSort.rend(), std::back_inserter(result),
-  //  [this]( GraphType::vertex_descriptor desc )
-  //  {
-  //    impl::ComponentImplementation* impl = const_cast<impl::ComponentImplementation*>(this->mDependencyGraph[desc].node());
-  //    return static_cast<AtomicComponent*>(&(impl->component())); 
-  //  } );
-#if 0
-  // Find the source node
-  VertexMap::const_iterator sourceIt = mVertexLookup.find( ProcessingNode( NodeType::Source ) );
-  if( sourceIt == mVertexLookup.end() )
-  {
-    throw std::logic_error( "Dependency graph does not have a source." );
-  }
-  GraphType::vertex_descriptor const sourceVertex = sourceIt->second;
-
-  auto  visitorMap = boost::make_iterator_property_map(colorMap.begin(), get(boost::vertex_index, mDependencyGraph ));
-  boost::depth_first_visit( mDependencyGraph, sourceVertex, visitor, visitorMap );
-
-  if( not backEdges.empty())
-  {
-    std::stringstream msg;
-    msg << "SchedulingGraph: Graph contains cycles: ";
-    for( auto e : backEdges )
-    {
-      GraphType::vertex_descriptor const startEdge = source( e, mDependencyGraph );
-      GraphType::vertex_descriptor const endEdge = target( e, mDependencyGraph );
-      ProcessingNode const startNode = getNode( startEdge );
-      ProcessingNode const endNode = getNode( endEdge );
-      msg << nodeName(startNode) << "->" << nodeName( endNode ) << ", ";
-    }
-    throw std::invalid_argument( msg.str() );
-  }
-
-  std::vector<GraphType::vertex_descriptor> topoSort;
-  topological_sort( mDependencyGraph, std::back_inserter( topoSort ) );
-  result.reserve( topoSort.size() );
-  for( std::size_t idx( 0 ); idx < topoSort.size(); ++idx )
-  {
-    // Traverse from the end because topoSort is in reverse order.
-    ProcessingNode const & node = mDependencyGraph[topoSort[topoSort.size() - 1 - idx]];
-    switch( node.type() )
-    {
-      case NodeType::Source:
-        // The following check does not work if we have internal sources (e.g., signal generators or network receivers)
-#if 0
-        if( idx != 0 )
-        {
-          throw std::logic_error( "SchedulingGraph: Internal inconsistency while creating a sequential schedule: Source node not at position zero." );
-        }
-#endif
-        break;
-      case NodeType::Sink:
-        // The following check does not work if we have internal sinks (e.g., signal analyzers, terminators, network senders, ...)
-#if 0
-        if( idx != topoSort.size() - 1 )
-        {
-          throw std::logic_error( "SchedulingGraph: Internal inconsistency while creating a sequential schedule: Sink node not at last position." );
-        }
-#endif
-        break;
-      case NodeType::Processor:
-      {
-        AtomicComponent const * atomic = node.node();
-        assert( atomic ); // no null pointers allowed
-        // TODO: check whether it is worth to rearrange the complete infrastructure 
-        // to have a non-const pointer here (and to avoid the evil const_cast)
-        result.push_back( const_cast<AtomicComponent *>(atomic) );
-      }
-    }
-  }
-#endif
   return result;
 }
 
@@ -500,24 +315,6 @@ SchedulingGraph::ProcessingNode::ProcessingNode( NodeType nodeType, impl::Compon
   : std::tuple<NodeType, impl::ComponentImplementation const *>( nodeType, atom )
 {
 }
-
-#if 0
-SchedulingGraph::EdgeNode::EdgeNode()
- : mSendPort()
- , mReceivePort( )
- , mWidth( 0 )
-{
-}
-
-SchedulingGraph::EdgeNode::EdgeNode( std::string const & sendPort,
-                                     std::string const & receivePort,
-                                     std::size_t width )
- : mSendPort( sendPort )
- , mReceivePort( receivePort )
- , mWidth( width )
-{
-}
-#endif
 
 } // namespace rrl
 } // namespace visr
