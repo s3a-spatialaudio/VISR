@@ -48,7 +48,7 @@ public:
 
     int setLoudspeakerArray(LoudspeakerArray const * array){
         m_array = array;
-        m_gain.resize( m_nSources, array->getNumSpeakers( ) );
+        m_gain.resize( m_nSources, array->getNumRegularSpeakers( ) );
         return 0;
     }
 
