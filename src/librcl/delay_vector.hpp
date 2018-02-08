@@ -46,6 +46,17 @@ public:
   using MethodDelayPolicy = rbbl::MultichannelDelayLine<SampleType>::MethodDelayPolicy;
 
   /**
+  * Enumeration denoting which control inputs should be activated
+  */
+  enum class ControlPortConfig
+  {
+    None = 0,
+    Delay = 1 << 0,
+    Gain = 1 << 1,
+    All = Delay | Gain
+  };
+
+  /**
    * Constructor.
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
@@ -80,7 +91,7 @@ public:
               SampleType maximumDelaySeconds,
               const char * interpolationMethod,
               MethodDelayPolicy methodDelayPolicy,
-              bool controlInputs = false,
+              ControlPortConfig controlInputs = ControlPortConfig::None,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
   /**
@@ -108,7 +119,7 @@ public:
               SampleType maximumDelaySeconds,
               const char * interpolationMethod,
               MethodDelayPolicy methodDelayPolicy,
-              bool controlInputs,
+              ControlPortConfig controlInputs,
               efl::BasicVector< SampleType > const & initialDelaysSeconds,
               efl::BasicVector< SampleType > const & initialGainsLinear );
 
@@ -238,7 +249,19 @@ private:
   SampleType const cSamplingFrequency;
 };
 
+/**
+* Bitwise operator to combine control input flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL DelayVector::ControlPortConfig operator|( DelayVector::ControlPortConfig lhs,
+  DelayVector::ControlPortConfig rhs );
+
+/**
+* Bitwise operator to extract mask control input flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL DelayVector::ControlPortConfig operator&( DelayVector::ControlPortConfig lhs,
+  DelayVector::ControlPortConfig rhs );
+
 } // namespace rcl
 } // namespace visr
-  
+
 #endif // #ifndef VISR_LIBRCL_DELAY_VECTOR_HPP_INCLUDED

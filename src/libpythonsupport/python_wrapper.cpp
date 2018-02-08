@@ -2,10 +2,6 @@
 
 #include "python_wrapper.hpp"
 
-// Whether to load the Python module from the full path or just the name.
-// As we are currently experiencing problems to retrieve the contained classes from a py::module, we use the 'full path' variant for the time being.
-#define PYTHON_WRAPPER_FULL_MODULE_PATH 1
-
 #include <libvisr/detail/compose_message_string.hpp>
 #include <libvisr/composite_component.hpp>
 #include <libvisr/audio_input.hpp>
@@ -20,12 +16,8 @@
 #include <libvisr/impl/audio_port_base_implementation.hpp>
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
 
-// Not needed if modules loaded by name (provided that they are on the path)
-// In this case we only use pybind11 functionality.
-#ifdef PYTHON_WRAPPER_FULL_MODULE_PATH
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#endif
 
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
@@ -42,7 +34,6 @@ namespace pythonsupport
 
 namespace py = pybind11;
 
-#ifdef PYTHON_WRAPPER_FULL_MODULE_PATH
 namespace // unnamed
 {
 
@@ -82,7 +73,6 @@ py::object loadModule( std::string const & moduleName,
 }
 
 } // unnamed namespace
-#endif
 
 class PythonWrapper::Impl
 {
@@ -148,9 +138,6 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * keywordArguments,
                            char const * moduleSearchPath)
 {
-#ifndef PYTHON_WRAPPER_FULL_MODULE_PATH
-  mModule = py::module( modulePath );
-#else
   // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
   boost::filesystem::path const modPath( moduleSearchPath );
   if( (not modPath.empty()) and (not exists( modPath )) )
@@ -169,7 +156,6 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   {
     throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
   }
-#endif
 
   mComponentClass = mModule.attr( componentClassName );
 

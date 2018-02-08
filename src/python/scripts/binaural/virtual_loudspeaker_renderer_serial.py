@@ -9,7 +9,7 @@ Created on Tue Oct 31 16:37:58 2017
 from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 from serial_reader import serialReader
 import visr
-
+import rcl
 
 class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):    
         def __init__( self,
@@ -21,7 +21,8 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
                      enableSerial = True,
                      dynITD = True,
                      hrirInterp = True,
-                     irTruncationLength = None
+                     irTruncationLength = None,
+                     headTrackingCalibrationPort = None
                      ):
             super( VirtualLoudspeakerRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numLoudspeakers )
@@ -40,8 +41,19 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
 #                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=220,rollOffset=-180, yawRightHand=True )
                 
 ##                WITH MY OFFICE DESK ORIENTATION OFFSET
-                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True )
+                calibrationInputPresent = not headTrackingCalibrationPort is None
+                self.serialReader = serialReader(context, "RazorHeadtrackerReceiver", self, port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True,
+                                                 calibrationInput = calibrationInputPresent)
                 self.parameterConnection( self.serialReader.parameterPort("orientation"), self.virtualLoudspeakerRenderer.parameterPort("tracking"))
+                if calibrationInputPresent:
+                    self.calibrationTriggerReceiver = rcl.UdpReceiver( context, "CalibrationTriggerReceiver", self, port = headTrackingCalibrationPort )
+                    self.parameterConnection( self.calibrationTriggerReceiver.parameterPort("messageOutput"),
+                                                                                      self.serialReader.parameterPort("calibration"))
+
+
+
+                
+
 
 
             self.audioConnection(  self.objectSignalInput, self.virtualLoudspeakerRenderer.audioPort("audioIn"))

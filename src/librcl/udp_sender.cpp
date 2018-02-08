@@ -79,6 +79,8 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
                               udp::resolver::query::flags::passive ); /* Override the default values for the flag parameter which includes "address_configured"
     that requires a network conection apart from loopback device. */
   mRemoteEndpoint = *resolver.resolve( query );
+  // Debug output:
+  // std::cout << "Remote endpoint: " << mRemoteEndpoint.address().to_string() << ":" << mRemoteEndpoint.port() << std::endl;
   if( mRemoteEndpoint.port() != static_cast<unsigned short>(receiverPort) )
   {
     throw std::logic_error("");

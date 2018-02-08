@@ -304,7 +304,7 @@ namespace // unnamed
   
   
   PortaudioInterface::Config PortaudioInterface::Impl::parseSpecificConf( std::string const & config ){
-    std::stringstream stream(config);
+    std::stringstream stream(config.empty() ? "{}" : config ); // Cope with empty optional configs (the default)
     //            std::cout<< "STREAM: "<<stream<<std::endl;
     boost::property_tree::ptree tree;
     try

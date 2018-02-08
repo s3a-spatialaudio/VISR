@@ -12,6 +12,7 @@ namespace rcl
 {
   void exportAdd( pybind11::module & m );
   void exportBiquadIirFilter( pybind11::module & m );
+  void exportCAPGainCalculator( pybind11::module & m );
   void exportChannelObjectRoutingCalculator( pybind11::module & m );
   void exportDelayVector( pybind11::module & m );
   void exportDelayMatrix( pybind11::module & m );
@@ -40,6 +41,7 @@ PYBIND11_MODULE(rcl, m)
   using namespace visr::python::rcl;
   exportAdd( m );
   exportBiquadIirFilter( m );
+  exportCAPGainCalculator( m );
   exportChannelObjectRoutingCalculator( m );
   exportDelayMatrix( m );
   exportDelayVector( m );

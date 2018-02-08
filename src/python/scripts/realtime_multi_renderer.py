@@ -21,47 +21,47 @@ class RealTimeMultiRenderer( visr.CompositeComponent ):
     def __init__( self, context, name, parent,
                  loudspeakerConfigFiles,
                  numberOfInputs,
-                 numberOfOutputs, 
+                 numberOfOutputs,
                  interpolationPeriod,
                  diffusionFilterFile,
                  udpReceivePort=8888,
                  controlReceivePort=8889,
                  trackingConfiguration='' ):
-        super(RealTimeMultiRenderer,self).__init__( context, name, parent )
+        super(RealTimeMultiRenderer,self).__init__( context, name, parent)
         self.input = visr.AudioInputFloat( "in", self, numberOfInputs )
         self.output = visr.AudioOutputFloat( "out", self, numberOfOutputs )
 
         rendererConfigs = []
         for cfgFile in loudspeakerConfigFiles:
             rendererConfigs.append( panning.LoudspeakerArray(cfgFile) )
-            
+
         diffFilters = np.array(pml.MatrixParameterFloat.fromAudioFile( diffusionFilterFile ))
 
         self.multiRenderer = MultiRenderer(context, name, self,
                                            loudspeakerConfigs=rendererConfigs,
                                            numberOfInputs=numberOfInputs,
-                                           numberOfOutputs=numberOfOutputs, 
+                                           numberOfOutputs=numberOfOutputs,
                                            interpolationPeriod=interpolationPeriod,
                                            diffusionFilters=diffFilters,
-                                           trackingConfiguration='' )
+                                           trackingConfiguration='',
+                                           controlDataType=pml.Float )
         self.audioConnection( self.input, self.multiRenderer.audioPort("in" ) )
         self.audioConnection( self.multiRenderer.audioPort("out" ), self.output )
 
-        self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self, 
-                                             port=udpReceivePort, 
+        self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self,
+                                             port=udpReceivePort,
                                              mode=rcl.UdpReceiver.Mode.Asynchronous )
         self.sceneDecoder = rcl.SceneDecoder( context, "SceneDecoder", self )
         self.parameterConnection( self.sceneReceiver.parameterPort("messageOutput"),
                                  self.sceneDecoder.parameterPort("datagramInput") )
-        self.parameterConnection( self.sceneDecoder.parameterPort( "objectVectorOutput"), 
+        self.parameterConnection( self.sceneDecoder.parameterPort( "objectVectorOutput"),
                                  self.multiRenderer.parameterPort( "objectIn" ) )
-        
+
         self.controlReceiver = rcl.UdpReceiver( context, "ControlReceiver", self,
                                                port=controlReceivePort,
                                                mode=rcl.UdpReceiver.Mode.Asynchronous)
-        self.controlDecoder = rcl.ScalarOscDecoder( context, "ControlDecoder", self )
-        self.controlDecoder.setup(dataType='uint')
+        self.controlDecoder = rcl.ScalarOscDecoder( context, "ControlDecoder", dataType='float')
         self.parameterConnection( self.controlReceiver.parameterPort("messageOutput"),
                                  self.controlDecoder.parameterPort("datagramInput") )
-        self.parameterConnection( self.controlDecoder.parameterPort( "dataOut"), 
+        self.parameterConnection( self.controlDecoder.parameterPort( "dataOut"),
                                  self.multiRenderer.parameterPort( "controlIn" ) )

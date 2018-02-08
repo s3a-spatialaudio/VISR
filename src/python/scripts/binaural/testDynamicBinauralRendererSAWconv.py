@@ -11,15 +11,16 @@ import visr
 import rcl
 import time
 import rrl
-import numpy as np
 import audiointerfaces as ai
+from extractDelayInSofaFile import extractDelayInSofaFile
+
 import os
 from urllib.request import urlretrieve
-from extractDelayInSofaFile import extractDelayInSofaFile
+from system import platform
 
 class DynamicBinauralRendererSAW( visr.CompositeComponent ):
          def __init__( self,
-                     context, name, parent, 
+                     context, name, parent,
                      numberOfObjects,
                      port,
                      baud,
@@ -27,50 +28,68 @@ class DynamicBinauralRendererSAW( visr.CompositeComponent ):
                      enableSerial = True,
                      dynamicITD = True,
                      dynamicILD = True,
-                     hrirInterpolation = True,
+                     hrirInterpolation = False,
                      udpReceivePort=4242,
+                     headTrackingCalibrationPort = None
                      ):
             super( DynamicBinauralRendererSAW, self ).__init__( context, name, parent )
-            self.dynamicBinauralRenderer = DynamicBinauralRendererSerial( context, "DynamicBinauralRenderer", self, 
-                                                                     numberOfObjects, 
+            self.dynamicBinauralRenderer = DynamicBinauralRendererSerial( context, "DynamicBinauralRenderer", self,
+                                                                     numberOfObjects,
                                                                      port,baud,
                                                                      sofaFile,
                                                                      enableSerial = enableSerial,
                                                                      dynITD = dynamicITD,
                                                                      dynILD = dynamicILD,
-                                                                     hrirInterp = hrirInterpolation
+                                                                     hrirInterp = hrirInterpolation,
+                                                                     headTrackingCalibrationPort=headTrackingCalibrationPort
                                                                    )
-            
-            self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self, 
-                                             port=udpReceivePort, 
+
+            self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self,
+                                             port=udpReceivePort,
                                              mode=rcl.UdpReceiver.Mode.Asynchronous )
             self.sceneDecoder = rcl.SceneDecoder( context, "SceneDecoder", self )
             self.parameterConnection( self.sceneReceiver.parameterPort("messageOutput"),
                                  self.sceneDecoder.parameterPort("datagramInput") )
-            self.parameterConnection( self.sceneDecoder.parameterPort( "objectVectorOutput"), 
+            self.parameterConnection( self.sceneDecoder.parameterPort( "objectVectorOutput"),
                                  self.dynamicBinauralRenderer.parameterPort("objectVector"))
 
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-           
+
             self.audioConnection(  self.objectSignalInput, self.dynamicBinauralRenderer.audioPort("audioIn"))
             self.audioConnection( self.dynamicBinauralRenderer.audioPort("audioOut"), self.binauralOutput)
 
+            if headTrackingCalibrationPort is not None:
+                self.calibrationTriggerReceiver = rcl.UdpReceiver( context, "CalibrationTriggerReceiver", self, port = headTrackingCalibrationPort )
+                self.parameterConnection( self.calibrationTriggerReceiver.parameterPort("messageOutput"),
+                                         self.dynamicBinauralRenderer.parameterPort("headTrackingCalibration"))
 
 
-############ CONFIG ###############  
+############ CONFIG ###############
 fs = 48000
 blockSize = 1024
-numBinauralObjects = 1
-numOutputChannels = 2;
+numBinauralObjects = 64
+numOutputChannels = 2
 
 # switch dynamic tracking on and off.
 useTracking = True
 useDynamicITD = True
 useDynamicILD = False
-useHRIRinterpolation = True
+useHRIRinterpolation = False
 
-port = "/dev/cu.usbserial-AJ03GSC8"
+if useTracking:
+    headTrackingCalibrationPort=8889
+else:
+    headTrackingCalibrationPort=None
+
+# TODO: Check and adjust port names for the individual system
+if platform == 'linux' or platform == 'linux2':
+    port = "/dev/ttyUSB0"
+elif platform == 'darwin':
+    port = "/dev/cu.usbserial-AJ03GSC8"
+elif platform == 'windows':
+    port = "COM10"
+
 baud = 57600
 ###################################
 
@@ -84,17 +103,18 @@ if useDynamicITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
         extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD        
+    sofaFile = sofaFileTD
 
-controller = DynamicBinauralRendererSAW( context, "Controller", None, 
-                                            numBinauralObjects, 
-                                            port, 
-                                            baud, 
+controller = DynamicBinauralRendererSAW( context, "TopLevelRenderer", None,
+                                            numBinauralObjects,
+                                            port,
+                                            baud,
                                             sofaFile,
-                                            enableSerial = useTracking, 
+                                            enableSerial = useTracking,
                                             dynamicITD = useDynamicITD,
                                             dynamicILD = False,
-                                            hrirInterpolation = useHRIRinterpolation)
+                                            hrirInterpolation = useHRIRinterpolation,
+                                            headTrackingCalibrationPort = headTrackingCalibrationPort)
 #to be completed
 
 result,messages = rrl.checkConnectionIntegrity(controller)
@@ -102,7 +122,7 @@ if not result:
    print(messages)
 
 flow = rrl.AudioSignalFlow( controller )
-                          
+
 aiConfig = ai.AudioInterface.Configuration( flow.numberOfCaptureChannels,
                                            flow.numberOfPlaybackChannels,
                                            fs,

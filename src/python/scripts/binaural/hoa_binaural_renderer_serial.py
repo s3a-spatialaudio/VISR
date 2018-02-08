@@ -20,7 +20,8 @@ class HoaBinauralRendererSerial(visr.CompositeComponent ):
                      sofaFile,
                      interpolationSteps = None,
                      headTracking = True,
-                     objectChannelAllocation = False
+                     objectChannelAllocation = False,
+                     headTrackingCalibrationPort = None
                      ):
             super( HoaBinauralRendererSerial, self ).__init__( context, name, parent )
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -41,8 +42,23 @@ class HoaBinauralRendererSerial(visr.CompositeComponent ):
 #                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=220,rollOffset=-180, yawRightHand=True )
                 
 ##                WITH MY OFFICE DESK ORIENTATION OFFSET
-                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True )
+
+
+                calibrationInputPresent = not headTrackingCalibrationPort is None
+                self.serialReader = serialReader(context, "RazorHeadtrackerReceiver", self, port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True,
+                                                 calibrationInput = calibrationInputPresent)
+
                 self.parameterConnection( self.serialReader.parameterPort("orientation"), self.hoaBinauralRenderer.parameterPort("headTracking"))
+
+                if calibrationInputPresent:
+                    self.calibrationInput = visr.ParameterInput( "headTrackingCalibration",
+                                                                self, pml.StringParameter.staticType,
+                                                                pml.MessageQueueProtocol.staticType,
+                                                                pml.EmptyParameterConfig() )
+                    self.parameterConnection( self.calibrationInput,
+                                             self.serialReader.parameterPort("calibration"))
+
+
 
             self.parameterConnection( self.objectVectorInput, self.hoaBinauralRenderer.parameterPort("objectVector"))
             self.audioConnection(  self.objectSignalInput, self.hoaBinauralRenderer.audioPort("audioIn"))

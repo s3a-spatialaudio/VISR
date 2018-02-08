@@ -19,9 +19,9 @@ from virtual_loudspeaker_controller import VirtualLoudspeakerController
 import numpy as np
 
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
-    
+
         def __init__( self,
-                     context, name, parent, 
+                     context, name, parent,
                      numberOfLoudspeakers,
                      sofaFile,
                      headTracking = True,
@@ -30,9 +30,9 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                      irTruncationLength = None
                      ):
             super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
-            self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
+            self.loudspeakerSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-           
+
             if headTracking:
                 self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
@@ -61,48 +61,58 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                                                       hrirInterpolation = hrirInterp,
                                                                       delays = hrirDelays
                                                                       )
-            
+
             if headTracking:
                 self.parameterConnection( self.trackingInput, self.virtualLoudspeakerController.parameterPort("headTracking"))
-            
-           
+
+
             # Define the routing for the binaural convolver such that it matches the organisation of the
             # flat BRIR matrix.
             filterRouting = pml.FilterRoutingList()
-            for idx in range(0, numberOfLoudspeakers ):
-                filterRouting.addRouting( idx, idx, idx, 1.0 )
-                filterRouting.addRouting( idx, idx+numberOfLoudspeakers, idx+numberOfLoudspeakers, 1.0 )
-                
+
             firLength = hrirData.shape[-1]
-            self.convolver = rcl.FirFilterMatrix( context, 'covolutionEngine', self,
-                                                 numberOfInputs=numberOfLoudspeakers,
-                                                 numberOfOutputs=2*numberOfLoudspeakers,
+
+            if dynITD:
+                self.delayVector = rcl.DelayVector( context, "delayVector", self,
+                                                   numberOfLoudspeakers*2, interpolationType="lagrangeOrder3", initialDelay=0,
+                                                   controlInputs=rcl.DelayVector.ControlPortConfig.Delay,
+                                                   methodDelayPolicy=rcl.DelayMatrix.MethodDelayPolicy.Add,
+                                                   initialGain=1.0,
+                                                   interpolationSteps=context.period)
+
+                self.audioConnection(self.loudspeakerSignalInput, [ i % numberOfLoudspeakers for i in range(numberOfLoudspeakers*2)],
+                                     self.delayVector.audioPort("in"), range(0,2*numberOfLoudspeakers ) )
+
+                for idx in range(0, numberOfLoudspeakers ):
+                    filterRouting.addRouting( idx, 0, idx, 1.0 )
+                    filterRouting.addRouting( idx+numberOfLoudspeakers, 1, idx+numberOfLoudspeakers, 1.0 )
+                self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
+                                                 numberOfInputs=2*numberOfLoudspeakers,
+                                                 numberOfOutputs=2,
                                                  maxFilters=2*numberOfLoudspeakers,
                                                  filterLength=firLength,
                                                  maxRoutings=2*numberOfLoudspeakers,
                                                  routings=filterRouting,
                                                  controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
                                                  )
+                self.audioConnection( self.delayVector.audioPort("out"), self.convolver.audioPort("in"), )
+                self.parameterConnection(self.virtualLoudspeakerController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
 
-            self.audioConnection(self.objectSignalInput, self.convolver.audioPort("in") )
+            else: # no dynamic ITD
+                for idx in range(0, numberOfLoudspeakers ):
+                    filterRouting.addRouting( idx, 0, idx, 1.0 )
+                    filterRouting.addRouting( idx, 1, idx+numberOfLoudspeakers, 1.0 )
+                self.convolver = rcl.FirFilterMatrix( context, 'convolutionEngine', self,
+                                                     numberOfInputs=numberOfLoudspeakers,
+                                                     numberOfOutputs=2,
+                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     filterLength=firLength,
+                                                     maxRoutings=2*numberOfLoudspeakers,
+                                                     routings=filterRouting,
+                                                     controlInputs=rcl.FirFilterMatrix.ControlPortConfig.Filters
+                                                     )
+                self.audioConnection(self.loudspeakerSignalInput,
+                                     self.convolver.audioPort("in") )
+
             self.parameterConnection(self.virtualLoudspeakerController.parameterPort("filterOutput"),self.convolver.parameterPort("filterInput") )
-
-            self.delayVector = rcl.DelayVector( context, "delayVector", self, 
-                                               numberOfLoudspeakers*2, interpolationType="lagrangeOrder3", initialDelay=0,
-                                               controlInputs=True, methodDelayPolicy=rcl.DelayMatrix.MethodDelayPolicy.Add,
-                                               initialGain=1.0, 
-                                               interpolationSteps=context.period)
-
-           
-            self.parameterConnection(self.virtualLoudspeakerController.parameterPort("delayOutput"),self.delayVector.parameterPort("delayInput") )
-            self.parameterConnection(self.virtualLoudspeakerController.parameterPort("gainOutput"),self.delayVector.parameterPort("gainInput") )            
-            self.audioConnection( self.convolver.audioPort("out"), self.delayVector.audioPort("in"))
-
-            self.adder = rcl.Add( context, 'add', self, numInputs = numberOfLoudspeakers, width=2)            
-
-
-            for idx in range(0, numberOfLoudspeakers ):
-                self.audioConnection( self.delayVector.audioPort("out"), visr.ChannelList([idx,idx+numberOfLoudspeakers]), self.adder.audioPort("in%d" % idx), visr.ChannelList([0,1]))                
-                
-                
-            self.audioConnection( self.adder.audioPort("out"), self.binauralOutput)
+            self.audioConnection( self.convolver.audioPort("out"), self.binauralOutput)

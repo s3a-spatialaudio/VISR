@@ -64,13 +64,11 @@ int main( int argc, char const * const * argv )
                          numberOfObjects, numberOfLoudspeakers,
                          cInterpolationLength,
                          fullPath.string().c_str(), udpPort );
-        graph.setup();
         
         rrl::AudioSignalFlow flow( graph );
         
-        
-        // audioInterface.registerCallback( &AudioSignalFlow::processFunction, &flow );
-        
+        audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
+
         // should there be a separate start() method for the audio interface?
         audioInterface->start( );
         
@@ -78,8 +76,7 @@ int main( int argc, char const * const * argv )
         std::getc( stdin );
         
         audioInterface->stop( );
-        
-        // audioInterface.unregisterCallback( &AudioSignalFlow::processFunction );
+
     }
     catch( std::exception const & ex )
     {

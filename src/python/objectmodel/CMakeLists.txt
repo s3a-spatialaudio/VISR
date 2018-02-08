@@ -1,6 +1,8 @@
 # Python bindings for the main VISR interface classes
 
 set( SOURCES
+channel_object.cpp
+diffuse_source.cpp
 hoa_source.cpp
 object.cpp
 object_type.cpp
@@ -8,6 +10,8 @@ object_vector.cpp
 objectmodel.cpp
 plane_wave.cpp
 point_source.cpp
+point_source_extent.cpp
+point_source_with_diffuseness.cpp
 point_source_with_reverb.cpp
 )
 

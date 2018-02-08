@@ -6,6 +6,7 @@
 //
 
 #include <libpanning/VBAP.h>
+#include <libpanning/CAP.h>
 #include <libpanning/AllRAD.h>
 #include <boost/filesystem.hpp>
 
@@ -19,8 +20,56 @@
 #include <stdexcept>
 #include <vector>
 
+BOOST_AUTO_TEST_CASE( VbapInstantiation )
+{
+  using namespace visr;
+  using namespace visr::panning;
 
 #if 0
+  LoudspeakerArray array, regArray;
+  VBAP vbap;
+  AllRAD allrad;
+
+  std::size_t numberOfSources = 8;
+
+  std::vector<XYZ> sourcePos( numberOfSources );
+   
+  FILE* file;
+    
+  boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
+  boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
+
+  // Useage / test VBAP with 8 sources around an octahedron array
+
+//  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/cube_audiolab.txt");
+//  boost::filesystem::path bfile = configDir / boost::filesystem::path("generic/octahedron.txt");
+//  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/9.1_audiolab.txt");
+
+
+  boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/bak/22.1_audiolab.txt" );
+
+  file = fopen( bfile.string().c_str(), "r" );
+  if( array.load( file ) == -1 )
+  {
+    return -1;
+  }
+  fclose( file );
+  file = 0;
+
+  // Alternatively, load the config file in XML format.
+  boost::filesystem::path configFileXml = configDir / boost::filesystem::path( "isvr/audiolab_22speakers_1subwoofer.xml" );
+  array.loadXmlFile( configFileXml.string() );
+
+  try
+  {
+    vbap.setLoudspeakerArray( &array );
+  }
+  catch( std::invalid_argument const & e )
+  {
+    std::cerr << "Error while loading XML array configuration: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+
 {
   vbap.setListenerPosition( 0.0f, 0.0f, 0.0f );
   //    vbap.setListenerPosition(-1.9f, 0.0f, -0.1f);
@@ -95,5 +144,5 @@
   vbap.calcGains();
 
   // Check the updated values of vbapGains in watch window
-}
 #endif
+}

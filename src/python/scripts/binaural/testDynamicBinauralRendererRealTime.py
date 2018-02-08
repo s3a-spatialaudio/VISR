@@ -12,25 +12,33 @@ import visr
 import rrl
 from rotationFunctions import deg2rad, sph2cart3inp
 import objectmodel
-import numpy as np
 import audiointerfaces as ai
-import os
-from urllib.request import urlretrieve
 from extractDelayInSofaFile import extractDelayInSofaFile
 
-############ CONFIG ###############  
+import os
+from urllib.request import urlretrieve
+from system import platform
+
+############ CONFIG ###############
 fs = 48000
 blockSize = 1024
 numBinauralObjects = 64
 numOutputChannels = 2;
 
 # switch dynamic tracking on and off.
-useTracking = True
-useDynamicITD = True
+useTracking = False
+useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
 
-port = "/dev/cu.usbserial-AJ03GSC8"
+# TODO: Check and adkust port names for the individual system
+if platform == 'linux' or platform == 'linux2':
+    port = "/dev/ttyUSB0"
+elif platform == 'darwin':
+    port = "/dev/cu.usbserial-AJ03GSC8"
+elif platform == 'windows':
+    port = "COM10"
+
 baud = 57600
 ###################################
 
@@ -47,14 +55,14 @@ if useDynamicITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
         extractDelayInSofaFile( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD        
+    sofaFile = sofaFileTD
 
-controller = DynamicBinauralRendererSerial( context, "Controller", None, 
-                                           numBinauralObjects, 
-                                           port, 
-                                           baud, 
+controller = DynamicBinauralRendererSerial( context, "Controller", None,
+                                           numBinauralObjects,
+                                           port,
+                                           baud,
                                            sofaFile,
-                                           enableSerial = useTracking, 
+                                           enableSerial = useTracking,
                                            dynITD = useDynamicITD,
                                            dynILD = False,
                                            hrirInterp = useHRIRinterpolation)
@@ -90,7 +98,7 @@ ov = paramInput.data()
 ov.clear()
 ov.insert( ps1 )
 paramInput.swapBuffers()
-                          
+
 aiConfig = ai.AudioInterface.Configuration( flow.numberOfCaptureChannels,
                                            flow.numberOfPlaybackChannels,
                                            fs,

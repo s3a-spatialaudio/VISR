@@ -42,6 +42,11 @@ public:
   /*virtual*/ std::unique_ptr<Object> clone() const;
 
   /**
+   * Return the number of channels.
+   */
+  std::size_t size() const;
+
+  /**
    * Return the vector of output channel indices.
    * The number of elements is identical to the number of channels (numberOfChannels())
    */

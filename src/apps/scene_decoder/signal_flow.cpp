@@ -28,7 +28,6 @@ SignalFlow::SignalFlow( SignalFlowContext & context,
  , cNumberOfInputs( numberOfInputs )
  , cNumberOfOutputs( numberOfOutputs )
  , cInterpolationSteps( interpolationPeriod )
- , mConfigFileName( configFile )
  , mNetworkPort( udpPort )
  , mInput( "in", *this )
  , mOutput( "out", *this )
@@ -36,52 +35,35 @@ SignalFlow::SignalFlow( SignalFlowContext & context,
  , mSceneDecoder( context, "SceneDecoder", this )
  , mSceneEncoder( context, "SceneEncoder", this )
  , mSceneSender( context, "SceneSender", this )
- , mGainCalculator( context, "VbapGainCalculator", this )
+ , mGainCalculator( context, "VbapGainCalculator", this, 
+                    numberOfInputs,
+                    panning::LoudspeakerArray( configFile ) )
  , mMatrix( context, "GainMatrix", this )
 {
+   mInput.setWidth( cNumberOfInputs );
+   mOutput.setWidth( cNumberOfOutputs );
+
+   // Initialise and configure audio components
+
+   mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous );
+   mSceneDecoder.setup();
+
+   mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
+
+   mSceneEncoder.setup();
+   mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
+
+   audioConnection( "this", "in", ChannelRange( 0, cNumberOfInputs ), "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs ) );
+   audioConnection( "GainMatrix", "out", ChannelRange( 0, cNumberOfOutputs ), "this", "out", ChannelRange( 0, cNumberOfOutputs ) );
+
+   parameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
+   parameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
+   parameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
+
 }
 
-SignalFlow::~SignalFlow( )
-{
-}
+ SignalFlow::~SignalFlow( ) = default;
  
-/*virtual*/ void 
-SignalFlow::process()
-{
-  mSceneReceiver.process();
-  mSceneDecoder.process();
-  mGainCalculator.process();
-  mMatrix.process();
-  //mSceneEncoder.process();
-  //mSceneSender.process();
-}
-
-/*virtual*/ void
-SignalFlow::setup()
-{
-  mInput.setWidth( cNumberOfInputs );
-  mOutput.setWidth( cNumberOfOutputs );
-
-  panning::LoudspeakerArray loudspeakerArray( mConfigFileName );
-
-  // Initialise and configure audio components
-
-  mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous );
-  mSceneDecoder.setup();
-  mGainCalculator.setup( cNumberOfInputs, loudspeakerArray );
-  mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
-
-  mSceneEncoder.setup();
-  mSceneSender.setup( 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous );
-
-  audioConnection( "this", "in", ChannelRange( 0, cNumberOfInputs ), "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs ) );
-  audioConnection( "GainMatrix", "out", ChannelRange( 0, cNumberOfOutputs ), "this", "out", ChannelRange( 0, cNumberOfOutputs ) );
-
-  parameterConnection( "SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput" );
-  parameterConnection( "SceneDecoder", "objectVectorOutput", "VbapGainCalculator", "objectVectorInput" );
-  parameterConnection( "VbapGainCalculator", "gainOutput", "GainMatrix", "gainInput" );
-}
-
 } // namespace scene_decoder
 } // namespace apps
 } // namespace visr

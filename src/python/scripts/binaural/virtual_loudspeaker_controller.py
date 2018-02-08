@@ -6,32 +6,20 @@ Created on Thu Oct 26 16:46:32 2017
 @author: gc1y17
 """
 
-from numpy.linalg import inv 
+from numpy.linalg import inv
 from readSofa import sph2cart
 from rotationFunctions import calcRotationMatrix, cart2sph, sph2cart3inp, rad2deg
-import matplotlib.pyplot as plt
 import visr
 import pml
 import time
 import cProfile, pstats, io
 import numpy as np
-import warnings
 
-
-#import plotly.plotly as py
-#from matplotlib.patches import Polygon
-#import plotly.figure_factory as FF
-#from plotly.graph_objs import graph_objs
-
-from scipy.spatial import Delaunay
-from scipy.spatial import KDTree
 from scipy.spatial import ConvexHull
 
-
 class VirtualLoudspeakerController( visr.AtomicComponent ):
-    """ Component to translate an object vector (and optionally head tracking information)
-        into parameter parameters for dynamic binaural signal processing. """
-        
+    """Controller component for a dynamic (head-tracked) virtual loudspeaker (or binaural room scanning) renderer."""
+
     def __init__( self,
                   context, name, parent,    # Standard visr component constructor arguments
                   numberOfLoudspeakers,          # The number of point source objects rendered.
@@ -49,7 +37,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         self.numberOfLoudspeakers = numberOfLoudspeakers
         self.dynamicITD = dynamicITD
 
-        # %% Define parameter ports        
+        # %% Define parameter ports
         if useHeadTracking:
             self.useHeadTracking = True
             self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
@@ -66,27 +54,19 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
                                                 pml.MessageQueueProtocol.staticType,
                                                 pml.EmptyParameterConfig() )
         self.filterOutputProtocol = self.filterOutput.protocolOutput()
-            
-        self.delayOutput = visr.ParameterOutput( "delayOutput", self,
-                                                pml.VectorParameterFloat.staticType,
-                                                pml.DoubleBufferingProtocol.staticType,
-                                                pml.VectorParameterConfig( 2*self.numberOfLoudspeakers) )
-        self.delayOutputProtocol = self.delayOutput.protocolOutput()
 
         if self.dynamicITD:
             if (delays is None) or (delays.ndim != 3) or (delays.shape != hrirData.shape[0:-1] ):
                 raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
 
             self.dynamicDelays = np.array(delays, copy=True)
+            self.delayOutput = visr.ParameterOutput( "delayOutput", self,
+                                                    pml.VectorParameterFloat.staticType,
+                                                    pml.DoubleBufferingProtocol.staticType,
+                                                    pml.VectorParameterConfig( 2*self.numberOfLoudspeakers) )
+            self.delayOutputProtocol = self.delayOutput.protocolOutput()
         else:
             self.dynamicDelays = None
-
-#         We are always using the gain oputput matrix to set set the level, even if we do not use a loudness model.
-        self.gainOutput = visr.ParameterOutput( "gainOutput", self,
-                                               pml.VectorParameterFloat.staticType,
-                                               pml.DoubleBufferingProtocol.staticType,
-                                               pml.VectorParameterConfig( 2*self.numberOfLoudspeakers) )
-        self.gainOutputProtocol = self.gainOutput.protocolOutput()
 
         # Initialise the head direction.
         # TODO: This should be costumisable (especially if head tracking is deactivated)
@@ -118,7 +98,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.lastHrirIndex = -1
 
     def process( self ):
-##PROFILING                    
+##PROFILING
 ##        startTot = time.time()
 #        pr = cProfile.Profile()
 #        pr.enable()
@@ -126,7 +106,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
             ypr = htrack.orientation
-            
+
             if self.hrirPos.shape[-1] == 2:
                 # 2D hrir positions
                 self.headDir = sph2cart3inp(ypr[0],0,1)[:2]
@@ -137,13 +117,9 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
 
             self.trackingInputProtocol.resetChanged()
 
-        # Obtain access to the output arrays
-        delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
-
-        # Set the output gains to a fixed level of 1.0
-        # TODO: Use gain output only if dynamic ILD is active (Does this make sense at all 
-        # for the virtual louspeakers approach?)
-        np.array( self.gainOutputProtocol.data(), copy = False )[...] = 1.0
+        # Obtain access to the delay output
+        if self.dynamicITD:
+            delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
 
         if self.hrirInterpolation:
             allGains =  self.inverted @ self.headDir.T
@@ -153,7 +129,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             unNormedGains = allGains[matchingSimplex,:]
             gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
             normedGains = unNormedGains / gainNorm
-            
+
             _indices = self.hrirLookup.simplices[matchingSimplex,:]
             _interpFilters = np.einsum('jkiw,j->ikw', self.hrirs[_indices,...], normedGains)
 
@@ -167,14 +143,12 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
                 delays = np.dot( np.moveaxis(self.dynamicDelays[_indices,:],0,-1), normedGains)
                 delayVec[0:self.numberOfLoudspeakers] = delays[0,:]
                 delayVec[self.numberOfLoudspeakers:] = delays[1,:]
-            else:
-                delayVec[...] = 0.
 
         else:  # hrirInterpolation == False
             dotprod = self.hrirPos @ self.headDir.T
             hrirIndex = np.argmax( dotprod, axis = 0 )
             if self.lastHrirIndex != hrirIndex:
-                for chIdx in range(0,self.numberOfLoudspeakers):    
+                for chIdx in range(0,self.numberOfLoudspeakers):
                     leftCmd  = pml.IndexedVectorFloat( chIdx,
                                                       self.hrirs[hrirIndex,0,chIdx,:])
                     rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfLoudspeakers,
@@ -185,9 +159,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
                 if self.dynamicITD:
                     delayVec[0:self.numberOfLoudspeakers] = self.dynamicDelays[hrirIndex,0,:]
                     delayVec[self.numberOfLoudspeakers:] = self.dynamicDelays[hrirIndex,1,:]
-                else:
-                    delayVec[...] = 0.
-                self.lastHrirIndex = hrirIndex
 
-        self.gainOutputProtocol.swapBuffers()
-        self.delayOutputProtocol.swapBuffers()
+                self.lastHrirIndex = hrirIndex
+        if self.dynamicITD:
+            self.delayOutputProtocol.swapBuffers()
