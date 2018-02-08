@@ -175,8 +175,9 @@ GainMatrix::~GainMatrix()
     SamplingFrequencyType const samplingFrequency = static_cast<SamplingFrequencyType>(std::round( samplerate ));
     mContext.reset( new SignalFlowContext( mPeriod, samplingFrequency ) );
 
-    mFlow.reset( new signalflows::GainMatrix( *mContext, "", nullptr, mNumberOfInputs, mNumberOfOutputs,
-                                              mGains, mInterpolationSteps ) );
+    mFlow.reset( new rcl::GainMatrix( *mContext, "", nullptr ) );
+    mFlow->setup( mNumberOfInputs, mNumberOfOutputs,
+                  mInterpolationSteps, mGains );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>(*mFlow )  );
   }
   catch (std::exception const & e )
