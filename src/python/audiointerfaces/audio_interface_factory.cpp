@@ -27,7 +27,7 @@ void exportAudioInterfaceFactory( pybind11::module & m )
     .def_static( "create", &AudioInterfaceFactory::create, pybind11::arg("interfaceName"),
       pybind11::arg("baseConfig"), pybind11::arg("optionalConfig") = "", pybind11::return_value_policy::take_ownership )
     .def_static( "create", 
-      []( /*AudioInterfaceFactory const & /*self,*/ std::string const & interfaceName, std::size_t numberOfInputs,
+      []( std::string const & interfaceName, std::size_t numberOfInputs,
           std::size_t numberOfOutputs, std::size_t periodSize, visr::SamplingFrequencyType samplingFrequency, std::string const & optionalConfig )
         {
           AudioInterface::Configuration const conf( numberOfInputs, numberOfOutputs, periodSize, samplingFrequency );
