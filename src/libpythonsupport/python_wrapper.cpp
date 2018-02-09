@@ -148,7 +148,9 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   PathList searchPath;
   boost::algorithm::split( searchPath, moduleSearchPath, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
   // Prune empty entries
-  searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(), [](auto const & s){return s.empty(); } ), searchPath.end() );
+  searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(),
+				   [](std::string const & s){return s.empty(); } ),
+		   searchPath.end() );
   for( auto const & str : searchPath )
   {
     if( not exists( boost::filesystem::path(str)) )
