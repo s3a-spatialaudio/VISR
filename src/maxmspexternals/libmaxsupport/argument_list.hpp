@@ -3,6 +3,8 @@
 #ifndef VISR_MAXMSP_MAXSUPPORT_ARGUMENT_LIST_HPP_INCLUDED
 #define VISR_MAXMSP_MAXSUPPORT_ARGUMENT_LIST_HPP_INCLUDED 
 
+#include "export_symbols.hpp"
+
 #include <boost/algorithm/string.hpp>
 
 #include <algorithm>
@@ -46,7 +48,7 @@ namespace maxmsp
   * arguments as the binary name (as it is in a standard-compliant option list).
   * 
   */
-  class ArgumentList
+  class VISR_MAXSUPPORT_LIBRARY_SYMBOL ArgumentList
   {
   public:
     /**

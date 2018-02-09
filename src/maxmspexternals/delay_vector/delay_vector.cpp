@@ -144,7 +144,7 @@ DelayVector::~DelayVector()
     mComp->setup( mNumberOfChannels, mInterpolationSteps, 1.0f, 
       mInterpolationMethod.c_str(),
       rcl::DelayVector::MethodDelayPolicy::Add,
-      true );
+      rcl::DelayVector::ControlPortConfig::All );
 
     mFlow.reset( new rrl::AudioSignalFlow(*mComp )  );
 

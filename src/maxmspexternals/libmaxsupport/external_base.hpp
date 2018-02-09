@@ -3,6 +3,8 @@
 #ifndef VISR_MAXMSP_MAXSUPPORT_EXTERNAL_BASE_HPP_INCLUDED
 #define VISR_MAXMSP_MAXSUPPORT_EXTERNAL_BASE_HPP_INCLUDED 
 
+#include "export_symbols.hpp"
+
 /* Super-safe determination of the MAX define for setting the operating system. */
 #ifdef __APPLE_CC__
 #ifndef MAC_VERSION 
@@ -35,7 +37,7 @@ namespace maxmsp
  * Abstract base class for Max/MSP externals
  * C++ classes to use the abstractions shall derive from this class.
  */
-class ExternalBase
+class VISR_MAXSUPPORT_LIBRARY_SYMBOL ExternalBase
 {
 public:
   /**
