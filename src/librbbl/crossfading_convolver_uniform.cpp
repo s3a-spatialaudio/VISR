@@ -30,10 +30,10 @@ CrossfadingConvolverUniform( std::size_t numberOfInputs,
   , mFrequencyDomainOutput( 2, mCoreConvolver.dftBlockRepresentationSize(), mCoreConvolver.complexAlignment() )
   , mTimeDomainTempOutput( 2, blockLength, alignment )
   , mMaxNumFilters( maxFilterEntries )
-  , mNumRampBlocks( (maxFilterLength+blockLength-1) / blockLength + 1) // integer ceil()
+  , mNumRampBlocks( (transitionSamples+blockLength-1) / blockLength + 1) // integer version of ceil(transition/blockLength)
   , mCurrentFilterOutput( maxFilterEntries, 0 )
   , mCurrentRampBlock( maxFilterEntries, mNumRampBlocks-1 )
-  , mCrossoverRamps( maxFilterEntries, blockLength * mNumRampBlocks, alignment )
+  , mCrossoverRamps( 2, blockLength * mNumRampBlocks, alignment )
 {
   initRoutingTable( initialRoutings );
   efl::vectorRamp( mCrossoverRamps.row(0), transitionSamples, static_cast<SampleType>(0.0f),
