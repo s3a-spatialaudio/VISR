@@ -3,6 +3,8 @@
 #ifndef VISR_MAXMSP_MAXSUPPORT_SIGNAL_FLOW_WRAPPER_WRAPPER_HPP_INCLUDED
 #define VISR_MAXMSP_MAXSUPPORT_SIGNAL_FLOW_WRAPPER_WRAPPER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libvisr/constants.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
@@ -25,7 +27,7 @@ namespace maxmsp
 {
 
 template<typename ExternalSampleType>
-class SignalFlowWrapper
+class VISR_MAXSUPPORT_LIBRARY_SYMBOL SignalFlowWrapper
 {
 public:
   SignalFlowWrapper( Component & comp );

@@ -1,11 +1,11 @@
 <!DOCTYPE patchbay>
-<patchbay version="0.3.6" name="virtual_loudspeaker_renderer">
+<patchbay version="0.3.10" name="virtual_loudspeaker_renderer">
  <output-sockets>
-  <socket exclusive="off" client="system" type="audio" name="system">
+  <socket exclusive="off" client="system" type="jack-audio" name="system">
    <plug>capture_1</plug>
    <plug>capture_2</plug>
   </socket>
-  <socket exclusive="off" client="REAPER" type="audio" name="REAPER">
+  <socket exclusive="off" client="REAPER" type="jack-audio" name="REAPER">
    <plug>out1</plug>
    <plug>out2</plug>
    <plug>out3</plug>
@@ -71,17 +71,17 @@
    <plug>out63</plug>
    <plug>out64</plug>
   </socket>
-  <socket exclusive="off" client="VirtualLdRendererSerial" type="audio" name="VirtualLdRendererSerial">
+  <socket exclusive="off" client="VirtualLdRendererSerial" type="jack-audio" name="VirtualLdRendererSerial">
    <plug>visr_out_0</plug>
    <plug>visr_out_1</plug>
   </socket>
  </output-sockets>
  <input-sockets>
-  <socket exclusive="off" client="system" type="audio" name="system">
+  <socket exclusive="off" client="system" type="jack-audio" name="system">
    <plug>playback_1</plug>
    <plug>playback_2</plug>
   </socket>
-  <socket exclusive="off" client="REAPER" type="audio" name="REAPER">
+  <socket exclusive="off" client="REAPER" type="jack-audio" name="REAPER">
    <plug>in1</plug>
    <plug>in2</plug>
    <plug>in3</plug>
@@ -147,7 +147,7 @@
    <plug>in63</plug>
    <plug>in64</plug>
   </socket>
-  <socket exclusive="off" client="VirtualLdRendererSerial" type="audio" name="VirtualLdRendererSerial">
+  <socket exclusive="off" client="VirtualLdRendererSerial" type="jack-audio" name="VirtualLdRendererSerial">
    <plug>visr_in_0</plug>
    <plug>visr_in_1</plug>
    <plug>visr_in_2</plug>
@@ -164,8 +164,8 @@
  </input-sockets>
  <slots/>
  <cables>
-  <cable output="REAPER" input="VirtualLdRendererSerial"/>
-  <cable output="VirtualLdRendererSerial" input="system"/>
+  <cable output="REAPER" input="VirtualLdRendererSerial" type="jack-audio"/>
+  <cable output="VirtualLdRendererSerial" input="system" type="jack-audio"/>
  </cables>
 </patchbay>
 

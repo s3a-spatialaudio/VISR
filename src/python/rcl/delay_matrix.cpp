@@ -7,6 +7,7 @@
 #include <libvisr/signal_flow_context.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 
 namespace visr
 {
@@ -34,6 +35,8 @@ void exportDelayMatrix( pybind11::module & m )
     .value( "Delay", DelayMatrix::ControlPortConfig::Delay )
     .value( "Gain", DelayMatrix::ControlPortConfig::Gain )
     .value( "All", DelayMatrix::ControlPortConfig::All )
+    .def( pybind11::self | pybind11::self )
+    .def( pybind11::self & pybind11::self )
     ;
 
   dVec.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),

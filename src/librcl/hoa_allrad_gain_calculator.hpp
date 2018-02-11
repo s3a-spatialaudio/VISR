@@ -58,10 +58,23 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param numberOfObjectChannels The totl number of object signal channels. Basically this defines the size of the gain matrices processed.
+   * @param regularArrayConfig The array configuration object for the virtual, regular array used for decoding the HOA signals.
+   * @param realArrayConfig The array configuration object for the real, physical array to which the soundfield is panned.
+   * @param decodeMatrix Matrix coefficients for decoding the HOA signals to the regular, virtual array. Dimension (hoaOrder+1)^2 x number of regular loudspeakers.
+   * The row dimension determines the (maximum) HOA order and must be a square number.
+   * @param listenerPosition The initial listener position used for VBAP panning. Optional argument, default is (0,0,0).
+   * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener In this case a parameter input port "listenerInput"
    */
   explicit HoaAllRadGainCalculator( SignalFlowContext const & context,
                                     char const * name,
-                                    CompositeComponent * parent );
+                                    CompositeComponent * parent,
+                                    std::size_t numberOfObjectChannels,
+                                    panning::LoudspeakerArray const & regularArrayConfig,
+                                    panning::LoudspeakerArray const & realArrayConfig,
+                                    efl::BasicMatrix<Afloat> const & decodeMatrix,
+                                    pml::ListenerPosition const & listenerPosition = pml::ListenerPosition(),
+                                    bool adaptiveListenerPosition = false );
 
   /**
    * Disabled (deleted) copy constructor
@@ -75,24 +88,8 @@ public:
   ~HoaAllRadGainCalculator();
 
   /**
-   * Method to initialise the component.
-   * @param numberOfObjectChannels The totl number of object signal channels. Basically this defines the size of the gain matrices processed.
-   * @param regularArrayConfig The array configuration object for the virtual, regular array used for decoding the HOA signals.
-   * @param realArrayConfig The array configuration object for the real, physical array to which the soundfield is panned.
-   * @param decodeMatrix Matrix coefficients for decoding the HOA signals to the regular, virtual array. Dimension (hoaOrder+1)^2 x number of regular loudspeakers.
-   * The row dimension determines the (maximum) HOA order and must be a square number.
-   * @param listenerPosition The initial listener position used for VBAP panning. Optional argument, default is (0,0,0).
-   * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener In this case a parameter input port "listenerInput"
-   * is instantiated.
+   * Process function implementing the runtime behaviour.
    */
-  void setup( std::size_t numberOfObjectChannels,
-              panning::LoudspeakerArray const & regularArrayConfig,
-              panning::LoudspeakerArray const & realArrayConfig,
-              efl::BasicMatrix<Afloat> const & decodeMatrix,
-              pml::ListenerPosition const & listenerPosition = pml::ListenerPosition(),
-              bool adaptiveListenerPosition = false );
-
-  /**/
   void process() override;
 
 private:
@@ -119,23 +116,15 @@ private:
   */
   void setListenerPosition( pml::ListenerPosition const & pos );
 
-  /**
-   * Implementation method to update the internal state.
-   * Must be called after one of the loudspeaker arrays or the listener position has changed.
-   */
-  void precalculate();
-
   ParameterInput<pml::DoubleBufferingProtocol, pml::ObjectVector> mObjectInput;
 
   ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixInput;
 
-  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > > mListenerInput;
-
   ParameterOutput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > mGainMatrixOutput;
 
-  std::unique_ptr<panning::AllRAD> mAllRadCalculator;
+  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > > mListenerInput;
 
-  efl::BasicMatrix<Afloat> mRealDecodeMatrix;
+  std::unique_ptr<panning::AllRAD> mAllRadCalculator;
 
   /**
    * Decoding matrix from HOA signal components to the loudspeakers of the (virtual) regular array.
@@ -143,8 +132,7 @@ private:
    */
   efl::BasicMatrix<Afloat> mRegularDecodeMatrix;
 
-
-
+  efl::BasicMatrix<Afloat> mRealDecodeMatrix;
 };
 
 } // namespace rcl

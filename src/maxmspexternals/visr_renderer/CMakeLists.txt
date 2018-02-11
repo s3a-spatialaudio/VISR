@@ -48,12 +48,9 @@ elseif(APPLE)
   set_target_properties( ${PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "mxo")
 endif(WIN32)
 
+# Link to shared libraries or to static libraries compiled as position-independent code.
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} apputilities_shared ) # slight misnomer, consider restructuring if the option handling should prove beneficial.
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} signalflows_shared )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rrl_shared )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport )
-
-# According to the current FindMaxSDK.cmake, there is no crt library for apple.
-# TODO: Verify and improve FindMaxSDK.cmake
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport_shared )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION max )

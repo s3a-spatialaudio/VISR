@@ -8,12 +8,14 @@ Created on Mon Oct 09 2017
 
 from hoa_binaural_renderer import HoaBinauralRenderer
 from dynamic_binaural_renderer import DynamicBinauralRenderer
+from rotationFunctions import deg2rad, rad2deg
 import visr
 import rrl
 import objectmodel
 
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 import os
 
@@ -29,10 +31,10 @@ useTracking = True
 
 fs = 48000
 
-numBinauralObjects = 64
+numBinauralObjects = 1
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 9
+maxHoaOrder = 1
 
 blockSize = 512
 
@@ -52,34 +54,43 @@ sofaFile = os.path.join( currDir, './data/bbc_hoa2bin_sofa/Gauss_O%d_ku100_dualb
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
-azimuths = np.arange( 0, 2*np.pi, 2*np.pi/72, dtype = np.float32 )
+azimuths = np.arange( 0, 2*np.pi, 2*np.pi/360, dtype = np.float32 )
 elevations = np.ones( azimuths.shape, dtype = np.float32 ) * 0.0
 
 numTestSignals = azimuths.size
 
-HRIRs = np.zeros( (numTestSignals, 2, blockSize*(numBlocks-1) ), dtype = np.float32 )
+HRIRsHoa = np.zeros( (numTestSignals, 2, blockSize*(numBlocks-1) ), dtype = np.float32 )
+HRIRsDyn = np.zeros( (numTestSignals, 2, blockSize*(numBlocks-1) ), dtype = np.float32 )
 
+graphHoa = HoaBinauralRenderer( context, "HoaBinauralRenderer", None,
+                            numberOfObjects = numBinauralObjects,
+                            maxHoaOrder = maxHoaOrder,
+                            sofaFile = sofaFile,
+                            interpolationSteps = blockSize,
+                            headTracking = False
+                            )
+graphDyn = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None, numBinauralObjects,
+                                  headTracking = False,
+                                  dynITD = False,
+                                  dynILD = False,
+                                  hrirInterp = True )
+
+#graphHoa = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None, numBinauralObjects,
+#                                  headTracking = False,
+#                                  dynITD = False,
+#                                  dynILD = False,
+#                                  hrirInterp = False )
+
+flowHoa = rrl.AudioSignalFlow( graphHoa )
+flowDyn = rrl.AudioSignalFlow( graphDyn )
+
+paramInputHoa = flowHoa.parameterReceivePort('objectVector')
+paramInputDyn = flowDyn.parameterReceivePort('objectVector')
 
 for testIdx in range(0,numTestSignals):
 
-#    graph = HoaBinauralRenderer( context, "HoaBinauralRenderer", None,
-#                                numberOfObjects = numBinauralObjects,
-#                                maxHoaOrder = maxHoaOrder,
-#                                sofaFile = sofaFile,
-#                                interpolationSteps = blockSize,
-#                                headTracking = False
-#                                )
-    graph = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", None, numBinauralObjects,
-                                      headTracking = False,
-                                      dynITD = False,
-                                      dynILD = False,
-                                      hrirInterp = True )
-    
-    flow = rrl.AudioSignalFlow( graph )
-    
-    paramInput = flow.parameterReceivePort('objectVector')
-
-    outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
+    outputSignalHoa = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
+    outputSignalDyn = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
     x,y,z = sph2cart( azimuths[testIdx], elevations[testIdx], 1.0 )
     ps1 = objectmodel.PointSource(0)
@@ -88,35 +99,54 @@ for testIdx in range(0,numTestSignals):
     ps1.groupId = 5
     ps1.priority = 5
     ps1.channels = [0]
-    ov = paramInput.data()
-    ov.clear()
-    ov.insert( ps1 )
-    paramInput.swapBuffers()
 
+    ovHoa = paramInputHoa.data()
+    ovHoa.clear()
+    ovHoa.insert( ps1 )
+    paramInputHoa.swapBuffers()
+
+    ovHoa = paramInputDyn.data()
+    ovHoa.clear()
+    ovHoa.insert( ps1 )
+    paramInputDyn.swapBuffers()
 
     for blockIdx in range(0,numBlocks):
 
         inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
-        outputBlock = flow.process( inputBlock )
-        outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
+        outputSignalHoa[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = flowHoa.process( inputBlock )
+        outputSignalDyn[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = flowDyn.process( inputBlock )
 
-    HRIRs[testIdx,:,:] = outputSignal[:, blockSize:]
+    HRIRsDyn[testIdx,:,:] = outputSignalDyn[:, blockSize:]
+    HRIRsHoa[testIdx,:,:] = outputSignalHoa[:, blockSize:]
 
 
 # Filter analysis
 
-H = np.fft.rfft( HRIRs, axis = - 1 )
+HDyn = np.fft.rfft( HRIRsDyn, axis = - 1 )
+HHoa = np.fft.rfft( HRIRsHoa, axis = - 1 )
 
-fGrid = np.arange(0, H.shape[-1]) * fs/HRIRs.shape[-1]
-fGridAngular = np.arange(0, H.shape[-1]) * 2*np.pi/HRIRs.shape[-1]
+fGrid = np.arange(0, HDyn.shape[-1]) * fs/HRIRsDyn.shape[-1]
+fGridAngular = np.arange(0, HDyn.shape[-1]) * 2*np.pi/HRIRsDyn.shape[-1]
 
-Hmag = np.abs( H )
-Hphase = np.angle( H )
-Hunwrapped = np.unwrap( Hphase, axis = -1 )
+HmagDyn = np.abs( HDyn )
+HphaseDyn = np.angle( HDyn )
+HunwrappedDyn = np.unwrap( HphaseDyn, axis = -1 )
 
 # Phase delay in samples
-phaseDelay = Hunwrapped / np.tile( fGridAngular, Hmag.shape[0:2]+(1,) )
+phaseDelayDyn = HunwrappedDyn / np.tile( fGridAngular, HmagDyn.shape[0:2]+(1,) )
 
-IPD = (phaseDelay[:,0,:] - phaseDelay[:,1,:]) / fs
+IPDDyn = (phaseDelayDyn[:,0,:] - phaseDelayDyn[:,1,:]) / fs
 
+ILDDyn = 20*np.log10(HmagDyn[:,1,:]) - 20*np.log10(HmagDyn[:,0,:])
+
+HmagHoa = np.abs( HHoa )
+HphaseHoa = np.angle( HHoa )
+HunwrappedHoa = np.unwrap( HphaseHoa, axis = -1 )
+
+# Phase delay in samples
+phaseDelayHoa = HunwrappedHoa / np.tile( fGridAngular, HmagHoa.shape[0:2]+(1,) )
+
+IPDHoa = (phaseDelayHoa[:,0,:] - phaseDelayHoa[:,1,:]) / float(fs)
+
+ILDHoa = 20*np.log10(HmagHoa[:,1,:]) - 20*np.log10(HmagHoa[:,0,:])
 

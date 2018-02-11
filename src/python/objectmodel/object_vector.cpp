@@ -36,7 +36,15 @@ void exportObjectVector( py::module & m )
     .def( "at", static_cast<Object&(ObjectVector::*)(ObjectId)>(&ObjectVector::at), py::return_value_policy::reference_internal, py::arg("id"), "Return a reference to an object with the given id." )
     .def( "__getitem__", static_cast<Object&(ObjectVector::*)(ObjectId)>(&ObjectVector::at), py::return_value_policy::reference_internal, py::arg("id"), "Return a reference to an object with the given id." )
     .def( "insert", static_cast<void(ObjectVector::*)(Object const&)>(&ObjectVector::insert), py::arg("obj"), "Set an object given id. If an object with that id already exists, it is replaced." )
-       .def( "insert", [](ObjectVector & ov, std::vector<Object const *> const & vec )
+    .def( "set", []( ObjectVector & ov, std::vector<Object const *> const & vec )
+     {
+       ov.clear();
+       for( Object const * obj : vec )
+       {
+         ov.insert( *obj );
+       }
+     }, "Fill an object vector from a list of objects" )
+    .def( "insert", [](ObjectVector & ov, std::vector<Object const *> const & vec )
      { for( Object const * obj : vec )
        {
          ov.insert( *obj );

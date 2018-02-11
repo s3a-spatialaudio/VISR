@@ -35,7 +35,8 @@ void exportGainMatrix( pybind11::module & m )
         inst->setup( numberOfInputs, numberOfOutputs, interpolationSteps, initialGain, controlInput );
         return inst;
       }),  py::arg("context"), py::arg("name"), py::arg("parent"), py::arg("numberOfInputs"),
-        py::arg( "numberOfOutputs" ), py::arg( "interpolationSteps" ), py::arg( "initialGains" ),
+        py::arg( "numberOfOutputs" ), py::arg( "interpolationSteps" ) = 0,
+        py::arg( "initialGains" ) = static_cast<SampleType>(1.0),
         py::arg( "controlInput" ) = true )
       .def( py::init( []( SignalFlowContext const & context, char const * name,
                        CompositeComponent * parent, std::size_t numberOfInputs,

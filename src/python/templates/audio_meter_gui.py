@@ -19,7 +19,7 @@ import sys
 
 numChannels = 2
 audioInterfaceName = 'Jack'
-audioBackendOptions = '{}'
+audioBackendOptions = '{"clientname": "LoudnessMeter", "autoconnect" : "true" }'
 samplingFrequency = 48000
 blockSize = 1024
 
@@ -57,7 +57,7 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         
         self.loudnessHist = -120.0 * np.ones( numPlotPoints, dtype=np.float32 )
         self.loudnessPlot.setData( self.loudnessHist )
-        
+
         # %% Setup the DSP part
         
         self.context = visr.SignalFlowContext( period = blockSize, 
@@ -99,19 +99,25 @@ class LoudnessGui( QtGui.QWidget ): # QtGui.QMainWindow
         self.loudnessLabel.setText( '--- dB' )
         return
     def getMeterValues( self ):
-        print("getMeterValues")
-        numPoints = self.loudnessPort.size()
-        if numPoints > 0:
-            self.loudnessHist = np.roll( self.loudnessHist, numPoints )
-            for idx in range( 0, numPoints ):
-                Lk = self.loudnessPort.front().value
-                self.loudnessHist[idx] = Lk
-                self.loudnessPort.pop()
-            self.loudnessLabel.setText( '%f dB' % Lk )
-            self.loudnessPlot.setData( self.loudnessHist )
+        try:
+            numPoints = self.loudnessPort.size()
+            # print("getMeterValues: %d data packets received" % numPoints )
+            if numPoints > 0:
+                self.loudnessHist = np.roll( self.loudnessHist, numPoints )
+                for idx in range( 0, numPoints ):
+                    Lk = self.loudnessPort.front()
+                    # print( "loudness value %d: %f dB" % (idx,Lk.value) )
+                    self.loudnessPort.pop()
+                    self.loudnessHist[numPoints-1-idx] = Lk.value
+                #print("getMeterValues: %d data packets in queue:" % self.loudnessPort.size() )
+                self.loudnessLabel.setText( '%f dB' % Lk.value )
+                self.loudnessPlot.setData( self.loudnessHist )
+        except Exception as ex:
+            print( "Exception in inner loop: %s" % ex )
 
 app = QtGui.QApplication( sys.argv )
 mainWnd = LoudnessGui()
 
 mainWnd.show()
 appReturnValue =  app.exec_()
+

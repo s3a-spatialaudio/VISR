@@ -292,9 +292,9 @@ namespace panning
     
 
 #ifdef VISR_USE_BOOST_REGEX
-    static const boost::regex idExpression{ "^[A-za-z0-9@&()+/:-_]+$" };
+    static const boost::regex idExpression{ "^[A-za-z0-9@&\\(\\)\\+/:\\-_]+$" };
 #else
-    static const std::regex idExpression{ "^[[:alnum:]@&()+/:-_]+$", std::regex::ECMAScript};  
+    static const std::regex idExpression{ "^[[:alnum:]@&\\(\\)\\+/:\\-_]+$", std::regex::ECMAScript};
 #endif
     // parsing the loudspeaker ids and channels
     std::size_t i = 0;

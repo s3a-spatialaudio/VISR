@@ -47,6 +47,10 @@ public:
 
   std::size_t size() const;
 
+  /**
+   * Make the assign function defined in the base class visible.
+   * The using directive avoids hiding by the overloads below.
+   */
   using TypedParameterBase<StringParameter, EmptyParameterConfig, detail::compileTimeHashFNV1(sStringParameterName) >::assign;
 
   void assign( char const * newStr );

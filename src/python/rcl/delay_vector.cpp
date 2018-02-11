@@ -10,6 +10,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/operators.h>
 
 #include <algorithm>
 #include <ciso646>
@@ -54,20 +55,29 @@ void exportDelayVector( py::module & m )
   // TODO: Consider creating a Python module for librbbl, bind rbbl::MultichannelDelayLine::MethodDelayPolicy there and add
   // it to the import dependencies of the rcl module
 
+  pybind11::enum_<DelayVector::ControlPortConfig>( dVec, "ControlPortConfig" )
+    .value( "No", DelayVector::ControlPortConfig::None ) // Cannot use 'None' because that is recognised as keyword in Python.
+    .value( "Delay", DelayVector::ControlPortConfig::Delay )
+    .value( "Gain", DelayVector::ControlPortConfig::Gain )
+    .value( "All", DelayVector::ControlPortConfig::All )
+    .def( pybind11::self | py::self )
+    .def( pybind11::self & py::self )
+    ;
+
   dVec.def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       py::arg("context"), py::arg("name"), py::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
     .def( "setup", static_cast<void(DelayVector::*)( std::size_t, std::size_t, SampleType, 
-      const char *, DelayVector::MethodDelayPolicy, bool, SampleType, SampleType)>(&DelayVector::setup), py::arg("numberOfChannels"),
+      const char *, DelayVector::MethodDelayPolicy, DelayVector::ControlPortConfig, SampleType, SampleType)>(&DelayVector::setup), py::arg("numberOfChannels"),
       py::arg( "interpolationSteps" ) = 1024, py::arg( "maxDelay" ) = 3.0f,
       py::arg( "interpolationType" ) /*= DelayVector::InterpolationType::CubicLagrange*/,
       py::arg( "methodDelayPolicy") = DelayVector::MethodDelayPolicy::Add,
-      py::arg( "controlInputs") = false,
+      py::arg( "controlInputs") = DelayVector::ControlPortConfig::None,
       py::arg( "initialDelay" ) = 0.0f,
       py::arg( "initialGain" ) = 1.0f )
     .def( py::init(
       []( visr::SignalFlowContext const& context, char const * name , visr::CompositeComponent* parent,
           std::size_t numberOfChannels, std::size_t interpolationSteps, SampleType maxDelay, const char * interpolationMethod,
-          DelayVector::MethodDelayPolicy methodDelayPolicy, bool controlInputs, SampleType initialDelay, SampleType initialGain)
+          DelayVector::MethodDelayPolicy methodDelayPolicy, DelayVector::ControlPortConfig controlInputs, SampleType initialDelay, SampleType initialGain)
       {
         DelayVector * inst = new DelayVector( context, name, parent );
         inst->setup( numberOfChannels, interpolationSteps, maxDelay, interpolationMethod,
@@ -79,13 +89,13 @@ void exportDelayVector( py::module & m )
       py::arg( "interpolationSteps" ) = 1024, py::arg( "maxDelay" ) = 3.0f,
       py::arg( "interpolationType" ) /*= DelayVector::InterpolationType::CubicLagrange*/,
       py::arg( "methodDelayPolicy" ) = DelayVector::MethodDelayPolicy::Add,
-      py::arg( "controlInputs" ) = false,
+      py::arg( "controlInputs" ) = DelayVector::ControlPortConfig::None,
       py::arg( "initialDelay" ) = 0.0f,
       py::arg( "initialGain" ) = 1.0f )
     .def( py::init(
       []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfChannels, std::size_t interpolationSteps, SampleType maxDelay, const char * interpolationMethod,
-        DelayVector::MethodDelayPolicy methodDelayPolicy, bool controlInputs, efl::BasicVector< SampleType > const & initialDelaysSeconds,
+        DelayVector::MethodDelayPolicy methodDelayPolicy, DelayVector::ControlPortConfig controlInputs, efl::BasicVector< SampleType > const & initialDelaysSeconds,
         efl::BasicVector< SampleType > const & initialGainsLinear )
       {
         DelayVector * inst = new DelayVector( context, name, parent );
@@ -98,14 +108,14 @@ void exportDelayVector( py::module & m )
       py::arg( "interpolationSteps" ) = 1024, py::arg( "maxDelay" ) = 3.0f,
       py::arg( "interpolationType" ) = "lagrangeOrder3",
       py::arg( "methodDelayPolicy" ) = DelayVector::MethodDelayPolicy::Add,
-      py::arg( "controlInputs" ) = false,
+      py::arg( "controlInputs" ) = DelayVector::ControlPortConfig::None,
       py::arg( "initialDelay" ) = pml::VectorParameter<SampleType>{}, // Use the pml type, because BasicVector does not provide a copy ctor
       py::arg( "initialGain" ) = pml::VectorParameter<SampleType>{}   // Use the pml type, because BasicVector does not provide a copy ctor
      )
      .def( py::init(
         []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
             std::size_t numberOfChannels, std::size_t interpolationSteps, SampleType maxDelay, const char * interpolationMethod,
-            DelayVector::MethodDelayPolicy methodDelayPolicy, bool controlInputs, std::vector< SampleType > const & initialDelaysSeconds,
+            DelayVector::MethodDelayPolicy methodDelayPolicy, DelayVector::ControlPortConfig controlInputs, std::vector< SampleType > const & initialDelaysSeconds,
             std::vector< SampleType > const & initialGainsLinear )
         {
           efl::BasicVector<SampleType> delays;
@@ -123,7 +133,7 @@ void exportDelayVector( py::module & m )
         py::arg( "interpolationSteps" ) = 1024, py::arg( "maxDelay" ) = 3.0f,
         py::arg( "interpolationType" ) = "lagrangeOrder3",
         py::arg( "methodDelayPolicy" ) = DelayVector::MethodDelayPolicy::Add,
-        py::arg( "controlInputs" ) = false,
+        py::arg( "controlInputs" ) = DelayVector::ControlPortConfig::None,
         py::arg( "initialDelay" ),
         py::arg( "initialGain" ),
         "Constructor taking Python lists or NumPy arrays as initial gain and delay values."
