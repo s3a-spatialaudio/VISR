@@ -8,19 +8,13 @@ Created on Tue Oct 31 16:35:10 2017
 
 import audiointerfaces as ai
 
-import rcl
-import time
-from extractDelayInSofaFile import extractDelayInSofaFile
-from urllib.request import urlretrieve
-import os
-from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+
+
 from virtual_loudspeaker_renderer_serial import VirtualLoudspeakerRendererSerial
 import visr
 import rrl
 
-import numpy as np
-import matplotlib.pyplot as plt
-
+import time
 from sys import platform
 
 ############ CONFIG ###############
@@ -29,13 +23,15 @@ blockSize = 1024
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 72;
-BRIRtruncationLength = 4096
+BRIRtruncationLength = None
 
 useTracking = True
 useDynamicITD = False
 useHRIRinterpolation = True
 useSerialPort = True
 useCrossfading = True
+useInterpolatingConvolver = True
+fftImplementation = 'ffts'
 
 # TODO: Check and adjust port names for the individual system
 if platform == 'linux' or platform == 'linux2':
@@ -54,31 +50,13 @@ else:
 
 ###################################
 
-idMatrix = np.identity(3)
-signalLength = blockSize * numBlocks
-t = 1.0/fs * np.arange(0,signalLength)
-
 # TODO: Select the path and the SOFA file.
-sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemD.sofa'
-# Set the number of loudspeakers accordingly.
-numLoudspeakers = 9
-
-#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemA.sofa'
-## Set the number of loudspeakers accordingly.
-#numLoudspeakers = 2
-
-#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemH.sofa'
-## Set the number of loudspeakers accordingly.
-#numLoudspeakers = 22
-#
-#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemF.sofa'
-## Set the number of loudspeakers accordingly.
-#numLoudspeakers = 10
+sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemA.sofa' # Stereo
+sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemB.sofa' # 5.1
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
 controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None,
-                                  numLoudspeakers,
                                   port,
                                   baud,
                                   sofaFile,
@@ -87,7 +65,9 @@ controller = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRende
                                   hrirInterp = useHRIRinterpolation,
                                   irTruncationLength = BRIRtruncationLength,
                                   headTrackingCalibrationPort=headTrackingCalibrationPort,
-                                  filterCrossfading = useCrossfading
+                                  filterCrossfading = useCrossfading,
+                                  interpolatingConvolver=useInterpolatingConvolver,
+                                  fftImplementation = fftImplementation
                                   )
 
 result,messages = rrl.checkConnectionIntegrity(controller)

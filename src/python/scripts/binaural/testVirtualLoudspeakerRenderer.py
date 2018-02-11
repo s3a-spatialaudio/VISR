@@ -19,29 +19,29 @@ import time
 
 ############ CONFIG ###############
 fs = 48000
-blockSize = 1024
+blockSize = 256
 numOutputChannels = 2;
 parameterUpdatePeriod = 1
 numBlocks = 512;
-BRIRtruncationLength = 4096
+BRIRtruncationLength = 16384
 
 useTracking = True
 useDynamicITD = False
 useHRIRinterpolation = True
 useSerialPort = False
 useFilterCrossfading = True
-useInterpolatingConvolver = False
-
+useInterpolatingConvolver = True
+fftImplementation = 'ffts'
 
 ###################################
 
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-
-sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_modelled_onsets_early_dynamic.sofa'
-
-numLoudspeakers = 32
+#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_reduced_onsets.sofa'
+#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_modelled_onsets_early_dynamic.sofa'
+#sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemA.sofa'
+sofaFile = '/home/andi/BBC/SOFA/bbcrdlr_systemB.sofa'
 
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
@@ -59,7 +59,6 @@ if useSerialPort:
     port = "/dev/ttyUSB0"
     baud = 57600
     renderer = VirtualLoudspeakerRendererSerial( context, "VirtualLoudspeakerRenderer", None,
-                                      numLoudspeakers,
                                       port,
                                       baud,
                                       sofaFile,
@@ -68,18 +67,19 @@ if useSerialPort:
                                       hrirInterp = useHRIRinterpolation,
                                       irTruncationLength = BRIRtruncationLength,
                                       filterCrossfading=useFilterCrossfading,
-                                      interpolatingConvolver=useInterpolatingConvolver
+                                      interpolatingConvolver=useInterpolatingConvolver,
+                                      fftImplementation=fftImplementation
                                       )
 else:
     renderer = VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", None,
-                                      numLoudspeakers,
                                       sofaFile,
                                       headTracking = useTracking,
                                       dynITD = useDynamicITD,
                                       hrirInterp = useHRIRinterpolation,
                                       irTruncationLength = BRIRtruncationLength,
                                       filterCrossfading=useFilterCrossfading,
-                                      interpolatingConvolver=useInterpolatingConvolver
+                                      interpolatingConvolver=useInterpolatingConvolver,
+                                      fftImplementation=fftImplementation
                                       )
 #to be completed
 
@@ -92,13 +92,16 @@ flow = rrl.AudioSignalFlow( renderer )
 if not useSerialPort and useTracking:
     trackingInput = flow.parameterReceivePort( "tracking" )
 
+# Determine the channel layout from the audio flow
+numLoudspeakers = flow.numberOfCaptureChannels
+
 inputSignal = np.zeros( (numLoudspeakers, signalLength ), dtype=np.float32 )
 inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-# inputSignal[0,0] = 1
+inputSignal[0,0] = 1
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 numPos = 360/5
-azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
+azSequence = (0.0*np.pi)/numPos *  np.arange( 0, numPos )
 start = time.time()
 
 for blockIdx in range(0,numBlocks):

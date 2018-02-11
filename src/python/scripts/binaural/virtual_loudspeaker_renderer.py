@@ -20,24 +20,29 @@ from virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 import numpy as np
 
-fftImplementation = 'ffts'
-#fftImplementation = 'kissfft'
-#fftImplementation = 'default'
-
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
         def __init__( self,
                      context, name, parent,
-                     numberOfLoudspeakers,
                      sofaFile,
                      headTracking = True,
                      dynITD = False,
                      hrirInterp = False,
                      irTruncationLength = None,
                      filterCrossfading = False,
-                     interpolatingConvolver = False
+                     interpolatingConvolver = False,
+                     fftImplementation = 'default'
                      ):
             super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
+
+            [ hrirPos, hrirData, hrirDelays ] = readSofaFile( sofaFile,
+                                                             truncationLength=irTruncationLength,
+                                                             truncationWindowLength=16 )
+
+            if hrirData.ndim != 4:
+                raise ValueError( "VirtualLoudspeakerRenderer: Dimension of SOFA BRIR data not suitable for virtual loudspeaker rendering" )
+            numberOfLoudspeakers = hrirData.shape[-2]
+
             self.loudspeakerSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
 
@@ -45,10 +50,6 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
-
-            [ hrirPos, hrirData, hrirDelays ] = readSofaFile( sofaFile,
-                                                             truncationLength=irTruncationLength,
-                                                             truncationWindowLength=16 )
 
             # Additional safety check (is tested in the controller anyway)
             if dynITD:
@@ -102,19 +103,17 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                     else:
                         interpolationSteps = 0
 
-                    # filterReshaped = np.concatenate( (hrirData[:,0,...],hrirData[:,1,...]), axis=1 )
                     numFilters = np.prod( hrirData.shape[:-1])
                     filterReshaped = np.reshape( hrirData, (numFilters,firLength))
-                    filterMtx = efl.BasicMatrixFloat(filterReshaped)
                     self.convolver = rcl.InterpolatingFirFilterMatrix( context, 'convolutionEngine', self,
                                                      numberOfInputs=2*numberOfLoudspeakers,
                                                      numberOfOutputs=2,
-                                                     maxFilters=2*numberOfLoudspeakers,
+                                                     maxFilters=numFilters,
                                                      filterLength=firLength,
                                                      maxRoutings=2*numberOfLoudspeakers,
                                                      numberOfInterpolants=2, # TODO: Find out from
                                                      transitionSamples=interpolationSteps,
-                                                     filters = filterMtx,
+                                                     filters = filterReshaped,
                                                      routings=filterRouting,
                                                      controlInputs=rcl.InterpolatingFirFilterMatrix.ControlPortConfig.Filters,
                                                      fftImplementation=fftImplementation

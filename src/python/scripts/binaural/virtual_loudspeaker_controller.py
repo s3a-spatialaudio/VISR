@@ -90,7 +90,6 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         # parameters are transmitted.
         if interpolatingConvolver:
             self.hrirs = None
-            self.numSpeakers = hrirData.shape[2]
         else:
             self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
 
