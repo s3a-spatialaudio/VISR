@@ -230,14 +230,22 @@ setInterpolant( rbbl::InterpolationParameter const & param )
   {
     throw std::out_of_range( "InterpolatingConvolverUniform::setInterpolant(): interpolant id exceeds number of filter routings. ");
   }
+  assert( mNumberOfInterpolants > 0 ); // Normally checked in the constructor
+  assert( param.indices().size() == param.numberOfInterpolants() );
+  // Typically this would be prohibited externally
   if( param.numberOfInterpolants() != mNumberOfInterpolants )
   {
     throw std::invalid_argument( "InterpolatingConvolverUniform::setInterpolant(): Number of interpolants in parameter does not match the value set in the convolver." );
   }
-  assert( mNumberOfInterpolants > 0 ); // Normally checked in the constructor
+  InterpolationParameter::IndexType const maxIndex = *(std::max_element( param.indices().begin(), param.indices().end() ));
+  if( maxIndex >= mFilters.numberOfRows() )
+  {
+    throw std::runtime_error( detail::composeMessageString( "InterpolatingConvolverUniform::setInterpolant(): At least one filter index \'",
+    		maxIndex, "\' exceeds maximum admissible index (", mFilters.numberOfRows()-1, ")." ) );
+  }
 
   // We use real-valued arithmetics to scale the complex-valued FD representations
-  std::size_t const numRealElements = 2 * mConvolver.dftBlockRepresentationSize();
+  std::size_t const numRealElements = 2 * mConvolver.dftFilterRepresentationSize();
 
   std::size_t align{ mConvolver.alignment() };
 

@@ -29,7 +29,6 @@ CoreConvolverUniform( std::size_t numberOfInputs,
  , mMaxFilterLength( maxFilterLength )
  , mNumberOfFilterPartitions( calculateNumberOfPartitions( maxFilterLength, blockLength ) )
  , mDftSize( calculateDftSize( blockLength ) )
- , mDftRepresentationSize( calculateDftRepresentationSize( blockLength ) )
  , mDftRepresentationSizePadded( calculateDftRepresentationSizePadded( blockLength, mComplexAlignment ) )
  , mInputBuffers( numberOfInputs, mDftSize, alignment )
  , mInputFDL( numberOfInputs, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
@@ -390,10 +389,10 @@ transformImpulseResponse( SampleType const * ir, std::size_t irLength, Frequency
       {
         std::runtime_error( "CoreConvolverUniform::transformImpulseResponse(): Error while copying data." );
       }
-      FrequencyDomainType * blockResult = result + partitionIdx * mDftRepresentationSizePadded;
-      // TODO: check error reporting of the wrapper.
-      mFftRepresentation->forwardTransform( mTimeDomainTransformBuffer.data(), blockResult );
     }
+    FrequencyDomainType * blockResult = result + partitionIdx * mDftRepresentationSizePadded;
+    // TODO: check error reporting of the wrapper.
+    mFftRepresentation->forwardTransform( mTimeDomainTransformBuffer.data(), blockResult );
   }
 }
 

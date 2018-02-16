@@ -14,7 +14,6 @@ import rcl
 class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
         def __init__( self,
                      context, name, parent,
-                     numLoudspeakers,
                      port,
                      baud,
                      sofaFile,
@@ -24,27 +23,22 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
                      irTruncationLength = None,
                      headTrackingCalibrationPort = None,
                      filterCrossfading = False,
-                     interpolatingConvolver = False
+                     interpolatingConvolver = False,
+                     fftImplementation = 'default'
                      ):
             super( VirtualLoudspeakerRendererSerial, self ).__init__( context, name, parent )
-            self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numLoudspeakers )
-            self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
 
             self.virtualLoudspeakerRenderer =  VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", self,
-                                      numLoudspeakers,
                                       sofaFile,
                                       headTracking = enableSerial,
                                       dynITD = dynITD,
                                       hrirInterp = hrirInterp,
                                       irTruncationLength = irTruncationLength,
                                       filterCrossfading = filterCrossfading,
-                                      interpolatingConvolver = interpolatingConvolver
+                                      interpolatingConvolver = interpolatingConvolver,
+                                      fftImplementation = fftImplementation
                                       )
             if enableSerial:
-##                WITH AUDIOLAB ORIENTATION OFFSET
-#                self.serialReader = serialReader(context, "Controller", self,port, baud, yawOffset=220,rollOffset=-180, yawRightHand=True )
-
-##                WITH MY OFFICE DESK ORIENTATION OFFSET
                 calibrationInputPresent = not headTrackingCalibrationPort is None
                 self.serialReader = serialReader(context, "RazorHeadtrackerReceiver", self, port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True,
                                                  calibrationInput = calibrationInputPresent)
@@ -52,14 +46,11 @@ class VirtualLoudspeakerRendererSerial(visr.CompositeComponent ):
                 if calibrationInputPresent:
                     self.calibrationTriggerReceiver = rcl.UdpReceiver( context, "CalibrationTriggerReceiver", self, port = headTrackingCalibrationPort )
                     self.parameterConnection( self.calibrationTriggerReceiver.parameterPort("messageOutput"),
-                                                                                      self.serialReader.parameterPort("calibration"))
+                                             self.serialReader.parameterPort("calibration"))
 
+            numLoudspeakers = self.virtualLoudspeakerRenderer.audioPort( "audioIn").width
+            self.lspSignalInput = visr.AudioInputFloat( "audioIn", self, numLoudspeakers )
+            self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
 
-
-
-
-
-
-            self.audioConnection(  self.objectSignalInput, self.virtualLoudspeakerRenderer.audioPort("audioIn"))
+            self.audioConnection(  self.lspSignalInput, self.virtualLoudspeakerRenderer.audioPort("audioIn"))
             self.audioConnection( self.virtualLoudspeakerRenderer.audioPort("audioOut"), self.binauralOutput)
-

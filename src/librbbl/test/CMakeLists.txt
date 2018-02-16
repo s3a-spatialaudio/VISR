@@ -15,6 +15,8 @@ set( SOURCES
  test_FIR.cpp
  multichannel_convolver.cpp
  object_channel_allocator.cpp
+interpolating_convolver.cpp
+test_main.cpp
 )
 
 if( BUILD_USE_FFTW )

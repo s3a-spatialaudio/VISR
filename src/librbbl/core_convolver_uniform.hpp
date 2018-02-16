@@ -71,6 +71,9 @@ public:
    */
   ~CoreConvolverUniform();
 
+  /**
+   * Number of input signals to the MIMO convolution process.
+   */
   std::size_t numberOfInputs() const { return mNumberOfInputs; }
 
   std::size_t numberOfOutputs() const { return mNumberOfOutputs; }
@@ -79,9 +82,9 @@ public:
 
   /**
    * Return the size of a DFT block.
-   * @todo do we need to query the padded size as well?
+   * @note that returns the padded size, including padding between DFT blocks introduced for alinment.
    */
-  std::size_t dftBlockRepresentationSize() const { return mDftRepresentationSize; }
+  std::size_t dftBlockRepresentationSize() const { return mDftRepresentationSizePadded; }
 
   std::size_t numberOfFilterPartitions() const { return mNumberOfFilterPartitions; }
 
@@ -141,11 +144,6 @@ public:
   static std::size_t calculateDftSize( std::size_t blockLength );
 
   /**
-  * Return the number of complex values to represent the frequency-domain DFT representation.
-  */
-  static std::size_t calculateDftRepresentationSize( std::size_t blockLength );
-
-  /**
   * Return the number of complex values to represent the frequency-domain DFT representation when padded to the requested alignment.
   * @param blockLength The number of values consumed and produced in each process() call.
   * @param alignment The alignment (in number of complex elements)
@@ -196,6 +194,12 @@ public:
 private:
 
   /**
+  * Return the number of complex values to represent the frequency-domain DFT representation.
+  * This function is for internal use only, becuase it does not account for potential padding between DFT blocks (for alignment)
+  */
+  static std::size_t calculateDftRepresentationSize( std::size_t blockLength );
+
+  /**
    * The alignment used in all data members.
    * Also used for the representation of the FDL and the frequency-domain filter representation, which stores all partitions in a single matrix row,
    * possibly using zero padding to enforce the required alignment for each partition.
@@ -219,7 +223,7 @@ private:
    */
   std::size_t const mDftSize;
 
-  std::size_t const mDftRepresentationSize;
+//  std::size_t const mDftRepresentationSize;
 
   std::size_t const mDftRepresentationSizePadded;
 
