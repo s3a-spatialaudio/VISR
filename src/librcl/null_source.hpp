@@ -28,22 +28,17 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param width The width of the output port, i.e., the number of single signals.
    */
   explicit NullSource( SignalFlowContext const & context,
                        char const * name,
-                       CompositeComponent * parent = nullptr );
+                       CompositeComponent * parent,
+					   std::size_t width );
 
   /**
    * Destructor.
    */
-  ~NullSource();
-
-  /**
-   * Method to initialise the component.
-   * @note Within the rcl library, this method is non-virtual and can have an arbitrary signature of arguments.
-   * @param width The width of the output port, i.e., the number of single signals.
-   */ 
-  void setup( std::size_t width );
+  virtual ~NullSource();
 
   /**
    * The process function.

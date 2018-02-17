@@ -61,7 +61,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                       loudspeakerConfiguration.getNumRegularSpeakers(),
                      3 + (frequencyDependentPanning ?1:0) + (reverbConfig.empty() ? 0 : 1) )
  , mSubwooferMix( context, "SubwooferMixer", this )
- , mNullSource( context, "NullSource", this )
+ , mNullSource( context, "NullSource", this,
+               (numberOfOutputs == loudspeakerConfiguration.getNumRegularSpeakers() + loudspeakerConfiguration.getNumSubwoofers()) ? 0 : 1 )
  , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
  , mLowFrequencyPanningMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "LowFrequencyPanningMatrix", this ) : nullptr)
 {
@@ -327,7 +328,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                    mLoudspeakerOutput, ChannelList( activePlaybackChannels ) );
 
   std::size_t const numSilentOutputs = numberOfOutputs - (numberOfLoudspeakers + numberOfSubwoofers);
-  mNullSource.setup( numSilentOutputs == 0 ? 0 : 1 );
   if( numSilentOutputs > 0 )
   {
     std::vector<ChannelList::IndexType> nullOutput( numSilentOutputs, 0 );
