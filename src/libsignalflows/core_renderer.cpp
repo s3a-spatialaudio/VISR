@@ -211,7 +211,25 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
    * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source.
    */
   SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
-  mDiffusePartDecorrelator.setup( numberOfLoudspeakers, diffusionFilters, diffusorGain );
+  pml::FilterRoutingList decorrelatorRoutings;
+  for( std::size_t outIdx( 0 ); outIdx < numberOfLoudspeakers; ++outIdx )
+  {
+    decorrelatorRoutings.addRouting( 0, outIdx, outIdx, diffusorGain );
+  }
+  /*
+  void setup( std::size_t numberOfInputs,
+              std::size_t numberOfOutputs,
+              std::size_t filterLength,
+              std::size_t maxFilters,
+              std::size_t maxRoutings,
+              efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
+              pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
+              ControlPortConfig controlInputs = ControlPortConfig::None,
+              char const * fftImplementation = "default" );
+  */
+  mDiffusePartDecorrelator.setup( 1, numberOfLoudspeakers, diffusionFilters.numberOfColumns(),
+                                  diffusionFilters.numberOfRows(), diffusionFilters.numberOfRows(),
+                                  diffusionFilters, decorrelatorRoutings );
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();

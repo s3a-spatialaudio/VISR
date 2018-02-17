@@ -25,7 +25,6 @@
 #include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
 #include <librcl/signal_routing.hpp>
-#include <librcl/single_to_multi_channel_diffusion.hpp>
 
 #include <libpml/listener_position.hpp>
 #include <libpml/double_buffering_protocol.hpp>
@@ -131,7 +130,7 @@ private:
 
   rcl::GainMatrix mDiffusePartMatrix;
 
-  rcl::SingleToMultichannelDiffusion mDiffusePartDecorrelator;
+  rcl::FirFilterMatrix mDiffusePartDecorrelator;
 
   rcl::Add mDirectDiffuseMix;
 
