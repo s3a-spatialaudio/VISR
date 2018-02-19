@@ -9,6 +9,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <list>
+
 namespace visr
 {
 
@@ -38,6 +40,15 @@ void exportFilterRoutingParameter( pybind11::module & m)
   pybind11::class_<FilterRoutingList>( m, "FilterRoutingList" )
     .def( pybind11::init<>() )
     .def( pybind11::init<std::initializer_list<FilterRoutingParameter> const &>(), pybind11::arg("entries") )
+    .def( pybind11::init( [](std::list<FilterRoutingParameter> const & list )
+     {
+       FilterRoutingList * inst = new FilterRoutingList();
+       for( auto v : list )
+       {
+         inst->addRouting( v );
+       }
+       return inst;
+     } ), pybind11::arg( "entries" ), "Create from a Python iterable of FilterRoutingParameter objects." )
     .def( pybind11::init<const FilterRoutingList &>() )
     .def_static( "fromJson", [](FilterRoutingList &, std::string const & str ){ return FilterRoutingList::fromJson( str ); } )
     .def( "parseJson", static_cast<void(FilterRoutingList::*)(std::string const &)>(&FilterRoutingList::parseJson), pybind11::arg("initString") )
