@@ -36,11 +36,14 @@ void exportParameterPort( pybind11::module & m)
 
   pybind11::class_<ParameterInputBase, ParameterPortBase>( m, "ParameterInputBase" )
     .def( "protocolInput", &ParameterInputBase::protocolInput, pybind11::return_value_policy::reference )
+    .def_property_readonly( "protocol", &ParameterInputBase::protocolInput, pybind11::return_value_policy::reference,
+      "Access the port's protocol as a Python property" )
     ;
 
   pybind11::class_<ParameterOutputBase, ParameterPortBase>( m, "ParameterOutputBase" )
     .def( "protocolOutput", &ParameterOutputBase::protocolOutput, pybind11::return_value_policy::reference )
-    ;
+    .def_property_readonly( "protocol", &ParameterOutputBase::protocolOutput, pybind11::return_value_policy::reference,
+      "Access the port's protocol as a Python property" );
 
   pybind11::class_<PolymorphicParameterInput, ParameterInputBase>( m, "ParameterInput" )
     .def( pybind11::init<char const *, Component &, ParameterType const &, CommunicationProtocolType const &, ParameterConfigBase const &>(),
