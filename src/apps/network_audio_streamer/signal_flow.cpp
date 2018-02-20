@@ -53,8 +53,9 @@ SignalFlow::SignalFlow( SignalFlowContext const & context,
 
     std::stringstream nameStr;
     nameStr << "Sender_" << idx;
-    std::unique_ptr<rcl::UdpSender> newSender( new rcl::UdpSender( context, nameStr.str().c_str(), this ) );
-    newSender->setup( 0, hostName, port, rcl::UdpSender::Mode::Asynchronous ); // '0' means that an available port is used at the local endpoint.
+    std::unique_ptr<rcl::UdpSender> newSender( new rcl::UdpSender( context, nameStr.str().c_str(), this,
+                                                 0, hostName, port,
+                                                 rcl::UdpSender::Mode::Asynchronous ) ); // '0' means that an available port is used at the local endpoint.
 
     std::stringstream portNameStr;
     portNameStr << "msgOut" << idx;
