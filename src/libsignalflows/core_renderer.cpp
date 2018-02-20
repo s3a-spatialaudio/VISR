@@ -53,7 +53,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
  , mOutputAdjustment( context, "OutputAdjustment", this )
  , mGainCalculator( context, "VbapGainCalculator", this, numberOfInputs, loudspeakerConfiguration, not trackingConfiguration.empty(),
                     frequencyDependentPanning /*separate lowpass panning*/ )
- , mDiffusionGainCalculator( context, "DiffusionCalculator", this )
+ , mDiffusionGainCalculator( context, "DiffusionCalculator", this, numberOfInputs )
  , mVbapMatrix( context, "VbapGainMatrix", this )
  , mDiffusePartMatrix( context, "DiffusePartMatrix", this )
  , mDiffusePartDecorrelator( context, "DiffusePartDecorrelator", this )
@@ -73,7 +73,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   bool const trackingEnabled = not trackingConfiguration.empty( );
 
   parameterConnection( mObjectVectorInput, mGainCalculator.parameterPort( "objectVectorInput" ) );
-
 
   if( trackingEnabled )
   {
@@ -198,7 +197,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 
   //////////////////////////////////////////////////////////////////////////////////////
 
-  mDiffusionGainCalculator.setup( numberOfInputs );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
   parameterConnection( mObjectVectorInput,  mDiffusionGainCalculator.parameterPort("objectInput") );
   parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
