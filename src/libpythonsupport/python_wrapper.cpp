@@ -2,10 +2,6 @@
 
 #include "python_wrapper.hpp"
 
-// Whether to load the Python module from the full path or just the name.
-// As we are currently experiencing problems to retrieve the contained classes from a py::module, we use the 'full path' variant for the time being.
-#define PYTHON_WRAPPER_FULL_MODULE_PATH 1
-
 #include <libvisr/detail/compose_message_string.hpp>
 #include <libvisr/composite_component.hpp>
 #include <libvisr/audio_input.hpp>
@@ -15,25 +11,26 @@
 #include <libvisr/polymorphic_parameter_input.hpp>
 #include <libvisr/polymorphic_parameter_output.hpp>
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <libvisr/impl/component_implementation.hpp>
 #include <libvisr/impl/audio_port_base_implementation.hpp>
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
 
-// Not needed if modules loaded by name (provided that they are on the path)
-// In this case we only use pybind11 functionality.
-#ifdef PYTHON_WRAPPER_FULL_MODULE_PATH
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#endif
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
 #include <pybind11/eval.h>
 #include <pybind11/pytypes.h> // For testing purposes
+#include <pybind11/stl.h>
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 namespace visr
 {
@@ -42,25 +39,35 @@ namespace pythonsupport
 
 namespace py = pybind11;
 
-#ifdef PYTHON_WRAPPER_FULL_MODULE_PATH
 namespace // unnamed
 {
 
-py::object loadModule( std::string const & module,
-                       std::string const & path,
+using PathList = std::vector<std::string>;
+
+/**
+ * Internal function to load a Python module.
+ * @param moduleName The name of the module, as it would be used in a Python 'import' statement. I.e., without 
+ * path or extension
+ * @param modulePath Optional search path for the location of the Python path. In any case, the Python 
+ * sys.path is searched, which includes the value of <tt>$PYTHONPATH</tt>.
+ * @param globals Any variables or definitions to be passed to the Python interpreter.
+ * @return A Python <b>module</b> object.
+ */
+py::object loadModule( std::string const & moduleName,
+                       PathList const & modulePath,
                        py::object & globals)
 {
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/
   py::dict locals;
-  locals["module_name"] = py::cast(module); // have to cast the std::string first
-  locals["path"]        = py::cast(path);
-
+  locals["moduleName"] = py::cast(moduleName);
+  locals["path"] = modulePath.empty() ? py::none() : py::cast( modulePath );
   try
   {
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
-      "new_module = imp.load_module(module_name, open(path), path, ('py', 'U', imp.PY_SOURCE))\n",
+      "name, modulePath, description = imp.find_module( moduleName, path)\n"
+      "new_module = imp.load_module(str(name), open(modulePath), modulePath, ('py', 'U', imp.PY_SOURCE))\n",
       globals,
       locals);
   }
@@ -72,7 +79,6 @@ py::object loadModule( std::string const & module,
 }
 
 } // unnamed namespace
-#endif
 
 class PythonWrapper::Impl
 {
@@ -80,10 +86,11 @@ public:
   explicit Impl( SignalFlowContext const & context,
                  char const * name,
                  PythonWrapper * parent,
-                 char const * modulePath,
+                 char const * moduleName,
                  char const * componentClassName,
                  char const * positionalArguments,
-                 char const * keywordArguments );
+                 char const * keywordArguments,
+                 char const * moduleSearchPath = nullptr );
 private:
   /**
   * A vector holding an arbitrary number of input ports
@@ -117,46 +124,53 @@ private:
 PythonWrapper::PythonWrapper( SignalFlowContext const & context,
                               char const * name,
                               CompositeComponent * parent,
-                              char const * modulePath,
+                              char const * moduleName,
                               char const * componentClassName,
                               char const * positionalArguments,
-                              char const * keywordArguments )
+                              char const * keywordArguments,
+                              char const * moduleSearchPath /*= nullptr*/ )
   : CompositeComponent( context, (std::string(name)+std::string("_wrapper")).c_str(), parent )
-  , mImpl( new Impl( context, name, this, modulePath, componentClassName, positionalArguments, keywordArguments ) )
+  , mImpl( new Impl( context, name, this, moduleName, componentClassName,
+                    positionalArguments, keywordArguments, moduleSearchPath ) )
 {}
 
 
 PythonWrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * name,
                            PythonWrapper * parent,
-                           char const * modulePath,
+                           char const * moduleName,
                            char const * componentClassName,
                            char const * positionalArguments,
-                           char const * keywordArguments )
+                           char const * keywordArguments,
+                           char const * moduleSearchPath)
 {
-#ifndef PYTHON_WRAPPER_FULL_MODULE_PATH
-  mModule = py::module( modulePath );
-#else
-  boost::filesystem::path const modPath( modulePath );
-
-  if( not exists( modPath ) )
+  // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
+  PathList searchPath;
+  boost::algorithm::split( searchPath, moduleSearchPath, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
+  // Prune empty entries
+  searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(),
+				   [](std::string const & s){return s.empty(); } ),
+		   searchPath.end() );
+  for( auto const & str : searchPath )
   {
-    throw std::invalid_argument( "The provided module path dows not exist." );
+    if( not exists( boost::filesystem::path(str)) )
+    {
+      throw std::invalid_argument( visr::detail::composeMessageString( "PythonWrapper: Directory \"", str,
+        "\" in module search path does not exist." ));
+    }
   }
-  boost::filesystem::path const moduleName = modPath.stem();
 
   py::object main     = py::module::import("__main__");
   py::object globals  = main.attr("__dict__");
 
   try
   {
-    mModule = loadModule( moduleName.string(), modPath.string(), globals );
+    mModule = loadModule( std::string(moduleName), searchPath, globals );
   }
   catch( std::exception const & ex )
   {
     throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
   }
-#endif
 
   mComponentClass = mModule.attr( componentClassName );
 

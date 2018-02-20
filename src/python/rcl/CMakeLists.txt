@@ -3,6 +3,7 @@
 set( SOURCES
 add.cpp
 biquad_iir_filter.cpp
+cap_gain_calculator.cpp
 channel_object_routing_calculator.cpp
 crossfading_fir_filter_matrix.cpp
 delay_matrix.cpp

@@ -148,7 +148,7 @@ private:
    * The dimension of the loudspeaker and position vectors.
    * Either 3 for a standard 3D panning setup, or 2 for a horizontal-only setup.
    */
-  std::size_t mVectorDimension;
+  std::size_t const mVectorDimension;
 
   efl::BasicMatrix<CoefficientType> mLoudspeakerPositions;
 

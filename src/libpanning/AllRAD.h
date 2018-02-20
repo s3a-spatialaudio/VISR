@@ -50,12 +50,12 @@ public:
 
   /**
    * Return the current matrix of decoding gains.
-   * Dimension: numberOfHarmonics x mumberOfRelarLoudspeakers
+   * Dimension: numberOfHarmonics x mumberOfRegularLoudspeakers
    */
   efl::BasicMatrix<Afloat> const & decodingGains() const
-        {
+  {
     return mRealDecodeCoefficients;
-        }
+  }
 private:
 
   /**

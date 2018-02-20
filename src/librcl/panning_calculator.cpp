@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <iterator>
 #include <numeric>
+#include <valarray>
 
 // for math utility functions (see implementations in the unnamed namespace below)
 
@@ -155,13 +156,21 @@ void PanningCalculator::process()
       if( pointSrc )
       {
         // channelLock processing first
-        std::vector<SampleType> sourcePos( mVectorDimension );
+        std::valarray<SampleType> sourcePos( mVectorDimension );
+	// Source positions need to be normalised before channel lock processing
         sourcePos[0] = pointSrc->x();
         sourcePos[1] = pointSrc->y();
         if( mVectorDimension == 3 )
         {
           sourcePos[2] = pointSrc->z();
+	  SampleType const norm = std::sqrt( sourcePos[0]*sourcePos[0]+sourcePos[1]*sourcePos[1] + sourcePos[2]*sourcePos[2 ] );
+          sourcePos = static_cast<SampleType>(1.0)/norm * sourcePos;
         }
+	else
+	{
+	  SampleType const norm = std::sqrt( sourcePos[0]*sourcePos[0]+sourcePos[1]*sourcePos[1] );
+	  sourcePos = static_cast<SampleType>(1.0)/norm * sourcePos;
+	}
 
         efl::ErrorCode res = efl::product( &sourcePos[0], mLoudspeakerPositions.data(), mTmpGains.data(),
                                            1 /*numResultRows*/, mNumberOfRegularLoudspeakers /* numResultColumns */, mVectorDimension /*numOp1Columns*/,

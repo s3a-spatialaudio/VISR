@@ -68,22 +68,29 @@ int main( int argc, char const * const * argv )
         const std::size_t periodSize = cmdLineOptions.getDefaultedOption<std::size_t>( "period", 1024 );
         const std::size_t samplingRate = cmdLineOptions.getDefaultedOption<std::size_t>( "sampling-frequency", 48000 );
 
-        boost::filesystem::path const modulePath( cmdLineOptions.getOption<std::string>( "module-path" ) );
-        if( not exists(modulePath) )
-        {
-            std::cerr << "The specified Python module path \""
-            << modulePath.string() << "\" does not exist." << std::endl;
-            return EXIT_FAILURE;
-        }
+        boost::filesystem::path const moduleName( cmdLineOptions.getOption<std::string>( "module-name" ) );
         std::string const pythonClassName = cmdLineOptions.getOption<std::string>( "python-class-name");
         std::string const objectName = cmdLineOptions.getDefaultedOption<std::string>( "object-name", "PythonFlow" );
         std::string const positionalArgs = cmdLineOptions.getDefaultedOption<std::string>( "positional-arguments", "" );
         std::string const kwArgs = cmdLineOptions.getDefaultedOption<std::string>( "keyword-arguments", "" );
-        
+        boost::filesystem::path const moduleSearchPath = cmdLineOptions.getDefaultedOption<std::string>( "module-search-path", "" );
+
+        if( (not moduleSearchPath.empty() ) and (not exists(moduleSearchPath)) )
+        {
+          std::cerr << "The specified Python module search path \""
+          << moduleSearchPath.string() << "\" does not exist." << std::endl;
+          return EXIT_FAILURE;
+        }
+
         SignalFlowContext const ctxt( periodSize, samplingRate );
-        pythonsupport::PythonWrapper topLevelComponent( ctxt, objectName.c_str(), nullptr,
-                                                       modulePath.string().c_str(), pythonClassName.c_str(),
-                                                       positionalArgs.c_str(), kwArgs.c_str() );
+        pythonsupport::PythonWrapper topLevelComponent( ctxt,
+                                                        objectName.c_str(),
+                                                        nullptr, // parent component (this is top level)
+                                                        moduleName.string().c_str(),
+                                                        pythonClassName.c_str(),
+                                                        positionalArgs.c_str(),
+                                                        kwArgs.c_str(),
+                                                        moduleSearchPath.string().c_str() );
         
         rrl::AudioSignalFlow flow( topLevelComponent );
         

@@ -9,7 +9,7 @@
 #include <libvisr/audio_output.hpp>
 
 #include <librcl/gain_matrix.hpp>
-#include <librcl/panning_gain_calculator.hpp>
+#include <librcl/panning_calculator.hpp>
 #include <librcl/scene_decoder.hpp>
 #include <librcl/scene_encoder.hpp>
 #include <librcl/udp_receiver.hpp>
@@ -38,18 +38,12 @@ public:
 
   ~SignalFlow();
 
-  /*virtual*/ void process();
-
-  /*virtual*/ void setup();
-
 private:
   const std::size_t cNumberOfInputs;
 
   const std::size_t cNumberOfOutputs;
 
   const std::size_t cInterpolationSteps;
-
-  const std::string mConfigFileName;
 
   const std::size_t mNetworkPort;
 
@@ -65,7 +59,7 @@ private:
 
   rcl::UdpSender mSceneSender;
 
-  rcl::PanningGainCalculator mGainCalculator;
+  rcl::PanningCalculator mGainCalculator;
 
   rcl::GainMatrix mMatrix;
 };
