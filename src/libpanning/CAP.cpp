@@ -26,14 +26,6 @@ CAP::CAP()
 
 int CAP::calcGains(){
 
-    //! Slow triplet search
-    // Find triplet with highest minimum-gain-in-triplet (may be negative)
-
-#ifdef CAP_DEBUG_MESSAGES
-    printf("setListenerPosition %f %f %f\n",m_listenerPos.x,m_listenerPos.y,m_listenerPos.z);
-#endif
-
-
     m_gain.zeroFill();
     
     // Abbreviated variables:

@@ -40,7 +40,7 @@ if platform == 'linux' or platform == 'linux2':
     port = "/dev/ttyUSB0"
 elif platform == 'darwin':
     port = "/dev/cu.usbserial-AJ03GSC8"
-elif platform == 'windows
+elif platform == 'windows':
     port = "COM10"
 baud = 57600
 

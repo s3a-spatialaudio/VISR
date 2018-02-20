@@ -17,7 +17,7 @@ from extractDelayInSofaFile import extractDelayInSofaFile
 
 import os
 from urllib.request import urlretrieve
-from system import platform
+from sys import platform
 
 ############ CONFIG ###############
 fs = 48000
@@ -26,7 +26,7 @@ numBinauralObjects = 64
 numOutputChannels = 2;
 
 # switch dynamic tracking on and off.
-useTracking = False
+useTracking = True
 useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
@@ -35,7 +35,7 @@ useHRIRinterpolation = True
 if platform == 'linux' or platform == 'linux2':
     port = "/dev/ttyUSB0"
 elif platform == 'darwin':
-    port = "/dev/cu.usbserial-AJ03GSC8"
+    port = "/dev/cu.usbserial-AJ03GR8O"
 elif platform == 'windows':
     port = "COM10"
 
