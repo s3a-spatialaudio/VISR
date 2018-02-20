@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <librcl/null_source.hpp>
+#include <librcl/diffusion_gain_calculator.hpp>
 
 #include <libvisr/atomic_component.hpp>
 #include <libvisr/composite_component.hpp>
@@ -17,15 +17,15 @@ namespace rcl
 
 namespace py = pybind11;
 
-void exportNullSource( py::module & m )
+void exportDiffusionGainCalculator( py::module & m )
 {
-  using visr::rcl::NullSource;
+  using visr::rcl::DiffusionGainCalculator;
 
-  py::class_<visr::rcl::NullSource, visr::AtomicComponent >( m, "NullSource" )
+  py::class_<visr::rcl::DiffusionGainCalculator, visr::AtomicComponent >( m, "DiffusionGainCalculator" )
     .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*, std::size_t>(),
       pybind11::arg("context"), pybind11::arg("name"),
       pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
-      pybind11::arg("width") = 1 )
+      pybind11::arg("numberOfObjectChannels") )
   ;
 }
 

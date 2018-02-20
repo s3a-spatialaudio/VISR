@@ -7,6 +7,7 @@ cap_gain_calculator.cpp
 channel_object_routing_calculator.cpp
 delay_matrix.cpp
 delay_vector.cpp
+diffusion_gain_calculator.cpp
 fir_filter_matrix.cpp
 gain_matrix.cpp
 gain_vector.cpp
@@ -21,6 +22,7 @@ signal_routing.cpp
 time_frequency_inverse_transform.cpp
 time_frequency_transform.cpp
 udp_receiver.cpp
+udp_sender.cpp
 )
 
 # We don't need header files

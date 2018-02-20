@@ -16,6 +16,7 @@ namespace rcl
   void exportChannelObjectRoutingCalculator( pybind11::module & m );
   void exportDelayVector( pybind11::module & m );
   void exportDelayMatrix( pybind11::module & m );
+  void exportDiffusionGainCalculator( pybind11::module & m );
   void exportFirFilterMatrix( pybind11::module & m );
   void exportGainMatrix( pybind11::module & m );
   void exportGainVector( pybind11::module & m );
@@ -29,6 +30,7 @@ namespace rcl
   void exportTimeFrequencyTransform( pybind11::module & m );
   void exportTimeFrequencyInverseTransform( pybind11::module & m );
   void exportUdpReceiver( pybind11::module & m );
+  void exportUdpSender( pybind11::module & m );
 }
 }
 }
@@ -46,6 +48,7 @@ PYBIND11_MODULE(rcl, m)
   exportChannelObjectRoutingCalculator( m );
   exportDelayMatrix( m );
   exportDelayVector( m );
+  exportDiffusionGainCalculator( m );
   exportFirFilterMatrix( m );
   exportGainMatrix( m );
   exportGainVector( m );
@@ -59,4 +62,5 @@ PYBIND11_MODULE(rcl, m)
   exportTimeFrequencyInverseTransform( m );
   exportTimeFrequencyTransform( m );
   exportUdpReceiver( m );
+  exportUdpSender( m );
 }
