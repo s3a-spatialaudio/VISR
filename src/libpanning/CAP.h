@@ -36,7 +36,7 @@ private:
     XYZ const * m_sourcePos;
     std::size_t m_nSources;
     Afloat m_maxGain = 10.0f;
-    
+    Afloat m_reorientMatrix[3][3] = {{1.0f,0.0f,0.0f}, {0.0f,1.0f,0.0f}, {0.0f,0.0f,1.0f}};
     
     
 public:
@@ -62,6 +62,11 @@ public:
 
         return 0;
     }
+    
+    
+    
+    int setListenerOrientation(Afloat yaw, Afloat pitch, Afloat roll, bool zero);
+
     
     
     int setListenerAuralAxis(Afloat x, Afloat y, Afloat z){
