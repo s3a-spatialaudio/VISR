@@ -42,6 +42,7 @@ public:
    * @param positionalArguments Comma-separated list of positional arguments to be passed to the constructor of the Python component. 
    * This list must not include the \p context, \p name, and \p parent arguments which are provided automatically.
    * @param keywordArguments Optional, comma-separated key-value pairs of the form "key:value" to provide keyword arguments to the Python component.
+   * @param moduleSearchPath Optional, comma-separated list of directories to search for the module named by the \p moduleName option (in addition to the default search path).
    */
   explicit PythonWrapper( SignalFlowContext const & context,
                           char const * name,

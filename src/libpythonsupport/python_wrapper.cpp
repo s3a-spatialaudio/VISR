@@ -11,6 +11,7 @@
 #include <libvisr/polymorphic_parameter_input.hpp>
 #include <libvisr/polymorphic_parameter_output.hpp>
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/detail/compose_message_string.hpp>
 
 #include <libvisr/impl/component_implementation.hpp>
 #include <libvisr/impl/audio_port_base_implementation.hpp>
@@ -18,14 +19,18 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
 #include <pybind11/eval.h>
 #include <pybind11/pytypes.h> // For testing purposes
+#include <pybind11/stl.h>
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 namespace visr
 {
@@ -37,6 +42,7 @@ namespace py = pybind11;
 namespace // unnamed
 {
 
+using PathList = std::vector<std::string>;
 
 /**
  * Internal function to load a Python module.
@@ -48,14 +54,14 @@ namespace // unnamed
  * @return A Python <b>module</b> object.
  */
 py::object loadModule( std::string const & moduleName,
-                       std::string const & modulePath,
+                       PathList const & modulePath,
                        py::object & globals)
 {
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/
   py::dict locals;
   locals["moduleName"] = py::cast(moduleName);
-  locals["path"] = modulePath.empty() ? py::none() : py::cast(modulePath);
+  locals["path"] = modulePath.empty() ? py::none() : py::cast( modulePath );
   try
   {
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
@@ -139,10 +145,19 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * moduleSearchPath)
 {
   // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
-  boost::filesystem::path const modPath( moduleSearchPath );
-  if( (not modPath.empty()) and (not exists( modPath )) )
+  PathList searchPath;
+  boost::algorithm::split( searchPath, moduleSearchPath, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
+  // Prune empty entries
+  searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(),
+				   [](std::string const & s){return s.empty(); } ),
+		   searchPath.end() );
+  for( auto const & str : searchPath )
   {
-    throw std::invalid_argument( "The provided module path dows not exist." );
+    if( not exists( boost::filesystem::path(str)) )
+    {
+      throw std::invalid_argument( visr::detail::composeMessageString( "PythonWrapper: Directory \"", str,
+        "\" in module search path does not exist." ));
+    }
   }
 
   py::object main     = py::module::import("__main__");
@@ -150,7 +165,7 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
 
   try
   {
-    mModule = loadModule( std::string(moduleName), modPath.string(), globals );
+    mModule = loadModule( std::string(moduleName), searchPath, globals );
   }
   catch( std::exception const & ex )
   {

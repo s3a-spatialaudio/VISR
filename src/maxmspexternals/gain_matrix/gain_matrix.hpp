@@ -8,7 +8,7 @@
 
 #include <libpml/matrix_parameter.hpp>
 
-#include <libsignalflows/gain_matrix.hpp>
+#include <librcl/gain_matrix.hpp>
 
 // We have to include these files last because they pull in the Max/MSP headers which do some very nasty 
 // stuff such as defining macros min, max, and error
@@ -59,7 +59,7 @@ private:
    */
   std::unique_ptr<SignalFlowContext> mContext;
 
-  std::unique_ptr<signalflows::GainMatrix> mFlow;
+  std::unique_ptr<rcl::GainMatrix> mFlow;
   std::unique_ptr<maxmsp::SignalFlowWrapper<double> > mFlowWrapper;
 
   pml::MatrixParameter<SampleType> mGains;
