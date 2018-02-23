@@ -77,13 +77,12 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   if( trackingEnabled )
   {
     // Instantiate the objects.
-    mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation", this ) );
+    mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation", this, loudspeakerConfiguration ) );
     mListenerGainDelayCompensation.reset( new rcl::DelayVector( context, "ListenerGainDelayCompensation", this ) );
 
     // for the very moment, do not parse any options, but use hard-coded option values.
     SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
 
-    mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mListenerGainDelayCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay, "lagrangeOrder0",
                                            rcl::DelayVector::MethodDelayPolicy::Limit,

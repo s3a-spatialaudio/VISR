@@ -46,18 +46,17 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param arrayConfig The loudspeaker configuration.
    */
   explicit ListenerCompensation( SignalFlowContext const & context,
                                  char const * name,
-                                 CompositeComponent * parent = nullptr );
+                                 CompositeComponent * parent,
+                                 panning::LoudspeakerArray const & arrayConfig );
 
   /**
    * Disabled (deleted) copy constructor
    */
   ListenerCompensation(ListenerCompensation const &) = delete;
-
-
-  void setup( panning::LoudspeakerArray const & arrayConfig );
 
   /**
    * The process function.
@@ -93,13 +92,12 @@ private:
 
   panning::LoudspeakerArray m_array; //passing the address of the loudspeaker array
   panning::XYZ m_listenerPos; //position of the listener
-  std::size_t mNumberOfLoudspeakers;
+  std::size_t const mNumberOfLoudspeakers;
 
   ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition > mPositionInput;
   ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<Afloat> > mGainOutput;
   ParameterOutput<pml::DoubleBufferingProtocol, pml::VectorParameter<Afloat> > mDelayOutput;
 };//class Listener Compensation
-
 
 } // namespace rcl
 } // namespace visr
