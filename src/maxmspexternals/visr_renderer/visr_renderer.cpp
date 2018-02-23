@@ -12,6 +12,8 @@
 
 #include <libpanning/LoudspeakerArray.h>
 
+#include <libpml/initialise_parameter_library.hpp>
+
 #include <libvisr/signal_flow_context.hpp>
 
 #include <libsignalflows/baseline_renderer.hpp>
@@ -60,6 +62,8 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
  : ExternalBase( maxProxy )
  , mArrayConfiguration( new panning::LoudspeakerArray )
 {
+  pml::initialiseParameterLibrary();
+
   object_post( reinterpret_cast<t_object *>(getMaxProxy()), "VisrRenderer::VisrRenderer() constructor called." );
   try
   {
@@ -161,13 +165,13 @@ VisrRenderer::~VisrRenderer()
 
 /*virtual*/ void VisrRenderer::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
-  mPeriod = maxvectorsize;
+  long period = maxvectorsize;
   // Request the actual buffer size
   if( maxvectorsize > std::numeric_limits<short>::max() )
   {
     error( "The maximum vector length is larger than the maximum value to be returned by the \"count\" variable." );
   }
-  *count = static_cast<short>(mPeriod);
+  *count = static_cast<short>(period);
 
   try
   {
@@ -177,9 +181,9 @@ VisrRenderer::~VisrRenderer()
     // Ideally, this roughly matches the update rate of the scene sender.
     // Provide a special case where the period is longer than the default period.
     // In this case the signal flow would produce an exception to avoid a 'staircased' gain trajectory.
-    const std::size_t cInterpolationLength = std::max( 2048l, mPeriod );
+    const std::size_t cInterpolationLength = std::max( 2048l, period );
 
-    SignalFlowContext const context{ static_cast<std::size_t>(mPeriod), samplingFrequency};
+    mContext.reset( new SignalFlowContext{ static_cast<std::size_t>(period), samplingFrequency} );
 
     /*
     explicit BaselineRenderer( SignalFlowContext const & context,
@@ -196,7 +200,7 @@ VisrRenderer::~VisrRenderer()
       std::string const & reverbConfig,
       bool frequencyDependentPanning );
 */
-    mFlow.reset( new signalflows::BaselineRenderer( context, "VisrRenderer", nullptr,
+    mFlow.reset( new signalflows::BaselineRenderer( *mContext, "VisrRenderer", nullptr,
                                                     *mArrayConfiguration,
                                                     mNumberOfObjects, mNumberOfOutputs,
                                                     cInterpolationLength,
@@ -218,8 +222,8 @@ VisrRenderer::~VisrRenderer()
 }
 
 /*virtual*/ void VisrRenderer::perform( t_object *dsp64, double **ins,
-                                           long numins, double **outs, long numouts,
-                                           long sampleframes, long flags, void *userparam )
+                                        long numins, double **outs, long numouts,
+                                        long sampleframes, long flags, void *userparam )
 {
   if( numins != mNumberOfObjects )
   {
@@ -229,7 +233,7 @@ VisrRenderer::~VisrRenderer()
   {
     error( "VisrRenderer::perform(): Parameter \"numouts\" does not match the number of configured output channels." );
   }
-  if( sampleframes != mPeriod )
+  if( sampleframes != static_cast<long>(mContext->period()) )
   {
     error( "VisrRenderer::perform( ): The number of requested samples %d  does not match the given block length." );
   }
