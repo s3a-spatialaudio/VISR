@@ -17,6 +17,7 @@ object_gain_eq_calculator.cpp
 panning_calculator.cpp
 rcl.cpp
 scene_decoder.cpp
+scene_encoder.cpp
 scalar_osc_decoder.cpp
 signal_routing.cpp
 time_frequency_inverse_transform.cpp

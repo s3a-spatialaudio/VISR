@@ -53,7 +53,6 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 
 {
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Asynchronous );
-  mSceneDecoder.setup();
 
   audioConnection( mInput, mCoreRenderer.audioPort( "audioIn") );
   audioConnection( mCoreRenderer.audioPort( "audioOut"), mOutput );
