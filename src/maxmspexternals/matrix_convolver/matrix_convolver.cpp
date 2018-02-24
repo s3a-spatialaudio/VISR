@@ -142,13 +142,13 @@ MatrixConvolver::~MatrixConvolver()
 
 /*virtual*/ void MatrixConvolver::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
-  mPeriod = maxvectorsize;
+  long const period = maxvectorsize;
   // Request the actual buffer size
   if( maxvectorsize > std::numeric_limits<short>::max() )
   {
     error( "The maximum vector length is larger than the maximum value to be returned by the \"count\" variable." );
   }
-  *count = static_cast<short>(mPeriod);
+  *count = static_cast<short>(period);
 
   try
   {
@@ -166,10 +166,9 @@ MatrixConvolver::~MatrixConvolver()
       mNumMaxFilters= initialFilters.numberOfRows( );
     }
 
-    // TODO: Livetime must exceed that of the flow.
-    SignalFlowContext const context{ static_cast<std::size_t>(mPeriod), samplingFrequency };
+    mContext.reset( new SignalFlowContext{ static_cast<std::size_t>(period), samplingFrequency } );
 
-    mFlow.reset( new rcl::FirFilterMatrix( context, "MatrixComvolver", nullptr ) );
+    mFlow.reset( new rcl::FirFilterMatrix( *mContext, "MatrixConvolver", nullptr ) );
     mFlow->setup( mNumberOfInputs, mNumberOfOutputs,
                   mMaxFilterLength,
                   mNumMaxFilters,
@@ -183,7 +182,7 @@ MatrixConvolver::~MatrixConvolver()
   catch( std::exception const & e )
   {
     error( "Error while initialising the signal flow %s", e.what() );
-    return;
+    throw e;
   }
 }
 
@@ -199,9 +198,15 @@ MatrixConvolver::~MatrixConvolver()
   {
     error( "MatrixConvolver::perform(): Parameter \"numouts\" does not match the number of configured output channels." );
   }
-  if( sampleframes != mPeriod )
+  if( sampleframes != static_cast<long>(mContext->period()) )
   {
     error( "MatrixConvolver::perform( ): The number of requested samples %d  does not match the given block length." );
+  }
+
+  if( not mFlowWrapper )
+  {
+    error( "MatrixConvolver::perform called although there is no signal flow." );
+    return;
   }
   try
   {
@@ -209,7 +214,7 @@ MatrixConvolver::~MatrixConvolver()
   }
   catch( std::exception const & e )
   {
-    error( "Error while initialising the signal flow %s", e.what() );
+    error( "Error while executing the signal flow %s", e.what() );
     return;
   }
 }

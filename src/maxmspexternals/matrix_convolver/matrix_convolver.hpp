@@ -36,23 +36,23 @@ public:
 
   ~MatrixConvolver();
 
-  /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags);
+  /*virtual*/ void initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags) override;
 
   /*virtual*/ void perform( t_object *dsp64, double **ins,
                             long numins, double **outs, long numouts,
-                            long sampleframes, long flags, void *userparam);
+                            long sampleframes, long flags, void *userparam) override;
 
-  /*virtual*/ void assist( void *b, long msg, long arg, char *dst );
+  /*virtual*/ void assist( void *b, long msg, long arg, char *dst ) override;
 
 
-  /*virtual*/ void getFloat( double f );
+  /*virtual*/ void getFloat( double f ) override;
 
 private:
   /**
-   * The number of samples to be processed per call.
-   * The type is chosen to be compatible to the parameter passed by the calling Max/MSP functions.
+   ß*
    */
-  long mPeriod;
+  std::unique_ptr<SignalFlowContext> mContext;
+
   std::size_t mNumberOfInputs;
   std::size_t mNumberOfOutputs;  
   
