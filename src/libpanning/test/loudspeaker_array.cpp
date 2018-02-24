@@ -31,45 +31,32 @@ BOOST_AUTO_TEST_CASE( LoudspeakerArrayLoad)
   std::size_t numfiles = 4;
   std::vector<boost::filesystem::path> configFiles(numfiles);
   
-  LoudspeakerArray regArray;
+//  LoudspeakerArray regArray;
   
-  std::size_t numberOfSources = 8;
+  //std::size_t numberOfSources = 8;
 
-  std::vector<XYZ> sourcePos( numberOfSources );
+  // std::vector<XYZ> sourcePos( numberOfSources );
 
-  FILE* file;
+//  FILE* file;
     
   boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
   boost::filesystem::path const sourceDir( CMAKE_CURRENT_SOURCE_DIR );
-
-  // Useage / test VBAP with 8 sources around an octahedron array
-
-//  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/cube_audiolab.txt");
-//  boost::filesystem::path bfile = configDir / boost::filesystem::path("generic/octahedron.txt");
-//  boost::filesystem::path bfile = configDir / boost::filesystem::path("isvr/9.1_audiolab.txt");
-
 
   configFiles[0] = (configDir / boost::filesystem::path( "isvr/audiolab_stereo_1sub_with_rerouting.xml" ));
   configFiles[1] = (configDir / boost::filesystem::path( "isvr/audiolab_39speakers_1subwoofer.xml" ));
   configFiles[2] = (configDir / boost::filesystem::path( "bbc/bs2051-9+10+3.xml" ));
   configFiles[3] = (configDir / boost::filesystem::path( "generic/bs2051-9+10+3.xml" ));
 
-  
-  
-  
-  
-  for(size_t i =0; i<numfiles; i++){
+  for(size_t i =0; i<numfiles; i++)
+  {
     LoudspeakerArray array;
-//  BOOST_CHECK_MESSAGE( exists(configFiles[i]), "Loudspeaker configuration text file dows not exist." );
-  BOOST_ASSERT( exists(configFiles[i] ));
-  file = fopen( configFiles[i].string().c_str(), "r" );
-  BOOST_CHECK( file != 0 );
-  BOOST_CHECK_NO_THROW( array.loadXmlFile( configFiles[i].string() ));
+    //  BOOST_CHECK_MESSAGE( exists(configFiles[i]), "Loudspeaker configuration text file dows not exist." );
+    BOOST_ASSERT( exists(configFiles[i] ));
+    // file = fopen( configFiles[i].string().c_str(), "r" );
+    // BOOST_CHECK( file != 0 );
+    BOOST_CHECK_NO_THROW( array.loadXmlFile( configFiles[i].string() ));
 
-  fclose( file );
-  
     std::cout<<"FILE: "<<configFiles[i].string()<<" parsed correctly"<<std::endl;
-  
   
 //  
 //    std::size_t const numCols = array.getNumRegularSpeakers();
@@ -167,10 +154,11 @@ BOOST_AUTO_TEST_CASE( LoadArrayConfigXmlFile )
   std::vector<std::size_t> chan ( array.getLoudspeakerChannels(), array.getLoudspeakerChannels()+ array.getNumRegularSpeakers());
   std::vector<LoudspeakerArray::ChannelIndex>::iterator pos = std::adjacent_find( chan.begin(), chan.end(), std::greater<std::size_t>() );
   BOOST_CHECK( pos == chan.end() );
-  for(std::size_t w=0; w< array.getNumRegularSpeakers();w++)
-  {
-    std::size_t ch = array.getSpeakerChannel( w );
-    //std::cout<<"w: "<<w<< " chn: "<< array.getSpeakerChannel( w )<<" spk: "<< array.getSpeakerIndexFromChn(ch+1)<<std::endl;
-    // BOOST_CHECK( w == array.(ch));
-  }
+  // Doesn't make sense at the moment.
+//  for(std::size_t w=0; w< array.getNumRegularSpeakers();w++)
+//  {
+//    std::size_t ch = array.getSpeakerChannel( w );
+//    //std::cout<<"w: "<<w<< " chn: "<< array.getSpeakerChannel( w )<<" spk: "<< array.getSpeakerIndexFromChn(ch+1)<<std::endl;
+//    // BOOST_CHECK( w == array.(ch));
+//  }
 }

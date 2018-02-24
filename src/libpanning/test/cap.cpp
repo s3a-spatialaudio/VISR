@@ -49,7 +49,17 @@ void capTestCase( std::string const & arrayConfig,
 
   BOOST_CHECK( cap.calcGains() == 0);
 
-  efl::BasicMatrix<Afloat> const & gains = cap.getGains();
+  if( not referenceGains.empty() )
+  {
+    efl::BasicMatrix<Afloat> const & gains = cap.getGains();
+    BOOST_CHECK_MESSAGE( gains.numberOfRows() == referenceGains.size(), "CAP gain vector size differs from reference." );
+
+    std::size_t const numCheckEl = std::min( gains.numberOfRows(), referenceGains.size() );
+    for( std::size_t idx(0); idx < numCheckEl; ++idx )
+    {
+      BOOST_CHECK_CLOSE( gains(idx,0), referenceGains[idx], 1.0e-4f );
+    }
+  }
 }
 
 /**
@@ -92,8 +102,8 @@ BOOST_AUTO_TEST_CASE( Cap2Loudspeakers )
   XYZ const listenerPos( 0.0f, 0.0f, 0.0f );
   XYZ const auralAxis( 0.0f, 1.0f, 0.0f ); // head forward (rL left)
 
-  // TODO: Add expected gains
-  capTestCase( arrayTwoSpeakers, sourcePos, listenerPos, auralAxis, {0.5f, 0.5f } );
+  // TODO: Add reference gains!
+  capTestCase( arrayTwoSpeakers, sourcePos, listenerPos, auralAxis /*, {0.5f, 0.5f }*/ );
 }
 
 BOOST_AUTO_TEST_CASE( Cap3Loudspeakers )
@@ -103,7 +113,8 @@ BOOST_AUTO_TEST_CASE( Cap3Loudspeakers )
   XYZ const auralAxis( 0.0f, 1.0f, 0.0f );           // head forward (rL left)
   // XYZ const auralAxis( -1.0f, 0.0f, 0.0f );       // head left (rL back)
 
-  capTestCase( arrayThreeSpeakers, sourcePos, listenerPos, auralAxis, { 0.5f, 0.5f, 0.5f } );
+  // TODO: Add reference gains!
+  capTestCase( arrayThreeSpeakers, sourcePos, listenerPos, auralAxis /*, { 0.5f, 0.5f, 0.5f }*/ );
 }
 
 } // namespace test
