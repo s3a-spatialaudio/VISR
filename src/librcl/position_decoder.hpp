@@ -34,6 +34,12 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param offsetKinect Offset position of the acquisition device (specific geometry assumptions for the Kinect
+   * @param qw W component of the quaternion describing the coordinate system rotation into the renderer's system
+   * @param qx X component of the quaternion describing the coordinate system rotation into the renderer's system
+   * @param qy Y component of the quaternion describing the coordinate system rotation into the renderer's system
+   * @param qz Z component of the quaternion describing the coordinate system rotation into the renderer's system
+   * @todo Provide a general implementation for transforming the coordinate system.
    */
   explicit PositionDecoder( SignalFlowContext const & context,
                             char const * name,
@@ -47,9 +53,6 @@ public:
    * Disabled (deleted) copy constructor
    */
   PositionDecoder( PositionDecoder const & ) = delete;
-
-
-
 
   /**
    * Destructor.
