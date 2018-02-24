@@ -46,11 +46,8 @@ SignalFlow::SignalFlow( SignalFlowContext & context,
    // Initialise and configure audio components
 
    mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous );
-   mSceneDecoder.setup();
 
    mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
-
-   mSceneEncoder.setup();
 
    audioConnection( "this", "in", ChannelRange( 0, cNumberOfInputs ), "GainMatrix", "in", ChannelRange( 0, cNumberOfInputs ) );
    audioConnection( "GainMatrix", "out", ChannelRange( 0, cNumberOfOutputs ), "this", "out", ChannelRange( 0, cNumberOfOutputs ) );

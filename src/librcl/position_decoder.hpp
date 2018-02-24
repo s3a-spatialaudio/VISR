@@ -37,8 +37,12 @@ public:
    */
   explicit PositionDecoder( SignalFlowContext const & context,
                             char const * name,
-                            CompositeComponent * parent = nullptr );
-
+                            CompositeComponent * parent,
+                            panning::XYZ const &offsetKinect,
+                            float qw = 1.0f,
+                            float qx = 0.0f,
+                            float qy = 0.0f,
+                            float qz = 0.0f);
   /**
    * Disabled (deleted) copy constructor
    */
@@ -51,12 +55,6 @@ public:
    * Destructor.
    */
   ~PositionDecoder();
-
-  /**
-   * Method to initialise the component.
-   * At the moment, there are arguments to customize the component, but this might change in the future.
-   */ 
-  void setup(panning::XYZ const &offsetKinect, float qw = 1.0f, float qx = 0.0f, float qy = 0.0f, float qz = 0.0f);
 
   /**
    * The process function. Decodes all messages arriving through the "messageInput" parameter input port and sends

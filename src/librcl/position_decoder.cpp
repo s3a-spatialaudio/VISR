@@ -23,25 +23,25 @@ namespace rcl
 
   PositionDecoder::PositionDecoder( SignalFlowContext const & context,
                                     char const * name,
-                                    CompositeComponent * parent /*= nullptr*/ )
+                                    CompositeComponent * parent,
+                                    panning::XYZ const &offsetKinect,
+                                    float qw /*=1.0f*/,
+                                    float qx /*= 0.0f*/,
+                                    float qy /*= 0.0f*/,
+                                    float qz /*= 0.0f*/ )
   : AtomicComponent( context, name, parent )
   , mDatagramInput( "messageInput", *this, pml::EmptyParameterConfig() )
   , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )
 {
+    mOffsetKinect = offsetKinect;
+    mQw = qw;
+    mQx = qx;
+    mQy = qy;
+    mQz = qz;
 }
 
 PositionDecoder::~PositionDecoder()
 {
-}
-
-void PositionDecoder::setup( panning::XYZ const &offsetKinect, float qw /*=1.0f*/, float qx /*= 0.0f*/, float qy /*= 0.0f*/, float qz /*= 0.0f*/ )
-{
-  // Nothing to be done at the moment (as there are no configurable options)
-  mOffsetKinect = offsetKinect;
-  mQw = qw;
-  mQx = qx;
-  mQy = qy;
-  mQz = qz;
 }
 
 
