@@ -1,29 +1,20 @@
 # -*- coding: utf-8 -*-
-"""
-Copyright Institute of Sound and Vibration research - All rights reserved
 
-S3A Binaural toolbox for the VISR framework
+# %BST_LICENCE_TEXT%
 
-Created on Wed Sep  6 22:02:40 2017
-
-@author: Andreas Franck a.franck@soton.ac.uk
-"""
+import numpy as np
+import warnings
 from numpy.linalg import inv
-#from readSofa import sph2cart
-from rotationFunctions import calcRotationMatrix, deg2rad, sph2cart
-import matplotlib.pyplot as plt
+from scipy.spatial import ConvexHull
+
 import visr
 import pml
 import rbbl
 import objectmodel as om
-import time
-import cProfile, pstats, io
-import numpy as np
-import warnings
 
-from scipy.spatial import ConvexHull
+from .util.rotation_functions import calcRotationMatrix, deg2rad, sph2cart
 
-class DynamicBinauralController( visr.AtomicComponent ):
+class DynamicHrirController( visr.AtomicComponent ):
     """ Component to translate an object vector (and optionally head tracking information)
         into parameter parameters for dynamic binaural signal processing. """
     def __init__( self,
@@ -40,7 +31,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
                   delays = None,             # Matrix of delays associated with filter dataset. Dimension: # filters * 2
                   ):
         # Call base class (AtomicComponent) constructor
-        super( DynamicBinauralController, self ).__init__( context, name, parent )
+        super( DynamicHrirController, self ).__init__( context, name, parent )
         self.numberOfObjects = numberOfObjects
         self.dynamicITD = dynamicITD
         self.dynamicILD = dynamicILD
@@ -78,8 +69,6 @@ class DynamicBinauralController( visr.AtomicComponent ):
                                                     pml.DoubleBufferingProtocol.staticType,
                                                     pml.VectorParameterConfig( 2*self.numberOfObjects) )
             self.delayOutputProtocol = self.delayOutput.protocolOutput()
-#        else:
-#            self.dynamicDelays = None
 
         # If we use dynamic ILD, only the object level is set at the moment.
         if self.dynamicILD:
@@ -123,15 +112,7 @@ class DynamicBinauralController( visr.AtomicComponent ):
             self.sourcePos = np.repeat( np.array([[1.0,0.0,0.0]]), self.numberOfObjects, axis = 0 )
             self.levels = np.zeros( (self.numberOfObjects), dtype = np.float32 )
 
-#        self.f = open('srcpAllinone.txt', 'w')
-
     def process( self ):
-
-##PROFILING
-##        startTot = time.time()
-#        pr = cProfile.Profile()
-#        pr.enable()
-
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
             ypr = htrack.orientation
