@@ -1,27 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep  6 22:02:40 2017
-
-@author: af5u13
-"""
+# %BST_LICENCE_TEXT%
 
 import os
 import numpy as np
 import h5py
-from scipy.spatial import KDTree
 
-from rotationFunctions import sph2cart
-
-def deg2rad( phi ):
-    return (np.pi/180.0) * phi
-
-def convertSofaSphToSph( sofaPos ):
-    az = deg2rad( sofaPos[:,0] )
-    el = deg2rad( sofaPos[:,1] )
-
-    pos = np.stack( (az,el, sofaPos[:,2] ), 1 )
-
-    return pos
+from .rotation_functions import sph2cart, deg2rad
 
 def readSofaFile( fileName, dtype = np.float32,
                  truncationLength = None,
@@ -30,10 +13,6 @@ def readSofaFile( fileName, dtype = np.float32,
         raise ValueError( "SOFA file does not exist." )
     fileH = h5py.File( fileName, 'r' )
     try:
-        sofaPos = np.asarray( fileH.get('SourcePosition'), dtype=dtype )
-
-        pos = convertSofaSphToSph( sofaPos )
-
         hrir = np.asarray( fileH.get('Data.IR'), dtype=dtype )
         hrirLength = hrir.shape[-1]
         if (not truncationLength is None) and (truncationLength < hrirLength ):
@@ -52,9 +31,25 @@ def readSofaFile( fileName, dtype = np.float32,
         else:
             delays = None
 
+        # Implicit decision: If the measurement has multiple listener positions (e.g.,
+        # as for a BRIR measurement for multiple loudspeakers), we use the 'ListenerView'
+        # coordinates as the hrir 'positions'.
+        # Otherwise the source positions are used.
+        if hrir.ndim == 4:
+            sofaPos = np.asarray( fileH.get('SourcePosition'), dtype=dtype )
+        else:
+            sofaPos = np.asarray( fileH.get('ListenerView'), dtype=dtype )
+        pos = convertSofaSphToSph( sofaPos )
+
         return pos, hrir, delays
     finally:
         fileH.close()
+
+def convertSofaSphToSph( sofaPos ):
+    az = deg2rad( sofaPos[...,0] )
+    el = deg2rad( sofaPos[...,1] )
+    pos = np.stack( (az,el, sofaPos[...,2] ), 1 )
+    return pos
 
 # Example code:
 if __name__ == '__main__':

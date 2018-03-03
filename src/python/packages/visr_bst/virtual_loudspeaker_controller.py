@@ -1,36 +1,28 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct 26 16:46:32 2017
+# %BST_LICENCE_TEXT%
 
-@author: gc1y17
-"""
+import numpy as np
+from scipy.spatial import ConvexHull
 
-from numpy.linalg import inv
-from readSofa import sph2cart
-from rotationFunctions import calcRotationMatrix, cart2sph, sph2cart3inp, rad2deg
 import visr
 import pml
-import time
-import cProfile, pstats, io
-import numpy as np
 
-from scipy.spatial import ConvexHull
+from visr_bst.util.rotation_functions import calcRotationMatrix, sph2cart
 
 class VirtualLoudspeakerController( visr.AtomicComponent ):
     """Controller component for a dynamic (head-tracked) virtual loudspeaker (or binaural room scanning) renderer."""
-
     def __init__( self,
-                  context, name, parent,    # Standard visr component constructor arguments
-                  numberOfLoudspeakers,          # The number of point source objects rendered.
-                  hrirPositions,            # The directions of the HRTF measurements, given as a #hrirPos x 2 or #hrirPos x 3 array,
-                                            # in polar or spherical coordinates, respectively
-                  hrirData,                 # The HRTF data as #hrirPos x 2 x #lsp x #firTaps matrix.
-                  headRadius = 0.0875,      # Head radius, optional. Might be used in a dynamic ITD/ILD individualisation algorithm.
-                  useHeadTracking = False,  # Whether head tracking data is provided via a self.headOrientation port.
-                  dynamicITD = False,       # Whether ITD delays are calculated and sent via a "delays" port.
+                  context, name, parent,     # Standard visr component constructor arguments
+                  numberOfLoudspeakers,      # The number of point source objects rendered.
+                  hrirPositions,             # The directions of the HRTF measurements, given as a #hrirPos x 2 or #hrirPos x 3 array,
+                                             # in polar or spherical coordinates, respectively
+                  hrirData,                  # The HRTF data as #hrirPos x 2 x #lsp x #firTaps matrix.
+                  headRadius = 0.0875,       # Head radius, optional. Might be used in a dynamic ITD/ILD individualisation algorithm.
+                  headOrientation = None,    # Head orientation, as a vector pointing in the listener's viewing direction. If dynamic
+                                             # tracking is enabled, this is the initial position until the first update.
+                  useHeadTracking = False,   # Whether head tracking data is provided via a self.headOrientation port.
+                  dynamicITD = False,        # Whether ITD delays are calculated and sent via a "delays" port.
                   hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
-                  delays = None,             # Matrix of delays associated with filter dataset. Dimension: #hrirPos x 2 x #lsp
+                  delays = None,             # Matrix of delays associated with filter dataset. Dimension: #hrirPos x 2 x #lsp, measured in sectonds.
                   ):
         # Call base class (AtomicComponent) constructor
         super( VirtualLoudspeakerController, self ).__init__( context, name, parent )
@@ -68,12 +60,6 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         else:
             self.dynamicDelays = None
 
-        # Initialise the head direction.
-        # TODO: This should be costumisable (especially if head tracking is deactivated)
-        # TODO: make it 2D or 3D depending on the dimension of hrirPositions
-        # For the time being we assume that it is 2D
-        self.headDir = np.array([1.0, 0.0 ], dtype=hrirPositions.dtype )
-
         # HRIR selection and interpolation data
         self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
 
@@ -92,16 +78,20 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         if self.hrirInterpolation:
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
-            self.inverted = inv(self.triplets)
-#            print(self.triplets )
+            self.inverted = np.linalg.inv(self.triplets)
         else:
             self.lastHrirIndex = -1
 
+        # Initialise the head direction.
+        # Expand or cut to the dimension of the HRIR position data.
+        self.headDir = np.array( headOrientation, dtype=hrirPositions.dtype )
+        if self.headDir.shape[-1] > self.hrirPos.shape[-1]:
+           self.headDir = self.headDir[:self.hrirPos.shape[-1]]
+        elif self.headDir.shape[-1] < self.hrirPos.shape[-1]:
+            self.headDir = np.concatenate( (self.headDir,
+                np.zeros(self.hrirPos.shape[-1]-self.headDir.shape[-1], dtype=self.headDir.dtype)), axis=0 )
+
     def process( self ):
-##PROFILING
-##        startTot = time.time()
-#        pr = cProfile.Profile()
-#        pr.enable()
         # TODO: This belongs somewhere else in the recompute logic.
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
@@ -109,12 +99,11 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
 
             if self.hrirPos.shape[-1] == 2:
                 # 2D hrir positions
-                self.headDir = sph2cart3inp(ypr[0],0,1)[:2]
+                self.headDir = sph2cart( [ ypr[0], 0.0, 1.0] )
             else: # 3D positions
                 # TODO: Check and test this!
-                rotationMatrix = calcRotationMatrix( - ypr)
-                self.headDir = np.array(np.matmul(np.asarray([1.0, 0.0, 0.0], dtype=self.hrirPos.dtype),rotationMatrix))
-
+                rotationMatrix = calcRotationMatrix( -ypr )
+                self.headDir = np.dot( rotationMatrix, np.asarray([1.0, 0.0, 0.0], dtype=self.headDir.dtype) )
             self.trackingInputProtocol.resetChanged()
 
         # Obtain access to the delay output

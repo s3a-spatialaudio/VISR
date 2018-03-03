@@ -1,10 +1,6 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Oct 26 16:22:24 2017
 
-@author: gc1y17
-"""
+# %BST_LICENCE_TEXT%
 
 import visr
 import pml
@@ -12,9 +8,9 @@ import rcl
 
 #import objectmodel as om
 
-from readSofa import readSofaFile
+from .util.read_sofa_file import readSofaFile
 
-from virtual_loudspeaker_controller import VirtualLoudspeakerController
+from .virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 import numpy as np
 
