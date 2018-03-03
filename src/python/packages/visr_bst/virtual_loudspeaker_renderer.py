@@ -15,28 +15,40 @@ from .virtual_loudspeaker_controller import VirtualLoudspeakerController
 import numpy as np
 
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
-
         def __init__( self,
                      context, name, parent,
-                     numberOfLoudspeakers,
-                     sofaFile,
+                     sofaFile = None,
+                     hrirPositions = None,
+                     hrirData = None,
+                     hrirDelays = None,
+                     headOrientation = None,
                      headTracking = True,
                      dynITD = False,
                      hrirInterp = False,
                      irTruncationLength = None
                      ):
-            super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
+            if (hrirData is not None) and (sofaFile is not None):
+                raise ValueError( "Exactly one of the arguments sofaFile and hrirData must be present." )
+            if sofaFile is not None:
+                [ sofaHrirPositions, hrirData, sofaHrirDelays ] = readSofaFile( sofaFile,
+                                                             truncationLength=irTruncationLength,
+                                                             truncationWindowLength=16 )
+                # If hrirDelays is not provided as an argument, use the one retrieved from the SOFA file
+                if hrirDelays is None:
+                    hrirDelays = sofaHrirDelays
+                # Use the positions obtained from the SOFA file only if the argument is not set
+                if hrirPositions is None:
+                    hrirPositions = sofaHrirPositions
+
+            numberOfLoudspeakers = hrirData.shape[2]
+
+            super(VirtualLoudspeakerRenderer,self).__init__( context, name, parent )
             self.loudspeakerSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-
             if headTracking:
                 self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
-
-            [ hrirPos, hrirData, hrirDelays ] = readSofaFile( sofaFile,
-                                                             truncationLength=irTruncationLength,
-                                                             truncationWindowLength=16 )
 
             # Additional safety check (is tested in the controller anyway)
             if dynITD:

@@ -5,7 +5,10 @@
 import visr
 import rcl
 
-from virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+
+# To be removed as soon as the tracking device is passed as a constructor parameter
+from .tracker.razor_ahrs import RazorAHRS
 
 class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
         def __init__( self,
@@ -33,7 +36,7 @@ class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
                                       )
             if enableSerial:
                 calibrationInputPresent = not headTrackingCalibrationPort is None
-                self.serialReader = serialReader(context, "RazorHeadtrackerReceiver", self, port, baud, yawOffset=90,rollOffset=-180, yawRightHand=True,
+                self.serialReader = RazorAHRS(context, "RazorHeadtrackerReceiver", self, port, yawOffset=90,rollOffset=-180, yawRightHand=True,
                                                  calibrationInput = calibrationInputPresent)
                 self.parameterConnection( self.serialReader.parameterPort("orientation"), self.virtualLoudspeakerRenderer.parameterPort("tracking"))
                 if calibrationInputPresent:
@@ -43,4 +46,3 @@ class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
 
             self.audioConnection(  self.objectSignalInput, self.virtualLoudspeakerRenderer.audioPort("audioIn"))
             self.audioConnection( self.virtualLoudspeakerRenderer.audioPort("audioOut"), self.binauralOutput)
-

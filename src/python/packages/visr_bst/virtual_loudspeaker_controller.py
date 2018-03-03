@@ -82,28 +82,19 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         else:
             self.lastHrirIndex = -1
 
-        # Initialise the head direction.
-        # Expand or cut to the dimension of the HRIR position data.
-        self.headDir = np.array( headOrientation, dtype=hrirPositions.dtype )
-        if self.headDir.shape[-1] > self.hrirPos.shape[-1]:
-           self.headDir = self.headDir[:self.hrirPos.shape[-1]]
-        elif self.headDir.shape[-1] < self.hrirPos.shape[-1]:
-            self.headDir = np.concatenate( (self.headDir,
-                np.zeros(self.hrirPos.shape[-1]-self.headDir.shape[-1], dtype=self.headDir.dtype)), axis=0 )
+        # %% Initialise the head direction.
+        if headOrientation is None:
+            headOrientation = np.array( [0.0, 0.0, 0.0 ], self.hrirPos.dtype )
+        else:
+            headOrientation = np.asarray( headOrientation )
+        self.headDir = orientationToDirectionVector( headOrientation, self.hrirPos.shape[-1] )
 
     def process( self ):
         # TODO: This belongs somewhere else in the recompute logic.
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
-            ypr = htrack.orientation
-
-            if self.hrirPos.shape[-1] == 2:
-                # 2D hrir positions
-                self.headDir = sph2cart( [ ypr[0], 0.0, 1.0] )
-            else: # 3D positions
-                # TODO: Check and test this!
-                rotationMatrix = calcRotationMatrix( -ypr )
-                self.headDir = np.dot( rotationMatrix, np.asarray([1.0, 0.0, 0.0], dtype=self.headDir.dtype) )
+            ypr = np.asarray(htrack.orientation, dtype=self.hrirPos.dtype)
+            self.headDir = orientationToDirectionVector( ypr, self.hrirPos.shape[-1] )
             self.trackingInputProtocol.resetChanged()
 
         # Obtain access to the delay output
@@ -152,3 +143,10 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
                 self.lastHrirIndex = hrirIndex
         if self.dynamicITD:
             self.delayOutputProtocol.swapBuffers()
+
+def orientationToDirectionVector( ypr, dimension ):
+    if ypr.shape[-1] < 3:
+        ypr = np.concatenate( ypr, np.zeros( 3-ypr.shape[-1], dtype=ypr.dtype ))
+    rotMtx = calcRotationMatrix( - ypr )
+    dirVec = np.dot( np.array( [1.0, 0.0, 0.0], dtype=ypr.dtype), rotMtx )
+    return dirVec[:dimension]

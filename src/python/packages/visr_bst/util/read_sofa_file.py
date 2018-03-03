@@ -35,7 +35,7 @@ def readSofaFile( fileName, dtype = np.float32,
         # as for a BRIR measurement for multiple loudspeakers), we use the 'ListenerView'
         # coordinates as the hrir 'positions'.
         # Otherwise the source positions are used.
-        if hrir.ndim == 4:
+        if hrir.ndim == 3:
             sofaPos = np.asarray( fileH.get('SourcePosition'), dtype=dtype )
         else:
             sofaPos = np.asarray( fileH.get('ListenerView'), dtype=dtype )
