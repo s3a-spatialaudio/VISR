@@ -27,7 +27,7 @@ class DynamicHrirController( visr.AtomicComponent ):
                   dynamicITD = False,       # Whether ITD delays are calculated and sent via a "delays" port.
                   dynamicILD = False,       # Whether ILD gains are calculated and sent via a "gains" port.
                   hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
-                  channelAllocation = False, # Whether to allocate object channels dynamically
+                  channelAllocation = False, # Whether to allocate object channels dynamically (not tested yet)
                   delays = None,             # Matrix of delays associated with filter dataset. Dimension: # filters * 2
                   ):
         # Call base class (AtomicComponent) constructor

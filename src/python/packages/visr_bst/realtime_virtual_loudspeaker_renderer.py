@@ -28,7 +28,6 @@ class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
                      dynamicITD = True,
                      hrirInterpolation = True,
                      irTruncationLength = None,
-                     headTrackingCalibrationPort = None,
                      filterCrossfading = False,
                      interpolatingConvolver = False,
                      headTrackingReceiver = None,
@@ -57,12 +56,14 @@ class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
             self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
 
+            enableTracking = (headTrackingReceiver is not None)
+
             self.virtualLoudspeakerRenderer =  VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", self,
                                                            hrirPositions = hrirPositions,
                                                            hrirData = hrirData,
                                                            hrirDelays = hrirDelays,
                                                            headOrientation = None,
-                                                           headTracking = (headTrackingReceiver is not None),
+                                                           headTracking = enableTracking,
                                                            dynamicITD = dynamicITD,
                                                            hrirInterpolation = hrirInterpolation,
                                                            irTruncationLength = irTruncationLength,
@@ -70,7 +71,7 @@ class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
                                                            interpolatingConvolver = interpolatingConvolver,
                                                            fftImplementation = fftImplementation
                                                            )
-            if headTrackingReceiver is not None:
+            if enableTracking:
                 if headTrackingPositionalArguments == None:
                     headTrackingPositionalArguments = ()
                 if headTrackingKeywordArguments == None:

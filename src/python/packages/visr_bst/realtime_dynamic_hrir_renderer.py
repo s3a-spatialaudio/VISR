@@ -5,23 +5,31 @@
 import visr
 import pml
 
-from .dynamic_hrir_renderer import DynamicBinauralRenderer
-
-# Temporary, until tracking device is passed as a constructor parameter.
-from .util.tracker.razor_ahrs import RazorAHRS
-
+from .dynamic_hrir_renderer import DynamicHrirRenderer
 
 class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
     def __init__( self,
-                 context, name, parent,
-                 numberOfObjects,
-                 port,
-                 sofaFile,
-                 enableSerial = True,
-                 dynamicITD = True,
-                 dynamicILD = True,
-                 hrirInterpolation = True,
-                 headTrackingCalibrationPort = None
+                 context, name, parent,                 # Standard arguments for visr.Component constructors
+                 *,                                     # No positional arguments beyond here.
+                 numberOfObjects,                       # Maximum number of audio objects
+                 sofaFile = None,                       # Whether a SOFA file is used to loaded the HRIR data.
+                 hrirPositions = None,                  # Optional way to provide the measurement grid for the BRIR listener view directions. If a SOFA file is provided, this is optional and
+                                                        # overrides the listener view data in the file. Otherwise this argument is mandatory. Dimension #grid directions x (dimension of position argument)
+                 hrirData = None,                       # Optional way to provide the BRIR data. Dimension: #grid directions  x #ears (2) # x #loudspeakers x #ir length
+                 hrirDelays = None,                     # Optional BRIR delays. If a SOFA file is given, this  argument overrides a potential delay setting from the file. Otherwise, no extra delays
+                                                        # are applied unless this option is provided. Dimension: #grid directions  x #ears(2) x # loudspeakers
+                 headOrientation = None,                # Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
+                                                        # or the initial view direction
+                 headTracking = True,                   # Whether dynamic racking is used.
+                 dynamicITD = True,                     # Whether the ITD is applied separately. That requires preprocessed HRIR data
+                 dynamicILD = True,                     # Whether the ILD is computed and applied separately. At the moment this feature is not used (apart from applying the object gains)
+                 hrirInterpolation = True,              # Whether the controller supports interpolation between neighbouring HRTF gridpoints. False means nearest neighbour (no interpolation),
+                                                        # True enables barycentric interpolation.
+                 filterCrossfading = False,             # Use a crossfading FIR filter matrix to avoid switching artifacts.
+                 fftImplementation = "default",         # The FFT implementation to use.
+                 headTrackingReceiver = None,           # Class of the head tracking recveiver, None (default value) disables dynamic head tracking.
+                 headTrackingPositionalArguments = None,# Positional arguments passed to the constructor of the head tracking receiver object. Must be a tuple.
+                 headTrackingKeywordArguments = None,   # Keyword arguments passed to the constructor of the head tracking receiver. Must be a dictionary (dict)
                  ):
         super( RealtimeDynamicHrirRenderer, self ).__init__( context, name, parent )
         self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
@@ -30,25 +38,31 @@ class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
                                                      pml.DoubleBufferingProtocol.staticType,
                                                      pml.EmptyParameterConfig() )
 
-        self.dynamicBinauralRenderer = DynamicBinauralRenderer( context, "DynamicBinauralRenderer", self, numberOfObjects, sofaFile,
-                                                                 headTracking = enableSerial,
-                                                                 dynamicITD = dynamicITD,
-                                                                 dynamicILD = dynamicILD,
-                                                                 hrirInterpolation = hrirInterpolation
-                                                               )
-        if enableSerial:
-            calibrationInputPresent = not headTrackingCalibrationPort is None
-            self.serialReader = RazorAHRS(context, "HeadtrackingReceiver", self, port, yawOffset=90,rollOffset=-180, yawRightHand=True,
-                                             calibrationInput = calibrationInputPresent)
-            self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
+        enableTracking = (headTrackingReceiver is not None)
 
-            if calibrationInputPresent:
-                self.calibrationInput = visr.ParameterInput( "headTrackingCalibration",
-                                                            self, pml.StringParameter.staticType,
-                                                            pml.MessageQueueProtocol.staticType,
-                                                            pml.EmptyParameterConfig() )
-                self.parameterConnection( self.calibrationInput,
-                                         self.serialReader.parameterPort("calibration"))
+        self.dynamicHrirRenderer = DynamicHrirRenderer( context, "DynamicBinauralRenderer", self,
+                                                       numberOfObjects = numberOfObjects,
+                                                       hrirPositions = hrirPositions,
+                                                       hrirData = hrirData,
+                                                       hrirDelays = hrirDelays,
+                                                       headOrientation = headOrientation,
+                                                       headTracking = enableTracking,
+                                                       dynamicITD = dynamicITD,
+                                                       dynamicILD = dynamicILD,
+                                                       hrirInterpolation = hrirInterpolation,
+                                                       filterCrossfading = filterCrossfading,
+                                                       fftImplementation = fftImplementation
+                                                       )
+
+        if enableTracking:
+            if headTrackingPositionalArguments == None:
+                headTrackingPositionalArguments = ()
+            if headTrackingKeywordArguments == None:
+                headTrackingKeywordArguments = {}
+            self.trackingDevice = headTrackingReceiver(context, "HeadTrackingReceiver", self,
+                                                *headTrackingPositionalArguments,
+                                                **headTrackingKeywordArguments )
+            self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
 
         self.parameterConnection( self.objectVectorInput, self.dynamicBinauralRenderer.parameterPort("objectVector"))
         self.audioConnection(  self.objectSignalInput, self.dynamicBinauralRenderer.audioPort("audioIn"))
