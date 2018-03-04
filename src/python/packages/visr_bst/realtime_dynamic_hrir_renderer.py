@@ -7,6 +7,8 @@ import pml
 
 from .dynamic_hrir_renderer import DynamicHrirRenderer
 
+from .util.read_sofa_file import readSofaFile
+
 class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
     def __init__( self,
                  context, name, parent,                 # Standard arguments for visr.Component constructors
@@ -40,6 +42,18 @@ class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
 
         enableTracking = (headTrackingReceiver is not None)
 
+        # Handle loading of HRIR data from either a SOFA file or the the matrix arguments.
+        if (hrirData is not None) == (sofaFile is not None):
+            raise ValueError( "Exactly one of the arguments sofaFile and hrirData must be present." )
+        if sofaFile is not None:
+            [ sofaHrirPositions, hrirData, sofaHrirDelays ] = readSofaFile( sofaFile )
+            # If hrirDelays is not provided as an argument, use the one retrieved from the SOFA file
+            if hrirDelays is None:
+                hrirDelays = sofaHrirDelays
+            # Use the positions obtained from the SOFA file only if the argument is not set
+            if hrirPositions is None:
+                hrirPositions = sofaHrirPositions
+
         self.dynamicHrirRenderer = DynamicHrirRenderer( context, "DynamicBinauralRenderer", self,
                                                        numberOfObjects = numberOfObjects,
                                                        hrirPositions = hrirPositions,
@@ -62,7 +76,7 @@ class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
             self.trackingDevice = headTrackingReceiver(context, "HeadTrackingReceiver", self,
                                                 *headTrackingPositionalArguments,
                                                 **headTrackingKeywordArguments )
-            self.parameterConnection( self.serialReader.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
+            self.parameterConnection( self.trackingDevice.parameterPort("orientation"), self.dynamicBinauralRenderer.parameterPort("tracking"))
 
         self.parameterConnection( self.objectVectorInput, self.dynamicBinauralRenderer.parameterPort("objectVector"))
         self.audioConnection(  self.objectSignalInput, self.dynamicBinauralRenderer.audioPort("audioIn"))
