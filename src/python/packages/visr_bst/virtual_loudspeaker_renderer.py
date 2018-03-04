@@ -3,7 +3,6 @@
 # %BST_LICENCE_TEXT%
 
 import visr
-import efl
 import pml
 import rbbl
 import rcl
@@ -16,21 +15,22 @@ from .virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 import numpy as np
 
-fftImplementation = 'ffts'
-#fftImplementation = 'kissfft'
-#fftImplementation = 'default'
-
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
         def __init__( self,
-                     context, name, parent,
-                     sofaFile = None,
-                     hrirPositions = None,
-                     hrirData = None,
-                     hrirDelays = None,
-                     headOrientation = None,
+                     context, name, parent,              # Standard visr.Component construction arguments.
+                     *,                                  # This ensures that the remaining arguments are given as keyword arguments.
+                     sofaFile = None,                    # BRIR database provided as a SOFA file. This is an alternative to the hrirPosition, hrirData (and optionally hrirDelays) argument.
+                     hrirPositions = None,               # Optional way to provide the measurement grid for the BRIR listener view directions. If a SOFA file is provided, this is optional and
+                                                         # overrides the listener view data in the file. Otherwise this argument is mandatory. Dimension #grid directions x (dimension of position argument)
+                     hrirData = None,                    # Optional way to provide the BRIR data. Dimension: #grid directions  x #ears (2) # x #loudspeakers x #ir length
+                     hrirDelays = None,                  # Optional BRIR delays. If a SOFA file is given, this  argument overrides a potential delay setting from the file. Otherwise, no extra delays
+                                                         # are applied unless this option is provided. Dimension: #grid directions  x #ears(2) x # loudspeakers
+
+                     headOrientation = None,             # Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
+                                                         # or the initial view direction
                      headTracking = True,
-                     dynITD = False,
-                     hrirInterp = False,
+                     dynamicITD = False,
+                     hrirInterpolation = False,
                      irTruncationLength = None,
                      filterCrossfading = False,
                      interpolatingConvolver = False,
@@ -59,24 +59,22 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
 
+            # Check consistency between HRIR positions and HRIR data
+            if (hrirPositions.shape[0] != hrirData.shape[0]):
+                raise ValueError( "The number of HRIR positions is inconsistent with the dimension of the HRIR data." )
+
             # Additional safety check (is tested in the controller anyway)
-            if dynITD:
+            if dynamicITD:
                 if (hrirDelays is None) or (hrirDelays.ndim != hrirData.ndim-1) or (hrirDelays.shape != hrirData.shape[0:-1] ):
                     raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must match the first dimensions of the hrir data matrix.' )
 
-            # The HRIR positions contained in the SOFA file are not the different head rotations, but the loudspeaker positions.
-            # Therefore we assume a equidistant grid in the horizontal plane (conventions as in the Sound Scape Renderer)
-            numHrirPos = hrirData.shape[0];
-            hrirAz = np.arange( 0, 2*np.pi, (2.0*np.pi)/numHrirPos )
-            hrirPos = np.stack( (hrirAz, np.ones(numHrirPos)), 1 )
-
             self.virtualLoudspeakerController = VirtualLoudspeakerController( context, "VirtualLoudspeakerController", self,
                                                                       numberOfLoudspeakers,
-                                                                      hrirPos, hrirData,
+                                                                      hrirPositions, hrirData,
                                                                       useHeadTracking = headTracking,
-                                                                      dynamicITD = dynITD,
-                                                                      hrirInterpolation = hrirInterp,
-                                                                      delays = hrirDelays,
+                                                                      dynamicITD = dynamicITD,
+                                                                      hrirInterpolation = hrirInterpolation,
+                                                                      hrirDelays = hrirDelays,
                                                                       interpolatingConvolver=interpolatingConvolver
                                                                       )
 
@@ -90,7 +88,7 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
             firLength = hrirData.shape[-1]
 
-            if dynITD:
+            if dynamicITD:
                 self.delayVector = rcl.DelayVector( context, "delayVector", self,
                                                    numberOfLoudspeakers*2, interpolationType="lagrangeOrder3", initialDelay=0,
                                                    controlInputs=rcl.DelayVector.ControlPortConfig.Delay,

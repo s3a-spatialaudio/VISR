@@ -11,18 +11,18 @@ from visr_bst.util.rotation_functions import calcRotationMatrix, sph2cart
 class VirtualLoudspeakerController( visr.AtomicComponent ):
     """Controller component for a dynamic (head-tracked) virtual loudspeaker (or binaural room scanning) renderer."""
     def __init__( self,
-                  context, name, parent,     # Standard visr component constructor arguments
-                  numberOfLoudspeakers,      # The number of point source objects rendered.
-                  hrirPositions,             # The directions of the HRTF measurements, given as a #hrirPos x 2 or #hrirPos x 3 array,
-                                             # in polar or spherical coordinates, respectively
-                  hrirData,                  # The HRTF data as #hrirPos x 2 x #lsp x #firTaps matrix.
-                  headRadius = 0.0875,       # Head radius, optional. Might be used in a dynamic ITD/ILD individualisation algorithm.
-                  headOrientation = None,    # Head orientation, as a vector pointing in the listener's viewing direction. If dynamic
-                                             # tracking is enabled, this is the initial position until the first update.
-                  useHeadTracking = False,   # Whether head tracking data is provided via a self.headOrientation port.
-                  dynamicITD = False,        # Whether ITD delays are calculated and sent via a "delays" port.
-                  hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
-                  delays = None,             # Matrix of delays associated with filter dataset. Dimension: #hrirPos x 2 x #lsp
+                  context, name, parent,         # Standard visr component constructor arguments
+                  numberOfLoudspeakers,          # The number of point source objects rendered.
+                  hrirPositions,                 # The directions of the HRTF measurements, given as a #hrirPos x 2 or #hrirPos x 3 array,
+                                                 # in polar or spherical coordinates, respectively
+                  hrirData,                      # The HRTF data as #hrirPos x 2 x #lsp x #firTaps matrix.
+                  headRadius = 0.0875,           # Head radius, optional. Might be used in a dynamic ITD/ILD individualisation algorithm.
+                  headOrientation = None,        # Head orientation, as a vector pointing in the listener's viewing direction. If dynamic
+                                                 # tracking is enabled, this is the initial position until the first update.
+                  useHeadTracking = False,       # Whether head tracking data is provided via a self.headOrientation port.
+                  dynamicITD = False,            # Whether ITD delays are calculated and sent via a "delays" port.
+                  hrirInterpolation = False,     # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
+                  hrirDelays = None,             # Matrix of delays associated with filter dataset. Dimension: #hrirPos x 2 x #lsp
                   interpolatingConvolver = False # Whether to transmit interpolation parameters (True) or complete interpolated filters
                   ):
         # Call base class (AtomicComponent) constructor
@@ -66,10 +66,10 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.interpolationOutputProtocol = None
 
         if self.dynamicITD:
-            if (delays is None) or (delays.ndim != 3) or (delays.shape != hrirData.shape[0:-1] ):
-                raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
+            if (hrirDelays is None) or (hrirDelays.ndim != 3) or (hrirDelays.shape != hrirData.shape[0:-1] ):
+                raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #grid x 2 x #lsp matrix.' )
 
-            self.dynamicDelays = np.array(delays, copy=True)
+            self.dynamicDelays = np.array(hrirDelays, copy=True, dtype = np.float32 )
             self.delayOutput = visr.ParameterOutput( "delayOutput", self,
                                                     pml.VectorParameterFloat.staticType,
                                                     pml.DoubleBufferingProtocol.staticType,
@@ -89,10 +89,9 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         if hrirPosDim == 2:
             # polar->Cartesian plus normalisation to unit radius
             self.hrirPos = np.array(np.stack( ( np.cos(hrirPositions[:,0]), np.sin(hrirPositions[:,0])), axis = 1), dtype=np.float32 )
-            self.headDir = np.array([1.0, 0.0 ], dtype=self.hrirPos.dtype )
         elif hrirPosDim == 3:
-            self.hrirPos = sph2cart( hrirPositions[:,0], hrirPositions[:,1], 1.0 )
-            self.headDir = np.array([1.0, 0.0, 0.0 ], dtype=self.hrirPos.dtype )
+            hrirPositions[:,2] = 1.0 # Normalise to unit vectors
+            self.hrirPos = sph2cart( np.array(hrirPositions, dtype=np.float32 ) )
         else:
             raise ValueError( 'HRIR position data has unsupported vector dimension.' )
 
@@ -113,7 +112,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         self.headDir = orientationToDirectionVector( headOrientation, self.hrirPos.shape[-1] )
 
     def process( self ):
-        # TODO: This belongs somewhere else in the recompute logic.
+        # Update the head orientation if tracking is used.
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
             ypr = np.asarray(htrack.orientation, dtype=self.hrirPos.dtype)
@@ -182,6 +181,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
             self.delayOutputProtocol.swapBuffers()
 
 def orientationToDirectionVector( ypr, dimension ):
+    """ Local function to convert an yaw-pitch-roll vector into a direction vector. """
     if ypr.shape[-1] < 3:
         ypr = np.concatenate( ypr, np.zeros( 3-ypr.shape[-1], dtype=ypr.dtype ))
     rotMtx = calcRotationMatrix( - ypr )
