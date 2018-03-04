@@ -10,7 +10,7 @@ import shutil
 import numpy as np
 import h5py
 
-def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjust = False ):
+def sofaExtractDelay( inFileName, outFileName, dtype = np.float32, fdAdjust = False ):
     if not os.path.exists( inFileName ):
         raise ValueError( "SOFA file does not exist." )
     try:
@@ -19,7 +19,7 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
 
         # hrir = np.asarray( h.get('Data.IR'), dtype=dtype )
         hrir = h['Data.IR']
- 
+
         HRTF = np.fft.rfft( hrir, axis = -1 )
 
         wrappedPhase = np.angle( HRTF )
@@ -33,8 +33,8 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
 
         # The (X^T*X)^-1*X^T part of a linear regression
         XTXinvXT = 1.0/np.dot(freqGridRad,freqGridRad)*freqGridRad
-                             
-        # Calculate the phase slope (i.e, the first-order approximation of the 
+
+        # Calculate the phase slope (i.e, the first-order approximation of the
         # negative time delay) simultaneously for all HRTFS
         beta = np.dot( unwrappedPhase, XTXinvXT )
 
@@ -42,14 +42,14 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
 
         minDelay = np.min( tdSamples )
 
-        # Truncate to the integer part to avoid fractional delay interpolation.            
+        # Truncate to the integer part to avoid fractional delay interpolation.
         tdAdjusted = np.floor(tdSamples - minDelay)
 
         tdRep = tdAdjusted.reshape( tdAdjusted.shape + (1,) ).repeat( fGridSize, axis=-1)
 
         # Whether to adjust
         if fdAdjust:
-            # Adjust the phases 
+            # Adjust the phases
             adjustedPhase = unwrappedPhase + tdRep * freqGridRad
 
             # FD adjust causes a circular shift, which might create artifacts at
@@ -58,10 +58,10 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
 
             hrirAdjust = np.fft.irfft( HRTFadjust )
         else:
-            
+
             # We don't use windowing here, because the end of the IR remains the same as in the original hrir
             # (only the end of the active filter is no longer aligned with the taps array.)
-            # We might consider filtering both the onset and the end, but we don't now which treatment the IRs 
+            # We might consider filtering both the onset and the end, but we don't now which treatment the IRs
             # have already undergone.
 
             hrirAdjust = np.zeros( hrir.shape, dtype=hrir.dtype )
@@ -78,7 +78,7 @@ def extractDelayInSofaFile( inFileName, outFileName, dtype = np.float32, fdAdjus
                          tdAdjusted.dtype, data=tdAdjusted, compression="gzip" )
 
         # Alter the IRs
-        hrirRef = h['Data.IR'] # We need to get an explicit reference 
+        hrirRef = h['Data.IR'] # We need to get an explicit reference
         hrirRef[...] = hrirAdjust # to avoid a "Name already exists" error.
 
         h.close()
