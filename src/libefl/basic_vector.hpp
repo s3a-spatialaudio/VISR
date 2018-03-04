@@ -63,6 +63,11 @@ public:
   std::copy( initialValues.begin(), initialValues.end(), data() );
   }
 
+  BasicVector( BasicVector<ElementType> && rhs ) = default;
+
+  BasicVector<ElementType> & operator=( BasicVector<ElementType> && rhs ) = default;
+
+
   /**
    * Destructor.
    */

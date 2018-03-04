@@ -42,7 +42,6 @@ BunchRenderer::BunchRenderer( SignalFlowContext const & context,
   mOutput.setWidth(numberOfOutputs);
 
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
-  mSceneDecoder.setup( );
    // mCoreRenderer is initialised in the ctor
 
   parameterConnection("SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput");

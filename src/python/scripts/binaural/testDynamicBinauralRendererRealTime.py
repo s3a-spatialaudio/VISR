@@ -26,7 +26,7 @@ numBinauralObjects = 64
 numOutputChannels = 2;
 
 # switch dynamic tracking on and off.
-useTracking = False
+useTracking = True
 useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
@@ -37,7 +37,7 @@ useCrossfading = True
 if platform == 'linux' or platform == 'linux2':
     port = "/dev/ttyUSB0"
 elif platform == 'darwin':
-    port = "/dev/cu.usbserial-AJ03GSC8"
+    port = "/dev/cu.usbserial-AJ03GR8O"
 elif platform == 'windows':
     port = "COM10"
 

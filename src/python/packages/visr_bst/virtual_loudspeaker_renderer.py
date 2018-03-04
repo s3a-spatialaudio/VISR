@@ -1,10 +1,6 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Oct 26 16:22:24 2017
 
-@author: gc1y17
-"""
+# %BST_LICENCE_TEXT%
 
 import visr
 import efl
@@ -14,9 +10,9 @@ import rcl
 
 #import objectmodel as om
 
-from readSofa import readSofaFile
+from .util.read_sofa_file import readSofaFile
 
-from virtual_loudspeaker_controller import VirtualLoudspeakerController
+from .virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 import numpy as np
 
@@ -25,10 +21,13 @@ fftImplementation = 'ffts'
 #fftImplementation = 'default'
 
 class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
-
         def __init__( self,
                      context, name, parent,
-                     sofaFile,
+                     sofaFile = None,
+                     hrirPositions = None,
+                     hrirData = None,
+                     hrirDelays = None,
+                     headOrientation = None,
                      headTracking = True,
                      dynITD = False,
                      hrirInterp = False,
@@ -37,19 +36,24 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                      interpolatingConvolver = False,
                      fftImplementation = 'default'
                      ):
-            super( VirtualLoudspeakerRenderer, self ).__init__( context, name, parent )
-
-            [ hrirPos, hrirData, hrirDelays ] = readSofaFile( sofaFile,
+            if (hrirData is not None) and (sofaFile is not None):
+                raise ValueError( "Exactly one of the arguments sofaFile and hrirData must be present." )
+            if sofaFile is not None:
+                [ sofaHrirPositions, hrirData, sofaHrirDelays ] = readSofaFile( sofaFile,
                                                              truncationLength=irTruncationLength,
                                                              truncationWindowLength=16 )
+                # If hrirDelays is not provided as an argument, use the one retrieved from the SOFA file
+                if hrirDelays is None:
+                    hrirDelays = sofaHrirDelays
+                # Use the positions obtained from the SOFA file only if the argument is not set
+                if hrirPositions is None:
+                    hrirPositions = sofaHrirPositions
 
-            if hrirData.ndim != 4:
-                raise ValueError( "VirtualLoudspeakerRenderer: Dimension of SOFA BRIR data not suitable for virtual loudspeaker rendering" )
-            numberOfLoudspeakers = hrirData.shape[-2]
+            numberOfLoudspeakers = hrirData.shape[2]
 
+            super(VirtualLoudspeakerRenderer,self).__init__( context, name, parent )
             self.loudspeakerSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfLoudspeakers )
             self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-
             if headTracking:
                 self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,

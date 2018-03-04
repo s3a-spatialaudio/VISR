@@ -28,10 +28,6 @@ SceneEncoder::~SceneEncoder()
 {
 }
 
-void SceneEncoder::setup( )
-{
-}
-
 void SceneEncoder::process()
 {
   std::stringstream msg;

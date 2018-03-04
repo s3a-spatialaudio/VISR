@@ -22,10 +22,12 @@ namespace rcl
 
   DiffusionGainCalculator::DiffusionGainCalculator( SignalFlowContext const & context,
                                                     char const * name,
-                                                    CompositeComponent * parent /*= nullptr*/ )
+                                                    CompositeComponent * parent,
+                                                    std::size_t numberOfObjectChannels )
   : AtomicComponent( context, name, parent )
-  , mNumberOfObjectChannels( 0 )
+  , mNumberOfObjectChannels( numberOfObjectChannels )
   , mObjectVectorInput( "objectInput", *this, pml::EmptyParameterConfig() )
+  , mGainOutput( "gainOutput", *this, pml::MatrixParameterConfig( 1, numberOfObjectChannels ) )
 {
 }
 
@@ -33,17 +35,10 @@ DiffusionGainCalculator::~DiffusionGainCalculator()
 {
 }
 
-void DiffusionGainCalculator::setup( std::size_t numberOfObjectChannels )
-{
-  mNumberOfObjectChannels = numberOfObjectChannels;
-  mGainOutput.reset( new ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > >
-    ( "gainOutput", *this, pml::MatrixParameterConfig( 1, numberOfObjectChannels ) ) );
-}
-
 void DiffusionGainCalculator::process()
 {
   objectmodel::ObjectVector const & objects = mObjectVectorInput.data();
-  pml::MatrixParameter<CoefficientType> & gainMatrix = mGainOutput->data();
+  pml::MatrixParameter<CoefficientType> & gainMatrix = mGainOutput.data();
   if( (gainMatrix.numberOfRows() != 1) or (gainMatrix.numberOfColumns() != mNumberOfObjectChannels) )
   {
     throw std::invalid_argument( "DiffusionGainCalculator::process(): The gainVector argument must be a vector with numberOfObjectChannels elements." );

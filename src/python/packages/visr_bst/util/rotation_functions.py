@@ -1,29 +1,23 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 15 16:50:56 2017
+# %BST_LICENCE_TEXT%
 
-@author: gc1y17
-"""
 import math
+
 import numpy as np
-
-# note: the input format is inconsistent with the return value and with sph2cart
-# (individual values vs single matrix)
-def cart2sph(x,y,z):
-    radius = math.sqrt( x*x + y*y + z*z );
-    az = math.atan2( y, x );
-    el = math.asin( z / radius );
-    #print('%f %f %f'%(az,el,radius))
-    sph = np.stack( (az, el, radius) )
-
-    return sph;
 
 def deg2rad( phi ):
     return (np.pi/180.0) * phi
 
 def rad2deg( phi ):
     return (180.0/np.pi) * phi
+
+# note: the input format is inconsistent with the return value and with sph2cart
+# (individual values vs single matrix)
+def cart2sph(x,y,z):
+    radius = np.sqrt( x*x + y*y + z*z )
+    az = np.atan2( y, x )
+    el = np.asin( z / radius )
+    sph = np.stack( (az, el, radius) )
+    return sph
 
 def sph2cart( sph ):
     elFactor = np.cos( sph[...,1] )
@@ -33,41 +27,29 @@ def sph2cart( sph ):
     cart = np.stack( (x,y,z), axis=-1 )
     return cart
 
-def sph2cart3inp(az,el,r):
-    x = r*np.cos(az)*np.cos(el)
-    y = r*np.sin(az)*np.cos(el)
-    z = r*np.sin(el)
-    return np.stack((x,y,z),0)
+def calcRotationMatrix( ypr ):
+    if ypr.shape[-1] != 3:
+        raise ValueError( "Trailing dimension of ypr argument must be 3.")
 
-def calcRotationMatrix(ypr):
-  if ypr.size == 3 :
+    phi = ypr[...,0]
+    the = ypr[...,1]
+    psi = ypr[...,2]
 
-#    psi = deg2rad(np.float32(ypr.item(0)))
-    phi = np.float32(ypr.item(0))
+    a11 = np.cos(the) * np.cos(phi)
+    a12 = np.cos(the) * np.sin(phi)
+    a13 = -np.sin(the)
 
-#    the = deg2rad(np.float32(ypr.item(1)))
-    the = np.float32(ypr.item(1))
+    a21 = np.sin(psi) * np.sin(the) * np.cos(phi) - np.cos(psi) * np.sin(phi)
+    a22 = np.sin(psi) * np.sin(the) * np.sin(phi) + np.cos(psi) * np.cos(phi)
+    a23 = np.cos(the) * np.sin(psi)
 
-#    phi = deg2rad(np.float32(ypr.item(2)))
-    psi = np.float32(ypr.item(2))
-
-    a11 = math.cos(the) * math.cos(phi)
-    a12 = math.cos(the) * math.sin(phi)
-    a13 = -math.sin(the)
-
-    a21 = math.sin(psi) * math.sin(the) * math.cos(phi) - math.cos(psi) * math.sin(phi)
-    a22 = math.sin(psi) * math.sin(the) * math.sin(phi) + math.cos(psi) * math.cos(phi)
-    a23 = math.cos(the) * math.sin(psi)
-
-    a31 = math.cos(psi) * math.sin(the) * math.cos(phi) + math.sin(psi) * math.sin(phi)
-    a32 = math.cos(psi) * math.sin(the) * math.sin(phi) - math.sin(psi) * math.cos(phi)
-    a33 = math.cos(the) * math.cos(psi)
+    a31 = np.cos(psi) * np.sin(the) * np.cos(phi) + np.sin(psi) * np.sin(phi)
+    a32 = np.cos(psi) * np.sin(the) * np.sin(phi) - np.sin(psi) * np.cos(phi)
+    a33 = np.cos(the) * np.cos(psi)
 
     rotation = np.array([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]])
-#    print(rotation)
     return rotation
-  else:
-    return np.identity(3)
+
 
 def delta(m, n):
 	# Kronecker Delta
@@ -112,8 +94,8 @@ def W(l, m, n, R_lm1, R_1):
 #    print("W %d [%d,%d]"%(l,m,n))
     if m == 0 :
         # Never gets called as kd=0
-#        ASSERT(false);
-        return (0);
+#        ASSERT(false)
+        return (0)
     elif m > 0 :
         return  P(1, l, m + 1, n, R_lm1, R_1) \
               + P(-1, l, -m - 1, n, R_lm1, R_1)
@@ -149,12 +131,12 @@ def HOARotationMatrixCalc(l, R_lm1, R_1):
     size = 2*l+1
 #    print(R_1)
     r = np.zeros( (size,size), dtype=np.float32 )
-# the correct spherical harmonics indices should span from -l to l (included),
-# here in the output matrix it is translated by l, to have only positive indices
+    # the correct spherical harmonics indices should span from -l to l (included),
+    # here in the output matrix it is translated by l, to have only positive indices
     for m in range(0,size) :
         for n in range(0,size) :
 #            print("R [%d,%d]"%(m-l, n-l))
-            r[m][n] = Rmatrix(l, m-l, n-l, R_lm1, R_1);
+            r[m][n] = Rmatrix(l, m-l, n-l, R_lm1, R_1)
 
     return r
 
@@ -167,19 +149,3 @@ def rotationMatrixReorderingACN(r):
     r = r[perm,:]
     return r
 
-##testing
-#np.set_printoptions(linewidth=10000)
-#np.set_printoptions(threshold=np.nan)
-#R_1 = calcRotationMatrix(np.array([np.pi/2,0,0]))
-#R_1 = rotationMatrixReorderingACN(R_1)
-#
-#print(R_1)
-#print()
-#
-#R_2 = HOARotationMatrixCalc(2,R_1,R_1)
-#print(R_2)
-#print()
-#
-#R_3 = HOARotationMatrixCalc(3,R_2,R_1)
-#print(R_3)
-#print()

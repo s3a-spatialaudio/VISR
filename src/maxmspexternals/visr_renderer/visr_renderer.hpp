@@ -55,12 +55,13 @@ private:
    * The number of samples to be processed per call.
    * The type is chosen to be compatible to the parameter passed by the calling Max/MSP functions.
    */
-  long mPeriod;
+  std::unique_ptr<SignalFlowContext> mContext;
+
   std::size_t mNumberOfObjects;
   std::size_t mNumberOfOutputs;
 
   std::size_t mNumberOfEqSections;
-  
+
   std::unique_ptr<panning::LoudspeakerArray> mArrayConfiguration;
 
   std::unique_ptr< efl::BasicMatrix<SampleType> > mDiffusionFilters;
