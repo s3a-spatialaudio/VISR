@@ -244,7 +244,8 @@ AlignedArray<ElementType> & AlignedArray<ElementType>::operator=( AlignedArray< 
     throw std::logic_error( "AlignedArray:: objects in move assignment must have the same alignment." );
   }
   swap( rhs );
-  rhs.deallocate(); // Not strictly necess
+  rhs.deallocate(); // Not strictly necessary
+  return *this;
 }
 
 template< typename ElementType>
