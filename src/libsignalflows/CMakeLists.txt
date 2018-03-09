@@ -7,6 +7,7 @@ bunch_renderer.cpp
 delay_vector.cpp 
 gain_matrix.cpp
 time_frequency_feedthrough.cpp
+visr_renderer.cpp
 )
 
 # Basically, this makes the headers show up in the Visual studio project.
@@ -18,7 +19,14 @@ delay_vector.hpp
 export_symbols.hpp
 gain_matrix.hpp
 time_frequency_feedthrough.hpp
+visr_renderer.hpp
 )
+
+# It would be nicer if we could limit that to visr_renderer.cpp
+if( BUILD_PYTHON_BINDINGS )
+  message( STATUS "Signalflows: python activated" )
+  add_definitions(  -DVISR_PYTHON_SUPPORT=1 )
+endif( BUILD_PYTHON_BINDINGS )
 
 add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_static PROPERTIES OUTPUT_NAME signalflows )
