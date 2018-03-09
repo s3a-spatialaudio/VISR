@@ -18,8 +18,6 @@
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdlib>
@@ -133,14 +131,6 @@ int main( int argc, char const * const * argv )
         std::unique_ptr<audiointerfaces::AudioInterface> audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf) );
         
         audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
-        
-        // Release the Python GIL before starting the audio processing.
-        // This is done because most audio interfaces execute the
-        // callback function in a separate thread.
-        // If this callback comprises Python functions, these will attempt to
-        //  acquire the GIL from this thread, which would deadlock if the GIL
-        // is still held here.
-        pybind11::gil_scoped_release gilReleaseGuard;
 
         audioInterface->start();
         
