@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "python_wrapper.hpp"
-#include "gil_ensure_guard.hpp"
+#include "load_module.hpp"
 
 #include <libvisr/detail/compose_message_string.hpp>
 #include <libvisr/composite_component.hpp>
@@ -18,12 +18,6 @@
 #include <libvisr/impl/audio_port_base_implementation.hpp>
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-
-
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
 #include <pybind11/eval.h>
@@ -31,6 +25,7 @@
 #include <pybind11/stl.h>
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -40,48 +35,6 @@ namespace pythonsupport
 {
 
 namespace py = pybind11;
-
-namespace // unnamed
-{
-
-using PathList = std::vector<std::string>;
-
-
-/**
- * Internal function to load a Python module.
- * @param moduleName The name of the module, as it would be used in a Python 'import' statement. I.e., without 
- * path or extension
- * @param modulePath Optional search path for the location of the Python path. In any case, the Python 
- * sys.path is searched, which includes the value of <tt>$PYTHONPATH</tt>.
- * @param globals Any variables or definitions to be passed to the Python interpreter.
- * @return A Python <b>module</b> object.
- */
-py::object loadModule( std::string const & moduleName,
-                       PathList const & modulePath,
-                       py::object & globals)
-{
-  // Taken and adapted from 
-  // https://skebanga.github.io/embedded-python-pybind11/
-  py::dict locals;
-  locals["moduleName"] = py::cast(moduleName);
-  locals["path"] = modulePath.empty() ? py::none() : py::cast( modulePath );
-  try
-  {
-    py::eval<py::eval_statements>( // tell eval we're passing multiple statements
-      "import imp\n"
-      "file, modulePath, description = imp.find_module( moduleName, path)\n"
-      "new_module = imp.load_module(moduleName, file, modulePath, description)\n",
-      globals,
-      locals);
-  }
-  catch( std::exception const & ex )
-  {
-    throw std::runtime_error( detail::composeMessageString( "PythonWrapper: Error while loading Python module: ", ex.what() ));
-  }
-  return locals["new_module"];
-}
-
-} // unnamed namespace
 
 class PythonWrapper::Impl
 {
@@ -94,8 +47,6 @@ public:
                  char const * positionalArguments,
                  char const * keywordArguments,
                  char const * moduleSearchPath = nullptr );
-  ~Impl();
-
 private:
   /**
   * A vector holding an arbitrary number of input ports
@@ -149,81 +100,60 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * keywordArguments,
                            char const * moduleSearchPath)
 {
-  // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
-  PathList searchPath;
-  boost::algorithm::split( searchPath, moduleSearchPath, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
-  // Prune empty entries
-  searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(),
-				   [](std::string const & s){return s.empty(); } ),
-		   searchPath.end() );
-  for( auto const & str : searchPath )
+
+  py::object main     = py::module::import("__main__");
+  py::object globals  = main.attr("__dict__");
+
+  try
   {
-    if( not exists( boost::filesystem::path(str)) )
+    mModule = loadModule( std::string(moduleName), moduleSearchPath, globals );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
+  }
+
+  mComponentClass = mModule.attr( componentClassName );
+
+  py::tuple keywordList;
+  py::dict keywordDict;
+  try
+  {
+    if( not std::string(positionalArguments).empty())
     {
-      throw std::invalid_argument( visr::detail::composeMessageString( "PythonWrapper: Directory \"", str,
-        "\" in module search path does not exist." ));
+      keywordList = py::eval( positionalArguments ).cast<py::tuple>();
+    }
+    if( not std::string(keywordArguments).empty())
+    {
+      keywordDict = py::eval( keywordArguments ).cast<py::dict>();
     }
   }
-  // Scope to ensure that the GIL is hold only as long as
-  // the Python interpreter is  accessed.
+  catch( std::exception const & ex )
   {
-    // Now that the GIL is released after thread initialisation in InitialisationGuard::initialize(),
-    // we must acquire it before calls to the C Python API.
-    // We use the home-made guard type that can be used regardless of the thread state.
-    GilEnsureGuard gilGuard;
+    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while parsing the constructor arguments for component \"", name, "\": reason: ",ex.what() ) );
+  }
 
-    py::object globals = py::globals();
+  try
+  {
+    mComponentWrapper = mComponentClass( context, name,
+                                         static_cast<CompositeComponent*>(parent),
+                                         *keywordList,
+                                         **keywordDict );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while instantiating the Python object of component \"", name, "\": reason: ",ex.what() ) );
+  }
 
-    try
-    {
-      mModule = loadModule( std::string(moduleName), searchPath, globals );
-    }
-    catch( std::exception const & ex )
-    {
-      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component  \"", name, "\": reason: ",ex.what() ) );
-    }
+  try
+  {
+    mComponent = py::cast<Component*>( mComponentWrapper );
+  }
+  catch( std::exception const & ex )
+  {
 
-    mComponentClass = mModule.attr( componentClassName );
-
-    py::tuple keywordList;
-    py::dict keywordDict;
-    try
-    {
-      if( not std::string(positionalArguments).empty())
-      {
-        keywordList = py::eval( positionalArguments ).cast<py::tuple>();
-      }
-      if( not std::string(keywordArguments).empty())
-      {
-        keywordDict = py::eval( keywordArguments ).cast<py::dict>();
-      }
-    }
-    catch( std::exception const & ex )
-    {
-      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while parsing the constructor arguments for  component \"", name, "\": reason: ",ex.what() ) );
-    }
-
-    try
-    {
-      mComponentWrapper = mComponentClass( context/*pyContext*/, name,
-                                          static_cast<CompositeComponent*>(parent),
-                                          *keywordList,
-                                          **keywordDict );
-    }
-    catch( std::exception const & ex )
-    {
-      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while instantiating the Python object of component \"", name, "\": reason: ",ex.what() ) );
-    }
-    try
-    {
-      mComponent = py::cast<Component*>( mComponentWrapper );
-    }
-    catch( std::exception const & ex )
-    {
-      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
-    }
-  } // Scope that holds the GIL ends here,
-
+    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
+  }
   impl::ComponentImplementation & compImpl = mComponent->implementation();
   // Collect the audio ports of the contained components, create matching external ports on the outside of 'this;
   // composite component, and connect them. This additional set of connections will be removed by the 'flattening' phase, leaving only an additional level in the full names.
@@ -279,18 +209,11 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
       mParameterOutputs.push_back( std::move( portPlaceholder ) );
     }
   }
-}
 
-PythonWrapper::Impl::~Impl()
-{
 }
-
 
 PythonWrapper::~PythonWrapper()
 {
-  PyGILState_STATE tState = PyGILState_Ensure();
-  mImpl.reset();
-  PyGILState_Release( tState );
 }
 
 } // namespace pythonsupport
