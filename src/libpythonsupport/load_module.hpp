@@ -46,8 +46,6 @@ pybind11::object loadModule( std::string const & moduleName,
                               std::string const & modulePath,
                               pybind11::object & globals);
 
-
-
 } // namespace pythonsupport
 } // namespace visr
 
