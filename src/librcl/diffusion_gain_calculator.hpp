@@ -17,7 +17,6 @@
 #include <libpml/object_vector.hpp>
 #include <libpml/shared_data_protocol.hpp>
 
-#include <memory>
 #include <vector>
 
 namespace visr
@@ -41,10 +40,12 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
+   * @param numberOfObjectChannels The number of object channels supported by this calculator.
    */
   explicit DiffusionGainCalculator( SignalFlowContext const & context,
                                     char const * name,
-                                    CompositeComponent * parent = nullptr );
+                                    CompositeComponent * parent,
+                                    std::size_t numberOfObjectChannels );
 
   /**
    * Disabled (deleted) copy constructor
@@ -57,11 +58,10 @@ public:
    */
   ~DiffusionGainCalculator();
 
-  /**
-   * Method to initialise the component.
-   * @param numberOfObjectChannels The number of object channels supported by this calculator.
-   */ 
-  void setup( std::size_t numberOfObjectChannels );
+//  /**
+//   * Method to initialise the component.
+//   */
+//  void setup( std::size_t numberOfObjectChannels );
 
   /**
   * The process function.
@@ -80,7 +80,7 @@ private:
   void processInternal( objectmodel::ObjectVector const & objects, CoefficientType * gains );
 
   ParameterInput< pml::DoubleBufferingProtocol, pml::ObjectVector > mObjectVectorInput;
-  std::unique_ptr<ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > > mGainOutput;
+  ParameterOutput< pml::SharedDataProtocol, pml::MatrixParameter<CoefficientType > > mGainOutput;
 
 };
 

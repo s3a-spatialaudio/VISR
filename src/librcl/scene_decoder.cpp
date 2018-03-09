@@ -27,10 +27,6 @@ SceneDecoder::~SceneDecoder()
 {
 }
 
-void SceneDecoder::setup( )
-{
-}
-
 void SceneDecoder::process()
 {
   objectmodel::ObjectVector & objects = mObjectVectorOutput.data();

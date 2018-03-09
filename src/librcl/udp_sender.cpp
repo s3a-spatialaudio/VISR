@@ -20,27 +20,15 @@ namespace rcl
 
   UdpSender::UdpSender( SignalFlowContext const & context,
                         char const * name,
-                        CompositeComponent * parent /*= nullptr*/ )
+                        CompositeComponent * parent,
+                        std::size_t sendPort,
+                        std::string const & receiverAddress,
+                        std::size_t receiverPort,
+                        UdpSender::Mode mode,
+                        boost::asio::io_service* externalIoService /*= nullptr*/ )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
  , mMessageInput( "messageInput", *this, pml::EmptyParameterConfig() )
-{
-}
-
-UdpSender::~UdpSender()
-{
-  if( mIoServiceInstance.get() != nullptr )
-  {
-    mIoServiceInstance->stop();
-  }
-  if( mServiceThread.get() != nullptr  )
-  {
-    mServiceThread->join();
-  }
-}
-
-void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress, std::size_t receiverPort,
-                      UdpSender::Mode mode, boost::asio::io_service* externalIoService /*= nullptr*/ )
 {
   using boost::asio::ip::udp;
   mMode = mode;
@@ -77,7 +65,7 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
                               receiverAddress,
                               std::to_string(receiverPort),
                               udp::resolver::query::flags::passive ); /* Override the default values for the flag parameter which includes "address_configured"
-    that requires a network conection apart from loopback device. */
+  that requires a network conection apart from loopback device. */
   mRemoteEndpoint = *resolver.resolve( query );
   // Debug output:
   // std::cout << "Remote endpoint: " << mRemoteEndpoint.address().to_string() << ":" << mRemoteEndpoint.port() << std::endl;
@@ -89,9 +77,21 @@ void UdpSender::setup(std::size_t sendPort, std::string const & receiverAddress,
   udp::endpoint localEndpoint( udp::v4( ), static_cast<unsigned short>(sendPort) );
   mSocket.reset( new udp::socket( *mIoService, localEndpoint) );
 
-  if(  mMode == Mode::Asynchronous )
+  if( mMode == Mode::Asynchronous )
   {
     mServiceThread.reset( new boost::thread( boost::bind( &boost::asio::io_service::run, mIoService ) ));
+  }
+}
+
+UdpSender::~UdpSender()
+{
+  if( mIoServiceInstance.get() != nullptr )
+  {
+    mIoServiceInstance->stop();
+  }
+  if( mServiceThread.get() != nullptr  )
+  {
+    mServiceThread->join();
   }
 }
 

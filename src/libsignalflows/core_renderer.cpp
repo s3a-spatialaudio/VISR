@@ -53,7 +53,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
  , mOutputAdjustment( context, "OutputAdjustment", this )
  , mGainCalculator( context, "VbapGainCalculator", this, numberOfInputs, loudspeakerConfiguration, not trackingConfiguration.empty(),
                     frequencyDependentPanning /*separate lowpass panning*/ )
- , mDiffusionGainCalculator( context, "DiffusionCalculator", this )
+ , mDiffusionGainCalculator( context, "DiffusionCalculator", this, numberOfInputs )
  , mVbapMatrix( context, "VbapGainMatrix", this )
  , mDiffusePartMatrix( context, "DiffusePartMatrix", this )
  , mDiffusePartDecorrelator( context, "DiffusePartDecorrelator", this )
@@ -61,7 +61,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                       loudspeakerConfiguration.getNumRegularSpeakers(),
                      3 + (frequencyDependentPanning ?1:0) + (reverbConfig.empty() ? 0 : 1) )
  , mSubwooferMix( context, "SubwooferMixer", this )
- , mNullSource( context, "NullSource", this )
+ , mNullSource( context, "NullSource", this,
+               (numberOfOutputs == loudspeakerConfiguration.getNumRegularSpeakers() + loudspeakerConfiguration.getNumSubwoofers()) ? 0 : 1 )
  , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
  , mLowFrequencyPanningMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "LowFrequencyPanningMatrix", this ) : nullptr)
 {
@@ -73,17 +74,15 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 
   parameterConnection( mObjectVectorInput, mGainCalculator.parameterPort( "objectVectorInput" ) );
 
-
   if( trackingEnabled )
   {
     // Instantiate the objects.
-    mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation", this ) );
+    mListenerCompensation.reset( new rcl::ListenerCompensation( context, "TrackingListenerCompensation", this, loudspeakerConfiguration ) );
     mListenerGainDelayCompensation.reset( new rcl::DelayVector( context, "ListenerGainDelayCompensation", this ) );
 
     // for the very moment, do not parse any options, but use hard-coded option values.
     SampleType const cMaxDelay = 1.0f; // maximum delay (in seconds)
 
-    mListenerCompensation->setup( loudspeakerConfiguration );
     // We start with a initial gain of 0.0 to suppress transients on startup.
     mListenerGainDelayCompensation->setup( numberOfLoudspeakers, period(), cMaxDelay, "lagrangeOrder0",
                                            rcl::DelayVector::MethodDelayPolicy::Limit,
@@ -197,7 +196,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 
   //////////////////////////////////////////////////////////////////////////////////////
 
-  mDiffusionGainCalculator.setup( numberOfInputs );
   mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
   parameterConnection( mObjectVectorInput,  mDiffusionGainCalculator.parameterPort("objectInput") );
   parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
@@ -210,7 +208,25 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
    * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source.
    */
   SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
-  mDiffusePartDecorrelator.setup( numberOfLoudspeakers, diffusionFilters, diffusorGain );
+  pml::FilterRoutingList decorrelatorRoutings;
+  for( std::size_t outIdx( 0 ); outIdx < numberOfLoudspeakers; ++outIdx )
+  {
+    decorrelatorRoutings.addRouting( 0, outIdx, outIdx, diffusorGain );
+  }
+  /*
+  void setup( std::size_t numberOfInputs,
+              std::size_t numberOfOutputs,
+              std::size_t filterLength,
+              std::size_t maxFilters,
+              std::size_t maxRoutings,
+              efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
+              pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
+              ControlPortConfig controlInputs = ControlPortConfig::None,
+              char const * fftImplementation = "default" );
+  */
+  mDiffusePartDecorrelator.setup( 1, numberOfLoudspeakers, diffusionFilters.numberOfColumns(),
+                                  diffusionFilters.numberOfRows(), diffusionFilters.numberOfRows(),
+                                  diffusionFilters, decorrelatorRoutings );
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
@@ -327,7 +343,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                    mLoudspeakerOutput, ChannelList( activePlaybackChannels ) );
 
   std::size_t const numSilentOutputs = numberOfOutputs - (numberOfLoudspeakers + numberOfSubwoofers);
-  mNullSource.setup( numSilentOutputs == 0 ? 0 : 1 );
   if( numSilentOutputs > 0 )
   {
     std::vector<ChannelList::IndexType> nullOutput( numSilentOutputs, 0 );

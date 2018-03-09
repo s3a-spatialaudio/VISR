@@ -1,6 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "python_wrapper.hpp"
+#include "gil_ensure_guard.hpp"
 
 #include <libvisr/detail/compose_message_string.hpp>
 #include <libvisr/composite_component.hpp>
@@ -21,6 +22,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+
 
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
@@ -44,6 +46,7 @@ namespace // unnamed
 
 using PathList = std::vector<std::string>;
 
+
 /**
  * Internal function to load a Python module.
  * @param moduleName The name of the module, as it would be used in a Python 'import' statement. I.e., without 
@@ -66,8 +69,8 @@ py::object loadModule( std::string const & moduleName,
   {
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
-      "name, modulePath, description = imp.find_module( moduleName, path)\n"
-      "new_module = imp.load_module(str(name), open(modulePath), modulePath, ('py', 'U', imp.PY_SOURCE))\n",
+      "file, modulePath, description = imp.find_module( moduleName, path)\n"
+      "new_module = imp.load_module(moduleName, file, modulePath, description)\n",
       globals,
       locals);
   }
@@ -91,6 +94,8 @@ public:
                  char const * positionalArguments,
                  char const * keywordArguments,
                  char const * moduleSearchPath = nullptr );
+  ~Impl();
+
 private:
   /**
   * A vector holding an arbitrary number of input ports
@@ -159,60 +164,66 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
         "\" in module search path does not exist." ));
     }
   }
-
-  py::object main     = py::module::import("__main__");
-  py::object globals  = main.attr("__dict__");
-
-  try
+  // Scope to ensure that the GIL is hold only as long as
+  // the Python interpreter is  accessed.
   {
-    mModule = loadModule( std::string(moduleName), searchPath, globals );
-  }
-  catch( std::exception const & ex )
-  {
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
-  }
+    // Now that the GIL is released after thread initialisation in InitialisationGuard::initialize(),
+    // we must acquire it before calls to the C Python API.
+    // We use the home-made guard type that can be used regardless of the thread state.
+    GilEnsureGuard gilGuard;
 
-  mComponentClass = mModule.attr( componentClassName );
+    py::object globals = py::globals();
 
-  py::tuple keywordList;
-  py::dict keywordDict;
-  try
-  {
-    if( not std::string(positionalArguments).empty())
+    try
     {
-      keywordList = py::eval( positionalArguments ).cast<py::tuple>();
+      mModule = loadModule( std::string(moduleName), searchPath, globals );
     }
-    if( not std::string(keywordArguments).empty())
+    catch( std::exception const & ex )
     {
-      keywordDict = py::eval( keywordArguments ).cast<py::dict>();
+      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component  \"", name, "\": reason: ",ex.what() ) );
     }
-  }
-  catch( std::exception const & ex )
-  {
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while parsing the constructor arguments for component \"", name, "\": reason: ",ex.what() ) );
-  }
 
-  try
-  {
-    mComponentWrapper = mComponentClass( context, name,
-                                         static_cast<CompositeComponent*>(parent),
-                                         *keywordList,
-                                         **keywordDict );
-  }
-  catch( std::exception const & ex )
-  {
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while instantiating the Python object of component \"", name, "\": reason: ",ex.what() ) );
-  }
+    mComponentClass = mModule.attr( componentClassName );
 
-  try
-  {
-    mComponent = py::cast<Component*>( mComponentWrapper );
-  }
-  catch( std::exception const & ex )
-  {
+    py::tuple keywordList;
+    py::dict keywordDict;
+    try
+    {
+      if( not std::string(positionalArguments).empty())
+      {
+        keywordList = py::eval( positionalArguments ).cast<py::tuple>();
+      }
+      if( not std::string(keywordArguments).empty())
+      {
+        keywordDict = py::eval( keywordArguments ).cast<py::dict>();
+      }
+    }
+    catch( std::exception const & ex )
+    {
+      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while parsing the constructor arguments for  component \"", name, "\": reason: ",ex.what() ) );
+    }
 
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
-  }
+    try
+    {
+      mComponentWrapper = mComponentClass( context/*pyContext*/, name,
+                                          static_cast<CompositeComponent*>(parent),
+                                          *keywordList,
+                                          **keywordDict );
+    }
+    catch( std::exception const & ex )
+    {
+      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while instantiating the Python object of component \"", name, "\": reason: ",ex.what() ) );
+    }
+    try
+    {
+      mComponent = py::cast<Component*>( mComponentWrapper );
+    }
+    catch( std::exception const & ex )
+    {
+      throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
+    }
+  } // Scope that holds the GIL ends here,
+
   impl::ComponentImplementation & compImpl = mComponent->implementation();
   // Collect the audio ports of the contained components, create matching external ports on the outside of 'this;
   // composite component, and connect them. This additional set of connections will be removed by the 'flattening' phase, leaving only an additional level in the full names.
@@ -268,11 +279,18 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
       mParameterOutputs.push_back( std::move( portPlaceholder ) );
     }
   }
-
 }
+
+PythonWrapper::Impl::~Impl()
+{
+}
+
 
 PythonWrapper::~PythonWrapper()
 {
+  PyGILState_STATE tState = PyGILState_Ensure();
+  mImpl.reset();
+  PyGILState_Release( tState );
 }
 
 } // namespace pythonsupport

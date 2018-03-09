@@ -23,10 +23,10 @@ SignalFlowWrapper<ExternalSampleType>::SignalFlowWrapper( Component & comp )
  : mFlow( comp )
  , mPeriodSize( comp.period( ) )
  , mConvertedSamples( 
-  new efl::BasicMatrix<SampleType>( mFlow.numberOfAudioCapturePorts( ) + mFlow.numberOfAudioPlaybackPorts( ),
+  new efl::BasicMatrix<SampleType>( mFlow.numberOfCaptureChannels( ) + mFlow.numberOfPlaybackChannels( ),
                                     comp.period(), cVectorAlignmentSamples ) )
- , mInputBufferPtrs( mFlow.numberOfAudioCapturePorts( ) )
- , mOutputBufferPtrs( mFlow.numberOfAudioPlaybackPorts( ) )
+ , mInputBufferPtrs( mFlow.numberOfCaptureChannels( ) )
+ , mOutputBufferPtrs( mFlow.numberOfPlaybackChannels( ) )
 {
   std::size_t index = 0;
   std::generate( mInputBufferPtrs.begin(), mInputBufferPtrs.end(), [&index, this] { return this->mConvertedSamples->row(index++); } );
@@ -59,8 +59,7 @@ void SignalFlowWrapper<ExternalSampleType>::processBlock( ExternalSampleType con
 template<typename ExternalSampleType>
 void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSampleType const * const * inputSamples )
 {
-  std::size_t const numberOfCaptureSignals = mFlow.numberOfAudioCapturePorts();
-  std::size_t const inputStride = 1;
+  std::size_t const numberOfCaptureSignals = mFlow.numberOfCaptureChannels();
   for( std::size_t inChanIdx( 0 ); inChanIdx < numberOfCaptureSignals; ++inChanIdx )
   {
     ExternalSampleType const * const firstInSample = inputSamples[inChanIdx];
@@ -76,9 +75,9 @@ void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSample
 template<typename ExternalSampleType >
 void SignalFlowWrapper<ExternalSampleType>::transferOutputSamples( ExternalSampleType * const * outputSamples )
 {
-  std::size_t const startIdx = mFlow.numberOfAudioCapturePorts();
-  std::size_t const numberOfPlaybackSignals = mFlow.numberOfAudioPlaybackPorts();
-  for( std::size_t outChanIdx( 0 ); outChanIdx < numberOfPlaybackSignals; ++outChanIdx )
+  std::size_t const startIdx = mFlow.numberOfCaptureChannels();
+  std::size_t const numberOfPlaybackSignals = mFlow.numberOfPlaybackChannels();
+  for( std::size_t outChanIdx( startIdx ); outChanIdx < numberOfPlaybackSignals; ++outChanIdx )
   {
     ExternalSampleType * const firstOutSample = outputSamples[ outChanIdx ];
     // Note: No alignment guarantees can be made because we do not know the alignment of outputSamples.

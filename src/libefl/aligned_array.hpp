@@ -56,6 +56,18 @@ public:
    */
   explicit AlignedArray( std::size_t length, std::size_t alignmentElements );
 
+  /**
+   * Move constructor, takes over the contents of an rvalue \p rhs and leaves \p rhs in an empty, but valid state.
+   */
+  AlignedArray( AlignedArray< ElementType > && rhs );
+
+  /**
+   * Move assignment operator from a rvalue \p rhs.
+   * @note The alignment of \p rhs must match the alignment of this object.
+   * @throw std::logic_error if the alignment of \p rhs does not match this object.
+   */
+  AlignedArray<ElementType> & operator=( AlignedArray< ElementType > && rhs );
+
   ~AlignedArray();
 
   /**
@@ -215,6 +227,24 @@ AlignedArray<ElementType>::AlignedArray( std::size_t length, std::size_t alignme
     mRawStorage = nullptr;
     mAlignedStorage = nullptr;
   }
+}
+
+template< typename ElementType>
+AlignedArray<ElementType>::AlignedArray( AlignedArray< ElementType > && rhs )
+ : AlignedArray( rhs.alignmentElements() )
+{
+  swap( rhs );
+}
+
+template< typename ElementType>
+AlignedArray<ElementType> & AlignedArray<ElementType>::operator=( AlignedArray< ElementType > && rhs )
+{
+  if( mAlignment != rhs.mAlignment )
+  {
+    throw std::logic_error( "AlignedArray:: objects in move assignment must have the same alignment." );
+  }
+  swap( rhs );
+  rhs.deallocate(); // Not strictly necess
 }
 
 template< typename ElementType>

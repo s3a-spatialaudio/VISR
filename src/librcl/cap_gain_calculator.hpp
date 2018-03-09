@@ -95,13 +95,13 @@ private:
   /**
    * The number of audio objects handled by this object.
    */
-  std::size_t mNumberOfObjects;
+  std::size_t const mNumberOfObjects;
 
   /**
    * The number of panning loudspeakers.
    * @note This excludes any potential subwoofers (which are not handled by the panning algorithm)
    */
-  std::size_t mNumberOfLoudspeakers;
+  std::size_t const mNumberOfLoudspeakers;
 
   /**
    * A vector to hold the source position data.

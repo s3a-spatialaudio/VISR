@@ -12,19 +12,15 @@ namespace rcl
 
   NullSource::NullSource( SignalFlowContext const & context,
                           char const * name,
-                          CompositeComponent * parent /*= nullptr*/ )
+                          CompositeComponent * parent,
+                          std::size_t width )
  : AtomicComponent( context, name, parent )
- , mOutput( "out", *this )
+ , mOutput( "out", *this, width )
 {
 }
 
 NullSource::~NullSource()
 {
-}
-
-void NullSource::setup( std::size_t width )
-{
-  mOutput.setWidth( width );
 }
 
 void NullSource::process()

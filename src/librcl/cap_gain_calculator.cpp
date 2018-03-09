@@ -34,6 +34,8 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
                                       panning::LoudspeakerArray const & arrayConfig )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( numberOfObjects )
+ , mNumberOfLoudspeakers( arrayConfig.getNumRegularSpeakers() )
+ , mSourcePositions( mNumberOfObjects, panning::XYZ() )
  , mObjectVectorInput( "objectVectorInput", *this, pml::EmptyParameterConfig() )
  , mListenerPositionInput( "listenerPosition", *this, pml::EmptyParameterConfig() )
  , mGainOutput( "gainOutput", *this, pml::MatrixParameterConfig( arrayConfig.getNumRegularSpeakers(), mNumberOfObjects ) )
@@ -42,6 +44,7 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
   mLevels = 0.0f;
 
   mCapCalculator.setLoudspeakerArray( &arrayConfig );
+  mCapCalculator.setNumSources( numberOfObjects );
 
   // Set initial positions
   mCapCalculator.setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
@@ -59,7 +62,7 @@ void CAPGainCalculator::process()
   if( mObjectVectorInput.changed() or mListenerPositionInput.changed() )
   {
     efl::BasicMatrix<CoefficientType> & gains = mGainOutput.data();
-    assert( (gains.numberOfRows() != mNumberOfLoudspeakers) or (gains.numberOfColumns() != mNumberOfObjects) );
+    assert( (gains.numberOfRows() == mNumberOfLoudspeakers) and (gains.numberOfColumns() == mNumberOfObjects) );
     process( mObjectVectorInput.data(),
              mListenerPositionInput.data(),
              gains );
@@ -149,7 +152,7 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects,
   mCapCalculator.setListenerPosition( listener.x(), listener.y(), listener.z() );
   // TODO: Calculate the listener aural axis from the values listener.yaw(), listener.pitch(), and listener.roll()
   CoefficientType const auralAxisX = 0.0f; // TODO: Replace by computation
-  CoefficientType const auralAxisY = 0.0f; // TODO: Replace by computation
+  CoefficientType const auralAxisY = 1.0f; // TODO: Replace by computation
   CoefficientType const auralAxisZ = 0.0f; // TODO: Replace by computation
   mCapCalculator.setListenerAuralAxis( auralAxisX, auralAxisY, auralAxisZ );
 

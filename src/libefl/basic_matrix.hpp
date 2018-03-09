@@ -73,6 +73,10 @@ public:
     }
   }
 
+  BasicMatrix( BasicMatrix<ElementType> && rhs ) = default;
+
+  BasicMatrix<ElementType> & operator=( BasicMatrix<ElementType> && rhs ) = default;
+
   ~BasicMatrix()
   {
   }

@@ -21,3 +21,6 @@ add_subdirectory( objectmodel )
 add_subdirectory( reverbobject )
 
 add_subdirectory( audiointerfaces )
+
+add_subdirectory( libpythonbindinghelpers )
+

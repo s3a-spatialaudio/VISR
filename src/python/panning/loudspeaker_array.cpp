@@ -57,7 +57,7 @@ std::vector<LoudspeakerArray::ChannelIndex> getSubwooferChannelIndices( Loudspea
 
 py::array getPositions( LoudspeakerArray const & la )
 {
-  std::size_t const len = la.getNumSpeakers();
+  std::size_t const len = la.getNumRegularSpeakers();
   py::array ret( py::dtype::of<float>(),
   py::array::ShapeContainer( {static_cast<int>(len), 3 }),
   { sizeof( Afloat )*3, sizeof( Afloat ) }

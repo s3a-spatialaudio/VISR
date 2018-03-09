@@ -7,19 +7,25 @@ cap_gain_calculator.cpp
 channel_object_routing_calculator.cpp
 delay_matrix.cpp
 delay_vector.cpp
+diffusion_gain_calculator.cpp
 fir_filter_matrix.cpp
 gain_matrix.cpp
 gain_vector.cpp
 hoa_allrad_gain_calculator.cpp
-panning_calculator.cpp
+listener_compensation.cpp
+null_source.cpp
 object_gain_eq_calculator.cpp
+panning_calculator.cpp
+position_decoder.cpp
 rcl.cpp
 scene_decoder.cpp
+scene_encoder.cpp
 scalar_osc_decoder.cpp
 signal_routing.cpp
 time_frequency_inverse_transform.cpp
 time_frequency_transform.cpp
 udp_receiver.cpp
+udp_sender.cpp
 )
 
 # We don't need header files

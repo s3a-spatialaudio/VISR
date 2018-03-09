@@ -52,16 +52,11 @@ public:
   ~SceneEncoder();
 
   /**
-   * Method to initialise the component.
-   */ 
-  void setup();
-
-  /**
    * Transform the incoming object vector into a JSON message.
    * @warning At the moment, a message is created in each process call.
    * @todo Create a triggering/timing method to control the output rate.
    */
-  void process();
+  void process() override;
 
 private:
   ParameterInput< pml::SharedDataProtocol, pml::ObjectVector> mObjectInput;

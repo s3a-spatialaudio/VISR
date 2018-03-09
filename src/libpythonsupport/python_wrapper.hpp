@@ -58,7 +58,7 @@ public:
    */
   ~PythonWrapper();
 
-
+  //@}
 private:
   /**
    * Forward declaration of private implementation object.

@@ -53,7 +53,6 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 
 {
   mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Asynchronous );
-  mSceneDecoder.setup();
 
   audioConnection( mInput, mCoreRenderer.audioPort( "audioIn") );
   audioConnection( mCoreRenderer.audioPort( "audioOut"), mOutput );
@@ -62,11 +61,10 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 
   if( not trackingConfiguration.empty() )
   {
-    mTrackingReceiver.reset( new rcl::UdpReceiver( context, "TrackingReceiver" ) );
-    mTrackingPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder" ) );
+    mTrackingReceiver.reset( new rcl::UdpReceiver( context, "TrackingReceiver", this ) );
+    mTrackingPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder", this, panning::XYZ( 0.0f, 0.0f, 0.0f ) ) );
 
     mTrackingReceiver->setup( 8888, rcl::UdpReceiver::Mode::Synchronous );
-    mTrackingPositionDecoder->setup( panning::XYZ( 0.0f, 0.0f, 0.0f ) );
     parameterConnection( mTrackingPositionDecoder->parameterPort("positionOutput"), mCoreRenderer.parameterPort("trackingPositionInput") );
   }
 }

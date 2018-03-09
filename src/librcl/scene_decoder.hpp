@@ -61,11 +61,6 @@ public:
   ~SceneDecoder();
 
   /**
-   * Method to initialise the component.
-   */ 
-  void setup();
-
-  /**
    * The process function. 
    */
   void process();

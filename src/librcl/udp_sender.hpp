@@ -47,27 +47,25 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
-   */
-  explicit UdpSender( SignalFlowContext const & context,
-                      char const * name,
-                      CompositeComponent * parent = nullptr );
-
-  /**
-   * Destructor.
-   */
-  ~UdpSender();
-
-  /**
-   * Method to initialise the component.
    * @param sendPort Local UDP port number for sending.
    * @param receiverAddress The name of the reciver (either numeric IP or DNS name)
    * @param receiverPort Remote UDP port number.
    * @param mode Asynchronity mode of the network communication
    * @param externalIoService Pointer to an external network IO service (or nullptr if there is none).
    * Must be non-null if and only if mode == Mode::ExternalServiceObject
-   */ 
-  void setup( std::size_t sendPort, std::string const & receiverAddress, std::size_t receiverPort,
-              Mode mode, boost::asio::io_service* externalIoService = nullptr );
+   */
+  explicit UdpSender( SignalFlowContext const & context,
+                      char const * name,
+                      CompositeComponent * parent,
+                      std::size_t sendPort,
+                      std::string const & receiverAddress,
+                      std::size_t receiverPort,
+                      Mode mode, boost::asio::io_service* externalIoService = nullptr );
+
+  /**
+   * Destructor.
+   */
+  virtual ~UdpSender();
 
   /**
    * The process function.

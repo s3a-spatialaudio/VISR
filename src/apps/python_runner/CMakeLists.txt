@@ -2,8 +2,6 @@
 
 set( APPLICATION_NAME python_runner )
 
-INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_DIR} )
-
 ADD_EXECUTABLE( ${APPLICATION_NAME} main.cpp options.hpp options.cpp )
 
 TARGET_LINK_LIBRARIES(${APPLICATION_NAME} audiointerfaces_static )

@@ -43,21 +43,16 @@ namespace rcl
 {
   ListenerCompensation::ListenerCompensation( SignalFlowContext const & context,
                                               char const * name,
-                                              CompositeComponent * parent /*= nullptr*/ )//constructor
+                                              CompositeComponent * parent,
+                                              panning::LoudspeakerArray const & arrayConfig )
   : AtomicComponent( context, name, parent )
   , m_listenerPos( 0.0f, 0.0f, 0.0f )
-  , mNumberOfLoudspeakers( 0 )
+  , mNumberOfLoudspeakers( arrayConfig.getNumRegularSpeakers() )
   , mPositionInput( "positionInput", *this, pml::EmptyParameterConfig() )
   , mGainOutput( "gainOutput", *this )
   , mDelayOutput( "delayOutput", *this)
 {
-}
-
-void ListenerCompensation::setup( panning::LoudspeakerArray const & arrayConfig )
-{
   m_array = arrayConfig;
-  mNumberOfLoudspeakers = m_array.getNumRegularSpeakers();
-
   pml::VectorParameterConfig const vectorConfig( mNumberOfLoudspeakers );
 
   mGainOutput.setParameterConfig( vectorConfig );
