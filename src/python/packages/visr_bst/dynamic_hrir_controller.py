@@ -28,7 +28,7 @@ class DynamicHrirController( visr.AtomicComponent ):
                   dynamicILD = False,       # Whether ILD gains are calculated and sent via a "gains" port.
                   hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
                   channelAllocation = False, # Whether to allocate object channels dynamically (not tested yet)
-                  delays = None,             # Matrix of delays associated with filter dataset. Dimension: # filters * 2
+                  hrirDelays = None,         # Matrix of delays associated with filter dataset. Dimension: # filters * 2
                   ):
         # Call base class (AtomicComponent) constructor
         super( DynamicHrirController, self ).__init__( context, name, parent )
@@ -61,9 +61,9 @@ class DynamicHrirController( visr.AtomicComponent ):
 
 
         if self.dynamicITD:
-            if (delays is None) or (delays.ndim != 2) or (delays.shape != (hrirData.shape[0], 2 ) ):
+            if (hrirDelays is None) or (hrirDelays.ndim != 2) or (hrirDelays.shape != (hrirData.shape[0], 2 ) ):
                 raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must be a #hrirs x 2 matrix.' )
-            self.dynamicDelays = np.array(delays, copy=True)
+            self.dynamicDelays = np.array(hrirDelays, copy=True)
             self.delayOutput = visr.ParameterOutput( "delayOutput", self,
                                                     pml.VectorParameterFloat.staticType,
                                                     pml.DoubleBufferingProtocol.staticType,

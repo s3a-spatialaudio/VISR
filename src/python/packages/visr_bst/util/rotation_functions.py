@@ -14,8 +14,8 @@ def rad2deg( phi ):
 # (individual values vs single matrix)
 def cart2sph(x,y,z):
     radius = np.sqrt( x*x + y*y + z*z )
-    az = np.atan2( y, x )
-    el = np.asin( z / radius )
+    az = np.arctan2( y, x )
+    el = np.arcsin( z / radius )
     sph = np.stack( (az, el, radius) )
     return sph
 

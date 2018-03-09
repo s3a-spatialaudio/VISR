@@ -64,7 +64,7 @@ class DynamicHrirRenderer( visr.CompositeComponent ):
                                                                   dynamicITD = dynamicITD,
                                                                   dynamicILD = dynamicILD,
                                                                   hrirInterpolation = hrirInterpolation,
-                                                                  delays = hrirDelays
+                                                                  hrirDelays = hrirDelays
                                                                   )
 
         self.parameterConnection( self.objectVectorInput, self.dynamicHrirController.parameterPort("objectVector"))
