@@ -2,6 +2,7 @@
 
 SET( SOURCES
 initialisation_guard.cpp
+load_module.cpp
 python_wrapper.cpp
 )
 
@@ -9,6 +10,7 @@ python_wrapper.cpp
 SET( HEADERS
 export_symbols.hpp
 initialisation_guard.hpp
+load_module.hpp
 python_wrapper.hpp
 )
 
