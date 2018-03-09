@@ -12,4 +12,5 @@ if( BUILD_PYTHON_BINDINGS )
 endif( BUILD_PYTHON_BINDINGS )
 ADD_SUBDIRECTORY( scene_decoder )
 ADD_SUBDIRECTORY( time_frequency_feedthrough )
+add_subdirectory( visr_renderer )
 # To be continued.
