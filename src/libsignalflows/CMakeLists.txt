@@ -22,9 +22,9 @@ time_frequency_feedthrough.hpp
 visr_renderer.hpp
 )
 
+# Signal that Python support is activated
 # It would be nicer if we could limit that to visr_renderer.cpp
 if( BUILD_PYTHON_BINDINGS )
-  message( STATUS "Signalflows: python activated" )
   add_definitions(  -DVISR_PYTHON_SUPPORT=1 )
 endif( BUILD_PYTHON_BINDINGS )
 
@@ -52,6 +52,15 @@ target_link_libraries( signalflows_shared pml_shared )
 # Because the headers are the same for the static library, the headers are only
 # installled once.
 set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
+# If Python is activated, enable the optional use of a Metadapter to receive and process object metadata. 
+if( BUILD_PYTHON_BINDINGS )
+  # It would be nicer if we could limit that to visr_renderer.cpp
+  add_definitions(  -DVISR_PYTHON_SUPPORT=1 )
+  target_link_libraries( signalflows_static pythonsupport_static )
+  target_link_libraries( signalflows_shared pythonsupport_shared )
+endif( BUILD_PYTHON_BINDINGS )
+
 
 install(TARGETS signalflows_static ARCHIVE DESTINATION lib )
 install(TARGETS signalflows_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libsignalflows )
