@@ -9,6 +9,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/eval.h>
+#include <pybind11/stl.h>
 
 #include <ciso646>
 
@@ -32,8 +33,8 @@ pybind11::object loadModule( std::string const & moduleName,
   {
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
-      "name, modulePath, description = imp.find_module( moduleName, path)\n"
-      "new_module = imp.load_module(str(name), open(modulePath), modulePath, ('py', 'U', imp.PY_SOURCE))\n",
+      "file, pathname, description = imp.find_module( moduleName, path)\n"
+      "new_module = imp.load_module( moduleName, file, pathname, description)\n",
       globals,
       locals);
     return locals["new_module"];

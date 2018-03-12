@@ -1,6 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "python_wrapper.hpp"
+#include "gil_ensure_guard.hpp"
 #include "load_module.hpp"
 
 #include <libvisr/detail/compose_message_string.hpp>
@@ -100,10 +101,13 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * keywordArguments,
                            char const * moduleSearchPath)
 {
+  // Ensure that we have a thread state for the current thread.
+  GilEnsureGuard guard;
 
   py::object main     = py::module::import("__main__");
   py::object globals  = main.attr("__dict__");
-
+  // Cleverer alternative?
+  //py::object globals = py::globals();
   try
   {
     mModule = loadModule( std::string(moduleName), moduleSearchPath, globals );
@@ -214,6 +218,9 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
 
 PythonWrapper::~PythonWrapper()
 {
+  // Destroy the Python/pybind11 data strutures while the thread state is held.
+  GilEnsureGuard guard;
+  mImpl.reset();
 }
 
 } // namespace pythonsupport
