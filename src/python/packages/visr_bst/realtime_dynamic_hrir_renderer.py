@@ -31,7 +31,7 @@ class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
                  fftImplementation = "default",         # The FFT implementation to use.
                  headTrackingReceiver = None,           # Class of the head tracking recveiver, None (default value) disables dynamic head tracking.
                  headTrackingPositionalArguments = None,# Positional arguments passed to the constructor of the head tracking receiver object. Must be a tuple.
-                 headTrackingKeywordArguments = None,   # Keyword arguments passed to the constructor of the head tracking receiver. Must be a dictionary (dict)
+                 headTrackingKeywordArguments = None    # Keyword arguments passed to the constructor of the head tracking receiver. Must be a dictionary (dict)
                  ):
         super( RealtimeDynamicHrirRenderer, self ).__init__( context, name, parent )
         self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
