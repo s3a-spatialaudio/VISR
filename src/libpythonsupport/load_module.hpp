@@ -27,9 +27,10 @@ namespace pythonsupport
  * @param globals Any variables or definitions to be passed to the Python interpreter.
  * @return A Python <b>module</b> object.
  */
+VISR_PYTHONSUPPORT_LIBRARY_SYMBOL
 pybind11::object loadModule( std::string const & moduleName,
-                            std::vector<std::string> const & modulePath,
-                            pybind11::object & globals);
+                             std::vector<std::string> const & modulePath,
+                             pybind11::object & globals);
 
 /**
  * Internal function to load a Python module.
@@ -42,11 +43,10 @@ pybind11::object loadModule( std::string const & moduleName,
  * @throw std::runtime_error If the Python module load function fails.
  * @throw std::invalid_argument if an entry of the search paths does not exist.
  */
-  pybind11::object loadModule( std::string const & moduleName,
-                              std::string const & modulePath,
-                              pybind11::object & globals);
-
-
+VISR_PYTHONSUPPORT_LIBRARY_SYMBOL
+pybind11::object loadModule( std::string const & moduleName,
+                             std::string const & modulePath,
+                             pybind11::object & globals);
 
 } // namespace pythonsupport
 } // namespace visr

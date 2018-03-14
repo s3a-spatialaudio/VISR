@@ -1,7 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "python_wrapper.hpp"
-#include "load_module.hpp"
+#include "wrapper.hpp"
+
+#include <libpythonsupport/gil_ensure_guard.hpp>
+#include <libpythonsupport/load_module.hpp>
 
 #include <libvisr/detail/compose_message_string.hpp>
 #include <libvisr/composite_component.hpp>
@@ -31,17 +33,17 @@
 
 namespace visr
 {
-namespace pythonsupport
+namespace pythoncomponents
 {
 
 namespace py = pybind11;
 
-class PythonWrapper::Impl
+class Wrapper::Impl
 {
 public:
   explicit Impl( SignalFlowContext const & context,
                  char const * name,
-                 PythonWrapper * parent,
+                 Wrapper * parent,
                  char const * moduleName,
                  char const * componentClassName,
                  char const * positionalArguments,
@@ -77,7 +79,7 @@ private:
   Component * mComponent;
 };
 
-PythonWrapper::PythonWrapper( SignalFlowContext const & context,
+Wrapper::Wrapper( SignalFlowContext const & context,
                               char const * name,
                               CompositeComponent * parent,
                               char const * moduleName,
@@ -91,26 +93,29 @@ PythonWrapper::PythonWrapper( SignalFlowContext const & context,
 {}
 
 
-PythonWrapper::Impl::Impl( SignalFlowContext const & context,
+Wrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * name,
-                           PythonWrapper * parent,
+                           Wrapper * parent,
                            char const * moduleName,
                            char const * componentClassName,
                            char const * positionalArguments,
                            char const * keywordArguments,
                            char const * moduleSearchPath)
 {
+  // Ensure that we have a thread state for the current thread.
+  pythonsupport::GilEnsureGuard guard;
 
   py::object main     = py::module::import("__main__");
   py::object globals  = main.attr("__dict__");
-
+  // Cleverer alternative?
+  //py::object globals = py::globals();
   try
   {
-    mModule = loadModule( std::string(moduleName), moduleSearchPath, globals );
+    mModule = pythonsupport::loadModule( std::string(moduleName), moduleSearchPath, globals );
   }
   catch( std::exception const & ex )
   {
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
+    throw std::runtime_error( detail::composeMessageString("Wrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
   }
 
   mComponentClass = mModule.attr( componentClassName );
@@ -130,7 +135,7 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   }
   catch( std::exception const & ex )
   {
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while parsing the constructor arguments for component \"", name, "\": reason: ",ex.what() ) );
+    throw std::runtime_error( detail::composeMessageString("Wrapper: Error while parsing the constructor arguments for component \"", name, "\": reason: ",ex.what() ) );
   }
 
   try
@@ -142,7 +147,7 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   }
   catch( std::exception const & ex )
   {
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error while instantiating the Python object of component \"", name, "\": reason: ",ex.what() ) );
+    throw std::runtime_error( detail::composeMessageString("Wrapper: Error while instantiating the Python object of component \"", name, "\": reason: ",ex.what() ) );
   }
 
   try
@@ -152,7 +157,7 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   catch( std::exception const & ex )
   {
 
-    throw std::runtime_error( detail::composeMessageString("PythonWrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
+    throw std::runtime_error( detail::composeMessageString("Wrapper: Error casting the Python object of component \"", name, "\" to the C++ base type. Reason: ",ex.what() ) );
   }
   impl::ComponentImplementation & compImpl = mComponent->implementation();
   // Collect the audio ports of the contained components, create matching external ports on the outside of 'this;
@@ -212,9 +217,12 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
 
 }
 
-PythonWrapper::~PythonWrapper()
+Wrapper::~Wrapper()
 {
+  // Destroy the Python/pybind11 data strutures while the thread state is held.
+  pythonsupport::GilEnsureGuard guard;
+  mImpl.reset();
 }
 
-} // namespace pythonsupport
+} // namespace pythoncomponents
 } // namespace visr

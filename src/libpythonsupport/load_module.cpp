@@ -9,6 +9,9 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/eval.h>
+#include <pybind11/stl.h>
+
+#include <ciso646>
 
 namespace visr
 {
@@ -16,8 +19,8 @@ namespace pythonsupport
 {
 
 pybind11::object loadModule( std::string const & moduleName,
-			     std::vector<std::string> const & modulePath,
-			     pybind11::object & globals)
+                             std::vector<std::string> const & modulePath,
+                             pybind11::object & globals)
 {
   namespace py = pybind11;
 
@@ -30,8 +33,8 @@ pybind11::object loadModule( std::string const & moduleName,
   {
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
-      "name, modulePath, description = imp.find_module( moduleName, path)\n"
-      "new_module = imp.load_module(str(name), open(modulePath), modulePath, ('py', 'U', imp.PY_SOURCE))\n",
+      "file, pathname, description = imp.find_module( moduleName, path)\n"
+      "new_module = imp.load_module( moduleName, file, pathname, description)\n",
       globals,
       locals);
     return locals["new_module"];
@@ -57,7 +60,7 @@ pybind11::object loadModule( std::string const & moduleName,
   {
     if( not exists( boost::filesystem::path(str)) )
     {
-      throw std::invalid_argument( ( "loadModule(): module search directory")
+      throw std::invalid_argument( std::string( "loadModule(): module search directory")
                                   + str + "\" does not exist." );
     }
   }

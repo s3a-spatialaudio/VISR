@@ -8,7 +8,8 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <libvisr/signal_flow_context.hpp>
 
-#include <libpythonsupport/python_wrapper.hpp>
+#include <libpythoncomponents/wrapper.hpp>
+
 #include <libpythonsupport/initialisation_guard.hpp>
 
 #include <libefl/denormalised_number_handling.hpp>
@@ -17,8 +18,6 @@
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
-
-#include <pybind11/pybind11.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -83,25 +82,25 @@ int main( int argc, char const * const * argv )
         }
 
         SignalFlowContext const ctxt( periodSize, samplingRate );
-        pythonsupport::PythonWrapper topLevelComponent( ctxt,
-                                                        objectName.c_str(),
-                                                        nullptr, // parent component (this is top level)
-                                                        moduleName.string().c_str(),
-                                                        pythonClassName.c_str(),
-                                                        positionalArgs.c_str(),
-                                                        kwArgs.c_str(),
-                                                        moduleSearchPath.string().c_str() );
-        
+        pythoncomponents::Wrapper topLevelComponent( ctxt,
+                                                     objectName.c_str(),
+                                                     nullptr, // parent component (this is top level)
+                                                     moduleName.string().c_str(),
+                                                     pythonClassName.c_str(),
+                                                     positionalArgs.c_str(),
+                                                     kwArgs.c_str(),
+                                                     moduleSearchPath.string().c_str() );
+
         rrl::AudioSignalFlow flow( topLevelComponent );
-        
+
         // Note: This works only for single in- and/or output ports of type SampleType.
         std::size_t const numInputs = flow.numberOfCaptureChannels();
         std::size_t const numOutputs = flow.numberOfPlaybackChannels();
-        
+
         // TODO: Check for dangling parameter ports.
-        
+
         visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
-       
+
         std::string specConf;
         bool const hasAudioInterfaceOptionString = cmdLineOptions.hasOption("audio-ifc-options");
         bool const hasAudioInterfaceOptionFile = cmdLineOptions.hasOption("audio-ifc-option-file");
@@ -133,14 +132,6 @@ int main( int argc, char const * const * argv )
         std::unique_ptr<audiointerfaces::AudioInterface> audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf) );
         
         audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
-        
-        // Release the Python GIL before starting the audio processing.
-        // This is done because most audio interfaces execute the
-        // callback function in a separate thread.
-        // If this callback comprises Python functions, these will attempt to
-        //  acquire the GIL from this thread, which would deadlock if the GIL
-        // is still held here.
-        pybind11::gil_scoped_release gilReleaseGuard;
 
         audioInterface->start();
         

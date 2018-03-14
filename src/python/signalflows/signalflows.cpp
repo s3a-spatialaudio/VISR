@@ -1,11 +1,20 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-
-#include "baseline_renderer.hpp"
-#include "core_renderer.hpp"
-#include "delay_vector.hpp"
-
 #include <pybind11/pybind11.h>
+
+namespace visr
+{
+namespace python
+{
+namespace signalflows
+{
+void exportBaselineRenderer( pybind11::module& m );
+void exportCoreRenderer( pybind11::module& m );
+void exportDelayVector( pybind11::module& m );
+void exportVisrRenderer( pybind11::module& m );
+}
+}
+}
 
 PYBIND11_MODULE( signalflows, m )
 {
@@ -18,4 +27,5 @@ PYBIND11_MODULE( signalflows, m )
   exportBaselineRenderer( m );
   exportCoreRenderer( m );
   exportDelayVector( m );
+  exportVisrRenderer( m );
 }

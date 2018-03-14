@@ -1,7 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libpythonsupport/initialisation_guard.hpp>
-#include <libpythonsupport/python_wrapper.hpp>
+#include <libpythoncomponents/wrapper.hpp>
 
 #include <libvisr/constants.hpp>
 #include <libvisr/signal_flow_context.hpp>
@@ -11,6 +10,9 @@
 #include <librrl/integrity_checking.hpp>
 
 #include <libefl/basic_matrix.hpp>
+
+#include <libpythonsupport/initialisation_guard.hpp>
+
 
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
@@ -25,12 +27,10 @@
 
 namespace visr
 {
-namespace pythonsupport
+namespace pythoncomponents
 {
 namespace test
 {
-
-using pythonsupport::PythonWrapper;
 
 BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 {
@@ -40,7 +40,9 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 
   boost::filesystem::path basePath{CMAKE_SOURCE_DIR}; 
   boost::filesystem::path const modulePath = basePath /
-    "src/python/scripts/pythonAtoms.py";
+    "src/python/scripts";
+
+  std::string const searchPath{ modulePath.string() };
 
   const std::size_t blockSize{64};
   const SamplingFrequencyType samplingFrequency{48000};
@@ -50,10 +52,11 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 
   // Instantiate the atomic component (implemented in Python)
   // by a mixture or poristional and keyword constructor arguments
-  PythonWrapper pyAtom1( ctxt, "PythonAtom", nullptr,
-			 modulePath.string().c_str(),
-			 "PythonAdder",
-			 "3,", "{'width':5}" );
+  Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
+		   moduleName.c_str(),
+		   "PythonAdder",
+		   "3,", "{'width':5}",
+		   searchPath.c_str() );
 
   std::stringstream errMsg;
   bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
@@ -87,5 +90,5 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 }
 
 } // namespace test
-} // namespace pythonsupport
+} // namespace pythoncomponents
 } // namespace visr

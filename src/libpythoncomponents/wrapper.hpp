@@ -1,7 +1,7 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBPYTHONSUPPORT_PYTHON_WRAPPER_HPP_INCLUDED
-#define VISR_LIBPYTHONSUPPORT_PYTHON_WRAPPER_HPP_INCLUDED
+#ifndef VISR_LIBPYTHONCOMPONENTS_PYTHON_WRAPPER_HPP_INCLUDED
+#define VISR_LIBPYTHONCOMPONENTS_PYTHON_WRAPPER_HPP_INCLUDED
 
 #include "export_symbols.hpp"
 
@@ -21,19 +21,19 @@ class ParameterPortBase;
 class PolymorphicParameterInput;
 class PolymorphicParameterOutput;
 
-namespace pythonsupport
+namespace pythoncomponents
 {
 
 /**
  * Wrapper component that encapsulates arbitrary Python components (atomic or composite) to be 
  * instantiated and called from C++.
  */
-class VISR_PYTHONSUPPORT_LIBRARY_SYMBOL PythonWrapper: public CompositeComponent
+class VISR_PYTHONCOMPONENTS_LIBRARY_SYMBOL Wrapper: public CompositeComponent
 {
 public:
 
   /**
-   * Constructor, creates a PythonWrapper object.
+   * Constructor, creates a Wrapper object.
    * @param context Configuration parameter containing information as period length and sampling frequency.
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    * @param parent Pointer to a containing component, if there is one. A value of \p nullptr signals that this is a top-level component.
@@ -44,7 +44,7 @@ public:
    * @param keywordArguments Optional, comma-separated key-value pairs of the form "key:value" to provide keyword arguments to the Python component.
    * @param moduleSearchPath Optional, comma-separated list of directories to search for the module named by the \p moduleName option (in addition to the default search path).
    */
-  explicit PythonWrapper( SignalFlowContext const & context,
+  explicit Wrapper( SignalFlowContext const & context,
                           char const * name,
                           CompositeComponent * parent,
                           char const * moduleName,
@@ -56,9 +56,9 @@ public:
   /**
    * Destructor.
    */
-  ~PythonWrapper();
+  ~Wrapper();
 
-
+  //@}
 private:
   /**
    * Forward declaration of private implementation object.
@@ -72,7 +72,7 @@ private:
   std::unique_ptr<Impl> mImpl;
 };
 
-} // namespace pythonsupport
+} // namespace pythoncomponents
 } // namespace visr
 
-#endif // #ifndef VISR_LIBPYTHONSUPPORT_PYTHON_WRAPPER_HPP_INCLUDED
+#endif // #ifndef VISR_LIBPYTHONCOMPONENTS_PYTHON_WRAPPER_HPP_INCLUDED
