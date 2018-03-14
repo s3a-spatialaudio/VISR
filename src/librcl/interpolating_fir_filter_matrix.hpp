@@ -64,6 +64,25 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
+   * @param numberOfInputs The number of input signals.
+   * the multichannel input and output waveforms. .
+   * @param numberOfOutputs The number of output signals.
+   * @param filterLength The maximum admissible FIR filter length.
+   * @param maxFilters The maximum number of filter specifications (single FIR filters) that can be stored within
+   * the component.
+   * @param maxRoutings The maximum number of routings (i.e., the maximum number of simultaneously convolved 
+   * signal/filter combinations supported by this filter.
+   * @param numberOfInterpolants The number of filters used in the calculation of any given filter for convolution.
+   * @param transitionSamples The duration of a crossfade (in samples)
+   * @param filters The initial FIR filters stored as matrix rows. The filters 0...filters.numberOfRows() are initialised
+   * to these FIR filters, the remaining filter specifications are set to zero. Default: empty matrix, i.e., 
+   * all filters are zero-initialised.
+   * @param initialInterpolants List of initial interpolation parameters, i.e., a set of interpolation weights per routing point.
+   * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
+   * active initially.
+   * @param controlInputs Enumeration to select which parameter update ports are instantiated. Default: ControlPortConfig::None
+   * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
+   * Optional parameter, default is "default", i.e., the default FFt library for the platform.
    */
   explicit InterpolatingFirFilterMatrix( SignalFlowContext const & context,
                             char const * name,
@@ -86,25 +105,7 @@ public:
    */
   ~InterpolatingFirFilterMatrix();
 
-  /**
-   * Setup method to initialise the object and set the parameters.
-   * @param numberOfInputs The number of input signals.
-   * the multichannel input and output waveforms. .
-   * @param numberOfOutputs The number of output signals.
-   * @param filterLength The maximum admissible FIR filter length.
-   * @param maxFilters The maximum number of filter specifications (single FIR filters) that can be stored within
-   * the component.
-   * @param maxRoutings The maximum number of routings (i.e., the maximum number of simultaneously convolved 
-   * signal/filter combinations supported by this filter.
-   * @param filters The initial FIR filters stored as matrix rows. The filters 0...filters.numberOfRows() are initialised
-   * to these FIR filters, the remaining filter specifications are set to zero. Default: empty matrix, i.e., 
-   * all filters are zero-initialised.
-   * @param routings Initial set of filter routings. Default value: empty routing list, i.e., no signal routings are 
-   * active initially.
-   * @param controlInputs Enumeration to select which parameter update ports are instantiated. Default: ControlPortConfig::None
-   * @param fftImplementation name of the FFt library to be used. See rbbl::FftWrapperFactory for available names. 
-   * Optional parameter, default is "default", i.e., the default FFt library for the platform.
-   */
+
 
   /**
    * The process method performs the multichannel convolution.

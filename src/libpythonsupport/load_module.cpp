@@ -46,12 +46,12 @@ pybind11::object loadModule( std::string const & moduleName,
 }
 
 pybind11::object loadModule( std::string const & moduleName,
-                             std::string const & modulePath,
+                             std::string const & modulePathList,
                              pybind11::object & globals)
 {
   // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
   std::vector<std::string> searchPath;
-  boost::algorithm::split( searchPath, modulePath, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
+  boost::algorithm::split( searchPath, modulePathList, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
   // Prune empty entries
   searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(),
                                   [](std::string const & s){return s.empty(); } ),

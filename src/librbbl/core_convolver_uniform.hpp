@@ -48,10 +48,8 @@ public:
    * @param numberOfOutputs The number of output channels produced.
    * @param blockLength The numbers of samples processed for each input or output channels in one process() call.
    * @param maxFilterLength The maximum length of the FIR filters (in samples).
-   * @param maxRoutingPoints The maximum number of routing points between input and output channels, i.e., the number of filter operations to be calculated.
    * @param maxFilterEntries The maximum number of filters that can be stored within the filter. This number can be different from \p maxRoutingPoints, as the convolver can 
    * both reuse the same filter representation multiple times, or store multiple filter representations to enable switching of the filter characteristics at runtime.
-   * @param initialRoutings The initial set of routing points.
    * @param initialFilters The initial set of filter coefficients. The matrix rows represent the distinct filters.
    * @param alignment The alignment (given as a multiple of the sample type size) to be used to allocate all data structure. It also guaranteees 
    * the alignment of the input and output samples to the process call. 
@@ -188,7 +186,10 @@ public:
 
   /**
    * Compute the frequency-domain representation of an impulse response.
-   * @param ir
+   * @param ir The impulse response sequence. Must hold at least \p ir samples.
+   * @ 
+   * @param result The result of the operation. Must hold at least \p dftFilterRepresentationSize() complex values.
+   * @param alignment The minimum alignment of the input parameter \p ir and the output parameter \p result, measured in samples.
    */
   void transformImpulseResponse( SampleType const * ir, std::size_t irLength, FrequencyDomainType * result, std::size_t alignment = 0 ) const;
 private:

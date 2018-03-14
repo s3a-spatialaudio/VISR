@@ -56,6 +56,8 @@ public:
    *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV) 
    *          containing the filter coefficients for the decorrelation of the late part.
    * @param frequencyDependentPanning Flag specifiying whether the frequency-dependent VBAP algorithm shall be activated (true) or not (false)
+   * @param metadapterConfig A filter path to a Metadapter configuration file (XML) that describes metadata transformations to the incoming object metadata.
+   * An empty string (default value) means that no metadapter is used. This can be used only if the code has been compiled with Python support.
    */
   explicit VisrRenderer( SignalFlowContext const & context,
                         char const * name,

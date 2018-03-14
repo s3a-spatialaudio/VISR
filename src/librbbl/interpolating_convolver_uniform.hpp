@@ -45,7 +45,10 @@ public:
    * @param maxRoutingPoints The maximum number of routing points between input and output channels, i.e., the number of filter operations to be calculated.
    * @param maxFilterEntries The maximum number of filters that can be stored within the filter. This number can be different from \p maxRoutingPoints, as the convolver can 
    * both reuse the same filter representation multiple times, or store multiple filter representations to enable switching of the filter characteristics at runtime.
+   * @param numberOfInterpolants The number of filters used for interpolating a single filter.
+   * @param transitionSamples Duration of a filter crossfade in samples.
    * @param initialRoutings The initial set of routing points.
+   * @param initialInterpolants List of initial interpolation coefficients to determine the filters for convolution.
    * @param initialFilters The initial set of filter coefficients. The matrix rows represent the distinct filters.
    * @param alignment The alignment (given as a multiple of the sample type size) to be used to allocate all data structure. It also guaranteees 
    * the alignment of the input and output samples to the process call. 

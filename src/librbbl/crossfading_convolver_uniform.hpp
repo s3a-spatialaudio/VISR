@@ -42,6 +42,7 @@ public:
    * @param maxRoutingPoints The maximum number of routing points between input and output channels, i.e., the number of filter operations to be calculated.
    * @param maxFilterEntries The maximum number of filters that can be stored within the filter. This number can be different from \p maxRoutingPoints, as the convolver can 
    * both reuse the same filter representation multiple times, or store multiple filter representations to enable switching of the filter characteristics at runtime.
+   * @param transitionSamples The duration of the crossfade (in samples)
    * @param initialRoutings The initial set of routing points.
    * @param initialFilters The initial set of filter coefficients. The matrix rows represent the distinct filters.
    * @param alignment The alignment (given as a multiple of the sample type size) to be used to allocate all data structure. It also guaranteees 
@@ -156,7 +157,7 @@ public:
    * If there are fewer filters in the matrix than the maximum admissible number, the remaining 
    * filters are set to zero. Likewise, if the length of the new filters is less than the maximum allowed filter length, 
    * the remaining elements are set to zero.
-   * @param newImpulseReponses The matrix of new filters, with each row representing an impulse response.
+   * @param newImpulseResponses The matrix of new filters, with each row representing an impulse response.
    * @throw std::invalid_argument If the number of filters (number of rows) exceeds the maximum admissible number of filters.
    * @throw std::invalid_argumeent If the length of the filters (number of matrix columns) exceeds the maximum admissible length,
    * @note This function does not affect the currently set (interpolated) filters used in the running convolution.

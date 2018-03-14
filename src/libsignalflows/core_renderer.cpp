@@ -10,6 +10,7 @@
 #include <libpanning/LoudspeakerArray.h>
 
 #include <librbbl/biquad_coefficient.hpp>
+#include <librbbl/filter_routing.hpp>
 
 #include <librcl/biquad_iir_filter.hpp>
 
@@ -208,7 +209,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
    * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source.
    */
   SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
-  pml::FilterRoutingList decorrelatorRoutings;
+  rbbl::FilterRoutingList decorrelatorRoutings;
   for( std::size_t outIdx( 0 ); outIdx < numberOfLoudspeakers; ++outIdx )
   {
     decorrelatorRoutings.addRouting( 0, outIdx, outIdx, diffusorGain );

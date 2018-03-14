@@ -1,10 +1,10 @@
 /**
- * @page baseline_renderer_usage Baseline Renderer Usage
+ * @page visr_renderer_usage Visr Renderer Usage
  *
  * @tableofcontents
  *
- * @section baseline_renderer_usage_overview Overview
- * The baseline renderer is controlled by a combination of command line options and configuration file(s), which are itself specified as command line options.
+ * @section visr_renderer_usage_overview Overview
+ * The visr renderer is controlled by a combination of command line options and configuration file(s), which are itself specified as command line options.
 
  * At the time being, the VBAP rendering supports two different configuration file formats: plain text and XML-based.
  * The XML configuration is currently supported only in the git branch \c subwoooferSupport, but will be merged into the main branch (\c master) soon.
@@ -20,12 +20,12 @@
  * 
  * The XML-based format also removes the necessity for a separate loudspeaker configuration file to adjsut the gains and delays. To avoid unneccessary complexity regarding channel numbering and the support for additional features as subwoofers, the separate configuration option \c --output-gain, short option \c -g will be removed. For the same, the ability to adjust the output channel ordering (option \c -output-routing is no longer supported.
  *
- * @section baseline_renderer_usage_cmdline Command Line Options
+ * @section visr_renderer_usage_cmdline Command Line Options
  *
  * The commandline options are displayed by invoking
  * 
  * @code{.sh}
- * $ baseline_renderer --help
+ * $ visr_renderer --help
  * @endcode
  * The current output is
  * @code{.sh}
@@ -46,9 +46,16 @@
                                   "z": <z in m> }, "rotation": { "rotX": rX, 
                                   "rotY": rY, "rotZ": rZ } }" .
   -r [ --scene-port ] arg         UDP port for receiving object metadata
+  -m [ --metadapter-config ] arg  Metadapter configuration file. Requires a 
+                                  build with Python support. If empty, no 
+                                  metadata adaptation is performed.
+  --low-frequency-panning         Activates frequency-dependent panning gains 
+                                  and normalisation
+  --audio-ifc-options arg         Audio interface optional configuration
+  --audio-ifc-option-file arg     Audio interface optional configuration file
  * @endcode
  *
- * @subsection baseline_renderer_usage_cmdline_details Command Line OptionsDetailed usage
+ * @subsection visr_renderer_usage_cmdline_details Command Line OptionsDetailed usage
  * - \c --audio-backend The audio backend used by the Portaudio driver. Currently supported backends are "ALSA" and "JACK" on Linux, "DirectSound", "ASIO", "WDMKS" and "WASAPI" on Windows (depending on the installed SDKs/Drivers), and "CoreAudio" on MacOS. The value "default" triggers the default backend for this platform (ALSA on Linux).
  * - \c --sampling-frequency Sampling frequency in Hz. Default: 48000 Hz.
  * - \c --period The number of samples processed in one iteration of the renderer. Should be a power of 2 (64,128,...,4096,...) Very low values increase the load and the likelihood of audio dropouts, larger value decrease reactiveness and increase audio latency. Default: 1024 samples.
@@ -69,10 +76,13 @@ Activates the listener-tracked VBAP reproduction, which adjust both the VBAP gai
 </table>
  * @note: The option parsing for \c --tracking not implemented yet, default values are used invariably. TO activate tracking, you need to specify the \c --tracking option with an arbitrary parameter (even \c false activates the tracker).
  * - \c --scene-port The UDP network port which receives the scene data in the S3A JSON object format.
+ * - \c --audio-ifc-options An optional string of option values passed to the audio backend. Format and admissible values depend on the backend.
+ * - \c --audio-ifc-options Same as \c --audio-ifc-options, but given as a the path of a file containing the audio backend options.
+ * - \c --low-frequency-panning Boolean switch to enable dual-band panning for point-source and plane wave object. Default value \p false means standard VBAP, \p true activates a dual-band VBAP/VBIP panner.
+ * - \c --metadapter-config Activates an internal metadata adaptation process by providing the path to an XML configuration file containing the metadapter processor configuration. An empyt string (default value) deactivates the metadata adaptation.
+ * @section visr_renderer_usage_xml_config XML Configuration File
  *
- * @section baseline_renderer_usage_xml_config XML Configuration File
- *
- * @subsection baseline_renderer_usage_xml_config_example Example
+ * @subsection visr_renderer_usage_xml_config_example Example
  *
  * @code{.xml}
  * <?xml version="1.0" encoding="utf-8"?>
@@ -108,7 +118,7 @@ Activates the listener-tracked VBAP reproduction, which adjust both the VBAP gai
 </panningConfiguration>
  * @endcode
  *
- * @subsection baseline_renderer_usage_xml_config_description Description
+ * @subsection visr_renderer_usage_xml_config_description Description
  * The root node of the XML file is \c &lt;panningConfiguration&gt;.
  * This element supports the folloring optional attributes:
  * - \c isInfinite Whether the loudspeakers are regardes as point sources located on the unit sphere (\b false) or as plane waves, corresponding to an infinite distance (\b true). Default: \b false.
