@@ -5,6 +5,7 @@ baseline_renderer.cpp
 core_renderer.cpp
 delay_vector.cpp
 signalflows.cpp
+visr_renderer.cpp
 )
 
 set( HEADERS

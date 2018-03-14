@@ -15,9 +15,14 @@
 #include <librrl/audio_signal_flow.hpp>
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
-
 #include <libaudiointerfaces/audio_interface.hpp>
+
 #include <libsignalflows/visr_renderer.hpp>
+
+#ifdef VISR_PYTHON_SUPPORT
+#include <libpythonsupport/initialisation_guard.hpp>
+#include <libpythonsupport/gil_ensure_guard.hpp>
+#endif
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
@@ -152,7 +157,15 @@ int main( int argc, char const * const * argv )
         
         SignalFlowContext context( periodSize, samplingRate );
         
-        signalflows::VisrRenderer renderer( context,
+        std::unique_ptr<signalflows::VisrRenderer> renderer;
+        
+        {
+#if VISR_PYTHON_SUPPORT
+          visr::pythonsupport::InitialisationGuard::initialise();
+          visr::pythonsupport::GilEnsureGuard guard;
+#endif
+          renderer.reset( new signalflows::VisrRenderer( 
+                                           context,
                                            "", nullptr,
                                            loudspeakerArray,
                                            numberOfObjects,
@@ -164,9 +177,11 @@ int main( int argc, char const * const * argv )
                                            numberOfEqSections,
                                            reverbConfiguration,
                                            lowFrequencyPanning,
-                                           metadapterConfig );
+                                           metadapterConfig ) );
+
+        }
         
-        rrl::AudioSignalFlow audioFlow( renderer );
+        rrl::AudioSignalFlow audioFlow( *renderer );
         std::unique_ptr<visr::audiointerfaces::AudioInterface>
           audioInterface( audiointerfaces::AudioInterfaceFactory::create( audioBackend, baseConfig, specConf ) );
 

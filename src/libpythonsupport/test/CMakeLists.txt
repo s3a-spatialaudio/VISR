@@ -5,7 +5,6 @@ set( APPLICATION_NAME pythonsupport_test )
 add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 set( SOURCES
-python_wrap_atom.cpp
 test_main.cpp
 )
 

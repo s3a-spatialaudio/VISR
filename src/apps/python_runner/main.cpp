@@ -8,7 +8,8 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <libvisr/signal_flow_context.hpp>
 
-#include <libpythonsupport/python_wrapper.hpp>
+#include <librcl/python_wrapper.hpp>
+
 #include <libpythonsupport/initialisation_guard.hpp>
 
 #include <libefl/denormalised_number_handling.hpp>
@@ -81,7 +82,7 @@ int main( int argc, char const * const * argv )
         }
 
         SignalFlowContext const ctxt( periodSize, samplingRate );
-        pythonsupport::PythonWrapper topLevelComponent( ctxt,
+        rcl::PythonWrapper topLevelComponent( ctxt,
                                                         objectName.c_str(),
                                                         nullptr, // parent component (this is top level)
                                                         moduleName.string().c_str(),

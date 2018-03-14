@@ -56,6 +56,13 @@ udp_receiver.hpp
 udp_sender.hpp
 )
 
+if( BUILD_PYTHON_BINDINGS )
+  # Unfortunately we have to set that for the target.
+  INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_DIR} )
+  list( APPEND HEADERS python_wrapper.hpp )
+  list( APPEND SOURCES python_wrapper.cpp )  
+endif( BUILD_PYTHON_BINDINGS )
+
 # Preliminary hack. Used only for scene_sender. 
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
@@ -90,6 +97,14 @@ target_link_libraries( rcl_shared efl_shared )
 target_link_libraries( rcl_shared ${Boost_FILESYSTEM_LIBRARY} )
 target_link_libraries( rcl_shared ${Boost_THREAD_LIBRARY} )
 target_link_libraries( rcl_shared ${Boost_SYSTEM_LIBRARY} )
+
+if( BUILD_PYTHON_BINDINGS )
+  # Note: We always need to link pythonsupport as a shared library because
+  # the intialisation guard must not be duplicated in different static libraries.
+  target_link_libraries( rcl_static pythonsupport_shared )
+  target_link_libraries( rcl_shared pythonsupport_shared )
+endif( BUILD_PYTHON_BINDINGS )
+
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only

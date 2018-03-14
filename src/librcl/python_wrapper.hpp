@@ -21,14 +21,14 @@ class ParameterPortBase;
 class PolymorphicParameterInput;
 class PolymorphicParameterOutput;
 
-namespace pythonsupport
+namespace rcl
 {
 
 /**
  * Wrapper component that encapsulates arbitrary Python components (atomic or composite) to be 
  * instantiated and called from C++.
  */
-class VISR_PYTHONSUPPORT_LIBRARY_SYMBOL PythonWrapper: public CompositeComponent
+class VISR_RCL_LIBRARY_SYMBOL PythonWrapper: public CompositeComponent
 {
 public:
 
@@ -72,7 +72,7 @@ private:
   std::unique_ptr<Impl> mImpl;
 };
 
-} // namespace pythonsupport
+} // namespace rcl
 } // namespace visr
 
 #endif // #ifndef VISR_LIBPYTHONSUPPORT_PYTHON_WRAPPER_HPP_INCLUDED

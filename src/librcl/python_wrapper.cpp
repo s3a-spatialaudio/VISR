@@ -1,8 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "python_wrapper.hpp"
-#include "gil_ensure_guard.hpp"
-#include "load_module.hpp"
+#include <libpythonsupport/gil_ensure_guard.hpp>
+#include <libpythonsupport/load_module.hpp>
 
 #include <libvisr/detail/compose_message_string.hpp>
 #include <libvisr/composite_component.hpp>
@@ -32,7 +32,7 @@
 
 namespace visr
 {
-namespace pythonsupport
+namespace rcl
 {
 
 namespace py = pybind11;
@@ -102,7 +102,7 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
                            char const * moduleSearchPath)
 {
   // Ensure that we have a thread state for the current thread.
-  GilEnsureGuard guard;
+  pythonsupport::GilEnsureGuard guard;
 
   py::object main     = py::module::import("__main__");
   py::object globals  = main.attr("__dict__");
@@ -110,7 +110,7 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
   //py::object globals = py::globals();
   try
   {
-    mModule = loadModule( std::string(moduleName), moduleSearchPath, globals );
+    mModule = pythonsupport::loadModule( std::string(moduleName), moduleSearchPath, globals );
   }
   catch( std::exception const & ex )
   {
@@ -219,9 +219,9 @@ PythonWrapper::Impl::Impl( SignalFlowContext const & context,
 PythonWrapper::~PythonWrapper()
 {
   // Destroy the Python/pybind11 data strutures while the thread state is held.
-  GilEnsureGuard guard;
+  pythonsupport::GilEnsureGuard guard;
   mImpl.reset();
 }
 
-} // namespace pythonsupport
+} // namespace rcl
 } // namespace visr

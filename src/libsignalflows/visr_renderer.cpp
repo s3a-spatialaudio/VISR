@@ -4,7 +4,7 @@
 
 #include <librcl/scene_decoder.hpp>
 
-#include <libpythonsupport/python_wrapper.hpp>
+#include <librcl/python_wrapper.hpp>
 
 #include <boost/format.hpp>
 
@@ -58,7 +58,7 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
     std::string const formatString = "{'processorConfig': '%s', 'objectVectorInput': True, 'objectVectorOutput': True, 'oscControlPort': False, 'jsonControlPort': False }";
     std::string const kwArgs = str( boost::format( formatString ) % metadapterConfig );
 
-    mSceneDecoder.reset( new pythonsupport::PythonWrapper( context, "Metadapter", this,
+    mSceneDecoder.reset( new rcl::PythonWrapper( context, "Metadapter", this,
       "metadapter", "Metadapter",
       "",
       //(std::string("'") + metadapterConfig + "',").c_str(), // The trailing comma ensures that it can be parsed as a Python tuple.

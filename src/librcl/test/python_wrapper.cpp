@@ -1,7 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <libpythonsupport/initialisation_guard.hpp>
-#include <libpythonsupport/python_wrapper.hpp>
+#include <librcl/python_wrapper.hpp>
 
 #include <libvisr/constants.hpp>
 #include <libvisr/signal_flow_context.hpp>
@@ -11,6 +10,9 @@
 #include <librrl/integrity_checking.hpp>
 
 #include <libefl/basic_matrix.hpp>
+
+#include <libpythonsupport/initialisation_guard.hpp>
+
 
 #include <boost/filesystem/path.hpp>
 #include <boost/test/unit_test.hpp>
@@ -25,12 +27,10 @@
 
 namespace visr
 {
-namespace pythonsupport
+namespace rcl
 {
 namespace test
 {
-
-using pythonsupport::PythonWrapper;
 
 BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 {
