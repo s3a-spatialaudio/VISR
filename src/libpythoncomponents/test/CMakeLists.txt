@@ -1,16 +1,17 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-set( APPLICATION_NAME pythonsupport_test )
+set( APPLICATION_NAME pythoncomponents_test )
 
 add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
 set( SOURCES
 test_main.cpp
+wrapper.cpp
 )
 
 add_executable( ${APPLICATION_NAME} ${SOURCES} ) 
 
-target_link_libraries( ${APPLICATION_NAME} pythonsupport_static )
+target_link_libraries( ${APPLICATION_NAME} pythoncomponents_static )
 target_link_libraries( ${APPLICATION_NAME} rrl_static )
 target_link_libraries( ${APPLICATION_NAME} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )

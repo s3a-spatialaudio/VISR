@@ -1,6 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <librcl/python_wrapper.hpp>
+#include <libpythoncomponents/wrapper.hpp>
 
 #include <libvisr/constants.hpp>
 #include <libvisr/signal_flow_context.hpp>
@@ -27,7 +27,7 @@
 
 namespace visr
 {
-namespace rcl
+namespace pythoncomponents
 {
 namespace test
 {
@@ -52,11 +52,11 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 
   // Instantiate the atomic component (implemented in Python)
   // by a mixture or poristional and keyword constructor arguments
-  PythonWrapper pyAtom1( ctxt, "PythonAtom", nullptr,
-                         moduleName.c_str(),
-                         "PythonAdder",
-                         "3,", "{'width':5}",
-                         searchPath.c_str() );
+  Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
+		   moduleName.c_str(),
+		   "PythonAdder",
+		   "3,", "{'width':5}",
+		   searchPath.c_str() );
 
   std::stringstream errMsg;
   bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
@@ -90,5 +90,5 @@ BOOST_AUTO_TEST_CASE( WrapAudioAtom )
 }
 
 } // namespace test
-} // namespace pythonsupport
+} // namespace pythoncomponents
 } // namespace visr

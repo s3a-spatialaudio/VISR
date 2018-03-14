@@ -8,7 +8,7 @@
 #include <librrl/audio_signal_flow.hpp>
 #include <libvisr/signal_flow_context.hpp>
 
-#include <librcl/python_wrapper.hpp>
+#include <libpythoncomponents/wrapper.hpp>
 
 #include <libpythonsupport/initialisation_guard.hpp>
 
@@ -82,25 +82,25 @@ int main( int argc, char const * const * argv )
         }
 
         SignalFlowContext const ctxt( periodSize, samplingRate );
-        rcl::PythonWrapper topLevelComponent( ctxt,
-                                                        objectName.c_str(),
-                                                        nullptr, // parent component (this is top level)
-                                                        moduleName.string().c_str(),
-                                                        pythonClassName.c_str(),
-                                                        positionalArgs.c_str(),
-                                                        kwArgs.c_str(),
-                                                        moduleSearchPath.string().c_str() );
-        
+        pythoncomponents::Wrapper topLevelComponent( ctxt,
+                                                     objectName.c_str(),
+                                                     nullptr, // parent component (this is top level)
+                                                     moduleName.string().c_str(),
+                                                     pythonClassName.c_str(),
+                                                     positionalArgs.c_str(),
+                                                     kwArgs.c_str(),
+                                                     moduleSearchPath.string().c_str() );
+
         rrl::AudioSignalFlow flow( topLevelComponent );
-        
+
         // Note: This works only for single in- and/or output ports of type SampleType.
         std::size_t const numInputs = flow.numberOfCaptureChannels();
         std::size_t const numOutputs = flow.numberOfPlaybackChannels();
-        
+
         // TODO: Check for dangling parameter ports.
-        
+
         visr::audiointerfaces::AudioInterface::Configuration const baseConfig(numInputs,numOutputs,samplingRate,periodSize);
-       
+
         std::string specConf;
         bool const hasAudioInterfaceOptionString = cmdLineOptions.hasOption("audio-ifc-options");
         bool const hasAudioInterfaceOptionFile = cmdLineOptions.hasOption("audio-ifc-option-file");

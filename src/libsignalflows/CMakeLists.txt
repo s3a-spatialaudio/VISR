@@ -57,8 +57,8 @@ set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" 
 if( BUILD_PYTHON_BINDINGS )
   # It would be nicer if we could limit that to visr_renderer.cpp
   add_definitions(  -DVISR_PYTHON_SUPPORT=1 )
-  target_link_libraries( signalflows_static pythonsupport_static )
-  target_link_libraries( signalflows_shared pythonsupport_shared )
+  target_link_libraries( signalflows_static pythoncomponents_static )
+  target_link_libraries( signalflows_shared pythoncomponents_shared )
 endif( BUILD_PYTHON_BINDINGS )
 
 

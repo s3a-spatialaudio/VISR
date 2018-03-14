@@ -37,4 +37,6 @@ install(TARGETS pythonsupport_static ARCHIVE DESTINATION lib )
 install(TARGETS pythonsupport_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
-ADD_SUBDIRECTORY( test )
+# No unit test for this basic functionality yet.
+# see libpythoncomponents/test
+# ADD_SUBDIRECTORY( test )

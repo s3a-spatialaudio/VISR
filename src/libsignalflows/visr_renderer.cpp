@@ -4,7 +4,7 @@
 
 #include <librcl/scene_decoder.hpp>
 
-#include <librcl/python_wrapper.hpp>
+#include <libpythoncomponents/wrapper.hpp>
 
 #include <boost/format.hpp>
 
@@ -48,23 +48,18 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
   }
   else
   {
-#if 1 // VISR_PYTHON_SUPPORT
-    //  char const * moduleName,
-    //  char const * componentClassName,
-    //  char const * positionalArguments = "",
-    //  char const * keywordArguments = "",
-    //  char const * moduleSearchPath = "");
+#if VISR_PYTHON_SUPPORT
+
 
     std::string const formatString = "{'processorConfig': '%s', 'objectVectorInput': True, 'objectVectorOutput': True, 'oscControlPort': False, 'jsonControlPort': False }";
     std::string const kwArgs = str( boost::format( formatString ) % metadapterConfig );
 
-    mSceneDecoder.reset( new rcl::PythonWrapper( context, "Metadapter", this,
-      "metadapter", "Metadapter",
-      "",
-      //(std::string("'") + metadapterConfig + "',").c_str(), // The trailing comma ensures that it can be parsed as a Python tuple.
-      //"{'objectVectorInput': True, 'objectVectorOutput': True, 'oscControlPort': False, 'jsonControlPort': False }",
-      kwArgs.c_str(),
-      "" // No module search path
+    mSceneDecoder.reset( new pythoncomponents::Wrapper( context, "Metadapter", this,
+      "metadapter",     //  char const * moduleName,
+      "Metadapter",     //  char const * componentClassName,
+      "",               //  char const * positionalArguments = "",
+      kwArgs.c_str(),   //  char const * keywordArguments = "",
+      ""                // No module search path
       ) );
     parameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder->parameterPort( "objectIn" ) );
     parameterConnection( mSceneDecoder->parameterPort( "objectOut" ), mCoreRenderer.parameterPort( "objectDataInput" ) );
@@ -72,7 +67,6 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
     throw std::invalid_argument( "Providing a metadapter configuration requires a VISR built with Python support." )
 #endif
   }
-
 
   audioConnection( mInput, mCoreRenderer.audioPort( "audioIn") );
   audioConnection( mCoreRenderer.audioPort( "audioOut"), mOutput );
