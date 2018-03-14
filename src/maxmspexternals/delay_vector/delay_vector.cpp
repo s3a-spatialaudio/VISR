@@ -147,9 +147,6 @@ DelayVector::~DelayVector()
       rcl::DelayVector::ControlPortConfig::All );
 
     mFlow.reset( new rrl::AudioSignalFlow(*mComp )  );
-
-    CommunicationProtocolBase::Output & gainInput = mFlow->externalParameterReceivePort("gainInput" );
-    CommunicationProtocolBase::Output & delayInput = mFlow->externalParameterReceivePort( "delayInput" );
   }
   catch (std::exception const & e )
   {
