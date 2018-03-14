@@ -187,7 +187,7 @@ public:
   /**
    * Compute the frequency-domain representation of an impulse response.
    * @param ir The impulse response sequence. Must hold at least \p ir samples.
-   * @ 
+   * @param irLength The length of the impulse response, it must not exceed the maximum filter lengthset in the constructor.
    * @param result The result of the operation. Must hold at least \p dftFilterRepresentationSize() complex values.
    * @param alignment The minimum alignment of the input parameter \p ir and the output parameter \p result, measured in samples.
    */
