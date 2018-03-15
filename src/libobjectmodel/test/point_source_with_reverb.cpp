@@ -52,6 +52,38 @@ BOOST_AUTO_TEST_CASE( ParsePointSourceWithReverb )
   std::cout << outputMessage.str() << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE( SerialisePointSourceWithReverb )
+{
+  boost::filesystem::path const jsonFileName = boost::filesystem::path( CMAKE_CURRENT_SOURCE_DIR ) / boost::filesystem::path( "/data/point_source_with_reverb_1.json" );
+  BOOST_CHECK( exists( jsonFileName ) and not is_directory( jsonFileName ) );
+  std::ifstream jsonFileStr( jsonFileName.string().c_str() );
+  BOOST_CHECK( jsonFileStr and not jsonFileStr.eof() );
+
+  std::stringstream msgStr;
+  msgStr << jsonFileStr.rdbuf();
+  std::string const msg = msgStr.str();
+  ObjectVector scene;
+
+  BOOST_CHECK_NO_THROW( ObjectVectorParser::fillObjectVector( msg, scene ) );
+
+  std::cout << "Scene size: " << scene.size() << std::endl;
+
+  BOOST_CHECK( scene.size() == 1 );
+
+  // TODO: Move to separate unit test.
+
+  std::stringstream outputMessage;
+
+  BOOST_CHECK_NO_THROW( ObjectVectorParser::encodeObjectVector( scene, outputMessage ) );
+
+  ObjectVector newVec;
+
+  BOOST_CHECK_NO_THROW( ObjectVectorParser::fillObjectVector( outputMessage.str(), newVec ) );
+
+  // No check whether the sources are identical (or close for floating-point quantities)
+}
+
+
 } // namespace test
 } // namespace objectmodel
 } // namespce visr

@@ -160,7 +160,12 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   PointSourceWithReverb::LateReverbCoeffs const & lateLevels = pswdObj.lateReverbLevels( );
   rbbl::FloatSequence<SampleType> lateLevelCoeffs( &lateLevels[0], lateLevels.size( ) );
   std::string const lateLevelStr( lateLevelCoeffs.toString( ", " ) );
-  lateTree.put<std::string>( "levels", lateLevelStr );
+  lateTree.put<std::string>( "level", lateLevelStr );
+
+  PointSourceWithReverb::LateReverbCoeffs const & lateAttack = pswdObj.lateReverbAttackTimes();
+  rbbl::FloatSequence<SampleType> lateAttackCoeffs( &lateAttack[0], lateAttack.size() );
+  std::string const lateAttackStr( lateAttackCoeffs.toString( ", " ) );
+  lateTree.put<std::string>( "attacktime", lateAttackStr );
 
   PointSourceWithReverb::LateReverbCoeffs const & lateDecays = pswdObj.lateReverbDecayCoeffs( );
   rbbl::FloatSequence<SampleType> lateDecayCoeffs( &lateDecays[0], lateDecays.size( ) );

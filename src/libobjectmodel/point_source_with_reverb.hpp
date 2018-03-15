@@ -330,7 +330,7 @@ namespace objectmodel
     * Return the attack times for the late reverberation envelope.
     * Returned as an array of time values [in seconds].
     */
-    LateReverbCoeffs const & attackTimes() const { return lateReverb().attackTimes(); }
+    LateReverbCoeffs const & lateReverbAttackTimes() const { return lateReverb().attackTimes(); }
 
 
     /**
