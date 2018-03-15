@@ -1,35 +1,35 @@
 # -*- coding: utf-8 -*-
-"""
-Copyright Institute of Sound and Vibration research - All rights reserved
 
-S3A Binaural toolbox for the VISR framework
+# %BST_LICENCE_TEXT%
 
-Created on Fri 06 Oct 2017
 
-@author: Andreas Franck a.franck@soton.ac.uk 
-"""
+# VISR core packages
 import visr
 import pml
 import objectmodel as om
 import rbbl
-# import time
 
-from rotationFunctions import cart2sph
-from real_sph_harmonics import allSphHarmRealACN
+# Helper functions contained in the
+from .util.rotation_functions  import cart2sph
+from .util.real_spherical_harmonics import allSphHarmRealACN
 
+# Standard Python packages
 import numpy as np
 import warnings
 
-class HoaEncoder( visr.AtomicComponent ):
-    """ Component encode point sources and plane waves contained in an object vector into a spherical harmonic coefficients """
+class HoaObjectEncoder( visr.AtomicComponent ):
+    """
+    Component to calculate encoding coefficients for point source and plane wave audio objects contained in
+    an object vector.
+    """
     def __init__( self,
-                  context, name, parent,    # Standard visr component constructor arguments
-                  numberOfObjects,          # The number of point source objects rendered.
-                  hoaOrder,
-                  channelAllocation = False  # Whether to allocate object channels dynamically
+                  context, name, parent,     # Standard visr component constructor arguments
+                  numberOfObjects,           # The number of point source objects rendered.
+                  hoaOrder,                  # The Ambisonics order for encoding the objects
+                  channelAllocation = False  # Whether to allocate object channels dynamically (not used at the moment)
                   ):
         # Call base class (AtomicComponent) constructor
-        super( HoaEncoder, self ).__init__( context, name, parent )
+        super( HoaObjectEncoder, self ).__init__( context, name, parent )
         self.numberOfObjects = numberOfObjects
         self.hoaOrder = hoaOrder
         self.numHoaCoeffs = (self.hoaOrder+1)**2
@@ -49,7 +49,7 @@ class HoaEncoder( visr.AtomicComponent ):
 
         if channelAllocation:
             self.channelAllocator = rbbl.ObjectChannelAllocator( self.numberOfObjects )
-            self.usedChannels = set()
+            self.usedChannels = set() # Initialised with an empty set.
             self.routingOutput = visr.ParameterOutput( "routingOutput", self,
                                                      pml.SignalRoutingParameter.staticType,
                                                      pml.DoubleBufferingProtocol.staticType,
@@ -62,7 +62,7 @@ class HoaEncoder( visr.AtomicComponent ):
     def process( self ):
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
-            
+
             coeffOut = np.array( self.coefficientOutputProtocol.data(), copy=False )
             if coeffOut.shape != ( self.numHoaCoeffs, self.numberOfObjects ):
                 raise ValueError( 'The dimensions of the output coefficient matrix does not match the expected shape.' )
@@ -78,7 +78,10 @@ class HoaEncoder( visr.AtomicComponent ):
                 for chIdx in range(0, numObjects):
                     objIdx = objIndices[chIdx]
                     src = ov[objIdx]
-                    sph = cart2sph( src.x, src.y, src.z )
+                    if isinstance( src, om.PlaneWave ):
+                        sph = [src.azimuth, src.elevation, src.referenceDistance ]
+                    else:
+                        sph = cart2sph( src.x, src.y, src.z )
                     pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
                     coeffOut[ :, chIdx] = pwCoeffs * src.level # encode the object level in the coefficients
             else:
@@ -89,5 +92,5 @@ class HoaEncoder( visr.AtomicComponent ):
                         pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
                         coeffOut[ :, chIdx ] = pwCoeffs * src.level # encode the object level in the coefficients
                     else:
-                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')                            
-                        break       
+                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
+                        break

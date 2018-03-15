@@ -1,54 +1,86 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct  9 09:49:40 2017
 
-S3A Binaural toolbox for the VISR framework
-
-Signal flow graph for binaural synthesis based on Higher Order Ambisonics rendering.
-
-@author: af5u13
-"""
-
-import visr
-import pml
-
-import rcl
-
-from hoa_encoder import HoaEncoder
-from hoa_coefficient_rotation import HoaCoefficientRotation
-from readSofa import readSofaFile
+# %BST_LICENCE_TEXT%
 
 import numpy as np
 
-class HoaBinauralRenderer( visr.CompositeComponent ):
+# Core VISR packages
+import visr
+import rbbl
+import pml
+import rcl
 
+from .hoa_object_encoder import HoaObjectEncoder
+from .hoa_coefficient_rotation import HoaCoefficientRotation
+from .util.read_sofa_file import readSofaFile
+
+class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
+    """
+    Component to render binaural audio from plane wave and point source objects using an Higher Order Ambisonics (HOA)
+    algorithm.
+
+    Parameters
+    ----------
+    context : visr.SignalFlowContext
+        Standard visr.Component construction argument, holds the block size and the sampling frequency
+    name : string
+        Name of the component, Standard visr.Component construction argument
+    parent : visr.CompositeComponent
+        Containing component if there is one, None if this is a top-level component of the signal flow.
+    numberOfObjects : int
+        The number of audio objects to be rendered.
+    maxHoaOrder: int
+    sofaFile: string or NoneType
+    decodingFilters : numpy.ndarray or NoneType
+        Alternative way to provide the HOA decoding filters.
+    interpolationSteps: int
+    headOrientation : array-like
+        Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
+        or the initial view direction
+    headTracking: bool
+        Whether dynamic head tracking is active.
+    objectChannelAllocation: bool
+        Whether the processing resources are allocated from a pool of resources
+        (True), or whether fixed processing resources statically tied to the audio signal channels are used.
+        Not implemented at the moment, so leave the default value (False).
+    """
     def __init__( self,
-                 context, name, parent, 
+                 context, name, parent,
                  numberOfObjects,
                  maxHoaOrder,
-                 sofaFile,
+                 sofaFile = None,
+                 decodingFilters = None,
                  interpolationSteps = None,
                  headTracking = True,
                  objectChannelAllocation = False
                  ):
         numHoaCoeffs = (maxHoaOrder+1)**2
-        
-        [pos, filters, delays] = readSofaFile( sofaFile )
 
-        super( HoaBinauralRenderer, self ).__init__( context, name, parent )
+        if (decodingFilters is None) == (sofaFile is None ):
+            raise ValueError( "HoaObjectToBinauralRenderer: Either 'decodingFilters' or 'sofaFile' must be provided." )
+        if sofaFile is None:
+            filters = decodingFilters
+        else:
+            # pos and delays are not used here.
+            [pos, filters, delays] = readSofaFile( sofaFile )
+
+        if filters.ndim != 3 or filters.shape[1] != 2 or filters.shape[0] < numHoaCoeffs:
+            raise ValueError( "HoaObjectToBinauralRenderer: the filter data must be a 3D matrix where the second dimension is 2 and the first dimension is equal or larger than (maxHoaOrder+1)^2." )
+
+        super( HoaObjectToBinauralRenderer, self ).__init__( context, name, parent )
         self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
         self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-        self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
+        self.objectVectorInput = visr.ParameterInput( "objects", self, pml.ObjectVector.staticType,
                                                      pml.DoubleBufferingProtocol.staticType,
                                                      pml.EmptyParameterConfig() )
 
         if interpolationSteps is None:
             interpolationSteps = context.period
 
-        self.objectEncoder = HoaEncoder( context, 'HoaEncoder', self,
-                                        numberOfObjects = numberOfObjects, 
-                                        hoaOrder = maxHoaOrder, 
-                                        channelAllocation = objectChannelAllocation )
+        self.objectEncoder = HoaObjectEncoder( context, 'HoaEncoder', self,
+                                              numberOfObjects = numberOfObjects,
+                                              hoaOrder = maxHoaOrder,
+                                              channelAllocation = objectChannelAllocation )
 
         self.parameterConnection( self.objectVectorInput, self.objectEncoder.parameterPort("objectVector"))
 
@@ -62,7 +94,7 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
 
         filterMtx = np.concatenate( (filters[0:numHoaCoeffs,0,:], filters[0:numHoaCoeffs,1,:]) )
 
-        routings = pml.FilterRoutingList()
+        routings = rbbl.FilterRoutingList()
         for idx in range(0,numHoaCoeffs):
             routings.addRouting( idx, 0, idx, 1.0 )
             routings.addRouting( idx, 1, idx+numHoaCoeffs, 1.0 )
@@ -81,13 +113,13 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
         self.audioConnection( self.binauralFilterBank.audioPort("out"), self.binauralOutput )
 
         if headTracking:
-            self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
+            self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,
                                               pml.EmptyParameterConfig() )
             self.coefficientRotator = HoaCoefficientRotation( context, 'coefficientRotator', self,
-                                                              numberOfObjects = numberOfObjects, 
+                                                              numberOfObjects = numberOfObjects,
                                                               hoaOrder = maxHoaOrder)
-            self.parameterConnection( self.trackingInput, self.coefficientRotator.parameterPort("headTracking") )
+            self.parameterConnection( self.trackingInput, self.coefficientRotator.parameterPort("tracking") )
             self.parameterConnection( self.objectEncoder.parameterPort("coefficientOutput"),
                                      self.coefficientRotator.parameterPort("coefficientInput") )
             self.parameterConnection( self.coefficientRotator.parameterPort("coefficientOutput"),

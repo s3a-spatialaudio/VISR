@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
-Copyright Institute of Sound and Vibration research - All rights reserved
 
-S3A Binaural toolbox for the VISR framework
-
-Created on Fri 06 Oct 2017
-
-@author: Andreas Franck a.franck@soton.ac.uk 
-"""
-import visr
-import pml
-import objectmodel as om
-# import time
-
-from rotationFunctions import cart2sph, calcRotationMatrix, rotationMatrixReorderingACN, HOARotationMatrixCalc
-from real_sph_harmonics import allSphHarmRealACN
+# %BST_LICENCE_TEXT%
 
 import numpy as np
+
+import visr
+import pml
+
+from .util.rotation_functions import calcRotationMatrix, rotationMatrixReorderingACN, HOARotationMatrixCalc
+# from real_sph_harmonics import allSphHarmRealACN
 
 class HoaCoefficientRotation( visr.AtomicComponent ):
     """ Component encode point sources and plane waves contained in an object vector into a spherical harmonic coefficients """
@@ -44,22 +36,22 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
                                                 pml.SharedDataProtocol.staticType,
                                                 matrixConfig )
         self.coefficientOutputProtocol = self.coefficientOutput.protocolOutput()
-        
+
         # Instantiate the head tracker input.
-        self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
+        self.trackingInput = visr.ParameterInput( "tracking", self, pml.ListenerPosition.staticType,
                                                   pml.DoubleBufferingProtocol.staticType,
                                                   pml.EmptyParameterConfig() )
         self.trackingInputProtocol = self.trackingInput.protocolInput()
         np.set_printoptions(linewidth=10000)
         np.set_printoptions(threshold=np.nan)
-        
+
         self.R_1 = np.identity(3)
-        
+
     def process( self ):
 
         if self.trackingInputProtocol.changed():
             head = self.trackingInputProtocol.data()
-            ypr = - np.array(head.orientation, dtype = np.float32 ) # negative because we rotate the sound field in the opposite 
+            ypr = - np.array(head.orientation, dtype = np.float32 ) # negative because we rotate the sound field in the opposite
             # direction of the head orientation.
             self.rotationMatrix[...] = calcRotationMatrix( ypr )
             self.R_1 = rotationMatrixReorderingACN(self.rotationMatrix)
@@ -76,9 +68,7 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
         # Compute order order by order
         rot = self.R_1
         for order in range(1, self.hoaOrder+1):
-            # TODO: Compute the transformation matrix for order 'order'
-#            rot = np.identity( 2*order + 1, dtype = coeffOut.dtype ) # Dummy rotation matrix
-            if order > 1:                 
-                rot = HOARotationMatrixCalc(order,rot,self.R_1)  
-#                print(rot)
+            # Compute the transformation matrix for order 'order'
+            if order > 1:
+                rot = HOARotationMatrixCalc(order,rot,self.R_1)
             coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot.T, coeffIn[ (order**2):((order+1)**2), : ] )
