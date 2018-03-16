@@ -51,7 +51,7 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
 #if VISR_PYTHON_SUPPORT
 
 
-    std::string const formatString = "{'processorConfig': '%s', 'objectVectorInput': True, 'objectVectorOutput': True, 'oscControlPort': False, 'jsonControlPort': False }";
+    std::string const formatString = "{'processorConfig': '%s', 'objectVectorInput': False, 'objectVectorOutput': True, 'oscControlPort': False, 'jsonControlPort': False }";
     std::string const kwArgs = str( boost::format( formatString ) % metadapterConfig );
 
     mSceneDecoder.reset( new pythoncomponents::Wrapper( context, "Metadapter", this,
@@ -64,7 +64,7 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
     parameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder->parameterPort( "objectIn" ) );
     parameterConnection( mSceneDecoder->parameterPort( "objectOut" ), mCoreRenderer.parameterPort( "objectDataInput" ) );
 #else
-    throw std::invalid_argument( "Providing a metadapter configuration requires a VISR built with Python support." )
+    throw std::invalid_argument( "Providing a metadapter configuration requires a VISR built with Python support." );
 #endif
   }
 
