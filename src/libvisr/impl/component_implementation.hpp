@@ -6,6 +6,7 @@
 #include "../constants.hpp"
 #include "../export_symbols.hpp"
 #include "../status_message.hpp"
+#include "../signal_flow_context.hpp"
 
 #include <cstddef>
 #include <string>
@@ -18,7 +19,6 @@ namespace visr
 class AudioPortBase;
 class Component;
 class ParameterPortBase;
-class SignalFlowContext;
 
 namespace impl
 {
@@ -281,7 +281,11 @@ private:
    */
   visr::Component & mComponent;
 
-  SignalFlowContext const & mContext;
+  /**
+   * The context object hiolding buffer size and sampling frequency.
+   * These vakues are not supposed to be changed during the lifetime of a component.
+   */
+  SignalFlowContext const mContext;
 
   /**
    * Parameter port subsystem
