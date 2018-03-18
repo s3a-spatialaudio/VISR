@@ -7,22 +7,44 @@ import numpy as np
 import visr
 import pml
 
-from .util.rotation_functions import calcRotationMatrix, rotationMatrixReorderingACN, HOARotationMatrixCalc
-# from real_sph_harmonics import allSphHarmRealACN
+from .util.rotation_functions import calcRotationMatrix, rotationMatrixReorderingACN
+# Use the vectorised, faster function.
+from .util.spherical_harmonics_rotation import allSphericalHarmonicsRotationMatrices
 
 class HoaCoefficientRotation( visr.AtomicComponent ):
-    """ Component encode point sources and plane waves contained in an object vector into a spherical harmonic coefficients """
+    """
+    Component to apply a rotation to a matrix of spherical harmonic coefficients.
+    """
     def __init__( self,
-                  context, name, parent,    # Standard visr component constructor arguments
-                  numberOfObjects,          # The number of point source objects supported.
+                  context, name, parent,
+                  numberOfObjects,
                   hoaOrder,
+                  dynamicUpdates = False,
+                  headOrientation = None
                   ):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        context: visr.SignalFlowContext
+            Structure containing block size and sampling frequency, standard visr component construction parameter.
+        name: string
+            Name of the component, can be chosen freely as long as it is unique withion the containing component.
+        parent: visr.CompositeComponent or NoneType
+            The containing composite component, or None for a top-level component.
+        numberOfObjects: int
+            The number of objects to be rendered, i.e., columns in the received spherical harmonics matrices.
+        hoaOrder: int
+            The order of the spherical harmonics. Defines the number of rows of the processed matrices ((hoaOrder+1)^2)
+        headOrientation: array-like (2- or 3- element) or NoneType
+            The initial head rotation or the static head orientation if dynamic updates are deactivated. Given as yaw, pitch, roll.
+        """
         # Call base class (AtomicComponent) constructor
         super( HoaCoefficientRotation, self ).__init__( context, name, parent )
         self.numberOfObjects = numberOfObjects
         self.hoaOrder = hoaOrder
         self.numHoaCoeffs = (self.hoaOrder+1)**2
-        self.rotationMatrix = np.identity( 3, dtype = np.float32 ) # TODO: decide whether to use xyz or ACN (yzx) order
 
         # %% Define parameter ports
         matrixConfig = pml.MatrixParameterConfig( self.numHoaCoeffs, self.numberOfObjects )
@@ -42,33 +64,40 @@ class HoaCoefficientRotation( visr.AtomicComponent ):
                                                   pml.DoubleBufferingProtocol.staticType,
                                                   pml.EmptyParameterConfig() )
         self.trackingInputProtocol = self.trackingInput.protocolInput()
-        np.set_printoptions(linewidth=10000)
-        np.set_printoptions(threshold=np.nan)
 
-        self.R_1 = np.identity(3)
+        if headOrientation is None:
+            headOrientation = np.zeros( (3), np.float32 )
+        R1 = rotationMatrixReorderingACN( calcRotationMatrix( headOrientation ) )
+        self.rotationMatrices = allSphericalHarmonicsRotationMatrices( self.hoaOrder, R1 )
 
     def process( self ):
-
+        """
+        Processing function, called from the runtime system in every iteration of the signal flow.
+        """
         if self.trackingInputProtocol.changed():
             head = self.trackingInputProtocol.data()
             ypr = - np.array(head.orientation, dtype = np.float32 ) # negative because we rotate the sound field in the opposite
             # direction of the head orientation.
-            self.rotationMatrix[...] = calcRotationMatrix( ypr )
-            self.R_1 = rotationMatrixReorderingACN(self.rotationMatrix)
+            R1 = rotationMatrixReorderingACN( calcRotationMatrix(ypr) )
+            self.rotationMatrices = allSphericalHarmonicsRotationMatrices( self.hoaOrder, R1 )
             self.trackingInputProtocol.resetChanged()
 
         coeffIn = np.array( self.coefficientInputProtocol.data(), copy = False )
         coeffOut = np.array( self.coefficientOutputProtocol.data(), copy = False )
 
-        # Order 0 remains unchanged
-        coeffOut[0,:] = coeffIn[0,:]
+        for order,R in enumerate(self.rotationMatrices):
+            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( R.T, coeffIn[ (order**2):((order+1)**2), : ] )
 
-        # TODO: If not done before, translate the rotation matrix to ACN format
-
-        # Compute order order by order
-        rot = self.R_1
-        for order in range(1, self.hoaOrder+1):
-            # Compute the transformation matrix for order 'order'
-            if order > 1:
-                rot = HOARotationMatrixCalc(order,rot,self.R_1)
-            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot.T, coeffIn[ (order**2):((order+1)**2), : ] )
+#        # Order 0 remains unchanged
+#        coeffOut[0,:] = coeffIn[0,:]
+#
+#        # TODO: If not done before, translate the rotation matrix to ACN format
+#
+#        # Compute order order by order
+#        rot = self.R_1
+#        for order in range(1, self.hoaOrder+1):
+#            # Compute the transformation matrix for order 'order'
+#            if order > 1:
+#                rot = HOARotationMatrixCalc(order,rot,self.R_1)
+#                # rot = np.identity( 2*order+1, dtype=np.float32 ) # Check the performance effect of the
+#            coeffOut[ (order**2):((order+1)**2), : ] = np.matmul( rot.T, coeffIn[ (order**2):((order+1)**2), : ] )

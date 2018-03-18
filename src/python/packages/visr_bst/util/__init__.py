@@ -8,4 +8,8 @@ from .rotation_functions import cart2sph
 from .rotation_functions import sph2cart
 from .rotation_functions import calcRotationMatrix
 
+# Vectorised rotation matrix calculation.
+from .spherical_harmonics_rotation import sphericalHarmonicsRotationMatrix
+from .spherical_harmonics_rotation import allSphericalHarmonicsRotationMatrices
+
 from .real_spherical_harmonics import sphHarmReal, allSphHarmRealACN

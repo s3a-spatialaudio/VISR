@@ -18,31 +18,6 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
     """
     Component to render binaural audio from plane wave and point source objects using an Higher Order Ambisonics (HOA)
     algorithm.
-
-    Parameters
-    ----------
-    context : visr.SignalFlowContext
-        Standard visr.Component construction argument, holds the block size and the sampling frequency
-    name : string
-        Name of the component, Standard visr.Component construction argument
-    parent : visr.CompositeComponent
-        Containing component if there is one, None if this is a top-level component of the signal flow.
-    numberOfObjects : int
-        The number of audio objects to be rendered.
-    maxHoaOrder: int
-    sofaFile: string or NoneType
-    decodingFilters : numpy.ndarray or NoneType
-        Alternative way to provide the HOA decoding filters.
-    interpolationSteps: int
-    headOrientation : array-like
-        Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
-        or the initial view direction
-    headTracking: bool
-        Whether dynamic head tracking is active.
-    objectChannelAllocation: bool
-        Whether the processing resources are allocated from a pool of resources
-        (True), or whether fixed processing resources statically tied to the audio signal channels are used.
-        Not implemented at the moment, so leave the default value (False).
     """
     def __init__( self,
                  context, name, parent,
@@ -51,9 +26,37 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
                  sofaFile = None,
                  decodingFilters = None,
                  interpolationSteps = None,
+                 headOrientation = None,
                  headTracking = True,
                  objectChannelAllocation = False
                  ):
+        """
+        Parameters
+        ----------
+        context : visr.SignalFlowContext
+            Standard visr.Component construction argument, holds the block size and the sampling frequency
+        name : string
+            Name of the component, Standard visr.Component construction argument
+        parent : visr.CompositeComponent
+            Containing component if there is one, None if this is a top-level component of the signal flow.
+        numberOfObjects : int
+            The number of audio objects to be rendered.
+        maxHoaOrder: int
+        sofaFile: string or NoneType
+        decodingFilters : numpy.ndarray or NoneType
+            Alternative way to provide the HOA decoding filters.
+        interpolationSteps: int
+        headOrientation : array-like
+            Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
+            or the initial view direction
+        headTracking: bool
+            Whether dynamic head tracking is active.
+        objectChannelAllocation: bool
+            Whether the processing resources are allocated from a pool of resources
+            (True), or whether fixed processing resources statically tied to the audio signal channels are used.
+            Not implemented at the moment, so leave the default value (False).
+
+        """
         numHoaCoeffs = (maxHoaOrder+1)**2
 
         if (decodingFilters is None) == (sofaFile is None ):

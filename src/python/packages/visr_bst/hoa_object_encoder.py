@@ -28,6 +28,21 @@ class HoaObjectEncoder( visr.AtomicComponent ):
                   hoaOrder,                  # The Ambisonics order for encoding the objects
                   channelAllocation = False  # Whether to allocate object channels dynamically (not used at the moment)
                   ):
+        """
+        Constructor
+
+
+        Parameters
+        ----------
+        numberOfObjects: int
+            The maximum number of audio objects to be rendered.
+        hoaOrder: int
+            The Ambisonics order for encoding the objects.
+        channelAllocation: bool, optional
+            Whether to send dynamic channel allocation data. Not used at the moment.
+            Default value means that the object channels are allocated statically and correspond to the
+            obbject's channel id.
+        """
         # Call base class (AtomicComponent) constructor
         super( HoaObjectEncoder, self ).__init__( context, name, parent )
         self.numberOfObjects = numberOfObjects

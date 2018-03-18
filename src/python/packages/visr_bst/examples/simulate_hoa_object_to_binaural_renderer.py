@@ -23,7 +23,7 @@ parameterUpdatePeriod = 1
 numBlocks = 256;
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 9
+maxHoaOrder = 7
 
 # TODO: set file location
 sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % maxHoaOrder

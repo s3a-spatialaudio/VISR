@@ -7,16 +7,20 @@ import warnings
 from numpy.linalg import inv
 from scipy.spatial import ConvexHull
 
+# core VISR packages
 import visr
 import pml
 import rbbl
 import objectmodel as om
 
+# Helper functions included in the BST pacjage
 from .util.rotation_functions import calcRotationMatrix, deg2rad, sph2cart
 
 class DynamicHrirController( visr.AtomicComponent ):
-    """ Component to translate an object vector (and optionally head tracking information)
-        into parameter parameters for dynamic binaural signal processing. """
+    """
+    Component to translate an object vector (and optionally head tracking information)
+    into control parameter for dynamic binaural signal processing.
+    """
     def __init__( self,
                   context, name, parent,    # Standard visr component constructor arguments
                   numberOfObjects,          # The number of point source objects rendered.
@@ -30,6 +34,39 @@ class DynamicHrirController( visr.AtomicComponent ):
                   channelAllocation = False, # Whether to allocate object channels dynamically (not tested yet)
                   hrirDelays = None,         # Matrix of delays associated with filter dataset. Dimension: # filters * 2
                   ):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        context : visr.SignalFlowContext
+            Standard visr.Component construction argument, a structure holding the block size and the sampling frequency
+        name : string
+            Name of the component, Standard visr.Component construction argument
+        parent : visr.CompositeComponent
+            Containing component if there is one, None if this is a top-level component of the signal flow.
+        numberOfObjects: int
+            The number of point source objects rendered.
+        hrirPositions : numpy.ndaarray
+            The directions of the HRTF measurements, given as a Nx3 array
+        hrirData : numpy.ndarray
+            The HRTF data as 3 Nx2xL matrix, with L as the FIR length.
+        headRadius: float
+            Head radius, optional and not currently used. Might be used in a dynamic ITD/ILD individualisation algorithm.
+        useHeadTracking: bool
+            Whether head tracking data is provided via a self.headOrientation port.
+        dynamicITD: bool
+            Whether ITD delays are calculated and sent via a "delays" port.
+        dynamicILD: bool
+            Whether ILD gains are calculated and sent via a "gains" port.
+        hrirInterpolation: bool
+            HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
+        channelAllocation: bool
+            Whether to allocate object channels dynamically (not tested yet)
+        hrirDelays: numpy.ndarray
+            Matrix of delays associated with filter dataset. Dimension: # filters * 2. Default None means there are no separate
+            delays, i.e., they must be contained in the HRIR data.
+        """
         # Call base class (AtomicComponent) constructor
         super( DynamicHrirController, self ).__init__( context, name, parent )
         self.numberOfObjects = numberOfObjects
