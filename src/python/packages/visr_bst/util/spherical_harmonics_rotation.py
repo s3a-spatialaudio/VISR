@@ -202,6 +202,7 @@ if __name__ == "__main__":
 
 
     # %% Detailed test of internals
+    order = 2
     Pref = np.zeros( (3, 2*order-1, 2*order+1), dtype = np.float64 )
     for i in range(-1, 1+1):
         for mu in range(-order+1, order+1-1):
