@@ -155,7 +155,7 @@ def _calcWcoeffs( order, dtype = np.float64 ):
 if __name__ == "__main__":
     from visr_bst.util.rotation_functions import deg2rad, calcRotationMatrix, HOARotationMatrixCalc
     # Testing of internal function only
-    # from visr_bst.util.rotation_functions import P, uvw, U, V, W
+    from visr_bst.util.rotation_functions import P, uvw, U, V, W
     from time import time
 
     yaw = deg2rad( 30 )
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     # Timing loop
     numIters = 500
-    maxOrder = 15
+    maxOrder = 25
 
     for order in range( 2, maxOrder+1):
         Rminus1 = sphericalHarmonicsRotationMatrix( order-1, R1 )
