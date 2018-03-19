@@ -13,8 +13,9 @@ from .dynamic_hrir_renderer import DynamicHrirRenderer
 from .hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
 from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 
-from .realtime_virtual_loudspeaker_renderer import RealtimeVirtualLoudspeakerRenderer
 from .realtime_dynamic_hrir_renderer import RealtimeDynamicHrirRenderer
+from .realtime_hoa_object_to_binaural_renderer import RealtimeHoaObjectToBinauralRenderer
+from .realtime_virtual_loudspeaker_renderer import RealtimeVirtualLoudspeakerRenderer
 
 # Import utility function subdirectory.
 from . import util

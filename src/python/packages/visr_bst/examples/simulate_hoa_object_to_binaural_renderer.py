@@ -21,15 +21,16 @@ numBinauralObjects = 64
 numOutputChannels = 2;     # Binaural
 parameterUpdatePeriod = 1
 numBlocks = 256;
+fftImplementation = 'default' #
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 7
+maxHoaOrder = 9
 
 # TODO: set file location
 sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % maxHoaOrder
 
 # Whether the sound source is moving or not
-useSourceMovement = True
+useSourceMovement = False
 
 # switch dynamic tracking on and off.
 useTracking = True
@@ -44,7 +45,8 @@ graph = HoaObjectToBinauralRenderer( context, "HoaBinauralRenderer", None,
                                     maxHoaOrder,
                                     sofaFile,
                                     interpolationSteps = blockSize,
-                                    headTracking = useTracking
+                                    headTracking = useTracking,
+                                    fftImplementation = fftImplementation
                                     )
 
 result,messages = rrl.checkConnectionIntegrity(graph)

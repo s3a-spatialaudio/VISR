@@ -29,8 +29,7 @@ class HoaObjectEncoder( visr.AtomicComponent ):
                   channelAllocation = False  # Whether to allocate object channels dynamically (not used at the moment)
                   ):
         """
-        Constructor
-
+        Constructor.
 
         Parameters
         ----------

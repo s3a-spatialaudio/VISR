@@ -6,14 +6,11 @@ import visr
 import rrl
 import audiointerfaces as ai
 
-from visr_bst.realtime_dynamic_hrir_renderer import RealtimeDynamicHrirRenderer
+from visr_bst.realtime_hoa_object_to_binaural_renderer import RealtimeHoaObjectToBinauralRenderer
 from visr_bst.tracker.razor_ahrs_with_udp_calibration_trigger import RazorAHRSWithUdpCalibrationTrigger
 
-from visr_bst.util.sofa_extract_delay import sofaExtractDelay
-
 import os
-from urllib.request import urlretrieve
-from sys import platform
+from sys import platform, exit
 
 ############ CONFIG ###############
 fs = 48000
@@ -21,14 +18,9 @@ blockSize = 1024
 numBinauralObjects = 2
 
 useTracking = True      # switch dynamic tracking on and off.
-useDynamicITD = False
-useDynamicILD = False
-useHRIRinterpolation = True
-useCrossfading = True
 fftImplementation = 'ffts'
-
+hoaOrder = 5 # HOA order for object encoding and sound field decoding
 sceneReceivePort = 4242 # UDP port to receive scene metadata, use 'None' to disable
-
 
 # %% Configure the tracking device (if used)
 if useTracking:
@@ -75,27 +67,23 @@ elif platform in ['windows', 'win32' ]:
 #    audioIfcCfg = """{ "hostapi": "ASIO" }"""   # If you have a professional audio interface with an ASIO driver
     audioIfcName = "PortAudio"
 
-sofaFile = './data/dtf b_nh169.sofa'
-if not os.path.exists( sofaFile ):
-    urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
 
-if useDynamicITD:
-    sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
-    if not os.path.exists( sofaFileTD ):
-        sofaExtractDelay( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD
+# TODO: Replace path
+sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % hoaOrder
+
+if not os.path.exists( sofaFile ):
+    print( "SOFA file containing HOA decoding filters not found")
+    exit( 1 )
 
 # %% Create and initialise the signal flow
 
 context = visr.SignalFlowContext(blockSize, fs )
 
-renderer = RealtimeDynamicHrirRenderer( context, "HrirRenderer", None,
+renderer = RealtimeHoaObjectToBinauralRenderer( context, "HoaRenderer", None,
                                        numberOfObjects = numBinauralObjects,
+                                       maxHoaOrder = hoaOrder,
                                        sofaFile = sofaFile,
-                                       dynamicITD = useDynamicITD,
-                                       dynamicILD = useDynamicITD,
-                                       hrirInterpolation = useHRIRinterpolation,
-                                       filterCrossfading=useCrossfading,
+                                       interpolationSteps = context.period,
                                        headTrackingReceiver = headTrackingDevice,
                                        headTrackingPositionalArguments = headTrackingPositionalArguments,
                                        headTrackingKeywordArguments = headTrackingKeywordArguments,

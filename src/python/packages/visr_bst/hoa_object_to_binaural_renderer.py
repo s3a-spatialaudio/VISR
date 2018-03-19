@@ -28,9 +28,12 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
                  interpolationSteps = None,
                  headOrientation = None,
                  headTracking = True,
-                 objectChannelAllocation = False
+                 objectChannelAllocation = False,
+                 fftImplementation = 'default'
                  ):
         """
+        Constructor.
+
         Parameters
         ----------
         context : visr.SignalFlowContext
@@ -55,7 +58,9 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
             Whether the processing resources are allocated from a pool of resources
             (True), or whether fixed processing resources statically tied to the audio signal channels are used.
             Not implemented at the moment, so leave the default value (False).
-
+        fftImplementation: string, optional
+            The FFT library to be used in the filtering. THe default uses VISR's
+            default implementation for the present platform.
         """
         numHoaCoeffs = (maxHoaOrder+1)**2
 
@@ -110,7 +115,8 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
                                                     maxRoutings = 2*numHoaCoeffs,
                                                     filters = filterMtx,
                                                     routings = routings,
-                                                    controlInputs=rcl.FirFilterMatrix.ControlPortConfig.NoInputs )
+                                                    controlInputs=rcl.FirFilterMatrix.ControlPortConfig.NoInputs,
+                                                    fftImplementation = fftImplementation )
 
         self.audioConnection( self.encoderMatrix.audioPort("out"), self.binauralFilterBank.audioPort("in") )
         self.audioConnection( self.binauralFilterBank.audioPort("out"), self.binauralOutput )
