@@ -99,12 +99,26 @@ class HoaObjectEncoder( visr.AtomicComponent ):
                     pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
                     coeffOut[ :, chIdx] = pwCoeffs * src.level # encode the object level in the coefficients
             else:
-                for index,src in enumerate(ov):
-                    if index < self.numberOfObjects :
-                        chIdx = src.channels[0]
-                        sph = cart2sph( src.x, src.y, src.z )
-                        pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
-                        coeffOut[ :, chIdx ] = pwCoeffs * src.level # encode the object level in the coefficients
-                    else:
+                levels = np.zeros( self.numberOfObjects, dtype=coeffOut.dtype )
+                pos = np.zeros( (self.numberOfObjects,3), dtype=coeffOut.dtype )
+                for src in ov:
+                    chIdx = src.channels[0]
+                    if chIdx > self.numberOfObjects:
                         warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
-                        break
+                        continue
+                    levels[chIdx] = src.level
+                    pos[chIdx,:] = src.position
+                sphPos = cart2sph( pos[:,0], pos[:,1], pos[:,2] )
+                shCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sphPos[1,:], sphPos[0,:], dtype = coeffOut.dtype )
+                res = shCoeffs * levels[np.newaxis,:]
+                coeffOut[...] = res
+# Old, serialized code:
+#                for index,src in enumerate(ov):
+#                    if index < self.numberOfObjects :
+#                        chIdx = src.channels[0]
+#                        sph = cart2sph( src.x, src.y, src.z )
+#                        pwCoeffs = allSphHarmRealACN( self.hoaOrder, np.pi/2-sph[1], sph[0], dtype = coeffOut.dtype )
+#                        coeffOut[ :, chIdx ] = pwCoeffs * src.level # encode the object level in the coefficients
+#                    else:
+#                        warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
+#                        break
