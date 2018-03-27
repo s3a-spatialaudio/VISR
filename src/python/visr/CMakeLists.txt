@@ -2,6 +2,7 @@
 
 set( SOURCES
 atomic_component.cpp
+audio_connection.cpp
 audio_port.cpp
 audio_sample_type.cpp
 channel_list.cpp
@@ -11,8 +12,10 @@ component.cpp
 composite_component.cpp
 parameter_base.cpp
 parameter_config_base.cpp
+parameter_connection.cpp
 parameter_factory.cpp
 parameter_port.cpp
+port.cpp
 signal_flow_context.cpp
 visr.cpp
 )

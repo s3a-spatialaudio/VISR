@@ -22,6 +22,9 @@ void exportAudioSampleType( py::module & m );
 void exportAudioPort(py::module & m);
 void exportParameterFactory(py::module & m);
 void exportParameterPort(py::module & m);
+void exportPort( py::module & m );
+void exportAudioConnection( py::module & m );
+void exportParameterConnection( py::module & m );
 void exportCompositeComponent(py::module & m);
 void exportAtomicComponent(py::module & m);
 
@@ -38,11 +41,14 @@ PYBIND11_MODULE( visr, m )
   exportCommunicationProtocol( m );
   exportCommunicationProtocolFactory( m );
   exportParameterFactory( m );
+  exportPort( m );
   exportChannelList( m );
   exportComponent( m );
   exportAudioSampleType( m );
   exportAudioPort( m );
   exportParameterPort(m);
+  exportAudioConnection( m );
+  exportParameterConnection( m );
   exportCompositeComponent( m );
   exportAtomicComponent( m );
 }

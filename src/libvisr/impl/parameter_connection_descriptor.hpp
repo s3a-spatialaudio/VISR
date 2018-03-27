@@ -3,6 +3,8 @@
 #ifndef VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 #define VISR_PARAMETER_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
+#include "../export_symbols.hpp"
+
 #include <set>
 
 namespace visr
@@ -35,7 +37,7 @@ private:
  * Store data from definition in derived class until initialisation of runtime structures.
  * @todo This should move into CompositeComponent.
  */
-struct ParameterConnection
+struct VISR_CORE_LIBRARY_SYMBOL ParameterConnection
 {
 public:
   /**

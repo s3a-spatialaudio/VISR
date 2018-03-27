@@ -4,6 +4,7 @@
 #define VISR_AUDIO_CONNECTION_DESCRIPTOR_HPP_INCLUDED
 
 #include "../channel_list.hpp"
+#include "../export_symbols.hpp"
 
 #include <ciso646>
 #include <cstddef>
@@ -26,7 +27,7 @@ class AudioPortBaseImplementation;
 /**
  * Store data from definition in derived class until initialisation of runtime structures.
  */
-struct AudioConnection
+struct VISR_CORE_LIBRARY_SYMBOL AudioConnection
 {
 public:
   /**

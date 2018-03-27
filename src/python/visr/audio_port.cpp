@@ -5,6 +5,7 @@
 #include <libvisr/audio_input.hpp>
 #include <libvisr/audio_output.hpp>
 #include <libvisr/audio_sample_type.hpp>
+#include <libvisr/port_base.hpp>
 #include <libvisr/constants.hpp>
 
 #include <libvisr/component.hpp>
@@ -171,6 +172,8 @@ void exportAudioPort( py::module & m)
     .def_property_readonly( "sampleSize", &AudioPortBase::sampleSize )
     .def_property_readonly( "sampleType", &AudioPortBase::sampleType )
     .def_property_readonly( "initialised", []( AudioPortBase const & port ){ return port.implementation().initialised(); } )
+    .def_property_readonly( "name", []( AudioPortBase const & port ) { return port.implementation().name(); } )
+    .def_property_readonly( "direction", []( AudioPortBase const & port ) { return port.implementation().direction(); } )
     ;
 
   /**
