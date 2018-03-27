@@ -2,19 +2,21 @@
 
 #include "port_base.hpp"
 
+#include <type_traits>
+
 namespace visr
 {
 
-#if 0
-PortBase::PortBase( std::string const & name, Component & container, Direction direction )
- : mName( name )
- , mParentComponent( container )
- , mDirection( direction )
+PortBase::Direction operator|( PortBase::Direction lhs, PortBase::Direction rhs )
 {
+  using T = std::underlying_type<PortBase::Direction>::type;
+  return static_cast<PortBase::Direction>(static_cast<T>(lhs) | static_cast<T>(rhs));
 }
 
-PortBase::~PortBase()
+PortBase::Direction operator&( PortBase::Direction lhs, PortBase::Direction rhs )
 {
+  using T = std::underlying_type<PortBase::Direction>::type;
+  return static_cast<PortBase::Direction>(static_cast<T>(lhs) & static_cast<T>(rhs));
 }
-#endif
+
 } // namespace visr

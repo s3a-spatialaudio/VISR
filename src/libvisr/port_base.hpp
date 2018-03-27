@@ -3,7 +3,7 @@
 #ifndef VISR_PORT_BASE_HPP_INCLUDED
 #define VISR_PORT_BASE_HPP_INCLUDED
 
-#include <string>
+#include "export_symbols.hpp"
 
 namespace visr
 {
@@ -16,57 +16,20 @@ class Component;
  * At the moment is simply exists because of the Direction enumeration 
  * used by audio and parameter ports.
  */
-class PortBase
+class VISR_CORE_LIBRARY_SYMBOL PortBase
 {
 public:
   enum class Direction
   {
-    Input,
-    Output
+    Input = 1,            ///< The port is an input
+    Output = 2,           ///< The port is an output.
+    All = Input | Output ///< Port can be both input or output. This setting is not used as an actual value for ports, but only as a mask when filtering for specific port types.
   };
-// Note: The class itself is not used naymore.
-//  explicit PortBase( std::string const & name, Component & container, Direction direction );
-//
-//  /**
-//   * Deleted default constructor.
-//   */
-//  PortBase() = delete;
-//
-//  /**
-//   * Deleted copy constructor to prevent copy construction of this and derived classes
-//   */
-//  PortBase( PortBase const & ) = delete;
-//
-//  /**
-//   * Deleted move constructor to prevent move construction of this and derived classes
-//   */
-//  PortBase( PortBase && ) = delete;
-//
-//  PortBase & operator=( PortBase const & ) = delete;
-//
-//  PortBase & operator=( PortBase && ) = delete;
-//
-//  /**
-//   * Destructor.
-//   * Ports are not intended to be used polymorphically, so the desctructor is non-virtual.
-//   */
-//  ~PortBase();
-//
-//  std::string const & name() const { return mName; }
-//
-//  Component const & parent() const { return mParentComponent; }
-//
-//  Component & parent() { return mParentComponent; }
-//
-//  Direction direction() const { return mDirection; }
-//
-//private:
-//  std::string const mName;
-//
-//  Component & mParentComponent;
-//
-//  Direction const mDirection;
 };
+
+VISR_CORE_LIBRARY_SYMBOL PortBase::Direction operator|( PortBase::Direction lhs, PortBase::Direction rhs );
+
+VISR_CORE_LIBRARY_SYMBOL PortBase::Direction operator&( PortBase::Direction lhs, PortBase::Direction rhs );
 
 } // namespace visr
 
