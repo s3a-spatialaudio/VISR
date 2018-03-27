@@ -66,17 +66,21 @@ outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 numPos = 360/5
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
 
-az = 0
-el = 0
-r = 1
-ps1 = objectmodel.PointSource(0)
-ps1.position = sph2cart( np.asarray([az, el, r]) )
-ps1.level = 0.5
-ps1.groupId = 5
-ps1.priority = 5
-ps1.channels = [ps1.objectId]
+ov = paramInput.data()
 
-paramInput.data().set( [ ps1 ] )
+
+for idx in range(numBinauralObjects):
+    az = 0
+    el = 0
+    r = 1
+    ps = objectmodel.PointSource(idx)
+    ps.position = sph2cart( np.asarray([az, el, r]) )
+    ps.level = 0.5
+    ps.groupId = 5
+    ps.priority = 5
+    ps.channels = [idx]
+    ov.insert( ps )
+
 paramInput.swapBuffers()
 
 start = time.time()
@@ -85,7 +89,7 @@ for blockIdx in range(0,numBlocks):
     if useSourceMovement:
         az = azSequence[int(blockIdx%numPos)]
         el = 0
-        ps1.position = sph2cart( np.asarray([az, el, r]) )
+        ps.position = sph2cart( np.asarray([az, el, r]) )
         ov = paramInput.data()
         ov.set( [ ps1 ] )
         paramInput.swapBuffers()

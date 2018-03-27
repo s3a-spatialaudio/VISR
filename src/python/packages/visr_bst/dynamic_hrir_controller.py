@@ -178,6 +178,7 @@ class DynamicHrirController( visr.AtomicComponent ):
             ypr = htrack.orientation
             # np.negative is to obtain the opposite rotation of the head rotation, i.e. the inverse matrix of head rotation matrix
             self.rotationMatrix = np.asarray( calcRotationMatrix(np.negative(ypr) ), dtype=np.float32 )
+            self.trackingInputProtocol.resetChanged()
 
         if self.objectInputProtocol.changed():
             ov = self.objectInputProtocol.data();
@@ -213,6 +214,7 @@ class DynamicHrirController( visr.AtomicComponent ):
                     else:
                         warnings.warn('The number of dynamically instantiated sound objects is more than the maximum number specified')
                         break
+            self.objectInputProtocol.resetChanged()
 
         # Computation performed each iteration
         # @todo Consider changing the recompute logic to compute fewer source per iteration.
@@ -221,85 +223,55 @@ class DynamicHrirController( visr.AtomicComponent ):
             allGains =  self.inverted @ translatedSourcePos.T
             minGains = np.min( allGains, axis = 1 ) # Minimum over last axis
             matchingTriplet = np.argmax( minGains, axis = 0 )
+            indices = self.hrirLookup.simplices[matchingTriplet,:]
 
             #Select the gains for the matching triplets.
             unNormedGains = allGains[matchingTriplet,:,range(0,self.numberOfObjects)]
             gainNorm = np.linalg.norm( unNormedGains, ord=1, axis = -1 )
-            normedGains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
-
-            if self.dynamicILD:
-                # Obtain access to the output arrays
-                gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
-
-                # Set the object for both ears.
-                # Note: Incorporate dynamically computed ILD if selected or adjust
-                # the level using an analytic model.
-                gainVec[0:self.numberOfObjects] = self.levels
-                gainVec[self.numberOfObjects:] = self.levels
-            else:
-                normedGains *= self.levels[...,np.newaxis]
-
-            _indices = self.hrirLookup.simplices[matchingTriplet,:]
-
-            if self.interpolatingConvolver:
-                for chIdx in range(0,self.numberOfObjects):
-                    gainList = normedGains[chIdx,:].tolist()
-                    chIndices = 2*_indices[chIdx,:]
-                    leftInterpParameter = pml.InterpolationParameter( chIdx,
-                                                                     chIndices.tolist(),
-                                                                     gainList )
-                    rightInterpParameter = pml.InterpolationParameter( chIdx+self.numberOfObjects,
-                                                                     (chIndices+1).tolist(),
-                                                                     gainList )
-                    self.interpolationOutputProtocol.enqueue( leftInterpParameter )
-                    self.interpolationOutputProtocol.enqueue( rightInterpParameter )
-            else:
-                _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[_indices,:,:], normedGains)
-                for chIdx in range(0,self.numberOfObjects):
-                    _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
-                    _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
-                    self.filterOutputProtocol.enqueue( _leftInterpolant )
-                    self.filterOutputProtocol.enqueue( _rightInterpolant )
-            if self.dynamicITD:
-                delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
-                delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), normedGains[...,np.newaxis]),axis=2 )
-                delayVec[0:self.numberOfObjects] = delays[:,0]
-                delayVec[self.numberOfObjects:] = delays[:,1]
-        else: # hrirInterpolation == False
+            gains = np.repeat( gainNorm[:,np.newaxis], 3, axis=-1 ) * unNormedGains
+        else: # No interpolation
             dotprod = self.hrirPos @ translatedSourcePos.T
-            indices = np.argmax( dotprod, axis = 0 )
-            if self.interpolatingConvolver:
-                for chIdx in range(0,self.numberOfObjects):
-                    gainList = [self.levels[chIdx]]
-                    chIndex = 2*indices[chIdx]
-                    leftInterpParameter = pml.InterpolationParameter( chIdx,
-                                                                     [chIndex],
-                                                                     gainList )
-                    rightInterpParameter = pml.InterpolationParameter( chIdx+self.numberOfObjects,
-                                                                     [chIndex+1],
-                                                                     gainList )
-                    self.interpolationOutputProtocol.enqueue( leftInterpParameter )
-                    self.interpolationOutputProtocol.enqueue( rightInterpParameter )
-            else:
-                for chIdx in range(0,self.numberOfObjects):
-                    leftCmd  = pml.IndexedVectorFloat( chIdx,
-                                                      self.hrirs[indices[chIdx],0,:])
-                    rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,
-                                                      self.hrirs[indices[chIdx],1,:])
-                    self.filterOutputProtocol.enqueue( leftCmd )
-                    self.filterOutputProtocol.enqueue( rightCmd )
-                    self.lastFilters[chIdx] = indices[chIdx]
+            #make it a 2D array
+            indices = np.reshape( np.argmax( dotprod, axis = 0 ), (-1,1) )
+            gains = np.ones( (self.numberOfObjects, 1 ), dtype = np.float32 )
 
-            if self.dynamicITD:
-                delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
-                delayVec[0:self.numberOfObjects] = self.dynamicDelays[indices,0]
-                delayVec[self.numberOfObjects:] =  self.dynamicDelays[indices,1]
-
-        if self.dynamicILD:
-            self.gainOutputProtocol.swapBuffers()
         if self.dynamicITD:
+            delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
+            delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[indices,:],1,2),
+                                          gains[...,np.newaxis]),axis=2 )
+            delayVec[0:self.numberOfObjects] = delays[:,0]
+            delayVec[self.numberOfObjects:] = delays[:,1]
             self.delayOutputProtocol.swapBuffers()
 
-        self.objectInputProtocol.resetChanged()
-        if self.useHeadTracking:
-            self.trackingInputProtocol.resetChanged()
+        if self.dynamicILD:
+            # Obtain access to the output arrays
+            gainVec = np.array( self.gainOutputProtocol.data(), copy = False )
+
+            # Set the object for both ears.
+            # Note: Incorporate dynamically computed ILD if selected or adjust
+            # the level using an analytic model.
+            gainVec[0:self.numberOfObjects] = self.levels
+            gainVec[self.numberOfObjects:] = self.levels
+            self.gainOutputProtocol.swapBuffers()
+        else:
+            gains *= self.levels[...,np.newaxis]
+
+        if self.interpolatingConvolver:
+            for chIdx in range(0,self.numberOfObjects):
+                gainList = gains[chIdx,:].tolist()
+                chIndices = 2*indices[chIdx,:]
+                leftInterpParameter = pml.InterpolationParameter( chIdx,
+                                                                 chIndices.tolist(),
+                                                                 gainList )
+                rightInterpParameter = pml.InterpolationParameter( chIdx+self.numberOfObjects,
+                                                                 (chIndices+1).tolist(),
+                                                                 gainList )
+                self.interpolationOutputProtocol.enqueue( leftInterpParameter )
+                self.interpolationOutputProtocol.enqueue( rightInterpParameter )
+        else:
+            _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[indices,:,:], gains)
+            for chIdx in range(0,self.numberOfObjects):
+                _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
+                _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
+                self.filterOutputProtocol.enqueue( _leftInterpolant )
+                self.filterOutputProtocol.enqueue( _rightInterpolant )
