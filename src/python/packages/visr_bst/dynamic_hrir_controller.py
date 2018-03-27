@@ -27,9 +27,10 @@ class DynamicHrirController( visr.AtomicComponent ):
                   hrirPositions,            # The directions of the HRTF measurements, given as a Nx3 array
                   hrirData,                 # The HRTF data as 3 Nx2xL matrix, with L as the FIR length.
                   headRadius = 0.0875,      # Head radius, optional. Might be used in a dynamic ITD/ILD individualisation algorithm.
-                  useHeadTracking = False,  # Whether head tracking data is provided via a self.headOrientation port.
-                  dynamicITD = False,       # Whether ITD delays are calculated and sent via a "delays" port.
-                  dynamicILD = False,       # Whether ILD gains are calculated and sent via a "gains" port.
+                  useHeadTracking = False,        # Whether head tracking data is provided via a self.headOrientation port.
+                  dynamicITD = False,             # Whether ITD delays are calculated and sent via a "delays" port.
+                  dynamicILD = False,             # Whether ILD gains are calculated and sent via a "gains" port.
+                  interpolatingConvolver = False, # Whether to transmit interpolation parameters (True) or complete interpolated filters
                   hrirInterpolation = False, # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
                   channelAllocation = False, # Whether to allocate object channels dynamically (not tested yet)
                   hrirDelays = None,         # Matrix of delays associated with filter dataset. Dimension: # filters * 2
@@ -90,12 +91,29 @@ class DynamicHrirController( visr.AtomicComponent ):
             self.trackingInputProtocol = None # Flag that head tracking is not used.
         self.rotationMatrix = np.identity( 3, dtype=np.float32 )
 
-        self.filterOutput = visr.ParameterOutput( "filterOutput", self,
-                                                pml.IndexedVectorFloat.staticType,
-                                                pml.MessageQueueProtocol.staticType,
-                                                pml.EmptyParameterConfig() )
-        self.filterOutputProtocol = self.filterOutput.protocolOutput()
+        self.interpolatingConvolver = interpolatingConvolver
+        if interpolatingConvolver:
+            self.filterOutputProtocol = None # Used as flag to distinguish between the output modes.
 
+            if not hrirInterpolation:
+                numInterpolants = 1
+            elif hrirPositions.shape[-1] == 2:
+                numInterpolants = 2
+            else:
+                numInterpolants = 3
+
+            self.interpolationOutput = visr.ParameterOutput( "interpolatorOutput", self,
+                                                     pml.InterpolationParameter.staticType,
+                                                     pml.MessageQueueProtocol.staticType,
+                                                     pml.InterpolationParameterConfig(numInterpolants) )
+            self.interpolationOutputProtocol = self.interpolationOutput.protocolOutput()
+        else:
+            self.filterOutput = visr.ParameterOutput( "filterOutput", self,
+                                                     pml.IndexedVectorFloat.staticType,
+                                                     pml.MessageQueueProtocol.staticType,
+                                                     pml.EmptyParameterConfig() )
+            self.filterOutputProtocol = self.filterOutput.protocolOutput()
+            self.interpolationOutputProtocol = None
 
         if self.dynamicITD:
             if (hrirDelays is None) or (hrirDelays.ndim != 2) or (hrirDelays.shape != (hrirData.shape[0], 2 ) ):
@@ -125,7 +143,11 @@ class DynamicHrirController( visr.AtomicComponent ):
             self.routingOutputProtocol = None
 
         # HRIR selection and interpolation data
-        self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
+        # If the interpolatingconvolver is used, only interpolation parameters are transmitted.
+        if interpolatingConvolver:
+            self.hrirs = None
+        else:
+            self.hrirs = np.array( hrirData, copy = True, dtype = np.float32 )
 
         # Normalise the hrir positions to unit radius (to let the k-d tree
         # lookup work as expected.)
@@ -218,25 +240,48 @@ class DynamicHrirController( visr.AtomicComponent ):
                 normedGains *= self.levels[...,np.newaxis]
 
             _indices = self.hrirLookup.simplices[matchingTriplet,:]
-            _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[_indices,:,:], normedGains)
 
-            for chIdx in range(0,self.numberOfObjects):
-                _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
-                _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
-                self.filterOutputProtocol.enqueue( _leftInterpolant )
-                self.filterOutputProtocol.enqueue( _rightInterpolant )
-
+            if self.interpolatingConvolver:
+                for chIdx in range(0,self.numberOfObjects):
+                    gainList = normedGains[chIdx,:].tolist()
+                    chIndices = 2*_indices[chIdx,:]
+                    leftInterpParameter = pml.InterpolationParameter( chIdx,
+                                                                     chIndices.tolist(),
+                                                                     gainList )
+                    rightInterpParameter = pml.InterpolationParameter( chIdx+self.numberOfObjects,
+                                                                     (chIndices+1).tolist(),
+                                                                     gainList )
+                    self.interpolationOutputProtocol.enqueue( leftInterpParameter )
+                    self.interpolationOutputProtocol.enqueue( rightInterpParameter )
+            else:
+                _interpFilters = np.einsum('ijkw,ij->ikw', self.hrirs[_indices,:,:], normedGains)
+                for chIdx in range(0,self.numberOfObjects):
+                    _leftInterpolant = pml.IndexedVectorFloat( chIdx, _interpFilters[chIdx,0,:] )
+                    _rightInterpolant = pml.IndexedVectorFloat( chIdx+self.numberOfObjects, _interpFilters[chIdx,1,:] )
+                    self.filterOutputProtocol.enqueue( _leftInterpolant )
+                    self.filterOutputProtocol.enqueue( _rightInterpolant )
             if self.dynamicITD:
                 delayVec = np.array( self.delayOutputProtocol.data(), copy = False )
                 delays = np.squeeze(np.matmul( np.moveaxis(self.dynamicDelays[_indices,:],1,2), normedGains[...,np.newaxis]),axis=2 )
                 delayVec[0:self.numberOfObjects] = delays[:,0]
                 delayVec[self.numberOfObjects:] = delays[:,1]
-
         else: # hrirInterpolation == False
             dotprod = self.hrirPos @ translatedSourcePos.T
             indices = np.argmax( dotprod, axis = 0 )
-            for chIdx in range(0,self.numberOfObjects):
-                if self.lastFilters[chIdx] != indices[chIdx]:
+            if self.interpolatingConvolver:
+                for chIdx in range(0,self.numberOfObjects):
+                    gainList = [self.levels[chIdx]]
+                    chIndex = 2*indices[chIdx]
+                    leftInterpParameter = pml.InterpolationParameter( chIdx,
+                                                                     [chIndex],
+                                                                     gainList )
+                    rightInterpParameter = pml.InterpolationParameter( chIdx+self.numberOfObjects,
+                                                                     [chIndex+1],
+                                                                     gainList )
+                    self.interpolationOutputProtocol.enqueue( leftInterpParameter )
+                    self.interpolationOutputProtocol.enqueue( rightInterpParameter )
+            else:
+                for chIdx in range(0,self.numberOfObjects):
                     leftCmd  = pml.IndexedVectorFloat( chIdx,
                                                       self.hrirs[indices[chIdx],0,:])
                     rightCmd = pml.IndexedVectorFloat( chIdx+self.numberOfObjects,

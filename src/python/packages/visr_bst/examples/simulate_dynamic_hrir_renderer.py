@@ -25,10 +25,11 @@ numBlocks = 128;
 
 useSourceAutoMovement = False
 useTracking = True
-useDynamicITD = True
+useDynamicITD = False
 useDynamicILD = False
 useHRIRinterpolation = True
 useCrossfading = True
+useInterpolatingConvolver = False
 
 ###################################
 
@@ -54,7 +55,8 @@ renderer = DynamicHrirRenderer( context, "DynamicHrirRenderer", None,
                                dynamicITD = useDynamicITD,
                                dynamicILD = useDynamicILD,
                                hrirInterpolation = useHRIRinterpolation,
-                               filterCrossfading = useCrossfading
+                               filterCrossfading = useCrossfading,
+                               interpolatingConvolver = useInterpolatingConvolver
                                )
 
 result,messages = rrl.checkConnectionIntegrity(renderer)
@@ -79,14 +81,14 @@ el = 0
 r = 1
 ps1 = objectmodel.PointSource(0)
 ps1.position = sph2cart( np.array([az, el, r]) )
-ps1.level = 0.5
+ps1.level = 0.005
 ps1.channels = [ps1.objectId]
 
 pw1 = objectmodel.PlaneWave(1)
 pw1.azimuth = az
 pw1.elevation = el
 pw1.referenceDistance = r
-pw1.level = 0.5
+pw1.level = 0.005
 pw1.groupId = 5
 pw1.priority = 5
 pw1.channels = [pw1.objectId]
@@ -94,6 +96,8 @@ pw1.channels = [pw1.objectId]
 ov = paramInput.data()
 ov.set( [ps1,pw1] )
 paramInput.swapBuffers()
+
+tStart = time()
 
 for blockIdx in range(0,numBlocks):
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
@@ -115,6 +119,7 @@ for blockIdx in range(0,numBlocks):
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
+print( 'Time elapsed: %f s' % (time()-tStart) )
 
 plt.figure()
 plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')

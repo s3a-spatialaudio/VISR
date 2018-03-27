@@ -132,7 +132,7 @@ class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
                                                          pml.DoubleBufferingProtocol.staticType,
                                                          pml.EmptyParameterConfig() )
             self.parameterConnection( self.objectVectorInput,
-                                     self.dynamicBinauralRenderer.parameterPort("objectVector"))
+                                     self.dynamicHrirRenderer.parameterPort("objectVector"))
 
         else:
             self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self,
