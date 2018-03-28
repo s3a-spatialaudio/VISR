@@ -11,6 +11,7 @@
 #include <libvisr/polymorphic_parameter_output.hpp>
 
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/component_implementation.hpp>
 
 #include <pybind11/pybind11.h>
 
@@ -34,6 +35,10 @@ void exportParameterPort( pybind11::module & m)
     .def_property_readonly( "protocolType", &ParameterPortBase::protocolType )
     .def_property( "parameterConfig", &ParameterPortBase::parameterConfig, &ParameterPortBase::setParameterConfig )
     .def_property_readonly( "name", []( ParameterPortBase const & port ) { return port.implementation().name(); } )
+    .def_property_readonly( "qualifiedName", []( ParameterPortBase const & port ) { return port.implementation().parent().name()
+      + ":" +port.implementation().name(); }, "Return the port name as a component:port combination" )
+    .def_property_readonly( "fullName", []( ParameterPortBase const & port ) { return port.implementation().parent().name()
+      + ":" +port.implementation().name(); }, "Return the port name as a component:port combination with a fully hierarchical component name." )
     .def_property_readonly( "direction", []( ParameterPortBase const & port ) { return port.implementation().direction(); } )
 //    .def( "hasParameterConfig", &ParameterPortBase::hasParameterConfig)
     ;

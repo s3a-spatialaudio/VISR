@@ -13,6 +13,7 @@
 
 // Extend the interface beyond the audio ports visible in the C++ API
 #include <libvisr/impl/audio_port_base_implementation.hpp>
+#include <libvisr/impl/component_implementation.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -173,6 +174,10 @@ void exportAudioPort( py::module & m)
     .def_property_readonly( "sampleType", &AudioPortBase::sampleType )
     .def_property_readonly( "initialised", []( AudioPortBase const & port ){ return port.implementation().initialised(); } )
     .def_property_readonly( "name", []( AudioPortBase const & port ) { return port.implementation().name(); } )
+    .def_property_readonly( "qualifiedName", []( AudioPortBase const & port ) { return port.implementation().parent().name()
+      + ":" +port.implementation().name(); }, "Return the port name as a component:port combination" )
+    .def_property_readonly( "fullName", []( AudioPortBase const & port ) { return port.implementation().parent().name()
+    + ":" +port.implementation().name(); }, "Return the port name as a component:port combination with a fully hierarchical component name." )
     .def_property_readonly( "direction", []( AudioPortBase const & port ) { return port.implementation().direction(); } )
     ;
 

@@ -34,8 +34,9 @@ void exportParameterConnection( pybind11::module& m )
    .def( "__str__", []( impl::ParameterConnection const & conn )
    {
      std::stringstream repr;
-     repr << conn.sender()->parent().name() << ":" << conn.sender()->name() 
+     repr << conn.sender()->parent().name() << ":" << conn.sender()->name() << "->"
           << conn.receiver()->parent().name() << ":" << conn.receiver()->name();
+     return repr.str();
    })
    ;
 }
