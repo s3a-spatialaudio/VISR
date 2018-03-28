@@ -7,6 +7,7 @@
 
 #include <iterator>
 #include <initializer_list>
+#include <ostream>
 #include <vector>
 
 namespace visr
@@ -16,6 +17,7 @@ namespace visr
 class ChannelRange;
 
 class ChannelList
+  
 {
 public:
   using IndexType = std::size_t;
@@ -91,6 +93,13 @@ private:
 
   VISR_CORE_LIBRARY_SYMBOL void appendRange( ChannelRange const & range );
 };
+
+/**
+ * Stream output operator for ChannelList objects.
+ * Creates a list of channel indices. Sequences of three or more equidistant consecutive indices are contracted into
+ * stride expressions start:step:end or start:end in case of a unit stride.
+ */
+VISR_CORE_LIBRARY_SYMBOL std::ostream & operator<<( std::ostream & str, ChannelList const channels );
 
 class VISR_CORE_LIBRARY_SYMBOL ChannelRange
 {
@@ -171,6 +180,11 @@ private:
   IndexType mEnd;
   StepType mStep;
 };
+
+/**
+ * Stream output operator for ChannelRange objects.
+ */
+VISR_CORE_LIBRARY_SYMBOL std::ostream & operator<<( std::ostream & str, ChannelRange const range );
 
 } // namespace visr
 

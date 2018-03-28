@@ -2,6 +2,7 @@
 
 #include "channel_list.hpp"
 
+#include <algorithm>
 #include <ciso646>
 #include <iterator>
 #include <numeric>
@@ -172,6 +173,65 @@ ChannelList::appendRange( ChannelRange const & range )
 void ChannelList::appendIndex( IndexType index )
 {
   mChannels.push_back( index );
+}
+
+std::ostream & operator<<( std::ostream & str, ChannelList const channels )
+{
+  for( ChannelList::const_iterator runIt(channels.begin());; )
+  {
+    ChannelList::const_iterator lookAheadIt( runIt );
+    if( ++lookAheadIt == channels.end() )
+    {
+      str << *runIt;
+      break;
+    }
+    else
+    {
+      std::ptrdiff_t const diff = *lookAheadIt - *runIt;
+      std::size_t advanceCounter{ 1 };
+      ChannelList::IndexType currVal = *lookAheadIt;
+      while( (++lookAheadIt != channels.end()) and static_cast<std::ptrdiff_t>(*lookAheadIt-currVal) == diff )
+      {
+        currVal = *lookAheadIt;
+        ++advanceCounter;
+      }
+      str << *runIt;
+      if( advanceCounter >= 2)
+      {
+        if( diff != 1 )
+        {
+          str << ":" << diff;
+        }
+        ChannelList::const_iterator sequenceLast{ lookAheadIt -1 };
+        str << ":" << *sequenceLast;
+      }
+      else
+      {
+        lookAheadIt = runIt + 1; // Advance only by one position
+      }
+    }
+    if( lookAheadIt == channels.end() )
+    {
+      break;
+    }
+    else
+    {
+      str << ",";
+      runIt = lookAheadIt;
+    }
+  }
+  return str;
+}
+
+std::ostream & operator<<( std::ostream & str, ChannelRange const range )
+{
+  str << range.start();
+  if( range.step() != 1 )
+  {
+    str << ":" << range.step();
+  }
+  str << ":" << range.end();
+  return str;
 }
 
 } // namespace visr
