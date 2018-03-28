@@ -56,7 +56,7 @@ class ComponentIterator: public impl::CompositeComponentImplementation::Componen
 public:
   using Base = impl::CompositeComponentImplementation::ComponentTable::const_iterator;
 
-  ComponentIterator( typename Base baseIt )
+  ComponentIterator( Base baseIt )
     : Base( baseIt )
   {
   }

@@ -34,7 +34,7 @@ class PortIterator: public Container::iterator
 public:
   using Base = typename Container::iterator; 
 
-  PortIterator( typename Base baseIt )
+  PortIterator( Base baseIt )
     : Container::iterator( baseIt )
   {
   }
