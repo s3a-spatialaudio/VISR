@@ -151,14 +151,13 @@ int CAP::setListenerOrientation(Afloat yaw, Afloat pitch, Afloat roll, bool zero
         
         Afloat m2[3][3]; // temp rotation matrix
         
-        int temp = 0;
         int i, j, k;
         
         for(i = 0; i < 3; i++)
         {
             for(j = 0; j < 3; j++)
             {
-                temp = 0;
+                Afloat temp = 0.0f;
                 for(k = 0; k < 3; k++)
                 {
                     temp += m_reorientMatrix[j][k] * m[k][i];
