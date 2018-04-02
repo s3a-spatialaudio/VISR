@@ -27,22 +27,6 @@ namespace rbbl
     for(i = 0; i < nBufferSamples; i++) m_inBuffer[i] = 0;
 }
 
-int FIR::loadFIRs(FILE* file) {
-   
-    int i,j;
-    
-    for( i = 0; i < m_nFIRs; i++ ) {
-        for( j = 0; j < m_nFIRsamples; j++ ) {
-            if (feof(file) == -1) {
-                return -1;
-            }
-            fscanf(file, "%f", &(m_B(i,j)));
-        }
-    }
-    
-    return 0;
-}
-
 void FIR::loadFIRs( efl::BasicMatrix<Afloat> const & filterCoeffs )
 {
   if( (filterCoeffs.numberOfRows() != static_cast<std::size_t>(m_nFIRs))

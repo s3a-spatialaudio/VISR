@@ -73,8 +73,6 @@ public:
         // <af> Is this correct? m_B is never accesses past m_nFIRsamples ?
         if (n * m_nFIRsamples > maxnFIRsamples) return -1;
         m_nUpsample = n; return 0; };
-    
-    int loadFIRs(FILE* file);
 
     /**
      * Load the filter coefficients from a matrix.
