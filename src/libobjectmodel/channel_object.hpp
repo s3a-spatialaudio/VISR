@@ -27,9 +27,15 @@ public:
   using OutputChannelId = std::string;
 
   /**
-   * Container type for holding the output channel indices.
+   * Container for all output loudspeakers (as loudspeaker labels) of one signal channel.
    */
-  using OutputChannelContainer = std::vector<OutputChannelId>;
+  using  OutputChannelList = std::vector<OutputChannelId>;
+
+  /**
+   * Container type for holding the output channel indices.
+   * Each entry marks all output channels to which a specific input is routed.
+   */
+  using OutputChannelContainer = std::vector< OutputChannelList >;
 
   ChannelObject( ) = delete;
 
@@ -52,7 +58,11 @@ public:
    */
   OutputChannelContainer const & outputChannels() const;
 
-  OutputChannelId outputChannel(std::size_t index) const;
+  /**
+   * Return all output loudspeaker indices for one channel.
+   * @throw std::out_of_range If \p index exceeds the number of signal channels of the channel object
+   */
+  OutputChannelList const & outputChannel(std::size_t index) const;
 
   /**
    * Set the output channel for a specific channel index.
@@ -60,14 +70,30 @@ public:
    */
   void setOutputChannels(OutputChannelContainer const & newChannels);
 
+  /*
+   * Doesn't make sense anymore.
+   */
   void setOutputChannels( OutputChannelId const * val, std::size_t numValues );
 
+  /**
+   * Set a specific channel to a single output channel.
+   */
   void setOutputChannel(std::size_t index, OutputChannelId val);
 
+  /**
+   * Set a list of output channels for a 
+   */
+  void setOutputChannel( std::size_t index, OutputChannelList const & outputChannels );
+
+  LevelType diffuseness() const;
+
+  void setDiffuseness( LevelType newDiffuseness );
 protected:
 
 private:
   OutputChannelContainer mOutputChannels;
+
+  LevelType mDiffuseness;
 
 };
 

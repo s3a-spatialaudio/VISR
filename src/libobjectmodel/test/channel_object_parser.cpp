@@ -22,20 +22,26 @@ namespace test
 
 BOOST_AUTO_TEST_CASE( ParseChannelObject )
 {
-  std::string const msg = "{ \"objects\":[{\"id\": 1, \"channels\": \"0\", \n \"type\": \"channel\",\n \"group\": 0,\n \"priority\": 3,\n \"level\": 0.8,\n"
-      "\"outputChannels\": \"0\" } ] }";
+  std::string const msg = "{ \"objects\":[{\"id\": 1, \"channels\": \"0, 1, 3\", \n \"type\": \"channel\",\n \"group\": 0,\n \"priority\": 3,\n \"level\": 0.8,\n"
+      "\"outputChannels\": \"M+000, U+030, B-045\" } ] }";
 
   ObjectVector scene;
 
   ObjectVectorParser::fillObjectVector( msg, scene );
 
   BOOST_CHECK( scene.size() == 1 );
+
+  ChannelObject * co;
+  auto & obj = scene.at( 1 );
+  BOOST_CHECK_NO_THROW( co = &dynamic_cast<ChannelObject&>( obj ) );
+
+  BOOST_CHECK( co->outputChannels().size() == 3 );
 }
 
 BOOST_AUTO_TEST_CASE(WriteChannelObject)
 {
   std::string const objRepr = "{\"id\": 1, \"channels\": \"0,7,12,15\", \n \"type\": \"channel\",\n \"group\": 0,\n \"priority\": 3,\n \"level\": 0.8,\n"
-    "\"outputChannels\": \"3:6\" }";
+    "\"outputChannels\": \"[M+000], [M-030,M+030], [U+045], []\", \"diffuseness\": 0.25 }";
 
   boost::property_tree::ptree propTree;
   try

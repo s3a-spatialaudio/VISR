@@ -88,7 +88,13 @@ void ChannelObjectRoutingCalculator::process( pml::ObjectVector const & objects,
         std::cerr << "ChannelObjectRoutingCalculator: Object channel index exceeds channel range." << std::endl;
         continue;
       }
-      ChannelLookup::const_iterator const findIt = mLookup.find(chObj.outputChannel(chIdx));
+      objectmodel::ChannelObject::OutputChannelList const & outChannels = chObj.outputChannel( chIdx );
+      if( outChannels.size() != 1 )
+      {
+        status( StatusMessage::Warning,  "This implementation supports only channel objects with a single output per  channel." );
+        continue;
+      }
+      ChannelLookup::const_iterator const findIt = mLookup.find(outChannels[0]);
       if (findIt == mLookup.end())
       {
         // TODO: Use error reporting API (when defined)
