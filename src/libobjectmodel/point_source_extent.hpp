@@ -3,7 +3,7 @@
 #ifndef VISR_OBJECTMODEL_POINT_SOURCE_EXTENT_HPP_INCLUDED
 #define VISR_OBJECTMODEL_POINT_SOURCE_EXTENT_HPP_INCLUDED
 
-#include "point_source.hpp"
+#include "point_source_with_diffuseness.hpp"
 
 #include "export_symbols.hpp"
 
@@ -15,7 +15,7 @@ namespace objectmodel
 /**
  *
  */
-class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceExtent: public PointSource
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceExtent: public PointSourceWithDiffuseness
 {
 public:
 

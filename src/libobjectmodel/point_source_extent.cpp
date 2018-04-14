@@ -8,7 +8,7 @@ namespace objectmodel
 {
 
 PointSourceExtent::PointSourceExtent( ObjectId id )
- : PointSource( id )
+ : PointSourceWithDiffuseness( id )
  , mWidth( static_cast<Coordinate>(0.0) )
  , mHeight( static_cast<Coordinate>(0.0f) )
  , mDepth( static_cast<Coordinate>(0.0f) )

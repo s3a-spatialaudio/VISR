@@ -2,7 +2,7 @@
 
 #include "point_source_extent_parser.hpp"
 
-#include "point_source_parser.hpp"
+#include "point_source_with_diffuseness_parser.hpp"
 #include "point_source_extent.hpp"
 
 #include <boost/property_tree/ptree.hpp>
@@ -21,7 +21,7 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     PointSourceExtent & extentPointSrc = dynamic_cast<PointSourceExtent&>(src);
 
     // Parse all members inherited from the base class PointSource
-    PointSourceParser::parse( tree, extentPointSrc );
+    PointSourceWithDiffusenessParser::parse( tree, extentPointSrc );
 
     // parse data members specific to extent sources
     extentPointSrc.setWidth( tree.get<PointSource::Coordinate>( "width" ) );

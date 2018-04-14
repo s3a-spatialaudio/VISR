@@ -3,7 +3,7 @@
 #ifndef VISR_OBJECTMODEL_POINT_SOURCE_EXTENT_PARSER_HPP_INCLUDED
 #define VISR_OBJECTMODEL_POINT_SOURCE_EXTENT_PARSER_HPP_INCLUDED
 
-#include "point_source_parser.hpp"
+#include "point_source_with_diffuseness_parser.hpp"
 
 #include "export_symbols.hpp"
 #include "object.hpp"
@@ -16,7 +16,7 @@ namespace objectmodel
 /**
  *
  */
-class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceExtentParser: public PointSourceParser
+class VISR_OBJECTMODEL_LIBRARY_SYMBOL PointSourceExtentParser: public PointSourceWithDiffusenessParser
 {
 public:
   virtual void parse( boost::property_tree::ptree const & tree, Object & src ) const;
