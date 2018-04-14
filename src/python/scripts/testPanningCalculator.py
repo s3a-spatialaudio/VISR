@@ -33,7 +33,7 @@ samplingFrequency = 48000
 
 azGrid = np.arange( -45, 45, 1 ) * np.pi/180.0
 gridSize = len( azGrid )
-                  
+
 numSamples = 1024;
 numObjectChannels = 1;
 
@@ -43,7 +43,7 @@ ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 # lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/generic/bs2051-9+10+3_linear.xml' )
 # lc = panning.LoudspeakerArray( 'c:/local/visr/config/isvr/audiolab_39speakers_1subwoofer.xml' )
 # lc = panning.LoudspeakerArray( 'c:/local/visr/config/generic/bs2051-9+10+3.xml' )
-lc = panning.LoudspeakerArray( '/home/andi/dev/visr/config/bbc/bs2051-4+5+0.xml' )
+lc = panning.LoudspeakerArray( 'c:/local/s3a_git/aes2018_dualband_panning/code/data/bs2051-4+5+0.xml' )
 
 numSpeakers = lc.numberOfRegularLoudspeakers
 
@@ -55,7 +55,7 @@ else:
     calc = rcl.PanningCalculator( ctxt, 'calc', None,
                                   numberOfObjects=numObjectChannels,
                                   arrayConfig=lc,
-                                  separateLowpassPanning=hfLfPanning )
+                                  separateLowpassPanning=True )
 
 flow = rrl.AudioSignalFlow( calc )
 
@@ -65,17 +65,15 @@ paramInput = flow.parameterReceivePort('objectVectorInput')
 # Dummy input required for the process() function
 inputBlock = np.zeros( (0, blockSize ), dtype=np.float32 )
 
-gainOutput = flow.parameterSendPort("gainOutput")
-if hfLfPanning:
-    lfGainOutput = flow.parameterSendPort("lowFrequencyGainOutput")
-
+lfGainOutput = flow.parameterSendPort("vbapGains")
+hfGainOutput = flow.parameterSendPort("vbipGains")
 
 hfGains = np.zeros( (gridSize, numSpeakers ) )
 lfGains = np.zeros( (gridSize, numSpeakers ) )
 
 for blockIdx in range(0,gridSize):
-    az = azGrid[blockIdx]
-    el = 15.0*np.pi/180.0
+    az = 50.0*np.pi/180.0 # azGrid[blockIdx]
+    el = 10.0*np.pi/180.0
     r = 1
     x,y,z = sph2cart( az, el, r )
     ps1 = objectmodel.PointSource(0)
@@ -86,19 +84,18 @@ for blockIdx in range(0,gridSize):
     ps1.channels = [ps1.objectId]
     # Optional: Check channel lock feature,
     # ps1.channelLockDistance = 17.50 # maximum distance (in degree)
-        
+
     ov = paramInput.data()
     ov.clear()
     ov.insert( ps1 )
     paramInput.swapBuffers()
-        
+
     outputBlock = flow.process( inputBlock )
 
-    hg = np.array( gainOutput.data(), copy=True )
+    hg = np.array( hfGainOutput.data(), copy=True )
     hfGains[blockIdx,:] = np.ravel( hg )
-    if hfLfPanning:
-        lg = np.array( lfGainOutput.data(), copy=True )
-        lfGains[blockIdx,:] = np.ravel( lg )
+    lg = np.array( lfGainOutput.data(), copy=True )
+    lfGains[blockIdx,:] = np.ravel( lg )
 
 
 plt.figure(1)

@@ -15,6 +15,8 @@
 
 #include <libobjectmodel/object.hpp> // needed basically for type definitions
 
+#include <libpml/listener_position.hpp>
+
 #include <libpanning/LoudspeakerArray.h>
 #include <libpanning/VBAP.h>
 #include <libpanning/XYZ.h>
@@ -33,7 +35,7 @@ namespace panning
   
 namespace pml
 {
-class ListenerPosition;
+// class ListenerPosition;
 class ObjectVector;
 template< typename ElementType > class MatrixParameter;
 class SharedDataProtocol;
@@ -49,6 +51,23 @@ namespace rcl
 class VISR_RCL_LIBRARY_SYMBOL PanningCalculator: public AtomicComponent
 {
 public:
+  enum class PanningMode
+  {
+    Nothing = 0, ///< Not used as a real choice, just for bit-testing.
+    LF = 1,
+    HF = 2,
+    Diffuse = 4,
+    Dualband = LF | HF,
+    All = Dualband | Diffuse
+  };
+
+  enum class Normalisation
+  {
+    Default = 0,    ///< Use the default value for the frequency regime in question.
+    Amplitude = 1,  ///< l_1 (amplitude/low frequency) normalisation
+    Energy = 2      ///< l_2 (energy/high-frequency) normalisation
+  };
+
   /**
    * Type of the gain coefficients. We use the same type as the samples in the signal flow graph
    * @todo maybe this should become a template parameter.
@@ -56,7 +75,27 @@ public:
   using CoefficientType = SampleType;
 
   /**
+  * Constructor.
+  * @param context Configuration object containing basic execution parameters.
+  * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+  * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+  * @param numberOfObjects The number of VBAP objects to be processed.
+  * @param arrayConfig The array configuration object.
+  * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener.
+  * @param separateLowpassPanning Whether to generate two separate gain matrixes for low and high frequencies.
+  */
+  explicit PanningCalculator( SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfObjects,
+    panning::LoudspeakerArray const & arrayConfig,
+    bool adaptiveListenerPosition = false,
+    bool separateLowpassPanning = false );
+
+
+  /**
    * Constructor.
+   * This is a legacy constructor that doesn't use the HF/LF port specification or noralisation options.
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
@@ -70,8 +109,13 @@ public:
                               CompositeComponent * parent,
                               std::size_t numberOfObjects,
                               panning::LoudspeakerArray const & arrayConfig,
-                              bool adaptiveListenerPosition = false,
-                              bool separateLowpassPanning = false );
+                              bool adaptiveListenerPosition,
+                              PanningMode panningMode = PanningMode::LF,
+                              Normalisation lfNormalisation = Normalisation::Default,
+                              Normalisation hfNormalisation = Normalisation::Default, 
+                              Normalisation diffuseNormalisation = Normalisation::Default,
+                              pml::ListenerPosition const & listenerPosition = pml::ListenerPosition(0.0f, 0.0f, 0.0f )
+  );
 
   /**
    * Disabled (deleted) copy constructor
@@ -164,6 +208,28 @@ private:
   mutable efl::BasicVector<SampleType> mTmpGains;
 
   /**
+  * Vector for intermediate results used for separate high/low frequency panning
+  */
+  mutable efl::BasicVector<CoefficientType> mTmpHfGains;
+
+  mutable efl::BasicVector<SampleType> mTmpDiffuseGains;
+
+  Normalisation const mLfNormalisation;
+
+  Normalisation const mHfNormalisation;
+
+  Normalisation const mDiffuseNormalisation;
+
+  using ChannelLabelLookup = std::map< std::string, std::size_t >;
+
+  ChannelLabelLookup const mLabelLookup;
+
+  /**
+   * Internal function to initialise the label lookup table.
+   */
+  static ChannelLabelLookup fillLabelLookup( panning::LoudspeakerArray const & config );
+
+  /**
    * Data type of the parameter ports for outgoing matrix data.
    */
   using ListenerPositionPort = ParameterInput<pml::DoubleBufferingProtocol, pml::ListenerPosition >;
@@ -175,20 +241,33 @@ private:
   std::unique_ptr<ListenerPositionPort> mListenerPositionInput;
 
   /**
-   * Needs to be instantiated as a pointer, because the ParameterConfig data is not known until the setup() method.
-   */
-  std::unique_ptr<MatrixPort> mGainOutput;
-
-  /**
-   * Separate gain output for low-frequency panning.
+   * Gain output for high-frequency panning (VBAP).
    */
   std::unique_ptr<MatrixPort> mLowFrequencyGainOutput;
 
   /**
-   * Vector for intermediate results used for separate high/low frequency panning
+   * Gain output for high-frequency panning (VBIP).
    */
-  efl::BasicVector<CoefficientType> mHighFrequencyGains;
+  std::unique_ptr<MatrixPort> mHighFrequencyGainOutput;
+
+  /**
+  * Optional gain output for signals to be decorrelated.
+  */
+  std::unique_ptr<MatrixPort> mDiffuseGainOutput;
 };
+
+/**
+* Bitwise operator to combine output port flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL PanningCalculator::PanningMode operator|( PanningCalculator::PanningMode lhs,
+                                                                  PanningCalculator::PanningMode rhs );
+
+/**
+* Bitwise operator to extract output port flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL PanningCalculator::PanningMode operator&( PanningCalculator::PanningMode lhs,
+                                                                  PanningCalculator::PanningMode rhs );
+
 
 } // namespace rcl
 } // namespace visr

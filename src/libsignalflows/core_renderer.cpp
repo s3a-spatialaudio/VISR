@@ -147,7 +147,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 
     mPanningFilterbank->setup( 2*numberOfInputs, 1, coeffMatrix );
     mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-    parameterConnection( "VbapGainCalculator", "lowFrequencyGainOutput", "LowFrequencyPanningMatrix", "gainInput" );
+    parameterConnection( "VbapGainCalculator", "vbipGains", "LowFrequencyPanningMatrix", "gainInput" );
 
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( numberOfInputs, 2*numberOfInputs ) );
@@ -191,7 +191,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                                pml::ListenerPosition(), trackingEnabled ) );
 
   parameterConnection( mObjectVectorInput, mAllradGainCalculator->parameterPort("objectInput") );
-  parameterConnection( mGainCalculator.parameterPort( "gainOutput" ), mAllradGainCalculator->parameterPort( "gainInput" ) );
+  parameterConnection( mGainCalculator.parameterPort( "vbapGains" ), mAllradGainCalculator->parameterPort( "gainInput" ) );
   parameterConnection( mAllradGainCalculator->parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
 
 
