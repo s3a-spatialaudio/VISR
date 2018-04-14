@@ -37,7 +37,7 @@ public:
   VBAP( VBAP const & ) = delete;
   
   /**
-   * Calculate the panning gains for a single source position.
+   * Calculate the panning gains for a single source position and apply power normalisation.
    * @param x Cartesian x coordinate of the source position
    * @param y Cartesian y coordinate of the source position
    * @param z Cartesian z coordinate of the source position
@@ -45,7 +45,17 @@ public:
    * Buffer must provide space for at least getNumSpeakers() values.
    */
   void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;
-  
+
+  /**
+  * Calculate the panning gains for a single source position without normalisation.
+  * @param x Cartesian x coordinate of the source position
+  * @param y Cartesian y coordinate of the source position
+  * @param z Cartesian z coordinate of the source position
+  * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
+  * Buffer must provide space for at least getNumSpeakers() values.
+  */
+  void calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;
+
   /**
    * Reset the listener position.
    * This causes a recalculation of the internal data structures (inverse matrices)

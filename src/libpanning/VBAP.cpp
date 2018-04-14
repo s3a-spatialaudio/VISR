@@ -78,10 +78,11 @@ namespace panning
         throw std::runtime_error( "VBAP: error during power normalisation." );
       }
     }
+
     void normalise( SampleType &a1, SampleType &a2, SampleType &a3)
     {
       SampleType l = std::sqrt(a1*a1 + a2*a2 + a3*a3);
-      if (l != 0.0f ) {
+      if (l >= std::numeric_limits<SampleType>::epsilon() ) {
         a1 /= l;
         a2 /= l;
         a3 /= l;
@@ -101,6 +102,14 @@ namespace panning
     powerNormalisation( &mGain[0], gains, numRegLoudspeakers );
   }
   
+  void VBAP::calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains ) const
+  {
+    calcPlainVBAP( x, y, z );
+    applyRerouting();
+    std::copy( mGain.begin(), mGain.begin()+numRegLoudspeakers, gains );
+  }
+
+
   void VBAP::setListenerPosition( SampleType x, SampleType y, SampleType z )
   {
     mListenerPos = std::array<SampleType, 3>{{x,y,z}};
@@ -304,8 +313,6 @@ namespace panning
     {
       for( std::size_t j = 0; j < numVirtLoudspeakers; j++ )
       {
-//        std::cout<<"G"<<mGain[i]<<std::endl;
-        
         mGain[i] = mGain[i] + mReroutingMatrix( j, i ) * mGain[numRegLoudspeakers + j];
       }
     }
