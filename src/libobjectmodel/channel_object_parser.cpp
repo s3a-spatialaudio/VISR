@@ -48,11 +48,6 @@ void pushLabel( ChannelObject::OutputChannelList & list, ChannelObject::OutputCh
   list.push_back( id );
 }
 
-void emptyLabelList( ChannelObject::OutputChannelList & list )
-{
-  list.clear();
-}
-
 template< typename IteratorType, typename Skipper >
 class Parser: public qi::grammar<IteratorType, ParserState(), Skipper>
 {
@@ -60,7 +55,7 @@ public:
   Parser():
    Parser::base_type( mTopLevelRule )
   {
-    auto _addLabel = phoenix::bind( &ParserState::appendOutputChannel, qi::_val );
+    // auto _addLabel = phoenix::bind( &ParserState::appendOutputChannel, qi::_val );
 
     mLabelRule = +qi::char_("a-zA-Z0-9+-&@+_-");
 

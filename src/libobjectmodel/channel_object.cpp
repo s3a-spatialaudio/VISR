@@ -12,6 +12,7 @@ namespace objectmodel
 
 ChannelObject::ChannelObject( ObjectId id )
  : Object( id )
+ , mDiffuseness( 0.0f )
 {
 }
 
