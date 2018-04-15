@@ -102,7 +102,12 @@ public:
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
    * @param adaptiveListenerPosition Whether the rendering supports adaptation to a tracked listener.
-   * @param separateLowpassPanning Whether to generate two separate gain matrixes for low and high frequencies.
+   * @param panningMode Select the gain outputs provided (LF, HF, Diffuse or any combination thereof)
+   * @param lfNormalisation The normalisation norm used for the LF gains. Default is 'Energy' as in plain VBAP if HF panning is deactivated,
+   * or 'Amplitude' if HF panning is present.
+   * @param hfNormalisation The normalisation norm used for the HF (VBIP) gains. Default is 'Energy'.
+   * @param diffuseNormalisation The normalisation norm used for the diffuse gains. Default is 'Energy'.
+   * @param listenerPosition The initial listener position (central position, default is (0,0,0)
    */
   explicit PanningCalculator( SignalFlowContext const & context,
                               char const * name,

@@ -60,11 +60,12 @@ PanningCalculator::PanningCalculator( SignalFlowContext const & context,
  , mVectorDimension( arrayConfig.is2D() ? 2 : 3 )
  , mLoudspeakerPositions( mVectorDimension, mNumberOfAllLoudspeakers )
  , mTmpGains( mNumberOfRegularLoudspeakers, cVectorAlignmentSamples )
- , mTmpDiffuseGains( mNumberOfRegularLoudspeakers, cVectorAlignmentSamples )
  , mTmpHfGains( mNumberOfRegularLoudspeakers, cVectorAlignmentSamples )
- , mLfNormalisation( lfNormalisation )
- , mHfNormalisation( hfNormalisation )
- , mDiffuseNormalisation( diffuseNormalisation )
+ , mTmpDiffuseGains( mNumberOfRegularLoudspeakers, cVectorAlignmentSamples )
+ , mLfNormalisation( (lfNormalisation == Normalisation::Default)
+                     ? ((panningMode & PanningMode::HF) == PanningMode::Nothing ? Normalisation::Energy : Normalisation::Amplitude ) : lfNormalisation )
+ , mHfNormalisation( (hfNormalisation == Normalisation::Default) ? Normalisation::Energy : hfNormalisation )
+ , mDiffuseNormalisation( (diffuseNormalisation == Normalisation::Default) ? Normalisation::Energy : diffuseNormalisation )
  , mLabelLookup( fillLabelLookup( arrayConfig ) )
 {
     // Initialise for all (regular and virtual) loudspeakers.
@@ -148,17 +149,18 @@ namespace // unnamed
       case PanningCalculator::Normalisation::Amplitude:
         sigNorm = std::accumulate( in, in + numberOfElements, 0.0f,
           []( SampleType acc, SampleType val ) { return acc + std::abs( val ); } );
+        break;
       case PanningCalculator::Normalisation::Energy:
        sigNorm = std::sqrt( std::accumulate( in, in + numberOfElements, 0.0f,
           []( SampleType acc, SampleType val ) { return acc + val * val; } ) );
+       break;
       default:
         sigNorm = 1.0f;
     }
     SampleType const normFactor = targetLevel / std::max( sigNorm, std::numeric_limits<SampleType>::epsilon() );
-    efl::ErrorCode res = efl::vectorMultiplyConstant( normFactor, in, out, numberOfElements, 0/*alignment*/ );
-    if( res != efl::noError )
+    for( std::size_t sampleIdx(0); sampleIdx < numberOfElements; ++sampleIdx, ++in, out += outputStride )
     {
-      throw std::runtime_error( "PanningCalculator: Arithmetic error during normalisation." );
+      *out = normFactor * *in;
     }
   }
 }
@@ -204,7 +206,7 @@ void PanningCalculator::process()
       objectmodel::ChannelObject const * co = dynamic_cast<objectmodel::ChannelObject const *>( &obj );
       if( co )
       {
-        SampleType diffuseRatio = diffuseRatio = co->diffuseness();
+        SampleType diffuseRatio = co->diffuseness();
         std::size_t const numChannels = co->numberOfChannels();
         for( std::size_t chIdx(0); chIdx < numChannels; ++chIdx )
         {
