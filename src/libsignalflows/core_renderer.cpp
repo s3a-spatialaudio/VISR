@@ -49,23 +49,20 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
  , mObjectInputGainEqCalculator( context, "ObjectGainEqCalculator", this, numberOfInputs, numberOfObjectEqSections )
  , mObjectGain( context, "ObjectGain", this )
  , mObjectEq( context, "ObjectEq", this )
- , mChannelObjectRoutingCalculator( context, "ChannelObjectRoutingCalculator", this, numberOfInputs, loudspeakerConfiguration )
- , mChannelObjectRouting( context, "ChannelObjectRouting", this )
  , mOutputAdjustment( context, "OutputAdjustment", this )
  , mGainCalculator( context, "VbapGainCalculator", this, numberOfInputs, loudspeakerConfiguration, not trackingConfiguration.empty(),
-                    frequencyDependentPanning /*separate lowpass panning*/ )
- , mDiffusionGainCalculator( context, "DiffusionCalculator", this, numberOfInputs )
+                    frequencyDependentPanning ? rcl::PanningCalculator::PanningMode::All : (rcl::PanningCalculator::PanningMode::LF | rcl::PanningCalculator::PanningMode::Diffuse) )
  , mVbapMatrix( context, "VbapGainMatrix", this )
- , mDiffusePartMatrix( context, "DiffusePartMatrix", this )
- , mDiffusePartDecorrelator( context, "DiffusePartDecorrelator", this )
+ , mVbipMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "VbipMatrix", this ) : nullptr)
+ , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
+ , mDiffuseMatrix( context, "DiffuseMatrix", this )
+ , mDecorrelator( context, "DiffusePartDecorrelator", this )
  , mDirectDiffuseMix( context, "DirectDiffuseMixer", this,
                       loudspeakerConfiguration.getNumRegularSpeakers(),
-                     3 + (frequencyDependentPanning ?1:0) + (reverbConfig.empty() ? 0 : 1) )
+                      2 + (frequencyDependentPanning ?1:0) + (reverbConfig.empty() ? 0 : 1) )
  , mSubwooferMix( context, "SubwooferMixer", this )
  , mNullSource( context, "NullSource", this,
-               (numberOfOutputs == loudspeakerConfiguration.getNumRegularSpeakers() + loudspeakerConfiguration.getNumSubwoofers()) ? 0 : 1 )
- , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
- , mLowFrequencyPanningMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "LowFrequencyPanningMatrix", this ) : nullptr)
+              (numberOfOutputs == loudspeakerConfiguration.getNumRegularSpeakers() + loudspeakerConfiguration.getNumSubwoofers()) ? 0 : 1 )
 {
   std::size_t const numberOfLoudspeakers = loudspeakerConfiguration.getNumRegularSpeakers();
   std::size_t const numberOfSubwoofers = loudspeakerConfiguration.getNumSubwoofers();
@@ -120,15 +117,8 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   audioConnection( mObjectGain.audioPort("out"), mObjectEq.audioPort("in") );
   parameterConnection( mObjectInputGainEqCalculator.parameterPort("eqOut"), mObjectEq.parameterPort("eqInput"));
 
-  parameterConnection(mObjectVectorInput, mChannelObjectRoutingCalculator.parameterPort("objectIn") );
-
-  mChannelObjectRouting.setup(numberOfInputs, numberOfLoudspeakers, true /* activate control input*/ );
-  audioConnection( mObjectEq.audioPort("out"), mChannelObjectRouting.audioPort("in") );
-  audioConnection( mChannelObjectRouting.audioPort("out"), mDirectDiffuseMix.audioPort("in0") );
-  parameterConnection( mChannelObjectRoutingCalculator.parameterPort("routingOut"), mChannelObjectRouting.parameterPort("controlInput") );
-
   mVbapMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-  audioConnection( mVbapMatrix.audioPort("out"), mDirectDiffuseMix.audioPort("in1") );
+  audioConnection( mVbapMatrix.audioPort("out"), mDirectDiffuseMix.audioPort("in0") );
   if( frequencyDependentPanning )
   {
     // Static crossover pair (2nd-order Linkwitz-Riley with cutoff 700 Hz @ fs=48 kHz)
@@ -141,20 +131,20 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
     rbbl::BiquadCoefficientMatrix<SampleType> coeffMatrix( 2*numberOfInputs, 1 );
     for( std::size_t chIdx(0); chIdx < numberOfInputs; ++chIdx )
     {
-      coeffMatrix( chIdx, 0 ) = highpass;
-      coeffMatrix( chIdx + numberOfInputs, 0 ) = lowpass;
+      coeffMatrix( chIdx, 0 ) = lowpass;
+      coeffMatrix( chIdx + numberOfInputs, 0 ) = highpass;
     }
 
     mPanningFilterbank->setup( 2*numberOfInputs, 1, coeffMatrix );
-    mLowFrequencyPanningMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
-    parameterConnection( "VbapGainCalculator", "vbipGains", "LowFrequencyPanningMatrix", "gainInput" );
+    mVbipMatrix->setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
+    parameterConnection( mGainCalculator.parameterPort("vbipGains"), mVbipMatrix->parameterPort( "gainInput") );
 
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
     audioConnection( mObjectEq.audioPort("out"), ChannelRange( 0, numberOfInputs ), mPanningFilterbank->audioPort("in"), ChannelRange( numberOfInputs, 2*numberOfInputs ) );
     audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( 0, numberOfInputs ), mVbapMatrix.audioPort("in"), ChannelRange( 0, numberOfInputs ) );
-    audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( numberOfInputs, 2*numberOfInputs ), mLowFrequencyPanningMatrix->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
+    audioConnection( mPanningFilterbank->audioPort("out"), ChannelRange( numberOfInputs, 2*numberOfInputs ), mVbipMatrix->audioPort("in"), ChannelRange( 0, numberOfInputs ) );
 
-    audioConnection( mLowFrequencyPanningMatrix->audioPort("out"), mDirectDiffuseMix.audioPort("in2") );
+    audioConnection( mVbipMatrix->audioPort("out"), mDirectDiffuseMix.audioPort("in1") );
   }
   else
   {
@@ -194,40 +184,22 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   parameterConnection( mGainCalculator.parameterPort( "vbapGains" ), mAllradGainCalculator->parameterPort( "gainInput" ) );
   parameterConnection( mAllradGainCalculator->parameterPort( "gainOutput" ), mVbapMatrix.parameterPort( "gainInput" ) );
 
-
   //////////////////////////////////////////////////////////////////////////////////////
 
-  mDiffusePartMatrix.setup( numberOfInputs, 1, interpolationPeriod, 0.0f );
-  parameterConnection( mObjectVectorInput,  mDiffusionGainCalculator.parameterPort("objectInput") );
-  parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
-  audioConnection( mObjectEq.audioPort("out"), mDiffusePartMatrix.audioPort("in") );
+  mDiffuseMatrix.setup( numberOfInputs, numberOfLoudspeakers, interpolationPeriod, 0.0f );
+//  parameterConnection( mObjectVectorInput,  mDiffusionGainCalculator.parameterPort("objectInput") );
+//  parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
+  parameterConnection( mGainCalculator.parameterPort("diffuseGains"), mDiffuseMatrix.parameterPort("gainInput") );
+  audioConnection( mObjectEq.audioPort("out"), mDiffuseMatrix.audioPort("in") );
 
-  /**
-   * Adjust the level of the diffuse objects such that they are comparable to point sources.
-   * Here we assume that the decorrelated signals are ideally decorrelated. Note that this is not
-   * the case with the current set of decorrelation filters.
-   * @todo Also consider a more elaborate panning law between the direct and diffuse part of a single source.
-   */
-  SampleType const diffusorGain = static_cast<SampleType>(1.0) / std::sqrt( static_cast<SampleType>(numberOfLoudspeakers) );
   rbbl::FilterRoutingList decorrelatorRoutings;
   for( std::size_t outIdx( 0 ); outIdx < numberOfLoudspeakers; ++outIdx )
   {
-    decorrelatorRoutings.addRouting( 0, outIdx, outIdx, diffusorGain );
+    decorrelatorRoutings.addRouting( outIdx, outIdx, outIdx, 1.0f );
   }
-  /*
-  void setup( std::size_t numberOfInputs,
-              std::size_t numberOfOutputs,
-              std::size_t filterLength,
-              std::size_t maxFilters,
-              std::size_t maxRoutings,
-              efl::BasicMatrix<SampleType> const & filters = efl::BasicMatrix<SampleType>(),
-              pml::FilterRoutingList const & routings = pml::FilterRoutingList(),
-              ControlPortConfig controlInputs = ControlPortConfig::None,
-              char const * fftImplementation = "default" );
-  */
-  mDiffusePartDecorrelator.setup( 1, numberOfLoudspeakers, diffusionFilters.numberOfColumns(),
-                                  diffusionFilters.numberOfRows(), diffusionFilters.numberOfRows(),
-                                  diffusionFilters, decorrelatorRoutings );
+  mDecorrelator.setup( numberOfLoudspeakers, numberOfLoudspeakers, diffusionFilters.numberOfColumns(),
+                       diffusionFilters.numberOfRows(), diffusionFilters.numberOfRows(),
+                       diffusionFilters, decorrelatorRoutings );
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();
@@ -261,9 +233,9 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   }
 
 
-  audioConnection( mDiffusePartMatrix.audioPort("out"), mDiffusePartDecorrelator.audioPort("in") );
-  audioConnection( mDiffusePartDecorrelator.audioPort("out"),
-                   mDirectDiffuseMix.audioPort( frequencyDependentPanning ? "in3" : "in2" ) );
+  audioConnection( mDiffuseMatrix.audioPort("out"), mDecorrelator.audioPort("in") );
+  audioConnection( mDecorrelator.audioPort("out"),
+                   mDirectDiffuseMix.audioPort( frequencyDependentPanning ? "in2" : "in1" ) );
 
   if( trackingEnabled )
   {
@@ -375,10 +347,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   }
 }
 
-CoreRenderer::~CoreRenderer( )
-{
-}
-
+CoreRenderer::~CoreRenderer( ) = default;
 } // namespace signalflows
 } // namespace visr
 

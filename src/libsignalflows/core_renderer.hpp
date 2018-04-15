@@ -12,9 +12,7 @@
 
 #include <librcl/add.hpp>
 #include <librcl/biquad_iir_filter.hpp>
-#include <librcl/channel_object_routing_calculator.hpp>
 #include <librcl/delay_vector.hpp>
-#include <librcl/diffusion_gain_calculator.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/gain_matrix.hpp>
 #include <librcl/gain_vector.hpp>
@@ -24,7 +22,6 @@
 #include <librcl/null_source.hpp>
 #include <librcl/panning_calculator.hpp>
 #include <librcl/position_decoder.hpp>
-#include <librcl/signal_routing.hpp>
 
 #include <libpml/listener_position.hpp>
 #include <libpml/double_buffering_protocol.hpp>
@@ -114,23 +111,32 @@ private:
 
   rcl::BiquadIirFilter mObjectEq;
 
-  rcl::ChannelObjectRoutingCalculator mChannelObjectRoutingCalculator;
-
-  rcl::SignalRouting mChannelObjectRouting;
-
   rcl::DelayVector mOutputAdjustment;
 
   rcl::PanningCalculator mGainCalculator;
 
   std::unique_ptr< rcl::HoaAllRadGainCalculator > mAllradGainCalculator;
 
-  rcl::DiffusionGainCalculator mDiffusionGainCalculator;
-
   rcl::GainMatrix mVbapMatrix;
 
-  rcl::GainMatrix mDiffusePartMatrix;
+  /**
+   * AUdio signal matrix to handle the high-frequency portion of panned objects.
+   */
+  std::unique_ptr<rcl::GainMatrix> mVbipMatrix;
 
-  rcl::FirFilterMatrix mDiffusePartDecorrelator;
+  /**
+   * Crossover filter bank for dual-band panning (if activated)
+   */
+  //@{
+  std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
+
+  /**
+   * Audio signal matrix handling the diffuse part of panning objects,
+   * diffuse sources, and channel object
+   */
+  rcl::GainMatrix mDiffuseMatrix;
+
+  rcl::FirFilterMatrix mDecorrelator;
 
   rcl::Add mDirectDiffuseMix;
 
@@ -157,18 +163,10 @@ private:
 
   //@}
 
-
   std::unique_ptr<reverbobject::ReverbObjectRenderer> mReverbRenderer;
 
   std::unique_ptr<rcl::BiquadIirFilter> mOutputEqualisationFilter;
 
-  /**
-   * Preliminary support for low-frequency adaptive panning.
-   */
-  //@{
-  std::unique_ptr<rcl::BiquadIirFilter> mPanningFilterbank;
-
-  std::unique_ptr<rcl::GainMatrix> mLowFrequencyPanningMatrix;
   //@}
 };
 
