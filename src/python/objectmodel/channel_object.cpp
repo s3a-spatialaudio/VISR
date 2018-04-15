@@ -29,7 +29,8 @@ void exportChannelObject( pybind11::module & m )
     .def( "outputChannel", &ChannelObject::outputChannel, py::arg("index" ) )
     .def( "__getitem__", &ChannelObject::outputChannel, py::arg( "index" ) )
     .def( "setOutputChannels", static_cast<void(ChannelObject::*)(objectmodel::ChannelObject::OutputChannelContainer const &)>(&ChannelObject::setOutputChannels), py::arg("newChannels") )
-    .def( "setOutputChannel", &ChannelObject::setOutputChannel, py::arg("index"), py::arg("newChannel") )
+    .def( "setOutputChannel", static_cast<void(ChannelObject::*)(std::size_t, ChannelObject::OutputChannelId)>(&ChannelObject::setOutputChannel), py::arg("index"), py::arg("newChannel"), "Set the output channel indices of a given channel to a single label label." )
+    .def( "setOutputChannel", static_cast<void(ChannelObject::*)(std::size_t, ChannelObject::OutputChannelList const & )>(&ChannelObject::setOutputChannel), py::arg("index"), py::arg("newChannels"), "Set the output channel indices of a given channel to list of loudspeaker label." )
   ;
 }
 
