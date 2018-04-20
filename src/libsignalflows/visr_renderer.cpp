@@ -54,7 +54,7 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
 
     mSceneDecoder.reset( new pythoncomponents::Wrapper( context, "Metadapter", this,
       "metadapter",     //  char const * moduleName,
-      "Metadapter",     //  char const * componentClassName,
+      "Component",     //  char const * componentClassName,
       "",               //  char const * positionalArguments = "",
       kwArgs.c_str(),   //  char const * keywordArguments = "",
       ""                // No module search path
