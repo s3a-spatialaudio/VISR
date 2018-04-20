@@ -68,8 +68,8 @@ public:
 private:
   qi::rule<IteratorType, ParserState(), Skipper> mTopLevelRule;
 
-  qi::rule<IteratorType, std::string()> mLabelRule;
-  qi::rule<IteratorType, ChannelObject::OutputChannelList() > mOutputChannelRule;
+  qi::rule<IteratorType, std::string(), boost::spirit::ascii::space_type > mLabelRule;
+  qi::rule<IteratorType, ChannelObject::OutputChannelList(), boost::spirit::ascii::space_type > mOutputChannelRule;
 };
 
 ChannelObject::OutputChannelContainer parseOutputChannels( std::string const strVal )

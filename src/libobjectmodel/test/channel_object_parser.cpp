@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( ParseChannelObject )
 BOOST_AUTO_TEST_CASE(WriteChannelObject)
 {
   std::string const objRepr = "{\"id\": 1, \"channels\": \"0,7,12,15\", \n \"type\": \"channel\",\n \"group\": 0,\n \"priority\": 3,\n \"level\": 0.8,\n"
-    "\"outputChannels\": \"[M+000], [M-030,M+030], [U+045], []\", \"diffuseness\": 0.25 }";
+    "\"outputChannels\": \"[ M+000 ], [ M-030, M+030 ], [U+045], []\", \"diffuseness\": 0.25 }";
 
   boost::property_tree::ptree propTree;
   try
