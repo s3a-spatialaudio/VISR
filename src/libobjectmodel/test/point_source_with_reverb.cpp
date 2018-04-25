@@ -76,6 +76,8 @@ BOOST_AUTO_TEST_CASE( SerialisePointSourceWithReverb )
 
   BOOST_CHECK_NO_THROW( ObjectVectorParser::encodeObjectVector( scene, outputMessage ) );
 
+  std::cout << "Re-serialised reverb object: " << outputMessage.str() << std::endl;
+
   ObjectVector newVec;
 
   BOOST_CHECK_NO_THROW( ObjectVectorParser::fillObjectVector( outputMessage.str(), newVec ) );

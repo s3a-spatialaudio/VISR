@@ -69,30 +69,38 @@ parse( boost::property_tree::ptree const & tree, Object & src ) const
     }
     ptree const & roomTree = tree.get_child( "room" );
 
-    std::size_t earlyIndex( 0 );
-    ptree const & ereflTree = roomTree.get_child( "ereflect" );
-    std::size_t const numEarlyReflections = ereflTree.count( "" );
-    reverbPointSrc.setNumberOfDiscreteReflections( numEarlyReflections );
-    auto const earlyNodes = ereflTree.equal_range( "" );
-    for( ptree::const_assoc_iterator treeIt( earlyNodes.first ); treeIt != earlyNodes.second; ++treeIt,++earlyIndex )
+    if( roomTree.count("ereflect") == 0 )
     {
-      PointSourceWithReverb::DiscreteReflection & refl = reverbPointSrc.discreteReflection( earlyIndex );
-      ptree const earlyTree = treeIt->second;
-      PointSourceWithReverb::Coordinate posX, posY, posZ;
-      PointSourceParser::parsePosition( earlyTree.get_child( "position" ), posX, posY, posZ );
-      refl.setPosition( posX, posY, posZ );
-      refl.setDelay( earlyTree.get<SampleType>( "delay" ) );
-      refl.setLevel( earlyTree.get<LevelType>( "level" ) );
-
-      ptree const & biquadTree = earlyTree.get_child( "biquadsos" );
-      rbbl::BiquadCoefficientList<SampleType> biqList;
-      biqList.loadJson( biquadTree );
-      if( biqList.size() > PointSourceWithReverb::cNumDiscreteReflectionBiquads )
-      {
-        throw std::invalid_argument( "PointSourceWithReverbParser: The number of biquad sections for an early reflection exceeds the maximum admissible value." );
-      }
-      refl.setReflectionFilters( biqList );
+      reverbPointSrc.setNumberOfDiscreteReflections( 0 );
     }
+    else
+    {
+      ptree const & ereflTree = roomTree.get_child( "ereflect" );
+      std::size_t const numEarlyReflections = ereflTree.count( "" );
+      reverbPointSrc.setNumberOfDiscreteReflections( numEarlyReflections );
+      auto const earlyNodes = ereflTree.equal_range( "" );
+      std::size_t earlyIndex{ 0 };
+      for( ptree::const_assoc_iterator treeIt( earlyNodes.first ); treeIt != earlyNodes.second; ++treeIt, ++earlyIndex )
+      {
+        PointSourceWithReverb::DiscreteReflection & refl = reverbPointSrc.discreteReflection( earlyIndex );
+        ptree const earlyTree = treeIt->second;
+        PointSourceWithReverb::Coordinate posX, posY, posZ;
+        PointSourceParser::parsePosition( earlyTree.get_child( "position" ), posX, posY, posZ );
+        refl.setPosition( posX, posY, posZ );
+        refl.setDelay( earlyTree.get<SampleType>( "delay" ) );
+        refl.setLevel( earlyTree.get<LevelType>( "level" ) );
+
+        ptree const & biquadTree = earlyTree.get_child( "biquadsos" );
+        rbbl::BiquadCoefficientList<SampleType> biqList;
+        biqList.loadJson( biquadTree );
+        if( biqList.size() > PointSourceWithReverb::cNumDiscreteReflectionBiquads )
+        {
+          throw std::invalid_argument( "PointSourceWithReverbParser: The number of biquad sections for an early reflection exceeds the maximum admissible value." );
+        }
+        refl.setReflectionFilters( biqList );
+      }
+    }
+
     if( roomTree.count( "lreverb" ) != 1 )
     {
       throw std::invalid_argument( "Object must contain exactly one \"room.lreverb\" element." );
@@ -141,19 +149,29 @@ write( Object const & obj, boost::property_tree::ptree & tree ) const
   PointSourceParser::write( obj, tree );
   ptree roomTree;
   std::size_t const numEarlies = pswdObj.numberOfDiscreteReflections();
-  for( std::size_t earlyIdx( 0 ); earlyIdx < numEarlies; ++earlyIdx )
+  if( numEarlies > 0 )
   {
-    PointSourceWithReverb::DiscreteReflection const & refl = pswdObj.discreteReflection( earlyIdx );
     ptree earlyTree;
-    earlyTree.put<SampleType>( "delay", refl.delay() );
-    earlyTree.put<LevelType>( "level", refl.level() );
+    for( std::size_t earlyIdx( 0 ); earlyIdx < numEarlies; ++earlyIdx )
+    {
+      PointSourceWithReverb::DiscreteReflection const & refl = pswdObj.discreteReflection( earlyIdx );
+      ptree eReflectTree;
+      eReflectTree.put<SampleType>( "delay", refl.delay() );
+      eReflectTree.put<LevelType>( "level", refl.level() );
 
-    ptree biquadTree;
-    refl.reflectionFilters().writeJson( biquadTree );
-    earlyTree.add_child( "biquadsos", biquadTree );
+      eReflectTree.put<PointSource::Coordinate>( "position.x", refl.positionX() );
+      eReflectTree.put<PointSource::Coordinate>( "position.y", refl.positionY() );
+      eReflectTree.put<PointSource::Coordinate>( "position.z", refl.positionZ() );
 
+      ptree biquadTree;
+      refl.reflectionFilters().writeJson( biquadTree );
+      eReflectTree.add_child( "biquadsos", biquadTree );
+
+      earlyTree.push_back( std::make_pair( "", eReflectTree ) );
+    }
     roomTree.add_child( "ereflect", earlyTree );
   }
+
   ptree lateTree;
 
   lateTree.put<SampleType>( "delay", pswdObj.lateReverbOnset() );

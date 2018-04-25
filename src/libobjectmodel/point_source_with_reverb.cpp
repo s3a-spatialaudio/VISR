@@ -79,7 +79,7 @@ void PointSourceWithReverb::DiscreteReflection::setLevel( LevelType newLevel )
 void PointSourceWithReverb::DiscreteReflection::setReflectionFilters( rbbl::BiquadCoefficientList<SampleType> const & newFilters )
 {
   assert( mDiscreteReflectionFilters.size() == cNumDiscreteReflectionBiquads );
-  if( newFilters.size() >= cNumDiscreteReflectionBiquads )
+  if( newFilters.size() > cNumDiscreteReflectionBiquads )
   {
     throw std::invalid_argument( "PointSourceWithReverb::DiscreteReflection::setReflectionFilters(): Size of new filter parameter exceeds the maximum number of biquads." );
   }
