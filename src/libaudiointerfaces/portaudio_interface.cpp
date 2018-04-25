@@ -90,6 +90,7 @@ namespace // unnamed
   
   class PortaudioInterface::Impl
   {
+    friend class PortaudioInterface;
   public:
     
     explicit Impl(Configuration const & baseConfig, std::string const & config );
@@ -519,7 +520,27 @@ namespace // unnamed
   {
     return mImpl->unregisterCallback( callback );
   }
-  
+
+  std::size_t PortaudioInterface::numberOfCaptureChannels() const
+  {
+    return mImpl->mNumCaptureChannels;
+  }
+
+  std::size_t PortaudioInterface::numberOfPlaybackChannels() const
+  {
+    return mImpl->mNumPlaybackChannels;
+  }
+
+  std::size_t PortaudioInterface::period() const
+  {
+    return mImpl->mPeriodSize;
+  }
+
+  std::size_t PortaudioInterface::samplingFrequency() const
+  {
+    return mImpl->mSampleRate;
+  }
+
   PortaudioInterface::Config::Config( std::string sampleFormat, bool interleaved, std::string mHostApi)
   : mInterleaved(interleaved)
   , mHostApi(mHostApi)

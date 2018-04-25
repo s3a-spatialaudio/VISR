@@ -66,17 +66,33 @@ public:
    * Virtual base class destructor, enable destruction of polymorphically instantiated objects
    */
   virtual ~AudioInterface();
+
   /**
    * The type of the callback function that can be registered to be called if sufficient data is available 
   */
-  //typedef void ( *AudioCallback )( void* /* userData */,
-  //                               ExternalSampleType const * const * /*captureBuffer*/,
-  //                               ExternalSampleType * const * /*playbackBuffer*/,
-  //                               bool& /*errorCode*/);
-
   using AudioCallback = void (*)( void *, ExternalSampleType const * const * /*captureBuffer*/,
                                   ExternalSampleType * const * /*playbackBuffer*/,
                                   bool& /*errorCode*/ );
+
+  /**
+   * Return the number of input channels to the interface.
+   */
+  virtual std::size_t numberOfCaptureChannels() const = 0;
+
+  /**
+   * Return the number of output channels to the interface.
+   */
+  virtual std::size_t numberOfPlaybackChannels() const = 0;
+
+  /**
+   * Return the configured period (block size).
+   */
+  virtual std::size_t period() const = 0;
+
+  /**
+   * Return the configured sampling frequency (in Hz)
+   */
+  virtual std::size_t samplingFrequency() const = 0;
 
   virtual bool registerCallback( AudioCallback callbackPtr, void* userData ) = 0;
 

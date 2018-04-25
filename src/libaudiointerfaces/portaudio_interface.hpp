@@ -68,14 +68,6 @@ public:
           }
           return findIt->second;
       }
-
-//    /** Default contructor to initialise elements to defined values. */
-//    Config()
-//      : mSampleFormat( SampleFormat::float32Bit )
-//      , mInterleaved( false )
-//      , mHostApi( "" )
-//    {}
-// 
       
     Config( std::string sampleFormat, bool interleaved, std::string mHostApi);
 
@@ -108,8 +100,7 @@ public:
   using Base = audiointerfaces::AudioInterface;
   
   explicit PortaudioInterface( Configuration const & baseConfig,  std::string const & config);
-  
-    
+
   ~PortaudioInterface( );
 
     
@@ -121,13 +112,31 @@ public:
 
   /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
     
-    
+  /**
+   * Return the number of input channels to the interface.
+   */
+  /*virtual*/ std::size_t numberOfCaptureChannels() const override;
+
+  /**
+   * Return the number of output channels to the interface.
+   */
+  /*virtual*/ std::size_t numberOfPlaybackChannels() const override;
+
+  /**
+   * Return the configured period (block size).
+   */
+  /*virtual*/ std::size_t period() const override;
+
+  /**
+   * Return the configured sampling frequency (in Hz)
+   */
+  /*virtual*/ std::size_t samplingFrequency() const override;
+
 private:
   /**
    * Private implementation class to avoid dependencies to the Portaudio library in the public interface.
    */
   class Impl;
-//  PortaudioInterface::Config parseSpecificConf( std::string const & config );
   /**
    * Private implementation object according to the "pointer to implementation" (pimpl) idiom.
    */

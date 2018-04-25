@@ -53,6 +53,7 @@ namespace visr
     
     class JackInterface::Impl
     {
+      friend class JackInterface;
     public:
       explicit Impl( Configuration const & baseConfig, std::string const & config );
       
@@ -698,6 +699,25 @@ namespace visr
       return mImpl->unregisterCallback( callback );
     }
     
+    std::size_t JackInterface::numberOfCaptureChannels() const
+    {
+      return mImpl->mNumCaptureChannels;
+    }
+
+    std::size_t JackInterface::numberOfPlaybackChannels() const
+    {
+      return mImpl->mNumPlaybackChannels;
+    }
+
+    std::size_t JackInterface::period() const
+    {
+      return mImpl->mPeriodSize;
+    }
+
+    std::size_t JackInterface::samplingFrequency() const
+    {
+      return mImpl->mSampleRate;
+    }
     
     JackInterface::Config::Config(std::string cliName, std::string servName, boost::property_tree::ptree portsConfig,  bool autoConnect)
     : mClientName(cliName)

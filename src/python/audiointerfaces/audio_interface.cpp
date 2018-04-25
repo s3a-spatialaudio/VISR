@@ -39,6 +39,20 @@ namespace // unnamed
   {
     // TODO: We could do lots of error checking here (provided that the AudioInterface interface allows sufficient information 
     // to be extracted.
+
+    if( flow.numberOfCaptureChannels() != interface.numberOfCaptureChannels() )
+    {
+      throw std::invalid_argument( "AudioInterface::registerCallback: Mismatched number of capture ports" );
+    }
+    if( flow.numberOfPlaybackChannels() != interface.numberOfPlaybackChannels() )
+    {
+      throw std::invalid_argument( "AudioInterface::registerCallback: Mismatched number of playback ports" );
+    }
+    if( flow.period() != interface.period() )
+    {
+      throw std::invalid_argument( "AudioInterface::registerCallback: Mismatched periods" );
+    }
+
     interface.registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
   }
 
@@ -73,6 +87,10 @@ void exportAudioInterface( pybind11::module & m )
     .def( "unregisterCallback", &unregisterFlowCallback )
     .def( "start", &visr::audiointerfaces::AudioInterface::start )
     .def( "stop", &visr::audiointerfaces::AudioInterface::stop )
+    .def_property_readonly( "numberOfCaptureChannels", &visr::audiointerfaces::AudioInterface::numberOfCaptureChannels )
+    .def_property_readonly( "numberOfPlaybackChannels", &visr::audiointerfaces::AudioInterface::numberOfPlaybackChannels )
+    .def_property_readonly( "period", &visr::audiointerfaces::AudioInterface::period )
+    .def_property_readonly( "samplingFrequency", &visr::audiointerfaces::AudioInterface::samplingFrequency )
     ;
 }
 

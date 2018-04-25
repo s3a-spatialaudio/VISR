@@ -68,16 +68,26 @@ namespace audiointerfaces
     /*virtual*/ bool registerCallback( AudioCallback callback, void* userData ) override;
     
     /*virtual*/ bool unregisterCallback( AudioCallback audioCallback ) override;
-    
-    
-    
-    //            std::size_t mNumberOfCaptureChannels;
-    //            std::size_t mNumberOfPlaybackChannels;
-    //
-    //            std::size_t mPeriodSize;
-    //
-    //            using SamplingRateType = std::size_t;
-    //            SamplingRateType mSampleRate;
+
+    /**
+     * Return the number of input channels to the interface.
+    */
+    /*virtual*/ std::size_t numberOfCaptureChannels() const override;
+
+    /**
+     * Return the number of output channels to the interface.
+     */
+    /*virtual*/ std::size_t numberOfPlaybackChannels() const override;
+
+    /**
+     * Return the configured period (block size).
+     */
+    /*virtual*/ std::size_t period() const override;
+
+    /**
+     * Return the configured sampling frequency (in Hz)
+     */
+    /*virtual*/ std::size_t samplingFrequency() const override;
     
   private:
     /**
