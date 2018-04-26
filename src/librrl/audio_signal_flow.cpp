@@ -34,7 +34,6 @@
 #include <cassert>
 #include <ciso646>
 #include <functional>
-#include <iostream>
 #include <iterator>
 #include <map>
 #include <numeric>
@@ -58,9 +57,7 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
   bool const checkResult = checkConnectionIntegrity( mFlow, true/* hierarchical*/, checkMessages );
   if( not checkResult )
   {
-    // TODO: Devise other ways to transport messages.
-    std::cout << "Messages during flow checking: " << checkMessages.str() << std::endl;
-    throw std::runtime_error( "Signal flow graph is inconsistent." );
+    throw std::runtime_error( detail::composeMessageString( "Signal flow graph is inconsistent: ", checkMessages.str() ) );
   }
   checkMessages.clear();
 
@@ -80,9 +77,8 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
                                                            adjustedAudioConnections);
   if( not initAudioResult )
   {
-    // TODO: Devise other ways to transport messages.
-    std::cout << "Messages during audio initialisation: " << checkMessages.str() << std::endl;
-    throw std::runtime_error( "AudioSignalFlow: Audio connections could not be initialised." );
+    throw std::runtime_error( detail::composeMessageString( "AudioSignalFlow: Audio connections could not be initialised.",
+                                                            checkMessages.str() ) );
   }
 
   ParameterConnectionMap adjustedParameterConnections;
@@ -90,8 +86,8 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
                                                                   adjustedParameterConnections);
   if( not initParamResult )
   {
-    std::cout << "Messages during parameter initialisation: " << checkMessages.str() << std::endl;
-    throw std::runtime_error( "AudioSignalFlow: Parameter infrastructure could not be initialised." );
+    throw std::runtime_error( detail::composeMessageString( "AudioSignalFlow: Parameter infrastructure could not be initialised.",
+                                                             checkMessages.str() ) );
   }
 
 
@@ -100,8 +96,8 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
   bool const initScheduleResult = initialiseSchedule( checkMessages, adjustedAudioConnections, adjustedParameterConnections );
   if( not initScheduleResult )
   {
-    std::cout << "Messages during schedule computation: " << checkMessages.str() << std::endl;
-    throw std::runtime_error( "AudioSignalFlow: Execution schedule could not be created." );
+    throw std::runtime_error( detail::composeMessageString( "AudioSignalFlow: Execution schedule could not be created.",
+                                                             checkMessages.str()) );
   }
 }
 

@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <ciso646>
+#include <exception>
 #include <iosfwd>
 #include <iostream>
 #include <map>
@@ -204,6 +205,11 @@ AudioConnectionMap AudioConnectionMap::resolvePlaceholders() const
         }
         connectionTrace.push_back( findIt->first );
         findIt = findReceiveChannel( findIt->first );
+        if( findIt == mConnections.end() )
+        {
+          // Internal error, we should not get here because the connection check should flag this up already.
+          throw std::logic_error("rrl::AudioCOnnectionMap: findReceiveChannel() failed." );
+        }
         if( std::find( connectionTrace.begin(), connectionTrace.end(), findIt->first ) != connectionTrace.end() )
         {
           std::stringstream str;
