@@ -9,29 +9,65 @@ import pml
 from visr_bst.util.rotation_functions import calcRotationMatrix, sph2cart
 
 class VirtualLoudspeakerController( visr.AtomicComponent ):
-    """Controller component for a dynamic (head-tracked) virtual loudspeaker (or binaural room scanning) renderer."""
+    """
+    Controller component for a dynamic (head-tracked) virtual loudspeaker (or binaural room scanning) renderer.
+
+    Computes and sends control paramters to the DSP components of a virtual loudspeaker renderer.
+    """
     def __init__( self,
                   context, name, parent,         # Standard visr component constructor arguments
-                  numberOfLoudspeakers,          # The number of point source objects rendered.
+                  *,                             # Only keyword arguments after here
                   hrirPositions,                 # The directions of the HRTF measurements, given as a #hrirPos x 2 or #hrirPos x 3 array,
                                                  # in polar or spherical coordinates, respectively
-                  hrirData,                      # The HRTF data as #hrirPos x 2 x #lsp x #firTaps matrix.
-                  headRadius = 0.0875,           # Head radius, optional. Might be used in a dynamic ITD/ILD individualisation algorithm.
+                  hrirData,                      # The BRIR data as #hrirPos x 2 x #lsp x #firTaps matrix.
                   headOrientation = None,        # Head orientation, as a vector pointing in the listener's viewing direction. If dynamic
                                                  # tracking is enabled, this is the initial position until the first update.
-                  useHeadTracking = False,       # Whether head tracking data is provided via a self.headOrientation port.
+                  headTracking = False,       # Whether head tracking data is provided via a self.headOrientation port.
                   dynamicITD = False,            # Whether ITD delays are calculated and sent via a "delays" port.
                   hrirInterpolation = False,     # HRTF interpolation selection: False: Nearest neighbour, True: Barycentric (3-point) interpolation
                   hrirDelays = None,             # Matrix of delays associated with filter dataset. Dimension: #hrirPos x 2 x #lsp
                   interpolatingConvolver = False # Whether to transmit interpolation parameters (True) or complete interpolated filters
                   ):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        context : visr.SignalFlowContext
+            Standard visr.Component construction argument, a structure holding the block size and the sampling frequency
+        name : string
+            Name of the component, Standard visr.Component construction argument
+        parent : visr.CompositeComponent
+            Containing component if there is one, None if this is a top-level component of the signal flow.
+        hrirPositions : numpy.ndarray
+            Optional way to provide the measurement grid for the BRIR listener view directions. If a
+            SOFA file is provided, this is optional and overrides the listener view data in the file.
+            Otherwise this argument is mandatory. Dimension #grid directions x (dimension of position argument)
+        hrirData: numpy.ndarray
+            Optional way to provide the BRIR data. Dimension: #grid directions  x #ears (2) # x #loudspeakers x #ir length
+        headOrientation : array-like
+            Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
+            or the initial view direction
+        headTracking: bool
+            Whether dynamic headTracking is active. If True, an control input "tracking" is created.
+        dynamicITD: bool
+            Whether the delay part of th BRIRs is applied separately to the (delay-free) BRIRs.
+        hrirInterpolation: bool
+            Whether BRIRs are interpolated for the current head oriention. If False, a nearest-neighbour interpolation is used.
+        hrirDelays: numpy.ndarray
+            Optional BRIR delays. If a SOFA file is given, this  argument overrides a potential delay setting from the file. Otherwise, no extra delays
+            are applied unless this option is provided. Dimension: #grid directions  x #ears(2) x # loudspeakers
+        interpolatingConvolver: bool
+            Whether the interpolating convolver option is used. If True, the convolver stores all BRIR filters, and the controller sends only
+            interpolation coefficient messages to select the BRIR filters and their interpolation ratios.
+        """
         # Call base class (AtomicComponent) constructor
         super( VirtualLoudspeakerController, self ).__init__( context, name, parent )
-        self.numberOfLoudspeakers = numberOfLoudspeakers
+        self.numberOfLoudspeakers = hrirData.shape[2]
         self.dynamicITD = dynamicITD
 
         # %% Define parameter ports
-        if useHeadTracking:
+        if headTracking:
             self.useHeadTracking = True
             self.trackingInput = visr.ParameterInput( "headTracking", self, pml.ListenerPosition.staticType,
                                               pml.DoubleBufferingProtocol.staticType,

@@ -113,9 +113,9 @@ class VirtualLoudspeakerRenderer( visr.CompositeComponent ):
                 raise ValueError( 'If the "dynamicITD" option is given, the parameter "delays" must match the first dimensions of the hrir data matrix.' )
 
         self.virtualLoudspeakerController = VirtualLoudspeakerController( context, "VirtualLoudspeakerController", self,
-                                                                  numberOfLoudspeakers,
-                                                                  hrirPositions, hrirData,
-                                                                  useHeadTracking = headTracking,
+                                                                  hrirPositions=hrirPositions,
+                                                                  hrirData = hrirData,
+                                                                  headTracking = headTracking,
                                                                   dynamicITD = dynamicITD,
                                                                   hrirInterpolation = hrirInterpolation,
                                                                   hrirDelays = hrirDelays,

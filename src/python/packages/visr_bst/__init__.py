@@ -12,6 +12,7 @@ from .hoa_coefficient_rotation import HoaCoefficientRotation
 from .dynamic_hrir_renderer import DynamicHrirRenderer
 from .hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
 from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+from .object_to_virtual_loudspeaker_renderer import ObjectToVirtualLoudspeakerRenderer
 
 from .realtime_dynamic_hrir_renderer_ahrs import RealtimeDynamicHrirRendererAhrs
 from .realtime_hoa_object_to_binaural_renderer import RealtimeHoaObjectToBinauralRenderer
