@@ -73,7 +73,7 @@ renderer = ObjectToVirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRende
                                       dynamicITD = useDynamicITD,
                                       hrirInterpolation = useHRIRinterpolation,
                                       filterCrossfading = useCrossfading,
-                                      loudspeakerConfiguration = arrayConfig
+                                      loudspeakerConfiguration = arrayConfigPath
                                       )
 
 result,messages = rrl.checkConnectionIntegrity(renderer)
@@ -84,7 +84,7 @@ flow = rrl.AudioSignalFlow( renderer )
 
 numOutputChannels = 2;
 
-paramInput = flow.parameterReceivePort('objects')
+paramInput = flow.parameterReceivePort('objectVector')
 if useTracking:
     trackingInput = flow.parameterReceivePort( "tracking" )
 

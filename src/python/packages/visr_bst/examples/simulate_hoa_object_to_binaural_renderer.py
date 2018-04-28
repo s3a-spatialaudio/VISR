@@ -40,10 +40,10 @@ t = 1.0/fs * np.arange(0,signalLength)
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
+#                                    maxHoaOrder,
 graph = HoaObjectToBinauralRenderer( context, "HoaBinauralRenderer", None,
                                     numBinauralObjects,
-                                    maxHoaOrder,
-                                    sofaFile,
+                                    sofaFile=sofaFile,
                                     interpolationSteps = blockSize,
                                     headTracking = useTracking,
                                     fftImplementation = fftImplementation
@@ -55,7 +55,7 @@ if not result:
 
 flow = rrl.AudioSignalFlow( graph )
 
-paramInput = flow.parameterReceivePort('objects')
+paramInput = flow.parameterReceivePort('objectVector')
 if useTracking:
     trackingInput = flow.parameterReceivePort( 'tracking' )
 
