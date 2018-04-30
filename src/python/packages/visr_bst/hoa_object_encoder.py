@@ -101,6 +101,7 @@ class HoaObjectEncoder( visr.AtomicComponent ):
             else:
                 levels = np.zeros( self.numberOfObjects, dtype=coeffOut.dtype )
                 pos = np.zeros( (self.numberOfObjects,3), dtype=coeffOut.dtype )
+                pos[:,0] = 1.0 # Set unused sources to a valid direction.
                 for src in ov:
                     chIdx = src.channels[0]
                     if chIdx > self.numberOfObjects:
