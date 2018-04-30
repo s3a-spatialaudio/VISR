@@ -36,7 +36,7 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
                  fftImplementation = "default",
                  loudspeakerConfiguration = None,
                  loudspeakerRouting = None,
-                 objectRendererOptions = {},
+                 objectRendererOptions = {}
                  ):
         """
         Constructor.
