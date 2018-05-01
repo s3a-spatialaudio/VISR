@@ -125,6 +125,9 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
             diffFilters = efl.BasicMatrixFloat( h )
             objectRendererOptions["diffusionFilters"] = diffFilters
 
+        # Workaround: Use a hard-coded reverb config until passing from is solved.
+        objectRendererOptions['reverbConfig'] = '{ "numberOfReverbObjects": 1, "discreteReflectionsPerObject": 20, "lateReverbFilterLength": 2.0 }'
+
         self.objectRenderer = CoreRenderer( context, "ObjectRenderer", self,
                                            **objectRendererOptions )
 
