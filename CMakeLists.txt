@@ -206,9 +206,27 @@ ENDIF(  WIN32 OR APPLE )
 OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
 
 IF( BUILD_PYTHON_BINDINGS )
-  FIND_PACKAGE( PythonLibs REQUIRED )
+  # Note: Disabled due to some Python binaries not working (probably due to PYTHONHOME set)
+  # if(NOT BUILD_VISR_PYTHON_VERSION)
+  #   set( BUILD_VISR_PYTHON_VERSION "" CACHE STRING "Version string to set used Python version" )
+  # endif(NOT BUILD_VISR_PYTHON_VERSION)
+  # set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 2.7)
+  # find_package(PythonLibsNew ${BUILD_VISR_PYTHON_VERSION} REQUIRED)
+
+  find_package( PythonLibs REQUIRED )
 
   include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+
+  # As we cannot use the PythonLibsNew package due to possible mismatches of the Python library name,
+  # we have to set the Python extensions ourselves (using the same variable names as created by
+  #  PythonLibsNew.
+  if( WIN32 )
+    set( PYTHON_MODULE_EXTENSION ".pyd" )
+  elseif( APPLE )
+    set( PYTHON_MODULE_EXTENSION ".so" )
+  else( WIN32 )
+    set( PYTHON_MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
+  endif( WIN32 )
 
   # Enable the pybind11 cmake support
   # TODO: Decide whether it's worth to use that in the future or remove it
