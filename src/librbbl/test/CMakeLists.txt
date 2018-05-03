@@ -9,14 +9,15 @@ set( SOURCES
  circular_buffer.cpp
  ffts_wrapper.cpp
  float_sequence.cpp index_sequence.cpp
+ interpolating_convolver.cpp
  kiss_fft_wrapper.cpp
  parametric_iir_coefficient.cpp
  test_main.cpp
  test_FIR.cpp
  multichannel_convolver.cpp
  object_channel_allocator.cpp
-interpolating_convolver.cpp
-test_main.cpp
+ sparse_gain_routing.cpp
+ test_main.cpp
 )
 
 if( BUILD_USE_FFTW )

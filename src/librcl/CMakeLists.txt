@@ -23,6 +23,7 @@ scalar_osc_decoder.cpp
 scene_decoder.cpp
 scene_encoder.cpp
 signal_routing.cpp
+sparse_gain_matrix.cpp
 time_frequency_inverse_transform.cpp
 time_frequency_transform.cpp
 udp_receiver.cpp
@@ -54,6 +55,7 @@ scalar_osc_decoder.hpp
 scene_decoder.hpp
 scene_encoder.hpp
 signal_routing.hpp
+sparse_gain_matrix.hpp
 time_frequency_inverse_transform.hpp
 time_frequency_transform.hpp
 udp_receiver.hpp
