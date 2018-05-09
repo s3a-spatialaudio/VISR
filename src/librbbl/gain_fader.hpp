@@ -40,6 +40,17 @@ public:
   ~GainFader();
 
   /**
+  * Return the number of interpolation steps, i.e., the number of samples it takes to reach a newly set gain value..
+  */
+  std::size_t interpolationSamples() const;
+
+  /**
+   * Return the number of interpolation 'buffers'/blocks, i.e., the next integer multiple of the 
+   * blockSize equal or larger than the number of interpolation samples.
+   */
+  std::size_t interpolationPeriods() const;
+
+  /**
    * Process \p mBlockSize samples of a single audio signal. The gain trajectory depends on the start end end gain
    * values and the time into the current transition (denoted by \p blockIndex). This method does not alter the state of the fader (and is therefore const).
    * @param input a buffer containing input samples. Must provide \p mBlockSize elements.
@@ -94,9 +105,14 @@ private:
   std::size_t const mBlockSize;
 
   /**
+  * The number of samples it takes to transition to a new gain values.
+  * 0 denotes an immediate application of a new gain matrix.
+  */
+  std::size_t const mInterpolationSamples;
+
+  /**
    * The number of process() invocations needed to perform a complete transition of gain values(),
    * i.e., the first number of blocks that contain interpolationSteps samples.
-   * 0 denotes an immediate application of a new gain matrix.
    */
   std::size_t const mInterpolationPeriods;
 

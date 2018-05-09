@@ -17,7 +17,8 @@ GainFader( std::size_t blockSize,
            std::size_t interpolationSteps,
            std::size_t alignment /*= 0*/ )
  : mBlockSize( blockSize )
- , mInterpolationPeriods( (interpolationSteps + blockSize - 1)/blockSize )
+ , mInterpolationSamples( interpolationSteps )
+ , mInterpolationPeriods( (interpolationSteps + blockSize - 1)/blockSize ) // integer ceil( interpolationSteps / blockSize )
  , mInterpolationRamp( (mInterpolationPeriods+1)*blockSize, alignment )
  , mTempBuffer( blockSize, alignment )
 {
@@ -26,6 +27,18 @@ GainFader( std::size_t blockSize,
 
 template< typename ElementType >
 GainFader<ElementType>::~GainFader() = default;
+
+template< typename ElementType >
+std::size_t GainFader<ElementType>::interpolationPeriods() const
+{
+  return mInterpolationPeriods;
+}
+
+template< typename ElementType >
+std::size_t GainFader<ElementType>::interpolationSamples() const
+{
+  return mInterpolationSamples;
+}
 
 template< typename ElementType >
 void GainFader<ElementType>::scale( ElementType const * input, ElementType * output,

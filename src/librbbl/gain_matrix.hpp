@@ -4,6 +4,7 @@
 #define VISR_LIBRBBL_GAIN_MATRIX_HPP_INCLUDED
 
 #include "export_symbols.hpp"
+#include "gain_fader.hpp"
 
 #include<libefl/aligned_array.hpp>
 #include<libefl/basic_matrix.hpp>
@@ -132,10 +133,10 @@ private:
   std::size_t const mBlockSize;
 
   /**
-   * The number of process() invocations needed to perform a complete transition of gain values.
-   * 0 denotes an immediate application of a new gain matrix.
+   * Guarantueed alignment for input and output blocks (in number of elements.
+   * The same alignment value is also used to set up the internal data strucutures.
    */
-  std::size_t const mInterpolationPeriods;
+  std::size_t const mAlignment;
 
   /**
    * Counter denoting the current position within the transition process.
@@ -144,17 +145,9 @@ private:
   std::size_t mInterpolationCounter;
 
   /**
-   * Precomputed vector of scaling values for computing the output values using interpolated gains.
-   * It consists of a linear ramp from 0 to 1 over $mInterpolationPeriods * mBlockSize$ samples, followed by
-   * \p mBlockSize values of '1' for the static gain after the transition has finished.
+   * Object that implements the 'ramping' of gain values.
    */
-  efl::AlignedArray< ElementType > mRamp;
-
-  /**
-   * Sample array used for temporary results within a process() call.
-   */
-  efl::AlignedArray< ElementType > mTempBuffer;
-
+  GainFader< ElementType > mFader;
 };
 
 } // namespace rbbl
