@@ -18,9 +18,9 @@ INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_DIR} )
 
 ADD_LIBRARY( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive dependencies
-target_link_libraries( pythonsupport_static ${PYTHON_LIBRARY} )
-target_link_libraries( pythonsupport_static ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( pythonsupport_static ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( pythonsupport_static PUBLIC ${PYTHON_LIBRARY} )
+target_link_libraries( pythonsupport_static PUBLIC Boost::filesystem )
+target_link_libraries( pythonsupport_static PUBLIC Boost::system )
 
 add_library( pythonsupport_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythonsupport_shared PROPERTIES OUTPUT_NAME pythonsupport )
@@ -29,12 +29,22 @@ set_target_properties( pythonsupport_shared PROPERTIES ARCHIVE_OUTPUT_NAME pytho
 target_compile_definitions( pythonsupport_shared PRIVATE -DVISR_BUILD_PYTHONSUPPORT_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
 target_compile_definitions( pythonsupport_shared PUBLIC -DVISR_BUILD_PYTHONSUPPORT_SHARED_LIBRARY=1)
 set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pythonsupport_shared ${PYTHON_LIBRARY} )
-target_link_libraries( pythonsupport_shared ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( pythonsupport_shared ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( pythonsupport_shared PUBLIC ${PYTHON_LIBRARY} )
+target_link_libraries( pythonsupport_shared PUBLIC Boost::filesystem )
+target_link_libraries( pythonsupport_shared PUBLIC Boost::system )
 
-install(TARGETS pythonsupport_static ARCHIVE DESTINATION lib )
-install(TARGETS pythonsupport_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(pythonsupport_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS pythonsupport_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS pythonsupport_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 # No unit test for this basic functionality yet.

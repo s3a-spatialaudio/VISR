@@ -73,9 +73,18 @@ target_link_libraries( objectmodel_shared rbbl_shared )
 # installed once.
 set_target_properties( objectmodel_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(objectmodel_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
 
-install(TARGETS objectmodel_static ARCHIVE DESTINATION lib )
-install(TARGETS objectmodel_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libobjectmodel )
+install(TARGETS objectmodel_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS objectmodel_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libobjectmodel )
 
 
 # Add the unit test directory.

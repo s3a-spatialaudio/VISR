@@ -15,8 +15,8 @@ ADD_LIBRARY( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive dependencies
 # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
 # exactly one instance of pythonsupport::InitialisationGuard
-target_link_libraries( pythoncomponents_static pythonsupport_shared )
-target_link_libraries( pythoncomponents_static visr_static )
+target_link_libraries( pythoncomponents_static PUBLIC pythonsupport_shared )
+target_link_libraries( pythoncomponents_static PUBLIC visr_static )
 
 add_library( pythoncomponents_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythoncomponents_shared PROPERTIES OUTPUT_NAME pythoncomponents )
@@ -25,11 +25,21 @@ set_target_properties( pythoncomponents_shared PROPERTIES ARCHIVE_OUTPUT_NAME py
 target_compile_definitions( pythoncomponents_shared PRIVATE -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONCOMPONENTS_LIBRARY=1)
 target_compile_definitions( pythoncomponents_shared PUBLIC -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1)
 set_target_properties( pythoncomponents_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pythoncomponents_shared pythonsupport_shared )
-target_link_libraries( pythoncomponents_shared visr_shared )
+target_link_libraries( pythoncomponents_shared PUBLIC pythonsupport_shared )
+target_link_libraries( pythoncomponents_shared PUBLIC visr_shared )
 
-install(TARGETS pythoncomponents_static ARCHIVE DESTINATION lib )
-install(TARGETS pythoncomponents_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(pythoncomponents_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS pythoncomponents_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS pythoncomponents_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

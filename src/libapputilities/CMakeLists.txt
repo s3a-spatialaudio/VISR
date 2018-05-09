@@ -5,7 +5,9 @@ set( HEADERS export_symbols.hpp options.hpp )
 
 add_library( apputilities_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( apputilities_static PROPERTIES OUTPUT_NAME apputilities )
-target_link_libraries( apputilities_static ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries( apputilities_static PUBLIC Boost::program_options )
+target_link_libraries( apputilities_static PRIVATE Boost::filesystem )
+target_link_libraries( apputilities_static PRIVATE Boost::system)
 
 add_library( apputilities_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( apputilities_shared PROPERTIES OUTPUT_NAME apputilities )
@@ -14,9 +16,19 @@ set_target_properties( apputilities_shared PROPERTIES ARCHIVE_OUTPUT_NAME apputi
 target_compile_definitions( apputilities_shared PRIVATE -DVISR_BUILD_APPUTILITIES_SHARED_LIBRARY=1 -DVISR_BUILD_APPUTILITIES_LIBRARY=1)
 target_compile_definitions( apputilities_shared PUBLIC -DVISR_BUILD_APPUTILITIES_SHARED_LIBRARY=1)
 set_target_properties( apputilities_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( apputilities_shared ${Boost_PROGRAM_OPTIONS_LIBRARY})
-target_link_libraries( apputilities_shared ${Boost_FILESYSTEM_LIBRARY})
-target_link_libraries( apputilities_shared ${Boost_SYSTEM_LIBRARY})
+target_link_libraries( apputilities_shared PUBLIC Boost::program_options )
+target_link_libraries( apputilities_shared PRIVATE Boost::filesystem )
+target_link_libraries( apputilities_shared PRIVATE Boost::system)
 
-install(TARGETS apputilities_static ARCHIVE DESTINATION lib )
-install(TARGETS apputilities_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(apputilities_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS apputilities_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS apputilities_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )

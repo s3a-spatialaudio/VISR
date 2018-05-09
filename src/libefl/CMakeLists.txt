@@ -54,8 +54,18 @@ set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT
 # installed once.
 set_target_properties( efl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-install(TARGETS efl_static ARCHIVE DESTINATION lib )
-install(TARGETS efl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libefl )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(efl_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS efl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS efl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libefl )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
