@@ -82,7 +82,7 @@ AudioPortBase& Component::audioPort( char const * portName )
   {
     return *port;
   }
-  throw std::invalid_argument( "Audio port with given name not found." );
+  throw std::invalid_argument( detail::composeMessageString("Audio port \"", portName, "\" not found in component \"", name(), "\".") );
 }
 
 AudioPortBase const& Component::audioPort( char const * portName ) const
@@ -92,7 +92,7 @@ AudioPortBase const& Component::audioPort( char const * portName ) const
   {
     return *port;
   }
-  throw std::invalid_argument( "Audio port with given name not found." );
+  throw std::invalid_argument( detail::composeMessageString("Audio port \"", portName, "\" not found in component \"", name(), "\".") );
 }
 
 AudioPortBase& Component::audioPort( std::string const & portName )
@@ -113,7 +113,7 @@ ParameterPortBase& Component::parameterPort( char const * portName )
   {
     return *port;
   }
-  throw std::invalid_argument( "Parameter port with given name not found." );
+  throw std::invalid_argument( detail::composeMessageString("Parameter port \"", portName, "\" not found in component \"", name(), "\".") );
 }
 
 ParameterPortBase const& Component::parameterPort( char const * portName ) const
@@ -123,7 +123,7 @@ ParameterPortBase const& Component::parameterPort( char const * portName ) const
   {
     return *port;
   }
-  throw std::invalid_argument( "ParameterPort port with given name not found." );
+  throw std::invalid_argument( detail::composeMessageString("Parameter port \"", portName, "\" not found in component \"", name(), "\".") );
 }
 
 ParameterPortBase& Component::parameterPort( std::string const & portName )

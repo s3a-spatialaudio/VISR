@@ -48,7 +48,8 @@ void CompositeComponentImplementation::registerChildComponent( char const * name
   ComponentTable::iterator findComp = findComponentEntry( name );
   if( findComp != mComponents.end() )
   {
-    throw std::invalid_argument( "CompositeComponentImplementation::registerChildComponent(): Component with given name already exists." );
+    throw std::invalid_argument( detail::composeMessageString("CompositeComponentImplementation::registerChildComponent(): Component named \"",
+                                                              name, "\" already exists.") );
   }
   mComponents.push_back( child );
 }
@@ -172,12 +173,14 @@ void CompositeComponentImplementation::registerParameterConnection( char const *
   ParameterPortBase * sender = findParameterPort( sendComponent, sendPort );
   if( not sender )
   {
-    throw std::invalid_argument( "CompositeComponent::registerParameterConnection(): sender port could not be found." );
+    throw std::invalid_argument( detail::composeMessageString( "CompositeComponent::registerParameterConnection(): send port \"",
+        sendComponent, ":", sendPort, "\" could not be found.") );
   }
   ParameterPortBase * receiver = findParameterPort( receiveComponent, receivePort );
   if( not receiver )
   {
-    throw std::invalid_argument( "CompositeComponent::registerParameterConnection(): receiver port could not be found." );
+    throw std::invalid_argument( detail::composeMessageString( "CompositeComponent::registerParameterConnection(): receiver port \"",
+        receiveComponent, ":", receivePort, "\" could not be found.") );
   }
 
   ParameterConnection newConnection( &(sender->implementation()), &(receiver->implementation()) );
@@ -204,12 +207,14 @@ void CompositeComponentImplementation::audioConnection( char const * sendCompone
   AudioPortBase * sender = findAudioPort( sendComponent, sendPort );
   if( not sender )
   {
-    throw std::invalid_argument( "CompositeComponent::audioConnection(): sender port could not be found." );
+    throw std::invalid_argument( detail::composeMessageString("CompositeComponent::audioConnection(): send port \"",
+        sendComponent, ":", sendPort, "\" could not be found.") );
   }
   AudioPortBase * receiver = findAudioPort( receiveComponent, receivePort );
   if( not receiver )
   {
-    throw std::invalid_argument( "CompositeComponent::audioConnection(): receiver port could not be found." );
+    throw std::invalid_argument( detail::composeMessageString("CompositeComponent::audioConnection(): receive port \"",
+        receiveComponent, ":", receivePort, "\" could not be found.") );
   }
   AudioConnection newConnection( &(sender->implementation()), sendIndices, &(receiver->implementation()), receiveIndices );
 
@@ -228,6 +233,25 @@ namespace // unnamed
     }
     return *findIt;
   }
+
+  // Return a comma-separated list of channel indices exceeding a given width.
+  std::string excessChannelList( ChannelList const & indices, ChannelList::IndexType width )
+  {
+    char const * sep = ", ";
+    std::stringstream excessChannels;
+    std::copy_if( indices.begin(), indices.end(),
+                  std::ostream_iterator<ChannelList::IndexType>(excessChannels, sep ),
+                  [width]( ChannelList::IndexType i ){ return i >= width;} );
+
+    std::string ret = excessChannels.str();
+    auto const pos = ret.rfind( sep );
+    if( pos != std::string::npos )
+    {
+      ret.erase( pos );
+    }
+    return ret;
+  }
+
 } // unnamed namespace
 
 void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort,
@@ -239,7 +263,8 @@ void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort
   checkPortParent( receivePort.implementation(), *this, "audio receive" );
   if( sendIndices.size() != receiveIndices.size() )
   {
-    throw std::invalid_argument( "CompositeComponent::audioConnection(): send and receive index lists have different sizes." );
+    throw std::invalid_argument( detail::composeMessageString("CompositeComponent::audioConnection(): send and receive index lists have different sizes (",
+                                                              sendIndices.size(), " vs. ", receiveIndices.size(), ").") );
   }
 
   // Allow empty send and receive ranges.
@@ -249,11 +274,15 @@ void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort
   }
   if( maxChannelIndex( sendIndices ) >= sendPort.width() )
   {
-    throw std::invalid_argument( "CompositeComponent::audioConnection(): A send channel index exceeds the port width." );
+    throw std::invalid_argument( detail::composeMessageString("CompositeComponent::audioConnection(): The send channel indices [",
+                                                              excessChannelList( sendIndices, sendPort.width() ),
+                                                              "] exceed the port width ", sendPort.width(), ".") );
   }
   if( maxChannelIndex( receiveIndices ) >= receivePort.width() )
   {
-    throw std::invalid_argument( "CompositeComponent::audioConnection(): A receive channel index exceeds the port width." );
+    throw std::invalid_argument( detail::composeMessageString("CompositeComponent::audioConnection(): The receive channel indices [",
+                                                              excessChannelList( receiveIndices, receivePort.width() ),
+                                                              "] exceed the port width ", receivePort.width(), ".") );
   }
   AudioConnection newConnection( &(sendPort.implementation()), sendIndices,
                                  &(receivePort.implementation()), receiveIndices );
@@ -269,7 +298,10 @@ void CompositeComponentImplementation::audioConnection( AudioPortBase & sendPort
   std::size_t const receiveWidth = receivePortImpl.width();
   if( sendWidth != receiveWidth )
   {
-    throw std::invalid_argument( "CompositeComponent::audioConnection(): send and receive port width do not match." );
+    std::string const sendName = sendPort.implementation().parent().name() + "." + sendPort.implementation().name();
+    std::string const receiveName = receivePort.implementation().parent().name() + "." + receivePort.implementation().name();
+    throw std::invalid_argument( detail::composeMessageString( "CompositeComponent::audioConnection(): width of send port\"", sendName, "\" (", sendWidth, ") and of receive port \"",
+                                                               receiveName, "\" (", receiveWidth, ") do not match.") );
   }
   ChannelList const indices( ChannelRange( 0, sendWidth ) );
   audioConnection( sendPort, indices, receivePort, indices );
