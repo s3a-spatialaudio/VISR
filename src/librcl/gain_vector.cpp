@@ -91,7 +91,7 @@ void GainVector::process()
     SampleType const oldGain = mCurrentGains[chIdx];
     SampleType const nextGain = mNextGains[chIdx];
 
-    mFader->process( inPtr, outPtr, oldGain, nextGain, mInterpolationCounter );
+    mFader->scale( inPtr, outPtr, oldGain, nextGain, mInterpolationCounter );
   }
   mInterpolationCounter = std::min( mInterpolationCounter+1, mInterpolationPeriods );
 }

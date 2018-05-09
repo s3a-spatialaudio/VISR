@@ -51,10 +51,28 @@ public:
    * [blockIndex*mBlockSize..(blockIndex+1)*mBlockSize] of the interpolation ramp is applied. A value equal or larger than \p mInterpolationPeriods
    * means that the signal is scaled by the constant value \p endGain.
    */
-  void process( ElementType const * input, ElementType * output,
-                ElementType startGain,
-                ElementType endGain,
-                std::size_t blockIndex ) const;
+  void scale( ElementType const * input, ElementType * output,
+              ElementType startGain,
+              ElementType endGain,
+              std::size_t blockIndex ) const;
+
+  /**
+  * Process \p mBlockSize samples of a single audio signal and add to the output signal. The gain trajectory depends on the start end end gain
+  * values and the time into the current transition (denoted by \p blockIndex). This method does not alter the state of the fader (and is therefore const).
+  * @param input a buffer containing input samples. Must provide \p mBlockSize elements.
+  * sample vector must contain at least \p blockLength elements.
+  * @param[in,out] outputAcc Array to write the scaled output signals. Must provide space for \p mBlockSize samples.
+  * @param startGain Gain value at the begin of the transition (the complete transition, not the current block)
+  * @param endGain Gain value at the end of the transition (the complete transition, not the current block)
+  * @param blockIndex block number denoting the current position within the current transition. In this invocation of process(), the section
+  * [blockIndex*mBlockSize..(blockIndex+1)*mBlockSize] of the interpolation ramp is applied. A value equal or larger than \p mInterpolationPeriods
+  * means that the signal is scaled by the constant value \p endGain.
+  */
+  void scaleAndAccumulate( ElementType const * input, ElementType * outputAcc,
+    ElementType startGain,
+    ElementType endGain,
+    std::size_t blockIndex ) const;
+
 
 private:
 
