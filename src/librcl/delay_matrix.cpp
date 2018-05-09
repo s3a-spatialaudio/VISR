@@ -11,6 +11,7 @@
 #include <cassert>
 #include <ciso646>
 #include <cmath>
+#include <type_traits>
 
 namespace visr
 {
