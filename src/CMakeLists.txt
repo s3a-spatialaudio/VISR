@@ -83,13 +83,13 @@ export(EXPORT VISR_exports
 
 # Install package config file
 # for use from install tree
-install(FILES visr_config.cmake
+install(FILES visr-config.cmake
   DESTINATION lib/cmake/visr)
 
 # Copy package config file
 # for use from build tree
-configure_file(visr_config.cmake
-  visr_config.cmake COPYONLY)
+configure_file(visr-config.cmake
+  visr-config.cmake COPYONLY)
 
 include(CMakePackageConfigHelpers)
 
