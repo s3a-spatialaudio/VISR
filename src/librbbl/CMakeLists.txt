@@ -78,15 +78,15 @@ endif( BUILD_USE_IPP )
 add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
 
-target_link_libraries( rbbl_static efl_static )
-target_link_libraries( rbbl_static ${FFTS_LIBRARY} )
-target_link_libraries( rbbl_static ${KISSFFT_LIBRARY} )
+target_link_libraries( rbbl_static PUBLIC efl_static )
+target_link_libraries( rbbl_static PRIVATE ${FFTS_LIBRARY} )
+target_link_libraries( rbbl_static PRIVATE ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )
-  target_link_libraries( rbbl_static ${FFTW3_LIBRARY} )
-  target_link_libraries( rbbl_static ${FFTW3F_LIBRARY} )
+  target_link_libraries( rbbl_static PRIVATE ${FFTW3_LIBRARY} )
+  target_link_libraries( rbbl_static PRIVATE ${FFTW3F_LIBRARY} )
 endif( BUILD_USE_FFTW )
 if( BUILD_USE_IPP )
-  target_link_libraries( rbbl_static ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+  target_link_libraries( rbbl_static PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
 add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
@@ -96,15 +96,15 @@ set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
 target_compile_definitions( rbbl_shared PRIVATE -DVISR_BUILD_RBBL_SHARED_LIBRARY=1 -DVISR_BUILD_RBBL_LIBRARY=1)
 target_compile_definitions( rbbl_shared PUBLIC -DVISR_BUILD_RBBL_SHARED_LIBRARY=1)
 set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( rbbl_shared efl_shared )
-target_link_libraries( rbbl_shared ${FFTS_LIBRARY} )
-target_link_libraries( rbbl_shared ${KISSFFT_LIBRARY} )
+target_link_libraries( rbbl_shared PUBLIC efl_shared )
+target_link_libraries( rbbl_shared PRIVATE ${FFTS_LIBRARY} )
+target_link_libraries( rbbl_shared PRIVATE ${KISSFFT_LIBRARY} )
 if( BUILD_USE_FFTW )
-  target_link_libraries( rbbl_shared ${FFTW3_LIBRARY} )
-  target_link_libraries( rbbl_shared ${FFTW3F_LIBRARY} )
+  target_link_libraries( rbbl_shared PRIVATE ${FFTW3_LIBRARY} )
+  target_link_libraries( rbbl_shared PRIVATE ${FFTW3F_LIBRARY} )
 endif( BUILD_USE_FFTW )
 if( BUILD_USE_IPP )
-  target_link_libraries( rbbl_shared ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+  target_link_libraries( rbbl_shared PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
 
@@ -113,8 +113,18 @@ endif( BUILD_USE_IPP )
 # installled once.
 set_target_properties( rbbl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-install(TARGETS rbbl_static ARCHIVE DESTINATION lib )
-install(TARGETS rbbl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librbbl)
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(rbbl_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS rbbl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS rbbl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librbbl)
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

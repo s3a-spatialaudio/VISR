@@ -28,12 +28,12 @@ endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 
 add_library( panning_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( panning_static PROPERTIES OUTPUT_NAME panning )
-target_link_libraries( panning_static rbbl_static )
+target_link_libraries( panning_static PUBLIC rbbl_static )
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-  target_link_libraries( panning_static ${Boost_REGEX_LIBRARY} )
+  target_link_libraries( panning_static PRIVATE Boost::regex )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-target_link_libraries( panning_static ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( panning_static ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( panning_static PRIVATE Boost::filesystem )
+target_link_libraries( panning_static PRIVATE Boost::system )
 
 add_library( panning_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( panning_shared PROPERTIES OUTPUT_NAME panning )
@@ -42,15 +42,25 @@ set_target_properties( panning_shared PROPERTIES ARCHIVE_OUTPUT_NAME panning_sha
 target_compile_definitions( panning_shared PRIVATE -DVISR_BUILD_PANNING_SHARED_LIBRARY=1 -DVISR_BUILD_PANNING_LIBRARY=1)
 target_compile_definitions( panning_shared PUBLIC -DVISR_BUILD_PANNING_SHARED_LIBRARY=1)
 set_target_properties( panning_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( panning_shared rbbl_shared )
+target_link_libraries( panning_shared PUBLIC rbbl_shared )
 if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-  target_link_libraries( panning_shared ${Boost_REGEX_LIBRARY} )
+  target_link_libraries( panning_shared PRIVATE Boost::regex )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-target_link_libraries( panning_shared ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( panning_shared ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( panning_shared PRIVATE Boost::filesystem )
+target_link_libraries( panning_shared PRIVATE Boost::system )
 
-install(TARGETS panning_static ARCHIVE DESTINATION lib )
-install(TARGETS panning_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(panning_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS panning_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS panning_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit tests.
 ADD_SUBDIRECTORY( test )

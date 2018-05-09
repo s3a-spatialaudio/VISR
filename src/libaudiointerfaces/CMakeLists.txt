@@ -28,8 +28,8 @@ set_target_properties( audiointerfaces_static PROPERTIES OUTPUT_NAME audiointerf
 target_link_libraries( audiointerfaces_static rrl_static)
 target_link_libraries( audiointerfaces_static ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
-  target_link_libraries( audiointerfaces_static ${JACK_LIBRARY} )
-  target_link_libraries( audiointerfaces_static rbbl_static )
+  target_link_libraries( audiointerfaces_static PRIVATE ${JACK_LIBRARY} )
+  target_link_libraries( audiointerfaces_static PRIVATE rbbl_static )
 endif( BUILD_USE_JACK )
 
 add_library( audiointerfaces_shared SHARED ${SOURCES} ${HEADERS} )
@@ -39,11 +39,11 @@ set_target_properties( audiointerfaces_shared PROPERTIES ARCHIVE_OUTPUT_NAME aud
 target_compile_definitions( audiointerfaces_shared PRIVATE -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1 -DVISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
 target_compile_definitions( audiointerfaces_shared PUBLIC -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1)
 set_target_properties( audiointerfaces_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( audiointerfaces_shared rrl_shared )
-target_link_libraries( audiointerfaces_shared ${PORTAUDIO_LIBRARIES} )
+target_link_libraries( audiointerfaces_shared PRIVATE rrl_shared )
+target_link_libraries( audiointerfaces_shared PRIVATE ${PORTAUDIO_LIBRARIES} )
 if( BUILD_USE_JACK )
-  target_link_libraries( audiointerfaces_shared ${JACK_LIBRARY} )
-  target_link_libraries( audiointerfaces_shared rbbl_shared )
+  target_link_libraries( audiointerfaces_shared PRIVATE ${JACK_LIBRARY} )
+  target_link_libraries( audiointerfaces_shared PRIVATE rbbl_shared )
 endif( BUILD_USE_JACK )
 
 # Set public headers to be installed for the shared library target.
@@ -51,8 +51,18 @@ endif( BUILD_USE_JACK )
 # installed once.
 set_target_properties( audiointerfaces_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-install(TARGETS audiointerfaces_static ARCHIVE DESTINATION lib )
-install(TARGETS audiointerfaces_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libaudiointerfaces )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(audiointerfaces_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS audiointerfaces_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS audiointerfaces_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libaudiointerfaces )
 
 # Add the unit test directory.
 add_subdirectory( test )

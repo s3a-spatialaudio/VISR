@@ -67,15 +67,15 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 add_library( rcl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
 # Transitive dependencies
-target_link_libraries( rcl_static pml_static )
-target_link_libraries( rcl_static visr_static )
-target_link_libraries( rcl_static panning_static )
-target_link_libraries( rcl_static objectmodel_static )
-target_link_libraries( rcl_static rbbl_static )
-target_link_libraries( rcl_static efl_static )
-target_link_libraries( rcl_static ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( rcl_static ${Boost_THREAD_LIBRARY} )
-target_link_libraries( rcl_static ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( rcl_static PUBLIC pml_static )
+target_link_libraries( rcl_static PUBLIC visr_static )
+target_link_libraries( rcl_static PUBLIC panning_static )
+target_link_libraries( rcl_static PUBLIC objectmodel_static )
+target_link_libraries( rcl_static PUBLIC rbbl_static )
+target_link_libraries( rcl_static PUBLIC efl_static )
+target_link_libraries( rcl_static PUBLIC Boost::filesystem )
+target_link_libraries( rcl_static PUBLIC Boost::thread )
+target_link_libraries( rcl_static PUBLIC Boost::system )
 
 add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
@@ -85,23 +85,33 @@ target_compile_definitions( rcl_shared PUBLIC -DVISR_BUILD_RCL_SHARED_LIBRARY=1)
 target_compile_definitions( rcl_shared PRIVATE -DVISR_BUILD_RCL_SHARED_LIBRARY=1 -DVISR_BUILD_RCL_LIBRARY=1)
 set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive dependencies
-target_link_libraries( rcl_shared pml_shared )
-target_link_libraries( rcl_shared visr_shared )
-target_link_libraries( rcl_shared panning_shared )
-target_link_libraries( rcl_shared objectmodel_shared )
-target_link_libraries( rcl_shared rbbl_shared )
-target_link_libraries( rcl_shared efl_shared )
-target_link_libraries( rcl_shared ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( rcl_shared ${Boost_THREAD_LIBRARY} )
-target_link_libraries( rcl_shared ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( rcl_shared PUBLIC pml_shared )
+target_link_libraries( rcl_shared PUBLIC visr_shared )
+target_link_libraries( rcl_shared PUBLIC panning_shared )
+target_link_libraries( rcl_shared PUBLIC objectmodel_shared )
+target_link_libraries( rcl_shared PUBLIC rbbl_shared )
+target_link_libraries( rcl_shared PUBLIC efl_shared )
+target_link_libraries( rcl_shared PUBLIC Boost::filesystem )
+target_link_libraries( rcl_shared PUBLIC Boost::thread )
+target_link_libraries( rcl_shared PUBLIC Boost::system )
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
 # installled once.
 set_target_properties(rcl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-install(TARGETS rcl_static ARCHIVE DESTINATION lib )
-install(TARGETS rcl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librcl )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(rcl_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS rcl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS rcl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librcl )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

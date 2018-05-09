@@ -64,3 +64,44 @@ if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( python )
   add_subdirectory( libpythoncomponents )
 endif( BUILD_PYTHON_BINDINGS )
+
+##### CMake packaging
+# Install exported targets as config files
+# for use from install tree
+install(EXPORT VISR_exports
+  NAMESPACE VISR::
+  FILE visr_exports.cmake
+  DESTINATION lib/cmake/visr
+  )
+
+# Create config files for exported targets
+# for use from build tree
+export(EXPORT VISR_exports
+  NAMESPACE VISR::
+  FILE visr_exports.cmake
+  )
+
+# Install package config file
+# for use from install tree
+install(FILES visr_config.cmake
+  DESTINATION lib/cmake/visr)
+
+# Copy package config file
+# for use from build tree
+configure_file(visr_config.cmake
+  visr_config.cmake COPYONLY)
+
+include(CMakePackageConfigHelpers)
+
+# Create package version file
+# Assuming major version bump = breaking API changes
+write_basic_package_version_file(visrConfigVersion.cmake
+  VERSION ${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}
+  COMPATIBILITY SameMajorVersion)
+
+# Install package version file
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visrConfigVersion.cmake
+  DESTINATION lib/cmake/visr)
+
+# Register visr package in user registry
+export(PACKAGE visr)

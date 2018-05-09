@@ -2,10 +2,8 @@
 
 # Top-level build configuration for project VISceRal
 
-# Arbitrarily set minimum version.
-# This specific version is used to avoid complaints about the 
-# cygwin platform not defining WIN32 anymore.
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.4)
+# 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
+CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy

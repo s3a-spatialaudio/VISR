@@ -49,8 +49,18 @@ target_link_libraries( rrl_shared efl_shared )
 # installed once.
 set_target_properties(rrl_shared PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
 
-install(TARGETS rrl_static ARCHIVE DESTINATION lib )
-install(TARGETS rrl_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(rrl_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS rrl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS rrl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
 
 # Add the unit test directory.
 add_subdirectory( test )

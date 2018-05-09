@@ -22,12 +22,12 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
 add_library( reverbobject_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive link dependencies
-target_link_libraries( reverbobject_static pml_static )
-target_link_libraries( reverbobject_static rcl_static )
-target_link_libraries( reverbobject_static objectmodel_static )
-target_link_libraries( reverbobject_static efl_static )
-target_link_libraries( reverbobject_static ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( reverbobject_static ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( reverbobject_static PUBLIC pml_static )
+target_link_libraries( reverbobject_static PUBLIC rcl_static )
+target_link_libraries( reverbobject_static PUBLIC objectmodel_static )
+target_link_libraries( reverbobject_static PUBLIC efl_static )
+target_link_libraries( reverbobject_static PRIVATE Boost::filesystem )
+target_link_libraries( reverbobject_static PRIVATE Boost::system )
 
 add_library( reverbobject_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( reverbobject_shared PROPERTIES OUTPUT_NAME reverbobject )
@@ -36,12 +36,12 @@ set_target_properties( reverbobject_shared PROPERTIES ARCHIVE_OUTPUT_NAME reverb
 target_compile_definitions( reverbobject_shared PRIVATE -DVISR_BUILD_REVERBOBJECT_SHARED_LIBRARY=1 -DVISR_BUILD_REVERBOBJECT_LIBRARY=1)
 set_target_properties( reverbobject_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive link dependencies
-target_link_libraries( reverbobject_shared pml_shared )
-target_link_libraries( reverbobject_shared rcl_shared )
-target_link_libraries( reverbobject_shared objectmodel_shared )
-target_link_libraries( reverbobject_shared efl_shared )
-target_link_libraries( reverbobject_shared ${Boost_FILESYSTEM_LIBRARY} )
-target_link_libraries( reverbobject_shared ${Boost_SYSTEM_LIBRARY} )
+target_link_libraries( reverbobject_shared PUBLIC pml_shared )
+target_link_libraries( reverbobject_shared PUBLIC rcl_shared )
+target_link_libraries( reverbobject_shared PUBLIC objectmodel_shared )
+target_link_libraries( reverbobject_shared PUBLIC efl_shared )
+target_link_libraries( reverbobject_shared PRIVATE Boost::filesystem )
+target_link_libraries( reverbobject_shared PRIVATE Boost::system )
 
 
 # Set public headers to be installed for the shared target.
@@ -49,8 +49,18 @@ target_link_libraries( reverbobject_shared ${Boost_SYSTEM_LIBRARY} )
 # installled once.
 set_target_properties( reverbobject_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-install(TARGETS reverbobject_static ARCHIVE DESTINATION lib )
-install(TARGETS reverbobject_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libreverbobject )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(reverbobject_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS reverbobject_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS reverbobject_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libreverbobject )
 
 # Add the unit test directory.
 # ADD_SUBDIRECTORY( test )

@@ -62,8 +62,18 @@ if( BUILD_PYTHON_BINDINGS )
 endif( BUILD_PYTHON_BINDINGS )
 
 
-install(TARGETS signalflows_static ARCHIVE DESTINATION lib )
-install(TARGETS signalflows_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libsignalflows )
+# Set include paths for dependent projects
+get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+foreach(TARGET_TYPE static shared)
+  target_include_directories(signalflows_${TARGET_TYPE}
+    PUBLIC
+    $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/visr>
+  )
+endforeach()
+
+install(TARGETS signalflows_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
+install(TARGETS signalflows_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
 
 
 # Add the unit test directory.
