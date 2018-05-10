@@ -7,10 +7,12 @@ from .virtual_loudspeaker_controller import VirtualLoudspeakerController
 # Other conponents
 from .hoa_object_encoder import HoaObjectEncoder
 from .hoa_coefficient_rotation import HoaCoefficientRotation
+from .hoa_rotation_matrix_calculator import HoaRotationMatrixCalculator
 
 # Full renderers
 from .dynamic_hrir_renderer import DynamicHrirRenderer
 from .hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
+from .hoa_binaural_renderer import HoaBinauralRenderer
 from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 from .object_to_virtual_loudspeaker_renderer import ObjectToVirtualLoudspeakerRenderer
 
