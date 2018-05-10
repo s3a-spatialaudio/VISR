@@ -29,7 +29,8 @@ void GainMatrix::setup( std::size_t numberOfInputs,
   mInput.setWidth( numberOfInputs );
   mOutput.setWidth( numberOfOutputs );
   mInputChannels.resize( numberOfInputs, nullptr );
-  mOutputChannels.resize( numberOfOutputs, nullptr );  mMatrix.reset( new rbbl::GainMatrix<SampleType>( numberOfInputs, numberOfOutputs, period(), interpolationSteps, initialGain, cVectorAlignmentSamples ) );
+  mOutputChannels.resize( numberOfOutputs, nullptr );
+  mMatrix.reset( new rbbl::GainMatrix<SampleType>( numberOfInputs, numberOfOutputs, period(), interpolationSteps, initialGain, cVectorAlignmentSamples ) );
   if( controlInput )
   {
     mGainInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
