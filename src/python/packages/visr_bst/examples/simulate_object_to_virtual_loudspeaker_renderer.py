@@ -2,7 +2,7 @@
 
 from visr_bst import ObjectToVirtualLoudspeakerRenderer
 from visr_bst.util.read_sofa_file import readSofaFile
-from visr_bst.util.rotation_functions import sph2cart
+from visr_bst.util.rotation_functions import sph2cart, deg2rad
 
 import visr
 import rrl
@@ -51,6 +51,9 @@ if not os.path.exists( fullSofaPath ):
 
 hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath,
                                               truncationLength = BRIRtruncationLength )
+
+if np.max( np.abs(hrirPos[:,1])) < deg2rad( 1 ): # Crude check for 'horizontal-only arrays.
+    hrirPos = hrirPos[ :, [0,2] ] # transform to polar coordinates
 
 #arrayConfigFile = 'bs2051-4+5+0.xml'
 #arrayConfigPath = os.path.join( sofaDirectory, arrayConfigFile )
