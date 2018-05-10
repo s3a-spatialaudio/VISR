@@ -36,13 +36,13 @@ def readSofaFile( fileName, dtype = np.float32,
         # coordinates as the hrir 'positions'.
         # Otherwise the source positions are used.
         if hrir.ndim == 3:
-            sofaPos = np.asarray( fileH.get('SourcePosition'), dtype=dtype )
-            pos = convertSofaSphToSph( sofaPos )
+            sp = fileH.get('SourcePosition')
         else:
-            sofaPos = np.asarray( fileH.get('ListenerView'), dtype=dtype )
-            # Preliminary fix. This should retrieve the actual coordinate system used.
-            pos = cart2sph( sofaPos[:,0], sofaPos[:,1], sofaPos[:,2] )[:2,:].T
-
+            sp = fileH.get('ListenerView')
+        sofaPos = np.asarray( sp , dtype=dtype )
+        sourceCoordSystem = sp.attrs['Type'] # This is a required attribute.
+        sourceCoordSystem = sourceCoordSystem.decode("utf-8") # make it a string.
+        pos = convertPositions( sofaPos, sourceCoordSystem  )
         return pos, hrir, delays
     finally:
         fileH.close()
@@ -52,6 +52,14 @@ def convertSofaSphToSph( sofaPos ):
     el = deg2rad( sofaPos[...,1] )
     pos = np.stack( (az,el, sofaPos[...,2] ), 1 )
     return pos
+
+def convertPositions( sofaPos, coordType ):
+    if coordType == 'cartesian':
+        return cart2sph( sofaPos[:,0], sofaPos[:,1], sofaPos[:,2] ).T
+    elif coordType == 'spherical':
+        return convertSofaSphToSph( sofaPos )
+    else:
+        raise ValueError( 'The Type attribute must be either "cartesian" or "spherical".' )
 
 # Example code:
 if __name__ == '__main__':
