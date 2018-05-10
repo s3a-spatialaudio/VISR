@@ -36,7 +36,7 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
                  fftImplementation = "default",
                  loudspeakerConfiguration = None,
                  loudspeakerRouting = None,
-                 objectRendererOptions = {},
+                 objectRendererOptions = {}
                  ):
         """
         Constructor.
@@ -91,7 +91,9 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
         # Parameter checking
         if not isinstance( loudspeakerConfiguration, panning.LoudspeakerArray ):
-            raise ValueError( "'loudspeakerConfiguration' is not a 'panning.LoudspeakerArray' object." )
+            # Try to convert automatically
+            loudspeakerConfiguration = panning.LoudspeakerArray( loudspeakerConfiguration )
+            # raise ValueError( "'loudspeakerConfiguration' is not a 'panning.LoudspeakerArray' object." )
         numArraySpeakers = loudspeakerConfiguration.numberOfRegularLoudspeakers
 
         outRoutings = list(range(numArraySpeakers)) # Plain[0,1,...] routing
@@ -100,7 +102,7 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
 
         self.objectInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
         self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-        self.objectVectorInput = visr.ParameterInput( "objects", self, pml.ObjectVector.staticType,
+        self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
                                                      pml.DoubleBufferingProtocol.staticType,
                                                      pml.EmptyParameterConfig() )
         if headTracking:
@@ -116,7 +118,7 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
             objectRendererOptions["interpolationPeriod"] = context.period
 
         if "diffusionFilters" not in objectRendererOptions:
-            diffLen = 1024
+            diffLen = 512
             fftLen = int(np.ceil( 0.5*(diffLen+1) ))
             H = np.exp( -1j*(np.random.rand( numArraySpeakers, fftLen )) )
             h = np.fft.irfft( H, axis=1 )

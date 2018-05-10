@@ -22,7 +22,7 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
     def __init__( self,
                  context, name, parent,
                  numberOfObjects,
-                 maxHoaOrder,
+                 maxHoaOrder = None,
                  sofaFile = None,
                  decodingFilters = None,
                  interpolationSteps = None,
@@ -44,7 +44,9 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
             Containing component if there is one, None if this is a top-level component of the signal flow.
         numberOfObjects : int
             The number of audio objects to be rendered.
-        maxHoaOrder: int
+        maxHoaOrder: int or None
+            The maximum HOA order that can be reproduced. If None, the HOA order is deduced
+            from the first dimension of the HOA filters (possibly contained in a SOFA file).
         sofaFile: string or NoneType
         decodingFilters : numpy.ndarray or NoneType
             Alternative way to provide the HOA decoding filters.
@@ -62,8 +64,6 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
             The FFT library to be used in the filtering. THe default uses VISR's
             default implementation for the present platform.
         """
-        numHoaCoeffs = (maxHoaOrder+1)**2
-
         if (decodingFilters is None) == (sofaFile is None ):
             raise ValueError( "HoaObjectToBinauralRenderer: Either 'decodingFilters' or 'sofaFile' must be provided." )
         if sofaFile is None:
@@ -71,6 +71,15 @@ class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
         else:
             # pos and delays are not used here.
             [pos, filters, delays] = readSofaFile( sofaFile )
+
+        if maxHoaOrder is None:
+            numHoaCoeffs = filters.shape[0]
+            orderP1 = int(np.floor(np.sqrt(numHoaCoeffs)))
+            if orderP1**2 != numHoaCoeffs:
+                raise ValueError( "If maxHoaOrder is not given, the number of HOA filters must be a square number" )
+            maxHoaOrder = orderP1 - 1
+        else:
+            numHoaCoeffs = (maxHoaOrder+1)**2
 
         if filters.ndim != 3 or filters.shape[1] != 2 or filters.shape[0] < numHoaCoeffs:
             raise ValueError( "HoaObjectToBinauralRenderer: the filter data must be a 3D matrix where the second dimension is 2 and the first dimension is equal or larger than (maxHoaOrder+1)^2." )

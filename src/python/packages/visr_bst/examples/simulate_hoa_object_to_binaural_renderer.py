@@ -17,33 +17,33 @@ from visr_bst.util.rotation_functions import sph2cart
 # %% Configuration
 fs = 48000
 blockSize = 512
-numBinauralObjects = 64
+numBinauralObjects = 2
 numOutputChannels = 2;     # Binaural
 parameterUpdatePeriod = 1
 numBlocks = 256;
 fftImplementation = 'default' #
 
 # datasets are provided for odd orders 1,3,5,7,9
-maxHoaOrder = 9
+maxHoaOrder = 3
 
 # TODO: set file location
 sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % maxHoaOrder
 
 # Whether the sound source is moving or not
-useSourceMovement = False
+useSourceMovement = True
 
 # switch dynamic tracking on and off.
-useTracking = True
+useTracking = False
 
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
+#                                    maxHoaOrder,
 graph = HoaObjectToBinauralRenderer( context, "HoaBinauralRenderer", None,
                                     numBinauralObjects,
-                                    maxHoaOrder,
-                                    sofaFile,
+                                    sofaFile=sofaFile,
                                     interpolationSteps = blockSize,
                                     headTracking = useTracking,
                                     fftImplementation = fftImplementation
@@ -55,7 +55,7 @@ if not result:
 
 flow = rrl.AudioSignalFlow( graph )
 
-paramInput = flow.parameterReceivePort('objects')
+paramInput = flow.parameterReceivePort('objectVector')
 if useTracking:
     trackingInput = flow.parameterReceivePort( 'tracking' )
 
@@ -90,8 +90,12 @@ for blockIdx in range(0,numBlocks):
         az = azSequence[int(blockIdx%numPos)]
         el = 0
         ps.position = sph2cart( np.asarray([az, el, r]) )
+        ps.level = 0.5
+        ps.groupId = 5
+        ps.priority = 5
+        ps.channels = [0]
         ov = paramInput.data()
-        ov.set( [ ps1 ] )
+        ov.set( [ ps ] )
         paramInput.swapBuffers()
 
     if useTracking:

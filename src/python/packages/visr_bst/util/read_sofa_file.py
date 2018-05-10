@@ -4,7 +4,7 @@ import os
 import numpy as np
 import h5py
 
-from .rotation_functions import sph2cart, deg2rad
+from .rotation_functions import cart2sph, sph2cart, deg2rad
 
 def readSofaFile( fileName, dtype = np.float32,
                  truncationLength = None,
@@ -37,9 +37,11 @@ def readSofaFile( fileName, dtype = np.float32,
         # Otherwise the source positions are used.
         if hrir.ndim == 3:
             sofaPos = np.asarray( fileH.get('SourcePosition'), dtype=dtype )
+            pos = convertSofaSphToSph( sofaPos )
         else:
             sofaPos = np.asarray( fileH.get('ListenerView'), dtype=dtype )
-        pos = convertSofaSphToSph( sofaPos )
+            # Preliminary fix. This should retrieve the actual coordinate system used.
+            pos = cart2sph( sofaPos[:,0], sofaPos[:,1], sofaPos[:,2] )[:2,:].T
 
         return pos, hrir, delays
     finally:
