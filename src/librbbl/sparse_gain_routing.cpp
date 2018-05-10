@@ -17,6 +17,9 @@ namespace visr
 {
 namespace rbbl
 {
+
+SparseGainRoutingList::SparseGainRoutingList() = default;
+
 SparseGainRoutingList::SparseGainRoutingList( std::initializer_list<SparseGainRouting> const & entries )
 {
   for( auto e : entries )
@@ -29,6 +32,11 @@ SparseGainRoutingList::SparseGainRoutingList( std::initializer_list<SparseGainRo
     }
   }
 }
+
+SparseGainRoutingList::SparseGainRoutingList( const SparseGainRoutingList & rhs ) = default;
+
+SparseGainRoutingList& SparseGainRoutingList::operator=( const SparseGainRoutingList & rhs ) = default;
+
 
 /*static*/ SparseGainRoutingList const SparseGainRoutingList::fromJson( std::string const & initString )
 {
@@ -104,6 +112,11 @@ SparseGainRoutingList::SparseGainRoutingList( std::initializer_list<SparseGainRo
     }
   }
   return newList;
+}
+
+void SparseGainRoutingList::clear( )
+{
+  mRoutings.clear();
 }
 
 void SparseGainRoutingList::swap( SparseGainRoutingList& rhs )

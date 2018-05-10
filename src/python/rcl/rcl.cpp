@@ -32,6 +32,7 @@ namespace rcl
   void exportSceneDecoder( pybind11::module & m );
   void exportSceneEncoder( pybind11::module & m );
   void exportSignalRouting( pybind11::module & m );
+  void exportSparseGainMatrix( pybind11::module & m );
   void exportTimeFrequencyTransform( pybind11::module & m );
   void exportTimeFrequencyInverseTransform( pybind11::module & m );
   void exportUdpReceiver( pybind11::module & m );
@@ -69,6 +70,7 @@ PYBIND11_MODULE(rcl, m)
   exportSceneDecoder( m );
   exportSceneEncoder( m );
   exportSignalRouting( m );
+  exportSparseGainMatrix( m );
   exportTimeFrequencyInverseTransform( m );
   exportTimeFrequencyTransform( m );
   exportUdpReceiver( m );

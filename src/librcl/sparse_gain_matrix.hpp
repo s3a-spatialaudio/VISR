@@ -12,18 +12,16 @@
 #include <libvisr/parameter_input.hpp>
 
 #include <librbbl/gain_fader.hpp>
-
-#include <libpml/vector_parameter.hpp>
-#include <libpml/double_buffering_protocol.hpp>
-#include <libpml/message_queue_protocol.hpp>
-
 #include <librbbl/sparse_gain_routing.hpp>
 
-// #include <libefl/aligned_array.hpp>
+#include <libpml/double_buffering_protocol.hpp>
+#include <libpml/message_queue_protocol.hpp>
+#include <libpml/shared_data_protocol.hpp>
+#include <libpml/vector_parameter.hpp>
+#include <libpml/sparse_gain_routing_parameter.hpp>
 
-#include <cstddef> // for std::size_t
 #include <memory>
-#include <valarray>
+#include <vector>
 
 namespace visr
 {
@@ -48,13 +46,13 @@ public:
   /**
    * Enumeration describing which control parameter input are to be instantiated.
    */
-  enum class ControlInputs
+  enum class ControlPortConfig
   {
-    No = 0,        ///< No control inputs
-    Routings = 1,   ///< Set individual rpouting points (with gains)
-    List = 2,       /// Reset the complete list of routing points.
-    Gains = 4,      /// A vector of gains corresponding to the routing entries.
-    All = Routings | List | Gains ///< Convenience value that activates all control inputs
+    No = 0,            ///< No control inputs
+    RoutingPoints = 1, ///< Set individual routing points (with gains)
+    RoutingList = 2,   ///< Reset the complete list of routing points.
+    Gain = 4,          ///< A vector of gains corresponding to the routing entries.
+    All = RoutingPoints | RoutingList | Gain ///< Convenience value that activates all control inputs
   };
 
   /**
@@ -80,29 +78,53 @@ public:
                              std::size_t interpolationSteps,
                              std::size_t maxRoutingPoints,
                              rbbl::SparseGainRoutingList const & initialRoutings = rbbl::SparseGainRoutingList(),
-                             ControlInputs controlInputs = ControlInputs::No );
+                             ControlPortConfig controlInputs = ControlPortConfig::No );
 
-  void process( );
+  void process( ) override;
 
 private:
-  rbbl::GainFader< SampleType > mGainRamp;
+  void setRoutings( rbbl::SparseGainRoutingList const & newRoutings );
 
-  efl::BasicVector<SampleType> mOldGains;
+  efl::BasicVector<SampleType> mPreviousGains;
 
-  efl::BasicVector<SampleType> mNewGains;
+  efl::BasicVector<SampleType> mNextGains;
 
-  std::vector<std::size_t> mInputIndex;
-  std::vector<std::size_t> mOutputIndex;
+  //std::vector<std::size_t> mInputIndex;
+  //std::vector<std::size_t> mOutputIndex;
 
-  std::vector<std::size_t> mRampIndex;
+  rbbl::SparseGainRoutingList mRoutings;
+
+  std::size_t mRampIndex;
+
+  std::size_t const mNumRoutingPoints;
+
+  rbbl::GainFader<SampleType> const mGainRamp;
 
   AudioInput mInput;
   AudioOutput mOutput;
 
-  using RoutingEntryInput = ParameterInput<pml::MessageQueueProtocol, pml::VectorParameter<SampleType> >;
+  using GainInput = ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> >;
+  using RoutingPointInput = ParameterInput<pml::MessageQueueProtocol, pml::SparseGainRoutingParameter >;
+  using RoutingListInput = ParameterInput<pml::DoubleBufferingProtocol, pml::SparseGainRoutingListParameter >;
 
-  std::unique_ptr<ParameterInput<pml::DoubleBufferingProtocol, pml::VectorParameter<SampleType> > > mGainInput;
+  std::unique_ptr< GainInput > mGainInput;
+
+  std::unique_ptr< RoutingPointInput > mRoutingPointInput;
+
+  std::unique_ptr< RoutingListInput > mRoutingListInput;
 };
+
+/**
+* Bitwise operator to combine control input flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL SparseGainMatrix::ControlPortConfig operator|( SparseGainMatrix::ControlPortConfig lhs,
+  SparseGainMatrix::ControlPortConfig rhs );
+
+/**
+* Bitwise operator to extract mask control input flags.
+*/
+VISR_RCL_LIBRARY_SYMBOL SparseGainMatrix::ControlPortConfig operator&( SparseGainMatrix::ControlPortConfig lhs,
+  SparseGainMatrix::ControlPortConfig rhs );
 
 } // namespace rcl
 } // namespace visr

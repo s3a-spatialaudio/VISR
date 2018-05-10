@@ -17,6 +17,7 @@ set( SOURCES
  scalar_parameter.cpp
  shared_data_protocol.cpp
  signal_routing_parameter.cpp
+ sparse_gain_routing_parameter.cpp
  string_parameter.cpp
  time_frequency_parameter.cpp
  time_frequency_parameter_config.cpp
@@ -43,6 +44,7 @@ set( HEADERS
  scalar_parameter.hpp
  shared_data_protocol.hpp
  signal_routing_parameter.hpp
+ sparse_gain_routing_parameter.hpp
  string_parameter.hpp
  time_frequency_parameter.hpp
  time_frequency_parameter_config.hpp

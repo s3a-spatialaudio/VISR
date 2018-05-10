@@ -53,12 +53,15 @@ void exportSparseGainRouting( pybind11::module & m)
     .def( "__repr__", [](SparseGainRoutingList const & sgr )
     {
       std::stringstream ret;
+      ret << "[";
       for( auto e : sgr )
       {
-        ret << "( e:" << e.entryIndex << " r:" << e.rowIndex << " r:" << e.columnIndex << " g: " << e.gain << "), ";
+        ret << "( e:" << e.entryIndex << " r:" << e.rowIndex << " c:" << e.columnIndex << " g: " << e.gain << "), ";
       }
+      ret << "]";
       return ret.str();
     } )
+    .def( "clear", &SparseGainRoutingList::clear )
     .def( "addRouting", static_cast<void(SparseGainRoutingList::*)(SparseGainRouting::IndexType, SparseGainRouting::IndexType, SparseGainRouting::IndexType, SparseGainRouting::GainType)>(&SparseGainRoutingList::addRouting) )
     .def( "addRouting", static_cast<void(SparseGainRoutingList::*)(SparseGainRouting const &)>(&SparseGainRoutingList::addRouting) )
     .def( "removeRouting", static_cast<bool(SparseGainRoutingList::*)(SparseGainRouting const &)>(&SparseGainRoutingList::removeRouting) )

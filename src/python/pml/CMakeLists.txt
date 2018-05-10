@@ -14,6 +14,7 @@ pml.cpp
 scalar_parameter.cpp
 shared_data_protocol.cpp
 signal_routing_parameter.cpp
+sparse_gain_routing_parameter.cpp
 string_parameter.cpp
 vector_parameter.cpp
 )

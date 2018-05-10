@@ -85,7 +85,7 @@ public:
   /**
   * Default constructor, creates an empty list
   */
-  SparseGainRoutingList( ) {}
+  SparseGainRoutingList( );
 
   /**
    * Create a routing list from an C++11 initialiser list in a C++ source file.
@@ -97,7 +97,13 @@ public:
    * Copy constructor
    * @param rhs The object to be copied.
    */
-  SparseGainRoutingList( const SparseGainRoutingList & rhs ) = default;
+  SparseGainRoutingList( const SparseGainRoutingList & rhs );
+
+  /**
+  * Assign the content from another SparseGainRoutingList object.
+  * @param rhs The object whose contents is copied to this object.
+  */
+  SparseGainRoutingList& operator=( const SparseGainRoutingList & rhs );
 
   /**
    * Construct an object from an JSON initialiser string following the 'named constructor' idiom.
@@ -132,6 +138,11 @@ public:
   using RoutingsType = std::set< SparseGainRouting, CompareEntries >;
 
   /**
+   * Empty the routing list.
+   */
+  void clear();
+
+  /**
    * Exchange the contents with another SparseGainRoutingList object.
    * Does not throw exceptions.
    * @param rhs The object to be swapped with.
@@ -149,12 +160,6 @@ public:
    * @return Number of current routings.
    */
   std::size_t size() const { return mRoutings.size(); }
-
-  /**
-   * Assign the content from another SparseGainRoutingList object.
-   * @param rhs The object whose contents is copied to this object.
-   */
-  SparseGainRoutingList & operator=( SparseGainRoutingList const & rhs) = default; 
 
   RoutingsType::const_iterator begin() const { return mRoutings.begin(); }
 

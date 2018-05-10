@@ -23,6 +23,7 @@ void exportMatrixParameters( pybind11::module & m );
 void exportObjectVector( pybind11::module & m );
 void exportScalarParameters( pybind11::module & m );
 void exportSignalRoutingParameter( pybind11::module & m );
+void exportSparseGainRoutingParameter( pybind11::module & m );
 void exportStringParameter( pybind11::module & m );
 void exportVectorParameters( pybind11::module & m );
 }
@@ -53,6 +54,7 @@ PYBIND11_MODULE( pml, m )
   exportObjectVector( m );
   exportScalarParameters( m );
   exportSignalRoutingParameter( m );
+  exportSparseGainRoutingParameter( m );
   exportStringParameter( m );
   exportVectorParameters( m );
 

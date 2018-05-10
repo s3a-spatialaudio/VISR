@@ -21,45 +21,117 @@ SparseGainMatrix::SparseGainMatrix( SignalFlowContext const & context,
                                     std::size_t interpolationSteps,
                                     std::size_t maxRoutingPoints,
                                     rbbl::SparseGainRoutingList const & initialRoutings /* = rbbl::SparseGainRoutingList() */,
-                                    ControlInputs controlInputs /*= ControlInputs::No*/ )
+                                    ControlPortConfig controlInputs /*= ControlPortConfig::No*/ )
  : AtomicComponent( context, name, parent )
+ , mPreviousGains( maxRoutingPoints, cVectorAlignmentSamples )
+ , mNextGains( maxRoutingPoints, cVectorAlignmentSamples )
+ , mNumRoutingPoints( maxRoutingPoints )
+ , mRampIndex( 0 )
  , mGainRamp( context.period(), interpolationSteps, cVectorAlignmentSamples )
  , mInput( "in", *this, numberOfInputs )
  , mOutput( "out", *this, numberOfOutputs )
 {
-  //mInputChannels.resize( numberOfInputs, nullptr );
-  //mOutputChannels.resize( numberOfOutputs, nullptr );
-  //mMatrix.reset( new rbbl::SparseGainMatrix<SampleType>( numberOfInputs, numberOfOutputs, period(), interpolationSteps, initialGain, cVectorAlignmentSamples ) );
-  if( controlInputs != ControlInputs::No )
+  if( (controlInputs & ControlPortConfig::Gain) != ControlPortConfig::No )
   {
-#if 0
-    mGainInput.reset( new ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> >( "gainInput", *this,
-      pml::EmptyParameterConfig()) );
-#endif
+    mGainInput.reset( new GainInput( "gainInput", *this,
+      pml::VectorParameterConfig( mNumRoutingPoints) ) );
   }
+  if( (controlInputs & ControlPortConfig::RoutingList) != ControlPortConfig::No )
+  {
+    mRoutingListInput.reset( new RoutingListInput( "routingListInput", *this,
+                             pml::EmptyParameterConfig() ) );
+  }
+  if( (controlInputs & ControlPortConfig::RoutingPoints) != ControlPortConfig::No )
+  {
+    mRoutingPointInput.reset( new RoutingPointInput( "routingPointInput", *this,
+      pml::EmptyParameterConfig() ) );
+  }
+  mPreviousGains.fillValue( 0.0f);
+  mNextGains.fillValue( 0.0f );
+
+  setRoutings( initialRoutings );
 }
 
 void SparseGainMatrix::process()
 {
-#if 0
-  if( mGainInput )
+  if( mRoutingListInput and mRoutingListInput->changed() )
   {
-    // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
-    // Thus would be a match for the DoubleBufferingProtocol.
-    mMatrix->setNewGains( mGainInput->data() );
+    mPreviousGains.swap( mNextGains );
+    setRoutings( mRoutingListInput->data() );
+    mRampIndex = 0;
+    mRoutingListInput->resetChanged();
+  }
+  if( mRoutingPointInput )
+  {
+    while( not mRoutingPointInput->empty() )
+    {
+      // TODO: Implement setting
+
+      mRoutingPointInput->pop();
+    }
+  }
+  if( mGainInput and mGainInput->changed() )
+  {
+    pml::VectorParameter<SampleType> const & newGains = mGainInput->data();
+    mNextGains.swap( mPreviousGains );
+    mNextGains.assign( newGains );
+    mRampIndex = 0;
+    mGainInput->resetChanged();
   }
 
-  // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
-  if( mInput.width() == 0 or mOutput.width() == 0 )
+  std::size_t const numOutputs{ mOutput.width() };
+  std::size_t blockSize( period() );
+  for( std::size_t outIdx(0); outIdx < numOutputs; ++outIdx )
   {
-    return;
+    efl::vectorZero( mOutput[outIdx], blockSize, mOutput.alignmentSamples() );
   }
-  mInput.getChannelPointers( &mInputChannels[0] );
-  mOutput.getChannelPointers( &mOutputChannels[0] );
-
-  // mMatrix->process( &mInputChannels[0], &mOutputChannels[0] );
-#endif
+  for( auto r : mRoutings )
+  {
+    mGainRamp.scale( mInput[r.columnIndex], mOutput[r.rowIndex],
+      mPreviousGains[ r.entryIndex ], mNextGains[ r.entryIndex ], mRampIndex );
+  }
+  mRampIndex = std::min( mRampIndex+1, mGainRamp.interpolationPeriods() );
 }
+
+void SparseGainMatrix::setRoutings( rbbl::SparseGainRoutingList const & newRoutings )
+{
+  std::size_t const numInputs{ mInput.width() };
+  std::size_t const numOutputs{ mOutput.width() };
+
+  for( auto r : newRoutings )
+  {
+    if( r.entryIndex >= mNumRoutingPoints )
+    {
+      status( StatusMessage::Error, "Entry index '", r.entryIndex, "' exceeds number of routing points (", mNumRoutingPoints, ")." );
+    }
+    if( r.rowIndex >= numOutputs )
+    {
+      status( StatusMessage::Error, "Row index '", r.rowIndex, "' exceeds number of output channels (", numOutputs, ")." );
+    }
+    if( r.columnIndex >= numInputs )
+    {
+      status( StatusMessage::Error, "Column index '", r.columnIndex, "' exceeds number of input channels (", numInputs, ")." );
+    }
+    mNextGains[ r.entryIndex ] = r.gain;
+  }
+  mRoutings = newRoutings;
+}
+
+SparseGainMatrix::ControlPortConfig operator&( SparseGainMatrix::ControlPortConfig lhs,
+  SparseGainMatrix::ControlPortConfig rhs )
+{
+  using T = std::underlying_type<SparseGainMatrix::ControlPortConfig>::type;
+  return static_cast<SparseGainMatrix::ControlPortConfig>(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+SparseGainMatrix::ControlPortConfig operator|( SparseGainMatrix::ControlPortConfig lhs,
+  SparseGainMatrix::ControlPortConfig rhs )
+{
+  using T = std::underlying_type<SparseGainMatrix::ControlPortConfig>::type;
+  return static_cast<SparseGainMatrix::ControlPortConfig>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+
 
 } // namespace rcl
 } // namespace visr
