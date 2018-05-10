@@ -118,15 +118,12 @@ class ObjectToVirtualLoudspeakerRenderer( visr.CompositeComponent ):
             objectRendererOptions["interpolationPeriod"] = context.period
 
         if "diffusionFilters" not in objectRendererOptions:
-            diffLen = 1024
+            diffLen = 512
             fftLen = int(np.ceil( 0.5*(diffLen+1) ))
             H = np.exp( -1j*(np.random.rand( numArraySpeakers, fftLen )) )
             h = np.fft.irfft( H, axis=1 )
             diffFilters = efl.BasicMatrixFloat( h )
             objectRendererOptions["diffusionFilters"] = diffFilters
-
-        # Workaround: Use a hard-coded reverb config until passing from is solved.
-        objectRendererOptions['reverbConfig'] = '{ "numberOfReverbObjects": 1, "discreteReflectionsPerObject": 20, "lateReverbFilterLength": 2.0 }'
 
         self.objectRenderer = CoreRenderer( context, "ObjectRenderer", self,
                                            **objectRendererOptions )

@@ -36,9 +36,10 @@ useSourceMovement = False
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaDirectory = './data'
+sofaDirectory = 'c:/local/SOFA/BBC_BRIR'
 
 sofaFile = 'bbcrdlr_systemD.sofa'
+# sofaFile = 'bbcrdlr_reduced_onsets.sofa'
 
 fullSofaPath = os.path.join( sofaDirectory, sofaFile )
 
@@ -51,8 +52,11 @@ if not os.path.exists( fullSofaPath ):
 hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath,
                                               truncationLength = BRIRtruncationLength )
 
-arrayConfigFile = 'bs2051-4+5+0.xml'
-arrayConfigPath = os.path.join( sofaDirectory, arrayConfigFile )
+#arrayConfigFile = 'bs2051-4+5+0.xml'
+#arrayConfigPath = os.path.join( sofaDirectory, arrayConfigFile )
+
+arrayConfigPath = 'c:/local/VISR/config/generic/bs2051-4+5+0.xml'
+
 
 arrayConfig = panning.LoudspeakerArray( arrayConfigPath )
 
@@ -62,6 +66,8 @@ numObjects = 16
 numLoudspeakers = hrirData.shape[2]
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
+
+objectRendererOptions = { 'reverbConfig': """{ "numReverbObjects": 1,"discreteReflectionsPerObject": 20, "lateReverbFilterLength": 2.0 }""" }
 
 renderer = ObjectToVirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", None,
                                       numberOfObjects = numObjects,
@@ -73,7 +79,8 @@ renderer = ObjectToVirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRende
                                       dynamicITD = useDynamicITD,
                                       hrirInterpolation = useHRIRinterpolation,
                                       filterCrossfading = useCrossfading,
-                                      loudspeakerConfiguration = arrayConfigPath
+                                      loudspeakerConfiguration = arrayConfigPath,
+                                      objectRendererOptions = objectRendererOptions
                                       )
 
 result,messages = rrl.checkConnectionIntegrity(renderer)
