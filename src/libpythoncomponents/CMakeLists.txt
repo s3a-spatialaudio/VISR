@@ -1,17 +1,20 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( SOURCES
+set( SOURCES
 wrapper.cpp
 )
 
 # Basically, this makes the files show up in the Visual studio project.
-SET( HEADERS
+set( HEADERS
 export_symbols.hpp
 wrapper.hpp)
 
-INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_DIR} )
+include_directories( ${PYTHON_INCLUDE_DIR} )
+# The pybind11 header is used to include Python.h.
+# This avoids preprocessor magic to work around platform specifics.
+include_directories( ${PYBIND11_INCLUDE_DIR} )
 
-ADD_LIBRARY( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
+add_library( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive dependencies
 # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
 # exactly one instance of pythonsupport::InitialisationGuard
@@ -32,4 +35,4 @@ install(TARGETS pythoncomponents_static ARCHIVE DESTINATION lib )
 install(TARGETS pythoncomponents_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
 
 # Add the unit test directory.
-ADD_SUBDIRECTORY( test )
+add_subdirectory( test )

@@ -215,11 +215,10 @@ IF( BUILD_PYTHON_BINDINGS )
 
   find_package( PythonLibs REQUIRED )
 
-  include_directories( ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
-
   # As we cannot use the PythonLibsNew package due to possible mismatches of the Python library name,
   # we have to set the Python extensions ourselves (using the same variable names as created by
-  #  PythonLibsNew.
+  # PythonLibsNew.
+  # Note: The pybind11Tools mechanism apparently needs this as well.
   if( WIN32 )
     set( PYTHON_MODULE_EXTENSION ".pyd" )
   elseif( APPLE )
@@ -228,12 +227,11 @@ IF( BUILD_PYTHON_BINDINGS )
     set( PYTHON_MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
   endif( WIN32 )
 
+  # This variable is used by pybind11Tools
+  SET( PYBIND11_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+
   # Enable the pybind11 cmake support
-  # TODO: Decide whether it's worth to use that in the future or remove it
-  # and the implementation files cmake_modules/pybind11Tools.cmake
-  # and cmake_modules/FindPythonLibsNew.cmake
-  # Support is activated in the CMakeLists.txt files of the respective
-  # Python binding modules.
+  # This takes, amongst other things, care of providing proper compile/link options.
   include( pybind11Tools )
 
 ENDIF( BUILD_PYTHON_BINDINGS )
