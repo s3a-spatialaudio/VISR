@@ -25,8 +25,8 @@ SparseGainMatrix::SparseGainMatrix( SignalFlowContext const & context,
  : AtomicComponent( context, name, parent )
  , mPreviousGains( maxRoutingPoints, cVectorAlignmentSamples )
  , mNextGains( maxRoutingPoints, cVectorAlignmentSamples )
- , mNumRoutingPoints( maxRoutingPoints )
  , mRampIndex( 0 )
+ , mNumRoutingPoints( maxRoutingPoints )
  , mGainRamp( context.period(), interpolationSteps, cVectorAlignmentSamples )
  , mInput( "in", *this, numberOfInputs )
  , mOutput( "out", *this, numberOfOutputs )
@@ -87,7 +87,7 @@ void SparseGainMatrix::process()
   }
   for( auto r : mRoutings )
   {
-    mGainRamp.scale( mInput[r.columnIndex], mOutput[r.rowIndex],
+    mGainRamp.scaleAndAccumulate( mInput[r.columnIndex], mOutput[r.rowIndex],
       mPreviousGains[ r.entryIndex ], mNextGains[ r.entryIndex ], mRampIndex );
   }
   mRampIndex = std::min( mRampIndex+1, mGainRamp.interpolationPeriods() );

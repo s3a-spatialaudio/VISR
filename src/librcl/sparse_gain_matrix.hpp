@@ -89,9 +89,6 @@ private:
 
   efl::BasicVector<SampleType> mNextGains;
 
-  //std::vector<std::size_t> mInputIndex;
-  //std::vector<std::size_t> mOutputIndex;
-
   rbbl::SparseGainRoutingList mRoutings;
 
   std::size_t mRampIndex;
