@@ -14,9 +14,13 @@ initialisation_guard.hpp
 load_module.hpp
 )
 
-INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_DIR} )
+include_directories( ${PYTHON_INCLUDE_DIR} )
+# The pybind11 header is used to include Python.h.
+# This avoids preprocessor magic to make this include statement
+# portable.
+include_directories( ${PYBIND11_INCLUDE_DIR} )
 
-ADD_LIBRARY( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
+add_library( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive dependencies
 target_link_libraries( pythonsupport_static PUBLIC ${PYTHON_LIBRARY} )
 target_link_libraries( pythonsupport_static PUBLIC Boost::filesystem )
@@ -49,4 +53,4 @@ install(TARGETS pythonsupport_shared EXPORT VISR_exports ARCHIVE DESTINATION lib
 # Add the unit test directory.
 # No unit test for this basic functionality yet.
 # see libpythoncomponents/test
-# ADD_SUBDIRECTORY( test )
+# add_subdirectory( test )

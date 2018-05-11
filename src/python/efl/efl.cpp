@@ -22,5 +22,4 @@ PYBIND11_MODULE( efl, m )
   using namespace visr::efl::python;
   exportBasicVectors( m );
   exportBasicMatrices( m );
-
 }

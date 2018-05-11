@@ -22,18 +22,12 @@ time_frequency_feedthrough.hpp
 visr_renderer.hpp
 )
 
-# Signal that Python support is activated
-# It would be nicer if we could limit that to visr_renderer.cpp
-if( BUILD_PYTHON_BINDINGS )
-  add_definitions(  -DVISR_PYTHON_SUPPORT=1 )
-endif( BUILD_PYTHON_BINDINGS )
-
 add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_static PROPERTIES OUTPUT_NAME signalflows )
 # Transitive link dependencies
-target_link_libraries( signalflows_static rcl_static )
-target_link_libraries( signalflows_static pml_static )
-target_link_libraries( signalflows_static reverbobject_static )
+target_link_libraries( signalflows_static PUBLIC rcl_static )
+target_link_libraries( signalflows_static PUBLIC pml_static )
+target_link_libraries( signalflows_static PUBLIC reverbobject_static )
 
 add_library( signalflows_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_shared PROPERTIES OUTPUT_NAME signalflows )
@@ -43,9 +37,9 @@ target_compile_definitions( signalflows_shared PRIVATE -DVISR_BUILD_SIGNALFLOWS_
 target_compile_definitions( signalflows_shared PUBLIC -DVISR_BUILD_SIGNALFLOWS_SHARED_LIBRARY=1)
 set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 # Transitive link dependencies
-target_link_libraries( signalflows_shared rcl_shared )
-target_link_libraries( signalflows_shared reverbobject_shared )
-target_link_libraries( signalflows_shared pml_shared )
+target_link_libraries( signalflows_shared PUBLIC rcl_shared )
+target_link_libraries( signalflows_shared PUBLIC reverbobject_shared )
+target_link_libraries( signalflows_shared PUBLIC pml_shared )
 
 
 # Set public headers to be installed for the shared target.
@@ -56,9 +50,13 @@ set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" 
 # If Python is activated, enable the optional use of a Metadapter to receive and process object metadata. 
 if( BUILD_PYTHON_BINDINGS )
   # It would be nicer if we could limit that to visr_renderer.cpp
-  add_definitions(  -DVISR_PYTHON_SUPPORT=1 )
-  target_link_libraries( signalflows_static pythoncomponents_static )
-  target_link_libraries( signalflows_shared pythoncomponents_shared )
+  add_definitions( -DVISR_PYTHON_SUPPORT=1 )
+  target_link_libraries( signalflows_static PUBLIC pythoncomponents_static )
+
+  # Deliberate decision: make this dependency private to avoid propagating the libpython dependency.
+  # This would create a problem in the signalflows Python binding, which must not depend on the Python lib
+  # (that causes errors on many Mac OS systems).
+  target_link_libraries( signalflows_shared PRIVATE pythoncomponents_shared )
 endif( BUILD_PYTHON_BINDINGS )
 
 
