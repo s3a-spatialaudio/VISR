@@ -62,13 +62,6 @@ sparse_gain_routing.hpp
 include_directories( ${FFTS_INCLUDE_DIR} )
 include_directories( ${KISSFFT_INCLUDE_DIR} )
 
-if( BUILD_USE_FFTW )
-  add_definitions( -DBUILD_USE_FFTW )
-  include_directories( ${FFTW_INCLUDES} )
-  list( APPEND SOURCES fftw_wrapper.cpp )
-  list( APPEND HEADERS fftw_wrapper.hpp )
-endif( BUILD_USE_FFTW )
-
 if( BUILD_USE_IPP )
   add_definitions( -DBUILD_USE_IPP )
   include_directories( ${IPP_INCLUDE_DIR} )
@@ -76,17 +69,13 @@ if( BUILD_USE_IPP )
   list( APPEND HEADERS ipp_fft_wrapper.hpp )
 endif( BUILD_USE_IPP )
 
-
 add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
 
 target_link_libraries( rbbl_static PUBLIC efl_static )
 target_link_libraries( rbbl_static PRIVATE ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_static PRIVATE ${KISSFFT_LIBRARY} )
-if( BUILD_USE_FFTW )
-  target_link_libraries( rbbl_static PRIVATE ${FFTW3_LIBRARY} )
-  target_link_libraries( rbbl_static PRIVATE ${FFTW3F_LIBRARY} )
-endif( BUILD_USE_FFTW )
+
 if( BUILD_USE_IPP )
   target_link_libraries( rbbl_static PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
@@ -101,10 +90,6 @@ set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJEC
 target_link_libraries( rbbl_shared PUBLIC efl_shared )
 target_link_libraries( rbbl_shared PRIVATE ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_shared PRIVATE ${KISSFFT_LIBRARY} )
-if( BUILD_USE_FFTW )
-  target_link_libraries( rbbl_shared PRIVATE ${FFTW3_LIBRARY} )
-  target_link_libraries( rbbl_shared PRIVATE ${FFTW3F_LIBRARY} )
-endif( BUILD_USE_FFTW )
 if( BUILD_USE_IPP )
   target_link_libraries( rbbl_shared PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )

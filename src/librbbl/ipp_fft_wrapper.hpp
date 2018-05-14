@@ -4,6 +4,7 @@
 #ifndef VISR_LIBRBBL_IPP_FFT_WRAPPER_HPP_INCLUDED
 #define VISR_LIBRBBL_IPP_FFT_WRAPPER_HPP_INCLUDED
 
+#include "export_symbols.hpp"
 #include "fft_wrapper_base.hpp"
 
 #include <memory>
@@ -18,7 +19,7 @@ namespace rbbl
  * @tparam DataType The floating-point element type for the transform. The class is specialized for type \p float and \p double.
  */
 template< typename DataType >
-class IppFftWrapper: public FftWrapperBase<DataType>
+class VISR_RBBL_LIBRARY_SYMBOL IppFftWrapper: public FftWrapperBase<DataType>
 {
 public:
   /**
@@ -31,18 +32,18 @@ public:
 
   ~IppFftWrapper();
 
-  /*virtual*/ efl::ErrorCode forwardTransform( DataType const * const in, FrequencyDomainType * out ) const;
+  /*virtual*/ efl::ErrorCode forwardTransform( DataType const * const in, FrequencyDomainType * out ) const override;
 
-  /*virtual*/ efl::ErrorCode inverseTransform( FrequencyDomainType const * const in, DataType * out ) const;
+  /*virtual*/ efl::ErrorCode inverseTransform( FrequencyDomainType const * const in, DataType * out ) const override;
 
-  /*virtual*/ DataType forwardScalingFactor( ) const { return static_cast<DataType>(1.0); };
+  /*virtual*/ DataType forwardScalingFactor( ) const override { return static_cast<DataType>(1.0); }
 
-  /*virtual*/ DataType inverseScalingFactor() const { return static_cast<DataType>(1.0); }
+  /*virtual*/ DataType inverseScalingFactor() const override { return static_cast<DataType>(1.0); }
 
 private:
   /**
    * Internal implementation object to avoid IPP dependencies in the header.
-   * Holds the FFTW plans and any other required data structures.
+   * Holds the FFT plan, any other required data structures, or temporary buffers
    */
   class Impl;
   /**
