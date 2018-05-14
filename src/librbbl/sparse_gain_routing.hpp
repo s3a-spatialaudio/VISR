@@ -26,7 +26,7 @@ public:
   using GainType = float; //for the moment, use a fixed type for gains instead of making it a template parameter
 
   /**
-   * Default constructor to create an object with invalid input, outpur, and filter indices.
+   * Default constructor to create an object with invalid entry, input, and output indices.
    */
   SparseGainRouting()
     : entryIndex( cInvalidIndex )
@@ -37,12 +37,13 @@ public:
 
   /**
    * Constructor with arguments.
-   * @param pInput Input index (zero-offset)
-   * @param pOutput Output index (zero-offset)
-   * @param pFilter Filter index (zero-offset)
+   * @param pEntry Unique index of the entry (zero-offset)
+   * @param pRow Row index of the routing point (zero-offset)
+   * @param pColumn Column index of the routing point (zero-offset)
    * @param pGain Initial gain value, linear scale. Default: 1.0
    */
-  SparseGainRouting( IndexType pEntry, IndexType pRow, IndexType pColumn, GainType pGain = 1.0 )
+  SparseGainRouting( IndexType pEntry, IndexType pRow, IndexType pColumn,
+                     GainType pGain = static_cast<GainType>(1.0) )
     : entryIndex(pEntry)
     , rowIndex( pRow )
     , columnIndex( pColumn )
@@ -168,17 +169,17 @@ public:
   /**
    * Set a new routing using specified by single parameters.
    * In case an entry already exists for this input-output routing, it is replaced by the new one.
-   * @param inputIdx Index of the input channel (zero-offset)
-   * @param outputIdx Index of the output channel (zero-offset)
-   * @param filterIdx Index of the filter (zero-offset)
+   * @param entryIdx Unique index of the entry (zero-offset).
+   * @param rowIdx Row of the output channel (zero-offset).
+   * @param columnIdx Column index of the routing point (zero-offset).
    * @param gain Gain value of the routing entry, linear scale. Default: 1.0
    */
   void addRouting( SparseGainRouting::IndexType entryIdx, 
-                   SparseGainRouting::IndexType inputIdx,
-                   SparseGainRouting::IndexType outputIdx,
+                   SparseGainRouting::IndexType rowIdx,
+                   SparseGainRouting::IndexType columnIdx,
                    SparseGainRouting::GainType gain = 0.0f )
   {
-    addRouting( SparseGainRouting( entryIdx, inputIdx, outputIdx, gain) );
+    addRouting( SparseGainRouting( entryIdx, rowIdx, columnIdx, gain) );
   }
 
   /**
@@ -216,9 +217,8 @@ public:
   bool removeRouting( IndexType inputIdx, IndexType outputIdx );
 
   /**
-   * Return a routing entry for a given pair of input and output index.
-   * @param inputIdx The input index of the reuested routing entry.
-   * @param outputIdx The output index of the reuested routing entry.
+   * Return a routing entry for a given entry index.
+   * @param entryIdx The index of the reuested routing entry.
    * @return A reference to the requested routing entry, or a reference to an object with invalidated index entries if the specified roputing is not found.
    */
   SparseGainRouting const & getEntry( IndexType entryIdx ) const

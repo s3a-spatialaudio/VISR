@@ -65,9 +65,9 @@ public:
    * @param interpolationSteps The number of samples needed for the transition after a new gain is set.
    * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
    * immediate application of the new gain value.
-   * @param initialGain The initial entries of the the gain matrix (linear scale). All entries are initialised to
-   * this value (default: 0.0)
-   * @param controlInputs Flag controlling whether to instantiate a parameter input to receive gain matrix updates.
+   * @param maxRoutingPoints The maimum number of routing points supported. This number must not be exceeded either in the initial setting or during run-time updates. This number also determines the size of the gain vector parameter for runtime updates.
+   * @param initialRoutings
+   * @param controlInputs Enumeration value to control which parameter inputs for runtime control are instantiated. See @see SparseGainMatrix::ControlPortConfig Multiple values can be combined by bit-wise or operations.
    * @todo Describe the complete semantics of the transition.
    */
   explicit SparseGainMatrix( SignalFlowContext const & context,
@@ -77,7 +77,8 @@ public:
                              std::size_t numberOfOutputs,
                              std::size_t interpolationSteps,
                              std::size_t maxRoutingPoints,
-                             rbbl::SparseGainRoutingList const & initialRoutings = rbbl::SparseGainRoutingList(),
+                             rbbl::SparseGainRoutingList const & initialRoutings
+                               = rbbl::SparseGainRoutingList(),
                              ControlPortConfig controlInputs = ControlPortConfig::No );
 
   void process( ) override;
