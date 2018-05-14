@@ -10,8 +10,8 @@ import rbbl
 import pml
 import rcl
 
-from .hoa_rotation_matrix_calculator import HoaRotationMatrixCalculator
-from .util.read_sofa_file import readSofaFile
+from visr_bst.hoa_components import HoaRotationMatrixCalculator
+from visr_bst.util import readSofaFile
 
 class HoaBinauralRenderer( visr.CompositeComponent ):
     """

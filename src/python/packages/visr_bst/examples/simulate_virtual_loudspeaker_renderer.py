@@ -1,7 +1,7 @@
 # %BST_LICENCE_TEXT%
 
 from visr_bst import VirtualLoudspeakerRenderer
-from visr_bst.util.read_sofa_file import readSofaFile
+from visr_bst.util import readSofaFile, deg2rad
 
 import visr
 import rrl
@@ -42,6 +42,10 @@ if not os.path.exists( fullSofaPath ):
 
 hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath,
                                               truncationLength = BRIRtruncationLength )
+
+# Crude check for 'horizontal-only' listener view directions
+if np.max( np.abs(hrirPos[:,1])) < deg2rad( 1 ):
+    hrirPos = hrirPos[ :, [0,2] ] # transform to polar coordinates
 
 # Dimension of hrirData is #measurement positions x #ears x # lsp x ir length
 numLoudspeakers = hrirData.shape[2]

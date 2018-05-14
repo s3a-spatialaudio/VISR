@@ -7,9 +7,9 @@ import pml
 import rbbl
 import rcl
 
-from .util.read_sofa_file import readSofaFile
+from visr_bst.util import readSofaFile
 
-from .virtual_loudspeaker_controller import VirtualLoudspeakerController
+from visr_bst import VirtualLoudspeakerController
 
 import numpy as np
 

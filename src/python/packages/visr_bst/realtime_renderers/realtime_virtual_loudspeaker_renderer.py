@@ -2,15 +2,13 @@
 
 # %BST_LICENCE_TEXT%
 
+import numpy as np
+
 import visr
-import rcl
 
-from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+from visr_bst import VirtualLoudspeakerRenderer
 
-from .util.read_sofa_file import readSofaFile
-
-# To be removed as soon as the tracking device is passed as a constructor parameter
-# from .tracker.razor_ahrs import RazorAHRS
+from visr_bst.util import readSofaFile, deg2rad
 
 class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
         def __init__( self,
@@ -50,6 +48,10 @@ class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
                 # Use the positions obtained from the SOFA file only if the argument is not set
                 if hrirPositions is None:
                     hrirPositions = sofaHrirPositions
+
+            # Crude check for 'horizontal-only' listener view directions
+            if np.max( np.abs(hrirPositions[:,1])) < deg2rad( 1 ):
+                hrirPositions = hrirPositions[ :, [0,2] ] # transform to polar coordinates
 
             numberOfLoudspeakers = hrirData.shape[2]
 

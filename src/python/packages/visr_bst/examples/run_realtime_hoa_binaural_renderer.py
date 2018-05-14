@@ -6,8 +6,8 @@ import visr
 import rrl
 import audiointerfaces as ai
 
-from visr_bst.realtime_hoa_binaural_renderer import RealtimeHoaBinauralRenderer
-from visr_bst.tracker.razor_ahrs_with_udp_calibration_trigger import RazorAHRSWithUdpCalibrationTrigger
+from visr_bst import RealtimeHoaBinauralRenderer
+from visr_bst.tracker import RazorAHRSWithUdpCalibrationTrigger
 
 import os
 from sys import platform, exit

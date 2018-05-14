@@ -5,11 +5,11 @@ Created on Fri Sep  8 08:16:32 2017
 @author: af5u13
 """
 
-from visr_bst.dynamic_hrir_controller import DynamicHrirController
+from visr_bst import DynamicHrirController
 
-from visr_bst.util.rotation_functions import sph2cart, cart2sph, rad2deg, deg2rad
-from visr_bst.util.read_sofa_file import readSofaFile
-from visr_bst.util.sofa_extract_delay import sofaExtractDelay
+from visr_bst.util import sph2cart, cart2sph, rad2deg, deg2rad
+from visr_bst.util import readSofaFile
+from visr_bst.util import sofaExtractDelay
 
 import numpy as np
 import os
@@ -38,6 +38,8 @@ context = visr.SignalFlowContext( period=bufferSize, samplingFrequency=fs)
 
 sofaFile = './data/dtf b_nh169.sofa'
 if not os.path.exists( sofaFile ):
+    if not os.path.exists( './data/' ):
+        os.mkdir( './data/' )
     urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
 
 if dynamicITD:

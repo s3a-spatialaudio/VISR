@@ -6,10 +6,10 @@ import visr
 import rrl
 import audiointerfaces as ai
 
-from visr_bst.realtime_dynamic_hrir_renderer import RealtimeDynamicHrirRenderer
-from visr_bst.tracker.razor_ahrs_with_udp_calibration_trigger import RazorAHRSWithUdpCalibrationTrigger
+from visr_bst import RealtimeDynamicHrirRenderer
+from visr_bst.tracker import RazorAHRSWithUdpCalibrationTrigger
 
-from visr_bst.util.sofa_extract_delay import sofaExtractDelay
+from visr_bst.util import sofaExtractDelay
 
 import os
 from urllib.request import urlretrieve
@@ -77,8 +77,11 @@ elif platform in ['windows', 'win32' ]:
 
 sofaFile = './data/dtf b_nh169.sofa'
 if not os.path.exists( sofaFile ):
+    if not os.path.exists( './data/' ):
+        os.mkdir( './data/' )
     urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
 
+# Extract the time delay from the SOFA data and store it in the 'Data.Delay' field.
 if useDynamicITD:
     sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
     if not os.path.exists( sofaFileTD ):
@@ -93,7 +96,7 @@ renderer = RealtimeDynamicHrirRenderer( context, "HrirRenderer", None,
                                        numberOfObjects = numBinauralObjects,
                                        sofaFile = sofaFile,
                                        dynamicITD = useDynamicITD,
-                                       dynamicILD = useDynamicITD,
+                                       dynamicILD = useDynamicILD,
                                        hrirInterpolation = useHRIRinterpolation,
                                        filterCrossfading=useCrossfading,
                                        headTrackingReceiver = headTrackingDevice,

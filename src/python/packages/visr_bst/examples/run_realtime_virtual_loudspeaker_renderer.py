@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from visr_bst.realtime_virtual_loudspeaker_renderer import RealtimeVirtualLoudspeakerRenderer
-from visr_bst.tracker.razor_ahrs_with_udp_calibration_trigger import RazorAHRSWithUdpCalibrationTrigger
+from visr_bst import RealtimeVirtualLoudspeakerRenderer
+from visr_bst.tracker import RazorAHRSWithUdpCalibrationTrigger
 
 import visr
 import rrl

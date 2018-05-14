@@ -7,8 +7,9 @@ import pml
 import rbbl
 import rcl
 
-from .util.read_sofa_file import readSofaFile
-from .dynamic_hrir_controller import DynamicHrirController
+from visr_bst.util import readSofaFile
+
+from visr_bst import DynamicHrirController
 
 class DynamicHrirRenderer( visr.CompositeComponent ):
     """

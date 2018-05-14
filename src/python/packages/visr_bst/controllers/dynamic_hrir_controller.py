@@ -14,7 +14,7 @@ import rbbl
 import objectmodel as om
 
 # Helper functions included in the BST pacjage
-from .util.rotation_functions import calcRotationMatrix, deg2rad, sph2cart
+from visr_bst.util import calcRotationMatrix, deg2rad, sph2cart
 
 class DynamicHrirController( visr.AtomicComponent ):
     """

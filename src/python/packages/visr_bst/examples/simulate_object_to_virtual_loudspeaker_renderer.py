@@ -52,7 +52,8 @@ if not os.path.exists( fullSofaPath ):
 hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath,
                                               truncationLength = BRIRtruncationLength )
 
-if np.max( np.abs(hrirPos[:,1])) < deg2rad( 1 ): # Crude check for 'horizontal-only arrays.
+# Crude check for 'horizontal-only' listener view directions
+if np.max( np.abs(hrirPos[:,1])) < deg2rad( 1 ):
     hrirPos = hrirPos[ :, [0,2] ] # transform to polar coordinates
 
 #arrayConfigFile = 'bs2051-4+5+0.xml'

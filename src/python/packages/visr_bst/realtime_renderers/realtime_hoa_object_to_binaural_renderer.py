@@ -6,7 +6,7 @@ import visr
 import pml
 import rcl
 
-from .hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
+from visr_bst import HoaObjectToBinauralRenderer
 
 class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
     """
