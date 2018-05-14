@@ -6,9 +6,9 @@ import visr
 import pml
 import rcl
 
-from .dynamic_hrir_renderer import DynamicHrirRenderer
+from visr_bst import DynamicHrirRenderer
 
-from .util.read_sofa_file import readSofaFile
+from visr_bst.util import readSofaFile
 
 class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
     """

@@ -20,10 +20,6 @@ set( SOURCES
  test_main.cpp
 )
 
-if( BUILD_USE_FFTW )
-  list( APPEND SOURCES fftw_wrapper.cpp)
-endif( BUILD_USE_FFTW )
-
 if( BUILD_USE_IPP )
   list( APPEND SOURCES ipp_fft_wrapper.cpp)
 endif( BUILD_USE_IPP )

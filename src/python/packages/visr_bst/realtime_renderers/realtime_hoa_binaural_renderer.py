@@ -3,37 +3,29 @@
 # %BST_LICENCE_TEXT%
 
 import visr
-import pml
-import rcl
 
-from .hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
+from visr_bst import HoaBinauralRenderer
 
-class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
+class RealtimeHoaBinauralRenderer(visr.CompositeComponent ):
     """
-    VISR component for realtime audio rendering of object-based scenes using a
-    Higher-order Ambisonics encoding of point source/plane wave objects and binaural
-    rendering of the soiundfield representation.
+    VISR component for realtime audio rendering of Higher-order Ambisonics (HOA) audio.
 
     It contains a HoaObjectToRenderer component, but optionally adds a receiver
-    component for head tracking devices and real-time receipt of object metadata
-    from UDP network packets.
+    component for head tracking devices
     """
     def __init__( self,
                  context, name, parent,
                  *,                       # Only keyword arguments after this point
-                 numberOfObjects,
-                 maxHoaOrder,
+                 hoaOrder = None,
                  sofaFile = None,
                  decodingFilters = None,
                  interpolationSteps = None,
                  headTracking = True,
                  headOrientation = None,
-                 objectChannelAllocation = False,
                  fftImplementation = "default",
                  headTrackingReceiver = None,
                  headTrackingPositionalArguments = None,
-                 headTrackingKeywordArguments = None,
-                 sceneReceiveUdpPort = None
+                 headTrackingKeywordArguments = None
                  ):
         """
         Constructor.
@@ -46,10 +38,10 @@ class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
             Name of the component, Standard visr.Component construction argument
         parent : visr.CompositeComponent
             Containing component if there is one, None if this is a top-level component of the signal flow.
-        numberOfObjects : int
-            The number of audio objects to be rendered.
-        maxHoaOrder: int
+        hoaOrder: optional, int or None
             HOA order used for encoding the point source and plane wave objects.
+            If not provided, the order is determined from the number of decoding filters (either passed as a matrix or in
+            a SOFA file)
         sofaFile: string, optional
             A SOFA file containing the HOA decoding filters. These are expects as a
             2 x (maxHoaIrder+1)^2 array in the field Data.IR
@@ -63,10 +55,6 @@ class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
             or the initial view direction
         headTracking: bool
             Whether dynamic head tracking is active.
-        objectChannelAllocation: bool
-            Whether the processing resources are allocated from a pool of resources
-            (True), or whether fixed processing resources statically tied to the audio signal channels are used.
-            Not implemented at the moment, so leave the default value (False).
         fftImplementation: string, optional
             The FFT implementation to use. Default value enables VISR's default
             FFT library for the platform.
@@ -77,20 +65,12 @@ class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
             Must be a tuple. If there is only a single argument, a trailing comma must be added.
         headTrackingKeywordArguments: dict, optional
             Keyword arguments passed to the constructor of the head tracking receiver. Must be a dictionary (dict)
-        sceneReceiveUdpPort: int, optional
-            A UDP port number where scene object metadata (in the S3A JSON format) is to be received).
-            If not given (default), no network receiver is instantiated, and the object exposes a
-            top-level parameter input port "objectVectorInput"
         """
-        super( RealtimeHoaObjectToBinauralRenderer, self ).__init__( context, name, parent )
-        self.objectSignalInput = visr.AudioInputFloat( "audioIn", self, numberOfObjects )
-        self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
-
+        super( RealtimeHoaBinauralRenderer, self ).__init__( context, name, parent )
         enableTracking = (headTrackingReceiver is not None)
 
-        self.hoaBinauralRenderer = HoaObjectToBinauralRenderer( context, "HoaBinauralRenderer", self,
-                                                        numberOfObjects = numberOfObjects,
-                                                        maxHoaOrder = maxHoaOrder,
+        self.hoaBinauralRenderer = HoaBinauralRenderer( context, "HoaBinauralRenderer", self,
+                                                        hoaOrder = hoaOrder,
                                                         sofaFile = sofaFile,
                                                         decodingFilters = decodingFilters,
                                                         interpolationSteps = interpolationSteps,
@@ -98,21 +78,6 @@ class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
                                                         headOrientation = headOrientation,
                                                         fftImplementation = fftImplementation
                                                         )
-
-        if sceneReceiveUdpPort is None:
-            self.objectVectorInput = visr.ParameterInput( "objectVector", self, pml.ObjectVector.staticType,
-                                                         pml.DoubleBufferingProtocol.staticType,
-                                                         pml.EmptyParameterConfig() )
-            self.parameterConnection( self.objectVectorInput,
-                                     self.hoaBinauralRenderer.parameterPort("objects"))
-        else:
-            self.sceneReceiver = rcl.UdpReceiver( context, "SceneReceiver", self,
-                                                 port = int(sceneReceiveUdpPort) )
-            self.sceneDecoder = rcl.SceneDecoder( context, "SceneDecoder", self )
-            self.parameterConnection( self.sceneReceiver.parameterPort("messageOutput"),
-                                 self.sceneDecoder.parameterPort("datagramInput") )
-            self.parameterConnection( self.sceneDecoder.parameterPort( "objectVectorOutput"),
-                                 self.hoaBinauralRenderer.parameterPort("objects"))
 
         if enableTracking:
             if headTrackingPositionalArguments == None:
@@ -125,6 +90,9 @@ class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
             self.parameterConnection( self.trackingDevice.parameterPort("orientation"),
                                      self.hoaBinauralRenderer.parameterPort("tracking"))
 
-        self.audioConnection(  self.objectSignalInput, self.hoaBinauralRenderer.audioPort("audioIn"))
-        self.audioConnection( self.hoaBinauralRenderer.audioPort("audioOut"), self.binauralOutput)
+        self.hoaSignalInput = visr.AudioInputFloat( "audioIn", self,
+                                                   self.hoaBinauralRenderer.audioPort("audioIn").width )
+        self.binauralOutput = visr.AudioOutputFloat( "audioOut", self, 2 )
 
+        self.audioConnection(  self.hoaSignalInput, self.hoaBinauralRenderer.audioPort("audioIn"))
+        self.audioConnection( self.hoaBinauralRenderer.audioPort("audioOut"), self.binauralOutput)

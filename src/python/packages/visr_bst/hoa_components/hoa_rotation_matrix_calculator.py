@@ -7,13 +7,12 @@ import numpy as np
 import visr
 import pml
 
-from .util.rotation_functions import calcRotationMatrix, rotationMatrixReorderingACN
-# Use the vectorised, faster function.
-from .util.spherical_harmonics_rotation import allSphericalHarmonicsRotationMatrices
+from visr_bst.util import calcRotationMatrix, rotationMatrixReorderingACN
+from visr_bst.util import allSphericalHarmonicsRotationMatrices
 
 class HoaRotationMatrixCalculator( visr.AtomicComponent ):
     """
-    Component compute a spherical harmonics rotation matrix. The matrix coeffients
+    Component to compute a spherical harmonics rotation matrix. The matrix coeffients
     are output as a coefficient list for a sparse matrix.
     """
     def __init__( self,

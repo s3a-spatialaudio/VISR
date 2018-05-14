@@ -10,9 +10,9 @@ import rbbl
 import pml
 import rcl
 
-from .hoa_object_encoder import HoaObjectEncoder
-from .hoa_coefficient_rotation import HoaCoefficientRotation
-from .util.read_sofa_file import readSofaFile
+from visr_bst.hoa_components import HoaObjectEncoder
+from visr_bst.hoa_components import HoaCoefficientRotation
+from visr_bst.util import readSofaFile
 
 class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
     """

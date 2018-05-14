@@ -10,8 +10,8 @@ import objectmodel as om
 import rbbl
 
 # Helper functions contained in the
-from .util.rotation_functions  import cart2sph
-from .util.real_spherical_harmonics import allSphHarmRealACN
+from visr_bst.util import cart2sph
+from visr_bst.util import allSphHarmRealACN
 
 # Standard Python packages
 import numpy as np

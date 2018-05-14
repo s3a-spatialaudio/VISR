@@ -9,7 +9,7 @@ import visr
 import rrl
 import time
 
-from visr_bst.hoa_binaural_renderer import HoaBinauralRenderer
+from visr_bst import HoaBinauralRenderer
 
 # %% Configuration
 fs = 48000

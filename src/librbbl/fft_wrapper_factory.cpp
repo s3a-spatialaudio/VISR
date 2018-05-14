@@ -8,9 +8,6 @@
 #endif
 #include "kiss_fft_wrapper.hpp"
 #include "ffts_wrapper.hpp"
-#ifdef BUILD_USE_FFTW
-#include "fftw_wrapper.hpp"
-#endif
 
 #include <stdexcept>
 
@@ -91,10 +88,6 @@ struct InstantiateFftWrapperFactory
 
     FftWrapperFactory<float>::registerWrapper<FftsWrapper<float> >( "ffts" );
     // FFTS is not implemented for type double.
-#ifdef BUILD_USE_FFTW
-    FftWrapperFactory<float>::registerWrapper<FftwWrapper<float> >( "fftw" );
-    FftWrapperFactory<double>::registerWrapper<FftwWrapper<double> >( "fftw" );
-#endif
 #ifdef BUILD_USE_IPP
     FftWrapperFactory<float>::registerWrapper<IppFftWrapper<float> >( "ipp" );
     FftWrapperFactory<double>::registerWrapper<IppFftWrapper<double> >( "ipp" );

@@ -7,9 +7,8 @@ import numpy as np
 import visr
 import pml
 
-from .util.rotation_functions import calcRotationMatrix, rotationMatrixReorderingACN
-# Use the vectorised, faster function.
-from .util.spherical_harmonics_rotation import allSphericalHarmonicsRotationMatrices
+from visr_bst.util import calcRotationMatrix, rotationMatrixReorderingACN
+from visr_bst.util import allSphericalHarmonicsRotationMatrices
 
 class HoaCoefficientRotation( visr.AtomicComponent ):
     """

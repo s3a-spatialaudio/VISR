@@ -1,24 +1,23 @@
 # %BST_LICENCE_TEXT%
 
 # Controllers
-from .dynamic_hrir_controller import DynamicHrirController
-from .virtual_loudspeaker_controller import VirtualLoudspeakerController
-
-# Other conponents
-from .hoa_object_encoder import HoaObjectEncoder
-from .hoa_coefficient_rotation import HoaCoefficientRotation
-from .hoa_rotation_matrix_calculator import HoaRotationMatrixCalculator
+from .controllers.dynamic_hrir_controller import DynamicHrirController
+from .controllers.virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 # Full renderers
-from .dynamic_hrir_renderer import DynamicHrirRenderer
-from .hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
-from .hoa_binaural_renderer import HoaBinauralRenderer
-from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
-from .object_to_virtual_loudspeaker_renderer import ObjectToVirtualLoudspeakerRenderer
+from .renderers.dynamic_hrir_renderer import DynamicHrirRenderer
+from .renderers.hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
+from .renderers.hoa_binaural_renderer import HoaBinauralRenderer
+from .renderers.virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
+from .renderers.object_to_virtual_loudspeaker_renderer import ObjectToVirtualLoudspeakerRenderer
 
-from .realtime_dynamic_hrir_renderer_ahrs import RealtimeDynamicHrirRendererAhrs
-from .realtime_hoa_object_to_binaural_renderer import RealtimeHoaObjectToBinauralRenderer
-from .realtime_virtual_loudspeaker_renderer import RealtimeVirtualLoudspeakerRenderer
+from .realtime_renderers.realtime_dynamic_hrir_renderer import RealtimeDynamicHrirRenderer
+from .realtime_renderers.realtime_hoa_object_to_binaural_renderer import RealtimeHoaObjectToBinauralRenderer
+from .realtime_renderers.realtime_hoa_binaural_renderer import RealtimeHoaBinauralRenderer
+from .realtime_renderers.realtime_virtual_loudspeaker_renderer import RealtimeVirtualLoudspeakerRenderer
+
+# Import HOA components
+from . import hoa_components
 
 # Import utility function subdirectory.
 from . import util

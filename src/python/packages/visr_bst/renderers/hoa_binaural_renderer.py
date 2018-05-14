@@ -10,8 +10,8 @@ import rbbl
 import pml
 import rcl
 
-from .hoa_rotation_matrix_calculator import HoaRotationMatrixCalculator
-from .util.read_sofa_file import readSofaFile
+from visr_bst.hoa_components import HoaRotationMatrixCalculator
+from visr_bst.util import readSofaFile
 
 class HoaBinauralRenderer( visr.CompositeComponent ):
     """
@@ -23,6 +23,7 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
                  hoaOrder = None,
                  sofaFile = None,
                  decodingFilters = None,
+                 interpolationSteps = None,
                  headOrientation = None,
                  headTracking = True,
                  fftImplementation = 'default'
@@ -47,6 +48,8 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
             must be provided in 'decodingFIlters' parameter.
         decodingFilters : numpy.ndarray or NoneType
             Alternative way to provide the HOA decoding filters.
+        interpolationSteps: int, optional
+           Number of samples to transition to new object positions after an update.
         headOrientation : array-like
             Head orientation in spherical coordinates (2- or 3-element vector or list). Either a static orientation (when no tracking is used),
             or the initial view direction
@@ -75,6 +78,10 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
 
         if filters.ndim != 3 or filters.shape[1] != 2 or filters.shape[0] < numHoaCoeffs:
             raise ValueError( "HoaObjectToBinauralRenderer: the filter data must be a 3D matrix where the second dimension is 2 and the first dimension is equal or larger than (hoaOrder+1)^2." )
+
+        # Set default value for fading between interpolation
+        if interpolationSteps is None:
+            interpolationSteps = context.period
 
         super( HoaBinauralRenderer, self ).__init__( context, name, parent )
         self.hoaSignalInput = visr.AudioInputFloat( "audioIn", self, numHoaCoeffs )
@@ -123,7 +130,7 @@ class HoaBinauralRenderer( visr.CompositeComponent ):
             self.rotationMatrix = rcl.SparseGainMatrix( context, "rotationMatrix", self,
                                              numberOfInputs = numHoaCoeffs,
                                              numberOfOutputs = numHoaCoeffs,
-                                             interpolationSteps = context.period,
+                                             interpolationSteps = interpolationSteps,
                                              maxRoutingPoints = numMatrixCoeffs,
                                              initialRoutings = rotationMatrixRoutings,
                                              controlInputs = rcl.SparseGainMatrix.ControlPortConfig.Gain )

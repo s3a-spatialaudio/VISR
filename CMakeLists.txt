@@ -283,15 +283,6 @@ FIND_PACKAGE( SndFile REQUIRED )
   LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/kissfft) )
 FIND_PACKAGE( KissFFT REQUIRED )
 
-## FFTW
-OPTION( BUILD_USE_FFTW "Use the FFTW library. Do not use for distribution, because this makes the whole project GPL." OFF )
-IF( BUILD_USE_FFTW )
-  IF( WIN32 ) # This includes 64-bit platforms.
-    LIST( APPEND CMAKE_PREFIX_PATH $ENV{FFTW_ROOT} )
-  ENDIF( WIN32 )
-  FIND_PACKAGE( FFTW REQUIRED )
-ENDIF( BUILD_USE_FFTW )
-
 # IPP
 OPTION( BUILD_USE_IPP "Use the Intel IPP for fast arithmetic functions and trasnforms. Set the environment variable IPP_ROOT accordingly." OFF )
 IF( BUILD_USE_IPP )
