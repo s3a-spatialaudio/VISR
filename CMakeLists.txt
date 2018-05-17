@@ -254,8 +254,7 @@ IF( WIN32 ) # This includes 64-bit platforms!
   LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
  
 ENDIF( WIN32 )
-FIND_PACKAGE( Portaudio )
-INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
+FIND_PACKAGE( Portaudio REQUIRED )
 
 ## Jack Audio Connection Kit (JACK)
 OPTION( BUILD_USE_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
