@@ -17,7 +17,6 @@ test_main.cpp
 target_link_libraries( ${APPLICATION_NAME} objectmodel_static )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
-target_link_libraries( ${APPLICATION_NAME} Boost::system )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 
 

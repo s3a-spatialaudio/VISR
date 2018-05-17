@@ -24,7 +24,6 @@ add_library( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
 # Transitive dependencies
 target_link_libraries( pythonsupport_static PUBLIC ${PYTHON_LIBRARY} )
 target_link_libraries( pythonsupport_static PUBLIC Boost::filesystem )
-target_link_libraries( pythonsupport_static PUBLIC Boost::system )
 
 add_library( pythonsupport_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythonsupport_shared PROPERTIES OUTPUT_NAME pythonsupport )
@@ -35,7 +34,6 @@ target_compile_definitions( pythonsupport_shared PUBLIC -DVISR_BUILD_PYTHONSUPPO
 set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( pythonsupport_shared PUBLIC ${PYTHON_LIBRARY} )
 target_link_libraries( pythonsupport_shared PUBLIC Boost::filesystem )
-target_link_libraries( pythonsupport_shared PUBLIC Boost::system )
 
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)

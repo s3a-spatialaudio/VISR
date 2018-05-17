@@ -27,7 +27,6 @@ target_link_libraries( reverbobject_static PUBLIC rcl_static )
 target_link_libraries( reverbobject_static PUBLIC objectmodel_static )
 target_link_libraries( reverbobject_static PUBLIC efl_static )
 target_link_libraries( reverbobject_static PRIVATE Boost::filesystem )
-target_link_libraries( reverbobject_static PRIVATE Boost::system )
 
 add_library( reverbobject_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( reverbobject_shared PROPERTIES OUTPUT_NAME reverbobject )
@@ -41,8 +40,6 @@ target_link_libraries( reverbobject_shared PUBLIC rcl_shared )
 target_link_libraries( reverbobject_shared PUBLIC objectmodel_shared )
 target_link_libraries( reverbobject_shared PUBLIC efl_shared )
 target_link_libraries( reverbobject_shared PRIVATE Boost::filesystem )
-target_link_libraries( reverbobject_shared PRIVATE Boost::system )
-
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only

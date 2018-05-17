@@ -7,7 +7,6 @@ add_library( apputilities_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( apputilities_static PROPERTIES OUTPUT_NAME apputilities )
 target_link_libraries( apputilities_static PUBLIC Boost::program_options )
 target_link_libraries( apputilities_static PRIVATE Boost::filesystem )
-target_link_libraries( apputilities_static PRIVATE Boost::system)
 
 add_library( apputilities_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( apputilities_shared PROPERTIES OUTPUT_NAME apputilities )
@@ -18,7 +17,6 @@ target_compile_definitions( apputilities_shared PUBLIC -DVISR_BUILD_APPUTILITIES
 set_target_properties( apputilities_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( apputilities_shared PUBLIC Boost::program_options )
 target_link_libraries( apputilities_shared PRIVATE Boost::filesystem )
-target_link_libraries( apputilities_shared PRIVATE Boost::system)
 
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)

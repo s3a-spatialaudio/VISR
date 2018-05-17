@@ -2,8 +2,8 @@
 
 #include "vector_functions_reference_impl.hpp"
 
-#include <boost/preprocessor/seq/for_each.hpp>
-#include <boost/preprocessor/seq/enum.hpp>
+// #include <boost/preprocessor/seq/for_each.hpp>
+// #include <boost/preprocessor/seq/enum.hpp>
 
 namespace visr
 {
@@ -25,6 +25,7 @@ namespace efl
    #undef __FUNCTION_MACRO__
 */
 
+/*
 //Here we should use our API macro
 #define EXPLICIT_INSTANTIATION_VECTOR_ZERO(r, d, __type__) \
   template ErrorCode vectorZero<__type__>( __type__ * const, std::size_t, std::size_t );
@@ -32,7 +33,7 @@ namespace efl
 #define EXPLICIT_INSTANTIATION_FUNCTION(r, d, __type__) \
   template ErrorCode vectorZero<__type__>( __type__ * const, std::size_t, std::size_t );
 BOOST_PP_SEQ_FOR_EACH(EXPLICIT_INSTANTIATION_VECTOR_ZERO, _, NUMERIC_TYPES)
-
+*/
 
 template ErrorCode vectorFill<float>( float const, float * const, std::size_t, std::size_t );
 template ErrorCode vectorFill<double>( double const, double * const, std::size_t, std::size_t );

@@ -57,7 +57,8 @@ point_source_with_reverb_parser.hpp
 add_library( objectmodel_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( objectmodel_static PROPERTIES OUTPUT_NAME objectmodel )
 
-target_link_libraries( objectmodel_static rbbl_static )
+target_link_libraries( objectmodel_static PUBLIC rbbl_static )
+target_link_libraries( objectmodel_static PRIVATE Boost::boost ) # Adds the boost include directory
 
 add_library( objectmodel_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( objectmodel_shared PROPERTIES OUTPUT_NAME objectmodel )
@@ -66,7 +67,8 @@ set_target_properties( objectmodel_shared PROPERTIES ARCHIVE_OUTPUT_NAME objectm
 set_target_properties( objectmodel_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_compile_definitions( objectmodel_shared PUBLIC -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 )
 target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
-target_link_libraries( objectmodel_shared rbbl_shared )
+target_link_libraries( objectmodel_shared PUBLIC rbbl_shared )
+target_link_libraries( objectmodel_shared PRIVATE Boost::boost ) # Adds the boost include directory
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

@@ -60,7 +60,6 @@ target_link_libraries( pml_static PUBLIC objectmodel_static )
 target_link_libraries( pml_static PUBLIC visr_static )
 target_link_libraries( pml_static PRIVATE ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_static PUBLIC Boost::filesystem )
-target_link_libraries( pml_static PUBLIC Boost::system )
 
 add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
@@ -73,7 +72,6 @@ target_link_libraries( pml_shared PUBLIC objectmodel_shared )
 target_link_libraries( pml_shared PUBLIC visr_shared )
 target_link_libraries( pml_shared PRIVATE ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_shared PUBLIC Boost::filesystem )
-target_link_libraries( pml_shared PUBLIC Boost::system )
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

@@ -31,8 +31,9 @@ signal_routing_internal.hpp
 add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
 # Transitive link dependencies
-target_link_libraries( rrl_static visr_static )
-target_link_libraries( rrl_static efl_static )
+target_link_libraries( rrl_static PUBLIC visr_static )
+target_link_libraries( rrl_static PUBLIC efl_static )
+target_link_libraries( rrl_static PRIVATE Boost::boost ) # Adds the boost include directory
 
 add_library( rrl_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
@@ -41,8 +42,9 @@ set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
 target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1 -DVISR_BUILD_RRL_LIBRARY=1)
 target_compile_definitions( rrl_shared PUBLIC -DVISR_BUILD_RRL_SHARED_LIBRARY=1)
 # Transitive link dependencies
-target_link_libraries( rrl_shared visr_shared )
-target_link_libraries( rrl_shared efl_shared )
+target_link_libraries( rrl_shared PUBLIC visr_shared )
+target_link_libraries( rrl_shared PUBLIC efl_shared )
+target_link_libraries( rrl_shared PRIVATE Boost::boost ) # Adds the boost include directory
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

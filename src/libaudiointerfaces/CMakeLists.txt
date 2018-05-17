@@ -20,13 +20,13 @@ IF( BUILD_USE_JACK )
 
 ENDIF( BUILD_USE_JACK )
 
-INCLUDE_DIRECTORIES( ${PORTAUDIO_INCLUDE_DIR} )
-
 add_library( audiointerfaces_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( audiointerfaces_static PROPERTIES OUTPUT_NAME audiointerfaces )
 # Transitive link dependencies
 target_link_libraries( audiointerfaces_static PRIVATE rrl_static)
 target_link_libraries( audiointerfaces_static PRIVATE ${PORTAUDIO_LIBRARIES} )
+target_include_directories( audiointerfaces_static PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
+
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_static PRIVATE ${JACK_LIBRARY} )
   target_link_libraries( audiointerfaces_static PRIVATE rbbl_static )
@@ -41,6 +41,7 @@ target_compile_definitions( audiointerfaces_shared PUBLIC -DVISR_BUILD_AUDIOINTE
 set_target_properties( audiointerfaces_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( audiointerfaces_shared PRIVATE rrl_shared )
 target_link_libraries( audiointerfaces_shared PRIVATE ${PORTAUDIO_LIBRARIES} )
+target_include_directories( audiointerfaces_static PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_shared PRIVATE ${JACK_LIBRARY} )
   target_link_libraries( audiointerfaces_shared PRIVATE rbbl_shared )

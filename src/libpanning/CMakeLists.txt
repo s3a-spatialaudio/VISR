@@ -33,7 +33,6 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
   target_link_libraries( panning_static PRIVATE Boost::regex )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 target_link_libraries( panning_static PRIVATE Boost::filesystem )
-target_link_libraries( panning_static PRIVATE Boost::system )
 
 add_library( panning_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( panning_shared PROPERTIES OUTPUT_NAME panning )
@@ -47,7 +46,6 @@ if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
   target_link_libraries( panning_shared PRIVATE Boost::regex )
 endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 target_link_libraries( panning_shared PRIVATE Boost::filesystem )
-target_link_libraries( panning_shared PRIVATE Boost::system )
 
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)

@@ -26,10 +26,11 @@ ADD_LIBRARY( maxsupport_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( maxsupport_static PROPERTIES OUTPUT_NAME maxsupport )
 
 # Transitive dependencies
-target_link_libraries( maxsupport_static rrl_static )
-target_link_libraries( maxsupport_static efl_static )
-target_link_libraries( maxsupport_static ${MAXSDK_AUDIO_LIBRARY} )
-target_link_libraries( maxsupport_static ${MAXSDK_API_LIBRARY} )
+target_link_libraries( maxsupport_static PUBLIC rrl_static )
+target_link_libraries( maxsupport_static PUBLIC efl_static )
+target_link_libraries( maxsupport_static PUBLIC ${MAXSDK_AUDIO_LIBRARY} )
+target_link_libraries( maxsupport_static PUBLIC ${MAXSDK_API_LIBRARY} )
+target_link_libraries( maxsupport_static PRIVATE Boost::boost ) # Adds the boost include directory
 
 add_library( maxsupport_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( maxsupport_shared PROPERTIES OUTPUT_NAME maxsupport )
@@ -40,10 +41,11 @@ target_compile_definitions( maxsupport_shared PUBLIC -DVISR_BUILD_MAXSUPPORT_SHA
 set_target_properties( maxsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Transitive dependencies
-target_link_libraries( maxsupport_shared rrl_shared )
-target_link_libraries( maxsupport_shared efl_shared )
-target_link_libraries( maxsupport_shared ${MAXSDK_AUDIO_LIBRARY} )
-target_link_libraries( maxsupport_shared ${MAXSDK_API_LIBRARY} )
+target_link_libraries( maxsupport_shared PUBLIC rrl_shared )
+target_link_libraries( maxsupport_shared PUBLIC efl_shared )
+target_link_libraries( maxsupport_shared PUBLIC ${MAXSDK_AUDIO_LIBRARY} )
+target_link_libraries( maxsupport_shared PUBLIC ${MAXSDK_API_LIBRARY} )
+target_link_libraries( maxsupport_shared PRIVATE Boost::boost ) # Adds the boost include directory
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

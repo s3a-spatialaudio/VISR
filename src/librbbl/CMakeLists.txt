@@ -75,6 +75,8 @@ set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
 target_link_libraries( rbbl_static PUBLIC efl_static )
 target_link_libraries( rbbl_static PRIVATE ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_static PRIVATE ${KISSFFT_LIBRARY} )
+target_link_libraries( rbbl_static PRIVATE Boost::boost ) # Adds the boost include directory 
+
 
 if( BUILD_USE_IPP )
   target_link_libraries( rbbl_static PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
@@ -90,6 +92,7 @@ set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJEC
 target_link_libraries( rbbl_shared PUBLIC efl_shared )
 target_link_libraries( rbbl_shared PRIVATE ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_shared PRIVATE ${KISSFFT_LIBRARY} )
+target_link_libraries( rbbl_shared PUBLIC Boost::boost ) # Adds the boost include directory 
 if( BUILD_USE_IPP )
   target_link_libraries( rbbl_shared PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )

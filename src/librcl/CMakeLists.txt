@@ -77,7 +77,6 @@ target_link_libraries( rcl_static PUBLIC rbbl_static )
 target_link_libraries( rcl_static PUBLIC efl_static )
 target_link_libraries( rcl_static PUBLIC Boost::filesystem )
 target_link_libraries( rcl_static PUBLIC Boost::thread )
-target_link_libraries( rcl_static PUBLIC Boost::system )
 
 add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
@@ -95,7 +94,6 @@ target_link_libraries( rcl_shared PUBLIC rbbl_shared )
 target_link_libraries( rcl_shared PUBLIC efl_shared )
 target_link_libraries( rcl_shared PUBLIC Boost::filesystem )
 target_link_libraries( rcl_shared PUBLIC Boost::thread )
-target_link_libraries( rcl_shared PUBLIC Boost::system )
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
