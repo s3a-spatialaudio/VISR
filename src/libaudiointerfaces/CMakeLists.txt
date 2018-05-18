@@ -25,6 +25,7 @@ set_target_properties( audiointerfaces_static PROPERTIES OUTPUT_NAME audiointerf
 # Transitive link dependencies
 target_link_libraries( audiointerfaces_static PRIVATE rrl_static)
 target_link_libraries( audiointerfaces_static PRIVATE ${PORTAUDIO_LIBRARIES} )
+target_link_libraries( audiointerfaces_static PRIVATE Boost::boost ) # Set the boost include directory.
 target_include_directories( audiointerfaces_static PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
 
 if( BUILD_USE_JACK )
@@ -40,8 +41,9 @@ target_compile_definitions( audiointerfaces_shared PRIVATE -DVISR_BUILD_AUDIOINT
 target_compile_definitions( audiointerfaces_shared PUBLIC -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1)
 set_target_properties( audiointerfaces_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 target_link_libraries( audiointerfaces_shared PRIVATE rrl_shared )
+target_link_libraries( audiointerfaces_shared PRIVATE Boost::boost ) # Set the boost include directory.
 target_link_libraries( audiointerfaces_shared PRIVATE ${PORTAUDIO_LIBRARIES} )
-target_include_directories( audiointerfaces_static PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
+target_include_directories( audiointerfaces_shared PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
 if( BUILD_USE_JACK )
   target_link_libraries( audiointerfaces_shared PRIVATE ${JACK_LIBRARY} )
   target_link_libraries( audiointerfaces_shared PRIVATE rbbl_shared )
