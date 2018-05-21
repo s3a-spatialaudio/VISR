@@ -1,0 +1,51 @@
+<panningConfiguration>
+  <loudspeaker id="M+000" channel="1">
+    <polar az="0.0" el="0.0" r="1.994"/>
+  </loudspeaker>
+  <loudspeaker id="M+030" channel="2">
+    <polar az="30.0" el="0.0" r="2.37201"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="3">
+    <polar az="-30.0" el="0.0" r="2.37201"/>
+  </loudspeaker>
+  <loudspeaker id="U+045" channel="4">
+    <polar az="45.0" el="40.0" r="1.91029"/>
+  </loudspeaker>
+  <loudspeaker id="U-045" channel="5">
+    <polar az="-45.0" el="40.0" r="1.91029"/>
+  </loudspeaker>
+  <loudspeaker id="M+090" channel="6">
+    <polar az="90.0" el="0.0" r="2.284"/>
+  </loudspeaker>
+  <loudspeaker id="M-090" channel="7">
+    <polar az="-90.0" el="0.0" r="2.284"/>
+  </loudspeaker>
+  <loudspeaker id="M+135" channel="8">
+    <polar az="135.0" el="0.0" r="3.00613"/>
+  </loudspeaker>
+  <loudspeaker id="M-135" channel="9">
+    <polar az="-135.0" el="0.0" r="3.00613"/>
+  </loudspeaker>
+  <loudspeaker id="U+180" channel="10">
+    <polar az="180.0" el="40.0" r="1.91029"/>
+  </loudspeaker>
+  <virtualspeaker id="VotD">
+    <polar az="0.0" el="-90.0" r="1.0"/>
+  </virtualspeaker>
+  <triplet l1="U+180" l2="U+045" l3="M+135"/>
+  <triplet l1="M+090" l2="U+045" l3="M+135"/>
+  <triplet l1="M+090" l2="U+045" l3="M+030"/>
+  <triplet l1="M+090" l2="VotD" l3="M+135"/>
+  <triplet l1="M+090" l2="VotD" l3="M+030"/>
+  <triplet l1="M-030" l2="VotD" l3="M+030"/>
+  <triplet l1="M-030" l2="VotD" l3="M-090"/>
+  <triplet l1="M-135" l2="U+180" l3="M+135"/>
+  <triplet l1="M-135" l2="VotD" l3="M+135"/>
+  <triplet l1="M-135" l2="VotD" l3="M-090"/>
+  <triplet l1="U-045" l2="U+180" l3="U+045"/>
+  <triplet l1="U-045" l2="M-030" l3="M-090"/>
+  <triplet l1="U-045" l2="M-135" l3="M-090"/>
+  <triplet l1="U-045" l2="M-135" l3="U+180"/>
+  <triplet l1="U-045" l2="M-030" l3="M+030"/>
+  <triplet l1="U-045" l2="U+045" l3="M+030"/>
+</panningConfiguration>

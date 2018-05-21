@@ -1,0 +1,21 @@
+<panningConfiguration>
+  <loudspeaker id="M+030" channel="1">
+    <polar az="30.0" r="2.37201"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="2">
+    <polar az="-30.0" r="2.37201"/>
+  </loudspeaker>
+  <loudspeaker id="M+000" channel="3">
+    <polar az="0.0" r="1.994"/>
+  </loudspeaker>
+  <loudspeaker id="M+110" channel="4">
+    <polar az="110.0" r="2.4594300000000002"/>
+  </loudspeaker>
+  <loudspeaker id="M-110" channel="5">
+    <polar az="-110.0" r="2.4594300000000002"/>
+  </loudspeaker>
+  <triplet l1="M+030" l2="M+110"/>
+  <triplet l1="M-110" l2="M+110"/>
+  <triplet l1="M-030" l2="M+030"/>
+  <triplet l1="M-030" l2="M-110"/>
+</panningConfiguration>
