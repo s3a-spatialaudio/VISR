@@ -37,7 +37,7 @@ if useTracking:
     if platform == 'linux' or platform == 'linux2':
         port = "/dev/ttyUSB0"
     elif platform == 'darwin':
-        port = "/dev/cu.usbserial-AJ03GSC8"
+        port = "/dev/cu.usbserial-AJ03GR8O"
     elif platform in ['windows','win32']:
         port = "COM4"
 
@@ -75,15 +75,22 @@ elif platform in ['windows', 'win32' ]:
 #    audioIfcCfg = """{ "hostapi": "ASIO" }"""   # If you have a professional audio interface with an ASIO driver
     audioIfcName = "PortAudio"
 
-sofaFile = './data/dtf b_nh169.sofa'
-if not os.path.exists( sofaFile ):
-    if not os.path.exists( './data/' ):
-        os.mkdir( './data/' )
-    urlretrieve( 'http://sofacoustics.org/data/database/ari%20(artificial)/dtf%20b_nh169.sofa',sofaFile )
 
-# Extract the time delay from the SOFA data and store it in the 'Data.Delay' field.
+# Select and load the HRIR data
+sofaFile = '../data/sofa/hrir/HRIR_L2354.sofa'
+
+if not os.path.exists( sofaFile ):
+    sofaDir = os.path.split( sofaFile )[0]
+    if not os.path.exists( sofaDir ):
+        os.makedirs( sofaDir )
+    urlretrieve( 'http://sofacoustics.org/data/database/thk/HRIR_L2354.sofa',sofaFile )
+
+# If the ITDs are to be applied separately, we create a version of the SOFA file 
+# that conains the delays separately in the Data.Delay dataset.
+# Note: This mechanism fails if the original SOFA file already cantains the delay data
+# (it would be discarded).
 if useDynamicITD:
-    sofaFileTD = './data/dtf b_nh169_timedelay.sofa'
+    sofaFileTD = os.path.splitext( sofaFile )[0] + '_modelled_onsets.sofa'
     if not os.path.exists( sofaFileTD ):
         sofaExtractDelay( sofaFile, sofaFileTD )
     sofaFile = sofaFileTD

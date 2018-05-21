@@ -76,20 +76,31 @@ elif platform in ['windows', 'win32' ]:
 
 ###################################
 
-sofaDirectory = './data'
+sofaDirectory = '../data/sofa/brir'
 
-sofaFile = 'bbcrdlr_systemA.sofa' # BS-2051 0+2+0 (Stereo)
-#sofaFile = 'bbcrdlr_systemB.sofa' # BS-2051 0+5+0 (5.1)
-#sofaFile = 'bbcrdlr_systemD.sofa' # BS-2051 4+5+0
+# Loudspeaker setups according to ITU-R BS.2051
+# Dataset described in:
+# Chris Pike and Michael Romanov, "An Impulse Response Dataset for Dynamic 
+# Data-Based Auralization of Advanced Sound Systems", in Proc. AES 142nd Conv., 
+# Berlin, Germany, 2017, Engineering Brief
+# http://www.aes.org/e-lib/browse.cfm?elib=18709
+#sofaFile = 'bbcrdlr_systemA.sofa' # 0+2+0 setup (stereo)
+#sofaFile = 'bbcrdlr_systemB.sofa' # 0+5+0 setup
+#sofaFile = 'bbcrdlr_systemC.sofa' # 2+5+0 setup
+sofaFile = 'bbcrdlr_systemD.sofa' # 4+5+0 setup
+#sofaFile = 'bbcrdlr_systemE.sofa' # 4+5+1 setup
+#sofaFile = 'bbcrdlr_systemF.sofa' # 3+7+0 setup
+#sofaFile = 'bbcrdlr_systemG.sofa' # 4+9+0 setup
+#sofaFile = 'bbcrdlr_systemH.sofa' # 9+10+3 setup
+#sofaFile = 'bbcrdlr_reduced_onsets.sofa' # Full 32-loudspeaker surround setup
 
 fullSofaPath = os.path.join( sofaDirectory, sofaFile )
-
 if not os.path.exists( fullSofaPath ):
-    if not os.path.exists( sofaDirectory ):
-        os.mkdir( sofaDirectory )
+    sofaDir = os.path.split( fullSofaPath )[0]
+    if not os.path.exists( sofaDir ):
+        os.makedirs( sofaDir )
     urlretrieve( 'http://data.bbcarp.org.uk/bbcrd-brirs/sofa/' + sofaFile,
                 fullSofaPath )
-
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 

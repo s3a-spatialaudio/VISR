@@ -1,4 +1,38 @@
-# %BST_LICENCE_TEXT%
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2017-2018 Andreas Franck and Giacomo Costantini
+# Copyright (C) 2017-2018 University of Southampton
+
+# VISR Binaural Synthesis Toolkit (BST)
+# Authors: Andreas Franck and Giacomo Costantini
+# Project page: http://cvssp.org/data/s3a/public/BinauralSynthesisToolkit/
+
+
+# The Binaural Synthesis Toolkit is provided under the ISC (Internet Systems Consortium) license
+# https://www.isc.org/downloads/software-support-policy/isc-license/ :
+
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+# OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+# ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+# We kindly ask to acknowledge the use of this software in publications or software.
+# Paper citation:
+# Andreas Franck, Giacomo Costantini, Chris Pike, and Filippo Maria Fazi,
+# “An Open Realtime Binaural Synthesis Toolkit for Audio Research,” in Proc. Audio Eng.
+# Soc. 144th Conv., Milano, Italy, 2018, Engineering Brief.
+# http://www.aes.org/e-lib/browse.cfm?elib=19525
+
+# The Binaural Synthesis Toolkit is based on the VISR framework. Information about the VISR,
+# including download, setup and usage instructions, can be found on the VISR project page
+# http://cvssp.org/data/s3a/public/VISR .
 
 from visr_bst import ObjectToVirtualLoudspeakerRenderer
 from visr_bst.util.read_sofa_file import readSofaFile
@@ -22,6 +56,7 @@ blockSize = 1024
 parameterUpdatePeriod = 1
 numBlocks = 512;
 BRIRtruncationLength = None
+numObjects = 2
 
 useTracking = True
 useDynamicITD = False
@@ -36,35 +71,55 @@ useSourceMovement = False
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaDirectory = 'c:/local/SOFA/BBC_BRIR'
+sofaDirectory = '../data/sofa/brir'
 
-sofaFile = 'bbcrdlr_systemD.sofa'
-# sofaFile = 'bbcrdlr_reduced_onsets.sofa'
+# Loudspeaker setups according to ITU-R BS.2051
+# Dataset described in:
+# Chris Pike and Michael Romanov, "An Impulse Response Dataset for Dynamic 
+# Data-Based Auralization of Advanced Sound Systems", in Proc. AES 142nd Conv., 
+# Berlin, Germany, 2017, Engineering Brief
+# http://www.aes.org/e-lib/browse.cfm?elib=18709
+
+#configName = 'bbcrdlr_systemA' # 0+2+0 setup (stereo)
+#configName = 'bbcrdlr_systemB' # 0+5+0 setup
+#configName = 'bbcrdlr_systemC' # 2+5+0 setup
+#configName = 'bbcrdlr_systemD' # 4+5+0 setup
+#configName = 'bbcrdlr_systemE' # 4+5+1 setup
+#configName = 'bbcrdlr_systemF' # 3+7+0 setup
+#configName = 'bbcrdlr_systemG' # 4+9+0 setup
+#configName = 'bbcrdlr_systemH' # 9+10+3 setup
+configName = 'bbcrdlr_allspeakers' # Full 32-loudspeaker surround setup
+
+# Retrieve the loudspeaker configuration 
+if configName == 'bbcrdlr_all_speakers':
+    sofaFile = 'bbcrdlr_reduced_onsets.sofa'
+else:
+    sofaFile = configName + '.sofa'
+
+arrayConfigDirectory = '../data/loudspeaker_configs'
+arrayConfigPath = os.path.join( arrayConfigDirectory, configName + '.xml' )
+
 
 fullSofaPath = os.path.join( sofaDirectory, sofaFile )
-
 if not os.path.exists( fullSofaPath ):
-    if not os.path.exists( sofaDirectory ):
-        os.mkdir( sofaDirectory )
+    sofaDir = os.path.split( fullSofaPath )[0]
+    if not os.path.exists( sofaDir ):
+        os.makedirs( sofaDir )
     urlretrieve( 'http://data.bbcarp.org.uk/bbcrd-brirs/sofa/' + sofaFile,
                 fullSofaPath )
 
 hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath,
                                               truncationLength = BRIRtruncationLength )
+arrayConfig = panning.LoudspeakerArray( arrayConfigPath )
+
+
+# Safety check to ensure that the dynamicITD is only used with datasets that contain extracted initial delays.
+if useDynamicITD and (hrirDelays is None or len(hrirDelays.shape) != 3 ):
+    raise ValueError( "The option 'useDynamicITD' must be used only with BRIR datasets that provide a full delay dataset in 'Data.Delay'." )
 
 # Crude check for 'horizontal-only' listener view directions
 if np.max( np.abs(hrirPos[:,1])) < deg2rad( 1 ):
     hrirPos = hrirPos[ :, [0,2] ] # transform to polar coordinates
-
-#arrayConfigFile = 'bs2051-4+5+0.xml'
-#arrayConfigPath = os.path.join( sofaDirectory, arrayConfigFile )
-
-arrayConfigPath = 'c:/local/VISR/config/generic/bs2051-4+5+0.xml'
-
-
-arrayConfig = panning.LoudspeakerArray( arrayConfigPath )
-
-numObjects = 16
 
 # Dimension of hrirData is #measurement positions x #ears x # lsp x ir length
 numLoudspeakers = hrirData.shape[2]

@@ -16,7 +16,7 @@ from sys import platform, exit
 fs = 48000
 blockSize = 1024
 
-useTracking = True      # switch dynamic tracking on and off.
+useTracking = False      # switch dynamic tracking on and off.
 fftImplementation = 'ffts'
 hoaOrder = 3 # HOA order for object encoding and sound field decoding
 
@@ -27,7 +27,7 @@ if useTracking:
     if platform == 'linux' or platform == 'linux2':
         port = "/dev/ttyUSB0"
     elif platform == 'darwin':
-        port = "/dev/cu.usbserial-AJ03GSC8"
+        port = "/dev/cu.usbserial-AJ03GR8O"
     elif platform in ['windows','win32']:
         port = "COM4"
 
@@ -65,9 +65,9 @@ elif platform in ['windows', 'win32' ]:
 #    audioIfcCfg = """{ "hostapi": "ASIO" }"""   # If you have a professional audio interface with an ASIO driver
     audioIfcName = "PortAudio"
 
-
-# TODO: Replace path
-sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % hoaOrder
+# TODO: Provide a SOFA file containing HOA->binaural file
+# 
+sofaFile = '../data/sofa/hoa2binaural/Gauss_O%d_ku100_dualband_energy.sofa' % hoaOrder
 
 if not os.path.exists( sofaFile ):
     print( "SOFA file containing HOA decoding filters not found")

@@ -68,8 +68,9 @@ elif platform in ['windows', 'win32' ]:
     audioIfcName = "PortAudio"
 
 
-# TODO: Replace path
-sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % hoaOrder
+# TODO: Provide a SOFA file containing HOA->binaural file
+# 
+sofaFile = '../data/sofa/hoa2binaural/Gauss_O%d_ku100_dualband_energy.sofa' % hoaOrder
 
 if not os.path.exists( sofaFile ):
     print( "SOFA file containing HOA decoding filters not found")

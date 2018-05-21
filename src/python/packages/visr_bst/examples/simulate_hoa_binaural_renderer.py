@@ -68,8 +68,9 @@ maxHoaOrder = 3
 inputWidth = (maxHoaOrder+1)**2
 
 
-# TODO: set file location
-sofaFile = 'c:/local/SOFA/bbc_hoa2bin/Gauss_O%d_ku100_dualband_energy.sofa' % maxHoaOrder
+# TODO: Provide a SOFA file containing HOA->binaural file
+# 
+sofaFile = '../data/sofa/hoa2binaural/Gauss_O%d_ku100_dualband_energy.sofa' % maxHoaOrder
 
 # Whether the sound source is moving or not
 useSourceMovement = True
@@ -99,8 +100,12 @@ flow = rrl.AudioSignalFlow( graph )
 if useTracking:
     trackingInput = flow.parameterReceivePort( 'tracking' )
 
+# TODO: Provide a HOA input signal (ACN convention).
+# Here we us a trivial, not very reasonable one (sine wave in the y component)
 inputSignal = np.zeros( (inputWidth, signalLength ), dtype=np.float32 )
-inputSignal[2,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
+inputSignal[1,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
+
+# Preallocate the binaural output signal
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 numPos = 360/5
@@ -118,7 +123,6 @@ for blockIdx in range(0,numBlocks):
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
-print("fs: %d\ order: %d\t #blocks: %d\t blocksize: %d\t expected:%f sec.\t\t Got %f sec"%(fs,maxHoaOrder,numBlocks,blockSize,(numBlocks*blockSize)/fs,(time.time()-start)))
 plt.figure()
 plt.plot( t, outputSignal[0,:], 'bo-',t, outputSignal[1,:], 'ro-')
 plt.show()

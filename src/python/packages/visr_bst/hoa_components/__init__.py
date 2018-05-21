@@ -20,7 +20,6 @@
 # AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
 # INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
 # OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
-+
 # ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
@@ -35,7 +34,7 @@
 # including download, setup and usage instructions, can be found on the VISR project page
 # http://cvssp.org/data/s3a/public/VISR .
 
-# Other conponents
+# Generic HOA processing components.
 from .hoa_object_encoder import HoaObjectEncoder
 from .hoa_coefficient_rotation import HoaCoefficientRotation
 from .hoa_rotation_matrix_calculator import HoaRotationMatrixCalculator

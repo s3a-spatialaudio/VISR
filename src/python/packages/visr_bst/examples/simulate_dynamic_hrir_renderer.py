@@ -80,12 +80,18 @@ useInterpolatingConvolver = True
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaFile = '../data/hrir/HRIR_L2354.sofa'
+sofaFile = '../data/sofa/hrir/HRIR_L2354.sofa'
+
 if not os.path.exists( sofaFile ):
     sofaDir = os.path.split( sofaFile )[0]
     if not os.path.exists( sofaDir ):
         os.makedirs( sofaDir )
     urlretrieve( 'http://sofacoustics.org/data/database/thk/HRIR_L2354.sofa',sofaFile )
+
+# If the ITDs are to be applied separately, we create a version of the SOFA file 
+# that conains the delays separately in the Data.Delay dataset.
+# Note: This mechanism fails if the original SOFA file already cantains the delay data
+# (it would be discarded).
 if useDynamicITD:
     sofaFileTD = os.path.splitext( sofaFile )[0] + '_modelled_onsets.sofa'
     if not os.path.exists( sofaFileTD ):

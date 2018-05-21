@@ -34,6 +34,11 @@
 # including download, setup and usage instructions, can be found on the VISR project page
 # http://cvssp.org/data/s3a/public/VISR .
 
+"""
+Script to simulate a virtual loudspeaker rendering where the BRIRs are partitioned into a 
+dynamic (head orientation-dependent) early and an orientation-independent late part.
+"""
+
 from visr_bst import VirtualLoudspeakerRenderer
 from visr_bst.util import readSofaFile, deg2rad
 
@@ -62,7 +67,7 @@ useHRIRinterpolation = True
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaDirectory = 'c:/local/SOFA/BBC_BRIR'
+sofaDirectory = '../data/sofa/brir'
 
 sofaFile = 'bbcrdlr_modelled_onsets_early_dynamic.sofa'
 sofaFileLate='bbcrdlr_modelled_onsets_late_static.sofa'
@@ -75,7 +80,12 @@ if not os.path.exists( fullSofaPath ):
         os.mkdir( sofaDirectory )
     urlretrieve( 'http://data.bbcarp.org.uk/bbcrd-brirs/sofa/' + sofaFile,
                 fullSofaPath )
-
+if not os.path.exists( fullSofaPathLate ):
+    if not os.path.exists( sofaDirectory ):
+        os.mkdir( sofaDirectory )
+    urlretrieve( 'http://data.bbcarp.org.uk/bbcrd-brirs/sofa/' + sofaFileLate,
+                fullSofaPathLate )
+    
 hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath )
 latePos, lateFilters, lateDelays = readSofaFile( fullSofaPathLate )
 
