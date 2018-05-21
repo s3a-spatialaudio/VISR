@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Copyright (C) 2017-2018 Andreas Franck and Giacomo Costantini
 # Copyright (C) 2017-2018 University of Southampton
@@ -34,129 +34,93 @@
 # including download, setup and usage instructions, can be found on the VISR project page
 # http://cvssp.org/data/s3a/public/VISR .
 
-"""
-Example script for an offline simulation using the Dynamic HRIR rendering approach.
-It simulates a moving point source, optionally subject to a dynamic head position.
-
-"""
+from visr_bst import VirtualLoudspeakerRenderer
+from visr_bst.util import readSofaFile, deg2rad
 
 import visr
 import rrl
-import objectmodel
 
-from visr_bst import DynamicHrirRenderer
-from visr_bst.util import sofaExtractDelay
-from visr_bst.util import sph2cart
-
+import os
 import numpy as np
 import matplotlib.pyplot as plt
+from urllib.request import urlretrieve # Load SOFA files on the fly
 
-from urllib.request import urlretrieve
-import os
-from time import time
 
-# %% General configuration parameters.
+############ CONFIG ###############
 fs = 48000
-
-signalLength = 256 * 1024
 blockSize = 1024
-numBinauralObjects = 32
-numOutputChannels = 2 # Binaural output
 parameterUpdatePeriod = 1
-numBlocks = signalLength // blockSize;
+numBlocks = 512;
+BRIRtruncationLength = None
 
-# %% Define simulation options
-
-useSourceAutoMovement = False
 useTracking = True
-useDynamicITD = True
-useDynamicILD = False
+useDynamicITD = False
 useHRIRinterpolation = True
-useCrossfading = True
-useInterpolatingConvolver = True
 
 ###################################
 
 signalLength = blockSize * numBlocks
 t = 1.0/fs * np.arange(0,signalLength)
 
-sofaFile = '../data/hrir/HRIR_L2354.sofa'
-if not os.path.exists( sofaFile ):
-    sofaDir = os.path.split( sofaFile )[0]
-    if not os.path.exists( sofaDir ):
-        os.makedirs( sofaDir )
-    urlretrieve( 'http://sofacoustics.org/data/database/thk/HRIR_L2354.sofa',sofaFile )
-if useDynamicITD:
-    sofaFileTD = os.path.splitext( sofaFile )[0] + '_modelled_onsets.sofa'
-    if not os.path.exists( sofaFileTD ):
-        sofaExtractDelay( sofaFile, sofaFileTD )
-    sofaFile = sofaFileTD
+sofaDirectory = 'c:/local/SOFA/BBC_BRIR'
+
+sofaFile = 'bbcrdlr_modelled_onsets_early_dynamic.sofa'
+sofaFileLate='bbcrdlr_modelled_onsets_late_static.sofa'
+
+fullSofaPath = os.path.join( sofaDirectory, sofaFile )
+fullSofaPathLate = os.path.join( sofaDirectory, sofaFileLate )
+
+if not os.path.exists( fullSofaPath ):
+    if not os.path.exists( sofaDirectory ):
+        os.mkdir( sofaDirectory )
+    urlretrieve( 'http://data.bbcarp.org.uk/bbcrd-brirs/sofa/' + sofaFile,
+                fullSofaPath )
+
+hrirPos, hrirData, hrirDelays = readSofaFile( fullSofaPath )
+latePos, lateFilters, lateDelays = readSofaFile( fullSofaPathLate )
+
+# Crude check for 'horizontal-only' listener view directions
+if np.max( np.abs(hrirPos[:,1])) < deg2rad( 1 ):
+    hrirPos = hrirPos[ :, [0,2] ] # transform to polar coordinates
+
+# Dimension of hrirData is #measurement positions x #ears x # lsp x ir length
+numLoudspeakers = hrirData.shape[2]
 
 context = visr.SignalFlowContext( period=blockSize, samplingFrequency=fs)
 
-renderer = DynamicHrirRenderer( context, "DynamicHrirRenderer", None,
-                               numberOfObjects = numBinauralObjects,
-                               sofaFile = sofaFile,
-                               headTracking = useTracking,
-                               dynamicITD = useDynamicITD,
-                               dynamicILD = useDynamicILD,
-                               hrirInterpolation = useHRIRinterpolation,
-                               filterCrossfading = useCrossfading,
-                               interpolatingConvolver = useInterpolatingConvolver
-                               )
+renderer = VirtualLoudspeakerRenderer( context, "VirtualLoudspeakerRenderer", None,
+                                      hrirPositions = hrirPos,
+                                      hrirData = hrirData,
+                                      hrirDelays = hrirDelays,
+                                      headOrientation = [0.0, 0.0, 0.0],
+                                      headTracking = useTracking,
+                                      dynamicITD = useDynamicITD,
+                                      staticLateFilters = np.squeeze(lateFilters),
+                                      staticLateDelays = np.squeeze(lateDelays),
+                                      hrirInterpolation = useHRIRinterpolation,
+                                      )
 
 result,messages = rrl.checkConnectionIntegrity(renderer)
 if not result:
    print(messages)
 
 flow = rrl.AudioSignalFlow( renderer )
-paramInput = flow.parameterReceivePort('objectVector')
+
+numOutputChannels = 2;
 
 if useTracking:
     trackingInput = flow.parameterReceivePort( "tracking" )
 
-inputSignal = np.zeros( (numBinauralObjects, signalLength ), dtype=np.float32 )
+inputSignal = np.zeros( (numLoudspeakers, signalLength ), dtype=np.float32 )
 inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
+
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 numPos = 360/5
 azSequence = (2.0*np.pi)/numPos *  np.arange( 0, numPos )
 
-az = 0
-el = 0
-r = 1
-ps1 = objectmodel.PointSource(0)
-ps1.position = sph2cart( np.array([az, el, r]) )
-ps1.level = 0.005
-ps1.channels = [ps1.objectId]
-
-pw1 = objectmodel.PlaneWave(1)
-pw1.azimuth = az
-pw1.elevation = el
-pw1.referenceDistance = r
-pw1.level = 0.005
-pw1.groupId = 5
-pw1.priority = 5
-pw1.channels = [pw1.objectId]
-
-ov = paramInput.data()
-ov.set( [ps1,pw1] )
-paramInput.swapBuffers()
-
-tStart = time()
-
 for blockIdx in range(0,numBlocks):
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
-        if useSourceAutoMovement:
-            az = azSequence[int(blockIdx%numPos)]
-            el = 0
-            ps1.position = sph2cart( np.array([az, el, r]) )
-            pw1.azimuth = az
-            pw1.elevation = el
-            pw1.referenceDistance = r
-            ov = paramInput.data()
-            ov.set( [ps1, pw1] )
-            paramInput.swapBuffers()
         if useTracking:
           headrotation =  azSequence[int(blockIdx%numPos)]
           trackingInput.data().orientation = [headrotation,0,0] #rotates over the z axis, that means that the rotation is on the xy plane
@@ -165,7 +129,6 @@ for blockIdx in range(0,numBlocks):
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 
-print( 'Computing time for generating %f s of audio: %f s' % (signalLength/fs, time()-tStart) )
 
 plt.figure()
 plt.plot( t, outputSignal[0,:], 'bo-', t, outputSignal[1,:], 'ro-')
