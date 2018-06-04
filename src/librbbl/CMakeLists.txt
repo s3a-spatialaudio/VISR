@@ -75,7 +75,7 @@ set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
 target_link_libraries( rbbl_static PUBLIC efl_static )
 target_link_libraries( rbbl_static PRIVATE ${FFTS_LIBRARY} )
 target_link_libraries( rbbl_static PRIVATE ${KISSFFT_LIBRARY} )
-target_link_libraries( rbbl_static PRIVATE Boost::boost ) # Adds the boost include directory 
+target_link_libraries( rbbl_static PUBLIC Boost::boost ) # Adds the boost include directory 
 
 
 if( BUILD_USE_IPP )
