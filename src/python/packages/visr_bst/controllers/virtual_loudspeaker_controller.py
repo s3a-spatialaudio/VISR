@@ -186,7 +186,7 @@ class VirtualLoudspeakerController( visr.AtomicComponent ):
         if self.useHeadTracking and self.trackingInputProtocol.changed():
             htrack = self.trackingInputProtocol.data()
             ypr = np.asarray(htrack.orientation, dtype=self.hrirPos.dtype)
-            self.headDir = orientationToDirectionVector( ypr, self.hrirPos.shape[-1] )
+            self.headDir = orientationToDirectionVector( -ypr, self.hrirPos.shape[-1] )
             self.trackingInputProtocol.resetChanged()
 
         # Obtain access to the delay output
