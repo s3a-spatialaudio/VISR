@@ -260,7 +260,7 @@ private:
 
   /**
    * Register a port with a type and a unique name within the port.
-   * @param name The name of 
+   * @param port The port to be registered.
    * @throw In case of a non-unique or invalid port name
    */
   void registerAudioPort( AudioPortBaseImplementation* port );

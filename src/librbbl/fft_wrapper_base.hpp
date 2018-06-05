@@ -3,6 +3,8 @@
 #ifndef VISR_LIBRBBL_FFT_WRAPPER_BASE_HPP_INCLUDED
 #define VISR_LIBRBBL_FFT_WRAPPER_BASE_HPP_INCLUDED
 
+#include "export_symbols.hpp"
+
 #include <libefl/error_codes.hpp>
 
 #include <cstddef>
@@ -14,7 +16,7 @@ namespace rbbl
 {
 
 template< typename DataType >
-class FftWrapperBase
+class VISR_RBBL_LIBRARY_SYMBOL FftWrapperBase
 {
 public:
   using FrequencyDomainType = std::complex<DataType>;

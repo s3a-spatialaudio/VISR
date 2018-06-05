@@ -139,6 +139,7 @@ private:
      * @param fcn Creation function for a communication protocol
      * @param inputCreator Creation function for a communication protocol input endpoint
      * @param outputCreator Creation function for a communication protocol output endpoint
+     * @param name The name under which the communication protocol is to be registered.
      */
     /*VISR_CORE_LIBRARY_SYMBOL*/ explicit Creator( CreateFunction fcn,
                                                    InputCreateFunction inputCreator,

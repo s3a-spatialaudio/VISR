@@ -45,8 +45,7 @@ class AudioSignalPool;
  * graphs and for transferring the input and output samples.
  * For the audio processing, this class provides a callback interface
  * that must be called in regular intervals (i.e., for a fixed number
- * of samples consumed and generated, respectively.
- * This class is abstract, i.e., cannot be instantiated, but must be subclassed.
+ * of samples consumed and generated, respectively).
  */
 class VISR_RRL_LIBRARY_SYMBOL AudioSignalFlow
 {
@@ -207,7 +206,8 @@ private:
     * Initialise the parameter infrastructure.
     * @return True if the initialisation was successful, false otherwise. In this case, \p messages should provide an explanation.
     * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
-    * @param [out] parameterConnections Connection map to be filled during the initialisation process.
+    * @param [in] originalConnections List of parameter connections of the hierarchical model.
+    * @param [out] finalConnections Connection map to be filled during the initialisation process, using the flattened version of the signal flow .
     */
   bool initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections );
 

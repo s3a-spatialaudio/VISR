@@ -13,7 +13,7 @@ namespace rbbl
 {
 
 template<>
-class KissFftWrapper<float>::Impl
+class VISR_RBBL_LIBRARY_SYMBOL KissFftWrapper<float>::Impl
 {
 public:
   using OrigDataType = float;
@@ -43,6 +43,8 @@ public:
   kiss_fftr_cfg_float mInvPlan;
 };
 
+// Avoid Doxygen warning because due to confusion caused by the visibility atttribute.
+///@cond NEVER
 template<>
 KissFftWrapper<float>::KissFftWrapper( std::size_t fftSize, std::size_t alignmentElements )
  : mImpl( new KissFftWrapper<float>::Impl( fftSize, alignmentElements ) )
@@ -67,6 +69,7 @@ efl::ErrorCode KissFftWrapper<float>::inverseTransform( std::complex<float> cons
   kiss_fftri_float( mImpl->mInvPlan, reinterpret_cast<Impl::TransformDataType*>(const_cast<std::complex<float>* >(in)), out );
   return efl::noError; // apparently, there is no error reporting.
 }
+/// @endcond NEVER
 
 } // namespace rbbl
 } // namespace visr

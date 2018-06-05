@@ -281,7 +281,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
       if( paramPort->direction() == PortBase::Direction::Input )
       {
         std::unique_ptr<CommunicationProtocolBase::Output> protocolOutput = CommunicationProtocolFactory::createOutput( protocol );
-	// TODO: Do we need to care for failing dynamic_casts (this would be a logical error).
+        // TODO: Do we need to care for failing dynamic_casts (this would be a logical error).
         ParameterInputBase & paramInput = dynamic_cast<ParameterInputBase&>(paramPort->containingPort());
         protocolInstance->connectInput( &(paramInput.protocolInput()) );
         protocolInstance->connectOutput( protocolOutput.get() );
@@ -309,6 +309,7 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     std::size_t const numSenders = connection.numSenders();
     std::size_t const numReceivers = connection.numReceivers();
     // This should not happen if the connections are created with registerParameterConnection()
+    // TODO: improve error reporting (i.e., provide as much as possible information about the connection)
     if( numSenders < 1 )
     {
       messages << "AudioSignalFlow: A parameter connection must have at least one sending port.\n";
@@ -316,10 +317,12 @@ bool AudioSignalFlow::initialiseParameterInfrastructure( std::ostream & messages
     }
     if( numReceivers < 1 )
     {
-      messages << "AudioSignalFlow: A parameter connection must have at least one sending port.\n";
+      messages << "AudioSignalFlow: A parameter connection must have at least one receiving port.\n";
       result = false;
     }
 
+    // Because we need a reference port, we cannot continue with this connection if there's no sender.
+    // Normally we try to perform the operations as much as possible to obtain reasonable error messages.
     if( numSenders < 1 )
     {
       continue;

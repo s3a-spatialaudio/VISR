@@ -109,7 +109,7 @@ private:
 
   /**
    * Internal method to populate the sets, called recursively.
-   * @param The component to analyse.
+   * @param comp The component to analyse.
    * @param hierarchical whether to analyse the complete hierarchical signal flow or just current level of the hierarchy.
    * @param topLevel Flag to signal that the method is called with the top level component to be analyzed.
    */

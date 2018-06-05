@@ -114,7 +114,7 @@ private:
 
   /**
    * Create an envelope.
-   * @ param numSamples Length of the envelope (total number of samples)
+   * @param numSamples Length of the envelope (total number of samples)
    * @param [out] data The output buffer where the created envelope is stored.
    * @param initialDelay Initial zero-valued part of the envelope.
    * @param gain The gain (maximum level) of the envelope, linear scle.

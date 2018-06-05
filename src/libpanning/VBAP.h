@@ -76,19 +76,19 @@ private:
   size_t numTriplets;
   /**
    * Inverse matrix of the vector components of loudspeakers positions considering loudspeaker triplets.
-   * Dimension: #triplets(Rows) x #vectorComponents(Columns).
+   * Dimension: # triplets(Rows) x # vectorComponents(Columns).
    */
   efl::BasicMatrix<SampleType> mInvMatrix;
   
   /**
    * Matrix that contains the positions of the loudspeakers.
-   * Dimension: #realLoudspeakers(Rows) x #3Dcoordinates(Columns).
+   * Dimension: # realLoudspeakers(Rows) x # 3Dcoordinates(Columns).
    */
   efl::BasicMatrix<SampleType> mPositions;
   
   /**
    * Matrix that contains the rereouting coefficients from virtual to real loudspeakers.
-   * Dimension: #virtualLoudspeakers(Rows) x #realLoudspeakers(Columns).
+   * Dimension: # virtualLoudspeakers(Rows) x # realLoudspeakers(Columns).
    */
   efl::BasicMatrix<SampleType> mReroutingMatrix;
   

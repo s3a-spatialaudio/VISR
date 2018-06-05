@@ -128,7 +128,7 @@ private:
 
   /**
    * Decoding matrix from HOA signal components to the loudspeakers of the (virtual) regular array.
-   * Dimension: #HOA signal components * # loudspeakers in the virtual array.
+   * Dimension: # HOA signal components * # loudspeakers in the virtual array.
    */
   efl::BasicMatrix<Afloat> mRegularDecodeMatrix;
 

@@ -37,8 +37,10 @@ public:
 private:
 
   /**
-   * @param
-   * @throw
+   * Fill an ObjectVector data structure from a property tree data structure.
+   * @param subtree Property tree representing a JSON object.
+   * @param [out] res The resulting object vector. If the variable contained object before the call, they are cleared.
+   * @throw std::exception if a 
    */
   static void parseObject( boost::property_tree::ptree const & subtree, ObjectVector & res );
 };
