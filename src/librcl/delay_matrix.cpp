@@ -33,6 +33,63 @@ namespace rcl
 {
 }
 
+DelayMatrix::DelayMatrix( SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfInputs,
+    std::size_t numberOfOutputs,
+    std::size_t interpolationSteps,
+    SampleType maximumDelaySeconds,
+    const char * interpolationMethod,
+    MethodDelayPolicy methodDelayPolicy,
+    ControlPortConfig controlInputs,
+    SampleType initialDelaySeconds /*= static_cast<SampleType>(0.0)*/,
+    SampleType initialGainLinear /*= static_cast<SampleType>(1.0)*/ )
+ : AtomicComponent( context, name, parent )
+ , mInput( "in", *this )
+ , mOutput( "out", *this )
+ , mCurrentGains( cVectorAlignmentSamples )
+ , mCurrentDelays( cVectorAlignmentSamples )
+ , mNextGains( cVectorAlignmentSamples )
+ , mNextDelays( cVectorAlignmentSamples )
+ , mTmpResult( mOutput.alignmentSamples() ) // Use the same alignment as for the audio port
+ , cSamplingFrequency( static_cast<SampleType>(samplingFrequency()) )
+{
+  setup( numberOfInputs, numberOfOutputs, interpolationSteps,
+         maximumDelaySeconds, interpolationMethod, methodDelayPolicy,
+         controlInputs, initialDelaySeconds, initialGainLinear );
+}
+
+DelayMatrix::DelayMatrix( SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfInputs,
+    std::size_t numberOfOutputs,
+    std::size_t interpolationSteps,
+    SampleType maximumDelaySeconds,
+    const char * interpolationMethod,
+    MethodDelayPolicy methodDelayPolicy,
+    ControlPortConfig controlInputs,
+    efl::BasicMatrix< SampleType > const & initialDelaysSeconds,
+    efl::BasicMatrix< SampleType > const & initialGainsLinear )
+  : AtomicComponent( context, name, parent )
+  , mInput( "in", *this )
+  , mOutput( "out", *this )
+  , mCurrentGains( cVectorAlignmentSamples )
+  , mCurrentDelays( cVectorAlignmentSamples )
+  , mNextGains( cVectorAlignmentSamples )
+  , mNextDelays( cVectorAlignmentSamples )
+  , mTmpResult( mOutput.alignmentSamples() ) // Use the same alignment as for the audio port
+  , cSamplingFrequency( static_cast<SampleType>(samplingFrequency()) )
+{
+  setup( numberOfInputs, numberOfOutputs, interpolationSteps,
+    maximumDelaySeconds, interpolationMethod, methodDelayPolicy,
+    controlInputs, initialDelaysSeconds, initialGainsLinear );
+}
+
+
+
+
 void DelayMatrix::setup( std::size_t numberOfInputs, 
                          std::size_t numberOfOutputs,
                          std::size_t interpolationSteps,

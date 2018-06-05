@@ -53,16 +53,10 @@ void exportFirFilterMatrix( py::module & m )
       py::arg("routings") = rbbl::FilterRoutingList(),
       py::arg( "controlInputs" ) = FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
-   .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
-        std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,
-        efl::BasicMatrix<SampleType> const & filters, rbbl::FilterRoutingList const & routings,
-        FirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
-     {
-       FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
-       inst->setup( numberOfInputs, numberOfOutputs, filterLength, maxFilters, maxRoutings,
-                    filters, routings, controlInputs, fftImplementation );
-       return inst;
-     }),
+    .def( py::init< visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
+                    std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, 
+                    efl::BasicMatrix<SampleType> const &, rbbl::FilterRoutingList const &,
+                    FirFilterMatrix::ControlPortConfig, char const *>(),
       py::arg( "context" ), py::arg( "name" ), py::arg( "parent" ),
       py::arg( "numberOfInputs" ),
       py::arg( "numberOfOutputs" ),
@@ -71,7 +65,7 @@ void exportFirFilterMatrix( py::module & m )
       py::arg( "maxRoutings" ),
       py::arg( "filters" ) = pml::MatrixParameter<SampleType>(),  // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
       py::arg( "routings" ) = rbbl::FilterRoutingList(),
-      py::arg( "controlInputs" ) =  FirFilterMatrix::ControlPortConfig::None,
+      py::arg( "controlInputs" ) = FirFilterMatrix::ControlPortConfig::None,
       py::arg( "fftImplementation" ) = "default" )
     .def( py::init( []( visr::SignalFlowContext const& context, char const * name, visr::CompositeComponent* parent,
         std::size_t numberOfInputs, std::size_t numberOfOutputs, std::size_t filterLength, std::size_t maxFilters, std::size_t maxRoutings,

@@ -37,6 +37,27 @@ FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
 {
 }
 
+FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
+  char const * name,
+  CompositeComponent * parent,
+  std::size_t numberOfInputs,
+  std::size_t numberOfOutputs,
+  std::size_t filterLength,
+  std::size_t maxFilters,
+  std::size_t maxRoutings,
+  efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
+  rbbl::FilterRoutingList const & routings /*= rbbl::FilterRoutingList()*/,
+  ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
+  char const * fftImplementation /*= "default"*/ )
+  : AtomicComponent( context, name, parent )
+  , mInput( "in", *this )
+  , mOutput( "out", *this )
+{
+  setup( numberOfInputs, numberOfOutputs, filterLength,
+         maxFilters, maxRoutings, filters,
+         routings, controlInputs, fftImplementation );
+}
+
 FirFilterMatrix::~FirFilterMatrix()
 {
 }

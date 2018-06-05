@@ -58,7 +58,8 @@ public:
   };
 
   /**
-   * Constructor.
+   * Constructor, creates a basic, not fully initialised object. 
+   * A setup() method must be called before the component before the process() method can be used.
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
@@ -66,7 +67,84 @@ public:
   explicit DelayMatrix( SignalFlowContext const & context,
                         char const * name,
                         CompositeComponent * parent = nullptr );
-    
+
+  /**
+   * Constructor, creates a fully initialised object.
+   * A setup() method does not need to called.
+   * This overload initalises all delay and gain values to the same (possibly defaulted) values.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param numberOfInputs The number of input audio waveforms
+   * @param numberOfOutputs The number of output audio waveforms
+   * @param interpolationSteps The number of samples needed for the
+   * transition after new delays and/or gains are set.
+   * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
+   * immediate application of the new settings.
+   * @param maximumDelaySeconds The maximal delay value supported by this
+   * object (in seconds)
+   * @param interpolationMethod The interpolation method to be applied. The string must correspond to a algorithm registered in
+   * rbbl::FractionalDelayFactory
+   * @param methodDelayPolicy Enumeration value governing how the method delay of the interpolation method is incorporated into
+   * the delay values applied to the signals.
+   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
+   * @param initialDelaySeconds The initial delay value for all
+   * channels (in seconds, default: 0.0)
+   * @param initialGainLinear The initial delay value for all
+   * channels (in linear scale, default: 1.0)
+   */
+  explicit DelayMatrix( SignalFlowContext const & context,
+                        char const * name,
+                        CompositeComponent * parent,
+                        std::size_t numberOfInputs,
+                        std::size_t numberOfOutputs,
+                        std::size_t interpolationSteps,
+                        SampleType maximumDelaySeconds,
+                        const char * interpolationMethod,
+                        MethodDelayPolicy methodDelayPolicy,
+                        ControlPortConfig controlInputs,
+                        SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
+                        SampleType initialGainLinear = static_cast<SampleType>(1.0) );
+
+  /**
+   * Constructor, creates a fully initialised object.
+   * A setup() method does not need to called.
+   * This overload accepts matrices of initial delays and gains to initialise each routing point individually.
+   * @param context Configuration object containing basic execution parameters.
+   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
+   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
+   * @param numberOfInputs The number of input audio waveforms
+   * @param numberOfOutputs The number of output audio waveforms
+   * @param interpolationSteps The number of samples needed for the
+   * transition after a new delay and/or gain is set.
+   * It must be an integral multiple of the period of the signal flow. The value "0" denotes an
+   * immediate application of the new delay/gain values.
+   * @param maximumDelaySeconds The maximal delay value supported by this
+   * object (in seconds)
+   * @param interpolationMethod The interpolation method to be applied. The string must correspond to a algorithm registered in
+   * rbbl::FractionalDelayFactory
+   * @param methodDelayPolicy Enumeration value governing how the method delay of the interpolation method is incorporated
+   * into the delay values applied to the signals.
+   * @param controlInputs Whether the component should contain parameter inputs for the gain and delay parameter.
+   * @param initialDelaysSeconds The delays for all channels in
+   * seconds. The number of elements of this vector must match the channel number of this object.
+   * @param initialGainsLinear The initial gain values for all
+   * channels, given in a linear scale.  The the number of
+   * elements in this vector must match the channel number of this object.
+   */
+  explicit DelayMatrix( SignalFlowContext const & context,
+                        char const * name,
+                        CompositeComponent * parent,
+                        std::size_t numberOfInputs,
+                        std::size_t numberOfOutputs,
+                        std::size_t interpolationSteps,
+                        SampleType maximumDelaySeconds,
+                        const char * interpolationMethod,
+                        MethodDelayPolicy methodDelayPolicy,
+                        ControlPortConfig controlInputs,
+                        efl::BasicMatrix< SampleType > const & initialDelaysSeconds,
+                        efl::BasicMatrix< SampleType > const & initialGainsLinear );
+
   /**
    * Setup method to initialise the object and set the parameters.
    * @param numberOfInputs The number of input audio waveforms
@@ -96,6 +174,7 @@ public:
               ControlPortConfig controlInputs,
               SampleType initialDelaySeconds = static_cast<SampleType>(0.0),
               SampleType initialGainLinear = static_cast<SampleType>(1.0) );
+
   /**
   * Setup method to initialise the object and set the parameters.
   * @param numberOfInputs The number of input audio waveforms

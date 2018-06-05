@@ -31,6 +31,80 @@ namespace rcl
 {
 }
 
+BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfChannels,
+    std::size_t numberOfBiquads,
+    bool controlInput /*= false*/ )
+ : AtomicComponent( context, name, parent )
+  , mInput( "in", *this, numberOfChannels )
+  , mOutput( "out", *this, numberOfChannels )
+  , mEqInput( nullptr )
+  , mCoefficients( cVectorAlignmentSamples )
+  , mState( cVectorAlignmentSamples )
+  , mCurrentInput( cVectorAlignmentSamples )
+  , mCurrentOutput( cVectorAlignmentSamples )
+{
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
+}
+
+BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
+  char const * name,
+  CompositeComponent * parent,
+  std::size_t numberOfChannels,
+  std::size_t numberOfBiquads,
+  rbbl::BiquadCoefficient<SampleType> const & initialBiquad,
+  bool controlInput /*= false*/ )
+ : BiquadIirFilter( context, name, parent, numberOfChannels, numberOfBiquads, controlInput )
+{
+  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
+  {
+    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections; ++biquadIdx )
+    {
+      setCoefficientsInternal( channelIdx, biquadIdx, initialBiquad );
+    }
+  }
+}
+
+
+BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfChannels,
+    std::size_t numberOfBiquads,
+    rbbl::BiquadCoefficientList< SampleType > const & coeffs,
+    bool controlInput /*= false*/ )
+ : BiquadIirFilter( context, name, parent, numberOfChannels, numberOfBiquads, controlInput )
+{
+  if( coeffs.size() != numberOfBiquads )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The length of the coefficient initialiser list does not match the number of biquads per channel." );
+  }
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
+  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
+  {
+    setChannelCoefficientsInternal( channelIdx, coeffs );
+  }
+}
+
+BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfChannels,
+    std::size_t numberOfBiquads,
+    rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs,
+    bool controlInput /*= false*/ )
+ : BiquadIirFilter( context, name, parent, numberOfChannels, numberOfBiquads, controlInput )
+{
+  if( (coeffs.numberOfFilters() != numberOfChannels) or (coeffs.numberOfSections() != numberOfBiquads) )
+  {
+    throw std::invalid_argument( "BiquadIirFilter: The size of the coefficient matrix does not match the dimension numberOfChannels x numberOfBiquads." );
+  }
+  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
+  setCoefficientMatrixInternal( coeffs );
+}
+
 void BiquadIirFilter::setCoefficients( std::size_t channelIndex, std::size_t biquadIndex,
                                        rbbl::BiquadCoefficient< SampleType > const & coeffs )
 {

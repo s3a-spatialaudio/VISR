@@ -39,8 +39,33 @@ void exportDelayMatrix( pybind11::module & m )
     .def( pybind11::self & pybind11::self )
     ;
 
-  dVec.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
+  dVec
+    .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
       pybind11::arg("context"), pybind11::arg("name"), pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
+    .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*, std::size_t,
+                         std::size_t, std::size_t, SampleType, const char *, DelayMatrix::MethodDelayPolicy, DelayMatrix::ControlPortConfig,
+      SampleType, SampleType>(),
+       pybind11::arg( "context" ), pybind11::arg( "name" ), pybind11::arg( "parent" ) = static_cast<visr::CompositeComponent*>(nullptr),
+       pybind11::arg( "numberOfInputs" ),
+       pybind11::arg( "numberOfOutputs" ),
+       pybind11::arg( "interpolationSteps" ) = 1024, pybind11::arg( "maxDelay" ) = 3.0f,
+       pybind11::arg( "interpolationType" ) /*= DelayMatrix::InterpolationType::CubicLagrange*/,
+       pybind11::arg( "methodDelayPolicy" ) = DelayMatrix::MethodDelayPolicy::Add,
+       pybind11::arg( "controlInputs" ) = DelayMatrix::ControlPortConfig::None,
+       pybind11::arg( "initialDelay" ) = 0.0f,
+       pybind11::arg( "initialGain" ) = 1.0f )
+    .def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*, std::size_t,
+                         std::size_t, std::size_t, SampleType, const char *, DelayMatrix::MethodDelayPolicy, DelayMatrix::ControlPortConfig,
+                         efl::BasicMatrix< SampleType > const &, efl::BasicMatrix< SampleType > const &>(),
+      pybind11::arg( "context" ), pybind11::arg( "name" ), pybind11::arg( "parent" ) = static_cast<visr::CompositeComponent*>(nullptr),
+      pybind11::arg( "numberOfInputs" ),
+      pybind11::arg( "numberOfOutputs" ),
+      pybind11::arg( "interpolationSteps" ) = 1024, pybind11::arg( "maxDelay" ) = 3.0f,
+      pybind11::arg( "interpolationType" ) /*= DelayMatrix::InterpolationType::CubicLagrange*/,
+      pybind11::arg( "methodDelayPolicy" ) = DelayMatrix::MethodDelayPolicy::Add,
+      pybind11::arg( "controlInputs" ) = DelayMatrix::ControlPortConfig::None,
+      pybind11::arg( "initialDelay" ) = 0.0f,
+      pybind11::arg( "initialGain" ) = 1.0f )
     .def( "setup", static_cast<void(DelayMatrix::*)( std::size_t, std::size_t, std::size_t, SampleType,
       const char *, DelayMatrix::MethodDelayPolicy, DelayMatrix::ControlPortConfig, SampleType, SampleType)>(&DelayMatrix::setup),
       pybind11::arg( "numberOfInputs" ),
@@ -49,8 +74,8 @@ void exportDelayMatrix( pybind11::module & m )
       pybind11::arg( "interpolationType" ) /*= DelayMatrix::InterpolationType::CubicLagrange*/,
       pybind11::arg( "methodDelayPolicy") = DelayMatrix::MethodDelayPolicy::Add,
       pybind11::arg( "controlInputs") = DelayMatrix::ControlPortConfig::None,
-      pybind11::arg( "initialDelay" ) = 0.0f,
-      pybind11::arg( "initialGain" ) = 1.0f )
+      pybind11::arg( "initialDelay" ) = static_cast<SampleType>(0.0),
+      pybind11::arg( "initialGain" ) = static_cast<SampleType>(1.0) )
     .def( "setup", static_cast<void(DelayMatrix::*)( std::size_t, std::size_t, std::size_t, SampleType,
         const char *, DelayMatrix::MethodDelayPolicy, DelayMatrix::ControlPortConfig, efl::BasicMatrix<SampleType> const &, efl::BasicMatrix<SampleType>  const &)>(&DelayMatrix::setup),
         pybind11::arg( "numberOfInputs" ),
