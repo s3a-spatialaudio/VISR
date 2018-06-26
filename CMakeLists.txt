@@ -334,6 +334,19 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   FIND_PACKAGE(Flac REQUIRED)
   FIND_PACKAGE(OggVorbis REQUIRED)
 
+    get_target_property(BOOST_FS Boost::filesystem IMPORTED_LOCATION)
+    get_target_property(BOOST_S Boost::system IMPORTED_LOCATION)
+    get_target_property(BOOST_T Boost::thread IMPORTED_LOCATION)
+    get_target_property(BOOST_PO Boost::program_options IMPORTED_LOCATION)
+    get_target_property(BOOST_R Boost::regex IMPORTED_LOCATION)
+    get_filename_component(BOOST_FS ${BOOST_FS} REALPATH)
+    get_filename_component(BOOST_S ${BOOST_S} REALPATH)
+    get_filename_component(BOOST_T ${BOOST_T} REALPATH)
+    get_filename_component(BOOST_PO ${BOOST_PO} REALPATH)
+    get_filename_component(BOOST_R ${BOOST_R} REALPATH)    
+   
+SET( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES BOOST_S BOOST_T BOOST_FS BOOST_PO BOOST_R)
+
 set (EXECUTE_COMMAND mkdir -p ${PROJECT_BINARY_DIR}/3rd)
 execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
@@ -343,8 +356,10 @@ function(fix_rpath libpath)
 	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
 	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
+#	MESSAGE( STATUS "BOOST imported location bef: " ${libpath} "=" ${${libpath}} )
 	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname})
 	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname} PARENT_SCOPE ) 
+#	MESSAGE( STATUS "BOOST imported location aft: " ${libpath} "=" ${${libpath}} )
 
 	set (EXECUTE_COMMAND  chmod 777 ${PROJECT_BINARY_DIR}/3rd/${libname})
 	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
@@ -363,6 +378,10 @@ function(fix_dependencies_of_3rdparty depname libpath)
 
 endfunction()
 
+##################################################
+# This is the pre-imported-targets way of "fixing" 3rd party libraries
+if(False)
+##################################################
 
 SET( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES Boost_SYSTEM_LIBRARY Boost_THREAD_LIBRARY Boost_CHRONO_LIBRARY Boost_DATE_TIME_LIBRARY Boost_FILESYSTEM_LIBRARY Boost_PROGRAM_OPTIONS_LIBRARY Boost_REGEX_LIBRARY Boost_TIMER_LIBRARY)
 
@@ -396,6 +415,42 @@ fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${SNDFILE_LIBRARY})
 fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBIS_LIBRARY})
 fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
 
+##################################################
+endif()
+##################################################
+
+
+#MESSAGE( STATUS "BOOST fix imported location bef: " BOOST_FS "=" ${BOOST_FS} )
+
+foreach(v IN LISTS FIX_LIBRARIES)
+    fix_rpath(${v})
+endforeach()
+
+#MESSAGE( STATUS "BOOST fix imported location aft: " BOOST_FS "=" ${BOOST_FS} )
+
+#	get_target_property(VAR__ Boost::filesystem IMPORT_LOCATION)
+#	message( STATUS "BOOST:: imported loc  before" ${VAR__} )
+
+    set_target_properties(Boost::filesystem PROPERTIES IMPORTED_LOCATION ${BOOST_FS}) 
+    set_target_properties(Boost::system PROPERTIES IMPORTED_LOCATION ${BOOST_S}) 
+    set_target_properties(Boost::thread PROPERTIES IMPORTED_LOCATION ${BOOST_T}) 
+    set_target_properties(Boost::program_options PROPERTIES IMPORTED_LOCATION ${BOOST_PO}) 
+    set_target_properties(Boost::regex PROPERTIES IMPORTED_LOCATION ${BOOST_R}) 
+
+    set_target_properties(Boost::filesystem PROPERTIES IMPORTED_LOCATION_DEBUG ${BOOST_FS}) 
+    set_target_properties(Boost::system PROPERTIES IMPORTED_LOCATION_DEBUG ${BOOST_S}) 
+    set_target_properties(Boost::thread PROPERTIES IMPORTED_LOCATION_DEBUG ${BOOST_T}) 
+    set_target_properties(Boost::program_options PROPERTIES IMPORTED_LOCATION_DEBUG ${BOOST_PO}) 
+    set_target_properties(Boost::regex PROPERTIES IMPORTED_LOCATION_DEBUG ${BOOST_R}) 
+
+    set_target_properties(Boost::filesystem PROPERTIES IMPORTED_LOCATION_RELEASE ${BOOST_FS}) 
+    set_target_properties(Boost::system PROPERTIES IMPORTED_LOCATION_RELEASE ${BOOST_S}) 
+    set_target_properties(Boost::thread PROPERTIES IMPORTED_LOCATION_RELEASE ${BOOST_T}) 
+    set_target_properties(Boost::program_options PROPERTIES IMPORTED_LOCATION_RELEASE ${BOOST_PO}) 
+    set_target_properties(Boost::regex PROPERTIES IMPORTED_LOCATION_RELEASE ${BOOST_R}) 
+
+#    get_target_property(VAR__ Boost::filesystem IMPORT_LOCATION)
+#	message( STATUS "BOOST:: imported loc  before" ${VAR__} )
 
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
