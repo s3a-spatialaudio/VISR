@@ -54,12 +54,19 @@ set( HEADERS
 
 include_directories( ${SNDFILE_INCLUDE_DIRS} )
 
+#set_target_properties( Boost::filesystem PROPERTIES CMAKE_INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_NAME_DIR TRUE)
+
 add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
+get_target_property(VAR_ Boost::filesystem IMPORT_LOCATION)
+message( STATUS "output from pml BOOST::  " ${VAR_} )
+message( STATUS "output from pml BOOST_FS  " ${BOOST_FS} )
+
 target_link_libraries( pml_static PUBLIC objectmodel_static )
 target_link_libraries( pml_static PUBLIC visr_static )
 target_link_libraries( pml_static PRIVATE ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_static PUBLIC Boost::filesystem )
+target_link_libraries( pml_static PUBLIC Boost::system )
 
 add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
@@ -72,6 +79,7 @@ target_link_libraries( pml_shared PUBLIC objectmodel_shared )
 target_link_libraries( pml_shared PUBLIC visr_shared )
 target_link_libraries( pml_shared PRIVATE ${SNDFILE_LIBRARY} )
 target_link_libraries( pml_shared PUBLIC Boost::filesystem )
+target_link_libraries( pml_shared PUBLIC Boost::system )
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

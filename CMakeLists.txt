@@ -324,80 +324,15 @@ SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thr
 # Todo: Replace by a substantiated version requirement.
 FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
  
-#WORKING
-#add_custom_target(comma ALL COMMAND /bin/sh /Users/gc1y17/VISR/visr/cmake_modules/postscript.sh)
-#add_dependencies(comma  rcl)
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
   FIND_PACKAGE(Flac REQUIRED)
   FIND_PACKAGE(OggVorbis REQUIRED)
 
-set (EXECUTE_COMMAND mkdir -p ${PROJECT_BINARY_DIR}/3rd)
-execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-function(fix_rpath libpath)
-	get_filename_component(libname ${${libpath}} NAME)
-
-	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
-	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname})
-	SET( ${libpath} ${PROJECT_BINARY_DIR}/3rd/${libname} PARENT_SCOPE ) 
-
-	set (EXECUTE_COMMAND  chmod 777 ${PROJECT_BINARY_DIR}/3rd/${libname})
-	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-	set (EXECUTE_COMMAND install_name_tool -id @rpath/${libname} ${${libpath}})
-	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
-
-endfunction()
-
-function(fix_dependencies_of_3rdparty depname libpath)
-
-	set (EXECUTE_COMMAND bash "-c" "${CMAKE_SOURCE_DIR}/cmake_modules/./change_dependency_installname.sh ${depname} ${libpath}" )
-
-	execute_process(COMMAND ${EXECUTE_COMMAND} OUTPUT_VARIABLE rv)
-	#message( STATUS "output "${depname} ": " ${rv} )
-
-endfunction()
-
-
-SET( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES Boost_SYSTEM_LIBRARY Boost_THREAD_LIBRARY Boost_CHRONO_LIBRARY Boost_DATE_TIME_LIBRARY Boost_FILESYSTEM_LIBRARY Boost_PROGRAM_OPTIONS_LIBRARY Boost_REGEX_LIBRARY Boost_TIMER_LIBRARY)
-
-foreach(v IN LISTS FIX_LIBRARIES)
-    fix_rpath(${v})
-endforeach()
-
-get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
-get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
-get_filename_component(VORBIS_LIBRARY_NAME ${VORBIS_LIBRARY} NAME_WE)
-get_filename_component(VORBISENC_LIBRARY_NAME ${VORBISENC_LIBRARY} NAME_WE)
-get_filename_component(Boost_SYSTEM_LIBRARY_NAME ${Boost_SYSTEM_LIBRARY} NAME_WE)
-get_filename_component(Boost_TIMER_LIBRARY_NAME ${Boost_TIMER_LIBRARY} NAME_WE)
-get_filename_component(Boost_CHRONO_LIBRARY_NAME ${Boost_CHRONO_LIBRARY} NAME_WE)
-
-
-SET(BOOST_SYSTEM_DEPENDENT ${Boost_FILESYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CHRONO_LIBRARY} ${Boost_TIMER_LIBRARY} )
-foreach(v IN LISTS BOOST_SYSTEM_DEPENDENT)
-    fix_dependencies_of_3rdparty(${Boost_SYSTEM_LIBRARY_NAME} ${v})
-endforeach()
-
-
-fix_dependencies_of_3rdparty(${Boost_CHRONO_LIBRARY_NAME} ${Boost_TIMER_LIBRARY})
-
-fix_dependencies_of_3rdparty(${FLAC_LIBRARY_NAME} ${SNDFILE_LIBRARY})
-fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${SNDFILE_LIBRARY})
-fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${VORBISENC_LIBRARY})
-fix_dependencies_of_3rdparty(${VORBISENC_LIBRARY_NAME} ${SNDFILE_LIBRARY})
-
-fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${SNDFILE_LIBRARY})
-fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBIS_LIBRARY})
-fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
-
-
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
+
 
 ################################################################################
 # Set the install directories of special output types.
@@ -411,6 +346,11 @@ endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 
 set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
+
+# Instructions for packaging are held in a separate file.
+# IMPORTANT: don’t put it after the ADD_SUBDIRECTORY( src ) command.
+# Reason: inside PackageConfig.cmake there is the required 3rd party libraries fixing, which needs to be performed before the target linking in the VISR libraries.
+INCLUDE( PackageConfig )
 
 
 ################################################################################
@@ -457,7 +397,4 @@ IF(BUILD_DOCUMENTATION)
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
 
 ENDIF()
-
-# Instructions for packaging are held in a separate file.
-INCLUDE( PackageConfig )
 
