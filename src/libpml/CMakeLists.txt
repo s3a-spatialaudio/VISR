@@ -59,8 +59,6 @@ include_directories( ${SNDFILE_INCLUDE_DIRS} )
 add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
 get_target_property(VAR_ Boost::filesystem IMPORT_LOCATION)
-message( STATUS "output from pml BOOST::  " ${VAR_} )
-message( STATUS "output from pml BOOST_FS  " ${BOOST_FS} )
 
 target_link_libraries( pml_static PUBLIC objectmodel_static )
 target_link_libraries( pml_static PUBLIC visr_static )
