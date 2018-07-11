@@ -1,0 +1,50 @@
+
+% 5.1 loudspeaker array
+% For the Audio Lab array, University of Southampton
+% Adapted from  ITU-R Rec. BS.2051-0
+% http://www.itu.int/rec/R-REC-BS.2051-0-201402-I
+
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
+
+
+2 % 2D mode for a horizontal array
+
+
+% positions
+% id = identity for triangularisation
+% chan = output audio channel
+
+
+% cartesians
+% (0,0,0) is at the centre of the Audio Lab: 1.95m and 2.35m from the inside bounding surfaces of the frame, and 1.22m from the floor.
+% id	chan	x(m)	y(m)	z(m)	
+
+c 1	0	2.17	1.36	0	% Left
+c 2	1	2.08	0	0	% Centre
+c 3	2	2.15	-1.22	0	% Right
+c 4	3	-1.01	-1.69	0	% Surround right
+c 5	4	-0.98	1.74	0	% Surround left
+
+% polars
+% id	chan	azim	elev	distance (m)
+%
+%p 1	1  	0	  0	2.00	   % Front Centre
+
+
+
+
+% triangularisation for VBAP etc
+
+% 2-tuplets   (2D mode)
+% 	id1	id2
+
+t 1	1	2	
+t 2	2	3	
+t 3	3	4	
+t 4	4	5	
+t 5	5	1	
+
+

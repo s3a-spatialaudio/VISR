@@ -201,7 +201,7 @@ setImpulseResponse( SampleType const * ir, std::size_t filterLength, std::size_t
   {
     throw std::invalid_argument( "InterpolatingConvolverUniform::setImpulseResponse(): Filter index exceeds number of filter slots." );
   }
-  if( filterLength >= maxFilterLength() )
+  if( filterLength > maxFilterLength() )
   {
     throw std::invalid_argument( "InterpolatingConvolverUniform::setImpulseResponse(): Length of new impulse response exceeds maximum filter length." );
   }
