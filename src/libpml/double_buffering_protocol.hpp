@@ -23,7 +23,9 @@ namespace pml
 {
 
 /**
- * 
+ * Communication protocol for double-buffered parameters.
+ * Parameters in output (send) ports can be modified, and the change become visible in connected input (receive) ports after a call to swapBuffers().
+ * The protocol supports 1:N connections. (single send port to an arbitray number of outputs).
  */
 class VISR_PML_LIBRARY_SYMBOL DoubleBufferingProtocol: public CommunicationProtocolBase
 {
@@ -44,27 +46,62 @@ public:
   explicit DoubleBufferingProtocol( ParameterType const & parameterType,
                                     ParameterConfigBase const & parameterConfig );
 
+  /**
+   * Destructor.
+   * The destructor is virtual because the class is intended to be used polymorphically.
+   */
   virtual ~DoubleBufferingProtocol() override;
 
+  /**
+   * Return the type id for the protocol.
+   */
   static constexpr CommunicationProtocolType staticType() { return communicationProtocolTypeFromString(sProtocolName); };
 
+  /**
+   * Return the name of the protocol.
+   */
   static constexpr char const * staticName() { return sProtocolName; }
 
+  /**
+   * Return the parameter ID for the transmitted parameter type.
+   */
   ParameterType parameterType( ) const override;
 
+  /**
+   * Return the actual protocol type.
+   * This function is virtual and non-static, i.e., it is typically used polymorphically through a base class pointer.
+   * @see staticType for the static function.
+   */
   virtual CommunicationProtocolType protocolType( ) const override { return staticType(); }
 
+  /**
+   * Return a reference to the 'front', i.e., the sending side of the buffer where data is set.
+   */
   ParameterBase & frontData();
 
+  /**
+   * Return a reference to the 'front', i.e., the sending side of the buffer where data is set.
+   * Const version.
+   */
   ParameterBase const & frontData() const;
 
+  /**
+   * Return a reference to the 'back', i.e., receiving end of the connection where parameters are read.
+   */
   ParameterBase & backData();
 
+  /**
+   * Return a reference to the 'back', i.e., receiving end of the connection where parameters are read.
+   * Const version.
+   */
   ParameterBase const & backData() const;
 
-  void setData( ParameterBase const & newData );
-
-  void swapBuffers();
+  /**
+   * Trigger an parameter change in all connected receive ports.
+   * @param copyValue Flag whether the parameter value visible from the output will be preserved by the swap. This means that the current value is copied to the other buffer during the switch.
+   * If set to false, the new parameter can have an arbitrary value, and has to be set completely.
+   */
+  void swapBuffers( bool copyValue );
 
   void connectInput( CommunicationProtocolBase::Input* port ) override;
 
@@ -168,14 +205,18 @@ public:
 
   DoubleBufferingProtocol const * getProtocol() const override { return mProtocol; }
 
-  void swapBuffers();
+  /**
+   * Make the current parameter available to the receiving ports.
+   * @param copyValue Whether the parameter value is copied to the new output buffer. Otherwise the output
+   * contains an arbitrary parameter value, and must be set/assigned completely.
+   */
+  void swapBuffers( bool copyValue = false );
 
   void setProtocolInstance( DoubleBufferingProtocol * protocol );
 
 private:
   DoubleBufferingProtocol * mProtocol;
 };
-
 
 template<class MessageType>
 class DoubleBufferingProtocol::Output: public OutputBase

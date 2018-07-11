@@ -49,17 +49,15 @@ ParameterBase const & DoubleBufferingProtocol::backData() const
   return *mBackData;
 }
 
-void DoubleBufferingProtocol::setData( ParameterBase const & newData )
+void DoubleBufferingProtocol::swapBuffers( bool copyValue /*= false*/)
 {
-  *mBackData = newData;
-}
-
-void DoubleBufferingProtocol::swapBuffers()
-{
+  if( copyValue )
+  {
+    mBackData->assign( *mFrontData );
+  }
   mBackData.swap( mFrontData );
   std::for_each( mInputs.begin(), mInputs.end(), []( InputBase* port ) { port->markChanged(); } );
 }
-
 
 void DoubleBufferingProtocol::connectInput( CommunicationProtocolBase::Input* port )
 {
@@ -188,9 +186,9 @@ ParameterBase & DoubleBufferingProtocol::OutputBase::data()
   return mProtocol->frontData();
 }
 
-void DoubleBufferingProtocol::OutputBase::swapBuffers()
+void DoubleBufferingProtocol::OutputBase::swapBuffers( bool copyValue /*= false*/ )
 {
-  mProtocol->swapBuffers();
+  mProtocol->swapBuffers( copyValue );
 }
 
 void DoubleBufferingProtocol::OutputBase::setProtocolInstance( CommunicationProtocolBase * protocol )
