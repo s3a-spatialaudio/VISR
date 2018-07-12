@@ -368,36 +368,6 @@ ADD_SUBDIRECTORY( src )
 ## Taken from: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
-IF(BUILD_DOCUMENTATION) 
-  FIND_PACKAGE(Doxygen)
-  IF(NOT DOXYGEN_FOUND)
-    MESSAGE(FATAL_ERROR
-      "Doxygen is needed to build the documentation.")
-  ENDIF()
- 
-  SET( doxyfile_in          ${PROJECT_SOURCE_DIR}/doc/src/Doxyfile.in )
-  SET( doxyfile             ${PROJECT_BINARY_DIR}/doc/Doxyfile )
-  SET( doxy_html_index_file ${PROJECT_BINARY_DIR}/doc/html/index.html )
-  SET( doxy_output_root     ${PROJECT_BINARY_DIR}/doc ) # Pasted into Doxyfile.in
-  SET( doxy_input           ${PROJECT_SOURCE_DIR}/src ) # Pasted into Doxyfile.in
-#  SET( doxy_extra_files     ${PROJECT_SOURCE_DIR}/doc/src/mainpage.dox    ) # Pasted into Doxyfile.in
- 
-  CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
- 
-  ADD_CUSTOM_COMMAND( OUTPUT ${doxy_html_index_file}
-                      COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-                      # The following should be ${doxyfile} only but it
-                      # will break the dependency.
-                      # The optimal solution would be creating a 
-                      # custom_command for ${doxyfile} generation
-                      # but I still have to figure out how...
-                      MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
-                      COMMENT "Generating HTML documentation")
- 
-  ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
- 
-  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
-
+IF(BUILD_DOCUMENTATION)
+  add_subdirectory(doc)
 ENDIF()
-
