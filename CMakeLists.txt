@@ -302,6 +302,11 @@ FIND_PACKAGE( FFTS REQUIRED )
 # Otherwise (in particular for Windows platforms), an environment variable
 # BOOST_ROOT should hold the path to the boost root directory.
 
+# Define a minimum boost version
+# Note: This requirement is chosen heuristically at the moment. 
+# Todo: Replace by a substantiated version requirement.
+set( VISR_BOOST_MINIMUM_VERSION 1.50 )
+
 OPTION( Boost_USE_STATIC_LIBS OFF )
 
 # For the moment, we support only dynamic linking of boost.
@@ -320,9 +325,7 @@ SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thr
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
-# Note: The minimum boost requirement is arbitrarily chosen at the moment. 
-# Todo: Replace by a substantiated version requirement.
-FIND_PACKAGE( Boost 1.50 REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
  
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs

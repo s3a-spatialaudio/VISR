@@ -87,9 +87,9 @@ install(FILES visr-config.cmake
   DESTINATION lib/cmake/visr)
 
 # Copy package config file
-# for use from build tree
+# for use from build tree, substituting Boost setting variables
 configure_file(visr-config.cmake
-  visr-config.cmake COPYONLY)
+  visr-config.cmake @ONLY)
 
 include(CMakePackageConfigHelpers)
 
