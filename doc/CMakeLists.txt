@@ -1,15 +1,17 @@
+# Copyright (c) 2018 Institute of Sound and Vibration Research, University of Southampton.
+# All rights reserved.
 
 find_package(Doxygen)
 if(NOT DOXYGEN_FOUND)
   message(FATAL_ERROR "Doxygen is needed to build the documentation.")
 endif()
 
-set( doxyfile_in          ${PROJECT_SOURCE_DIR}/doc/doxygen/src/Doxyfile.in )
+set( doxyfile_in          ${PROJECT_SOURCE_DIR}/doc/doxygen/Doxyfile.in )
 set( doxyfile             ${PROJECT_BINARY_DIR}/doc/doxygen/Doxyfile )
 set( doxy_html_index_file ${PROJECT_BINARY_DIR}/doc/doxygen/html/index.html )
 set( doxy_output_root     ${PROJECT_BINARY_DIR}/doc/doxygen/ )
 set( doxy_input           ${PROJECT_SOURCE_DIR}/src )
-set( doxy_extra_files     ${PROJECT_SOURCE_DIR}/doc/doxygen/src/ )
+set( doxy_extra_files     ${PROJECT_SOURCE_DIR}/doc/doxygen/ )
 
 configure_file( ${doxyfile_in} ${doxyfile} @ONLY )
 

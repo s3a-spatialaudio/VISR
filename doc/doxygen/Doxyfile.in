@@ -858,7 +858,9 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = *.m
+# <af> Exclude autmatic inclusion of .md files, because this would also entail
+# files in subdirectories, e.g., Python packages as visr_bst.
+EXCLUDE_PATTERNS       = *.m, *.md
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
