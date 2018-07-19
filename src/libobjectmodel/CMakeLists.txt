@@ -32,6 +32,7 @@ channel_object.hpp
 channel_object_parser.hpp
 diffuse_source.hpp
 diffuse_source_parser.hpp
+export_symbols.hpp
 hoa_source.hpp
 hoa_source_parser.hpp
 object.hpp
