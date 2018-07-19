@@ -3,9 +3,6 @@
 #ifndef VISR_LIBRRL_AUDIO_SIGNAL_FLOW_HPP_INCLUDED
 #define VISR_LIBRRL_AUDIO_SIGNAL_FLOW_HPP_INCLUDED
 
-#include "audio_connection_map.hpp"
-#include "parameter_connection_map.hpp"
-
 #include "export_symbols.hpp"
 
 #include <libvisr/audio_port_base.hpp>
@@ -37,7 +34,9 @@ namespace rrl
 
 // Forward declarations
 class AudioSignalPool;
-  
+class AudioConnectionMap;
+class ParameterConnectionMap;
+
 /**
  * Base class for signal flows, i.e., graphs of connected audio
  * components which perform an audio signal processing operation.
@@ -198,8 +197,15 @@ public:
 
   //@}
 
-
 private:
+  /**
+   * Initialise the audio subsystem, i.e., creating audio buffers and connecting the audio ports to the sample buffers.
+   * This might also introduce infrastructure components.
+   * @param [out] messages Output stream to receive verbose information about connection errors.
+   * @param [in] originalConnections List of audio connections of the hierarchical model.
+   * @param [out] finalConnections List of final audio connections of the flattened model, possibly with added infrastructure components.
+   * @todo Consider moving this out of the public header, either by using the pimpl idiom or by making it a free function in the implementation file.
+   */
   bool initialiseAudioConnections( std::ostream & messages, AudioConnectionMap const & originalConnections, AudioConnectionMap & finalConnections);
 
   /**
@@ -208,6 +214,7 @@ private:
     * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
     * @param [in] originalConnections List of parameter connections of the hierarchical model.
     * @param [out] finalConnections Connection map to be filled during the initialisation process, using the flattened version of the signal flow .
+    * @todo Consider moving this out of the public header, either by using the pimpl idiom or by making it a free function in the implementation file.
     */
   bool initialiseParameterInfrastructure( std::ostream & messages, ParameterConnectionMap const & originalConnections, ParameterConnectionMap & finalConnections );
 
@@ -217,6 +224,7 @@ private:
    * @param [out] messages Output stream containing error messages and warnings generated during the initialisation.
    * @param audioConnections The audio connection relations of the final signal flow (possibly including additional infrastructure components created during initialisation)
    * @param parameterConnections The parameter connection relations of the final signal flow (possibly including additional infrastructure components created during initialisation)
+   * @todo Consider moving this out of the public header, either by using the pimpl idiom or by making it a free function in the implementation file.
    */
   bool initialiseSchedule( std::ostream & messages,
                            AudioConnectionMap const & audioConnections,
