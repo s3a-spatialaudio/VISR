@@ -20,7 +20,14 @@ class ParameterPortBaseImplementation;
 namespace rrl
 {
 
-using ParameterConnectionMap = std::multimap< impl::ParameterPortBaseImplementation *, impl::ParameterPortBaseImplementation * >;
+/**
+ * Internal class to represent the parameter connections within a signal flow.
+ * @todo Public intheritance from std::map is a short-term solution to permit its forward in order make this a private header (not exported to other projects).
+ * @todo Remove the use of this class from the public interface of rrl::AudioSignalFlow.
+ */
+class ParameterConnectionMap: public std::multimap< impl::ParameterPortBaseImplementation *, impl::ParameterPortBaseImplementation * >
+{
+};
 
 bool fillRecursive( ParameterConnectionMap & res, impl::ComponentImplementation const & component,
                     std::ostream & messages );
