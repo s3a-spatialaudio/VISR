@@ -95,7 +95,7 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
   # Sphinx build
   # Add additional option for this :
 
-  option(BUILD_DOCUMENTATION_SPHINX "Create and install the WebAPI documentation (requires Sphinx and Breathe)" ON)
+  option(BUILD_DOCUMENTATION_SPHINX "Create and install the WebAPI documentation (requires Sphinx and Breathe)" OFF)
   IF(BUILD_DOCUMENTATION_SPHINX )
 
     find_package(Sphinx)
