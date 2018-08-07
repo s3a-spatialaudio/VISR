@@ -151,7 +151,7 @@ endif( WIN32 )
 ############################################################
 # Create universal binaries on MacOS
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" ON)
+  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" OFF)
   IF( BUILD_MACOS_UNIVERSAL_BINARIES )
     SET( OSX_UNIVERSAL ON )
     SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
@@ -238,7 +238,7 @@ ENDIF( BUILD_PYTHON_BINDINGS )
 # Support for 3rd-party libraries.
 
 # Threads are required wherever we link with boost_threads.
-# Note that the dependency is added automatically in most cases, so the 
+# Note that the dependency is added automatically in most cases, so the
 # omission will go unnoticed very often.
 FIND_PACKAGE(Threads REQUIRED)
 
@@ -252,7 +252,7 @@ IF( WIN32 ) # This includes 64-bit platforms!
   # call instead of setting it globally.
   LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
   LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
- 
+
 ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio REQUIRED )
 
@@ -303,7 +303,7 @@ FIND_PACKAGE( FFTS REQUIRED )
 # BOOST_ROOT should hold the path to the boost root directory.
 
 # Define a minimum boost version
-# Note: This requirement is chosen heuristically at the moment. 
+# Note: This requirement is chosen heuristically at the moment.
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
@@ -326,7 +326,7 @@ SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thr
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
- 
+
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
