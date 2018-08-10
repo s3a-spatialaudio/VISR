@@ -6,18 +6,25 @@
 Welcome to visr's documentation!
 ================================
 
+.. toctree::
+   :maxdepth: 1
 
+   about
+   exhibition
+   books
+   handbook
+   people
+
+Download
+==================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-   installation
-   getting-started
-   point-source
+   download
+   source
 
-
-Indices and tables
+Documentation
 ==================
 
 * :ref:`genindex`
@@ -31,3 +38,15 @@ Indices and tables
 .. This is an example of what would be for a single source . You can also do classes too.
 .. .. doxygenfile:: point_source.hpp
 ..    :project: visr
+
+Learning
+==================
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials
+   examples
+
+Community
+==================
