@@ -22,7 +22,16 @@ Download
    :maxdepth: 2
 
    download
-   source
+
+
+Development and Contribution
+============================
+
+.. toctree::
+  :maxdepth: 2
+
+  source
+  git-workflow
 
 Documentation
 ==================
@@ -47,11 +56,3 @@ Learning
 
    tutorials
    examples
-
-Community
-==================
-
-.. toctree::
-   :maxdepth: 2
-
-   git-workflow

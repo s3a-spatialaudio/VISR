@@ -1,7 +1,8 @@
 stages:
-  - build
-  - documentation
+  - cmake
   - compile and test
+  - documentation
+  - package
   - deployment
 
 # Runners (currently tagged in jobs):
@@ -13,19 +14,25 @@ stages:
 
 # For the time being, pushing should only occur manually, and
 
-########### build ###########
+########### cmake ###########
 
-########### documentation ###########
-
+# Linux:Freshly:Requirements:
+# - To make a fresh build from scratch
+# - Build and compile with documentation and sphinx
+# - With other options - python bindings too?
+# - Only trigger this job via variable
+# - package and build binaries
+# - Upload binary artifacts for website
 Linux:Freshly:
-  stage: build
+  stage: cmake
   before_script:
     - if [ -d build/ ] ; then rm -R build/; fi
   script:
     - mkdir build && cd build
     - chmod 777 ../build
-    - cmake -DBUILD_DOCUMENTATION=ON -DBUILD_DOCUMENTATION_SPHINX=ON ..
+    - cmake ..
     - make
+    - make package
   # Pass artifacts to deployment stage
   artifacts:
     paths:
@@ -36,13 +43,21 @@ Linux:Freshly:
     - linux
     - ubuntu16
 
+# The default behaviour of a caching job is to download the files at the start of execution, and to re-upload them at the end. This allows any changes made by the job to be persisted for future runs, and is known as the pull-push cache policy.
+
+# Linux:Cachely:Requirements:
+# - To make from a cache. Must have artifacts from
+
+# Future request https://gitlab.com/gitlab-org/gitlab-ce/issues/23902 on pipelines for merge requests
 Linux:Cachely:
-  stage: build
+  stage: cmake
   script:
     - cd build
     - make
+    - make doxy
+    - make webapi
     # Pass artifacts to deployment stage
-  artifacts:
+  cache:
     paths:
       - build/
   only:
@@ -52,7 +67,6 @@ Linux:Cachely:
     - ubuntu16
 
     # Add variable here to trigger
-
 Linux:SphinxAPI:
   stage: documentation
   script:
@@ -61,8 +75,14 @@ Linux:SphinxAPI:
     - make webapi
   # Dependent on previous linux build stage
   # Want to have either Linux:Cachely or Linux:Freshly , not both for faster pipeline triggers on merge
+  cache:
+    paths:
+      - build/
+      # This policy is to download the files at the start of execution and re-upload them at the end. This allows any changes made by the job to be persisted for future runs, known as the pull-push cache policy.
+      # If we know that the job doesnt' alter the cached files, you can skip the upload step by setting this policy: pull in the job spec.
+    policy: pull
   dependencies:
-    - Linux:Build
+    - Linux:Cachely
   artifacts:
     paths:
       - build/
@@ -71,8 +91,6 @@ Linux:SphinxAPI:
   tags:
     - linux
     - ubuntu16
-
-
 
 # Doxygen:
 #   stage: documentation
@@ -216,7 +234,7 @@ VISRWebAPI:
     # - yes | cp -rf doc/sphinx /vol/vssp/dataweb/data/s3a/public/VISRWeb
     # - rsync -hrvz --update -e "ssh -i " wm0014@cvssp.org:~/.ssh/builds/cfa3a610/0/s3a/VISR/build/doc /vol/vssp/dataweb/data/s3a/public/VISRWeb
     # - cd build/doc/sphinx && ls -la
-    - rsync -harvz --update ~/.ssh/builds/cfa3a610/0/s3a/VISR/build/ /vol/vssp/dataweb/data/s3a/public/VISRWeb
+    - rsync -h -v -r -P -t ~/.ssh/builds/cfa3a610/0/s3a/VISR/build/ /vol/vssp/dataweb/data/s3a/public/VISRWeb
   # # Each time a job suceeds , a deployment is recorded, remembering the git SHA and environment name.
   # environment:
   #   name: staging
@@ -224,7 +242,6 @@ VISRWebAPI:
   # artifacts:
   #   paths:
   #     - build/doc/sphinx
-  # after_script:
   dependencies:
     - Linux:Build
   only:

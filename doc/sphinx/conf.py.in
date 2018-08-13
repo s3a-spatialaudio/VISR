@@ -5,7 +5,8 @@ import os.path
 sys.path.append( "@sphinx_breathe_path@")
 
 extensions = [
-    "breathe"  # Doxygen-based C++ documentation gathering
+    "breathe",  # Doxygen-based C++ documentation gathering
+    "sphinx.ext.autosectionlabel"
 ]
 
 # The suffix(es) of source filenames.
@@ -42,6 +43,8 @@ html_theme = 'classic'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = []
 
+def setup(app):
+  app.add_stylesheet('css/custom.css')
 
 # .. doxygenclass:: PointSource
 #    :project: visr
