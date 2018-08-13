@@ -17,7 +17,7 @@ stages:
 
 ########### documentation ###########
 
-Linux:Build:
+Linux:Freshly:
   stage: build
   before_script:
     - if [ -d build/ ] ; then rm -R build/; fi
@@ -26,9 +26,22 @@ Linux:Build:
     - chmod 777 ../build
     - cmake -DBUILD_DOCUMENTATION=ON -DBUILD_DOCUMENTATION_SPHINX=ON ..
     - make
-    - make doxy
-    - make webapi
   # Pass artifacts to deployment stage
+  artifacts:
+    paths:
+      - build/
+  only:
+    - feature/sphinx-ci-integration
+  tags:
+    - linux
+    - ubuntu16
+
+Linux:Cachely:
+  stage: build
+  script:
+    - cd build
+    - make
+    # Pass artifacts to deployment stage
   artifacts:
     paths:
       - build/
@@ -40,41 +53,25 @@ Linux:Build:
 
     # Add variable here to trigger
 
-# Linux:SphinxAPI:
-#   stage: documentation
-#   script:
-#     - cd build
-#     - ls -la
-#     - make
-#     - make doxy
-#     - make webapi
-#   # Dependent on previous linux build stage
-#   dependencies:
-#     - Linux:Build
-#   artifacts:
-#     paths:
-#       - build/
-#   only:
-#     - feature/sphinx-ci-integration
-#   tags:
-#     - linux
-#     - ubuntu16
+Linux:SphinxAPI:
+  stage: documentation
+  script:
+    - cd build
+    - make doxy
+    - make webapi
+  # Dependent on previous linux build stage
+  # Want to have either Linux:Cachely or Linux:Freshly , not both for faster pipeline triggers on merge
+  dependencies:
+    - Linux:Build
+  artifacts:
+    paths:
+      - build/
+  only:
+    - feature/sphinx-ci-integration
+  tags:
+    - linux
+    - ubuntu16
 
-# Linux:CacheBuild:
-#     stage: build
-#     script:
-#       - mkdir build && cd build
-#       - chmod 777 ../build
-#       - cmake -DBUILD_DOCUMENTATION=ON -DBUILD_DOCUMENTATION_SPHINX=ON ..
-#     # Pass artifacts to deployment stage
-#     artifacts:
-#       paths:
-#         - ../build
-#     only:
-#       - feature/sphinx-ci-integration
-#     tags:
-#       - linux
-#       - ubuntu16
 
 
 # Doxygen:
@@ -218,7 +215,7 @@ VISRWebAPI:
     # av --update so only files that are NEWER will be synced from loc1 to loc2. Logic dictates that any files that are NEWER on loc2 will be # untouched. Therefore all the      outdated files on loc2 will be up-to-date thanks to loc1
     # - yes | cp -rf doc/sphinx /vol/vssp/dataweb/data/s3a/public/VISRWeb
     # - rsync -hrvz --update -e "ssh -i " wm0014@cvssp.org:~/.ssh/builds/cfa3a610/0/s3a/VISR/build/doc /vol/vssp/dataweb/data/s3a/public/VISRWeb
-
+    # - cd build/doc/sphinx && ls -la
     - rsync -harvz --update ~/.ssh/builds/cfa3a610/0/s3a/VISR/build/ /vol/vssp/dataweb/data/s3a/public/VISRWeb
   # # Each time a job suceeds , a deployment is recorded, remembering the git SHA and environment name.
   # environment:

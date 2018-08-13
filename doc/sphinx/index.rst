@@ -50,3 +50,8 @@ Learning
 
 Community
 ==================
+
+.. toctree::
+   :maxdepth: 2
+
+   git-workflow
