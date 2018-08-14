@@ -10,6 +10,13 @@ stages:
 # - kane -    Linuxgcc4++
 # - usain -   Windows
 
+# Changing the key will clear the cache, and you can store it in a different location with a predefined variable.
+# Change this by doing $ export CI_PROJECT_NAME='VISR' && export CI_BUILD_REF_NAME="path/of/new/cache"
+cache:
+  # key: "$CI_PROJECT_NAME/$CI_BUILD_REF_NAME"
+  paths:
+    - ./build/
+
 # Note - please look at remote/origin/ci-integration-experimental for a more detailed outlook on future ci work
 
 # For the time being, pushing should only occur manually, and
@@ -25,20 +32,27 @@ stages:
 # - Upload binary artifacts for website
 Linux:Freshly:
   stage: cmake
+  variables:
+    CI_DEBUG_TRACE: "true"
   before_script:
     - if [ -d build/ ] ; then rm -R build/; fi
+    - mkdir build
   script:
-    - mkdir build && cd build
+    - if [ -d build/ ] ; then cd build/ && cmake -DBUILD_DOCUMENTATION_SPHINX=ON .. && make && make doxy && make webapi; fi
     - chmod 777 ../build
-    - cmake ..
-    - make
-    - make package
+    # - make package
   # Pass artifacts to deployment stage
   artifacts:
     paths:
       - build/
+  cache:
+    paths:
+      - build/
   only:
     - feature/sphinx-ci-integration
+    # This job can be triggered by exporting a variable in terminal, like:
+    # variables:
+    #   - $CI_COMMIT_MESSAGE == "Run fresh build"
   tags:
     - linux
     - ubuntu16
@@ -50,13 +64,9 @@ Linux:Freshly:
 
 # Future request https://gitlab.com/gitlab-org/gitlab-ce/issues/23902 on pipelines for merge requests
 Linux:Cachely:
-  stage: cmake
+  stage: compile and test
   script:
-    - cd build
-    - make
-    - make doxy
-    - make webapi
-    # Pass artifacts to deployment stage
+    - if [ -d build/ ] ; then cd build/ && make && make doxy && make webapi; fi
   cache:
     paths:
       - build/
@@ -70,9 +80,7 @@ Linux:Cachely:
 Linux:SphinxAPI:
   stage: documentation
   script:
-    - cd build
-    - make doxy
-    - make webapi
+    - if [ -d build/ ] ; then cd build/ && make && make doxy and make webapi; fi
   # Dependent on previous linux build stage
   # Want to have either Linux:Cachely or Linux:Freshly , not both for faster pipeline triggers on merge
   cache:
@@ -212,7 +220,7 @@ Linux:SphinxAPI:
 
 #You can only use paths that are within the project workspace. To pass artifacts between different jobs, see dependencies.
 
-VISRWebAPI:
+Linux:WebAPI:
   stage: deployment
   # before_script:
   #   - if [ -d ../build ] ; then rm -R ../build; fi
@@ -243,7 +251,7 @@ VISRWebAPI:
   #   paths:
   #     - build/doc/sphinx
   dependencies:
-    - Linux:Build
+    - Linux:SphinxAPI
   only:
     - feature/sphinx-ci-integration
   tags:
