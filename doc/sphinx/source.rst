@@ -1,6 +1,13 @@
 Source Code
 ===========================
 
+.. _MacOS Setup Guide:
+.. _Linux Setup Guide:
+.. _Windows Setup Guide:
+
+
+
+
 Depending on the operating system you have, the following startup guides will be useful for creating a successful build and/or using VISR for your own development. In a new terminal window, run the following:
 
 ``git clone gitlab@gitlab.eps.surrey.ac.uk:s3a/VISR.git``
