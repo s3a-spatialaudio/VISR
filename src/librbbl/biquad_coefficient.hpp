@@ -237,33 +237,75 @@ public:
   const_iterator begin() const { return mBiquads.begin(); }
   const_iterator end() const { return mBiquads.end(); }
 
-
+  /**
+   * DE-serialization from text formats.
+   */
+  //@{
+  /**
+   * Initialise from a JSON representation, provided as a Boost property tree ptree object.
+   */
   void loadJson( boost::property_tree::ptree const & tree );
 
+  /**
+  * Initialise from a JSON representation, provided as an input stream containing JSON text data.
+  */
   void loadJson( std::basic_istream<char> & stream );
 
+  /**
+  * Initialise from a JSON representation, provided as a string containing JSON text data.
+  */
   void loadJson( std::string const & str );
 
+  /**
+   * Initialise from an XML representation, provided as a Boost property tree ptree object.
+   */
   void loadXml( boost::property_tree::ptree const & tree );
 
+  /**
+   * Initialise from an XML representation, provided as an input stream containing JSON text data.
+   */
   void loadXml( std::basic_istream<char> & stream );
 
+  /**
+   * Initialise from an XML representation, provided as a string containing JSON text data.
+   */
   void loadXml( std::string const & str );
+  //@}
 
   /**
-  *
-  */
+   * Serialisation into textual formats.
+   */
   //@{
+  /**
+   * Write to a boost property tree object (ptree) that can be serialised to an XML document (or part thereof)
+   * @note the ptree representations for XML and JSON differ slightly, so different implementations are needed.
+   */
   void writeJson( boost::property_tree::ptree & tree ) const;
 
+  /**
+   * Write an XML representation to an output stream.
+   */
   void writeJson( std::basic_ostream<char> & stream ) const;
 
+  /**
+   * Write an XML representation into a string.
+   */
   void writeJson( std::string & str ) const;
 
+  /**
+  * Write to a boost property tree object (ptree) that can be serialised to an XML document (or part thereof)
+  * @note the ptree representations for XML and JSON differ slightly, so different implementations are needed.
+  */
   void writeXml( boost::property_tree::ptree & tree ) const;
 
+  /**
+  * Write an XML representation to an output stream.
+  */
   void writeXml( std::basic_ostream<char> & stream ) const;
 
+  /**
+  * Write an XML representation into a string.
+  */
   void writeXml( std::string & str ) const;
   //@}
 
@@ -279,6 +321,18 @@ public:
   explicit BiquadCoefficientMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );
 
   ~BiquadCoefficientMatrix();
+
+  static BiquadCoefficientMatrix fromJson( boost::property_tree::ptree const & tree );
+
+  static BiquadCoefficientMatrix fromJson( std::basic_istream<char> & stream );
+
+  static BiquadCoefficientMatrix fromJson( std::string const & str );
+
+  static BiquadCoefficientMatrix fromXml( boost::property_tree::ptree const & tree );
+
+  static BiquadCoefficientMatrix fromXml( std::basic_istream<char> & stream );
+
+  static BiquadCoefficientMatrix fromXml( std::string const & str );
 
   std::size_t numberOfFilters() const { return mRows.size(); }
   std::size_t numberOfSections() const { return mRows.empty() ? 0 : mRows[0].size(); }
@@ -297,6 +351,78 @@ public:
    * @throw std::invalid_argument If \p nnewFilters has more elements than the column number of the matrix.
    */
   void setFilter( std::size_t filterIdx, BiquadCoefficientList<CoeffType> const & newFilter );
+
+  /**
+  * Deserialisation from text formats.
+  */
+  //@{
+  /**
+  * Initialise from a JSON representation, provided as a Boost property tree ptree object.
+  */
+  void loadJson( boost::property_tree::ptree const & tree );
+
+  /**
+  * Initialise from a JSON representation, provided as an input stream containing JSON text data.
+  */
+  void loadJson( std::basic_istream<char> & stream );
+
+  /**
+  * Initialise from a JSON representation, provided as a string containing JSON text data.
+  */
+  void loadJson( std::string const & str );
+
+  /**
+  * Initialise from an XML representation, provided as a Boost property tree ptree object.
+  */
+  void loadXml( boost::property_tree::ptree const & tree );
+
+  /**
+  * Initialise from an XML representation, provided as an input stream containing JSON text data.
+  */
+  void loadXml( std::basic_istream<char> & stream );
+
+  /**
+  * Initialise from an XML representation, provided as a string containing JSON text data.
+  */
+  void loadXml( std::string const & str );
+  //@}
+
+  /**
+  * Serialisation into textual formats.
+  */
+  //@{
+  /**
+  * Write to a boost property tree object (ptree) that can be serialised to an XML document (or part thereof)
+  * @note the ptree representations for XML and JSON differ slightly, so different implementations are needed.
+  */
+  void writeJson( boost::property_tree::ptree & tree ) const;
+
+  /**
+  * Write an XML representation to an output stream.
+  */
+  void writeJson( std::basic_ostream<char> & stream ) const;
+
+  /**
+  * Write an XML representation into a string.
+  */
+  void writeJson( std::string & str ) const;
+
+  /**
+  * Write to a boost property tree object (ptree) that can be serialised to an XML document (or part thereof)
+  * @note the ptree representations for XML and JSON differ slightly, so different implementations are needed.
+  */
+  void writeXml( boost::property_tree::ptree & tree ) const;
+
+  /**
+  * Write an XML representation to an output stream.
+  */
+  void writeXml( std::basic_ostream<char> & stream ) const;
+
+  /**
+  * Write an XML representation into a string.
+  */
+  void writeXml( std::string & str ) const;
+  //@}
 
 private:
   using ContainerType = std::vector< BiquadCoefficientList<CoeffType> >;
