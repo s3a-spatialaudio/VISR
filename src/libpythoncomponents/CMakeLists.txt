@@ -31,6 +31,12 @@ set_target_properties( pythoncomponents_shared PROPERTIES RUNTIME_OUTPUT_DIRECTO
 target_link_libraries( pythoncomponents_shared PUBLIC pythonsupport_shared )
 target_link_libraries( pythoncomponents_shared PUBLIC visr_shared )
 
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installled once.
+set_target_properties( pythoncomponents_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
+
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 foreach(TARGET_TYPE static shared)
@@ -42,7 +48,7 @@ foreach(TARGET_TYPE static shared)
 endforeach()
 
 install(TARGETS pythoncomponents_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS pythoncomponents_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib )
+install(TARGETS pythoncomponents_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libpythoncomponents)
 
 # Add the unit test directory.
 add_subdirectory( test )
