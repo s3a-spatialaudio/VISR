@@ -25,9 +25,14 @@ BOOST_AUTO_TEST_CASE( instantiateChannelRange )
   BOOST_CHECK( singleValRange[0] == singleVal );
   BOOST_CHECK_THROW( singleValRange.at( 1 ), std::out_of_range );
 
-  ChannelRange const sliceFromInitList{ 1, 6, 2 };
-  BOOST_CHECK( sliceFromInitList.size() == 3 );
-  BOOST_CHECK( sliceFromInitList[2] == 5 );
+  // Check that the end element is not included.
+  ChannelRange const sliceFromInitList{ 1, 6, 1 };
+  BOOST_CHECK( sliceFromInitList.size() == 5 );
+  BOOST_CHECK( sliceFromInitList[4] == 5 );
+
+  ChannelRange const sliceFromInitListStep2{ 1, 6, 2 };
+  BOOST_CHECK( sliceFromInitListStep2.size() == 3 );
+  BOOST_CHECK( sliceFromInitListStep2[2] == 5 );
 }
 
 BOOST_AUTO_TEST_CASE( instantiateAudioChannelIndexVector )
@@ -53,6 +58,11 @@ BOOST_AUTO_TEST_CASE( instantiateAudioChannelIndexVector )
   ChannelList const vecFromMultipleInitLists = { ChannelRange{ 10, 5, -1 }, ChannelRange{ 3, 7, 1 } };
   BOOST_CHECK( vecFromMultipleInitLists.size() == 9 );
   BOOST_CHECK( vecFromMultipleInitLists[5] == 3 );
+
+  ChannelList const vecFromMultipleInitLists2 = { { 10, 5, -1 }, { 3, 7, 1 } };
+  BOOST_CHECK( vecFromMultipleInitLists2.size() == 9 );
+  BOOST_CHECK( vecFromMultipleInitLists2[5] == 3 );
+
 
 }
 
