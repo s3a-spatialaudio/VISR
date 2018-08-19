@@ -9,6 +9,10 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
   CMAKE_POLICY(SET CMP0063 NEW)
 endif( POLICY CMP0063 )
+# Policy for supporting <package>_ROOT CMake or environment variables in find_package() (CMake >= 3.12 only)
+if( POLICY CMP0074 )
+  CMAKE_POLICY(SET CMP0074 NEW)
+endif( POLICY CMP0074 )
 
 # The name of our top-level project.
 PROJECT( VISR CXX C )
