@@ -95,12 +95,12 @@ include(CMakePackageConfigHelpers)
 
 # Create package version file
 # Assuming major version bump = breaking API changes
-write_basic_package_version_file(visrConfigVersion.cmake
+write_basic_package_version_file(visr-config-version.cmake
   VERSION ${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}
   COMPATIBILITY SameMajorVersion)
 
 # Install package version file
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visrConfigVersion.cmake
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config-version.cmake
   DESTINATION lib/cmake/visr)
 
 # Register visr package in user registry
