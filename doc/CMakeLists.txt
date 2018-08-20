@@ -54,7 +54,7 @@ if (BUILD_DOCUMENTATION)
   configure_file( ${doxyfile_in} ${doxyfile} @ONLY )
 
 # TODO What is this needed for? Do we need installation rules for a project?
-  install( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/doxygen/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
+  install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
 
 # TODO There should be seperate commands for generating html and xml seperately. This however, requires cmake to edit the doxyfile . May have to be done manually.
 # TODO Doxygen generates files on any edit to the code source. It will regenerate each time, causing slow downs. The only possible way I can think of regeneration to stop is to check git somehow, if even possible.
