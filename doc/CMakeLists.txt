@@ -68,10 +68,9 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
 		  # but I still have to figure out how...
 		  MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
 		  DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
-		  COMMENT "Generating HTML documentation")
-
+		  COMMENT "Generating Doxygen HTML and XML documentation")
 		  
-  add_custom_target( doxygen-doc ALL DEPENDS ${doxy_html_index_file}  )
+  add_custom_target( doxygen-doc DEPENDS ${doxy_html_index_file}  )
 
   # "Meta-target" to trigger build of all documentation outputs
   add_custom_target( doc DEPENDS doxygen-doc )
@@ -89,7 +88,6 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
     # sphinx_js and jsdoc).
     set(BUILD_VIRTUALENV_PATH ${PROJECT_BINARY_DIR}/venv/bin/)
     list(INSERT CMAKE_PROGRAM_PATH 0 ${BUILD_VIRTUALENV_PATH})
-
 
     # HTML output directory
     set ( userdoc_html_dir     ${PROJECT_BINARY_DIR}/doc/userdoc/html/)
@@ -118,7 +116,7 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
     function( HtmlDocBuild targetName sourceDir outputDir depends )
       # message( STATUS "configure_file( ${configTemplate} ${outputDir}/html/conf.py @ONLY )" )
       configure_file( ${sourceDir}/conf.py.in ${outputDir}/html/conf.py @ONLY )
-      add_custom_target( ${targetName} ALL
+      add_custom_target( ${targetName}-html
         ${SPHINX_EXECUTABLE}
                    -q
                    -b html
@@ -127,7 +125,7 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
                     ${sourceDir}
                     ${outputDir}/html
       DEPENDS ${depends}
-      COMMENT "HTML generation for target ${targetName}."
+      COMMENT "HTML generation for target ${targetName}-html."
       )
     endfunction(HtmlDocBuild)
 
@@ -146,27 +144,27 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
                     ${sourceDir}
                     ${outputDir}/latex
       DEPENDS ${depends}
-      COMMENT "User-defined translation for target ${targetName}."
+      COMMENT "LaTeX generation for target ${targetName}-pdf."
       )
 
-      add_custom_target( ${targetName} ALL
-      ${PDFLATEX_COMPILER} visr
-      WORKING_DIRECTORY ${outputDir}/latex
-      DEPENDS ${outputDir}/latex/visr.tex
-      COMMENT "PDF compilation." )
+      add_custom_target( ${targetName}-pdf
+        COMMAND ${PDFLATEX_COMPILER} visr
+	COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
+        WORKING_DIRECTORY ${outputDir}/latex
+        DEPENDS ${outputDir}/latex/visr.tex
+        COMMENT "PDF compilation for target ${targetName}-pdf." )
     endfunction(PdfDocBuild)
 
-    PdfDocBuild( userdoc-pdf ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
-    PdfDocBuild( apidoc-pdf ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
+    PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
+    PdfDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
 
-    HtmlDocBuild( userdoc-html ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
-    HtmlDocBuild( apidoc-html ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
+    HtmlDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
+    HtmlDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
 
     # Add the Sphinx-generated targets to the "doc" meta-target
     add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf ) 
 
   endif(BUILD_DOCUMENTATION_SPHINX)
-
 
   # Include the Doxygen documentation in the package installer
   # Note: Doxygen as output format is deprecated, so it's not going to be visible externally.
