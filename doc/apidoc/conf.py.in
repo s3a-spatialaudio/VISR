@@ -49,16 +49,17 @@ def setup(app):
 # .. doxygenclass:: PointSource
 #    :project: visr
 
-# # -- Options for LaTeX output ---------------------------------------------
-#
-# latex_elements = {
-#     'papersize': 'a4paper',
-# }
-#
-# # Grouping the document tree into LaTeX files. List of tuples
-# # (source start file, target name, title,
-# #  author, documentclass [howto, manual, or own class]).
-# latex_documents = [
-#     (master_doc, 'WebVISR.tex', u'WebVISR Documentation',
-#      u'Jonathan Heathcote (BBC R\\&D)', 'manual'),
-# ]
+# -- Options for LaTeX output ---------------------------------------------
+
+latex_elements = {
+    'papersize': 'a4paper',
+    'author': 'The S3A team',
+}
+
+# Grouping the document tree into LaTeX files. List of tuples
+# (source start file, target name, title,
+#  author, documentclass [howto, manual, or own class]).
+latex_documents = [
+    (master_doc, 'visr.tex', u'VISR User documentation',
+     u'The S3A project team', 'manual'),
+]

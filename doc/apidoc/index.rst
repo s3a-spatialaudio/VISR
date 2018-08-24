@@ -42,8 +42,11 @@ Documentation
 
 .. Andreas ! This is commented out, comment this in so that it can scan through the /doc/src/xml/index.xml and produce an index of classes.
 .. .. doxygenindex::
-..    project: visr
+..   project: visr
 
+.. .. doxygennamespace:: visr
+..    project: visr
+   
 .. This is an example of what would be for a single source . You can also do classes too.
 .. .. doxygenfile:: point_source.hpp
 ..    :project: visr

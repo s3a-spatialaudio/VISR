@@ -15,6 +15,9 @@ if (BUILD_DOCUMENTATION)
     message(FATAL_ERROR "Doxygen is needed to build the documentation. You can install it here at ...")
   endif()
 
+  # Latex is used to create PDFs from the sphinx documentation
+  find_package( LATEX COMPONENTS PDFLATEX )
+
 #   ################################################################################
 # # Directories setup
 # # Do we need to set these directories as variables? TODO Delete if not necessary or not used
@@ -53,9 +56,6 @@ if (BUILD_DOCUMENTATION)
 
   configure_file( ${doxyfile_in} ${doxyfile} @ONLY )
 
-# TODO What is this needed for? Do we need installation rules for a project?
-  install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
-
 # TODO There should be seperate commands for generating html and xml seperately. This however, requires cmake to edit the doxyfile . May have to be done manually.
 # TODO Doxygen generates files on any edit to the code source. It will regenerate each time, causing slow downs. The only possible way I can think of regeneration to stop is to check git somehow, if even possible.
 # HTML command
@@ -70,32 +70,13 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
 		  DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
 		  COMMENT "Generating HTML documentation")
 
-# TODO add this below when I have figured out how to generate either targets xml/html seperately.
-# XML command
-  # add_custom_command( OUTPUT ${doxy_xml_index_file}
-	# 	    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-  # 		  # The following should be ${doxyfile} only but it
-  # 		  # will break the dependency.
-  # 		  # The optimal solution would be creating a
-  # 		  # custom_command for ${doxyfile} generation
-  # 		  # but I still have to figure out how...
-  # 		  MAIN_DEPENDENCY ${doxyfile_out} ${doxyfile_in}
-  #       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/
-  # 		  DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
-  #     COMMENT "Generating XML file index")
+		  
+  add_custom_target( doxygen-doc ALL DEPENDS ${doxy_html_index_file}  )
 
-# TODO make doxy will generate xml and html commands - add the above to args when working...
+  # "Meta-target" to trigger build of all documentation outputs
+  add_custom_target( doc DEPENDS doxygen-doc )
 
-################################################################################
-# TARGET
-  add_custom_target( doxy ALL DEPENDS ${doxy_html_index_file}  )
-################################################################################
-
-  ################################################################################
-  # Sphinx build
-  # Add additional option for this :
-
-  option(BUILD_DOCUMENTATION_SPHINX "Create and install the WebAPI documentation (requires Sphinx and Breathe)" OFF)
+  option(BUILD_DOCUMENTATION_SPHINX "Create and install the user and API reference documentation (requires Sphinx and Breathe)" OFF)
   IF(BUILD_DOCUMENTATION_SPHINX )
 
     find_package(Sphinx)
@@ -109,20 +90,21 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
     set(BUILD_VIRTUALENV_PATH ${PROJECT_BINARY_DIR}/venv/bin/)
     list(INSERT CMAKE_PROGRAM_PATH 0 ${BUILD_VIRTUALENV_PATH})
 
-    # Add subdirectory here?
-    set( sphinx_output_root   ${PROJECT_BINARY_DIR}/doc/sphinx/ )
-    set (sphinx_breathe_path  ${PROJECT_BINARY_DIR}/doc/sphinx/breathe)
-    set( sphinx_cache_dir     ${PROJECT_BINARY_DIR}/doc/sphinx/doctrees)
 
     # HTML output directory
-    set ( sphinx_html_dir     ${PROJECT_BINARY_DIR}/doc/sphinx/html/)
+    set ( userdoc_html_dir     ${PROJECT_BINARY_DIR}/doc/userdoc/html/)
     # For PDF generation using sphinx pdfbuilder
-    set ( sphinx_pdf_output   ${PROJECT_BINARY_DIR}/doc/sphinx/pdf/)
+    set ( userdoc_pdf_output   ${PROJECT_BINARY_DIR}/doc/userdoc/pdf/)
     # Used as dependencies when making custom command directive for Sphinx
-    set (config               ${PROJECT_BINARY_DIR}/doc/sphinx/config.py)
-    set (config_in            ${PROJECT_SOURCE_DIR}/doc/sphinx/config.py.in)
-    set (sphinx_root          ${PROJECT_SOURCE_DIR}/doc/sphinx/)
 
+    # <af> apparently unused:
+    set (userdoc_config_file    ${PROJECT_BINARY_DIR}/doc/userdoc/conf.py)
+    set (userdoc_config_in      ${PROJECT_SOURCE_DIR}/doc/userdoc/conf.py.in)
+    set (userdoc_source_root    ${PROJECT_SOURCE_DIR}/doc/userdoc/)
+    set (apidoc_source_root    ${PROJECT_SOURCE_DIR}/doc/userdoc/)
+
+    set( userdoc_output_root   ${PROJECT_BINARY_DIR}/doc/userdoc )
+    set( apidoc_output_root   ${PROJECT_BINARY_DIR}/doc/apidoc )
 
     if(NOT DEFINED SPHINX_THEME)
         set(SPHINX_THEME default)
@@ -132,52 +114,62 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
         set(SPHINX_THEME_DIR)
     endif()
 
-    configure_file(
-        "${PROJECT_SOURCE_DIR}/doc/sphinx/conf.py.in"
-        "${PROJECT_BINARY_DIR}/doc/sphinx/conf.py"
-        @ONLY)
+    # Function to define a target building HTML documentation from a source directory containing Sphinx rst code.
+    function( HtmlDocBuild targetName sourceDir outputDir depends )
+      # message( STATUS "configure_file( ${configTemplate} ${outputDir}/html/conf.py @ONLY )" )
+      configure_file( ${sourceDir}/conf.py.in ${outputDir}/html/conf.py @ONLY )
+      add_custom_target( ${targetName} ALL
+        ${SPHINX_EXECUTABLE}
+                   -q
+                   -b html
+                   -c ${outputDir}/html
+                   -d ${outputDir}/cache
+                    ${sourceDir}
+                    ${outputDir}/html
+      DEPENDS ${depends}
+      COMMENT "HTML generation for target ${targetName}."
+      )
+    endfunction(HtmlDocBuild)
 
-    # add_custom_command( OUTPUT ${doxy_xml_index_file}
-  	# 	    COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile_out}
-    # 		  # The following should be ${doxyfile} only but it
-    # 		  # will break the dependency.
-    # 		  # The optimal solution would be creating a
-    # 		  # custom_command for ${doxyfile} generation
-    # 		  # but I still have to figure out how...
-    # 		  MAIN_DEPENDENCY ${doxyfile_out} ${doxyfile_in}
-    #       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/
-    # 		  DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
-    #     COMMENT "Generating XML file index")
+    # Function to define a target building PDF documentation from a source directory containing Sphinx rst code.
+    function( PdfDocBuild targetName sourceDir outputDir depends )
+      #message( STATUS "configure_file( ${configTemplate} ${outputDir}/latex/conf.py @ONLY )" )
+      configure_file( ${sourceDir}/conf.py.in ${outputDir}/latex/conf.py @ONLY )
 
-  ################################################################################
-    # TARGET
-    add_custom_target(webapi ALL
-      ${SPHINX_EXECUTABLE}
-        -q
-        -b html
-        -c ${PROJECT_BINARY_DIR}/doc/sphinx/
-        -d ${sphinx_cache_dir}
-        ${sphinx_root}
-        ${sphinx_output_root}
-    DEPENDS ${doxy_xml_index_file}
-    COMMENT "Building WebAPI")
-  ################################################################################
+      add_custom_command(
+        OUTPUT ${outputDir}/latex/visr.tex
+        COMMAND ${SPHINX_EXECUTABLE}
+                   -q
+                   -b latex
+                   -c ${outputDir}/latex
+                   -d ${outputDir}/cache
+                    ${sourceDir}
+                    ${outputDir}/latex
+      DEPENDS ${depends}
+      COMMENT "User-defined translation for target ${targetName}."
+      )
 
-# TODO change to latex AND SEE more info here https://docs.typo3.org/typo3cms/extensions/sphinx/AdvancedUsersManual/RenderingPdf/Index.html
-    # if(rst2pdf_FOUND)
-    #   add_custom_command( OUTPUT ${sphinx_pdf_output}
-    #     COMMAND ${SPHINX_EXECUTABLE}
-    #     -b pdf
-    #     # -c where the configuration path is located config.py.in
-    #     -c ${PROJECT_BINARY_DIR}/doc/sphinx/
-    #     -d ${sphinx_cache_dir}
-    #     MAIN_DEPENDENCY ${config} ${config_in}
-    #     # If xml has successfully been generated by doxygen
-    #     DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
-    #     COMMENT "Generating HTML documentation")
-    #
-    #   add_custom_target( pdf ALL DEPENDS ${sphinx_pdf_output}  )
-    # endif()
+      add_custom_target( ${targetName} ALL
+      ${PDFLATEX_COMPILER} visr
+      WORKING_DIRECTORY ${outputDir}/latex
+      DEPENDS ${outputDir}/latex/visr.tex
+      COMMENT "PDF compilation." )
+    endfunction(PdfDocBuild)
 
-  endif()
-endif()
+    PdfDocBuild( userdoc-pdf ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
+    PdfDocBuild( apidoc-pdf ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
+
+    HtmlDocBuild( userdoc-html ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
+    HtmlDocBuild( apidoc-html ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
+
+    # Add the Sphinx-generated targets to the "doc" meta-target
+    add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf ) 
+
+  endif(BUILD_DOCUMENTATION_SPHINX)
+
+
+  # Include the Doxygen documentation in the package installer
+  # Note: Doxygen as output format is deprecated, so it's not going to be visible externally.
+  # install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
+
+endif(BUILD_DOCUMENTATION)
