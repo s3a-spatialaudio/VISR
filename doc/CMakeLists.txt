@@ -148,7 +148,10 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
       )
 
       add_custom_target( ${targetName}-pdf
+        # Multiple runs to sort undefined reference (very crude at the moment
         COMMAND ${PDFLATEX_COMPILER} visr
+        COMMAND ${PDFLATEX_COMPILER} visr
+	COMMAND ${PDFLATEX_COMPILER} visr
 	COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
         WORKING_DIRECTORY ${outputDir}/latex
         DEPENDS ${outputDir}/latex/visr.tex
