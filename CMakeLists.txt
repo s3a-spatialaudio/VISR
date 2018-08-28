@@ -155,7 +155,7 @@ endif( WIN32 )
 ############################################################
 # Create universal binaries on MacOS
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" ON)
+  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" OFF)
   IF( BUILD_MACOS_UNIVERSAL_BINARIES )
     SET( OSX_UNIVERSAL ON )
     SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
