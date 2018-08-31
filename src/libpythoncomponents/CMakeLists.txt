@@ -15,11 +15,6 @@ include_directories( ${PYTHON_INCLUDE_DIR} )
 include_directories( ${PYBIND11_INCLUDE_DIR} )
 
 add_library( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
-# Transitive dependencies
-# Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
-# exactly one instance of pythonsupport::InitialisationGuard
-target_link_libraries( pythoncomponents_static PUBLIC pythonsupport_shared )
-target_link_libraries( pythoncomponents_static PUBLIC visr_static )
 
 add_library( pythoncomponents_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythoncomponents_shared PROPERTIES OUTPUT_NAME pythoncomponents )
@@ -28,8 +23,15 @@ set_target_properties( pythoncomponents_shared PROPERTIES ARCHIVE_OUTPUT_NAME py
 target_compile_definitions( pythoncomponents_shared PRIVATE -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONCOMPONENTS_LIBRARY=1)
 target_compile_definitions( pythoncomponents_shared PUBLIC -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1)
 set_target_properties( pythoncomponents_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pythoncomponents_shared PUBLIC pythonsupport_shared )
-target_link_libraries( pythoncomponents_shared PUBLIC visr_shared )
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  # Transitive dependencies
+  # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
+  # exactly one instance of pythonsupport::InitialisationGuard
+  target_link_libraries( pythoncomponents_${LIBTYPE} PUBLIC pythonsupport_shared )
+  target_link_libraries( pythoncomponents_${LIBTYPE} PUBLIC visr_${LIBTYPE} )
+endforeach()
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
