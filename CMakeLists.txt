@@ -38,10 +38,6 @@ if(UNIX)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-#message( STATUS "output "${CMAKE_MODULE_PATH} )
-# At the moment, all include directories are relative to the source root directory.
-# Therefore it suffices to set this root as the include path.
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
