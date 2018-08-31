@@ -50,10 +50,8 @@ class XYZ {
    */
   XYZ( XYZ const & rhs ) = default;
   
-    
   Afloat x, y, z;
   bool isInfinite; // eg for source at infinity.
-    
     
   int set(Afloat X, Afloat Y, Afloat Z, bool inf = false) {
     x = X; y = Y; z =Z;
@@ -63,18 +61,7 @@ class XYZ {
     
   Afloat getLength() const {
     return std::sqrt(x*x + y*y + z*z);
-  }
-    
-  Afloat dot( XYZ v) const {
-        return x * v.x + y * v.y + z * v.z;
-  }
-
-  int minus( XYZ v) {
-        x -= v.x;
-        y -= v.y;
-        z -= v.z;
-        return 0;
-  }
+  }    
 
   int normalise() {
     Afloat l = getLength();
