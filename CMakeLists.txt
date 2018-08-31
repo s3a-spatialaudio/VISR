@@ -3,7 +3,8 @@
 # Top-level build configuration for project VISceRal
 
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
-CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
+# >= 3.1 for CMAKE_CXX_STANDARD
+CMAKE_MINIMUM_REQUIRED (VERSION 3.1.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
@@ -30,12 +31,9 @@ ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
 # Add support for unit tests
 INCLUDE( CTest )
 
-# Enable C++11 features on Linux platforms
-# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
-# Maybe there is a more general way to configure the different platforms and toolchains
-if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-endif()
+# Enable C++ 11 support
+# This requires CMake >= 3.1
+set( CMAKE_CXX_STANDARD 11 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
@@ -44,7 +42,7 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 # Default path for static libraries
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
 
-# Copy the executabl  es to the binary directory
+# Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 # Default destination for shared libraries (not DLLs)
