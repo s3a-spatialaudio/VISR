@@ -313,17 +313,7 @@ FIND_PACKAGE( FFTS REQUIRED )
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
-OPTION( Boost_USE_STATIC_LIBS OFF )
-
-# For the moment, we support only dynamic linking of boost.
-# In this case, this line is required on Windows to prevent undefined symbols from boost::program_options
-
-IF( NOT Boost_USE_STATIC_LIBS )
-  ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
-ENDIF( NOT Boost_USE_STATIC_LIBS )
-
-# Avoid problems with the auto-link feature on Windows platforms
-ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
+OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
 
 # Define the boost libraries that must be present.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.

@@ -54,17 +54,8 @@ set( HEADERS
 
 include_directories( ${SNDFILE_INCLUDE_DIRS} )
 
-#set_target_properties( Boost::filesystem PROPERTIES CMAKE_INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_NAME_DIR TRUE)
-
 add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
-get_target_property(VAR_ Boost::filesystem IMPORT_LOCATION)
-
-target_link_libraries( pml_static PUBLIC objectmodel_static )
-target_link_libraries( pml_static PUBLIC visr_static )
-target_link_libraries( pml_static PRIVATE ${SNDFILE_LIBRARY} )
-target_link_libraries( pml_static PUBLIC Boost::filesystem )
-target_link_libraries( pml_static PUBLIC Boost::system )
 
 add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
@@ -73,11 +64,18 @@ set_target_properties( pml_shared PROPERTIES ARCHIVE_OUTPUT_NAME pml_shared )
 target_compile_definitions( pml_shared PRIVATE -DVISR_BUILD_PML_SHARED_LIBRARY=1 -DVISR_BUILD_PML_LIBRARY=1)
 target_compile_definitions( pml_shared PUBLIC -DVISR_BUILD_PML_SHARED_LIBRARY=1)
 set_target_properties( pml_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pml_shared PUBLIC objectmodel_shared )
-target_link_libraries( pml_shared PUBLIC visr_shared )
-target_link_libraries( pml_shared PRIVATE ${SNDFILE_LIBRARY} )
-target_link_libraries( pml_shared PUBLIC Boost::filesystem )
-target_link_libraries( pml_shared PUBLIC Boost::system )
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  target_link_libraries( pml_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
+  target_link_libraries( pml_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
+  target_link_libraries( pml_${LIB_TYPE} PRIVATE ${SNDFILE_LIBRARY} )
+  target_link_libraries( pml_${LIB_TYPE} PUBLIC Boost::filesystem )
+  if( NOT Boost_USE_STATIC_LIBS )
+    target_compile_definitions( pml_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
+  endif( NOT Boost_USE_STATIC_LIBS )
+  target_compile_definitions( pml_${LIB_TYPE} PUBLIC -DBOOST_ALL_NO_LIB )
+endforeach()
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

@@ -13,6 +13,10 @@ target_link_libraries( ${APPLICATION_NAME} pythoncomponents_shared )
 target_link_libraries( ${APPLICATION_NAME} rrl_shared )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+if( NOT Boost_USE_STATIC_LIBS )
+  target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
+endif( NOT Boost_USE_STATIC_LIBS )
+target_compile_definitions( ${APPLICATION_NAME} PRIVATE -DBOOST_ALL_NO_LIB )
 
 # Since the 'wrapper' unit tests require the visr Python external, ensure that it is compiled
 add_dependencies( ${APPLICATION_NAME} visrpython )
