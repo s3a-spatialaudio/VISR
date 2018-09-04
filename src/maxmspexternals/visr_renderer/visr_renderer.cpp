@@ -17,6 +17,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#include <ciso646>
 #include <cstdlib>
 #include <sstream>
 
@@ -56,6 +57,7 @@ namespace visr_renderer
 
 VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
  : ExternalBase( maxProxy )
+ , mConfigInitialised( false )
  , mArrayConfiguration( new panning::LoudspeakerArray )
 {
   object_post( reinterpret_cast<t_object *>(getMaxProxy()), "VisrRenderer::VisrRenderer() constructor called." );
@@ -130,7 +132,9 @@ VisrRenderer::VisrRenderer( t_pxobject & maxProxy, short argc, t_atom *argv )
   catch( std::exception const & ex )
   {
     object_error( reinterpret_cast<t_object *>(getMaxProxy()), "Error in constructor: ", ex.what() );
+    return;
   }
+  mConfigInitialised = true;
 }
 
 VisrRenderer::~VisrRenderer()
@@ -157,6 +161,11 @@ VisrRenderer::~VisrRenderer()
 
 /*virtual*/ void VisrRenderer::initDsp( t_object *dsp64, short *count, double samplerate, long maxvectorsize, long flags )
 {
+  if( not mConfigInitialised )
+  {
+    error( "VisrRenderer::initDsp(): Configuration in constructor failed, therefore dspInit() cannot be performed." );
+    return;
+  }
   mPeriod = maxvectorsize;
   // Request the actual buffer size
   if( maxvectorsize > std::numeric_limits<short>::max() )
