@@ -5,6 +5,8 @@
 // TODO: Eliminate this dependency!
 #include <librrl/communication_area.hpp>
 
+#include <libvisr/detail/compose_message_string.hpp>
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
@@ -212,7 +214,8 @@ namespace // unnamed
     // Initialise the portaudio library. Multiple calls of this constructur should be no problem, since the number of initialize and deInitialize must match.
     if( (ret = Pa_Initialize()) != paNoError )
     {
-      throw std::runtime_error( "Initialisation of PortAudio library failed." );
+      char const * msg = Pa_GetErrorText( ret );
+      throw std::runtime_error( visr::detail::composeMessageString( "Initialisation of PortAudio library failed: ", msg, "." ) );
     }
     
     PaHostApiTypeId apiType;

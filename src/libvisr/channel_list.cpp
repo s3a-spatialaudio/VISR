@@ -129,6 +129,8 @@ ChannelList::ChannelList( std::initializer_list<ChannelRange> const & initList )
   }
 }
 
+ChannelList::~ChannelList() = default;
+
 std::size_t ChannelList::size() const
 {
   return mChannels.size();

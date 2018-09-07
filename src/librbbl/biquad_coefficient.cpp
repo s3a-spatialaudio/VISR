@@ -370,6 +370,10 @@ void BiquadCoefficientList<CoeffType>::writeXml( std::string & str ) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 template<typename CoeffType>
 BiquadCoefficientMatrix<CoeffType>::BiquadCoefficientMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads )
 {
@@ -403,11 +407,226 @@ void BiquadCoefficientMatrix<CoeffType>::setFilter( std::size_t filterIdx, Biqua
   BiquadCoefficientList<CoeffType> & row = mRows[filterIdx];
   std::copy( &newFilter[0], &newFilter[0] + newFilter.size(), &row[0] );
   std::fill_n( &row[0] + newFilter.size(),
-               numberOfSections()
-               - newFilter.size(), BiquadCoefficient<CoeffType>() );
+    numberOfSections()
+    - newFilter.size(), BiquadCoefficient<CoeffType>() );
 }
 
-// explicit instantiation
+template< typename CoeffType >
+/*static*/ BiquadCoefficientMatrix<CoeffType>
+BiquadCoefficientMatrix<CoeffType>::fromJson( boost::property_tree::ptree const & tree )
+{
+  BiquadCoefficientMatrix<CoeffType> ret{0,0};
+  ret.loadJson( tree );
+  return ret;
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficientMatrix<CoeffType>
+BiquadCoefficientMatrix<CoeffType>::fromJson( std::basic_istream<char> & stream )
+{
+  BiquadCoefficientMatrix<CoeffType> ret{0,0};
+  ret.loadJson( stream );
+  return ret;
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficientMatrix<CoeffType>
+BiquadCoefficientMatrix<CoeffType>::fromJson( std::string const & str )
+{
+  BiquadCoefficientMatrix<CoeffType> ret{0,0};
+  ret.loadJson( str );
+  return ret;
+
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficientMatrix<CoeffType>
+BiquadCoefficientMatrix<CoeffType>::fromXml( boost::property_tree::ptree const & tree )
+{
+  BiquadCoefficientMatrix<CoeffType> ret{0,0};
+  ret.loadXml( tree );
+  return ret;
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficientMatrix<CoeffType>
+BiquadCoefficientMatrix<CoeffType>::fromXml( std::basic_istream<char> & stream )
+{
+  BiquadCoefficientMatrix<CoeffType> ret{0,0};
+  ret.loadXml( stream );
+  return ret;
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficientMatrix<CoeffType>
+BiquadCoefficientMatrix<CoeffType>::fromXml( std::string const & str )
+{
+  BiquadCoefficientMatrix<CoeffType> ret{0,0};
+  ret.loadXml( str );
+  return ret;
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::loadJson( boost::property_tree::ptree const & tree )
+{
+  auto const channelNodes = tree.equal_range( "" );
+  std::size_t const numChannels = std::distance( channelNodes.first, channelNodes.second );
+  if( numChannels == 0 )
+  {
+    resize( 0, 0 ); // return empty matrix
+  }
+  std::size_t static const unInitMarker = std::numeric_limits<std::size_t>::max();
+  std::size_t numBiquads = unInitMarker;
+  std::size_t rowIdx{ 0 };
+  for( boost::property_tree::ptree::const_assoc_iterator channelIt( channelNodes.first ); channelIt != channelNodes.second; ++channelIt, ++rowIdx )
+  {
+    boost::property_tree::ptree const channelTree = channelIt->second;
+    BiquadCoefficientList<CoeffType> const rowFilters = BiquadCoefficientList<CoeffType>::fromJson( channelTree );
+    if( rowIdx == 0 )
+    {
+      numBiquads = rowFilters.size();
+      resize( numChannels, numBiquads );
+    }
+    assert( numBiquads != unInitMarker ); // Check that initialisation is performed during the first run.
+    if( rowFilters.size() != numBiquads )
+    {
+      std::invalid_argument( "BiquadCoefficientMatrix::loadJSON(): Encountered matrix rows with differing sizes." );
+    }
+    setFilter( rowIdx, rowFilters );
+  }
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::loadJson( std::basic_istream<char> & stream )
+{
+  boost::property_tree::ptree tree;
+  try
+  {
+    read_json( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while parsing a JSON BiquadCoefficientMatrix representation: " ) + ex.what() );
+  }
+  loadJson( tree );
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::loadJson( std::string const & str )
+{
+  std::stringstream stream( str );
+  loadJson( stream );
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::loadXml( boost::property_tree::ptree const & tree )
+{
+#if 0
+  // Hack: Depending from where this method is called, we don't know
+  boost::property_tree::ptree const specNode = tree.count( "filterSpec" ) == 0
+    ? tree : tree.get_child( "filterSpec" );
+
+  auto const biquadNodes = specNode.equal_range( "biquad" );
+  std::size_t const numBiquads = std::distance( biquadNodes.first, biquadNodes.second );
+  resize( numBiquads );
+  std::size_t biqIndex = 0;
+  for( boost::property_tree::ptree::const_assoc_iterator treeIt( biquadNodes.first ); treeIt != biquadNodes.second; ++treeIt, ++biqIndex )
+  {
+    boost::property_tree::ptree const childTree = treeIt->second;
+    at( biqIndex ).loadXml( childTree );
+  }
+#endif
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::loadXml( std::basic_istream<char> & stream )
+{
+  boost::property_tree::ptree tree;
+  try
+  {
+    read_xml( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while parsing a XML BiquadCoefficient node: " ) + ex.what() );
+  }
+  loadXml( tree );
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::loadXml( std::string const & str )
+{
+  std::stringstream stream( str );
+  loadXml( stream );
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::writeJson( boost::property_tree::ptree & tree ) const
+{
+#if 0
+  for( std::size_t idx( 0 ); idx < size(); ++idx )
+  {
+    boost::property_tree::ptree child;
+    at( idx ).writeJson( child );
+    tree.push_back( std::make_pair( "", child ) );
+  }
+#endif
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::writeJson( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree tree;
+  writeJson( tree );
+  try
+  {
+    write_json( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while writing a BiquadCoefficientMatrix to JSON: " ) + ex.what() );
+  }
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::writeJson( std::string & str ) const
+{
+  std::stringstream stream;
+  writeJson( stream );
+  str = stream.str();
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::writeXml( boost::property_tree::ptree & tree ) const
+{
+  // TODO: implement me!
+  assert( false );
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::writeXml( std::basic_ostream<char> & stream ) const
+{
+  boost::property_tree::ptree tree;
+  writeXml( tree );
+  try
+  {
+    write_xml( stream, tree );
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::invalid_argument( std::string( "Error while writing BiquadCoefficientMatrix to XML: " ) + ex.what() );
+  }
+}
+
+template< typename CoeffType >
+void BiquadCoefficientMatrix<CoeffType>::writeXml( std::string & str ) const
+{
+  std::stringstream stream;
+  writeXml( stream );
+  str = stream.str();
+}
+
+// Explicit instantiations
 template class BiquadCoefficient<float>;
 template class BiquadCoefficientList<float>;
 template class BiquadCoefficientMatrix<float>;

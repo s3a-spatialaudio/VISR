@@ -8,6 +8,7 @@ audio_interface_factory.cpp
 
 SET( HEADERS
 audio_interface.hpp
+export_symbols.hpp  
 portaudio_interface.hpp
 audio_interface_factory.hpp
 )

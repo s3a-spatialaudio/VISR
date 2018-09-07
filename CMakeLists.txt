@@ -9,6 +9,10 @@ CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
   CMAKE_POLICY(SET CMP0063 NEW)
 endif( POLICY CMP0063 )
+# Policy for supporting <package>_ROOT CMake or environment variables in find_package() (CMake >= 3.12 only)
+if( POLICY CMP0074 )
+  CMAKE_POLICY(SET CMP0074 NEW)
+endif( POLICY CMP0074 )
 
 # The name of our top-level project.
 PROJECT( VISR CXX C )
@@ -16,7 +20,7 @@ PROJECT( VISR CXX C )
 # Define central version numbers for the project
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 9 )
+set( VISR_MINOR_VERSION 10 )
 set( VISR_PATCH_VERSION 0 )
 
 ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
@@ -53,13 +57,14 @@ SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 # Default path for DLLs on windows
 SET( RUNTIME_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 
+set( VISR_VERSIONED_NAME VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION})
+
 #############################################################
 # Create a system string.
 SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
 IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
-SET( VISR_TOPLEVEL_NAME VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION})
-SET(CMAKE_INSTALL_PREFIX /Applications/${VISR_TOPLEVEL_NAME})
+SET (CMAKE_INSTALL_PREFIX /Applications/${VISR_VERSIONED_NAME})
 
 SET( CMAKE_MACOSX_RPATH ON)
 # use, i.e. don't skip the full RPATH for the build tree
@@ -151,7 +156,7 @@ endif( WIN32 )
 ############################################################
 # Create universal binaries on MacOS
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" ON)
+  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" OFF)
   IF( BUILD_MACOS_UNIVERSAL_BINARIES )
     SET( OSX_UNIVERSAL ON )
     SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )

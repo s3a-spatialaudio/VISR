@@ -1,5 +1,16 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+
+# Set the installation directory for the export and version files
+if( VISR_SYSTEM_NAME MATCHES "Linux" )
+  # On  Linux, there's a predefined directory structure under /usr/lib
+  set( VISR_INSTALL_EXPORT_CONFIG_DIRECTORY lib/cmake/visr )
+else( VISR_SYSTEM_NAME MATCHES "Linux" )
+  # On Windows and MacOS, install it in a cmake/ directory within the appication's install directory,
+  # e.g. c:\Program Files\VISR-X.X.X/cmake or /Applications/VISR-X.X.X/cmake
+  set( VISR_INSTALL_EXPORT_CONFIG_DIRECTORY cmake )
+endif( VISR_SYSTEM_NAME MATCHES "Linux" )
+
 # Build configuration for the top-level src/ directory
 
 # Common functionalties for realtime applications
@@ -71,7 +82,7 @@ endif( BUILD_PYTHON_BINDINGS )
 install(EXPORT VISR_exports
   NAMESPACE VISR::
   FILE visr_exports.cmake
-  DESTINATION lib/cmake/visr
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
   )
 
 # Create config files for exported targets
@@ -84,7 +95,7 @@ export(EXPORT VISR_exports
 # Install package config file
 # for use from install tree
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config.cmake
-  DESTINATION lib/cmake/visr)
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} )
 
 # Copy package config file
 # for use from build tree, substituting Boost setting variables
@@ -95,13 +106,13 @@ include(CMakePackageConfigHelpers)
 
 # Create package version file
 # Assuming major version bump = breaking API changes
-write_basic_package_version_file(visrConfigVersion.cmake
+write_basic_package_version_file(visr-config-version.cmake
   VERSION ${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}
   COMPATIBILITY SameMajorVersion)
 
 # Install package version file
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visrConfigVersion.cmake
-  DESTINATION lib/cmake/visr)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config-version.cmake
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY})
 
 # Register visr package in user registry
 export(PACKAGE visr)

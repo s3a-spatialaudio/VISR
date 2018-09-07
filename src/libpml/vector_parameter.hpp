@@ -59,6 +59,38 @@ public:
 
   explicit VectorParameter(VectorParameterConfig const & config);
 
+  /**
+  * Named constructors to create and initialise vectors from various representations.
+  */
+  //@{
+  /**
+   * Create a VectorParameter from a string containing a list of numbers separated by a space or a comma 
+   * plus arbitray amounts of whitespace
+   */
+  static VectorParameter fromString( std::string const & initString, std::size_t alignment = 0 );
+
+  /**
+   * Create a VectorParameter from a stream containing a textual representation of the string.
+   * @see fromString for the format.
+   */
+  static VectorParameter fromStream( std::istream & stream, std::size_t alignment = 0 );
+
+  /**
+   * Create a VectorParameter from an audio file (e.g., a WAV file).
+   * The file must contain a single audio channel.
+   */
+  static VectorParameter fromAudioFile( std::string const & fileName, std::size_t alignment = 0 );
+
+  /**
+   * Create a VectorParameter from a file containing a list of values.
+   * @see fromStream for a description of the text format.
+   */
+  static VectorParameter fromTextFile( std::string const & fileName, std::size_t alignment = 0 );
+  //@}
+
+  /**
+   * Destructor (virtual)
+   */
   virtual ~VectorParameter() override;
 };
 

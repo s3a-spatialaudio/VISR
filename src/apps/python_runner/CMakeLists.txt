@@ -2,12 +2,12 @@
 
 set( APPLICATION_NAME python_runner )
 
-ADD_EXECUTABLE( ${APPLICATION_NAME} main.cpp options.hpp options.cpp )
+add_executable( ${APPLICATION_NAME} main.cpp options.hpp options.cpp )
 
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} audiointerfaces_static )
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} apputilities_static )
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} pythoncomponents_static )
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} rcl_static )
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} rrl_static )
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} pml_static )
-TARGET_LINK_LIBRARIES(${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries(${APPLICATION_NAME} PRIVATE audiointerfaces_static )
+target_link_libraries(${APPLICATION_NAME} PRIVATE apputilities_static )
+target_link_libraries(${APPLICATION_NAME} PRIVATE pythoncomponents_static )
+target_link_libraries(${APPLICATION_NAME} PRIVATE pml_static )
+target_link_libraries(${APPLICATION_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
+
+install( TARGETS ${APPLICATION_NAME} DESTINATION bin )
