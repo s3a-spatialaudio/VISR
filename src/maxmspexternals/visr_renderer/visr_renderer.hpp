@@ -52,6 +52,14 @@ public:
 
 private:
   /**
+   * Flag to specify whether the configuration parsing in the constructor was successfull.
+   * If not, the initDsp() method will return immediately with an error.
+   * This is necessary because initDsp() is called regardless of whether the constructor fails.
+   */
+  bool mConfigInitialised;
+
+
+  /**
    * The number of samples to be processed per call.
    * The type is chosen to be compatible to the parameter passed by the calling Max/MSP functions.
    */
