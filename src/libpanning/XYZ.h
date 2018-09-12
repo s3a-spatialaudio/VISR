@@ -25,12 +25,7 @@ class VISR_PANNING_LIBRARY_SYMBOL XYZ {
  /**
   * Default constructor.
   */
-   XYZ()
-    : x( 0.0f )
-    , y( 0.0f )
-    , z( 0.0f )
-    , isInfinite( false )
-   {}
+    XYZ();
  
   /**
    * Constructor with specified coordinates.

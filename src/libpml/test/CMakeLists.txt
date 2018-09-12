@@ -8,6 +8,7 @@ set( SOURCES
  filter_routing_parameter.cpp
  matrix_parameter.cpp
  parameter_instantiation.cpp
+ vector_parameter.cpp
  test_main.cpp
 )
 

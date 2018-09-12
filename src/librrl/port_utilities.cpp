@@ -68,13 +68,29 @@ bool checkParameterPortCompatibility( impl::ParameterPortBaseImplementation cons
     messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter types of the connected parameter ports \""
       << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" do not match.\n";
   }
-  ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
-  ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
-  if( not sendParameterConfig.compare( receiveParameterConfig ) )
+  else // If the types don't match, we do not need to compare the configs.
   {
-    result = false;
-    messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \""
-      << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" are not compatible.\n";
+    ParameterConfigBase const & sendParameterConfig = sendPort.parameterConfig();
+    ParameterConfigBase const & receiveParameterConfig = receivePort.parameterConfig();
+    // Note: At the moment, polymorphic parameter ports do not detect if a non-matching parameter config type is used (as opposed to the type-safe
+    // interface of the templated visr::Parameter{Input|Output} ports).
+    // TODO: Implement check in the constructor of polymorphic or all parameter ports whether the dynamic type of the parameter config object is
+    // compatible with the set parameter type.
+    try
+    {
+      if( not sendParameterConfig.compare( receiveParameterConfig ) )
+      {
+        result = false;
+        messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \""
+                 << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" are not compatible.\n";
+      }
+    }
+    catch( std::exception const & /*ex*/ ) // compare() throws, i.e., incompatible types
+    {
+      messages << "AudioSignalFlow::initialiseParameterInfrastructure(): The parameter configurations of the connected parameter ports \""
+               << fullyQualifiedName( sendPort ) << "\" and \"" << fullyQualifiedName( receivePort ) << "\" have different types.\n";
+      result = false;
+    }
   }
   return result;
 }

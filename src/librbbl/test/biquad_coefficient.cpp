@@ -200,6 +200,30 @@ BOOST_AUTO_TEST_CASE( InstantiateBiquadListFromJson )
   BOOST_CHECK_CLOSE( bi1.a2( ), a12, std::numeric_limits<CoeffType>::epsilon( ) );
 }
 
+// ============================================================================
+// BiquadCoefficientMatrix
+
+BOOST_AUTO_TEST_CASE( InstantiateBiquadMatrixFromJson )
+{
+  using CoeffType = float;
+
+  std::string const jsonStr( "[ ["
+    "{ \"b0\": 0.2713121e-4, \"b1\": 0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\": -1.9792, \"a2\": 0.9793 }, "
+    "{ \"b0\": 0.2713121e-2, \"b1\": 0.5426241e-2, \"b2\": 0.2713121e-2, \"a1\": 1.9792, \"a2\": -0.9793 }"
+    "], ["
+    "{ \"b0\": 0.2713121e-4, \"b1\": 0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\": -1.9792, \"a2\": 0.9793 }, "
+    "{ \"b0\": 0.2713121e-2, \"b1\": 0.5426241e-2, \"b2\": 0.2713121e-2, \"a1\": 1.9792, \"a2\": -0.9793 }"
+    "], ["
+    "{ \"b0\": 0.2713121e-4, \"b1\": 0.5426241e-4, \"b2\": 0.2713121e-4, \"a1\": -1.9792, \"a2\": 0.9793 }, "
+    "{ \"b0\": 0.2713121e-2, \"b1\": 0.5426241e-2, \"b2\": 0.2713121e-2, \"a1\": 1.9792, \"a2\": -0.9793 }"
+    "] ]" );
+
+  visr::rbbl::BiquadCoefficientMatrix<CoeffType> const biqMtx = visr::rbbl::BiquadCoefficientMatrix<CoeffType>::fromJson( jsonStr );
+
+  BOOST_CHECK( biqMtx.numberOfFilters() == 3 );
+  BOOST_CHECK( biqMtx.numberOfSections() == 2 );
+}
+
 
 } // namespace test
 } // namespace rbbl

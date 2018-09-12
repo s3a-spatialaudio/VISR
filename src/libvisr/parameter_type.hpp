@@ -12,27 +12,6 @@ namespace visr
 
 using ParameterType = uint64_t;
 
-//enum class ParameterType
-//{
-//  MatrixFloat,
-//  MatrixDouble,
-//  MatrixFloatComplex,
-//  MatrixDoubleComplex,
-//  BiquadMatrixFloat,
-//  BiquadMatrixDouble,
-//  IndexedString, /**< Combination of an index and a string. */
-//  IndexedVectorFloat,
-//  IndexedVectorDouble,
-//  ListenerPosition,
-//  ObjectVector,
-//  SignalRouting,
-//  String, // TODO: We need a proper string type
-//  TimeFrequencyFloat,
-//  TimeFrequencyDouble,
-//  VectorFloat,
-//  VectorDouble
-//};
-
 /**
  * Type trait to translate a type to its corresponding ID and the
  * config type.

@@ -71,7 +71,7 @@ foreach(TARGET_TYPE static shared)
 endforeach()
 
 install(TARGETS signalflows_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS signalflows_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
+install(TARGETS signalflows_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libsignalflows )
 
 
 # Add the unit test directory.
