@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Feb 26 16:41:01 2017
 
-@author: andi
+# Copyright (C) 2017-2018 Andreas Franck
+# Copyright (C) 2017-2018 University of Southampton
+
+"""
+Simple atomic component implmented in Python to be used in a unit test.
 """
 
 import visr
