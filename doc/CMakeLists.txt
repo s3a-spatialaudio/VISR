@@ -99,7 +99,7 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
     set (userdoc_config_file    ${PROJECT_BINARY_DIR}/doc/userdoc/conf.py)
     set (userdoc_config_in      ${PROJECT_SOURCE_DIR}/doc/userdoc/conf.py.in)
     set (userdoc_source_root    ${PROJECT_SOURCE_DIR}/doc/userdoc/)
-    set (apidoc_source_root    ${PROJECT_SOURCE_DIR}/doc/userdoc/)
+    set (apidoc_source_root    ${PROJECT_SOURCE_DIR}/doc/apidoc/)
 
     set( userdoc_output_root   ${PROJECT_BINARY_DIR}/doc/userdoc )
     set( apidoc_output_root   ${PROJECT_BINARY_DIR}/doc/apidoc )

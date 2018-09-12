@@ -3,59 +3,108 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to visr's documentation!
-================================
+.. toctree::
+   :maxdepth: 3
+
+================   
+VISR User Manual
+================
 
 .. toctree::
    :maxdepth: 1
 
    about
-   exhibition
-   books
-   handbook
+   basic_tutorial
    people
-
-Download
-==================
+   
+Getting VISR
+=========================
 
 .. toctree::
    :maxdepth: 2
 
    download
+   installation
+   sourcecode
+   support
+
+VISR principles
+===============
+
+.. toctree 
+
+Component-Based Audio processing
+--------------------------------
+
+VISR as a Rendering Framework
+-----------------------------
+   
+Using VISR
+==================
+
+.. toctree::
+   :maxdepth: 2
+
+Using VISR standalone renderers
+------------------------------- 
+
+  using_standalone_applications
 
 
-Development and Contribution
+Using VISR with Python
+----------------------
+
+Using VISR audio workstation plugins
+------------------------------------
+
+Using Max/MSP externals
+-----------------------
+
+
+Extending VISR
+==============
+
+In this part we describe how to use the VISR framework to implement new functionality, i.e., functionality that is not contained in the existing components or standalone renderers.
+This part is basically an extended version of the tutorial presented in 
+
+
+Creating signal flows from existing components in Python
+--------------------------------------------------------
+
+Writing atomic functionality in Python
+--------------------------------------
+
+Implementing atomic components in C++
+-------------------------------------
+
+Creating composite components in C++
+------------------------------------
+
+Object-Based Audio with VISR
 ============================
 
-.. toctree::
-  :maxdepth: 2
+Overview
+--------
 
-  source
-  git-workflow
+The VISR object model
+---------------------
 
-Documentation
-==================
+Predefined object-based rendering primitives and renderers
+----------------------------------------------------------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Object-Based Reverberation
+--------------------------
 
-.. Andreas ! This is commented out, comment this in so that it can scan through the /doc/src/xml/index.xml and produce an index of classes.
-.. .. doxygenindex::
-..   project: visr
+VISR component reference
+========================
 
-.. .. doxygennamespace:: visr
-..    project: visr
-   
-.. This is an example of what would be for a single source . You can also do classes too.
-.. .. doxygenfile:: point_source.hpp
-..    :project: visr
+Standard rendering component library
+------------------------------------
 
-Learning
-==================
+Binaural synthesis toolkit
+--------------------------
 
-.. toctree::
-   :maxdepth: 1
+Dynamic range control library
+-----------------------------
 
-   tutorials
-   examples
+

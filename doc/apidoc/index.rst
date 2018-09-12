@@ -3,16 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to visr's documentation!
-================================
-
+Front matter
+   
 .. toctree::
    :maxdepth: 1
 
    about
-   exhibition
-   books
-   handbook
    people
 
 Download
@@ -32,24 +28,43 @@ Development and Contribution
 
   source
   git-workflow
+  
+  create-build-environment
+  
+  macos-setup-guide
+  
+VISR API
+========
 
+Libraries
+=========
+
+.. toctree::
+  :maxdepth: 2
+
+
+  builtin_component_library
+  runtime_library
+  objectmodel_library
+
+..  elementary_function_library
+  
 Documentation
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
 
 .. Andreas ! This is commented out, comment this in so that it can scan through the /doc/src/xml/index.xml and produce an index of classes.
-.. .. doxygenindex::
-..   project: visr
-
-.. .. doxygennamespace:: visr
-..    project: visr
+.. doxygenindex::
+..  :project: visr
+..  :outline:
+	    
    
 .. This is an example of what would be for a single source . You can also do classes too.
 .. .. doxygenfile:: point_source.hpp
-..    :project: visr
+..   :project: visr
 
 Learning
 ==================
