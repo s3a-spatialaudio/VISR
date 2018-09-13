@@ -1,28 +1,8 @@
-.. _using_visr_using_standalone_renderers:
+.. _basic_tutorial:
 
-Using standalone renderers
---------------------------
+Basic tutorial
+--------------
 
+This tutorial explains the first steps for using the VISR framework by creating and running an audio renderer.
+It is based on the conference paper [].
 
-
-
-.. _using_visr_using_standalone_renderers_visr_renderer:
-
-VISR object-based renderer
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The *visr_renderer* binary provides 
-
-
-
-
-
-
-
-
-
-Common audio options
-^^^^^^^^^^^^^^^^^^^^
-
-PortAudio interface
-~~~~~~~~~~~~~~~~~~~~~

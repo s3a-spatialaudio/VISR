@@ -1,35 +1,53 @@
-Installing visr!
+Installing binary versions
 ================================
 
 
-The installation packages are provided in the S3A wiki http://s3a-spatialaudio.org/wiki/index.php/Software#Installation
+Windows
+-------
 
-@subsection linux_installation Linux Installation
-Type the following on a shell:
+An executable installer (.exe) with a graphical user interface and corresponding uninstall functionality. Supported are 64-bit versions of Windows.
+If required, install the "Microsoft Visual C++ Redistributable for Visual Studio 2017", package,
+for example from the `Visual C++ downloads page <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads>`_.
 
-@code sudo dpkg -i VISR-X.X.X.tar-Linux.deb @endcode
+On Windows, it is necessary to add the directory containing the VISR libraries (DLLs) to the **PATH** variable.
+To this end, open the environment variable editor (Settings -> System -> Advanced system settings -> Environment variables).
+The environment variable on Windows 10 is depicted in this figure:
 
-Dependencies should be installed automatically
-Binaries are in the system path (/usr/bin/)
+.. figure::
+   :scale: 50 %
+   :align: center   
+   
+   Environment variable editor on Windows 10.
 
-@subsection windows_installation Windows Installation
-Execute the graphical installer.
+Depending on your system permissions and whether you VISR shall be used by all users of the computer, you can either set the **PATH** user variable or the **PATH** system variable.
+Append the path ''<install-directory>/lib'' to the path variable, where ''install_diectory'' is the directory specified during the installation.
+For the default path, the setting would be ''c:\Program Files\VISR-N.N.N\lib'', where ''N.N.N is replaced by the actual version number.
+If the **PATH** variable is edited as a string, subsequent paths are separated by semicoli.
 
-If not present already, download and install the Visual Studio 2015 C++ Redistributable packages (64 Bit):
 
-https://www.microsoft.com/en-us/download/details.aspx?id=53587
 
-The Windows installer contains the required third-party libraries (portaudio, libsndfile) in the same directories as the executables.
-To execute binaries, open an shell (e.g., cmd, navigate to the bin/, and start the binaries using the command line and options.
+.. note:: Future versions of the 
 
-@subsection macosx_installation MacOS X Installation
-Install Jack, preferably JackOSX http://www.jackosx.com/
-Beta version https://github.com/jackaudio/jackaudio.github.com/releases/download/1.9.11/JackOSX.0.92_b3.zip seems to cause less trouble (and has a working qjackctl).
 
-Double-click on <tt>VISR-X.X.X-Darwin.dmg</tt> installer and follow the instructions.
+Mac OS X
+--------
+An installer with a graphical user interface guides through the installation process and allows the selection of optional components.
 
-When the image is mounted, a new window should appear with a link to the <tt>Applications</tt> folder and a <tt>VISR-X.X.X-Darwin</tt> floder. Just drag that folder into <tt>Applications</tt> and the installation is completed.
+.. todo:: Add screenshot of Mac OS X installer
 
-@section installation_instructions_python_setup Using VISR Python components
+Linux
+-----
 
-If you want to use the VISR framework as python packages, follow the instructions in @ref python_support_setting_up_runtime_env to set up the runtime environment variables.
+For Linux, installation packages are provided as *.deb* (Debian) packages. They are installed via the command
+
+.. code-block:: bash
+		
+   sudo apt install VISR-<version>.deb
+
+If this command reports missing dependencies, these can be installed subsequently with the command 
+
+.. code-block:: bash
+		
+   sudo apt install --fix-broken
+
+After that, the framework is ready to use.

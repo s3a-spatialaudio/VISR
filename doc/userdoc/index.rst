@@ -4,6 +4,8 @@
    contain the root `toctree` directive.
 
 .. toctree::
+   :caption: Contents
+   :name: mastertoc
    :maxdepth: 3
 
 ================   
@@ -31,14 +33,21 @@ Getting VISR
 VISR principles
 ===============
 
-.. toctree 
+.. toctree::
+   :maxdepth: 2
 
 Component-Based Audio processing
 --------------------------------
 
 VISR as a Rendering Framework
 -----------------------------
-   
+
+Realtime and Offline Processing
+-------------------------------
+
+Prototyping versus mature signal processing code
+------------------------------------------------
+
 Using VISR
 ==================
 
@@ -48,7 +57,10 @@ Using VISR
 Using VISR standalone renderers
 ------------------------------- 
 
-  using_standalone_applications
+.. toctree::
+   :maxdepth: 2
+
+   using-standalone-renderers
 
 
 Using VISR with Python
@@ -85,6 +97,9 @@ Object-Based Audio with VISR
 
 Overview
 --------
+
+Although the VISR framework is deliberately application-agnostic, it is well-suited for working with 
+
 
 The VISR object model
 ---------------------
