@@ -29,8 +29,8 @@ foreach(LIB_TYPE static shared)
   # Transitive dependencies
   # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
   # exactly one instance of pythonsupport::InitialisationGuard
-  target_link_libraries( pythoncomponents_${LIBTYPE} PUBLIC pythonsupport_shared )
-  target_link_libraries( pythoncomponents_${LIBTYPE} PUBLIC visr_${LIBTYPE} )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PUBLIC pythonsupport_shared )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
 endforeach()
 
 # Set public headers to be installed for the shared target.
