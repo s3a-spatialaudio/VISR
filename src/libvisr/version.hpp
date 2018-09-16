@@ -9,8 +9,16 @@
 
 #include <string>
 
+// Avoid warning with newer glibc versions (>=2.25)
+// This might cause problems if code included after this file uses these macros.
+#if defined(__GLIBC__) && defined( __GLIBC_MINOR__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 25 )
+#undef major
+#undef minor
+#endif
+
 namespace visr
 {
+
 namespace version
 {
 
