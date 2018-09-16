@@ -14,25 +14,23 @@ namespace version
 
 unsigned int major()
 {
-  return VISR_API_VERSION_MAJOR;
+  return std::stoi( VISR_MAJOR_VERSION );
 }
-
 
 unsigned int minor()
 {
-  return VISR_API_VERSION_MINOR;
+  return std::stoi( VISR_MINOR_VERSION );
 }
-
 
 unsigned int patch()
 {
-  return VISR_API_VERSION_PATCH;
+  return std::stoi( VISR_PATCH_VERSION );
 }
 
 std::string versionString()
 {
   std::stringstream stream;
-  stream << VISR_API_VERSION_MAJOR << '.' << VISR_API_VERSION_MINOR << '.' << VISR_API_VERSION_PATCH;
+  stream << VISR_MAJOR_VERSION << '.' << VISR_MINOR_VERSION << '.' << VISR_PATCH_VERSION;
   return stream.str();
 }
 
