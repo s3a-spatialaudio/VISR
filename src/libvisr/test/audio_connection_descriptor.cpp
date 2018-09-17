@@ -30,9 +30,20 @@ BOOST_AUTO_TEST_CASE( instantiateChannelRange )
   BOOST_CHECK( sliceFromInitList.size() == 5 );
   BOOST_CHECK( sliceFromInitList[4] == 5 );
 
+  // Unit negaitve stride
+  ChannelRange const sliceFromInitListNeg{ 6, 1, -1 }; // {6,5,4,3,2}
+  BOOST_CHECK( sliceFromInitListNeg.size() == 5 );
+  BOOST_CHECK( sliceFromInitListNeg[4] == 2 );
+
+
   ChannelRange const sliceFromInitListStep2{ 1, 6, 2 };
   BOOST_CHECK( sliceFromInitListStep2.size() == 3 );
   BOOST_CHECK( sliceFromInitListStep2[2] == 5 );
+
+  // Construct channel with negative non-unit stride
+  ChannelRange const sliceFromInitListStep2Neg{ 6, 1, -2 }; // {6,4,2}
+  BOOST_CHECK( sliceFromInitListStep2Neg.size() == 3 );
+  BOOST_CHECK( sliceFromInitListStep2Neg[2] == 2 );
 }
 
 BOOST_AUTO_TEST_CASE( instantiateAudioChannelIndexVector )

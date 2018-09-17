@@ -66,9 +66,11 @@ ChannelRange::size() const
     throw std::invalid_argument( "ChannelRange::size() The range is not valid." );
   }
   StepType const diff = mEnd - mStart;
-  // Cast is safe because diff and step always the same sign.
-  // TODO: This fails with non-unity steps if the mEnd value is not the continuation of the index sequence.
-  return static_cast<IndexType>(diff / mStep); // integer division (truncates towards zero)
+
+  // Integer ceil() operation.
+  // isValid() ensures that diff and mStep have the same sign, so the result is always positive.
+  StepType const ceil = diff / mStep + ( diff % mStep == 0 ? 0 : 1 );
+  return static_cast<IndexType>(ceil);
 }
 
 ChannelRange::IndexType

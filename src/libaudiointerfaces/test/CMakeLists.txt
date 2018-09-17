@@ -6,7 +6,6 @@ set( APPLICATION_NAME audiointerfaces_test )
 add_definitions( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
 
-
 add_executable( ${APPLICATION_NAME} 
 audio_interface_configuration.cpp
 )

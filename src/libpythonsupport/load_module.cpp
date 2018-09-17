@@ -28,12 +28,17 @@ pybind11::object loadModule( std::string const & moduleName,
   // https://skebanga.github.io/embedded-python-pybind11/
   py::dict locals;
   locals["moduleName"] = py::cast(moduleName);
-  locals["path"] = modulePath.empty() ? py::none() : py::cast( modulePath );
+  locals["modulePath"] = modulePath.empty() ? py::list() : py::cast( modulePath );
   try
   {
+    // Adding the module path to the system path enables us to specify the path of other dependencies as well
+    // (e.g., the location of the VISR externals).
+    // We also use it as the path argument of imp.find_module to avoid finding other occurences on the system path.
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
-      "file, pathname, description = imp.find_module( moduleName, path)\n"
+      "import sys\n"
+      "sys.path += modulePath\n"
+      "file, pathname, description = imp.find_module( moduleName, modulePath)\n"
       "new_module = imp.load_module( moduleName, file, pathname, description)\n",
       globals,
       locals);

@@ -4,7 +4,6 @@ set( APPLICATION_NAME rrl_test )
 
 set( SOURCES
 audio_signal_flow_checking.cpp
-delay_vector.cpp
 parameter_connection.cpp
 test_main.cpp
 )

@@ -13,7 +13,7 @@
 
 namespace visr
 {
-namespace rrl
+namespace signalflows
 {
 namespace test
 {
@@ -57,5 +57,5 @@ BOOST_AUTO_TEST_CASE( CheckDelayVector )
 }
 
 } // namespace test
-} // namespace rrl
+} // namespace signalflows
 } // namespace visr
