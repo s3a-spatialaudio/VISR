@@ -98,7 +98,7 @@ Object-Based Audio with VISR
 Overview
 --------
 
-Although the VISR framework is deliberately application-agnostic, it is well-suited for working with 
+Although the VISR framework is deliberately application-agnostic, it is well-suited for working with spatial and object-based audio.
 
 
 The VISR object model

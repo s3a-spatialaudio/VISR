@@ -24,10 +24,10 @@ Append the path ''<install-directory>/lib'' to the path variable, where ''instal
 For the default path, the setting would be ''c:\Program Files\VISR-N.N.N\lib'', where ''N.N.N is replaced by the actual version number.
 If the **PATH** variable is edited as a string, subsequent paths are separated by semicoli.
 
-
-
-.. note:: Future versions of the 
-
+.. note:: Future versions of the installer might adjust the paths automatically.
+	  However, as pointed out in
+	  `NSIS Path manipulation <http://nsis.sourceforge.net/Path_Manipulation>`_,
+	  this needs an extremely cautious implementation to avoid damage to users' systems.
 
 Mac OS X
 --------
