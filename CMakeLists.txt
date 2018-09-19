@@ -24,16 +24,26 @@ set( VISR_MAJOR_VERSION 0 )
 set( VISR_MINOR_VERSION 10 )
 set( VISR_PATCH_VERSION 0 )
 
-ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
-ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
-ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
+add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
+add_definitions( -DVISR_PATCH_VERSION=${VISR_PATCH_VERSION} )
 
 # Add support for unit tests
 INCLUDE( CTest )
 
+## Set C++ standard used. 
+
 # Enable C++ 11 support
 # This requires CMake >= 3.1
+# TODO: Check when we can increase the requirement to C++14
 set( CMAKE_CXX_STANDARD 11 )
+
+# Treat the above standard as a hard requirement rather than 'decaying' to a
+# previous standard if the requirments aren' met
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
+# Disable compiler-specific extensions (e.g., GNU extensions)
+set( CMAKE_CXX_EXTENSIONS OFF )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
 
@@ -117,7 +127,6 @@ if(UNIX)
     # (as pragmas are compiler-specific, unknown ones should be ignored silently anyway)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nested-anon-types -Wno-unknown-pragmas" )
   endif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
 if( WIN32 ) # Covers 64-bit Windows as well
