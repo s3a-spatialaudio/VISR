@@ -42,12 +42,12 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
 add_custom_target( doxygen-doc DEPENDS ${doxy_html_index_file}  )
 
 # "Meta-target" to trigger build of all documentation outputs
-add_custom_target( doc DEPENDS doxygen-doc )
+add_custom_target( doc ALL DEPENDS doxygen-doc )
 
 find_package(Sphinx)
 if(NOT Sphinx_FOUND)
-  message(FATAL_ERROR "Sphinx is needed to build HTML-based documentation and VISR's web-api. You should install it here at ...")
-endif()
+  message(FATAL_ERROR "Sphinx is required to build documentation. Please set the SPHINX_EXECUTABLE variable.")
+endif(NOT Sphinx_FOUND)
 
 # TODO Do we need this ? Look in virtualenv and node_modules directories of the build directory (as
 # per the hints in the documentation about installing sphinx, breathe,
@@ -71,28 +71,37 @@ endif()
 
 # Function to define a target building HTML documentation from a source directory containing Sphinx rst code.
 function( HtmlDocBuild targetName sourceDir outputDir depends )
-  # message( STATUS "configure_file( ${configTemplate} ${outputDir}/html/conf.py @ONLY )" )
   configure_file( ${sourceDir}/conf.py.in ${outputDir}/html/conf.py @ONLY )
-  add_custom_target( ${targetName}-html
-    ${SPHINX_EXECUTABLE}
+  # Define an empty file that gets updated when the target is build, such that it can be used as
+  # a dependency for other targets. 
+  set( STAMP ${outputDir}/htmlbuild.stamp )
+  add_custom_command(
+    OUTPUT ${STAMP}
+    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir}
+    COMMAND ${SPHINX_EXECUTABLE}
                -q
                -b html
                -c ${outputDir}/html
                -d ${outputDir}/cache
                 ${sourceDir}
                 ${outputDir}/html
-  DEPENDS ${depends}
-  COMMENT "HTML generation for target ${targetName}-html."
+    COMMAND cmake -E touch ${STAMP}
+    BYPRODUCTS ${outputDir}/cache
+    COMMENT "HTML generation for target ${targetName}-html."
+  )
+  add_custom_target( ${targetName}-html
+    DEPENDS ${STAMP}
   )
 endfunction(HtmlDocBuild)
 
 # Function to define a target building PDF documentation from a source directory containing Sphinx rst code.
 function( PdfDocBuild targetName sourceDir outputDir depends )
-  #message( STATUS "configure_file( ${configTemplate} ${outputDir}/latex/conf.py @ONLY )" )
   configure_file( ${sourceDir}/conf.py.in ${outputDir}/latex/conf.py @ONLY )
-
+  # Name (with version) of the output file. This is the main dependency of the target.
+set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
   add_custom_command(
-    OUTPUT ${outputDir}/latex/visr.tex
+    OUTPUT ${OUTPUTFILE}
+    DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir}
     COMMAND ${SPHINX_EXECUTABLE}
                -q
                -b latex
@@ -100,19 +109,17 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
                -d ${outputDir}/cache
                 ${sourceDir}
                 ${outputDir}/latex
-  DEPENDS ${depends}
-  COMMENT "LaTeX generation for target ${targetName}-pdf."
-  )
-
-  add_custom_target( ${targetName}-pdf
-    # Multiple runs to sort undefined reference (very crude at the moment
-    COMMAND ${PDFLATEX_COMPILER} visr
-    COMMAND ${PDFLATEX_COMPILER} visr
-    COMMAND ${PDFLATEX_COMPILER} visr
+    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
+    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
+    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/latex
-    DEPENDS ${outputDir}/latex/visr.tex
-    COMMENT "PDF compilation for target ${targetName}-pdf." )
+    BYPRODUCTS ${outputDir}/cache ${outputDir}/latex
+    COMMENT "PDF compilation for target ${targetName}-pdf."
+  )
+  add_custom_target( ${targetName}-pdf
+    DEPENDS ${OUTPUTFILE}
+  )
 endfunction(PdfDocBuild)
 
 PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
