@@ -4,20 +4,12 @@
    contain the root `toctree` directive.
 
 Front matter
+============
    
 .. toctree::
    :maxdepth: 1
-
+	      
    about
-   people
-
-Download
-==================
-
-.. toctree::
-   :maxdepth: 2
-
-   download
 
 
 Development and Contribution
@@ -26,51 +18,21 @@ Development and Contribution
 .. toctree::
   :maxdepth: 2
 
-  source
+  source-code
+  
   git-workflow
   
   create-build-environment
-  
-  macos-setup-guide
-  
-VISR API
-========
-
+    
 Libraries
 =========
 
 .. toctree::
   :maxdepth: 2
 
-
+  visr-apidoc
   builtin_component_library
   runtime_library
   objectmodel_library
-
-..  elementary_function_library
+  elementary_functions_library
   
-Documentation
-==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
-
-.. Andreas ! This is commented out, comment this in so that it can scan through the /doc/src/xml/index.xml and produce an index of classes.
-.. doxygenindex::
-..  :project: visr
-..  :outline:
-	    
-   
-.. This is an example of what would be for a single source . You can also do classes too.
-.. .. doxygenfile:: point_source.hpp
-..   :project: visr
-
-Learning
-==================
-
-.. toctree::
-   :maxdepth: 1
-
-   tutorials
-   examples
