@@ -28,8 +28,12 @@ class ComponentImplementation;
 }
 
 /**
- * Base class for p
- *
+ * Base class for processing components.
+ * Components may contain ports to exchange data (either audio signal or parameter)
+ * with other components or with the exterior.
+ * A component may have a parent, that is, a composite component it is contained in. 
+ * If the parent is null it is a top-level component.
+ * Components also have a name, which must be unique within a containing composite component.
  */
 class VISR_CORE_LIBRARY_SYMBOL Component
 {
@@ -172,8 +176,20 @@ public:
    */
   bool isTopLevel() const;
 
+  /**
+   * Provide a pointer to an external implementation object.
+   * The type of this implementation object is opaque, i.e., not visible from the public VISR API.
+   * @note This method is not supposed to be called in user code. It is public because it is is used
+   * by the VISR runtime system.
+   */
   impl::ComponentImplementation & implementation();
 
+  /**
+   * Provide a pointer to an external implementation object, constant version.
+   * The type of this implementation object is opaque, i.e., not visible from the public VISR API.
+   * @note This method is not supposed to be called in user code. It is public because it is is used
+   * by the VISR runtime system.
+   */
   impl::ComponentImplementation const & implementation() const;
 
 protected:
@@ -195,8 +211,7 @@ private:
   impl::ComponentImplementation* mImpl;
 };
 
-/**
- */
+// template method implementation.
 template<typename ... MessageArgs >
 inline void Component::status( StatusMessage::Kind statusId, MessageArgs ... args )
 {

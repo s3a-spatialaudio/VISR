@@ -243,7 +243,7 @@ ENDIF( BUILD_PYTHON_BINDINGS )
 # Support for 3rd-party libraries.
 
 # Threads are required wherever we link with boost_threads.
-# Note that the dependency is added automatically in most cases, so the 
+# Note that the dependency is added automatically in most cases, so the
 # omission will go unnoticed very often.
 FIND_PACKAGE(Threads REQUIRED)
 
@@ -257,7 +257,7 @@ IF( WIN32 ) # This includes 64-bit platforms!
   # call instead of setting it globally.
   LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
   LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
- 
+
 ENDIF( WIN32 )
 FIND_PACKAGE( Portaudio REQUIRED )
 
@@ -308,7 +308,7 @@ FIND_PACKAGE( FFTS REQUIRED )
 # BOOST_ROOT should hold the path to the boost root directory.
 
 # Define a minimum boost version
-# Note: This requirement is chosen heuristically at the moment. 
+# Note: This requirement is chosen heuristically at the moment.
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
@@ -331,7 +331,7 @@ SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thr
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
- 
+
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
@@ -373,36 +373,6 @@ ADD_SUBDIRECTORY( src )
 ## Taken from: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
-IF(BUILD_DOCUMENTATION) 
-  FIND_PACKAGE(Doxygen)
-  IF(NOT DOXYGEN_FOUND)
-    MESSAGE(FATAL_ERROR
-      "Doxygen is needed to build the documentation.")
-  ENDIF()
- 
-  SET( doxyfile_in          ${PROJECT_SOURCE_DIR}/doc/src/Doxyfile.in )
-  SET( doxyfile             ${PROJECT_BINARY_DIR}/doc/Doxyfile )
-  SET( doxy_html_index_file ${PROJECT_BINARY_DIR}/doc/html/index.html )
-  SET( doxy_output_root     ${PROJECT_BINARY_DIR}/doc ) # Pasted into Doxyfile.in
-  SET( doxy_input           ${PROJECT_SOURCE_DIR}/src ) # Pasted into Doxyfile.in
-#  SET( doxy_extra_files     ${PROJECT_SOURCE_DIR}/doc/src/mainpage.dox    ) # Pasted into Doxyfile.in
- 
-  CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
- 
-  ADD_CUSTOM_COMMAND( OUTPUT ${doxy_html_index_file}
-                      COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-                      # The following should be ${doxyfile} only but it
-                      # will break the dependency.
-                      # The optimal solution would be creating a 
-                      # custom_command for ${doxyfile} generation
-                      # but I still have to figure out how...
-                      MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
-                      COMMENT "Generating HTML documentation")
- 
-  ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
- 
-  INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
-
+IF(BUILD_DOCUMENTATION)
+  add_subdirectory(doc)
 ENDIF()
-
