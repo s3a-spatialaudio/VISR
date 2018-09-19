@@ -318,17 +318,14 @@ set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
 OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
 
-# Define the boost libraries that must be present.
+# Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
 SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread regex timer)
-
-
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} unit_test_framework )
-
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
