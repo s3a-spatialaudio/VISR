@@ -15,6 +15,10 @@ namespace visr
 namespace objectmodel
 {
 
+ObjectParser::ObjectParser() = default;
+
+ObjectParser::~ObjectParser() = default;
+
 /*virtual*/ void ObjectParser
 ::parse( boost::property_tree::ptree const & tree, Object & obj ) const
 {
