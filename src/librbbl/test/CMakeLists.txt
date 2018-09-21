@@ -20,10 +20,6 @@ set( SOURCES
  test_main.cpp
 )
 
-if( BUILD_USE_IPP )
-  list( APPEND SOURCES ipp_fft_wrapper.cpp)
-endif( BUILD_USE_IPP )
-
 add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
 target_link_libraries( ${APPLICATION_NAME} rbbl_static)
@@ -33,6 +29,10 @@ target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
 target_link_libraries( ${APPLICATION_NAME} Boost::system )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+if( BUILD_USE_IPP )
+  list( APPEND SOURCES ipp_fft_wrapper.cpp)
+  target_compile_definitions(${APPLICATION_NAME} PRIVATE BUILD_USE_IPP )
+endif( BUILD_USE_IPP )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

@@ -39,7 +39,7 @@ unsigned int minor();
 unsigned int patch();
 
 /**
- * Return the software version as a string of the form <major>.<minor>.<patch>
+ * Return the software version as a string of the form &lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;
  */
 std::string versionString();
 

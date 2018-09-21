@@ -14,17 +14,17 @@ namespace version
 
 unsigned int major()
 {
-  return std::stoi( VISR_MAJOR_VERSION );
+  return VISR_MAJOR_VERSION;
 }
 
 unsigned int minor()
 {
-  return std::stoi( VISR_MINOR_VERSION );
+  return VISR_MINOR_VERSION;
 }
 
 unsigned int patch()
 {
-  return std::stoi( VISR_PATCH_VERSION );
+  return VISR_PATCH_VERSION;
 }
 
 std::string versionString()

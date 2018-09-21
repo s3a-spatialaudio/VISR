@@ -19,10 +19,15 @@ target_link_libraries( ${APPLICATION_NAME} panning_static )
 target_link_libraries( ${APPLICATION_NAME} pml_static )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+if( NOT Boost_USE_STATIC_LIBS )
+  target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
+endif( NOT Boost_USE_STATIC_LIBS )
+target_compile_definitions( ${APPLICATION_NAME} PRIVATE -DBOOST_ALL_NO_LIB )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)
 
+# TODO: Remove this, because this should already be a transitive dependency 
 if( BUILD_USE_IPP )
   target_link_libraries(${APPLICATION_NAME} ${IPP_LIB_S} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
