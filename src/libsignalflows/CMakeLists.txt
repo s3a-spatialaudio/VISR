@@ -33,6 +33,7 @@ target_compile_definitions( signalflows_shared PRIVATE -DVISR_BUILD_SIGNALFLOWS_
 target_compile_definitions( signalflows_shared PUBLIC -DVISR_BUILD_SIGNALFLOWS_SHARED_LIBRARY=1)
 set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
+
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
@@ -47,8 +48,7 @@ set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" 
 
 # If Python is activated, enable the optional use of a Metadapter to receive and process object metadata. 
 if( BUILD_PYTHON_BINDINGS )
-  # It would be nicer if we could limit that to visr_renderer.cpp
-  add_definitions( -DVISR_PYTHON_SUPPORT=1 )
+  set_property( SOURCE visr_renderer.cpp APPENDE PROPERTY COMPILE_DEFINITIONS VISR_PYTHON_SUPPORT=1 )
   target_link_libraries( signalflows_static PUBLIC pythoncomponents_static )
 
   # Deliberate decision: make this dependency private to avoid propagating the libpython dependency.
