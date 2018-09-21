@@ -60,7 +60,6 @@ sparse_gain_routing.hpp
 )
 
 if( BUILD_USE_IPP )
-  add_definitions( -DBUILD_USE_IPP )
   list( APPEND SOURCES ipp_fft_wrapper.cpp )
   list( APPEND HEADERS ipp_fft_wrapper.hpp )
 endif( BUILD_USE_IPP )

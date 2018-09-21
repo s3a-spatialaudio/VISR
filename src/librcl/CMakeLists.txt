@@ -75,7 +75,8 @@ set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
-  # Not ideal. This is only used by certain files.
+  # Not ideal. This is only used by certain files (scalar_osc_decoder.cpp)
+  # But INCLUDE_DIRECTORIES is a source file peroperty only since Cmake 3.11
   target_include_directories( rcl_${LIB_TYPE} PRIVATE ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
   # Transitive dependencies
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
