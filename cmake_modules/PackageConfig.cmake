@@ -22,6 +22,25 @@ endif( BUILD_PYTHON_BINDINGS )
 set( CPACK_PACKAGE_FILE_NAME ${PKG_FILE_NAME} )
 SET( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
+#########################
+#set(CPACK_COMPONENTS_ALL libraries loudspeakerLayouts pythonTemplates pythonPackages Unspecified) 
+
+#VISR
+#set(CPACK_COMPONENT_VISR_DOWNLOADED "VISR")
+#http://cvssp.org/data/s3a/public/VISR/visr-tutorial-code-1.0.0.zip
+
+set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
+set(CPACK_COMPONENT_LOUDSPEAKERLAYOUTS_DISPLAY_NAME "Loudspeaker Layouts")
+set(CPACK_COMPONENT_PYTHONTEMPLATES_DISPLAY_NAME "Python Templates")
+set(CPACK_COMPONENT_PYTHONPACKAGES_DISPLAY_NAME "Python Packages")
+
+set(CPACK_COMPONENT_LIBRARIES_REQUIRED 1)
+set(CPACK_COMPONENT_LOUDSPEAKERLAYOUTS_REQUIRED 1)
+set(CPACK_COMPONENT_PYTHONPACKAGES_REQUIRED 1)
+
+#set(CPACK_MONOLITHIC_INSTALL 1)
+###########################################
+
 IF( WIN32 )
 SET( CPACK_GENERATOR NSIS ZIP )
 SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
@@ -71,12 +90,12 @@ SET( CPACK_PACKAGE_NAME ${PKG_FILE_NAME}.pkg )
   #SET( CPACK_GENERATOR Bundle )   
 # set( CPACK_PACKAGE_DEFAULT_LOCATION "/Applications" )
 # set( CPACK_PACKAGING_INSTALL_PREFIX "${CPACK_PACKAGE_DEFAULT_LOCATION}/${VISR_TOPLEVEL_NAME}")
-  
+
 ##########################
 	SET( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 #	SET( CPACK_PACKAGE_INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX} )
 
-###########################
+###########################  
 
 #SET( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/cmake_modules/resources/s3a_logo.jpg )
 #set( CPACK_DMG_VOLUME_NAME ${PKG_FILE_NAME})
@@ -193,30 +212,12 @@ fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${VORBISENC_LIBRARY})
 #  INSTALL_TYPES Developer Full )
 
 
-#########################
-set(CPACK_COMPONENTS_ALL libraries loudspeakerLayouts pythonTemplates pythonPackages Unspecified) 
-
-#VISR
-#set(CPACK_COMPONENT_VISR_DOWNLOADED "VISR")
-#http://cvssp.org/data/s3a/public/VISR/visr-tutorial-code-1.0.0.zip
-
-set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "Libraries")
-set(CPACK_COMPONENT_LOUDSPEAKERLAYOUTS_DISPLAY_NAME "Loudspeaker Layouts")
-set(CPACK_COMPONENT_PYTHONTEMPLATES_DISPLAY_NAME "Python Templates")
-set(CPACK_COMPONENT_PYTHONPACKAGES_DISPLAY_NAME "Python Packages")
-
-set(CPACK_COMPONENT_LIBRARIES_REQUIRED 1)
-set(CPACK_COMPONENT_LOUDSPEAKERLAYOUTS_REQUIRED 1)
-set(CPACK_COMPONENT_PYTHONPACKAGES_REQUIRED 1)
-
-set(CPACK_MONOLITHIC_INSTALL 1)
 #set(CPACK_POSTFLIGHT_LOUDSPEAKERLAYOUTS_SCRIPT ${CMAKE_SOURCE_DIR}/cmake_modules/postscript.sh)
 configure_file (${CMAKE_SOURCE_DIR}/cmake_modules/postscript.sh.in
-		"${PROJECT_BINARY_DIR}/postscript.sh" @ONLY)
+        "${PROJECT_BINARY_DIR}/postscript.sh" @ONLY)
 set(CPACK_POSTFLIGHT_SCRIPT ${PROJECT_BINARY_DIR}/postscript.sh)
 
 #set(CPACK_POSTUPGRADE_SCRIPT "${CMAKE_SOURCE_DIR}/cmake_modules/pkg_rename.sh" ${PROJECT_BINARY_DIR}/${VISR_TOPLEVEL_NAME}.dmg ${PROJECT_BINARY_DIR}/PKG_FILE_NAME.dmg )
-
 
    # CPACK_PACKAGE_FILE_NAME - provides the name of the final compressed disk image (the name of the file that is distributed).
    # CPACK_PACKAGE_ICON - provides the icon for the mounted disk image (appears after the user mounts the disk image).
