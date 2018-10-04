@@ -29,4 +29,6 @@ TARGET_LINK_LIBRARIES(network_audio_streamer rrl_static )
 TARGET_LINK_LIBRARIES(network_audio_streamer audiointerfaces_static )
 TARGET_LINK_LIBRARIES(network_audio_streamer ${CMAKE_THREAD_LIBS_INIT} )
 
-INSTALL( TARGETS network_audio_streamer DESTINATION bin )
+INSTALL( TARGETS network_audio_streamer
+         DESTINATION bin
+         COMPONENT standalone_applications )

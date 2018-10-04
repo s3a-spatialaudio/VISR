@@ -10,4 +10,4 @@ target_link_libraries(${APPLICATION_NAME} PRIVATE pythoncomponents_static )
 target_link_libraries(${APPLICATION_NAME} PRIVATE pml_static )
 target_link_libraries(${APPLICATION_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
 
-install( TARGETS ${APPLICATION_NAME} DESTINATION bin )
+install( TARGETS ${APPLICATION_NAME} DESTINATION bin COMPONENT standalone_applications )

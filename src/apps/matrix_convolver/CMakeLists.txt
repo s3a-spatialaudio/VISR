@@ -12,4 +12,4 @@ target_link_libraries(matrix_convolver_app signalflows_static )
 target_link_libraries(matrix_convolver_app rrl_static )
 target_link_libraries(matrix_convolver_app audiointerfaces_static )
 
-install( TARGETS matrix_convolver_app DESTINATION bin )
+install( TARGETS matrix_convolver_app DESTINATION bin COMPONENT standalone_applications )

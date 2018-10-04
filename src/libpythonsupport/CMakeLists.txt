@@ -51,8 +51,15 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS pythonsupport_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS pythonsupport_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libpythonsupport)
+install(TARGETS pythonsupport_static
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+install(TARGETS pythonsupport_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libpythonsupport COMPONENT development_files )
 
 # Add the unit test directory.
 # No unit test for this basic functionality yet.

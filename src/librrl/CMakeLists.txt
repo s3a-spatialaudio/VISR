@@ -61,8 +61,15 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS rrl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS rrl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
+install(TARGETS rrl_static
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+install(TARGETS rrl_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/librrl COMPONENT development_files )
 
 # Add the unit test directory.
 add_subdirectory( test )

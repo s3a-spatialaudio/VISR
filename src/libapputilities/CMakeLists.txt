@@ -33,5 +33,10 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS apputilities_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS apputilities_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libapputilities )
+install(TARGETS apputilities_static EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT static_libraries)
+install(TARGETS apputilities_shared EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libapputilities COMPONENT development_files )

@@ -83,6 +83,7 @@ install(EXPORT VISR_exports
   NAMESPACE VISR::
   FILE visr_exports.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
+  COMPONENT development_files 
   )
 
 # Create config files for exported targets
@@ -95,7 +96,7 @@ export(EXPORT VISR_exports
 # Install package config file
 # for use from install tree
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config.cmake
-  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} )
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Copy package config file
 # for use from build tree, substituting Boost setting variables
@@ -112,7 +113,7 @@ write_basic_package_version_file(visr-config-version.cmake
 
 # Install package version file
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config-version.cmake
-  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY})
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Register visr package in user registry
 export(PACKAGE visr)

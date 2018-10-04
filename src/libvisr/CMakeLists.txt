@@ -113,9 +113,16 @@ target_include_directories(
   $<INSTALL_INTERFACE:include/visr>)
 endforeach()
 
-install(TARGETS visr_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS visr_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libvisr )
-install( FILES ${PUBLIC_HEADERS_DETAIL} DESTINATION include/visr/libvisr/detail )
+install(TARGETS visr_static
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+install(TARGETS visr_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libvisr COMPONENT development_files )
+install( FILES ${PUBLIC_HEADERS_DETAIL} DESTINATION include/visr/libvisr/detail COMPONENT development_files )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

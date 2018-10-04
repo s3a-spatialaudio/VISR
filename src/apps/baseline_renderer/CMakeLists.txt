@@ -10,4 +10,4 @@ target_link_libraries(baseline_renderer audiointerfaces_static )
 target_link_libraries(baseline_renderer rrl_static )
 target_link_libraries(baseline_renderer ${CMAKE_THREAD_LIBS_INIT} )
 
-install( TARGETS baseline_renderer DESTINATION bin )
+install( TARGETS baseline_renderer DESTINATION bin COMPONENT standalone_applications )

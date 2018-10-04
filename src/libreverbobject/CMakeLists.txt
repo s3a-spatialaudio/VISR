@@ -56,8 +56,15 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS reverbobject_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS reverbobject_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libreverbobject )
+install(TARGETS reverbobject_static
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+install(TARGETS reverbobject_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libreverbobject COMPONENT development_files )
 
 # Add the unit test directory.
 # ADD_SUBDIRECTORY( test )
