@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+      <object data="{'id': 0, 'channels': 0, 'type': 'pointdiffuse', 'group': 0, 'priority': 0, 'level': 1.0, 'diffuseness': 0.0, 'position': {'x': 1.0, 'y': 0.0, 'z': 0.0 } }" />
+    </processor>
+	<processor name="moveSource" type="AdaptPosition" objectID="0" x="1.0" y="0.0" height="0.0" active="true" />
+	<processor name="changeDiffuseness" type="AdaptDiffuseness" id="0" active="true" diffuse = "0.0"/>
+</metadapter>

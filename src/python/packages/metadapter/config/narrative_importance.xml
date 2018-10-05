@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <!-- <processor name="FakeGroups" type="FakeGroups" /> -->
+	<processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" />
+
+	<processor name="NarrativeImportance" type="NarrativeImportance" on="1" narrativeimportance="0.0" />    
+    
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
+    
+    <!--<processor name="SpatMessages" type="SpatMessages" objectID="0 1 2 3 4 5 6 7 8 9" active="true"/>-->
+
+</metadapter>

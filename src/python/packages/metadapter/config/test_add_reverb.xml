@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+      <object data="{'id': 0, 'channels': 0,
+'type': 'point', 'group': 0, 'priority': 0, 'level': 0.80000, 'position': {'x': 1.500000, 'y': 0.000000, 'z': 0.0000 } }" />
+<object data="{'id': 3, 'channels': 1,
+'type': 'point', 'group': 0, 'priority': 0, 'level': 0.10000, 'position': {'x': -1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+    </processor>
+    <processor name="AddReverb" type="AddReverb" libFile="processors/reverb/BFormatParamTest.json" initRoomName="testroom" initObjs="list" initObjectList="1" />
+</metadapter>
