@@ -147,9 +147,10 @@ include( CPack )
 # This must happen after include( CPack )
 
 # Installation types are ATM only supported by NSIS.
-cpack_add_install_type( developer DISPLAY_NAME Developer )
-cpack_add_install_type( full DISPLAY_NAME Full )
-cpack_add_install_type( python DISPLAY_NAME Python developer )
+cpack_add_install_type( default DISPLAY_NAME "Default" )
+cpack_add_install_type( developer DISPLAY_NAME "Developer" )
+cpack_add_install_type( full DISPLAY_NAME "Full" )
+cpack_add_install_type( python DISPLAY_NAME "Python developer" )
 
 cpack_add_component( base
                      DISPLAY_NAME "Base"
@@ -172,40 +173,41 @@ cpack_add_component(shared_libraries
 cpack_add_component(static_libraries
                     DISPLAY_NAME "Static Libraries"
                     DESCRIPTION "Core VISR libraries (static)"
+                    INSTALL_TYPES full
                     DISABLED
-		    DEPENDS development_files
+                    DEPENDS development_files
                    )
 
 cpack_add_component( standalone_applications
                     DISPLAY_NAME "Standalone applications"
                     DESCRIPTION "Standalone command-line applications"
-                    INSTALL_TYPES full
-		    DEPENDS shared_libraries
+                    INSTALL_TYPES default full
+                    DEPENDS shared_libraries
                    )
 
 cpack_add_component(development_files
                     DISPLAY_NAME "Development files"
-                    DESCRIPTION description "Header files and CMake support"
+                    DESCRIPTION "Header files and CMake support"
                     INSTALL_TYPES developer full
                    )
 
 cpack_add_component( python_externals
                     DISPLAY_NAME "Python Externals"
                     DESCRIPTION "Python modules to access the VISR functionality from Python"
-                    INSTALL_TYPES python full
+                    INSTALL_TYPES default python full
                    )
 
 cpack_add_component_group( python_packages
                           DISPLAY_NAME "Python packages"
-		          DESCRIPTION "VISR extension packages implemented in Python"
-			 )
+                          DESCRIPTION "VISR extension packages implemented in Python"
+                          )
 
 cpack_add_component( python_package_bst
                     DISPLAY_NAME "Binaural Synthesis Toolkit"
                     DESCRIPTION "Toolbox for binaural synthesis"
-                    INSTALL_TYPES python full
+                    INSTALL_TYPES default python full
                     DEPENDS python_externals
-		    GROUP python_packages
+                    GROUP python_packages
                    )
 
 cpack_add_component( python_templates
@@ -217,32 +219,34 @@ cpack_add_component( python_templates
 
 cpack_add_component_group( documentation
                           DISPLAY_NAME "Documentation"
-		          DESCRIPTION "User and API documentation"
-			 )
+                          DESCRIPTION "User and API documentation"
+                          )
 
 cpack_add_component( user_documentation_pdf
                     DISPLAY_NAME "User documentation (PDF)"
                     DESCRIPTION "User documentation"
-		    INSTALL_TYPE developer full
-		    GROUP documentation
+                    INSTALL_TYPES default developer full
+                    GROUP documentation
                    )
 
 cpack_add_component( api_documentation_pdf
                     DISPLAY_NAME "API documentation (PDF)"
                     DESCRIPTION "Code reference documentation"
-		    GROUP documentation
+                    INSTALL_TYPES developer full
+                    GROUP documentation
                    )
 
 cpack_add_component( doxygen_documentation_html
                     DISPLAY_NAME "Doxygen code documentation"
                     DESCRIPTION "Code reference documentation in Doxygen format (deprecated)"
-		    INSTALL_TYPE full
+                    INSTALL_TYPES full
                     DISABLED
-		    GROUP documentation
+                    GROUP documentation
                    )
 
 cpack_add_component( loudspeaker_configs
                     DISPLAY_NAME "Loudspeaker configuration files"
                     DESCRIPTION "Example configuration files for the loudspeaker renderers."
-		    INSTALL_TYPE full
+                    INSTALL_TYPES default developer full
                    )
+
