@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="AdaptPosition" type="AdaptPosition" objectID="0" x="-5.0" y="0" height="1.0" active="false" />
+    <processor name="AddReverbTarget" type="AddReverb" libFile="processors/reverb/AES142Library1.json" initRoomName="emm_main" initObjs="list" initObjectList="0" />
+    <processor name="AddReverbScene" type="AddReverb" libFile="processors/reverb/AES142Library1.json" initRoomName="emm_main" initObjs="list" initObjectList="3" />
+    <processor name="EditReverbTarget" type="EditReverb" objectIds="0" earlyLevelAdjust="0.0" lateLevelAdjust="0.0" lateDecayAdjust="1.0" lateSubbandLevelAdjust="0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0" preDelayAdjust="0.0" preDelayAdjustLate="0.0" lateDelayAdjust="0.0"/>
+    <processor name="EditReverbScene" type="EditReverb" objectIds="1,2,3,4,5,6,7,8,9" earlyLevelAdjust="0.0" lateLevelAdjust="0.0" lateDecayAdjust="1.0" lateSubbandLevelAdjust="0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0" preDelayAdjust="0.0" preDelayAdjustLate="0.0" lateDelayAdjust="0.0"/>
+    <processor name="GlobalLevel" type="ChangeVolume" volumeAdjust="0.0" />
+    <processor name="EditDistance" type="EditDistance" r="1.0" objectIds="0" />
+</metadapter>

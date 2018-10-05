@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+	<processor name="SemanticStereo" type="SemanticStereo" minAz = "-30" maxAz="30" levelActive="1" positionActive="1"  positionCats = "dialogue foreground music" levelAdj = "{'dialogue': -1.6, 'foreground': -5.2, 'background': -2.4}" verbose ="0"/>
+</metadapter>

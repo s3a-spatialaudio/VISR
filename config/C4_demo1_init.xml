@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+	<processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" />
+	<processor name = "VOG" type="AdaptPosition" objectID="0" x="0.0" y="0" height="2.0" active="false" />
+	<processor name = "pointRemap" type="AzRemap" objectID="0" maxAz = "180" active="true" />
+	<processor name = "attenuateAction" type="AttenuateAction" objectID="0" active="true" />
+	<processor name="CompressAbove" type="CompressAbove" active="false"/>
+    <processor name="CompressBelow" type="CompressBelow" active="false"/>
+    <processor name="SpatMessages" type="SpatMessages" objectID="0" active="true"/>
+
+</metadapter>

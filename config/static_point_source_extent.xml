@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+      <!--
+      <object data="{'id': 0, 'channels': 0,
+      'type': 'pointextent', 'group': 0, 'priority': 0, 'level': 0.750000, 'position': {'x': 1.500000, 'y': -3.000000, 'z': 0.350000 }, 'width': 30, 'height': 15, 'channelLock': 15 }" />
+      -->
+     <object data="{'id': 0, 'channels': 0,
+      'type': 'point', 'group': 0, 'priority': 0, 'level': 0.750000, 'position': {'x': 1.0, 'y': 0.4, 'z': 0.0000 }, 'channelLock': 15 }" />
+     <object data="{'id': 1, 'channels': 1,
+      'type': 'point', 'group': 0, 'priority': 0, 'level': 0.750000, 'position': {'x': 1.0, 'y': 0.4, 'z': 0.0000 }, 'channelLock': 2 }" />
+
+    </processor>
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="-6.0" />
+</metadapter>

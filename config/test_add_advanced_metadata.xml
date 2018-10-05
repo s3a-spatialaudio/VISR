@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+	
+	<processor name="StaticConfig" type="AddObjects">
+		<object data="{'id': 0, 'channels': 0, 'type': 'plane', 'group': 1, 'priority': 1, 'level': 1.00000000, 'direction': {'az': 0.00000000, 'el': 0.00000000, 'refdist': 1.00000000 } }" />
+	</processor>
+	
+	<processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" filename="./ADM_library/Forest_envelopment.wav" />
+</metadapter>

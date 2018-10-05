@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+
+    <processor name="RouteToSoundbar" type="RouteToSoundbar" on="0" soundbarchannel="3" initialobjects="0" />    
+    
+    <processor name="GroupVolume" type="GroupVolume" >
+		<group name="speech" initialVolume="0" objectIds="0" />
+	</processor>
+	
+	<processor name="GlobalEQ" type="GlobalEQ" on="1" />
+		
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
+
+</metadapter>

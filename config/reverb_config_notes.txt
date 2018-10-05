@@ -1,0 +1,7 @@
+AddReverb processor 
+	 libFile: json file with "reverblibrary" array
+	 initRoomName: name of room reverb to initialize, or "none" for no reverb 
+	 initObjs can take arguments: "all", "none", or "list"
+	 	and dictates which objects reverb is added to 
+	 initObjectList (optional unless initObjs="list") describes a comma-separated 
+	 	list "0,1,10" 
