@@ -85,12 +85,13 @@ foreach(LIB_TYPE static shared)
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC rbbl_${LIB_TYPE} )
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
-  target_link_libraries( rcl_${LIB_TYPE} PUBLIC Boost::filesystem )
-  target_link_libraries( rcl_${LIB_TYPE} PUBLIC Boost::thread )
+  target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::boost )
+  target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::filesystem )
+  target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::thread )
   if( NOT Boost_USE_STATIC_LIBS )
-    target_compile_definitions( rcl_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
+    target_compile_definitions( rcl_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
-  target_compile_definitions( rcl_${LIB_TYPE} PUBLIC -DBOOST_ALL_NO_LIB )
+  target_compile_definitions( rcl_${LIB_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
 endforeach()
 
 # Set public headers to be installed for the shared target.
@@ -119,4 +120,4 @@ install(TARGETS rcl_shared
         PUBLIC_HEADER DESTINATION include/visr/librcl COMPONENT development_files )
 
 # Add the unit test directory.
-ADD_SUBDIRECTORY( test )
+add_subdirectory( test )

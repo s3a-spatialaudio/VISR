@@ -45,9 +45,9 @@ foreach(TARGET_TYPE static shared)
   endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
   target_link_libraries( panning_${TARGET_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
-    target_compile_definitions( panning_${TARGET_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
+    target_compile_definitions( panning_${TARGET_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
-  target_compile_definitions( panning_${TARGET_TYPE} PUBLIC -DBOOST_ALL_NO_LIB )
+  target_compile_definitions( panning_${TARGET_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
 endforeach()
 
 # Set public headers to be installed for the shared target.

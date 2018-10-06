@@ -14,12 +14,6 @@ initialisation_guard.hpp
 load_module.hpp
 )
 
-include_directories( ${PYTHON_INCLUDE_DIR} )
-# The pybind11 header is used to include Python.h.
-# This avoids preprocessor magic to make this include statement
-# portable.
-include_directories( ${PYBIND11_INCLUDE_DIR} )
-
 add_library( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
 
 add_library( pythonsupport_shared SHARED ${SOURCES} ${HEADERS} )
@@ -32,13 +26,19 @@ set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY 
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
+  # The pybind11 header is used to include Python.h.
+  # This avoids preprocessor magic to make this include statement
+  # portable.
+  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
+
   # Transitive dependencies
-  target_link_libraries( pythonsupport_${LIB_TYPE} PUBLIC ${PYTHON_LIBRARY} )
-  target_link_libraries( pythonsupport_${LIB_TYPE} PUBLIC Boost::filesystem )
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
-    target_compile_definitions( pythonsupport_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
+    target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
-  target_compile_definitions( pythonsupport_${LIB_TYPE} PUBLIC -DBOOST_ALL_NO_LIB )
+  target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
 endforeach()
 
 # Set public headers to be installed for the shared target.
@@ -66,8 +66,3 @@ install(TARGETS pythonsupport_shared
         RUNTIME DESTINATION lib COMPONENT shared_libraries
         LIBRARY DESTINATION lib COMPONENT shared_libraries
         PUBLIC_HEADER DESTINATION include/visr/libpythonsupport COMPONENT development_files )
-
-# Add the unit test directory.
-# No unit test for this basic functionality yet.
-# see libpythoncomponents/test
-# add_subdirectory( test )

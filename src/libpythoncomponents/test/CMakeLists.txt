@@ -9,8 +9,15 @@ wrapper.cpp
 
 add_executable( ${APPLICATION_NAME} ${SOURCES} ) 
 
-target_link_libraries( ${APPLICATION_NAME} pythoncomponents_shared )
-target_link_libraries( ${APPLICATION_NAME} rrl_shared )
+target_include_directories( ${APPLICATION_NAME} PRIVATE ${PYTHON_INCLUDE_DIR} )
+# The pybind11 header is used to include Python.h.
+# This avoids preprocessor magic to work around platform specifics.
+target_include_directories( ${APPLICATION_NAME} PRIVATE ${PYBIND11_INCLUDE_DIR} )
+
+target_link_libraries( ${APPLICATION_NAME} pythoncomponents_static )
+target_link_libraries( ${APPLICATION_NAME} pythonsupport_static )
+target_link_libraries( ${APPLICATION_NAME} rrl_static )
+target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 if( NOT Boost_USE_STATIC_LIBS )
