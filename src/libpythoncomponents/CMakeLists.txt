@@ -9,17 +9,7 @@ set( HEADERS
 export_symbols.hpp
 wrapper.hpp)
 
-include_directories( ${PYTHON_INCLUDE_DIR} )
-# The pybind11 header is used to include Python.h.
-# This avoids preprocessor magic to work around platform specifics.
-include_directories( ${PYBIND11_INCLUDE_DIR} )
-
 add_library( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
-# Transitive dependencies
-# Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
-# exactly one instance of pythonsupport::InitialisationGuard
-target_link_libraries( pythoncomponents_static PUBLIC pythonsupport_shared )
-target_link_libraries( pythoncomponents_static PUBLIC visr_static )
 
 add_library( pythoncomponents_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythoncomponents_shared PROPERTIES OUTPUT_NAME pythoncomponents )
@@ -28,14 +18,20 @@ set_target_properties( pythoncomponents_shared PROPERTIES ARCHIVE_OUTPUT_NAME py
 target_compile_definitions( pythoncomponents_shared PRIVATE -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONCOMPONENTS_LIBRARY=1)
 target_compile_definitions( pythoncomponents_shared PUBLIC -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1)
 set_target_properties( pythoncomponents_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pythoncomponents_shared PUBLIC pythonsupport_shared )
-target_link_libraries( pythoncomponents_shared PUBLIC visr_shared )
 
-# Set public headers to be installed for the shared target.
-# Because the headers are the same for the static library, the headers are only
-# installled once.
-set_target_properties( pythoncomponents_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
+  # The pybind11 header is used to include Python.h.
+  # This avoids preprocessor magic to work around platform specifics.
+  target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
 
+  # Transitive dependencies
+  # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
+  # exactly one instance of pythonsupport::InitialisationGuard
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pythonsupport_shared )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
+endforeach()
 
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)

@@ -14,16 +14,7 @@ initialisation_guard.hpp
 load_module.hpp
 )
 
-include_directories( ${PYTHON_INCLUDE_DIR} )
-# The pybind11 header is used to include Python.h.
-# This avoids preprocessor magic to make this include statement
-# portable.
-include_directories( ${PYBIND11_INCLUDE_DIR} )
-
 add_library( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
-# Transitive dependencies
-target_link_libraries( pythonsupport_static PUBLIC ${PYTHON_LIBRARY} )
-target_link_libraries( pythonsupport_static PUBLIC Boost::filesystem )
 
 add_library( pythonsupport_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythonsupport_shared PROPERTIES OUTPUT_NAME pythonsupport )
@@ -32,8 +23,23 @@ set_target_properties( pythonsupport_shared PROPERTIES ARCHIVE_OUTPUT_NAME pytho
 target_compile_definitions( pythonsupport_shared PRIVATE -DVISR_BUILD_PYTHONSUPPORT_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
 target_compile_definitions( pythonsupport_shared PUBLIC -DVISR_BUILD_PYTHONSUPPORT_SHARED_LIBRARY=1)
 set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pythonsupport_shared PUBLIC ${PYTHON_LIBRARY} )
-target_link_libraries( pythonsupport_shared PUBLIC Boost::filesystem )
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
+  # The pybind11 header is used to include Python.h.
+  # This avoids preprocessor magic to make this include statement
+  # portable.
+  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
+
+  # Transitive dependencies
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE Boost::filesystem )
+  if( NOT Boost_USE_STATIC_LIBS )
+    target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
+  endif( NOT Boost_USE_STATIC_LIBS )
+  target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
+endforeach()
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
@@ -60,8 +66,3 @@ install(TARGETS pythonsupport_shared
         RUNTIME DESTINATION lib COMPONENT shared_libraries
         LIBRARY DESTINATION lib COMPONENT shared_libraries
         PUBLIC_HEADER DESTINATION include/visr/libpythonsupport COMPONENT development_files )
-
-# Add the unit test directory.
-# No unit test for this basic functionality yet.
-# see libpythoncomponents/test
-# add_subdirectory( test )

@@ -24,10 +24,6 @@ visr_renderer.hpp
 
 add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_static PROPERTIES OUTPUT_NAME signalflows )
-# Transitive link dependencies
-target_link_libraries( signalflows_static PUBLIC rcl_static )
-target_link_libraries( signalflows_static PUBLIC pml_static )
-target_link_libraries( signalflows_static PUBLIC reverbobject_static )
 
 add_library( signalflows_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_shared PROPERTIES OUTPUT_NAME signalflows )
@@ -36,11 +32,14 @@ set_target_properties( signalflows_shared PROPERTIES ARCHIVE_OUTPUT_NAME signalf
 target_compile_definitions( signalflows_shared PRIVATE -DVISR_BUILD_SIGNALFLOWS_SHARED_LIBRARY=1 -DVISR_BUILD_SIGNALFLOWS_LIBRARY=1)
 target_compile_definitions( signalflows_shared PUBLIC -DVISR_BUILD_SIGNALFLOWS_SHARED_LIBRARY=1)
 set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-# Transitive link dependencies
-target_link_libraries( signalflows_shared PUBLIC rcl_shared )
-target_link_libraries( signalflows_shared PUBLIC reverbobject_shared )
-target_link_libraries( signalflows_shared PUBLIC pml_shared )
 
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  target_link_libraries( signalflows_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
+  target_link_libraries( signalflows_${LIB_TYPE} PUBLIC reverbobject_${LIB_TYPE} )
+  target_link_libraries( signalflows_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
+endforeach()
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
@@ -49,8 +48,7 @@ set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" 
 
 # If Python is activated, enable the optional use of a Metadapter to receive and process object metadata. 
 if( BUILD_PYTHON_BINDINGS )
-  # It would be nicer if we could limit that to visr_renderer.cpp
-  add_definitions( -DVISR_PYTHON_SUPPORT=1 )
+  set_property( SOURCE visr_renderer.cpp APPENDE PROPERTY COMPILE_DEFINITIONS VISR_PYTHON_SUPPORT=1 )
   target_link_libraries( signalflows_static PUBLIC pythoncomponents_static )
 
   # Deliberate decision: make this dependency private to avoid propagating the libpython dependency.

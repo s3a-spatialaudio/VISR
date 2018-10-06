@@ -21,12 +21,6 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
 
 add_library( reverbobject_static STATIC ${SOURCES} ${HEADERS} )
-# Transitive link dependencies
-target_link_libraries( reverbobject_static PUBLIC pml_static )
-target_link_libraries( reverbobject_static PUBLIC rcl_static )
-target_link_libraries( reverbobject_static PUBLIC objectmodel_static )
-target_link_libraries( reverbobject_static PUBLIC efl_static )
-target_link_libraries( reverbobject_static PRIVATE Boost::filesystem )
 
 add_library( reverbobject_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( reverbobject_shared PROPERTIES OUTPUT_NAME reverbobject )
@@ -34,12 +28,16 @@ set_target_properties( reverbobject_shared PROPERTIES OUTPUT_NAME reverbobject )
 set_target_properties( reverbobject_shared PROPERTIES ARCHIVE_OUTPUT_NAME reverbobject_shared )
 target_compile_definitions( reverbobject_shared PRIVATE -DVISR_BUILD_REVERBOBJECT_SHARED_LIBRARY=1 -DVISR_BUILD_REVERBOBJECT_LIBRARY=1)
 set_target_properties( reverbobject_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-# Transitive link dependencies
-target_link_libraries( reverbobject_shared PUBLIC pml_shared )
-target_link_libraries( reverbobject_shared PUBLIC rcl_shared )
-target_link_libraries( reverbobject_shared PUBLIC objectmodel_shared )
-target_link_libraries( reverbobject_shared PUBLIC efl_shared )
-target_link_libraries( reverbobject_shared PRIVATE Boost::filesystem )
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  # Transitive link dependencies
+  target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
+  target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
+  target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
+  target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
+  target_link_libraries( reverbobject_${LIB_TYPE} PRIVATE Boost::filesystem )
+endforeach()
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only

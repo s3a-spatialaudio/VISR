@@ -3,7 +3,8 @@
 # Top-level build configuration for project VISceRal
 
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
-CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
+# >= 3.1 for CMAKE_CXX_STANDARD
+CMAKE_MINIMUM_REQUIRED (VERSION 3.1.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
@@ -23,32 +24,35 @@ set( VISR_MAJOR_VERSION 0 )
 set( VISR_MINOR_VERSION 10 )
 set( VISR_PATCH_VERSION 0 )
 
-ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
-ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
-ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
+add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
+add_definitions( -DVISR_PATCH_VERSION=${VISR_PATCH_VERSION} )
 
 # Add support for unit tests
 INCLUDE( CTest )
 
-# Enable C++11 features on Linux platforms
-# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
-# Maybe there is a more general way to configure the different platforms and toolchains
-if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-endif()
+## Set C++ standard used. 
+
+# Enable C++ 11 support
+# This requires CMake >= 3.1
+# TODO: Check when we can increase the requirement to C++14
+set( CMAKE_CXX_STANDARD 11 )
+
+# Treat the above standard as a hard requirement rather than 'decaying' to a
+# previous standard if the requirments aren' met
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
+# Disable compiler-specific extensions (e.g., GNU extensions)
+set( CMAKE_CXX_EXTENSIONS OFF )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-#message( STATUS "output "${CMAKE_MODULE_PATH} )
-# At the moment, all include directories are relative to the source root directory.
-# Therefore it suffices to set this root as the include path.
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Default path for static libraries
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
 
-# Copy the executabl  es to the binary directory
+# Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 # Default destination for shared libraries (not DLLs)
@@ -123,7 +127,6 @@ if(UNIX)
     # (as pragmas are compiler-specific, unknown ones should be ignored silently anyway)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nested-anon-types -Wno-unknown-pragmas" )
   endif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
 if( WIN32 ) # Covers 64-bit Windows as well
@@ -313,29 +316,16 @@ FIND_PACKAGE( FFTS REQUIRED )
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
-OPTION( Boost_USE_STATIC_LIBS OFF )
+OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
 
-# For the moment, we support only dynamic linking of boost.
-# In this case, this line is required on Windows to prevent undefined symbols from boost::program_options
-
-IF( NOT Boost_USE_STATIC_LIBS )
-  ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
-ENDIF( NOT Boost_USE_STATIC_LIBS )
-
-# Avoid problems with the auto-link feature on Windows platforms
-ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
-
-# Define the boost libraries that must be present.
+# Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
 SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread regex timer)
-
-
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} unit_test_framework )
-
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
