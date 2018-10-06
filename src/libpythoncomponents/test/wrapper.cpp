@@ -18,6 +18,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <stdlib.h> // Use putenv() which is not in the C++ standard
+#include <iostream>
 
 #include <stdexcept>
 #include <string>
@@ -34,6 +35,75 @@ namespace pythoncomponents
 namespace test
 {
 
+// Use the PYTHONPATH to locate transitive dependencies of the imported module
+// (here: The VISR external modules, e.g., 'visr') 
+// NOTE: this test must come first, because the state of the environmnent is preserved in between Python calls.
+// TODO: Consider a pythonsupport::InitialisationGuard::uninitialise() method to clean the state.
+BOOST_AUTO_TEST_CASE( WrapUsePYTHONPATH )
+{
+  std::string moduleName = "testmodule";
+
+  boost::filesystem::path basePath{CMAKE_CURRENT_SOURCE_DIR};
+  boost::filesystem::path const modulePath = basePath / "python";
+
+  // Use the path to the VISR python externals (retrieved from CMake)
+  boost::filesystem::path additionalPath{ PYTHON_MODULE_INSTALL_DIRECTORY };
+
+  std::string pythonPath = (std::string("PYTHONPATH=") + additionalPath.string());
+
+  // Pass the path to the VISR externals via the PYTHONPATH environment variable.
+  // putenv( &pythonPath[0] );
+
+  char const * ppCheck = getenv( "PYTHONPATH" );
+  std::cout << "PYTHONPATH: " << ppCheck << std::endl;
+
+  pythonsupport::InitialisationGuard::initialise();
+  
+  const std::size_t blockSize{64};
+  const SamplingFrequencyType samplingFrequency{48000};
+  std::size_t const numBlocks{16};
+
+  SignalFlowContext ctxt( blockSize, samplingFrequency );
+
+  // Instantiate the atomic component (implemented in Python)
+  // by a mixture or poristional and keyword constructor arguments
+  Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
+                  moduleName.c_str(),
+                  "Adder",
+                  "3,", "{'width':5}",
+                  modulePath.c_str() );
+
+  std::stringstream errMsg;
+  bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
+  BOOST_CHECK_MESSAGE( res, errMsg.str() );
+
+  rrl::AudioSignalFlow flow( pyAtom1 );
+
+  std::size_t const numInputChannels = 15;
+  std::size_t const numOutputChannels = 5;
+
+  std::vector<SampleType*> inputPtr( numInputChannels, nullptr );
+  std::vector<SampleType*> outputPtr( numOutputChannels, nullptr );
+
+  efl::BasicMatrix<SampleType> inputData( numInputChannels, blockSize* numBlocks );
+  // TODO: Fill the input data with something useful
+
+  efl::BasicMatrix<SampleType> outputData( numOutputChannels, blockSize* numBlocks );
+
+  for( std::size_t blockIdx(0); blockIdx < numBlocks; ++blockIdx )
+  {
+    for( std::size_t idx(0); idx < numInputChannels; ++idx )
+    {
+      inputPtr[idx] = inputData.row(idx) + blockIdx*blockSize;
+    }
+    for( std::size_t idx(0); idx < numOutputChannels; ++idx )
+    {
+      outputPtr[idx] = outputData.row(idx) + blockIdx*blockSize;
+    }
+    flow.process( &inputPtr[0], &outputPtr[0] );
+  }
+}
+  
 // Wrap a Python component in a Python file (as opposed to a multi-file package)
 BOOST_AUTO_TEST_CASE( WrapSingleFileModule )
 {
@@ -153,70 +223,6 @@ BOOST_AUTO_TEST_CASE( WrapMultiFilePackage )
     flow.process( &inputPtr[0], &outputPtr[0] );
   }
 }
-
-// Wrap a Python component contained in a multi-file package)
-BOOST_AUTO_TEST_CASE( WrapUsePYTHONPATH )
-{
-  pythonsupport::InitialisationGuard::initialise();
-
-  std::string moduleName = "testmodule";
-
-  boost::filesystem::path basePath{CMAKE_CURRENT_SOURCE_DIR};
-  boost::filesystem::path const modulePath = basePath / "python";
-
-  // Use the path to the VISR python externals (retrieved from CMake)
-  boost::filesystem::path additionalPath{ PYTHON_MODULE_INSTALL_DIRECTORY };
-
-  std::string pythonPath = (std::string("PYTHONPATH=") + additionalPath.string());
-
-  // Pass the path to the VISR externals via the PYTHONPATH environment variable.
-  putenv( &pythonPath[0] );
-
-  const std::size_t blockSize{64};
-  const SamplingFrequencyType samplingFrequency{48000};
-  std::size_t const numBlocks{16};
-
-  SignalFlowContext ctxt( blockSize, samplingFrequency );
-
-  // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
-  Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
-                  moduleName.c_str(),
-                  "Adder",
-                  "3,", "{'width':5}",
-                  modulePath.c_str() );
-
-  std::stringstream errMsg;
-  bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
-  BOOST_CHECK_MESSAGE( res, errMsg.str() );
-
-  rrl::AudioSignalFlow flow( pyAtom1 );
-
-  std::size_t const numInputChannels = 15;
-  std::size_t const numOutputChannels = 5;
-
-  std::vector<SampleType*> inputPtr( numInputChannels, nullptr );
-  std::vector<SampleType*> outputPtr( numOutputChannels, nullptr );
-
-  efl::BasicMatrix<SampleType> inputData( numInputChannels, blockSize* numBlocks );
-  // TODO: Fill the input data with something useful
-
-  efl::BasicMatrix<SampleType> outputData( numOutputChannels, blockSize* numBlocks );
-
-  for( std::size_t blockIdx(0); blockIdx < numBlocks; ++blockIdx )
-  {
-    for( std::size_t idx(0); idx < numInputChannels; ++idx )
-    {
-      inputPtr[idx] = inputData.row(idx) + blockIdx*blockSize;
-    }
-    for( std::size_t idx(0); idx < numOutputChannels; ++idx )
-    {
-      outputPtr[idx] = outputData.row(idx) + blockIdx*blockSize;
-    }
-    flow.process( &inputPtr[0], &outputPtr[0] );
-  }
-}
-
   
 } // namespace test
 } // namespace pythoncomponents
