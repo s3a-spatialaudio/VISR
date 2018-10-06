@@ -81,18 +81,18 @@ impl/port_base_implementation.cpp
 add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
 set_target_properties( visr_static PROPERTIES OUTPUT_NAME visr)
 set_target_properties(visr_static PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+target_compile_definitions( visr_static PUBLIC -DVISR_CORE_STATIC_LIBRARY=1 )
 
 add_library( visr_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
 set_target_properties( visr_shared PROPERTIES OUTPUT_NAME visr)
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( visr_shared PROPERTIES ARCHIVE_OUTPUT_NAME visr_shared )
-# Specify that this library is built as a dynamic library.
-# 'PUBLIC' means that the definition is also activated for other targets that depend on this library.
-target_compile_definitions( visr_shared PUBLIC -DVISR_BUILD_VISR_SHARED_LIBRARY=1 )
 # Set this definition only when building the present target.
-target_compile_definitions( visr_shared PRIVATE -DVISR_BUILD_VISR_SHARED_LIBRARY=1 -DVISR_BUILD_VISR_LIBRARY=1 )
 set_target_properties(visr_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
+foreach( LIB_TYPE static shared )
+  target_compile_definitions( visr_${LIB_TYPE} PRIVATE VISR_BUILD_CORE_LIBRARY=1 )
+endforeach()
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only

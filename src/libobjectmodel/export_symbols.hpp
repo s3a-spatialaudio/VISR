@@ -5,7 +5,9 @@
 
 /**
  * @file
- *
+ * 
+ * Define macros for exporting and importing shared library symbols
+ * of the objectmodel library.
  */
 
 // For unknown reasons this definition does not becaome visible here:

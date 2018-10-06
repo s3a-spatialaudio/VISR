@@ -4,18 +4,19 @@
 #define VISR_RCL_EXPORT_SYMBOLS_HPP_INCLUDED
 
 /**
- * @file
+ * @file 
  *
+ * Define macros for exporting and importing shared library symbols
+ * of the rcl library.
  */
 
-#ifdef VISR_BUILD_RCL_SHARED_LIBRARY
-
+#ifndef VISR_RCL_STATIC_LIBRARY
 #ifdef _MSC_VER // Windows platform
 #ifdef VISR_BUILD_RCL_LIBRARY
 #define VISR_RCL_LIBRARY_SYMBOL __declspec(dllexport)
 #else
 #define VISR_RCL_LIBRARY_SYMBOL __declspec(dllimport)
-#endif // #ifdef VISR_BUILD_RCL_LIBRARIES
+#endif // #ifdef VISR_BUILD_RCL_LIBRARY
 #elif defined(__GNUC__)
 
 // Unix platforms (Linux and Mac OS X)
@@ -25,10 +26,8 @@
 #error "Platform does not support symbol export."
 #endif // #ifdef _WIN32
 
-#else // VISR_BUILD_RCL_SHARED_LIBRARY
-
-#define VISR_RCL_LIBRARY_SYMBOL // expand to empty string
-
-#endif // VISR_BUILD_RCL_SHARED_LIBRARY
+#else // #ifdef VISR_RCL_STATIC_LIBRARY
+#define VISR_RCL_LIBRARY_SYMBOL // empty
+#endif // #ifdef VISR_RCL_STATIC_LIBRARY
 
 #endif // #ifndef VISR_RCL_EXPORT_SYMBOLS_HPP_INCLUDED

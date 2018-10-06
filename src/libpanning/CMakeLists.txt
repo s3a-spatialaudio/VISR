@@ -28,17 +28,17 @@ endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
 
 add_library( panning_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( panning_static PROPERTIES OUTPUT_NAME panning )
+target_compile_definitions( panning_static PUBLIC VISR_PANNING_STATIC_LIBRARY=1)
 
 add_library( panning_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( panning_shared PROPERTIES OUTPUT_NAME panning )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( panning_shared PROPERTIES ARCHIVE_OUTPUT_NAME panning_shared )
-target_compile_definitions( panning_shared PRIVATE -DVISR_BUILD_PANNING_SHARED_LIBRARY=1 -DVISR_BUILD_PANNING_LIBRARY=1)
-target_compile_definitions( panning_shared PUBLIC -DVISR_BUILD_PANNING_SHARED_LIBRARY=1)
 set_target_properties( panning_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(TARGET_TYPE static shared)
+  target_compile_definitions( panning_${TARGET_TYPE} PRIVATE VISR_BUILD_PANNING_LIBRARY=1)
   target_link_libraries( panning_${TARGET_TYPE} PUBLIC rbbl_${TARGET_TYPE} )
   if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
     target_link_libraries( panning_${TARGET_TYPE} PRIVATE Boost::regex )

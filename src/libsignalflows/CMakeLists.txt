@@ -24,18 +24,18 @@ visr_renderer.hpp
 
 add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_static PROPERTIES OUTPUT_NAME signalflows )
+target_compile_definitions( signalflows_static PUBLIC VISR_SIGNALFLOWS_STATIC_LIBRARY=1)
 
 add_library( signalflows_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( signalflows_shared PROPERTIES OUTPUT_NAME signalflows )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( signalflows_shared PROPERTIES ARCHIVE_OUTPUT_NAME signalflows_shared )
-target_compile_definitions( signalflows_shared PRIVATE -DVISR_BUILD_SIGNALFLOWS_SHARED_LIBRARY=1 -DVISR_BUILD_SIGNALFLOWS_LIBRARY=1)
-target_compile_definitions( signalflows_shared PUBLIC -DVISR_BUILD_SIGNALFLOWS_SHARED_LIBRARY=1)
 set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( signalflows_${LIB_TYPE} PRIVATE VISR_BUILD_SIGNALFLOWS_LIBRARY=1)
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC reverbobject_${LIB_TYPE} )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )

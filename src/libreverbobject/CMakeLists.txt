@@ -21,16 +21,17 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
 
 
 add_library( reverbobject_static STATIC ${SOURCES} ${HEADERS} )
+target_compile_definitions( reverbobject_static PUBLIC VISR_REVERBOBJECT_STATIC_LIBRARY=1)
 
 add_library( reverbobject_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( reverbobject_shared PROPERTIES OUTPUT_NAME reverbobject )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( reverbobject_shared PROPERTIES ARCHIVE_OUTPUT_NAME reverbobject_shared )
-target_compile_definitions( reverbobject_shared PRIVATE -DVISR_BUILD_REVERBOBJECT_SHARED_LIBRARY=1 -DVISR_BUILD_REVERBOBJECT_LIBRARY=1)
 set_target_properties( reverbobject_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE VISR_BUILD_REVERBOBJECT_LIBRARY=1)
   # Transitive link dependencies
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )

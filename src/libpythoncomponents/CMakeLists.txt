@@ -10,17 +10,18 @@ export_symbols.hpp
 wrapper.hpp)
 
 add_library( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
+target_compile_definitions( pythoncomponents_static PUBLIC VISR_PYTHONCOMPONENTS_STATIC_LIBRARY=1 )
 
 add_library( pythoncomponents_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythoncomponents_shared PROPERTIES OUTPUT_NAME pythoncomponents )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( pythoncomponents_shared PROPERTIES ARCHIVE_OUTPUT_NAME pythoncomponents_shared )
-target_compile_definitions( pythoncomponents_shared PRIVATE -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONCOMPONENTS_LIBRARY=1)
-target_compile_definitions( pythoncomponents_shared PUBLIC -DVISR_BUILD_PYTHONCOMPONENTS_SHARED_LIBRARY=1)
 set_target_properties( pythoncomponents_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( pythoncomponents_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONCOMPONENTS_LIBRARY=1 )
+
   target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
   # The pybind11 header is used to include Python.h.
   # This avoids preprocessor magic to work around platform specifics.

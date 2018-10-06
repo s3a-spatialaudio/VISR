@@ -15,17 +15,17 @@ load_module.hpp
 )
 
 add_library( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
+target_compile_definitions( pythonsupport_static PUBLIC VISR_PYTHONSUPPORT_STATIC_LIBRARY=1)
 
 add_library( pythonsupport_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pythonsupport_shared PROPERTIES OUTPUT_NAME pythonsupport )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( pythonsupport_shared PROPERTIES ARCHIVE_OUTPUT_NAME pythonsupport_shared )
-target_compile_definitions( pythonsupport_shared PRIVATE -DVISR_BUILD_PYTHONSUPPORT_SHARED_LIBRARY=1 -DVISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
-target_compile_definitions( pythonsupport_shared PUBLIC -DVISR_BUILD_PYTHONSUPPORT_SHARED_LIBRARY=1)
 set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
   target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
   # The pybind11 header is used to include Python.h.
   # This avoids preprocessor magic to make this include statement

@@ -20,17 +20,19 @@ endif( BUILD_USE_JACK )
 
 add_library( audiointerfaces_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( audiointerfaces_static PROPERTIES OUTPUT_NAME audiointerfaces )
+target_compile_definitions( audiointerfaces_static PUBLIC VISR_AUDIOINTERFACES_STATIC_LIBRARY=1 )
 
 add_library( audiointerfaces_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( audiointerfaces_shared PROPERTIES OUTPUT_NAME audiointerfaces )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( audiointerfaces_shared PROPERTIES ARCHIVE_OUTPUT_NAME audiointerfaces_shared )
-target_compile_definitions( audiointerfaces_shared PRIVATE -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1 -DVISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
-target_compile_definitions( audiointerfaces_shared PUBLIC -DVISR_BUILD_AUDIOINTERFACES_SHARED_LIBRARY=1)
+
 set_target_properties( audiointerfaces_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( audiointerfaces_${LIB_TYPE} PUBLIC VISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
+
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE rrl_${LIB_TYPE} )
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE Boost::boost ) # Set the boost include directory.
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE ${PORTAUDIO_LIBRARIES} )

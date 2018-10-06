@@ -30,16 +30,16 @@ signal_routing_internal.hpp
 
 add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
+target_compile_definitions( rrl_static PUBLIC VISR_RRL_STATIC_LIBRARY=1)
 
 add_library( rrl_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
-target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1 -DVISR_BUILD_RRL_LIBRARY=1)
-target_compile_definitions( rrl_shared PUBLIC -DVISR_BUILD_RRL_SHARED_LIBRARY=1)
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( rrl_${LIB_TYPE} PRIVATE VISR_BUILD_RRL_LIBRARY=1)
   # Transitive link dependencies
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )

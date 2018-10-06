@@ -64,17 +64,17 @@ udp_sender.hpp
 
 add_library( rcl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
+target_compile_definitions( rcl_static PUBLIC VISR_RCL_STATIC_LIBRARY=1)
 
 add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rcl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rcl_shared )
-target_compile_definitions( rcl_shared PUBLIC -DVISR_BUILD_RCL_SHARED_LIBRARY=1)
-target_compile_definitions( rcl_shared PRIVATE -DVISR_BUILD_RCL_SHARED_LIBRARY=1 -DVISR_BUILD_RCL_LIBRARY=1)
 set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( rcl_${LIB_TYPE} PRIVATE VISR_BUILD_RCL_LIBRARY=1)
   # Not ideal. This is only used by certain files (scalar_osc_decoder.cpp)
   # But INCLUDE_DIRECTORIES is a source file peroperty only since Cmake 3.11
   target_include_directories( rcl_${LIB_TYPE} PRIVATE ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
