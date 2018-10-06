@@ -60,13 +60,13 @@ set_target_properties( objectmodel_static PROPERTIES OUTPUT_NAME objectmodel )
 
 target_link_libraries( objectmodel_static PUBLIC rbbl_static )
 target_link_libraries( objectmodel_static PRIVATE Boost::boost ) # Adds the boost include directory
+target_compile_definitions( objectmodel_static PUBLIC -DVISR_OBJECTMODEL_STATIC_LIBRARY=1 )
 
 add_library( objectmodel_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( objectmodel_shared PROPERTIES OUTPUT_NAME objectmodel )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( objectmodel_shared PROPERTIES ARCHIVE_OUTPUT_NAME objectmodel_shared )
 set_target_properties( objectmodel_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_compile_definitions( objectmodel_shared PUBLIC -DVISR_BUILD_OBJECTMODEL_SHARED_LIBRARY=1 )
 target_compile_definitions( objectmodel_shared PRIVATE -DVISR_BUILD_OBJECTMODEL_LIBRARY=1)
 target_link_libraries( objectmodel_shared PUBLIC rbbl_shared )
 target_link_libraries( objectmodel_shared PRIVATE Boost::boost ) # Adds the boost include directory

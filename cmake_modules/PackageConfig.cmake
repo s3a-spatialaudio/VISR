@@ -138,9 +138,11 @@ INSTALL( FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt DESTINATION ${VISR_TOPLEVEL_INSTA
 SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt )
 
 # Install Python example scripts and templates
-INSTALL( DIRECTORY src/python/templates DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_templates )
-INSTALL( DIRECTORY src/python/packages/visr_bst DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_bst )
+install( DIRECTORY src/python/templates DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_templates )
+install( DIRECTORY src/python/packages/visr_bst DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_bst )
+install( DIRECTORY src/python/packages/metadapter DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_metadapter )
 
+# CPack must be included after all install directives and CPACK_ variable definitions.
 include( CPack )
 
 # Define components and component groups for the component-enabled installers.
@@ -205,6 +207,14 @@ cpack_add_component_group( python_packages
 cpack_add_component( python_package_bst
                     DISPLAY_NAME "Binaural Synthesis Toolkit"
                     DESCRIPTION "Toolbox for binaural synthesis"
+                    INSTALL_TYPES default python full
+                    DEPENDS python_externals
+                    GROUP python_packages
+                   )
+
+cpack_add_component( python_package_metadapter
+                    DISPLAY_NAME "Metadapter"
+                    DESCRIPTION "Extensible system for object metadata adaptation"
                     INSTALL_TYPES default python full
                     DEPENDS python_externals
                     GROUP python_packages
