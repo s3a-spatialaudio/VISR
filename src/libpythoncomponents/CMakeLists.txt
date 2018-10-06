@@ -31,6 +31,7 @@ foreach(LIB_TYPE static shared)
   # exactly one instance of pythonsupport::InitialisationGuard
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pythonsupport_shared )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
 endforeach()
 
 # Set include paths for dependent projects

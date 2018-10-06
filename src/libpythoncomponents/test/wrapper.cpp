@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( WrapUsePYTHONPATH )
                   moduleName.c_str(),
                   "Adder",
                   "3,", "{'width':5}",
-                  modulePath.c_str() );
+                  modulePath.string().c_str() );
 
   std::stringstream errMsg;
   bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
@@ -128,10 +128,10 @@ BOOST_AUTO_TEST_CASE( WrapSingleFileModule )
   // Instantiate the atomic component (implemented in Python)
   // by a mixture or poristional and keyword constructor arguments
   Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
-		   moduleName.c_str(),
-		   "PythonAdder",
-		   "3,", "{'width':5}",
-		   searchPath.c_str() );
+                   moduleName.c_str(),
+                   "PythonAdder",
+                   "3,", "{'width':5}",
+                   searchPath.c_str() );
 
   std::stringstream errMsg;
   bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE( WrapMultiFilePackage )
                   moduleName.c_str(),
                   "Adder",
                   "3,", "{'width':5}",
-                  modulePath.c_str() );
+                  modulePath.string().c_str() );
 
   std::stringstream errMsg;
   bool res = rrl::checkConnectionIntegrity( pyAtom1, true, errMsg );

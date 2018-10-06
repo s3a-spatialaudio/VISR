@@ -14,7 +14,9 @@ target_link_libraries(visr_renderer apputilities_static )
 target_link_libraries(visr_renderer signalflows_static )
 target_link_libraries(visr_renderer audiointerfaces_static )
 target_link_libraries(visr_renderer panning_static )
-target_link_libraries(visr_renderer pythonsupport_static )
 target_link_libraries(visr_renderer rrl_static )
+# Note: pythonsupport must be linked as a shared library, because there must be
+# exactly one instance of pythonsupport::InitialisationGuard
+target_link_libraries(visr_renderer pythonsupport_shared )
 target_link_libraries(visr_renderer ${CMAKE_THREAD_LIBS_INIT} )
 install( TARGETS visr_renderer RUNTIME DESTINATION bin COMPONENT standalone_applications )

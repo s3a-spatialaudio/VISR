@@ -39,24 +39,24 @@ foreach(LIB_TYPE static shared)
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC reverbobject_${LIB_TYPE} )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
+
+  target_link_libraries( signalflows_${LIB_TYPE} PRIVATE Boost::system )
+  if( NOT Boost_USE_STATIC_LIBS )
+    target_compile_definitions( signalflows_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
+  endif( NOT Boost_USE_STATIC_LIBS )
+  target_link_libraries( signalflows_${LIB_TYPE} PUBLIC Boost::disable_autolinking )
+
+  # If Python is activated, enable the optional use of a Metadapter to receive and process object metadata.
+  if( BUILD_PYTHON_BINDINGS )
+    set_property( SOURCE visr_renderer.cpp APPENDE PROPERTY COMPILE_DEFINITIONS VISR_PYTHON_SUPPORT=1 )
+    target_link_libraries( signalflows_${LIB_TYPE} PRIVATE pythoncomponents_${LIB_TYPE} )
+  endif( BUILD_PYTHON_BINDINGS )
 endforeach()
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
 # installled once.
 set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-
-# If Python is activated, enable the optional use of a Metadapter to receive and process object metadata. 
-if( BUILD_PYTHON_BINDINGS )
-  set_property( SOURCE visr_renderer.cpp APPENDE PROPERTY COMPILE_DEFINITIONS VISR_PYTHON_SUPPORT=1 )
-  target_link_libraries( signalflows_static PUBLIC pythoncomponents_static )
-
-  # Deliberate decision: make this dependency private to avoid propagating the libpython dependency.
-  # This would create a problem in the signalflows Python binding, which must not depend on the Python lib
-  # (that causes errors on many Mac OS systems).
-  target_link_libraries( signalflows_shared PRIVATE pythoncomponents_shared )
-endif( BUILD_PYTHON_BINDINGS )
-
 
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
