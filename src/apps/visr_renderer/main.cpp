@@ -17,7 +17,7 @@
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 
-#include <libsignalflows/visr_renderer.hpp>
+#include <libsignalflowspython/visr_renderer.hpp>
 
 #ifdef VISR_PYTHON_SUPPORT
 #include <libpythonsupport/initialisation_guard.hpp>
@@ -157,14 +157,14 @@ int main( int argc, char const * const * argv )
         
         SignalFlowContext context( periodSize, samplingRate );
         
-        std::unique_ptr<signalflows::VisrRenderer> renderer;
+        std::unique_ptr<signalflowspython::VisrRenderer> renderer;
         
         {
 #if VISR_PYTHON_SUPPORT
           visr::pythonsupport::InitialisationGuard::initialise();
           visr::pythonsupport::GilEnsureGuard guard;
 #endif
-          renderer.reset( new signalflows::VisrRenderer( 
+          renderer.reset( new signalflowspython::VisrRenderer( 
                                            context,
                                            "", nullptr,
                                            loudspeakerArray,

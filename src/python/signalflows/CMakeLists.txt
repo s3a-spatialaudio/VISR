@@ -31,6 +31,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMA
 set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT_NAME}_import" )
 
 target_link_libraries( ${PROJECT_NAME} PRIVATE signalflows_shared ) 
+target_link_libraries( ${PROJECT_NAME} PRIVATE signalflowspython_shared ) 
 
 install(TARGETS ${PROJECT_NAME}
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}

@@ -39,6 +39,14 @@ endif( BUILD_PYTHON_BINDINGS )
 # Library for signal flows.
 ADD_SUBDIRECTORY( libsignalflows )
 
+# Library for signal flows that use Python.
+# Temporary solution to avoid a link dependency on Python 
+# for the majority of signal flows.
+# Note that this library is also build if BUILD_PYTHON_BINDINGS is unselected.
+# In this case, it contains a reduced functionality that does not use Python.
+add_subdirectory( libsignalflowspython )
+
+
 # Rendering building block library
 ADD_SUBDIRECTORY( librbbl )
 

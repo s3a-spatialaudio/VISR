@@ -7,7 +7,6 @@ bunch_renderer.cpp
 delay_vector.cpp 
 gain_matrix.cpp
 time_frequency_feedthrough.cpp
-visr_renderer.cpp
 )
 
 # Basically, this makes the headers show up in the Visual studio project.
@@ -19,7 +18,6 @@ delay_vector.hpp
 export_symbols.hpp
 gain_matrix.hpp
 time_frequency_feedthrough.hpp
-visr_renderer.hpp
 )
 
 add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
@@ -45,12 +43,6 @@ foreach(LIB_TYPE static shared)
     target_compile_definitions( signalflows_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC Boost::disable_autolinking )
-
-  # If Python is activated, enable the optional use of a Metadapter to receive and process object metadata.
-  if( BUILD_PYTHON_BINDINGS )
-    set_property( SOURCE visr_renderer.cpp APPENDE PROPERTY COMPILE_DEFINITIONS VISR_PYTHON_SUPPORT=1 )
-    target_link_libraries( signalflows_${LIB_TYPE} PRIVATE pythoncomponents_${LIB_TYPE} )
-  endif( BUILD_PYTHON_BINDINGS )
 endforeach()
 
 # Set public headers to be installed for the shared target.

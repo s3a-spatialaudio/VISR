@@ -4,13 +4,15 @@
 
 #include <librcl/scene_decoder.hpp>
 
+#if VISR_PYTHON_SUPPORT
 #include <libpythoncomponents/wrapper.hpp>
+#endif
 
 #include <boost/format.hpp>
 
 namespace visr
 {
-namespace signalflows
+namespace signalflowspython
 {
 
 VisrRenderer::VisrRenderer( SignalFlowContext const & context,
@@ -83,5 +85,5 @@ VisrRenderer::~VisrRenderer( )
 {
 }
 
-} // namespace signalflows
+} // namespace signalflowspython
 } // namespace visr

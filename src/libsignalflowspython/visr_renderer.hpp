@@ -3,8 +3,9 @@
 #ifndef VISR_SIGNALFLOWS_VISR_RENDERER_HPP_INCLUDED
 #define VISR_SIGNALFLOWS_VISR_RENDERER_HPP_INCLUDED
 
-#include "core_renderer.hpp"
 #include "export_symbols.hpp"
+
+#include <libsignalflows/core_renderer.hpp>
 
 #include <libvisr/composite_component.hpp>
 #include <libvisr/audio_input.hpp>
@@ -25,13 +26,13 @@
 namespace visr
 {
 
-namespace signalflows
+namespace signalflowspython
 {
 
 /**
  * Audio signal graph object for the VISR baseline renderer.
  */
-class VISR_SIGNALFLOWS_LIBRARY_SYMBOL VisrRenderer: public CompositeComponent
+class VISR_SIGNALFLOWSPYTHON_LIBRARY_SYMBOL VisrRenderer: public CompositeComponent
 {
 public:
   /**
@@ -99,13 +100,13 @@ private:
   std::unique_ptr<rcl::PositionDecoder> mTrackingPositionDecoder;
   //@}
 
-  CoreRenderer mCoreRenderer;
+  signalflows::CoreRenderer mCoreRenderer;
 
   AudioInput mInput;
   AudioOutput mOutput;
 };
 
-} // namespace signalflows
+} // namespace signalflowspython
 } // namespace visr
 
 #endif // VISR_SIGNALFLOWS_VISR_RENDERER_HPP_INCLUDED

@@ -16,6 +16,7 @@ add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
 target_link_libraries( ${APPLICATION_NAME} visr_static)
 target_link_libraries( ${APPLICATION_NAME} pml_static )
+target_link_libraries( ${APPLICATION_NAME} rcl_static )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 if( NOT Boost_USE_STATIC_LIBS )
