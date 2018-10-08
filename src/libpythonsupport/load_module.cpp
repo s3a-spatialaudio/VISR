@@ -39,7 +39,7 @@ pybind11::object loadModule( std::string const & moduleName,
   py::dict locals;
   locals["moduleName"] = py::cast(moduleName);
   locals["modulePath"] = modulePath.empty() ? py::none() : py::cast( modulePath );
-  locals["aditionalPath"] = additionalSystemPath.empty()
+  locals["additionalPath"] = additionalSystemPath.empty()
     ? py::list() : py::cast( additionalSystemPath );
   try
   {
@@ -85,6 +85,7 @@ std::vector<std::string> pathStringToSequence( std::string const & pathString )
                                   + str + "\" does not exist." );
     }
   }
+  return searchPath;
 }
 
 } // unnamed namespace 
