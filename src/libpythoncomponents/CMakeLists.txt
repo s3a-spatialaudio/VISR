@@ -35,6 +35,11 @@ foreach(LIB_TYPE static shared)
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
 endforeach()
 
+# Set public headers to be installed for the shared target.
+# Because the headers are the same for the static library, the headers are only
+# installed once.
+set_target_properties( pythoncomponents_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
 # Set include paths for dependent projects
 get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 foreach(TARGET_TYPE static shared)
