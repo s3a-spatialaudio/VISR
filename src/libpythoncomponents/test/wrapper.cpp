@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( WrapUsePYTHONPATH )
   std::string pythonPath = (std::string("PYTHONPATH=") + additionalPath.string());
 
   // Pass the path to the VISR externals via the PYTHONPATH environment variable.
-  // putenv( &pythonPath[0] );
+  putenv( &pythonPath[0] );
 
   char const * ppCheck = getenv( "PYTHONPATH" );
   std::cout << "PYTHONPATH: " << ppCheck << std::endl;
