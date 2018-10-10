@@ -61,9 +61,11 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS rrl_static
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS rrl_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )	  
 install(TARGETS rrl_shared
         EXPORT VISR_exports
         ARCHIVE DESTINATION lib COMPONENT development_files

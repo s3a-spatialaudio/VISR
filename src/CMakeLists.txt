@@ -1,5 +1,6 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+option( BUILD_INSTALL_STATIC_LIBRARIES "Whether to provide static libraries in the installation packages." OFF )
 
 # Set the installation directory for the export and version files
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
@@ -85,6 +86,7 @@ if( BUILD_PYTHON_BINDINGS )
 endif( BUILD_PYTHON_BINDINGS )
 
 ##### CMake packaging
+
 # Install exported targets as config files
 # for use from install tree
 install(EXPORT VISR_exports

@@ -171,13 +171,21 @@ cpack_add_component(shared_libraries
                     DESCRIPTION "Core VISR libraries (shared)"
                     REQUIRED
                    )
-		   
-cpack_add_component(static_libraries
-                    DISPLAY_NAME "Static Libraries"
-                    DESCRIPTION "Core VISR libraries (static)"
-                    INSTALL_TYPES full
-                    DISABLED
-                    DEPENDS development_files
+
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  cpack_add_component(static_libraries
+                      DISPLAY_NAME "Static Libraries"
+                      DESCRIPTION "Core VISR libraries (static)"
+                      INSTALL_TYPES full developer
+                      DISABLED
+                     )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+
+cpack_add_component( standalone_applications
+                    DISPLAY_NAME "Standalone applications"
+                    DESCRIPTION "Standalone command-line applications"
+                    INSTALL_TYPES default full
+                    DEPENDS shared_libraries
                    )
 
 cpack_add_component( standalone_applications
@@ -187,11 +195,22 @@ cpack_add_component( standalone_applications
                     DEPENDS shared_libraries
                    )
 
-cpack_add_component(development_files
-                    DISPLAY_NAME "Development files"
-                    DESCRIPTION "Header files and CMake support"
-                    INSTALL_TYPES developer full
-                   )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  cpack_add_component(development_files
+                      DISPLAY_NAME "Development files"
+                      DESCRIPTION "Header files and CMake support"
+                      INSTALL_TYPES developer full
+                      DEPENDS static_libraries
+                      DISABLED # Not contained in standard installation
+                     )
+else( BUILD_INSTALL_STATIC_LIBRARIES )
+  cpack_add_component(development_files
+                      DISPLAY_NAME "Development files"
+                      DESCRIPTION "Header files and CMake support"
+                      INSTALL_TYPES developer full
+                      DISABLED # Not contained in standard installation
+                     )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 cpack_add_component( python_externals
                     DISPLAY_NAME "Python Externals"

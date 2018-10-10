@@ -113,9 +113,11 @@ target_include_directories(
   $<INSTALL_INTERFACE:include/visr>)
 endforeach()
 
-install(TARGETS visr_static
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS visr_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 install(TARGETS visr_shared
         EXPORT VISR_exports
         ARCHIVE DESTINATION lib COMPONENT development_files

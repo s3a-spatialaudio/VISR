@@ -16,11 +16,8 @@ reverb_object_renderer.hpp
 reverb_parameter_calculator.hpp
 )
 
-# Preliminary hack. Used only for scene_sender. 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
-
-
 add_library( reverbobject_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( reverbobject_static PROPERTIES OUTPUT_NAME reverbobject )
 target_compile_definitions( reverbobject_static PUBLIC VISR_REVERBOBJECT_STATIC_LIBRARY=1)
 
 add_library( reverbobject_shared SHARED ${SOURCES} ${HEADERS} )
@@ -55,9 +52,11 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS reverbobject_static
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS reverbobject_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 install(TARGETS reverbobject_shared
         EXPORT VISR_exports
         ARCHIVE DESTINATION lib COMPONENT development_files

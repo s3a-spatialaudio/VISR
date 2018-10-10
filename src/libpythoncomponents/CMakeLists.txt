@@ -10,6 +10,7 @@ export_symbols.hpp
 wrapper.hpp)
 
 add_library( pythoncomponents_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( pythoncomponents_static PROPERTIES OUTPUT_NAME pythoncomponents )
 target_compile_definitions( pythoncomponents_static PUBLIC VISR_PYTHONCOMPONENTS_STATIC_LIBRARY=1 )
 
 add_library( pythoncomponents_shared SHARED ${SOURCES} ${HEADERS} )
@@ -50,9 +51,11 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS pythoncomponents_static
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT static_libraries )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS pythoncomponents_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 install(TARGETS pythoncomponents_shared
         EXPORT VISR_exports
         ARCHIVE DESTINATION lib COMPONENT development_files
