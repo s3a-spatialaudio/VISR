@@ -16,6 +16,7 @@ VISR User Manual
    :maxdepth: 1
 
    about
+   getting-started
    basic_tutorial
    people
    
@@ -121,5 +122,16 @@ Binaural synthesis toolkit
 
 Dynamic range control library
 -----------------------------
+
+Old contents
+========================================
+
+.. toctree::
+
+  examples
+  tutorials
+  
+The contents of these files will be removed or moded to other parts of the documentation.
+
 
 
