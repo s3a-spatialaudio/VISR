@@ -1,0 +1,416 @@
+stages:
+  - initial
+  - config
+  - build
+  - test
+  - documentation
+  - package
+  - deploy
+  # - cleanup
+
+# Global Cache - TEMP for faster testing
+# Changing the key will clear the cache, and you can store it in a different location with a predefined variable.
+# Change this by doing $ export CI_PROJECT_NAME='VISR' && export CI_BUILD_REF_NAME="path/of/new/cache"
+cache:
+  # key: "$CI_PROJECT_NAME/$CI_BUILD_REF_NAME"
+  paths:
+    - build/
+# variables:
+#   CI_DEBUG_TRACE: "true"
+
+init-macosx:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build
+  only:
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+init-windows:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build
+  only:
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+init-linux:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+# CMake Configuration:
+
+linux-arch-config:
+  stage: config
+  dependencies:
+    - init-linux
+  script:
+    - cmake -E chdir build/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+windows-arch-config:
+  stage: config
+  dependencies:
+    - init-windows
+  script:
+    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:/ProgramData/Anaconda3/include -DPYTHON_LIBRARY=C:/ProgramData/Anaconda3/libs/python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+  tags:
+    - windows
+  only:
+    - feature/experimental-ci
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+macosx-arch-config:
+  stage: config
+  dependencies:
+    - init-macosx
+  script:
+    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/lib/libpython3.6m.dylib -DBUILD_JACK_SUPPORT=ON ..
+  tags:
+    - macosx
+  only:
+    - feature/experimental-ci
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+# Build:
+
+linux-arch-build:
+  stage: build
+  dependencies:
+    - linux-arch-config
+  script:
+    - cmake --build build/ --target --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+windows-arch-build:
+  stage: build
+  dependencies:
+    - windows-arch-config
+  script:
+    - cmake --build build/ --target --config Release
+  tags:
+    - windows
+  only:
+    - feature/experimental-ci
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+macosx-arch-build:
+  stage: build
+  dependencies:
+    - macosx-arch-config
+  script:
+    - cmake --build build/ --target --config Release
+  tags:
+    - macosx
+  only:
+    - feature/experimental-ci
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+# Test:
+
+linux-arch-test:
+  stage: test
+  dependencies:
+    - linux-arch-build
+  script:
+    - cmake --build build/ --target test --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+    - Testing/*.log
+    expire_in: 1 week
+  # TEMP REMOVE THIS when tests are finished - TEMP
+  allow_failure: true
+  cache:
+    paths:
+      - build/
+
+macosx-arch-test:
+  stage: test
+  dependencies:
+    - macosx-arch-build
+  script:
+    - cmake --build build/ --target RUN_TESTS --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+    - Testing/*.log
+    expire_in: 1 week
+  # TEMP REMOVE THIS when tests are finished - TEMP
+  allow_failure: true
+  cache:
+    paths:
+      - build/
+
+
+windows-arch-test:
+  stage: test
+  dependencies:
+    - windows-arch-build
+  script:
+    - cmake --build build/ --target RUN_TESTS --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+    - Testing/*.log
+    expire_in: 1 week
+  # TEMP REMOVE THIS when tests are finished - TEMP
+  allow_failure: true
+  cache:
+    paths:
+      - build/
+
+  # Documentation
+
+linux-arch-doc:
+  stage: documentation
+  dependencies:
+    - linux-arch-config
+  script:
+    - cmake --build build/ --target doc
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+
+windows-arch-doc:
+  stage: documentation
+  dependencies:
+    - windows-arch-config
+  script:
+    - cmake --build build/ --target doc
+  only:
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+macosx-arch-doc:
+  stage: documentation
+  dependencies:
+    - macosx-arch-config
+  script:
+    - cmake --build build/ --target doc
+  only:
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+
+# Package - dependencies on build , test and package
+
+linux-arch-package:
+  stage: package
+  dependencies:
+    - linux-arch-build
+    # - linux-arch-test
+    - linux-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+windows-arch-package:
+  stage: package
+  dependencies:
+    - windows-arch-build
+    # - windows-arch-test
+    - windows-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+
+macosx-arch-package:
+  stage: package
+  dependencies:
+    - macosx-arch-config
+    # - macosx-arch-test
+    - macosx-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+# When fixed - create test jobs for mac and windows too.
+
+# For internal, private deployment
+linux-arch-deploy-int:
+  stage: deploy
+  dependencies:
+    - linux-arch-doc
+  script:
+    - rsync --recursive --delete build/doc/apidoc/html/ /vol/vssp/dataweb/data/s3a/public/VISR-API/
+  only:
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+# Global Cache - TEMP for faster testing
+# cleanup:
+#   stage: cleanup
+#   script:
+#     - cmake -E remove_directory build
+#   only:
+#     - feature/experimental-ci
+#   when: always
+
+## Notes
+#     # possible variables needed here: "JOB-TOKEN: $CI_JOB_TOKEN" || --form "job-token=$CI_JOB_TOKEN" (parameter, as well as header)
+#     # possible branch variable $CI_COMMIT_REF_NAME
+#     # possible destination variable path name
+#     #
+#     # Need to consider -
+#     # 1. how files are unzipped in their destination
+#     # 2. to curl specific files rather than the entire artifact - this has been tried, and is not working.
+#     # 3. automatically make new directories in the /vol/vssp/dataweb/data/s3a/private/visr_installers/ when a new version is comissioned for release
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=linux-arch-doc" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/documentation/doc.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/documentation/doc.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=macosx-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/macosx/macosx.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/macosx/macosx.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=linux-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/linux_1604_LTS/linux_1604_lts.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/linux_1604_LTS/linux_1604_lts.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=windows-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/windows_64/windows_64.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/windows_64/windows_64.zip
+#
+# Direct links via http (Currently embedded within Wordpress for faster access, with less hassle)
+# Linux deb or tar.bz2 package
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/VISR-0.10.0-python3.5-Linux.tar.bz2?job=linux-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/VISR-0.10.0-python3.5-Linux.tar.bz2?job=linux-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# # Macosx package
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/VISR-0.10.0-python3.6-Darwin.dmg?job=macosx-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# # Windows package
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/VISR-0.10.0-python3.6-Windows.zip?job=windows-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# # userdoc [For VISR Installer package]
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/doc/userdoc/userdoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# # apidoc [For VISR developers]
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/doc/apidoc/apidoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# # api-html-index.html (download-file from gitlab)
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# - api-html-index.html (view-file on gitlab)
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/file/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# Licence
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/raw/build/LICENSE.md?job=macosx-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+#
