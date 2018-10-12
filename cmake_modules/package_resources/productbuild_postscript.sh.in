@@ -1,0 +1,30 @@
+#!/bin/sh
+
+PYPURE="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/lib"
+RPATH="@rpath"
+
+if [ -d "@CMAKE_INSTALL_PREFIX@/3rd" ]; then
+
+if [ -d "${HOME}/anaconda3" ]; then
+    sudo install_name_tool -add_rpath "${HOME}/anaconda3" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+    sudo install_name_tool -add_rpath "${HOME}/anaconda3" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+    #echo "conda python present"
+fi
+
+if [ -d "${HOME}/anaconda" ]; then
+    sudo install_name_tool -add_rpath "${HOME}/anaconda/lib" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+    sudo install_name_tool -add_rpath "${HOME}/anaconda/lib" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+    #echo "conda python present"
+fi
+
+# TODO: Add support for the brew Python
+
+# Fall back to the system python (if present) on MacOS >= 10.12
+# TODO: Check the paths!
+if [ -d "/Library/Frameworks/Python.framework" ]; then
+    sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+    sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+    #echo "system python present"
+fi
+
+fi

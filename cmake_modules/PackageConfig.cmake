@@ -61,77 +61,32 @@ IF( VISR_SYSTEM_NAME MATCHES "Linux" )
 ENDIF(VISR_SYSTEM_NAME MATCHES "Linux")
 
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-#  SET( CPACK_GENERATOR productbuild DragNDrop)
-   SET( CPACK_GENERATOR productbuild )
+  set( CPACK_GENERATOR productbuild )
 
-##########################################
-SET( CPACK_PACKAGE_NAME ${PKG_FILE_NAME}.pkg )
-#SET( CPACK_PACKAGE_NAME ${VISR_TOPLEVEL_NAME}-${CMAKE_SYSTEM_NAME}.pkg )
-##########################################
+  set( CPACK_PACKAGE_NAME ${PKG_FILE_NAME}.pkg )
 
-  #disabled ZIP and TBZ2 
-  #SET( CPACK_GENERATOR Bundle )   
-# set( CPACK_PACKAGE_DEFAULT_LOCATION "/Applications" )
-# set( CPACK_PACKAGING_INSTALL_PREFIX "${CPACK_PACKAGE_DEFAULT_LOCATION}/${VISR_TOPLEVEL_NAME}")
+  set( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
-##########################
-	SET( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
-#	SET( CPACK_PACKAGE_INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX} )
+  install( FILES ${PORTAUDIO_LIBRARIES} DESTINATION 3rd COMPONENT thirdparty_libraries)
+  install( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)  
+  install( FILES ${FLAC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+  install( FILES ${OGG_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+  install( FILES ${VORBIS_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+  install( FILES ${VORBISENC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
 
-###########################  
+  if( NOT Boost_USE_STATIC_LIBS )
+    # These variables are defined in Adjust3rdPartyLibraries.cmake
+    # TODO: Replace by list of Boost libraries to be installed (${VISR_BOOST_LIBRARIES})
+    foreach( BOOSTLIB BOOST_S BOOST_T BOOST_FS BOOST_PO BOOST_C BOOST_DT BOOST_TI BOOST_A FILES BOOST_R )
+      install( FILES ${BOOST_R} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    endforeach()
+  endif( NOT Boost_USE_STATIC_LIBS )
 
-#SET( CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/cmake_modules/resources/s3a_logo.jpg )
-#set( CPACK_DMG_VOLUME_NAME ${PKG_FILE_NAME})
+  configure_file(${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
+  		       "${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh" @ONLY)
+  set(CPACK_POSTFLIGHT_SHARED_LIBRARIES_SCRIPT ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)   
 
-######################################################################################################
-
-#  SET( CPACK_BUNDLE_NAME "VISR-0.9.0-Darwin/VISR" )
-#  SET( CPACK_BUNDLE_NAME "VISR" )
-#  SET( CPACK_BUNDLE_ICON ${CMAKE_SOURCE_DIR}/cmake_modules/resources/s3a_logo.png )
-#  SET( CPACK_BUNDLE_PLIST ${CMAKE_SOURCE_DIR}/cmake_modules/Info.plist )
-#  SET( CPACK_BUNDLE_STARTUP_COMMAND ${CMAKE_SOURCE_DIR}/cmake_modules/postscript.sh )  
-
-  INSTALL( FILES ${PORTAUDIO_LIBRARIES} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  INSTALL( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)  
-  INSTALL( FILES ${FLAC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  INSTALL( FILES ${OGG_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  INSTALL( FILES ${VORBIS_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  INSTALL( FILES ${VORBISENC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-
-#CPACK_ADD_COMPONENT ( libraries
-#  DISPLAY_NAME "Libraries"
-#  DESCRIPTION "Static libraries used to build programs with MyLib"
-#  INSTALL_TYPES Developer Full )
-
-
-#set(CPACK_POSTFLIGHT_LOUDSPEAKERLAYOUTS_SCRIPT ${CMAKE_SOURCE_DIR}/cmake_modules/postscript.sh)
-configure_file (${CMAKE_SOURCE_DIR}/cmake_modules/postscript.sh.in
-        "${PROJECT_BINARY_DIR}/postscript.sh" @ONLY)
-set(CPACK_POSTFLIGHT_SCRIPT ${PROJECT_BINARY_DIR}/postscript.sh)
-
-#set(CPACK_POSTUPGRADE_SCRIPT "${CMAKE_SOURCE_DIR}/cmake_modules/pkg_rename.sh" ${PROJECT_BINARY_DIR}/${VISR_TOPLEVEL_NAME}.dmg ${PROJECT_BINARY_DIR}/PKG_FILE_NAME.dmg )
-
-   # CPACK_PACKAGE_FILE_NAME - provides the name of the final compressed disk image (the name of the file that is distributed).
-   # CPACK_PACKAGE_ICON - provides the icon for the mounted disk image (appears after the user mounts the disk image).
-   
-
-  If( NOT Boost_USE_STATIC_LIBS )
-    INSTALL( FILES ${BOOST_S} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${BOOST_T} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${BOOST_FS} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${BOOST_PO} DESTINATION 3rd COMPONENT thirdparty_libraries)
-
-    INSTALL( FILES ${BOOST_C} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${BOOST_DT} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${CMAKE_THREAD_LIBS_INIT} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${BOOST_TI} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${BOOST_A} DESTINATION 3rd COMPONENT thirdparty_libraries)
-
-    INSTALL( FILES ${BOOST_R} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    INSTALL( FILES ${CMAKE_THREAD_LIBS_INIT} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  ENDIF( NOT Boost_USE_STATIC_LIBS )
-
-ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 INSTALL( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )
 INSTALL( FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
