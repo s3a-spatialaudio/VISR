@@ -6,14 +6,12 @@ Copyright (c) 2014-2018 Institute of Sound and Vibration Research,
 The software is provided under the permissive ISC (Internet Systems Consortium) printed below and in the Licence.md file
 
 We kindly ask to acknowledge the use of this software in publications or software.
+
 Paper citation:
 
-Andreas Franck and Filippo Maria Fazi, “VISR – A versatile open software
-framework for audio signal processing,” in Proc. Audio Eng. Soc. 2018 Int. Conf.
-Spatial Reproduction, Tokyo, Japan, 2018.
+Andreas Franck and Filippo Maria Fazi, “VISR – A versatile open software framework for audio signal processing,” in Proc. Audio Eng. Soc. 2018 Int. Conf. Spatial Reproduction, Tokyo, Japan, 2018.
 
-Specific parts of the software have been provided by other groups as listed in 
-the file Contributors.md
+Specific parts of the software have been provided by other groups as listed in the file Contributors.md
 
 ISC (Internet Systems Consortium) License
 https://www.isc.org/downloads/software-support-policy/isc-license/
@@ -30,17 +28,7 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
-We kindly ask to acknowledge the use of this software in publications or software.
-Paper citation:
-
-Andreas Franck and Filippo Maria Fazi, “VISR – A versatile open software
-framework for audio signal processing,” in Proc. Audio Eng. Soc. 2018 Int. Conf.
-Spatial Reproduction, Tokyo, Japan, 2018.
-
-
-
-This software uses the following external software components subject to the
-following licenses:
+This software uses the following external software components subject to the following licenses:
 
 *** Boost ***
 
