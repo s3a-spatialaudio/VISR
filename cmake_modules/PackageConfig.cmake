@@ -88,9 +88,18 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
-INSTALL( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )
-INSTALL( FILES ${CMAKE_SOURCE_DIR}/LICENSE.txt DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
-SET( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.txt )
+install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )
+install( FILES ${CMAKE_SOURCE_DIR}/LICENSE.md DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
+configure_file (${CMAKE_SOURCE_DIR}/LICENSE.md
+        "${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt" @ONLY)
+set( CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt )
+configure_file (${CMAKE_SOURCE_DIR}/Readme.md
+        "${PROJECT_BINARY_DIR}/package_resources/Readme.txt" @ONLY)
+set( CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/package_resources/Readme.txt )
+configure_file (${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/welcome.txt.in
+        "${PROJECT_BINARY_DIR}/package_resources/welcome.txt" @ONLY)
+set(CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/package_resources/welcome.txt)
+
 
 # Install Python example scripts and templates
 install( DIRECTORY src/python/templates DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_templates )
