@@ -169,7 +169,8 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 ############################################################
 # Set the minimum Mac OS version.
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+#  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 
@@ -329,12 +330,9 @@ FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOO
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  FIND_PACKAGE(Flac REQUIRED)
-  FIND_PACKAGE(OggVorbis REQUIRED)
-
+  find_package(Flac REQUIRED)
+  find_package(OggVorbis REQUIRED)
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
-
 
 ################################################################################
 # Set the install directories of special output types.
@@ -349,24 +347,24 @@ endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
-# Instructions for packaging are held in a separate file.
-# IMPORTANT: don’t put it after the ADD_SUBDIRECTORY( src ) command.
-# Reason: inside PackageConfig.cmake there is the required 3rd party libraries fixing, which needs to be performed before the target linking in the VISR libraries.
-INCLUDE( PackageConfig )
-
+################################################################################
+# Adjust the location of 3rd-party libraries.
+# This is required on Mac OS X. Essentially the files are copied to <build/3rd>
+# and the rpaths of of inter-library dependencies are adjusted.
+# NOTE: This has to happen before the add_subdirectory( src )
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  include( Adjust3rdPartyLibraries )
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ################################################################################
 # Actual software components (subprojects) to be built are
 # contained in the src/ directory
-# TODO: This is a quite hidden location for setting the subdirectories and subprojects.
-# Restructure the main build file in order to make this line more prominent.
-ADD_SUBDIRECTORY( src )
+add_subdirectory( src )
 
-################################################################################
-## Support for building Doxygen documentation
-## Taken from: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
-
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
-IF(BUILD_DOCUMENTATION)
+option(BUILD_DOCUMENTATION "Build the API and user documentation (requires Sphinx, breathe, and Doxygen)" ON)
+if(BUILD_DOCUMENTATION)
   add_subdirectory(doc)
-ENDIF()
+endif()
+
+# Instructions for packaging are held in a separate file.
+include( PackageConfig )

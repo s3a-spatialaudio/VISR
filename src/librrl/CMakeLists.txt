@@ -30,16 +30,16 @@ signal_routing_internal.hpp
 
 add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
+target_compile_definitions( rrl_static PUBLIC VISR_RRL_STATIC_LIBRARY=1)
 
 add_library( rrl_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
-target_compile_definitions( rrl_shared PRIVATE -DVISR_BUILD_RRL_SHARED_LIBRARY=1 -DVISR_BUILD_RRL_LIBRARY=1)
-target_compile_definitions( rrl_shared PUBLIC -DVISR_BUILD_RRL_SHARED_LIBRARY=1)
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( rrl_${LIB_TYPE} PRIVATE VISR_BUILD_RRL_LIBRARY=1)
   # Transitive link dependencies
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
@@ -61,8 +61,17 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS rrl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS rrl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librrl )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS rrl_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )	  
+install(TARGETS rrl_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/librrl COMPONENT development_files )
 
 # Add the unit test directory.
 add_subdirectory( test )

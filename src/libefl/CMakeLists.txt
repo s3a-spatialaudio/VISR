@@ -40,14 +40,18 @@ vector_functions_reference_impl.hpp
 
 add_library( efl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( efl_static PROPERTIES OUTPUT_NAME efl )
+target_compile_definitions( efl_static PUBLIC VISR_EFL_STATIC_LIBRARY=1)
 
 add_library( efl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( efl_shared PROPERTIES OUTPUT_NAME efl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( efl_shared PROPERTIES ARCHIVE_OUTPUT_NAME efl_shared )
-target_compile_definitions( efl_shared PRIVATE -DVISR_BUILD_EFL_SHARED_LIBRARY=1 -DVISR_BUILD_EFL_LIBRARY=1)
 target_compile_definitions( efl_shared PUBLIC -DVISR_BUILD_EFL_SHARED_LIBRARY=1)
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+
+foreach( LIB_TYPE static shared)
+  target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
+endforeach()
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only
@@ -64,8 +68,17 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS efl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS efl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libefl )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS efl_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+install(TARGETS efl_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

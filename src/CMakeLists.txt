@@ -1,5 +1,6 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+option( BUILD_INSTALL_STATIC_LIBRARIES "Whether to provide static libraries in the installation packages." OFF )
 
 # Set the installation directory for the export and version files
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
@@ -39,6 +40,14 @@ endif( BUILD_PYTHON_BINDINGS )
 # Library for signal flows.
 ADD_SUBDIRECTORY( libsignalflows )
 
+# Library for signal flows that use Python.
+# Temporary solution to avoid a link dependency on Python 
+# for the majority of signal flows.
+# Note that this library is also build if BUILD_PYTHON_BINDINGS is unselected.
+# In this case, it contains a reduced functionality that does not use Python.
+add_subdirectory( libsignalflowspython )
+
+
 # Rendering building block library
 ADD_SUBDIRECTORY( librbbl )
 
@@ -77,12 +86,14 @@ if( BUILD_PYTHON_BINDINGS )
 endif( BUILD_PYTHON_BINDINGS )
 
 ##### CMake packaging
+
 # Install exported targets as config files
 # for use from install tree
 install(EXPORT VISR_exports
   NAMESPACE VISR::
   FILE visr_exports.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
+  COMPONENT development_files 
   )
 
 # Create config files for exported targets
@@ -95,7 +106,7 @@ export(EXPORT VISR_exports
 # Install package config file
 # for use from install tree
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config.cmake
-  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} )
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Copy package config file
 # for use from build tree, substituting Boost setting variables
@@ -112,7 +123,7 @@ write_basic_package_version_file(visr-config-version.cmake
 
 # Install package version file
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config-version.cmake
-  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY})
+  DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Register visr package in user registry
 export(PACKAGE visr)

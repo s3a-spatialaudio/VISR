@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+      	<object data="{'id': 0, 'channels': 0, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 1, 'channels': 1, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 2, 'channels': 2, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 3, 'channels': 3, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 4, 'channels': 4, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 5, 'channels': 5, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 6, 'channels': 6, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 7, 'channels': 7, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 8, 'channels': 8, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 9, 'channels': 9, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 10, 'channels': 10, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 11, 'channels': 11, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 12, 'channels': 12, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 13, 'channels': 13, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 14, 'channels': 14, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 15, 'channels': 15, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 16, 'channels': 16, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 17, 'channels': 17, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 18, 'channels': 18, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 19, 'channels': 19, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+      	<object data="{'id': 20, 'channels': 20, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': 0.00000, 'z': 0.350000 } }" />
+    </processor>
+    <processor name="AdaptPosition" type="AdaptPosition" objectID="0" x="-5.0" y="0" height="1.0" active="false" />
+    <processor name="AddReverbTarget" type="AddReverb" libFile="processors/reverb/AES142Library1.json" initRoomName="emm_main" initObjs="list" initObjectList="0" />
+    <processor name="AddReverbScene" type="AddReverb" libFile="processors/reverb/AES142Library1.json" initRoomName="emm_main" initObjs="list" initObjectList="1,2,3,4,5,6,7" />
+    <!--<processor name="EditReverbTarget" type="EditReverb" objectIds="0" earlyLevelAdjust="0.0" lateLevelAdjust="0.0" lateDecayAdjust="1.0" lateSubbandLevelAdjust="0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0" preDelayAdjust="0.0" preDelayAdjustLate="0.0" lateDelayAdjust="0.0"/>
+    <processor name="EditReverbScene" type="EditReverb" objectIds="1,2,3,4,5,6,7,8,9" earlyLevelAdjust="0.0" lateLevelAdjust="0.0" lateDecayAdjust="1.0" lateSubbandLevelAdjust="0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0" preDelayAdjust="0.0" preDelayAdjustLate="0.0" lateDelayAdjust="0.0"/>
+    <processor name="GlobalLevel" type="ChangeVolume" volumeAdjust="0.0" />
+    <processor name="EditDistance" type="EditDistance" r="1.0" objectIds="0" />-->
+</metadapter>

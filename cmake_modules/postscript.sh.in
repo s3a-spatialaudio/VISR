@@ -1,0 +1,70 @@
+#!/bin/sh
+
+#temp testing script
+#echo "HELLO"
+#sudo mv @CMAKE_INSTALL_PREFIX@3rd @CMAKE_INSTALL_PREFIX@/3rd_lib
+
+#PYTHONROOT="$(python3-config --prefix)"
+#PYTHONROOT="$(which python3)"
+#PYTHONROOT="$(dirname -- $(dirname -- $(which python3)))"
+#PYTHONROOT="$(echo $PYTHONHOME)"
+#for filename in @CMAKE_INSTALL_PREFIX@/bin/*; do
+#sudo install_name_tool -add_rpath "${PYTHONROOT}" $filename
+#done
+
+#for filename in @CMAKE_INSTALL_PREFIX@/dawplugins/vst/*.vst/Contents/MacOS/*; do
+#sudo install_name_tool -add_rpath "${PYTHONROOT}/lib" $filename
+#done
+
+#sudo echo "python root: ${PYTHONROOT}/lib" > "@CMAKE_INSTALL_PREFIX@/log.txt"
+
+#sudo touch "@CMAKE_INSTALL_PREFIX@/log.txt"
+#sudo chmod 777 "@CMAKE_INSTALL_PREFIX@/log.txt"
+#echo $PYTHONHOME 2> "@CMAKE_INSTALL_PREFIX@/log.txt"
+#echo $PYTHONHOME > "@CMAKE_INSTALL_PREFIX@/log.txt"
+#echo $PWD > "@CMAKE_INSTALL_PREFIX@/log.txt"
+#echo $PATH > "@CMAKE_INSTALL_PREFIX@/log.txt"
+
+PYCONDA="${HOME}/anaconda3/lib"
+PYPURE="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/lib"
+
+#TODO: use a temp_script.sh.in with placeholder for the PYTHON_LIBRARY which is being used in the machine which generates the installer
+#TODO: test it with a machine using anaconda
+
+RPATH="@rpath"
+
+sudo install_name_tool -change /Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/Python ${RPATH}/libpython@PYTHON_MAJOR_MINOR@m.dylib @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+sudo install_name_tool -change /Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/Python ${RPATH}/libpython@PYTHON_MAJOR_MINOR@m.dylib @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+sudo install_name_tool -change /Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/Python ${RPATH}/libpython@PYTHON_MAJOR_MINOR@m.dylib @CMAKE_INSTALL_PREFIX@/lib/libsignalflows.dylib
+
+sudo install_name_tool -change /Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/Python ${RPATH}/libpython@PYTHON_MAJOR_MINOR@m.dylib @CMAKE_INSTALL_PREFIX@/bin/baseline_renderer
+sudo install_name_tool -change /Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/Python ${RPATH}/libpython@PYTHON_MAJOR_MINOR@m.dylib @CMAKE_INSTALL_PREFIX@/bin/matrix_convolver
+sudo install_name_tool -change /Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/Python ${RPATH}/libpython@PYTHON_MAJOR_MINOR@m.dylib @CMAKE_INSTALL_PREFIX@/bin/visr_renderer
+
+
+if [ -d "${HOME}/anaconda3" ]; then
+
+sudo install_name_tool -add_rpath "${PYCONDA}" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+sudo install_name_tool -add_rpath "${PYCONDA}" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+sudo install_name_tool -add_rpath "${PYCONDA}" @CMAKE_INSTALL_PREFIX@/lib/libsignalflows.dylib
+
+sudo install_name_tool -add_rpath "${PYCONDA}" @CMAKE_INSTALL_PREFIX@/bin/baseline_renderer
+sudo install_name_tool -add_rpath "${PYCONDA}" @CMAKE_INSTALL_PREFIX@/bin/matrix_convolver
+sudo install_name_tool -add_rpath "${PYCONDA}" @CMAKE_INSTALL_PREFIX@/bin/visr_renderer
+
+echo "conda python present"
+fi
+
+
+if [ -d "/Library/Frameworks/Python.framework" ]; then
+
+sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libsignalflows.dylib
+
+sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/bin/baseline_renderer
+sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/bin/matrix_convolver
+sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/bin/visr_renderer
+
+echo "system python present"
+fi

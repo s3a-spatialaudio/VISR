@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+    	<object data="{'id': 0, 'channels': 0, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'az': 30.0, 'el': 0.0, 'radius': 1.0 } }" />
+		<object data="{'id': 1, 'channels': 1, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'az': -30.0, 'el': 0.0, 'radius': 1.00 } }" />
+    	<object data="{'id': 2, 'channels': 2, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'az': 0.0, 'el': 0.0, 'radius': 1.0 } }" />
+		<object data="{'id': 3, 'channels': 3, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'az': 110.0, 'el': 0.0, 'radius': 1.00 } }" />
+    	<object data="{'id': 4, 'channels': 4, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'az': -110.0, 'el': 0.0, 'radius': 1.0 } }" />
+		<object data="{'id': 5, 'channels': 5, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'az': 0.0, 'el': 0.0, 'radius': 1.00 } }" />
+    </processor>
+    <processor name="TMMExperiment3_MUSHRA" type="TMMExperiment3_MUSHRA" />
+</metadapter>

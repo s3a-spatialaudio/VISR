@@ -16,31 +16,25 @@ reverb_object_renderer.hpp
 reverb_parameter_calculator.hpp
 )
 
-# Preliminary hack. Used only for scene_sender. 
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
-
-
 add_library( reverbobject_static STATIC ${SOURCES} ${HEADERS} )
+set_target_properties( reverbobject_static PROPERTIES OUTPUT_NAME reverbobject )
+target_compile_definitions( reverbobject_static PUBLIC VISR_REVERBOBJECT_STATIC_LIBRARY=1)
 
 add_library( reverbobject_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( reverbobject_shared PROPERTIES OUTPUT_NAME reverbobject )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( reverbobject_shared PROPERTIES ARCHIVE_OUTPUT_NAME reverbobject_shared )
-target_compile_definitions( reverbobject_shared PRIVATE -DVISR_BUILD_REVERBOBJECT_SHARED_LIBRARY=1 -DVISR_BUILD_REVERBOBJECT_LIBRARY=1)
 set_target_properties( reverbobject_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE VISR_BUILD_REVERBOBJECT_LIBRARY=1)
   # Transitive link dependencies
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
   target_link_libraries( reverbobject_${LIB_TYPE} PRIVATE Boost::filesystem )
-  if( NOT Boost_USE_STATIC_LIBS )
-    target_compile_definitions( reverbobject_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
-  endif( NOT Boost_USE_STATIC_LIBS )
-  target_compile_definitions( reverbobject_${LIB_TYPE} PUBLIC -DBOOST_ALL_NO_LIB )
 endforeach()
 
 # Set public headers to be installed for the shared target.
@@ -58,8 +52,14 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS reverbobject_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS reverbobject_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libreverbobject )
-
-# Add the unit test directory.
-# ADD_SUBDIRECTORY( test )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS reverbobject_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+install(TARGETS reverbobject_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libreverbobject COMPONENT development_files )

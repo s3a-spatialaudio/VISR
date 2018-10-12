@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+
+	<processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" />
+
+	<processor name="MDOPhones" type="MDOPhones" on="1" verbose="1" />
+	    
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
+    
+</metadapter>

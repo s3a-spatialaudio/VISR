@@ -37,4 +37,6 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE audiointerfaces_shared )
 target_link_libraries( ${PROJECT_NAME} PRIVATE rrl_shared )
 target_link_libraries( ${PROJECT_NAME} PRIVATE Boost::boost ) # Adds the boost include directory
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} )
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+        COMPONENT python_externals )

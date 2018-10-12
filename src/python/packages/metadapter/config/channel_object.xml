@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+     <object data="{'id': 0, 'channels': 0,
+      'type': 'channel', 'group': 0, 'priority': 0, 'level': 0.750000, 'outputChannels': '1' }" />
+     <object data="{'id': 1, 'channels': 1,
+      'type': 'channel', 'group': 0, 'priority': 0, 'level': 0.750000, 'outputChannels': '0' }" />
+    </processor>
+</metadapter>

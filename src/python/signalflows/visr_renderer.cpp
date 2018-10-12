@@ -6,14 +6,14 @@
 #include <libvisr/composite_component.hpp>
 #include <libvisr/signal_flow_context.hpp>
 
-#include <libsignalflows/visr_renderer.hpp> 
+#include <libsignalflowspython/visr_renderer.hpp> 
 
 #include <pybind11/pybind11.h>
 
 namespace visr
 {
 
-using signalflows::VisrRenderer;
+using signalflowspython::VisrRenderer;
 
 namespace python
 {

@@ -66,17 +66,18 @@ endif( BUILD_USE_IPP )
 
 add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
+target_compile_definitions( rbbl_static PUBLIC VISR_RBBL_STATIC_LIBRARY=1)
 
 add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_shared PROPERTIES OUTPUT_NAME rbbl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
-target_compile_definitions( rbbl_shared PRIVATE -DVISR_BUILD_RBBL_SHARED_LIBRARY=1 -DVISR_BUILD_RBBL_LIBRARY=1)
-target_compile_definitions( rbbl_shared PUBLIC -DVISR_BUILD_RBBL_SHARED_LIBRARY=1)
+
 set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
+  target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE VISR_BUILD_RBBL_LIBRARY=1)
   target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${FFTS_INCLUDE_DIR} )
   target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_INCLUDE_DIR} )
   target_link_libraries( rbbl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
@@ -105,8 +106,17 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS rbbl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS rbbl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librbbl)
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS rbbl_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+install(TARGETS rbbl_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files 
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/librbbl COMPONENT development_files )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )
