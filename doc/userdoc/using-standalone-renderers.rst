@@ -1,7 +1,7 @@
 .. _using_visr_using_standalone_renderers:
 
-Using standalone renderers
---------------------------
+Using standalone applications
+-----------------------------
 
 
 
