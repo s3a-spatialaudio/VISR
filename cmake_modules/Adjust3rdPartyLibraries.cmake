@@ -2,9 +2,8 @@
 
 # 3rd party library fixing required on Mac OS X
 
-function(fix_rpath libpath)
-	get_filename_component(libname ${${libpath}} NAME)
-
+function(fix_rpath libpath )
+  get_filename_component( libname ${${libpath}} NAME )
 	set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
 	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 
@@ -18,6 +17,10 @@ function(fix_rpath libpath)
 	message( STATUS " output " ${libname} ": " ${${libpath}} )
 	execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 endfunction()
+
+# function(fix_rpath libpath)
+#   fix_rpath_and_name( libpath ${libname} )
+# endfunction()
 
 function(fix_dependencies_of_3rdparty depname libpath)
 
@@ -45,9 +48,9 @@ endfunction()
     get_filename_component(BOOST_PO ${BOOST_PO} REALPATH)
     get_filename_component(BOOST_R ${BOOST_R} REALPATH) 
     get_filename_component(BOOST_TI ${BOOST_TI} REALPATH)    
-    get_filename_component(BOOST_A ${BOOST_A} REALPATH)    
+    get_filename_component(BOOST_A ${BOOST_A} REALPATH)
    
-SET( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES BOOST_S BOOST_T BOOST_C BOOST_DT BOOST_FS BOOST_PO BOOST_R BOOST_TI BOOST_A)
+SET( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES BOOST_S BOOST_T BOOST_C BOOST_DT BOOST_FS BOOST_PO BOOST_R BOOST_TI BOOST_A PYTHON_LIBRARY )
 
 ################################################################################
 # copying 3rd party libraries in "3rd" folder, and changing the ID to @rpath/<libraryname>.dylib. 
@@ -58,6 +61,8 @@ execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
 foreach(v IN LISTS FIX_LIBRARIES)
     fix_rpath(${v})
 endforeach()
+
+message( STATUS "Python library after adjust: " ${PYTHON_LIBRARY} )
 
 ################################################################################
 # Updating the imported library location
