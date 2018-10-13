@@ -79,7 +79,9 @@ install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONE
 install( FILES ${CMAKE_SOURCE_DIR}/LICENSE.md
                ${CMAKE_SOURCE_DIR}/Contributors.md
                ${CMAKE_SOURCE_DIR}/Readme.md
+               ${CMAKE_SOURCE_DIR}/ChangeLog.txt
                DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
+# Allow for text substitution in the files and change names from .md to .txt (the former is not currently supported by CMake).
 configure_file (${CMAKE_SOURCE_DIR}/LICENSE.md
         "${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt" @ONLY)
 set( CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt )
