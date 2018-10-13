@@ -31,7 +31,7 @@ set_target_properties( audiointerfaces_shared PROPERTIES RUNTIME_OUTPUT_DIRECTOR
 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
-  target_compile_definitions( audiointerfaces_${LIB_TYPE} PUBLIC VISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
+  target_compile_definitions( audiointerfaces_${LIB_TYPE} PRIVATE VISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE rrl_${LIB_TYPE} )
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE Boost::boost ) # Set the boost include directory.
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE ${PORTAUDIO_LIBRARIES} )
