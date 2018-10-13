@@ -8,8 +8,9 @@ add_executable( matrix_convolver_app ${SOURCES} ${HEADERS} )
 set_target_properties( matrix_convolver_app PROPERTIES OUTPUT_NAME matrix_convolver )
 
 target_link_libraries(matrix_convolver_app apputilities_shared )
-target_link_libraries(matrix_convolver_app signalflows_shared )
+target_link_libraries(matrix_convolver_app rcl_shared )
 target_link_libraries(matrix_convolver_app rrl_shared )
 target_link_libraries(matrix_convolver_app audiointerfaces_shared )
+target_link_libraries(matrix_convolver_app visr_shared )
 
 install( TARGETS matrix_convolver_app DESTINATION bin COMPONENT standalone_applications )
