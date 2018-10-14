@@ -388,6 +388,7 @@ BiquadCoefficientMatrix<CoeffType>::~BiquadCoefficientMatrix()
 template<typename CoeffType>
 void BiquadCoefficientMatrix<CoeffType>::resize( std::size_t numberOfFilters, std::size_t numberOfBiquads )
 {
+  mRows.clear(); // Needed to trigger the re-initialisation of all rows even if the size decreases or stayed constant.
   // Define the initial entry for all filter rows (numberOfBiquads 'default' biquad specs) 
   BiquadCoefficientList<CoeffType> templ( numberOfBiquads );
   mRows.resize( numberOfFilters, templ );
