@@ -44,7 +44,7 @@ if( WIN32 )
 endif( WIN32 )
 
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( CPACK_GENERATOR DEB TBZ2 )
+  set( CPACK_GENERATOR DEB )
   set( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
   set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 endif(VISR_SYSTEM_NAME MATCHES "Linux")
