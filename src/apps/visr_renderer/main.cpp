@@ -11,13 +11,14 @@
 #include <libpml/initialise_parameter_library.hpp>
 
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/version.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 
-#include <libsignalflows/visr_renderer.hpp>
+#include <libsignalflowspython/visr_renderer.hpp>
 
 #ifdef VISR_PYTHON_SUPPORT
 #include <libpythonsupport/initialisation_guard.hpp>
@@ -61,10 +62,7 @@ int main( int argc, char const * const * argv )
                 return EXIT_SUCCESS;
             case Options::ParseResult::Version:
                 // TODO: Outsource the version string generation to a central file.
-                std::cout << "VISR S3A Baseline Renderer "
-                << VISR_MAJOR_VERSION << "."
-                << VISR_MINOR_VERSION << "."
-                << VISR_PATCH_VERSION << std::endl;
+                std::cout << "VISR object-based loudspeaker renderer " << visr::version::versionString() << std::endl;
                 return EXIT_SUCCESS;
             case Options::ParseResult::Success:
                 break; // carry on
@@ -157,14 +155,14 @@ int main( int argc, char const * const * argv )
         
         SignalFlowContext context( periodSize, samplingRate );
         
-        std::unique_ptr<signalflows::VisrRenderer> renderer;
+        std::unique_ptr<signalflowspython::VisrRenderer> renderer;
         
         {
 #if VISR_PYTHON_SUPPORT
           visr::pythonsupport::InitialisationGuard::initialise();
           visr::pythonsupport::GilEnsureGuard guard;
 #endif
-          renderer.reset( new signalflows::VisrRenderer( 
+          renderer.reset( new signalflowspython::VisrRenderer( 
                                            context,
                                            "", nullptr,
                                            loudspeakerArray,

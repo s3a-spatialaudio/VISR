@@ -5,6 +5,7 @@
 #include <libpml/matrix_parameter.hpp>
 
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/version.hpp>
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #include <libaudiointerfaces/portaudio_interface.hpp>
@@ -37,7 +38,7 @@ int main( int argc, char const * const * argv )
     return EXIT_SUCCESS;
   case Options::ParseResult::Version:
     // TODO: Implement retrieval of version information.
-    std::cout << "VISR gain matrix renderer V1.0b" << std::endl;
+    std::cout << "VISR gain matrix renderer " << visr::version::versionString() << std::endl;
     return EXIT_SUCCESS;
   case Options::ParseResult::Success:
     break; // carry on

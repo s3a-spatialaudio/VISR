@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Uses single quotes in JSON messages to avoid clashes with the use of double quotes in XML (and the clumsy &quot; escap sequence) -->
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+      <object data="{'id': 5, 'channels': 0,
+'type': 'point', 'group': 0, 'priority': 0, 'level': 0.750000, 'position': {'x': 1.500000, 'y': -3.000000, 'z': 0.350000 } }" />
+      <object data="{'id': 6, 'channels': 0,
+'type': 'plane', 'group': 0, 'priority': 0, 'level': 0.100000, 'direction': {'az': 130.000000, 'el': 15.000000, 'refdist': 0.000000 } }" />
+</processor>
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="-6.0" />
+</metadapter>

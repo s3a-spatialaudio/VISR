@@ -1,32 +1,22 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-
-#include <boost/algorithm/string.hpp> // case-insensitive string compare
-#include <boost/filesystem.hpp>
-
-// TODO: Eliminate this dependency!
-//#include <librrl/communication_area.hpp>
-
-//#include <libvisr/constants.hpp>
-#ifndef BOOST_AUTO_TEST_MAIN
-#define BOOST_AUTO_TEST_MAIN
-//#include <boost/test/auto_unit_test.hpp>
-
-
-
-//#include <libaudiointerfaces/jack_interface.hpp>
-
-
-#include <libaudiointerfaces/portaudio_interface.hpp>
-
 #include <libaudiointerfaces/audio_interface_factory.hpp>
-
-#include <librrl/audio_signal_flow.hpp>
-#include <libvisr/signal_flow_context.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
 
+#include <libvisr/signal_flow_context.hpp>
+#include <libvisr/audio_input.hpp>
+#include <libvisr/audio_output.hpp>
+#include <libvisr/composite_component.hpp>
 
+#include <librcl/add.hpp>
+
+#include <librrl/audio_signal_flow.hpp>
+
+#ifndef BOOST_AUTO_TEST_MAIN
+#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/unit_test.hpp>
+// #include <boost/algorithm/string.hpp> // case-insensitive string compare
+#include <boost/filesystem.hpp>
 
 
 #include <iostream>
@@ -36,11 +26,11 @@
 
 
 
-#include <libvisr/audio_input.hpp>
-#include <libvisr/audio_output.hpp>
-#include <libvisr/composite_component.hpp>
-#include <librcl/add.hpp>
 
+// Set if the file is to be run as part of an automated unit test.
+// In this case all calls to audio interfaces
+// Comment if you run the test binary manually to check the working of the audio interfaces.
+#define AUTOMATED_UNIT_TEST 1
 
 namespace visr
 {
@@ -61,10 +51,6 @@ namespace test
       audioConnection( mInput, { 0, 1 }, mSum.audioPort( "in1" ), { 1, 0 } );
       audioConnection( mSum.audioPort( "out"), { 0, 1 },mOutput, { 0, 1 } );
     }
-    //                ~Feedthrough();
-    
-    /*virtual*/ void process( );
-    
   private:
     AudioInput mInput;
     AudioOutput mOutput;
@@ -75,12 +61,11 @@ namespace test
   std::size_t numberOfLoudspeakers = 2;
   std::size_t periodSize = 512;
   std::size_t samplingRate = 44100; // gives error if it's not the same as JackServer
-  
-  static void init(std::string type, std::string conf){
-    
+
+  static void init(std::string type, std::string conf)
+  {  
     AudioInterface::Configuration baseConfig(numberOfSources,numberOfLoudspeakers,samplingRate,periodSize);
     std::cout<<type<<" Specific Configuration: \n"<<conf<<std::endl;
-    std::unique_ptr<AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, conf);
     std::vector <std::string> audioifcs = AudioInterfaceFactory::audioInterfacesList();
     std::cout<<"AVAILABLE INTERFACES: ";
     for (auto i = audioifcs.begin(); i != audioifcs.end(); ++i)
@@ -90,6 +75,9 @@ namespace test
     SignalFlowContext context( periodSize, samplingRate );
     Feedthrough topLevel( context, "feedthrough" );
     rrl::AudioSignalFlow flow( topLevel );
+
+#ifndef AUTOMATED_UNIT_TEST
+    std::unique_ptr<AudioInterface> audioInterface = AudioInterfaceFactory::create( type, baseConfig, conf);
     audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
     /*******************************************************************/
     
@@ -98,6 +86,7 @@ namespace test
     std::getc( stdin );
     audioInterface->stop( );
     audioInterface->unregisterCallback( &rrl::AudioSignalFlow::processFunction );
+#endif // AUTOMATED_UNIT_TEST
   }
   
 #ifdef VISR_JACK_SUPPORT
@@ -144,10 +133,11 @@ namespace test
       specConf = tmp.str();
       //            std::cout<<specConf<<std::endl;
     }
+
     init("Jack",specConf);
-    
   }
 #endif
+
   BOOST_AUTO_TEST_CASE( PortAudioInterfaceTest )
   {
     
@@ -161,10 +151,8 @@ namespace test
      boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/audioIfc/portAudioDefConf.json" );*/
     boost::filesystem::path const configDir( CMAKE_SOURCE_DIR "/config" );
     boost::filesystem::path bfile = configDir / boost::filesystem::path( "isvr/audioIfc/portAudioDefConf.json" );
-//    std::cout << bfile.parent_path().c_str() << std::endl;
     BOOST_CHECK_MESSAGE( exists(bfile), "Audio Interface configuration json file does not exist." );
     
-    //                const std::string audioIfcConf = "visr/config/isvr/audioIfc/jackConf.json";
     std::ifstream file(bfile.c_str());
     
     if(file){
@@ -173,7 +161,6 @@ namespace test
         specConf = tmp.str();
 //                 std::cout<<specConf<<std::endl;
     }
-    
     
     init("PortAudio", specConf );
   }

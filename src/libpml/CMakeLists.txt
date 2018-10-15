@@ -54,30 +54,29 @@ set( HEADERS
 
 include_directories( ${SNDFILE_INCLUDE_DIRS} )
 
-#set_target_properties( Boost::filesystem PROPERTIES CMAKE_INSTALL_NAME_DIR "@rpath" BUILD_WITH_INSTALL_NAME_DIR TRUE)
-
 add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
-get_target_property(VAR_ Boost::filesystem IMPORT_LOCATION)
-
-target_link_libraries( pml_static PUBLIC objectmodel_static )
-target_link_libraries( pml_static PUBLIC visr_static )
-target_link_libraries( pml_static PRIVATE ${SNDFILE_LIBRARY} )
-target_link_libraries( pml_static PUBLIC Boost::filesystem )
-target_link_libraries( pml_static PUBLIC Boost::system )
+target_compile_definitions( pml_static PUBLIC VISR_PML_STATIC_LIBRARY=1)
 
 add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( pml_shared PROPERTIES ARCHIVE_OUTPUT_NAME pml_shared )
-target_compile_definitions( pml_shared PRIVATE -DVISR_BUILD_PML_SHARED_LIBRARY=1 -DVISR_BUILD_PML_LIBRARY=1)
-target_compile_definitions( pml_shared PUBLIC -DVISR_BUILD_PML_SHARED_LIBRARY=1)
 set_target_properties( pml_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( pml_shared PUBLIC objectmodel_shared )
-target_link_libraries( pml_shared PUBLIC visr_shared )
-target_link_libraries( pml_shared PRIVATE ${SNDFILE_LIBRARY} )
-target_link_libraries( pml_shared PUBLIC Boost::filesystem )
-target_link_libraries( pml_shared PUBLIC Boost::system )
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  target_compile_definitions( pml_${LIB_TYPE} PRIVATE VISR_BUILD_PML_LIBRARY=1 )
+  target_link_libraries( pml_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
+  target_link_libraries( pml_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
+  target_link_libraries( pml_${LIB_TYPE} PRIVATE ${SNDFILE_LIBRARY} )
+  target_link_libraries( pml_${LIB_TYPE} PUBLIC Boost::boost )
+  target_link_libraries( pml_${LIB_TYPE} PRIVATE Boost::filesystem )
+  if( NOT Boost_USE_STATIC_LIBS )
+    target_compile_definitions( pml_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
+  endif( NOT Boost_USE_STATIC_LIBS )
+  target_compile_definitions( pml_${LIB_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
+endforeach()
 
 # Set public headers to be installed for the shared library target.
 # Because the headers are the same for the static library, the headers are only
@@ -94,8 +93,17 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS pml_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS pml_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/libpml )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS pml_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+install(TARGETS pml_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib  COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/libpml COMPONENT development_files )
 
 # Add the unit test directory.
 add_subdirectory( test )

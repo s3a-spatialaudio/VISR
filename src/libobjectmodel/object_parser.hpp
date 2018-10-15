@@ -21,6 +21,19 @@ namespace objectmodel
 class VISR_OBJECTMODEL_LIBRARY_SYMBOL ObjectParser
 {
 public:
+
+  /**
+   * Default constructor.
+   */
+  ObjectParser();
+
+  /**
+   * Destructor (virtual).
+   * Virtual destructor is required since this objects are
+   * used polymorphically.
+   */
+  virtual ~ObjectParser();
+
   /**
    * Parse an object from a property node.
    * @param tree The property tree node containing the object information.

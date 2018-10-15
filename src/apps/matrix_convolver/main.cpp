@@ -10,6 +10,7 @@
 #include <librbbl/index_sequence.hpp>
 
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/version.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
 
@@ -48,10 +49,7 @@ int main( int argc, char const * const * argv )
     return EXIT_SUCCESS;
   case Options::ParseResult::Version:
     // TODO: Outsource the version string generation to a central file.
-    std::cout << "VISR Matrix convolver utility  "
-              << VISR_MAJOR_VERSION << "."
-              << VISR_MINOR_VERSION << "."
-              << VISR_PATCH_VERSION << std::endl;
+    std::cout << "VISR Matrix convolver utility " << visr::version::versionString() << std::endl;
     return EXIT_SUCCESS;
   case Options::ParseResult::Success:
     break; // carry on

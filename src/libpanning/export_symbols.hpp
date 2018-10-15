@@ -6,9 +6,11 @@
 /**
  * @file
  *
+ * Define macros for exporting and importing shared library symbols
+ * of the panning library.
  */
 
-#ifdef VISR_BUILD_PANNING_SHARED_LIBRARY
+#ifndef VISR_PANNING_STATIC_LIBRARY
 
 #ifdef _MSC_VER // Windows platform
 #ifdef VISR_BUILD_PANNING_LIBRARY
@@ -25,10 +27,10 @@
 #error "Platform does not support symbol export."
 #endif // #ifdef _WIN32
 
-#else // VISR_BUILD_PANNING_SHARED_LIBRARY
+#else // VISR_PANNING_STATIC_LIBRARY
 
 #define VISR_PANNING_LIBRARY_SYMBOL // expand to empty string
 
-#endif // VISR_BUILD_PANNING_SHARED_LIBRARY
+#endif // VISR_PANNING_STATIC_LIBRARY
 
 #endif // #ifndef VISR_PANNING_EXPORT_SYMBOLS_HPP_INCLUDED

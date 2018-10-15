@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    
+    <processor name="AdaptPosition" type="AdaptPosition" objectID="0" x="-5.0" y="0" height="1.0" active="true" />
+    <processor name="AddReverbTarget" type="AddReverb" libFile="./metadapter/processors/reverb/AES142Library1.json" initRoomName="emm_main" initObjs="list" initObjectList="0" />
+    
+    <processor name="EditReverbTarget" type="EditReverb" objectIds="0" earlyLevelAdjust="0.0" lateLevelAdjust="0.0" lateDecayAdjust="1.0" lateSubbandLevelAdjust="0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0" preDelayAdjust="0.0" preDelayAdjustLate="0.0" lateDelayAdjust="0.0"/>
+    
+    <processor name="EditDistance" type="EditDistance" r="1.0" objectIds="0" /> 
+
+    <!-- FOREST VERSION OF PROCESSORS -->
+    
+    <!--<processor name="GroupVolume" type="GroupVolume" >
+		<group name="narrator" initialVolume="0.0" objectIds="0" />
+		<group name="music" initialVolume="0.0" objectIds="27 28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43" />
+		<group name="sfx" initialVolume="0.0" objectIds="1   2   3   4   5   6   7   8   9  10  11  12  13  14  15 16 17 18 19 20 21 22 23  24  25  26" />
+		<group name="atmos" initialVolume="0.0" objectIds="44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59" />
+	</processor> -->
+    
+    <!--<processor name="GroupSpread" type="Spread" >
+		<group name="music" initialSpread="1.0" objectIds="15  16  17  18  19  20  21  22  27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43" />
+		<group name="sfx" initialSpread="1.0" objectIds="1   2   3   4   5   6   7   8   9  10  11  12  13  14  23  24  25  26" />
+		<group name="atmos" initialSpread="1.0" objectIds="44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59" />
+	</processor> -->
+      
+    <!--<processor name="groupSolo" type="Solo" initialSolo="" active="true" >
+		<group name="narrator" objectIds="0" />
+		<group name="music" objectIds="27  28  29  30  31  32  33  34  35  36  37  38  39  40  41  42  43 15  16  17  18  19  20  21  22" />
+		<group name="sfx" objectIds="1   2   3   4   5   6   7   8   9  10  11  12  13  14  15 16 17 18 19 20 21 22 23  24  25  26" />
+		<group name="atmos" objectIds="44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59" />
+	</processor> -->
+    
+    <!-- FRAME VERSION OF PROCESSORS -->
+    
+    <processor name="GroupVolume" type="GroupVolume" >
+		<group name="vox" initialVolume="0.0" objectIds="0" />
+		<group name="flute" initialVolume="0.0" objectIds="3" />
+		<group name="bg" initialVolume="0.0" objectIds="1 2 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32" />
+	</processor>
+    
+    <processor name="GroupSpread" type="Spread" >
+		<group name="bg" initialSpread="1.0" objectIds="1 2 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32" />
+	</processor>
+      
+    <processor name="groupSolo" type="Solo" initialSolo="" active="true" >
+		<group name="vox" objectIds="0" />
+		<group name="flute" objectIds="3" />
+		<group name="bg" objectIds="1 2 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32" />
+	</processor>
+    
+    <processor name="GlobalEQ" type="GlobalEQ" on="1" verbose="1" lowfreq="200.0" highfreq="2000.0" /> 
+       
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
+</metadapter>

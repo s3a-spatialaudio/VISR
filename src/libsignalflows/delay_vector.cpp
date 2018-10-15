@@ -26,7 +26,7 @@ DelayVector::DelayVector( SignalFlowContext const & context,
   // Initialise and configure audio components
   mDelay.setup( numberOfChannels, interpolationPeriod, 0.02f, interpolationMethod,
                 rcl::DelayVector::MethodDelayPolicy::Limit, 
-                rcl::DelayVector::ControlPortConfig::None, 
+                rcl::DelayVector::ControlPortConfig::All, 
                 0.0f, 1.0f );
   mInput.setWidth( numberOfChannels );
   mOutput.setWidth( numberOfChannels );

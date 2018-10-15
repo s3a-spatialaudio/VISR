@@ -1,6 +1,19 @@
 Changelog for project VISR
 
 
+Version 0.11.0
+==============
+
+* Added sphinx-based user documentation (userdoc) and code reference documentation (apidoc)
+* Added GitLab CI configuration (.gitlab-ci.yml) for continuous integration and deployment.
+* Component-based installers for Windows and Mac OS X (based on PKG / ProductBuild
+* Fixing of Python rpaths in Mac OS X during installation.
+* Cleaned up CMake target dependencies to reduce shared library dependencies (especially for Python)
+* Link standalone applications to shared libraries.
+* Changed defines VISR_<LIB>_STATIC_LIBRARY for libraries: define is now necessary when using the static 
+  variant instead of the shared (automatically done by CMake exported targets).
+* Added metadapter code to repo (as git subtree)
+
 Version 0.10.0
 ==============
 

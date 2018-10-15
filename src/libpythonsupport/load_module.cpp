@@ -22,18 +22,35 @@ pybind11::object loadModule( std::string const & moduleName,
                              std::vector<std::string> const & modulePath,
                              pybind11::object & globals)
 {
+  // We append the modulePath also to sys.path
+  return loadModule( moduleName, modulePath, modulePath, globals );
+}
+
+VISR_PYTHONSUPPORT_LIBRARY_SYMBOL
+pybind11::object loadModule( std::string const & moduleName,
+                             std::vector<std::string> const & modulePath,
+			     std::vector<std::string> const & additionalSystemPath,
+                             pybind11::object & globals)  
+{
   namespace py = pybind11;
 
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/
   py::dict locals;
   locals["moduleName"] = py::cast(moduleName);
-  locals["path"] = modulePath.empty() ? py::none() : py::cast( modulePath );
+  locals["modulePath"] = modulePath.empty() ? py::none() : py::cast( modulePath );
+  locals["additionalPath"] = additionalSystemPath.empty()
+    ? py::list() : py::cast( additionalSystemPath );
   try
   {
+    // Adding the module path to the system path enables us to specify the path of other dependencies as well
+    // (e.g., the location of the VISR externals).
+    // We also use it as the path argument of imp.find_module to avoid finding other occurences on the system path.
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
-      "file, pathname, description = imp.find_module( moduleName, path)\n"
+      "import sys\n"
+      "sys.path += additionalPath\n"
+      "file, pathname, description = imp.find_module( moduleName, modulePath)\n"
       "new_module = imp.load_module( moduleName, file, pathname, description)\n",
       globals,
       locals);
@@ -45,13 +62,17 @@ pybind11::object loadModule( std::string const & moduleName,
   }
 }
 
-pybind11::object loadModule( std::string const & moduleName,
-                             std::string const & modulePathList,
-                             pybind11::object & globals)
+  namespace // unnamed
 {
-  // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
+
+/**
+ * Internal function to split a comm-separated list of paths into a vector
+ * Whitespaces and empty list entries are pruned.
+ */
+std::vector<std::string> pathStringToSequence( std::string const & pathString )
+{
   std::vector<std::string> searchPath;
-  boost::algorithm::split( searchPath, modulePathList, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
+  boost::algorithm::split( searchPath, pathString, boost::algorithm::is_any_of( ", "), boost::algorithm::token_compress_on );
   // Prune empty entries
   searchPath.erase(std::remove_if( searchPath.begin(), searchPath.end(),
                                   [](std::string const & s){return s.empty(); } ),
@@ -64,8 +85,29 @@ pybind11::object loadModule( std::string const & moduleName,
                                   + str + "\" does not exist." );
     }
   }
+  return searchPath;
+}
+
+} // unnamed namespace 
+  
+pybind11::object loadModule( std::string const & moduleName,
+                             std::string const & modulePathList,
+                             pybind11::object & globals)
+{
+  // The path is optional, empty search paths are allowed (in this case only the Python system path is searched)
+  auto const searchPath = pathStringToSequence( modulePathList );
   return loadModule( moduleName, searchPath, globals );
 }
 
+pybind11::object loadModule( std::string const & moduleName,
+                             std::string const & modulePathList,
+			     std::string const & additionalPathList,
+                             pybind11::object & globals)
+{
+  auto const modulePath = pathStringToSequence( modulePathList );
+  auto const additionalPath = pathStringToSequence( additionalPathList );
+  return loadModule( moduleName, modulePath, additionalPath, globals );
+}
+  
 } // namespace pythonsupport
 } // namespace visr

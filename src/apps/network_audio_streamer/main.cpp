@@ -6,6 +6,9 @@
 #include <libefl/denormalised_number_handling.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
+
+#include <libvisr/version.hpp>
+
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 #ifdef VISR_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
@@ -48,9 +51,7 @@ int main( int argc, char const * const * argv )
             case Options::ParseResult::Version:
                 // TODO: Outsource the version string generation to a central file.
                 std::cout << "VISR S3A Audio over UDP streaming "
-                << VISR_MAJOR_VERSION << "."
-                << VISR_MINOR_VERSION << "."
-                << VISR_PATCH_VERSION << std::endl;
+                << visr::version::versionString() << std::endl;
                 return EXIT_SUCCESS;
             case Options::ParseResult::Success:
                 break; // carry on

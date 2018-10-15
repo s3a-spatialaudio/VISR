@@ -6,7 +6,9 @@
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
+
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/version.hpp>
 
 #include <libpythoncomponents/wrapper.hpp>
 
@@ -58,7 +60,7 @@ int main( int argc, char const * const * argv )
                 return EXIT_SUCCESS;
             case Options::ParseResult::Version:
                 // TODO: Implement retrieval of version information.
-                std::cout << "VISR S3A Python signal flow runner V0.9.0" << std::endl;
+                std::cout << "VISR Python runner " << visr::version::versionString() << std::endl;
                 return EXIT_SUCCESS;
             case Options::ParseResult::Success:
                 break; // carry on
