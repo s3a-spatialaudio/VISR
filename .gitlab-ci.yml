@@ -93,7 +93,42 @@ windows-arch-config:
   dependencies:
     - init-windows
   script:
-    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:/ProgramData/Anaconda3/include -DPYTHON_LIBRARY=C:/ProgramData/Anaconda3/libs/python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+  tags:
+    - windows
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+
+windows-arch-config-py36:
+  stage: config
+  dependencies:
+    - init-windows
+  script:
+    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\include -DPYTHON_LIBRARY=C:/ProgramData/Anaconda3/libs/python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+  tags:
+    - windows
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+windows-arch-config-py37:
+  stage: config
+  dependencies:
+    - init-windows
+  script:
+    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\envs\py37\include -DPYTHON_LIBRARY=C:\ProgramData\Anaconda3\envs\py37\libs\python37.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
   tags:
     - windows
   only:
@@ -110,7 +145,7 @@ macosx-arch-config:
   dependencies:
     - init-macosx
   script:
-    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/lib/libpython3.6m.dylib -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release ..
   tags:
     - macosx
   only:
@@ -121,6 +156,41 @@ macosx-arch-config:
   cache:
     paths:
       - build/
+
+macosx-arch-config-py36:
+  stage: config
+  dependencies:
+    - init-macosx
+  script:
+    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py36/lib/libpython3.6m.dylib -DBUILD_JACK_SUPPORT=ON ..
+  tags:
+    - macosx
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+macosx-arch-config-py37:
+  stage: config
+  dependencies:
+    - init-macosx
+  script:
+    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_JACK_SUPPORT=ON ..
+  tags:
+    - macosx
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
 # Build:
 
 linux-arch-build:
@@ -157,6 +227,40 @@ windows-arch-build:
     paths:
       - build/
 
+windows-arch-build-py36:
+  stage: build
+  dependencies:
+    - windows-arch-config-py36
+  script:
+    - cmake --build build/ --target --config Release
+  tags:
+    - windows
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+windows-arch-build-py37:
+  stage: build
+  dependencies:
+    - windows-arch-config-py37
+  script:
+    - cmake --build build/ --target --config Release
+  tags:
+    - windows
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
 macosx-arch-build:
   stage: build
   dependencies:
@@ -173,6 +277,41 @@ macosx-arch-build:
   cache:
     paths:
       - build/
+
+macosx-arch-build-py36:
+  stage: build
+  dependencies:
+    - macosx-arch-config-py36
+  script:
+    - cmake --build build/ --target --config Release
+  tags:
+    - macosx
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+macosx-arch-build-py37:
+  stage: build
+  dependencies:
+    - macosx-arch-config-py37
+  script:
+    - cmake --build build/ --target --config Release
+  tags:
+    - macosx
+  only:
+    - develop
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
 
 # Test:
 
@@ -200,6 +339,8 @@ macosx-arch-test:
   stage: test
   dependencies:
     - macosx-arch-build
+    - macosx-arch-build-py36
+    - macosx-arch-build-py37
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
@@ -215,7 +356,6 @@ macosx-arch-test:
   cache:
     paths:
       - build/
-
 
 windows-arch-test:
   stage: test
@@ -260,7 +400,7 @@ linux-arch-doc:
 windows-arch-doc:
   stage: documentation
   dependencies:
-    - windows-arch-config
+    - windows-arch-config-py36
   script:
     - cmake --build build/ --target doc
   only:
@@ -277,7 +417,7 @@ windows-arch-doc:
 macosx-arch-doc:
   stage: documentation
   dependencies:
-    - macosx-arch-config
+    - macosx-arch-config-py36
   script:
     - cmake --build build/ --target doc
   only:
@@ -333,6 +473,44 @@ windows-arch-package:
       - build/
 
 
+windows-arch-package-py36:
+  stage: package
+  dependencies:
+    - windows-arch-build-py36
+    # - windows-arch-test
+    - windows-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - develop
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+windows-arch-package-py37:
+  stage: package
+  dependencies:
+    - windows-arch-build-py37
+    # - windows-arch-test
+    - windows-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - develop
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
 macosx-arch-package:
   stage: package
   dependencies:
@@ -351,6 +529,45 @@ macosx-arch-package:
   cache:
     paths:
       - build/
+
+macosx-arch-package-py36:
+  stage: package
+  dependencies:
+    - macosx-arch-config-py36
+    # - macosx-arch-test
+    - macosx-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - develop
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
+macosx-arch-package-py37:
+  stage: package
+  dependencies:
+    - macosx-arch-config-py37
+    # - macosx-arch-test
+    - macosx-arch-doc
+  script:
+    - cmake --build build/ --target package --config Release
+  only:
+    - develop
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build/
+  cache:
+    paths:
+      - build/
+
 
 # When fixed - create test jobs for mac and windows too.
 
