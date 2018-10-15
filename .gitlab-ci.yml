@@ -179,7 +179,7 @@ macosx-arch-config-py37:
   dependencies:
     - init-macosx
   script:
-    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py37/include/python3.7m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_JACK_SUPPORT=ON ..
   tags:
     - macosx
   only:
