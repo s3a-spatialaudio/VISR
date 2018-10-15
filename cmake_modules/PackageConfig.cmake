@@ -20,11 +20,12 @@ if( BUILD_PYTHON_BINDINGS )
 endif( BUILD_PYTHON_BINDINGS )
 
 set( CPACK_PACKAGE_FILE_NAME ${PKG_FILE_NAME} )
-SET( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
+set( CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 
 if( WIN32 )
   set( CPACK_GENERATOR NSIS )
   set( CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+  set( CPACK_PACKAGE_INSTALL_DIRECTORY ${VISR_VERSIONED_NAME} )
   get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
   install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
 
@@ -43,7 +44,7 @@ if( WIN32 )
 endif( WIN32 )
 
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( CPACK_GENERATOR DEB TBZ2 )
+  set( CPACK_GENERATOR DEB )
   set( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
   set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 endif(VISR_SYSTEM_NAME MATCHES "Linux")
@@ -79,7 +80,9 @@ install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONE
 install( FILES ${CMAKE_SOURCE_DIR}/LICENSE.md
                ${CMAKE_SOURCE_DIR}/Contributors.md
                ${CMAKE_SOURCE_DIR}/Readme.md
+               ${CMAKE_SOURCE_DIR}/ChangeLog.txt
                DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
+# Allow for text substitution in the files and change names from .md to .txt (the former is not currently supported by CMake).
 configure_file (${CMAKE_SOURCE_DIR}/LICENSE.md
         "${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt" @ONLY)
 set( CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt )

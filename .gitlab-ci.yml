@@ -25,7 +25,6 @@ init-macosx:
     # - cmake -E remove_directory build
     - cmake -E make_directory build
   only:
-    - develop
     - master
   tags:
     - macosx
@@ -43,7 +42,6 @@ init-windows:
     # - cmake -E remove_directory build
     - cmake -E make_directory build
   only:
-    - develop
     - master
   tags:
     - windows
@@ -61,7 +59,6 @@ init-linux:
     # - cmake -E remove_directory build
     - cmake -E make_directory build
   only:
-    - develop
     - master
   tags:
     - linux
@@ -81,7 +78,6 @@ linux-arch-config:
   script:
     - cmake -E chdir build/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
   only:
-    - develop
     - master
   tags:
     - linux
@@ -101,7 +97,6 @@ windows-arch-config:
   tags:
     - windows
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -120,7 +115,6 @@ windows-arch-config-py36:
   tags:
     - windows
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -138,7 +132,6 @@ windows-arch-config-py37:
   tags:
     - windows
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -156,7 +149,6 @@ macosx-arch-config:
   tags:
     - macosx
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -174,7 +166,6 @@ macosx-arch-config-py36:
   tags:
     - macosx
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -192,7 +183,6 @@ macosx-arch-config-py37:
   tags:
     - macosx
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -210,7 +200,6 @@ linux-arch-build:
   script:
     - cmake --build build/ --target --config Release
   only:
-    - develop
     - master
   tags:
     - linux
@@ -230,7 +219,6 @@ windows-arch-build:
   tags:
     - windows
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -248,7 +236,6 @@ windows-arch-build-py36:
   tags:
     - windows
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -266,7 +253,6 @@ windows-arch-build-py37:
   tags:
     - windows
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -284,7 +270,6 @@ macosx-arch-build:
   tags:
     - macosx
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -302,7 +287,6 @@ macosx-arch-build-py36:
   tags:
     - macosx
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -320,7 +304,6 @@ macosx-arch-build-py37:
   tags:
     - macosx
   only:
-    - develop
     - master
   artifacts:
     paths:
@@ -339,7 +322,6 @@ linux-arch-test:
   script:
     - cmake --build build/ --target test --config Release
   only:
-    - develop
     - master
   tags:
     - linux
@@ -362,7 +344,6 @@ macosx-arch-test:
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
-    - develop
     - master
   tags:
     - macosx
@@ -383,7 +364,6 @@ windows-arch-test:
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
-    - develop
     - master
   tags:
     - windows
@@ -406,7 +386,6 @@ linux-arch-doc:
   script:
     - cmake --build build/ --target doc
   only:
-    - develop
     - master
   tags:
     - linux
@@ -425,7 +404,6 @@ windows-arch-doc:
   script:
     - cmake --build build/ --target doc
   only:
-    - develop
     - master
   tags:
     - windows
@@ -443,7 +421,6 @@ macosx-arch-doc:
   script:
     - cmake --build build/ --target doc
   only:
-    - develop
     - master
   tags:
     - macosx
@@ -466,7 +443,6 @@ linux-arch-package:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - linux
@@ -486,7 +462,6 @@ windows-arch-package:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - windows
@@ -507,7 +482,6 @@ windows-arch-package-py36:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - windows
@@ -527,7 +501,6 @@ windows-arch-package-py37:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - windows
@@ -547,7 +520,6 @@ macosx-arch-package:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - macosx
@@ -567,7 +539,6 @@ macosx-arch-package-py36:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - macosx
@@ -587,7 +558,6 @@ macosx-arch-package-py37:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
     - master
   tags:
     - macosx
@@ -609,7 +579,6 @@ linux-arch-deploy-int:
   script:
     - rsync --recursive --delete build/doc/apidoc/html/ /vol/vssp/dataweb/data/s3a/public/VISR-API/
   only:
-    - develop
     - master
   tags:
     - linux
@@ -626,7 +595,7 @@ linux-arch-deploy-int:
 #   script:
 #     - cmake -E remove_directory build
 #   only:
-#     - develop
+#     - master
 #   when: always
 
 ## Notes
@@ -653,7 +622,7 @@ linux-arch-deploy-int:
 # - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/VISR-0.10.0-python3.6-Windows.zip?job=windows-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
 # # userdoc [For VISR Installer package]
 # - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/doc/userdoc/userdoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
-# # apidoc [For VISR masterers]
+# # apidoc [For VISR devs]
 # - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/doc/apidoc/apidoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
 # # api-html-index.html (download-file from gitlab)
 # - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz

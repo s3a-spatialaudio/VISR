@@ -10,6 +10,7 @@ target_link_libraries(visr_renderer signalflowspython_shared )
 target_link_libraries(visr_renderer audiointerfaces_shared )
 target_link_libraries(visr_renderer panning_shared )
 target_link_libraries(visr_renderer rrl_shared )
+target_link_libraries(visr_renderer visr_shared )
 target_link_libraries(visr_renderer ${CMAKE_THREAD_LIBS_INIT} )
 
 if( BUILD_PYTHON_BINDINGS )

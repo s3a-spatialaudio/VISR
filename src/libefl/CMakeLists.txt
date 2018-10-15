@@ -46,7 +46,6 @@ add_library( efl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( efl_shared PROPERTIES OUTPUT_NAME efl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( efl_shared PROPERTIES ARCHIVE_OUTPUT_NAME efl_shared )
-target_compile_definitions( efl_shared PUBLIC -DVISR_BUILD_EFL_SHARED_LIBRARY=1)
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 foreach( LIB_TYPE static shared)
