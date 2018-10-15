@@ -25,7 +25,7 @@ init-macosx:
     # - cmake -E remove_directory build
     - cmake -E make_directory build
   only:
-    - develop
+    - master
   tags:
     - macosx
   artifacts:
@@ -42,7 +42,7 @@ init-windows:
     # - cmake -E remove_directory build
     - cmake -E make_directory build
   only:
-    - develop
+    - master
   tags:
     - windows
   artifacts:
@@ -59,7 +59,7 @@ init-linux:
     # - cmake -E remove_directory build
     - cmake -E make_directory build
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -78,7 +78,7 @@ linux-arch-config:
   script:
     - cmake -E chdir build/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -97,7 +97,7 @@ windows-arch-config:
   tags:
     - windows
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -115,7 +115,7 @@ windows-arch-config-py36:
   tags:
     - windows
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -132,7 +132,7 @@ windows-arch-config-py37:
   tags:
     - windows
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -149,7 +149,7 @@ macosx-arch-config:
   tags:
     - macosx
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -166,7 +166,7 @@ macosx-arch-config-py36:
   tags:
     - macosx
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -183,7 +183,7 @@ macosx-arch-config-py37:
   tags:
     - macosx
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -200,7 +200,7 @@ linux-arch-build:
   script:
     - cmake --build build/ --target --config Release
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -219,7 +219,7 @@ windows-arch-build:
   tags:
     - windows
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -236,7 +236,7 @@ windows-arch-build-py36:
   tags:
     - windows
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -253,7 +253,7 @@ windows-arch-build-py37:
   tags:
     - windows
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -270,7 +270,7 @@ macosx-arch-build:
   tags:
     - macosx
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -287,7 +287,7 @@ macosx-arch-build-py36:
   tags:
     - macosx
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -304,7 +304,7 @@ macosx-arch-build-py37:
   tags:
     - macosx
   only:
-    - develop
+    - master
   artifacts:
     paths:
       - build/
@@ -322,7 +322,7 @@ linux-arch-test:
   script:
     - cmake --build build/ --target test --config Release
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -344,7 +344,7 @@ macosx-arch-test:
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
-    - develop
+    - master
   tags:
     - macosx
   artifacts:
@@ -364,7 +364,7 @@ windows-arch-test:
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
-    - develop
+    - master
   tags:
     - windows
   artifacts:
@@ -386,7 +386,7 @@ linux-arch-doc:
   script:
     - cmake --build build/ --target doc
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -404,7 +404,7 @@ windows-arch-doc:
   script:
     - cmake --build build/ --target doc
   only:
-    - develop
+    - master
   tags:
     - windows
   artifacts:
@@ -421,7 +421,7 @@ macosx-arch-doc:
   script:
     - cmake --build build/ --target doc
   only:
-    - develop
+    - master
   tags:
     - macosx
   artifacts:
@@ -443,7 +443,7 @@ linux-arch-package:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -462,7 +462,7 @@ windows-arch-package:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - windows
   artifacts:
@@ -482,7 +482,7 @@ windows-arch-package-py36:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - windows
   artifacts:
@@ -501,7 +501,7 @@ windows-arch-package-py37:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - windows
   artifacts:
@@ -520,7 +520,7 @@ macosx-arch-package:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - macosx
   artifacts:
@@ -539,7 +539,7 @@ macosx-arch-package-py36:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - macosx
   artifacts:
@@ -558,7 +558,7 @@ macosx-arch-package-py37:
   script:
     - cmake --build build/ --target package --config Release
   only:
-    - develop
+    - master
   tags:
     - macosx
   artifacts:
@@ -579,7 +579,7 @@ linux-arch-deploy-int:
   script:
     - rsync --recursive --delete build/doc/apidoc/html/ /vol/vssp/dataweb/data/s3a/public/VISR-API/
   only:
-    - develop
+    - master
   tags:
     - linux
   artifacts:
@@ -595,7 +595,7 @@ linux-arch-deploy-int:
 #   script:
 #     - cmake -E remove_directory build
 #   only:
-#     - develop
+#     - master
 #   when: always
 
 ## Notes
@@ -607,27 +607,27 @@ linux-arch-deploy-int:
 #     # 1. how files are unzipped in their destination
 #     # 2. to curl specific files rather than the entire artifact - this has been tried, and is not working.
 #     # 3. automatically make new directories in the /vol/vssp/dataweb/data/s3a/private/visr_installers/ when a new version is comissioned for release
-#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/download?job=linux-arch-doc" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/documentation/doc.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/documentation/doc.zip
-#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/download?job=macosx-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/macosx/macosx.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/macosx/macosx.zip
-#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/download?job=linux-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/linux_1604_LTS/linux_1604_lts.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/linux_1604_LTS/linux_1604_lts.zip
-#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/download?job=windows-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/windows_64/windows_64.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/windows_64/windows_64.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=linux-arch-doc" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/documentation/doc.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/documentation/doc.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=macosx-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/macosx/macosx.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/macosx/macosx.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=linux-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/linux_1604_LTS/linux_1604_lts.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/linux_1604_LTS/linux_1604_lts.zip
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=windows-arch-package" > /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/windows_64/windows_64.zip && unzip -o /vol/vssp/dataweb/data/s3a/private/visr_installers/0.10.0/windows_64/windows_64.zip
 #
 # Direct links via http (Currently embedded within Wordpress for faster access, with less hassle)
 # Linux deb or tar.bz2 package
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/VISR-0.10.0-python3.5-Linux.tar.bz2?job=linux-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/VISR-0.10.0-python3.5-Linux.tar.bz2?job=linux-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/VISR-0.10.0-python3.5-Linux.tar.bz2?job=linux-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/VISR-0.10.0-python3.5-Linux.tar.bz2?job=linux-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
 # # Macosx package
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/VISR-0.10.0-python3.6-Darwin.dmg?job=macosx-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/VISR-0.10.0-python3.6-Darwin.dmg?job=macosx-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
 # # Windows package
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/VISR-0.10.0-python3.6-Windows.zip?job=windows-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/VISR-0.10.0-python3.6-Windows.zip?job=windows-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
 # # userdoc [For VISR Installer package]
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/doc/userdoc/userdoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
-# # apidoc [For VISR developers]
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/doc/apidoc/apidoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/doc/userdoc/userdoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# # apidoc [For VISR devs]
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/doc/apidoc/apidoc-0.10.0.pdf?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
 # # api-html-index.html (download-file from gitlab)
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
 # - api-html-index.html (view-file on gitlab)
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/file/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/file/build/doc/apidoc/html/index.html?job=macosx-arch-doc&private_token=pGxrNG6gYyfiU7F4SkVz
 # Licence
-# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/develop/raw/build/LICENSE.md?job=macosx-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
+# - http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/raw/build/LICENSE.md?job=macosx-arch-package&private_token=pGxrNG6gYyfiU7F4SkVz
 #
