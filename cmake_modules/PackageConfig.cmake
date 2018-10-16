@@ -167,14 +167,14 @@ if( BUILD_INSTALL_STATIC_LIBRARIES )
                       DESCRIPTION "Header files and CMake support"
                       INSTALL_TYPES developer full
                       DEPENDS static_libraries
-                      DISABLED # Not contained in standard installation
+                      # DISABLED # Enable by default.
                      )
 else( BUILD_INSTALL_STATIC_LIBRARIES )
   cpack_add_component(development_files
                       DISPLAY_NAME "Development files"
                       DESCRIPTION "Header files and CMake support"
                       INSTALL_TYPES developer full
-                      DISABLED # Not contained in standard installation
+                      # DISABLED # Enable by default
                      )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
