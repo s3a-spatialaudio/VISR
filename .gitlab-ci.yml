@@ -356,9 +356,7 @@ linux-arch-test:
 macosx-arch-test:
   stage: test
   dependencies:
-    - macosx-arch-build
     - macosx-arch-build-py36
-    - macosx-arch-build-py37
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
