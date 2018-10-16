@@ -26,6 +26,7 @@ init-macosx:
     - cmake -E make_directory build
   only:
     - master
+    - develop
   tags:
     - macosx
   artifacts:
@@ -45,6 +46,7 @@ init-windows:
     - master
   tags:
     - windows
+    - develop
   artifacts:
     paths:
       - build/
@@ -60,6 +62,7 @@ init-linux:
     - cmake -E make_directory build
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
@@ -79,6 +82,7 @@ linux-arch-config:
     - cmake -E chdir build/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
@@ -98,6 +102,7 @@ windows-arch-config:
     - windows
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -116,6 +121,7 @@ windows-arch-config-py36:
     - windows
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -133,6 +139,7 @@ windows-arch-config-py37:
     - windows
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -150,6 +157,7 @@ macosx-arch-config:
     - macosx
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -167,6 +175,7 @@ macosx-arch-config-py36:
     - macosx
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -184,6 +193,7 @@ macosx-arch-config-py37:
     - macosx
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -201,6 +211,7 @@ linux-arch-build:
     - cmake --build build/ --target --config Release
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
@@ -220,6 +231,7 @@ windows-arch-build:
     - windows
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -237,6 +249,7 @@ windows-arch-build-py36:
     - windows
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -254,6 +267,7 @@ windows-arch-build-py37:
     - windows
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -271,6 +285,7 @@ macosx-arch-build:
     - macosx
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -288,6 +303,7 @@ macosx-arch-build-py36:
     - macosx
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -305,6 +321,7 @@ macosx-arch-build-py37:
     - macosx
   only:
     - master
+    - develop
   artifacts:
     paths:
       - build/
@@ -323,6 +340,7 @@ linux-arch-test:
     - cmake --build build/ --target test --config Release
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
@@ -345,6 +363,7 @@ macosx-arch-test:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
     - master
+    - develop
   tags:
     - macosx
   artifacts:
@@ -365,6 +384,7 @@ windows-arch-test:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
     - master
+    - develop
   tags:
     - windows
   artifacts:
@@ -387,6 +407,7 @@ linux-arch-doc:
     - cmake --build build/ --target doc
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
@@ -405,6 +426,7 @@ windows-arch-doc:
     - cmake --build build/ --target doc
   only:
     - master
+    - develop
   tags:
     - windows
   artifacts:
@@ -422,6 +444,7 @@ macosx-arch-doc:
     - cmake --build build/ --target doc
   only:
     - master
+    - develop
   tags:
     - macosx
   artifacts:
@@ -444,6 +467,7 @@ linux-arch-package:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
@@ -463,6 +487,7 @@ windows-arch-package:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - windows
   artifacts:
@@ -483,6 +508,7 @@ windows-arch-package-py36:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - windows
   artifacts:
@@ -502,6 +528,7 @@ windows-arch-package-py37:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - windows
   artifacts:
@@ -521,6 +548,7 @@ macosx-arch-package:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - macosx
   artifacts:
@@ -540,6 +568,7 @@ macosx-arch-package-py36:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - macosx
   artifacts:
@@ -559,6 +588,7 @@ macosx-arch-package-py37:
     - cmake --build build/ --target package --config Release
   only:
     - master
+    - develop
   tags:
     - macosx
   artifacts:
@@ -575,11 +605,14 @@ macosx-arch-package-py37:
 linux-arch-deploy-int:
   stage: deploy
   dependencies:
-    - linux-arch-doc
+    - linux-arch-package
   script:
     - rsync --recursive --delete build/doc/apidoc/html/ /vol/vssp/dataweb/data/s3a/public/VISR-API/
+    - rsync --recursive --delete build/doc/apidoc/apidoc-0.11.0.pdf /vol/vssp/dataweb/data/s3a/public/VISR-API/
+    - rsync --recursive --delete build/doc/userdoc/userdoc-0.11.0.pdf /vol/vssp/dataweb/data/s3a/public/VISR-API/
   only:
     - master
+    - develop
   tags:
     - linux
   artifacts:
