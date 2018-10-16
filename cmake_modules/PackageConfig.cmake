@@ -70,10 +70,19 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
 
+  # Prepare a example launchagent file 
+  set( LAUNCHAGENT_PLIST_FILENAME ${VISR_VERSIONED_NAME}.plist )
+  set( LAUNCHAGENT_PLIST_FILEPATH ${PROJECT_BINARY_DIR}/package_resources/${LAUNCHAGENT_PLIST_FILENAME} )
+  configure_file( ${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/VISR-launchagent.plist.in
+                  ${LAUNCHAGENT_PLIST_FILEPATH}	@ONLY )
+  # Hack: we treat the launchagents file as part of shared_libraries because we want to use the same script.
+  install( FILES ${LAUNCHAGENT_PLIST_FILEPATH}
+           DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY}/etc COMPONENT shared_libraries )
+
   configure_file(${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
   		       "${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh" @ONLY)
-  set(CPACK_POSTFLIGHT_SHARED_LIBRARIES_SCRIPT ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)   
-
+  set( CPACK_POSTFLIGHT_SHARED_LIBRARIES_SCRIPT
+       ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)   
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )

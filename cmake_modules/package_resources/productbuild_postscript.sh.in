@@ -1,27 +1,31 @@
 #!/bin/sh
 
-PYPURE="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@/lib"
-RPATH="@rpath"
+# TODO: Add support for the brew Python distribution
+# TODO: change the name of the referenced python library if necessary.
 
-if [ -d "@CMAKE_INSTALL_PREFIX@/3rd" ]; then
+
+# Determine the Python home directory
 
 if [ -d "${HOME}/anaconda3" ]; then
-    sudo install_name_tool -add_rpath "${HOME}/anaconda3/lib" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
-    sudo install_name_tool -add_rpath "${HOME}/anaconda3/lib" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
-    #echo "conda python present"
+  PYTHONHOME=${HOME}/anaconda3
+  PYTHONLIBPATH="${HOME}/anaconda3/lib"
 elif [ -d "${HOME}/anaconda" ]; then
-    sudo install_name_tool -add_rpath "${HOME}/anaconda/lib" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
-    sudo install_name_tool -add_rpath "${HOME}/anaconda/lib" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
-    #echo "conda python present"
-
-# TODO: Add support for the brew Python
-
+  PYTHONHOME=${HOME}/anaconda
+  PYTHONLIBPATH="${HOME}/anaconda/lib"
 # Fall back to the system python (if present) on MacOS >= 10.12
-# TODO: Check the paths!
 elif [ -d "/Library/Frameworks/Python.framework" ]; then
-    sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
-    sudo install_name_tool -add_rpath "${PYPURE}" @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
-    #echo "system python present"
+  PYTHONHOME="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
+  PYTHONLIBPATH="${PYTHONHOME}/lib"
+else
+  echo "No valid Python installation found."
+  PYTHONHOME=""
+  PYTHONLIBPATH=""
+fi 
+
+if [ -d "@CMAKE_INSTALL_PREFIX@/3rd" ] && [ ! -z $PYTHONLIBPATH ]; then
+  install_name_tool -add_rpath ${PYTHONLIBPATH} @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+  install_name_tool -add_rpath ${PYTHONLIBPATH} @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
 fi
 
-fi
+# Pre-populate the VISR-launchagent.plist file
+sed -i "" "s|PYTHONHOME_PLACEHOLDER|$PYTHONHOME|" @CMAKE_INSTALL_PREFIX@/etc/@LAUNCHAGENT_PLIST_FILENAME@
