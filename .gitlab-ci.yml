@@ -618,6 +618,8 @@ linux-arch-deploy-int:
   cache:
     paths:
       - build/
+  allow_failure: true
+
 
 # Global Cache - TEMP for faster testing
 # cleanup:
