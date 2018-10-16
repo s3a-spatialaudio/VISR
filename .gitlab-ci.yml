@@ -44,9 +44,9 @@ init-windows:
     - cmake -E make_directory build
   only:
     - master
+    - develop
   tags:
     - windows
-    - develop
   artifacts:
     paths:
       - build/
@@ -377,7 +377,7 @@ macosx-arch-test:
 windows-arch-test:
   stage: test
   dependencies:
-    - windows-arch-build
+    - windows-arch-build-py36
   script:
     - cmake --build build/ --target RUN_TESTS --config Release
   only:
