@@ -605,8 +605,8 @@ linux-arch-deploy-int:
   dependencies:
     - linux-arch-package
   script:
-    - rsync --recursive --delete build/doc/apidoc/ /vol/vssp/dataweb/data/s3a/public/VISR-API/
-    - rsync --recursive --delete build/doc/userdoc/ /vol/vssp/dataweb/data/s3a/public/VISR-API/
+    - rsync --recursive --delete build/doc/apidoc /vol/vssp/dataweb/data/s3a/public/VISR-API/
+    - rsync --recursive --delete build/doc/userdoc /vol/vssp/dataweb/data/s3a/public/VISR-API/
   only:
     - master
     - develop
