@@ -7,7 +7,8 @@ sys.path.append( "@sphinx_breathe_path@")
 extensions = [
     "breathe",  # Doxygen-based C++ documentation gathering
     "sphinx.ext.todo",
-    "sphinx.ext.autodoc"
+    "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax"
     # "sphinx.ext.autosectionlabel"
 ]
 
