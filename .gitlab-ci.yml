@@ -8,19 +8,19 @@ stages:
   - deploy
   # - cleanup
 
-cache:
-  # key: "$CI_PROJECT_NAME/$CI_BUILD_REF_NAME"
-  paths:
-    - build/
+# cache:
+#   # key: "$CI_PROJECT_NAME/$CI_BUILD_REF_NAME"
+#   paths:
+#     - build/
 # variables:
 #   CI_DEBUG_TRACE: "true"
 
-init-macosx:
+init-macosx-py36:
   stage: initial
   script:
     # Crude way to remove and make sure directory is removed before creating a new one.
     # - cmake -E remove_directory build
-    - cmake -E make_directory build
+    - cmake -E make_directory build_py36
   only:
     - master
     - develop
@@ -30,19 +30,41 @@ init-macosx:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
-  # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
+      - build_py36/
+      # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
   allow_failure: true
 
-init-windows:
+init-macosx-py37:
   stage: initial
   script:
     # Crude way to remove and make sure directory is removed before creating a new one.
     # - cmake -E remove_directory build
-    - cmake -E make_directory build
+    - cmake -E make_directory build_py37
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build_py37/
+  cache:
+    paths:
+      - build_py37/
+      # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
+  allow_failure: true
+
+init-windows-py36:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_py36
   only:
     - master
     - develop
@@ -52,10 +74,31 @@ init-windows:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
+  allow_failure: true
+
+init-windows-py37:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_py37
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_py37/
+  cache:
+    paths:
+      - build_py37/
   allow_failure: true
 
 init-linux:
@@ -76,6 +119,26 @@ init-linux:
     paths:
       - build/
   allow_failure: true
+
+init-linux-18:
+  stage: initial
+  script:
+    - cmake -E make_directory build_18
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - linux-ubuntu-18
+  artifacts:
+    paths:
+      - build_18/
+  cache:
+    paths:
+      - build_18/
+  allow_failure: true
+
 
 # CMake Configuration:
 
@@ -100,34 +163,33 @@ linux-arch-config:
       - build/
   allow_failure: true
 
-
-windows-arch-config:
+linux-arch-config-18:
   stage: config
   dependencies:
-    - init-windows
+    - init-linux-18
   script:
-    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+    - cmake -E chdir build_18/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
   only:
     - master
     - develop
     # Testing branch for CI development
     - feature/experimental-ci
   tags:
-    - windows
+    - linux-ubuntu-18
   artifacts:
     paths:
-      - build/
+      - build_18/
   cache:
     paths:
-      - build/
+      - build_18/
   allow_failure: true
 
 windows-arch-config-py36:
   stage: config
   dependencies:
-    - init-windows
+    - init-windows-py36
   script:
-    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\include -DPYTHON_LIBRARY=C:/ProgramData/Anaconda3/libs/python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+    - cmake -E chdir build_py36/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\include -DPYTHON_LIBRARY=C:/ProgramData/Anaconda3/libs/python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
   only:
     - master
     - develop
@@ -137,18 +199,18 @@ windows-arch-config-py36:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 windows-arch-config-py37:
   stage: config
   dependencies:
-    - init-windows
+    - init-windows-py37
   script:
-    - cmake -E chdir build/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\envs\py37\include -DPYTHON_LIBRARY=C:\ProgramData\Anaconda3\envs\py37\libs\python37.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+    - cmake -E chdir build_py37/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\envs\py37\include -DPYTHON_LIBRARY=C:\ProgramData\Anaconda3\envs\py37\libs\python37.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
   only:
     - master
     - develop
@@ -158,39 +220,18 @@ windows-arch-config-py37:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py37/
   cache:
     paths:
-      - build/
-  allow_failure: true
-
-macosx-arch-config:
-  stage: config
-  dependencies:
-    - init-macosx
-  script:
-    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build/
-  cache:
-    paths:
-      - build/
+      - build_py37/
   allow_failure: true
 
 macosx-arch-config-py36:
   stage: config
   dependencies:
-    - init-macosx
+    - init-macosx-py36
   script:
-    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py36/lib/libpython3.6m.dylib -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_py36/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py36/lib/libpython3.6m.dylib -DBUILD_JACK_SUPPORT=ON ..
   only:
     - master
     - develop
@@ -200,18 +241,18 @@ macosx-arch-config-py36:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 macosx-arch-config-py37:
   stage: config
   dependencies:
-    - init-macosx
+    - init-macosx-py37
   script:
-    - cmake -E chdir build/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py37/include/python3.7m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_py37/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py37/include/python3.7m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_JACK_SUPPORT=ON ..
   only:
     - master
     - develop
@@ -221,10 +262,10 @@ macosx-arch-config-py37:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py37/
   cache:
     paths:
-      - build/
+      - build_py37/
   allow_failure: true
 
 # Build:
@@ -250,25 +291,25 @@ linux-arch-build:
       - build/
   allow_failure: true
 
-windows-arch-build:
+linux-arch-build-18:
   stage: build
   dependencies:
-    - windows-arch-config
+    - linux-arch-config-18
   script:
-    - cmake --build build/ --target --config Release
+    - cmake --build build_18/ --target --config Release
   only:
     - master
     - develop
     # Testing branch for CI development
     - feature/experimental-ci
   tags:
-    - windows
+    - linux-ubuntu-18
   artifacts:
     paths:
-      - build/
+      - build_18/
   cache:
     paths:
-      - build/
+      - build_18/
   allow_failure: true
 
 windows-arch-build-py36:
@@ -276,7 +317,7 @@ windows-arch-build-py36:
   dependencies:
     - windows-arch-config-py36
   script:
-    - cmake --build build/ --target --config Release
+    - cmake --build build_py36/ --target --config Release
   only:
     - master
     - develop
@@ -286,10 +327,10 @@ windows-arch-build-py36:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 windows-arch-build-py37:
@@ -297,7 +338,7 @@ windows-arch-build-py37:
   dependencies:
     - windows-arch-config-py37
   script:
-    - cmake --build build/ --target --config Release
+    - cmake --build build_py37/ --target --config Release
   only:
     - master
     - develop
@@ -307,31 +348,10 @@ windows-arch-build-py37:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py37/
   cache:
     paths:
-      - build/
-  allow_failure: true
-
-macosx-arch-build:
-  stage: build
-  dependencies:
-    - macosx-arch-config
-  script:
-    - cmake --build build/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build/
-  cache:
-    paths:
-      - build/
+      - build_py37/
   allow_failure: true
 
 macosx-arch-build-py36:
@@ -339,7 +359,7 @@ macosx-arch-build-py36:
   dependencies:
     - macosx-arch-config-py36
   script:
-    - cmake --build build/ --target --config Release
+    - cmake --build build_py36/ --target --config Release
   only:
     - master
     - develop
@@ -349,10 +369,10 @@ macosx-arch-build-py36:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 macosx-arch-build-py37:
@@ -360,7 +380,7 @@ macosx-arch-build-py37:
   dependencies:
     - macosx-arch-config-py37
   script:
-    - cmake --build build/ --target --config Release
+    - cmake --build build_py37/ --target --config Release
   only:
     - master
     - develop
@@ -370,12 +390,11 @@ macosx-arch-build-py37:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py37/
   cache:
     paths:
-      - build/
+      - build_py37/
   allow_failure: true
-
 
 # Test:
 
@@ -402,12 +421,35 @@ linux-arch-test:
     paths:
       - build/
 
+linux-arch-test-18:
+  stage: test
+  dependencies:
+    - linux-arch-build-18
+  script:
+    - cmake --build build_18/ --target test --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - linux-ubuntu-18
+  artifacts:
+    paths:
+    - Testing/*.log
+    expire_in: 1 week
+  # TEMP REMOVE THIS when tests are finished - TEMP
+  allow_failure: true
+  cache:
+    paths:
+      - build_18/
+
 macosx-arch-test:
   stage: test
   dependencies:
     - macosx-arch-build-py36
   script:
-    - cmake --build build/ --target RUN_TESTS --config Release
+    - cmake --build build_py36/ --target RUN_TESTS --config Release
   only:
     - master
     - develop
@@ -423,7 +465,7 @@ macosx-arch-test:
   allow_failure: true
   cache:
     paths:
-      - build/
+      - build_py36/
 
 # windows-arch-test:
 #   stage: test
@@ -470,13 +512,12 @@ linux-arch-doc:
       - build/
   allow_failure: true
 
-
 windows-arch-doc:
   stage: documentation
   dependencies:
     - windows-arch-config-py36
   script:
-    - cmake --build build/ --target doc
+    - cmake --build build_py37/ --target doc
   only:
     - master
     - develop
@@ -486,10 +527,10 @@ windows-arch-doc:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 macosx-arch-doc:
@@ -497,7 +538,7 @@ macosx-arch-doc:
   dependencies:
     - macosx-arch-config-py36
   script:
-    - cmake --build build/ --target doc
+    - cmake --build build_py36/ --target doc
   only:
     - master
     - develop
@@ -507,12 +548,11 @@ macosx-arch-doc:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
-
 
 # Package - dependencies on build , test and package
 
@@ -537,34 +577,33 @@ linux-arch-package:
       - build/
   allow_failure: true
 
-windows-arch-package:
+linux-arch-package-18:
   stage: package
   dependencies:
-    - windows-arch-build
+    - linux-arch-build-18
   script:
-    - cmake --build build/ --target package --config Release
+    - cmake --build build_18/ --target package --config Release
   only:
     - master
     - develop
     # Testing branch for CI development
     - feature/experimental-ci
   tags:
-    - windows
+    - linux-ubuntu-18
   artifacts:
     paths:
-      - build/
+      - build_18/
   cache:
     paths:
-      - build/
+      - build_18/
   allow_failure: true
-
 
 windows-arch-package-py36:
   stage: package
   dependencies:
     - windows-arch-build-py36
   script:
-    - cmake --build build/ --target package --config Release
+    - cmake --build build_py36/ --target package --config Release
   only:
     - master
     - develop
@@ -574,10 +613,10 @@ windows-arch-package-py36:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 windows-arch-package-py37:
@@ -585,7 +624,7 @@ windows-arch-package-py37:
   dependencies:
     - windows-arch-build-py37
   script:
-    - cmake --build build/ --target package --config Release
+    - cmake --build build_py37/ --target package --config Release
   only:
     - master
     - develop
@@ -595,31 +634,10 @@ windows-arch-package-py37:
     - windows
   artifacts:
     paths:
-      - build/
+      - build_py37/
   cache:
     paths:
-      - build/
-  allow_failure: true
-
-macosx-arch-package:
-  stage: package
-  dependencies:
-    - macosx-arch-build
-  script:
-    - cmake --build build/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build/
-  cache:
-    paths:
-      - build/
+      - build_py37/
   allow_failure: true
 
 macosx-arch-package-py36:
@@ -627,7 +645,7 @@ macosx-arch-package-py36:
   dependencies:
     - macosx-arch-build-py36
   script:
-    - cmake --build build/ --target package --config Release
+    - cmake --build build_py36/ --target package --config Release
   only:
     - master
     - develop
@@ -637,10 +655,10 @@ macosx-arch-package-py36:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py36/
   cache:
     paths:
-      - build/
+      - build_py36/
   allow_failure: true
 
 macosx-arch-package-py37:
@@ -648,7 +666,7 @@ macosx-arch-package-py37:
   dependencies:
     - macosx-arch-build-py37
   script:
-    - cmake --build build/ --target package --config Release
+    - cmake --build build_py37/ --target package --config Release
   only:
     - master
     - develop
@@ -658,10 +676,10 @@ macosx-arch-package-py37:
     - macosx
   artifacts:
     paths:
-      - build/
+      - build_py37/
   cache:
     paths:
-      - build/
+      - build_py37/
   allow_failure: true
 
 # For internal, private deployment
