@@ -399,6 +399,13 @@ Within the :code:`<panningConfiguration>` root element, the following elements a
   The values of :code:`l1`, :code:`l2`, and :code:`l3` must correspond to IDs of existing real or virtual loudspeakers.
   In case of a 2D setup, only :code:`l1` and :code:`l2` are evaluated.
 
+  .. note:: At the time being, triplet specifications must be generated externally and placed in the configuration file.
+	    This is typically done by creating a Delaunay triangulation on the sphere, which can be done in Matlab or Python.
+
+	    Future versions of the loudspeaker renderer might perform the triangulation internally, or might not require a
+	    conventional triangulation at all. In these cases, is it possible that the renderer ignores or internally
+	    adapts the specified triplets.
+  
 :code:`outputEqConfiguration`
   This optional element must occur at most once.
   It provides a global specification for equalisation filters for loudspeakers and subwoofers.
@@ -427,7 +434,233 @@ Within the :code:`<panningConfiguration>` root element, the following elements a
   .. math::
 
      H(z) = \frac{ b_0 + b_1 z^{-1} + b_{2}z^{-2} }{1 + a_1 z^{-1} + a_{2}z^{-2}}
+
+.. _using_visr_using_standalone_renderers_matrix_convolver:
+
+The matrix convolver renderer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The matrix convolver renderer is a multiple-input multiple-output convolution engine to be run as a command line application.
+
+It implements uniformly partitioned fast convolution for arbitrary routing points between input and output files.
+
+Basic usage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+.. code-block:: bash
+
+   $> matrix_convolver --help
+   -h [ --help ]                   Show help and usage information.
+   -v [ --version ]                Display version information.
+   --option-file arg               Load options from a file. Can also be used
+                                   with syntax "@<filename>".
+   -D [ --audio-backend ] arg      The audio backend. JACK_NATIVE activates the
+                                   native Jack driver insteat of the PortAudio
+                                   implementation.
+   --audio-ifc-options arg         Audio interface optional configuration
+   --audio-ifc-option-file arg     Audio interface optional configuration file
+   --list-audio-backends           List the supported audio backends that can be
+                                   passed to the the "--audio-backend" ("-D")
+                                   option.
+   --list-fft-libraries            List the supported FFT implementations that
+                                   can be selected using the "--fftLibrary"
+                                   option.
+   -f [ --sampling-frequency ] arg Sampling frequency [Hz]
+   -p [ --period ] arg             Period (block length): The number of samples
+                                   per audio block, also the block size of the
+                                   partitioned convolution.
+   -i [ --input-channels ] arg     Number of input channels for audio object
+                                   signal.
+   -o [ --output-channels ] arg    Number of audio output channels.
+   --filters arg                   Initial impulse responses, specified as
+                                   comma-separated list of one or multiple WAV
+                                   files.
+   --filter-file-index-offsets arg Index offsets to address the impulses in the
+                                   provided multichannel filter files. If
+                                   specified, the number of values must match
+                                   the number of filter files.
+   -r [ --routings ] arg           Initial routing entries, expects a JSON array
+                                   consisting of objects "{"inputs": nn,
+                                   "outputs":nn, "filters":nn ("gain":XX)
+   -l [ --max-filter-length ] arg  Maximum length of the impulse responses, in
+                                   samples. If not given, it defaults to the
+                                   longest provided filter,
+   --max-routings arg              Maximum number of filter routings.
+   --max-filters arg               Maximum number of impulse responses that can
+                                   be stored.
+   --fft-library arg               Specify the FFT implementation to be used.
+                                   Defaults to the default implementation for
+                                   the platform.
+
+
+Operation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The matrix convolver consists of the following elements:
+
+* A number of **input channels**.
+* A set of **FIR filter**, which can be reused multiple times.
+* A set of **output channels**.  
+* A set of **routings**, which defines that a given input is filtered through a specific filter (with an optional gain), and the result is routed to a given output channels. All filtering results that are routed to a given output are summed together.
+
+This interface allows for several different operation modes, for example:
+
+* Multi-channel filtering where each input is filtered with one filter to give produce the same number of output channels.
+* Filtering to produce multiple, different copies of the same input signal.
+* Filtering multiple signals and adding them together, as, for example, in filter-and-sum beamforming.
+* MIMO filtering with complete matrices, where a filter is defined for each input-output combination.
+* MIMO filtering with sparse matrices, corresponding to sophisticated routings between inputs and outputs.
   
+
+Detailed option description
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:code:`--help` or :code:`-h`:
+
+:code:`--version` or :code:`-v`  :
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--option-file`:
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--audio-backend` or :code:`-D`:
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--audio-ifc-options`:
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--audio-ifc-option-file`:
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--sampling-frequency` or :code:`-f`
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--period` or :code:`-p`:
+  Standard options, described in :ref:`using_standalone_renderers_common_options`
+:code:`--input-channels` or :code:`-i`:
+  The number of input channels. Must not exceed the number of capture channels of the sound card.
+:code:`-o` or :code:`--output-channels`:
+  The number of output channels. Must be less or equal than the number of sound card output channels.
+:code:`--filters`
+  The filters, specified as a comma-separated list of WAV files. WAV files can be multichannel, in this case, every channel is handled as a separate filter.
+
+  All filters are combined into a single array, where each filter is associated to a unique index (starting from zero if not specified otherwise.)
+
+  This argument is optional. If not provided, all filters are zero-initialised. Note that if the :code:`filters` argument is not provided, then the option :code:`max-routings` must be provided.
+:code:`--filter-file-index-offsets`
+  Specify the start filter index for each WAV file specified by the :code:`--filters` argument.
+  To be provided as a comma-separated list of nonnegative filter entries, one for each file in the :code:`filters` argument.
+  This argument is optional. If not provided, the start index of the first file is 0, and the start offset af all subsequent filter files follows the end index of the previous filter file.
+  This facility can be used to decouple the number of filters in the WAV files from the indexing scheme used to define the routings.
+
+  Example:
+
+  .. code-block:: bash
+
+     --filters ="filters_2ch.wav, filters_6ch.wav, filters_4ch.wav"   
+     --filter-file-index-offsets="2, 8, 16"
+
+  Here, three WAV files are provided: :code:`filters_2ch.wav`, :code:`filters_6ch.wav`, and :code:`filters_4ch.wav`, with 2, 6, and 4 channels respectively.
+  The filter offsets "2, 8, 16" mean that the filters of :code:`filters_2ch.wav` will be associated to the indices 2 and 3, that of :code:`filters_6ch.wav` by indices 8-13, and that of :code:`filters_4ch.wav` by the indices 16-19.
+
+  Any filters below, between, or above the initialized filter channels (here, indices 0-1, 4-7, 14-15, and >=20) will be zero-initialised. 
+
+  If the :code:`--filter-file-index-offsets` hadn't been provided in this example, the start offsets for the filter sets from the three files would have been 0,2,8.
+
+:code:`--routings` or :code:`-r`
+  Provide a list of routings points. This is to be specified as a JSON string.
+  A routing defines a filter being applied between a specific input channel and a specific output channels.
+  The JSON representation for a single entry is
+
+  .. code-block:: json
+
+     { "input": "<i>", "output": "<o>", "filter": "<f>", "gain": "<g>" }		  
+
+  Here, :code:`<i>` is the index of the input channel, :code:`<o>` is the channel index of the output, and :code:`<f>` is the index of the filter (see above).
+  All indices are zero-offset.
+  The gain specification :code:`,"gain": <g>` is optional, with :code:`<g>` representing a linear-scale gain value.
+
+  A routing list is a JSON array of routing entries, for example
+
+  .. code-block:: json
+
+     [{"input":"0", "output":"0", "filter":"2" },
+      {"input":"0", "output":"1", "filter":"1" },
+      {"input":"0", "output":"2", "filter":"0" }]
+  
+  A routing entry can define multiple multiple routings using a Matlab-like stride syntax for :code:`<i>`, :code:`<o>`, :code:`<f>`, or several of them.
+  If an index is a stride sequence, then the routing entry is duplicated over all values of the stride sequence. If more than one index in the routing entry are strides, then all of them must have the same length, and each of the duplicated routing entries contains the respective value of the respective stride sequence.
+  For example, the strided routing entry
+
+  .. code-block:: json
+
+     {"input":"3", "output":"0:3:9", "filter":"1" }
+
+  routes input 3 to the outputs 0, 3, 6, and 9, using the filter indexed by 1 for each routing.
+  In contrast.
+  
+  .. code-block:: json
+
+     {"input":"0", "output":"0:2", "filter":"2:-1:0" }
+
+  is equivalent to the routing list shown above.
+  
+  .. code-block:: json
+
+     [{"input":"0", "output":"0", "filter":"2" },
+      {"input":"0", "output":"1", "filter":"1" },
+      {"input":"0", "output":"2", "filter":"0" }]
+  
+:code:`--max-filter-length` or :code:`-l`:
+  Define the maximum length of the FIR filters.
+  If the :code:`--filters` option is provided, this argument is optional. In this case, admissible filter length is set to the largest length of all specified filter.
+  an error is reported if any specified filter exceeds the admissible length.
+  If :code:`--filters` and :code:`--max-filter-length` are both provided, then an error is generated if the length of any specified filter exceeds the value of :code:`--max-filter-length`.
+
+:code:`--max-routings` :
+  Define the maximum number of routings.
+  If the :code:`--routings` options is present, this argument is optional, and the maximum number of permissible routings is set to the number
+  of routing entries in the :code:`--routing` argument.
+  If :code:`routings` and :code:`--max-routings` are both specified, the number of entries in :code:`--routings` must not exceed the value of :code:`--max-routings`.
+:code:`--max-filters`:
+  Define the maximum number of filter entries.
+  This parameter is optional if the argument :code:`--filters` is provided. In this case, the maximum filter number is set to the number of filters generated by the  :code:`--filters` argument.
+
+  .. note:: If combined with :code:`--filter-file-index-offsets`, this automatically computed number of filters includes any gaps in the generated filter set.
+
+  If :code:`--filters` and :code:`max-filters` are both provided, then the number of filter entries created by :code:`--filters` must not exceed
+  the value of :code:`--max-filters`. 	    
+:code:`--fft-library`:
+  Select a FFT implementation from the set of available FFT libraries.
+  The admissible values (strings) can be obtained through the :code:`--list-fft-libraries` option.
+  
+.. note:: The current implementation accepts only a static configuration.
+
+   Future versions, however, will provide runtime control through a network command interface.
+
+   Some arguments or argument combinations do not make sense at the moment, but will do when combined with runtime control.
+   Examples include the ability to provide empty routings, zero-valued filters, or to specify values for :code:`--max-routings` or :code:`--max-filters` that are larger than the currently set values. 
+
+
+Examples   
+~~~~~~~~
+
+A channel-wise multichannel convolution can be performed as
+
+.. code-block:: bash
+
+   $> matrix_convolver -i 2 -o 2 -p 512 -D PortAudio -f 48000 --filters="filters.wav"
+     -r '[ {\"input\": \"0:1\", \"output\":\"0:1\", \"filter\":\"0:1\"}]'
+
+.. note:: The quoting is necessary when started from the command line. 
+
+The following example shows a convolution with binaural room impulse responses, where a 9-loudspeaker multichannel signal is routed to 9x2 BRIRs
+that are summed to form two ear signals.
+
+.. code-block:: bash
+
+   $> matrix_convolver -i 9 -o 2 --max-filters=18 --max-routings=18
+      -r "[{\"input\":\"0:8\", \"output\":\"0\", \"filter\":\"0:2:16\"},
+           {\"input\":\"0:8\", \"output\":\"1\", \"filter\":\"1:2:17\"}]"
+      --filters="bbcrdlr9ch_brirs.wav"
+      -D Jack -f 48000 -p 512
+
+Here, the file :code:`bbcrdlr9ch_brirs.wav` contains the 18 BRIRs, with the first nine channels for the left and the remaining channels for the right ear filters.
+
 .. _using_visr_using_standalone_renderers_specific_audio_options:
 
 Interface-specific audio options
