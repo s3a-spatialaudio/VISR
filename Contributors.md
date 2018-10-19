@@ -23,6 +23,8 @@ CVSSP - University of Surrey
 BBC R & D
   Chris Pike          - chris.pike@bbc.uk
     - Loudspeaker configuration files
+  Richard Taylor      -
+    - Initial implementation of CMake target exporting 
   Jonathan Heathcote
     - Bugfixes rbbl::InterpolatingConvolverUniform
     - emscripten build support.

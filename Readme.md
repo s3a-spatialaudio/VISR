@@ -5,6 +5,9 @@ Copyright (c) 2014-2018 Institute of Sound and Vibration Research,
 
 The software is provided under the permissive ISC (Internet Systems Consortium) printed below and in the Licence.md file
 
+This work was supported by the EPSRC Programme Grant S3A: Future Spatial Audio for an Immersive Listener Experience at Home
+(EP/L000539/1) http://www.s3a-spatialaudio.org and the BBC as part of the BBC Audio Research Partnership.
+
 We kindly ask to acknowledge the use of this software in publications or software.
 
 Paper citation:
