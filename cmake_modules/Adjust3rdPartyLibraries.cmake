@@ -21,7 +21,11 @@ endfunction()
 ################################################################################
 # copying 3rd party libraries in "3rd" folder, and changing the ID to @rpath/<libraryname>.dylib. 
 
-set( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES PYTHON_LIBRARY )
+set( FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY SNDFILE_LIBRARY PORTAUDIO_LIBRARIES )
+
+if( BUILD_PYTHON_BINDINGS )
+ list( APPEND FIX_LIBRARIES PYTHON_LIBRARY )
+endif( BUILD_PYTHON_BINDINGS )
 
 file( MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/3rd )
  
