@@ -105,8 +105,12 @@ Although the VISR framework is deliberately application-agnostic, it is well-sui
 The VISR object model
 ---------------------
 
+.. _the_visr_object_model:
+
 Predefined object-based rendering primitives and renderers
 ----------------------------------------------------------
+
+.. _visr_object_based_audio__reverberation:
 
 Object-Based Reverberation
 --------------------------

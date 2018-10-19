@@ -22,7 +22,7 @@ PROJECT( VISR CXX C )
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
 set( VISR_MINOR_VERSION 11 )
-set( VISR_PATCH_VERSION 0 )
+set( VISR_PATCH_VERSION 1 )
 
 add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
 add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
@@ -321,7 +321,7 @@ OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost librari
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread regex timer)
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
