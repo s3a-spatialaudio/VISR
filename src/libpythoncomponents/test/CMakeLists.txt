@@ -20,6 +20,8 @@ target_link_libraries( ${APPLICATION_NAME} rrl_static )
 target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
+set_target_properties( ${APPLICATION_NAME} PROPERTIES SKIP_BUILD_RPATH FALSE)
+
 if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
 endif( NOT Boost_USE_STATIC_LIBS )
