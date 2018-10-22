@@ -1,5 +1,10 @@
 Changelog for project VISR
 
+Patch release 0.11.2
+--------------------
+* necessary RPATH fixing for VISR easy usage as imported: Removed RPATH by default, prepended library IDs with @rpath, and added runtime path to executables only.
+
+
 Patch release 0.11.1
 --------------------
 
