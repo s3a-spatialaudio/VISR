@@ -7,7 +7,10 @@ sys.path.append( "@sphinx_breathe_path@")
 extensions = [
     "breathe",  # Doxygen-based C++ documentation gathering
     "sphinx.ext.todo",
-    "sphinx.ext.autodoc"
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon", # Markdown autodoc like in Numpy docu.
+    "sphinx.ext.mathjax",
+    "sphinxcontrib.bibtex",
     # "sphinx.ext.autosectionlabel"
 ]
 
@@ -33,6 +36,19 @@ breathe_default_project = "visr"
 # breathe_build_directory = {"visr": os.path.dirname("@sphinx_output_root@")}
 # breathe_domain_by_extension = {"hpp" : "cpp","py": "py"}
 # breathe_use_project_refids = True
+
+# Add Python packages for documentation, for example visr_bst
+# <af> Document __init__ method
+autoclass_content = 'both'
+autodoc_default_options = {
+    'special-members': '__init__'
+}
+
+# Add the VISR Python modules to the module search path.
+# We insert them to the front of the list to have precedence over other VISR paths 
+# that might already be in the path, e.g., through PYTHONHOME)
+# TODO: insert path to the built C++ Python externals (this requires a generator expression)
+sys.path.insert( 0, "@CMAKE_SOURCE_DIR@/src/python/packages" )
 
 # -- Options for HTML output ----------------------------------------------
 

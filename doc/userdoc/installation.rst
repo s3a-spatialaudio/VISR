@@ -201,7 +201,7 @@ Two environment variables must be set to ensure the working of the VISR Python s
 
   However, we recommend setting **PYTHONPATH** and assume this in the examples throughout this document.
 
-PYTHOMHOME
+PYTHONHOME
   This variable is needed to locate the files and libraries of the Python distribution.
   This is especially important if there are more than one distributions on the system, most often on Mac OS X.
   Strictly speaking, this variable is required only if VISR Python code is executed from a C++ application, for instance some DAW plugins, **python_runner** standalone application (section ??), or the **visr_renderer** with metadata processing enabled. (see section :ref:`using_visr_using_standalone_renderers_visr_renderer`).
@@ -272,7 +272,10 @@ Windows
 Mac OS X
   In order to set the environment variables system-wide, without requiring that the applications in question is started from a shell, (e.g., a command-line terminal), we recommend a custom **launchd** property list file, as detailed, e.g., in this `StackExchange thread <https://apple.stackexchange.com/questions/106355/setting-the-system-wide-path-environment-variable-in-mavericks>`_.
 
-  To this end, create a **VISR-X.X.X.plist** file with this contents
+.. note:: For convenience, the installers create a pre-configured **VISR-X.X.X.plist** file in the **etc** subdirectory of the installation directory (e.g., **/Applications/VISR-X.X.X/etc/VISR-X.X.X.plist** ).
+  This file can be either loaded directly or copied to the **LaunchAgents/** directory first. Please check the values in this file first and adjust them accordingly.
+
+  The **VISR-X.X.X.plist** will have this contents:
 
   .. code-block:: xml
 
@@ -289,7 +292,7 @@ Mac OS X
         <string>
         launchctl setenv PYTHONPATH /Applications/VISR-X.X.X/python
         launchctl setenv OPENBLAS_NUM_THREADS 1
-        launchctl setenv PYTHONHOME ${HOME}/anaconda3
+        launchctl setenv PYTHONHOME <BASE_DIRECTORY_OF_PYTHON_INSTALLATION>
         </string>
       </array>
       <key>RunAtLoad</key>
@@ -315,9 +318,6 @@ Mac OS X
 
   If you made changes to the settings, you have to perform the **unload** command followed by a **load**.
   
-  For convenience, the installers create a pre-configured **VISR-X.X.X.plist** file in the **etc** subdirectory of the installation directory (e.g., **/Applications/VISR-X.X.X/etc/VISR-X.X.X.plist** ).
-  This file can be either loaded directly or copied to the **LaunchAgents/** directory first. Please check the values in this file first and adjust them accordingly.
-
 Verifying the installation
 ==========================
 

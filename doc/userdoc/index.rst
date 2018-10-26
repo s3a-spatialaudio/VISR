@@ -114,11 +114,19 @@ Object-Based Reverberation
 VISR component reference
 ========================
 
-Standard rendering component library
-------------------------------------
+Standard rendering component library (:code:`rcl`)
+--------------------------------------------------
 
-Binaural synthesis toolkit
---------------------------
+.. toctree::
+
+   rcl_component_documentation
+
+The Binaural Synthesis Toolkit (VISR-BST)
+-----------------------------------------
+
+.. toctree::
+
+  binaural-synthesis-toolkit
 
 Dynamic range control library
 -----------------------------
@@ -130,8 +138,8 @@ Old contents
 
   examples
   tutorials
-  
-The contents of these files will be removed or moded to other parts of the documentation.
+
+The contents of these files will be removed or moved to other parts of the documentation.
 
 
 

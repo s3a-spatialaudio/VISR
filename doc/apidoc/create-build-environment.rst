@@ -56,7 +56,17 @@ In order to create the user and API documentation, the following software tools 
 	
 * Breathe: Breathe is needed by sphinx to render source code generation for languages other than Python. As Breathe is a Python package, the package management system of the Python distribution should be used.
     - Linux: use the package manager of the Linux distribution, e.g., ``sudo apt install python3-breathe``.
-	- Anaconda (recommended distribution on Windows and Mac OS X): use ``conda install -c conda-forge breathe``. Note that breathe is not contained in the standard package repository but the additional repository `conda-forge <https://conda-forge.org>`_.
+    - Anaconda (recommended distribution on Windows and Mac OS X): use ``conda install -c conda-forge breathe``. Note that breathe is not contained in the standard package repository but the additional repository `conda-forge <https://conda-forge.org>`_.
+    
+* sphinxcontrib-bibtex: Extension to create bibliographies using BibTeX files. Installed in the same way as breathe, that, is using ``conda`` where available, or the ``pip`` package manager. Again, it is not included in the standard conda package repository, therefore it has to be installed through
+
+  .. code-block:: bash
+
+     conda install -c conda-forge sphinxcontrib-bibtex
+
+* sphinx.ext.autodoc: Extract documentation from the docstrings contained in Python code and Python bindings.
+
+* sphinx.ext.napoleon: Enables a simpler syntax for Python docstrings to be extracted via ``autodoc``.
 
 Installer package generation
 --------------------------------------
