@@ -3,5 +3,7 @@
 Basic tutorial
 --------------
 
-.. include:: ../../src/tutorials/visr-tutorial-code/doc/tutorial.rst
+.. .. Disabled at the moment until location of tutorial is resolved.
+
+   .. .. include:: ../../src/tutorials/visr-tutorial-code/doc/tutorial.rst
 
