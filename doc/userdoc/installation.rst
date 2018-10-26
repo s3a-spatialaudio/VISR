@@ -80,7 +80,7 @@ By default, it installs the VISR into the directory **/Applications/VISR-X.X.X/*
    
    Component-based installer for Mac OS X.
 
-To access the component selection dialog, use the button "Customize" on the "Installation Type" screen (see figure :ref:``)
+To access the component selection dialog, use the button "Customize" on the "Installation Type" screen (see figure :ref:`figure_visr_macos_installer_customize`)
    
 .. _figure_visr_macos_installer_customize:
 
