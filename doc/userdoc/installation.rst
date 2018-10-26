@@ -28,7 +28,7 @@ Figure figure_windows_installer_ shows the component selection dialog of the ins
 
 .. _figure_windows_installer:
 .. figure:: ../images/windows_installer.png
-   :scale: 100 %
+   :width: 60 %
    :align: center   
    
    Graphical Windows installer.
@@ -43,7 +43,7 @@ The environment variable on Windows 10 is depicted in figure windows_environment
 
 .. _windows_environment_variables_editor:
 .. figure:: ../images/windows_environment_variables_editor.png
-   :scale: 50 %
+   :width: 60 %
    :align: center   
    
    Environment variable editor on Windows 10.
@@ -75,7 +75,7 @@ By default, it installs the VISR into the directory **/Applications/VISR-X.X.X/*
 .. _figure_visr_macos_installer:
 
 .. figure:: ../images/visr_macos_installer.png
-   :scale: 50 %
+   :width: 75 %
    :align: center   
    
    Component-based installer for Mac OS X.
@@ -85,7 +85,7 @@ To access the component selection dialog, use the button "Customize" on the "Ins
 .. _figure_visr_macos_installer_customize:
 
 .. figure:: ../images/visr_macos_installer_customize.png
-   :scale: 50 %
+   :width: 75 %
    :align: center   
    
    "Installation type" screen of Mac OS X installer. Use "Customize" to get to the component selection.

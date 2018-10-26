@@ -63,7 +63,7 @@ Component-Based Design
 .. _figure_visr_bst_component_schematic:
 
 .. figure:: ../images/visr_bst/visr_component_schematic.png
-   :scale: 100 %
+   :width: 80%
    :align: center   
    
    General interface of a VISR component.
@@ -105,7 +105,7 @@ Figures :ref:`figure_visr_bst_atomic_component` and :ref:`figure_visr_bst_compos
 .. _figure_visr_bst_atomic_component:
 
 .. figure:: ../images/visr_bst/visr_atomic_component.png
-   :scale: 100 %
+   :width: 80%
    :align: center   
    
    Atomic VISR component.
@@ -117,7 +117,7 @@ The operation of an atomic component is implemented in the :code:`process` metho
 .. _figure_visr_bst_composite_component:
 
 .. figure:: ../images/visr_bst/visr_composite_component.png
-   :scale: 100 %
+   :width: 80%
    :align: center   
    
    Composite VISR component.
@@ -220,7 +220,7 @@ In its basic form, it synthesizes sound scenes under freefield conditions, and i
 .. _figure_visr_bst_dynamic_hrir_synthesis:
 
 .. figure:: ../images/visr_bst/dynamic_hrir_synthesis.png
-   :scale: 25 %
+   :width: 80 %
    :align: center   
    
    Dynamic binaural synthesis rendering component. Optional parts are dashed.
@@ -259,7 +259,7 @@ This scene-based rendering approach forms, for example, the basis of the spatial
 .. _figure_visr_bst_hoa_to_binaural_renderer:
 
 .. figure:: ../images/visr_bst/hoa_to_binaural_renderer.png
-   :scale: 25 %
+   :width: 80 %
    :align: center   
    
    Binaural synthesis based on HOA.
@@ -273,7 +273,7 @@ The component of this signal are filtered with a bank of :math:`(L+1)^2` static 
 .. _figure_visr_bst_hoa_object_to_binaural_renderer:
 
 .. figure:: ../images/visr_bst/hoa_object_to_binaural_renderer.png
-   :scale: 25 %
+   :width: 80 %
    :align: center   
    
    HOA binaural synthesis of object-based scenes.
@@ -294,7 +294,7 @@ It is therefore used to reproduce channel-based content or to transform the outp
 .. _figure_visr_bst_virtual_loudspeaker_renderer:
 
 .. figure:: ../images/visr_bst/virtual_loudspeaker_renderer.png
-   :scale: 25 %
+   :width: 80 %
    :align: center
    
    Virtual loudspeaker renderer.
@@ -413,7 +413,7 @@ Realtime HRIR synthesis of object-based scenes
 .. _figure_visr_bst_object_based_scene_renderer:
 
 .. figure:: ../images/visr_bst/object_based_scene_renderer.png
-   :scale: 25 %
+   :width: 80 %
    :align: center
    
    Application: Object scene rendering.
@@ -433,7 +433,7 @@ Transaural Loudspeaker Array
 .. _figure_visr_bst_transaural_array_renderer:
 
 .. figure:: ../images/visr_bst/transaural_array_renderer.png
-   :scale: 25 %
+   :width: 80 %
    :align: center
    
    Application: Transaural array rendering
