@@ -16,14 +16,14 @@ A binary installers enables all uses of the framework, including
 
 Installation packages are available on the `S3A Software download page <http://s3a-audio.space>`_.
 
-.. note:: If you plan to use the Python integration of the VISR framework (see :ref:`overview_python_integration`), you need to select an installation package matching the Python version you are using, for example **VISR-X.X.X-python36-Windows.exe**.
+.. note:: If you plan to use the Python integration of the VISR framework (see :ref:`overview_python_integration`), you need to select an installation package matching the Python version you are using, for example :code:`VISR-X.X.X-python36-Windows.exe`.
 
 .. _installation_windows:
 
 Windows
 -------
 
-The graphical installer is provides as an **.exe** file and provides a dialog-based, component-enables installation.
+The graphical installer is provides as an :code:`.exe` file and provides a dialog-based, component-enables installation.
 Figure figure_windows_installer_ shows the component selection dialog of the installer. The choices are detailed below in section :ref:`installation_component_description`.
 
 .. _figure_windows_installer:
@@ -37,7 +37,7 @@ An executable installer (.exe) with a graphical user interface and corresponding
 If required, install the "Microsoft Visual C++ Redistributable for Visual Studio 2017", package,
 for example from the `Visual C++ downloads page <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads>`_.
 
-On Windows, it is necessary to add the directory containing the VISR libraries (DLLs) as well as the directory containing third-party libraries shipped with the VISR installer to the **PATH** variable.
+On Windows, it is necessary to add the directory containing the VISR libraries (DLLs) as well as the directory containing third-party libraries shipped with the VISR installer to the :code:`PATH` variable.
 To this end, open the environment variable editor (Settings -> System -> Advanced system settings -> Environment variables).
 The environment variable on Windows 10 is depicted in figure windows_environment_variables_editor .
 
@@ -48,29 +48,29 @@ The environment variable on Windows 10 is depicted in figure windows_environment
    
    Environment variable editor on Windows 10.
 
-Append the value "C:\ Program Files\VISR-X.X.X\lib;C:\ Program Files\VISR-X.X.X\3rd" if the standard installation location was used. (Note: Replace **X.X.X** with the actual version number of VISR.
-Depending on your system permissions and whether you VISR shall be used by all users of the computer, you can either set the **PATH** user variable or the **PATH** system variable.
+Append the value :code:`C:\Program Files\VISR-X.X.X\lib;C:\Program Files\VISR-X.X.X\3rd` if the standard installation location was used (Note: Replace :code:`X.X.X` with the actual version number of VISR).
+Depending on your system permissions and whether you VISR shall be used by all users of the computer, you can either set the :code:`PATH` user variable or the :code:`PATH` system variable.
 
 .. note::
    Any applications used to access VISR (for example command line terminals, Python development environments, or DAWs) must be closed and reopened before the changed paths take effect.
 
 Append the path ''<install-directory>/lib'' to the path variable, where ''install_diectory'' is the directory specified during the installation.
-For the default path, the setting would be ''c:\Program Files\VISR-N.N.N\lib'', where ''N.N.N is replaced by the actual version number.
-If the **PATH** variable is edited as a string, subsequent paths are separated by semicolons.
+For the default path, the setting would be :code:`c:\Program Files\VISR-N.N.N\lib`, where :code:`N.N.N` is replaced by the actual version number.
+If the :code:`PATH` variable is edited as a string, subsequent paths are separated by semicolons.
 
 .. note:: Future versions of the installer might adjust the paths automatically.
    However, as pointed out in
    `NSIS Path manipulation <http://nsis.sourceforge.net/Path_Manipulation>`_,
    this needs an extremely cautious implementation to avoid potential damage to users' systems.
    
-To use standalone applications (see section :ref:`using_visr_using_standalone_renderers`), it may be useful to add the **bin/** directory to the user or system path.
-For the default installation location, add ''c:\Program Files\VISR-N.N.N\bin'' to the **%PATH%** environment variable.
+To use standalone applications (see section :ref:`using_visr_using_standalone_renderers`), it may be useful to add the :code:`bin/` directory to the user or system path.
+For the default installation location, add :code:`c:\Program Files\VISR-N.N.N\bin` to the :code:`%PATH%` environment variable.
 
 Mac OS X
 --------
 An installer with a graphical user interface guides through the installation process and allows the selection of optional components.
 Figure :ref:`figure_visr_macos_installer` shows a screenshot of this installer.
-By default, it installs the VISR into the directory **/Applications/VISR-X.X.X/** where **X.X.X** denotes the version number.
+By default, it installs the VISR into the directory :code:`/Applications/VISR-X.X.X/` where :code:`X.X.X` denotes the version number.
 
 .. _figure_visr_macos_installer:
 
@@ -91,14 +91,14 @@ To access the component selection dialog, use the button "Customize" on the "Ins
    "Installation type" screen of Mac OS X installer. Use "Customize" to get to the component selection.
 
    
-To use the standalone applications from the command line, the **bin/** subfolder of the installation directory, e.g., **/Applications/VISR-X.X.X/bin**.
+To use the standalone applications from the command line, the :code:`bin/` subfolder of the installation directory, e.g., :code:`/Applications/VISR-X.X.X/bin`.
 This can be done, for example, by adding 
 
 .. code-block:: bash
 
    export PATH=$PATH:/Applications/VISR-X.X.X/bin
 
-to the file **$HOME/\.bash_profile**.
+to the file :code:`$HOME/\.bash_profile`.
 However, this works only for running standalone applications from a shell (i.e., a terminal window). 
 If you need this path also from applications that are not started from a shell, we recommend the solution used in section :ref:`installation_python_setup_configuration`.
 
@@ -179,8 +179,8 @@ Windows and Mac OS X
 ^^^^^^^^^^^^^^^^^^^^
 We recommend `Anaconda <https://www.anaconda.com/download/>`_. Please make sure you install the  Python3 / 64-Bit variant. 
 
-.. note:: Some Mac OS variants (for example 10.12) come with a pre-installed Python 3 variant in **/Library/Frameworks/Python.framework**.
-   In this case, care must be taken that it does not interferes with the chosen Python distribution. In particular, the **PYTHONHOME** environment variable must be set correctly.
+.. note:: Some Mac OS variants (for example 10.12) come with a pre-installed Python 3 variant in :code:`/Library/Frameworks/Python.framework`.
+   In this case, care must be taken that it does not interferes with the chosen Python distribution. In particular, the :code:`PYTHONHOME` environment variable must be set correctly.
 
 .. _installation_python_setup_configuration:
 
@@ -189,8 +189,8 @@ Configuration
 
 Two environment variables must be set to ensure the working of the VISR Python subsystem.
 
-* **PYTHONPATH** This variable is used to add the directory containing the VISR python modules to the system path.
-  To this end, the **python/** subdirectory of the installation folder must be added to **PYTHONPATH**.
+* :code:`PYTHONPATH` This variable is used to add the directory containing the VISR python modules to the system path.
+  To this end, the :code:`python/` subdirectory of the installation folder must be added to :code:`PYTHONPATH`.
   
   Note that other ways exist to add to the system path, for example 
 
@@ -199,27 +199,27 @@ Two environment variables must be set to ensure the working of the VISR Python s
      import sys
      sys.path.append( '<visr_installation_dir>/python' )
 
-  However, we recommend setting **PYTHONPATH** and assume this in the examples throughout this document.
+  However, we recommend setting :code:`PYTHONPATH` and assume this in the examples throughout this document.
 
 PYTHONHOME
   This variable is needed to locate the files and libraries of the Python distribution.
   This is especially important if there are more than one distributions on the system, most often on Mac OS X.
-  Strictly speaking, this variable is required only if VISR Python code is executed from a C++ application, for instance some DAW plugins, **python_runner** standalone application (section ??), or the **visr_renderer** with metadata processing enabled. (see section :ref:`using_visr_using_standalone_renderers_visr_renderer`).
+  Strictly speaking, this variable is required only if VISR Python code is executed from a C++ application, for instance some DAW plugins, :code:`python_runner` standalone application (section ??), or the :code:`visr_renderer` with metadata processing enabled. (see section :ref:`using_visr_using_standalone_renderers_visr_renderer`).
 
   This variable has to be set to the root directory of the Python distribution, i.e., 
-  one level of hierarchy above the **bin/** folder conatining the Python interpreter.
+  one level of hierarchy above the :code:`bin/` folder conatining the Python interpreter.
   Depending on the platform and the distribution, the correct value might be:
   
   Windows with Anaconda
-    **C:\ProgramData\Anaconda3**
+    :code:`C:\ProgramData\Anaconda3`
   Mac OS X with Anaconda
-    **$HOME/anaconda3/**
+    `$HOME/anaconda3/`
   Linux
-    **/usr**
+    :code:`/usr`
 
   It is necessary to check whether these settings match with your directory layout.
   
-  If the Python distribution provides a **python-config** or **python3-config** binary, the command
+  If the Python distribution provides a :code:`python-config` or :code:`python3-config` binary, the command
 
   .. code-block:: bash
 
@@ -231,14 +231,12 @@ PYTHONHOME
 
     python3-config --prefix
   
-  can be used to retrieve the required value for **PYTHONHOME**
-  On Linux, setting **PYTHONHOME** is not necessary in most cases, because there is only the system-provided Python installation available.
+  can be used to retrieve the required value for :code:`PYTHONHOME`
+  On Linux, setting :code:`PYTHONHOME` is not necessary in most cases, because there is only the system-provided Python installation available.
   
-Depending on the operating system, these variables can be set as follows:
-
 OPENBLAS_NUM_THREADS 
-  It is advisable, in many cases, to set the value of this environment variable to 1. It controls how **numpy** numerical algebra functions are distributed to multiple CPU cores.
-  **numpy** is used by the VISR Python integration as well as in many Python-based VISR components performing mathematical or DSP operations. 
+  It is advisable, in many cases, to set the value of this environment variable to 1. It controls how :code:`numpy` numerical algebra functions are distributed to multiple CPU cores.
+  :code:`numpy` is used by the VISR Python integration as well as in many Python-based VISR components performing mathematical or DSP operations. 
   For the matrix/vector sizes typically encountered in our code, the overhead for distributing the work over multiple cores typically exceeds the potential gains.
   Multithreading is disabled by setting the maximum number of cores (or threads) to 1:
 
@@ -246,36 +244,39 @@ OPENBLAS_NUM_THREADS
 
     OPENBLAS_NUM_THREADS = 1
 
-  This setting is optional. However, if you encounter excessive loads, for example a constant 100% load in the real-time thread, this setting can help to resolve the problem.
+  This setting is optional. However, if you encounter excessive processor loads, for example a constant 100% load in the real-time thread, this setting can help to resolve the problem.
+
+Depending on the operating system, these variables can be set as follows:
 
 Linux
   Append the lines
+  
   .. code-block:: bash
 
     export PYTHONPATH=$PYTHONPATH:/usr/share/visr/python
     export OPENBLAS_NUM_THREADS=1
 
-  to **$HOME/.profile**.
+  to :code:`$HOME/.profile`.
 
 Windows
-  Add **PYTHONPATH** entries either as a user or system variable as described in :ref:`installation_windows` section.
+  Add :code:`PYTHONPATH` entries either as a user or system variable as described in :ref:`installation_windows` section.
   The corrects setting are (assuming the default installation directory and the Anaconda distribution):
   
-    .. code-block:: bash
+  .. code-block:: bash
 
     PYTHONPATH=c:\Program Files\VISR-X.X.X\python
     PYTHONHOME=c:\ProgramData\Anaconda3
     OPENBLAS_NUM_THREADS=1
   
-  Note that if there is already a **PYTHONPATH** variable, the recommended value should be appended, using a semicolon as a separator.
+  Note that if there is already a :code:`PYTHONPATH` variable, the recommended value should be appended, using a semicolon as a separator.
 
 Mac OS X
-  In order to set the environment variables system-wide, without requiring that the applications in question is started from a shell, (e.g., a command-line terminal), we recommend a custom **launchd** property list file, as detailed, e.g., in this `StackExchange thread <https://apple.stackexchange.com/questions/106355/setting-the-system-wide-path-environment-variable-in-mavericks>`_.
+  In order to set the environment variables system-wide, without requiring that the applications in question is started from a shell, (e.g., a command-line terminal), we recommend a custom :code:`launchd` property list file, as detailed, e.g., in this `StackExchange thread <https://apple.stackexchange.com/questions/106355/setting-the-system-wide-path-environment-variable-in-mavericks>`_.
 
-.. note:: For convenience, the installers create a pre-configured **VISR-X.X.X.plist** file in the **etc** subdirectory of the installation directory (e.g., **/Applications/VISR-X.X.X/etc/VISR-X.X.X.plist** ).
-  This file can be either loaded directly or copied to the **LaunchAgents/** directory first. Please check the values in this file first and adjust them accordingly.
+.. note:: For convenience, the installers create a pre-configured :code:`VISR-X.X.X.plist` file in the :code:`etc` subdirectory of the installation directory (e.g., :code:`/Applications/VISR-X.X.X/etc/VISR-X.X.X.plist` ).
+  This file can be either loaded directly or copied to the :code:`LaunchAgents/` directory first. Please check the values in this file first and adjust them accordingly.
 
-  The **VISR-X.X.X.plist** will have this contents:
+  The :code:`VISR-X.X.X.plist` will have this contents:
 
   .. code-block:: xml
 
@@ -300,7 +301,7 @@ Mac OS X
      </dict>
      </plist>
 
-  By convention, these files are stored in **/Users/<loginname>/Library/LaunchAgents/**.
+  By convention, these files are stored in :code:`/Users/<loginname>/Library/LaunchAgents/`.
   To activate the settings, call
   
   .. code-block:: bash
@@ -316,7 +317,7 @@ Mac OS X
 
       launchctl unload <path-to-file>/VISR-X.X.X.plist
 
-  If you made changes to the settings, you have to perform the **unload** command followed by a **load**.
+  If you made changes to the settings, you have to perform the :code:`unload` command followed by a :code:`load`.
   
 Verifying the installation
 ==========================
@@ -328,7 +329,7 @@ Testing a standalone application
 This test is to ensure that that the installation is successful, and that the VISR shared libraries can be located and are compatible with the system.
 When using the component-enabled installers, the component ``Standalone applications`` must have been selected in order to perform this check.
 
-In a terminal (Linux shell, Mac OS Terminal application, Windows command line **cmd**),
+In a terminal (Linux shell, Mac OS Terminal application, Windows command line :code:`cmd`),
 execute this command:
 
 .. code-block:: bash
@@ -356,7 +357,7 @@ Linux
 
      /usr/bin/matrix_convolver --version
 
-If you added the **bin/** directory as described above, calling 
+If you added the :code:`bin/` directory as described above, calling 
 
   .. code-block:: bash
 
@@ -371,18 +372,18 @@ In any case, the call should generate a statement like
      VISR Matrix convolver utility  0.10.0
 
 If there is an error message about a missing shared library (or DLL), you should consult the respective section about installation. 
-In particular this applies Windows, where the **PATH** variable needs to be set accordingly.
+In particular this applies Windows, where the :code:`PATH` variable needs to be set accordingly.
 
 Testing the interactive Python integration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This test ensures that the VISR framework can be used interactively from Python interpreters.
 
-First start a Python 3 interpreter (for example **python** or **ipython**).
-Depending on the system, the binaries might be called **python3** or **ipython3**, respectively
+First start a Python 3 interpreter (for example :code:`python` or :code:`ipython`).
+Depending on the system, the binaries might be called :code:`python3` or :code:`ipython3`, respectively
 It must be the interpreter of the Python distribution you intend to use (e.g., Anaconda).
 
-In the interpreter, try to import the **visr** modules
+In the interpreter, try to import the :code:`visr` modules
   
   .. code-block:: python
     
@@ -395,9 +396,9 @@ In this case, you can check whether the module is loaded from the correct locati
 
     getattr( visr, '__file__' )
 
-The directory of the resulting file path should be **<visr-installation-dir>/python**.
-For example, on Windows this returns **C:\Program Files\VISR 0.10.0\\python\\visr.pyd**.
+The directory of the resulting file path should be :code:`<visr-installation-dir>/python`.
+For example, on Windows this returns :code:`C:\Program Files\VISR 0.10.0\\python\\visr.pyd`.
 
-.. todo:: Add a test with the **python_runner** application to check whether the
-   linked Python library is found and the setting of **PYTHONHOME** is sensible.
+.. todo:: Add a test with the :code:`python_runner` application to check whether the
+   linked Python library is found and the setting of :code:`PYTHONHOME` is sensible.
 
