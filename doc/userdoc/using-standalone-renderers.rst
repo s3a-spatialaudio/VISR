@@ -153,20 +153,20 @@ The command line arguments supported by the **visr_renderer** application are:
 The arguments for the **baseline_renderer** application are identical, except that the :code:`--metadapter-config` option is not supported as explained above.
 
 :code:`--audio-backend` or :code:`-D`
-   The audio interface library to be used. See section :ref:using_standalone_renderers_common_options.
+   The audio interface library to be used. See section :ref:`using_standalone_renderers_common_options`.
 :code:`--audio-ifc-options`:
-   Audio-interface specific options, section :ref:using_standalone_renderers_common_options.
+   Audio-interface specific options, section :ref:`using_standalone_renderers_common_options`.
 :code:`--audio-ifc-option-file`:
-   Audio-interface specific options, section :ref:using_standalone_renderers_common_options.
+   Audio-interface specific options, section :ref:`using_standalone_renderers_common_options`.
 :code:`--sampling-frequency` or :code:`-f`:
-  Sampling frequency in Hz. Default: 48000 Hz. See section :ref:using_standalone_renderers_common_options.
+  Sampling frequency in Hz. Default: 48000 Hz. See section :ref:`using_standalone_renderers_common_options`.
 :code:`--period` or :code:`-p`:
-  The number of samples processed in one iteration of the renderer. Should be a power of 2 (64,128,...,4096,...) . Default: 1024 samples. See section :ref:using_standalone_renderers_common_options.
+  The number of samples processed in one iteration of the renderer. Should be a power of 2 (64,128,...,4096,...) . Default: 1024 samples. See section :ref:`using_standalone_renderers_common_options`.
 :code:`--array-config` or :code:`-c`:
   File path to the loudspeaker configuration file. Path might be relative to the current working directory. Mandatory argument.
   The XML file format is described below in Section :ref:`loudspeaker_configuration_file_format`.
 :code:`--input-channels` or :code:`-i`:
-  The number of audio input channels. This corresponds to the number of single-waveform objects the renderer will process. Mandatory argument. A (case-insensitive) file extension of \c .xml triggers the use of the XML format for parsing.
+  The number of audio input channels. This corresponds to the number of single-waveform objects the renderer will process. Mandatory argument. A (case-insensitive) file extension of :code:`.xml` triggers the use of the XML format for parsing.
 :code:`--output-channels` or :code:`-o`:
   The number of output channels the renderer will put write to. If not given, the number of output channels is determined from the largest logical channel number in the array configuration.
 :code:`--object-eq-sections`:
@@ -332,8 +332,11 @@ Format description
 ''''''''''''''''''
 The root node of the XML file is :code:`<panningConfiguration>`.
 This root element supports the folloring optional attributes:
-* :code:`isInfinite` Whether the loudspeakers are regardes as point sources located on the unit sphere (:code:`false`) or as plane waves, corresponding to an infinite distance (:code:`true`). The default value is :code:`false`.
-* :code:`dimension` Whether the setup is considered as a 2-dimensional configuration (value :code:`2`) or as three-dimensional (:code:`3`, thedefault). In the 2D case, the array is considered in the x-y plane , and the :code:`z` or :code:`el` attributes of the loudspeaker positions are not evaluated. In this case, the triplet specifications consist of two indices only (technically they are pairs, not triplets).
+
+:code:`isInfinite`
+  Whether the loudspeakers are regarded as point sources located on the unit sphere (:code:`false`) or as plane waves, corresponding to an infinite distance (:code:`true`). The default value is :code:`false`.
+:code:`dimension`
+  Whether the setup is considered as a 2-dimensional configuration (value :code:`2`) or as three-dimensional (:code:`3`, thedefault). In the 2D case, the array is considered in the x-y plane , and the :code:`z` or :code:`el` attributes of the loudspeaker positions are not evaluated. In this case, the triplet specifications consist of two indices only (technically they are pairs, not triplets).
 
 Within the :code:`<panningConfiguration>` root element, the following elements are supported:
 
@@ -341,7 +344,7 @@ Within the :code:`<panningConfiguration>` root element, the following elements a
   Represents a reproduction loudspeaker.
   The position  is encoded either in a :code:`<cart>` node representing the cartesian coordinates in the :code:`x`, :code:`y` and :code:`z` attributes (floating point values in meter), or a :code:`<polar>` node with the attributes :code:`az` and :code:`el` (azimuth and elevation, both in degree) and :code:`r` (radius, in meter).
 
-  The :code:`<loudspeaker>` nodes allows for  number of attributes:
+  The :code:`<loudspeaker>` nodes supports for a number of attributes:
 
   * :code:`id` A mandatory, non-empty string identification for the loudspeaker, which must be unique across all :code:`<loudspeaker>` and :code:`<virtualspeaker>` (see below) elements.
     Permitted are alpha-numeric characters, numbers, and the characters "@&()+/:_-".
@@ -660,6 +663,259 @@ that are summed to form two ear signals.
       -D Jack -f 48000 -p 512
 
 Here, the file :code:`bbcrdlr9ch_brirs.wav` contains the 18 BRIRs, with the first nine channels for the left and the remaining channels for the right ear filters.
+
+.. _using_visr_using_standalone_renderers_python_runner:
+
+The python_runner application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This standalone application is an alternative way to run arbitrary VISR components in real-time.
+
+Compared to instantiating the processing from a Python interpreter, this can be easier to control, for example within  a script or when running a device in 'headless mode'.
+
+For obvious reasons, this application requires an installed and correctly configured Python distribution, as described in Section :ref:`installation_python_setup_configuration`. 
+
+Usage
+~~~~~
+The supported options are displayed when started with the :code:`--help` or :code:`-h` option:
+
+.. code-block:: bash
+
+   $> python_runner --help
+     -h [ --help ]                     Show help and usage information.
+     -v [ --version ]                  Display version information.
+     --option-file arg                 Load options from a file. Can also be used 
+                                       with syntax "@<filename>".
+     -D [ --audio-backend ] arg        The audio backend.
+     -f [ --sampling-frequency ] arg   Sampling frequency [Hz]
+     -p [ --period ] arg               Period (blocklength) [Number of samples per
+                                       audio block]
+     -m [ --module-name ] arg          Name of the Python module to be loaded 
+                                       (without path or extension).
+     -c [ --python-class-name ] arg    Name of the Python class (must be a 
+                                       subclass of visr.Component).
+     -n [ --object-name ] arg          Name of the Python class (must be a 
+                                       subclass of visr.Component).
+     -a [ --positional-arguments ] arg Comma-separated list of positional options 
+                                       passed to the class constructor.
+     -k [ --keyword-arguments ] arg    Comma-separated list of named (keyword) 
+                                       options passed to the class constructor.
+     -d [ --module-search-path ] arg   Optional path to search for the Python 
+                                       module (in addition to the default search 
+                                       path (sys.path incl. $PYTHONPATH). Provided as a
+                                       comma-separated list of directories.
+     --audio-ifc-options arg           Audio interface optional configuration.
+     --audio-ifc-option-file arg       Audio interface optional configuration file.
+
+Detailed option description
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The standard options :code:`--help`, :code:`--version`, :code:`--audio-backend`, :code:`sampling-frequency`, `:code:`--period`, `:code:`--audio-ifc-options`, and `:code:`--audio-ifc-option-file` are described in Section :ref:`using_standalone_renderers_common_options`.
+
+The remaining options are:
+
+:code:`--module-name` or :code:`-m`:
+  Specify the name of a Python module that contains the VISR component to be executed.
+  That is, use the module name that would need to be imported in an interactive Python session.
+  The module name must be provided without the file extension.
+  It can be specified either with a full file path, or as a pure module name.
+  In the latter case, the directory containing the module must be on the Python module search
+  path or included in the :code:`--module-search-path` option.
+
+  The module can be in one of several forms:
+
+  * A Python file (normally with extension :code:`.py`) that contains the component class.
+    The module name must be specified without the extension.
+  * A directory containing a multi-file package.
+  * Compiled extension modules implemented in C++. Typical file extesnions are :code:`.so`
+    (Linux and Mac OS X) or :code:`.pyc` (Windows). The module name must be specified without the extension.
+
+  This is a mandatory argument.
+:code:`--python-class-name` or :code:`-c`:
+  The name of the Python class to be instantiated, without the leading namespace name.
+  This class must be derived from :code:`visr.Component`
+  and must be defined in the module :code:`module-name`.
+
+  .. note:: At the moment, only classes in the top-level namespace are supported.
+	    That is, classes of the form :code:`moduleName.submodule.className` cannot be used. 
+
+  This argument is mandatory.	    
+:code:`--object-name` or :code:`-n`:
+  Set a name for the top-level component. This name is used, for example, in error messages
+  and warnings emitted from the component.
+  
+  This argument is optional.
+  If not provided, a default name is used.
+:code:`-a` :code:`--positional-arguments`:
+  Provide a sequence of parameters to the component's constructor as positional arguments.
+
+  The fixed first three arguments to a component constructor, i.e., :code:`context`,
+  :code:`name` and :code:`parent`, do not need top be specified.
+  That means the first value of the sequence is passed to the fourth argument, the second value
+  to the fifth argument, and so on.
+
+  The parameters are passed as a Python tuple.
+  See, e.g., the `Python documentation on tuples <https://docs.python.org/3.7/library/stdtypes.html#typesseq-tuple>`_.
+  Following these conventions, the arguments can be specified as follows:
+
+  * A comma-separated list of values, for example
+
+    .. code-block:: bash
+		    
+       -a "3, 2.7,'foobar'"
+
+    Note that the enclosing double quotes are required to separate the argument to :code:`-a`
+    from other options on the command line.
+    They are strictly necessary only if the parameter sequence contains spaces, but we
+    recommend to use double quotes for consistency.
+
+    If the parameter sequence consists of a single value, a training comma is required.
+    That is, a single positional argument is specified as
+    
+    .. code-block:: bash
+		    
+       -a "3,"
+
+    If two or more arguments are provided, the trailing comma is optional.
+
+  * A comma-separated list of values, enclosed in parentheses.
+    Apart from the additional parentheses, the syntax is identical to the
+    comma-separated lists above.
+    That is, the argument list above would be specified as
+    
+    .. code-block:: bash
+		    
+       -a "(3, 2.7,'foobar' )"
+
+    As above, single arguments require a trailing comma.
+       
+    .. code-block:: bash
+		    
+       -a "(3,)"
+
+  * A tuple constructed using the :code:`tuple()` keyword, that is
+
+    .. code-block:: bash
+
+       -a "tuple(3, 2.7,'foobar' )"
+
+    and in the single-parameter case
+       
+    .. code-block:: bash
+		    
+       -a "tuple(3)"
+
+    That is, no trailing comma is required in this case.
+
+  The :code:`--positional-arguments` option is optional.
+  If it is not provided, no positional arguments are passed to the component's constructor.
+
+:code:`--keyword-arguments` or :code:`-k`:
+  A set of keyword arguments to be passed to the component's constructor.
+  To be provided as a Python dictionary, for example:
+
+  .. code-block:: bash
+		    
+     -k "{ 'argument1': value1, 'argument2': value2, ..., 'argumentN': valueN }"
+
+  .. hint:: As in case of positional arguments, we suggest to enclose the complete argument
+            in double quotes.
+            When following this convention, single quotes can be used for the keywords as
+            :code:`'argument1'` and string parameters without the need for escaping quotes.
+
+  Following Python conventions, keyword arguments must not be provided for arguments already
+  handled by the :code:`--positional-arguments` option.
+  Likewise, keyword arguments must not be provided for the fixed first three constructor
+  arguments of a component: :code:`context`, :code:`name` and :code:`parent`.
+
+  This argument is optional; no keyword arguments are passed to the component if it is not given.
+:code:`--module-search-path` or :code:`-d`:
+  Specifies additional search paths for Python modules.
+
+  To be specified as a comma-separeted list of directory path.
+  
+  These search paths can be used to locate the module containing the component to be run, unless
+  a directory path is passed to the :code:`--module-name` option.
+  In addition, the search paths are evaluated to locate transitive dependencies of the module to be loaded.
+  For example, the path to VISR Python externals can be specidied in this way, thus avoiding the use of
+  the :code:`PYTHONPATH` environment variable, as described in section
+  :ref:`installation_python_setup_configuration`.
+  The additional search paths are added to the Python search path :code:`sys.path` before the main
+  module specified by the :code:`-m` option is loaded. 
+
+  .. todo:: Decide whether the additional paths shall be appended or prepended to the system path.
+	    In the latter case, this could avoid loading another module of the same name by prioritizing the explicitly added paths.
+
+  This argument is optional, no additional search paths are added if the option is not provided.
+  
+Examples
+~~~~~~~~
+
+In this example we use a simple Python-based VISR component :code:`PythonAdder`.
+
+.. code-block:: python
+
+    class PythonAdder( visr.AtomicComponent ):
+      """ General-purpose add block for an arbitrary number of inputs"""
+      def __init__( self, context, name, parent, numInputs, width ):
+      ...
+
+that implements generic addition with :code:`numInputs` signals to be added with
+:code:`width` signals each.
+Here, the component class :code:`PythonAdder` is contained in a source file :code:`pythonAtoms.py`. 
+      
+The :code:`python_runner` can be invoked using positional arguments through
+
+.. code-block:: bash
+
+   $> python_runner -D PortAudio -f 48000 -p 512
+       -m $HOME/VISR/src/python/scripts/pythonAtoms -c PythonAdder -a "3,2"
+
+which creates a :code:`PythonAdder` component with three inputs and a width of two.
+
+The same component is constructed with the keyword argument option as 
+
+.. code-block:: bash
+
+   $> python_runner -D PortAudio -f 48000 -p 512
+       -m $HOME/VISR/src/python/scripts/pythonAtoms -c PythonAdder -k "{'width':2, 'numInputs':3}"
+
+Positional and keyword arguments can also be mixed, as long as the corresponding Python rules are observed:
+
+.. code-block:: bash
+
+   $> python_runner -D PortAudio -f 48000 -p 512
+       -m $HOME/VISR/src/python/scripts/pythonAtoms -c PythonAdder -a "3," -k "{'width':2}"
+
+Note the trailing comma for the positional option.
+
+So far, the examples specified the path to the module explicitly.
+If this path (:code:`$HOME/VISR/src/python/scripts` in the example) is contained in the default Python search path, i.e., :code:`sys.path`, then the pure module name suffices
+	
+.. code-block:: bash
+
+   $> python_runner -D PortAudio -f 48000 -p 512
+       -m pythonAtoms -c PythonAdder -a "3," -k "{'width':2}"
+
+Another way to locate the module is to provide the path through the :code:`module-search-path` option.
+
+.. code-block:: bash
+
+   $> python_runner -D PortAudio -f 48000 -p 512
+       -m pythonAtoms -c PythonAdder -a "3," -k "{'width':2}"
+       --module-search-path $HOME/VISR/src/python/scripts
+
+Finally, the option :code:`--module-search-path` can also be used to locate modules needed by the
+main module. For example, the path to the core VISR modules can be specified in this way, thus
+eradicating the need to add them to the default Python search path, for example by adding them to
+the :code:`PYTHONPATH` variable.
+
+.. code-block:: bash
+
+   $> python_runner -D PortAudio -f 48000 -p 512
+       -m pythonAtoms -c PythonAdder -a "3," -k "{'width':2}"
+       --module-search-path
+       $HOME/VISR/src/python/scripts,/usr/share/visr/python 
+
 
 .. _using_visr_using_standalone_renderers_specific_audio_options:
 
