@@ -707,6 +707,19 @@ The supported options are displayed when started with the :code:`--help` or :cod
      --audio-ifc-options arg           Audio interface optional configuration.
      --audio-ifc-option-file arg       Audio interface optional configuration file.
 
+If the processing is correctly started, a message is displayed on the command line:
+
+.. code-block:: bash
+
+   VISR Python signal flow runner. Press "q<Return>" to quit.
+
+To terminate the :code:`python_runner`, press the "q" key followed by <Return>.
+
+.. note:: On Linux and Mac OS X, the standard program termination via <Ctrl-C> does not work at the moment.
+	  Instead, this key combination is ignored, and Python exception message is shown if the program is
+	  later terminated via "q<Return>".
+	  See issue https://gitlab.eps.surrey.ac.uk/s3a/VISR/issues/23 .
+
 Detailed option description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The standard options :code:`--help`, :code:`--version`, :code:`--audio-backend`, :code:`sampling-frequency`, `:code:`--period`, `:code:`--audio-ifc-options`, and `:code:`--audio-ifc-option-file` are described in Section :ref:`using_standalone_renderers_common_options`.
