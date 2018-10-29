@@ -28,7 +28,7 @@ elif [ -d "/usr/local/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
   PYTHONLIBPATH="${PYTHONHOME}/lib"
 
 # Fall back to the system python (if present) on MacOS >= 10.12
-elif [ -d "/Library/Frameworks/Python.framework/Python.framework/Versions/@PYTHON_MAJOR_MINOR@" ]; then
+elif [ -d "/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@" ]; then
   PYTHONHOME="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
   PYTHONLIBPATH="${PYTHONHOME}/lib"
 else
