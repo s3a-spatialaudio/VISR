@@ -1,5 +1,13 @@
 Changelog for project VISR
 
+Patch release 0.11.2
+--------------------
+
+* Change RPATH handling to allow easier manipulation in Mac OS installers, especially from externals projects.
+* This makes Python externals on MacOS unusable in local builds, they have to be installed.
+* Mac OS installer searches for system-wide installations of the Anaconda Python distibution and Python 3 installed through HomeBrew.
+* Updated documentation for python_runner standalone application
+
 Patch release 0.11.1
 --------------------
 

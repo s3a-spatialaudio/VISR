@@ -6,14 +6,29 @@
 
 # Determine the Python home directory
 
+# First check whether there is a use-local anaconda directory, this has the highest priority.
 if [ -d "${HOME}/anaconda3" ]; then
   PYTHONHOME=${HOME}/anaconda3
   PYTHONLIBPATH="${HOME}/anaconda3/lib"
 elif [ -d "${HOME}/anaconda" ]; then
   PYTHONHOME=${HOME}/anaconda
   PYTHONLIBPATH="${HOME}/anaconda/lib"
+
+# Then check whether there is a system-wide python installation.     
+elif [ -d "/anaconda3" ]; then
+  PYTHONHOME=/anaconda3
+  PYTHONLIBPATH="/anaconda3/lib"
+elif [ -d "/anaconda" ]; then
+  PYTHONHOME=/anaconda
+  PYTHONLIBPATH="/anaconda/lib"
+
+# Check for a Python installed through homebrew.
+elif [ -d "/usr/local/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@" ]; then
+  PYTHONHOME="/usr/local/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
+  PYTHONLIBPATH="${PYTHONHOME}/lib"
+
 # Fall back to the system python (if present) on MacOS >= 10.12
-elif [ -d "/Library/Frameworks/Python.framework" ]; then
+elif [ -d "/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@" ]; then
   PYTHONHOME="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
   PYTHONLIBPATH="${PYTHONHOME}/lib"
 else

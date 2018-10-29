@@ -95,23 +95,16 @@ license above.
 
 Copyright (C) 1999-2011Erik de Castro Lopo <erikd@mega-nerd.com>
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
-(at your option) any later version.
+Project page: http://www.mega-nerd.com/libsndfile
+License statement: http://www.mega-nerd.com/libsndfile/#Licensing
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+libsndfile is released under the terms of the GNU Lesser General Public License, of which there are two versions; version 2.1 (http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) and version 3 (http://www.gnu.org/copyleft/lesser.html). To maximise the compatibility of libsndfile, the user may choose to use libsndfile under either of the above two licenses.
 
 Sndfile libraries uses the FLAC, OGG and VORBIS libraries, whose licenses are shown below.
 
 *** FLAC - Free Lossless Audio Codec ***
+
+https://xiph.org/flac/license.html
 
 Copyright (C) 2001,2002,2003,2004,2005,2006,2007  Josh Coalson
 
@@ -130,6 +123,8 @@ distribution.
 
 
 *** VORBIS ***
+
+https://svn.xiph.org/trunk/vorbis/COPYING
 
 Copyright (c) 2002-2015 Xiph.org Foundation
 
@@ -164,6 +159,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *** OGG ***
 
+https://svn.xiph.org/trunk/ogg/COPYING
+
 Copyright (c) 2002, Xiph.org Foundation
 
 Redistribution and use in source and binary forms, with or without
@@ -196,6 +193,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 *** FFTS ***
 
+https://github.com/anthonix/ffts
+
  Copyright (c) 2012, Anthony M. Blake
  All rights reserved.
 
@@ -224,6 +223,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *** KissFFT ***
 
 Copyright (c) 2003-2010 Mark Borgerding
+
+https://sourceforge.net/projects/kissfft/
+https://github.com/mborgerding/kissfft
+
+SPDX-License-Identifier: BSD-3-Clause
 
 All rights reserved.
 
