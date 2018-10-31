@@ -40,6 +40,11 @@ foreach(LIB_TYPE static shared)
     target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
+
+  # Export the Python version as a compile definition.
+  # This can be extracted by other projects importing this target.
+  target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
+                              VISR_PYTHON_VERSION=${PYTHONLIBS_VERSION_STRING} )
 endforeach()
 
 # Set public headers to be installed for the shared target.
