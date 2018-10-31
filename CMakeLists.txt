@@ -223,6 +223,12 @@ IF( BUILD_PYTHON_BINDINGS )
 
   find_package( PythonLibs REQUIRED )
 
+  # find_package does not detect if the Python include directories are not found.
+  # Checking prevents strange error messages later on.
+  if( NOT DEFINED PYTHONLIBS_VERSION_STRING )
+    message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
+  endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
+
   # As we cannot use the PythonLibsNew package due to possible mismatches of the Python library name,
   # we have to set the Python extensions ourselves (using the same variable names as created by
   # PythonLibsNew.
