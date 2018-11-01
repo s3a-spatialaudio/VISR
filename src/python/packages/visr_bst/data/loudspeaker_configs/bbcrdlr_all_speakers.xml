@@ -1,4 +1,4 @@
-<panningConfiguration>
+<panningConfiguration dimension="3">
   <loudspeaker id="B+045" channel="1">
     <polar az="45.0" el="-22.0" r="2.5897500000000004"/>
   </loudspeaker>
@@ -47,7 +47,7 @@
   <loudspeaker id="M+135" channel="16">
     <polar az="135.0" el="0.0" r="3.00613"/>
   </loudspeaker>
-  <loudspeaker id="M-110" channel="17">
+  <loudspeaker id="M+110" channel="17">
     <polar az="110.0" el="0.0" r="2.4594300000000002"/>
   </loudspeaker>
   <loudspeaker id="M+090" channel="18">
@@ -95,52 +95,64 @@
   <loudspeaker id="T+000" channel="32">
     <polar az="0.0" el="90.0" r="1.297"/>
   </loudspeaker>
-  <triplet l1="M-110" l2="U-110" l3="M-135"/>
-  <triplet l1="U+180" l2="M+135" l3="M-135"/>
-  <triplet l1="M-045" l2="U+000" l3="M+045"/>
-  <triplet l1="M+060" l2="U+090" l3="M+045"/>
-  <triplet l1="M+060" l2="B+045" l3="M+045"/>
-  <triplet l1="U+045" l2="U+090" l3="M+045"/>
-  <triplet l1="B+135" l2="M+060" l3="B+045"/>
-  <triplet l1="U-090" l2="M-110" l3="M-060"/>
-  <triplet l1="U-090" l2="M-110" l3="U-110"/>
-  <triplet l1="U-090" l2="M-045" l3="M-060"/>
-  <triplet l1="U-135" l2="U-110" l3="M-135"/>
-  <triplet l1="U-135" l2="U+180" l3="M-135"/>
-  <triplet l1="U-135" l2="U-110" l3="T+000"/>
-  <triplet l1="U-135" l2="U+180" l3="T+000"/>
-  <triplet l1="U+135" l2="U+180" l3="M+135"/>
-  <triplet l1="U+135" l2="U+180" l3="T+000"/>
-  <triplet l1="B-045" l2="M-045" l3="M-060"/>
-  <triplet l1="M-110" l2="M+060" l3="U+090"/>
-  <triplet l1="M-110" l2="B+135" l3="M+135"/>
-  <triplet l1="M-110" l2="B+135" l3="M+060"/>
-  <triplet l1="U+030" l2="U+000" l3="M+045"/>
-  <triplet l1="U+030" l2="U+045" l3="M+045"/>
-  <triplet l1="U+030" l2="U+000" l3="T+000"/>
-  <triplet l1="U+030" l2="U+045" l3="T+000"/>
-  <triplet l1="U-045" l2="U-090" l3="M-045"/>
-  <triplet l1="U-045" l2="U-110" l3="T+000"/>
-  <triplet l1="U-045" l2="U-090" l3="U-110"/>
-  <triplet l1="U+110" l2="U+135" l3="M+135"/>
-  <triplet l1="U+110" l2="M-110" l3="M+135"/>
-  <triplet l1="U+110" l2="M-110" l3="U+090"/>
-  <triplet l1="U+110" l2="U+135" l3="T+000"/>
-  <triplet l1="U+110" l2="U+045" l3="T+000"/>
-  <triplet l1="U+110" l2="U+045" l3="U+090"/>
-  <triplet l1="B-135" l2="M-110" l3="M-060"/>
-  <triplet l1="B-135" l2="B-045" l3="M-060"/>
-  <triplet l1="B-135" l2="M-110" l3="M-135"/>
-  <triplet l1="B+000" l2="M-045" l3="M+045"/>
-  <triplet l1="B+000" l2="B+045" l3="M+045"/>
-  <triplet l1="B+000" l2="B-045" l3="B+045"/>
-  <triplet l1="B+000" l2="B-045" l3="M-045"/>
-  <triplet l1="U-030" l2="M-045" l3="U+000"/>
-  <triplet l1="U-030" l2="U-045" l3="M-045"/>
-  <triplet l1="U-030" l2="U+000" l3="T+000"/>
+  <triplet l1="U-090" l2="U-045" l3="T+000"/>
+  <triplet l1="U+180" l2="U-135" l3="T+000"/>
+  <triplet l1="U+180" l2="U+135" l3="T+000"/>
+  <triplet l1="U+090" l2="U+045" l3="T+000"/>
+  <triplet l1="B-135" l2="M-135" l3="M+180"/>
+  <triplet l1="M-030" l2="B+000" l3="M+000"/>
+  <triplet l1="B-045" l2="B-135" l3="M-090"/>
+  <triplet l1="B-045" l2="B-135" l3="B+000"/>
+  <triplet l1="B-045" l2="M-030" l3="B+000"/>
+  <triplet l1="B-045" l2="M-030" l3="M-045"/>
+  <triplet l1="U-110" l2="U-135" l3="T+000"/>
+  <triplet l1="U-110" l2="U-090" l3="T+000"/>
+  <triplet l1="M-060" l2="U-090" l3="M-090"/>
+  <triplet l1="M-060" l2="M-045" l3="U-045"/>
+  <triplet l1="M-060" l2="U-090" l3="U-045"/>
+  <triplet l1="M-060" l2="B-045" l3="M-090"/>
+  <triplet l1="M-060" l2="B-045" l3="M-045"/>
+  <triplet l1="B+135" l2="B-135" l3="B+000"/>
+  <triplet l1="B+135" l2="M+135" l3="M+180"/>
+  <triplet l1="B+135" l2="B-135" l3="M+180"/>
+  <triplet l1="M+030" l2="B+000" l3="M+000"/>
+  <triplet l1="B+045" l2="B+135" l3="M+090"/>
+  <triplet l1="B+045" l2="B+135" l3="B+000"/>
+  <triplet l1="B+045" l2="M+030" l3="B+000"/>
+  <triplet l1="B+045" l2="M+030" l3="M+045"/>
   <triplet l1="U-030" l2="U-045" l3="T+000"/>
-  <triplet l1="B-135" l2="B+135" l3="M+135"/>
-  <triplet l1="B-135" l2="M+135" l3="M-135"/>
-  <triplet l1="B-135" l2="B-045" l3="B+045"/>
-  <triplet l1="B-135" l2="B+135" l3="B+045"/>
+  <triplet l1="U-030" l2="U+000" l3="T+000"/>
+  <triplet l1="U+110" l2="U+135" l3="T+000"/>
+  <triplet l1="U+110" l2="U+090" l3="T+000"/>
+  <triplet l1="M+060" l2="M+045" l3="U+045"/>
+  <triplet l1="M+060" l2="U+090" l3="M+090"/>
+  <triplet l1="M+060" l2="U+090" l3="U+045"/>
+  <triplet l1="M+060" l2="B+045" l3="M+090"/>
+  <triplet l1="M+060" l2="B+045" l3="M+045"/>
+  <triplet l1="M-110" l2="B-135" l3="M-090"/>
+  <triplet l1="M-110" l2="B-135" l3="M-135"/>
+  <triplet l1="U+030" l2="U+045" l3="T+000"/>
+  <triplet l1="U+030" l2="U+000" l3="T+000"/>
+  <triplet l1="M+110" l2="B+135" l3="M+090"/>
+  <triplet l1="M+110" l2="B+135" l3="M+135"/>
+  <triplet l1="U+180" l2="M-135" l3="U-135"/>
+  <triplet l1="U+180" l2="M-135" l3="M+180"/>
+  <triplet l1="U+180" l2="M+135" l3="M+180"/>
+  <triplet l1="U+180" l2="M+135" l3="U+135"/>
+  <triplet l1="U-030" l2="M-030" l3="M-045"/>
+  <triplet l1="U-030" l2="M-045" l3="U-045"/>
+  <triplet l1="U-030" l2="U+000" l3="M+000"/>
+  <triplet l1="U-030" l2="M-030" l3="M+000"/>
+  <triplet l1="M-110" l2="U-110" l3="U-090"/>
+  <triplet l1="M-110" l2="U-090" l3="M-090"/>
+  <triplet l1="M-110" l2="M-135" l3="U-135"/>
+  <triplet l1="M-110" l2="U-110" l3="U-135"/>
+  <triplet l1="U+030" l2="M+030" l3="M+045"/>
+  <triplet l1="U+030" l2="M+045" l3="U+045"/>
+  <triplet l1="U+030" l2="U+000" l3="M+000"/>
+  <triplet l1="U+030" l2="M+030" l3="M+000"/>
+  <triplet l1="M+110" l2="U+110" l3="U+090"/>
+  <triplet l1="M+110" l2="U+090" l3="M+090"/>
+  <triplet l1="M+110" l2="M+135" l3="U+135"/>
+  <triplet l1="M+110" l2="U+110" l3="U+135"/>
 </panningConfiguration>

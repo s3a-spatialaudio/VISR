@@ -1,4 +1,4 @@
-<panningConfiguration>
+<panningConfiguration dimension="3">
   <loudspeaker id="M+000" channel="1">
     <polar az="0.0" el="0.0" r="1.994"/>
   </loudspeaker>
@@ -31,21 +31,30 @@
   </loudspeaker>
   <virtualspeaker id="VotD">
     <polar az="0.0" el="-90.0" r="1.0"/>
+    <route lspId="M+030" gainDB="-16.9018"/>
+    <route lspId="M-030" gainDB="-16.9018"/>
+    <route lspId="M+000" gainDB="-16.9018"/>
+    <route lspId="M+090" gainDB="-16.9018"/>
+    <route lspId="M-090" gainDB="-16.9018"/>
+    <route lspId="M+135" gainDB="-16.9018"/>
+    <route lspId="M-135" gainDB="-16.9018"/>
   </virtualspeaker>
-  <triplet l1="U+180" l2="U+045" l3="M+135"/>
-  <triplet l1="M+090" l2="U+045" l3="M+135"/>
-  <triplet l1="M+090" l2="U+045" l3="M+030"/>
-  <triplet l1="M+090" l2="VotD" l3="M+135"/>
-  <triplet l1="M+090" l2="VotD" l3="M+030"/>
-  <triplet l1="M-030" l2="VotD" l3="M+030"/>
-  <triplet l1="M-030" l2="VotD" l3="M-090"/>
-  <triplet l1="M-135" l2="U+180" l3="M+135"/>
-  <triplet l1="M-135" l2="VotD" l3="M+135"/>
-  <triplet l1="M-135" l2="VotD" l3="M-090"/>
-  <triplet l1="U-045" l2="U+180" l3="U+045"/>
+  <triplet l1="M+135" l2="VotD" l3="M+090"/>
+  <triplet l1="M-135" l2="M-090" l3="VotD"/>
+  <triplet l1="M-135" l2="M+135" l3="U+180"/>
+  <triplet l1="M-135" l2="M+135" l3="VotD"/>
+  <triplet l1="M-030" l2="VotD" l3="M+000"/>
+  <triplet l1="M-030" l2="M-090" l3="VotD"/>
+  <triplet l1="M+030" l2="U+045" l3="M+090"/>
+  <triplet l1="M+030" l2="U+045" l3="M+000"/>
+  <triplet l1="M+030" l2="VotD" l3="M+000"/>
+  <triplet l1="M+030" l2="VotD" l3="M+090"/>
   <triplet l1="U-045" l2="M-030" l3="M-090"/>
+  <triplet l1="U-045" l2="U+045" l3="U+180"/>
+  <triplet l1="U-045" l2="U+045" l3="M+000"/>
+  <triplet l1="U-045" l2="M-030" l3="M+000"/>
+  <triplet l1="M+135" l2="U+045" l3="M+090"/>
+  <triplet l1="M+135" l2="U+045" l3="U+180"/>
   <triplet l1="U-045" l2="M-135" l3="M-090"/>
   <triplet l1="U-045" l2="M-135" l3="U+180"/>
-  <triplet l1="U-045" l2="M-030" l3="M+030"/>
-  <triplet l1="U-045" l2="U+045" l3="M+030"/>
 </panningConfiguration>

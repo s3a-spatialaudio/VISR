@@ -1,4 +1,4 @@
-<panningConfiguration>
+<panningConfiguration dimension="3">
   <loudspeaker id="M+030" channel="1">
     <polar az="30.0" el="0.0" r="2.37201"/>
   </loudspeaker>
@@ -22,15 +22,22 @@
   </loudspeaker>
   <virtualspeaker id="VotD">
     <polar az="0.0" el="-90.0" r="1.0"/>
+    <route lspId="M+030" gainDB="-13.9794"/>
+    <route lspId="M-030" gainDB="-13.9794"/>
+    <route lspId="M+000" gainDB="-13.9794"/>
+    <route lspId="M+110" gainDB="-13.9794"/>
+    <route lspId="M-110" gainDB="-13.9794"/>
   </virtualspeaker>
-  <triplet l1="U+030" l2="M+030" l3="M+110"/>
-  <triplet l1="U-030" l2="M-030" l3="M-110"/>
   <triplet l1="VotD" l2="M-110" l3="M+110"/>
-  <triplet l1="VotD" l2="M+030" l3="M+110"/>
-  <triplet l1="VotD" l2="M-030" l3="M+030"/>
-  <triplet l1="VotD" l2="M-030" l3="M-110"/>
-  <triplet l1="U-030" l2="M-110" l3="M+110"/>
+  <triplet l1="M+030" l2="VotD" l3="M+110"/>
+  <triplet l1="M+030" l2="VotD" l3="M+000"/>
+  <triplet l1="M+030" l2="U+030" l3="M+110"/>
+  <triplet l1="M+030" l2="U+030" l3="M+000"/>
+  <triplet l1="M-030" l2="VotD" l3="M+000"/>
+  <triplet l1="M-030" l2="VotD" l3="M-110"/>
+  <triplet l1="U-030" l2="M-030" l3="M-110"/>
+  <triplet l1="U-030" l2="U+030" l3="M+000"/>
+  <triplet l1="U-030" l2="M-030" l3="M+000"/>
   <triplet l1="U-030" l2="U+030" l3="M+110"/>
-  <triplet l1="U-030" l2="M-030" l3="M+030"/>
-  <triplet l1="U-030" l2="U+030" l3="M+030"/>
+  <triplet l1="U-030" l2="M-110" l3="M+110"/>
 </panningConfiguration>
