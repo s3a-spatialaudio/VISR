@@ -9,21 +9,24 @@
 # Define paths needed for sphinx/autodoc documentation
 
 # The path containing extension packages written in Python, for example visr_bst.
-set( VISR_PYTHON_PACKAGE_PATH ${PROJECT_SOURCE_DIR}/src/python/packages} )
+set( VISR_PYTHON_PACKAGE_PATH ${PROJECT_SOURCE_DIR}/src/python/packages )
 # Path containing the VISR Python externals (in C++)
 # We use visrpython to locate the directory, which also contains the other externals.
 set( VISR_PYTHON_BINARY_PATH $<TARGET_FILE_DIR:visrpython> )
 # Define the separator between multiple directories in environment variables, e.g., PATH
-# or PYTHONPATH. We would prefer a CMake-provided soultion.
+# or PYTHONPATH. We would prefer a CMake-provided solution.
 if( WIN32 )
   set( VISR_ENVIRONMENT_PATH_SEPARATOR ";" ) 
 else( WIN32 )
   set( VISR_ENVIRONMENT_PATH_SEPARATOR ":" )
 endif( WIN32 )
 set( VISR_PYTHON_PATH ${VISR_PYTHON_BINARY_PATH}${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH})
-# Set the dependencies needed to build the documentation. For sphinx.autodoc, Python externals need to be built before the documentation can be extracted.
-set( VISR_USERDOC_DEPENDENCIES visrpython rclpython )
-set( VISR_APIDOC_DEPENDENCIES doxygen-doc visrpython )
+# Set the dependencies needed to build the documentation. For sphinx.autodoc,
+# the Python externals need to be built before the documentation can be extracted.
+# We use the meta-target 'pythonexternals' that combines all externals,
+# defined in ${CMAKE_SOURCE_DIR}/src/python/CMakeLists.txt
+set( VISR_USERDOC_DEPENDENCIES pythonexternals )
+set( VISR_APIDOC_DEPENDENCIES doxygen-doc pythonexternals )
 
 find_package(Doxygen)
 if(NOT DOXYGEN_FOUND)
