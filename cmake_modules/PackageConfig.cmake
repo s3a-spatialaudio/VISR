@@ -111,9 +111,11 @@ set(CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/package_resources/welcome.
 
 
 # Install Python example scripts and templates
-install( DIRECTORY src/python/templates DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_templates )
-install( DIRECTORY src/python/packages/visr_bst DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_bst )
-install( DIRECTORY src/python/packages/metadapter DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_metadapter )
+if( BUILD_PYTHON_BINDINGS )
+  install( DIRECTORY src/python/templates DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_templates )
+  install( DIRECTORY src/python/packages/visr_bst DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_bst )
+  install( DIRECTORY src/python/packages/metadapter DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_metadapter )
+endif( BUILD_PYTHON_BINDINGS )
 
 # CPack must be included after all install directives and CPACK_ variable definitions.
 include( CPack )
@@ -125,7 +127,9 @@ include( CPack )
 cpack_add_install_type( default DISPLAY_NAME "Default" )
 cpack_add_install_type( developer DISPLAY_NAME "Developer" )
 cpack_add_install_type( full DISPLAY_NAME "Full" )
-cpack_add_install_type( python DISPLAY_NAME "Python developer" )
+if( BUILD_PYTHON_BINDINGS )
+  cpack_add_install_type( python DISPLAY_NAME "Python developer" )
+endif( BUILD_PYTHON_BINDINGS )
 
 cpack_add_component( base
                      DISPLAY_NAME "Base"
@@ -185,6 +189,7 @@ else( BUILD_INSTALL_STATIC_LIBRARIES )
                      )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
+if( BUILD_PYTHON_BINDINGS )
 cpack_add_component( python_externals
                     DISPLAY_NAME "Python Externals"
                     DESCRIPTION "Python modules to access the VISR functionality from Python"
@@ -218,6 +223,7 @@ cpack_add_component( python_templates
                     DEPENDS python_externals 
                     INSTALL_TYPES python full
                    )
+endif( BUILD_PYTHON_BINDINGS )
 
 cpack_add_component_group( documentation
                           DISPLAY_NAME "Documentation"
