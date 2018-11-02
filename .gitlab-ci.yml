@@ -3,7 +3,6 @@ stages:
   - config
   - build
   - test
-  - documentation
   - package
   - deploy
   # - cleanup
@@ -14,6 +13,28 @@ stages:
 #     - build/
 # variables:
 #   CI_DEBUG_TRACE: "true"
+
+init-macosx-core:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_core
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
+      # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
+  allow_failure: true
 
 init-macosx-py36:
   stage: initial
@@ -59,6 +80,27 @@ init-macosx-py37:
       # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
   allow_failure: true
 
+init-windows-core:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_core
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
+  allow_failure: true
+
 init-windows-py36:
   stage: initial
   script:
@@ -101,10 +143,10 @@ init-windows-py37:
       - build_py37/
   allow_failure: true
 
-init-linux:
+init-linux-core:
   stage: initial
   script:
-    - cmake -E make_directory build
+    - cmake -E make_directory build_core
   only:
     - master
     - develop
@@ -114,10 +156,29 @@ init-linux:
     - linux
   artifacts:
     paths:
-      - build/
+      - build_core/
   cache:
     paths:
-      - build/
+      - build_core/
+  allow_failure: true
+
+init-linux-16:
+  stage: initial
+  script:
+    - cmake -E make_directory build_16
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build_16/
+  cache:
+    paths:
+      - build_16/
   allow_failure: true
 
 init-linux-18:
@@ -139,15 +200,14 @@ init-linux-18:
       - build_18/
   allow_failure: true
 
-
 # CMake Configuration:
 
-linux-arch-config:
+linux-arch-config-core:
   stage: config
   dependencies:
-    - init-linux
+    - init-linux-core
   script:
-    - cmake -E chdir build/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_core/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_JACK_SUPPORT=ON ..
   only:
     - master
     - develop
@@ -157,10 +217,31 @@ linux-arch-config:
     - linux
   artifacts:
     paths:
-      - build/
+      - build_core/
   cache:
     paths:
-      - build/
+      - build_core/
+  allow_failure: true
+
+linux-arch-config-16:
+  stage: config
+  dependencies:
+    - init-linux-16
+  script:
+    - cmake -E chdir build_16/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build_16/
+  cache:
+    paths:
+      - build_16/
   allow_failure: true
 
 linux-arch-config-18:
@@ -182,6 +263,27 @@ linux-arch-config-18:
   cache:
     paths:
       - build_18/
+  allow_failure: true
+
+windows-arch-config-core:
+  stage: config
+  dependencies:
+    - init-windows-core
+  script:
+    - cmake -E chdir build_core/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_core
+  cache:
+    paths:
+      - build_core
   allow_failure: true
 
 windows-arch-config-py36:
@@ -224,6 +326,27 @@ windows-arch-config-py37:
   cache:
     paths:
       - build_py37/
+  allow_failure: true
+
+macosx-arch-config-core:
+  stage: config
+  dependencies:
+    - init-macosx-core
+  script:
+    - cmake -E chdir build_core/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_JACK_SUPPORT=ON ..
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
   allow_failure: true
 
 macosx-arch-config-py36:
@@ -270,12 +393,12 @@ macosx-arch-config-py37:
 
 # Build:
 
-linux-arch-build:
+linux-arch-build-core:
   stage: build
   dependencies:
-    - linux-arch-config
+    - linux-arch-config-core
   script:
-    - cmake --build build/ --target --config Release
+    - cmake --build build_core/ --target --config Release
   only:
     - master
     - develop
@@ -285,10 +408,31 @@ linux-arch-build:
     - linux
   artifacts:
     paths:
-      - build/
+      - build_core/
   cache:
     paths:
-      - build/
+      - build_core/
+  allow_failure: true
+
+linux-arch-build-16:
+  stage: build
+  dependencies:
+    - linux-arch-config-16
+  script:
+    - cmake --build build_16/ --target --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build_16/
+  cache:
+    paths:
+      - build_16/
   allow_failure: true
 
 linux-arch-build-18:
@@ -310,6 +454,27 @@ linux-arch-build-18:
   cache:
     paths:
       - build_18/
+  allow_failure: true
+
+windows-arch-build-core:
+  stage: build
+  dependencies:
+    - windows-arch-config-core
+  script:
+    - cmake --build build_core/ --target --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
   allow_failure: true
 
 windows-arch-build-py36:
@@ -352,6 +517,27 @@ windows-arch-build-py37:
   cache:
     paths:
       - build_py37/
+  allow_failure: true
+
+macosx-arch-build-core:
+  stage: build
+  dependencies:
+    - macosx-arch-config-core
+  script:
+    - cmake --build build_core/ --target --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
   allow_failure: true
 
 macosx-arch-build-py36:
@@ -401,9 +587,9 @@ macosx-arch-build-py37:
 linux-arch-test:
   stage: test
   dependencies:
-    - linux-arch-build
+    - linux-arch-build-16
   script:
-    - cmake --build build/ --target test --config Release
+    - cmake --build build_16/ --target test --config Release
   only:
     - master
     - develop
@@ -419,7 +605,7 @@ linux-arch-test:
   allow_failure: true
   cache:
     paths:
-      - build/
+      - build_16/
 
 linux-arch-test-18:
   stage: test
@@ -489,79 +675,14 @@ macosx-arch-test:
 #     paths:
 #       - build/
 
-  # Documentation
-
-linux-arch-doc:
-  stage: documentation
-  dependencies:
-    - linux-arch-config
-  script:
-    - cmake --build build/ --target doc
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build/
-  cache:
-    paths:
-      - build/
-  allow_failure: true
-
-windows-arch-doc:
-  stage: documentation
-  dependencies:
-    - windows-arch-config-py36
-  script:
-    - cmake --build build_py37/ --target doc
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py36/
-  cache:
-    paths:
-      - build_py36/
-  allow_failure: true
-
-macosx-arch-doc:
-  stage: documentation
-  dependencies:
-    - macosx-arch-config-py36
-  script:
-    - cmake --build build_py36/ --target doc
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py36/
-  cache:
-    paths:
-      - build_py36/
-  allow_failure: true
-
 # Package - dependencies on build , test and package
 
-linux-arch-package:
+linux-arch-package-core:
   stage: package
   dependencies:
-    - linux-arch-build
+    - linux-arch-build-core
   script:
-    - cmake --build build/ --target package --config Release
+    - cmake --build build_core/ --target package --config Release
   only:
     - master
     - develop
@@ -571,10 +692,31 @@ linux-arch-package:
     - linux
   artifacts:
     paths:
-      - build/
+      - build_core/
   cache:
     paths:
-      - build/
+      - build_core/
+  allow_failure: true
+
+linux-arch-package-16:
+  stage: package
+  dependencies:
+    - linux-arch-build-16
+  script:
+    - cmake --build build_16/ --target package --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - linux
+  artifacts:
+    paths:
+      - build_16/
+  cache:
+    paths:
+      - build_16/
   allow_failure: true
 
 linux-arch-package-18:
@@ -596,6 +738,27 @@ linux-arch-package-18:
   cache:
     paths:
       - build_18/
+  allow_failure: true
+
+windows-arch-package-core:
+  stage: package
+  dependencies:
+    - windows-arch-build-core
+  script:
+    - cmake --build build_core/ --target package --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
   allow_failure: true
 
 windows-arch-package-py36:
@@ -638,6 +801,27 @@ windows-arch-package-py37:
   cache:
     paths:
       - build_py37/
+  allow_failure: true
+
+macosx-arch-package-core:
+  stage: package
+  dependencies:
+    - macosx-arch-build-core
+  script:
+    - cmake --build build_core/ --target package --config Release
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - macosx
+  artifacts:
+    paths:
+      - build_core/
+  cache:
+    paths:
+      - build_core/
   allow_failure: true
 
 macosx-arch-package-py36:
@@ -683,24 +867,45 @@ macosx-arch-package-py37:
   allow_failure: true
 
 # For internal, private deployment
-linux-arch-deploy-int:
-  stage: deploy
-  dependencies:
-    - linux-arch-package
-  script:
-    - rsync --recursive --delete build/doc/apidoc /vol/vssp/dataweb/data/s3a/public/VISR-API/
-    - rsync --recursive --delete build/doc/userdoc /vol/vssp/dataweb/data/s3a/public/VISR-API/
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build/
-  cache:
-    paths:
-      - build/
-  allow_failure: true
+# linux-arch-deploy-int-master:
+#   stage: deploy
+#   script:
+#     # Windows
+#     - cd /vol/vssp/dataweb/data/s3a/public/VISR/visr_installers
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=windows-arch-package-py36" > windows/windows-arch-package-py36.zip && unzip -o windows/windows-arch-package-py36.zip -d windows/
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=windows-arch-package-py37" > windows/windows-arch-package-py37.zip && unzip -o windows/windows-arch-package-py37.zip -d windows/
+#
+#    # Macosx
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=macosx-arch-package-py36" > macosx/macosx-arch-package-py36.zip && unzip -o macosx/macosx-arch-package-py36.zip -d macosx/
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=macosx-arch-package-py37" > macosx/macosx-arch-package-py37.zip && unzip -o macosx/macosx-arch-package-py37.zip -d macosx/
+#
+#    # Linux
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=linux-arch-package-16" > linux/linux-arch-package-16.zip && unzip -o linux/linux-arch-package-16.zip -d linux/
+#     # - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/master/download?job=linux-arch-package-18" > linux/linux-arch-package-18.zip && unzip -o linux/linux-arch-package-18.zip -d linux/
+#   only:
+#     - master
+#   tags:
+#     - linux
+#   allow_failure: true
+
+# For internal, private deployment
+# linux-arch-deploy-int-experimental:
+#   stage: deploy
+#   script:
+#     # Windows
+#     - cd /vol/vssp/dataweb/data/s3a/public/VISR/visr_installers
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=windows-arch-package-py36" > windows/windows-arch-package-py36.zip && unzip -o windows/windows-arch-package-py36.zip -d windows/
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=windows-arch-package-py37" > windows/windows-arch-package-py37.zip && unzip -o windows/windows-arch-package-py37.zip -d windows/
+#
+#    # Macosx
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=macosx-arch-package-py36" > macosx/macosx-arch-package-py36.zip && unzip -o macosx/macosx-arch-package-py36.zip -d macosx/
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=macosx-arch-package-py37" > macosx/macosx-arch-package-py37.zip && unzip -o macosx/macosx-arch-package-py37.zip -d macosx/
+#
+#    # Linux
+#     - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=linux-arch-package-16" > linux/linux-arch-package-16.zip && unzip -o linux/linux-arch-package-16.zip -d linux/
+#     # - curl -XGET -L --header "PRIVATE-TOKEN:pGxrNG6gYyfiU7F4SkVz" "http://gitlab.eps.surrey.ac.uk/s3a/VISR/-/jobs/artifacts/feature/experimental-ci/download?job=linux-arch-package-18" > linux/linux-arch-package-18.zip && unzip -o linux/linux-arch-package-18.zip -d linux/
+#   only:
+#     - feature/experimental-ci
+#   tags:
+#     - linux
+#   allow_failure: true
