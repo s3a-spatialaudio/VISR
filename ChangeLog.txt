@@ -3,6 +3,13 @@ Changelog for project VISR
 Patch release 0.11.3
 --------------------
 
+* FIX: Fixed package generation if BUILD_PYTHON_SUPPORT is deactivated.
+* FIX: Activated native Jack audio interface support on GitLab-CI for Linux and Mac OS X.
+* Cleaned up GitLab-CI configuration, worked around caching problem.
+
+Patch release 0.11.3
+--------------------
+
 * FIX: Resolved problem with Python3.7 on Mac OS X (Bug #24 Python 3.7 support on Mac OS faulty).
   through updating Pybind11 to version 2.2.4
 * FIX: Fixed BBC BRIR loudspeaker configuration files (duplicated labels for system G, center speaker M+000 missing in most configurations)
