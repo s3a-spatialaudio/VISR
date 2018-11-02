@@ -1,4 +1,5 @@
 stages:
+  - startup
   - initial
   - config
   - build
@@ -12,10 +13,14 @@ stages:
 #   paths:
 #     - build/
 # variables:
-#   CI_DEBUG_TRACE: "true"
+#   CI_DEBUG_TRACE: "true
 
 init-macosx-core:
   stage: initial
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   script:
     # Crude way to remove and make sure directory is removed before creating a new one.
     # - cmake -E remove_directory build
@@ -30,14 +35,18 @@ init-macosx-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
       # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
   allow_failure: true
 
 init-macosx-py36:
   stage: initial
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   script:
     # Crude way to remove and make sure directory is removed before creating a new one.
     # - cmake -E remove_directory build
@@ -52,14 +61,18 @@ init-macosx-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
       # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
   allow_failure: true
 
 init-macosx-py37:
   stage: initial
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   script:
     # Crude way to remove and make sure directory is removed before creating a new one.
     # - cmake -E remove_directory build
@@ -74,9 +87,9 @@ init-macosx-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
       # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
   allow_failure: true
 
@@ -96,9 +109,9 @@ init-windows-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 init-windows-py36:
@@ -117,9 +130,9 @@ init-windows-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 init-windows-py37:
@@ -138,13 +151,17 @@ init-windows-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 init-linux-core:
   stage: initial
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   script:
     - cmake -E make_directory build_core
   only:
@@ -157,13 +174,17 @@ init-linux-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 init-linux-16:
   stage: initial
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   script:
     - cmake -E make_directory build_16
   only:
@@ -176,13 +197,17 @@ init-linux-16:
   artifacts:
     paths:
       - build_16/
-  cache:
-    paths:
-      - build_16/
+  # cache:
+  #   paths:
+  #     - build_16/
   allow_failure: true
 
 init-linux-18:
   stage: initial
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   script:
     - cmake -E make_directory build_18
   only:
@@ -195,19 +220,23 @@ init-linux-18:
   artifacts:
     paths:
       - build_18/
-  cache:
-    paths:
-      - build_18/
+  # cache:
+  #   paths:
+  #     - build_18/
   allow_failure: true
 
 # CMake Configuration:
 
 linux-arch-config-core:
   stage: config
+  before_script:
+    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
+    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
+    - if [ -d build_core ]; then rm -Rf build_core; fi
   dependencies:
     - init-linux-core
   script:
-    - cmake -E chdir build_core/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_core/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_USE_JACK=ON ..
   only:
     - master
     - develop
@@ -218,9 +247,9 @@ linux-arch-config-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 linux-arch-config-16:
@@ -228,7 +257,7 @@ linux-arch-config-16:
   dependencies:
     - init-linux-16
   script:
-    - cmake -E chdir build_16/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_16/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_USE_JACK=ON ..
   only:
     - master
     - develop
@@ -239,9 +268,9 @@ linux-arch-config-16:
   artifacts:
     paths:
       - build_16/
-  cache:
-    paths:
-      - build_16/
+  # cache:
+  #   paths:
+  #     - build_16/
   allow_failure: true
 
 linux-arch-config-18:
@@ -249,7 +278,7 @@ linux-arch-config-18:
   dependencies:
     - init-linux-18
   script:
-    - cmake -E chdir build_18/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_18/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_USE_JACK=ON ..
   only:
     - master
     - develop
@@ -260,9 +289,9 @@ linux-arch-config-18:
   artifacts:
     paths:
       - build_18/
-  cache:
-    paths:
-      - build_18/
+  # cache:
+  #   paths:
+  #     - build_18/
   allow_failure: true
 
 windows-arch-config-core:
@@ -281,9 +310,9 @@ windows-arch-config-core:
   artifacts:
     paths:
       - build_core
-  cache:
-    paths:
-      - build_core
+  # cache:
+  #   paths:
+  #     - build_core
   allow_failure: true
 
 windows-arch-config-py36:
@@ -302,9 +331,9 @@ windows-arch-config-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 windows-arch-config-py37:
@@ -323,9 +352,9 @@ windows-arch-config-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 macosx-arch-config-core:
@@ -333,7 +362,7 @@ macosx-arch-config-core:
   dependencies:
     - init-macosx-core
   script:
-    - cmake -E chdir build_core/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_core/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_USE_JACK=ON ..
   only:
     - master
     - develop
@@ -344,9 +373,9 @@ macosx-arch-config-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 macosx-arch-config-py36:
@@ -354,7 +383,7 @@ macosx-arch-config-py36:
   dependencies:
     - init-macosx-py36
   script:
-    - cmake -E chdir build_py36/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py36/lib/libpython3.6m.dylib -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_py36/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py36/lib/libpython3.6m.dylib -DBUILD_USE_JACK=ON ..
   only:
     - master
     - develop
@@ -365,9 +394,9 @@ macosx-arch-config-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 macosx-arch-config-py37:
@@ -375,7 +404,7 @@ macosx-arch-config-py37:
   dependencies:
     - init-macosx-py37
   script:
-    - cmake -E chdir build_py37/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py37/include/python3.7m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_JACK_SUPPORT=ON ..
+    - cmake -E chdir build_py37/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py37/include/python3.7m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_USE_JACK=ON ..
   only:
     - master
     - develop
@@ -386,9 +415,9 @@ macosx-arch-config-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 # Build:
@@ -408,10 +437,10 @@ linux-arch-build-core:
     - linux
   artifacts:
     paths:
-      - build_core/
-  cache:
-    paths:
-      - build_core/
+  #     - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 linux-arch-build-16:
@@ -430,9 +459,9 @@ linux-arch-build-16:
   artifacts:
     paths:
       - build_16/
-  cache:
-    paths:
-      - build_16/
+  # cache:
+  #   paths:
+  #     - build_16/
   allow_failure: true
 
 linux-arch-build-18:
@@ -451,9 +480,9 @@ linux-arch-build-18:
   artifacts:
     paths:
       - build_18/
-  cache:
-    paths:
-      - build_18/
+  # cache:
+  #   paths:
+  #     - build_18/
   allow_failure: true
 
 windows-arch-build-core:
@@ -472,9 +501,9 @@ windows-arch-build-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 windows-arch-build-py36:
@@ -493,9 +522,9 @@ windows-arch-build-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 windows-arch-build-py37:
@@ -514,9 +543,9 @@ windows-arch-build-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 macosx-arch-build-core:
@@ -535,9 +564,9 @@ macosx-arch-build-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 macosx-arch-build-py36:
@@ -556,9 +585,9 @@ macosx-arch-build-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 macosx-arch-build-py37:
@@ -577,9 +606,9 @@ macosx-arch-build-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 # Test:
@@ -603,9 +632,9 @@ linux-arch-test:
     expire_in: 1 week
   # TEMP REMOVE THIS when tests are finished - TEMP
   allow_failure: true
-  cache:
-    paths:
-      - build_16/
+  # cache:
+  #   paths:
+  #     - build_16/
 
 linux-arch-test-18:
   stage: test
@@ -626,9 +655,9 @@ linux-arch-test-18:
     expire_in: 1 week
   # TEMP REMOVE THIS when tests are finished - TEMP
   allow_failure: true
-  cache:
-    paths:
-      - build_18/
+  # cache:
+  #   paths:
+  #     - build_18/
 
 macosx-arch-test:
   stage: test
@@ -649,9 +678,9 @@ macosx-arch-test:
     expire_in: 1 week
   # TEMP REMOVE THIS when tests are finished - TEMP
   allow_failure: true
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
 
 # windows-arch-test:
 #   stage: test
@@ -693,9 +722,9 @@ linux-arch-package-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 linux-arch-package-16:
@@ -714,9 +743,9 @@ linux-arch-package-16:
   artifacts:
     paths:
       - build_16/
-  cache:
-    paths:
-      - build_16/
+  # cache:
+  #   paths:
+  #     - build_16/
   allow_failure: true
 
 linux-arch-package-18:
@@ -735,9 +764,9 @@ linux-arch-package-18:
   artifacts:
     paths:
       - build_18/
-  cache:
-    paths:
-      - build_18/
+  # cache:
+  #   paths:
+  #     - build_18/
   allow_failure: true
 
 windows-arch-package-core:
@@ -756,9 +785,9 @@ windows-arch-package-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 windows-arch-package-py36:
@@ -777,9 +806,9 @@ windows-arch-package-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 windows-arch-package-py37:
@@ -798,9 +827,9 @@ windows-arch-package-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 macosx-arch-package-core:
@@ -819,9 +848,9 @@ macosx-arch-package-core:
   artifacts:
     paths:
       - build_core/
-  cache:
-    paths:
-      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
   allow_failure: true
 
 macosx-arch-package-py36:
@@ -840,9 +869,9 @@ macosx-arch-package-py36:
   artifacts:
     paths:
       - build_py36/
-  cache:
-    paths:
-      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
   allow_failure: true
 
 macosx-arch-package-py37:
@@ -861,9 +890,9 @@ macosx-arch-package-py37:
   artifacts:
     paths:
       - build_py37/
-  cache:
-    paths:
-      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
   allow_failure: true
 
 # For internal, private deployment
