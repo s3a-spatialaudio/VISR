@@ -1,5 +1,5 @@
 <panningConfiguration dimension="3">
-  <!--Defined in ITU-R BS-2051 as system D, one subwoofer-->
+  <!--Defined in ITU-R BS-2051 as system D, no subwoofer-->
   <loudspeaker id="M+030" channel="1">
     <polar az="30.0" el="0.0" r="1.0"/>
   </loudspeaker>
@@ -51,5 +51,4 @@
   <triplet l1="U-030" l2="U-110" l3="U+110"/>
   <triplet l1="U-030" l2="U-110" l3="M-110"/>
   <triplet l1="U-030" l2="M-030" l3="M-110"/>
-  <subwoofer name="subName" channel="4" assignedLoudspeakers="M+030, M-030, M+000, M+110, M-110, U+030, U-030, U+110, U-110"/>
 </panningConfiguration>
