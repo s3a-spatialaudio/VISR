@@ -1,5 +1,18 @@
 Changelog for project VISR
 
+Patch release 0.11.3
+--------------------
+
+* FIX: Resolved problem with Python3.7 on Mac OS X (Bug #24 Python 3.7 support on Mac OS faulty).
+  through updating Pybind11 to version 2.2.4
+* FIX: Fixed BBC BRIR loudspeaker configuration files (duplicated labels for system G, center speaker M+000 missing in most configurations)
+* Provide mechanism to export the used Python version a a target property.
+* FIX: panning::LoudspeakerConfig: Made 3rd coordiante of loudspeaker positions optional if dimension==2.
+* New Python-based loudspeaker configuration generation function in Python.
+* Replaced loudspeaker configurations for the BBC BRIR dataset in visr_bst and the BS-2051 configs
+  in $VISR/config/generic.
+* Updated Gitlab CI configuration (build Python-free "core" version as well).
+
 Patch release 0.11.2
 --------------------
 
