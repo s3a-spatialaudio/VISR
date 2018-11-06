@@ -178,7 +178,9 @@ bs2051_2_5_0_plain = { "name": 'bs2051-2+5+0-no-subwoofer',
   "comment": "Defined in ITU-R BS-2051 as system C, no subwoofers",
   "speakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030"  ],
   "channels": [1, 2, 3, 5, 6, 7, 8],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+    "routing": [ ("U+030", 0.25), ("U-030", 0.25), ("M+110", 0.25), ("M-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
     "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }],
   "subwooferConfig": [ {"name": "LFE", "assignedSpeakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030" ],
                         "channel": 4 } ]
@@ -188,24 +190,30 @@ bs2051_2_5_0_subwoofer = { "name": 'bs2051-2+5+0',
   "comment": "Defined in ITU-R BS-2051 as system C, one subwoofer",
   "speakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030"  ],
   "channels": list(range(1,8)),
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }]
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+030", 0.25), ("U-030", 0.25), ("M+110", 0.25), ("M-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                         "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }]
 }
 
 bs2051_4_5_0_plain = { "name": 'bs2051-4+5+0-no-subwoofer',
   "comment": "Defined in ITU-R BS-2051 as system D, no subwoofer",
   "speakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030", "U+110", "U-110"  ],
   "channels": [1, 2, 3, 5, 6, 7, 8, 9, 10],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }]
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+030", 0.25), ("U-030", 0.25), ("U+110", 0.25), ("U-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                         "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }]
 }
 
 bs2051_4_5_0_subwoofer = { "name": 'bs2051-4+5+0',
   "comment": "Defined in ITU-R BS-2051 as system D, one subwoofer",
   "speakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030", "U+110", "U-110"  ],
   "channels": [1, 2, 3, 5, 6, 7, 8, 9, 10],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }],
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+030", 0.25), ("U-030", 0.25), ("U+110", 0.25), ("U-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                         "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }],
   "subwooferConfig": [ {"name": "LFE", "assignedSpeakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030", "U+110", "U-110" ],
                         "channel": 4 } ]
 }
@@ -214,11 +222,10 @@ bs2051_4_5_1_plain = { "name": 'bs2051-4+5+1-no-subwoofer',
   "comment": "Defined in ITU-R BS-2051 as system D, one subwoofer",
   "speakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030", "U+110", "U-110", "B+000"  ],
   "channels": [1, 2, 3, 5, 6, 7, 8, 9, 10, 11 ],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("B+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }],
-  "subwooferConfig": [ {"name": "LFE", "assignedSpeakers": ["M+030", "M-030", "M+000", "M+110", "M-110",
-                                                            "U+030", "U-030", "U+110", "U-110", "B+000" ],
-                        "channel": 4 } ]
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+030", 0.25), ("U-030", 0.25), ("U+110", 0.25), ("U-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                         "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }]
 }
 
 
@@ -226,8 +233,10 @@ bs2051_4_5_1_subwoofer = { "name": 'bs2051-4+5+1',
   "comment": "Defined in ITU-R BS-2051 as system D, one subwoofer",
   "speakers": ["M+030", "M-030", "M+000", "M+110", "M-110", "U+030", "U-030", "U+110", "U-110", "B+000"  ],
   "channels": [1, 2, 3, 5, 6, 7, 8, 9, 10, 11 ],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("B+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }],
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+030", 0.25), ("U-030", 0.25), ("U+110", 0.25), ("U-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                         "routing": [ ("M+030", 0.2), ("M-030", 0.2), ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }],
   "subwooferConfig": [ {"name": "LFE", "assignedSpeakers": ["M+030", "M-030", "M+000", "M+110", "M-110",
                                                             "U+030", "U-030", "U+110", "U-110", "B+000" ],
                         "channel": 4 } ]
@@ -238,9 +247,11 @@ bs2051_3_7_0_plain = { "name": 'bs2051-3+7+0-no-subwoofer',
   "comment": "Defined in ITU-R BS-2051 as system F, no subwoofers",
   "speakers": ["M+000", "M+030", "M-030", "U+045", "U-045", "M+090", "M-090", "M+135", "M-135", "U+180" ],
   "channels": list(range(1,11)),
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.14286), ("M-030", 0.14286), ("M+000", 0.14286), ("M+090", 0.14286),
-                 ("M-090", 0.14286), ("M+135", 0.14286), ("M-135", 0.14286) ] }]
+  "virtualSpeakers": [  { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+045", 1.0/3), ("U-045", 1.0/3), ("U+180", 1.0/3) ] },
+                        { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                          "routing": [ ("M+030", 0.14286), ("M-030", 0.14286), ("M+000", 0.14286), ("M+090", 0.14286),
+                                       ("M-090", 0.14286), ("M+135", 0.14286), ("M-135", 0.14286) ] }]
 }
 
 
@@ -248,9 +259,11 @@ bs2051_3_7_0_subwoofers = { "name": 'bs2051-3+7+0',
   "comment": "Defined in ITU-R BS-2051 as system F, two subwoofers",
   "speakers": ["M+000", "M+030", "M-030", "U+045", "U-045", "M+090", "M-090", "M+135", "M-135", "U+180" ],
   "channels": list(range(1,11)), # 1..10
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
-    "routing": [ ("M+030", 0.14286), ("M-030", 0.14286), ("M+000", 0.14286), ("M+090", 0.14286),
-                 ("M-090", 0.14286), ("M+135", 0.14286), ("M-135", 0.14286) ] }],
+  "virtualSpeakers": [  { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+045", 1.0/3), ("U-045", 1.0/3), ("U+180", 1.0/3) ] },
+                        { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+                          "routing": [ ("M+030", 0.14286), ("M-030", 0.14286), ("M+000", 0.14286), ("M+090", 0.14286),
+                                       ("M-090", 0.14286), ("M+135", 0.14286), ("M-135", 0.14286) ] }],
   "subwooferConfig": [ {"name": "LFE1",
                         "assignedSpeakers": ["M+000", "M+030", "U+045", "M+090", "M+135", "U+180" ],
                         "weights": [ 0.5, 1.0, 1.0, 1.0, 1.0, 0.5 ],
@@ -265,7 +278,9 @@ bs2051_4_9_0_plain = { "name": 'bs2051-4+9+0-no-subwoofer',
   "comment": "Defined in ITU-R BS-2051 as system G, no subwoofer",
   "speakers": [ 'M+000', 'M+045', 'M-045', 'M+030', 'M-030', 'M+090', 'M-090', 'M+135', 'M-135',
                 'U+045', 'U-045', 'U+110', 'U-110' ],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+  "virtualSpeakers": [ { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+045", 0.25), ("U-045", 0.25), ("U+110", 0.25), ("U-110", 0.25) ] },
+                       { "id": "VotD", "pos": [0.0, 0.0,-1.0],
     "routing": [ ("M+000", 0.1111111), ("M+045", 0.1111111), ("M-045", 0.1111111), ("M+030", 0.1111111),
                  ("M-030", 0.1111111), ("M+090", 0.1111111), ("M-090", 0.1111111), ("M+135", 0.1111111),
                  ("M-135", 0.1111111) ] }],
@@ -276,7 +291,9 @@ bs2051_4_9_0_subwoofer = { "name": 'bs2051-4+9+0',
   "comment": "Defined in ITU-R BS-2051 as system G, one subwoofer",
   "speakers": [ 'M+000', 'M+045', 'M-045', 'M+030', 'M-030', 'M+090', 'M-090', 'M+135', 'M-135',
                 'U+045', 'U-045', 'U+110', 'U-110' ],
-  "virtualSpeakers": [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+  "virtualSpeakers": [  { "id": "VoG", "pos": [0.0, 0.0,1.0],
+                         "routing": [ ("U+045", 0.25), ("U-045", 0.25), ("U+110", 0.25), ("U-110", 0.25) ] },
+                        { "id": "VotD", "pos": [0.0, 0.0,-1.0],
     "routing": [ ("M+000", 0.1111111), ("M+045", 0.1111111), ("M-045", 0.1111111), ("M+030", 0.1111111),
                  ("M-030", 0.1111111), ("M+090", 0.1111111), ("M-090", 0.1111111), ("M+135", 0.1111111),
                  ("M-135", 0.1111111) ] }],
@@ -396,7 +413,7 @@ for cfg in allConfigs:
 
     virtualSpeakers = cfg["virtualSpeakers"] if "virtualSpeakers" in cfg else []
 
-    outputFileName = cfg["name"] + ".xml"
+    outputFileName = '../' + cfg["name"] + ".xml"
 
     labels = [allSpeakerLabels[idx] for idx in speakerIdx]
 
