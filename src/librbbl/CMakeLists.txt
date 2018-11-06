@@ -59,44 +59,37 @@ parametric_iir_coefficient_calculator.hpp
 sparse_gain_routing.hpp
 )
 
-include_directories( ${FFTS_INCLUDE_DIR} )
-include_directories( ${KISSFFT_INCLUDE_DIR} )
-
 if( BUILD_USE_IPP )
-  add_definitions( -DBUILD_USE_IPP )
-  include_directories( ${IPP_INCLUDE_DIR} )
   list( APPEND SOURCES ipp_fft_wrapper.cpp )
   list( APPEND HEADERS ipp_fft_wrapper.hpp )
 endif( BUILD_USE_IPP )
 
 add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
-
-target_link_libraries( rbbl_static PUBLIC efl_static )
-target_link_libraries( rbbl_static PRIVATE ${FFTS_LIBRARY} )
-target_link_libraries( rbbl_static PRIVATE ${KISSFFT_LIBRARY} )
-target_link_libraries( rbbl_static PUBLIC Boost::boost ) # Adds the boost include directory 
-
-
-if( BUILD_USE_IPP )
-  target_link_libraries( rbbl_static PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
-endif( BUILD_USE_IPP )
+target_compile_definitions( rbbl_static PUBLIC VISR_RBBL_STATIC_LIBRARY=1)
 
 add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( rbbl_shared PROPERTIES OUTPUT_NAME rbbl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
-target_compile_definitions( rbbl_shared PRIVATE -DVISR_BUILD_RBBL_SHARED_LIBRARY=1 -DVISR_BUILD_RBBL_LIBRARY=1)
-target_compile_definitions( rbbl_shared PUBLIC -DVISR_BUILD_RBBL_SHARED_LIBRARY=1)
-set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-target_link_libraries( rbbl_shared PUBLIC efl_shared )
-target_link_libraries( rbbl_shared PRIVATE ${FFTS_LIBRARY} )
-target_link_libraries( rbbl_shared PRIVATE ${KISSFFT_LIBRARY} )
-target_link_libraries( rbbl_shared PUBLIC Boost::boost ) # Adds the boost include directory 
-if( BUILD_USE_IPP )
-  target_link_libraries( rbbl_shared PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
-endif( BUILD_USE_IPP )
 
+set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+
+# Set target properties common to both library types.
+foreach(LIB_TYPE static shared)
+  target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE VISR_BUILD_RBBL_LIBRARY=1)
+  target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${FFTS_INCLUDE_DIR} )
+  target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_INCLUDE_DIR} )
+  target_link_libraries( rbbl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
+  target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${FFTS_LIBRARY} )
+  target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_LIBRARY} )
+  target_link_libraries( rbbl_${LIB_TYPE} PUBLIC Boost::boost ) # Adds the boost include directory 
+  if( BUILD_USE_IPP )
+    target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE -DBUILD_USE_IPP )
+    target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${IPP_INCLUDE_DIR} )
+    target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
+  endif( BUILD_USE_IPP )
+endforeach()
 
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
@@ -113,8 +106,17 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
-install(TARGETS rbbl_static EXPORT VISR_exports ARCHIVE DESTINATION lib )
-install(TARGETS rbbl_shared EXPORT VISR_exports ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include/visr/librbbl)
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS rbbl_static
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+install(TARGETS rbbl_shared
+        EXPORT VISR_exports
+        ARCHIVE DESTINATION lib COMPONENT development_files 
+        RUNTIME DESTINATION lib COMPONENT shared_libraries
+        LIBRARY DESTINATION lib COMPONENT shared_libraries
+        PUBLIC_HEADER DESTINATION include/visr/librbbl COMPONENT development_files )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

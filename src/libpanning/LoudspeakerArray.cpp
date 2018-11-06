@@ -85,10 +85,12 @@ namespace panning
      * Local function to parse the coordinate of either a normal or a virtual loudspeaker.
      * @param node The speaker node
      * @param isInfinite The global infinity flag for the array, i.e., whether loudspeakers are considered to emit plane waves.
+     * @param is2D Whether the loudspeaker config is considered as 2D or 3D. In the latter case, the coordiante attributes 
+     * "z" and "el" are optional and default to zero.
      * @return Reference to return the parsed position.
      * @throw std::invalid_argument If parsing fails.
      */
-    XYZ parseCoordNode( boost::property_tree::ptree const & node, bool isInfinite )
+    XYZ parseCoordNode( boost::property_tree::ptree const & node, bool isInfinite, bool is2D )
     {
       XYZ pos( 0.0f, 0.0f, 0.0f, isInfinite );
       using namespace boost::property_tree;
@@ -106,7 +108,15 @@ namespace panning
         ptree const coordNode = cartIt->second;
         pos.x = coordNode.get<SampleType>( "<xmlattr>.x" );
         pos.y = coordNode.get<SampleType>( "<xmlattr>.y" );
-        pos.z = coordNode.get<SampleType>( "<xmlattr>.z" );
+        if( is2D )
+        {
+          auto const zOpt = coordNode.get_optional<SampleType>("<xmlattr>.z" );
+          pos.z = zOpt ? *zOpt : static_cast<SampleType>(0.0);
+        }
+        else
+        {
+          pos.z = coordNode.get<SampleType>("<xmlattr>.z");
+        }
       }
       else
       {
@@ -114,7 +124,16 @@ namespace panning
         assert( polarIt != node.not_found() );
         ptree const coordNode = polarIt->second;
         SampleType const az = coordNode.get<SampleType>( "<xmlattr>.az" );
-        SampleType const el = coordNode.get<SampleType>( "<xmlattr>.el" );
+        SampleType el{ static_cast<SampleType>(0.0) };
+        if( is2D )
+        {
+          auto const elOpt = coordNode.get_optional<SampleType>( "<xmlattr>.el" );
+          el = elOpt ? *elOpt : static_cast<SampleType>(0.0);
+        }
+        else
+        {
+          el = coordNode.get<SampleType>("<xmlattr>.el");
+        }
         SampleType const r = coordNode.get<SampleType>( "<xmlattr>.r" );
         std::tie( pos.x, pos.y, pos.z ) = efl::spherical2cartesian( efl::degree2radian( az ), efl::degree2radian( el ), r );
       }
@@ -345,7 +364,7 @@ namespace panning
       m_id[id] = offset;
       
       
-      m_position[m_id[id]] = parseCoordNode( childTree, m_isInfinite );
+      m_position[m_id[id]] = parseCoordNode( childTree, m_isInfinite, m_is2D );
       
       parseGainDelayAdjustments( childTree, m_gainAdjustment[m_id[id]], m_delayAdjustment[m_id[id]] );
       
@@ -399,7 +418,7 @@ namespace panning
        std::cout << std::endl;
        }
        */
-      m_position[i] = parseCoordNode( childTree, m_isInfinite );
+      m_position[i] = parseCoordNode( childTree, m_isInfinite, m_is2D );
     }
     // The checks above (all speaker indices are between 1 and numTotalSpeakers && the indices are unique) are
     // sufficient to ensure that the speaker indices are consecutive.

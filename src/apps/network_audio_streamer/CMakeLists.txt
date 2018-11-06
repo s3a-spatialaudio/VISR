@@ -13,20 +13,20 @@ set( HEADERS
  signal_flow.hpp
 )
 
-ADD_DEFINITIONS( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
-
+add_executable( network_audio_streamer ${SOURCES} ${HEADERS} )
 # Preliminary solution: communicate to main.cpp that Jack support is enabled.
 # TODO: Replace by factory mechanism to select audio interface.
-IF( BUILD_USE_JACK )
-  ADD_DEFINITIONS( "-DVISR_JACK_SUPPORT" )
-ENDIF( BUILD_USE_JACK )
+if( BUILD_USE_JACK )
+  target_compile_definitions( network_audio_streamer PRIVATE VISR_JACK_SUPPORT )
+endif( BUILD_USE_JACK )
 
-ADD_EXECUTABLE( network_audio_streamer ${SOURCES} ${HEADERS} )
+target_link_libraries(network_audio_streamer apputilities_shared )
+target_link_libraries(network_audio_streamer rcl_shared )
+target_link_libraries(network_audio_streamer rrl_shared )
+target_link_libraries(network_audio_streamer audiointerfaces_shared )
+target_link_libraries(network_audio_streamer ${CMAKE_THREAD_LIBS_INIT} )
+set_target_properties(network_audio_streamer PROPERTIES SKIP_BUILD_RPATH FALSE)
 
-TARGET_LINK_LIBRARIES(network_audio_streamer apputilities_static )
-TARGET_LINK_LIBRARIES(network_audio_streamer rcl_static )
-TARGET_LINK_LIBRARIES(network_audio_streamer rrl_static )
-TARGET_LINK_LIBRARIES(network_audio_streamer audiointerfaces_static )
-TARGET_LINK_LIBRARIES(network_audio_streamer ${CMAKE_THREAD_LIBS_INIT} )
-
-INSTALL( TARGETS network_audio_streamer DESTINATION bin )
+install( TARGETS network_audio_streamer
+         DESTINATION bin
+         COMPONENT standalone_applications )

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+
+	<processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" />
+
+	<processor name="MDO" type="MDOAzimuth" on="1" priority="quality" />
+	    
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
+    
+</metadapter>

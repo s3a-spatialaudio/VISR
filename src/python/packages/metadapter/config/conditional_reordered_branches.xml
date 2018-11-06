@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="StaticConfig" type="AddObjects">
+      <object data="{'id': 0, 'channels': 0,
+'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 1.500000, 'y': -3.000000, 'z': 0.350000 } }" />
+      <object data="{'id': 2, 'channels': 0,
+'type': 'plane', 'group': 2, 'priority': 0, 'level': 1.0, 'direction': {'az': 130.000000, 'el': 15.000000, 'refdist': 0.000000 } }" />
+      <object data="{'id': 5, 'channels': 0,
+'type': 'plane', 'group': 5, 'priority': 0, 'level': 1.0, 'direction': {'az': 30.000000, 'el': -5.000000, 'refdist': 0.000000 } }" />
+    </processor>
+	<conditional>
+	  <condition name="GroupSelect" type ="SelectGroup" >
+	    <group branch="dialog" groupIds="0,1" />
+	    <group branch="fx"  groupIds="2"   />
+	    <default branch="other" />
+          </condition>
+	  <branch id="other">
+	     <processor name="AttenuateRest" type="ChangeVolume" volumeAdjust="-3.01" />
+	     <processor name="AttenuateAgain" type="ChangeVolume" volumeAdjust="-3.01" />
+          </branch>
+	  <branch id="fx" /> <!-- Empty branch, copy directly to output -->
+	  <branch id="dialog">
+	     <processor name="AttenuateDialog" type="ChangeVolume" volumeAdjust="3.01" />
+	  </branch>
+	  <merge name="MergeGroups" type="BranchOrderMerge" order="other,fx,dialog" />
+	</conditional>
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0" />
+</metadapter>

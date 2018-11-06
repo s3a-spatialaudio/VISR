@@ -123,13 +123,13 @@ void DelayMatrix::setup( std::size_t numberOfInputs,
   if( interpolationSteps % period() != 0 )
   {
     // Replace by status() call?
-    throw( "DelayMatrix::setup(): The parameter interpolationSteps must be a nonzero multiple of the processing block size." );
+    throw std::invalid_argument( "DelayMatrix::setup(): The parameter interpolationSteps must be a nonzero multiple of the processing block size." );
   }
   mInterpolationBlocks = interpolationSteps / period();
   // Decide whether we want to allow immediate switches. In this case the logic of calculating the interpolation ratios would need to would need to change.
   if( mInterpolationBlocks < 1 )
   {
-    throw( "DelayMatrix::setup(): The parameter interpolationSteps must be greater or equal than the block size." );
+    throw std::invalid_argument( "DelayMatrix::setup(): The parameter interpolationSteps must be greater or equal than the block size." );
   }
   mGainInterpolationCounter = 0;
   mDelayInterpolationCounter = 0;

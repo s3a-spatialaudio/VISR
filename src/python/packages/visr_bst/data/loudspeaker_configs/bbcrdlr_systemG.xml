@@ -1,8 +1,8 @@
-<panningConfiguration>
+<panningConfiguration dimension="3">
   <loudspeaker id="M+000" channel="1">
     <polar az="0.0" el="0.0" r="1.994"/>
   </loudspeaker>
-  <loudspeaker id="M-045" channel="2">
+  <loudspeaker id="M+045" channel="2">
     <polar az="45.0" el="0.0" r="3.0061300000000006"/>
   </loudspeaker>
   <loudspeaker id="M-045" channel="3">
@@ -40,23 +40,38 @@
   </loudspeaker>
   <virtualspeaker id="VotD">
     <polar az="0.0" el="-90.0" r="1.0"/>
+    <route lspId="M+000" gainDB="-19.0849"/>
+    <route lspId="M+045" gainDB="-19.0849"/>
+    <route lspId="M-045" gainDB="-19.0849"/>
+    <route lspId="M+030" gainDB="-19.0849"/>
+    <route lspId="M-030" gainDB="-19.0849"/>
+    <route lspId="M+090" gainDB="-19.0849"/>
+    <route lspId="M-090" gainDB="-19.0849"/>
+    <route lspId="M+135" gainDB="-19.0849"/>
+    <route lspId="M-135" gainDB="-19.0849"/>
   </virtualspeaker>
-  <triplet l1="U+110" l2="U+045" l3="M-045"/>
-  <triplet l1="VotD" l2="M-045" l3="M-045"/>
-  <triplet l1="VotD" l2="M-045" l3="M-090"/>
-  <triplet l1="M+090" l2="U+110" l3="M+135"/>
-  <triplet l1="M+090" l2="U+110" l3="M-045"/>
-  <triplet l1="M+090" l2="VotD" l3="M+135"/>
-  <triplet l1="M+090" l2="VotD" l3="M-045"/>
   <triplet l1="M-135" l2="VotD" l3="M+135"/>
   <triplet l1="M-135" l2="VotD" l3="M-090"/>
+  <triplet l1="M-045" l2="VotD" l3="M-090"/>
+  <triplet l1="M+030" l2="VotD" l3="M+000"/>
+  <triplet l1="M+030" l2="M+045" l3="VotD"/>
+  <triplet l1="M+090" l2="U+110" l3="M+135"/>
+  <triplet l1="M+090" l2="VotD" l3="M+135"/>
+  <triplet l1="M+090" l2="M+045" l3="VotD"/>
+  <triplet l1="M-030" l2="VotD" l3="M+000"/>
+  <triplet l1="M-030" l2="M-045" l3="VotD"/>
+  <triplet l1="U-045" l2="M-045" l3="M-090"/>
+  <triplet l1="U-045" l2="M-030" l3="M-045"/>
+  <triplet l1="U-045" l2="M-030" l3="M+000"/>
   <triplet l1="U-110" l2="M-135" l3="M-090"/>
-  <triplet l1="U-110" l2="M-045" l3="M-090"/>
-  <triplet l1="U-045" l2="U-110" l3="M-045"/>
+  <triplet l1="U-110" l2="U-045" l3="M-090"/>
+  <triplet l1="U+045" l2="M+030" l3="M+045"/>
+  <triplet l1="U+045" l2="M+030" l3="M+000"/>
+  <triplet l1="U+045" l2="U-045" l3="M+000"/>
+  <triplet l1="U+045" l2="M+090" l3="U+110"/>
+  <triplet l1="U+045" l2="M+090" l3="M+045"/>
   <triplet l1="U-110" l2="M-135" l3="M+135"/>
   <triplet l1="U-110" l2="U+110" l3="M+135"/>
-  <triplet l1="U-045" l2="M-045" l3="M-045"/>
-  <triplet l1="U-045" l2="U+045" l3="M-045"/>
-  <triplet l1="U-045" l2="U-110" l3="U+110"/>
-  <triplet l1="U-045" l2="U+110" l3="U+045"/>
+  <triplet l1="U+045" l2="U-110" l3="U+110"/>
+  <triplet l1="U+045" l2="U-110" l3="U-045"/>
 </panningConfiguration>

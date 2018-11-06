@@ -3,7 +3,8 @@
 # Top-level build configuration for project VISceRal
 
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
-CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
+# >= 3.1 for CMAKE_CXX_STANDARD
+CMAKE_MINIMUM_REQUIRED (VERSION 3.1.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
@@ -20,35 +21,38 @@ PROJECT( VISR CXX C )
 # Define central version numbers for the project
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 10 )
-set( VISR_PATCH_VERSION 0 )
+set( VISR_MINOR_VERSION 11 )
+set( VISR_PATCH_VERSION 4 )
 
-ADD_DEFINITIONS( -DVISR_MAJOR_VERSION="${VISR_MAJOR_VERSION}" )
-ADD_DEFINITIONS( -DVISR_MINOR_VERSION="${VISR_MINOR_VERSION}" )
-ADD_DEFINITIONS( -DVISR_PATCH_VERSION="${VISR_PATCH_VERSION}" )
+add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
+add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
+add_definitions( -DVISR_PATCH_VERSION=${VISR_PATCH_VERSION} )
 
 # Add support for unit tests
 INCLUDE( CTest )
 
-# Enable C++11 features on Linux platforms
-# See http://www.cmake.org/Wiki/CMake/Tutorials/C%2B%2B11Flags
-# Maybe there is a more general way to configure the different platforms and toolchains
-if(UNIX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
-endif()
+## Set C++ standard used. 
+
+# Enable C++ 11 support
+# This requires CMake >= 3.1
+# TODO: Check when we can increase the requirement to C++14
+set( CMAKE_CXX_STANDARD 11 )
+
+# Treat the above standard as a hard requirement rather than 'decaying' to a
+# previous standard if the requirments aren' met
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
+# Disable compiler-specific extensions (e.g., GNU extensions)
+set( CMAKE_CXX_EXTENSIONS OFF )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-#message( STATUS "output "${CMAKE_MODULE_PATH} )
-# At the moment, all include directories are relative to the source root directory.
-# Therefore it suffices to set this root as the include path.
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/src )
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 # Default path for static libraries
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
 
-# Copy the executabl  es to the binary directory
+# Copy the executables to the binary directory
 SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 
 # Default destination for shared libraries (not DLLs)
@@ -68,7 +72,8 @@ SET (CMAKE_INSTALL_PREFIX /Applications/${VISR_VERSIONED_NAME})
 
 SET( CMAKE_MACOSX_RPATH ON)
 # use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+SET(CMAKE_SKIP_BUILD_RPATH  TRUE)
+SET(CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
 # when building, don't use the install RPATH already
 # (but later on when installing)
 
@@ -78,7 +83,7 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
 # add the automatically determined parts of the RPATH
 # which point to directories outside the build tree to the install RPATH
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
 
 
    SET( VISR_SYSTEM_NAME MacOS )
@@ -123,7 +128,6 @@ if(UNIX)
     # (as pragmas are compiler-specific, unknown ones should be ignored silently anyway)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nested-anon-types -Wno-unknown-pragmas" )
   endif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
 if( WIN32 ) # Covers 64-bit Windows as well
@@ -166,7 +170,8 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 ############################################################
 # Set the minimum Mac OS version.
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+#  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 
@@ -217,6 +222,12 @@ IF( BUILD_PYTHON_BINDINGS )
   # find_package(PythonLibsNew ${BUILD_VISR_PYTHON_VERSION} REQUIRED)
 
   find_package( PythonLibs REQUIRED )
+
+  # find_package does not detect if the Python include directories are not found.
+  # Checking prevents strange error messages later on.
+  if( NOT DEFINED PYTHONLIBS_VERSION_STRING )
+    message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
+  endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
 
   # As we cannot use the PythonLibsNew package due to possible mismatches of the Python library name,
   # we have to set the Python extensions ourselves (using the same variable names as created by
@@ -312,35 +323,23 @@ FIND_PACKAGE( FFTS REQUIRED )
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
-OPTION( Boost_USE_STATIC_LIBS OFF )
+OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
 
-# For the moment, we support only dynamic linking of boost.
-# In this case, this line is required on Windows to prevent undefined symbols from boost::program_options
-
-IF( NOT Boost_USE_STATIC_LIBS )
-  ADD_DEFINITIONS("-DBOOST_ALL_DYN_LINK")
-ENDIF( NOT Boost_USE_STATIC_LIBS )
-
-# Avoid problems with the auto-link feature on Windows platforms
-ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
-
-# Define the boost libraries that must be present.
+# Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread unit_test_framework regex timer)
+# Note that unit_test_framework is excluded here because it's only used in local builds.
+SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
-FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
-
+FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} unit_test_framework )
+ 
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  FIND_PACKAGE(Flac REQUIRED)
-  FIND_PACKAGE(OggVorbis REQUIRED)
-
+  find_package(Flac REQUIRED)
+  find_package(OggVorbis REQUIRED)
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
-
 
 ################################################################################
 # Set the install directories of special output types.
@@ -355,24 +354,24 @@ endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
-# Instructions for packaging are held in a separate file.
-# IMPORTANT: don’t put it after the ADD_SUBDIRECTORY( src ) command.
-# Reason: inside PackageConfig.cmake there is the required 3rd party libraries fixing, which needs to be performed before the target linking in the VISR libraries.
-INCLUDE( PackageConfig )
-
+################################################################################
+# Adjust the location of 3rd-party libraries.
+# This is required on Mac OS X. Essentially the files are copied to <build/3rd>
+# and the rpaths of of inter-library dependencies are adjusted.
+# NOTE: This has to happen before the add_subdirectory( src )
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  include( Adjust3rdPartyLibraries )
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ################################################################################
 # Actual software components (subprojects) to be built are
 # contained in the src/ directory
-# TODO: This is a quite hidden location for setting the subdirectories and subprojects.
-# Restructure the main build file in order to make this line more prominent.
-ADD_SUBDIRECTORY( src )
+add_subdirectory( src )
 
-################################################################################
-## Support for building Doxygen documentation
-## Taken from: http://mementocodex.wordpress.com/2013/01/19/how-to-generate-code-documentation-with-doxygen-and-cmake-a-slightly-improved-approach/
-
-option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ON)
-IF(BUILD_DOCUMENTATION)
+option(BUILD_DOCUMENTATION "Build the API and user documentation (requires Sphinx, breathe, and Doxygen)" ON)
+if(BUILD_DOCUMENTATION)
   add_subdirectory(doc)
-ENDIF()
+endif()
+
+# Instructions for packaging are held in a separate file.
+include( PackageConfig )

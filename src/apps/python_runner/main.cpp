@@ -6,7 +6,9 @@
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
 #include <librrl/audio_signal_flow.hpp>
+
 #include <libvisr/signal_flow_context.hpp>
+#include <libvisr/version.hpp>
 
 #include <libpythoncomponents/wrapper.hpp>
 
@@ -58,7 +60,7 @@ int main( int argc, char const * const * argv )
                 return EXIT_SUCCESS;
             case Options::ParseResult::Version:
                 // TODO: Implement retrieval of version information.
-                std::cout << "VISR S3A Python signal flow runner V0.9.0" << std::endl;
+                std::cout << "VISR Python runner " << visr::version::versionString() << std::endl;
                 return EXIT_SUCCESS;
             case Options::ParseResult::Success:
                 break; // carry on
@@ -73,13 +75,6 @@ int main( int argc, char const * const * argv )
         std::string const positionalArgs = cmdLineOptions.getDefaultedOption<std::string>( "positional-arguments", "" );
         std::string const kwArgs = cmdLineOptions.getDefaultedOption<std::string>( "keyword-arguments", "" );
         boost::filesystem::path const moduleSearchPath = cmdLineOptions.getDefaultedOption<std::string>( "module-search-path", "" );
-
-        if( (not moduleSearchPath.empty() ) and (not exists(moduleSearchPath)) )
-        {
-          std::cerr << "The specified Python module search path \""
-          << moduleSearchPath.string() << "\" does not exist." << std::endl;
-          return EXIT_FAILURE;
-        }
 
         SignalFlowContext const ctxt( periodSize, samplingRate );
         pythoncomponents::Wrapper topLevelComponent( ctxt,
@@ -136,7 +131,17 @@ int main( int argc, char const * const * argv )
         audioInterface->start();
         
         // Rendering runs until q<Return> is entered on the console.
-        std::cout << "S3A Python signal flow runner. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+
+	// Note: Standard program termination via Ctrl-C does not work at the moment on POSIX
+	// platforms, because the Python library
+	// apparently registers a handler for the corrsponding SIGINT signal, creating an exception message on
+	// program termination.
+	// See issue https://gitlab.eps.surrey.ac.uk/s3a/VISR/issues/23 .
+#ifdef VISR_PLATFORM_NAME_windows
+	std::cout << "VISR Python signal flow runner. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+#else
+        std::cout << "VISR Python signal flow runner. Press \"q<Return>\" to quit." << std::endl;
+#endif
 
         char c;
         do

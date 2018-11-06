@@ -165,11 +165,13 @@ add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf )
 
 # Include the Doxygen documentation in the package installer
 # Note: Doxygen as output format is deprecated, so it won't be externally visible in the future.
-install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
+install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html
+         DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY}
+	 COMPONENT doxygen_documentation_html )
 
 # Place the generated PDF documentation in the installers.
 # NOTE: Unfortuanately we need to operate on files, as installing for targets apparently works only for executables and libraries (which have a predefined main file)
 # TODO: Remove construction of file name with full version string.
-install( FILES  ${userdoc_output_root}/userdoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
-install( FILES  ${apidoc_output_root}/apidoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} )
+install( FILES  ${userdoc_output_root}/userdoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT user_documentation_pdf )
+install( FILES  ${apidoc_output_root}/apidoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT api_documentation_pdf )
 

@@ -58,8 +58,11 @@ efl::ErrorCode filterBiquad( SampleType const * const input, SampleType * const 
 // Explicit instantiations
 template efl::ErrorCode filterBiquad( float const * const input, float * const output, std::size_t numSamples,
   rbbl::BiquadCoefficient<float> const & iir, std::array<float, 2> const &, std::array<float, 2> const & );
+// Disabled explicit instantiation for double to avoid a compiler warning becuase this version is not used at the moment. Enable if required.
+#if 0
 template efl::ErrorCode filterBiquad( double const * const input, double * const output, std::size_t numSamples,
-  rbbl::BiquadCoefficient<double> const & iir, std::array<double, 2> const &, std::array<double, 2> const &);
+     rbbl::BiquadCoefficient<double> const & iir, std::array<double, 2> const &, std::array<double, 2> const &);
+ #endif
 
 /**
  * Hard-coded IIR coefficients for a fixed set of 9 octave bands: { 62.5 Hz, 125 Hz, 250 Hz, 500 Hz, 1 kHz, 2 kHz, 4 kHz, 8 kHz, 16 kHz }.

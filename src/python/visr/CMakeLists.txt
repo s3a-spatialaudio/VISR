@@ -41,6 +41,6 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT
 
 target_link_libraries( ${PROJECT_NAME} PRIVATE visr_shared )
 
-# ??? Correct? THE LIBRARY_OUTPUT_DIRECTORY should be enough for the compilation.
-# Packaging has to be handled specifically.
-install(TARGETS ${PROJECT_NAME} DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY})
+install(TARGETS ${PROJECT_NAME}
+        DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+        COMPONENT python_externals )

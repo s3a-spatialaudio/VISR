@@ -25,8 +25,6 @@ add_library( pythonbindinghelpers INTERFACE )
 # # installed once.
 # set_target_properties( pythonbindinghelpers_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-# install(TARGETS pythonbindinghelpers_static ARCHIVE DESTINATION lib )
-# install(TARGETS pythonbindinghelpers_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libpythonbindinghelpers )
-
-# Add the unit test directory.
-# ADD_SUBDIRECTORY( test )
+install( TARGETS pythonbindinghelpers
+         PUBLIC_HEADER DESTINATION include/visr/python/libpythonbindinghelpers
+         COMPONENT development_files )

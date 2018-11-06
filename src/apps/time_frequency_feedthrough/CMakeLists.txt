@@ -2,7 +2,8 @@
 
 add_executable( time_frequency_feedthrough main.cpp )
 
-target_link_libraries(time_frequency_feedthrough signalflows_static )
-target_link_libraries(time_frequency_feedthrough rrl_static )
-target_link_libraries(time_frequency_feedthrough audiointerfaces_static )
+target_link_libraries(time_frequency_feedthrough signalflows_shared )
+target_link_libraries(time_frequency_feedthrough rrl_shared )
+target_link_libraries(time_frequency_feedthrough audiointerfaces_shared )
 target_link_libraries(time_frequency_feedthrough ${CMAKE_THREAD_LIBS_INIT} )
+set_target_properties(time_frequency_feedthrough PROPERTIES SKIP_BUILD_RPATH FALSE)

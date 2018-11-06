@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <processor name="AddMdo" type="AddMdoMetadata" udpPort="9001" messagePacketSize="16384" />
+</metadapter>
