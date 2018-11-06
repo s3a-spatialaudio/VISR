@@ -24,7 +24,7 @@ Class :code:`rcl.DelayMatrix`
 .. autoclass:: rcl.DelayMatrix
    :members:
 
-   Class :code:`rcl.DelayVector`
+Class :code:`rcl.DelayVector`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: rcl.DelayVector
