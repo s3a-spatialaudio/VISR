@@ -14,8 +14,6 @@ import collections
 
 from .geometry_functions import cart2sph, rad2deg
 
-#TODO add EQ configuration support
-#TODO Add subwoofer configuration support
 def createArrayConfigFile( outputFileName,
                            lspPositions,
                            twoDconfig = False,
@@ -23,12 +21,15 @@ def createArrayConfigFile( outputFileName,
                            channelIndices = None,
                            loudspeakerLabels = None,
                            triplets = None,
+                           distanceDelay = False,
+                           distanceAttenuation = False,
                            lspDelays = None,
                            lspGainDB = None,
                            eqConfiguration = None,
                            virtualLoudspeakers = [],
                            subwooferConfig = [],
-                           comment = None
+                           comment = None,
+                           speedOfSound = 340.0
                            ):
     """
     Generate a loudspeaker configuration XML file.
@@ -63,6 +64,18 @@ def createArrayConfigFile( outputFileName,
        existing values of the loudspeakerLabels  parameter.
        Optional parameter, to be provided only in special cases. By default, the
        triangulation is computed internally.
+    distanceDelay: bool, optional
+       Whether the loudspeaker signals are delayed such that they arrive simultaneously in the array centre.
+       This can be used if the loudspeaker distances to the centre ar not equal. In this case
+       the farthest loudspeaker gets a delay of 0 s, and closer loudpeakers a positive delay.
+       The distance compensation delay is added to the :code:`lspDelays` parameter (if present).
+       Optional attribute. The default (False) means no distance attenuation is used.
+    distanceAttenuation: bool, optional
+       Whether the loudspeaker gains shall be scaled if the loudspeaker distances are not 1.0.
+       In this case, a 1/r distance law is applied such that the farthest loudspeaker
+       gets a scaling factor of 0 dB, and lower factors are assigned to loudspeakers closer to the centre.
+       The gain factors are applied on top of the optional parameter :code:`lspGainDB`, if present.
+       Optional attribute. Default is False (no distance attenutation applied)
     lspDelays: array-like, optional
        An array of delay values to be applied tothe loudspeakers. Values are to be provided in seconds.
        If not provided, no delays are applied. If specified, the length of the array must match the
@@ -102,7 +115,7 @@ def createArrayConfigFile( outputFileName,
 
     A minimal example of a 3D configuration:
 
-    .. code-block:: python 
+    .. code-block:: python
 
        createArrayConfigFile( 'bs2051-4+5+0.xml',
                               lspPositions = lspPos,
@@ -210,6 +223,25 @@ def createArrayConfigFile( outputFileName,
         if len(lspGainDB) != numRealLoudspeakers:
             raise ValueError( "The argument 'lspDelays' is provided, but its length does not match the number of real loudspeakers." )
 
+    if distanceAttenuation:
+        if lspGainDB is None:
+            lspGainDB = np.zeros( numRealLoudspeakers )
+        lspDistances = np.linalg.norm( lspPositions, ord=2, axis = 0 )
+        # Calculate the gain adjustment such that the farthest loudspeaker has 0 dB,
+        # and closer loudspeakers a negative dB gain
+        maxDistance = np.max( lspDistances )
+        distanceGainAdjustment = 20.0*np.log10( lspDistances / maxDistance )
+        lspGainDB += distanceGainAdjustment
+
+    if distanceDelay:
+        if lspDelays is None:
+            lspDelays = np.zeros( numRealLoudspeakers )
+        lspDistances = np.linalg.norm( lspPositions, ord=2, axis = 0 )
+        # Calculate the delay adjustment such that the farthest loudspeaker has 0 s,
+        # and closer loudspeakers a positive delay
+        maxDistance = np.max( lspDistances )
+        distanceDelayAdjustment = (  maxDistance - lspDistances ) / speedOfSound
+        lspDelays += distanceDelayAdjustment
 
     # %% Create the document tree
     xmlRoot = ET.Element( "panningConfiguration" )
@@ -279,9 +311,9 @@ def createArrayConfigFile( outputFileName,
         writePositionNode( lspNode,
                            lspPositions[:,lspIdx], sphericalPositions, twoDconfig )
         if lspDelays is not None:
-            lspNode.set( "delay", str(round(lspDelays,10)) )
+            lspNode.set( "delay", str(round(lspDelays[lspIdx],10)) )
         if lspGainDB is not None:
-            lspNode.set( "gainDB", str(round(lspGainDB,10)) )
+            lspNode.set( "gainDB", str(round(lspGainDB[lspIdx],10)) )
         if eqConfiguration and (lspLabel in loudspeakerEqs):
             lspNode.set( "eq", loudspeakerEqs[lspLabel] )
 
