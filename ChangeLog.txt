@@ -1,5 +1,10 @@
 Changelog for project VISR
 
+Patch release 0.11.6
+--------------------
+
+* FIX: Documentation generation for builds without Python.
+
 Patch release 0.11.5
 --------------------
 
