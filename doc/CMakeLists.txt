@@ -6,6 +6,31 @@
 # the Sphinx-generated C++ API documentation uses Doxygen in the background to extract information
 # from C++ code and stores it in XML format, which is picked up by the Breathe for Sphinx package
 
+# Define paths needed for sphinx/autodoc documentation
+
+# The path containing extension packages written in Python, for example visr_bst.
+file( TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/src/python/packages VISR_PYTHON_PACKAGE_PATH )
+# Path containing the VISR Python externals (in C++)
+# We use visrpython to locate the directory, which also contains the other externals.
+set( VISR_PYTHON_BINARY_PATH $<TARGET_FILE_DIR:visrpython> )
+# Define the separator between multiple directories in environment variables, e.g., PATH
+# or PYTHONPATH. We would prefer a CMake-provided solution.
+if( WIN32 )
+  set( VISR_ENVIRONMENT_PATH_SEPARATOR "\;" ) # Apparently semicolons need to be escaped in CMake.
+else( WIN32 )
+  set( VISR_ENVIRONMENT_PATH_SEPARATOR ":" )
+endif( WIN32 )
+set( VISR_PYTHON_PATH ${VISR_PYTHON_BINARY_PATH}${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH})
+# Set the dependencies needed to build the documentation. For sphinx.autodoc,
+# the Python externals need to be built before the documentation can be extracted.
+# We use the meta-target 'pythonexternals' that combines all externals,
+# defined in ${CMAKE_SOURCE_DIR}/src/python/CMakeLists.txt
+set( VISR_USERDOC_DEPENDENCIES pythonexternals )
+set( VISR_APIDOC_DEPENDENCIES doxygen-doc pythonexternals )
+
+# Debug message:
+# message( STATUS "VISR_PYTHON_PATH: " ${VISR_PYTHON_PATH} )
+
 find_package(Doxygen)
 if(NOT DOXYGEN_FOUND)
   #TODO add installation line guides for installing Doxygen via website www. ....
@@ -77,15 +102,17 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   set( STAMP ${outputDir}/htmlbuild.stamp )
   add_custom_command(
     OUTPUT ${STAMP}
-    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir}
-    COMMAND ${SPHINX_EXECUTABLE}
+    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
+             ${SPHINX_EXECUTABLE}
+	       -a
                -q
                -b html
                -c ${outputDir}/html
                -d ${outputDir}/cache
                 ${sourceDir}
                 ${outputDir}/html
-    COMMAND cmake -E touch ${STAMP}
+    COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
     BYPRODUCTS ${outputDir}/cache
     COMMENT "HTML generation for target ${targetName}-html."
   )
@@ -101,8 +128,9 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
 set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
-    DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir}
-    COMMAND ${SPHINX_EXECUTABLE}
+    DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
+            ${SPHINX_EXECUTABLE}
                -q
                -b latex
                -c ${outputDir}/latex
@@ -122,11 +150,11 @@ set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VE
   )
 endfunction(PdfDocBuild)
 
-PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
-PdfDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
+PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} ${VISR_USERDOC_DEPENDENCIES} )
+PdfDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} ${VISR_APIDOC_DEPENDENCIES} )
 
-HtmlDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} doxygen-doc )
-HtmlDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} doxygen-doc )
+HtmlDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} ${VISR_USERDOC_DEPENDENCIES} )
+HtmlDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} ${VISR_APIDOC_DEPENDENCIES} )
 
 # Add the Sphinx-generated targets to the "doc" meta-target
 add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf ) 

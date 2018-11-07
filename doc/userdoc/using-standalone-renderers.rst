@@ -164,7 +164,7 @@ The arguments for the **baseline_renderer** application are identical, except th
   The number of samples processed in one iteration of the renderer. Should be a power of 2 (64,128,...,4096,...) . Default: 1024 samples. See section :ref:`using_standalone_renderers_common_options`.
 :code:`--array-config` or :code:`-c`:
   File path to the loudspeaker configuration file. Path might be relative to the current working directory. Mandatory argument.
-  The XML file format is described below in Section :ref:`loudspeaker_configuration_file_format`.
+  The XML file format is described in Section :ref:`loudspeaker_configuration_file_format`.
 :code:`--input-channels` or :code:`-i`:
   The number of audio input channels. This corresponds to the number of single-waveform objects the renderer will process. Mandatory argument. A (case-insensitive) file extension of :code:`.xml` triggers the use of the XML format for parsing.
 :code:`--output-channels` or :code:`-o`:
@@ -230,9 +230,9 @@ The arguments for the **baseline_renderer** application are identical, except th
 :code:`--tracking`
   Activates the listener-tracked VBAP reproduction, which adjust both the VBAP gains as well as the final loudspeaker gains and delays according to the listener position. It takes a non-empty string argument containing a JSON message of the format: :code:`{ "port": &lt;UDP port number&gt;, "position": {"x": &lt;x in m&gt;, "y": &lt;y im m&gt;, "z": &lt;z in m&gt; }, "rotation": { "rotX": rX, "rotY": rY, "rotZ": rZ } }"`. The values are defined as follows:
 
-  =============  ======================================================  ============  ====
+  =============  ======================================================  ============  =======
   ID             Description                                             Unit          Default 
-  =============  ======================================================  ============  ====
+  =============  ======================================================  ============  =======
   port           UDP port number                                         unsigned int  8888 
   position.x     x position of the tracker                               m             2.08 
   position.y     y position of the tracker                               m             0.0 
@@ -240,7 +240,7 @@ The arguments for the **baseline_renderer** application are identical, except th
   rotation.rotX  rotation the tracker about the x axis, i.e., y-z plane  degree        0.0 
   rotation.rotY  rotation the tracker about the y axis, i.e., z-x plane  degree        0.0 
   rotation.rotZ  rotation the tracker about the z axis, i.e., x-y plane  degree        180 
-  =============  ======================================================  ============  ====
+  =============  ======================================================  ============  =======
 
 .. note:: The option parsing for :code:`--tracking` not supported yet, default values are used invariably. To activate tracking, you need to specify the  :code:`--tracking` option with an arbitrary parameter (even  :code:`--tracking=false` would activate the tracking.
 	  
@@ -250,193 +250,6 @@ The arguments for the **baseline_renderer** application are identical, except th
   An optional Metadapter configuration file in XML format, provided as a full path to the file. If specified, the received metadata are passed through a sequence of metadata adaptation steps that are specified in the configuration file. If not given., metadata adaptation is not performed, and objects are directly passed to the audio renderer.
 
   This option is not supported by the **baseline_renderer** application.
-
-.. _loudspeaker_configuration_file_format:
-  
-Loudspeaker configuration file format
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The loudspeaker configuration has to be specified in an XML file.
-It is used primarily for the loudspeaker renderers.
-
-An example is given below.
-
-.. code-block:: xml
-		
-   <panningConfiguration>
-     <loudspeaker id="M+000" channel="1" eq="highpass">
-       <cart x="1.0" y="0.0" z="0"/>
-     </loudspeaker>
-     <loudspeaker id="M-030" channel="2" eq="highpass">
-       <polar az="-30.0" el="0.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="M+030" channel="3" eq="highpass">
-       <polar az="30.0" el="0.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="M-110" channel="4" eq="highpass">
-       <polar az="-110.0" el="0.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="M+110" channel="5" eq="highpass">
-       <polar az="110.0" el="0.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="U-030" channel="6" eq="highpass">
-       <polar az="-30.0" el="30.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="U+030" channel="7" eq="highpass">
-       <polar az="30.0" el="30.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="U-110" channel="8" eq="highpass">
-       <polar az="-110.0" el="30.0" r="1.0"/>
-     </loudspeaker>
-     <loudspeaker id="U+110" channel="9" eq="highpass">
-       <polar az="110.0" el="30.0" r="1.0"/>
-     </loudspeaker>
-     <virtualspeaker id="VoS">
-       <polar az="0.0" el="-90.0" r="1.0"/>
-       <route lspId="M+000" gainDB="-13.9794"/>
-       <route lspId="M+030" gainDB="-13.9794"/>
-       <route lspId="M-030" gainDB="-13.9794"/>
-       <route lspId="M+110" gainDB="-13.9794"/>
-       <route lspId="M-110" gainDB="-13.9794"/>
-     </virtualspeaker>
-     <triplet l1="VoS" l2="M+110" l3="M-110"/>
-     <triplet l1="M-030" l2="VoS" l3="M-110"/>
-     <triplet l1="M-030" l2="VoS" l3="M+000"/>
-     <triplet l1="M-030" l2="U-030" l3="M+000"/>
-     <triplet l1="M+030" l2="VoS" l3="M+000"/>
-     <triplet l1="M+030" l2="VoS" l3="M+110"/>
-     <triplet l1="U+030" l2="U-030" l3="M+000"/>
-     <triplet l1="U+030" l2="M+030" l3="M+000"/>
-     <triplet l1="U-110" l2="M-030" l3="U-030"/>
-     <triplet l1="U-110" l2="M-030" l3="M-110"/>
-     <triplet l1="U+110" l2="U-110" l3="M-110"/>
-     <triplet l1="U+110" l2="M+110" l3="M-110"/>
-     <triplet l1="U+030" l2="U-110" l3="U-030"/>
-     <triplet l1="U+030" l2="U+110" l3="U-110"/>
-     <triplet l1="U+030" l2="U+110" l3="M+110"/>
-     <triplet l1="U+030" l2="M+030" l3="M+110"/>
-     <subwoofer assignedLoudspeakers="M+000, M-030, M+030, M-110, M+110, U-030, U+030, U-110, U+110"
-   	     channel="10" delay="0" eq="lowpass" gainDB="0"
-   	     weights="1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0"
-   	     />
-     <outputEqConfiguration numberOfBiquads="1" type="iir">
-         <filterSpec name="lowpass">
-            <biquad a1="-1.9688283" a2="0.96907117" b0="6.0729856e-05" b1="0.00012145971" b2="6.0729856e-05"/>
-         </filterSpec>
-         <filterSpec name="highpass">
-            <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
-         </filterSpec>
-     </outputEqConfiguration>
-   </panningConfiguration>
-
-Format description		
-''''''''''''''''''
-The root node of the XML file is :code:`<panningConfiguration>`.
-This root element supports the folloring optional attributes:
-
-:code:`isInfinite`
-  Whether the loudspeakers are regarded as point sources located on the unit sphere (:code:`false`) or as plane waves, corresponding to an infinite distance (:code:`true`). The default value is :code:`false`.
-:code:`dimension`
-  Whether the setup is considered as a 2-dimensional configuration (value :code:`2`) or as three-dimensional (:code:`3`, thedefault). In the 2D case, the array is considered in the x-y plane , and the :code:`z` or :code:`el` attributes of the loudspeaker positions are not evaluated. In this case, the triplet specifications consist of two indices only (technically they are pairs, not triplets).
-
-Within the :code:`<panningConfiguration>` root element, the following elements are supported:
-
-:code:`<loudspeaker>`
-  Represents a reproduction loudspeaker.
-  The position  is encoded either in a :code:`<cart>` node representing the cartesian coordinates in the :code:`x`, :code:`y` and :code:`z` attributes (floating point values in meter), or a :code:`<polar>` node with the attributes :code:`az` and :code:`el` (azimuth and elevation, both in degree) and :code:`r` (radius, in meter).
-
-  The :code:`<loudspeaker>` nodes supports for a number of attributes:
-
-  * :code:`id` A mandatory, non-empty string identification for the loudspeaker, which must be unique across all :code:`<loudspeaker>` and :code:`<virtualspeaker>` (see below) elements.
-    Permitted are alpha-numeric characters, numbers, and the characters "@&()+/:_-".
-    ID strings are case-sensitive.
-  * :code:`channel` The output channel number (sound card channel) for this loudspeaker. Logical channel indices start from 1. Each channel must be assigned at most once over the set of all loudspeaker and subwoofers of the setup..
-  * :code:`gainDB` or :code:`gain` Additional gain adjustment for this loudspeaker, either in linear scale or in dB (floating-point values. The  default value is 1.0 or 0 dB.  :code:`gainDB` or :code:`gain` are mutually exclusive.
-  * :code:`delay` Delay adjustment to be applied to this loudspeaker as a floating-point value in seconds. The default value is  0.0).
-  * :code:`eq` An optional output equalisation filter to be applied for this loudspeaker.
-    Specified as a non-empty string that needs to match an :code:`filterSpec` element in the :code:`outputEqConfiguration`
-    element (see below). If not given, no EQ is applied to for this loudspeaker.
-:code:`<virtualspeaker>`
-   An additional vertex added to the triangulation that does not correspond to a physical loudspeaker. Consist of a numerical :code:`id` attribute and a position specified either as a :code:`<cart>` or a :code:`<polar>` node (see :code:`<loudspeaker>` specification).
-
-   The :code:`<virtualspeaker>` node provides the following configuration options:
-
-   * A mandatory, nonempty and unique attribute :code:`id` that follows the same rules as for the :code:`<loudspeaker>` elements.
-   * A number of :code:`route` sub-elements that specify how the energy from this virtual loudspeaker is routed to real loudspeakers.
-     The :code:`route` element has the following attributes:
-     * :code:`lspId`: The ID of an existing real loudspeaker.
-     * :code:`gainDB`: A scaling factor with which the gain of the virtual loudspeaker is distributed to the real loudspeaker.
-     
-     In the above example, the routing specification is given by
-
-     .. code-block:: xml
-
-        <virtualspeaker id="VoS">
-         <polar az="0.0" el="-90.0" r="1.0"/>
-         <route lspId="M+000" gainDB="-13.9794"/>
-         <route lspId="M+030" gainDB="-13.9794"/>
-         <route lspId="M-030" gainDB="-13.9794"/>
-         <route lspId="M+110" gainDB="-13.9794"/>
-         <route lspId="M-110" gainDB="-13.9794"/>
-       </virtualspeaker>
-
-     That means that the energy of the virtual speaker :code:`"vos"` is routed to five surrounding speakers, with a scaling factor of 13.97 dB each.
-     
-:code:`<subwoofer>` Specify a subwoofer channel. In the current implementation, the loudspeaker are weighted and mixed into an arbitray number of subwoofer channels. The attributes are:
-      
-  * :code:`assignedLoudspeakers` The loudspeaker signals (given as a sequence of logical loudspeaker IDs) that contribute to the subwoofer signals. Given as comma-separated list of loudspeaker index or loudspeaker ranges. Index sequences are similar to Matlab array definitions, except that thes commas separating the parts of the sequence are compulsory.
-
-    Complex example:
-
-    .. code-block:: xml
-
-       assignedLoudspeakers = "1, 3,4,5:7, 2, 8:-3:1"
-    
-  * :code:`weights` Optional weights (linear scale) that scale the contributions of the assigned speakers to the subwoofer signal.
-    Given as a sequence of comma-separated linear-scale gain values, Matlab ranges are also allowed. The number of elements must match the :code:`assignedLoudspeakers` index list. Optional value, the default option assigns 1.0 for all assigned loudspeakers.
-    Example: "0:0.2:1.0, 1, 1, 1:-0.2:0".
-  * :code:`gainDB` or :code:`gain` Additional gain adjustment for this subwoofer, either in linear scale or in dB (floating-point valus, default 1.0 / 0 dB ). Applied on top of the :code:`weight` attributes to the summed subwoofer signal. See the :code:`<loudspeaker>` specification.
-  * :code:`delay` Delay adjustment for this (floating-point value in seconds, default 0.0). See the :code:`<loudspeaker>` specification.
-    
-:code:`<triplet>`
-  Loudspeaker triplet specified by the attributes :code:`l1`, :code:`l2`, and :code:`l3`.
-  The values of :code:`l1`, :code:`l2`, and :code:`l3` must correspond to IDs of existing real or virtual loudspeakers.
-  In case of a 2D setup, only :code:`l1` and :code:`l2` are evaluated.
-
-  .. note:: At the time being, triplet specifications must be generated externally and placed in the configuration file.
-	    This is typically done by creating a Delaunay triangulation on the sphere, which can be done in Matlab or Python.
-
-	    Future versions of the loudspeaker renderer might perform the triangulation internally, or might not require a
-	    conventional triangulation at all. In these cases, is it possible that the renderer ignores or internally
-	    adapts the specified triplets.
-  
-:code:`outputEqConfiguration`
-  This optional element must occur at most once.
-  It provides a global specification for equalisation filters for loudspeakers and subwoofers.
-
-  .. code-block:: xml
-
-     <outputEqConfiguration  type="iir" numberOfBiquads="1">
-       <filterSpec name="lowpass">
-         <biquad a1="-1.9688283" a2="0.96907117" b0="6.0729856e-05" b1="0.00012145971" b2="6.0729856e-05"/>
-       </filterSpec>
-       <filterSpec name="highpass">
-         <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
-       </filterSpec>
-     </outputEqConfiguration>
-
-  The  attributes are:
-
-  * :code:`type`: The type of the output filters. At the moment, only IIR filters provide as second-order sections (biquads) are supported. Thus, the value :code:`"iir"` must be set.
-  * :code:`numberOfBiquads`: This value is specific to the :code:`"iir"` filter type.
-
-  The filters are described in :code:`filterSpec` elements.
-  These are identifed by a :code:`name` attribute, which must be an non-empty string unique across all :code:`filterSpec` elements.
-  For the type :code:`iir`, a :code:`filterSpec` element consists of at most :code:`numberOfBiquad` nodes of type :code:`biquad`, which represent the coefficients of one second-order IIR (biquad) section.
-  This is done through the attributes :code:`a1`,  :code:`a2`, :code:`b0`, :code:`b1`, :code:`b2` that represent the coefficients of the normalised transfer function
-  
-  .. math::
-
-     H(z) = \frac{ b_0 + b_1 z^{-1} + b_{2}z^{-2} }{1 + a_1 z^{-1} + a_{2}z^{-2}}
 
 .. _using_visr_using_standalone_renderers_matrix_convolver:
 
