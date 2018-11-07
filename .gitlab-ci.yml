@@ -93,68 +93,6 @@ init-macosx-py37:
       # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
   allow_failure: true
 
-init-windows-core:
-  stage: initial
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_core
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-init-windows-py36:
-  stage: initial
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_py36
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-init-windows-py37:
-  stage: initial
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_py37
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
 
 init-linux-core:
   stage: initial
@@ -225,14 +163,73 @@ init-linux-18:
   #     - build_18/
   allow_failure: true
 
+init-windows-core:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_core
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_core/
+  # cache:
+  #   paths:
+  #     - build_core/
+  allow_failure: true
+
+init-windows-py36:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_py36
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_py36/
+  # cache:
+  #   paths:
+  #     - build_py36/
+  allow_failure: true
+
+init-windows-py37:
+  stage: initial
+  script:
+    # Crude way to remove and make sure directory is removed before creating a new one.
+    # - cmake -E remove_directory build
+    - cmake -E make_directory build_py37
+  only:
+    - master
+    - develop
+    # Testing branch for CI development
+    - feature/experimental-ci
+  tags:
+    - windows
+  artifacts:
+    paths:
+      - build_py37/
+  # cache:
+  #   paths:
+  #     - build_py37/
+  allow_failure: true
+
 # CMake Configuration:
 
 linux-arch-config-core:
   stage: config
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
   dependencies:
     - init-linux-core
   script:
@@ -437,10 +434,7 @@ linux-arch-build-core:
     - linux
   artifacts:
     paths:
-  #     - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
+      - build_core/
   allow_failure: true
 
 linux-arch-build-16:

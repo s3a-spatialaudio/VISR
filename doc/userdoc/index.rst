@@ -73,7 +73,6 @@ Using VISR audio workstation plugins
 Using Max/MSP externals
 -----------------------
 
-
 Extending VISR
 ==============
 
@@ -96,6 +95,10 @@ Creating composite components in C++
 Object-Based Audio with VISR
 ============================
 
+.. toctree::
+   :maxdepth: 2
+
+
 Overview
 --------
 
@@ -114,6 +117,15 @@ Predefined object-based rendering primitives and renderers
 
 Object-Based Reverberation
 --------------------------
+
+.. _loudspeaker_configuration_file_format:
+
+The loudspeaker configuration format
+------------------------------------
+
+.. toctree::
+
+   loudspeaker-config-file-format
 
 VISR component reference
 ========================

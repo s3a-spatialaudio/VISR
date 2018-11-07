@@ -30,6 +30,12 @@
   <loudspeaker id="U+180" channel="10">
     <polar az="180.0" el="30.0" r="1.0"/>
   </loudspeaker>
+  <virtualspeaker id="VoG">
+    <polar az="0.0" el="90.0" r="1.0"/>
+    <route lspId="U+045" gainDB="-9.5424"/>
+    <route lspId="U-045" gainDB="-9.5424"/>
+    <route lspId="U+180" gainDB="-9.5424"/>
+  </virtualspeaker>
   <virtualspeaker id="VotD">
     <polar az="0.0" el="-90.0" r="1.0"/>
     <route lspId="M+030" gainDB="-16.9018"/>
@@ -41,23 +47,25 @@
     <route lspId="M-135" gainDB="-16.9018"/>
   </virtualspeaker>
   <triplet l1="M-135" l2="VotD" l3="M-090"/>
+  <triplet l1="M-135" l2="VoG" l3="U+180"/>
+  <triplet l1="M-135" l2="VoG" l3="M-090"/>
   <triplet l1="M+135" l2="M+090" l3="VotD"/>
   <triplet l1="M+135" l2="M-135" l3="U+180"/>
   <triplet l1="M+135" l2="M-135" l3="VotD"/>
+  <triplet l1="M+135" l2="VoG" l3="U+180"/>
+  <triplet l1="M+135" l2="VoG" l3="M+090"/>
   <triplet l1="M+030" l2="VotD" l3="M+000"/>
   <triplet l1="M+030" l2="M+090" l3="VotD"/>
-  <triplet l1="M-030" l2="U-045" l3="M-090"/>
+  <triplet l1="U-045" l2="VoG" l3="M-090"/>
+  <triplet l1="U+045" l2="VoG" l3="M+090"/>
+  <triplet l1="U+045" l2="M+030" l3="M+090"/>
+  <triplet l1="U+045" l2="M+030" l3="M+000"/>
+  <triplet l1="U+045" l2="U-045" l3="M+000"/>
+  <triplet l1="U+045" l2="U-045" l3="VoG"/>
   <triplet l1="M-030" l2="U-045" l3="M+000"/>
+  <triplet l1="M-030" l2="U-045" l3="M-090"/>
   <triplet l1="M-030" l2="VotD" l3="M+000"/>
   <triplet l1="M-030" l2="VotD" l3="M-090"/>
-  <triplet l1="U+045" l2="M+030" l3="M+090"/>
-  <triplet l1="U+045" l2="U-045" l3="U+180"/>
-  <triplet l1="U+045" l2="U-045" l3="M+000"/>
-  <triplet l1="U+045" l2="M+030" l3="M+000"/>
-  <triplet l1="M-135" l2="U-045" l3="M-090"/>
-  <triplet l1="M-135" l2="U-045" l3="U+180"/>
-  <triplet l1="U+045" l2="M+135" l3="M+090"/>
-  <triplet l1="U+045" l2="M+135" l3="U+180"/>
   <subwoofer name="subName" channel="11" assignedLoudspeakers="M+000, M+030, U+045, M+090, M+135, U+180" weights="0.5, 1.0, 1.0, 1.0, 1.0, 0.5"/>
   <subwoofer name="subName" channel="12" assignedLoudspeakers="M+000, M+030, U+045, M+090, M+135, U+180" weights="0.5, 1.0, 1.0, 1.0, 1.0, 0.5"/>
 </panningConfiguration>

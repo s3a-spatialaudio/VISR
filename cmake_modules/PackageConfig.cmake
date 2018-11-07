@@ -117,6 +117,10 @@ if( BUILD_PYTHON_BINDINGS )
   install( DIRECTORY src/python/packages/metadapter DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_metadapter )
 endif( BUILD_PYTHON_BINDINGS )
 
+# TODO: Decide whether this shall go into a separate component.
+install( DIRECTORY src/python/packages/loudspeakerconfig DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT base )
+
+
 # CPack must be included after all install directives and CPACK_ variable definitions.
 include( CPack )
 

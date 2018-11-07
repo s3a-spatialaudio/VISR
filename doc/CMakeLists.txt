@@ -103,9 +103,7 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   add_custom_command(
     OUTPUT ${STAMP}
     DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
-    # Note: PYTHONPATH setting not working at the moment (at least not on Windows)
-    # Therefore we only set a harmless dummy env. variable
-    COMMAND ${CMAKE_COMMAND} -E env FOO="bar" # PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
              ${SPHINX_EXECUTABLE}
 	       -a
                -q
@@ -131,9 +129,7 @@ set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VE
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
     DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
-    # Note: PYTHONPATH setting not working at the moment (at least not on Windows)
-    # Therefore we only set a harmless dummy env. variable
-    COMMAND ${CMAKE_COMMAND} -E env  FOO="bar" # PYTHONPATH="$ENV{PYTHONPATH}${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PATH}"
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
             ${SPHINX_EXECUTABLE}
                -q
                -b latex

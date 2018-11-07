@@ -14,8 +14,6 @@ import collections
 
 from .geometry_functions import cart2sph, rad2deg
 
-#TODO add EQ configuration support
-#TODO Add subwoofer configuration support
 def createArrayConfigFile( outputFileName,
                            lspPositions,
                            twoDconfig = False,
@@ -23,108 +21,110 @@ def createArrayConfigFile( outputFileName,
                            channelIndices = None,
                            loudspeakerLabels = None,
                            triplets = None,
+                           distanceDelay = False,
+                           distanceAttenuation = False,
                            lspDelays = None,
                            lspGainDB = None,
                            eqConfiguration = None,
                            virtualLoudspeakers = [],
                            subwooferConfig = [],
-                           comment = None
+                           comment = None,
+                           speedOfSound = 340.0
                            ):
     """
     Generate a loudspeaker configuration XML file.
 
     Parameters
-    ==========
-
+    ----------
     outputFileName: string
-      The file name of the XML file to be written. This can be a file name or path.
-      The file extension (typically .xml) must be provided by the user.
+       The file name of the XML file to be written. This can be a file name or path.
+       The file extension (typically .xml) must be provided by the user.
     lspPositions: array-like, 3xL or 2xL, where L is the number of loudspeakers.
-      Provide the loudspeaker in Cartesian coordinates, relative to the centre of the array.
+       Provide the loudspeaker in Cartesian coordinates, relative to the centre of the array.
     twoDconfig: bool, optional
-      Whether the loudspeaker configuration is 2D or 3D (default). In the former case, the lspPositions
-      parameter does not need to have a third row, and it is ignored if present. If twoDconfig if True,
-      then the loudspeaker coordinates in the do not have an "z" or "el" coordinate. Likewise,
-      the triangulation "triplets" consist only of two loudspeakers.
+       Whether the loudspeaker configuration is 2D or 3D (default). In the former case, the lspPositions
+       parameter does not need to have a third row, and it is ignored if present. If twoDconfig if True,
+       then the loudspeaker coordinates in the do not have an "z" or "el" coordinate. Likewise,
+       the triangulation "triplets" consist only of two loudspeakers.
     sphericalPositions: bool, optional
-      Specify whether the loudspeaker and virtual loudspeaker positions are written in spherical (True)
-      or Cartesian coordinates (False). Default is Cartesian.
+       Specify whether the loudspeaker and virtual loudspeaker positions are written in spherical (True)
+       or Cartesian coordinates (False). Default is Cartesian.
     channelIndices: array-like, optional
-      A list of output integer channel indices, one for each real loudspeaker. Optional
-      argument, if not provided, consecutive indeices starting from 1 are assigned.
-      If provided, the length of the array must match the number of real loudspeakers,
-      and indices must be unique.
+       A list of output integer channel indices, one for each real loudspeaker. Optional argument, if not provided, consecutive indices starting from 1 are assigned. If provided, the length of the array must match the number of real loudspeakers, and indices must be unique.
     loudspeakerLabels: array-like, optional
-      A list of strings containing alphanumerical labels for the real loudspeakers.
-      Labels must be unique, consist of the characters 'a-zA-Z0-9&()\+:_-', one for
-      each real loudspeaker. The labels are used to reference loudspeakers in triplets,
-      virtual loudspeaker routings, and subwoofer configs.
-      Optional parameter. If not provided, labels of the form 'lsp_i' with i=1,2,...
-      are generated.
+       A list of strings containing alphanumerical labels for the real loudspeakers.
+       Labels must be unique, consist of the characters 'a-zA-Z0-9&()\+:_-', one for
+       each real loudspeaker. The labels are used to reference loudspeakers in triplets,
+       virtual loudspeaker routings, and subwoofer configs.
+       Optional parameter. If not provided, labels of the form 'lsp_i' with i=1,2,...
+       are generated.
     triplets: array-like, optional.
-      A loudspeaker triangulation. To be provided as a list of arrays consisting of three
-      (or two in case of a 2D configuration) loudspeaker labels. Labels must match
-      existing values of the loudspeakerLabels  parameter.
-      Optional parameter, to be provided only in special cases. By default, the
-      triangulation is computed internally.
+       A loudspeaker triangulation. To be provided as a list of arrays consisting of three
+       (or two in case of a 2D configuration) loudspeaker labels. Labels must match
+       existing values of the loudspeakerLabels  parameter.
+       Optional parameter, to be provided only in special cases. By default, the
+       triangulation is computed internally.
+    distanceDelay: bool, optional
+       Whether the loudspeaker signals are delayed such that they arrive simultaneously in the array centre.
+       This can be used if the loudspeaker distances to the centre ar not equal. In this case
+       the farthest loudspeaker gets a delay of 0 s, and closer loudpeakers a positive delay.
+       The distance compensation delay is added to the :code:`lspDelays` parameter (if present).
+       Optional attribute. The default (False) means no distance attenuation is used.
+    distanceAttenuation: bool, optional
+       Whether the loudspeaker gains shall be scaled if the loudspeaker distances are not 1.0.
+       In this case, a 1/r distance law is applied such that the farthest loudspeaker
+       gets a scaling factor of 0 dB, and lower factors are assigned to loudspeakers closer to the centre.
+       The gain factors are applied on top of the optional parameter :code:`lspGainDB`, if present.
+       Optional attribute. Default is False (no distance attenutation applied)
     lspDelays: array-like, optional
-      An array of delay values to be applied tothe loudspeakers. Values are to be provided in seconds.
-      If not provided, no delays are applied. If specified, the length of the array must match the number of real loudspeakers.
+       An array of delay values to be applied tothe loudspeakers. Values are to be provided in seconds.
+       If not provided, no delays are applied. If specified, the length of the array must match the
+       number of real loudspeakers.
     lspGainDB: array-like, optional.
-      An array of gain values (in dB) to adjust the output gains of the real loudpeakers.
-      If provided, the length must match the number of real loudspeakers.
-      By default, no additional gains are applied.
+       An array of gain values (in dB) to adjust the output gains of the real loudpeakers.
+       If provided, the length must match the number of real loudspeakers.
+       By default, no additional gains are applied.
     virtualLoudspeakers: array of dicts, optional
-      Provide a set of additional virtual/phantom/dead/imaginary loudspeaker nodes
-      to adjust the triangulation of the array. Each entry is a dict consiting of the following key-value pairs:
+       Provide a set of additional virtual/phantom/dead/imaginary loudspeaker nodes to adjust the triangulation of the array. Each entry is a dict consisting of the following key-value pairs.
 
-      * "id": A alphanumeric id, following the same rules as the loudspeaker indices.
-        Must be unique across all real and imaginary loudspeakers.
-      * "pos": A 3- or vector containing the position in Cartesian coordinates.
-        2 elements are allowed for 2D setups.
-      * "routing": Specification how the panning gains calculated for this loudspeaker are
-        distributed to neighbouring real loudspeakers. Provided as a list of tuples
-        (label, gain), where label is the id of a real loudspeaker and gain is a linear gain value.
-        Optional element, if not given, the energy of the virtual loudspeaker is discarded.
+       * "id": A alphanumeric id, following the same rules as the loudspeaker indices. Must be unique across all real and imaginary loudspeakers.
+       * "pos": A 3- or vector containing the position in Cartesian coordinates. 2 elements are allowed for 2D setups.
+       * "routing": Specification how the panning gains calculated for this loudspeaker are distributed to neighbouring real loudspeakers. Provided as a list of tuples (label, gain), where label is the id of a real loudspeaker and gain is a linear gain value. Optional element, if not given, the energy of the virtual loudspeaker is discarded.
 
-      Optional argument. No virtual loudspeakers are created ff not specified.
+      Optional argument. No virtual loudspeakers are created if not specified.
     eqConfiguration: array of structures (dicts), optional
-      Define a set of EQ filters to be applied to loudspeaker and subwoofer output channels.
-      Each entry of the list is a dict containing the following key-value pairs.
-      * "name": A unique, nonempty id that is referenced in loudspeaker and subwoofer
-        specifications.
-      * "filter": A list of biquad definitions, where each element is a dictionary containing
-        the keys 'b' and 'a' that represent the numerator and denominator of the transfer function.
-        'b' must be a 3-element numeric vector, and 'a' a three- or two-element numeric vector.
-        In the latter case, the leading coefficient is assumed to be 1, i.e., a normalised
-        transfer function.
-      * "loudspeakers": A list of loudspeaker labels (real loudspeakers) to whom the eq is applied.
+       Define a set of EQ filters to be applied to loudspeaker and subwoofer output channels. Each entry of the list is a dict containing the following key-value pairs.
+
+       * "name": A unique, nonempty id that is referenced in loudspeaker and subwoofer specifications.
+       * "filter": A list of biquad definitions, where each element is a dictionary containing the keys 'b' and 'a' that represent the numerator and denominator of the transfer function. 'b' must be a 3-element numeric vector, and 'a' a three- or two-element numeric vector. In the latter case, the leading coefficient is assumed to be 1, i.e., a normalised transfer function.
+       * "loudspeakers": A list of loudspeaker labels (real loudspeakers) to whom the eq is applied.
+
     subwooferConfig: array of dicts, optional
-      A list of subwoofer specifications, where each entry is a dictionary with
-      the following key-value pairs:
-      * "name": A string to name the subwoofer. If not provided, a default name will be generated.
-      * "channel": An output channel number for the subwoofer signal. Must be unique
-        across all loudspeakers and subwoofers.
-      * "assignedSpeakers": A list of ids of (real) loudspeakers. The signals of
-        these loudspeakers are used in the computation of the subwoofer signal.
-      * "weights": An optional weighting applied to the loudspeaker signals of the the assigned
-        loudspeakers. If provided, it must be an array-like sequence with the same length as assignedSpeakers.
-        If not given, all assigned speakers are weighted equally with factor "1.0".
+       A list of subwoofer specifications, where each entry is a dictionary with the following key-value pairs:
+
+       * "name": A string to name the subwoofer. If not provided, a default name will be generated.
+       * "channel": An output channel number for the subwoofer signal. Must be unique across all loudspeakers and subwoofers.
+       * "assignedSpeakers": A list of ids of (real) loudspeakers. The signals of these loudspeakers are used in the computation of the subwoofer signal.
+       * "weights": An optional weighting applied to the loudspeaker signals of the the assigned loudspeakers. If provided, it must be an array-like sequence with the same length as assignedSpeakers. If not given, all assigned speakers are weighted equally with factor "1.0".
+
     comment: string, optional
-      Optional string to be written as an XML comment at the head of the file.
+       Optional string to be written as an XML comment at the head of the file.
+
     Examples
     ========
 
     A minimal example of a 3D configuration:
 
-    createArrayConfigFile( 'bs2051-4+5+0.xml',
-                           lspPositions = lspPos,
-                           twoDconfig = False,
-                           sphericalPositions=True,
-                           channelIndices = [1, 2, 3, 5, 6, 7, 8, 9, 10],
-                           loudspeakerLabels =  ["M+030", "M-030", "M+000", "M+110", "M-110",
-                              "U+030", "U-030", "U+110", "U-110"  ],
-                           virtualLoudspeakers = [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
+    .. code-block:: python
+
+       createArrayConfigFile( 'bs2051-4+5+0.xml',
+                              lspPositions = lspPos,
+                              twoDconfig = False,
+                              sphericalPositions=True,
+                              channelIndices = [1, 2, 3, 5, 6, 7, 8, 9, 10],
+                              loudspeakerLabels =  ["M+030", "M-030", "M+000", "M+110", "M-110",
+                                 "U+030", "U-030", "U+110", "U-110"  ],
+                              virtualLoudspeakers = [ { "id": "VotD", "pos": [0.0, 0.0,-1.0],
                                                    "routing": [ ("M+030", 0.2), ("M-030", 0.2),
                                                     ("M+000", 0.2), ("M+110", 0.2), ("M-110", 0.2) ] }]
 
@@ -223,6 +223,25 @@ def createArrayConfigFile( outputFileName,
         if len(lspGainDB) != numRealLoudspeakers:
             raise ValueError( "The argument 'lspDelays' is provided, but its length does not match the number of real loudspeakers." )
 
+    if distanceAttenuation:
+        if lspGainDB is None:
+            lspGainDB = np.zeros( numRealLoudspeakers )
+        lspDistances = np.linalg.norm( lspPositions, ord=2, axis = 0 )
+        # Calculate the gain adjustment such that the farthest loudspeaker has 0 dB,
+        # and closer loudspeakers a negative dB gain
+        maxDistance = np.max( lspDistances )
+        distanceGainAdjustment = 20.0*np.log10( lspDistances / maxDistance )
+        lspGainDB += distanceGainAdjustment
+
+    if distanceDelay:
+        if lspDelays is None:
+            lspDelays = np.zeros( numRealLoudspeakers )
+        lspDistances = np.linalg.norm( lspPositions, ord=2, axis = 0 )
+        # Calculate the delay adjustment such that the farthest loudspeaker has 0 s,
+        # and closer loudspeakers a positive delay
+        maxDistance = np.max( lspDistances )
+        distanceDelayAdjustment = (  maxDistance - lspDistances ) / speedOfSound
+        lspDelays += distanceDelayAdjustment
 
     # %% Create the document tree
     xmlRoot = ET.Element( "panningConfiguration" )
@@ -292,9 +311,9 @@ def createArrayConfigFile( outputFileName,
         writePositionNode( lspNode,
                            lspPositions[:,lspIdx], sphericalPositions, twoDconfig )
         if lspDelays is not None:
-            lspNode.set( "delay", str(round(lspDelays,10)) )
+            lspNode.set( "delay", str(round(lspDelays[lspIdx],10)) )
         if lspGainDB is not None:
-            lspNode.set( "gainDB", str(round(lspGainDB,10)) )
+            lspNode.set( "gainDB", str(round(lspGainDB[lspIdx],10)) )
         if eqConfiguration and (lspLabel in loudspeakerEqs):
             lspNode.set( "eq", loudspeakerEqs[lspLabel] )
 

@@ -1,6 +1,14 @@
 Changelog for project VISR
 
-Patch release 0.11.3
+Patch release 0.11.5
+--------------------
+
+* Updated loudspeaker configuration files for BS-2051 configs and BBC BRIR data sets.
+* Added Python functions for documentation generation.
+* Documentation: Added VISR_BST documentation, moved loudspeaker config description to separate chapter.
+* FIX: GitLab-CI configuration: Caching problems
+
+Patch release 0.11.4
 --------------------
 
 * FIX: Fixed package generation if BUILD_PYTHON_SUPPORT is deactivated.
