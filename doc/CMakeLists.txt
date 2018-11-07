@@ -11,8 +11,6 @@
 # The path containing extension packages written in Python, for example visr_bst.
 file( TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/src/python/packages VISR_PYTHON_PACKAGE_PATH )
 # Path containing the VISR Python externals (in C++)
-# We use visrpython to locate the directory, which also contains the other externals.
-set( VISR_PYTHON_BINARY_PATH $<TARGET_FILE_DIR:visrpython> )
 # Define the separator between multiple directories in environment variables, e.g., PATH
 # or PYTHONPATH. We would prefer a CMake-provided solution.
 if( WIN32 )
@@ -20,13 +18,17 @@ if( WIN32 )
 else( WIN32 )
   set( VISR_ENVIRONMENT_PATH_SEPARATOR ":" )
 endif( WIN32 )
-set( VISR_PYTHON_PATH ${VISR_PYTHON_BINARY_PATH}${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH})
 # Set the dependencies needed to build the documentation. For sphinx.autodoc,
 # the Python externals need to be built before the documentation can be extracted.
 # We use the meta-target 'pythonexternals' that combines all externals,
 # defined in ${CMAKE_SOURCE_DIR}/src/python/CMakeLists.txt
-set( VISR_USERDOC_DEPENDENCIES pythonexternals )
-set( VISR_APIDOC_DEPENDENCIES doxygen-doc pythonexternals )
+if( BUILD_PYTHON_SUPPORT)
+  set( VISR_USERDOC_DEPENDENCIES pythonexternals )
+  set( VISR_APIDOC_DEPENDENCIES doxygen-doc pythonexternals )
+else( BUILD_PYTHON_SUPPORT)
+  set( VISR_USERDOC_DEPENDENCIES doxygen-doc ) # Used as dummy to prevent error later on if the variable is empty
+  set( VISR_APIDOC_DEPENDENCIES doxygen-doc )
+endif( BUILD_PYTHON_SUPPORT)
 
 # Debug message:
 # message( STATUS "VISR_PYTHON_PATH: " ${VISR_PYTHON_PATH} )
@@ -100,6 +102,8 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   # Define an empty file that gets updated when the target is build, such that it can be used as
   # a dependency for other targets. 
   set( STAMP ${outputDir}/htmlbuild.stamp )
+  # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
+  if( BUILD_PYTHON_BINDINGS )
   add_custom_command(
     OUTPUT ${STAMP}
     DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
@@ -115,7 +119,25 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
     BYPRODUCTS ${outputDir}/cache
     COMMENT "HTML generation for target ${targetName}-html."
-  )
+    )
+  else( BUILD_PYTHON_BINDINGS )
+  add_custom_command(
+    OUTPUT ${STAMP}
+    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${VISR_PYTHON_PACKAGE_PATH}"
+             ${SPHINX_EXECUTABLE}
+	       -a
+               -q
+               -b html
+               -c ${outputDir}/html
+               -d ${outputDir}/cache
+                ${sourceDir}
+                ${outputDir}/html
+    COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
+    BYPRODUCTS ${outputDir}/cache
+    COMMENT "HTML generation for target ${targetName}-html."
+    )
+  endif( BUILD_PYTHON_BINDINGS )
   add_custom_target( ${targetName}-html
     DEPENDS ${STAMP}
   )
@@ -125,11 +147,13 @@ endfunction(HtmlDocBuild)
 function( PdfDocBuild targetName sourceDir outputDir depends )
   configure_file( ${sourceDir}/conf.py.in ${outputDir}/latex/conf.py @ONLY )
   # Name (with version) of the output file. This is the main dependency of the target.
-set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
+  set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
+  # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
+  if( BUILD_PYTHON_BINDINGS )
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
     DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
+    COMMAND # ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
             ${SPHINX_EXECUTABLE}
                -q
                -b latex
@@ -144,7 +168,28 @@ set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VE
     WORKING_DIRECTORY ${outputDir}/latex
     BYPRODUCTS ${outputDir}/cache ${outputDir}/latex
     COMMENT "PDF compilation for target ${targetName}-pdf."
-  )
+    )
+  else( BUILD_PYTHON_BINDINGS )
+  add_custom_command(
+    OUTPUT ${OUTPUTFILE}
+    DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
+    COMMAND # ${CMAKE_COMMAND} -E env PYTHONPATH="${VISR_PYTHON_PACKAGE_PATH}"
+            ${SPHINX_EXECUTABLE}
+               -q
+               -b latex
+               -c ${outputDir}/latex
+               -d ${outputDir}/cache
+                ${sourceDir}
+                ${outputDir}/latex
+    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
+    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
+    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
+    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
+    WORKING_DIRECTORY ${outputDir}/latex
+    BYPRODUCTS ${outputDir}/cache ${outputDir}/latex
+    COMMENT "PDF compilation for target ${targetName}-pdf."
+    )
+  endif( BUILD_PYTHON_BINDINGS )
   add_custom_target( ${targetName}-pdf
     DEPENDS ${OUTPUTFILE}
   )
