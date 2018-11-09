@@ -17,8 +17,10 @@ VISR User Manual
 
    about
    getting-started
-   basic_tutorial
+   visr-python-tutorial
    people
+
+.. _getting_visr:
    
 Getting VISR
 =========================
