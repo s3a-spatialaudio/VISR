@@ -1,11 +1,16 @@
 # Python bindings for the main VISR interface classes
 
+# Define this variable to include the binding for the metadapter-enabled VisrRenderer.
+# At the moment, the visr_renderer binding is excluded to break the dependency to the Python libraries.
+# This dependency is likely to cause problems on Mac OS.
+# TODO: Check whether pythoncomponent::Wrapper can be made working at all from within a Python interpreter!
+# set( VISR_RENDERER_PYTHON_BINDING 1 )
+
 set( SOURCES
 baseline_renderer.cpp
 core_renderer.cpp
 delay_vector.cpp
 signalflows.cpp
-visr_renderer.cpp
 )
 
 set( HEADERS
@@ -13,6 +18,11 @@ baseline_renderer.hpp
 core_renderer.hpp
 delay_vector.hpp
 )
+
+if( ${VISR_RENDERER_PYTHON_BINDING} )
+  message( STATUS "Entering VISR_RENDERER_PYTHON_BINDING" )
+  list( APPEND SOURCES visr_renderer.cpp )
+endif( ${VISR_RENDERER_PYTHON_BINDING} )
 
 set(PROJECT_NAME signalflowspython)
 
@@ -31,7 +41,11 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMA
 set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT_NAME}_import" )
 
 target_link_libraries( ${PROJECT_NAME} PRIVATE signalflows_shared ) 
-target_link_libraries( ${PROJECT_NAME} PRIVATE signalflowspython_shared ) 
+if( ${VISR_RENDERER_PYTHON_BINDING} )
+  message( STATUS "Entering VISR_RENDERER_PYTHON_BINDING" )
+  target_link_libraries( ${PROJECT_NAME} PRIVATE signalflowspython_shared ) 
+  target_compile_definitions( ${PROJECT_NAME} PRIVATE VISR_RENDERER_PYTHON_BINDING=1 ) 
+endif( ${VISR_RENDERER_PYTHON_BINDING} )
 
 install(TARGETS ${PROJECT_NAME}
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}

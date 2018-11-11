@@ -1,5 +1,12 @@
 Changelog for project VISR
 
+Patch release 0.11.7
+--------------------
+
+* FIX: Documentation generation with autodoc on Mac OS X
+* FIX: Removed libpython dependency in the signalflows Python external by disabling the VisrRenderer binding.
+* Updted documentation: Added VISR-Python tutorial, first version of object model description.
+
 Patch release 0.11.6
 --------------------
 

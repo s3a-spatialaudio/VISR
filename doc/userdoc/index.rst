@@ -17,8 +17,10 @@ VISR User Manual
 
    about
    getting-started
-   basic_tutorial
+   visr-python-tutorial
    people
+
+.. _getting_visr:
    
 Getting VISR
 =========================
@@ -104,11 +106,9 @@ Overview
 
 Although the VISR framework is deliberately application-agnostic, it is well-suited for working with spatial and object-based audio.
 
+.. toctree::
 
-The VISR object model
----------------------
-
-.. _the_visr_object_model:
+  object-model
 
 Predefined object-based rendering primitives and renderers
 ----------------------------------------------------------
@@ -130,15 +130,19 @@ The loudspeaker configuration format
 VISR component reference
 ========================
 
-Standard rendering component library
-------------------------------------
+Standard rendering component library (:code:`rcl`)
+--------------------------------------------------
+
+.. toctree::
+
+   rcl_component_documentation
 
 The Binaural Synthesis Toolkit (VISR-BST)
 -----------------------------------------
 
 .. toctree::
 
-   binaural-synthesis-toolkit
+  binaural-synthesis-toolkit
 
 Dynamic range control library
 -----------------------------
@@ -150,8 +154,8 @@ Old contents
 
   examples
   tutorials
-  
-The contents of these files will be removed or moded to other parts of the documentation.
+
+The contents of these files will be removed or moved to other parts of the documentation.
 
 
 
