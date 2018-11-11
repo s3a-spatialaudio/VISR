@@ -15,24 +15,24 @@ Binaural synthesis has gained fundamental importance both as a practical sound r
 Introduction
 ~~~~~~~~~~~~
 
-Binaural synthesis aims at recreating spatial audio by recreating binaural signals at the listener's ears :cite:`nicol2010_binaural_technology`, using either headphones or loudspeakers.
+Binaural synthesis aims at recreating spatial audio by recreating binaural signals at the listener's ears :cite:`bst-nicol2010_binaural_technology`, using either headphones or loudspeakers.
 While binaural technology is an area of active research for a long time, the shift of music consumption towards mobile listening, object-based content, as well as the increasing importance of augmented and virtual reality (AR/VR) applications emphasize the increasing significance of binaural reproduction.
-In addition, binaural techniques are an important tool in many areas of audio research and development, from basic perceptual experiments to auralization of acoustic environments or the evaluation of spatial sound reproduction :cite:`lindau_weinzierl2012_assessing_the_plausibility_of_virtual_acoustic_environments`.
+In addition, binaural techniques are an important tool in many areas of audio research and development, from basic perceptual experiments to auralization of acoustic environments or the evaluation of spatial sound reproduction :cite:`bst-lindau_weinzierl2012_assessing_the_plausibility_of_virtual_acoustic_environments`.
 
-Regardless of the application, synthesizing binaural content invariably comprises a number of software building blocks, e.g., HRTF/BRIR selection and/or interpolation, signal filtering, modeling and applying interaural time and level differences, etc. :cite:`jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony`.
-Dynamic binaural synthesis significantly increases the plausibility of reproduction by including dynamic cues as head movements :cite:`algazi_duda2011_headphone-based_spatial_sound`, but requires both a real-time implementation and additional DSP functionality as time-variant delays, dynamic filter updates, and filter crossfading techniques.
+Regardless of the application, synthesizing binaural content invariably comprises a number of software building blocks, e.g., HRTF/BRIR selection and/or interpolation, signal filtering, modeling and applying interaural time and level differences, etc. :cite:`bst-jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony`.
+Dynamic binaural synthesis significantly increases the plausibility of reproduction by including dynamic cues as head movements :cite:`bst-algazi_duda2011_headphone-based_spatial_sound`, but requires both a real-time implementation and additional DSP functionality as time-variant delays, dynamic filter updates, and filter crossfading techniques.
 This implies a considerable implementation effort for research based on binaural synthesis, increases the likelihood of errors due to implementation effects, and makes it difficult to reproduce or evaluate the research of others.
-This argument is in line with the increasing importance of software in (audio) research, e.g., :cite:`cannam_figueira_plumbley2012_sound_software_towards_software_research_in_audio_and_music_research`, and the generally growing awareness of reproducible research, e.g., :cite:`wilson_et_al2014_best_practices_for_scientific_computing`.
+This argument is in line with the increasing importance of software in (audio) research, e.g., :cite:`bst-cannam_figueira_plumbley2012_sound_software_towards_software_research_in_audio_and_music_research`, and the generally growing awareness of reproducible research, e.g., :cite:`bst-wilson_et_al2014_best_practices_for_scientific_computing`.
 
 For this reason we introduce the Binaural Synthesis Toolkit (BST) as an open source, portable, and extensible software library for real-time and offline binaural synthesis.
 Our intention is to provide baseline implementations for main binaural rendering schemes as well as DSP building blocks that enable the modification of existing renderers as well as the implementation of new rendering approaches.
 
 The objective of its paper is to describe the architecture of the BST to enable its use as well as its adaptation by the audio community.
-In essence, the BST is a set of processing components implemented within the VISR --- an open  software rendering framework for audio rendering :cite:`franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research` --- and preconfigured renderers built upon these components.
-At the moment, three renderers are provided, namely HRIR-based dynamic synthesis, e.g., :cite:`algazi_duda2011_headphone-based_spatial_sound`, virtual loudspeaker synthesis (also termed room scanning :cite:`mackensen_et_al1999_binaural_room_scanning_a_new_tool_for_acoustic_and_psychoacoustic_research`), and binaural rendering based on higher order Ambisonics (HOA), e.g., :cite:`daniel_rault_polack1998_ambisonics_encoding_of_other_audio_format_for_multiple_listening_conditions`.
-BRIR/HRIR data can be provided in the AES69-2015 format (SOFA) :cite:`aes2015_aes69_sofa_standard` (http://www.sofaconventions.org), allowing for arbitrary HRIR/BRIR measurement grids, and enabling the use of a wide range of impulse response datasets.
+In essence, the BST is a set of processing components implemented within the VISR --- an open  software rendering framework for audio rendering :cite:`bst-franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research` --- and preconfigured renderers built upon these components.
+At the moment, three renderers are provided, namely HRIR-based dynamic synthesis, e.g., :cite:`bst-algazi_duda2011_headphone-based_spatial_sound`, virtual loudspeaker synthesis (also termed room scanning :cite:`bst-mackensen_et_al1999_binaural_room_scanning_a_new_tool_for_acoustic_and_psychoacoustic_research`), and binaural rendering based on higher order Ambisonics (HOA), e.g., :cite:`bst-daniel_rault_polack1998_ambisonics_encoding_of_other_audio_format_for_multiple_listening_conditions`.
+BRIR/HRIR data can be provided in the AES69-2015 format (SOFA) :cite:`bst-aes2015_aes69_sofa_standard` (http://www.sofaconventions.org), allowing for arbitrary HRIR/BRIR measurement grids, and enabling the use of a wide range of impulse response datasets.
 
-Compared to existing software projects supporting binaural synthesis, for instance Spat :cite:`daniel_rault_polack1998_ambisonics_encoding_of_other_audio_format_for_multiple_listening_conditions` or the SoundScape Renderer (SSR) :cite:`geier_spors2012_spatial_audio_with_the_soundscape_renderer`, the BST offers several new possibilities.
+Compared to existing software projects supporting binaural synthesis, for instance Spat :cite:`bst-daniel_rault_polack1998_ambisonics_encoding_of_other_audio_format_for_multiple_listening_conditions` or the SoundScape Renderer (SSR) :cite:`bst-geier_spors2012_spatial_audio_with_the_soundscape_renderer`, the BST offers several new possibilities.
 On the one hand, its modular structure is designed for easy adaptation and extension rather than providing a fixed functionality.
 To a large extent, this is achieved by the Python language interface of the underlying VISR, and the fact that most high-level BST components are implemented in Python.
 On the other hand, while most other software projects are mainly for real-time use, BST components can be used both in real-time and in fully parametrizable offline simulations using the same code base.
@@ -51,8 +51,8 @@ Sec. :ref:`visr_bst_sec_tutorial_conclusion` summarizes the paper.
 The VISR Framework
 ~~~~~~~~~~~~~~~~~~
 
-The binaural synthesis toolkit is based on the VISR (Versatile Interactive Scene Renderer) framework, an open-source, portable, and extensible software for audio processing :cite:`franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research`.
-It is being developed as part of the S3A project (http://www.s3a-spatialaudio.org) :cite:`coleman_et_al2018_an_audio-visual_system_for_object_based_audio`.
+The binaural synthesis toolkit is based on the VISR (Versatile Interactive Scene Renderer) framework, an open-source, portable, and extensible software for audio processing :cite:`bst-franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research`.
+It is being developed as part of the S3A project (http://www.s3a-spatialaudio.org) :cite:`bst-coleman_et_al2018_an_audio-visual_system_for_object_based_audio`.
 At the moment, it is supported on Linux (Intel and Raspberry Pi), Mac OS X, and Windows.
 VISR is a general-purpose audio processing software with emphasis on, but not limited to, multichannel and object-based audio.
 This section outlines the main features of the VISR framework and the implications on design and usage of the BST.
@@ -158,7 +158,7 @@ object to an audiointerfaces object.
 Python interface
 ''''''''''''''''
 While the core of the VISR framework is implemented in C++, it provides a full application programming interface (API) for the Python programming language.
-This is to enable users to adapt or extend signal flows more productively, using an interpreted language with a more accessible, readable syntax and enabling the use of rich libraries for numeric computing and DSP, such as NumPy and SciPy :cite:`oliphant2007_python_for_scientific_computing`.
+This is to enable users to adapt or extend signal flows more productively, using an interpreted language with a more accessible, readable syntax and enabling the use of rich libraries for numeric computing and DSP, such as NumPy and SciPy :cite:`bst-oliphant2007_python_for_scientific_computing`.
 The Python API can be used in three principal ways:
 
 **Configuring and running signal flows**
@@ -190,14 +190,14 @@ By virtue of the Python integration, signal flows implemented as components are 
 Because the top-level audio and parameter ports of a component can be accessed externally, dynamic rendering features such as moving objects or head movements can be simulated in a deterministic way.
 In the majority of uses, this is most conveniently performed in an interactive Python environment.
 Applications of this feature range from regression tests of atomic components or complex composite signal flows, performance simulations, to offline rendering of complete sound scenes.
-A full characterization of the offline rendering support is beyond the scope of this paper, interested readers are referred to :cite:`franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research`.
+A full characterization of the offline rendering support is beyond the scope of this paper, interested readers are referred to :cite:`bst-franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research`.
 
 Use in multiple software environments
 '''''''''''''''''''''''''''''''''''''
 In addition to realtime rendering and offline Python scripting, VISR components can also be embedded into audio software environments such as digital audio  workstations (DAWs) plugins, or Max/MSP or Pd externals.
 This means that parts of the BST can be used from these applications, creating new tools and integrating into the workflow of more researchers and creatives.
 Support libraries are provided to ease this task by reducing the amount of code required for this embedding.
-Again, a full discussion of this paper is beyond the scope of this paper, see :cite:`franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research` for a discussion.
+Again, a full discussion of this paper is beyond the scope of this paper, see :cite:`bst-franck_et_al2018_an_open_software_rendering_framework_for_audio_reproduction_and_reproducible_research` for a discussion.
 
 .. _visr_bst_sec_tutorial_preconfigured_renderers:
 
@@ -213,9 +213,9 @@ Entities such as components, ports, or configuration options are set in a monosp
 Dynamic HRIR-Based Synthesis
 ''''''''''''''''''''''''''''
 
-This approach renders sound objects, typically point sources or plane waves represented by position metadata and a mono signal, using spatial datasets of head-related impulse responses (HRIR) or, equivalently, head-related transfer functions (HRTFs), e.g., :cite:`jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony,algazi_duda2011_headphone-based_spatial_sound`.
+This approach renders sound objects, typically point sources or plane waves represented by position metadata and a mono signal, using spatial datasets of head-related impulse responses (HRIR) or, equivalently, head-related transfer functions (HRTFs), e.g., :cite:`bst-jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony,bst-algazi_duda2011_headphone-based_spatial_sound`.
 This approach is widely used in audio research and for practical reproduction and is well-suited for object-based audio as well as AR/VR applications.
-In its basic form, it synthesizes sound scenes under freefield conditions, and is therefore often augmented by a reverberation engine, e.g., :cite:`jot_walsh_philp2006_binaural_simulation_of_complex_acoustic_scenes_for_interactive_audio`.
+In its basic form, it synthesizes sound scenes under freefield conditions, and is therefore often augmented by a reverberation engine, e.g., :cite:`bst-jot_walsh_philp2006_binaural_simulation_of_complex_acoustic_scenes_for_interactive_audio`.
 
 .. _figure_visr_bst_dynamic_hrir_synthesis:
 
@@ -232,16 +232,16 @@ It receives object metadata and determines a pair of HRIR filters for each objec
 The controller is initialized with a spatial HRIR dataset and the corresponding grid locations of the IRs.
 Audio object metadata, including positions and levels, are received through the parameter input port :code:`objects`.
 If present, the listener's head orientation is received through the optional input :code:`tracking` and incorporated in the HRIR calculation.
-At the moment, two HRIR calculation methods are supported: nearest-neighbour selection and barycentric interpolation using a Delaunay triangulation, e.g., :cite:`gamper2013_selection_and_interpolation_of_hrtf_for_rendering_moving_virtual_sources`.
+At the moment, two HRIR calculation methods are supported: nearest-neighbour selection and barycentric interpolation using a Delaunay triangulation, e.g., :cite:`bst-gamper2013_selection_and_interpolation_of_hrtf_for_rendering_moving_virtual_sources`.
 The generated IRs, one per sound object and ear, are transmitted through the output port :code:`filters` to the :code:`DynamicConvolver` component, which performs time-variant MIMO (multiple-input, multiple-output) FFT-based convolution of the object audio signals and combines them into binaural output. 
 Depending on the configuration, the :code:`DynamicConvolver` uses crossfading to reduce audible artifacts when changing filters.
 
-The HRTF dataset, including the measurement position grid, can be provided in the AES69:2015 (SOFA) format :cite:`aes2015_aes69_sofa_standard`.
+The HRTF dataset, including the measurement position grid, can be provided in the AES69:2015 (SOFA) format :cite:`bst-aes2015_aes69_sofa_standard`.
 Optionally the rendering component accepts preprocessed datasets where the HRIRs are time-aligned and the onset delays are kept apart (e.g., in the :code:`Data.Delay` field of the SOFA format).
-Applying the delays separately can improve HRIR interpolation quality, reduces audible effects when updating filters, and can therefore enable the use of coarser HRIR datasets, e.g., :cite:`jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony`.
-Because the pure delay part of the HRIRs dominates the ITD cue of the synthesized binaural signal, this also provides a means to use alternative ITD models instead of the measured IR delays, or to implement ITD  individualization :cite:`lindau_estrella_weinzierl2010_individualization_of_dynamic_binaural_synthesis_by_real_time_manipulation_of_the_itd`.
-%It also provides a means to use alternative ITD models instead of the measured IR delays, or to implement ITD  individualization :cite:`lindau_estrella_weinzierl2010_individualization_of_dynamic_binaural_synthesis_by_real_time_manipulation_of_the_itd`.
-In the same way, the filter gain may be calculated separately, for instance to simulate near-field source effects :cite:`jot_walsh_philp2006_binaural_simulation_of_complex_acoustic_scenes_for_interactive_audio`.
+Applying the delays separately can improve HRIR interpolation quality, reduces audible effects when updating filters, and can therefore enable the use of coarser HRIR datasets, e.g., :cite:`bst-jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony`.
+Because the pure delay part of the HRIRs dominates the ITD cue of the synthesized binaural signal, this also provides a means to use alternative ITD models instead of the measured IR delays, or to implement ITD  individualization :cite:`bst-lindau_estrella_weinzierl2010_individualization_of_dynamic_binaural_synthesis_by_real_time_manipulation_of_the_itd`.
+%It also provides a means to use alternative ITD models instead of the measured IR delays, or to implement ITD  individualization :cite:`bst-lindau_estrella_weinzierl2010_individualization_of_dynamic_binaural_synthesis_by_real_time_manipulation_of_the_itd`.
+In the same way, the filter gain may be calculated separately, for instance to simulate near-field source effects :cite:`bst-jot_walsh_philp2006_binaural_simulation_of_complex_acoustic_scenes_for_interactive_audio`.
 %In either of these cases, the optional component :code:`DelayGainMatrix` is instantiated, and the dynamic delay or gain values are calculated in the :code:`DynamicHrirController` component and are applied in delay/gain matrix prior to the convolution.
 In either of these cases, the dynamic delay and/or gain coefficients are calculated in the :code:`DynamicHrirController`, and the optional component :code:`DelayGainMatrix` is instantiated to apply these values prior to the convolution.
 As described in Sec. :ref:`visr_bst_sec_tutorial_building_blocks_delays`, the delay/gain components support configurable fractional delay filtering and smooth parameter updates, thus ensuring audio quality and reducing audible artifacts in dynamic rendering scenarios.
@@ -252,7 +252,7 @@ Higher Order Ambisonics-Based Synthesis
 '''''''''''''''''''''''''''''''''''''''
 
 A second approach, termed HOA (Higher Order Ambisonics)-based synthesis, is based on a spherical harmonics (SH) representation of a spatial sound scene, i.e., higher-order B-format.
-First-order B-format binaural synthesis has been proposed, e.g., in :cite:`mckeag_mcgrath1996_sound_field_format_to_binaural_decoder_with_head_tracking,jot_wardle_larcher1998_approaches_to_binaural_synthesis`, and extended to higher Ambisonic orders, e.g., :cite:`bernschuetz_et_al2014_binaural_reproduction_of_plane_waves_with_reduced_modal_order`.
+First-order B-format binaural synthesis has been proposed, e.g., in :cite:`bst-mckeag_mcgrath1996_sound_field_format_to_binaural_decoder_with_head_tracking,bst-jot_wardle_larcher1998_approaches_to_binaural_synthesis`, and extended to higher Ambisonic orders, e.g., :cite:`bst-bernschuetz_et_al2014_binaural_reproduction_of_plane_waves_with_reduced_modal_order`.
 This scene-based rendering approach forms, for example, the basis of the spatial audio synthesis in Facebook's Audio360 Google's Resonance Audio SDK https://github.com/resonance-audio/resonance-audio-web-sdk.
 
 
@@ -266,9 +266,9 @@ This scene-based rendering approach forms, for example, the basis of the spatial
 
 The signal flow of the generic HOA synthesis renderer is depicted in Fig. :ref:`figure_visr_bst_hoa_to_binaural_renderer`.
 The component :code:`HoaBinauralRenderer` accepts a HOA input signal, i.e., higher-order B-format, of a selectable order :math:`L`, consisting of :math:`(L+1)^2` channels.
-If head tracking is enabled, the component :code:`RotationMatrixCalculator` computes a rotation matrix for spherical harmonics using a recurrent formula :cite:`ivanic_ruedenberg1996_rotation_matrices_for_real_spherical_harmonics_direct_determination_by_recursion`.
+If head tracking is enabled, the component :code:`RotationMatrixCalculator` computes a rotation matrix for spherical harmonics using a recurrent formula :cite:`bst-ivanic_ruedenberg1996_rotation_matrices_for_real_spherical_harmonics_direct_determination_by_recursion`.
 These coefficients are applied to the B-format signal in the gain matrix component :code:`HoaSignalRotation`, effectively rotating the sound field to compensate for the listener's orientation.
-The component of this signal are filtered with a bank of :math:`(L+1)^2` static FIR filters for each ear :cite:`bernschuetz_et_al2014_binaural_reproduction_of_plane_waves_with_reduced_modal_order` in the :code:`StaticConvolver` component, which also performs an ear-wise summation of the filtered signals to yield the binaural output signal.
+The component of this signal are filtered with a bank of :math:`(L+1)^2` static FIR filters for each ear :cite:`bst-bernschuetz_et_al2014_binaural_reproduction_of_plane_waves_with_reduced_modal_order` in the :code:`StaticConvolver` component, which also performs an ear-wise summation of the filtered signals to yield the binaural output signal.
 
 .. _figure_visr_bst_hoa_object_to_binaural_renderer:
 
@@ -285,11 +285,11 @@ The advantage of this approach is that the rotation is performed on the SH coeff
 Virtual Loudspeaker Rendering/ Binaural Room Scanning
 '''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-The third principal approach implemented in the BST, denoted as virtual loudspeaker rendering, uses binaural room impulse responses of a multi-loudspeaker setup in a given acoustic environment to recreate the listening experience in that room. For this reason it is also referred to as *binaural room scanning* :cite:`mackensen_et_al1999_binaural_room_scanning_a_new_tool_for_acoustic_and_psychoacoustic_research,algazi_duda2011_headphone-based_spatial_sound`.
+The third principal approach implemented in the BST, denoted as virtual loudspeaker rendering, uses binaural room impulse responses of a multi-loudspeaker setup in a given acoustic environment to recreate the listening experience in that room. For this reason it is also referred to as *binaural room scanning* :cite:`bst-mackensen_et_al1999_binaural_room_scanning_a_new_tool_for_acoustic_and_psychoacoustic_research,bst-algazi_duda2011_headphone-based_spatial_sound`.
 Headtracking can be used to incorporate the listener's orientation by switching or interpolating between BRIR data provided for a grid of orientations.
-While the BST supports both 2D and 3D grids, exiting datasets, e.g., :cite:`pike_melchior_tew2014_assessing_the_plausibility_of_non-individualised_dynamic_binaural_synthesis_in_a_small_room,pike_romanov2017_an_impulse_response_dataset_for_dynamic_data-based_auralization_of_advanced_sound_systems` are typically restricted to orientations in the horizontal plane because of the measurement effort and data size.
+While the BST supports both 2D and 3D grids, exiting datasets, e.g., :cite:`bst-pike_melchior_tew2014_assessing_the_plausibility_of_non-individualised_dynamic_binaural_synthesis_in_a_small_room,bst-pike_romanov2017_an_impulse_response_dataset_for_dynamic_data-based_auralization_of_advanced_sound_systems` are typically restricted to orientations in the horizontal plane because of the measurement effort and data size.
 In contrast to the aforementioned methods, this approach does not operate on audio objects but on loudspeaker signals.
-It is therefore used to reproduce channel-based content or to transform the output of loudspeaker-based rendering methods to binaural, e.g., :cite:`laitinen_pulkki2009_binaural_rendering_for_directional_audio_coding`.
+It is therefore used to reproduce channel-based content or to transform the output of loudspeaker-based rendering methods to binaural, e.g., :cite:`bst-laitinen_pulkki2009_binaural_rendering_for_directional_audio_coding`.
 
 .. _figure_visr_bst_virtual_loudspeaker_renderer:
 
@@ -306,7 +306,7 @@ The resulting BRIRs are sent to the :code:`DynamicBrirConvolution` component, wh
 
 If the onset delays are extracted from the BRIRs, they are dynamically computed in the controller and applied in the optional :code:`DynamicDelayMatrix` component.
 As in case dynamic HRIR synthesis, this can help to improve filter interpolation, reduce switching artifacts, and allow for coarser BRIR datasets.
-To reduce memory requirements and the computational load due to filter interpolation and switching, the late part of the BRIRs can optionally be rendered statically, i.e., independent of the head rotation, as described in :cite:`pike_melchior_tew2014_assessing_the_plausibility_of_non-individualised_dynamic_binaural_synthesis_in_a_small_room`.
+To reduce memory requirements and the computational load due to filter interpolation and switching, the late part of the BRIRs can optionally be rendered statically, i.e., independent of the head rotation, as described in :cite:`bst-pike_melchior_tew2014_assessing_the_plausibility_of_non-individualised_dynamic_binaural_synthesis_in_a_small_room`.
 In this case, the loudspeaker signals are processed through an additional branch consisting of a fixed delay matrix :code:`LateDelayMatrix`, which applies the time offset (mixing time) of the late reverberation tail, and the static convolver :code:`LateConvolutionEngine`.
 The result is combined with the dynamically convolved early part to form the binaural output signal.
 
@@ -346,7 +346,7 @@ Depending on the configuration, both the routing points and the FIR filters can 
 To avoid artifacts due to such filter switching operations, the component :code:`rcl.CrossFadingFirFilterMatrix` extends this filter matrix by a crossfading implementation to enable smooth transitions.
 To this end, an additional configuration parameter :code:`interpolationSteps` is added to specify the duration of the transition to a new filter.
 At the moment, this operation is performed in the time domain, thus incurring significant increase in computational complexity. 
-This can be partly alleviated by frequency-domain filter exchange strategies, e.g., :cite:`franck2014_efficient_frequency-domain_crossfading_for_fast_convolution_with_application_to_binaural_synthesis`, which can be implemented 
+This can be partly alleviated by frequency-domain filter exchange strategies, e.g., :cite:`bst-franck2014_efficient_frequency-domain_crossfading_for_fast_convolution_with_application_to_binaural_synthesis`, which can be implemented 
 without changing the component's interface.
 
 Gain Vectors and Matrices
@@ -375,7 +375,7 @@ For time-variant delay operation, an optional parameter input :code:`delay` is i
 For artifact-free operation, the time delays are transitioned smoothly to the new values, based on a :code:`interpolationsteps` configuration parameter as described above.
 In addition, fractional delay (FD) filtering is essential for maintaining audio quality in time-variant delay lines.
 To this end, a FD algorithm can be selected using the :code:`interpolationType` parameter.
-Currently the delay components support nearest-neighbor interpolation and Lagrange interpolation of arbitrary order based on an efficient linear-complexity implementation :cite:`franck2008_efficient_algorithms_and_structures_for_fractional_delay_filtering_based_on_lagrange_interpolation`.
+Currently the delay components support nearest-neighbor interpolation and Lagrange interpolation of arbitrary order based on an efficient linear-complexity implementation :cite:`bst-franck2008_efficient_algorithms_and_structures_for_fractional_delay_filtering_based_on_lagrange_interpolation`.
 Since signal delays are often applied in combination with a scaling, i.e., gain, and because these operations can be combined efficiently, the VISR delay components support an optional :code:`gain` parameter input port that can be activated if required.
 
 
@@ -418,8 +418,8 @@ Realtime HRIR synthesis of object-based scenes
    
    Application: Object scene rendering.
 
-In this use case, a complex object-based scene, e.g., :cite:`woodcock_et_al2016_presenting_the_s3a_object-based_audio_drama_dataset` is reproduced binaurally.
-The dynamic scene is stored in the Audio Definition Model (ADM) :cite:`itu2017_itu-r_2076.1_adm` format and played through a specialized software player, generating a multichannel audio signal containing the object waveforms, and the object metadata as a UDP network stream.
+In this use case, a complex object-based scene, e.g., :cite:`bst-woodcock_et_al2016_presenting_the_s3a_object-based_audio_drama_dataset` is reproduced binaurally.
+The dynamic scene is stored in the Audio Definition Model (ADM) :cite:`bst-itu2017_itu-r_2076.1_adm` format and played through a specialized software player, generating a multichannel audio signal containing the object waveforms, and the object metadata as a UDP network stream.
 A new composite component :code:`ObjectSceneRenderer`, depicted in Fig. :ref:`figure_visr_bst_object_based_scene_renderer`, is created to reproduce such content.
 It contains a :code:`UdpReceiver` and a :code:`SceneDecoder` component, both part of the VISR :code:`rcl` library, to receive object metadata and to decode it into the internal representation.
 This and the multichannel object audio is passed to the :code:`DynamicHrirRenderer`.
@@ -438,7 +438,7 @@ Transaural Loudspeaker Array
    
    Application: Transaural array rendering
 
-A variant of the object scene rendering for transaural array reproduction e.g., :cite:`simon-galvez_fazi2015_loudspeaker_arrays_for_transaural_reproduction` is depicted in Fig. :ref:`figure_visr_bst_transaural_array_renderer`.
+A variant of the object scene rendering for transaural array reproduction e.g., :cite:`bst-simon-galvez_fazi2015_loudspeaker_arrays_for_transaural_reproduction` is depicted in Fig. :ref:`figure_visr_bst_transaural_array_renderer`.
 It features a new top-level composite component :code:`TransauralArrayRendering`, which connects a :code:`ObjectSceneRenderer` to the transaural-specific crosstalk cancellation algorithm, which is implemented using the VISR framework.
 The output of the latter is sent to a multichannel loudspeaker array.
 
@@ -464,7 +464,9 @@ References
 ~~~~~~~~~~
 
 .. bibliography:: references_binaural_synthesis_toolkit.bib
+   :labelprefix: B
    :style: unsrt
+   :filter: docname in docnames
 
 Class reference
 ^^^^^^^^^^^^^^^
@@ -505,5 +507,3 @@ Realtime rendering classes
 .. autoclass:: visr_bst.RealtimeHoaBinauralRenderer
 
 .. autoclass:: visr_bst.RealtimeVirtualLoudspeakerRenderer
-
-
