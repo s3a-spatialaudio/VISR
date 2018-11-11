@@ -548,7 +548,7 @@ Instead, the protocol of the parameter output :code:`"gains"` is accessed and th
 
 Figure :ref:`figure_visr_python_tutorial_offline_simulation_gains` shows the resulting gains of the :code:`VbapL2Panner` and the standard VBAP algorithm for the upper-rear loudspeakers :code:`U-135` and :code:`U+135` as a function of the source's azimuth.
 For plain VBAP, the gains for the symmetrical loudspeaker positions are asymmetrical, and :code:`U-135` is active for a wide range of azimuths with some rapid gain changes.
-This is in accordance with the audio signal depicted in Figure :ref:``figure_visr_python_tutorial_offline_simulation_audio_signal`, and is caused by ambiguities inherent to the VBAP algorithm, see e.g., :cite:`tut-franck_wang_fazi2017_sparse_l1-optimal_multiloudspeaker_panning_and_its_equivalence_to_vector_based_amplitude_panning`.
+This is in accordance with the audio signal depicted in Figure :ref:`figure_visr_python_tutorial_offline_simulation_audio_signal`, and is caused by ambiguities inherent to the VBAP algorithm, see e.g., :cite:`tut-franck_wang_fazi2017_sparse_l1-optimal_multiloudspeaker_panning_and_its_equivalence_to_vector_based_amplitude_panning`.
 In contrast, the proposed algorithm offers symmetric, localized loudspeaker activations that with smoother transitions as the source moves.
 
 .. _figure_visr_python_tutorial_offline_simulation_energy_direction_difference:

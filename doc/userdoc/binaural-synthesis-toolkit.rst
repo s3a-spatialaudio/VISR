@@ -77,7 +77,6 @@ Ports
 
 Data inputs and outputs to components are represented by *ports*.
 They enable configurable, directional flow of information between components or with the outside environment. 
-% The component API (application programming interface) is the core of the VISR framework
 There are two distinct types of ports: audio and parameter ports.
 Audio ports accept or create multichannel audio signals with an arbitrary, configurable number of single/mono audio signal waveforms, which is referred as the *width* of the port.
 Audio ports are configured with unique name, a width and a sample type such as :code:`float` or :code:`int16`.
@@ -126,7 +125,6 @@ In contrast, a *composite component* contains a set of interconnected components
 This allows the specification of more complex signal flows in terms of existing functionality, but also the reuse of such complex signal flows.
 As their atomic counterparts, they may take a rich set of constructor options.
 These can control which contained components are constructed, how they are configured, and how they are connected.
-%Decomposing a complex signal flow into hierarchical components improves readability and the reuse of parts.
 It is worth noting that nested components do not impair computational efficiency because the hierarchy is flattened at initialisation time and therefore not visible to the runtime engine.
 
 This hierarchical structure has far-reaching consequences for the design and the use of the BST.
@@ -186,7 +184,6 @@ Offline Rendering
 '''''''''''''''''
 
 By virtue of the Python integration, signal flows implemented as components are not limited to realtime rendering, but can also be executed in an offline programming environment.
-%Because it is possible to access the top-level parameter ports of a component from the Python environment, dynamic rendering features such as moving objects or head movements can be simulated deterministically.
 Because the top-level audio and parameter ports of a component can be accessed externally, dynamic rendering features such as moving objects or head movements can be simulated in a deterministic way.
 In the majority of uses, this is most conveniently performed in an interactive Python environment.
 Applications of this feature range from regression tests of atomic components or complex composite signal flows, performance simulations, to offline rendering of complete sound scenes.
@@ -240,9 +237,7 @@ The HRTF dataset, including the measurement position grid, can be provided in th
 Optionally the rendering component accepts preprocessed datasets where the HRIRs are time-aligned and the onset delays are kept apart (e.g., in the :code:`Data.Delay` field of the SOFA format).
 Applying the delays separately can improve HRIR interpolation quality, reduces audible effects when updating filters, and can therefore enable the use of coarser HRIR datasets, e.g., :cite:`bst-jot_larcher_warusfel_1995_digital_signal_processing_issues_in_the_context_of_binaural_and_transaural_stereophony`.
 Because the pure delay part of the HRIRs dominates the ITD cue of the synthesized binaural signal, this also provides a means to use alternative ITD models instead of the measured IR delays, or to implement ITD  individualization :cite:`bst-lindau_estrella_weinzierl2010_individualization_of_dynamic_binaural_synthesis_by_real_time_manipulation_of_the_itd`.
-%It also provides a means to use alternative ITD models instead of the measured IR delays, or to implement ITD  individualization :cite:`bst-lindau_estrella_weinzierl2010_individualization_of_dynamic_binaural_synthesis_by_real_time_manipulation_of_the_itd`.
 In the same way, the filter gain may be calculated separately, for instance to simulate near-field source effects :cite:`bst-jot_walsh_philp2006_binaural_simulation_of_complex_acoustic_scenes_for_interactive_audio`.
-%In either of these cases, the optional component :code:`DelayGainMatrix` is instantiated, and the dynamic delay or gain values are calculated in the :code:`DynamicHrirController` component and are applied in delay/gain matrix prior to the convolution.
 In either of these cases, the dynamic delay and/or gain coefficients are calculated in the :code:`DynamicHrirController`, and the optional component :code:`DelayGainMatrix` is instantiated to apply these values prior to the convolution.
 As described in Sec. :ref:`visr_bst_sec_tutorial_building_blocks_delays`, the delay/gain components support configurable fractional delay filtering and smooth parameter updates, thus ensuring audio quality and reducing audible artifacts in dynamic rendering scenarios.
 
@@ -315,8 +310,6 @@ The result is combined with the dynamically convolved early part to form the bin
 Rendering Building Blocks
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-%In addition to using the prepackaged renderers, the open and extensible structure of the VISR binaural synthesis toolkit fosters the modification and extension of binaural rendering algorithms.
-%In this section we describe generic building blocks, mostly DSP algorithms, that are used in the prepackaged renderers but which are reusable for other binaural synthesis algorithms.
 After describing the ready-made binaural synthesis approaches provided in the BST, this section explains the main DSP building blocks used to implement these algorithms in more detail.
 On the one hand, this is to provide more insight into the workings of these renderers.
 On the other hand, these components can also be used to adapt or extend the BST, or to implement alternative synthesis approaches.
@@ -339,7 +332,6 @@ The most basic, :code:`rcl.FirFilterMatrix`, enables arbitrary sets of filtering
 To this end, so-called *routings* --- lists of elements formed by an input index, an output index and a filter id --- can be provided either during initialisation or at runtime.
 In this way, widely different filtering operations can be performed by the same component.
 Examples are multichannel channel-wise filtering, dense MIMO filter matrix, or application-specific topologies such as filtering a set of object signals to a left and right HRIR each, and summing the results ear-wise.
-%This enables a wide range of different uses, from filtering of individual channels, dense matrixing operations, or application-specific sparse patterns of filtering operations, all using the same component.
 FFT and inverse FFT transforms are reused for multiple filtering operations where possible, improving efficiency compared to simple channel-wise convolution.
 Depending on the configuration, both the routing points and the FIR filters can be exchanged at runtime, and the changes are performed instantaneously.
 
