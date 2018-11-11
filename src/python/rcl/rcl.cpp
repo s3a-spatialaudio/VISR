@@ -47,6 +47,13 @@ PYBIND11_MODULE(rcl, m)
   pybind11::module::import( "panning" );
   pybind11::module::import( "pml" );
 
+  m.doc() = 
+R"(VISR default component library.
+
+At the moment, this module contains atomic components (whereas the composite ones are in signalflows) for historic reasons.
+In the future, however, this will change do a topical orgainisation.
+)";
+
   using namespace visr::python::rcl;
   exportAdd( m );
   exportBiquadIirFilter( m );

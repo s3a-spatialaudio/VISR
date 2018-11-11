@@ -22,13 +22,13 @@ endif( WIN32 )
 # the Python externals need to be built before the documentation can be extracted.
 # We use the meta-target 'pythonexternals' that combines all externals,
 # defined in ${CMAKE_SOURCE_DIR}/src/python/CMakeLists.txt
-if( BUILD_PYTHON_SUPPORT)
-  set( VISR_USERDOC_DEPENDENCIES pythonexternals )
+if( BUILD_PYTHON_BINDINGS)
+  set( VISR_USERDOC_DEPENDENCIES doxygen-doc pythonexternals )
   set( VISR_APIDOC_DEPENDENCIES doxygen-doc pythonexternals )
-else( BUILD_PYTHON_SUPPORT)
+else( BUILD_PYTHON_PYTHON_BINDINGS)
   set( VISR_USERDOC_DEPENDENCIES doxygen-doc ) # Used as dummy to prevent error later on if the variable is empty
   set( VISR_APIDOC_DEPENDENCIES doxygen-doc )
-endif( BUILD_PYTHON_SUPPORT)
+endif( BUILD_PYTHON_BINDINGS)
 
 # Debug message:
 # message( STATUS "VISR_PYTHON_PATH: " ${VISR_PYTHON_PATH} )
@@ -36,7 +36,7 @@ endif( BUILD_PYTHON_SUPPORT)
 find_package(Doxygen)
 if(NOT DOXYGEN_FOUND)
   #TODO add installation line guides for installing Doxygen via website www. ....
-  message(FATAL_ERROR "Doxygen is needed to build the documentation. You can install it here at ...")
+  message(FATAL_ERROR "Doxygen is needed to build the documentation.")
 endif()
 
 # Latex is used to create PDFs from the sphinx documentation
@@ -107,7 +107,10 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   add_custom_command(
     OUTPUT ${STAMP}
     DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
+    # The DYLD_LIBRARY_PATH setting is needed only on Mac OS X (because the current build process creates Python
+    # externals without an rpath pointing to the underlying VISR shared libraries.
+    # We add this variable for all platforms to avoid substantial code duplication.
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}" DYLD_LIBRARY_PATH="$<TARGET_FILE_DIR:visr_shared>"
              ${SPHINX_EXECUTABLE}
 	       -a
                -q
@@ -153,7 +156,10 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
     DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
-    COMMAND # ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}"
+    # The DYLD_LIBRARY_PATH setting is needed only on Mac OS X (because the current build process creates Python
+    # externals without an rpath pointing to the underlying VISR shared libraries.
+    # We add this variable for all platforms to avoid substantial code duplication.
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}" DYLD_LIBRARY_PATH="$<TARGET_FILE_DIR:visr_shared>"
             ${SPHINX_EXECUTABLE}
                -q
                -b latex
@@ -173,7 +179,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
     DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
-    COMMAND # ${CMAKE_COMMAND} -E env PYTHONPATH="${VISR_PYTHON_PACKAGE_PATH}"
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${VISR_PYTHON_PACKAGE_PATH}"
             ${SPHINX_EXECUTABLE}
                -q
                -b latex

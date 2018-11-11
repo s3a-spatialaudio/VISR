@@ -11,7 +11,9 @@ namespace signalflows
 void exportBaselineRenderer( pybind11::module& m );
 void exportCoreRenderer( pybind11::module& m );
 void exportDelayVector( pybind11::module& m );
-void exportVisrRenderer( pybind11::module& m );
+#ifdef VISR_RENDERER_PYTHON_BINDING
+  void exportVisrRenderer( pybind11::module& m );
+#endif
 }
 }
 }
@@ -27,5 +29,8 @@ PYBIND11_MODULE( signalflows, m )
   exportBaselineRenderer( m );
   exportCoreRenderer( m );
   exportDelayVector( m );
+#ifdef VISR_RENDERER_PYTHON_BINDING
   exportVisrRenderer( m );
+#pragma message( "BUILD VISR Renderer" )
+#endif
 }
