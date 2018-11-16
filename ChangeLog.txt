@@ -1,5 +1,11 @@
 Changelog for project VISR
 
+Patch release 0.11.8
+--------------------
+
+* FIX: Documentation generation to make sure that the Python externals are
+  built before they are used in the docu generation.
+
 Patch release 0.11.7
 --------------------
 
