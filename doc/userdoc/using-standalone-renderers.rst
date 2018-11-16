@@ -96,7 +96,19 @@ VISR object-based loudspeaker renderer
 These renderers facilitate object-based rendering to arbitrary loudspeaker setups.
 They use the VISR audio object model and the corresponding JSON format described in Section :ref:`the_visr_object_model`.
 
-Note that there are two binaries for loudspeaker rendering: **visr_renderer** and **baseline_renderer**.
+.. note:: Object-based rendering requires audio scenes consisting of audio objects, that is, audio and corresponding
+	  object metadata.
+	  The audio signals have to be provided to the input of the audio interface used by the renderer.
+	  The object metadata has to be sent as a stream of UDP messages.
+
+	  The VISR framework does not provide a graphical user interface to generate object metadata.
+	  We recommend using thehttps://www.reaper.fm>`_.
+	  Section "TODO: Insert name here" of the `VISR production suite User Manual <http://cvssp.org/data/s3a/public/VISRPluginSuite/html/index.html>`_
+	  describes how to configure these plugins with an external renderer.
+
+
+
+There are two binaries for loudspeaker rendering: **visr_renderer** and **baseline_renderer**.
 The provision of these separate binaries has technical reasons - mainly their dependency on a compatible and configured Python installation, as explained below.
 
 The two binaries provided are:
