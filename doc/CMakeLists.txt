@@ -201,11 +201,11 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
   )
 endfunction(PdfDocBuild)
 
-PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} ${VISR_USERDOC_DEPENDENCIES} )
-PdfDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} ${VISR_APIDOC_DEPENDENCIES} )
+PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} "${VISR_USERDOC_DEPENDENCIES}" )
+PdfDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} "${VISR_APIDOC_DEPENDENCIES}" )
 
-HtmlDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} ${VISR_USERDOC_DEPENDENCIES} )
-HtmlDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} ${VISR_APIDOC_DEPENDENCIES} )
+HtmlDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} "${VISR_USERDOC_DEPENDENCIES}" )
+HtmlDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} "${VISR_APIDOC_DEPENDENCIES}" )
 
 # Add the Sphinx-generated targets to the "doc" meta-target
 add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf ) 
