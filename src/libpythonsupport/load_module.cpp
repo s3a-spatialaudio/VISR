@@ -29,15 +29,22 @@ pybind11::object loadModule( std::string const & moduleName,
 VISR_PYTHONSUPPORT_LIBRARY_SYMBOL
 pybind11::object loadModule( std::string const & moduleName,
                              std::vector<std::string> const & modulePath,
-			     std::vector<std::string> const & additionalSystemPath,
+                             std::vector<std::string> const & additionalSystemPath,
                              pybind11::object & globals)  
 {
   namespace py = pybind11;
 
+  std::vector<std::string> moduleNameParts;
+  boost::algorithm::split(moduleNameParts, moduleName, boost::algorithm::is_any_of("."));
+  if (moduleNameParts.empty())
+  {
+    throw std::invalid_argument( "pythonsupport::loadModule(): Invalid module name" );
+  }
+
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/
   py::dict locals;
-  locals["moduleName"] = py::cast(moduleName);
+  locals["moduleName"] = py::cast(moduleNameParts[0] );
   locals["modulePath"] = modulePath.empty() ? py::none() : py::cast( modulePath );
   locals["additionalPath"] = additionalSystemPath.empty()
     ? py::list() : py::cast( additionalSystemPath );
@@ -54,7 +61,20 @@ pybind11::object loadModule( std::string const & moduleName,
       "new_module = imp.load_module( moduleName, file, pathname, description)\n",
       globals,
       locals);
-    return locals["new_module"];
+
+    if (moduleNameParts.size() == 1)
+    {
+      return locals["new_module"];
+    }
+    else
+    {
+      py::object mod = locals["new_module"];
+      for (std::size_t nestingLevel(1); nestingLevel < moduleNameParts.size(); ++nestingLevel)
+      {
+        mod = mod.attr(moduleNameParts[nestingLevel].c_str() );
+      }
+      return mod;
+    }
   }
   catch( std::exception const & ex )
   {
@@ -62,7 +82,7 @@ pybind11::object loadModule( std::string const & moduleName,
   }
 }
 
-  namespace // unnamed
+namespace // unnamed
 {
 
 /**
@@ -101,7 +121,7 @@ pybind11::object loadModule( std::string const & moduleName,
 
 pybind11::object loadModule( std::string const & moduleName,
                              std::string const & modulePathList,
-			     std::string const & additionalPathList,
+                             std::string const & additionalPathList,
                              pybind11::object & globals)
 {
   auto const modulePath = pathStringToSequence( modulePathList );
