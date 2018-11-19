@@ -1,6 +1,22 @@
 .. Copyright Andreas Franck 2018 - All rights reserved.
 .. Copyright University of Southampton 2018 - All rights reserved.
+   
+.. _visr_bst:
+   
+The Binaural Synthesis Toolkit
+------------------------------
 
+.. toctree::
+
+The binaural synthesis toolkit (VISR_BST) is an extensible set of components for realtime and offline binaural synthesis.
+
+
+This section consists of two parts.
+First, Section :ref:`visr_bst_tutorial` introduces the BST in a tutorial-style form.
+After that, Section :ref:`visr_bst_component_reference` describes all components and helper classes and functions in detail. 
+
+.. _visr_bst_tutorial:
+   
 Tutorial
 ^^^^^^^^
 
@@ -460,42 +476,123 @@ References
    :style: unsrt
    :filter: docname in docnames
 
-Class reference
-^^^^^^^^^^^^^^^
+.. _visr_bst_component_reference:
+	    
+Component reference
+^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: visr_bst
-   :members:
+.. _visr_bst_reference_core_renderers:
 
-The renderer classes
-~~~~~~~~~~~~~~~~~~~~
+The renderer components
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Class :code:`DynamicHrirRenderer`
-'''''''''''''''''''''''''''''''''
+The renderer classes contain the audio signal flow for one binaural synthesis approach.
+Typically, they have a large number of configuration parameters to select between different processing variants.
+
+In contrasts to the realtime renderering components (Section :ref:`visr_bst_reference_realtime_renderers`), the core renderers are designed to be usable in very different environments, for example within a realtime renderer, but also in an offline simultation or a DAW external where control input is provided differently.
+For this reason, components as network data receivers are omitted, and all parameter input and output is handled through parameter ports instead.
+
+
+Component :code:`DynamicHrirRenderer`
+'''''''''''''''''''''''''''''''''''''
+
+.. figure:: ../images/visr_bst/dynamic_hrir_synthesis.png
+   :width: 80 %
+   :align: center   
+   
+   :code:`DynamicHrirRenderer` component
 
 .. autoclass:: visr_bst.DynamicHrirRenderer
    :members:
 
-Class :code:`HoaBinauralRenderer`
-'''''''''''''''''''''''''''''''''''''''''
+Component :code:`HoaBinauralRenderer`
+'''''''''''''''''''''''''''''''''''''
 
 .. autoclass:: visr_bst.HoaBinauralRenderer
 
-Class :code:`HoaObjectToBinauralRenderer`
-'''''''''''''''''''''''''''''''''''''''''
+Component :code:`HoaObjectToBinauralRenderer`
+'''''''''''''''''''''''''''''''''''''''''''''
 
 .. autoclass:: visr_bst.HoaObjectToBinauralRenderer
 
+Component :code:`VirtualLoudspeakerRenderer`
+''''''''''''''''''''''''''''''''''''''''''''
 .. autoclass:: visr_bst.VirtualLoudspeakerRenderer
 
+Component :code:`ObjectToVirtualLoudspeakerRenderer`
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 .. autoclass:: visr_bst.ObjectToVirtualLoudspeakerRenderer
 
-Realtime rendering classes
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _visr_bst_reference_realtime_renderers:
+	       
+Realtime rendering components
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The realtime rendering components provide signal flows for the different rendering approaches including the realtime input/output for head tracking information and, where applicable, object metadata.
+These classes are therefore less versatile than the core renderers described in Section :ref:`visr_bst_reference_core_renderers`, but provide ready-to-go components for many practical uses.
+
+Component :code:`RealtimeDynamicHrirRenderer`
+'''''''''''''''''''''''''''''''''''''''''''''
 .. autoclass:: visr_bst.RealtimeDynamicHrirRenderer
 
+Component :code:`RealtimeHoaObjectToBinauralRenderer`
+'''''''''''''''''''''''''''''''''''''''''''''''''''''
 .. autoclass:: visr_bst.RealtimeHoaObjectToBinauralRenderer
 
+Component :code:`RealtimeHoaBinauralRenderer`
+'''''''''''''''''''''''''''''''''''''''''''''
 .. autoclass:: visr_bst.RealtimeHoaBinauralRenderer
 
+Component :code:`RealtimeVirtualLoudspeakerRenderer`
+''''''''''''''''''''''''''''''''''''''''''''''''''''
 .. autoclass:: visr_bst.RealtimeVirtualLoudspeakerRenderer
+
+Controller components
+~~~~~~~~~~~~~~~~~~~~~
+
+Controller components implement the logic of binaural synthesis renderer and control the audio processing.
+Therefore the form the core of the BST.
+There are two controllers, one for dynamic HRIR synthesis and one for virtual loudspeaker rendererin.
+Note that the HOA synthesis rendering does not require a controller.
+
+Component :code:`DynamicHrirController`
+'''''''''''''''''''''''''''''''''''''''
+.. autoclass:: visr_bst.DynamicHrirController
+
+Component :code:`VirtualLoudspeakerController`
+''''''''''''''''''''''''''''''''''''''''''''''
+.. autoclass:: visr_bst.VirtualLoudspeakerController
+
+HOA components
+~~~~~~~~~~~~~~
+
+The sub-module :code:`visr_bst.hoa_components` contains a set of processing components that are used
+in the HOA (higher-order Ambisonics) binaural rendering approaches.
+
+.. note:: These classes might be moved outside the :code:`visr_bst` module in the future, and might also be reimplemented in C++.
+
+Component :code:`HoaObjectEncoder`
+''''''''''''''''''''''''''''''''''
+.. autoclass:: visr_bst.hoa_components.HoaObjectEncoder
+
+Component :code:`HoaCoefficientRotation`
+''''''''''''''''''''''''''''''''''''''''
+.. autoclass:: visr_bst.hoa_components.HoaCoefficientRotation
+
+Component :code:`HoaRotationMatrixCalculator`
+'''''''''''''''''''''''''''''''''''''''''''''
+.. autoclass:: visr_bst.hoa_components.HoaRotationMatrixCalculator
+
+Trackers
+~~~~~~~~
+
+Tracker classes receive data from headtracking devices and create :code:`pml.ListenerPosition` parameters.
+Tracker objects can be used either in custom signal flows or passed as optional arguments to the :ref:`visr_bst_reference_realtime_renderers`.
+
+Component :code:`RazorAHRS`
+'''''''''''''''''''''''''''
+.. autoclass:: visr_bst.tracker.RazorAHRS
+
+Component :code:`RazorAHRSWithUdpCalibrationTrigger`
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+.. autoclass:: visr_bst.tracker.RazorAHRSWithUdpCalibrationTrigger

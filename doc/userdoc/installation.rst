@@ -147,6 +147,8 @@ Python templates
 Documentation
   User and code reference documentation as PDF documents.
   The Doxygen code documentation covering the complete source code can be optionally selected. However, the latter documentation is deprecated and will be contained in the code reference documentation in the future.
+
+.. _visr_installation_setting_up_python:
   
 Setting up Python
 =================

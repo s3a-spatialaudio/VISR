@@ -1,3 +1,5 @@
+.. _visr_python_tutorial:
+
 VISR tutorial using Python
 ==========================
 
@@ -204,6 +206,7 @@ Finally, VISR contains a set of support libraries that simplifies the translatio
 
 Application Example: Panning Algorithm Development
 --------------------------------------------------
+
 In this section we explain the use of the VISR framework in a continued application example.
 To this end we describe the prototyping and testing of a multichannel amplitude panning technique.
 For expressiveness and conciseness, the examples are presented in the Python language.
@@ -213,6 +216,7 @@ The full source code is available through :cite:`tut-s3a2018_visr_download_site`
 
 Obtaining and installing the VISR framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The VISR framework is available under a permissive open-source license which allows for free use and modification.
 Installation packages and setup instructions are provided in section :ref:`getting_visr`.
 To use the Python integration, Python 3 must be installed.
@@ -220,7 +224,7 @@ For Windows ans Mac OS we recommend the Anaconda distribution (https://anaconda.
 Note that the installer must match the Python major and minor version number on the target system, e.g., Python 3.5.
 
 Creating and Adapting Signal Flows
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. _figure_visr_python_tutorial_vbap_panner:
 
@@ -303,7 +307,8 @@ As demonstrated in later sections, it fosters reuse of functionality and helps t
 .. _visr_tutorial_subsec_example_realtime_and_binaural:
 
 Realtime Execution and Binaural Auralization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Components -- both composite and atomic -- can be readily used for realtime rendering, both as a standalone application or from a Python session.
 We first describe the latter, interactive approach.
 To run a VISR component, we first construct an object of type :code:`rrl.AudioSignalFlow`.
@@ -373,7 +378,7 @@ VISR's ability to combine the components, however, makes such applications less 
 .. _visr_tutorial_subsec_example_prototyping_algorithms:
    
 Prototyping Atomic functionality
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In addition to creating new functionality by interconnecting existing components, the VISR framework can be extended by implementing new primitive (or atomic) functionality as C++ or Python code.
 This is done by creating new atomic components, which can then be used either standalone or combined with other VISR components.
 In this section we demonstrate this functionality by prototyping a novel multi-loudspeaker panner -- an algorithm for calculating loudspeaker gains -- as an atomic component in Python.
@@ -453,7 +458,7 @@ This shows how numeric and DSP functionality can be prototyped on a high level o
 But if required, the :code:`AudioPort` interface also enables access to individual audio channels and samples.
 
 Offline Testing and Objective Evaluation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 As explained in Section :ref:`visr_tutorial_subsec_visr_framework_offline_rendering`, VISR enables the offline execution and analysis of components, both C++ and Python, within an interactive Python environment
 This allows for the use of the same source code for algorithm development, offline processing, and realtime rendering.
 In this section we show how this feature is used to design and evaluate the panning component created in Section :ref:`visr_tutorial_subsec_example_prototyping_algorithms`.
@@ -566,7 +571,7 @@ This example shows how VISR's offline execution features can ease the developmen
 By using the same implementation as for realtime rendering, this offers the potential of unifying conventional signal processing development and realtime-capable implementation.
 
 Subjective Listening Test Application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ..
    \begin{figure}
      \centering
@@ -614,7 +619,7 @@ This example shows how the use of the VISR framework can reduce the time and eff
 
 
 Use in Different Software Environments
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 As explained in Section :ref:`visr_tutorial_subsec_visr_framework_use_multiple_enironments`, the VISR framework enables the use of audio processing components by embedding them into other audio software environments.
 
 .. _figure_visr_python_tutorial_max_msp_example:
