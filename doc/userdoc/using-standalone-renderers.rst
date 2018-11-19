@@ -192,7 +192,7 @@ The arguments for the **baseline_renderer** application are identical, except th
       to the standard VBAP algorithm.
   
 :code:`--reverb-config`:
-  A set of options for the integrated reverberation engine for the RSAO (:code:`PointsourceWithReverb`) object (see section :ref:`visr_object_based_audio__reverberation`).
+  A set of options for the integrated reverberation engine for the RSAO (:code:`PointsourceWithReverb`) object (see section :ref:`visr_object_based_audio_reverberation`).
   To be passed as a JSON string. The supported options are:
 
   :code:`numReverbObjects`:

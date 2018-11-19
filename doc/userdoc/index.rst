@@ -17,10 +17,9 @@ VISR User Manual
    about
    getting-started
    visr-python-tutorial
-   people
    getting-visr
    using-standalone-renderers
-   binaural-synthesis-toolkit
-   visr-principles
    object-based-audio-with-visr
    rcl_component_documentation
+   binaural-synthesis-toolkit
+   references

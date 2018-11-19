@@ -214,6 +214,8 @@ Multiple channels routed to single or multiple loudspeakers:
      "level": 0.350000, "diffuseness": 0.25,
      "outputChannels": "M+000, [M+030], [M-030, U+030], U+110"}]
 
+.. _visr_object_model_reverb_object:
+     
 PointSourceWithReverb
 ~~~~~~~~~~~~~~~~~~~~~
 

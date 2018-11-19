@@ -1,3 +1,5 @@
+.. _visr_python_tutorial:
+
 VISR tutorial using Python
 ==========================
 
