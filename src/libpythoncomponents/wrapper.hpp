@@ -38,7 +38,10 @@ public:
    * @param name The name of the component. Must be unique within the containing AudioSignalFlow.
    * @param parent Pointer to a containing component, if there is one. A value of \p nullptr signals that this is a top-level component.
    * @param moduleName Name of the Python module containing the class to be instantiated. Undecorated name as used, e.g., for in a Python 'import' statement.
-   * @param componentClassName The class name of the Python component to be instantiated. The class must inherited from visr::Component, that is, either from CompositeComponent or AtomicComponent.
+   * Submodules of the form <tt>module.submodule1.submodule2</tt> are also supported.
+   * @param componentClassName The class name of the Python component to be instantiated. The class must inherited from visr::Component,
+   * that is, either from CompositeComponent or AtomicComponent. Namespaced names relative to the \p moduleName module are permitted, for example <tt>namespace1.namespace2.className</tt>.
+   * This feature can be used alternatively or in combination with nested submodules in the\p moduleName argument.
    * @param positionalArguments Comma-separated list of positional arguments to be passed to the constructor of the Python component. 
    * This list must not include the \p context, \p name, and \p parent arguments which are provided automatically.
    * @param keywordArguments Optional, comma-separated key-value pairs of the form "key:value" to provide keyword arguments to the Python component.

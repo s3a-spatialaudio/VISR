@@ -20,12 +20,17 @@
 #include <libvisr/impl/audio_port_base_implementation.hpp>
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/cast.h>
 #include <pybind11/eval.h>
 #include <pybind11/pytypes.h> // For testing purposes
 #include <pybind11/stl.h>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -118,7 +123,25 @@ Wrapper::Impl::Impl( SignalFlowContext const & context,
     throw std::runtime_error( detail::composeMessageString("Wrapper: Error while loading the Python module for component \"", name, "\": reason: ",ex.what() ) );
   }
 
-  mComponentClass = mModule.attr( componentClassName );
+  // Separate namespace components and the actual class name
+  std::vector<std::string> classNameParts;
+  boost::algorithm::split(classNameParts, componentClassName, boost::algorithm::is_any_of("."));
+  // Remove whitespaces (legal in Python)
+  std::for_each(classNameParts.begin(), classNameParts.end(),
+    [](auto & v) { boost::algorithm::trim( v ); });
+  if (classNameParts.empty())
+  {
+    throw std::invalid_argument( "Pythoncomponents::Wrapper(): Failed to split the class name argument into namespaces and class name.");
+  }
+
+  // Recursive lookup through the namespace part until we reach the class name.
+  auto currObject{ mModule };
+  for (auto namePart : classNameParts)
+  {
+    currObject = currObject.attr(namePart.c_str() );
+  }
+
+  mComponentClass = currObject;
 
   py::tuple keywordList;
   py::dict keywordDict;

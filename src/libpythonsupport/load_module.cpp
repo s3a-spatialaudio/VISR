@@ -6,6 +6,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/eval.h>
@@ -40,6 +41,9 @@ pybind11::object loadModule( std::string const & moduleName,
   {
     throw std::invalid_argument( "pythonsupport::loadModule(): Invalid module name" );
   }
+  // Remove whitespaces (because they are also ignored in Python)
+  std::for_each(moduleNameParts.begin(), moduleNameParts.end(),
+    [](auto & v) { boost::algorithm::trim(v); });
 
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/
@@ -62,11 +66,11 @@ pybind11::object loadModule( std::string const & moduleName,
       globals,
       locals);
 
-    if (moduleNameParts.size() == 1)
+    if (moduleNameParts.size() == 1) // Standard case: No nested submodules
     {
       return locals["new_module"];
     }
-    else
+    else // Iterate through nested submodules.
     {
       py::object mod = locals["new_module"];
       for (std::size_t nestingLevel(1); nestingLevel < moduleNameParts.size(); ++nestingLevel)

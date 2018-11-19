@@ -34,6 +34,8 @@ foreach(LIB_TYPE static shared)
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pythonsupport_shared )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE Boost::boost )
+
 endforeach()
 
 # Set public headers to be installed for the shared target.
