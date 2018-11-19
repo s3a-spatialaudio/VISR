@@ -21,8 +21,8 @@ PROJECT( VISR CXX C )
 # Define central version numbers for the project
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 11 )
-set( VISR_PATCH_VERSION 8 )
+set( VISR_MINOR_VERSION 12 )
+set( VISR_PATCH_VERSION 0 )
 
 add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
 add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
