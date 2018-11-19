@@ -43,7 +43,7 @@ pybind11::object loadModule( std::string const & moduleName,
   }
   // Remove whitespaces (because they are also ignored in Python)
   std::for_each(moduleNameParts.begin(), moduleNameParts.end(),
-    [](auto & v) { boost::algorithm::trim(v); });
+		[](std::string & v) { boost::algorithm::trim(v); });
 
   // Taken and adapted from 
   // https://skebanga.github.io/embedded-python-pybind11/

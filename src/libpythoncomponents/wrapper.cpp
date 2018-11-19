@@ -128,7 +128,7 @@ Wrapper::Impl::Impl( SignalFlowContext const & context,
   boost::algorithm::split(classNameParts, componentClassName, boost::algorithm::is_any_of("."));
   // Remove whitespaces (legal in Python)
   std::for_each(classNameParts.begin(), classNameParts.end(),
-    [](auto & v) { boost::algorithm::trim( v ); });
+		[](std::string & v) { boost::algorithm::trim( v ); });
   if (classNameParts.empty())
   {
     throw std::invalid_argument( "Pythoncomponents::Wrapper(): Failed to split the class name argument into namespaces and class name.");
