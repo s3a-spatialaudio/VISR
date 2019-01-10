@@ -41,8 +41,6 @@ public:
                   * the process() method. */
     Asynchronous, /** Network data is received asynchronously within a
                       thread. */
-    ExternalServiceObject /**< Network data is received
- asynchronously using an externally provided (for instance application-global) boost asio IO service object. */
   };
 
   static std::size_t const cMaxMessageLength = 65536;
@@ -70,7 +68,7 @@ public:
    * @param externalIoService An externally provided IO service
    * object. Must be non-zero if and only if mode == Mode::ExternalServiceObject
    */ 
-  void setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService = nullptr );
+  void setup( std::size_t port, Mode mode );
 
   /**
    * The process function. 

@@ -23,10 +23,9 @@ void exportUdpReceiver( py::module & m )
 
   py::class_<visr::rcl::UdpReceiver, visr::AtomicComponent > udp( m, "UdpReceiver" );
 
-  py::enum_<UdpReceiver::Mode>(udp, "Mode" )
-      .value( "Synchronous", UdpReceiver::Mode::Synchronous )
-      .value( "Asynchronous", UdpReceiver::Mode::Asynchronous )
-      .value( "ExternalServiceObject", UdpReceiver::Mode::ExternalServiceObject ); // Not usable from Python
+  py::enum_<UdpReceiver::Mode>(udp, "Mode")
+      .value("Synchronous", UdpReceiver::Mode::Synchronous)
+      .value("Asynchronous", UdpReceiver::Mode::Asynchronous);
 
   udp.def( py::init( [](SignalFlowContext const & context,
                         char const * name,

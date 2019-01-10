@@ -36,8 +36,7 @@ public:
   enum class Mode
   {
     Synchronous, /**< The messages are sent within the process() call, blocking the call*/
-    Asynchronous, /**< The messages are stored in a queue, and send non-blocking, asynchronously when the network stack is ready. */
-    ExternalServiceObject /**< Same as asynchronous, but using a boost::asio::io_service object provided externally. */
+    Asynchronous /**< The messages are stored in a queue, and send non-blocking, asynchronously when the network stack is ready. */
   };
 
   static std::size_t const cMaxMessageLength = 8192;
@@ -51,8 +50,6 @@ public:
    * @param receiverAddress The name of the reciver (either numeric IP or DNS name)
    * @param receiverPort Remote UDP port number.
    * @param mode Asynchronity mode of the network communication
-   * @param externalIoService Pointer to an external network IO service (or nullptr if there is none).
-   * Must be non-null if and only if mode == Mode::ExternalServiceObject
    */
   explicit UdpSender( SignalFlowContext const & context,
                       char const * name,
@@ -60,7 +57,7 @@ public:
                       std::size_t sendPort,
                       std::string const & receiverAddress,
                       std::size_t receiverPort,
-                      Mode mode, boost::asio::io_service* externalIoService = nullptr );
+                      UdpSender::Mode mode );
 
   /**
    * Destructor.

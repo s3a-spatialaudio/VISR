@@ -39,30 +39,14 @@ UdpReceiver::~UdpReceiver()
   }
 }
 
-void UdpReceiver::setup( std::size_t port, Mode mode, boost::asio::io_service* externalIoService /*= nullptr*/ )
+void UdpReceiver::setup( std::size_t port, Mode mode )
 {
   using boost::asio::ip::udp;
   mMode = mode;
-  if( mMode == Mode::ExternalServiceObject )
-  {
-    if( externalIoService == nullptr )
-    {
-      throw std::invalid_argument( "UdpReceiver: If mode == Mode::ExternalServiceObject, the \"externalServiceObject\" must not be zero." );
-    }
-    mIoServiceInstance.reset( );
-    mIoService = externalIoService;
-  }
-  else
-  {
-    if( externalIoService != nullptr )
-    {
-      throw std::invalid_argument( "UdpReceiver: A non-null externalIoService parameter must be given only if mode == Mode::ExternalServiceObject" );
-    }
-    mIoServiceInstance.reset( new boost::asio::io_service( ) );
-    mIoService = mIoServiceInstance.get();
-  }
+  mIoServiceInstance.reset( new boost::asio::io_service( ) );
+  mIoService = mIoServiceInstance.get();
 
-  if( (mMode == Mode::Synchronous) or (mMode == Mode::ExternalServiceObject) )
+  if( mMode == Mode::Synchronous )
   {
     mIoServiceWork.reset();
   }

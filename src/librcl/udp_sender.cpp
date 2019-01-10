@@ -24,34 +24,16 @@ namespace rcl
                         std::size_t sendPort,
                         std::string const & receiverAddress,
                         std::size_t receiverPort,
-                        UdpSender::Mode mode,
-                        boost::asio::io_service* externalIoService /*= nullptr*/ )
+                        UdpSender::Mode mode )
  : AtomicComponent( context, name, parent )
  , mMode( Mode::Asynchronous)
  , mMessageInput( "messageInput", *this, pml::EmptyParameterConfig() )
 {
   using boost::asio::ip::udp;
   mMode = mode;
-  if( mMode == Mode::ExternalServiceObject )
-  {
-    if( externalIoService == nullptr )
-    {
-      throw std::invalid_argument( "UdpReceiver: If mode == Mode::ExternalServiceObject, the \"externalServiceObject\" must not be zero." );
-    }
-    mIoServiceInstance.reset( );
-    mIoService = externalIoService;
-  }
-  else
-  {
-    if( externalIoService != nullptr )
-    {
-      throw std::invalid_argument( "UdpReceiver: A non-null externalIoService parameter must be given only if mode == Mode::ExternalServiceObject" );
-    }
-    mIoServiceInstance.reset( new boost::asio::io_service( ) );
-    mIoService = mIoServiceInstance.get( );
-  }
-
-  if( (mMode == Mode::Synchronous) or ( mMode == Mode::ExternalServiceObject ) )
+  mIoServiceInstance.reset( new boost::asio::io_service( ) );
+  mIoService = mIoServiceInstance.get( );
+  if( mMode == Mode::Synchronous )
   {
     mIoServiceWork.reset( );
   }
@@ -114,7 +96,6 @@ void UdpSender::process()
     }
     break;
   case Mode::Asynchronous:
-  case Mode::ExternalServiceObject:
     {
       boost::lock_guard<boost::mutex> lock( mMutex );
       bool const transmissionPending = not mInternalMessageBuffer.empty();
