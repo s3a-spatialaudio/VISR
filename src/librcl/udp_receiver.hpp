@@ -50,25 +50,19 @@ public:
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
+   * @param port The UDP port number to receive data.
+   * @param mode The mode how data is received. See documentation of enumeration Mode.
    */
   explicit UdpReceiver( SignalFlowContext const & context,
                         char const * name,
-                        CompositeComponent * parent = nullptr );
+                        CompositeComponent * parent,
+                        std::size_t port,
+                        Mode mode );
 
   /**
    * Destructor.
    */
   ~UdpReceiver();
-
-  /**
-   * Method to initialise the component.
-   * @param port The UDP port number to receive data.
-   * @param mode The mode how data is received. See documantation of
-   * enumeration Mode.
-   * @param externalIoService An externally provided IO service
-   * object. Must be non-zero if and only if mode == Mode::ExternalServiceObject
-   */ 
-  void setup( std::size_t port, Mode mode );
 
   /**
    * The process function. 
@@ -79,7 +73,7 @@ private:
   void handleReceiveData( const boost::system::error_code& error,
                           std::size_t numBytesTransferred );
   
-  Mode mMode;
+  Mode const mMode;
 
   /**
    * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.

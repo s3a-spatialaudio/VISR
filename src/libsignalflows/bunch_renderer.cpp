@@ -29,7 +29,7 @@ BunchRenderer::BunchRenderer( SignalFlowContext const & context,
                                     std::size_t sceneReceiverPort,
                                     std::string const & reverbConfig )
  : CompositeComponent( context, name, parent )
- , mSceneReceiver( context, "SceneReceiver", this )
+ , mSceneReceiver( context, "SceneReceiver", this, sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous )
  , mSceneDecoder( context, "SceneDecoder", this )
  , mCoreRenderer( context, "CoreRenderer", this,
      loudspeakerConfiguration, numberOfInputs, numberOfOutputs,
@@ -41,7 +41,6 @@ BunchRenderer::BunchRenderer( SignalFlowContext const & context,
   mInput.setWidth(numberOfInputs);
   mOutput.setWidth(numberOfOutputs);
 
-  mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Synchronous );
    // mCoreRenderer is initialised in the ctor
 
   parameterConnection("SceneReceiver", "messageOutput", "SceneDecoder", "datagramInput");

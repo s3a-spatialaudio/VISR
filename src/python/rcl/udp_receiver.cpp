@@ -27,16 +27,8 @@ void exportUdpReceiver( py::module & m )
       .value("Synchronous", UdpReceiver::Mode::Synchronous)
       .value("Asynchronous", UdpReceiver::Mode::Asynchronous);
 
-  udp.def( py::init( [](SignalFlowContext const & context,
-                        char const * name,
-                        CompositeComponent * parent,
-                        std::size_t port, UdpReceiver::Mode mode )
-  {
-    UdpReceiver * inst = new UdpReceiver( context, name, parent);
-    inst->setup( port, mode );
-    return inst;
-
-  }),
+  udp.def( py::init<SignalFlowContext const &, char const *, CompositeComponent *,
+                        std::size_t, UdpReceiver::Mode>(),
   py::arg("context"), py::arg("name"), py::arg("parent") = static_cast<CompositeComponent*>(nullptr),
   py::arg("port"), py::arg("mode") = UdpReceiver::Mode::Asynchronous )
   ;
