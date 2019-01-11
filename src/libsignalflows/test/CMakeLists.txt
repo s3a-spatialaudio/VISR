@@ -11,12 +11,13 @@ test_main.cpp )
 
 target_link_libraries(${APPLICATION_NAME} signalflows_static )
 target_link_libraries(${APPLICATION_NAME} rrl_static )
+target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
 endif( NOT Boost_USE_STATIC_LIBS )
-target_compile_definitions( ${APPLICATION_NAME} PRIVATE -DBOOST_ALL_NO_LIB )
+target_compile_definitions( ${APPLICATION_NAME} PRIVATE Boost::disable_autolinking )
 
 set_target_properties( ${APPLICATION_NAME} PROPERTIES 
   RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/test_binaries)

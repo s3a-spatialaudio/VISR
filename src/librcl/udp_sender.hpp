@@ -12,11 +12,6 @@
 #include <libpml/message_queue_protocol.hpp>
 #include <libpml/string_parameter.hpp>
 
-#include <boost/array.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/thread/thread.hpp>
-
 #include <memory>
 #include <string>
 
@@ -36,7 +31,7 @@ public:
   enum class Mode
   {
     Synchronous, /**< The messages are sent within the process() call, blocking the call*/
-    Asynchronous /**< The messages are stored in a queue, and send non-blocking, asynchronously when the network stack is ready. */
+    Asynchronous, /**< The messages are stored in a queue, and send non-blocking, asynchronously when the network stack is ready. */
   };
 
   static std::size_t const cMaxMessageLength = 8192;
@@ -70,45 +65,13 @@ public:
   void process() override;
 
 private:
-  /**
-   * Callback function triggered by the ASIO library.
-   * @throw std::runtime_error if \p error is set or the number of transferred bytes differs from the expected value.
-   */
-  void handleSentData( const boost::system::error_code& error,
-                       std::size_t numBytesTransferred );
+  class Impl;
 
-  Mode mMode;
+  std::unique_ptr<Impl> mImpl;
 
-  /**
-  * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.
-  */
-  boost::asio::io_service* mIoService;
+  using MessageInput = ParameterInput< pml::MessageQueueProtocol, pml::StringParameter >;
 
-  /**
-  * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
-  * but not for ExternalServiceObject.
-  */
-  std::unique_ptr<boost::asio::io_service> mIoServiceInstance;
-
-  std::unique_ptr<boost::asio::ip::udp::socket> mSocket;
-
-  boost::asio::ip::udp::endpoint mRemoteEndpoint;
-
-//  boost::array<char, cMaxMessageLength> mSendBufferBuffer;
-
-  std::unique_ptr<boost::asio::io_service::work> mIoServiceWork;
-
-  /**
-  * Internal queue of messages received asynchronously. They will be copied into the output
-  *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
-  */
-  std::deque< pml::StringParameter > mInternalMessageBuffer;
-
-  std::unique_ptr< boost::thread > mServiceThread;
-
-  boost::mutex mMutex;
-
-  ParameterInput< pml::MessageQueueProtocol, pml::StringParameter > mMessageInput;
+  MessageInput mMessageInput;
 };
 
 } // namespace rcl

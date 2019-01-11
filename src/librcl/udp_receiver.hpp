@@ -12,11 +12,6 @@
 #include <libpml/string_parameter.hpp>
 #include <libpml/message_queue_protocol.hpp>
 
-#include <boost/array.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/thread/thread.hpp>
-
 #include <memory>
 #include <string>
 #include <deque>
@@ -70,42 +65,13 @@ public:
   void process() override;
 
 private:
-  void handleReceiveData( const boost::system::error_code& error,
-                          std::size_t numBytesTransferred );
-  
-  Mode const mMode;
+  class Impl;
 
-  /**
-   * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.
-   */
-  boost::asio::io_service* mIoService;
+  std::unique_ptr<Impl> mImpl;
 
-  /**
-   * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
-   * but not for ExternalServiceObject.
-   */
-  std::unique_ptr<boost::asio::io_service> mIoServiceInstance;
+  using MessageOutput = ParameterOutput<pml::MessageQueueProtocol, pml::StringParameter >;
 
-
-  std::unique_ptr<boost::asio::ip::udp::socket> mSocket;
-
-  boost::asio::ip::udp::endpoint mRemoteEndpoint;
-
-  boost::array<char, cMaxMessageLength> mReceiveBuffer;
-
-  std::unique_ptr<boost::asio::io_service::work> mIoServiceWork;
-
-  /**
-   * Internal queue of messages received asynchronously. They will be copied into the output
-   *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
-   */
-  std::deque< pml::StringParameter > mInternalMessageBuffer;
-
-  std::unique_ptr< boost::thread > mServiceThread;
-
-  boost::mutex mMutex;
-
-  ParameterOutput<pml::MessageQueueProtocol, pml::StringParameter > mDatagramOutput;
+  MessageOutput mDatagramOutput;
 };
 
 } // namespace rcl
