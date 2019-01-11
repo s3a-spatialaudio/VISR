@@ -66,29 +66,25 @@ set( VISR_VERSIONED_NAME VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR
 #############################################################
 # Create a system string.
 SET( VISR_SYSTEM_NAME ${CMAKE_SYSTEM_NAME} )
-IF( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
-SET (CMAKE_INSTALL_PREFIX /Applications/${VISR_VERSIONED_NAME})
+# Mac OS specific settings (mainly rpath handling)
+if( VISR_SYSTEM_NAME MATCHES "Darwin" )
+  set( VISR_SYSTEM_NAME MacOS ) # Replace CMake's name for MacOS X by a more descriptive one.
 
-SET( CMAKE_MACOSX_RPATH ON)
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  TRUE)
-SET(CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
-# when building, don't use the install RPATH already
-# (but later on when installing)
+  set( CMAKE_INSTALL_PREFIX /Applications/${VISR_VERSIONED_NAME})
 
-# <af> Temporarily disabled this feature to enable building without installing.
-# <af> This probably breaks the package building mechanism.
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-
-
-   SET( VISR_SYSTEM_NAME MacOS )
-#  SET(CMAKE_INSTALL_PREFIX /Applications )
-ENDIF( VISR_SYSTEM_NAME MATCHES "Darwin" )
+  # Activate rpath support
+  set( CMAKE_MACOSX_RPATH ON)
+  # Use, i.e., don't skip rpaths in the build tree
+  set( CMAKE_SKIP_BUILD_RPATH FALSE)
+  set( CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
+  # When building, set the rpath to the libraries in the build tree, not to the install tree
+  set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
+  # Add the automatically determined parts of the RPATH
+  # which point to directories outside the build tree to the install RPATH
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+endif( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
 SET( VISR_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} )
 IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
