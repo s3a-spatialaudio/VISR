@@ -19,7 +19,6 @@ target_link_libraries( ${APPLICATION_NAME} pythonsupport_static )
 target_link_libraries( ${APPLICATION_NAME} rrl_static )
 target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
-target_link_libraries( ${APPLICATION_NAME} ${CMAKE_THREAD_LIBS_INIT} )
 set_target_properties( ${APPLICATION_NAME} PROPERTIES SKIP_BUILD_RPATH FALSE)
 
 if( NOT Boost_USE_STATIC_LIBS )
