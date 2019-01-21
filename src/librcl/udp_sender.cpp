@@ -103,13 +103,13 @@ UdpSender::Impl::Impl(UdpSender & parent,
     mIoServiceInstance.reset(new boost::asio::io_service());
     mIoService = mIoServiceInstance.get();
 
-    if ((mMode == Mode::Synchronous))
+    if( mMode == Mode::Synchronous )
     {
-        mIoServiceWork.reset();
+      mIoServiceWork.reset();
     }
     else
     {
-        mIoServiceWork.reset(new  boost::asio::io_service::work(*mIoService));
+      mIoServiceWork.reset(new  boost::asio::io_service::work(*mIoService));
     }
 
     udp::resolver resolver(*mIoService);
