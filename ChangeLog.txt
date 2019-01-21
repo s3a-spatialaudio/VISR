@@ -8,6 +8,7 @@ Patch release 0.12.1
 * FIX: On Mac OS, use rpaths again in the build tree. This allows running and
        debugging without installing.
 * FIX: Removed public dependency of librcl on Boost. Boost is still used internally, but only private.
+* Cleanup of CMakeList.txt files, remove obsolete dependency on thread library.
 
 Patch release 0.12.0
 ====================
