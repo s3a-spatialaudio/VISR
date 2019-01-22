@@ -25,7 +25,6 @@ target_link_libraries(network_audio_streamer rcl_shared )
 target_link_libraries(network_audio_streamer rrl_shared )
 target_link_libraries(network_audio_streamer audiointerfaces_shared )
 target_link_libraries(network_audio_streamer Boost::filesystem )
-set_target_properties(network_audio_streamer PROPERTIES SKIP_BUILD_RPATH FALSE)
 
 install( TARGETS network_audio_streamer
          DESTINATION bin

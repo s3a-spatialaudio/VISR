@@ -12,7 +12,6 @@ target_link_libraries(visr_renderer panning_shared )
 target_link_libraries(visr_renderer rrl_shared )
 target_link_libraries(visr_renderer visr_shared )
 target_link_libraries(visr_renderer Boost::filesystem )
-set_target_properties(visr_renderer PROPERTIES SKIP_BUILD_RPATH FALSE)
 
 
 if( BUILD_PYTHON_BINDINGS )

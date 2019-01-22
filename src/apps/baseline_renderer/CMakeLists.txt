@@ -9,6 +9,5 @@ target_link_libraries(baseline_renderer signalflows_shared )
 target_link_libraries(baseline_renderer audiointerfaces_shared )
 target_link_libraries(baseline_renderer rrl_shared )
 target_link_libraries(baseline_renderer Boost::filesystem )
-set_target_properties(baseline_renderer PROPERTIES SKIP_BUILD_RPATH FALSE)
 
 install( TARGETS baseline_renderer DESTINATION bin COMPONENT standalone_applications )
