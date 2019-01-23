@@ -36,9 +36,9 @@ foreach(LIB_TYPE static shared)
   target_link_libraries( reverbobject_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
   target_link_libraries( reverbobject_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
-    target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
+    target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE BOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
-  target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE Boost::disable_autolinking )
+  target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE BOOST_ALL_NO_LIB )
 endforeach()
 
 # Set public headers to be installed for the shared target.
