@@ -71,7 +71,7 @@ pybind11::object loadModule( std::string const & moduleName,
  * path or extension.  Submodules of the form "module.submodule1.submodule2." are permitted.
  * @param modulePathList Optional search path for the location of the module, provided as a comma-separated list.
  * If left empty, the Python system path (including the value of <tt>$PYTHONPATH</tt> and the content of the \p additionalSystemPath variable) is searched.
- * @param additionalSystemPath Directories to be appended to the system directory, provided as a comma-separated list.
+ * @param additionalPathList Directories to be appended to the system directory, provided as a comma-separated list.
  * This can be used to locate dependencies of the module \p moduleName, or, if \p modulePath is empty, \p moduleName itself.
  * @param globals Any variables or definitions to be passed to the Python interpreter.
  * @return A Python <b>module</b> object.
