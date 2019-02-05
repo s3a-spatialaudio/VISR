@@ -85,13 +85,15 @@ foreach(LIB_TYPE static shared)
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC rbbl_${LIB_TYPE} )
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
-  target_link_libraries( rcl_${LIB_TYPE} PUBLIC Boost::boost )
+  target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::boost )
   target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::filesystem )
-  target_link_libraries( rcl_${LIB_TYPE} PUBLIC Boost::system ) # needs to be public because it is used by boost::asio.
+  target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::system )
   target_link_libraries( rcl_${LIB_TYPE} PRIVATE Boost::thread )
   if( NOT Boost_USE_STATIC_LIBS )
-    target_compile_definitions( rcl_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
+    target_compile_definitions( rcl_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
+  # Apparently the Boost::disable_autolinking directive must be public even if the 
+  # boost libs are used only private
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC Boost::disable_autolinking )
 endforeach()
 

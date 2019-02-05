@@ -112,14 +112,25 @@ set(CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/package_resources/welcome.
 
 # Install Python example scripts and templates
 if( BUILD_PYTHON_BINDINGS )
-  install( DIRECTORY src/python/templates DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_templates )
-  install( DIRECTORY src/python/packages/visr_bst DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_bst )
-  install( DIRECTORY src/python/packages/metadapter DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT python_package_metadapter )
+  install( DIRECTORY src/python/templates
+           DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+           COMPONENT python_templates
+	   PATTERN __pycache__ EXCLUDE )
+  install( DIRECTORY src/python/packages/visr_bst
+           DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+           COMPONENT python_package_bst
+	   PATTERN __pycache__ EXCLUDE )
+  install( DIRECTORY src/python/packages/metadapter
+           DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+           COMPONENT python_package_metadapter
+	   PATTERN __pycache__ EXCLUDE )
 endif( BUILD_PYTHON_BINDINGS )
 
 # TODO: Decide whether this shall go into a separate component.
-install( DIRECTORY src/python/packages/loudspeakerconfig DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY} COMPONENT base )
-
+install( DIRECTORY src/python/packages/loudspeakerconfig
+         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+         COMPONENT base
+	 PATTERN __pycache__ EXCLUDE )
 
 # CPack must be included after all install directives and CPACK_ variable definitions.
 include( CPack )

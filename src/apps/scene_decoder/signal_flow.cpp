@@ -31,7 +31,7 @@ SignalFlow::SignalFlow( SignalFlowContext & context,
  , mNetworkPort( udpPort )
  , mInput( "in", *this )
  , mOutput( "out", *this )
- , mSceneReceiver( context, "SceneReceiver", this )
+ , mSceneReceiver( context, "SceneReceiver", this, mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous )
  , mSceneDecoder( context, "SceneDecoder", this )
  , mSceneEncoder( context, "SceneEncoder", this )
  , mSceneSender( context, "SceneSender", this, 9998, "152.78.243.62", 9999, rcl::UdpSender::Mode::Asynchronous )
@@ -44,8 +44,6 @@ SignalFlow::SignalFlow( SignalFlowContext & context,
    mOutput.setWidth( cNumberOfOutputs );
 
    // Initialise and configure audio components
-
-   mSceneReceiver.setup( mNetworkPort, rcl::UdpReceiver::Mode::Asynchronous );
 
    mMatrix.setup( cNumberOfInputs, cNumberOfOutputs, cInterpolationSteps, 1.0f );
 

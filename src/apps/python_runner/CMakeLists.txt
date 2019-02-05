@@ -11,7 +11,6 @@ target_link_libraries(${APPLICATION_NAME} PRIVATE pythonsupport_shared )
 target_link_libraries(${APPLICATION_NAME} PRIVATE pml_shared )
 target_link_libraries(${APPLICATION_NAME} PRIVATE rrl_shared )
 target_link_libraries(${APPLICATION_NAME} PRIVATE visr_shared )
-target_link_libraries(${APPLICATION_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT} )
-set_target_properties(${APPLICATION_NAME} PROPERTIES SKIP_BUILD_RPATH FALSE)
+target_link_libraries(${APPLICATION_NAME} PRIVATE Boost::filesystem )
 
 install( TARGETS ${APPLICATION_NAME} DESTINATION bin COMPONENT standalone_applications )

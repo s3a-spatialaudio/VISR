@@ -12,6 +12,6 @@ target_link_libraries(matrix_convolver_app rcl_shared )
 target_link_libraries(matrix_convolver_app rrl_shared )
 target_link_libraries(matrix_convolver_app audiointerfaces_shared )
 target_link_libraries(matrix_convolver_app visr_shared )
-set_target_properties(matrix_convolver_app PROPERTIES SKIP_BUILD_RPATH FALSE)
+target_link_libraries(matrix_convolver_app Boost::filesystem )
 
 install( TARGETS matrix_convolver_app DESTINATION bin COMPONENT standalone_applications )
