@@ -1,20 +1,46 @@
-Copyright (c) 2014-2018 Andreas Franck a.franck@soton.ac.uk
-                        --- All rights reserved.
-Copyright (c) 2014-2018 Institute of Sound and Vibration Research,
-                        University of Southampton --- All rights reserved.
+Copyright (c) 2014-2019 Andreas Franck a.franck@soton.ac.uk --- All rights reserved.
+Copyright (c) 2014-2019 Institute of Sound and Vibration Research, University of Southampton and VISR contributors --- All rights reserved.
 
-The software is provided under the permissive ISC (Internet Systems Consortium) printed below and in the Licence.md file
+# Overview
 
-This work was supported by the EPSRC Programme Grant S3A: Future Spatial Audio for an Immersive Listener Experience at Home
-(EP/L000539/1) http://www.s3a-spatialaudio.org and the BBC as part of the BBC Audio Research Partnership.
+The VISR framework is a collection of software for audio processing.
+In this extensible software framework, complex audio algorithms can be formed by interconnecting existing building blocks, termed components. 
+
+It can be used either interactively in the Python language, in custom applications (for instance in written C++, or integrated into other applications, for instance as DAW plugins or Max/MSP externals. While the VISR provides several renderers and building blocks for spatial and object-based audio, it is nonetheless a generic audio processing framework that can be used in other applications, for example array processing or hearing aid prototypes. The Python integration makes the system accessible, and enables easy algorithm development and prototyping.
+
+Development of this project has been supported by the EPSRC Programme Grant S3A: Future Spatial Audio for an Immersive Listener Experience at Home (EP/L000539/1) http://www.s3a-spatialaudio.org and the BBC as part of the BBC Audio Research Partnership.
+
+# Citing the VISR framework
 
 We kindly ask to acknowledge the use of this software in publications or software.
 
-Paper citation:
-
 Andreas Franck and Filippo Maria Fazi, “VISR – A versatile open software framework for audio signal processing,” in Proc. Audio Eng. Soc. 2018 Int. Conf. Spatial Reproduction, Tokyo, Japan, 2018.
 
+# Contributors
+
 Specific parts of the software have been provided by other groups as listed in the file Contributors.md
+
+# Contributing
+
+Contributions to the project are welcome -- through comments, feature requests bug reports or code contributions.
+
+## Bug reports and feature requests
+
+Please submit feature recommentations and bug through GitHub's issue tracking system.
+
+# Code contributions
+
+Code contributions are handled through GitHub pull requests.
+Please see [this article](https://help.github.com/articles/about-pull-requests/) for an introduction to pull requests.
+
+Contributors are required to sign a Contributor License agreement (CLA).
+This is to ensure that all contributions can be distributed under the same licence terms as the original project.
+For more information, see for example this [article](http://oss-watch.ac.uk/resources/cla).
+CLA templates can be found in the `doc/contributing` subdirectory of the repository.
+
+# License
+
+The software is provided under the permissive ISC (Internet Systems Consortium) printed below and in the Licence.md file
 
 ISC (Internet Systems Consortium) License
 https://www.isc.org/downloads/software-support-policy/isc-license/
@@ -31,9 +57,11 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
+# Licences of third-party software
+
 This software uses the following external software components subject to the following licenses:
 
-*** Boost ***
+## Boost
 
 Boost Software License - Version 1.0 - August 17th, 2003
 
@@ -59,7 +87,7 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-*** PortAudio ***
+## PortAudio
 
 Copyright (c) 1999-2002 Ross Bencina and Phil Burk
 
@@ -91,7 +119,7 @@ they can be incorporated into the canonical version. It is also
 requested that these non-binding requests be included along with the
 license above.
 
-*** SNDFILE ***
+## SNDFILE
 
 Copyright (C) 1999-2011Erik de Castro Lopo <erikd@mega-nerd.com>
 
@@ -102,7 +130,7 @@ libsndfile is released under the terms of the GNU Lesser General Public License,
 
 Sndfile libraries uses the FLAC, OGG and VORBIS libraries, whose licenses are shown below.
 
-*** FLAC - Free Lossless Audio Codec ***
+## FLAC - Free Lossless Audio Codec
 
 https://xiph.org/flac/license.html
 
@@ -122,7 +150,7 @@ restrictive of those mentioned above.  See the file COPYING.Xiph in this
 distribution.
 
 
-*** VORBIS ***
+## VORBIS
 
 https://svn.xiph.org/trunk/vorbis/COPYING
 
@@ -157,7 +185,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-*** OGG ***
+## OGG
 
 https://svn.xiph.org/trunk/ogg/COPYING
 
@@ -191,7 +219,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-*** FFTS ***
+## FFTS
 
 https://github.com/anthonix/ffts
 
@@ -220,7 +248,7 @@ https://github.com/anthonix/ffts
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*** KissFFT ***
+## KissFFT
 
 Copyright (c) 2003-2010 Mark Borgerding
 
@@ -254,7 +282,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-*** pybind11 ***
+## pybind11
 
 https://github.com/pybind/pybind11
 
@@ -287,4 +315,3 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Please also refer to the file CONTRIBUTING.md, which clarifies licensing of
 external contributions to this project including patches, pull requests, etc.
-

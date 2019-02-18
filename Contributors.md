@@ -1,7 +1,5 @@
-Copyright (c) 2014-2018 Andreas Franck a.franck@soton.ac.uk
-                        --- All rights reserved.
-Copyright (c) 2014-2018 Institute of Sound and Vibration Research,
-                        University of Southampton --- All rights reserved.
+Copyright (c) 2014-2019 Andreas Franck a.franck@soton.ac.uk --- All rights reserved.
+Copyright (c) 2014-2019 Institute of Sound and Vibration Research, University of Southampton and VISR contributors --- All rights reserved.
 
 Software Contributors
 ---------------------
