@@ -26,7 +26,7 @@ Contributions to the project are welcome -- through comments, feature requests b
 
 ## Bug reports and feature requests
 
-Please submit feature recommentations and bug through GitHub's issue tracking system.
+Please submit feature recommendations and bugs through GitHub's issue tracking system.
 
 # Code contributions
 
