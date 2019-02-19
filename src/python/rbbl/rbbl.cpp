@@ -18,6 +18,8 @@ namespace python
   void exportInterpolatingConvolversUniform( pybind11::module & m );
   void exportMultichannelConvolversUniform( pybind11::module & m );
   void exportObjectChannelAllocator( pybind11::module & m );
+  void exportParametricIirCoefficient(pybind11::module & m);
+  void exportParametricIirCoefficientCalculator(pybind11::module & m);
   void exportSparseGainRouting( pybind11::module & m );
 }
 }
@@ -34,5 +36,7 @@ PYBIND11_MODULE( rbbl, m )
   exportInterpolatingConvolversUniform( m );
   exportMultichannelConvolversUniform( m );
   exportObjectChannelAllocator( m );
+  exportParametricIirCoefficient( m );
+  exportParametricIirCoefficientCalculator(m);
   exportSparseGainRouting( m );
 }
