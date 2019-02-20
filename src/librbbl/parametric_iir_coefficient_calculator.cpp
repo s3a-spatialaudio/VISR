@@ -20,8 +20,8 @@ namespace rbbl
 template< typename CoefficientType > 
 BiquadCoefficient<CoefficientType> 
 ParametricIirCoefficientCalculator::
-calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
-                                                             CoefficientType samplingFrequency )
+calculateIirCoefficients( ParametricIirCoefficient< CoefficientType> const & param,
+                                                    CoefficientType samplingFrequency )
 {
   BiquadCoefficient<CoefficientType> res;
   calculateIirCoefficients( param, res, samplingFrequency );
@@ -197,9 +197,9 @@ calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
                                   BiquadCoefficient<double> &, double );
 
 template< typename CoefficientType >
-void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
-  BiquadCoefficientList<CoefficientType> & coeffs,
-  CoefficientType samplingFrequency )
+void ParametricIirCoefficientCalculator::calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
+                                                                   BiquadCoefficientList<CoefficientType> & coeffs,
+                                                                   CoefficientType samplingFrequency )
 {
   if( params.size() > coeffs.size() )
   {
