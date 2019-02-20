@@ -24,78 +24,44 @@ namespace
   template< typename CoeffType >
   void exportParametricIirCoefficient( pybind11::module & m, char const * className )
   {
-    py::class_<ParametricIirCoefficient<CoeffType> >( m, className )
+    py::class_<ParametricIirCoefficient<CoeffType>, ParametricIirCoefficientBase >( m, className )
       .def( py::init<>(), "Default constructor" )
       .def( py::init<ParametricIirCoefficient<CoeffType> const & >(), py::arg( "rhs" ) )
-      .def( py::init< ParametricIirCoefficient<CoeffType>::Type, CoeffType, CoeffType, CoeffType>(),
+      .def( py::init< typename ParametricIirCoefficient<CoeffType>::Type, CoeffType, CoeffType, CoeffType>(),
          py::arg("type"),
-         py::arg("centreFrequency"), py::arg("quality"), py::arg("gain") = static_cast<CoeffType>(0.0) )
+         py::arg("frequency"), py::arg("quality"), py::arg("gain") = static_cast<CoeffType>(0.0) )
+      .def( py::init( []( std::string const & typeStr, CoeffType frequency, CoeffType quality, CoeffType gain )
+	    {
+	      typename ParametricIirCoefficient<CoeffType>::Type const typeId{ParametricIirCoefficientBase::stringToTypeId( typeStr ) };
+	      return new ParametricIirCoefficient<CoeffType>{ typeId, frequency, quality, gain };
+	    } ),
+            py::arg("type"),
+            py::arg("frequency"), py::arg("quality"), py::arg("gain") = static_cast<CoeffType>(0.0) )
+
+      .def( "__str__", [](ParametricIirCoefficient<CoeffType> const & self )
+	    {
+	      std::stringstream str;
+	      str << ParametricIirCoefficientBase::typeIdToString(self.type()) << ", f: " << self.frequency()
+	          << ", q: " << self.quality() << ", g: " << self.gain();
+	      return str.str();
+	    } )
       .def_property( "type", &ParametricIirCoefficient<CoeffType>::type, &ParametricIirCoefficient<CoeffType>::setType )
-#if 0
-    CoefficientType frequency() const { return mFrequency; }
+      .def_property( "frequency", &ParametricIirCoefficient<CoeffType>::frequency, &ParametricIirCoefficient<CoeffType>::setFrequency )
+      .def_property( "quality", &ParametricIirCoefficient<CoeffType>::quality, &ParametricIirCoefficient<CoeffType>::setQuality )
+      .def_property( "gain", &ParametricIirCoefficient<CoeffType>::gain, &ParametricIirCoefficient<CoeffType>::setGain )
+      .def( "loadJson", static_cast<void(ParametricIirCoefficient<CoeffType>::*)(std::string const &)>
+                   (&ParametricIirCoefficient<CoeffType>::loadJson ), py::arg("string") )
+      .def( "loadXml", static_cast<void(ParametricIirCoefficient<CoeffType>::*)(std::string const &)>
+                   (&ParametricIirCoefficient<CoeffType>::loadXml ), py::arg("string") )
+      .def_static( "fromJson", static_cast<ParametricIirCoefficient<CoeffType>(*)(std::string const &)>
+                    (&ParametricIirCoefficient<CoeffType>::fromJson ), py::arg("string") )
+      .def_static( "fromXml", static_cast<ParametricIirCoefficient<CoeffType>(*)(std::string const &)>
+                   (&ParametricIirCoefficient<CoeffType>::fromXml ), py::arg("string") )
+      .def( "writeJson", static_cast<void(ParametricIirCoefficient<CoeffType>::*)(std::string &) const>
+                   (&ParametricIirCoefficient<CoeffType>::writeJson ), py::arg("string") )
+      .def( "writeXml", static_cast<void(ParametricIirCoefficient<CoeffType>::*)(std::string &) const>
+                   (&ParametricIirCoefficient<CoeffType>::writeXml ), py::arg("string") )
 
-    CoefficientType quality() const { return mQuality; }
-
-    CoefficientType gain() const { return mGain; }
-
-    void setType(Type newType);
-
-    void setFrequency(CoefficientType newFrequency);
-
-    void setQuality(CoefficientType newQuality);
-
-    void setGain(CoefficientType newGain);
-
-    /**
-     * Create a ParametricIirCoefficient objects from JSON and XML representations.
-     */
-     //@{
-    static ParametricIirCoefficient fromJson(boost::property_tree::ptree const & tree);
-
-    static ParametricIirCoefficient fromJson(std::basic_istream<char> & stream);
-
-    static ParametricIirCoefficient fromJson(std::string const & str);
-
-    static ParametricIirCoefficient fromXml(boost::property_tree::ptree const & tree);
-
-    static ParametricIirCoefficient fromXml(std::basic_istream<char> & stream);
-
-    static ParametricIirCoefficient fromXml(std::string const & str);
-    //@}
-
-
-    ParametricIirCoefficient & operator=(ParametricIirCoefficient const & rhs) = default;
-
-    void loadJson(boost::property_tree::ptree const & tree);
-
-    void loadJson(std::basic_istream<char> & stream);
-
-    void loadJson(std::string const & str);
-
-
-    void loadXml(boost::property_tree::ptree const & tree);
-
-    void loadXml(std::basic_istream<char> & stream);
-
-    void loadXml(std::string const & str);
-
-
-    /**
-     *
-     */
-     //@{
-    void writeJson(boost::property_tree::ptree & tree) const;
-
-    void writeJson(std::basic_ostream<char> & stream) const;
-
-    void writeJson(std::string & str) const;
-
-    void writeXml(boost::property_tree::ptree & tree) const;
-
-    void writeXml(std::basic_ostream<char> & stream) const;
-
-    void writeXml(std::string & str) const;
-#endif
     ;
   }
 
@@ -104,10 +70,10 @@ namespace
 void exportParametricIirCoefficient( pybind11::module & m )
 {
   py::class_<ParametricIirCoefficientBase > base(m, "ParametricIirCoefficientBase");
-  base.def_static("stringTypeToId", &ParametricIirCoefficientBase::stringToTypeId, py::arg("name"))
+  base.def_static("stringToTypeId", &ParametricIirCoefficientBase::stringToTypeId, py::arg("name"))
       .def_static("typeToIdString", &ParametricIirCoefficientBase::typeIdToString, py::arg("typeId"));
 
-  py::enum_<ParametricIirCoefficientBase::Type >(m, "Type")
+  py::enum_<ParametricIirCoefficientBase::Type >(base, "Type")
     .value("lowpass", ParametricIirCoefficientBase::Type::lowpass)
     .value("highpass", ParametricIirCoefficientBase::Type::highpass)
     .value("bandpass", ParametricIirCoefficientBase::Type::bandpass)

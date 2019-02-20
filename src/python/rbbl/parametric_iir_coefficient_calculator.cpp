@@ -21,22 +21,6 @@ namespace python
 
 namespace py = pybind11;
 
-namespace 
-{
-
-template< typename CoeffType >
-void exportParametricIirCoefficientCalculator(pybind11::module & m, char const * className)
-{
-	py::class_<ParametricIirCoefficientCalculator >(m, className);
-    //.def_static("calculateIirCoefficients",
-    //   static_cast<void(ParametricIirCoefficientCalculator<CoeffType>::*)
-    //     (CoeffType const &, BiquadCoefficient<CoeffType> &, CoeffType)>(&ParametricIirCoefficientCalculator<CoeffType>::calculateIirCoefficients),
-    //     py::arg("param"), py::arg("coeffs"), py::arg("samplingFrequency"))
-    ;
-}
-
-} // unnamed namespace
-
 void exportParametricIirCoefficientCalculator( pybind11::module & m )
 {
   py::class_<ParametricIirCoefficientCalculator >(m, "ParametricIirCoefficientCalculator")
@@ -44,7 +28,7 @@ void exportParametricIirCoefficientCalculator( pybind11::module & m )
         static_cast<void(*)(ParametricIirCoefficient<float> const &, BiquadCoefficient<float> &, float)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<float>),
         py::arg("param"), py::arg("coeffs"), py::arg("samplingFrequency") )
     .def_static("calculateIirCoefficients",
-        static_cast<typename BiquadCoefficient<float>(*)(ParametricIirCoefficient<float> const &, float)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<float>),
+        static_cast<BiquadCoefficient<float>(*)(ParametricIirCoefficient<float> const &, float)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<float>),
         py::arg("param"), py::arg("samplingFrequency") )
     .def_static("calculateIirCoefficients",
         static_cast<void(*)(ParametricIirCoefficientList<float> const &, BiquadCoefficientList<float> &, float)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<float>),
@@ -53,7 +37,7 @@ void exportParametricIirCoefficientCalculator( pybind11::module & m )
         static_cast<void(*)(ParametricIirCoefficient<double> const &, BiquadCoefficient<double> &, double)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<double>),
         py::arg("param"), py::arg("coeffs"), py::arg("samplingFrequency"))
     .def_static("calculateIirCoefficients",
-        static_cast<typename BiquadCoefficient<double>(*)(ParametricIirCoefficient<double> const &, double)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<double>),
+        static_cast<BiquadCoefficient<double>(*)(ParametricIirCoefficient<double> const &, double)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<double>),
         py::arg("param"), py::arg("samplingFrequency"))
     .def_static("calculateIirCoefficients",
     static_cast<void(*)(ParametricIirCoefficientList<double> const &, BiquadCoefficientList<double> &, double)>(&ParametricIirCoefficientCalculator::calculateIirCoefficients<double>),
