@@ -8,6 +8,8 @@
 
 #include <libpml/empty_parameter_config.hpp>
 
+#include <librcl/fir_filter_matrix.hpp>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -16,6 +18,39 @@ namespace visr
 {
 namespace reverbobject
 {
+
+namespace // unnamed
+{
+  /**
+   * Create a routing that routes \p numChannels input signals to a single output (adding them).
+   * @param numChannels The number of input signals, which are translated to the indices 0..numChanels-1
+   * @todo Consider to make this an utility function (e.g., in librbbl)
+   */
+  rbbl::FilterRoutingList allToOneRouting( std::size_t numChannels )
+  {
+    rbbl::FilterRoutingList res;
+    for (std::size_t chIdx(0); chIdx < numChannels; ++chIdx)
+    {
+      res.addRouting(chIdx, 0, chIdx, 1.0f);
+    }
+    return res;
+  }
+
+  /**
+   * Create a routing that routes a single input to \p numchannels output signals, filtering each with an individual filter.
+   * @param numChannels The number of output signals, which are translated to the indices 0..numChannels-1
+   * @todo Consider to make this an utility function (e.g., in librbbl)
+   */
+  rbbl::FilterRoutingList oneToAllRouting(std::size_t numChannels)
+  {
+    rbbl::FilterRoutingList res;
+    for (std::size_t chIdx(0); chIdx < numChannels; ++chIdx)
+    {
+      res.addRouting(0, chIdx, chIdx, 1.0f);
+    }
+    return res;
+  }
+} // unnamed namespace
 
 ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                       char const * name,
@@ -34,8 +69,6 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   , mDiscreteReverbPanningMatrix( context, "discretePanningMatrix", this )
   , mLateReverbFilterCalculator() //  context, "lateReverbCalculator", this )
   , mLateReverbGainDelay( context, "lateReverbGainDelay", this )
-  , mLateReverbFilter( context, "lateReverbFilter", this )
-  , mLateDiffusionFilter( context, "decorrelationFilter", this )
   , mReverbMix( context, "Sum", this, arrayConfig.getNumRegularSpeakers(), 2 )
 {
   // Parse and apply default values for the reverb parameters.
@@ -132,36 +165,28 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                        objectmodel::PointSourceWithReverb::cNumberOfSubBands,
                                        cLateFilterUpdatesPerPeriod ) );
 
-    // TODO: Add configuration parameters for maximum delay of the late reverb onset delay.
-    mLateReverbGainDelay.setup( maxNumReverbObjects,
-                                period(),
-                                maxDiscreteReflectionDelay, // For the moment, use the same max. delay as for discretes.
-                                "lagrangeOrder3",
-                                rcl::DelayVector::MethodDelayPolicy::Limit,
-                                rcl::DelayVector::ControlPortConfig::All,
-                                0.0f, 0.0f );
+  // TODO: Add configuration parameters for maximum delay of the late reverb onset delay.
+  mLateReverbGainDelay.setup( maxNumReverbObjects,
+                              period(),
+                              maxDiscreteReflectionDelay, // For the moment, use the same max. delay as for discretes.
+                              "lagrangeOrder3",
+                              rcl::DelayVector::MethodDelayPolicy::Limit,
+                              rcl::DelayVector::ControlPortConfig::All,
+                              0.0f, 0.0f );
 
-    // Create a routing for #reverbObjects signals, each filtered with an individual filter, and summed into a single
-    rbbl::FilterRoutingList lateReverbRouting;
-    for( std::size_t objIdx( 0 ); objIdx < maxNumReverbObjects; ++objIdx )
-    {
-      lateReverbRouting.addRouting( objIdx, 0, objIdx, 1.0f );
-    }
-    mLateReverbFilter.setup( maxNumReverbObjects, 1, lateReverbFilterLengthSamples,
-                             maxNumReverbObjects, maxNumReverbObjects,
-                             efl::BasicMatrix<SampleType>(), // No initial filters provided.
-                             lateReverbRouting,
-                             rcl::FirFilterMatrix::ControlPortConfig::Filters );
+  // A single late reverb filter for each object, which are routed (summed) to a single output. 
+  mLateReverbFilter.reset( new rcl::FirFilterMatrix(context, "lateReverbFilter", this,
+                           maxNumReverbObjects, 1, lateReverbFilterLengthSamples,
+                           maxNumReverbObjects, maxNumReverbObjects,
+                           efl::BasicMatrix<SampleType>(), // No initial filters provided.
+                           allToOneRouting( maxNumReverbObjects ),
+                           rcl::FirFilterMatrix::ControlPortConfig::Filters ) );
 
-    // Create a routing from 1 to #loudspeakers signals, each filtered with an individual filter
-    rbbl::FilterRoutingList lateDecorrelationRouting;
-    for( std::size_t lspIdx( 0 ); lspIdx < arrayConfig.getNumRegularSpeakers(); ++lspIdx )
-    {
-      lateDecorrelationRouting.addRouting( 0, lspIdx, lspIdx, 1.0f );
-    }
-    mLateDiffusionFilter.setup( 1, arrayConfig.getNumRegularSpeakers( ), lateDecorrelationFilters.numberOfColumns(),
-                                arrayConfig.getNumRegularSpeakers( ), arrayConfig.getNumRegularSpeakers( ),
-                                lateDecorrelationFilters, lateDecorrelationRouting );
+  // Create #loudspeakers decorrelated signals from a single, each filtered with an individual decorrelation filter
+  mLateDiffusionFilter.reset(new rcl::FirFilterMatrix(context, "decorrelationFilter", this, 
+                             1, arrayConfig.getNumRegularSpeakers( ), lateDecorrelationFilters.numberOfColumns(),
+                             arrayConfig.getNumRegularSpeakers( ), arrayConfig.getNumRegularSpeakers( ),
+                             lateDecorrelationFilters, oneToAllRouting( arrayConfig.getNumRegularSpeakers()) ) );
 
   audioConnection( mObjectSignalInput, mReverbSignalRouting.audioPort("in") );
   std::size_t const totalDiscreteReflections = maxNumReverbObjects*numDiscreteReflectionsPerObject;
@@ -179,9 +204,9 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   audioConnection( mDiscreteReverbPanningMatrix.audioPort("out"), mReverbMix.audioPort("in0") );
 
   audioConnection( mReverbSignalRouting.audioPort("out"), mLateReverbGainDelay.audioPort("in") );
-  audioConnection( mLateReverbGainDelay.audioPort("out"), mLateReverbFilter.audioPort("in") );
-  audioConnection( mLateReverbFilter.audioPort("out"), mLateDiffusionFilter.audioPort("in") );
-  audioConnection( mLateDiffusionFilter.audioPort("out"), mReverbMix.audioPort("in1") );
+  audioConnection( mLateReverbGainDelay.audioPort("out"), mLateReverbFilter->audioPort("in") );
+  audioConnection( mLateReverbFilter->audioPort("out"), mLateDiffusionFilter->audioPort("in") );
+  audioConnection( mLateDiffusionFilter->audioPort("out"), mReverbMix.audioPort("in1") );
 
   audioConnection( mReverbMix.audioPort("out"), mLoudspeakerOutput );
 
@@ -195,7 +220,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   parameterConnection( mReverbParameterCalculator.parameterPort("lateDelayOut"), mLateReverbGainDelay.parameterPort( "delayInput" ) );
 
   parameterConnection( mReverbParameterCalculator.parameterPort("lateSubbandOut"), mLateReverbFilterCalculator->parameterPort("subbandInput") );
-  parameterConnection( mLateReverbFilterCalculator->parameterPort("lateFilterOutput"), mLateReverbFilter.parameterPort("filterInput") );
+  parameterConnection( mLateReverbFilterCalculator->parameterPort("lateFilterOutput"), mLateReverbFilter->parameterPort("filterInput") );
 
 }
 
