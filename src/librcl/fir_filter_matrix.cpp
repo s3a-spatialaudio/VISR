@@ -50,41 +50,20 @@ FirFilterMatrix::FirFilterMatrix( SignalFlowContext const & context,
   ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
   char const * fftImplementation /*= "default"*/ )
   : AtomicComponent( context, name, parent )
-  , mInput( "in", *this )
-  , mOutput( "out", *this )
-{
-  setup( numberOfInputs, numberOfOutputs, filterLength,
-         maxFilters, maxRoutings, filters,
-         routings, controlInputs, fftImplementation );
-}
-
-FirFilterMatrix::~FirFilterMatrix()
-{
-}
-
-void FirFilterMatrix::setup( std::size_t numberOfInputs,
-                             std::size_t numberOfOutputs,
-                             std::size_t filterLength,
-                             std::size_t maxFilters,
-                             std::size_t maxRoutings,
-                             efl::BasicMatrix<SampleType> const & filters /*= efl::BasicMatrix<SampleType>()*/,
-                             rbbl::FilterRoutingList const & routings /*= rbbl::FilterRoutingList()*/,
-                             ControlPortConfig controlInputs /*= ControlPortConfig::None*/,
-                             char const * fftImplementation /*= "default" */ )
-{
-  mInput.setWidth( numberOfInputs );
-  mOutput.setWidth( numberOfOutputs );
-
-  mConvolver.reset( new rbbl::MultichannelConvolverUniform<SampleType>(
+  , mInput( "in", *this, numberOfInputs )
+  , mOutput( "out", *this, numberOfOutputs )
+  , mConvolver(new rbbl::MultichannelConvolverUniform<SampleType>(
     numberOfInputs, numberOfOutputs, period(),
     filterLength, maxRoutings, maxFilters,
-    routings, filters, cVectorAlignmentSamples, fftImplementation ) );
-
+    routings, filters, cVectorAlignmentSamples, fftImplementation ) )
+{
   bool const filterInput = (controlInputs & ControlPortConfig::Filters) != ControlPortConfig::None;
-  mSetFilterInput.reset( filterInput
-                         ? new ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > >( "filterInput", *this, pml::EmptyParameterConfig() )
-                         : nullptr );
+  mSetFilterInput.reset(filterInput
+    ? new ParameterInput<pml::MessageQueueProtocol, pml::IndexedValueParameter< std::size_t, std::vector<SampleType > > >("filterInput", *this, pml::EmptyParameterConfig())
+    : nullptr);
 }
+
+FirFilterMatrix::~FirFilterMatrix() = default;
 
 void FirFilterMatrix::process()
 {
