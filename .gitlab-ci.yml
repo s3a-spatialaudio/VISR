@@ -317,7 +317,7 @@ windows-arch-config-py36:
   dependencies:
     - init-windows-py36
   script:
-    - cmake -E chdir build_py36/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\include -DPYTHON_LIBRARY=C:/ProgramData/Anaconda3/libs/python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
+    - cmake -E chdir build_py36/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\envs\py36\include -DPYTHON_LIBRARY=C:\ProgramData\Anaconda3\envs\py36\libs\python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
   only:
     - master
     - develop
