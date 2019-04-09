@@ -15,6 +15,7 @@
 #include <librcl/delay_vector.hpp>
 #include <librcl/gain_matrix.hpp>
 #include <librcl/signal_routing.hpp>
+#include <librcl/crossfading_fir_filter_matrix.hpp>
 
 #include "late_reverb_filter_calculator.hpp"
 #include "reverb_parameter_calculator.hpp"
@@ -61,13 +62,15 @@ public:
    *          containing the filter coefficients for the decorrelation of the late part.
    * @param arrayConfig Array configuration object to describe the reproduction system.
    * @param numberOfObjectSignals Total number of object audio signals that might carry reverb objects.
+   * @param transitionSamples Total length in samples of a rcl::CrossFadeFirFilterMatrix used to fade between different rooms for every object
    */
   explicit ReverbObjectRenderer( SignalFlowContext const & context,
                                  char const * name,
                                  CompositeComponent * parent,
                                  std::string const & reverbConfig,
                                  panning::LoudspeakerArray const & arrayConfig, 
-                                 std::size_t numberOfObjectSignals );
+                                 std::size_t numberOfObjectSignals,
+                                 std::size_t const transitionSampleSize = 48000 );
 
   ~ReverbObjectRenderer();
 
@@ -89,7 +92,7 @@ private:
   rcl::GainMatrix mDiscreteReverbPanningMatrix;
 
   std::unique_ptr<LateReverbFilterCalculator> mLateReverbFilterCalculator;
-
+    
   /**
    * Overall gain and delay for the source signals going into the late
    * reverberation part.
@@ -97,12 +100,15 @@ private:
    * onset delay.
    */
   rcl::DelayVector mLateReverbGainDelay;
-
-  std::unique_ptr< rcl::FirFilterMatrix > mLateReverbFilter;
+    
+  std::unique_ptr< rcl::CrossfadingFirFilterMatrix> mLateReverbFilter;
 
   std::unique_ptr< rcl::FirFilterMatrix > mLateDiffusionFilter;
 
   rcl::Add mReverbMix;
+    
+  std::size_t mTransitionSamplesSize;
+
 };
 
 } // namespace reverbobject

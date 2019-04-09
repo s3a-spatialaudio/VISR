@@ -57,7 +57,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                       CompositeComponent * parent,
                                       std::string const & reverbConfig,
                                       panning::LoudspeakerArray const & arrayConfig, 
-                                      std::size_t numberOfObjectSignals )
+                                      std::size_t numberOfObjectSignals,
+                                      std::size_t transitionSampleSize )
   : CompositeComponent( context, name, parent )
   , mObjectSignalInput( "in", *this, numberOfObjectSignals )
   , mLoudspeakerOutput( "out", *this, arrayConfig.getNumRegularSpeakers() )
@@ -70,6 +71,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   , mLateReverbFilterCalculator() //  context, "lateReverbCalculator", this )
   , mLateReverbGainDelay( context, "lateReverbGainDelay", this )
   , mReverbMix( context, "Sum", this, arrayConfig.getNumRegularSpeakers(), 2 )
+  , mTransitionSamplesSize(transitionSampleSize)
 {
   // Parse and apply default values for the reverb parameters.
   std::stringstream stream( reverbConfig );
@@ -175,12 +177,19 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                               0.0f, 0.0f );
 
   // A single late reverb filter for each object, which are routed (summed) to a single output. 
-  mLateReverbFilter.reset( new rcl::FirFilterMatrix(context, "lateReverbFilter", this,
-                           maxNumReverbObjects, 1, lateReverbFilterLengthSamples,
-                           maxNumReverbObjects, maxNumReverbObjects,
-                           efl::BasicMatrix<SampleType>(), // No initial filters provided.
-                           allToOneRouting( maxNumReverbObjects ),
-                           rcl::FirFilterMatrix::ControlPortConfig::Filters ) );
+    mLateReverbFilter.reset( new rcl::CrossfadingFirFilterMatrix(context,
+                                                     "lateReverbFilter",
+                                                     this,
+                                                     maxNumReverbObjects,
+                                                     1,
+                                                     lateReverbFilterLengthSamples,
+                                                     maxNumReverbObjects,
+                                                     maxNumReverbObjects,
+                                                     mTransitionSamplesSize,
+                                                     efl::BasicMatrix<SampleType>(), // No initial filters provided.
+                                                     allToOneRouting( maxNumReverbObjects ),
+                                                     rcl::CrossfadingFirFilterMatrix::ControlPortConfig::Filters, "default"
+                                                    ));
 
   // Create #loudspeakers decorrelated signals from a single, each filtered with an individual decorrelation filter
   mLateDiffusionFilter.reset(new rcl::FirFilterMatrix(context, "decorrelationFilter", this, 
