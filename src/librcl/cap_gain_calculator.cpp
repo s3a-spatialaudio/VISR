@@ -31,7 +31,8 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
                                       char const * name,
                                       CompositeComponent * parent,
                                       std::size_t numberOfObjects,
-                                      panning::LoudspeakerArray const & arrayConfig )
+                                      panning::LoudspeakerArray const & arrayConfig,
+                                      PanningMode panningMode /* = PanningMode::LF */ )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( numberOfObjects )
  , mNumberOfLoudspeakers( arrayConfig.getNumRegularSpeakers() )
@@ -48,8 +49,9 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
 
   // Set initial positions
   mCapCalculator.setListenerPosition( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
-  mCapCalculator.setListenerAuralAxis( static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(1.0), static_cast<CoefficientType>(0.0) );
-
+  mCapCalculator.setListenerAuralAxis( static_cast<CoefficientType>(1.0), static_cast<CoefficientType>(0.0), static_cast<CoefficientType>(0.0) );
+    
+  if (panningMode == PanningMode::HF) mCapCalculator.setHFmode();
 }
 
 CAPGainCalculator::~CAPGainCalculator()
@@ -66,7 +68,10 @@ void CAPGainCalculator::process()
     process( mObjectVectorInput.data(),
              mListenerPositionInput.data(),
              gains );
+      
+      
   }
+    
   if( mObjectVectorInput.changed() )
   {
     mObjectVectorInput.resetChanged();
@@ -149,28 +154,35 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects,
   mCapCalculator.setSourcePositions( &mSourcePositions[0] );
 
   // Set the listener position and orientation
+  // TODO: Add direct inter-aural axis control
+    
   mCapCalculator.setListenerPosition( listener.x(), listener.y(), listener.z() );
-  // TODO: Calculate the listener aural axis from the values listener.yaw(), listener.pitch(), and listener.roll()
-  CoefficientType const auralAxisX = 0.0f; // TODO: Replace by computation
-  CoefficientType const auralAxisY = 1.0f; // TODO: Replace by computation
-  CoefficientType const auralAxisZ = 0.0f; // TODO: Replace by computation
-  mCapCalculator.setListenerAuralAxis( auralAxisX, auralAxisY, auralAxisZ );
+    
+  mCapCalculator.setListenerOrientation( listener.yaw(), listener.pitch(), listener.roll(), false );
+    
+    
+  // printf("setListenerOrientation ypr %f %f %f %d\n", listener.yaw(), listener.pitch(), listener.roll(), false );
 
+
+    
   if( mCapCalculator.calcGains() != 0 )
   {
     std::cout << "CAPGainCalculator: Error calculating VBAP gains." << std::endl;
   }
   
-  efl::BasicMatrix<Afloat> const & vbapGains = mCapCalculator.getGains();
+  efl::BasicMatrix<Afloat> const & capGains = mCapCalculator.getGains();
   // This is essentially a matrix transposition and a row-wise scalar multiplication.
   for( std::size_t chIdx(0); chIdx < mNumberOfObjects; ++chIdx )
   {
-    Afloat const * const gainRow = vbapGains.row( chIdx );
+    Afloat const * const gainRow = capGains.row( chIdx );
     objectmodel::LevelType const level = mLevels[ chIdx ];
+//      std::cout<<"gain obj "<<chIdx<<" [";
     for( std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx )
     {
       gainMatrix( outIdx, chIdx ) = level * gainRow[ outIdx ];
+//        std::cout<<std::to_string(gainMatrix( outIdx, chIdx ))<<", ";
     }
+//      std::cout<<"]"<<std::endl;
   }
 }
 

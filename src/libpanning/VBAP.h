@@ -64,11 +64,15 @@ public:
    * @param z Cartesian z coordinate of the new listener position
    */
   void setListenerPosition( SampleType x, SampleType y, SampleType z );
+    
+    
+  void set2DfadeMode( bool m2DfadeMode );
   
 private:
   
-  bool is2D;
-  bool isInfinite;
+  bool mArrayIs2D;
+  bool mArrayIsInfinite;
+  bool m2DfadeMode;
   
   size_t numTotLoudspeakers;
   size_t numRegLoudspeakers;
@@ -108,6 +112,15 @@ private:
    * The gains of virtual loudspeakers are after the regular loudspeaker gains.
    */
   mutable std::vector<SampleType> mGain;
+    
+
+    /**
+     * State indicates whether is listener is near to triplet boundary (in 2D only for now)
+     * Used for 360 HF integration with CAP.
+     */
+    mutable std::vector<bool> mListenerIsNearTripletBoundary;
+
+    
   
   /**
    * Calculates the inverse matrix required for VBAP gain calculation.

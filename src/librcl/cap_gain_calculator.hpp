@@ -50,7 +50,15 @@ public:
    * Type of the gain coefficients. We use the same type as
    */
   using CoefficientType = visr::SampleType;
-
+    
+    enum class PanningMode
+    {
+        Nothing = 0, ///< Not used as a real choice, just for bit-testing.
+        LF = 1,
+        HF = 2,
+    };
+    
+    
   /**
    * Constructor.
    * @param context SignalFlowContext object holding parameters as sampling freqequency and period (block size).
@@ -63,7 +71,9 @@ public:
                               char const * name,
                               CompositeComponent * parent,
                               std::size_t numberOfObjects, 
-                              panning::LoudspeakerArray const & arrayConfig );
+                              panning::LoudspeakerArray const & arrayConfig,
+                              PanningMode panningMode = PanningMode::LF
+                             );
 
   /**
    * Disabled (deleted) copy constructor

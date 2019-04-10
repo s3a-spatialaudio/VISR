@@ -9,6 +9,8 @@
 
 #include "CAP.h"
 
+#include <boost/math/constants/constants.hpp>
+
 #ifdef CAP_DEBUG_MESSAGES
 #include <cstdio>
 #endif
@@ -33,7 +35,7 @@ int CAP::calcGains(){
     // rL   inter-aural axis normal vector
     // rI   image normal vector
     
-    std::size_t const n = m_array->getNumSpeakers();
+    std::size_t const n = m_array->getNumRegularSpeakers();
     
     
     // Setup normal vectors from listener to speakers
@@ -42,131 +44,323 @@ int CAP::calcGains(){
     
     for (std::size_t i = 0 ; i < n; i++) {
         r[i] = m_array->getPosition(i);
-        r[i].x -= m_listenerPos.x;
-        r[i].y -= m_listenerPos.y;
-        r[i].z -= m_listenerPos.z;
+        r[i].minus(m_listenerPos);
         r[i].normalise();
     }
     
+    
     XYZ & rL = m_listenerAuralAxis; // assume normalised.
     
-    std::vector<Afloat> a;
-    a.resize(n);
-    Afloat b, c, l1, l2;  // main algorithm variables.
-    Afloat t; // temp
-    XYZ rt; // temp
-    
-    for(std::size_t j = 0; j < m_nSources; j++) {
-    
-        XYZ rI = m_sourcePos[j];
+    if (n >= 3) { // Energy minimization
         
-        if (!m_sourcePos[j].isInfinite) {
-            rI.minus(m_listenerPos);
-        }
-
-        rI.normalise();
+        std::vector<Afloat> a;
+        a.resize(n);
         
-        b = c = 0;
-        
-        for (std::size_t i = 0 ; i < n; i++) {
-            rt = r[i];
-            rt.minus(rI);
-            a[i] = rL.dot(rt);
+        for(std::size_t j = 0; j < m_nSources; j++) {
             
-            b += a[i];
-            c += a[i] * a[i];
+            XYZ rI = m_sourcePos[j];
+            
+            Afloat rI0_ = rI.getLength();           // image - 0  distance
+            
+            if (!m_sourcePos[j].isInfinite) {     //!
+                rI.minus(m_listenerPos);
+            }
+            
+            Afloat rI_ = rI.getLength();  // rI_ : image-listener gain adjustment
+            
+            rI.normalise();               //! replace getLength to avoid length recalc
+            
+            Afloat b = 0, c = 0;
+            
+            for (std::size_t i = 0 ; i < n; i++) {
+                XYZ rt = r[i];
+                rt.minus(rI);
+                a[i] = rL.dot(rt);
+                
+                b += a[i];
+                c += a[i] * a[i];
+            }
+            
+            Afloat d = (c*n - b*b)   * (rI_ + 0.01) / rI0_;  // image distance correction added
+            Afloat g;
+            Afloat gMax = 0;
+            
+            Afloat gSum = 0;
+            Afloat ggSum = 0;
+            
+            for (std::size_t i = 0 ; i < n; i++) {
+                g = (-b * a[i] + c ) / d;
+                if (g > gMax) gMax = g;
+                gSum = gSum +g;
+                ggSum = ggSum +g*g;
+                m_gain(j, i) = g;
+                //printf( g);
+            }
+            // printf("%f   %f\n", gSum, ggSum);
+            
+            // Limit gains
+            if (gMax > m_maxGain) {
+                Afloat f = m_maxGain / gMax;
+                for (std::size_t i = 0 ; i < n; i++) {
+                    m_gain(j, i) = m_gain(j, i) * f;
+                }
+            }
+
         }
+    }
+    else if (n == 2) { // For this case use the linear formula, because singularity limiting is simpler.
         
-        t = 2/(c*n - b*b);
-        l1 = -b * t;
-        l2 = c * t;
-    
-        for (std::size_t i = 0 ; i < n; i++) {
-            m_gain(j, i) = ( l1*a[i] + l2 )/2;
-            //printf( m_gain(j, i) );
+        for(std::size_t j = 0; j < m_nSources; j++) {
+            
+            XYZ rI = m_sourcePos[j];
+            
+            Afloat rI0_ = rI.getLength();            // image - 0  distance
+            
+            if (!m_sourcePos[j].isInfinite) {     //!
+                rI.minus(m_listenerPos);
+            }
+            
+            Afloat rI_ = rI.getLength();  // rI_ : image-listener gain adjustment
+            
+            rI.normalise();
+            
+            XYZ rt = rI;
+            rt.minus(r[1]);
+            Afloat g1 = rL.dot(rt);
+                   
+            rt = rI;
+            rt.minus(r[0]);
+            Afloat g2 = -rL.dot(rt);
+            
+            //Afloat d = g1 + g2;
+            
+            Afloat d = std::abs(g1 + g2); // denominator. abs() ensures continuity of normalised gains
+            
+            if (d < 0.001) d = 0.001;     // hard gain limit to avoid singularity
+            
+            g1 = g1 / d;
+            g2 = g2 / d;
+            
+            
+            // Experimental CAP - VBIP hybrid
+            if (m_HFmode) {
+                if (g1*g2 > 0) { // both -ve or +ve
+                    Afloat g1 = sqrt(g1); // gain remapping
+                    Afloat g2 = sqrt(g2);
+                    Afloat f = 1/sqrt(g1*g1 + g2*g2);
+                    g1 = g1 * f; //  energy normalisation
+                    g2 = g2 * f;
+                }
+                else {
+                    g1 = 0;
+                    g2 = 0;
+                }
+            }
+            
+            
+            // Gain limiting, pre image/speaker distance compensation
+            // - to make smooth transition through singularity
+            Afloat gMax = std::abs(g1);
+            if (std::abs(g2) > gMax) gMax = std::abs(g2);
+            if (gMax > m_maxGainPreComp) {
+                Afloat f = m_maxGainPreComp / gMax;
+                g1 = g1 * f;
+                g2 = g2 * f;
+            }
+            
+            
+            // Image/speaker distance compensation
+            if (rI_ < 0.001) rI_ = 0.001;
+            Afloat c = rI0_ / rI_;    // gain 1 when listener is at 0
+                                      // Should replace rI0_ with rI1_ set in plugin - fixed unity-gain-distance parameter (rI0_ varies with pointsource distance).
+            
+            g1 = g1 * c;
+            g2 = g2 * c;
+            
+        
+            
+            // Final gain limiting
+            gMax = std::abs(g1);
+            if (std::abs(g2) > gMax) gMax = std::abs(g2);
+            if (gMax > m_maxGain) {
+                Afloat f = m_maxGain / gMax;
+                g1 = g1 * f;
+                g2 = g2 * f;
+            }
+            
+            // if (j==0) printf("%f %f\n", g1, g2);    //printf("%f\n", f);
+            
+            
+            // Latency test
+//            if ( rL.z > 0 ) {
+//                g1 = 1;
+//                g2 = 1;
+//            }
+//            else {
+//                g1 = 0;
+//                g2 = 0;
+//            }
+            
+            
+            m_gain(j, 0) = g1;
+            m_gain(j, 1) = g2;
+            
+            
+            
+            
+                      
+//            Matlab:
+//
+//            g(1) = (rL * (rI - r(2,:))');
+//            g(2) = -(rL * (rI - r(1,:))');
+//
+//             d = abs(g(1)) + abs(g(2)); % simple, no control over max gains
+//             % note: gain signs are both reversed for reverse head direction, but this makes no
+//             % difference to image
+//
+//             d = g(1) + g(2);
+//             d = abs(d);
+//             if (d < 0.2) d = 0.2;   % controllable max gains
+//             end
+//             % note: gain signs are both reversed for reverse head direction, but this makes no
+//             % difference to image
+//
+//             g(1) = g(1) / d;
+//             g(2) = g(2) / d;
+            
         }
+    }
+    else { // n = 1
+        for(std::size_t j = 0; j < m_nSources; j++) {
+            m_gain(j, 0) = 1;
+        }
+    }
 
 #ifdef CAP_DEBUG_MESSAGES
         printf("\n");
 #endif
-    }
     return 0;
 }
     
+  
     
 int CAP::setListenerOrientation(Afloat yaw, Afloat pitch, Afloat roll, bool zero){
-    
-        // zero = true  is used to set the identity orientation.
-    
-    
-#ifdef CAP_DEBUG_MESSAGES
-        printf("setListenerOrientation %f %f %f %d\n", yaw, pitch, roll, zero);
-#endif
-        Afloat m[3][3]; // temp rotation matrix
+        
+        // zero = true  is used to set the identity orientation. (calibration / experimental)
         
         
-        // phi the psi
+//#ifdef CAP_DEBUG_MESSAGES
+//        printf("setListenerOrientation ypr %f %f %f\n", yaw, pitch, roll);
+//#endif
+        
+        // Convert to radians. !But shouldn't these be in radians already?
+        yaw = yaw * boost::math::constants::degree<Afloat>();
+        pitch = pitch * boost::math::constants::degree<Afloat>();
+        roll = roll * boost::math::constants::degree<Afloat>();
+        
         
         Afloat cy = cos(yaw);
         Afloat sy = sin(yaw);
         Afloat cp = cos(pitch);
         Afloat sp = sin(pitch);
+    
         Afloat cr = cos(roll);
         Afloat sr = sin(roll);
+
+    
+        // For general y p r aligned in Vive frame.
+        // m_listenerAuralAxis.set( cy*sp*sr-sy*cr, sy*sp*sr+cy*cr, cp*sr ); // standard
+    
+        m_listenerAuralAxis.set( cy*sp*sr-sy*cr, sy*sp*sr+cy*cr, -cp*sr );  // modified for -p, -r
+    
+        //printf("AuralAxis %8.4f %8.4f %8.4f\n", cy*sp*sr-sy*cr, sy*sp*sr+cy*cr, -cp*sr  );
+        
+    
+        // Kinect - Sparkfun IMU tracking system
+        // m_listenerAuralAxis.set( -sy*cp, cy*cp, -sp );
         
         
-        m[0][0] = cp * cy;
-        m[0][1] = cp * sy;
-        m[0][2] = -sp;
+        // Vive tracker system  R(0:2,0) is the roll axis = x axis in VISR coords
+        // m_listenerAuralAxis.set( -sp, cy*cp, sy*cp );
+        // printf("AuralAxis %8.4f %8.4f %8.4f\n", -sp, cy*cp, sy*cp );
+    
+    
+    
+    
         
-        m[1][0] = sr * sp * cy - cr * sy;
-        m[1][1] = sr * sp * sy + cr * cy;
-        m[1][2] = cp * sr;
+        // // Experimental calibration stuff, double take allowing for arbitrary orientation of tracker on hat.
+        //
+        //        Afloat m[3][3]; // temp rotation matrix
+        //
+        //
+        //        // phi the psi
+        //
+        //        Afloat cy = cos(yaw);
+        //        Afloat sy = sin(yaw);
+        //        Afloat cp = cos(pitch);
+        //        Afloat sp = sin(pitch);
+        //        Afloat cr = cos(roll);
+        //        Afloat sr = sin(roll);
+        //
+        //
+        //        m[0][0] = cp * cy;
+        //        m[0][1] = cp * sy;
+        //        m[0][2] = -sp; ??
+        //
+        //        m[1][0] = sr * sp * cy - cr * sy;
+        //        m[1][1] = sr * sp * sy + cr * cy;
+        //        m[1][2] = cp * sr;
+        //
+        //        m[2][0] = cr * sp * cy + sr * sy;
+        //        m[2][1] = cr * sp * sy - sr * cy;
+        //        m[2][2] = cp * cr;
+        //
+        //
+        //        if (zero) { // Update reorientation matrix by finding the inverse of current matrix
+        //            Afloat det = m[0][0] * ( m[1][1] * m[2][2] - m[2][1] * m[1][2] )
+        //            - m[0][1] * ( m[1][0] * m[2][2] - m[1][2] * m[2][0] ) +
+        //            m[0][2] * ( m[1][0] * m[2][1] - m[1][1] * m[2][0] );
+        //
+        //            Afloat invdet = 1 / det;
+        //
+        //            Afloat (*minv)[3] = m_reorientMatrix; // inverse of matrix m
+        //            minv[0][0] = ( m[1][1] * m[2][2] - m[2][1] * m[1][2] ) * invdet;
+        //            minv[0][1] = ( m[0][2] * m[2][1] - m[0][1] * m[2][2] ) * invdet;
+        //            minv[0][2] = ( m[0][1] * m[1][2] - m[0][2] * m[1][1] ) * invdet;
+        //            minv[1][0] = ( m[1][2] * m[2][0] - m[1][0] * m[2][2] ) * invdet;
+        //            minv[1][1] = ( m[0][0] * m[2][2] - m[0][2] * m[2][0] ) * invdet;
+        //            minv[1][2] = ( m[1][0] * m[0][2] - m[0][0] * m[1][2] ) * invdet;
+        //            minv[2][0] = ( m[1][0] * m[2][1] - m[2][0] * m[1][1] ) * invdet;
+        //            minv[2][1] = ( m[2][0] * m[0][1] - m[0][0] * m[2][1] ) * invdet;
+        //            minv[2][2] = ( m[0][0] * m[1][1] - m[1][0] * m[0][1] ) * invdet;
+        //        }
+        //
+        //        // Apply reorientation
+        //
+        //        Afloat m2[3][3]; // temp rotation matrix
+        //
+        //        int temp = 0;
+        //        int i, j, k;
+        //
+        //        for(i = 0; i < 3; i++)
+        //        {
+        //            for(j = 0; j < 3; j++)
+        //            {
+        //                temp = 0;
+        //                for(k = 0; k < 3; k++)
+        //                {
+        //                    temp += m_reorientMatrix[j][k] * m[k][i];
+        //                }
+        //                m2[j][i] = temp;
+        //            }
+        //        }
+        //
+        //
+        //        m_listenerAuralAxis.set(m2[1][0], m2[1][1], m2[1][2]);
+        //
         
-        m[2][0] = cr * sp * cy + sr * sy;
-        m[2][1] = cr * sp * sy - sr * cy;
-        m[2][2] = cp * cr;
         
         
-        if (zero) { // Update reorientation matrix by finding the inverse of current matrix
-            Afloat det = m[0][0] * ( m[1][1] * m[2][2] - m[2][1] * m[1][2] )
-            - m[0][1] * ( m[1][0] * m[2][2] - m[1][2] * m[2][0] ) +
-            m[0][2] * ( m[1][0] * m[2][1] - m[1][1] * m[2][0] );
-            
-            Afloat invdet = 1 / det;
-            
-            Afloat (*minv)[3] = m_reorientMatrix; // inverse of matrix m
-            minv[0][0] = ( m[1][1] * m[2][2] - m[2][1] * m[1][2] ) * invdet;
-            minv[0][1] = ( m[0][2] * m[2][1] - m[0][1] * m[2][2] ) * invdet;
-            minv[0][2] = ( m[0][1] * m[1][2] - m[0][2] * m[1][1] ) * invdet;
-            minv[1][0] = ( m[1][2] * m[2][0] - m[1][0] * m[2][2] ) * invdet;
-            minv[1][1] = ( m[0][0] * m[2][2] - m[0][2] * m[2][0] ) * invdet;
-            minv[1][2] = ( m[1][0] * m[0][2] - m[0][0] * m[1][2] ) * invdet;
-            minv[2][0] = ( m[1][0] * m[2][1] - m[2][0] * m[1][1] ) * invdet;
-            minv[2][1] = ( m[2][0] * m[0][1] - m[0][0] * m[2][1] ) * invdet;
-            minv[2][2] = ( m[0][0] * m[1][1] - m[1][0] * m[0][1] ) * invdet;
-        }
-        
-        // Apply reorientation
-        
-        Afloat m2[3][3]; // temp rotation matrix
-        
-        int i, j, k;
-        
-        for(i = 0; i < 3; i++)
-        {
-            for(j = 0; j < 3; j++)
-            {
-                Afloat temp = 0.0f;
-                for(k = 0; k < 3; k++)
-                {
-                    temp += m_reorientMatrix[j][k] * m[k][i];
-                }
-                m2[j][i] = temp;
-            }
-        }
-        
-        m_listenerAuralAxis.set(m2[1][0], m2[1][1], m2[1][2]);
         
         
         //        a11 = math.cos(the) * math.cos(phi)

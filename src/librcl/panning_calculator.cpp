@@ -1,4 +1,4 @@
-/* Copyright Institute of Sound and Vibration Research - All rights reserved */
+ /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "panning_calculator.hpp"
 
@@ -296,8 +296,9 @@ void PanningCalculator::process()
         }
         if( hfGains )
         {
-          std::transform( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
-            mTmpHfGains.data(), [](SampleType val ){ return std::sqrt(val); } );
+          std::transform( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers, mTmpHfGains.data(), [](SampleType val ){ return std::sqrt(val); } );
+//          std::transform( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,   mTmpHfGains.data(), [](SampleType val ){ return 1; } );   //    std::pow(val, 0); } );
+
           normalise( mTmpHfGains.data(), hfGains->data() + objChannelIdx, mNumberOfRegularLoudspeakers,
             mHfNormalisation, hfGains->stride(), directRatio );
         }
@@ -439,10 +440,15 @@ void PanningCalculator::process()
           lfGains( lspIdx, channelId ) = scaleFactor * mTmpGains[lspIdx];
         }
 
-        // Now compute the VBIP (HF) gains
-        std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
+        // Now compute the VBIP (HF) gains  (generalise with pow)
+//        std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                        // Safeguard against potentially negative values that would yield NaNs
-                       [](SampleType & val ){ val = std::sqrt( std::max( val, static_cast<SampleType>(0.0) ) ); });
+                       [](SampleType & val ){ val = std::pow( std::max( val, static_cast<SampleType>(0.0) ), 0.0 ); });
+          
+        std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
+                        // Safeguard against potentially negative values that would yield NaNs
+                        [](SampleType & val ){ val = std::sqrt( std::max( val, static_cast<SampleType>(0.0) ) ); });
+          
         // Re-normalise with l2 (power) norm.
         SampleType const l2Sqr = std::accumulate( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                                                   static_cast<SampleType>(0.0),
