@@ -142,11 +142,11 @@ int CAP::calcGains(){
             g2 = g2 / d;
             
             
-            // Experimental CAP - VBIP hybrid
+            // Experimental CAP - VBIP hybrid for HF
             if (m_HFmode) {
                 if (g1*g2 > 0) { // both -ve or +ve
-                    Afloat g1 = sqrt(g1); // gain remapping
-                    Afloat g2 = sqrt(g2);
+                    g1 = sqrt(g1); // gain remapping
+                    g2 = sqrt(g2);
                     Afloat f = 1/sqrt(g1*g1 + g2*g2);
                     g1 = g1 * f; //  energy normalisation
                     g2 = g2 * f;
