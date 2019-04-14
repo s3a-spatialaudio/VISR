@@ -236,7 +236,6 @@ namespace // unnamed
       else
       {
         PaDeviceIndex const numDevices = hostApiInfo->deviceCount;
-        PaDeviceInfo const * info{ nullptr };
         {
           for (PaDeviceIndex idx(0); idx < numDevices; ++idx)
           {
