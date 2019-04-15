@@ -91,6 +91,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
 
   std::size_t const maxNumReverbObjects = tree.get<std::size_t>( "numReverbObjects", 0 );
   SampleType const lateReverbFilterLengthSeconds = tree.get<SampleType>( "lateReverbFilterLength", 0 );
+  // Enforce a minimum late reverb filter length of 1 sample. This is currently needed as not all components are safe when used with a filter length of 0.
   std::size_t const lateReverbFilterLengthSamples = std::max( static_cast<std::size_t>(std::ceil( lateReverbFilterLengthSeconds * samplingFrequency() )),
     static_cast<std::size_t>(1) );
 
