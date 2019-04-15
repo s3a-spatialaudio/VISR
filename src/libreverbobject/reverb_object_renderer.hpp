@@ -5,6 +5,7 @@
 
 #include "export_symbols.hpp"
 
+#include <libvisr/component.hpp>
 #include <libvisr/composite_component.hpp>
 #include <libvisr/audio_input.hpp>
 #include <libvisr/audio_output.hpp>
@@ -15,7 +16,6 @@
 #include <librcl/delay_vector.hpp>
 #include <librcl/gain_matrix.hpp>
 #include <librcl/signal_routing.hpp>
-#include <librcl/crossfading_fir_filter_matrix.hpp>
 
 #include "late_reverb_filter_calculator.hpp"
 #include "reverb_parameter_calculator.hpp"
@@ -60,6 +60,8 @@ public:
    *        - discreteReflectionsPerObject (integer) The number of discrete reflections per reverb object.
    *        - lateReverbDecorrelationFilters (string) Absolute or relative file path (relative to start directory of the renderer) to a multichannel audio file (typically WAV)
    *          containing the filter coefficients for the decorrelation of the late part.
+   *        - lateReverbCrossfadeTime (floating-point number) Crossfade time between reverb tails in case of a switch. A value of 0.0 triggers a more efficient implementation, at the cost of a 
+   *          hard switch with potential clicks or a transient loudness boosts.
    * @param arrayConfig Array configuration object to describe the reproduction system.
    * @param numberOfObjectSignals Total number of object audio signals that might carry reverb objects.
    * @param transitionSamples Total length in samples of a rcl::CrossFadeFirFilterMatrix used to fade between different rooms for every object
@@ -69,8 +71,7 @@ public:
                                  CompositeComponent * parent,
                                  std::string const & reverbConfig,
                                  panning::LoudspeakerArray const & arrayConfig, 
-                                 std::size_t numberOfObjectSignals,
-                                 std::size_t const transitionSampleSize = 48000 );
+                                 std::size_t numberOfObjectSignals );
 
   ~ReverbObjectRenderer();
 
@@ -100,15 +101,18 @@ private:
    * onset delay.
    */
   rcl::DelayVector mLateReverbGainDelay;
-    
-  std::unique_ptr< rcl::CrossfadingFirFilterMatrix> mLateReverbFilter;
+
+  /**
+   * FIR filter matrix for the late reverberation tails, with one channel per 
+   * reverb object channel.
+   * Depending on the configuration, this can be poulated with either a rcl::CrossfadingFirFilterMatrix
+   * (with crossfade) or a rcl::FirFilterMatrix (lateReverbCrossfadeTime=0.0) hard switching, but less expensive)
+   */
+  std::unique_ptr< visr::Component > mLateReverbFilter;
 
   std::unique_ptr< rcl::FirFilterMatrix > mLateDiffusionFilter;
 
   rcl::Add mReverbMix;
-    
-  std::size_t mTransitionSamplesSize;
-
 };
 
 } // namespace reverbobject

@@ -2,6 +2,8 @@
 
 #include "reverb_object_renderer.hpp"
 
+#include <libvisr/signal_flow_context.hpp>
+
 #include <libefl/db_linear_conversion.hpp>
 
 #include <libpanning/LoudspeakerArray.h>
@@ -9,10 +11,14 @@
 #include <libpml/empty_parameter_config.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
+#include <librcl/crossfading_fir_filter_matrix.hpp>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace visr
 {
@@ -57,8 +63,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                       CompositeComponent * parent,
                                       std::string const & reverbConfig,
                                       panning::LoudspeakerArray const & arrayConfig, 
-                                      std::size_t numberOfObjectSignals,
-                                      std::size_t transitionSampleSize )
+                                      std::size_t numberOfObjectSignals )
   : CompositeComponent( context, name, parent )
   , mObjectSignalInput( "in", *this, numberOfObjectSignals )
   , mLoudspeakerOutput( "out", *this, arrayConfig.getNumRegularSpeakers() )
@@ -68,10 +73,9 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   , mDiscreteReverbDelay( context, "discreteReverbDelay", this )
   , mDiscreteReverbReflFilters( context, "discreteReverbReflectionFilters", this )
   , mDiscreteReverbPanningMatrix( context, "discretePanningMatrix", this )
-  , mLateReverbFilterCalculator() //  context, "lateReverbCalculator", this )
+  , mLateReverbFilterCalculator()
   , mLateReverbGainDelay( context, "lateReverbGainDelay", this )
   , mReverbMix( context, "Sum", this, arrayConfig.getNumRegularSpeakers(), 2 )
-  , mTransitionSamplesSize(transitionSampleSize)
 {
   // Parse and apply default values for the reverb parameters.
   std::stringstream stream( reverbConfig );
@@ -96,6 +100,9 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   std::size_t const numWallReflBiquads = objectmodel::PointSourceWithReverb::cNumDiscreteReflectionBiquads;
 
   SampleType const maxDiscreteReflectionDelay = tree.get<SampleType>( "maxDiscreteReflectionDelay",  1.0f );
+
+  SampleType const lateReverbCrossfadeTime = tree.get<SampleType>("lateReverbCrossfadeTime", 2.0f); // Default value
+  std::size_t const lateReverbCrossfadeSamples{ static_cast<std::size_t>(std::max(0.0f, std::ceil(lateReverbCrossfadeTime*context.samplingFrequency()) )) };
 
   // The maximum number of late filter recalculations per period.
   std::size_t const cLateFilterUpdatesPerPeriod( tree.get<std::size_t>( "lateReverbFilterUpdatesPerPeriod", 1 ));
@@ -177,19 +184,37 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                               0.0f, 0.0f );
 
   // A single late reverb filter for each object, which are routed (summed) to a single output. 
-    mLateReverbFilter.reset( new rcl::CrossfadingFirFilterMatrix(context,
-                                                     "lateReverbFilter",
-                                                     this,
-                                                     maxNumReverbObjects,
-                                                     1,
-                                                     lateReverbFilterLengthSamples,
-                                                     maxNumReverbObjects,
-                                                     maxNumReverbObjects,
-                                                     mTransitionSamplesSize,
-                                                     efl::BasicMatrix<SampleType>(), // No initial filters provided.
-                                                     allToOneRouting( maxNumReverbObjects ),
-                                                     rcl::CrossfadingFirFilterMatrix::ControlPortConfig::Filters, "default"
-                                                    ));
+  if( lateReverbCrossfadeSamples > 0 )
+  {
+    mLateReverbFilter.reset(new rcl::CrossfadingFirFilterMatrix(context,
+                             "lateReverbFilter",
+                              this,
+                              maxNumReverbObjects,
+                              1,
+                              lateReverbFilterLengthSamples,
+                              maxNumReverbObjects,
+                              maxNumReverbObjects,
+                              lateReverbCrossfadeSamples,
+                              efl::BasicMatrix<SampleType>(), // No initial filters provided.
+                              allToOneRouting(maxNumReverbObjects),
+                              rcl::CrossfadingFirFilterMatrix::ControlPortConfig::Filters, "default"
+                             ));
+  }
+  else
+  {
+    mLateReverbFilter.reset(new rcl::FirFilterMatrix(context,
+                             "lateReverbFilter",
+                             this,
+                             maxNumReverbObjects,
+                             1,
+                             lateReverbFilterLengthSamples,
+                             maxNumReverbObjects,
+                             maxNumReverbObjects,
+                            efl::BasicMatrix<SampleType>(), // No initial filters provided.
+                            allToOneRouting(maxNumReverbObjects),
+                            rcl::FirFilterMatrix::ControlPortConfig::Filters, "default"
+    ));
+  }
 
   // Create #loudspeakers decorrelated signals from a single, each filtered with an individual decorrelation filter
   mLateDiffusionFilter.reset(new rcl::FirFilterMatrix(context, "decorrelationFilter", this, 

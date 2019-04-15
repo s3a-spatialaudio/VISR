@@ -236,7 +236,7 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
   {
     mReverbRenderer.reset( new reverbobject::ReverbObjectRenderer( context, "ReverbObjectRenderer", this,
                                                                    reverbConfig, loudspeakerConfiguration,
-                                                                   numberOfInputs , 72000 ) );
+                                                                   numberOfInputs ) );
 
     audioConnection( mObjectEq.audioPort("out"), mReverbRenderer->audioPort("in") );
     char const * diffuseInPort = frequencyDependentPanning ? "in3" : "in2";
