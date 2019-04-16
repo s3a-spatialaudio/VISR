@@ -62,6 +62,7 @@ namespace // unnamed
   {
     { "default", paInDevelopment }, // we use this reserved type for the value "default"
     { "DirectSound", paDirectSound },
+    { "MME", paMME },
     { "ASIO", paASIO },
     { "SoundManager", paSoundManager },
     { "CoreAudio", paCoreAudio },
@@ -142,13 +143,10 @@ namespace // unnamed
     
     std::size_t const mNumPlaybackChannels;
     std::size_t const mPeriodSize;
-    std::size_t mSampleRate;
-    
-    
+    std::size_t const mSampleRate;
+
     Config::SampleFormat::Type mSampleFormat;
-    //            std::string mSampleFormat;
-    
-    
+
     bool mInterleaved;
     
     std::string mHostApiName;
@@ -181,7 +179,100 @@ namespace // unnamed
   
   /******************************************************************************/
   /* Implementation of the PortaudioInterface::Impl class                       */
-  
+
+  namespace // unnamed
+  {
+    /**
+     * Return a list of audio devices that have at least minChannels channels in the specified direction.
+     */
+    std::string listDeviceNames( PaHostApiIndex const hostApiIndex,
+                                 bool isInput,
+                                 std::size_t minChannels = 1)
+    {
+      // Prepare a list of devices that have at least one output channel in the given direction.
+      std::stringstream deviceList;
+      PaHostApiInfo const * hostApiInfo = Pa_GetHostApiInfo(hostApiIndex);
+      PaDeviceIndex const numDevices = hostApiInfo->deviceCount;
+      bool empty{ true };
+      for (PaDeviceIndex idx(0); idx < numDevices; ++idx)
+      {
+        PaDeviceIndex const globalIdx = Pa_HostApiDeviceIndexToDeviceIndex(hostApiIndex, idx);
+        PaDeviceInfo const * info = Pa_GetDeviceInfo(globalIdx);
+        if ((isInput and info->maxInputChannels >= 1) or ((not isInput) and info->maxOutputChannels >= 1))
+        {
+          if( empty )
+          {
+            empty = false;
+          }
+          else
+          {
+            deviceList << ", ";
+          }
+          deviceList << "\"" << info->name << "\"";
+        }
+      }
+      return deviceList.str();
+    }
+
+    /**
+     * Find a device index with a given name and direction.
+     * If the parameter \p is left empty, return the default device for the given host api and direction.
+     * @throw std::invalid_argument if no device with this name exists.
+     * @throw std::invalid_argument if the device does not provide the requested number of channels.
+     */
+    PaDeviceIndex findDevice( std::string const & name,
+                              PaHostApiIndex const hostApiIndex,
+                              std::size_t minChannels,
+                              bool isInput )
+    {
+      PaHostApiInfo const * hostApiInfo = Pa_GetHostApiInfo(hostApiIndex);
+      PaDeviceIndex deviceIdx = paNoDevice;
+      bool const useDefault = name.empty();
+      if( useDefault )
+      {
+        deviceIdx = isInput ? hostApiInfo->defaultInputDevice 
+                            : hostApiInfo->defaultOutputDevice;
+      }
+      else
+      {
+        PaDeviceIndex const numDevices = hostApiInfo->deviceCount;
+        PaDeviceInfo const * info{ nullptr };
+        {
+          for (PaDeviceIndex idx(0); idx < numDevices; ++idx)
+          {
+            PaDeviceIndex const globalIdx = Pa_HostApiDeviceIndexToDeviceIndex(hostApiIndex, idx);
+            PaDeviceInfo const * info = Pa_GetDeviceInfo(globalIdx);
+            // Compare only up to the length of the device name returned by PortAudio.
+            // A device name is considered as matching if it's equal up to that length.
+            // This is done because PortAudio sometimes truncates its device names.
+            if (std::strncmp(name.c_str(), info->name, std::strlen(info->name) ) == 0)
+            {
+              deviceIdx = idx;
+              break;
+            }
+          }
+        }
+      }
+      if( deviceIdx == paNoDevice )
+      {
+        // We list all devices that have at least 1 channel in the specified direction (minChannels=1)
+        std::string const deviceNames = listDeviceNames(hostApiIndex, isInput, 1 /*minChannels*/);
+        throw std::invalid_argument(detail::composeMessageString("PortAudioInterface: ", isInput ? "Input" : "Output", " device with name \"",
+          name, "\" not found. Admissible devices are: ", deviceNames));
+      }
+      PaDeviceInfo const * deviceInfo = Pa_GetDeviceInfo(deviceIdx);
+      std::size_t const numChannels = isInput ? deviceInfo->maxInputChannels : deviceInfo->maxOutputChannels;
+      if (numChannels < minChannels)
+      {
+        throw std::runtime_error(detail::composeMessageString("PortAudio device \"", deviceInfo->name,
+          useDefault ? " (default) " : "",
+          "\" has too few ", isInput ? "input" : "output", " channels (", numChannels, ")."));
+      }
+      return deviceIdx;
+    }
+
+  } // unnamed namespace
+
   PortaudioInterface::Impl::Impl( Configuration const & baseConfig, std::string const & conf )
   : mNumCaptureChannels( baseConfig.numCaptureChannels() )
   , mNumPlaybackChannels( baseConfig.numPlaybackChannels() )
@@ -243,22 +334,16 @@ namespace // unnamed
     {
       throw std::logic_error( "PortAudioInterface: The returned API index exceeds the number of APIs" );
     }
-    const PaHostApiInfo* apiInfo = Pa_GetHostApiInfo( hostApiIdx );
-    
-    // For the moment, use the default device for input and output.
-    // PaDeviceIndex const inDeviceIdx = Pa_GetDefaultInputDevice();
-    PaDeviceIndex const inDeviceIdx = apiInfo->defaultInputDevice;
-    if( (mNumCaptureChannels > 0) && (inDeviceIdx == paNoDevice) )
-    {
-      throw std::invalid_argument( "No valid default input device found." );
-    }
-    // PaDeviceIndex const outDeviceIdx = Pa_GetDefaultOutputDevice( );
-    PaDeviceIndex const outDeviceIdx = apiInfo->defaultOutputDevice;
-    if( (mNumPlaybackChannels > 0) && (outDeviceIdx == paNoDevice) )
-    {
-      throw std::invalid_argument( "No valid default output device found." );
-    }
-    
+
+    PaDeviceIndex const inDeviceIdx = findDevice(config.mInputDeviceName,
+      hostApiIdx,
+      mNumCaptureChannels,
+      true /*isInput*/);
+    PaDeviceIndex const outDeviceIdx = findDevice(config.mOutputDeviceName,
+      hostApiIdx,
+      mNumPlaybackChannels,
+      false /*isInput*/ );
+
     PaSampleFormat const cPaSampleFormat = translateSampleFormat( mSampleFormat, mInterleaved );
     
     // Create input and output parameters
@@ -307,7 +392,8 @@ namespace // unnamed
   }
   
   
-  PortaudioInterface::Config PortaudioInterface::Impl::parseSpecificConf( std::string const & config ){
+  PortaudioInterface::Config PortaudioInterface::Impl::parseSpecificConf( std::string const & config )
+  {
     std::stringstream stream(config.empty() ? "{}" : config ); // Cope with empty optional configs (the default)
     //            std::cout<< "STREAM: "<<stream<<std::endl;
     boost::property_tree::ptree tree;
@@ -317,39 +403,19 @@ namespace // unnamed
     }
     catch( std::exception const & ex )
     {
-      throw std::invalid_argument( std::string( "Error while parsing a json portaudio configuration string: " ) + ex.what( ) );
+      throw std::invalid_argument( std::string( "Error while parsing a json portaudio configuration string: ") + ex.what() );
     }
-    boost::optional<std::string> sampleF;
-    boost::optional<bool> interl;
-    boost::optional<std::string> mHostA;
-    
-    std::string sampleFormat =  "float32Bit" ;
-    bool interleaved= false;
-    std::string mHostApi="default";
-    
-    
-    sampleF = tree.get_optional<std::string>( "sampleformat" );
-    interl = tree.get_optional<bool>( "interleaved" );
-    mHostA = tree.get_optional<std::string>( "hostapi" );
-    
-    if(sampleF) sampleFormat = *sampleF;
-    if(interl) interleaved = *interl;
-    if(mHostA) mHostApi = *mHostA;
-    
-    return Config(sampleFormat, interleaved, mHostApi);
-    
-    
-    
+
+    std::string const sampleFormat = tree.get<std::string>("sampleformat", "float32Bit" );
+    bool const interleaved = tree.get<bool>("interleaved", false );
+    std::string const mHostApi = tree.get<std::string>("hostapi", "default" );
+
+    Config ret(sampleFormat, interleaved, mHostApi);
+    ret.mInputDeviceName = tree.get<std::string>("inputDevice", std::string() );
+    ret.mOutputDeviceName = tree.get<std::string>("outputDevice", std::string() );
+    return ret;
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   void PortaudioInterface::Impl::start()
   {
     // Todo: do we need an internal state representation and checking?
@@ -495,23 +561,22 @@ namespace // unnamed
   : mImpl( new Impl( baseConfig, config ) )
   {
   }
-  
+
   PortaudioInterface::~PortaudioInterface( )
   {
     // nothing to be done, as all cleanup is performed in the implementation object.
   }
-  
-  
+
   void PortaudioInterface::start()
   {
     mImpl->start();
   }
-  
+
   void PortaudioInterface::stop()
   {
     mImpl->stop();
   }
-  
+
   /*virtual*/ bool
   PortaudioInterface::registerCallback( AudioCallback callback, void* userData )
   {

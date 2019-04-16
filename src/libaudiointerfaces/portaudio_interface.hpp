@@ -95,6 +95,17 @@ public:
      */
     std::string mHostApi;
 
+    /**
+     * Name of the PortAudio input device.
+     * If left empty, the default input for the given host API will be used.
+     */
+    std::string mInputDeviceName;
+
+    /**
+     * Name of the PortAudio output device.
+     * If left empty, the default output for the given host API will be used.
+     */
+    std::string mOutputDeviceName;
   };
 
   using Base = audiointerfaces::AudioInterface;

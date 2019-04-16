@@ -5,10 +5,15 @@
 #include <libvisr/signal_flow_context.hpp>
 
 #include <libefl/db_linear_conversion.hpp>
+#include <libefl/basic_matrix.hpp>
+#include <libefl/vector_functions.hpp>
 
 #include <libpanning/LoudspeakerArray.h>
 
 #include <libpml/empty_parameter_config.hpp>
+
+#include <librbbl/fft_wrapper_factory.hpp>
+#include <librbbl/fft_wrapper_base.hpp>
 
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/crossfading_fir_filter_matrix.hpp>
@@ -16,6 +21,22 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <vector>
+
+// If active, the matrix of generated late reverb decorrelation filters is
+// written into a text file in working directory of the application.
+#define DEBUG_DECORR_FILTER_GENERATION
+
+#ifdef DEBUG_DECORR_FILTER_GENERATION
+#include <iterator>
+#include <fstream>
+#endif
 
 #include <algorithm>
 #include <cmath>
@@ -56,6 +77,62 @@ namespace // unnamed
     }
     return res;
   }
+
+  /**
+   * Create a set of random-phase allpass filters. The frequency response is unity at the frequency grid points, but the phase is unformly
+   * distributed in [-pi,pi].
+   * @param filters The matrix to be filled. Must be set to the desired dimensions beforehand.
+   * @todo Consider promoting this into a general-purpose library function (rbbl or efl).
+   */
+  template<typename DataType>
+  void generateRandomPhaseAllpass(efl::BasicMatrix<DataType> & filters)
+  {
+    std::size_t const numFilters{ filters.numberOfRows() };
+    std::size_t const filterLength{ filters.numberOfColumns() };
+    std::size_t const freqResponseSize{ filterLength / 2 + 1 }; // Frequency
+
+    std::vector<std::complex<DataType> > freqResponse(freqResponseSize);
+    // 0-Hz and fs/2 frequency bins must be real-valued for a real-valued
+    freqResponse.front() = std::complex<DataType>{ 1.0f, 0.0 };
+    freqResponse.back() = std::complex<DataType>{ 1.0f, 0.0 };
+
+    std::unique_ptr<rbbl::FftWrapperBase<DataType> >  fft
+      = rbbl::FftWrapperFactory<DataType>::create("default", filterLength, 0 /*no alignment specified*/);
+    DataType const scaleFactor{ static_cast<DataType>(1.0) / (static_cast<DataType>(filterLength) * fft->inverseScalingFactor()) };
+
+    boost::random::mt19937 gen;
+    boost::random::uniform_real_distribution<DataType> uniformPhaseGen{ -boost::math::constants::pi<DataType>(), boost::math::constants::pi<DataType>() };
+
+#ifdef DEBUG_DECORR_FILTER_GENERATION
+    std::stringstream fileName;
+    fileName << "leta_decorrelation_filters.dat";
+    std::ofstream out(fileName.str(), std::ios_base::out);
+#endif
+
+    for (std::size_t filterIdx{ 0 }; filterIdx < numFilters; ++filterIdx)
+    {
+      std::generate( freqResponse.begin()+1, freqResponse.end()-1,
+        [&]()
+        {
+          DataType const ang{ uniformPhaseGen(gen) };
+          std::complex<DataType> const val{ std::cos(ang), std::sin(ang) };
+          return val;
+        }
+      );
+      fft->inverseTransform( &freqResponse[0], filters.row(filterIdx));
+      efl::ErrorCode const res = efl::vectorMultiplyConstantInplace<DataType>( scaleFactor, filters.row(filterIdx), filterLength, 0/*no alignment*/);
+      if (res != efl::noError)
+      {
+        throw std::runtime_error(detail::composeMessageString("Error creating an random-phase allpass:", efl::errorMessage(res) ) );
+      }
+
+#ifdef DEBUG_DECORR_FILTER_GENERATION
+      std::copy(filters.row(filterIdx), filters.row(filterIdx) + filterLength, std::ostream_iterator<DataType>(out, " "));
+      out << "\n";
+#endif
+    }
+  }
+
 } // unnamed namespace
 
 ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
@@ -119,9 +196,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   pml::MatrixParameter<SampleType> lateDecorrelationFilters(cVectorAlignmentSamples );
     if( lateReverbDecorrFilterName.empty() )
     {
-      // The convolution engine requires at least one filter block.
-      lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), period() );
-      lateDecorrelationFilters.zeroFill();
+      lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), 512 ); // default filter length
+      generateRandomPhaseAllpass( lateDecorrelationFilters );
     }
     else
     {

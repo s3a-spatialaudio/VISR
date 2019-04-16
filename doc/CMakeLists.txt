@@ -116,11 +116,11 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
                -q
                -b html
                -c ${outputDir}/html
-               -d ${outputDir}/cache
+               -d ${outputDir}/html-cache
                 ${sourceDir}
                 ${outputDir}/html
     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
-    BYPRODUCTS ${outputDir}/cache
+    BYPRODUCTS ${outputDir}/html-cache
     COMMENT "HTML generation for target ${targetName}-html."
     )
   else( BUILD_PYTHON_BINDINGS )
@@ -133,11 +133,11 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
                -q
                -b html
                -c ${outputDir}/html
-               -d ${outputDir}/cache
+               -d ${outputDir}/html-cache
                 ${sourceDir}
                 ${outputDir}/html
     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
-    BYPRODUCTS ${outputDir}/cache
+    BYPRODUCTS ${outputDir}/html-cache
     COMMENT "HTML generation for target ${targetName}-html."
     )
   endif( BUILD_PYTHON_BINDINGS )
@@ -164,7 +164,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
                -q
                -b latex
                -c ${outputDir}/latex
-               -d ${outputDir}/cache
+               -d ${outputDir}/latex-cache
                 ${sourceDir}
                 ${outputDir}/latex
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
@@ -172,7 +172,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/latex
-    BYPRODUCTS ${outputDir}/cache ${outputDir}/latex
+    BYPRODUCTS ${outputDir}/latex-cache ${outputDir}/latex
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
   else( BUILD_PYTHON_BINDINGS )
@@ -184,7 +184,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
                -q
                -b latex
                -c ${outputDir}/latex
-               -d ${outputDir}/cache
+               -d ${outputDir}/latex-cache
                 ${sourceDir}
                 ${outputDir}/latex
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
@@ -192,7 +192,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/latex
-    BYPRODUCTS ${outputDir}/cache ${outputDir}/latex
+    BYPRODUCTS ${outputDir}/latex-cache ${outputDir}/latex
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
   endif( BUILD_PYTHON_BINDINGS )

@@ -16,12 +16,12 @@ namespace visr
 {
 namespace rbbl
 {
-namespace ParametricIirCoefficientCalculator
-{
 
-template< typename CoefficientType >
-BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
-                                                             CoefficientType samplingFrequency )
+template< typename CoefficientType > 
+BiquadCoefficient<CoefficientType> 
+ParametricIirCoefficientCalculator::
+calculateIirCoefficients( ParametricIirCoefficient< CoefficientType> const & param,
+                                                    CoefficientType samplingFrequency )
 {
   BiquadCoefficient<CoefficientType> res;
   calculateIirCoefficients( param, res, samplingFrequency );
@@ -29,10 +29,20 @@ BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoeffi
   return res;
 }
 
-template< typename T > VISR_RBBL_LIBRARY_SYMBOL
-void calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
-                               BiquadCoefficient<T> & coeffs,
-                               T samplingFrequency )
+// Explicit instantiations
+template VISR_RBBL_LIBRARY_SYMBOL
+BiquadCoefficient<float> ParametricIirCoefficientCalculator::
+calculateIirCoefficients<float>(ParametricIirCoefficient<float> const &, float);
+template VISR_RBBL_LIBRARY_SYMBOL
+BiquadCoefficient<double> ParametricIirCoefficientCalculator::
+calculateIirCoefficients<double>(ParametricIirCoefficient<double> const &, double);
+
+
+template< typename T >
+void ParametricIirCoefficientCalculator::
+calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
+                          BiquadCoefficient<T> & coeffs,
+                          T samplingFrequency )
 {
   T const w0 = static_cast<T>(2.0) * boost::math::constants::pi<T>()*param.frequency() / samplingFrequency;
   T const alpha = std::sin( w0 ) / (static_cast<T>(2.0) * param.quality() );
@@ -178,16 +188,18 @@ void calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
 }
 
 template  VISR_RBBL_LIBRARY_SYMBOL
-void calculateIirCoefficients<float>( ParametricIirCoefficient<float> const &,
-                                      BiquadCoefficient<float> &, float );
+void ParametricIirCoefficientCalculator::
+calculateIirCoefficients<float>( ParametricIirCoefficient<float> const &,
+                                 BiquadCoefficient<float> &, float );
 template  VISR_RBBL_LIBRARY_SYMBOL
-void calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
-                                       BiquadCoefficient<double> &, double );
+void ParametricIirCoefficientCalculator::
+calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
+                                  BiquadCoefficient<double> &, double );
 
 template< typename CoefficientType >
-void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
-  BiquadCoefficientList<CoefficientType> & coeffs,
-  CoefficientType samplingFrequency )
+void ParametricIirCoefficientCalculator::calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
+                                                                   BiquadCoefficientList<CoefficientType> & coeffs,
+                                                                   CoefficientType samplingFrequency )
 {
   if( params.size() > coeffs.size() )
   {
@@ -199,12 +211,12 @@ void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> con
   std::fill( it, coeffs.end(), BiquadCoefficient<CoefficientType>() );
 }
 
-template VISR_RBBL_LIBRARY_SYMBOL void
+template VISR_RBBL_LIBRARY_SYMBOL 
+void ParametricIirCoefficientCalculator::
 calculateIirCoefficients<float>( ParametricIirCoefficientList<float> const &, BiquadCoefficientList<float> &, float );
-template VISR_RBBL_LIBRARY_SYMBOL void
+template VISR_RBBL_LIBRARY_SYMBOL 
+void ParametricIirCoefficientCalculator::
 calculateIirCoefficients<double>( ParametricIirCoefficientList<double> const &, BiquadCoefficientList<double> &, double );
 
-
-} // ParametricIirCoefficientCalculator
 } // namespace rbbl
 } // namespace visr

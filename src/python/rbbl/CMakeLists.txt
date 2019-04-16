@@ -9,6 +9,8 @@ interpolating_convolver_uniform.cpp
 interpolation_parameter.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
+parametric_iir_coefficient.cpp
+parametric_iir_coefficient_calculator.cpp
 sparse_gain_routing.cpp
 rbbl.cpp
 )
