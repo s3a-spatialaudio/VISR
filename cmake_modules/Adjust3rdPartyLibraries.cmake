@@ -1,5 +1,20 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+
+function(fix_rpath libpath )
+  get_filename_component( libname ${${libpath}} NAME )
+  set (EXECUTE_COMMAND  cp ${${libpath}} ${PROJECT_BINARY_DIR}/3rd/${libname})
+  execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+  set (EXECUTE_COMMAND  chmod 777 ${PROJECT_BINARY_DIR}/3rd/${libname})
+  execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+  get_filename_component( libname ${${libpath}} NAME )
+  set( ${libpath} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}/${libname})
+  set( ${libpath} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}/${libname} PARENT_SCOPE )
+  set (EXECUTE_COMMAND ${CMAKE_INSTALL_NAME_TOOL} -id @rpath/${libname} ${${libpath}})
+  message( STATUS " output " ${libname} ": " ${${libpath}} )
+  execute_process(COMMAND ${EXECUTE_COMMAND} RESULT_VARIABLE rv)
+endfunction()
+
 # Copy a file to a destination folder and set permissions suitable for a shared libary
 function( copyLibrary libName targetDir )
   # message( STATUS "copyLibrary: " ${libName} " " ${targetDir} )
@@ -25,7 +40,7 @@ endfunction()
 
 function( fixBoostLibrary BOOSTLIB )
   get_target_property( LIBLOCATION Boost::${BOOSTLIB} IMPORTED_LOCATION_RELEASE )
-  message( STATUS "lib: " ${BOOSTLIB} " liblocation: " ${LIBLOCATION} )
+  # message( STATUS "lib: " ${BOOSTLIB} " liblocation: " ${LIBLOCATION} )
   get_filename_component( LIBREALPATH ${LIBLOCATION} REALPATH)
   fix_rpath( LIBREALPATH )
   get_filename_component( LIBNAME ${LIBREALPATH} NAME )
