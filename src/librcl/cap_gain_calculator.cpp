@@ -184,6 +184,8 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects,
     }
 //      std::cout<<"]"<<std::endl;
   }
+    
+    //if (rand() % 256 == 1) printf("gains obj0 %f %f\n", gainMatrix(0,0), gainMatrix(1,0) );
 }
 
 } // namespace rcl
