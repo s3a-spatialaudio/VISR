@@ -166,7 +166,7 @@ namespace panning
 
    
       // Calc speaker positions relative to listener.
-      // If the array is infinite don't subtract listener position
+      // If the array is finite subtract the listener position
       if (!mArrayIsInfinite) {
           l1X = l1X - mListenerPos[0];
           l1Y = l1Y - mListenerPos[1];
@@ -247,7 +247,8 @@ namespace panning
     y = posY;
     z = posZ;
     
-    if (1)   //! if( isInfinite )  should be if ( !mSource[i].isInfinite )
+    // If source is finite subtract the listener position
+    if (1)   // if ( !mSource[i].isInfinite )     //! Is mSource[i].isInfinite set correctly?
     {
       x -= mListenerPos[0];
       y -= mListenerPos[1];
@@ -324,11 +325,11 @@ namespace panning
 //    mGain[l2] = std::abs(g2);
       //if (g1<0) g1 = -g1;
       //if (g1<0) g1 = -g1;
-     mGain[l1] = g1;
-     mGain[l2] = g2;
+    mGain[l1] = g1;
+    mGain[l2] = g2;
 
-      if( !mArrayIs2D )
-      mGain[l3] = g3;     // l3 undefined in 2D case
+    if( !mArrayIs2D )
+     mGain[l3] = g3;     // l3 undefined in 2D case
       
       
 #ifdef VBAP_DEBUG_MESSAGES

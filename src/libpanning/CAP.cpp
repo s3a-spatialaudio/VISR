@@ -2,6 +2,8 @@
 //  CAP.h
 //  Created by Dylan Menzies on 24/1/2018.
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
+//  d.menzies@soton.ac.uk
+//  dylan.menzies1@gmail.com
 //
 //  Minimum energy Multichannel Compensated Amplitude Panning
 //  Panning compensated for head orientation, valid in ITD frequency range ~(0,1000)Hz
@@ -50,6 +52,8 @@ int CAP::calcGains(){
     
     
     XYZ & rL = m_listenerAuralAxis; // assume normalised.
+    
+    // printf("m_listenerAuralAxis %f %f %f\n", rL.x, rL.y, rL.z);
     
     if (n >= 3) { // Energy minimization
         
@@ -124,6 +128,8 @@ int CAP::calcGains(){
             
             rI.normalise();
             
+            // if (j==2) printf("%f %f %f\n", rI.x, rI.y, rI.z); // gains for one object
+            
             XYZ rt = rI;
             rt.minus(r[1]);
             Afloat g1 = rL.dot(rt);
@@ -188,10 +194,10 @@ int CAP::calcGains(){
                 g2 = g2 * f;
             }
             
-            // if (j==0) printf("%f %f\n", g1, g2);    //printf("%f\n", f);
+            // if (j==2) printf("%f %f\n", g1, g2); // gains for one object
             
             
-            // Latency test
+            // use for latency test
 //            if ( rL.z > 0 ) {
 //                g1 = 1;
 //                g2 = 1;
@@ -205,28 +211,6 @@ int CAP::calcGains(){
             m_gain(j, 0) = g1;
             m_gain(j, 1) = g2;
             
-            
-            
-            
-                      
-//            Matlab:
-//
-//            g(1) = (rL * (rI - r(2,:))');
-//            g(2) = -(rL * (rI - r(1,:))');
-//
-//             d = abs(g(1)) + abs(g(2)); % simple, no control over max gains
-//             % note: gain signs are both reversed for reverse head direction, but this makes no
-//             % difference to image
-//
-//             d = g(1) + g(2);
-//             d = abs(d);
-//             if (d < 0.2) d = 0.2;   % controllable max gains
-//             end
-//             % note: gain signs are both reversed for reverse head direction, but this makes no
-//             % difference to image
-//
-//             g(1) = g(1) / d;
-//             g(2) = g(2) / d;
             
         }
     }
@@ -250,13 +234,13 @@ int CAP::setListenerOrientation(Afloat yaw, Afloat pitch, Afloat roll, bool zero
         
         
 //#ifdef CAP_DEBUG_MESSAGES
-//        printf("setListenerOrientation ypr %f %f %f\n", yaw, pitch, roll);
+//      printf("setListenerOrientation ypr %f %f %f\n", yaw, pitch, roll);
 //#endif
         
         // Convert to radians. !But shouldn't these be in radians already?
-        yaw = yaw * boost::math::constants::degree<Afloat>();
-        pitch = pitch * boost::math::constants::degree<Afloat>();
-        roll = roll * boost::math::constants::degree<Afloat>();
+        //yaw = yaw * boost::math::constants::degree<Afloat>();
+        //pitch = pitch * boost::math::constants::degree<Afloat>();
+        //roll = roll * boost::math::constants::degree<Afloat>();
         
         
         Afloat cy = cos(yaw);
@@ -268,24 +252,20 @@ int CAP::setListenerOrientation(Afloat yaw, Afloat pitch, Afloat roll, bool zero
         Afloat sr = sin(roll);
 
     
-        // For general y p r aligned in Vive frame.
+    
+        // For Vive tracking system
         // m_listenerAuralAxis.set( cy*sp*sr-sy*cr, sy*sp*sr+cy*cr, cp*sr ); // standard
     
         m_listenerAuralAxis.set( cy*sp*sr-sy*cr, sy*sp*sr+cy*cr, -cp*sr );  // modified for -p, -r
     
-        //printf("AuralAxis %8.4f %8.4f %8.4f\n", cy*sp*sr-sy*cr, sy*sp*sr+cy*cr, -cp*sr  );
-        
+        //printf("m_listenerAuralAxis %8.4f %8.4f %8.4f\n", m_listenerAuralAxis.x, m_listenerAuralAxis.y, m_listenerAuralAxis.z);
+    
+    
     
         // Kinect - Sparkfun IMU tracking system
         // m_listenerAuralAxis.set( -sy*cp, cy*cp, -sp );
-        
-        
-        // Vive tracker system  R(0:2,0) is the roll axis = x axis in VISR coords
-        // m_listenerAuralAxis.set( -sp, cy*cp, sy*cp );
-        // printf("AuralAxis %8.4f %8.4f %8.4f\n", -sp, cy*cp, sy*cp );
     
-    
-    
+
     
         
         // // Experimental calibration stuff, double take allowing for arbitrary orientation of tracker on hat.
