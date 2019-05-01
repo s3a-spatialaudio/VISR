@@ -75,9 +75,7 @@ All standalone applications provided with the VISR provide a common set of comma
 
   .. code-block:: json
 
-     {
-       "hostapi": "WASAPI"
-     }
+     { "hostapi": "WASAPI" }
 
   and passed as
 
@@ -776,7 +774,7 @@ for example:
     "interleaved": "...",
     "hostapi" : "...",
     "inputDevice": "...",
-    "outputDevice": "
+    "outputDevice": "..."
    }
 
 .. note:: When used on the command line using the :code:`--audio-ifc-options` argument, apply the quotation and escaping as described in Section :ref:`using_standalone_renderers_common_options`.
