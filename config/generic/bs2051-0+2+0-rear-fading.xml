@@ -1,0 +1,15 @@
+<panningConfiguration dimension="2">
+  <!--Defined in ITU-R BS-2051 as system A (stereo), energy-discarding virtual loudspeaker at the rear, no subwoofers.-->
+  <loudspeaker id="M+030" channel="1">
+    <polar az="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="2">
+    <polar az="-30.0" r="1.0"/>
+  </loudspeaker>
+  <virtualspeaker id="rear">
+    <polar az="180.0" r="1.0"/>
+  </virtualspeaker>
+  <triplet l1="M+030" l2="rear"/>
+  <triplet l1="M-030" l2="rear"/>
+  <triplet l1="M-030" l2="M+030"/>
+</panningConfiguration>

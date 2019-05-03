@@ -1,6 +1,0 @@
-C:/work/uoswork/visr/build/CMakeFiles/ALL_BUILD.dir
-C:/work/uoswork/visr/build/CMakeFiles/ZERO_CHECK.dir
-C:/work/uoswork/visr/build/libefl/CMakeFiles/efl.dir
-C:/work/uoswork/visr/build/libril/CMakeFiles/ril.dir
-C:/work/uoswork/visr/build/librrl/CMakeFiles/rrl.dir
-C:/work/uoswork/visr/build/apps/vbap_renderer/CMakeFiles/vbap_renderer.dir

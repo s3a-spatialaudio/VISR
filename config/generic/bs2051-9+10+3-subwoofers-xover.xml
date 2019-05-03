@@ -1,0 +1,134 @@
+<panningConfiguration dimension="3">
+  <!--Defined in ITU-R BS-2051 as system H, two subwoofers and integrated crossover.-->
+  <outputEqConfiguration type="iir" numberOfBiquads="1">
+    <filterSpec name="speakers">
+      <biquad a1="-1.9688283" a2="0.96907117" b0="-0.98447486" b1="1.9689497" b2="-0.98447486"/>
+    </filterSpec>
+    <filterSpec name="subwoofer">
+      <biquad a1="-1.9688283" a2="0.96907117" b0="6.0729856e-05" b1="0.00012145971" b2="6.0729856e-05"/>
+    </filterSpec>
+  </outputEqConfiguration>
+  <loudspeaker id="M+060" channel="1" eq="speakers">
+    <polar az="60.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-060" channel="2" eq="speakers">
+    <polar az="-60.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+000" channel="3" eq="speakers">
+    <polar az="0.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+135" channel="5" eq="speakers">
+    <polar az="135.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-135" channel="6" eq="speakers">
+    <polar az="-135.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+030" channel="7" eq="speakers">
+    <polar az="30.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="8" eq="speakers">
+    <polar az="-30.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+180" channel="9" eq="speakers">
+    <polar az="180.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+090" channel="11" eq="speakers">
+    <polar az="90.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-090" channel="12" eq="speakers">
+    <polar az="-90.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U+045" channel="13" eq="speakers">
+    <polar az="45.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U-045" channel="14" eq="speakers">
+    <polar az="-45.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U+000" channel="15" eq="speakers">
+    <polar az="0.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="T+000" channel="16" eq="speakers">
+    <polar az="0.0" el="90.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U+135" channel="17" eq="speakers">
+    <polar az="135.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U-135" channel="18" eq="speakers">
+    <polar az="-135.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U+090" channel="19" eq="speakers">
+    <polar az="90.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U-090" channel="20" eq="speakers">
+    <polar az="-90.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U+180" channel="21" eq="speakers">
+    <polar az="180.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="B+000" channel="22" eq="speakers">
+    <polar az="0.0" el="-30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="B+045" channel="23" eq="speakers">
+    <polar az="45.0" el="-30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="B-045" channel="24" eq="speakers">
+    <polar az="-45.0" el="-30.0" r="1.0"/>
+  </loudspeaker>
+  <virtualspeaker id="VotD">
+    <polar az="0.0" el="-90.0" r="1.0"/>
+    <route lspId="B+000" gainDB="-20.0"/>
+    <route lspId="B+045" gainDB="-20.0"/>
+    <route lspId="B-045" gainDB="-20.0"/>
+    <route lspId="M+060" gainDB="-20.0"/>
+    <route lspId="M-060" gainDB="-20.0"/>
+    <route lspId="M+090" gainDB="-20.0"/>
+    <route lspId="M-090" gainDB="-20.0"/>
+    <route lspId="M+135" gainDB="-20.0"/>
+    <route lspId="M-135" gainDB="-20.0"/>
+    <route lspId="M+180" gainDB="-20.0"/>
+  </virtualspeaker>
+  <triplet l1="B-045" l2="VotD" l3="M-090"/>
+  <triplet l1="U+180" l2="U-135" l3="T+000"/>
+  <triplet l1="M-135" l2="VotD" l3="M+180"/>
+  <triplet l1="M-135" l2="VotD" l3="M-090"/>
+  <triplet l1="U+000" l2="U-045" l3="T+000"/>
+  <triplet l1="U-090" l2="U-135" l3="T+000"/>
+  <triplet l1="U-090" l2="U-045" l3="T+000"/>
+  <triplet l1="B+000" l2="B-045" l3="VotD"/>
+  <triplet l1="M-030" l2="U+000" l3="M+000"/>
+  <triplet l1="M-030" l2="U+000" l3="U-045"/>
+  <triplet l1="M-030" l2="B+000" l3="M+000"/>
+  <triplet l1="M-030" l2="B+000" l3="B-045"/>
+  <triplet l1="M+135" l2="VotD" l3="M+180"/>
+  <triplet l1="M+135" l2="M+090" l3="VotD"/>
+  <triplet l1="U+045" l2="U+000" l3="T+000"/>
+  <triplet l1="B+045" l2="M+090" l3="VotD"/>
+  <triplet l1="B+045" l2="B+000" l3="VotD"/>
+  <triplet l1="M-060" l2="M-030" l3="U-045"/>
+  <triplet l1="M-060" l2="U-090" l3="M-090"/>
+  <triplet l1="M-060" l2="U-090" l3="U-045"/>
+  <triplet l1="M-060" l2="B-045" l3="M-090"/>
+  <triplet l1="M-060" l2="M-030" l3="B-045"/>
+  <triplet l1="U+135" l2="U+180" l3="T+000"/>
+  <triplet l1="M+060" l2="B+045" l3="M+090"/>
+  <triplet l1="U+090" l2="M+060" l3="M+090"/>
+  <triplet l1="U+090" l2="M+060" l3="U+045"/>
+  <triplet l1="U+090" l2="U+045" l3="T+000"/>
+  <triplet l1="U+090" l2="U+135" l3="T+000"/>
+  <triplet l1="M+030" l2="M+060" l3="B+045"/>
+  <triplet l1="M+030" l2="B+000" l3="M+000"/>
+  <triplet l1="M+030" l2="B+045" l3="B+000"/>
+  <triplet l1="M+030" l2="M+060" l3="U+045"/>
+  <triplet l1="M+030" l2="U+000" l3="M+000"/>
+  <triplet l1="M+030" l2="U+045" l3="U+000"/>
+  <triplet l1="M-135" l2="U+180" l3="U-135"/>
+  <triplet l1="M-135" l2="U+180" l3="M+180"/>
+  <triplet l1="U-090" l2="M-135" l3="U-135"/>
+  <triplet l1="U-090" l2="M-135" l3="M-090"/>
+  <triplet l1="U+135" l2="U+180" l3="M+180"/>
+  <triplet l1="U+135" l2="M+135" l3="M+180"/>
+  <triplet l1="U+090" l2="U+135" l3="M+135"/>
+  <triplet l1="U+090" l2="M+135" l3="M+090"/>
+  <subwoofer name="subName" channel="4" assignedLoudspeakers="M+060, M+000, M+135, M+030, M+180, M+090, U+045, U+000, T+000, U+135, U+090, U+180, B+000, B+045" eq="subwoofer"/>
+  <subwoofer name="subName" channel="10" assignedLoudspeakers="M-060, M+000, M-135, M-030, M+180, M-090, U-045, U+000, T+000, U-135, U-090, U+180, B+000, B-045" eq="subwoofer"/>
+</panningConfiguration>

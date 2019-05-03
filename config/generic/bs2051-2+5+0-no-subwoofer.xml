@@ -1,0 +1,54 @@
+<panningConfiguration dimension="3">
+  <!--Defined in ITU-R BS-2051 as system C, no subwoofers-->
+  <loudspeaker id="M+030" channel="1">
+    <polar az="30.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="2">
+    <polar az="-30.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+000" channel="3">
+    <polar az="0.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M+110" channel="5">
+    <polar az="110.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-110" channel="6">
+    <polar az="-110.0" el="0.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U+030" channel="7">
+    <polar az="30.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="U-030" channel="8">
+    <polar az="-30.0" el="30.0" r="1.0"/>
+  </loudspeaker>
+  <virtualspeaker id="VoG">
+    <polar az="0.0" el="90.0" r="1.0"/>
+    <route lspId="U+030" gainDB="-12.0412"/>
+    <route lspId="U-030" gainDB="-12.0412"/>
+    <route lspId="M+110" gainDB="-12.0412"/>
+    <route lspId="M-110" gainDB="-12.0412"/>
+  </virtualspeaker>
+  <virtualspeaker id="VotD">
+    <polar az="0.0" el="-90.0" r="1.0"/>
+    <route lspId="M+030" gainDB="-13.9794"/>
+    <route lspId="M-030" gainDB="-13.9794"/>
+    <route lspId="M+000" gainDB="-13.9794"/>
+    <route lspId="M+110" gainDB="-13.9794"/>
+    <route lspId="M-110" gainDB="-13.9794"/>
+  </virtualspeaker>
+  <triplet l1="VoG" l2="M-110" l3="M+110"/>
+  <triplet l1="VotD" l2="M-110" l3="M+110"/>
+  <triplet l1="U+030" l2="VoG" l3="M+110"/>
+  <triplet l1="U-030" l2="VoG" l3="M-110"/>
+  <triplet l1="U-030" l2="U+030" l3="M+000"/>
+  <triplet l1="U-030" l2="U+030" l3="VoG"/>
+  <triplet l1="M+030" l2="U+030" l3="M+110"/>
+  <triplet l1="M+030" l2="U+030" l3="M+000"/>
+  <triplet l1="M+030" l2="VotD" l3="M+110"/>
+  <triplet l1="M+030" l2="VotD" l3="M+000"/>
+  <triplet l1="M-030" l2="U-030" l3="M+000"/>
+  <triplet l1="M-030" l2="U-030" l3="M-110"/>
+  <triplet l1="M-030" l2="VotD" l3="M+000"/>
+  <triplet l1="M-030" l2="VotD" l3="M-110"/>
+  <subwoofer name="subName" channel="4" assignedLoudspeakers="M+030, M-030, M+000, M+110, M-110, U+030, U-030"/>
+</panningConfiguration>

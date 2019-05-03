@@ -1,0 +1,182 @@
+/**
+@page python_support Python support in VISR
+ 
+@tableofcontents
+
+
+@section python_support_overview Python Support Overview
+The VISR framework aims at a seamless integration with Python. This supports four different ways (which can be
+combined arbitrarily):
+ * Controlling VISR signal flows from Python, e.g., starting, pausing and stopping processing.
+ * Simulating the run of signal flows interactively in a Python development environment.
+ * Extending and creating new signal flows by combining existing components in Python
+ * Implementing new components in Python, which can be freely mixed and composed with other components.
+
+This is achieved by providing the core VISR functionality, which is implemented in C++, as a set of Python modules, plus additional Python modules.
+
+This page describes how to use the Python bindings and how to build them on a development machine.
+
+@section python_support_installation_and_setup  Setting up Python
+To use the Python integration, a working Python environment must be installed both on a development system and on systems which use installed VISR binaries.
+ * We highly recommend Python 3 (although the code should compile and run with Python 2 (provided that it is
+built correctly). No testing is performed for that combination.
+ * On Linux, the versions provided by the package manager (python3-dev, python3-*, spyder3) are fine. On
+Windows, we recommend the Anaconda distribution https://www.continuum.io/ (Python 3, 64 Bit).
+On Mac OS X, we also recommend Anaconda. The default distribution of the OS image is outdated (Python 2.7)
+
+When using a VISR installation package, make sure that the Python major and minor version (e.g. Python 3.6) matches that of the installer. Failure to do so will result in errors when loading the external modules.
+
+ 
+@section python_support_setting_up_runtime_env Setting up the runtime environment
+The following steps are required regardless whether the externals were built on the computer itself, or whether they
+were installed using an installation package (differences are noted). The Python modules are located in a directory,
+either within the build directory or the installation root directory.
+ If the VISR framework has been installed using an installation package, the Python modules are in <tt>$VISR_INSTALLATION_ROOT/python</tt>:
+ *  - On Windows: <tt>C:\\Program Files`VISR-X.X.X/python</tt>
+ *  - On Mac OS X: <tt>/Applicatons/VISR-X.X.X-python3.X-Darwin/python</tt>
+ *  - On Linux: <tt>/usr/python/</tt>
+If the code has been built on the present machine, the extensions are located in <tt>$VISR_BUILD_DIRECTORY/python</tt>. In development
+environments that support multiple configurations (e.g., Visual Studio and MacOS XCode), their is a subdirectory Debug/ or Release/ within python.
+Choose the build configuration you want to use (Release/ is typically faster, but does not yield sensible
+information when used with a debugger). This path must be known to Python in order to find these extension
+modules.
+
+To enable the Python interpreter to find the VISR modules, the above path must be contained in the <tt>$PYTHONPATH</tt> environment variable. This is explained below.
+
+In addition, if Python code is to be called from within a non-Python application, e.g, a DAW, Max/MSP or the <tt>python_runner</tt> described below, the environment variable <tt>$PYTHONHOME</tt> must be set to the root of the Python installation (see https://docs.python.org/3/using/cmdline.html#envvar-PYTHONHOME). 
+
+
+ * * On Windows, set <tt>PYTHONPATH</tt> and <tt>PYTHONHOME</tt> in "Control Center"->"System"->"Advanced system settings"->" -
+Environment Variables". Setting it as a user variable is preferred if you want to use the VISR only as the
+current user.
+ * On Linux system, add this line to the file $HOME/.profile
+   @code
+   export PYTHONPATH=<path_to_extension_modules>:$PYTHONPATH
+   @endcode
+
+   The <tt>$PYTHONHOME</tt> can be set in the same way.
+   @code
+   export PYTHONHOME=<path_to_python_installation_root>
+   @endcode
+   However, this will rarely be necessary because on Linux it is advisable in most cases to use the system-provided Python 3 installation. 
+ * * On MacOS X, the safest way to set environment variables to that can also be used from within GUI applications is to load a script file through the <tt>launchctl</tt> mechanism.
+ The following setup procedure works for both MacOS X 10.9 and erlier, and for MacOS X 10.10+.
+  The <tt>VISR_environment_build_install_X.X.X.plist</tt> file listed below is a MacOS X <tt>LaunchAgent</tt> which is activated when the user logs in, and which sets and load the desired variables. If you don't have that file already, create a file with that name and with the following content:
+@code
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>my.startup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>sh</string>
+    <string>-c</string>
+    <string>
+    launchctl setenv PYTHONPATH ..path_to_extension_modules..
+    launchctl setenv PYTHONHOME ${HOME}/anaconda
+    </string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+@endcode
+This configuration file sets:
+*    - <b>PYTHONPATH</b>: <tt>path_to_extension_modules</tt>  
+*    -  <b>PYTHONHOME</b>: <tt>${HOME}/anaconda</tt>
+
+  There are three steps to install the environment variables.
+*    -# (optional) You can change the values of the environment variables in the .plist file if you need them to address different folders. 
+It is not needed if you have already installed the VISR framework with the installer and have installed python's anaconda distribution.
+*    -# Copy <tt>VISR_environment_build_install_X.X.X.plist</tt> into <tt>${HOME}/Library/LaunchAgents</tt>
+*    -# Open the <b>Terminal</b> application from <tt>/Applications/Utilities</tt>
+*    -# Write @code launchctl load VISR_environment_build_install_X.X.X.plist @endcode and press Enter
+This sets the environment variables permanently. Changing the paths within the <tt>.plist</tt> file takes effect after the next reboot.
+To see the effect, it is necessary to close and restart relevant applications (terminal, Spyder, etc.)
+
+Another, operating system-independent, way is to set the module search path within Python. To do so, add the line 
+@code
+import sys
+sys.path.append( ’path_to_visr_python_modules’ )
+@endcode
+to a script. Obviously, that makes it less easy to pass scripts between different places because the paths are hardcoded. On Windows, we must also ensure that the shared libraries (DLLs) used by the Python extensions are in a directory contained in the PATH variable. See @ users)
+
+That is, the <tt>$PATH</tt> variable variable  must contain this directory: <tt>$VISR_INSTALLATION_ROOT/lib</tt> if an installer package has been used, or <tt>$VISR_BUILD_DIRECTORY/lib/{Debug|Release}</tt> if the VISR has been built from the source. Match that the build configuration Debug or Release matches that used in the <tt>$PYTHONPATH</tt> variable.
+
+@section python_support_python_runner Running Python Components as Standalone Application: python_runner
+
+While it is possible to run Python components directly from a Python interpreter, there are also use cases where a signal flow defined in Python is preferably run as a standalone audio application. The application python_runner, installed as part of the VISR package, can be used. This binary is started as a command-line application and runs the specified VISR component as a real-time rendering process using a specified audio interface.
+
+@section python_support_python_runner_cmdline_options  Command line options
+
+The command line arguments are displayed by the –help option:
+@code
+$ ./python_runner --help
+  -h [ --help ]                     Show help and usage information.
+  -v [ --version ]                  Display version information.
+  --option-file arg                 Load options from a file. Can also be used with syntax "@<filename>".
+  -D [ --audio-backend ] arg        The audio backend.
+  --audio-ifc-options arg           Audio interface optional configuration
+  --audio-ifc-option-file arg       Audio interface optional configuration file
+  -f [ --sampling-frequency ] arg   Sampling frequency [Hz]
+  -p [ --period ] arg               Period (blocklength) [Number of samples per
+                                    audio block]
+  -m [ --module-path ] arg          Full path of the Python module to be 
+                                    loaded.
+  -c [ --python-class-name ] arg    Name of the Python class (must be a 
+                                    subclass of visr.Component).
+  -n [ --object-name ] arg          Name of the Python class (must be a 
+                                    subclass of visr.Component).
+  -a [ --positional-arguments ] arg Comma-separated list of positional options 
+                                    passed to the class constructor.
+  -k [ --keyword-arguments ] arg    Comma-separated list of named (keyword) 
+                                    options passed to the class constructor.
+@endcode
+
+Description:
+
+* * <tt>-option-file</tt> (or @[file]) Specify a text file that contains the command line options
+* * <tt>-D</tt> The audio interface to use (e.g., "PortAudio" or "Jack")
+* * <tt>–audio-ifc-options</tt> Interface-dependent set of options provided as a string (typically in JSON format)
+* * <tt>–audio-ifc-option-file</tt> Alternative way to provide interface-specific options within a text file.
+* * <tt>-f</tt> Sampling frequency in Hz
+* * <tt>-m</tt> Full path to the Python module (including file name and extension)
+* * <tt>-c</tt> Name of the Python class to be instantiated. The class has to be defined in the named module, and has to be a subclass of <tt>visr.Component</tt> (atomic or composite).
+* * <tt>-n</tt> Name of the top-level component. Used in status and error messages. Can be chosen freely. Default "Pythonflow"
+* * <tt>-a</tt> Positional (non-keyword) arguments passed to the top-level component. Provided as a Python tuple, i.e, comma-separated values. If there is only one value, it has to be trailed by a comma, otherwise the trailing comma is optional. The whole paremter can be enclosed in quotes, e.g., if it contains spaces.
+* * <tt>-k</tt> Keyword arguments, provided as a Python dictionary. That is, a set of 'key':value pairs separated by commas and  enclosed in brackets: <tt>"{'key1':val1, 'key2':val2, ... }"</tt>. A Python keyword argument sequence <tt>key1=val1, key2=val2, ...</tt> can be straightforwardly converted into a dictionary by quoting the keys, replacing "=" by ":" and enclosing the whole argument in quotes and braces<tt>"{...}"</tt>.
+
+The main limitation of VISR flows started from the <tt>python_runner</tt> is that all constructor parameters must be expressable on the command line. Constructing complex objects, such as reading matrices, which is possible within a Python scripts, cannot be performed.
+One way to work around this limitation is to wrap the signal flow in a new composite component which performs this complex initialisation from arguments that fit into the command line arguments.
+
+@subsection python_support_python_runner_example Example
+
+To start an atomic Python summation component, use
+@code
+python_runner python_runner -m /Applications/VISR-0.9.0/python/templates/pythonAtoms.py -c PythonAdder -D Jack -a 2, -k "{'width': 4}"
+@endcode
+
+
+
+@section building_python_externals Building the Python externals
+To build the code on a development machine, the follwoing options must be set in CMAKE: Activate the option <tt>BUILD_PYTHON_BINDINGS</tt>. After running "Configure", check the settings in the newly appeared group <tt>PYTHON</tt>:
+ * The setting <tt>PYTHON_INCLUDE_DIR</tt> must point to the include directory of the Python distribution.
+Amongst others, this directory must contain the main Python header Python.h. If that
+is not the case, set the entry to this directory. On the development systems, the following directories
+are set:
+   - Linux (Ubuntu 14.04 LTS 64 Bit): <tt>/usr/include/python3.4m</tt>
+   - Windows (Anaconda 64 Bit): <tt>C:/Program Files/Anaconda3/include</tt>
+   - Mac OS (Anaconda): <tt>/Users/&lt;loginname&gt;/anaconda/include/python3.5m</tt>
+   .
+ * The setting <tt>PYTHON_LIBRARY</tt> must point to the main Python library. This file is located within the
+directory root of the installed Python distribution (or in case of Linux, a standard library directory. On our test systems, the file names are as follows:
+   - Linux (Ubuntu 14.04 LTS 64 Bit): <tt>/usr/lib/x86_64-linux-gnu/libpython3.4m.so</tt>
+   - Windows (Anaconda 64 Bit): <tt>C:/Program Files/Anaconda3/libs/python35.lib</tt>
+   - Mac OS (Anaconda): /Users/loginname/anaconda/lib/libpython3.5m.dylib
+   .
+ * In CMake, call "Configure" again and run "Generate"
+ * Build the project (the Python externals are distributed over several targets, so "Build all" is the best option.
+
+*/

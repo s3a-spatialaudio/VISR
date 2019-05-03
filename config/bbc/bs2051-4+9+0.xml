@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<panningConfiguration dimension="3" infinite="false">
+   <loudspeaker channel="8" delay="0" gainDB="0" id="1">
+      <cart x="1.994" y="0" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="9" delay="0" gainDB="0" id="2">
+      <cart x="2.0542" y="-1.186" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="7" delay="0" gainDB="0" id="3">
+      <cart x="2.0542" y="1.186" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="12" delay="0" gainDB="0" id="4">
+      <cart x="1.3985e-16" y="-2.284" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="18" delay="0" gainDB="0" id="5">
+      <cart x="1.3985e-16" y="2.284" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="14" delay="0" gainDB="0" id="6">
+      <cart x="-2.1257" y="-2.1257" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="16" delay="0" gainDB="0" id="7">
+      <cart x="-2.1257" y="2.1257" z="0"/>
+   </loudspeaker>
+   <loudspeaker channel="24" delay="0" gainDB="0" id="8">
+      <cart x="1.0348" y="-1.0348" z="1.2279"/>
+   </loudspeaker>
+   <loudspeaker channel="20" delay="0" gainDB="0" id="9">
+      <cart x="1.0348" y="1.0348" z="1.2279"/>
+   </loudspeaker>
+   <loudspeaker channel="26" delay="0" gainDB="0" id="10">
+      <cart x="-0.5005" y="-1.3751" z="1.2279"/>
+   </loudspeaker>
+   <loudspeaker channel="30" delay="0" gainDB="0" id="11">
+      <cart x="-0.5005" y="1.3751" z="1.2279"/>
+   </loudspeaker>
+   <virtualspeaker id="12">
+      <cart x="7.3479e-17" y="0" z="-1.2"/>
+   </virtualspeaker>
+   <subwoofer assignedLoudspeakers="4, 2, 1, 3, 5, 8, 9" channel="33" delay="0" gainDB="0" weights="0.500000, 1.000000, 1.000000, 1.000000, 0.500000, 1.000000, 1.000000"/>
+   <subwoofer assignedLoudspeakers="4, 6, 7, 5, 10, 11" channel="34" delay="0" gainDB="0" weights="0.500000, 1.000000, 1.000000, 0.500000, 1.000000, 1.000000"/>
+   <triplet l1="1" l2="2" l3="12"/>
+   <triplet l1="1" l2="3" l3="9"/>
+   <triplet l1="1" l2="8" l3="2"/>
+   <triplet l1="1" l2="9" l3="8"/>
+   <triplet l1="1" l2="12" l3="3"/>
+   <triplet l1="2" l2="4" l3="12"/>
+   <triplet l1="2" l2="8" l3="4"/>
+   <triplet l1="3" l2="5" l3="9"/>
+   <triplet l1="3" l2="12" l3="5"/>
+   <triplet l1="4" l2="6" l3="12"/>
+   <triplet l1="4" l2="8" l3="10"/>
+   <triplet l1="4" l2="10" l3="6"/>
+   <triplet l1="5" l2="7" l3="11"/>
+   <triplet l1="5" l2="11" l3="9"/>
+   <triplet l1="5" l2="12" l3="7"/>
+   <triplet l1="6" l2="7" l3="12"/>
+   <triplet l1="6" l2="10" l3="7"/>
+   <triplet l1="7" l2="10" l3="11"/>
+   <triplet l1="8" l2="9" l3="11"/>
+   <triplet l1="8" l2="11" l3="10"/>
+</panningConfiguration>

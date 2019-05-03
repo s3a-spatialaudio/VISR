@@ -1,0 +1,17 @@
+<panningConfiguration dimension="2">
+  <!--Defined in ITU-R BS-2051 as system A (stereo), virtual loudspeaker at the rear routed to the left and right speaker, no subwoofers.-->
+  <loudspeaker id="M+030" channel="1">
+    <polar az="30.0" r="1.0"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="2">
+    <polar az="-30.0" r="1.0"/>
+  </loudspeaker>
+  <virtualspeaker id="rear">
+    <polar az="180.0" r="1.0"/>
+    <route lspId="M+030" gainDB="-6.0206"/>
+    <route lspId="M-030" gainDB="-6.0206"/>
+  </virtualspeaker>
+  <triplet l1="M+030" l2="rear"/>
+  <triplet l1="M-030" l2="rear"/>
+  <triplet l1="M-030" l2="M+030"/>
+</panningConfiguration>

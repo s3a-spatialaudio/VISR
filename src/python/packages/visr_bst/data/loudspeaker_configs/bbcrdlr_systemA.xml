@@ -1,0 +1,16 @@
+<panningConfiguration dimension="2">
+  <loudspeaker id="M+030" channel="1">
+    <polar az="30.0" r="2.37201"/>
+  </loudspeaker>
+  <loudspeaker id="M-030" channel="2">
+    <polar az="-30.0" r="2.37201"/>
+  </loudspeaker>
+  <virtualspeaker id="VotD">
+    <polar az="180.0" r="1.0"/>
+    <route lspId="M+030" gainDB="-6.0206"/>
+    <route lspId="M-030" gainDB="-6.0206"/>
+  </virtualspeaker>
+  <triplet l1="M+030" l2="VotD"/>
+  <triplet l1="M-030" l2="VotD"/>
+  <triplet l1="M-030" l2="M+030"/>
+</panningConfiguration>

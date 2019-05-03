@@ -1,0 +1,56 @@
+/**
+  @page portaudio_audio_interface_configuration PortAudio Audio Interface
+ 
+  @tableofcontents
+ 
+  @section portaudio_interf_conf Audio Interface Configuration
+  The following options can be provided when using PortAudio as our top level component’s Audio Interface:
+
+* * <b>sampleformat</b>: Specifies PortAudio sample format. Possible values are:
+           - <tt>signedInt8Bit</tt>
+           - <tt>unsignedInt8Bit</tt>
+           - <tt>signedInt16Bit</tt>
+           - <tt>unsignedInt16Bit</tt>
+           - <tt>signedInt24Bit</tt>
+           - <tt>unsignedInt24Bit</tt>
+           - <tt>signedInt32Bit</tt>
+           - <tt>unsignedInt32Bit</tt>
+           - <tt>float32Bit</tt> .
+
+* * <b>interleaved</b>: Enable/disable interleaved mode, possible values are <tt>true, false</tt>.
+ 
+* * <b>hostapi</b>t: Used to specify PortAudio backend audio interface. Possible values are:
+           - <tt> default </tt>
+           - <tt> WASAPI </tt> : Supported OS: Windows.
+           - <tt> ASIO </tt> : Supported OS: Windows.
+           - <tt> WDMKS </tt>: Supported OS: Windows.
+           - <tt> DirectSound </tt> : Supported OS: Windows.
+           - <tt> CoreAudio </tt> : Supported OS: MacOs.
+           - <tt> ALSA </tt> : Supported OS: Linux.
+           - <tt> JACK </tt> : Supported OSs: MacOs, Linux. 
+
+Other deprecated or unused backends which are available within PortAudio are <tt>SoundManager(MacOs)</tt>, <tt>OSS(Linux)</tt>, <tt>AL</tt>, <tt>BeOS</tt>, <tt>AudioScienceHPI(Linux)</tt>.
+
+
+@section portaudio_configuration_syntax Configuration Syntax
+  This is the configuration syntax, expressed in json language:
+ 
+@code
+ 
+{
+  "sampleformat": "", 
+  "interleaved": "", 
+  "hostapi" : ""
+}
+@endcode
+
+@section portaudioconfex Configuration Example
+This configuration is an example of usage of PortAudio, with Jack audio interface as backend.
+@code
+{
+  "sampleformat": "float32Bit", 
+  "interleaved": "false", 
+  "hostapi" : "JACK"
+}
+@endcode
+ */

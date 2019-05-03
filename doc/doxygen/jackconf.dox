@@ -1,0 +1,168 @@
+/**
+  @page jack_audio_interface_configuration Jack Audio Interface
+ 
+  @tableofcontents
+ 
+  @section jack_audio_interf_conf Audio Interface Configuration
+  The following options can be provided when using Jack as our top level component’s Audio Interface:
+
+* * <b>clientname</b>: Jack Client name for our top level component.
+* * <b>servername</b>: current Jack Server name, the currently active Jack Server name is chosen if not provided.
+* * <b>autoconnec</b>t: Enable/disable auto connection of all ports, possible values are <tt>true, false</tt>. It can be overridden by setting the same option separately for capture and playback ports, in port configuration.
+* * <b>portconfig</b>: subset of options regarding the configuration and connection of Jack Ports, see following section.
+  
+   @section port_conf Port Configuration
+
+* * <b>capture</b>: Specifies that the following options regard the top level component’s capture ports only
+   - <b>autoconnect</b> : Enable/disable auto connection to an external jack client’s input ports, possible values are <tt>true, false</tt>
+   - <b>port</b>: Jack ports specification
+       - <b>basename</b>: Common name for all top level component’s capture ports
+       - <b>indices</b>:  list of port numbers to append to top level component’s capture port name. It is possible to use Matlab’s colon operator to express a list of numbers in a compact fashion (es."0:4" means appending numbers 0 to 4 to port names)
+       - <b>externalport</b>: Specification of an external jack client to connect to if <tt>autoconnect</tt> is enabled.
+             - <b>client</b>: Name of an external jack client to use as input for our top level component (es. “system")
+             - <b>portname</b>: Common name for all external jack client input ports
+             - <b>indices</b>: List of port numbers that together with <tt> portname </tt> describe existing external jack client input ports. It is possible to use Matlab’s colon operator to express a list of numbers.
+
+* * <b>playback</b>: Specifies that the following options regard the top level component’s playback ports only
+   - <b>autoconnect</b> : Enable/disable auto connection to an external jack client’s output ports, possible values are <tt>true, false</tt>
+   - <b>port</b>: Jack ports specification
+       - <b>basename</b>: Common name for all top level component’s playback ports
+       - <b>indices</b>:  list of port numbers to append to top level component’s playback port name. It is possible to use Matlab’s colon operator to express a list of numbers in a compact fashion (es."0:4" means appending numbers 0 to 4 to port names)
+       - <b>externalport</b>: Specification of an external jack client to connect to if <tt>autoconnect</tt> is enabled.
+             - <b>client</b>: Name of an external jack client to use as output for our top level component (es. “system")
+             - <b>portname</b>: Common name for all external jack client output ports
+             - <b>indices</b>: List of port numbers that together with <tt> portname </tt> describe existing external jack client output ports. It is possible to use Matlab’s colon operator to express a list of numbers.
+  
+
+@section jackaudio_configuration_syntax Configuration Syntax
+  This is the configuration syntax, expressed in json language:
+ 
+@code
+ 
+ {
+     "clientname": "…",
+     "servername": "…",
+     "autoconnect": "…",
+     "portconfig":
+     {
+         "capture":
+         {
+             "autoconnect": "…",
+             "port":
+              [
+                {
+                  "basename": "…",
+                  "indices": "…",
+                  "externalport":
+                   {
+                     "client": "…",
+                     "portname": "…",
+                     "indices": "…"
+                   }
+                },
+              	…
+              ]
+         },
+         "playback":
+         {
+             "autoconnect" : "…",
+             "port":
+              [
+                {
+                  "basename": "…",
+                  "indices": "…",
+                  "externalport":
+                   {
+                     "client": "…",
+                     "portname": "…",
+                     "indices": "…"
+                   }
+                },
+              	…
+              ]
+         }
+     }
+ }
+@endcode
+
+@section jackconfex Configuration Examples
+@subsection simpleex Simple Example 
+This configuration example shows how to auto-connect the ports of our top level component to the default jack client: <tt>system</tt>, specifying which range of ports to connect.
+@code
+{
+  "clientname": "BaseRenderer",
+  "autoconnect" : "true",
+  "portconfig":
+  {
+    "capture":
+    {
+      "port":
+      [{ "externalport" : {"indices": "1:4"} }]
+    },
+    "playback":
+    {
+      "port":
+      [{ "externalport" : {"indices": "5:8"} }]
+    }
+  }
+}
+@endcode
+@subsubsection jack_result_simple Result
+@image html jacksimpleexample.jpeg
+
+
+@subsection completeex Complex Example 
+Follow a more complex example where auto-connection of ports is performed specifying different jack clients and the ranges of ports to be connected are described both for the top level component and for external clients.
+@code
+{
+  "clientname": "BaseRenderer",
+  "servername": "",
+  "autoconnect" : "true",
+  "portconfig":
+  {
+    "capture":
+    {
+      "autoconnect" : "true",
+      "port":
+      [
+        {
+         "basename" : "Baseinput_" ,
+         "indices": "0:1",
+         "externalport" :
+          {
+            "client" : "REAPER",
+            "portname": "out",
+            "indices": "1:2"
+          }
+        },
+        {
+         "basename" : "Baseinput_" ,
+         "indices": "2:3",
+         "externalport" :
+          {
+            "indices": "4:5"
+          }
+         }
+      ]
+    },
+    "playback":
+    {
+      "autoconnect" : "true",
+      "port":
+      [{
+        "basename" : "Baseoutput_" ,
+        "indices": "0:1",
+        "externalport" :
+         {
+          "client" : "system",
+          "portname": "playback_",
+          "indices": "4:5"
+         }
+       }]
+    }
+  }
+}
+@endcode
+@subsubsection jack_result_complex Result
+@image html jackexample.jpeg
+ */

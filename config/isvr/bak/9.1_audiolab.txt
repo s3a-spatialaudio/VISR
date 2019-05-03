@@ -1,0 +1,68 @@
+
+% 9.1 loudspeaker array
+% For the Audio Lab array, University of Southampton
+% Adapted from  ITU-R Rec. BS.2051-0
+% http://www.itu.int/rec/R-REC-BS.2051-0-201402-I
+
+% Orientation
+% x - forward, y - left, z - up. 
+% azimuth (theta) - left from front, elevation (phi) - up from horizontal.
+
+
+% positions
+% id = identity for triangularisation
+% chan = output audio channel
+
+% cartesians
+% (0,0,0) is at the centre of the Audio Lab: 1.95m and 2.35m from the inside bounding surfaces of the frame, and 1.22m from the floor.
+% id	chan	x(m)	y(m)	z(m)
+
+c 1	18	2.08	0	0	% Front Centre (Centre)
+c 2	26	2.15	-1.22	0.01	% Front Centre Right (Right)
+c 3	21	-1.01	-1.69	0	% Back Right (Right surround)
+c 4   	25	-0.98	1.74	0	% Back Left (Left surround)
+c 5 	19	2.17	1.36	0	% Front Centre Left (Left)
+
+c 6 	27	2.15	-1.28	1.17	% Top Front Right 
+c 7 	6	-1.68	-1.73	1.13	% Top Back Right
+c 8  	10	-1.68	1.76	1.13	% Top Back Left
+c 9 	17	2.18	1.36	1.14	% Top Front Left
+
+c 10	0	0.0	0.0	-10.0	% ‘Dead’ speaker, out-of-bounds fading	
+
+% polars
+% id	chan	azim	elev	distance (m)
+%
+%p 1	1  	0	  0	2.00	   % Front Centre
+
+
+
+
+% triangularisation for VBAP etc
+% clockwise means outwards-pointing triangle
+
+% 3-tuplets
+% n id1 id2 id3
+
+t 1 6 2 1
+t 2 6 3 2
+t 3 9 7 6 
+t 4 7 3 6
+t 5 8 4 3
+t 6 7 8 3
+t 7 9 5 4
+t 8 9 4 8
+t 9 8 7 9
+t 10 9 1 5
+t 11 6 1 9
+
+% optional lower cover
+%t 12 2 3 5
+%t 13 5 3 4
+
+t 50  1 2 10
+t 50  2 3 10
+t 50  3 4 10
+t 50  4 5 10
+t 50  5 1 10
+

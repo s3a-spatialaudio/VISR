@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# TODO: Add support for the brew Python distribution
+# TODO: change the name of the referenced python library if necessary.
+
+
+# Determine the Python home directory
+
+# First check whether there is a use-local anaconda directory, this has the highest priority.
+if [ -d "${HOME}/anaconda3" ]; then
+  PYTHONHOME=${HOME}/anaconda3
+  PYTHONLIBPATH="${HOME}/anaconda3/lib"
+elif [ -d "${HOME}/anaconda" ]; then
+  PYTHONHOME=${HOME}/anaconda
+  PYTHONLIBPATH="${HOME}/anaconda/lib"
+
+# Then check whether there is a system-wide python installation.     
+elif [ -d "/anaconda3" ]; then
+  PYTHONHOME=/anaconda3
+  PYTHONLIBPATH="/anaconda3/lib"
+elif [ -d "/anaconda" ]; then
+  PYTHONHOME=/anaconda
+  PYTHONLIBPATH="/anaconda/lib"
+
+# Check for a Python installed through homebrew.
+elif [ -d "/usr/local/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@" ]; then
+  PYTHONHOME="/usr/local/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
+  PYTHONLIBPATH="${PYTHONHOME}/lib"
+
+# Fall back to the system python (if present) on MacOS >= 10.12
+elif [ -d "/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@" ]; then
+  PYTHONHOME="/Library/Frameworks/Python.framework/Versions/@PYTHON_MAJOR_MINOR@"
+  PYTHONLIBPATH="${PYTHONHOME}/lib"
+else
+  echo "No valid Python installation found."
+  PYTHONHOME=""
+  PYTHONLIBPATH=""
+fi 
+
+if [ -d "@CMAKE_INSTALL_PREFIX@/3rd" ] && [ ! -z $PYTHONLIBPATH ]; then
+  install_name_tool -add_rpath ${PYTHONLIBPATH} @CMAKE_INSTALL_PREFIX@/lib/libpythonsupport.dylib
+  install_name_tool -add_rpath ${PYTHONLIBPATH} @CMAKE_INSTALL_PREFIX@/lib/libpythoncomponents.dylib
+fi
+
+# Pre-populate the VISR-launchagent.plist file
+sed -i "" "s|PYTHONHOME_PLACEHOLDER|$PYTHONHOME|" @CMAKE_INSTALL_PREFIX@/etc/@LAUNCHAGENT_PLIST_FILENAME@

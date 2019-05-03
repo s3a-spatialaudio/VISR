@@ -1,0 +1,114 @@
+==========================
+Changelog for project VISR
+==========================
+
+Patch release 0.12.0
+====================
+
+* First public release.
+* FEATURE: Allow nested Python submodules and namespaced class names when loading Python components in
+         C++.
+* DOCU: Major restructuring of user manual,preaparation for first public release.
+* DOCU: Changed Sphinx HTML theme to Alabaster.
+
+Patch release 0.11.8
+--------------------
+
+* FIX: Documentation generation to make sure that the Python externals are
+  built before they are used in the docu generation.
+
+Patch release 0.11.7
+--------------------
+
+* FIX: Documentation generation with autodoc on Mac OS X
+* FIX: Removed libpython dependency in the signalflows Python external by disabling the VisrRenderer binding.
+* Updted documentation: Added VISR-Python tutorial, first version of object model description.
+
+Patch release 0.11.6
+--------------------
+
+* FIX: Documentation generation for builds without Python.
+
+Patch release 0.11.5
+--------------------
+
+* Updated loudspeaker configuration files for BS-2051 configs and BBC BRIR data sets.
+* Added Python functions for documentation generation.
+* Documentation: Added VISR_BST documentation, moved loudspeaker config description to separate chapter.
+* FIX: GitLab-CI configuration: Caching problems
+
+Patch release 0.11.4
+--------------------
+
+* FIX: Fixed package generation if BUILD_PYTHON_SUPPORT is deactivated.
+* FIX: Activated native Jack audio interface support on GitLab-CI for Linux and Mac OS X.
+* Cleaned up GitLab-CI configuration, worked around caching problem.
+
+Patch release 0.11.3
+--------------------
+
+* FIX: Resolved problem with Python3.7 on Mac OS X (Bug #24 Python 3.7 support on Mac OS faulty).
+  through updating Pybind11 to version 2.2.4
+* FIX: Fixed BBC BRIR loudspeaker configuration files (duplicated labels for system G, center speaker M+000 missing in most configurations)
+* Provide mechanism to export the used Python version a a target property.
+* FIX: panning::LoudspeakerConfig: Made 3rd coordiante of loudspeaker positions optional if dimension==2.
+* New Python-based loudspeaker configuration generation function in Python.
+* Replaced loudspeaker configurations for the BBC BRIR dataset in visr_bst and the BS-2051 configs
+  in $VISR/config/generic.
+* Updated Gitlab CI configuration (build Python-free "core" version as well).
+
+Patch release 0.11.2
+--------------------
+
+* Change RPATH handling to allow easier manipulation in Mac OS installers, especially from externals projects.
+* This makes Python externals on MacOS unusable in local builds, they have to be installed.
+* Mac OS installer searches for system-wide installations of the Anaconda Python distibution and Python 3 installed through HomeBrew.
+* Updated documentation for python_runner standalone application
+
+Patch release 0.11.1
+--------------------
+
+* Added libboost_atomic to installed 3rd-party libraries (formal dependency of libboost_thread)
+* Fixed problems in Gitlab-CI configuration, provide support for Ubuntu 18
+* User documentation for standalone applications
+
+Version 0.11.0
+==============
+
+* Added sphinx-based user documentation (userdoc) and code reference documentation (apidoc)
+* Added GitLab CI configuration (.gitlab-ci.yml) for continuous integration and deployment.
+* Component-based installers for Windows and Mac OS X (based on PKG / ProductBuild )
+* Fixing of Python rpaths in Mac OS X during installation.
+* Cleaned up CMake target dependencies to reduce shared library dependencies (especially for Python)
+* Link standalone applications to shared libraries.
+* Changed defines VISR_<LIB>_STATIC_LIBRARY for libraries: define is now necessary when using the static 
+  variant instead of the shared (automatically done by CMake exported targets).
+* Added metadapter code to repo (as git subtree)
+
+Version 0.10.0
+==============
+
+- Brought prototypical_restructuring branch into main development line
+- Established gitflow versioning and release management scheme
+- Support CMake target exporting
+
+Version 0.8.2
+=============
+
+- Baseline renderer: Implemented object equalisation (activated vie --object-eq-sections or -e with argument > 0)
+
+Version 0.8.1
+=============
+
+- Baseline renderer: Provide option NATIVE_JACK for using the native jack audio driver
+- Matrix convolver: Renamed audio backend option "JACK" to JACK_NATIVE for consistency.
+
+Version 0.8.0
+=============
+
+- First implementation of ChannelObject objects.
+- First implementation of HOA (Higher-Order Ambisonics) rendering using AllRAD.
+  * Hitherto developed in the hoaSourceObject
+  * Debugging and evaluation not complete yet, but no detrimental influence on other rendering techniques expected.
+- Impemented central versioning scheme for project.
+  * Possibly this will be refined by moving the implementation (version amcros and strings) into a separate file.
