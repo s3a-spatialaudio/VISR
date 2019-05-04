@@ -24,8 +24,7 @@ target_link_libraries(network_audio_streamer apputilities_shared )
 target_link_libraries(network_audio_streamer rcl_shared )
 target_link_libraries(network_audio_streamer rrl_shared )
 target_link_libraries(network_audio_streamer audiointerfaces_shared )
-target_link_libraries(network_audio_streamer ${CMAKE_THREAD_LIBS_INIT} )
-set_target_properties(network_audio_streamer PROPERTIES SKIP_BUILD_RPATH FALSE)
+target_link_libraries(network_audio_streamer Boost::filesystem )
 
 install( TARGETS network_audio_streamer
          DESTINATION bin

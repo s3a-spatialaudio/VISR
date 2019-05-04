@@ -43,7 +43,7 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
                                     std::string const & reverbConfig,
                                     bool frequencyDependentPanning )
  : CompositeComponent( context, name, parent )
- , mSceneReceiver( context, "SceneReceiver", this )
+ , mSceneReceiver( context, "SceneReceiver", this, sceneReceiverPort, rcl::UdpReceiver::Mode::Asynchronous )
  , mSceneDecoder( context, "SceneDecoder", this )
  , mCoreRenderer( context, "CoreRenderer", this, loudspeakerConfiguration, numberOfInputs, numberOfOutputs,
                   interpolationPeriod, diffusionFilters, trackingConfiguration, numberOfObjectEqSections,
@@ -52,8 +52,6 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
  , mOutput( "output", *this, numberOfOutputs )
 
 {
-  mSceneReceiver.setup( sceneReceiverPort, rcl::UdpReceiver::Mode::Asynchronous );
-
   audioConnection( mInput, mCoreRenderer.audioPort( "audioIn") );
   audioConnection( mCoreRenderer.audioPort( "audioOut"), mOutput );
   parameterConnection( mSceneReceiver.parameterPort("messageOutput"), mSceneDecoder.parameterPort("datagramInput") );
@@ -61,10 +59,8 @@ BaselineRenderer::BaselineRenderer( SignalFlowContext const & context,
 
   if( not trackingConfiguration.empty() )
   {
-    mTrackingReceiver.reset( new rcl::UdpReceiver( context, "TrackingReceiver", this ) );
+    mTrackingReceiver.reset( new rcl::UdpReceiver( context, "TrackingReceiver", this, 8888, rcl::UdpReceiver::Mode::Synchronous) );
     mTrackingPositionDecoder.reset( new rcl::PositionDecoder( context, "TrackingPositionDecoder", this, panning::XYZ( 0.0f, 0.0f, 0.0f ) ) );
-
-    mTrackingReceiver->setup( 8888, rcl::UdpReceiver::Mode::Synchronous );
     parameterConnection( mTrackingPositionDecoder->parameterPort("positionOutput"), mCoreRenderer.parameterPort("trackingPositionInput") );
   }
 }

@@ -17,7 +17,7 @@ set_target_properties( apputilities_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "
 foreach(LIB_TYPE static shared)
   target_compile_definitions( apputilities_shared PRIVATE VISR_BUILD_APPUTILITIES_LIBRARY=1)
   target_link_libraries( apputilities_${LIB_TYPE} PUBLIC Boost::program_options )
-  target_link_libraries( apputilities_${LIB_TYPE} PUBLIC Boost::filesystem )
+  target_link_libraries( apputilities_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( apputilities_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )

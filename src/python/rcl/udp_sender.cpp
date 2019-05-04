@@ -25,8 +25,7 @@ void exportUdpSender( py::module & m )
 
   py::enum_<UdpSender::Mode>(udp, "Mode" )
       .value( "Synchronous", UdpSender::Mode::Synchronous )
-      .value( "Asynchronous", UdpSender::Mode::Asynchronous )
-      .value( "ExternalServiceObject", UdpSender::Mode::ExternalServiceObject ); // Not usable from Python
+      .value( "Asynchronous", UdpSender::Mode::Asynchronous );
 
   udp.def( pybind11::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
            std::size_t, std::string const &, std::size_t, UdpSender::Mode/*, boost::asio::io_service* */>(),
