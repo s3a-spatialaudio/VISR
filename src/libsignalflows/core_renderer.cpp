@@ -30,6 +30,25 @@ namespace visr
 namespace signalflows
 {
 
+namespace // unnamed
+{
+  /**
+   * Create a routing that routes \p numChannels input signals to the corresponding output using an individual filter with the same index.
+   * @param numChannels The number of input signals, which are translated to the indices 0..numChannels-1
+   * @todo Consider to make this an utility function (e.g., in librbbl)
+   */
+  rbbl::FilterRoutingList oneToOneRouting(std::size_t numChannels)
+  {
+    rbbl::FilterRoutingList res;
+    for (std::size_t chIdx(0); chIdx < numChannels; ++chIdx)
+    {
+      res.addRouting(chIdx, chIdx, chIdx, 1.0f);
+    }
+    return res;
+  }
+}
+// unnamed namespace
+
 CoreRenderer::CoreRenderer( SignalFlowContext const & context,
                             char const * name,
                             CompositeComponent * parent,
@@ -56,7 +75,10 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
  , mVbipMatrix( frequencyDependentPanning ? new rcl::GainMatrix( context, "VbipMatrix", this ) : nullptr)
  , mPanningFilterbank( frequencyDependentPanning ? new rcl::BiquadIirFilter( context, "PanningFilterbank", this ) : nullptr )
  , mDiffuseMatrix( context, "DiffuseMatrix", this )
- , mDecorrelator( context, "DiffusePartDecorrelator", this )
+ , mDecorrelator( context, "DiffusePartDecorrelator", this, loudspeakerConfiguration.getNumRegularSpeakers(),
+                  loudspeakerConfiguration.getNumRegularSpeakers(), diffusionFilters.numberOfColumns(),
+                  diffusionFilters.numberOfRows(), diffusionFilters.numberOfRows(), diffusionFilters,
+                  oneToOneRouting(loudspeakerConfiguration.getNumRegularSpeakers()) )
  , mDirectDiffuseMix( context, "DirectDiffuseMixer", this,
                       loudspeakerConfiguration.getNumRegularSpeakers(),
                       2 + (frequencyDependentPanning ?1:0) + (reverbConfig.empty() ? 0 : 1) )
@@ -191,15 +213,6 @@ CoreRenderer::CoreRenderer( SignalFlowContext const & context,
 //  parameterConnection( "DiffusionCalculator", "gainOutput", "DiffusePartMatrix", "gainInput" );
   parameterConnection( mGainCalculator.parameterPort("diffuseGains"), mDiffuseMatrix.parameterPort("gainInput") );
   audioConnection( mObjectEq.audioPort("out"), mDiffuseMatrix.audioPort("in") );
-
-  rbbl::FilterRoutingList decorrelatorRoutings;
-  for( std::size_t outIdx( 0 ); outIdx < numberOfLoudspeakers; ++outIdx )
-  {
-    decorrelatorRoutings.addRouting( outIdx, outIdx, outIdx, 1.0f );
-  }
-  mDecorrelator.setup( numberOfLoudspeakers, numberOfLoudspeakers, diffusionFilters.numberOfColumns(),
-                       diffusionFilters.numberOfRows(), diffusionFilters.numberOfRows(),
-                       diffusionFilters, decorrelatorRoutings );
 
   efl::BasicVector<SampleType> const & outputGains =loudspeakerConfiguration.getGainAdjustment();
   efl::BasicVector<SampleType> const & outputDelays = loudspeakerConfiguration.getDelayAdjustment();

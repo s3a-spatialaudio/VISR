@@ -13,6 +13,7 @@ import visr
 import signalflows
 import panning
 import pml
+import rbbl
 import rcl
 import rrl
 #import objectmodel as om
@@ -30,7 +31,7 @@ class ReverbToBinaural( visr.CompositeComponent ):
                  loudspeakerConfig,
                  numberOfInputs,
                  rendererOutputs,
-                 interpolationPeriod, 
+                 interpolationPeriod,
                  diffusionFilters,
                  trackingConfiguration,
                  brirRouting,
@@ -41,27 +42,27 @@ class ReverbToBinaural( visr.CompositeComponent ):
         self.coreRenderer = signalflows.BaselineRenderer( ctxt, 'renderer', self,
                                       loudspeakerConfig=loudspeakerConfig,
                                       numberOfInputs=numberOfInputs,
-                                      numberOfOutputs=rendererOutputs, 
-                                      interpolationPeriod=interpolationPeriod, 
+                                      numberOfOutputs=rendererOutputs,
+                                      interpolationPeriod=interpolationPeriod,
                                       diffusionFilters=diffusionFilters,
                                       reverbConfig=reverbConfiguration,
                                       sceneReceiverPort=scenePort,
-                                      trackingConfiguration=trackingConfiguration 
+                                      trackingConfiguration=trackingConfiguration
                                       )
         numFilters = brirFilters.numberOfRows
         firLength = brirFilters.numberOfColumns
         numRoutings = brirRouting.size
-        self.convolver = rcl.FirFilterMatrix( ctxt, 'convolver', self )
-        self.convolver.setup( numberOfInputs=rendererOutputs,
-                             numberOfOutputs=2,
-                             maxFilters=numFilters,
-                             filterLength=firLength,
-                             maxRoutings=numRoutings,
-                             filters=brirFilters,
-                             routings=brirRouting,
-                             controlInputs=False,
-                             fftImplementation='ffts'
-                             )
+        self.convolver = rcl.FirFilterMatrix( ctxt, 'convolver', self,
+                                             numberOfInputs=rendererOutputs,
+                                             numberOfOutputs=2,
+                                             maxFilters=numFilters,
+                                             filterLength=firLength,
+                                             maxRoutings=numRoutings,
+                                             filters=brirFilters,
+                                             routings=brirRouting,
+                                             controlInputs=rcl.FirFilterMatrix.ControlPortConfig.NoInputs,
+                                             fftImplementation='ffts'
+                                             )
         self.audioIn = visr.AudioInputFloat( "audioIn", self, numberOfInputs )
         self.audioOut = visr.AudioOutputFloat( "audioOut", self, 2 )
         self.audioConnection( self.audioIn, self.coreRenderer.audioPort("input"))
@@ -76,8 +77,7 @@ class ReverbToBinaural( visr.CompositeComponent ):
             self.parameterConnection( self.posIn, self.coreRenderer.parameterPort("trackingPositionInput") )
 
 # Get VISR base directory from rsao subdirectory.
-#visrBaseDirectory = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../..' )).replace('\\','/')
-visrBaseDirectory = '/home/andi/dev/visr'
+visrBaseDirectory = os.path.normpath(os.path.join( os.getcwd(), '../../../..' )).replace('\\','/')
 
 blockSize = 4096
 samplingFrequency = 48000
@@ -113,7 +113,7 @@ reverbConfigStr = '{ "numReverbObjects": %i, "discreteReflectionsPerObject": 20,
 #brirFull = np.array( brirMat['h_sweetspot'], dtype=np.float32 ).copy('C')
 ## Scalefactor to compensate for the very low amplitudes of the BBC BRIRs
 #brirScaleFactor = 500;
-#brirFlat = brirScaleFactor * np.concatenate( (brirFull[:,0,0:16384], brirFull[:,1,0:16384] ) ) 
+#brirFlat = brirScaleFactor * np.concatenate( (brirFull[:,0,0:16384], brirFull[:,1,0:16384] ) )
 #brirFilterParam = pml.MatrixParameterFloat( brirFlat, 16 )
 #numBrirSpeakers = brirFull.shape[0]
 ## Define the routing for the binaural convolver such that it matches the organisation of the
@@ -134,7 +134,7 @@ brirFilterParam = pml.MatrixParameterFloat( brirFlat, 16 )
 numBrirSpeakers = brirFlat.shape[0]//2
 # Define the routing for the binaural convolver such that it matches the organisation of the
 # flat BRIR matrix.
-filterRouting = pml.FilterRoutingList()
+filterRouting = rbbl.FilterRoutingList()
 for idx in range(0, numBrirSpeakers ):
     filterRouting.addRouting( idx, 0, idx, 1.0 )
     filterRouting.addRouting( idx, 1, idx+numBrirSpeakers, 1.0 )
@@ -142,8 +142,8 @@ for idx in range(0, numBrirSpeakers ):
 renderer = ReverbToBinaural( ctxt, 'top', None,
                           loudspeakerConfig=lc,
                           numberOfInputs=numObjects,
-                          rendererOutputs=numOutputChannels, 
-                          interpolationPeriod=parameterUpdatePeriod, 
+                          rendererOutputs=numOutputChannels,
+                          interpolationPeriod=parameterUpdatePeriod,
                           diffusionFilters=diffFilters,
                           trackingConfiguration='',
                           brirFilters = brirFilterParam,
@@ -189,13 +189,13 @@ print( "Rendering started." )
 #start = time.time()
 #
 #for blockIdx in range(0,numBlocks):
-#        
+#
 #    inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
 #    outputBlock = flow.process( inputBlock )
 #    outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
 #
 #end = time.time()
-#print("Time for calculation %f" % ((end-start)/numBlocks) )    
+#print("Time for calculation %f" % ((end-start)/numBlocks) )
 #
 #
 #plt.figure(1)
