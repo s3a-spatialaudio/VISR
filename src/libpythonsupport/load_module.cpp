@@ -31,10 +31,12 @@ VISR_PYTHONSUPPORT_LIBRARY_SYMBOL
 pybind11::object loadModule( std::string const & moduleName,
                              std::vector<std::string> const & modulePath,
                              std::vector<std::string> const & additionalSystemPath,
-                             pybind11::object & globals)  
+                             pybind11::object & globals)
 {
   namespace py = pybind11;
 
+  // The python functions imp.find_module and imp.load_module does not support nested subpackages (with dots).
+  // This code follows https://docs.python.org/3/library/imp.html
   std::vector<std::string> moduleNameParts;
   boost::algorithm::split(moduleNameParts, moduleName, boost::algorithm::is_any_of("."));
   if (moduleNameParts.empty())
@@ -45,7 +47,7 @@ pybind11::object loadModule( std::string const & moduleName,
   std::for_each(moduleNameParts.begin(), moduleNameParts.end(),
 		[](std::string & v) { boost::algorithm::trim(v); });
 
-  // Taken and adapted from 
+  // Taken and adapted from
   // https://skebanga.github.io/embedded-python-pybind11/
   py::dict locals;
   locals["moduleName"] = py::cast(moduleNameParts[0] );
@@ -54,9 +56,10 @@ pybind11::object loadModule( std::string const & moduleName,
     ? py::list() : py::cast( additionalSystemPath );
   try
   {
-    // Adding the module path to the system path enables us to specify the path of other dependencies as well
-    // (e.g., the location of the VISR externals).
-    // We also use it as the path argument of imp.find_module to avoid finding other occurences on the system path.
+    // Adding the module path to the system path enables us to specify the path
+    // of other dependencies as well (e.g., the location of the VISR externals).
+    // We also use it as the path argument of imp.find_module to avoid finding
+    // other occurences on the system path.
     py::eval<py::eval_statements>( // tell eval we're passing multiple statements
       "import imp\n"
       "import sys\n"
@@ -66,19 +69,24 @@ pybind11::object loadModule( std::string const & moduleName,
       globals,
       locals);
 
-    if (moduleNameParts.size() == 1) // Standard case: No nested submodules
+    py::object mod = locals["new_module"];
+    // Recursively iterate through nested sub-package names (if there are any)
+    for (std::size_t nestingLevel(1); nestingLevel < moduleNameParts.size();
+	 ++nestingLevel)
     {
-      return locals["new_module"];
+      py::object newModulePath = mod.attr("__path__");
+      locals["moduleName"] = py::cast(moduleNameParts[nestingLevel].c_str());
+      locals["modulePath"] = newModulePath;
+      py::eval<py::eval_statements>( // tell eval we're passing multiple statements
+	"sys.path += additionalPath\n"
+	"file, pathname, description = imp.find_module( moduleName, modulePath)\n"
+	"new_module = imp.load_module( moduleName, file, pathname, description)\n",
+	globals,
+	locals);
+
+      mod = locals["new_module"];
     }
-    else // Iterate through nested submodules.
-    {
-      py::object mod = locals["new_module"];
-      for (std::size_t nestingLevel(1); nestingLevel < moduleNameParts.size(); ++nestingLevel)
-      {
-        mod = mod.attr(moduleNameParts[nestingLevel].c_str() );
-      }
-      return mod;
-    }
+    return mod;
   }
   catch( std::exception const & ex )
   {
@@ -112,8 +120,8 @@ std::vector<std::string> pathStringToSequence( std::string const & pathString )
   return searchPath;
 }
 
-} // unnamed namespace 
-  
+} // unnamed namespace
+
 pybind11::object loadModule( std::string const & moduleName,
                              std::string const & modulePathList,
                              pybind11::object & globals)
@@ -132,6 +140,6 @@ pybind11::object loadModule( std::string const & moduleName,
   auto const additionalPath = pathStringToSequence( additionalPathList );
   return loadModule( moduleName, modulePath, additionalPath, globals );
 }
-  
+
 } // namespace pythonsupport
 } // namespace visr
