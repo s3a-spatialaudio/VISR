@@ -5,6 +5,7 @@
 #include <libefl/vector_functions.hpp>
 
 #include <complex>
+#include <stdexcept>
 
 namespace visr
 {
@@ -36,12 +37,25 @@ CrossfadingConvolverUniform( std::size_t numberOfInputs,
   , mCrossoverRamps( 2, blockLength * mNumRampBlocks, alignment )
 {
   initRoutingTable( initialRoutings );
-  efl::vectorRamp( mCrossoverRamps.row(0), transitionSamples, static_cast<SampleType>(0.0f),
-                   static_cast<SampleType>(1.0f), false, true, alignment );
-  efl::vectorFill( static_cast<SampleType>(1.0f), mCrossoverRamps.row(0)+transitionSamples, blockLength * mNumRampBlocks-transitionSamples, alignment );
-  efl::vectorRamp( mCrossoverRamps.row(1), transitionSamples, static_cast<SampleType>(1.0f),
-                   static_cast<SampleType>(0.0f), false, true, alignment );
-  efl::vectorFill( static_cast<SampleType>(0.0f), mCrossoverRamps.row(1)+transitionSamples, blockLength * mNumRampBlocks-transitionSamples, alignment );
+  efl::ErrorCode ret;
+  if( (ret = efl::vectorRamp( mCrossoverRamps.row(0), transitionSamples, static_cast<SampleType>(0.0f),
+                             static_cast<SampleType>(1.0f), false, true, alignment )) != efl::noError )
+  {
+    throw std::runtime_error( "CrossfadingConvolverUniform: Error initialising crossfading ramps." );
+  }
+  if( (ret = efl::vectorFill( static_cast<SampleType>(1.0f), mCrossoverRamps.row(0)+transitionSamples, blockLength * mNumRampBlocks-transitionSamples, 0 /* cannot assume any alignment here*/ )) != efl::noError )
+  {
+    throw std::runtime_error( "CrossfadingConvolverUniform: Error initialising crossfading ramps." );
+  }
+  if( (ret = efl::vectorRamp( mCrossoverRamps.row(1), transitionSamples, static_cast<SampleType>(1.0f),
+                             static_cast<SampleType>(0.0f), false, true, alignment )) != efl::noError )
+  {
+    throw std::runtime_error( "CrossfadingConvolverUniform: Error initialising crossfading ramps." );
+  }
+  if( (ret = efl::vectorFill( static_cast<SampleType>(0.0f), mCrossoverRamps.row(1)+transitionSamples, blockLength * mNumRampBlocks-transitionSamples, 0 /* cannot assume any alignment here*/ )) != efl::noError )
+  {
+    throw std::runtime_error( "CrossfadingConvolverUniform: Error initialising crossfading ramps." );
+  }
 }
 
 template< typename SampleType >

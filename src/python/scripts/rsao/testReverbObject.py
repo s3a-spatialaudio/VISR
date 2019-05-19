@@ -12,6 +12,7 @@ import visr
 import signalflows
 import panning
 import pml
+import efl
 import rrl
 import objectmodel as om
 
@@ -53,15 +54,15 @@ numLoudspeakers = lc.numberOfRegularLoudspeakers
 diffFilterFile = os.path.join( visrBaseDirectory, 'config/filters/random_phase_allpass_64ch_512taps.wav')
 diffFiltersRaw = np.array(pml.MatrixParameterFloat.fromAudioFile( diffFilterFile ),
                           dtype = np.float32 )
-diffFilters = pml.BasicMatrixFloat( diffFiltersRaw[ np.array(lc.channelIndices() )-1,: ] )
+diffFilters = efl.BasicMatrixFloat( diffFiltersRaw[ np.array(lc.channelIndices() )-1,: ] )
 
 reverbConfigStr = '{ "numReverbObjects": %i, "discreteReflectionsPerObject": 20, "lateReverbFilterLength": 2.0, "lateReverbDecorrelationFilters": "%s/config/filters/random_phase_allpass_64ch_1024taps.wav" }' % (numChannels, visrBaseDirectory )
 
 renderer1 = signalflows.CoreRenderer( ctxt, 'renderer1', None,
                                       loudspeakerConfiguration=lc,
                                       numberOfInputs=1,
-                                      numberOfOutputs=numOutputChannels, 
-                                      interpolationPeriod=parameterUpdatePeriod, 
+                                      numberOfOutputs=numOutputChannels,
+                                      interpolationPeriod=parameterUpdatePeriod,
                                       diffusionFilters=diffFilters,
                                       reverbConfig=reverbConfigStr,
                                       trackingConfiguration='' )
@@ -77,22 +78,21 @@ obj_vector=om.ObjectVector() # load the object vector
 obj_str=open(jsonFile).read() # read json object vector as a string
 obj_vector.fillFromJson(obj_str) # populate the object vector
 ro = obj_vector[0]
-                       
+
 paramInput = flow.parameterReceivePort('objectDataInput')
 
 inputSignal = np.zeros( (1, signalLength ), dtype=np.float32 )
 # inputSignal[0,:] = 0.75*np.sin( 2.0*np.pi*440 * t )
-inputSignal[ 0, 100 ] = 1
+inputSignal[ 0, 100 ] = 1 # Discrete Dirac
 
 outputSignal = np.zeros( (numOutputChannels, signalLength ), dtype=np.float32 )
 
 for blockIdx in range(0,numBlocks):
     if blockIdx % (parameterUpdatePeriod/blockSize) == 0:
         ov = paramInput.data()
-        ov.clear()
-        ov.set(  ro.objectId, ro )
+        ov.set( [ ro ] )
         paramInput.swapBuffers()
-        
+
     inputBlock = inputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize]
     outputBlock = flow.process( inputBlock )
     outputSignal[:, blockIdx*blockSize:(blockIdx+1)*blockSize] = outputBlock
