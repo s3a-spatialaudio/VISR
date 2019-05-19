@@ -18,8 +18,6 @@ Development and Contribution
 .. toctree::
   :maxdepth: 2
 
-  source-code
-  
   git-workflow
   
   create-build-environment

@@ -240,6 +240,15 @@ cpack_add_component( python_templates
                    )
 endif( BUILD_PYTHON_BINDINGS )
 
+if( BUILD_MAX_MSP_EXTERNALS )
+cpack_add_component( max_externals
+                    DISPLAY_NAME "Max/MSP externals"
+                    DESCRIPTION "Multichannel DSP externals for Max/MSP"
+                    INSTALL_TYPES full
+                    DEPENDS shared_libraries
+                   )
+endif( BUILD_MAX_MSP_EXTERNALS )
+
 cpack_add_component_group( documentation
                           DISPLAY_NAME "Documentation"
                           DESCRIPTION "User and API documentation"

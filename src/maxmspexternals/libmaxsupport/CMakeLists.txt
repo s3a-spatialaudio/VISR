@@ -52,6 +52,11 @@ target_link_libraries( maxsupport_shared PRIVATE Boost::boost ) # Adds the boost
 # installed once.
 set_target_properties( maxsupport_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
-install(TARGETS maxsupport_static ARCHIVE DESTINATION staticlib )
-install(TARGETS maxsupport_shared ARCHIVE DESTINATION lib RUNTIME DESTINATION lib LIBRARY DESTINATION lib  PUBLIC_HEADER DESTINATION include/visr/libmaxsupport )
-
+install( TARGETS maxsupport_static
+         ARCHIVE DESTINATION staticlib COMPONENT max_externals
+       )
+install( TARGETS maxsupport_shared
+         ARCHIVE DESTINATION lib COMPONENT max_externals
+         RUNTIME DESTINATION lib COMPONENT max_externals
+         LIBRARY DESTINATION lib COMPONENT max_externals
+         PUBLIC_HEADER DESTINATION include/visr/libmaxsupport COMPONENT max_externals )

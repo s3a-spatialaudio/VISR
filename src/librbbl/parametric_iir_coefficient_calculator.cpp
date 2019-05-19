@@ -30,13 +30,16 @@ calculateIirCoefficients( ParametricIirCoefficient< CoefficientType> const & par
 }
 
 // Explicit instantiations
+// Note: This code needs to be excluded from Doxygen documentation generation to avoid
+// warnings about non-matching class members.
+/// @cond NEVER
 template VISR_RBBL_LIBRARY_SYMBOL
 BiquadCoefficient<float> ParametricIirCoefficientCalculator::
 calculateIirCoefficients<float>(ParametricIirCoefficient<float> const &, float);
 template VISR_RBBL_LIBRARY_SYMBOL
 BiquadCoefficient<double> ParametricIirCoefficientCalculator::
 calculateIirCoefficients<double>(ParametricIirCoefficient<double> const &, double);
-
+/// @endcond NEVER
 
 template< typename T >
 void ParametricIirCoefficientCalculator::
@@ -187,6 +190,10 @@ calculateIirCoefficients( ParametricIirCoefficient<T> const & param,
   }
 }
 
+// Explicit instantiations
+// Note: This code needs to be excluded from Doxygen documentation generation to avoid
+// warnings about non-matching class members.
+/// @cond NEVER
 template  VISR_RBBL_LIBRARY_SYMBOL
 void ParametricIirCoefficientCalculator::
 calculateIirCoefficients<float>( ParametricIirCoefficient<float> const &,
@@ -195,6 +202,7 @@ template  VISR_RBBL_LIBRARY_SYMBOL
 void ParametricIirCoefficientCalculator::
 calculateIirCoefficients<double>( ParametricIirCoefficient<double> const &,
                                   BiquadCoefficient<double> &, double );
+/// @endcond NEVER
 
 template< typename CoefficientType >
 void ParametricIirCoefficientCalculator::calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
@@ -211,12 +219,16 @@ void ParametricIirCoefficientCalculator::calculateIirCoefficients( ParametricIir
   std::fill( it, coeffs.end(), BiquadCoefficient<CoefficientType>() );
 }
 
+// Note: This code needs to be excluded from Doxygen documentation generation to avoid
+// warnings about non-matching class members.
+/// @cond NEVER
 template VISR_RBBL_LIBRARY_SYMBOL 
 void ParametricIirCoefficientCalculator::
 calculateIirCoefficients<float>( ParametricIirCoefficientList<float> const &, BiquadCoefficientList<float> &, float );
 template VISR_RBBL_LIBRARY_SYMBOL 
 void ParametricIirCoefficientCalculator::
 calculateIirCoefficients<double>( ParametricIirCoefficientList<double> const &, BiquadCoefficientList<double> &, double );
+/// @endcond NEVER
 
 } // namespace rbbl
 } // namespace visr

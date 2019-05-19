@@ -14,10 +14,33 @@ file( TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/src/python/packages VISR_PYTHON_PACKA
 # Define the separator between multiple directories in environment variables, e.g., PATH
 # or PYTHONPATH. We would prefer a CMake-provided solution.
 if( WIN32 )
-  set( VISR_ENVIRONMENT_PATH_SEPARATOR "\;" ) # Apparently semicolons need to be escaped in CMake.
+  set( VISR_ENVIRONMENT_PATH_SEPARATOR "$<SEMICOLON>" ) # Apparently semicolons need to be escaped in CMake.
 else( WIN32 )
   set( VISR_ENVIRONMENT_PATH_SEPARATOR ":" )
 endif( WIN32 )
+
+# Create a variable that contains all environment variable settings for running a Python process (e.g., Sphinx documentation building or Python-based unit testing).
+# TODO: Consider moving out of doc/ into a more central location.
+if( BUILD_PYTHON_BINDINGS )
+  # Include the location of the C++ externals and the pure Python modules.
+  # the visrpython target is used because all externals are in the same directory.
+  set( VISR_PYTHON_EXEC_ENVIRONMENT PYTHONPATH="$<SHELL_PATH:$<TARGET_FILE_DIR:visrpython>>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}" )
+else()
+  # Only the pure Python packages are used in this case.
+  set( VISR_PYTHON_EXEC_ENVIRONMENT PYTHONPATH="{VISR_PYTHON_PACKAGE_PATH}" )
+endif( BUILD_PYTHON_BINDINGS )
+# Ensure that the shared libraries are found.
+if(VISR_SYSTEM_NAME MATCHES "MacOS")
+  # On Mac OS, this is required if rpaths are not used at build time.
+  # TODO: Are there cases where we have to add the VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR as well?
+  list( APPEND VISR_PYTHON_EXEC_ENVIRONMENT DYLD_LIBRARY_PATH="$<SHELL_PATH:$<TARGET_FILE_DIR:visr_shared>>" )
+endif(VISR_SYSTEM_NAME MATCHES "MacOS")
+if(VISR_SYSTEM_NAME MATCHES "Windows")
+  # The VISR DLLs as well as the 3rd party libraries must be added to the path.
+  list( APPEND VISR_PYTHON_EXEC_ENVIRONMENT PATH="$<SHELL_PATH:$<TARGET_FILE_DIR:visr_shared>>${VISR_ENVIRONMENT_PATH_SEPARATOR}$<SHELL_PATH:${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}>${VISR_ENVIRONMENT_PATH_SEPARATOR}%PATH%" )
+endif(VISR_SYSTEM_NAME MATCHES "Windows")
+# No special handling is required on Linux, because the paths of dependent shared libraries are automatically encoded in the binaries. 
+
 # Set the dependencies needed to build the documentation. For sphinx.autodoc,
 # the Python externals need to be built before the documentation can be extracted.
 # We use the meta-target 'pythonexternals' that combines all externals,
@@ -103,15 +126,11 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   # a dependency for other targets. 
   set( STAMP ${outputDir}/htmlbuild.stamp )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
-  if( BUILD_PYTHON_BINDINGS )
   add_custom_command(
     OUTPUT ${STAMP}
     DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
-    # The DYLD_LIBRARY_PATH setting is needed only on Mac OS X (because the current build process creates Python
-    # externals without an rpath pointing to the underlying VISR shared libraries.
-    # We add this variable for all platforms to avoid substantial code duplication.
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}" DYLD_LIBRARY_PATH="$<TARGET_FILE_DIR:visr_shared>"
-             ${SPHINX_EXECUTABLE}
+    COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
+              ${SPHINX_EXECUTABLE}
 	       -a
                -q
                -b html
@@ -119,28 +138,10 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
                -d ${outputDir}/html-cache
                 ${sourceDir}
                 ${outputDir}/html
-    COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
+     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
     BYPRODUCTS ${outputDir}/html-cache
     COMMENT "HTML generation for target ${targetName}-html."
     )
-  else( BUILD_PYTHON_BINDINGS )
-  add_custom_command(
-    OUTPUT ${STAMP}
-    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${VISR_PYTHON_PACKAGE_PATH}"
-             ${SPHINX_EXECUTABLE}
-	       -a
-               -q
-               -b html
-               -c ${outputDir}/html
-               -d ${outputDir}/html-cache
-                ${sourceDir}
-                ${outputDir}/html
-    COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
-    BYPRODUCTS ${outputDir}/html-cache
-    COMMENT "HTML generation for target ${targetName}-html."
-    )
-  endif( BUILD_PYTHON_BINDINGS )
   add_custom_target( ${targetName}-html
     DEPENDS ${STAMP}
   )
@@ -152,14 +153,10 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
   # Name (with version) of the output file. This is the main dependency of the target.
   set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
-  if( BUILD_PYTHON_BINDINGS )
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
     DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
-    # The DYLD_LIBRARY_PATH setting is needed only on Mac OS X (because the current build process creates Python
-    # externals without an rpath pointing to the underlying VISR shared libraries.
-    # We add this variable for all platforms to avoid substantial code duplication.
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="$<TARGET_FILE_DIR:visrpython>${VISR_ENVIRONMENT_PATH_SEPARATOR}${VISR_PYTHON_PACKAGE_PATH}" DYLD_LIBRARY_PATH="$<TARGET_FILE_DIR:visr_shared>"
+    COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
             ${SPHINX_EXECUTABLE}
                -q
                -b latex
@@ -175,27 +172,6 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     BYPRODUCTS ${outputDir}/latex-cache ${outputDir}/latex
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
-  else( BUILD_PYTHON_BINDINGS )
-  add_custom_command(
-    OUTPUT ${OUTPUTFILE}
-    DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${VISR_PYTHON_PACKAGE_PATH}"
-            ${SPHINX_EXECUTABLE}
-               -q
-               -b latex
-               -c ${outputDir}/latex
-               -d ${outputDir}/latex-cache
-                ${sourceDir}
-                ${outputDir}/latex
-    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
-    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
-    COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
-    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
-    WORKING_DIRECTORY ${outputDir}/latex
-    BYPRODUCTS ${outputDir}/latex-cache ${outputDir}/latex
-    COMMENT "PDF compilation for target ${targetName}-pdf."
-    )
-  endif( BUILD_PYTHON_BINDINGS )
   add_custom_target( ${targetName}-pdf
     DEPENDS ${OUTPUTFILE}
   )
