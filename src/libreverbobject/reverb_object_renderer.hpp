@@ -64,7 +64,6 @@ public:
    *          hard switch with potential clicks or a transient loudness boosts.
    * @param arrayConfig Array configuration object to describe the reproduction system.
    * @param numberOfObjectSignals Total number of object audio signals that might carry reverb objects.
-   * @param transitionSamples Total length in samples of a rcl::CrossFadeFirFilterMatrix used to fade between different rooms for every object
    */
   explicit ReverbObjectRenderer( SignalFlowContext const & context,
                                  char const * name,
