@@ -25,15 +25,14 @@
 #include <sstream>
 #include <vector>
 
-// Used to include the main Python include file (for Py_Initialize() )
-#include <pybind11/pybind11.h>
-
 namespace visr
 {
 namespace pythoncomponents
 {
 namespace test
 {
+
+
 
 // Use the PYTHONPATH to locate transitive dependencies of the imported module
 // (here: The VISR external modules, e.g., 'visr') 
@@ -66,7 +65,7 @@ BOOST_AUTO_TEST_CASE( WrapUsePYTHONPATH )
   SignalFlowContext ctxt( blockSize, samplingFrequency );
 
   // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
+  // by a mixture or positional and keyword constructor arguments
   Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
                   moduleName.c_str(),
                   "Adder",
@@ -126,7 +125,7 @@ BOOST_AUTO_TEST_CASE( WrapSingleFileModule )
   SignalFlowContext ctxt( blockSize, samplingFrequency );
 
   // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
+  // by a mixture or positional and keyword constructor arguments
   Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
                    moduleName.c_str(),
                    "PythonAdder",
@@ -186,7 +185,7 @@ BOOST_AUTO_TEST_CASE( WrapMultiFilePackage )
   SignalFlowContext ctxt( blockSize, samplingFrequency );
 
   // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
+  // by a mixture or positional and keyword constructor arguments
   Wrapper pyAtom1( ctxt, "PythonAtom", nullptr,
                   moduleName.c_str(),
                   "Adder",
@@ -229,7 +228,7 @@ BOOST_AUTO_TEST_CASE(WrapNestedPackage)
 {
   pythonsupport::InitialisationGuard::initialise();
 
-  std::string moduleName = "nestedmodule.level1.level2";
+  std::string moduleName = "subpackagemodule.level1.level2";
 
   boost::filesystem::path basePath{ CMAKE_CURRENT_SOURCE_DIR };
   boost::filesystem::path const modulePath = basePath / "python";
@@ -246,7 +245,7 @@ BOOST_AUTO_TEST_CASE(WrapNestedPackage)
   SignalFlowContext ctxt(blockSize, samplingFrequency);
 
   // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
+  // by a mixture or positional and keyword constructor arguments
   Wrapper pyAtom1(ctxt, "PythonAtom", nullptr,
     moduleName.c_str(),
     "Level2Adder",
@@ -289,7 +288,7 @@ BOOST_AUTO_TEST_CASE(WrapNamespacedClass)
 {
   pythonsupport::InitialisationGuard::initialise();
 
-  std::string moduleName = "nestedmodule";
+  std::string moduleName = "nestednamespacemodule";
 
   boost::filesystem::path basePath{ CMAKE_CURRENT_SOURCE_DIR };
   boost::filesystem::path const modulePath = basePath / "python";
@@ -306,7 +305,7 @@ BOOST_AUTO_TEST_CASE(WrapNamespacedClass)
   SignalFlowContext ctxt(blockSize, samplingFrequency);
 
   // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
+  // by a mixture or positional and keyword constructor arguments
   Wrapper pyAtom1(ctxt, "PythonAtom", nullptr,
     moduleName.c_str(),
     "level1.level2.Level2Adder",
@@ -350,7 +349,7 @@ BOOST_AUTO_TEST_CASE(WrapNamespacedClassSplit)
 {
   pythonsupport::InitialisationGuard::initialise();
 
-  std::string moduleName = "nestedmodule.level1";
+  std::string moduleName = "nestednamespacemodule.level1";
 
   boost::filesystem::path basePath{ CMAKE_CURRENT_SOURCE_DIR };
   boost::filesystem::path const modulePath = basePath / "python";
@@ -367,7 +366,7 @@ BOOST_AUTO_TEST_CASE(WrapNamespacedClassSplit)
   SignalFlowContext ctxt(blockSize, samplingFrequency);
 
   // Instantiate the atomic component (implemented in Python)
-  // by a mixture or poristional and keyword constructor arguments
+  // by a mixture or positional and keyword constructor arguments
   Wrapper pyAtom1(ctxt, "PythonAtom", nullptr,
     moduleName.c_str(),
     "     level2 .   Level2Adder", // Adds some arbitrary whitespace around argument, which should be ignored (as in Python)
@@ -404,7 +403,6 @@ BOOST_AUTO_TEST_CASE(WrapNamespacedClassSplit)
     flow.process(&inputPtr[0], &outputPtr[0]);
   }
 }
-
 
 } // namespace test
 } // namespace pythoncomponents
