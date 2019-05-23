@@ -121,6 +121,7 @@ public:
                               Normalisation diffuseNormalisation = Normalisation::Default,
                               pml::ListenerPosition const & listenerPosition = pml::ListenerPosition(0.0f, 0.0f, 0.0f )
   );
+    
 
   /**
    * Disabled (deleted) copy constructor
@@ -139,7 +140,11 @@ public:
    */
   void process();
 
-
+  void setNearTripletBoundaryCosTheta( SampleType ct )
+  {
+    mVbapCalculator->setNearTripletBoundaryCosTheta(ct);
+  }
+    
 private:
   bool separateLowpassPanning() const { return bool(mLowFrequencyGainOutput); }
 
@@ -259,8 +264,13 @@ private:
   * Optional gain output for signals to be decorrelated.
   */
   std::unique_ptr<MatrixPort> mDiffuseGainOutput;
+    
+    
 };
 
+    
+    
+    
 /**
 * Bitwise operator to combine output port flags.
 */
@@ -274,6 +284,7 @@ VISR_RCL_LIBRARY_SYMBOL PanningCalculator::PanningMode operator&( PanningCalcula
                                                                   PanningCalculator::PanningMode rhs );
 
 
+    
 } // namespace rcl
 } // namespace visr
 

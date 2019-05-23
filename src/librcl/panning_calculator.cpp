@@ -68,6 +68,8 @@ PanningCalculator::PanningCalculator( SignalFlowContext const & context,
  , mDiffuseNormalisation( (diffuseNormalisation == Normalisation::Default) ? Normalisation::Energy : diffuseNormalisation )
  , mLabelLookup( fillLabelLookup( arrayConfig ) )
 {
+    //mVbapCalculator->setNearTripletBoundaryCosTheta(-0.7);
+    
     // Initialise for all (regular and virtual) loudspeakers.
     for( std::size_t lspIdx( 0 ); lspIdx < mNumberOfAllLoudspeakers; ++lspIdx )
     {
@@ -136,6 +138,9 @@ void PanningCalculator::setListenerPosition( pml::ListenerPosition const & pos )
 {
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
+    
+
+    
 
 namespace // unnamed
 {
@@ -164,6 +169,9 @@ namespace // unnamed
     }
   }
 }
+    
+    
+
 
 void PanningCalculator::process()
 {
@@ -508,5 +516,6 @@ PanningCalculator::fillLabelLookup( panning::LoudspeakerArray const & config )
   return table;
 }
 
+    
 } // namespace rcl
 } // namespace visr

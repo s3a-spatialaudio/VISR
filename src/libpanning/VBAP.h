@@ -66,18 +66,25 @@ public:
   void setListenerPosition( SampleType x, SampleType y, SampleType z );
     
     
-  void set2DfadeMode( bool m2DfadeMode );
+  void set2Dfade( bool m2Dfade );
+    
+  void setNearTripletBoundaryCosTheta( SampleType t ) {
+      mNearTripletBoundaryCosTheta = t;
+  }
   
 private:
   
   bool mArrayIs2D;
   bool mArrayIsInfinite;
-  bool m2DfadeMode;
+  bool m2Dfade;
   
   size_t numTotLoudspeakers;
   size_t numRegLoudspeakers;
   size_t numVirtLoudspeakers;
   size_t numTriplets;
+
+  SampleType mNearTripletBoundaryCosTheta;
+    
   /**
    * Inverse matrix of the vector components of loudspeakers positions considering loudspeaker triplets.
    * Dimension: # triplets(Rows) x # vectorComponents(Columns).
@@ -118,7 +125,7 @@ private:
      * State indicates whether is listener is near to triplet boundary (in 2D only for now)
      * Used for 360 HF integration with CAP.
      */
-    mutable std::vector<bool> mListenerIsNearTripletBoundary;
+  mutable std::vector<bool> mListenerIsNearTripletBoundary;
 
     
   

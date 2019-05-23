@@ -32,7 +32,8 @@ CAPGainCalculator::CAPGainCalculator( SignalFlowContext const & context,
                                       CompositeComponent * parent,
                                       std::size_t numberOfObjects,
                                       panning::LoudspeakerArray const & arrayConfig,
-                                      PanningMode panningMode /* = PanningMode::LF */ )
+                                      PanningMode panningMode /* = PanningMode::LF */
+                                      )
  : AtomicComponent( context, name, parent )
  , mNumberOfObjects( numberOfObjects )
  , mNumberOfLoudspeakers( arrayConfig.getNumRegularSpeakers() )

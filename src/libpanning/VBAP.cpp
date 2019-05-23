@@ -37,7 +37,8 @@ namespace panning
     mListenerIsNearTripletBoundary.resize( numTriplets );
     mTriplets.resize( numTriplets );
     mReroutingMatrix.resize( numVirtLoudspeakers, numRegLoudspeakers );
-    m2DfadeMode = false;
+    m2Dfade = false;
+    mNearTripletBoundaryCosTheta = -1.0;
     
     
     //mPositions
@@ -212,8 +213,8 @@ namespace panning
       inv[5] = ((l1X * l3Y) - (l1Y * l3X)) * -det;
       inv[8] = ((l1X * l2Y) - (l1Y * l2X)) * det;
         
-        
-      mListenerIsNearTripletBoundary[i] = (l1X * l2X + l1Y * l2Y < -0.7); //! cos(theta) < -.7
+      // Is listener inside near triplet boundary?
+      mListenerIsNearTripletBoundary[i] = (l1X * l2X + l1Y * l2Y < mNearTripletBoundaryCosTheta);
 
     }
    
@@ -254,7 +255,7 @@ namespace panning
       y -= mListenerPos[1];
       z -= mListenerPos[2];
     }
-    if( mArrayIs2D && !m2DfadeMode) z = 0; // ensures no fade for source out of 2D plane, when mIs2Dfade is false
+    if( mArrayIs2D && !m2Dfade) z = 0; // ensures no fade for source out of 2D plane, when mIs2Dfade is false
       
     std::size_t l1, l2, l3;
     SampleType g1, g2, g3;
@@ -265,17 +266,18 @@ namespace panning
       g2 = x*inv[3] + y*inv[4] + z*inv[5];
       g3 = x*inv[6] + y*inv[7] + z*inv[8];
       
+      // Triplet found for current image if the source appears inside triplet from listener, or edge in 2D case.
+      // or listener is 'near' triplet on same side as source.
       if (
          ( g1 >= 0 && g2 >= 0 && (g3 >= 0 || mArrayIs2D) )
          || ( g1 <= 0 && g2 <= 0 && (g3 <= 0 || mArrayIs2D) && mListenerIsNearTripletBoundary[j])
          //|| mListenerIsNearTripletBoundary[j]
-         )  // From listener the source appears inside triplet, or edge in 2D case.
-            // Or listener is 'near' triplet on same side as source.
+         )
       {
         jmin = j;
           if (g1 <= 0 && g2 <= 0) { g1 = -g1; g2 = -g2; } // prevent later - -> 0 VBIP cutoff.
         // g1min = g1; g2min = g2; g3min = g3;
-        break;  // should only be at most one triplet with all positive gains.
+        break;  // choose only one triplet.
       }
       
 //        
