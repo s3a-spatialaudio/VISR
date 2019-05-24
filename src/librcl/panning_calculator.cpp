@@ -266,7 +266,7 @@ void PanningCalculator::process()
       {
         SampleType x,y,z;
         std::tie( x, y, z ) = efl::spherical2cartesian( pw->incidenceAzimuth(), pw->incidenceElevation(), pw->referenceDistance() );
-        mVbapCalculator->calculateGainsUnNormalised( x, y, z, &mTmpGains[0] );
+        mVbapCalculator->calculateGainsUnNormalised( x, y, z, &mTmpGains[0], true /*planeWave*/ );
         diffuseRatio = 0.0f;
         objectHandled = true;
       }
@@ -274,7 +274,7 @@ void PanningCalculator::process()
       if( ps )
       {
         objectHandled = true;
-        mVbapCalculator->calculateGainsUnNormalised( ps->x(), ps->y(), ps->z(), mTmpGains.data() );
+        mVbapCalculator->calculateGainsUnNormalised( ps->x(), ps->y(), ps->z(), mTmpGains.data(), false /*planeWave*/ );
 
         objectmodel::PointSourceWithDiffuseness const * psd = dynamic_cast<objectmodel::PointSourceWithDiffuseness const *>(&obj);
         diffuseRatio = psd ? psd->diffuseness() : 0.0f;
@@ -297,8 +297,6 @@ void PanningCalculator::process()
         if( hfGains )
         {
           std::transform( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers, mTmpHfGains.data(), [](SampleType val ){ return std::sqrt(val); } );
-//          std::transform( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,   mTmpHfGains.data(), [](SampleType val ){ return 1; } );   //    std::pow(val, 0); } );
-
           normalise( mTmpHfGains.data(), hfGains->data() + objChannelIdx, mNumberOfRegularLoudspeakers,
             mHfNormalisation, hfGains->stride(), directRatio );
         }
