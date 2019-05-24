@@ -142,7 +142,7 @@ int CAP::calcGains(){
             
             Afloat d = std::abs(g1 + g2); // denominator. abs() ensures continuity of normalised gains
             
-            if (d < 0.001) d = 0.001;     // hard gain limit to avoid singularity
+            if (d < 0.001f) d = 0.001f;     // hard gain limit to avoid singularity
             
             g1 = g1 / d;
             g2 = g2 / d;
@@ -176,7 +176,7 @@ int CAP::calcGains(){
             
             
             // Image/speaker distance compensation
-            if (rI_ < 0.001) rI_ = 0.001;
+            if (rI_ < 0.001f) rI_ = 0.001f;
             Afloat c = rI0_ / rI_;    // gain 1 when listener is at 0
                                       // Should replace rI0_ with rI1_ set in plugin - fixed unity-gain-distance parameter (rI0_ varies with pointsource distance).
             
