@@ -70,14 +70,17 @@ class VISR_PANNING_LIBRARY_SYMBOL XYZ {
         return 0;
   }
 
+  /**
+   * Re-scale the vector to unit length.
+   * @return The length of the vector before the normalisation.
+   */
   Afloat normalise() {
     Afloat l = getLength();
-      if (l != 0.0f ) {
-          x /= l;
-          y /= l;
-          z /= l;
-      }
-
+    if (l != 0.0f ) {
+      x /= l;
+      y /= l;
+      z /= l;
+    }
     return l;
   }
 };
