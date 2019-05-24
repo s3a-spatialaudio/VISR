@@ -22,7 +22,7 @@ namespace visr
 {
 namespace panning
 {
-  
+
 class VISR_PANNING_LIBRARY_SYMBOL VBAP
 {
 public:
@@ -35,7 +35,7 @@ public:
    */
   explicit VBAP( const LoudspeakerArray &array, SampleType x = 0.0f, SampleType y = 0.0f, SampleType z = 0.0f );
   VBAP( VBAP const & ) = delete;
-  
+
   /**
    * Calculate the panning gains for a single source position and apply power normalisation.
    * @param x Cartesian x coordinate of the source position
@@ -43,18 +43,21 @@ public:
    * @param z Cartesian z coordinate of the source position
    * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
    * Buffer must provide space for at least getNumSpeakers() values.
+   * @param planeWave Whether the source distance is considered finite, i.e., a point source, (false, default) or infinite, i.e., a plane wave (true)
    */
-  void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;
+  void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave = false ) const;
 
   /**
   * Calculate the panning gains for a single source position without normalisation.
   * @param x Cartesian x coordinate of the source position
   * @param y Cartesian y coordinate of the source position
   * @param z Cartesian z coordinate of the source position
+  * @param finiteDistance Whether the source distance is considered infinite (i.e., a plane wave)
   * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
   * Buffer must provide space for at least getNumSpeakers() values.
+   * @param planeWave Whether the source distance is considered finite, i.e., a point source, (false, default) or infinite, i.e., a plane wave (true)
   */
-  void calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains ) const;
+  void calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave = false ) const;
 
   /**
    * Reset the listener position.
@@ -64,16 +67,18 @@ public:
    * @param z Cartesian z coordinate of the new listener position
    */
   void setListenerPosition( SampleType x, SampleType y, SampleType z );
-    
-    
+
+  /**
+   * Toggle the handling of the height (z) compononent for 2D (planar) loudspeaker setups.
+   */
   void set2DfadeMode( bool m2DfadeMode );
-  
+
 private:
-  
+
   bool mArrayIs2D;
   bool mArrayIsInfinite;
   bool m2DfadeMode;
-  
+
   size_t numTotLoudspeakers;
   size_t numRegLoudspeakers;
   size_t numVirtLoudspeakers;
@@ -83,24 +88,24 @@ private:
    * Dimension: # triplets(Rows) x # vectorComponents(Columns).
    */
   efl::BasicMatrix<SampleType> mInvMatrix;
-  
+
   /**
    * Matrix that contains the positions of the loudspeakers.
    * Dimension: # realLoudspeakers(Rows) x # 3Dcoordinates(Columns).
    */
   efl::BasicMatrix<SampleType> mPositions;
-  
+
   /**
    * Matrix that contains the rereouting coefficients from virtual to real loudspeakers.
    * Dimension: # virtualLoudspeakers(Rows) x # realLoudspeakers(Columns).
    */
   efl::BasicMatrix<SampleType> mReroutingMatrix;
-  
+
   /**
    * Vector holding the triplets of loudspeakers for VBAP calculation.
    */
   std::vector<LoudspeakerArray::TripletType> mTriplets;
-  
+
   /**
    * Vector holding the cartesian coordinates of the listener.
    */
@@ -112,38 +117,34 @@ private:
    * The gains of virtual loudspeakers are after the regular loudspeaker gains.
    */
   mutable std::vector<SampleType> mGain;
-    
 
-    /**
-     * State indicates whether is listener is near to triplet boundary (in 2D only for now)
-     * Used for 360 HF integration with CAP.
-     */
-    mutable std::vector<bool> mListenerIsNearTripletBoundary;
+  /**
+   * State indicates whether is listener is near to triplet boundary (in 2D only for now)
+   * Used for 360 HF integration with CAP.
+   */
+  std::vector<bool> mListenerIsNearTripletBoundary;
 
-    
-  
   /**
    * Calculates the inverse matrix required for VBAP gain calculation.
    */
   void calcInvMatrices();
-  
+
   /**
    * Perform the basic VBAP gain calculation.
    * @param posX Cartesian x coordinate of the sound source position
    * @param posY Cartesian y coordinate of the sound source position
    * @param posZ Cartesian z coordinate of the sound source position
-   
-   
+   * @param planeWave Whether the source is a plane wave, i.e., at infinite distance, or a point source with finite distance.
    */
-  void calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ ) const;
-  
+  void calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ, bool planeWave ) const;
+
   /**
-   * Applies rereouting coefficients to VBAP gains
+   * Applies rerouting coefficients to VBAP gains
    */
   void applyRerouting() const;
-  
+
 };
-  
+
 } // namespace panning
 } // namespace visr
 

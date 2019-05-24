@@ -92,21 +92,16 @@ namespace panning
     }
   } // unnamed namespace
   
-  void VBAP::calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains ) const
+  void VBAP::calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave /*= false*/) const
   {
-    calcPlainVBAP( x, y, z);
+    calcPlainVBAP( x, y, z, planeWave );
     applyRerouting();
-//    for( size_t i = 0; i < mGain.size(); i++ )
-//    {
-//      gains[i] = mGain[i];
-//    }
-
     powerNormalisation( &mGain[0], gains, numRegLoudspeakers );
   }
   
-  void VBAP::calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains ) const
+  void VBAP::calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave /*= false*/) const
   {
-    calcPlainVBAP( x, y, z );
+    calcPlainVBAP( x, y, z, planeWave );
     applyRerouting();
     std::copy( mGain.begin(), mGain.begin()+numRegLoudspeakers, gains );
   }
@@ -221,7 +216,7 @@ namespace panning
   }
   
   
-  void VBAP::calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ ) const
+  void VBAP::calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ, bool planeWave ) const
   {
     
 //     std::cout<<"l1X: "<<posX<<" l1Y: "<<posY<<" l1Z: "<<posZ<<std::endl;
@@ -247,8 +242,8 @@ namespace panning
     y = posY;
     z = posZ;
     
-    // If source is finite subtract the listener position
-    if (1)   // if ( !mSource[i].isInfinite )     //! Is mSource[i].isInfinite set correctly?
+    // If source distance is finite, i.e., not a plane wave, subtract the listener position
+    if( not planeWave )
     {
       x -= mListenerPos[0];
       y -= mListenerPos[1];
