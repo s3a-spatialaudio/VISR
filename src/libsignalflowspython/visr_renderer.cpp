@@ -54,11 +54,11 @@ VisrRenderer::VisrRenderer( SignalFlowContext const & context,
     std::string const kwArgs = str( boost::format( formatString ) % metadapterConfig );
 
     mSceneDecoder.reset( new pythoncomponents::Wrapper( context, "Metadapter", this,
-      "metadapter",     //  char const * moduleName,
-      "Component",     //  char const * componentClassName,
-      "",               //  char const * positionalArguments = "",
-      kwArgs.c_str(),   //  char const * keywordArguments = "",
-      ""                // No module search path
+      "metadapter.visrintegration", //  char const * moduleName,
+      "Component",                  //  char const * componentClassName,
+      "",                           //  char const * positionalArguments = "",
+      kwArgs.c_str(),               //  char const * keywordArguments = "",
+      ""                            //  No module search path
       ) );
     parameterConnection( mSceneReceiver.parameterPort( "messageOutput" ), mSceneDecoder->parameterPort( "objectIn" ) );
     parameterConnection( mSceneDecoder->parameterPort( "objectOut" ), mCoreRenderer.parameterPort( "objectDataInput" ) );
