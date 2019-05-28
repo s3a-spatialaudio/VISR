@@ -46,7 +46,17 @@ ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T end
   bool startInclusive, bool endInclusive, std::size_t alignment /*= 0*/ )
 {
   if( not checkAlignment( dest, alignment ) ) return alignmentError;
-  if( numElements < 2 ) return logicError; // ramps with less than 2 elements make no sense.
+  if( numElements == 0 ) return noError; // Not very sensible, but legal
+  if( numElements == 1 ) // Special handling for single-element ramps.
+  {
+    // Meet in the middle if either both or none of start and end points are to be included
+    if( startInclusive == endInclusive )
+    {
+      dest[0] = 0.5*(startVal+endVal);
+    }
+    dest[0] = startInclusive ? startVal : endVal;
+    return noError;
+  }
   std::size_t const numSteps = numElements + 1 - (startInclusive ? 1 : 0) - (endInclusive ? 1 : 0);
   T const step = (endVal - startVal) / static_cast<T>(numSteps);
   std::size_t calcIdx( startInclusive ? 0 : 1 );
