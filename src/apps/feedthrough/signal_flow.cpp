@@ -14,18 +14,16 @@ namespace feedthrough
 
 Feedthrough::Feedthrough( SignalFlowContext & context,
                           char const * name,
-                          CompositeComponent * parent )
+                          CompositeComponent * parent,
+			  std::size_t inputChannels )
  : CompositeComponent( context, name, parent )
- , mInput( "input", *this, 2 )
- , mOutput( "output", *this, 2 )
- , mSum( context, "Add", this, 2, 2)
+ , mInput( "input", *this, inputChannels )
+ , mOutput( "output", *this, inputChannels )
+ , mSum( context, "Add", this, inputChannels, 1 )
 {
-  audioConnection( mInput, {0,1},
-                   mSum.audioPort( "in0" ), { 0, 1 } );
-  audioConnection( mInput, { 0, 1 },
-                   mSum.audioPort( "in0" ), { 1, 0 } );
-  audioConnection( mSum.audioPort( "out0"), { 0, 1 },
-                   mOutput, { 0, 1 } );
+  audioConnection( mInput, mSum.audioPort( "in0" ) );
+  audioConnection( mSum.audioPort( "out"), 
+                   mOutput );
 }
 
 Feedthrough::~Feedthrough( )

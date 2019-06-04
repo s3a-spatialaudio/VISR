@@ -2,7 +2,7 @@
 
 #include "signal_flow.hpp"
 
-#define FEEDTHROUGH_NATIVE_JACK
+// #define FEEDTHROUGH_NATIVE_JACK
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
 
@@ -32,7 +32,7 @@ int main( int argc, char const * const * argv )
     const std::size_t numberOfObjects = 2;
     const std::size_t numberOfLoudspeakers = 2;
     
-    const std::size_t periodSize = 128;
+    const std::size_t periodSize = 1024;
     const std::size_t samplingRate = 48000;
     try
     {
@@ -47,15 +47,15 @@ int main( int argc, char const * const * argv )
         
         type = "Jack";
 #else
-        specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : \"default\"}";
+        specConf = "{ \"interleaved\": \"true\", \"hostapi\" : \"ALSA\", \"inputDevice\": \"USB Sound Device: Audio (hw:1,0)\", \"outputDevice\": \"USB Sound Device: Audio (hw:1,0)\" }";
         type = "PortAudio";
 #endif
         
         std::unique_ptr<audiointerfaces::AudioInterface> audioInterface = audiointerfaces::AudioInterfaceFactory::create( type, baseConfig, specConf);
         
-        /********************************* SETTING TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
+        /********************************* SETTING UP TOP LEVEL COMPONENT AND ITS CALLBACK  **********************************/
         SignalFlowContext context( periodSize, samplingRate );
-        Feedthrough topLevel( context, "feedthrough" );
+        Feedthrough topLevel( context, "feedthrough", nullptr, numberOfObjects );
         rrl::AudioSignalFlow flow( topLevel );
         audioInterface->registerCallback( &rrl::AudioSignalFlow::processFunction, &flow );
         /*******************************************************************/

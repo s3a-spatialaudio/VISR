@@ -21,7 +21,8 @@ namespace feedthrough
 class Feedthrough: public CompositeComponent
 {
 public:
-  explicit Feedthrough( SignalFlowContext & context, const char* name, CompositeComponent * parent = nullptr );
+  explicit Feedthrough( SignalFlowContext & context, const char* name, CompositeComponent * parent /*= nullptr*/,
+			std::size_t inputChannels );
 
   ~Feedthrough();
 
