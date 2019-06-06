@@ -12,8 +12,8 @@ import random
 import copy
 from time import gmtime
 
-from twisted.internet.protocol import DatagramProtocol
-from twisted.internet import reactor
+#from twisted.internet.protocol import DatagramProtocol
+#from twisted.internet import reactor
 
 #from sys import version_info
 #
@@ -67,78 +67,81 @@ def dB2lin( dbVal ):
 # FUNCTION to parse loudspeaker config .xml file
 def Parse_Loudspeaker_Config(filename):
 
-    if filename == 'None':
-        print( "MDO processor: no loudspeaker config file (.xml) specified" )
-        return None
-
-    import xml.etree.ElementTree as ET
-
-    # Read the file
-    tree = ET.parse(filename)
-    root = tree.getroot()
-
-
     # Preallocate a list of loudspeakers
     loudspeakers = []
+		
+    if filename == None:
+        
+        print( "MDO processor: no loudspeaker config file (.xml) specified - using default" )
+        # Use default stereo plus 1 MDO to start with (can be updated)
+        loudspeakers.append( dict(name='Left', id=1, channel=1, mdo=0, quality='unknown', type='unknown', x=0.866, y=+0.5, z=0.0, switch=1, function='unknown', mdoZone=-1) )
+        loudspeakers.append( dict(name='Right', id=2, channel=2, mdo=0, quality='unknown', type='unknown', x=0.866, y=-0.5, z=0.0, switch=1, function='unknown', mdoZone=-1) )
+        loudspeakers.append( dict(name='MDO1', id=3, channel=3, mdo=1, quality='unknown', type='unknown', x=1.0, y=0.0, z=0.0, switch=1, function='unknown', mdoZone=1) )
+    
+    else:
+        
+        # Read from xml file
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(filename)
+        root = tree.getroot()
 
-    for child in root:
-        if child.tag == "loudspeaker": # found a loudspeaker
+        for child in root:
 
-            if 'name' in child.attrib:
-                name = child.attrib['name']
-            else:
-                name = 'no name'    # Unknown name is set as 'no name'
+            if child.tag == "loudspeaker": # found a loudspeaker
 
-            if 'mdo' in child.attrib:           # If the MDO attribute exists
-                mdo = int(child.attrib['mdo'])  # ...see what it is
-            else:                               # Otherwise, it doesn't exist
-                mdo = 0                         # ...set MDO to zero
+                if 'name' in child.attrib:
+                    name = child.attrib['name']
+                else:
+                    name = 'no name'    # Unknown name is set as 'no name'
 
-            if 'quality' in child.attrib:
-                quality = child.attrib['quality']
-            else:
-                quality = 'unknown'     # Unknown quality is set as unknown
+                if 'mdo' in child.attrib:           # If the MDO attribute exists
+                    mdo = int(child.attrib['mdo'])  # ...see what it is
+                else:                               # Otherwise, it doesn't exist
+                    mdo = 0                         # ...set MDO to zero
 
-            if 'type' in child.attrib:
-                type = child.attrib['type']
-            else:
-                type = 'unknown'
+                if 'quality' in child.attrib:
+                    quality = child.attrib['quality']
+                else:
+                    quality = 'unknown'     # Unknown quality is set as unknown
 
-            if 'switch' in child.attrib:
-                switch = int(child.attrib['switch'])
-            else:
-                switch = 1
+                if 'type' in child.attrib:
+                    type = child.attrib['type']
+                else:
+                    type = 'unknown'
 
-            if 'function' in child.attrib:
-                function = child.attrib['function']
-            else:
-                function = 'unknown'
+                if 'switch' in child.attrib:
+                    switch = int(child.attrib['switch'])
+                else:
+                    switch = 1
+
+                if 'function' in child.attrib:
+                    function = child.attrib['function']
+                else:
+                    function = 'unknown'
 				
-            if 'mdoZone' in child.attrib:
-                mdoZone = int(child.attrib['mdoZone'])
-            else:
-                mdoZone = -1
+                if 'mdoZone' in child.attrib:
+                    mdoZone = int(child.attrib['mdoZone'])
+                else:
+                    mdoZone = -1
 
-            id = int(child.attrib['id'])
-            channel = int(child.attrib['channel'])
+                id = int(child.attrib['id'])
+                channel = int(child.attrib['channel'])
 
+                # Get the loudspeaker position
+                for lschild in child:
 
-            # Get the loudspeaker position
-            for lschild in child:
+                    #print( lschild.attrib )
 
-                #print( lschild.attrib )
+                    if lschild.tag == "polar":
+                        x,y,z = sphDeg2cart(float(lschild.attrib['az']),float(lschild.attrib['el']),float(lschild.attrib['r']))
 
-                if lschild.tag == "polar":
-                    x,y,z = sphDeg2cart(float(lschild.attrib['az']),float(lschild.attrib['el']),float(lschild.attrib['r']))
+                    elif lschild.tag == "cart":
+                        x,y,z = float(lschild.attrib['x']),float(lschild.attrib['y']),float(lschild.attrib['z'])
 
-                elif lschild.tag == "cart":
-                    x,y,z = float(lschild.attrib['x']),float(lschild.attrib['y']),float(lschild.attrib['z'])
+                    #print( x,y,z )
 
-                #print( x,y,z )
-
-
-            # Compile the loudspeaker list of dictionaries
-            loudspeakers.append( dict(name=name, id=id, channel=channel, mdo=mdo, quality=quality, type=type, x=x, y=y, z=z, switch=switch, function=function, mdoZone=mdoZone) )
+                # Compile the loudspeaker list of dictionaries
+                loudspeakers.append( dict(name=name, id=id, channel=channel, mdo=mdo, quality=quality, type=type, x=x, y=y, z=z, switch=switch, function=function, mdoZone=mdoZone) )
     
     return loudspeakers
 
@@ -246,7 +249,7 @@ def Parse_Loudspeaker_Config(filename):
 # FUNCTION: print what's in loudspeakers data
 def print_loudspeakers(loudspeakers):
     
-    print("\nFound %i loudspeakers:" % len(loudspeakers))
+    print("\nFound %i loudspeakers:\n" % len(loudspeakers))
     
     # Get keys
     lsKeys = []
@@ -270,6 +273,59 @@ def print_loudspeakers(loudspeakers):
             else:
                 value = 'Unknown'
             string = string+(' %s: %s ; ' % (k,value))
+        print(string)
+    print('')
+
+    return
+
+
+# FUNCTION: print what's in loudspeakers data
+def print_objects(objects):
+    
+    print("\nFound %i objects:\n" % len(objects))
+    
+    objKeys = ['id','group','label','type','level','outputChannels','diffuseness','mdoSpread']
+    
+    # Print headers
+    print('          ID   GROUP               LABEL       TYPE    LEVEL (dB)       OUTPUTCHANNELS   DIFFUSENESS        SPREAD')
+        
+    # Loop round objects and print details
+    for i, obj in enumerate(objects):
+        string = '%7i.' % i
+        for k in objKeys:   
+            if k in obj:
+                value = obj[k]
+                if value=='':
+                    # Assume always got an id, but for others...
+                    if k=='group' or k=='diffuseness' or k=='mdoSpread' or k=='level':
+                        value = int(0)
+                    else:
+                        value = 'Unknown'
+            elif k=='group' or k=='diffuseness' or k=='mdoSpread' or k=='level':
+                value = int(0)
+            else:
+                value = 'Unknown'
+            if k=='id':
+                value = '%3i' % int(value)
+            if k=='group':
+                value = '%4i' % int(value)
+            if k=='label':
+                value = '%16.16s' % str(value)
+            elif k=='type':
+                value = '%7.7s' % str(value)
+            elif k=='level':
+                value = float(value)
+                if value < 0.00001:
+                    value = 0.00001
+                value = lin2dB(value)
+                value = '%10.1f' % float(value)
+            elif k=='diffuseness':
+                value = '%10.2f' % float(value)
+            elif k=='outputChannels':
+                value = '%17.17s' % str(value)
+            elif k=='mdoSpread':
+                value = '%10i' % int(value)
+            string = string+(' %s ; ' % value)
         print(string)
     print('')
 
@@ -367,6 +423,7 @@ def get_mdo_speakers(self):
     MDOactive = []
     MDOorder = []
     MDOzone = []
+    MDOquality = []
     for i,ls in enumerate(self.loudspeakers):
         # Check if MDO
         if 'mdo' in ls:
@@ -398,11 +455,25 @@ def get_mdo_speakers(self):
                 else:
                     zone_value = -1
                 MDOzone.append(zone_value)
+                # Add quality of device
+                if 'quality' in ls:
+                    quality_value = str(ls['quality'])
+                    if quality_value == 'low':
+                        quality_value = 1
+                    elif quality_value == 'medium':
+                        quality_value = 2
+                    elif quality_value == 'high':
+                        quality_value = 3
+                    else:
+                        quality_value = 1 # Default is low
+                else:
+                    quality_value = 1 # Default is low
+                MDOquality.append(quality_value)
     
     MDOactive = numpy.array(MDOactive)
     MDOorder = numpy.array(MDOorder)
     MDOzone = numpy.array(MDOzone)
-        
+    MDOquality = numpy.array(MDOquality)
     # Number of MDO devices available
     NMDO = len(MDOactive)
     
@@ -411,11 +482,12 @@ def get_mdo_speakers(self):
         MDOorder[MDOorder==-1] = numpy.max(MDOorder)+1
         MDOactive = MDOactive[numpy.argsort(MDOorder)]
         MDOzone = MDOzone[numpy.argsort(MDOorder)]
+        MDOquality = MDOquality[numpy.argsort(MDOorder)]
     
     if self.verbose:
         print('\nMDO speaker ids available:',MDOactive,'in zones:',MDOzone,'\n')
         
-    return MDOactive, MDOzone, NMDO
+    return MDOactive, MDOzone, NMDO, MDOquality
 
 
 
@@ -442,7 +514,7 @@ def zone_method(MDOactive,MDOzone,NMDO,OBJzones,OBJprevious,OBJprevzone,OBJdynam
         op_zone_level = -1
     if verbose:
         print('%s - Looking for MDO speaker in min zone level: %i' % (objName,zone_min))
-        
+    
     # Check zone priorities in decreasing order until found device (or no zones left)
     found_new_zone = False
     while zone_priority >= zone_min:
@@ -450,18 +522,22 @@ def zone_method(MDOactive,MDOzone,NMDO,OBJzones,OBJprevious,OBJprevzone,OBJdynam
         in_zone = [j+1 for j,x in enumerate(OBJzones) if x==zone_priority]
         Nzone = len(in_zone)
         # Check each of the zones at this priority in a random order
+        #random.seed(gmtime())
         rand_order = random.sample(range(0,Nzone),Nzone)
         izone = 0
         while izone < Nzone:
             check_zone = in_zone[rand_order[izone]]
             # Check each of the devices in order (the order they joined)
             iMDO = 0
-            if not OBJdynamic:
-                # For static, check devices in order they joined
-                ind = range(0,NMDO)
-            else:
-                # For dynamic, check devices in random order
-                ind = random.sample(range(0,NMDO),NMDO)
+#            if not OBJdynamic:
+#                # For static, check devices in order they joined
+#                ind = range(0,NMDO)
+#            else:
+#                # For dynamic, check devices in random order
+#                ind = random.sample(range(0,NMDO),NMDO)
+            # Just check in random order (regardless of if dynamic or not)
+            #random.seed(gmtime())
+            ind = random.sample(range(0,NMDO),NMDO)
             while iMDO < NMDO:
                 indi = ind[iMDO]
                 if MDOzone[indi]==check_zone:
@@ -479,6 +555,9 @@ def zone_method(MDOactive,MDOzone,NMDO,OBJzones,OBJprevious,OBJprevzone,OBJdynam
         zone_priority = zone_priority-1     # Decrement zone to look at
     if verbose:
         print(objName,'- New zone routing found:',found_new_zone)
+    
+    #Ensure op_id is int
+    op_id = int(op_id)
     
     # If exits above while loops withut finding device, op_id should remain unchanged
     
@@ -555,25 +634,45 @@ def update_loudspeaker_data(self,verboseCheck=True):
     
     ''' Function to update current loudspeaker data'''
     
+    # Updates can add to existing defined loudspeakers
+    # (i.e. speaker with specified id doesn't have to already exist)
+    addToExisting = True
+    
     # Update speakers if LSupdate flag is true
     if self.LSupdate == True:
-        # Reset loudspeaker settings to those in config file
-        self.loudspeakers = copy.deepcopy(self.loudspeaker_config)
+        if self.lsMode == 'overwrite':
+            # Reset loudspeaker settings to those in config file if in overwrite mode
+            self.loudspeakers = copy.deepcopy(self.loudspeaker_config)
         # Verbose printout
         if self.verbose0:
             #print('\nReceived loudspeaker update:\n',self.loudspeakers)
             print('\nReceived loudspeaker update\n')
         # Update loudspeaker values
-        for ls in self.loudspeakers:
-            lsId = int(ls["id"])
-            if lsId in self.lsData:
-                ls.update( self.lsData[lsId] )
-    
+        if not addToExisting:
+            # Only update existing loudspeakers (i.e. those specified in the initial config)
+            for ls in self.loudspeakers:
+                lsId = int(ls["id"])
+                if lsId in self.lsData:
+                    ls.update( self.lsData[lsId] )
+        else:
+            # Also append any newly specified loudspeakers
+            for i in self.lsData:
+                foundSpeaker = False
+                for ls in self.loudspeakers:
+                    lsId = int(ls["id"])
+                    if lsId == i:
+                        ls.update( self.lsData[lsId] )
+                        foundSpeaker = True
+                if not foundSpeaker:
+                    newEntry = {'id':i}
+                    newEntry.update(self.lsData[i])
+                    self.loudspeakers.append(newEntry)
+
     # Make in correct format
     for ls in self.loudspeakers:
         
         if 'id' in ls:
-            ls['id'] = int(ls['id'])
+            ls['id'] = int(float(ls['id']))
         
         if 'name' in ls:
             ls['label'] = str(ls['name'])
@@ -581,14 +680,14 @@ def update_loudspeaker_data(self,verboseCheck=True):
             ls['label'] = str(ls['label'])
         
         if 'channel' in ls:
-            ls['channel'] = int(ls['channel'])
+            ls['channel'] = int(float(ls['channel']))
             if verboseCheck:
-                print('\nLoudspeaker %i: channel updates will have no effect\n' % ls['id'])
+                print('Loudspeaker %i: channel updates will have no effect' % ls['id'])
         
         if 'mdo' in ls:
-            ls['mdo'] = bool(int(ls['mdo']))
+            ls['mdo'] = bool(float(int(ls['mdo'])))
             if verboseCheck and not ls['mdo']:
-                print('\nLoudspeaker %i: updates to non-MDO loudspeakers may have no effect\n' % ls['id'])
+                print('Loudspeaker %i: updates to non-MDO loudspeakers may have no effect' % ls['id'])
         
         if 'x' in ls:
             ls['x'] = float(ls['x'])
@@ -598,13 +697,15 @@ def update_loudspeaker_data(self,verboseCheck=True):
             ls['z'] = float(ls['z'])
         
         if 'mdoZone' in ls:
-            ls['mdoZone'] = int(ls['mdoZone'])
+            ls['mdoZone'] = int(float(ls['mdoZone']))
         if 'switch' in ls:
-            ls['switch'] = bool(int(ls['switch']))
+            ls['switch'] = bool(int(float(ls['switch'])))
         if 'joined' in ls:
-            ls['joined'] = int(ls['joined'])
+            ls['joined'] = int(float(ls['joined']))
         if 'mdoGainDB' in ls:
             ls['mdoGainDB'] = float(ls['mdoGainDB'])
+        if 'mdoQuality' in ls:
+            ls['quality'] = int(float(ls['mdoQuality']))
     
     # Print loudspeaker list
     if self.verbose0:
@@ -613,41 +714,90 @@ def update_loudspeaker_data(self,verboseCheck=True):
     return self
 
 def getLsData(self,allData):
-    """ Internal function to get object data from dict """
+    """ Internal function to get loudspeaker data from dict """
+    
     # Extract the actual table.
     # Depends on the actualsend format.
-    if 'mdoLoudspeakers' in allData:
-        tableData = allData['mdoLoudspeakers']
-        # Store the received data in a lookup table (a dict) with the id as search index.
-        # Note: Revisit whether the ID should be transmitted as "ID"
+    # Get the mode (update/overwrite)
+    #if 'mode' in allData:
+    #    mode = allData["mode"]
+    #else:
+    #    self.updateMode # Use default
+    mode = self.updateMode # Use default
+
+    # Store the received data in a lookup table (a dict) with the id as search index.
+    # Note: Revisit whether the ID should be transmitted as "ID"
+    if mode=='overwrite':
         self.lsData = {}
-        for ls in tableData:
-            #objId = int(obj.pop( "ID" ))
-            if 'id' in ls:
-                lsId = int(ls.pop( "id" )) # Loudspeakers ids are not zero indexed
-            elif 'speakerNumber' in ls:
-                lsId = int(ls.pop( "speakerNumber" ))
-            self.lsData[lsId] = ls
-        # Unfortunately this does not work, because id is removed before it can be used for the index
-        # int(obj["ID"]): obj.pop("ID") for obj in tableData }
-        self.LSupdate = True
-        
+        self.lsMode = mode  # Updates here so knows if to clear object history or not later on
+    for ls in allData:
+        if 'id' in ls:
+            lsId = int(float(ls.pop( "id" ))) # Loudspeakers ids are not zero indexed
+        elif 'speakerNumber' in ls:
+            lsId = int(float(ls.pop( "speakerNumber" )))
+        self.lsData[lsId] = ls
+    self.LSupdate = True
+
     return self
 
 
-class TableReceiver( DatagramProtocol ):
-    """ Internal class to handle receipt of table messages """
-    def __init__( self, parent, verbose=False ):
-        super(TableReceiver).__init__()
-        self.parent = parent
-        self.verbose = verbose
+def sortObjects(objects):
+    """ Internal function to sort objects by id """
+    # Temporarily convert objects to array for sorting
+    objects = numpy.array(objects)
+    # Get ids and exclusivity and sort by exc then ids
+    sortBy = []
+    for obj in objects:
+        objId = int(float(obj['id']))
+        if 'exclusivity' in obj:
+            # Note reversing of exclusive logic for simpler sorting
+            exc = 1-int(float(obj['exclusivity']))
+        else:
+            exc = 1
+        sortBy = sortBy+[exc+objId*1e-4]
+    order = numpy.argsort(numpy.array(sortBy))
+    objects = objects[order]
+    # Convert back to list
+    objects = list(objects)
+    return objects
 
-    def startProtocol( self ):
-        if self.verbose:
-            print( 'NetworkUdpReceiver.startProtocol()' )
-            # Nothing really to do here (for a receiver)
-    def datagramReceived( self, data, address ):
-        self.parent.datagramReceived( data, address )
+def getJsonData(self,data):
+
+    """ Internal function to save to file and determine message type """
+    if 'mdoLoudspeakers' in data:  # Legacy term
+        # Get object metadata
+        allData = data["mdoLoudspeakers"]
+    else:
+        # Data doesn't need pulling out
+        allData = data
+
+    # Write archive to file if requested
+    if len(self.writeLsToFile) > 0:
+        filename = self.writeLsToFile
+        t = gmtime()
+        # filename = ('%s_%04i%02i%02i%02i%02i%02i.txt' % (filename,t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec))
+        filename = ('%s_%04i%02i%02i%02i%02i.txt' % (filename,t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min))
+        with open(filename, 'w') as file:
+            file.write(json.dumps(data))
+        
+    # Get speaker data        
+    self = getLsData(self,allData)
+	
+
+#class TableReceiver( DatagramProtocol ):
+#    """ Internal class to handle receipt of table messages """
+#    def __init__( self, parent, verbose=False ):
+#        super(TableReceiver).__init__()
+#        self.parent = parent
+#        self.verbose = verbose
+#
+#    def startProtocol( self ):
+#        if self.verbose:
+#            print( 'NetworkUdpReceiver.startProtocol()' )
+#            # Nothing really to do here (for a receiver)
+#    def datagramReceived( self, data, address ):
+#        self.parent.datagramReceived( data, address )
+
         
 class MDOProductionProcessor(SequenceProcessorInterface):
     def __init__(self, arguments ):
@@ -666,7 +816,7 @@ class MDOProductionProcessor(SequenceProcessorInterface):
             #print(arguments.attrib['loudspeakerconfig'])
             self.loudspeaker_config = arguments.attrib['loudspeakerconfig']
         else:
-            self.loudspeaker_config = 'None'
+            self.loudspeaker_config = None
         
         # If verbose
         if 'verbose' in arguments.attrib:
@@ -684,9 +834,16 @@ class MDOProductionProcessor(SequenceProcessorInterface):
         # If UDP port for receiving updated loudspeaker settings on
         if "udpPort" in arguments.attrib:
             self.udpPort = int(arguments.attrib[ "udpPort" ])
+        elif "objUdpPort" in arguments.attrib:
+            self.udpPort = int(arguments.attrib[ "udpPort" ])
         else:
-            self.udpPort = 5000
+            self.udpPort = 9002
         
+        if "updateMode" in arguments.attrib:
+            self.updateMode = arguments.attrib[ "updateMode" ]
+        else:
+            self.updateMode = 'update'
+
         # Rendering method to use
         if "method" in arguments.attrib:
             self.method = int(arguments.attrib[ "method" ])
@@ -697,13 +854,17 @@ class MDOProductionProcessor(SequenceProcessorInterface):
         if "numberZones" in arguments.attrib:
             self.MaxZones = int(arguments.attrib[ "numberZones" ])
         else:
-            self.MaxZones = 4
+            self.MaxZones = 6
         
-        # Force update of devices
-        if "updateDevices" in arguments.attrib:
-            self.LSupdate = bool(int(arguments.attrib[ "updateDevices" ]))
+        # Or now define zone labels...
+        self.zoneLabels = ['nearFront', 'nearSide', 'nearRear', 'farFront', 'farSide', 'farRear','above']
+        self.MaxZones = len(self.zoneLabels)
+        
+        # Overwrite/update - what to do when loudspeaker data is updated
+        if "lsMode" in arguments.attrib:
+            self.writeLsToFile =  arguments.attrib[ "lsMode" ]
         else:
-            self.LSupdate = False
+            self.lsMode = 'overwrite'
         
         # Refresh period for verbose messages
         if "verbosePeriod" in arguments.attrib:
@@ -717,51 +878,72 @@ class MDOProductionProcessor(SequenceProcessorInterface):
         else:
             self.writeLsToFile = ''
         
-        # Flag to clear any previous device history from objects
+        # Clear any previous device history from objects
         self.LSclear = True
+        
+        # Force update of devices
+        self.LSupdate = True
+        
+        # For keeping track of object history
+        self.objHistory = {}
+        
+#        # For keeping track of group data
+#        self.grpHistory = {}
+        
+        # For keeping track of loudspeaker data
+        self.lsData = {}
+        
+        # Count the number of periods elapsed (this is used to print output less frequently)
+        self.periods = 1
         
         # Try parsing loudspeaker config file
         self.loudspeaker_config = Parse_Loudspeaker_Config(self.loudspeaker_config) # Keep original copy
         self.loudspeakers = copy.deepcopy(self.loudspeaker_config)                  # Copy for using and updating
         self = update_loudspeaker_data(self,False)                                  # Because converts some data types and prints (without checking for stuff can't update)
         
-        # Set up udp receive for loudspeaker data updates
-        self.udpPort = self.udpPort
-        self.udpReceiver = TableReceiver( self, verbose = True )
-        if inputPacketSize == None:
-            reactor.listenUDP( self.udpPort, self.udpReceiver )
-        else:
-            reactor.listenUDP( self.udpPort, self.udpReceiver, maxPacketSize=inputPacketSize )
-        self.lsData = {}
+        ## Set up udp receive for loudspeaker data updates
+        #self.udpReceiver = TableReceiver( self, verbose = True )
+        #if inputPacketSize == None:
+        #    reactor.listenUDP( self.udpPort, self.udpReceiver )
+        #else:
+        #    reactor.listenUDP( self.udpPort, self.udpReceiver, maxPacketSize=inputPacketSize )
         
-        # Count the number of periods elapsed (this is used to print output less frequently)
-        self.periods = 1
-        
-        # For keeping track of object history
-        self.objHistory = {}
-
     def processObjectVector( self, objectVector):
+        
+        # TODO: Remove this test objectVector when done with
+#        objectVector = [{'type': 'point', 'channels': '9', 'id': '9', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'ThunderMDO2_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': 3, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '10', 'id': '10', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'RainMDO_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': 1.0, 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 1, 'nearSide': 1, 'nearRear': 1, 'farFront': '1', 'farSide': '1', 'farRear': 3, 'above': 3, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '7', 'id': '7', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'ThunderMDO2_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': 3, 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '8', 'id': '8', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'ThunderMDO2_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': 3, 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '13', 'id': '13', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'RocketMDO_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 1, 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': 1, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '12', 'id': '12', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'RocketMDO_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': 0, 'nearFront': 3, 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '11', 'id': '11', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'RainMDO_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': 1.0, 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': 3, 'farSide': 3, 'farRear': 1, 'above': 1, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '14', 'id': '14', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'Shk_1_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': 0, 'nearFront': 3, 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '16', 'id': '16', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'Shk_2_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': 3, 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '17', 'id': '17', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Shk_2_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': 1, 'nearRear': '1', 'farFront': 1, 'farSide': 3, 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '18', 'id': '18', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'Shk_3_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': 3, 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '15', 'id': '15', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Shk_1_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 1, 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': 1, 'farRear': 3, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '19', 'id': '19', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Shk_3_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': 1, 'farFront': 3, 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '22', 'id': '22', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'Shk_5_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': 3, 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '21', 'id': '21', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Shk_4_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': 1, 'nearRear': 3, 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '20', 'id': '20', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'Shk_4_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': 3, 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '24', 'id': '24', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'Shk_6_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': 3, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '23', 'id': '23', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Shk_5_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 1, 'nearSide': 3, 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '25', 'id': '25', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Shk_6_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 3, 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '26', 'id': '26', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'HeadingRD_L', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': 0, 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 3, 'nearSide': 3, 'nearRear': 3, 'farFront': 3, 'farSide': 3, 'farRear': 3, 'above': 3, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '27', 'id': '27', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'HeadingRD_R', 'mdoThreshold': 1.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 3, 'nearSide': 3, 'nearRear': 3, 'farFront': 3, 'farSide': 3, 'farRear': 3, 'above': 3, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '28', 'id': '28', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'TatBroken', 'mdoThreshold': 2.0, 'mdoOnly': 0, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': 3.0, 'exclusivity': '0', 'nearFront': 3, 'nearSide': 2, 'nearRear': '1', 'farFront': '1', 'farSide': 1, 'farRear': 1, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '29', 'id': '29', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'Shots', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': 1.0, 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': 1, 'farRear': 3, 'above': 3, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '30', 'id': '30', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'JetFlyby1_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': 3, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '32', 'id': '32', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'JetFlyby2_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 3, 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '31', 'id': '31', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'JetFlyby1_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': 3, 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '33', 'id': '33', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'JetFlyby2_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': 3, 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '34', 'id': '34', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '0.49999997', 'z': '0'}, 'label': 'DogfightSynth_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': 3, 'farSide': 3, 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '0', 'id': '0', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025388', 'y': '0.5', 'z': '0'}, 'label': 'StereoL', 'mdoThreshold': '0', 'mdoOnly': '0', 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '35', 'id': '35', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'DogfightSynth_R', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': 3, 'above': 3, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '1', 'id': '1', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.866025329', 'y': '-0.49999997', 'z': '0'}, 'label': 'Stereo_R', 'mdoThreshold': '0', 'mdoOnly': '0', 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '2', 'id': '2', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'GeneralTat', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': 1, 'nearFront': '1', 'nearSide': 3, 'nearRear': '1', 'farFront': '1', 'farSide': 3, 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '4', 'id': '4', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'CockpitMDO_1', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': 1.0, 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 3, 'nearSide': 3, 'nearRear': 3, 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '3', 'id': '3', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'Sam', 'mdoThreshold': 2.0, 'mdoOnly': '0', 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': 3, 'nearSide': 2, 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '6', 'id': '6', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'ThunderMDO1_L', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': '0', 'mdoSpread': '0', 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': '1', 'farSide': '1', 'farRear': '1', 'above': 3, 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}, {'type': 'point', 'channels': '5', 'id': '5', 'group': 0, 'level': '0.5', 'priority': '5', 'position': {'x': '0.99999994', 'y': '0', 'z': '0'}, 'label': 'CockpitMDO_2', 'mdoThreshold': 1.0, 'mdoOnly': 1, 'mdoMethod': '3', 'speakerNumber': '', 'diffuseness': 1.0, 'mdoSpread': 1, 'mdoDynamic': '0', 'mdoGainDB': '0', 'muteIfObject': '0', 'exclusivity': '0', 'nearFront': '1', 'nearSide': '1', 'nearRear': '1', 'farFront': 3, 'farSide': 3, 'farRear': 3, 'above': '1', 'onDropin': '1', 'onDropout': '1', 'minQuality': '1'}]
+        
         # Function to be implemented by all derived MetaDataProcessor interfaces.
         
         # Because when been an update, converts some data types and then prints
         if self.LSupdate:
             self = update_loudspeaker_data(self)
-        
+            if self.lsMode == 'overwrite':
+                # If in overwrite mode then clear all history from objects when receive loudspeaker update
+                self.LSclear = True
+            
         """ Do MDO processing """
 
         if self.on:     # Do stuff if processor turned on
             
             # Get available MDO speaker ids and zones (in order they joined)
-            MDOactive,MDOzone,NMDO = get_mdo_speakers(self)
+            MDOactive,MDOzone,NMDO,MDOquality = get_mdo_speakers(self)
+            
+            # Sort objects by id
+            
+            objectVector = sortObjects(objectVector)
+            
+            # For keeping track of group data
+            grpHistory = {}
+            
+            # Keep track of devices in use by 'exclusive' objects
+            deviceInUse = []
             
             for i,obj in enumerate(objectVector):
-                #if int(obj["id"]) == 0:
-                #    print(obj)
-                # Loop round objects...
                 
                 # Get current id
                 if 'id' in obj:
-                    id_i = int(obj['id'])
+                    id_i = int(float(obj['id']))
                 else:
                     id_i = -1
                     print('\nObject error - invalid id !!!\n')
@@ -771,108 +953,170 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                     objName = str(obj['label'])
                 else:
                     objName = 'Object %3i' % (id_i+1)
+                    obj['label'] = objName
                 objName = '%16.16s' % objName # Make fixed length (padded or truncated)
                 
+                # Get group number
+                if 'group' in obj:
+                    group = int(float(obj['group']))
+                else:
+                    group = 0
+                
+                # If in a group, and group alredy has a result - copy result and history
+                if group > 0 and group in grpHistory:
+                    objCopy = copy.deepcopy(grpHistory[group])
+                    copyId = int(objCopy.pop('id'))
+                    objCopy.pop('label')
+                    self.objHistory[id_i] = {}
+                    self.objHistory[id_i].update(self.objHistory[copyId])
+                    obj.update(objCopy)
+                    alreadyInGroup = True
+                else:
+                    alreadyInGroup = False
+                
                 # Get object history (if there is any)
-                if id in self.objHistory:
-                    objHistory = self.objHistory[id]
+                if id_i in self.objHistory:
+                    objHistory = self.objHistory[id_i]
                 else:
                     objHistory = {}
                 
-                # Clear device routing history from objects if requested
-                if self.LSclear:
-                    objHistory['mdoPreviousId'] = -1
-                    objHistory['mdoPreviousZoneLevel'] = -1
-#                    if 'mdoPreviousId' in obj:
-#                        obj['mdoPreviousId'] = -1
-#                    if 'mdoPreviousZoneLevel' in obj:
-#                        obj['mdoPreviousZoneLevel'] = -1
-                
-                # Determine if object is active (and store in object history)
-                if 'active' in obj:
-                    objHistory['active'] = bool(obj['active'])
-                else:
-                    # Currently assume object is active unless find otherwise
-                    objHistory['active'] = True
-                
-                # Check to see if any mute if other object active id passed
-                if 'muteIfObject' in obj:
-                    muteIfObject = int(obj['muteIfObject'])-1 # Offset by -1 because of zero indexing here
-                else:
-                    muteIfObject = -1 # Default no muting
-                
-                # Check if object can be MDO (at this point this is a "threshold")
-                if 'mdoThreshold' in obj:
-                    OBJismdo = int(obj['mdoThreshold'])
-                elif 'ForceAuxiliary' in obj:
-                    OBJismdo = int(obj['ForceAuxiliary']) # Legacy name
-                else:
-                    OBJismdo = 0 # Default not MDO
-                
-                # Check if MDO 'threshold' - only played if this many or more MDO devices
-                if 'mdoOnlyThreshold' in obj:
-                    mdoOnlyThreshold = int(obj['mdoOnlyThreshold'])
-                else:
-                    mdoOnlyThreshold = 0 # Default no threshold
-                
-                # Threshold for ONLY appearing if (minimum number of) MDO devices present
-                if mdoOnlyThreshold > 0 and mdoOnlyThreshold > NMDO:
-                    mdoOnlyThreshold = 0
-                else:
-                    mdoOnlyThreshold = 1
-                
-                # Chek if can be MDO
-                if OBJismdo and not mdoOnlyThreshold:
-                    # If object is MDO and MDO ONLY threshold is less than number of available devices
-                    OBJismdo = 0 # Saves looking for MDO routing
-                    objHistory['active'] = False
-                    if self.verbose:
-                        print('%s - Not enough MDO devices to unlock - object inactive' % objName)
-                elif NMDO < 1:
-                    # Not MDO if no devices
-                     OBJismdo == 0 # Saves looking for MDO routing
-                     if self.verbose:
-                         print('%s - No MDO devices' % objName)
-                elif NMDO < OBJismdo:
-                    # If number of devices is less than "mdo threshold" it can't be mdo
-                    OBJismdo = 0 # Saves looking for MDO routing
-                    if self.verbose:
-                        if OBJismdo:
-                            print('%s - Not enough MDO devices to make MDO' % objName)
-                else:
-                    # Otherwise convert back to on/off flag
+                if not alreadyInGroup:
+                    
+                    # Check if any available devices now exclusive - remove from available list if they are
+                    delete = []
+                    for i,MDOact in enumerate(MDOactive):
+                        if any(MDOact==numpy.array(deviceInUse)):
+                            delete = delete+[i]
+                    exclusiveDevices = MDOactive[delete]
+                    MDOactive = numpy.delete(MDOactive,delete)
+                    MDOzone = numpy.delete(MDOzone,delete)
+                    MDOquality = numpy.delete(MDOquality,delete)
+                    NMDO = len(MDOactive)
+                    #TODO: Use exclusiveDevices later on?
+                    
+                    # minQuality - minimum required quality of an MDO device
+                    if 'minQuality' in obj:
+                        minQuality = int(float(obj['minQuality']))
+                    else:
+                        minQuality = 1  # Default only needs low quality
+                    
+                    # Check for devices of specified minimum quality
+                    delete = []
+                    for i,MDOqual in enumerate(MDOquality):
+                        if int(MDOqual)<minQuality:
+                            delete = delete+[i]
+                    MDOactivei = numpy.delete(MDOactive,delete)
+                    MDOzonei = numpy.delete(MDOzone,delete)
+                    MDOqualityi = numpy.delete(MDOquality,delete)
+                    NMDOi = len(MDOactivei)
+                    #TODO: Replace MDOactive with MDOactivei etc... from here on
+                    
+                    # If not already got a group result, get some extra info...
+                    
+                    # Check if an object/group update has occured
+                    if 'objectUpdate' in obj:
+                        objectUpdate = int(obj.pop('objectUpdate'))
+                    else:
+                        objectUpdate = 0 # Assume object not updated unless told otherwise
+                    objectUpdate = bool(objectUpdate)
+                    
+                    # Clear device routing history from objects if requested (unless copying from existing group result)
+                    if self.LSclear or objectUpdate:
+                        objHistory['mdoPreviousId'] = -1
+                        objHistory['mdoPreviousZoneLevel'] = -1
+    #                    if 'mdoPreviousId' in obj:
+    #                        obj['mdoPreviousId'] = -1
+    #                    if 'mdoPreviousZoneLevel' in obj:
+    #                        obj['mdoPreviousZoneLevel'] = -1
+                    
+                    # Determine if object is active (and store in object history)
+                    if 'active' in obj:
+                        active = int(float(obj['active']))
+                    else:
+                        # Currently assume object is active unless find otherwise
+                        active = True
+                    active = bool(active)
+                    
+                    # Check to see if any mute if other object active id passed
+                    if 'muteIfObject' in obj:
+                        muteIfObject = int(float(obj['muteIfObject']))-1 # Offset by -1 because of zero indexing here
+                    else:
+                        muteIfObject = -1 # Default no muting
+                    
+                    # Check if object can be MDO (at this point this is a "threshold")
+                    if 'mdoThreshold' in obj:
+                        OBJismdo = int(float(obj['mdoThreshold']))
+                    elif 'ForceAuxiliary' in obj:
+                        OBJismdo = int(float(obj['ForceAuxiliary'])) # Legacy name
+                    else:
+                        OBJismdo = 0 # Default not MDO
+                    
+                    # Check if MDO only (can't be in bed)
+                    if 'mdoOnly' in obj:
+                        mdoOnly = int(float(obj['mdoOnly']))
+                    else:
+                        mdoOnly = False # Not MDO only
+                    mdoOnly = bool(mdoOnly)
+                    
+                    # Define result for quirk with conflicting logic
+                    if mdoOnly and not OBJismdo:
+                        OBJismdo = NMDOi+1  # I.e. force mdoOnly objects to be MDO and locked (because not enough devices)
+                    
+                    # Convert to MDO on/off flag
+                    if OBJismdo:
+                        # If trying to make MDO
+                        if NMDOi < OBJismdo:
+                            # Not enough devices
+                            OBJismdo = 0 # Saves looking for MDO routing
+                            if mdoOnly:
+                                # Object can only be MDO
+                                active = False
+                                if self.verbose:
+                                    print('%s - Not enough MDO devices to unlock - object inactive' % objName)
+                            else:
+                                # Number of devices less than "mdo threshold" so can't be MDO
+                                if self.verbose:
+                                    print('%s - Not enough MDO devices to make MDO' % objName)
+                    
+                    # Convert to binary on/off
                     OBJismdo = numpy.minimum(OBJismdo,1)
+                    
+                    # Assume inactive if no level
+                    if float(obj['level']) <= 0.00001: # i.e. less than or equal to -100 dB
+                        active = False
+                    
+                    # Check if should be muted if other object active
+                    if muteIfObject in self.objHistory:
+                        check_obj = self.objHistory[muteIfObject]
+                        if check_obj['active']:
+                            # Deactivate if check object is active
+                            active = False
+                    
+                    # Mute object if not active
+                    if not active:
+                        # Mute object
+                        obj['level'] = 0.0
+                        OBJismdo = 0 # Saves looking for MDO routing
                 
-                # Assume inactive if no level
-                if float(obj['level']) <= 0.00001: # i.e. less than or equal to -100 dB
-                    objHistory['active'] = False
+                if alreadyInGroup:
+                    
+                    if self.verbose:
+                        print('%s - Result copied from previous group\n' % objName)
                 
-                # Check if should be muted if other object active
-                if muteIfObject in self.objHistory:
-                    check_obj = self.objHistory[muteIfObject]
-                    if check_obj['active']:
-                        # Deactivate if check object is active
-                        objHistory['active'] = False
-                
-                # Mute object if not active
-                if not objHistory['active']:
-                    # Mute object
-                    obj['level'] = 0.0
-                    OBJismdo == 0 # Saves looking for MDO routing
-                
-                if not OBJismdo:
+                elif not OBJismdo:
                     
                     # Object can't be MDO...
                     
                     # Strip out any old mdoPrevious data and then do nothing
                     objHistory['mdoPreviousId'] = -1
                     objHistory['mdoPreviousZoneLevel'] = -1
+                    objHistory['active'] = active
 #                    if 'mdoPreviousId' in obj:
 #                        obj['mdoPreviousId'] = -1
 #                    if 'mdoPreviousZoneLevel' in obj:
 #                        obj['mdoPreviousZoneLevel'] = -1
                     if self.verbose:
-                        print('%s - Not MDO' % (objName))
+                        print('%s - Not MDO\n' % (objName))
                     
                 else:
                     
@@ -880,7 +1124,7 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                     
                     # Check if object has specified rendering method
                     if 'mdoMethod' in obj:
-                        OBJmethod = int(obj['mdoMethod'])
+                        OBJmethod = int(obj['mdoMethod'])-1 # Subtract 1 because VST no longer 0 indexed
                         if OBJmethod < 0:
                             # Use default if integer negative
                             OBJmethod = self.method
@@ -895,11 +1139,11 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                     if OBJmethod == 1:
                         OBJmethod = 2
                         # MDOzone = (numpy.array(range(0,NMDO))%self.MaxZones)+1 # Done modulo
-                        MDOzone = numpy.minimum(numpy.array(range(0,NMDO))+1,self.MaxZones) # Final zone represents all devices joined from then on
+                        MDOzonei = numpy.minimum(numpy.array(range(0,NMDOi))+1,self.MaxZones) # Final zone represents all devices joined from then on
                     
                     # Check if dynamic MDO (rendering method dependent)
                     if 'mdoDynamic' in obj:
-                        OBJdynamic = int(obj['mdoDynamic'])
+                        OBJdynamic = int(float(obj['mdoDynamic']))
                     else:
                         OBJdynamic = 0 # Default static
                     OBJdynamic = bool(OBJdynamic)
@@ -910,28 +1154,78 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                     else:
                         OBJgain = 1.0   # Default no gain
                     
-                    # Channel to route to if MDO device
-                    if 'speakerNumber' in obj:
-                        mdoId = int(obj['speakerNumber'])
+                    # Default diffuseness if not got one
+                    if 'diffuseness' not in obj:
+                        obj['diffuseness'] = 0.0
+                    
+                    #TODO: Code logic for method 3
+                    # Whether to spread sound across all suitable MDO devices (with above diffuseness)
+                    if 'mdoSpread' in obj:
+                        mdoSpread = int(float(obj['mdoSpread']))
+                    else:
+                        mdoSpread = 0
+                    mdoSpread = bool(mdoSpread)
+                        
+                    #TODO: Code logic
+                    # onCheckin - what to do if new device joins
+                    if 'onCheckin' in obj:
+                        onCheckin = int(float(obj['onCheckin']))
+                    else:
+                        onCheckin = 1
+                    
+                    #TODO: Code logic
+                    # onCheckout - what to do if device leaves
+                    if 'onCheckout' in obj:
+                        onCheckout = int(float(obj['onCheckout']))
+                    else:
+                        onCheckout = 1
+                    
+                    #TODO: Code logic for this
+                    # exclusivity - if an MDO speaker is exclusive to object (/group)
+                    if 'exclusivity' in obj:
+                        exclusivity = int(float(obj['exclusivity']))
+                    else:
+                        exclusivity = False
+                    exclusivity = bool(exclusivity)
+                    
+                    # Channel(s) to route to if MDO device
+                    if OBJmethod==0:
+                        if 'speakerNumber' in obj:
+                            mdoId = obj['speakerNumber']
+                            if type(mdoId) == int or type(mdoId) == float:
+                                mdoId = [int(mdoId)]
+                            elif type(mdoId) == str:
+                                try:
+                                    mdoIdTry = mdoId
+                                    mdoIdTry = mdoIdTry.split(sep=',')
+                                    mdoIdTry = [int(ii) for ii in mdoIdTry]
+                                    mdoId = mdoIdTry
+                                except:                                    
+                                    if self.verbose:
+                                        print('%s - Unable to interpret speakerNumber string: %s' % (objName,mdoId))
+                                    mdoId = [0]   # Default no channel
+                        else:
+                            mdoId = [0]   # Default no channel
                     else:
                         mdoId = 0   # Default no channel
                     
-                    # Commented because dynamic always means something now
-                    # Turn off dynamic rendering if don't know where speakers are (could be set to !=3)
-                    #if OBJmethod == 1:
-                    #    OBJdynamic = 0
-                    
                     # Check if has previous channel routing data
                     if 'mdoPreviousId' in objHistory:
-                        OBJprevious = int(objHistory['mdoPreviousId'])
+                        OBJprevious = objHistory['mdoPreviousId']
                         # And check if know the level of the previous zone it was put in
                         if 'mdoPreviousZoneLevel' in objHistory:
-                            OBJprevzone = int(objHistory['mdoPreviousZoneLevel'])
+                            OBJprevzone = objHistory['mdoPreviousZoneLevel']
                         else:
                             OBJprevzone = -1
                     else:
                         OBJprevious = -1    # Default no previous channel routing
                         OBJprevzone = -1    # Or previous zone
+                    
+                    # Convert current category/zone labels from VST to local format
+                    for j, labeli in enumerate(self.zoneLabels):
+                        if labeli in obj:
+                            zonename = 'zone'+str(j+1)
+                            obj[zonename] = obj.pop(labeli)
                     
                     # Check if has any specified MDO zones (default none)
                     OBJzones = [0]*self.MaxZones
@@ -945,7 +1239,10 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                             OBJzones[j] = OBJzones[j]-1		# Because metadata 'levels' received currently start from 1 not 0
                     
                     # Does object have any previous active speakers
-                    anyPrevious = [j for j, x in enumerate(OBJprevious==MDOactive) if x]
+                    if type(OBJprevious)==list:
+                        anyPrevious = [j for j, x in enumerate(MDOactivei) if any(x==numpy.array(OBJprevious))]
+                    else:
+                        anyPrevious = [j for j, x in enumerate(MDOactivei) if x==OBJprevious]
                     isPrevious = len(anyPrevious) > 0
                     
                     # Print object details
@@ -958,17 +1255,38 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                     op_id = -1
                     op_zone = -1
                     op_zone_level = -1
+                        
+                    if ( OBJmethod < 3 and (isPrevious and (not self.LSupdate or not OBJdynamic)) ) or ( OBJmethod == 3 and not self.LSupdate and isPrevious and not OBJdynamic ):
+                        
+                        # If has previous active speaker and either there is no configuration update or object is static - use previous speaker id
+                        # Note slight different definition for method 3 - may want to have this not based on LSupdate
+                                                    
+                        op_id = OBJprevious
+                        if len(anyPrevious) > 1:
+                            op_zone = [int(MDOzonei[prev]) for prev in anyPrevious]
+                        else:
+                            op_zone = int(MDOzonei[anyPrevious[0]])
+                        op_zone_level = OBJprevzone
+                        
+                        if self.verbose:
+                            print('%s - Keeping previous MDO speaker id(s): %s' % (objName,op_id))
                     
-                    if OBJmethod == 0:
+                    elif OBJmethod == 0:
                         
                         # Pass specific channel rendering method - find speaker routed to this channel
                         
+                        op_id = []
                         for ls in self.loudspeakers:
-                            if int(ls['id']) == mdoId and any(int(ls['id'])==MDOactive):
-                                # Use this speaker if active MDO device with requested channel
-                                op_id = int(ls['id'])
-                                if self.verbose:
-                                    print('%s - Direct routing to speaker id: %i' % (objName,op_id))
+                            speakerId = int(ls['id'])
+                            # If speaker is a requested mdoId and an active MDO device
+                            if any(speakerId==numpy.array(mdoId)) and any(speakerId==MDOactivei):
+                                # Add requested id to list
+                                op_id.append(speakerId)
+                        if len(op_id)>0:
+                            if self.verbose:
+                                print('%s - Direct routing to speaker id(s): %s' % (objName,op_id))
+                        else:
+                            op_id = -1
 #                        op_zone = -1
 #                        op_zone_level = -1
                         
@@ -986,84 +1304,96 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                         
                         # Coarse zonal loudspeaker rendering method
                         
-                        if (not self.LSupdate and isPrevious):
+                        if not mdoSpread:
                             
-                            # If there is no configuration update and object has previous active speaker - use previous speaker id
+                            # Need to pick a single active speaker based on zone...
                             
-                            op_id = OBJprevious
-                            op_zone = int(MDOzone[anyPrevious[0]])        
-                            op_zone_level = OBJprevzone
-                            
-                            if self.verbose:
-                                print('%s - Keeping previous MDO speaker id: %i' % (objName,op_id))
+                            op_id,op_zone,op_zone_level = zone_method(MDOactivei,MDOzonei,NMDOi,OBJzones,OBJprevious,OBJprevzone,OBJdynamic,anyPrevious,isPrevious,objName,self.verbose)
                             
                         else:
                             
-                            # Need to pick an active speaker based on zone...
+                            # Need to get all active speakers in appropriate zone(s)...
                             
-                            op_id,op_zone,op_zone_level = zone_method(MDOactive,MDOzone,NMDO,OBJzones,OBJprevious,OBJprevzone,OBJdynamic,anyPrevious,isPrevious,objName,self.verbose)
+                            spread_zones = [i+1 for i,zone in enumerate(OBJzones) if zone>0]
+                            spread_levels = [OBJzones[i] for i,zone in enumerate(OBJzones) if zone>0]
+                            op_id = [MDOactivei[i] for i,zone in enumerate(MDOzonei) if any(zone==numpy.array(spread_zones))]
+                            op_zone = [MDOzonei[i] for i,zone in enumerate(MDOzonei) if any(zone==numpy.array(spread_zones))]
+                            op_zone_level = [spread_levels[i] for i,zone in enumerate(spread_zones) if any(zone==MDOzonei)]
                             
                     elif OBJmethod == 3:
                         
                         # Known loudspeaker location rendering method
+                            
+                        # Need to pick an active speaker based on location...
                         
-                        if not self.LSupdate and isPrevious and not OBJdynamic:
-                            
-                            # If there is no configuration update, and object has previous active speaker, and object is static - use previous speaker id
-                            
-                            op_id = OBJprevious
-#                            op_zone = -1
-#                            op_zone_level = -1
-                            
-                            if self.verbose:
-                                print('%s - Keeping previous MDO speaker id: %i' % (objName,op_id))
-                            
-                        else:
-                            
-                            # Need to pick an active speaker based on location...
-                            
-                            op_id = nearest_neighbour_method(obj,self.loudspeakers,MDOactive,i,self.verbose)
-#                            op_zone = -1
-#                            op_zone_level = -1
+                        op_id = nearest_neighbour_method(obj,self.loudspeakers,MDOactivei,i,self.verbose)
+#                        op_zone = -1
+#                        op_zone_level = -1
                     
                     # Tidy up for this object...
                     
+                    # If found an id or not
+                    validId = (type(op_id)==list and len(op_id) > 0) or (type(op_id)==int and op_id > 0)
+                    
                     # Set loudspeaker channel to route out on (if found valid id)
-                    if op_id >= 0:
+                    if validId:
+                        # If found an MDO device output channel is that in op_id
+                        obj['type'] = 'channel'
+                        obj['outputChannels'] = str(op_id).replace(" ","")
+                        # Check speaker(s) for gains                        
+                        MDOgain = 0.0
+                        nGain = 0
                         for ls in self.loudspeakers:
-                            if int(ls['id']) == op_id:
-                                # Output channel is that in op_id
-                                obj['type'] = 'channel'
-                                #obj['outputChannels'] = ls['channel']
-                                obj['outputChannels'] = ls['id']
-                                # Output gain is current gain with any MDO specific gains
+                            lsId = int(ls['id'])
+                            if (type(op_id)==int and lsId==op_id) or (type(op_id)==list and any(lsId==numpy.array(op_id))):
+                                # Get any MDO specific gains
                                 if 'mdoGainDB' in ls:
-                                    MDOgain = dB2lin(float(obj['mdoGainDB']))
+                                    MDOgain = MDOgain+dB2lin(float(ls['mdoGainDB']))**2
                                 else:
-                                    MDOgain = 1.0 # Default no gain
-                                obj['level'] = float(obj['level'])*OBJgain*MDOgain
-                                # print(obj)
-                                if self.verbose:
-                                    if OBJmethod == 3:
-                                        print('%s - Routed to MDO speaker id: %s ; channel: %s ; x: %d, y: %d, z: %d' % (objName,ls['id'],ls['channel'],float(ls['x']),float(ls['y']),float(ls['z'])))
-                                    else:
-                                        print('%s - Routed to MDO speaker id: %s ; channel: %s ; zone: %i at level: %i' % (objName,ls['id'],ls['channel'],op_zone,op_zone_level))
-                    elif mdoOnlyThreshold:
-                        obj['level'] = 0.0
-                        objHistory['active'] = False 
-                    else:
+                                    MDOgain = MDOgain+1.0 # Default no (additional) gain
+                                nGain = nGain+1
+                        MDOgain = (MDOgain/nGain)**0.5  # Take energy average (for if more than one speaker routed to)
+                        obj['level'] = float(obj['level'])*OBJgain*MDOgain
+                        # Check if 'exclusive' object
+                        if exclusivity:
+                            # Unique list of exclusive speakers
+                            if type(op_id)==list:
+                                deviceInUse = deviceInUse+op_id
+                            else:
+                                deviceInUse = deviceInUse+[op_id]
+                            deviceInUse = list(set(deviceInUse))
                         if self.verbose:
-                            print('%s - no available MDO device' % (objName))
+                            if OBJmethod == 3:
+                                print('%s - Routed to MDO speaker id(s): %s ; x: %d, y: %d, z: %d' % (objName,op_id,float(ls['x']),float(ls['y']),float(ls['z'])))
+                            else:
+                                print('%s - Routed to MDO speaker id(s): %s ; zone(s): %s at level(s): %s' % (objName,op_id,op_zone,op_zone_level))
+                    elif mdoOnly:
+                        # If no MDO device and MDO only then mute
+                        obj['level'] = 0.0
+                        active = False
+                    else:
+					       # Otherwise do nothing (object stays in bed)
+                        if self.verbose:
+                            print('%s - No available MDO device' % (objName))
                     
                     # Store this routing id for next time
                     objHistory['mdoPreviousId'] = op_id
                     objHistory['mdoPreviousZoneLevel'] = op_zone_level
+                    objHistory['active'] = active
                     
                     # Update object history
-                    self.objHistory[id] = objHistory
+                    self.objHistory[id_i] = objHistory
+                    
+                    # Update group history if member of a group
+                    if group > 0:
+                        grpHistory[group] = {}
+                        grpHistory[group].update(obj)
                     
                     if self.verbose:
                         print('')
+            
+            if self.verbose:
+                print_objects(objectVector)
             
             # Each period, increment the count
             if self.periods >= self.refreshPeriod:
@@ -1073,11 +1403,11 @@ class MDOProductionProcessor(SequenceProcessorInterface):
                 if self.periods == 1:
                     self.verbose = False	# Turn off verbose
                 self.periods += 1
-            # Tidy up...
+
+        # Tidy up...
             
         # Speaker routing has been updated - reset back to zero (note inside self.on loop to ensure LSupdate message received next time turned on)
         self.LSupdate = False
-        #print(objectVector)
         
         # Reset and device history clearing flag
         self.LSclear = False
@@ -1093,16 +1423,10 @@ class MDOProductionProcessor(SequenceProcessorInterface):
             print( 'mdoProductionProcessor:datagramReceived(): %d bytes received' % len(data) )
         try:
             # Load JSON data
-            allData = json.loads( data )
-            # Write archive to file if requested
-            if len(self.writeLsToFile) > 0:
-                filename = self.writeLsToFile
-                t = gmtime()
-                filename = ('%s_%04i%02i%02i%02i%02i%02i.txt' % (filename,t.tm_year,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec))
-                with open(filename, 'w') as file:
-                    file.write(json.dumps(allData))
-            # Get speaker data        
-            self = getLsData(self,allData)
+            if type(data) == bytes:
+                data = data.decode("utf-8")
+            data = json.loads( data )
+            getJsonData(self,data)
         except Exception as ex:
             print( "Error receiving data in mdoProductionProcessor: %s" % str(ex) )
 
@@ -1197,6 +1521,16 @@ class MDOProductionProcessor(SequenceProcessorInterface):
             #self.periods = self.refreshPeriod
             print("MDO processor: clear device history")
             
+        elif key == "lsMode":
+            self.LSmode = valueList[0]
+            if type(self.LSmode)==int and self.LSmode==0:
+                self.LSmode = 'update'
+            elif type(self.LSmode)==int and self.LSmode==1:
+                self.LSmode = 'overwrite'
+            self.periods = 1
+            #self.periods = self.refreshPeriod
+            print("MDO processor: set to loudspeaker mode %s" % self.LSmode)
+            
         elif key == "refreshPeriod":
             self.refreshPeriod = int(valueList[0])
             self.periods = 1
@@ -1211,7 +1545,12 @@ class MDOProductionProcessor(SequenceProcessorInterface):
             with open(filename, 'r') as file:
                 self = getLsData(self,json.load(file))
             print('\nReading loudspeaker data from file: %s\n' % filename)
-            
+        
+        elif key == "loudspeakers":
+            # Received loudspeaker metadata update
+            print( 'MDOProcessor:OSC/JSON control:%s package received ' % key)
+            getJsonData(self, valueList)
+        
         else:
             raise KeyError( "MDOProcessor parameter set type unsupported")
 

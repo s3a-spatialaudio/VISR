@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadapter>
+    <!-- <processor name="FakeGroups" type="FakeGroups" /> -->
+    
+    <processor name="StaticConfig" type="AddObjects">
+		<object data="{'id': 0, 'channels': 0, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 1, 'channels': 1, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 2, 'channels': 2, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 3, 'channels': 3, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 4, 'channels': 4, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 5, 'channels': 5, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 6, 'channels': 6, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 7, 'channels': 7, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 8, 'channels': 8, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 9, 'channels': 9, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 10, 'channels': 10, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 11, 'channels': 11, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 12, 'channels': 12, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 13, 'channels': 13, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 14, 'channels': 14, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 15, 'channels': 15, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 16, 'channels': 16, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 17, 'channels': 17, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 18, 'channels': 18, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 19, 'channels': 19, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 20, 'channels': 20, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 21, 'channels': 21, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 22, 'channels': 22, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 23, 'channels': 23, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 24, 'channels': 24, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 25, 'channels': 25, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 26, 'channels': 26, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 27, 'channels': 27, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 28, 'channels': 28, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 29, 'channels': 29, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 30, 'channels': 30, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 31, 'channels': 31, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 32, 'channels': 32, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 33, 'channels': 33, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 34, 'channels': 34, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 35, 'channels': 35, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 36, 'channels': 36, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 37, 'channels': 37, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 38, 'channels': 38, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 39, 'channels': 39, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 40, 'channels': 40, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 41, 'channels': 41, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 42, 'channels': 42, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 43, 'channels': 43, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 44, 'channels': 44, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 45, 'channels': 45, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 46, 'channels': 46, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 47, 'channels': 47, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 48, 'channels': 48, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 49, 'channels': 49, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 50, 'channels': 50, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 51, 'channels': 51, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 52, 'channels': 52, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 53, 'channels': 53, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 54, 'channels': 54, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 55, 'channels': 55, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 56, 'channels': 56, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 57, 'channels': 57, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 58, 'channels': 58, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 59, 'channels': 59, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 60, 'channels': 60, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 61, 'channels': 61, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 62, 'channels': 62, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 63, 'channels': 63, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 64, 'channels': 64, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 65, 'channels': 65, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 66, 'channels': 66, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 67, 'channels': 67, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 68, 'channels': 68, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 69, 'channels': 69, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 70, 'channels': 70, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 71, 'channels': 71, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 72, 'channels': 72, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 73, 'channels': 73, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 74, 'channels': 74, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 75, 'channels': 75, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 76, 'channels': 76, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 77, 'channels': 77, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 78, 'channels': 78, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 79, 'channels': 79, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 80, 'channels': 80, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 81, 'channels': 81, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 82, 'channels': 82, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 83, 'channels': 83, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 84, 'channels': 84, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 85, 'channels': 85, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 86, 'channels': 86, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 87, 'channels': 87, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 88, 'channels': 88, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 89, 'channels': 89, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 90, 'channels': 80, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 91, 'channels': 91, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 92, 'channels': 92, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 93, 'channels': 93, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 94, 'channels': 94, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 95, 'channels': 95, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+		<object data="{'id': 96, 'channels': 96, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 97, 'channels': 97, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    	<object data="{'id': 98, 'channels': 98, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': 0.5, 'z': 0.0 } }" />
+		<object data="{'id': 99, 'channels': 99, 'type': 'point', 'group': 0, 'priority': 0, 'level': 1.0, 'position': {'x': 0.866, 'y': -0.5, 'z': 0.0 } }" />
+    </processor>
+    
+	<!--processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" /-->
+	<processor name="AddMdo" type="AddMdoMetadata" udpPort="9001" messagePacketSize="65536" verbose="1" />    
+    
+    <processor name="NarrativeImportance" type="NarrativeImportance" on="1" narrativeimportance="0.0" writeToFile="Narrative_importance/metadata_history"/>    
+    
+    <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
+    
+    <!--<processor name="SpatMessages" type="SpatMessages" objectID="0 1 2 3 4 5 6 7 8 9" active="true"/>-->
+
+</metadapter>

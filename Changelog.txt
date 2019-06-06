@@ -1,0 +1,10 @@
+# Copyright Andreas Franck - All rights reserved
+# Copyright Institute of Sound and Vibration Research - All rights reserved
+
+Release 0.9.0
+=============
+
+* First numbered release
+* Source code management: Adoption of GitFlow workflow and semantic numbering scheme
+* FEATURE: Incorporated "modularisation", allowing the use of the metadapter as VISR component.
+* FEATURE: Support JSON control messages.

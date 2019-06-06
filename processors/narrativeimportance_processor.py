@@ -113,16 +113,41 @@ class NarrativeImportanceProcessor(SequenceProcessorInterface):
         if self.on:
 
             for i, obj in enumerate(objectVector):
+                
+                # Get label to print as (default based on object id, kept as 0 indexed to match other print out - sent from e.g. VST)
+                if 'label' in obj and len(obj['label']) > 0:
+                    objName = str(obj['label'])
+                else:
+                    objName = 'Object %3i' % int(float(obj['id']))
+                    obj['label'] = objName
+                objName = '%-16.16s' % objName # Make fixed length (padded or truncated)
 
                 # Parse the object type to see how it's position is specified
                 objtype, pos = parse_object_type(obj)
-
+                
+                # Check for alternative naming of processor attribute (and replace value if find)
+                if 'narrativeImportance' in obj:
+                    obj['narrative_importance'] = int(float(obj.pop('narrativeImportance')))
+                
                 # Get the narrative importance. If it's not specified, then it's a 1 (there'll be no change)
                 if 'narrative_importance' in obj:
                     ni_level = int(obj['narrative_importance'])
                 else:
                     ni_level = 1
-
+                
+                # Check if an object/group update has occured (sent from e.g. VST)
+                if 'objectUpdate' in obj:
+                    objectUpdate = int(float(obj.pop('objectUpdate')))
+                else:
+                    objectUpdate = 0 # Assume object not updated unless told otherwise
+                objectUpdate = bool(objectUpdate)
+                
+                # If object has been updated
+                if objectUpdate:
+                    self.sendstrings = 1 # To update (e.g. Max) of categories
+                    if self.verbose:
+                        print('%s - narrative importance level: %s' % (objName,ni_level))
+                
                 if ni_level == 0:
 
                     obj['level'] = float(obj['level']) * dB2lin((3 * self.ni))
