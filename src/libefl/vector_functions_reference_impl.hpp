@@ -52,7 +52,7 @@ ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T end
     // Meet in the middle if either both or none of start and end points are to be included
     if( startInclusive == endInclusive )
     {
-      dest[0] = 0.5*(startVal+endVal);
+      dest[0] = static_cast<T>(0.5f)*(startVal+endVal);
     }
     dest[0] = startInclusive ? startVal : endVal;
     return noError;
