@@ -168,15 +168,15 @@ MatrixConvolver::~MatrixConvolver()
 
     mContext.reset( new SignalFlowContext{ static_cast<std::size_t>(period), samplingFrequency } );
 
-    mFlow.reset( new rcl::FirFilterMatrix( *mContext, "MatrixConvolver", nullptr ) );
-    mFlow->setup( mNumberOfInputs, mNumberOfOutputs,
+    mFlow.reset( new rcl::FirFilterMatrix( *mContext, "MatrixConvolver", nullptr,
+                  mNumberOfInputs, mNumberOfOutputs,
                   mMaxFilterLength,
                   mNumMaxFilters,
                   mRoutings.size(),
                   initialFilters,
                   mRoutings,
                   rcl::FirFilterMatrix::ControlPortConfig::None,
-                  mFftLibrary.c_str() );
+                  mFftLibrary.c_str() ) );
     mFlowWrapper.reset( new maxmsp::SignalFlowWrapper<double>( *mFlow ) );
   }
   catch( std::exception const & e )
