@@ -1,12 +1,630 @@
+# Copyright Centre for Vision Speech and Signal Processing & Institute of Sound and Vibration Research - All rights reserved
+
+#
+# Gitlab CI Script:
+#
 stages:
-  - startup
-  - initial
-  - config
+  - config_and_generate
   - build
   - test
   - package
-  - deploy
-  # - cleanup
+
+#
+# Global variable declarations
+# These variables can be set/unset based on the currently active runners. For example, If there is no runner for python 3.6, the job will be pending and causing the whole stage to be pending and eventually fail. Setting RUNNER_MACOS_PYTHON_36="OFF" allows to say that at the moment there are no runners for macosx-py36 tag.
+# Runner_macos_standard_template# If you want to avoid committing each time you change those variables, you can also trigger a pipeline from the CI/CD->Pipelines webpage, providing the changed variable from the Run Pipeline UI
+#
+variables:
+
+   RUNNER_MACOS_STANDARD: "ON"
+   RUNNER_MACOS_PYTHON_36: "ON"
+   RUNNER_MACOS_PYTHON_37: "ON"
+   RUNNER_WINDOWS_STANDARD: "ON"
+   RUNNER_WINDOWS_PYTHON_36: "ON"
+   RUNNER_WINDOWS_PYTHON_37: "ON"
+   RUNNER_LINUX16_STANDARD: "ON"
+   RUNNER_LINUX16_PYTHON_35: "ON"
+   RUNNER_LINUX18_STANDARD: "ON"
+   RUNNER_LINUX18_PYTHON_36: "ON"
+
+#
+# Templates for specifiying the runner tags for different jobs and to avoid. Running a job when there is no active runner for that, by setting/unsetting the corresponding variable.
+#
+.runner_macos_standard_template: &runner_macos_standard
+  only:
+    variables:
+      - $RUNNER_MACOS_STANDARD == "ON"
+  tags:
+    - macosx
+
+.runner_macos_python_36_template: &runner_macos_python_36
+  only:
+    variables:
+      - $RUNNER_MACOS_PYTHON_36 == "ON"
+  tags:
+    - macosx-py36
+
+.runner_macos_python_37_template: &runner_macos_python_37
+  only:
+    variables:
+      - $RUNNER_MACOS_PYTHON_37 == "ON"
+  tags:
+    - macosx-py37
+
+.runner_windows_standard_template: &runner_windows_standard
+  only:
+    variables:
+      - $RUNNER_WINDOWS_STANDARD == "ON"
+  tags:
+    - windows
+
+.runner_windows_python_36_template: &runner_windows_python_36
+  only:
+    variables:
+      - $RUNNER_WINDOWS_PYTHON_36 == "ON"
+  tags:
+    - windows-py36
+
+.runner_windows_python_37_template: &runner_windows_python_37
+  only:
+    variables:
+      - $RUNNER_WINDOWS_PYTHON_37 == "ON"
+  tags:
+    - windows-py37
+
+.runner_linux16_standard_template: &runner_linux16_standard
+  only:
+    variables:
+      - $RUNNER_LINUX16_STANDARD == "ON"
+  tags:
+    - linux16
+
+.runner_linux16_python_35_template: &runner_linux16_python_35
+  only:
+    variables:
+      - $RUNNER_LINUX16_PYTHON_35 == "ON"
+  tags:
+    - linux16-py35
+
+.runner_linux18_standard_template: &runner_linux18_standard
+  only:
+    variables:
+      - $RUNNER_LINUX18_STANDARD == "ON"
+  tags:
+    - linux18
+
+.runner_linux18_python_36_template: &runner_linux18_python_36
+  only:
+    variables:
+      - $RUNNER_LINUX18_PYTHON_36 == "ON"
+  tags:
+    - linux18-py36
+
+# Specifies the CI branches once and for all jobs
+.default_config:
+  only:
+    - master
+    - develop
+    - feature/experimental-ci
+
+#
+# Templates for CMake commands - Windows and Unix
+#
+
+# Config-and-generate stage template
+.config_and_generate_windows_template:
+  extends: .default_config
+  script:
+    - SET  CMAKE_OPTIONS_ALL=-DCMAKE_BUILD_TYPE=Release
+                             -DBOOST_ROOT=%BOOST_ROOT%
+                             %CMAKE_OPTIONS%
+    - cmake -E remove_directory %BUILD_FOLDER%
+    # folllowing line is for debug purposes only
+    - echo "%GENERATOR%" \n\n %CMAKE_OPTIONS% \n\n %CMAKE_OPTIONS_ALL%
+    - cmake -E make_directory %BUILD_FOLDER%
+    - cmake -E chdir %BUILD_FOLDER%/
+      cmake -G "%GENERATOR%" %CMAKE_OPTIONS_ALL% ..
+  artifacts:
+    paths:
+      - "%BUILD_FOLDER%/"
+
+.config_and_generate_unix_template:
+  extends: .default_config
+  script:
+    - CMAKE_OPTIONS_ALL="-DCMAKE_BUILD_TYPE=Release
+                         -DBUILD_USE_JACK=ON
+                         $CMAKE_OPTIONS"
+    - cmake -E remove_directory $BUILD_FOLDER
+    # folllowing line is for debug purposes only
+    - echo "variables\n\n "$PYTHONHOME" \n\n $PYTHONHOME_PY36 \n\n $PYTHONHOME_PY37"
+    - echo "variables\n\n "$GENERATOR" \n\n $CMAKE_OPTIONS \n\n $CMAKE_OPTIONS_ALL"
+    - cmake -E make_directory $BUILD_FOLDER
+    - cmake -E chdir $BUILD_FOLDER/
+      cmake -G "$GENERATOR" $CMAKE_OPTIONS_ALL ..
+  artifacts:
+    paths:
+      - $BUILD_FOLDER/
+
+#
+# Build stage template - Windows and Unix
+#
+.build_windows_template:
+  #usage of hidden job for defining a common default job configuration
+  extends: .default_config
+  script:
+    - cmake --build %BUILD_FOLDER%/ --target --config Release
+  artifacts:
+    paths:
+      - "%BUILD_FOLDER%/"
+
+.build_unix_template:
+  #usage of hidden job for defining a common default job configuration
+  extends: .default_config
+  script:
+    - cmake --build $BUILD_FOLDER/ --target --config Release
+  artifacts:
+    paths:
+      - $BUILD_FOLDER/
+
+
+#
+# Test stage template
+#
+
+.test_linux_template:
+  extends: .default_config
+  script:
+    - cmake --build $BUILD_FOLDER/ --target test --config Release
+  artifacts:
+    paths:
+      - $BUILD_FOLDER/
+    expire_in: 1 week
+  # cache:
+  #   paths:
+  #     - "%BUILD_FOLDER%/"
+
+.test_windows_template:
+  #usage of hidden job for defining a common default job configuration
+  extends: .default_config
+  script:
+    - echo "%PYTHONHOME%" \n\n
+    - cmake --build %BUILD_FOLDER%/ --target RUN_TESTS --config Release
+  #-- /verbosity:quiet
+  artifacts:
+    paths:
+      - "%BUILD_FOLDER%/"
+    expire_in: 1 week
+  # cache:
+  #   paths:
+  #     - "%BUILD_FOLDER%/"
+
+.test_macos_template:
+  extends: .default_config
+  script:
+    - echo "variables\n\n "$PYTHONHOME" \n\n $PYTHONHOME_PY36 \n\n $PYTHONHOME_PY37"
+    - cmake --build $BUILD_FOLDER/ --target RUN_TESTS --config Release
+  artifacts:
+    paths:
+      - $BUILD_FOLDER/
+    expire_in: 1 week
+  # cache:
+  #   paths:
+  #     - "%BUILD_FOLDER%/"
+
+#
+# Package stage template
+#
+
+.package_windows_template:
+  extends: .default_config
+  script:
+    - cmake --build %BUILD_FOLDER%/ --target package --config Release
+  artifacts:
+    paths:
+      - "%BUILD_FOLDER%/"
+
+.package_unix_template:
+  extends: .default_config
+  script:
+    - cmake --build $BUILD_FOLDER/ --target package --config Release
+    # - installer -dumplog -pkg VISR-Production-Suite*.pkg -target /
+  artifacts:
+    paths:
+      - $BUILD_FOLDER/
+
+## End of templates.
+
+
+#
+# Config stage jobs
+#
+
+# Linux
+config-linux16-standard:
+  stage: config_and_generate
+  #usage of hidden job as a template for this stage, implicitly providing job-specific variables
+  extends: .config_and_generate_unix_template
+  variables:
+    BUILD_FOLDER: build_standard
+    GENERATOR: "Unix Makefiles"
+  <<: *runner_linux16_standard
+
+config-linux16-full-py35:
+  extends: config-linux16-standard
+  variables:
+    BUILD_FOLDER: build_full_py35
+    CMAKE_OPTIONS: "-DBUILD_PYTHON_BINDINGS=ON
+                    -DPYTHON_INCLUDE_DIR=$PYTHON_INCLUDE_DIR_PY35
+                    -DPYTHON_LIBRARY=$PYTHON_LIBRARY_PY35"
+  <<: *runner_linux16_python_35
+
+config-linux18-standard:
+  stage: config_and_generate
+  #usage of hidden job as a template for this stage, implicitly providing job-specific variables
+  extends: .config_and_generate_unix_template
+  variables:
+    BUILD_FOLDER: build_standard
+    GENERATOR: "Unix Makefiles"
+  <<: *runner_linux18_standard
+
+config-linux18-full-py36:
+  extends: config-linux18-standard
+  variables:
+    BUILD_FOLDER: build_full_py36
+    CMAKE_OPTIONS: "-DBUILD_PYTHON_BINDINGS=ON
+                    -DPYTHON_INCLUDE_DIR=$PYTHON_INCLUDE_DIR_PY36
+                    -DPYTHON_LIBRARY=$PYTHON_LIBRARY_PY36"
+  <<: *runner_linux18_python_36
+
+# Windows
+config-windows-standard:
+  stage: config_and_generate
+  #usage of hidden job as a template for this stage, implicitly providing job-specific variables
+  extends: .config_and_generate_windows_template
+  variables:
+    BUILD_FOLDER: build_standard
+    GENERATOR: "Visual Studio 15 2017 Win64"
+  <<: *runner_windows_standard
+
+config-windows-full-py36:
+  extends: config-windows-standard
+  before_script: #here I'm using the before_script instead of variables because using CI "variables" I cannot have nested variables resolution
+     - SET  CMAKE_OPTIONS=-DBUILD_PYTHON_BINDINGS=ON
+                          -DPYTHON_INCLUDE_DIR=%PYTHON_INCLUDE_DIR_PY36%
+                          -DPYTHON_LIBRARY=%PYTHON_LIBRARY_PY36%
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_windows_python_36
+
+config-windows-full-py37:
+  extends: config-windows-standard
+  before_script:
+     - SET  CMAKE_OPTIONS=-DBUILD_PYTHON_BINDINGS=ON
+                          -DPYTHON_INCLUDE_DIR=%PYTHON_INCLUDE_DIR_PY37%
+                          -DPYTHON_LIBRARY=%PYTHON_LIBRARY_PY37%
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_windows_python_37
+
+# MacOs
+config-macosx-standard:
+  stage: config_and_generate
+  #usage of hidden job as a template for this stage, implicitly providing job-specific variables
+  extends: .config_and_generate_unix_template
+  variables:
+    BUILD_FOLDER: build_standard
+    GENERATOR: "Xcode"
+  <<: *runner_macos_standard
+
+config-macosx-full-py36:
+  extends: config-macosx-standard
+  variables:
+    BUILD_FOLDER: build_full_py36
+    CMAKE_OPTIONS: "-DBUILD_PYTHON_BINDINGS=ON
+                    -DPYTHON_INCLUDE_DIR=$PYTHON_INCLUDE_DIR_PY36
+                    -DPYTHON_LIBRARY=$PYTHON_LIBRARY_PY36"
+  <<: *runner_macos_python_36
+
+config-macosx-full-py37:
+  extends: config-macosx-standard
+  variables:
+    BUILD_FOLDER: build_full_py37
+    CMAKE_OPTIONS: "-DBUILD_PYTHON_BINDINGS=ON
+                    -DPYTHON_INCLUDE_DIR=$PYTHON_INCLUDE_DIR_PY37
+                    -DPYTHON_LIBRARY=$PYTHON_LIBRARY_PY37"
+  <<: *runner_macos_python_37
+
+#
+# Build stage jobs
+#
+
+# Linux
+build-linux16-standard:
+  stage: build
+  extends: .build_unix_template
+  dependencies:
+    - config-linux16-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_linux16_standard
+
+build-linux16-full-py35:
+  extends: build-linux16-standard
+  dependencies:
+    - config-linux16-full-py35
+  variables:
+    BUILD_FOLDER: build_full_py35
+  <<: *runner_linux16_python_35
+
+build-linux18-standard:
+  stage: build
+  extends: .build_unix_template
+  dependencies:
+    - config-linux18-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_linux18_standard
+
+build-linux18-full-py36:
+  extends: build-linux18-standard
+  dependencies:
+    - config-linux18-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_linux18_python_36
+
+# Windows
+build-windows-standard:
+  stage: build
+  extends: .build_windows_template
+  dependencies:
+    - config-windows-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_windows_standard
+
+build-windows-full-py36:
+  extends: build-windows-standard
+  dependencies:
+    - config-windows-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_windows_python_36
+
+build-windows-full-py37:
+  extends: build-windows-standard
+  dependencies:
+    - config-windows-full-py37
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_windows_python_37
+
+# MacOs
+build-macosx-standard:
+  stage: build
+  extends: .build_unix_template
+  dependencies:
+    - config-macosx-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_macos_standard
+
+build-macosx-full-py36:
+  extends: build-macosx-standard
+  dependencies:
+    - config-macosx-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_macos_python_36
+
+build-macosx-full-py37:
+  extends: build-macosx-standard
+  dependencies:
+    - config-macosx-full-py37
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_macos_python_37
+
+#
+# Test stage jobs
+#
+
+# Linux
+test-linux16-standard:
+  stage: test
+  extends: .test_linux_template
+  dependencies:
+    - build-linux16-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_linux16_standard
+  allow_failure: true
+
+test-linux16-full-py35:
+  extends: test-linux16-standard
+  dependencies:
+    - build-linux16-full-py35
+  variables:
+    BUILD_FOLDER: build_full_py35
+  <<: *runner_linux16_python_35
+
+test-linux18-standard:
+  stage: test
+  extends: .test_linux_template
+  dependencies:
+    - build-linux18-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_linux18_standard
+  allow_failure: true
+
+test-linux18-full-py36:
+  extends: test-linux18-standard
+  dependencies:
+    - build-linux18-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_linux18_python_36
+
+# Windows
+test-windows-standard:
+  stage: test
+  extends: .test_windows_template
+  dependencies:
+    - build-windows-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_windows_standard
+  allow_failure: true
+
+# disabled for the moment. ATM some VISR-related PATH variables would need to be changed to make it work.
+# test-windows-full-py36:
+#   extends: test-windows-standard
+#   before_script: #here I'm using the before_script instead of variables because using CI "variables" I cannot have nested variables resolution
+#      - SET PYTHONHOME=%PYTHONHOME_PY36%
+#   dependencies:
+#     - build-windows-full-py36
+#   variables:
+#     BUILD_FOLDER: build_full_py36
+#   <<: *runner_windows_python_36
+
+test-windows-full-py37:
+  extends: test-windows-standard
+  before_script: #here I'm using the before_script instead of variables because using CI "variables" I cannot have nested variables resolution
+     - SET PYTHONHOME=%PYTHONHOME_PY37%
+  dependencies:
+    - build-windows-full-py37
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_windows_python_37
+
+
+# MacOs
+test-macosx-standard:
+  stage: test
+  extends: .test_macos_template
+  dependencies:
+    - build-macosx-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_macos_standard
+  allow_failure: true
+
+test-macosx-full-py36:
+  extends: test-macosx-standard
+  before_script: 
+     - export  PYTHONHOME=$PYTHONHOME_PY36
+  dependencies:
+    - build-macosx-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_macos_python_36
+
+test-macosx-full-py37:
+  extends: test-macosx-standard
+  before_script: 
+     - export  PYTHONHOME=$PYTHONHOME_PY37
+  dependencies:
+    - build-macosx-full-py37
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_macos_python_37
+
+#
+# Package stage jobs
+#
+
+# Linux
+package-linux16-standard:
+  stage: package
+  extends: .package_unix_template
+  dependencies:
+    - build-linux16-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_linux16_standard
+
+package-linux16-full-py35:
+  extends: package-linux16-standard
+  dependencies:
+    - build-linux16-full-py35
+  variables:
+    BUILD_FOLDER: build_full_py35
+  <<: *runner_linux16_python_35
+
+package-linux18-standard:
+  stage: package
+  extends: .package_unix_template
+  dependencies:
+    - build-linux18-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_linux18_standard
+
+package-linux18-full-py36:
+  extends: package-linux18-standard
+  dependencies:
+    - build-linux18-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_linux18_python_36
+
+# Windows
+package-windows-standard:
+  stage: package
+  #usage of hidden job for defining a common default job configuration
+  extends: .package_windows_template
+  dependencies:
+    - build-windows-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_windows_standard
+
+package-windows-full-py36:
+  extends: package-windows-standard
+  dependencies:
+    - build-windows-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_windows_python_36
+
+package-windows-full-py37:
+  extends: package-windows-standard
+  dependencies:
+    - build-windows-full-py37
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_windows_python_37
+
+# MacOs
+package-macosx-standard:
+  stage: package
+  #usage of hidden job for defining a common default job configuration
+  extends: .package_unix_template
+  dependencies:
+    - build-macosx-standard
+  variables:
+    BUILD_FOLDER: build_standard
+  <<: *runner_macos_standard
+
+package-macosx-full-py36:
+  extends: package-macosx-standard
+  dependencies:
+    - build-macosx-full-py36
+  variables:
+    BUILD_FOLDER: build_full_py36
+  <<: *runner_macos_python_36
+
+package-macosx-full-py37:
+  extends: package-macosx-standard
+  dependencies:
+    - build-macosx-full-py37
+  variables:
+    BUILD_FOLDER: build_full_py37
+  <<: *runner_macos_python_37
+
+
+
 
 # cache:
 #   # key: "$CI_PROJECT_NAME/$CI_BUILD_REF_NAME"
@@ -15,882 +633,12 @@ stages:
 # variables:
 #   CI_DEBUG_TRACE: "true
 
-init-macosx-core:
-  stage: initial
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_core
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-      # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
-  allow_failure: true
-
-init-macosx-py36:
-  stage: initial
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_py36
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-      # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
-  allow_failure: true
-
-init-macosx-py37:
-  stage: initial
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_py37
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-      # TEMP workaround for default behaviour - to allow entire pipeline to keep moving should one particular job in a stage fail.
-  allow_failure: true
+# variables:
+#   - linux: [linux, linux-ubuntu-18]
 
 
-init-linux-core:
-  stage: initial
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
-  script:
-    - cmake -E make_directory build_core
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-init-linux-16:
-  stage: initial
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
-  script:
-    - cmake -E make_directory build_16
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_16/
-  # cache:
-  #   paths:
-  #     - build_16/
-  allow_failure: true
-
-init-linux-18:
-  stage: initial
-  before_script:
-    - if [ -d build_py36 ]; then rm -Rf build_py36; fi
-    - if [ -d build_py37 ]; then rm -Rf build_py37; fi
-    - if [ -d build_core ]; then rm -Rf build_core; fi
-  script:
-    - cmake -E make_directory build_18
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux-ubuntu-18
-  artifacts:
-    paths:
-      - build_18/
-  # cache:
-  #   paths:
-  #     - build_18/
-  allow_failure: true
-
-init-windows-core:
-  stage: initial
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_core
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-init-windows-py36:
-  stage: initial
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_py36
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-init-windows-py37:
-  stage: initial
-  script:
-    # Crude way to remove and make sure directory is removed before creating a new one.
-    # - cmake -E remove_directory build
-    - cmake -E make_directory build_py37
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-# CMake Configuration:
-
-linux-arch-config-core:
-  stage: config
-  dependencies:
-    - init-linux-core
-  script:
-    - cmake -E chdir build_core/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_USE_JACK=ON ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-linux-arch-config-16:
-  stage: config
-  dependencies:
-    - init-linux-16
-  script:
-    - cmake -E chdir build_16/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_USE_JACK=ON ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_16/
-  # cache:
-  #   paths:
-  #     - build_16/
-  allow_failure: true
-
-linux-arch-config-18:
-  stage: config
-  dependencies:
-    - init-linux-18
-  script:
-    - cmake -E chdir build_18/ cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DBUILD_USE_JACK=ON ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux-ubuntu-18
-  artifacts:
-    paths:
-      - build_18/
-  # cache:
-  #   paths:
-  #     - build_18/
-  allow_failure: true
-
-windows-arch-config-core:
-  stage: config
-  dependencies:
-    - init-windows-core
-  script:
-    - cmake -E chdir build_core/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_core
-  # cache:
-  #   paths:
-  #     - build_core
-  allow_failure: true
-
-windows-arch-config-py36:
-  stage: config
-  dependencies:
-    - init-windows-py36
-  script:
-    - cmake -E chdir build_py36/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\envs\py36\include -DPYTHON_LIBRARY=C:\ProgramData\Anaconda3\envs\py36\libs\python36.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-windows-arch-config-py37:
-  stage: config
-  dependencies:
-    - init-windows-py37
-  script:
-    - cmake -E chdir build_py37/ cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=C:\ProgramData\Anaconda3\envs\py37\include -DPYTHON_LIBRARY=C:\ProgramData\Anaconda3\envs\py37\libs\python37.lib -DBOOST_ROOT=c:/local/dev/boost_1_67_0 ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-macosx-arch-config-core:
-  stage: config
-  dependencies:
-    - init-macosx-core
-  script:
-    - cmake -E chdir build_core/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_USE_JACK=ON ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-macosx-arch-config-py36:
-  stage: config
-  dependencies:
-    - init-macosx-py36
-  script:
-    - cmake -E chdir build_py36/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py36/include/python3.6m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py36/lib/libpython3.6m.dylib -DBUILD_USE_JACK=ON ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-macosx-arch-config-py37:
-  stage: config
-  dependencies:
-    - init-macosx-py37
-  script:
-    - cmake -E chdir build_py37/ cmake -G "Xcode" -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_BINDINGS=ON -DPYTHON_INCLUDE_DIR=/Users/williammorris/anaconda3/envs/py37/include/python3.7m -DPYTHON_LIBRARY=/Users/williammorris/anaconda3/envs/py37/lib/libpython3.7m.dylib -DBUILD_USE_JACK=ON ..
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-# Build:
-
-linux-arch-build-core:
-  stage: build
-  dependencies:
-    - linux-arch-config-core
-  script:
-    - cmake --build build_core/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_core/
-  allow_failure: true
-
-linux-arch-build-16:
-  stage: build
-  dependencies:
-    - linux-arch-config-16
-  script:
-    - cmake --build build_16/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_16/
-  # cache:
-  #   paths:
-  #     - build_16/
-  allow_failure: true
-
-linux-arch-build-18:
-  stage: build
-  dependencies:
-    - linux-arch-config-18
-  script:
-    - cmake --build build_18/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux-ubuntu-18
-  artifacts:
-    paths:
-      - build_18/
-  # cache:
-  #   paths:
-  #     - build_18/
-  allow_failure: true
-
-windows-arch-build-core:
-  stage: build
-  dependencies:
-    - windows-arch-config-core
-  script:
-    - cmake --build build_core/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-windows-arch-build-py36:
-  stage: build
-  dependencies:
-    - windows-arch-config-py36
-  script:
-    - cmake --build build_py36/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-windows-arch-build-py37:
-  stage: build
-  dependencies:
-    - windows-arch-config-py37
-  script:
-    - cmake --build build_py37/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-macosx-arch-build-core:
-  stage: build
-  dependencies:
-    - macosx-arch-config-core
-  script:
-    - cmake --build build_core/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-macosx-arch-build-py36:
-  stage: build
-  dependencies:
-    - macosx-arch-config-py36
-  script:
-    - cmake --build build_py36/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-macosx-arch-build-py37:
-  stage: build
-  dependencies:
-    - macosx-arch-config-py37
-  script:
-    - cmake --build build_py37/ --target --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-# Test:
-
-linux-arch-test:
-  stage: test
-  dependencies:
-    - linux-arch-build-16
-  script:
-    - cmake --build build_16/ --target test --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-    - Testing/*.log
-    expire_in: 1 week
-  # TEMP REMOVE THIS when tests are finished - TEMP
-  allow_failure: true
-  # cache:
-  #   paths:
-  #     - build_16/
-
-linux-arch-test-18:
-  stage: test
-  dependencies:
-    - linux-arch-build-18
-  script:
-    - cmake --build build_18/ --target test --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux-ubuntu-18
-  artifacts:
-    paths:
-    - Testing/*.log
-    expire_in: 1 week
-  # TEMP REMOVE THIS when tests are finished - TEMP
-  allow_failure: true
-  # cache:
-  #   paths:
-  #     - build_18/
-
-macosx-arch-test:
-  stage: test
-  dependencies:
-    - macosx-arch-build-py36
-  script:
-    - cmake --build build_py36/ --target RUN_TESTS --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-    - Testing/*.log
-    expire_in: 1 week
-  # TEMP REMOVE THIS when tests are finished - TEMP
-  allow_failure: true
-  # cache:
-  #   paths:
-  #     - build_py36/
-
-# windows-arch-test:
-#   stage: test
-#   dependencies:
-#     - windows-arch-build-py36
-#   script:
-#     - cmake --build build/ --target RUN_TESTS --config Release
-#   only:
-#     - master
-#     - develop
-#     - feature/experimental-ci
-#   tags:
-#     - windows
-#   artifacts:
-#     paths:
-#     - Testing/*.log
-#     expire_in: 1 week
-#   # TEMP REMOVE THIS when tests are finished - TEMP
-#   allow_failure: true
-#   cache:
-#     paths:
-#       - build/
-
-# Package - dependencies on build , test and package
-
-linux-arch-package-core:
-  stage: package
-  dependencies:
-    - linux-arch-build-core
-  script:
-    - cmake --build build_core/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-linux-arch-package-16:
-  stage: package
-  dependencies:
-    - linux-arch-build-16
-  script:
-    - cmake --build build_16/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux
-  artifacts:
-    paths:
-      - build_16/
-  # cache:
-  #   paths:
-  #     - build_16/
-  allow_failure: true
-
-linux-arch-package-18:
-  stage: package
-  dependencies:
-    - linux-arch-build-18
-  script:
-    - cmake --build build_18/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - linux-ubuntu-18
-  artifacts:
-    paths:
-      - build_18/
-  # cache:
-  #   paths:
-  #     - build_18/
-  allow_failure: true
-
-windows-arch-package-core:
-  stage: package
-  dependencies:
-    - windows-arch-build-core
-  script:
-    - cmake --build build_core/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-windows-arch-package-py36:
-  stage: package
-  dependencies:
-    - windows-arch-build-py36
-  script:
-    - cmake --build build_py36/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-windows-arch-package-py37:
-  stage: package
-  dependencies:
-    - windows-arch-build-py37
-  script:
-    - cmake --build build_py37/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - windows
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-macosx-arch-package-core:
-  stage: package
-  dependencies:
-    - macosx-arch-build-core
-  script:
-    - cmake --build build_core/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_core/
-  # cache:
-  #   paths:
-  #     - build_core/
-  allow_failure: true
-
-macosx-arch-package-py36:
-  stage: package
-  dependencies:
-    - macosx-arch-build-py36
-  script:
-    - cmake --build build_py36/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py36/
-  # cache:
-  #   paths:
-  #     - build_py36/
-  allow_failure: true
-
-macosx-arch-package-py37:
-  stage: package
-  dependencies:
-    - macosx-arch-build-py37
-  script:
-    - cmake --build build_py37/ --target package --config Release
-  only:
-    - master
-    - develop
-    # Testing branch for CI development
-    - feature/experimental-ci
-  tags:
-    - macosx
-  artifacts:
-    paths:
-      - build_py37/
-  # cache:
-  #   paths:
-  #     - build_py37/
-  allow_failure: true
-
-# For internal, private deployment
-# linux-arch-deploy-int-master:
+# # For internal, private deployment
+# .linux-arch-deploy-int-master:
 #   stage: deploy
 #   script:
 #     # Windows
@@ -910,9 +658,9 @@ macosx-arch-package-py37:
 #   tags:
 #     - linux
 #   allow_failure: true
-
-# For internal, private deployment
-# linux-arch-deploy-int-experimental:
+#
+# # For internal, private deployment
+# .linux-arch-deploy-int-experimental:
 #   stage: deploy
 #   script:
 #     # Windows
