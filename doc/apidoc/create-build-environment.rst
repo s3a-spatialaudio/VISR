@@ -10,7 +10,7 @@ Git
  * On Mac OS X 10.9 and above, the git command line tool is installed on its first invocation (source: `GIT SCM book <https://git-scm.com/book/>`_).
  * On Windows, we suggest the `Git for Windows <htps://git-scm.com/download/win>`_ binaries.
  
- Alternatively you can choose from a number of GUIs, for example <SourceTree <https://www.sourcetreeapp.com/>`_ or `GitKraken <https://www.gitkraken.com/>`_, or the support in modern IDEs as Microsoft Visual Studio or Apple XCode.
+ Alternatively you can choose from a number of GUIs, for example `SourceTree <https://www.sourcetreeapp.com/>`_ or `GitKraken <https://www.gitkraken.com/>`_, or the support in modern IDEs as Microsoft Visual Studio or Apple XCode.
 
 CMake
 ---------------------
@@ -28,7 +28,7 @@ CMake can be used as a command line tool but also provides a GUI (cmake-gui) for
 Documentation
 -----------------------
 
-The VISR documentation is mainly written as ReStructured text documents (using `Sphinx <>`_ to create web pages and PDF documents), whereas the code documentation pulled into these documents is generated through `Doxygen <https://www.doxygen.nl>`_.
+The VISR documentation is mainly written as ReStructured text documents (using `Sphinx <http://www.sphinx-doc.org/>`_ to create web pages and PDF documents), whereas the code documentation pulled into these documents is generated through `Doxygen <https://www.doxygen.nl>`_.
 
 In order to create the user and API documentation, the following software tools must be installed:
 
@@ -37,8 +37,8 @@ In order to create the user and API documentation, the following software tools 
 * LaTeX: Both the Doxygen documentation and the PDF generation of Sphinx require a LaTeX system to be installed. We recommend the following LaTeX distributions:
 
     - Linux: The system-provided LaTeX (installed, e.g., through ``sudo apt install texlive-full`` ``sudo apt install texlive`` on Ubuntu)
-	  - Mac OS X: `MacTeX <http://www.tug.org/mactex/`_
-	  - Windows:  `MikTeX <http://www.miktex.org`_
+	  - Mac OS X: `MacTeX <http://www.tug.org/mactex/>`_
+	  - Windows:  `MikTeX <http://www.miktex.org>`_
 	
   Note that - unless you install a "full" distribution - LaTeX packages might be missing and would need to be installed as needed. So look out for error messages when running the documentation generation for the first time, and use the distribution's package manager to install the missing packages as needed.
   
@@ -75,7 +75,7 @@ Installation packages are created using `CPack <https://cmake.org/cmake/help/lat
 
 Windows
 """""""
-Download and install the NSIS installer system (`https://sourceforge.net/projects/nsis/`_). It will be automatically recognized if you create the installer packages.
+Download and install the NSIS installer system (`<https://sourceforge.net/projects/nsis/>`_). It will be automatically recognized if you create the installer packages.
 
 Setup as Gitlab runner
 ----------------------
