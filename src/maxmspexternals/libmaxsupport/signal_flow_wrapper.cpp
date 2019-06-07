@@ -73,7 +73,6 @@ void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSample
 template<typename ExternalSampleType >
 void SignalFlowWrapper<ExternalSampleType>::transferOutputSamples( ExternalSampleType * const * outputSamples )
 {
-  std::size_t const startIdx = mFlow.numberOfCaptureChannels();
   std::size_t const numberOfPlaybackSignals = mFlow.numberOfPlaybackChannels();
   for( std::size_t outIdx( 0 ); outIdx < numberOfPlaybackSignals; ++outIdx )
   {
