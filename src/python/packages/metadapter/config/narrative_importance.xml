@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <metadapter>
     <!-- <processor name="FakeGroups" type="FakeGroups" /> -->
+    
 	<processor name="AddAdvancedMetadata" type="AddAdvancedMetadata" />
-
-	<processor name="NarrativeImportance" type="NarrativeImportance" on="1" narrativeimportance="0.0" />    
+	<!--processor name="AddMdo" type="AddMdoMetadata" udpPort="9001" messagePacketSize="65536" verbose="1" /-->    
+    
+    <processor name="NarrativeImportance" type="NarrativeImportance" on="1" narrativeimportance="0.0" />    
     
     <processor name="GlobalAttenuation" type="ChangeVolume" volumeAdjust="0.0" />
     

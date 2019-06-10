@@ -23,66 +23,64 @@ All standalone applications provided with the VISR provide a common set of comma
 **--option-file <filename>** or **@<filename>**
   Pass a configuration file containing a set of command line options to the applications.
   This options allows to store and share complex sets of command line options, and to overcome potential command line length limitations.
-  
+
   A typical option file has the format
-  
+
   .. code-block:: bash
-  
+
      -i 2
      -o 2
      -f 48000
      -c "/usr/share/visr/config/generic/stereo.xml"
-  
+
   where,by convention, one option is stored per line.
 **--sampling-frequency** or **-f**
   The sampling frequency to be used for rendering, as an integer value in Hz.
   Typically optional. If not given, a default value (e.g., 48000 Hz) will be used.
 **--period** or **-p**
-  The period, or blocksize, or buffersize to be used by the audio interface. 
-  
+  The period, or blocksize, or buffersize to be used by the audio interface.
+
   In most cases, the period should be a power of 2, e.g., 64, 128, 256, 512, ..., 4096.
   Lower values mean lower audio latency, but typically higher system load and higher susceptibility to audio underruns.
-  
+
   Typically an optional argument. If not given, a default value (e.g., 1024) is used.
 **--audio-backend** or **-D**
   Specify the audio interface library to be used.
-  
+
   This option is mandatory.
-  
+
   The audio interfaces depend on the operating system and the configuration of the user's system. The most common options are **"PortAudio"** (all platforms) and **"Jack"** (Linux and Mac OS X). Note that additional libraries (or backends) can be available for a specific platform, and new backends might be added in the future.
 **-audio-ifc-options**
   A string to provide additional options to the audio interface.
-  
+
   This is an optional argument, and its content is interface-specific.
-  
+
   By convention, the existing audio interfaces expect JSON (`JavaScript Object Notation <https://www.json.org/>`_) strings for the backend-configuration.
-  
+
   To pass JSON strings, the whole string should be enclosed in single or double quotes, and the quotes required by JSON must be escaped with a backslash. For example, the option might be used in this way:
-  
+
   .. code-block:: bash
-  
+
      visr_renderer ... -audio-ifc-options='{ \"hostapi\": \"WASAPI\" }'
 
   Section :ref:`using_visr_using_standalone_renderers_specific_audio_options` below explains the options for the currently supported audio interfaces.
-     
+
 **-audio-ifc-option-file**
   Provide a interface-specific option string within a file.
-  
+
   This can be used to avoid re-specifying complex options strings, to author them in a structured way, and to store and share them.
-  
+
   In addition, it avoids the quoting and escaping tricks needed on the command line.
   For example, the option shown above could be specified in a file **portaudio_options.cfg** as
-  
+
   .. code-block:: json
-  
-     {
-       "hostapi": "WASAPI"
-     }
-  
-  and passed as 
-  
+
+     { "hostapi": "WASAPI" }
+
+  and passed as
+
   .. code-block:: bash
-  
+
      visr_renderer ... -audio-ifc-option-file=portaudio_options.cfg
 
 .. note:: The options **--audio-ifc-options** and **--audio-ifc-option-file** are mutually
@@ -118,11 +116,11 @@ The two binaries provided are:
   This metadapter is integrated into the rendering binary as an optional part, and is used if the option **--metadapter-config** is specified.
   The binary itself, however, needs a Python istallation to start at all, irrespective whether this option is set.
 *baseline_renderer*
-  This is the legacy object-based loudspeaker renderer. At the time being, it provides the same functionality as the **visr_renderer**, 
+  This is the legacy object-based loudspeaker renderer. At the time being, it provides the same functionality as the **visr_renderer**,
   but without the optional integrated metadapter component.
   In this way, the binary is independent of a Python distribution on the user's computer.
 
-In general, we recommend to use **visr_renderer** if possible, and to use **baseline_renderer** on systems where the Python features 
+In general, we recommend to use **visr_renderer** if possible, and to use **baseline_renderer** on systems where the Python features
 of the VISR framework are not available.
 
 The command line arguments supported by the **visr_renderer** application are:
@@ -190,7 +188,7 @@ The arguments for the **baseline_renderer** application are identical, except th
 
       Admissible values are :code:`true` and :code:`false`. The default value is :code:`false`, corresponding
       to the standard VBAP algorithm.
-  
+
 :code:`--reverb-config`:
   A set of options for the integrated reverberation engine for the RSAO (:code:`PointsourceWithReverb`) object (see section :ref:`visr_object_based_audio_reverberation`).
   To be passed as a JSON string. The supported options are:
@@ -237,25 +235,25 @@ The arguments for the **baseline_renderer** application are identical, except th
 
      --reverb-config='{ \"numReverbObjects\": 5, \"lateReverbFilterLength\": 4.0,
                 \"lateReverbDecorrelationFilters\": "/home/af5u13/tmp/decorr.wav\",
-                \"discreteReflectionsPerObject\": 10 }'	    
-  
+                \"discreteReflectionsPerObject\": 10 }'
+
 :code:`--tracking`
   Activates the listener-tracked VBAP reproduction, which adjust both the VBAP gains as well as the final loudspeaker gains and delays according to the listener position. It takes a non-empty string argument containing a JSON message of the format: :code:`{ "port": &lt;UDP port number&gt;, "position": {"x": &lt;x in m&gt;, "y": &lt;y im m&gt;, "z": &lt;z in m&gt; }, "rotation": { "rotX": rX, "rotY": rY, "rotZ": rZ } }"`. The values are defined as follows:
 
   =============  ======================================================  ============  =======
-  ID             Description                                             Unit          Default 
+  ID             Description                                             Unit          Default
   =============  ======================================================  ============  =======
-  port           UDP port number                                         unsigned int  8888 
-  position.x     x position of the tracker                               m             2.08 
-  position.y     y position of the tracker                               m             0.0 
-  position.z     z position of the tracker                               m             0.0 
-  rotation.rotX  rotation the tracker about the x axis, i.e., y-z plane  degree        0.0 
-  rotation.rotY  rotation the tracker about the y axis, i.e., z-x plane  degree        0.0 
-  rotation.rotZ  rotation the tracker about the z axis, i.e., x-y plane  degree        180 
+  port           UDP port number                                         unsigned int  8888
+  position.x     x position of the tracker                               m             2.08
+  position.y     y position of the tracker                               m             0.0
+  position.z     z position of the tracker                               m             0.0
+  rotation.rotX  rotation the tracker about the x axis, i.e., y-z plane  degree        0.0
+  rotation.rotY  rotation the tracker about the y axis, i.e., z-x plane  degree        0.0
+  rotation.rotZ  rotation the tracker about the z axis, i.e., x-y plane  degree        180
   =============  ======================================================  ============  =======
 
 .. note:: The option parsing for :code:`--tracking` not supported yet, default values are used invariably. To activate tracking, you need to specify the  :code:`--tracking` option with an arbitrary parameter (even  :code:`--tracking=false` would activate the tracking.
-	  
+
 :code:`--scene-port`
   The UDP network port which receives the scene data in the VISR JSON object format.
 :code:`--metadapter-config`
@@ -328,7 +326,7 @@ The matrix convolver consists of the following elements:
 
 * A number of **input channels**.
 * A set of **FIR filter**, which can be reused multiple times.
-* A set of **output channels**.  
+* A set of **output channels**.
 * A set of **routings**, which defines that a given input is filtered through a specific filter (with an optional gain), and the result is routed to a given output channels. All filtering results that are routed to a given output are summed together.
 
 This interface allows for several different operation modes, for example:
@@ -338,7 +336,7 @@ This interface allows for several different operation modes, for example:
 * Filtering multiple signals and adding them together, as, for example, in filter-and-sum beamforming.
 * MIMO filtering with complete matrices, where a filter is defined for each input-output combination.
 * MIMO filtering with sparse matrices, corresponding to sophisticated routings between inputs and outputs.
-  
+
 
 Detailed option description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -379,13 +377,13 @@ Detailed option description
 
   .. code-block:: bash
 
-     --filters ="filters_2ch.wav, filters_6ch.wav, filters_4ch.wav"   
+     --filters ="filters_2ch.wav, filters_6ch.wav, filters_4ch.wav"
      --filter-file-index-offsets="2, 8, 16"
 
   Here, three WAV files are provided: :code:`filters_2ch.wav`, :code:`filters_6ch.wav`, and :code:`filters_4ch.wav`, with 2, 6, and 4 channels respectively.
   The filter offsets "2, 8, 16" mean that the filters of :code:`filters_2ch.wav` will be associated to the indices 2 and 3, that of :code:`filters_6ch.wav` by indices 8-13, and that of :code:`filters_4ch.wav` by the indices 16-19.
 
-  Any filters below, between, or above the initialized filter channels (here, indices 0-1, 4-7, 14-15, and >=20) will be zero-initialised. 
+  Any filters below, between, or above the initialized filter channels (here, indices 0-1, 4-7, 14-15, and >=20) will be zero-initialised.
 
   If the :code:`--filter-file-index-offsets` hadn't been provided in this example, the start offsets for the filter sets from the three files would have been 0,2,8.
 
@@ -396,7 +394,7 @@ Detailed option description
 
   .. code-block:: json
 
-     { "input": "<i>", "output": "<o>", "filter": "<f>", "gain": "<g>" }		  
+     { "input": "<i>", "output": "<o>", "filter": "<f>", "gain": "<g>" }
 
   Here, :code:`<i>` is the index of the input channel, :code:`<o>` is the channel index of the output, and :code:`<f>` is the index of the filter (see above).
   All indices are zero-offset.
@@ -409,7 +407,7 @@ Detailed option description
      [{"input":"0", "output":"0", "filter":"2" },
       {"input":"0", "output":"1", "filter":"1" },
       {"input":"0", "output":"2", "filter":"0" }]
-  
+
   A routing entry can define multiple multiple routings using a Matlab-like stride syntax for :code:`<i>`, :code:`<o>`, :code:`<f>`, or several of them.
   If an index is a stride sequence, then the routing entry is duplicated over all values of the stride sequence. If more than one index in the routing entry are strides, then all of them must have the same length, and each of the duplicated routing entries contains the respective value of the respective stride sequence.
   For example, the strided routing entry
@@ -420,19 +418,19 @@ Detailed option description
 
   routes input 3 to the outputs 0, 3, 6, and 9, using the filter indexed by 1 for each routing.
   In contrast.
-  
+
   .. code-block:: json
 
      {"input":"0", "output":"0:2", "filter":"2:-1:0" }
 
   is equivalent to the routing list shown above.
-  
+
   .. code-block:: json
 
      [{"input":"0", "output":"0", "filter":"2" },
       {"input":"0", "output":"1", "filter":"1" },
       {"input":"0", "output":"2", "filter":"0" }]
-  
+
 :code:`--max-filter-length` or :code:`-l`:
   Define the maximum length of the FIR filters.
   If the :code:`--filters` option is provided, this argument is optional. In this case, admissible filter length is set to the largest length of all specified filter.
@@ -451,20 +449,20 @@ Detailed option description
   .. note:: If combined with :code:`--filter-file-index-offsets`, this automatically computed number of filters includes any gaps in the generated filter set.
 
   If :code:`--filters` and :code:`max-filters` are both provided, then the number of filter entries created by :code:`--filters` must not exceed
-  the value of :code:`--max-filters`. 	    
+  the value of :code:`--max-filters`.
 :code:`--fft-library`:
   Select a FFT implementation from the set of available FFT libraries.
   The admissible values (strings) can be obtained through the :code:`--list-fft-libraries` option.
-  
+
 .. note:: The current implementation accepts only a static configuration.
 
    Future versions, however, will provide runtime control through a network command interface.
 
    Some arguments or argument combinations do not make sense at the moment, but will do when combined with runtime control.
-   Examples include the ability to provide empty routings, zero-valued filters, or to specify values for :code:`--max-routings` or :code:`--max-filters` that are larger than the currently set values. 
+   Examples include the ability to provide empty routings, zero-valued filters, or to specify values for :code:`--max-routings` or :code:`--max-filters` that are larger than the currently set values.
 
 
-Examples   
+Examples
 ~~~~~~~~
 
 A channel-wise multichannel convolution can be performed as
@@ -474,7 +472,7 @@ A channel-wise multichannel convolution can be performed as
    $> matrix_convolver -i 2 -o 2 -p 512 -D PortAudio -f 48000 --filters="filters.wav"
      -r '[ {\"input\": \"0:1\", \"output\":\"0:1\", \"filter\":\"0:1\"}]'
 
-.. note:: The quoting is necessary when started from the command line. 
+.. note:: The quoting is necessary when started from the command line.
 
 The following example shows a convolution with binaural room impulse responses, where a 9-loudspeaker multichannel signal is routed to 9x2 BRIRs
 that are summed to form two ear signals.
@@ -498,7 +496,7 @@ This standalone application is an alternative way to run arbitrary VISR componen
 
 Compared to instantiating the processing from a Python interpreter, this can be easier to control, for example within  a script or when running a device in 'headless mode'.
 
-For obvious reasons, this application requires an installed and correctly configured Python distribution, as described in Section :ref:`installation_python_setup_configuration`. 
+For obvious reasons, this application requires an installed and correctly configured Python distribution, as described in Section :ref:`installation_python_setup_configuration`.
 
 Usage
 ~~~~~
@@ -509,24 +507,24 @@ The supported options are displayed when started with the :code:`--help` or :cod
    $> python_runner --help
      -h [ --help ]                     Show help and usage information.
      -v [ --version ]                  Display version information.
-     --option-file arg                 Load options from a file. Can also be used 
+     --option-file arg                 Load options from a file. Can also be used
                                        with syntax "@<filename>".
      -D [ --audio-backend ] arg        The audio backend.
      -f [ --sampling-frequency ] arg   Sampling frequency [Hz]
      -p [ --period ] arg               Period (blocklength) [Number of samples per
                                        audio block]
-     -m [ --module-name ] arg          Name of the Python module to be loaded 
+     -m [ --module-name ] arg          Name of the Python module to be loaded
                                        (without path or extension).
-     -c [ --python-class-name ] arg    Name of the Python class (must be a 
+     -c [ --python-class-name ] arg    Name of the Python class (must be a
                                        subclass of visr.Component).
-     -n [ --object-name ] arg          Name of the Python class (must be a 
+     -n [ --object-name ] arg          Name of the Python class (must be a
                                        subclass of visr.Component).
-     -a [ --positional-arguments ] arg Comma-separated list of positional options 
+     -a [ --positional-arguments ] arg Comma-separated list of positional options
                                        passed to the class constructor.
-     -k [ --keyword-arguments ] arg    Comma-separated list of named (keyword) 
+     -k [ --keyword-arguments ] arg    Comma-separated list of named (keyword)
                                        options passed to the class constructor.
-     -d [ --module-search-path ] arg   Optional path to search for the Python 
-                                       module (in addition to the default search 
+     -d [ --module-search-path ] arg   Optional path to search for the Python
+                                       module (in addition to the default search
                                        path (sys.path incl. $PYTHONPATH). Provided as a
                                        comma-separated list of directories.
      --audio-ifc-options arg           Audio interface optional configuration.
@@ -574,13 +572,13 @@ The remaining options are:
   and must be defined in the module :code:`module-name`.
 
   .. note:: At the moment, only classes in the top-level namespace are supported.
-	    That is, classes of the form :code:`moduleName.submodule.className` cannot be used. 
+	    That is, classes of the form :code:`moduleName.submodule.className` cannot be used.
 
-  This argument is mandatory.	    
+  This argument is mandatory.
 :code:`--object-name` or :code:`-n`:
   Set a name for the top-level component. This name is used, for example, in error messages
   and warnings emitted from the component.
-  
+
   This argument is optional.
   If not provided, a default name is used.
 :code:`-a` :code:`--positional-arguments`:
@@ -598,7 +596,7 @@ The remaining options are:
   * A comma-separated list of values, for example
 
     .. code-block:: bash
-		    
+
        -a "3, 2.7,'foobar'"
 
     Note that the enclosing double quotes are required to separate the argument to :code:`-a`
@@ -608,9 +606,9 @@ The remaining options are:
 
     If the parameter sequence consists of a single value, a training comma is required.
     That is, a single positional argument is specified as
-    
+
     .. code-block:: bash
-		    
+
        -a "3,"
 
     If two or more arguments are provided, the trailing comma is optional.
@@ -619,15 +617,15 @@ The remaining options are:
     Apart from the additional parentheses, the syntax is identical to the
     comma-separated lists above.
     That is, the argument list above would be specified as
-    
+
     .. code-block:: bash
-		    
+
        -a "(3, 2.7,'foobar' )"
 
     As above, single arguments require a trailing comma.
-       
+
     .. code-block:: bash
-		    
+
        -a "(3,)"
 
   * A tuple constructed using the :code:`tuple()` keyword, that is
@@ -637,9 +635,9 @@ The remaining options are:
        -a "tuple(3, 2.7,'foobar' )"
 
     and in the single-parameter case
-       
+
     .. code-block:: bash
-		    
+
        -a "tuple(3)"
 
     That is, no trailing comma is required in this case.
@@ -652,7 +650,7 @@ The remaining options are:
   To be provided as a Python dictionary, for example:
 
   .. code-block:: bash
-		    
+
      -k "{ 'argument1': value1, 'argument2': value2, ..., 'argumentN': valueN }"
 
   .. hint:: As in case of positional arguments, we suggest to enclose the complete argument
@@ -670,7 +668,7 @@ The remaining options are:
   Specifies additional search paths for Python modules.
 
   To be specified as a comma-separeted list of directory path.
-  
+
   These search paths can be used to locate the module containing the component to be run, unless
   a directory path is passed to the :code:`--module-name` option.
   In addition, the search paths are evaluated to locate transitive dependencies of the module to be loaded.
@@ -678,13 +676,13 @@ The remaining options are:
   the :code:`PYTHONPATH` environment variable, as described in section
   :ref:`installation_python_setup_configuration`.
   The additional search paths are added to the Python search path :code:`sys.path` before the main
-  module specified by the :code:`-m` option is loaded. 
+  module specified by the :code:`-m` option is loaded.
 
   .. todo:: Decide whether the additional paths shall be appended or prepended to the system path.
 	    In the latter case, this could avoid loading another module of the same name by prioritizing the explicitly added paths.
 
   This argument is optional, no additional search paths are added if the option is not provided.
-  
+
 Examples
 ~~~~~~~~
 
@@ -699,8 +697,8 @@ In this example we use a simple Python-based VISR component :code:`PythonAdder`.
 
 that implements generic addition with :code:`numInputs` signals to be added with
 :code:`width` signals each.
-Here, the component class :code:`PythonAdder` is contained in a source file :code:`pythonAtoms.py`. 
-      
+Here, the component class :code:`PythonAdder` is contained in a source file :code:`pythonAtoms.py`.
+
 The :code:`python_runner` can be invoked using positional arguments through
 
 .. code-block:: bash
@@ -710,7 +708,7 @@ The :code:`python_runner` can be invoked using positional arguments through
 
 which creates a :code:`PythonAdder` component with three inputs and a width of two.
 
-The same component is constructed with the keyword argument option as 
+The same component is constructed with the keyword argument option as
 
 .. code-block:: bash
 
@@ -728,7 +726,7 @@ Note the trailing comma for the positional option.
 
 So far, the examples specified the path to the module explicitly.
 If this path (:code:`$HOME/VISR/src/python/scripts` in the example) is contained in the default Python search path, i.e., :code:`sys.path`, then the pure module name suffices
-	
+
 .. code-block:: bash
 
    $> python_runner -D PortAudio -f 48000 -p 512
@@ -752,7 +750,7 @@ the :code:`PYTHONPATH` variable.
    $> python_runner -D PortAudio -f 48000 -p 512
        -m pythonAtoms -c PythonAdder -a "3," -k "{'width':2}"
        --module-search-path
-       $HOME/VISR/src/python/scripts,/usr/share/visr/python 
+       $HOME/VISR/src/python/scripts,/usr/share/visr/python
 
 
 .. _using_visr_using_standalone_renderers_specific_audio_options:
@@ -760,7 +758,7 @@ the :code:`PYTHONPATH` variable.
 Interface-specific audio options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This section described the audio-interface-specific options that can be passed through the 
+This section described the audio-interface-specific options that can be passed through the
 :code:`--audio-ifc-options` or :code:`--audio-ifc-option-file` arguments.
 
 PortAudio interface
@@ -770,20 +768,22 @@ The interface-specific options for the PortAudio interface are to be provided as
 for example:
 
 .. code-block:: json
-   
+
    {
     "sampleformat": "...",
     "interleaved": "...",
-    "hostapi" : "..."
+    "hostapi" : "...",
+    "inputDevice": "...",
+    "outputDevice": "..."
    }
 
 .. note:: When used on the command line using the :code:`--audio-ifc-options` argument, apply the quotation and escaping as described in Section :ref:`using_standalone_renderers_common_options`.
 
 The following options are supported for the PortAudio interface:
 
-**sampleformat** 
+**sampleformat**
   Specifies the PortAudio sample format. Possible values are:
-  
+
    * :code:`signedInt8Bit`
    * :code:`unsignedInt8Bit`
    * :code:`signedInt16Bit`
@@ -795,34 +795,52 @@ The following options are supported for the PortAudio interface:
    * :code:`float32Bit` .
 
 **interleaved**:
-  Enable/disable interleaved mode, possible values are :code:`true, false`.
- 
+  Enable/disable interleaved mode, that is, whether the samples of all channels are interleaved when transferred to or from the sound interface.
+  This configures how the sound interface handles the data, it does not affect the format of the audio data within VISR.
+  Possible values are :code:`true` (default) and :code:`false`.
+
 **hostapi**:
   Used to specify PortAudio backend audio interface. Possible values are:
 
    - :code:`default`: This activates the default backend
    - :code:`WASAPI` : Supported OS: Windows.
+   - :code:`MME` : Supported OS: Windows.
    - :code:`ASIO` : Supported OS: Windows.
    - :code:`WDMKS`: Supported OS: Windows.
    - :code:`DirectSound` : Supported OS: Windows.
-   - :code:`CoreAudio` : Supported OS: MacOs.
+   - :code:`CoreAudio` : Supported OS: Mac OS X.
    - :code:`ALSA` : Supported OS: Linux.
-   - :code:`JACK` : Supported OSs: MacOs, Linux. 
+   - :code:`JACK` : Supported OSs: Mac OS X, Linux.
+
+  This argument is optional. If it is not provided, the default host API for the current platform is used (equivalent to specifying :code:`"default"`).
 
   PortAudio aupports a number of other APIs. However, they are outdated or refer to obsolete platforms and therefore should not be used:
+
   - :code:`SoundManager` (MacOs)
   - :code:`OSS` (Linux)
   - :code:`AL`
   - :code:`BeOS`
   - :code:`AudioScienceHPI` (Linux)
 
+**inputDevice**:
+  Specifies the audio device used as input.
+  Optional argument. If not provided or empty, the default input for the chosen host API is used.
+  The simplest way to see the list of admissible devices is to use the :code:`inputDevice` option with a random string.
+  The error message will return a list of all device names of the chosen host API with at least one input channel.
+
+**outputDevice**:
+  Specifies the audio device used as output.
+  Optional argument. If not provided or empty, the default output for the chosen host API is used.
+  The simplest way to see the list of admissible devices is to use the :code:`outputDevice` option with a random string.
+  The error message will return a list of all device names of the chosen host API with at least one output channel.
+
 This configuration is an example of usage of PortAudio, with Jack audio interface as backend.
 
 .. code-block:: json
 
    {
-     "sampleformat": "float32Bit", 
-     "interleaved": "false", 
+     "sampleformat": "float32Bit",
+     "interleaved": "false",
      "hostapi" : "JACK"
    }
 
@@ -839,18 +857,18 @@ The following options can be provided when using Jack as our top level component
    Globally enable/disable the automatic connection of ports.
    Admissible values are :code:`true` and :code:`false`.
    This setting can be overridden specifically for capture and playback ports in the port configuration section described below.
-   
+
 :code:`portconfig`: Subset of options regarding the configuration and connection of Jack Ports, see following section.
-  
+
 Port Configuration
 ''''''''''''''''''
 The port configuration section allows to individually set properties for the capture, i.e., input, and the playback, i.e., output, ports of an application.
 
 :code:`capture`: Specifies that the following options regard the top level component’s capture ports only
-      
+
    - :code:`autoconnect` : Enable/disable auto connection to an external jack client’s input ports, possible values are :code:`true, false`
    - :code:`port`: Jack ports specification
-     
+
        - :code:`basename`: Common name for all top level component’s capture ports
        - :code:`indices`:  list of port numbers to append to top level component’s capture port name. It is possible to use Matlab’s colon operator to express a list of numbers in a compact fashion (es."0:4" means appending numbers 0 to 3 to port names)
        - :code:`externalport`: Specification of an external jack client to connect to if :code:`autoconnect` is enabled.
@@ -859,7 +877,7 @@ The port configuration section allows to individually set properties for the cap
              - :code:`indices`: List of port numbers that together with :code:` portname` describe existing external jack client input ports. It is possible to use Matlab’s colon operator to express a list of numbers.
 
 :code:`playback`: Specifies that the following options regard the top level component’s playback ports only.
-      
+
    - :code:`autoconnect` : Enable/disable auto connection to an external jack client’s output ports, possible values are :code:`true, false`
    - :code:`port`: Jack ports specification
        - :code:`basename`: Common name for all top level component’s playback ports
@@ -893,7 +911,7 @@ This configuration example shows how to auto-connect the Jack input and output p
        }
      }
    }
-   
+
 .. _figure_jack_config_simple_example:
 .. figure:: ../images/jacksimpleexample.jpeg
    :scale: 100 %
@@ -902,7 +920,7 @@ This configuration example shows how to auto-connect the Jack input and output p
    Jack audio complex configuration example.
 
 
-Complex Example 
+Complex Example
 '''''''''''''''
 
 Follow a more complex example where auto-connection of ports is performed specifying different jack clients and the ranges of ports to be connected are described both for the top level component and for external clients.
@@ -964,5 +982,3 @@ Follow a more complex example where auto-connection of ports is performed specif
    :align: center
 
    Jack audio complex configuration example.
-
-

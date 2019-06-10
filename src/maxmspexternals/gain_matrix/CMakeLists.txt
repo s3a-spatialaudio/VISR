@@ -41,5 +41,8 @@ endif(WIN32)
 # Link either to shared libraries or position-independent static libraries.
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl_shared )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport_shared )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} Boost::filesystem )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION max )
+install( TARGETS ${PROJECT_NAME}
+         LIBRARY DESTINATION max COMPONENT max_externals
+         RUNTIME DESTINATION max COMPONENT max_externals )

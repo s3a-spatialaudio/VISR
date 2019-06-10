@@ -25,21 +25,20 @@ class BiquadCoefficient;
 template <typename CoefficientType >
 class BiquadCoefficientList;
 
-template <typename CoefficientType >
-class BiquadCoefficientMatrix;
+//template <typename CoefficientType >
+//class BiquadCoefficientMatrix;
 
 
-namespace ParametricIirCoefficientCalculator
+class VISR_RBBL_LIBRARY_SYMBOL ParametricIirCoefficientCalculator
 {
+public:
 template< typename CoefficientType >
-VISR_RBBL_LIBRARY_SYMBOL
-void calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param, 
+static void calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param, 
                                BiquadCoefficient<CoefficientType> & coeffs,
                                CoefficientType samplingFrequency );
 
 template< typename CoefficientType >
-VISR_RBBL_LIBRARY_SYMBOL
-BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
+static BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoefficient<CoefficientType> const & param,
                                                                    CoefficientType samplingFrequency );
 
 /**
@@ -51,12 +50,10 @@ BiquadCoefficient<CoefficientType> calculateIirCoefficients( ParametricIirCoeffi
  * @param samplingFrequency
  */
 template< typename CoefficientType >
-VISR_RBBL_LIBRARY_SYMBOL
-void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
-  BiquadCoefficientList<CoefficientType> & coeffs,
-  CoefficientType samplingFrequency );
-
-}
+static void calculateIirCoefficients( ParametricIirCoefficientList<CoefficientType> const & params,
+                                      BiquadCoefficientList<CoefficientType> & coeffs,
+                                      CoefficientType samplingFrequency );
+}; // class ParametricIirCoefficientCalculator
 
 } // namespace rbbl
 } // namespace visr

@@ -102,13 +102,11 @@ int main( int argc, char const * const * argv )
 
     SignalFlowContext const context{ periodSize, samplingFrequency };
 
-    rcl::FirFilterMatrix convolver( context, "MatrixConvolver", nullptr/*instantiate as top-level flow*/ );
-
-    convolver.setup( numberOfInputChannels, numberOfOutputChannels,
-                     initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
-                     initialFilters, routings,
-                     rcl::FirFilterMatrix::ControlPortConfig::None /*no control inputs*/,
-                     fftLibrary.c_str() );
+    rcl::FirFilterMatrix convolver( context, "MatrixConvolver", nullptr/*instantiate as top-level flow*/, numberOfInputChannels, numberOfOutputChannels,
+                                    initialFilters.numberOfColumns(), maxFilters, maxFilterRoutings,
+                                    initialFilters, routings,
+                                    rcl::FirFilterMatrix::ControlPortConfig::None /*no control inputs*/,
+                                    fftLibrary.c_str() );
 
     rrl::AudioSignalFlow flow( convolver );
 

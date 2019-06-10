@@ -42,17 +42,17 @@ void exportFirFilterMatrix( py::module & m )
    ;
 
   ffm
-   .def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
-      py::arg("context"), py::arg("name"), py::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
-   .def( "setup", &FirFilterMatrix::setup, py::arg("numberOfInputs"),
-      py::arg("numberOfOutputs"),
-      py::arg("filterLength"),
-      py::arg("maxFilters"),
-      py::arg("maxRoutings"),
-      py::arg("filters") = pml::MatrixParameter<SampleType>(), // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
-      py::arg("routings") = rbbl::FilterRoutingList(),
-      py::arg( "controlInputs" ) = FirFilterMatrix::ControlPortConfig::None,
-      py::arg( "fftImplementation" ) = "default" )
+   //.def( py::init<visr::SignalFlowContext const&, char const *, visr::CompositeComponent*>(),
+   //   py::arg("context"), py::arg("name"), py::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr) )
+   //.def( "setup", &FirFilterMatrix::setup, py::arg("numberOfInputs"),
+   //   py::arg("numberOfOutputs"),
+   //   py::arg("filterLength"),
+   //   py::arg("maxFilters"),
+   //   py::arg("maxRoutings"),
+   //   py::arg("filters") = pml::MatrixParameter<SampleType>(), // We use a MatrixParameter as default argument because the base efl::BasicMatrix<SampleType> deliberately has no copy ctor.
+   //   py::arg("routings") = rbbl::FilterRoutingList(),
+   //   py::arg( "controlInputs" ) = FirFilterMatrix::ControlPortConfig::None,
+   //   py::arg( "fftImplementation" ) = "default" )
     .def( py::init< visr::SignalFlowContext const&, char const *, visr::CompositeComponent*,
                     std::size_t, std::size_t, std::size_t, std::size_t, std::size_t, 
                     efl::BasicMatrix<SampleType> const &, rbbl::FilterRoutingList const &,
@@ -72,7 +72,6 @@ void exportFirFilterMatrix( py::module & m )
         py::array const & filters, rbbl::FilterRoutingList const & routings,
         FirFilterMatrix::ControlPortConfig controlInputs, char const * fftImplementation )
      {
-       FirFilterMatrix * inst = new FirFilterMatrix( context, name, parent );
        // Todo: Consider moving the matrix parameter creation from Numpy arrays to a library.
        if( filters.ndim() != 2 )
        {
@@ -92,8 +91,9 @@ void exportFirFilterMatrix( py::module & m )
            filterMtxParam( rowIdx, colIdx ) = *static_cast<SampleType const *>(filters.data( rowIdx, colIdx ));
          }
        }
-       inst->setup( numberOfInputs, numberOfOutputs, filterLength, maxFilters, maxRoutings,
-                    filterMtxParam, routings, controlInputs, fftImplementation );
+       FirFilterMatrix * inst = new FirFilterMatrix(context, name, parent,
+          numberOfInputs, numberOfOutputs, filterLength, maxFilters, maxRoutings,
+          filterMtxParam, routings, controlInputs, fftImplementation );
        return inst;
      }),
       py::arg( "context" ), py::arg( "name" ), py::arg( "parent" ),

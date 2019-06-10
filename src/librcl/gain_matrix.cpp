@@ -2,6 +2,8 @@
 
 #include "gain_matrix.hpp"
 
+#include <libefl/vector_functions.hpp>
+
 #include <libpml/matrix_parameter.hpp>
 
 #include <ciso646>
@@ -66,13 +68,25 @@ void GainMatrix::process()
   if( mGainInput )
   {
     // TODO: Adapt logic to reset the gain matrix only after it has been actually changed. 
-    // Thus would be a match for the DoubleBufferingProtocol.
+    // This would be a match for the DoubleBufferingProtocol.
     mMatrix->setNewGains( mGainInput->data() );
   }
 
   // Allow for either zero inputs or outputs although the getVector() methods are not safe to use in this case.
-  if( mInput.width() == 0 or mOutput.width() == 0 )
+  if( mOutput.width() == 0 )
   {
+    return;
+  }
+
+  if( mInput.width() == 0 )
+  {
+    // If we get here, there is at least one output channel.
+    std::size_t const bufferSize{ period() };
+    std::size_t const align{mOutput.alignmentSamples()};
+    for( std::size_t chIdx{0}; chIdx < mOutput.width(); ++chIdx )
+    {
+      efl::vectorZero( mOutput[chIdx], bufferSize, align );
+    }
     return;
   }
   mInput.getChannelPointers( &mInputChannels[0] );

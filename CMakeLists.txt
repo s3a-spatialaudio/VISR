@@ -22,7 +22,7 @@ PROJECT( VISR CXX C )
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
 set( VISR_MINOR_VERSION 12 )
-set( VISR_PATCH_VERSION 1 )
+set( VISR_PATCH_VERSION 2 )
 
 add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
 add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
@@ -351,13 +351,21 @@ set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python"
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
 ################################################################################
-# Adjust the location of 3rd-party libraries.
-# This is required on Mac OS X. Essentially the files are copied to <build/3rd>
-# and the rpaths of of inter-library dependencies are adjusted.
-# NOTE: This has to happen before the add_subdirectory( src )
-if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+# Adjust the location of 3rd-party libraries on Windows and Mac OS:
+# - On Windows, we need to add the locations of all non-standard 3rd-party shared
+#   libraries to the %PATH% variable in order to execute built binaries (e.g.,
+#   Python externals or unit tests).
+# - On Mac OS this is also necessary (depending on the RPATH setting used while
+#   building). In addition, we need to adjust the rpath settings of the 3rd-party
+#   libraries itself, which implies that they need to be copied.
+
+# Define the location of the 3rd-party runtime libraries (Shared libraries or DLLs)
+set( VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR ${CMAKE_BINARY_DIR}/3rd )
+
+# NOTE: This must happen before the add_subdirectory( src ) directive.
+if( (VISR_SYSTEM_NAME MATCHES "MacOS") OR (VISR_SYSTEM_NAME MATCHES "Windows") )
   include( Adjust3rdPartyLibraries )
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+endif( (VISR_SYSTEM_NAME MATCHES "MacOS") OR (VISR_SYSTEM_NAME MATCHES "Windows") )
 
 ################################################################################
 # Actual software components (subprojects) to be built are

@@ -49,5 +49,8 @@ endif(WIN32)
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} apputilities_shared ) # slight misnomer, consider restructuring if the option handling should prove beneficial.
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} rcl_shared )
 TARGET_LINK_LIBRARIES( ${PROJECT_NAME} maxsupport_shared )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} Boost::filesystem )
 
-install(TARGETS ${PROJECT_NAME} DESTINATION max )
+install( TARGETS ${PROJECT_NAME}
+         LIBRARY DESTINATION max COMPONENT max_externals
+         RUNTIME DESTINATION max COMPONENT max_externals )

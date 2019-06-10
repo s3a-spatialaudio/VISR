@@ -11,7 +11,6 @@ import objectmodel as om
 import reverbobject as ro
 import panning
 import rrl
-import rcl
 import numpy as np
 import matplotlib.pyplot as plt
 import os.path
@@ -33,7 +32,7 @@ rob.lateReverb.decayCoefficients = np.array( [-5.0, 1.0, 1.0, 1.0, -3.0, 1.0, 1.
 # create signal flow context and loudspeaker array config
 blockSize = 128
 samplingFrequency = 48000
-ctxt = visr.SignalFlowContext( blockSize, samplingFrequency) 
+ctxt = visr.SignalFlowContext( blockSize, samplingFrequency)
 lc = panning.LoudspeakerArray( os.path.join( visrBaseDirectory, 'config/generic/bs2051-9+10+3.xml' ) )
 
 robj=obj_vector[0]
@@ -62,12 +61,12 @@ while not filter_out.empty():
     # Retrieve the filter coefficients
     firTaps[filterStruct.index] = np.array(filterStruct.value)
     # TODO: Analyse the filters.
-   
+
     # Slight oddity: We have to delete the Python variable because it would screw up the memory management
     # if the underlying C++ object is deleted in pop() while the Python representation is still alive.
-       
+
     del filterStruct
- 
+
     filter_out.pop()
 
 plt.figure(1)

@@ -2,6 +2,25 @@
 Changelog for project VISR
 ==========================
 
+Patch release 0.12.2
+--------------------
+
+* FEATURE: Updated metadapter engine and processors to version 0.9.1, switching to 'versioned' metadpter subtree. Tested Metadapter integration in visr_renderer and DAW plugins.
+* FEATURE: Add Max/MSP externals as optional component in installation packages. Not selected by default.
+* FEATURE: support loading of nested Python sub-packages of the form "package.sub1.sub2".
+* FEATURE: libaudiointerfaces: Added optional parameters "inputDevice" and "outputDevice" to Portaudio-specific audio interface configuration.
+* FEATURE: reverb object renderer: Use crossfading between late reverberation tails by default, enable switch to old implementation.
+* FEATURE: reverb object renderer: Provide default decorrelation filters if no filter path is provided. This avoids the lack of late reverb if no decorrelation filters are supplied.
+
+* BUILD: Make documentation building independent of $PYTHONPATH and $PATH settings.
+* BUILD: Fix documentation build warnings.
+
+* FIX: Under some conditions (esp. "odd" transition sample numbers), the rcl::CrossfadingFilterMatrix
+     and rbbl::CrossfadingConvolverUniform created erroneous transitions, which muted the filter
+     after the transition time.
+* FIX: Severe buffering error in Max/MSP external wrapper, with potential memory corruptions.
+* FIX: Added missing support for host API "MME" (Windows-only) in PortAudio configuration.
+
 Patch release 0.12.1
 --------------------
 
