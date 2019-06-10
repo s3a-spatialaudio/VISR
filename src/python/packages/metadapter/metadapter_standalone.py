@@ -6,19 +6,24 @@ Created on Thu Jan 21 17:52:45 2016
 
 @author: af5u13
 """
-
-from metadapter.networked import Engine
-
 import argparse
 import os
 import sys
+
+# Slightly hacky: Make the present package ('metadapter') appear first in the system path,
+# to load it irrespective of the $PYTHONPATH configuration.
+sys.path.insert( 0, '..' )
+
+from metadapter.networked import MetadataAdaptationEngine as Engine
 
 # Command line parsing
 cmdLineParser = argparse.ArgumentParser()
 
 cmdLineParser.add_argument( "-c", "--configFile", default="config.xml", help="XML configuration file containing the processing chain.")
 cmdLineParser.add_argument( "-r", "--receivePort", default=4243, help="UDP port number for receiving scene data." )
-cmdLineParser.add_argument( "--controlPort", default=None, help="UDP port number for control messages." )
+cmdLineParser.add_argument( "--controlPort", default=None, help="UDP port number for OSC control messages. Deprecated, use the '--oscControlPort' option instead." )
+cmdLineParser.add_argument( "-o", "--oscControlPort", default=None, help="UDP port number for OSC control messages.." )
+cmdLineParser.add_argument( "-j", "--jsonControlPort", default=None, help="UDP port number for JSON control messages.." )
 cmdLineParser.add_argument( "-s", "--sendHost", default=None, help="Network address and UDP port to which the processed scene data is sent.")
 cmdLineParser.add_argument( "-p", "--sceneSendInterval", default=0.1, help="Send interval for outgoing scene data vectors")
 cmdLineParser.add_argument( "-v", "--verbosity", default=0, help="Verbosity level. Integer number from 0 (no verbosity) to N (max. verbosity).")
@@ -28,7 +33,7 @@ cmdLineParser.add_argument( "-t", "--objectTimeout", default=86400, help="Object
 
 # Define the maximum length of the input scene data.
 # The default (8192) is slightly too small for larger SAW scenes.
-# A too small value results in no packages received at all.
+# A value too small results in no packages received at all.
 inputPacketSize = 65536
 
 # Maximum length for sent data.
@@ -41,10 +46,21 @@ configFileRaw = arguments.configFile
 configFile = os.path.abspath( configFileRaw )
 
 receivePort = int(arguments.receivePort)
-if arguments.controlPort == None:
-    controlPort = None
+
+if arguments.controlPort is not None and arguments.oscControlPort is not None:
+    raise ValueError( "The option '--oscControlPort' and the deprecated option '--oscControlPort' cannot both be given." )
+if arguments.oscControlPort is not None:
+    oscControlPort = int(arguments.oscControlPort)
+elif arguments.controlPort is not None:
+    print( "The option '--controlPort' is deprecated, use '--oscControlPort' instead." )
+    oscControlPort = int(arguments.controlPort)
 else:
-    controlPort = int(arguments.controlPort)
+    oscControlPort = None
+
+if arguments.jsonControlPort is not None:
+    jsonControlPort = int(arguments.jsonControlPort)
+else:
+    jsonControlPort = None
 
 sceneSendInterval = float(arguments.sceneSendInterval)
 verbosity = int(arguments.verbosity)
@@ -63,14 +79,18 @@ else:
     sendHostPort = int(sendHostArgs[1])
     sendHostName = sendHostArgs[0]
 
-objectTimeout = float(arguments.objectTimeout)
+if arguments.objectTimeout is None:
+    objectTimeout = None
+else:
+    objectTimeout = float(arguments.objectTimeout)
 
 try:
     engine = Engine( configFile,
                     sendHost=sendHostName,
                     sendPort=sendHostPort,
                     receivePort=receivePort,
-                    controlDataPort=controlPort,
+                    oscControlDataPort=oscControlPort,
+                    jsonControlDataPort=jsonControlPort,
                     sendInterval=sceneSendInterval,
                     inputPacketSize=inputPacketSize,
                     outputPacketSize=outputPacketSize,

@@ -2,13 +2,11 @@
 
 #include "signal_flow_wrapper.hpp"
 
-// #include <libefl/alignment.hpp>
 #include <libefl/basic_matrix.hpp>
 #include <libefl/vector_conversions.hpp>
 
 #include <libvisr/component.hpp>
 
-// #include <librrl/audio_interface.hpp>
 
 #include <cassert>
 #include <ciso646>
@@ -75,13 +73,12 @@ void SignalFlowWrapper<ExternalSampleType>::transferInputSamples( ExternalSample
 template<typename ExternalSampleType >
 void SignalFlowWrapper<ExternalSampleType>::transferOutputSamples( ExternalSampleType * const * outputSamples )
 {
-  std::size_t const startIdx = mFlow.numberOfCaptureChannels();
   std::size_t const numberOfPlaybackSignals = mFlow.numberOfPlaybackChannels();
-  for( std::size_t outChanIdx( startIdx ); outChanIdx < numberOfPlaybackSignals; ++outChanIdx )
+  for( std::size_t outIdx( 0 ); outIdx < numberOfPlaybackSignals; ++outIdx )
   {
-    ExternalSampleType * const firstOutSample = outputSamples[ outChanIdx ];
+    ExternalSampleType * const firstOutSample = outputSamples[ outIdx ];
     // Note: No alignment guarantees can be made because we do not know the alignment of outputSamples.
-    efl::ErrorCode const ret = efl::vectorConvert( mOutputBufferPtrs[ outChanIdx ], firstOutSample, mPeriodSize, 0 );
+    efl::ErrorCode const ret = efl::vectorConvert( mOutputBufferPtrs[ outIdx ], firstOutSample, mPeriodSize, 0 );
     if( ret != efl::noError )
     {
       throw std::runtime_error( "SignalFlowWrapper::transferOutputSamples( ) failed." );

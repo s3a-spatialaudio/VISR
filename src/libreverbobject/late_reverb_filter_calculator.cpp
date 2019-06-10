@@ -94,7 +94,10 @@ LateReverbFilterCalculator::LateReverbFilterCalculator( SignalFlowContext const 
  , mAlignment( cVectorAlignmentSamples )
  , mNumberOfObjects( numberOfObjects )
  , mNumberOfSubBands( numLateReflectionSubBandLevels )
- , mFilterLength( static_cast<std::size_t>( std::ceil( lateReflectionLengthSeconds * samplingFrequency() ) ) )
+ // Disallow filterLength == 0, because the processing chain is not completely safe in this case.
+ // TODO: Consider passing the filter length as a number of samples, because currently this adjustment has to be made also in the ReverbObjectRenderer,
+ // which makes it prone to inconsistencies.
+ , mFilterLength( static_cast<std::size_t>(std::max(std::ceil( lateReflectionLengthSeconds * samplingFrequency() ), 1.0f) ) )
  , mMaxUpdatesPerIteration( maxUpdatesPerPeriod == 0 ? mNumberOfObjects : maxUpdatesPerPeriod )
  , mSubBandNoiseSequences( numberOfObjects * mNumberOfSubBands, mFilterLength, mAlignment )
  , mSubbandInput( "subbandInput", *this, pml::EmptyParameterConfig( ) )
@@ -152,9 +155,14 @@ void LateReverbFilterCalculator::process( )
     // As the check for parameter changes is done on the sending end, we do not need to do it here again
     // Anyway, this will not change the impulse responses, as the calculation is deterministic.
 
-    // TODO: Fix this code before finalising the merge!!!
-    calculateImpulseResponse( val.index(), val.getReverbParameters(), &newFilter[0], mFilterLength );
-    
+    // Although we allow mFilterLength == 0 (corresponding to 'no late reverb') here, the access 
+    // &newFilter[0] would be illegal and possibly triggers a debug assertion.
+    // Note: Currently, the constructor adjusts this value to >=1
+    if( mFilterLength > 0 )
+    {
+      calculateImpulseResponse(val.index(), val.getReverbParameters(), &newFilter[0], mFilterLength);
+    }
+
     mFilterOutput.enqueue( IndexedFilter( val.index(), newFilter ) );
 
     mSubbandInput.pop();

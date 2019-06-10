@@ -102,7 +102,7 @@ class AddReverbProcessor(SequenceProcessorInterface):
           obj = addReverbMetadataToObject(obj,self.reverbLibrary,self.roomName)
 
     # Return the object vector
-    #pprint(objectVector)
+    pprint(objectVector)
     return objectVector
 
 
