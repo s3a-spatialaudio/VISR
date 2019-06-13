@@ -1,8 +1,13 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-ADD_EXECUTABLE( feedthrough_app main.cpp signal_flow.cpp )
+add_executable( feedthrough_app
+  main.cpp
+  options.hpp
+  options.cpp
+  signal_flow.cpp )
 
-TARGET_LINK_LIBRARIES(feedthrough_app rcl_shared  )
-TARGET_LINK_LIBRARIES(feedthrough_app visr_shared )
-TARGET_LINK_LIBRARIES(feedthrough_app rrl_shared )
-TARGET_LINK_LIBRARIES(feedthrough_app audiointerfaces_shared )
+target_link_libraries(feedthrough_app PRIVATE visr_shared )
+target_link_libraries(feedthrough_app PRIVATE rrl_shared )
+target_link_libraries(feedthrough_app PRIVATE apputilities_shared )
+target_link_libraries(feedthrough_app PRIVATE audiointerfaces_shared )
+target_link_libraries(feedthrough_app PRIVATE Boost::filesystem )
