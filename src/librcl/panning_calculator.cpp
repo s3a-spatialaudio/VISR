@@ -68,6 +68,8 @@ PanningCalculator::PanningCalculator( SignalFlowContext const & context,
  , mDiffuseNormalisation( (diffuseNormalisation == Normalisation::Default) ? Normalisation::Energy : diffuseNormalisation )
  , mLabelLookup( fillLabelLookup( arrayConfig ) )
 {
+    //mVbapCalculator->setNearTripletBoundaryCosTheta(-0.7);
+
     // Initialise for all (regular and virtual) loudspeakers.
     for( std::size_t lspIdx( 0 ); lspIdx < mNumberOfAllLoudspeakers; ++lspIdx )
     {
@@ -137,9 +139,12 @@ void PanningCalculator::setListenerPosition( pml::ListenerPosition const & pos )
   setListenerPosition( pos.x(), pos.y(), pos.z() );
 }
 
+
+
+
 namespace // unnamed
 {
-  void normalise( SampleType const * in, SampleType * out, std::size_t numberOfElements, 
+  void normalise( SampleType const * in, SampleType * out, std::size_t numberOfElements,
                   PanningCalculator::Normalisation mode, std::size_t outputStride = 1,
                   SampleType targetLevel = 1.0f )
   {
@@ -164,6 +169,9 @@ namespace // unnamed
     }
   }
 }
+
+
+
 
 void PanningCalculator::process()
 {
@@ -247,7 +255,7 @@ void PanningCalculator::process()
         continue;
       }
       // From here on we only deal with single-channel objects. That means we can skip all other objects
-      if( obj.numberOfChannels() != 1 ) 
+      if( obj.numberOfChannels() != 1 )
       {
         continue;
       }
@@ -442,11 +450,11 @@ void PanningCalculator::process()
 //        std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                        // Safeguard against potentially negative values that would yield NaNs
                        [](SampleType & val ){ val = std::pow( std::max( val, static_cast<SampleType>(0.0) ), 0.0 ); });
-          
+
         std::for_each( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                         // Safeguard against potentially negative values that would yield NaNs
                         [](SampleType & val ){ val = std::sqrt( std::max( val, static_cast<SampleType>(0.0) ) ); });
-          
+
         // Re-normalise with l2 (power) norm.
         SampleType const l2Sqr = std::accumulate( mTmpGains.data(), mTmpGains.data()+mNumberOfRegularLoudspeakers,
                                                   static_cast<SampleType>(0.0),
@@ -505,6 +513,7 @@ PanningCalculator::fillLabelLookup( panning::LoudspeakerArray const & config )
   }
   return table;
 }
+
 
 } // namespace rcl
 } // namespace visr

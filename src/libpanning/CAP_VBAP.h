@@ -1,15 +1,12 @@
 //
-//  VBAP.h
+//  CAP_VBAP.h
 //
 //  Created by Dylan Menzies on 10/11/2014.
 //  Copyright (c) ISVR, University of Southampton. All rights reserved.
 //
 
-#ifndef __S3A_renderer_dsp__VBAP__
-#define __S3A_renderer_dsp__VBAP__
-
-// uncomment to enable debug output
-// #define VBAP_DEBUG_MESSAGES
+#ifndef __S3A_renderer_dsp__CAP_VBAP__
+#define __S3A_renderer_dsp__CAP_VBAP__
 
 #include "defs.h"
 #include "LoudspeakerArray.h"
@@ -22,8 +19,11 @@ namespace visr
 {
 namespace panning
 {
-  
-class VISR_PANNING_LIBRARY_SYMBOL VBAP
+
+/**
+ * Specialised version of the VBAP renderer to be used in combination with CAP (compensated amplitude panning).
+ */
+class VISR_PANNING_LIBRARY_SYMBOL CAP_VBAP
 {
 public:
   /**
@@ -33,19 +33,23 @@ public:
    * @param y Cartesian y coordinate of the listener position
    * @param z Cartesian z coordinate of the listener position
    */
-  explicit VBAP( const LoudspeakerArray &array, SampleType x = 0.0f, SampleType y = 0.0f, SampleType z = 0.0f );
-  VBAP( VBAP const & ) = delete;
+  explicit CAP_VBAP( const LoudspeakerArray &array, SampleType x = 0.0f, SampleType y = 0.0f, SampleType z = 0.0f );
+
+  /**
+   * Deleted copy constructor, avoid unintentional copying include pass-by-value
+   */
+  CAP_VBAP( CAP_VBAP const & ) = delete;
   
   /**
    * Calculate the panning gains for a single source position and apply power normalisation.
    * @param x Cartesian x coordinate of the source position
    * @param y Cartesian y coordinate of the source position
    * @param z Cartesian z coordinate of the source position
-   * @param planeWave Whether the source is handles a point source (false) or plane wave (true)
    * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
    * Buffer must provide space for at least getNumSpeakers() values.
+   * @param planeWave Whether the source is handles a point source (false) or plane wave (true)
    */
-  void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave ) const;
+  void calculateGains( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave /*= false*/) const;
 
   /**
   * Calculate the panning gains for a single source position without normalisation.
@@ -53,10 +57,10 @@ public:
   * @param y Cartesian y coordinate of the source position
   * @param z Cartesian z coordinate of the source position
   * @param planeWave Whether the source is handles a point source (false) or plane wave (true)
-  * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
   * Buffer must provide space for at least getNumSpeakers() values.
+  * @param[out] gains array holding the panning gains for the regular (non-virtual) loudspeakers).
   */
-  void calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave ) const;
+  void calculateGainsUnNormalised( SampleType x, SampleType y, SampleType z, SampleType * gains, bool planeWave /*= false*/) const;
 
   /**
    * Reset the listener position.
@@ -66,16 +70,29 @@ public:
    * @param z Cartesian z coordinate of the new listener position
    */
   void setListenerPosition( SampleType x, SampleType y, SampleType z );
+    
+  /**
+   * Set the 2D fading mode.
+   */
+  void set2Dfade( bool m2Dfade );
+    
+  void setNearTripletBoundaryCosTheta( SampleType t ) {
+      mNearTripletBoundaryCosTheta = t;
+  }
   
 private:
   
-  bool is2D;
-  bool isInfinite;
+  bool mArrayIs2D;
+  bool mArrayIsInfinite;
+  bool m2Dfade;
   
   size_t numTotLoudspeakers;
   size_t numRegLoudspeakers;
   size_t numVirtLoudspeakers;
   size_t numTriplets;
+
+  SampleType mNearTripletBoundaryCosTheta;
+    
   /**
    * Inverse matrix of the vector components of loudspeakers positions considering loudspeaker triplets.
    * Dimension: # triplets(Rows) x # vectorComponents(Columns).
@@ -95,7 +112,7 @@ private:
   efl::BasicMatrix<SampleType> mReroutingMatrix;
   
   /**
-   * Vector holding the triplets of loudspeakers for VBAP calculation.
+   * Vector holding the triplets of loudspeakers for CAP_VBAP calculation.
    */
   std::vector<LoudspeakerArray::TripletType> mTriplets;
   
@@ -104,29 +121,38 @@ private:
    */
   std::array<SampleType, 3> mListenerPos;
   /**
-   * Vector holding the VBAP gains for all loudspeakers.
+   * Vector holding the CAP_VBAP gains for all loudspeakers.
    * Size: number of regular loudspeakers + number of virtual loudspeakers.
    * The gains are stored in order of their zero-offset logical loudspeaker index (not output signal index).
    * The gains of virtual loudspeakers are after the regular loudspeaker gains.
    */
   mutable std::vector<SampleType> mGain;
+    
+
+    /**
+     * State indicates whether is listener is near to triplet boundary (in 2D only for now)
+     * Used for 360 HF integration with CAP.
+     */
+  mutable std::vector<bool> mListenerIsNearTripletBoundary;
+
+    
   
   /**
-   * Calculates the inverse matrix required for VBAP gain calculation.
+   * Calculates the inverse matrix required for CAP_VBAP gain calculation.
    */
   void calcInvMatrices();
   
   /**
-   * Perform the basic VBAP gain calculation.
+   * Perform the basic CAP_VBAP gain calculation.
    * @param posX Cartesian x coordinate of the sound source position
    * @param posY Cartesian y coordinate of the sound source position
    * @param posZ Cartesian z coordinate of the sound source position
    * @param planeWave Flag whether the source is a poiunt source (false) or plane wave (true)
    */
-  void calcPlainVBAP( SampleType posX, SampleType posY, SampleType posZ, bool planeWave ) const;
+  void calcPlainGains( SampleType posX, SampleType posY, SampleType posZ, bool planeWave ) const;
   
   /**
-   * Applies rereouting coefficients to VBAP gains
+   * Applies rerouting coefficients to VBAP gains
    */
   void applyRerouting() const;
   
@@ -135,4 +161,4 @@ private:
 } // namespace panning
 } // namespace visr
 
-#endif /* defined(__S3A_renderer_dsp__VBAP__) */
+#endif /* defined(__S3A_renderer_dsp__CAP_VBAP__) */
