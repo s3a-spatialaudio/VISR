@@ -71,7 +71,7 @@ public:
    * @param numberOfObjects The number of VBAP objects to be processed.
    * @param arrayConfig The array configuration object.
    * @param panningMode whether the CAP gains are calculated in LF or HF mode.
-   * @param hfGainPutput Whether VBIP gains are vomputed in parallel and sent through an optional parameter port ""
+   * @param hfGainOutput Whether VBIP gains are vomputed in parallel and sent through an optional parameter port ""
 
    */
   explicit CAPGainCalculator( SignalFlowContext const & context,
@@ -79,7 +79,7 @@ public:
                               CompositeComponent * parent,
                               std::size_t numberOfObjects, 
                               panning::LoudspeakerArray const & arrayConfig,
-                              PanningMode capMode = PanningMode::LF,
+                              PanningMode panningMode = PanningMode::LF,
                               bool hfGainOutput = false
                              );
 
