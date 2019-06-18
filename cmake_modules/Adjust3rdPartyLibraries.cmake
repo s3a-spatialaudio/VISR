@@ -36,6 +36,15 @@ function( copyDllFromTarget tgt targetDir )
   # message( STATUS "lib: " ${BOOSTLIB} " liblocation: " ${LIBLOCATION} )
   get_filename_component( LIBREALPATH ${LIBLOCATION} REALPATH)
   copyDllFromLibName( ${LIBREALPATH} ${targetDir} )
+
+  # Take into account if there's a dedicated debug library.
+  # In this case copy both into the target directory.
+  get_target_property( DEBUGLIBLOCATION ${tgt} IMPORTED_LOCATION_DEBUG )
+  # message( STATUS "debug lib: " ${BOOSTLIB} " liblocation: " ${DEBUGLIBLOCATION} )
+  get_filename_component( DEBUGLIBREALPATH ${DEBUGLIBLOCATION} REALPATH)
+  if( NOT ${DEBUGLIBREALPATH} MATCHES ${LIBREALPATH} )
+    copyDllFromLibName( ${DEBUGLIBREALPATH} ${targetDir} )
+  endif( NOT ${DEBUGLIBREALPATH} MATCHES ${LIBREALPATH} )
 endfunction()
 
 function( fixBoostLibrary BOOSTLIB )
