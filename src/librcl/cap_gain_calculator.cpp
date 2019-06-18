@@ -214,7 +214,6 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects,
       std::for_each(mTempHfGains.begin(), mTempHfGains.end(), [](Afloat & val) { return std::sqrt(std::max(val, 0.0f)); });
       Afloat const sigNorm = std::sqrt(std::accumulate(mTempHfGains.begin(), mTempHfGains.end(), 0.0f,
         [](SampleType acc, SampleType val) { return acc + val * val; }));
-      break;
       Afloat const normedLevel = level / std::max(sigNorm, std::numeric_limits<SampleType>::epsilon());
       for (std::size_t outIdx(0); outIdx < mNumberOfLoudspeakers; ++outIdx)
       {
