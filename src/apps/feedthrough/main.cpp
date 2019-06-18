@@ -13,6 +13,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <ciso646>
 #include <cstddef>
 #include <cstdlib>
 #include <cstdio> // for getc(), for testing purposes
