@@ -215,6 +215,10 @@ namespace panning
       // Is listener inside near triplet boundary?
       mListenerIsNearTripletBoundary[i] = (l1X * l2X + l1Y * l2Y < mNearTripletBoundaryCosTheta);
 
+//printf("%d\n", (l1X * l2X + l1Y * l2Y < mNearTripletBoundaryCosTheta));
+//printf("%f %f  %f %f\n", l1X, l1Y, l2X, l2Y);
+//printf("%f\n", l1X * l2X + l1Y * l2Y );
+        
     }
    
       

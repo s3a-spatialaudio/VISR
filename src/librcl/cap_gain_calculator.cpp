@@ -92,7 +92,7 @@ void CAPGainCalculator::process()
 
     if( mVbipCalculator )
     {
-      mCapCalculator.setListenerPosition(listener.x(), listener.y(), listener.z());
+      mVbipCalculator->setListenerPosition(listener.x(), listener.y(), listener.z());
     }
     mListenerPositionInput.resetChanged();
   }
@@ -200,8 +200,9 @@ void CAPGainCalculator::process( objectmodel::ObjectVector const & objects,
     }
 //      std::cout<<"]"<<std::endl;
   }
-    
-    //if (rand() % 256 == 1) printf("gains obj0 %f %f\n", gainMatrix(0,0), gainMatrix(1,0) );
+  
+  //if (rand() % 256 == 1)
+  //printf("gains obj0 %f %f\n", gainMatrix(0,0), gainMatrix(1,0) );
 
   if( mVbipCalculator )
   {
