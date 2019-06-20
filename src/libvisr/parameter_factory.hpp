@@ -39,11 +39,18 @@ public:
   static void registerParameterType( ParameterType const &  type );
 
   /**
-   * Special registration function for ParameterType subtypes that inherit from 
-   * TypedParameterBase.
-   */
+   * Special registration function for ParameterType subtypes that inherit from
+  * TypedParameterBase.
+  */
   template< class TypedParameterType >
   static void registerParameterType();
+
+
+  template< class ConcreteParameterType >
+  static void unregisterParameterType(ParameterType const &  type) noexcept;
+
+  template< class ConcreteParameterType >
+  static void unregisterParameterType() noexcept;
 
   /**
    * Template class to register parameter types.
@@ -60,13 +67,28 @@ public:
   };
 
 private:
-  struct Creator
+  struct VISR_CORE_LIBRARY_SYMBOL Creator
   {
     using CreateFunction = std::function< ParameterBase* ( ParameterConfigBase const & config ) >;
 
-    VISR_CORE_LIBRARY_SYMBOL explicit Creator( CreateFunction fcn );
+    /**
+     * Constructor, taking a creation function as parameter.
+     */
+    explicit Creator( CreateFunction fcn );
 
-    VISR_CORE_LIBRARY_SYMBOL std::unique_ptr<ParameterBase> create( ParameterConfigBase const & config ) const;
+    /**
+     * Move constructor, used to pass a Creator object into the creator table without copy construction.
+     */
+    Creator( Creator && rhs );
+
+    /**
+     * Deleted copy constructor to prohibit pass-by-value.
+     */
+    Creator( Creator const & rhs ) = delete;
+
+    ~Creator();
+
+    std::unique_ptr<ParameterBase> create( ParameterConfigBase const & config ) const;
  private:
     CreateFunction mCreateFunction;
   };
@@ -80,6 +102,15 @@ private:
     {
     }
 
+    ~TCreator()
+    {
+
+    }
+
+    TCreator(TCreator const & rhs) = delete;
+
+    TCreator(TCreator && rhs) = default;
+
     static ParameterBase* construct( ParameterConfigBase const & config )
     {
       ParameterBase* obj = new ConcreteParameterType( config );
@@ -87,7 +118,17 @@ private:
     }
   };
 
-  using CreatorTable = std::map<ParameterType, Creator >;
+  struct CreatorTable : public std::map<ParameterType, Creator >
+  {
+    CreatorTable()
+    {
+    }
+
+    ~CreatorTable()
+    {
+    }
+
+  };
 
   static CreatorTable & creatorTable();
 };
@@ -101,9 +142,25 @@ void ParameterFactory::registerParameterType( ParameterType const & type )
 template< class TypedParameterType >
 void ParameterFactory::registerParameterType()
 {
-  registerParameterType<TypedParameterType>( TypedParameterType::staticType() );
+  registerParameterType<TypedParameterType>(TypedParameterType::staticType());
 }
 
+template< class ConcreteParameterType >
+void ParameterFactory::unregisterParameterType(ParameterType const & type) noexcept
+{
+  auto & table = creatorTable();
+  auto findIt = table.find( type );
+  if (findIt != table.end())
+  {
+    table.erase( findIt );
+  }
+}
+
+template< class ConcreteParameterType >
+void ParameterFactory::unregisterParameterType() noexcept
+{
+  unregisterParameterType<ConcreteParameterType>(ConcreteParameterType::staticType());
+}
 
 // The macro does not work for multiple uses in the same .cpp file
 // (multiple definitions of 'maker'), stringization of names difficult

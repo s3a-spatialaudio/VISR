@@ -40,6 +40,18 @@ void CommunicationProtocolFactory::registerCommunicationProtocol( CommunicationP
   }
 }
 
+void CommunicationProtocolFactory::unregisterCommunicationProtocol( CommunicationProtocolType type )
+{
+  CreatorTable & table = creatorTable();
+  auto const findIt = table.find(type);
+
+  if (findIt != table.cend())
+  {
+    table.erase(findIt);
+  }
+}
+
+
 CommunicationProtocolFactory::Creator::Creator( CreateFunction fcn, 
                                                 InputCreateFunction inputCreator,
                                                 OutputCreateFunction outputCreator,

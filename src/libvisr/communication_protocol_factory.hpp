@@ -113,6 +113,9 @@ public:
   template< class ConcreteCommunicationProtocol >
   static void registerCommunicationProtocol();
 
+  template< class ConcreteCommunicationProtocol >
+  static void unregisterCommunicationProtocol();
+
 private:
   /**
    * Internal data structure to hold creation functions as well as the name of a particular protocol.
@@ -172,6 +175,8 @@ private:
    */
   /*VISR_CORE_LIBRARY_SYMBOL*/ static void registerCommunicationProtocol( CommunicationProtocolType type, Creator&& creator );
 
+  static void unregisterCommunicationProtocol(CommunicationProtocolType type );
+
   template< class ConcreteCommunicationProtocolType >
   class TCreator: public Creator
   {
@@ -220,6 +225,13 @@ void CommunicationProtocolFactory::registerCommunicationProtocol()
     CommunicationProtocolToId<ConcreteCommunicationProtocolType>::id, 
     CommunicationProtocolToId<ConcreteCommunicationProtocolType>::name ) ;
 }
+
+template< class ConcreteCommunicationProtocolType >
+void CommunicationProtocolFactory::unregisterCommunicationProtocol()
+{
+  unregisterCommunicationProtocol(ConcreteCommunicationProtocolType::staticType() );
+}
+
 
 } // namespace visr
 
