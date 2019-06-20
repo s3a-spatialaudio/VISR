@@ -3,6 +3,7 @@
 SET( SOURCES
  AllRAD.cpp
  CAP.cpp
+ CAP_VBAP.cpp
  LoudspeakerArray.cpp
  VBAP.cpp
  XYZ.cpp
@@ -14,6 +15,7 @@ SET( HEADERS
  export_symbols.hpp
  AllRAD.h
  CAP.h
+ CAP_VBAP.h
  LoudspeakerArray.h
  VBAP.h
  XYZ.h
