@@ -324,11 +324,13 @@ OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost librari
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-SET( VISR_BOOST_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
+SET( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
+# The set of all boost libraries used by the build and test stages.
+SET( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
-FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} unit_test_framework )
+FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
  
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
@@ -360,7 +362,7 @@ set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 #   libraries itself, which implies that they need to be copied.
 
 # Define the location of the 3rd-party runtime libraries (Shared libraries or DLLs)
-set( VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR ${CMAKE_BINARY_DIR}/3rd )
+set( VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR ${CMAKE_BINARY_DIR}/3rd/ )
 
 # NOTE: This must happen before the add_subdirectory( src ) directive.
 if( (VISR_SYSTEM_NAME MATCHES "MacOS") OR (VISR_SYSTEM_NAME MATCHES "Windows") )
