@@ -92,6 +92,13 @@ public:
    * Destructor (virtual)
    */
   virtual ~VectorParameter() override;
+
+  /**
+   * Assignment operator.
+   * @throw std::out_of_range if the vector sizes are not compatible.
+   */
+  VectorParameter& operator=( VectorParameter<ElementType> const & rhs );
+
 };
 
 } // namespace pml

@@ -48,6 +48,18 @@ VectorParameter<ElementType>::VectorParameter( VectorParameter<ElementType> cons
 template< typename ElementType >
 VectorParameter<ElementType>::~VectorParameter() = default;
 
+template< typename ElementType >
+VectorParameter<ElementType>& VectorParameter<ElementType>::operator=(VectorParameter<ElementType> const & rhs)
+{
+  if( this->size() != rhs.size() )
+  {
+    throw std::out_of_range( "VectorParameter assignment: Sizes are different." );
+  }
+  efl::BasicVector<ElementType>::copy( rhs );
+  return *this;
+}
+
+  
 namespace // unnamed
 {
 
