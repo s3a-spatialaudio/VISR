@@ -15,7 +15,7 @@ from ..core.metadata_processor_factory import MetadataProcessorFactory
 from .addadvancedmetadata_processor import AddAdvancedMetadataProcessor
 from .adapt_diffuseness_processor import AdaptDiffusenessProcessor
 from .adapt_position_processor import AdaptPositionProcessor
-from .add_mdo_metadata_processor import AddMdoMetadataProcessor
+from .add_object_metadata_processor import AddObjectMetadataProcessor
 from .add_objects_processor import AddObjectsProcessor
 from .add_reverb_processor import AddReverbProcessor
 from .attenuate_action_processor import AttenuateActionProcessor
@@ -46,12 +46,13 @@ from .print_advanced_metadata_processor import PrintAdvancedMetadataProcessor
 from .TMMGeneric_processor import TMMGenericProcessor
 from .TMMExperiment3_MUSHRA_processor import TMMExperiment3_MUSHRAProcessor
 from .spat_message_processor import SpatMessageProcessor
+from .saveObjectVector import saveObjectVector
 from .semantic_stereo_processor import SemanticStereoProcessor
-#
+
 #print( 'processors/__init__.py: Initialization called.' )
 MetadataProcessorFactory.registerProcessorClass( 'AddAdvancedMetadata', AddAdvancedMetadataProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'AdaptDiffuseness', AdaptDiffusenessProcessor )
-MetadataProcessorFactory.registerProcessorClass( 'AddMdoMetadata', AddMdoMetadataProcessor )
+MetadataProcessorFactory.registerProcessorClass( 'addObjectMetadata', AddObjectMetadataProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'AddObjects', AddObjectsProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'AdaptPosition', AdaptPositionProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'AddReverb', AddReverbProcessor )
@@ -65,7 +66,7 @@ MetadataProcessorFactory.registerProcessorClass( 'EnvelopmentOpt', EnvelopmentOp
 MetadataProcessorFactory.registerProcessorClass( 'FakeGroups', FakeGroupsProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'GlobalEQ', GlobalEQProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'MDO', MDOProcessor )
-MetadataProcessorFactory.registerProcessorClass( 'MDOProduction', MDOProductionProcessor )
+MetadataProcessorFactory.registerProcessorClass( 'mdoProduction', MDOProductionProcessor )
 #MetadataProcessorFactory.registerProcessorClass( 'MDOAzimuth', MDOAzimuthProcessor )
 #MetadataProcessorFactory.registerProcessorClass( 'MDOPhones', MDOPhonesProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'GroupVolume', GroupVolumeProcessor )
@@ -83,5 +84,6 @@ MetadataProcessorFactory.registerProcessorClass( 'PrintAdvancedMetadata', PrintA
 MetadataProcessorFactory.registerProcessorClass( 'TMMGeneric', TMMGenericProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'TMMExperiment3_MUSHRA', TMMExperiment3_MUSHRAProcessor )
 MetadataProcessorFactory.registerProcessorClass( 'SpatMessages', SpatMessageProcessor )
+MetadataProcessorFactory.registerProcessorClass( 'saveObjectVector', saveObjectVector )
 MetadataProcessorFactory.registerProcessorClass( 'SemanticStereo', SemanticStereoProcessor )
 #print( 'processors/__init__.py: Initialization finished.' )

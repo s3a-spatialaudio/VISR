@@ -60,7 +60,7 @@ class Component( visr.AtomicComponent ):
         else:
             self.oscControlInput = None
         if jsonControlPort:
-            self.oscControlInput = visr.ParameterInput( "jsonControlIn", self,
+            self.jsonControlInput = visr.ParameterInput( "jsonControlIn", self,
                                                    pml.StringParameter.staticType,
                                                    pml.MessageQueueProtocol.staticType,
                                                    pml.EmptyParameterConfig() )
@@ -84,7 +84,15 @@ class Component( visr.AtomicComponent ):
             while not self.oscControlInput.protocol.empty():
                 oscControlMessages.append( self.oscControlInput.protocol.front().bytes )
                 self.oscControlInput.protocol.pop()
-        newObjectVector = self._engine.process( objectMessages, oscControlMessages )
+        jsonControlMessages = []
+        if self.jsonControlInput is not None:
+            while not self.jsonControlInput.protocol.empty():
+                payload = self.jsonControlInput.protocol.front().str
+                jsonControlMessages.append( payload )
+                self.jsonControlInput.protocol.pop()
+        newObjectVector = self._engine.process( objectMessages,
+                                                oscControlMessages,
+                                                jsonControlMessages )
         fullJsonMsg = self._encodeObjectVectorFromJson( newObjectVector )
         if self.textOutput:
             self.objectOutput.protocol.enqueue( pml.StringParameter(fullJsonMsg) )

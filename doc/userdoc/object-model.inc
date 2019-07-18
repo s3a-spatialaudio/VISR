@@ -19,9 +19,10 @@ For transmission, object vectors are encoded as JSON messages.
 A scene vector (or a part thereof) has the format
 
 .. code-block:: json
-		
-   "objects": [ {<object 0>}, {<object 1>}, ... , {<object n>}]
 
+   {
+     "objects": [{"<object 0>"}, {"<object 1>"}, {"<object n>"} ]
+   }
 
 where :code:`<object k>` stands for the encoding of a single object. The objects can be arranged in arbitary order as long as the object ids are unique. Moreover, the object vector can be split into arbitrary subsets and be transmitted as individual :code:`"objects"` messages.
 
@@ -70,13 +71,16 @@ The following attributes are supported:
 
 .. code-block:: json
 		
-  "eq": [{<eq 0>}, {<eq 1},...{<eq n-1>}]
+   { "eq": [{"<eq 0>"}, {"<eq 1>"}, {"<eq n-1>"}] }
 
 : The number of admissible EQ sections is renderer-dependent. Providing more EQ parameters for a single object than supported by the renderer might result in an error message and termination of the renderer. If less EQ parameters are sent than supported by the renderer, the remaining EQ sections are padded with 'flat' characteristics. The individual EQ section have the form
 
 .. code-block:: json
 		
-   { "type": "<type>", "f": (center/cutoff frequency), "q": (quality) [, "gain": (dB) }
+   {
+     "type": "<type>", "f": "<center/cutoff frequency>",
+     "q": "<quality>", "gain": "<value in dB>"
+   }
 
 with the following attributes:
 
@@ -102,15 +106,21 @@ Example
 
 .. code-block:: json
 		
-   { "id": "5", "channels": "2", "type": "point", "group": "2", "priority": "0", "level": "0.350",
-     "position": {"x": "3.0", "y": "-0.5", "z": "0.25" } }
+   {
+     "id": "5", "channels": "2", "type": "point", "group": "2",
+     "priority": "0", "level": "0.350",
+     "position": {"x": "3.0", "y": "-0.5", "z": "0.25" }
+   }
 
 or, using polar coordinates,
      
 .. code-block:: json
 		
-   { "id": "5", "channels": "2", "type": "point", "group": "2", "priority": "0", "level": "0.350",
-     "position": {"az": "30", "el": "15.0", "radius": "1.25" } }
+   {
+     "id": "5", "channels": "2", "type": "point", "group": "2",
+     "priority": "0", "level": "0.350",
+     "position": {"az": "30", "el": "15.0", "radius": "1.25" }
+   }
 
 
 PlaneWave
@@ -127,7 +137,11 @@ Example
 
 .. code-block:: json
 		
-   {"id": 5, "channels": 5, "type": "plane", "group": 0, "priority": 0, "level": 1.000000, "direction": {"az": 30.0, "el": 45.0, "refdist": 12.00 } }
+   {
+     "id": 5, "channels": 5, "type": "plane", "group": 0,
+     "priority": 0, "level": 1.000000,
+     "direction": {"az": 30.0, "el": 45.0, "refdist": 12.00 }
+   }
 
 PointSourceDiffuse
 ~~~~~~~~~~~~~~~~~~
@@ -140,8 +154,10 @@ Example
 '''''''
 .. code-block:: json
 		
-   {"id": "5", "channels": "5", "type": "pointdiffuse", "group": "0", "priority": "0",
-    "level": "1.0", "diffuseness": "0.35", "position": {"x": "3.0", "y": "-0.5", "z": "0.25" } }
+   { "id": "5", "channels": "5", "type": "pointdiffuse", "group": "0",
+     "priority": "0", "level": "1.0", "diffuseness": "0.35",
+     "position": {"x": "3.0", "y": "-0.5", "z": "0.25" }
+   }
 
 DiffuseSource
 ~~~~~~~~~~~~~
@@ -154,7 +170,10 @@ Example
 
 .. code-block:: json
 		
-   {"id": 3, "channels": 3, "type": "diffuse", "group": 0, "priority": 0, "level": 1.000000}
+   {
+     "id": 3, "channels": 3, "type": "diffuse", "group": 0,
+     "priority": 0, "level": 1.0
+   }
 
 HoaSource
 ~~~~~~~~~
@@ -168,7 +187,10 @@ Example
 
 .. code-block:: json
 		
-   {"type": "hoa", "channels": "0:8", "group": 0, "id": 0, "level": 1, "order": 2, "priority": 0},
+   {
+     "type": "hoa", "channels": "0:8", "group": 0, "id": 0,
+     "level": 1, "order": 2, "priority": 0
+   }
 
 ChannelObject
 ~~~~~~~~~~~~~
@@ -185,34 +207,47 @@ If a channel is routed to more than one loudspeaker, the levels of these loudspe
 
 Example
 '''''''
+
 Single-channel object routed to a single loudspeaker:
 
 .. code-block:: json
 		
-  {"id": 2, "channels": "3", "type": "channel", "group": 0, "priority": 0, "level": 0.50000, "diffuseness": 0.5,
-    "outputChannels": "M+030"} ]
+  {
+    "id": 2, "channels": "3", "type": "channel", "group": 0,
+    "priority": 0, "level": 0.50000, "diffuseness": 0.5,
+    "outputChannels": "M+030"
+  }
 
 Alternative syntax for single-channel syntax :
 
 .. code-block:: json
 		
-  {"id": 2, "channels": "3", "type": "channel", "group": 0, "priority": 0, "level": 0.50000, "diffuseness": 0.5,
-   "outputChannels": "[M+030]"} ]
+  {
+    "id": 2, "channels": "3", "type": "channel", "group": 0,
+    "priority": 0,
+    "level": 0.50000, "diffuseness": 0.5,
+    "outputChannels": "[M+030]"
+  }
 
 Single channel routed to multiple loudspeakers:
 
 .. code-block:: json
 		
-  {"id": 2, "channels": "3", "type": "channel", "group": 0, "priority": 0, "level": 0.50000, "diffuseness": 0.5,
-   "outputChannels": "[M+030, M-030]"} ]
+  {
+    "id": 2, "channels": "3", "type": "channel", "group": 0,
+    "priority": 0, "level": 0.50000, "diffuseness": 0.5,
+    "outputChannels": "[M+030, M-030]"
+  }
 
 Multiple channels routed to single or multiple loudspeakers:
 
 .. code-block:: json
 		
-   { "id": 2, "channels": "4:8", "type": "channel", "group": 0, "priority": 0,
-     "level": 0.350000, "diffuseness": 0.25,
-     "outputChannels": "M+000, [M+030], [M-030, U+030], U+110"}]
+   {
+     "id": 2, "channels": "4:8", "type": "channel", "group": 0,
+     "priority": 0, "level": 0.350000, "diffuseness": 0.25,
+     "outputChannels": "M+000, [M+030], [M-030, U+030], U+110"
+   }
 
 .. _visr_object_model_reverb_object:
      
@@ -231,18 +266,20 @@ Example
 
 .. code-block:: json
 		
-   { "type": "pointreverb", "channels": "4", "group": 0, "id": 1,"level": 1,
+   {
+     "type": "pointreverb", "channels": "4", "group": 0, "id": 1,"level": 1,
      "position": {"x": 1.5, "y": 0.0, "z": 0.0}, "priority": 0,
      "room": {
      "ereflect": [{"biquadsos": [{"a0": "1.00000e+00", "a1": "-1.05734e+00", "a2": "5.69314e-01",
                                   "b0": "3.87648e-01", "b1": "0.00000e+00", "b2": "0.00000e+00"},
-                                 ( more biquad coefficients)
+
                                  {"a0": "1.00000e+00", "a1": "-7.20132e-02", "a2": "6.48827e-01",
                                   "b0": "1.00000e+00", "b1": "0.00000e+00", "b2": "0.00000e+00"}],
                    "delay": "0.00931", "level": "0.0603584806", "position": {"az": 337.0, "el": "-1.00000", "refdist": "1.00000"} },
-                 ( more early reflections )     
+
                ],
    "lreverb": {"attacktime": "0.01321, 0.01321, 0.01321, 0.01321, 0.01321, 0.01321, 0.01321, 0.01321, 0.01321",
                "decayconst": "-4.50698, -5.02028, -5.75817, -5.36509, -5.42654, -5.62316, -5.75298, -6.41075, -11.13465",
                "level": "0.02522, 0.01052, 0.01657, 0.02744, 0.02058, 0.01679, 0.01698, 0.01433, 0.00041", "delay": "0.00931" } }
+   }
  

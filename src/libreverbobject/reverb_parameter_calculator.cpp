@@ -230,7 +230,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
     std::size_t const matrixIdx = startIdx + srcIdx;
 
     mVbapCalculator->calculateGains( discRefl.positionX(), discRefl.positionY(), discRefl.positionZ(), mTmpPanningGains.data(),
-                                     false /*planeWave*/ );
+                                     false /*planeWave=false means discrete reflections are considered as point sources.*/ );
     efl::ErrorCode const res = efl::vectorCopyStrided( mTmpPanningGains.data(), &discretePanningMatrix(0, matrixIdx ), 1, 
       discretePanningMatrix.stride(), mNumberOfPanningLoudspeakers, 0 /*no assumptions on stride possible*/ );
     if( res != efl::noError )

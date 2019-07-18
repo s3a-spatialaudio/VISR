@@ -134,14 +134,21 @@ Wrapper::Impl::Impl( SignalFlowContext const & context,
     throw std::invalid_argument( "Pythoncomponents::Wrapper(): Failed to split the class name argument into namespaces and class name.");
   }
 
-  // Recursive lookup through the namespace part until we reach the class name.
-  auto currObject{ mModule };
-  for (auto namePart : classNameParts)
+  try
   {
-    currObject = currObject.attr(namePart.c_str() );
-  }
+    // Recursive lookup through the namespace part until we reach the class name.
+    auto currObject{ mModule };
+    for (auto namePart : classNameParts)
+    {
+      currObject = currObject.attr(namePart.c_str() );
+    }
 
-  mComponentClass = currObject;
+    mComponentClass = currObject;
+  }
+  catch( std::exception const & ex )
+  {
+    throw std::runtime_error( detail::composeMessageString("Wrapper: Error while recursing nested namespaces for component \"", name, "\": reason: ",ex.what() ) );
+  }
 
   py::tuple keywordList;
   py::dict keywordDict;

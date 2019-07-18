@@ -41,7 +41,8 @@ if( WIN32 )
 
   # Boost
   if( NOT Boost_USE_STATIC_LIBS )
-    foreach( BOOSTLIB ${VISR_BOOST_LIBRARIES} )
+    foreach( BOOSTLIB ${VISR_BOOST_INSTALL_LIBRARIES} )
+      # TODO: Use generator expression to select the right file depending on the config.
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION_RELEASE )
       get_filename_component( BOOSTLIBNAME ${BOOSTLIBPATH} NAME_WE )
       get_filename_component( BOOSTLIBDIR ${BOOSTLIBPATH} DIRECTORY )
@@ -71,7 +72,7 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   install( FILES ${VORBISENC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
 
   if( NOT Boost_USE_STATIC_LIBS )
-    foreach( BOOSTLIB ${VISR_BOOST_LIBRARIES} )
+    foreach( BOOSTLIB ${VISR_BOOST_INSTALL_LIBRARIES} )
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION )
       install( FILES ${BOOSTLIBPATH} DESTINATION 3rd COMPONENT thirdparty_libraries)
     endforeach()
@@ -239,6 +240,15 @@ cpack_add_component( python_templates
                     INSTALL_TYPES python full
                    )
 endif( BUILD_PYTHON_BINDINGS )
+
+if( BUILD_MAX_MSP_EXTERNALS )
+cpack_add_component( max_externals
+                    DISPLAY_NAME "Max/MSP externals"
+                    DESCRIPTION "Multichannel DSP externals for Max/MSP"
+                    INSTALL_TYPES full
+                    DEPENDS shared_libraries
+                   )
+endif( BUILD_MAX_MSP_EXTERNALS )
 
 cpack_add_component_group( documentation
                           DISPLAY_NAME "Documentation"

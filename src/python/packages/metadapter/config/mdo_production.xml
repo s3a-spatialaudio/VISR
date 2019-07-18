@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <metadapter>
-    <processor name="AddMdo" type="AddMdoMetadata" udpPort="9001" messagePacketSize="16384"  writeToFile="MDO_production/object_metadata_history/obj"/>
-    <processor name="MDOProduction" type="MDOProduction" on="1" verbose="1" loudspeakerconfig="MDO_production/render_configs/mdo_production.xml" udpPort="9002" writeToFile="MDO_production/object_metadata_history/ls"/>
+    <processor name="addObjectMetadata" type="addObjectMetadata" messagePacketSize="16384"/>
+	<processor name="mdoProduction" type="mdoProduction" on="1" verbose="1"/>
 </metadapter>
