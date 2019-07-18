@@ -29,161 +29,166 @@ namespace visr
 namespace pml
 {
 
-class ParameterRegistrarBase
-{
-};
-
-template< typename T >
-class ParameterRegistrar: public ParameterRegistrarBase
+/**
+ * Helper template class to register and unregister parameter types 
+ * following the RAII idiom.
+ * By creating a variable of a specific template type, an arbitrary number of parameter types can be registered.
+ * They are automatically unregistered when the lifetime of the variable ends.
+ * To this end, the template accepts an arbitary number of parameter types as template parameters.
+ *
+ */
+//@{
+/**
+ * Base case of the recursive variadic template.
+ * An empty registrar object (with no associated parameter types)
+ */
+template< class ... Parameter >
+class ParameterRegistrar
 {
 public:
+  /**
+   * Constructor (trival).
+   */
+  ParameterRegistrar() = default;
+  /**
+   * Destructor (trival)
+   */
+  ~ParameterRegistrar() {}
+};
+
+/**
+ * Variadic macro, acepting one or more paramter types as template parameters.
+ */
+template< class Parameter, class ... Parameters >
+class ParameterRegistrar< Parameter, Parameters ...>: public ParameterRegistrar< Parameters ... >
+{
+public:
+  /**
+   * Constructor, registers the first element of the template argument list and passes the remaining elements 
+   * recursively to a another ParameterRegistrar template, which forms the base class of the this class.
+   */
   ParameterRegistrar()
+    : ParameterRegistrar<Parameters...>()
   {
-    ParameterFactory::registerParameterType< T >();
+    visr::ParameterFactory::registerParameterType<Parameter>();
   }
 
-  ParameterRegistrar(ParameterRegistrar const &) = delete;
-
+  /**
+   * Destructors, performs unregistration of the first parameter type in the 
+   * template argument list, while the remaining elements are unregistered 
+   * recursively.
+   */
   ~ParameterRegistrar()
   {
-    ParameterFactory::unregisterParameterType< T >();
+    visr::ParameterFactory::unregisterParameterType<Parameter>();
   }
 };
+//@}
 
-class ProtocolRegistrarBase
-{
-};
-
-template< typename T >
-class ProtocolRegistrar : public ProtocolRegistrarBase
+/**
+ * Helper template class to register and unregister protocol types
+ * following the RAII idiom.
+ * By creating a variable of a specific template type, an arbitrary number of protocol types can be registered.
+ * They are automatically unregistered when the lifetime of the variable ends.
+ * To this end, the template accepts an arbitary number of protocol types as template arguments.
+ *
+ */
+ //@{
+ /**
+  * Base case of the recursive variadic template.
+  * An empty registrar object (with no associated protocol types)
+  */
+template< class ... Protocol >
+class ProtocolRegistrar
 {
 public:
+  /**
+   * Constructor (trival).
+   */
+  ProtocolRegistrar() = default;
+  /**
+   * Destructor (trival)
+   */
+  ~ProtocolRegistrar() {}
+};
+
+/**
+ * Variadic macro, acepting one or more paramter types as template protocols.
+ */
+template< class Protocol, class ... Protocols >
+class ProtocolRegistrar< Protocol, Protocols ...> : public ProtocolRegistrar< Protocols ... >
+{
+public:
+  /**
+   * Constructor, registers the first element of the template argument list and passes the remaining elements
+   * recursively to a another protocolRegistrar template, which forms the base class of the this class.
+   */
   ProtocolRegistrar()
+    : ProtocolRegistrar<Protocols...>()
   {
-    CommunicationProtocolFactory::registerCommunicationProtocol< T >();
+    visr::CommunicationProtocolFactory::registerCommunicationProtocol<Protocol>();
   }
 
+  /**
+   * Destructors, performs unregistration of the first parameter type in the
+   * template argument list, while the remaining elements are unregistered
+   * recursively.
+   */
   ~ProtocolRegistrar()
   {
-    CommunicationProtocolFactory::unregisterCommunicationProtocol< T >();
+    visr::CommunicationProtocolFactory::unregisterCommunicationProtocol<Protocol>();
   }
 };
-
-
-class InitObject
-{
-public:
-  InitObject()
-  {
-
-  }
-
-  ~InitObject()
-  {
-
-  }
-private:
-  std::vector<ParameterRegistrarBase> mParameters = {
-  ParameterRegistrar< BiquadParameterMatrix<double> >(),
-  ParameterRegistrar< FilterRoutingParameter >(),
-  ParameterRegistrar< FilterRoutingListParameter >(),
-
-  ParameterRegistrar< IndexedVectorDoubleType >(),
-  ParameterRegistrar< IndexedVectorFloatType >(),
-  ParameterRegistrar< IndexedStringType >(),
-
-  ParameterRegistrar< InterpolationParameter >(),
-
-  ParameterRegistrar< ListenerPosition >(),
-
-  ParameterRegistrar< MatrixParameter<float> >(),
-  ParameterRegistrar< MatrixParameter<double> >(),
-  ParameterRegistrar< MatrixParameter<std::complex<float> > >(),
-  ParameterRegistrar< MatrixParameter<std::complex<double> > >(),
-
-  ParameterRegistrar< ObjectVector >(),
-
-  ParameterRegistrar< ListenerPosition >(),
-
-  ParameterRegistrar< ScalarParameter<bool> >(),
-  ParameterRegistrar< ScalarParameter<int> >(),
-  ParameterRegistrar< ScalarParameter<unsigned int> >(),
-  ParameterRegistrar< ScalarParameter<float> >(),
-  ParameterRegistrar< ScalarParameter<double> >(),
-  ParameterRegistrar< ScalarParameter<std::complex<float> > >(),
-  ParameterRegistrar< ScalarParameter<std::complex<double> > >(),
-
-  ParameterRegistrar< SignalRoutingParameter >(),
-
-  ParameterRegistrar< StringParameter >(),
-
-  ParameterRegistrar< TimeFrequencyParameter<float> >(),
-  ParameterRegistrar< TimeFrequencyParameter<double> >(),
-
-  ParameterRegistrar< VectorParameter<float> >(),
-  ParameterRegistrar< VectorParameter<double> >(),
-  };
-
-  std::vector<ProtocolRegistrarBase> mProtocols =
-  {
-    ProtocolRegistrar< DoubleBufferingProtocol >(),
-    ProtocolRegistrar< MessageQueueProtocol >(),
-    ProtocolRegistrar< SharedDataProtocol >()
-  };
-};
+//@}
 
 
 void initialiseParameterLibrary()
 {
-  static InitObject sInitLibrary;
+  static ParameterRegistrar<
+    BiquadParameterMatrix<float>,
+    BiquadParameterMatrix<double>,
+    FilterRoutingParameter,
+    FilterRoutingListParameter,
+    IndexedVectorDoubleType,
+    IndexedVectorFloatType,
+    IndexedStringType,
+    InterpolationParameter,
+    ListenerPosition,
+    MatrixParameter<float>,
+    MatrixParameter<double>,
+    MatrixParameter<std::complex<float> >,
+    MatrixParameter<std::complex<double> >,
 
-  //CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >();
-  //CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >();
-  //CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >();
+    ObjectVector,
 
-  //// Register all supported parameter types.
-  //ParameterFactory::registerParameterType< BiquadParameterMatrix<float> >( BiquadParameterMatrix<float>::staticType() );
-  //ParameterFactory::registerParameterType< BiquadParameterMatrix<double> >( BiquadParameterMatrix<double>::staticType() );
+    ListenerPosition,
 
-  //ParameterFactory::registerParameterType< FilterRoutingParameter >( FilterRoutingParameter::staticType() );
-  //ParameterFactory::registerParameterType< FilterRoutingListParameter >( FilterRoutingListParameter::staticType() );
+    ScalarParameter<bool>,
+    ScalarParameter<int>,
+    ScalarParameter<unsigned int>,
+    ScalarParameter<float>,
+    ScalarParameter<double>,
+    ScalarParameter<std::complex<float> >,
+    ScalarParameter<std::complex<double> >,
 
-  //ParameterFactory::registerParameterType< IndexedVectorDoubleType >( IndexedVectorDoubleType::staticType() );
-  //ParameterFactory::registerParameterType< IndexedVectorFloatType >( IndexedVectorFloatType::staticType() );
-  //ParameterFactory::registerParameterType< IndexedStringType >( IndexedStringType::staticType() );
+    SignalRoutingParameter,
 
-  //ParameterFactory::registerParameterType< InterpolationParameter >( InterpolationParameter::staticType() );
+    StringParameter,
 
-  //ParameterFactory::registerParameterType< ListenerPosition >( ListenerPosition::staticType() );
+    TimeFrequencyParameter<float>,
+    TimeFrequencyParameter<double>,
 
-  //ParameterFactory::registerParameterType< MatrixParameter<float> >( MatrixParameter<float>::staticType() );
-  //ParameterFactory::registerParameterType< MatrixParameter<double> >( MatrixParameter<double>::staticType() );
-  //ParameterFactory::registerParameterType< MatrixParameter<std::complex<float> > >( MatrixParameter<std::complex<float> >::staticType() );
-  //ParameterFactory::registerParameterType< MatrixParameter<std::complex<double> > >( MatrixParameter<std::complex<double> >::staticType() );
+    VectorParameter<float>,
+    VectorParameter<double> >
+ sParameterRegistrar;
 
-  //ParameterFactory::registerParameterType< ObjectVector >(ObjectVector::staticType() );
+  static ProtocolRegistrar<
+    DoubleBufferingProtocol,
+    MessageQueueProtocol,
+    SharedDataProtocol >
+  sProtocolRegistrar;
 
-  //ParameterFactory::registerParameterType< ListenerPosition >( );
 
-  //ParameterFactory::registerParameterType< ScalarParameter<bool> >();
-  //ParameterFactory::registerParameterType< ScalarParameter<int> >();
-  //ParameterFactory::registerParameterType< ScalarParameter<unsigned int> >();
-  //ParameterFactory::registerParameterType< ScalarParameter<float> >();
-  //ParameterFactory::registerParameterType< ScalarParameter<double> >();
-  //ParameterFactory::registerParameterType< ScalarParameter<std::complex<float> > >();
-  //ParameterFactory::registerParameterType< ScalarParameter<std::complex<double> > >();
-
-  //ParameterFactory::registerParameterType< SignalRoutingParameter >();
-
-  //ParameterFactory::registerParameterType< StringParameter >();
-
-  //ParameterFactory::registerParameterType< TimeFrequencyParameter<float> >();
-  //ParameterFactory::registerParameterType< TimeFrequencyParameter<double> >();
-
-  //ParameterFactory::registerParameterType< VectorParameter<float> >();
-  //ParameterFactory::registerParameterType< VectorParameter<double> >();
-
-//  initialised = true;
 }
 
 } // namespace pml
