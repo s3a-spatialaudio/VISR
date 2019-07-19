@@ -162,6 +162,68 @@ void ParameterFactory::unregisterParameterType() noexcept
   unregisterParameterType<ConcreteParameterType>(ConcreteParameterType::staticType());
 }
 
+/**
+ * @name ParameterRegistrar
+ * Helper template class to register and unregister parameter types
+ * following the RAII idiom.
+ * By creating a variable of a specific template type, an arbitrary number of parameter types can be registered.
+ * They are automatically unregistered when the lifetime of the variable ends.
+ * To this end, the template accepts an arbitary number of parameter types as template parameters.
+ *
+ * Example usage (using a static variable to tie the lifetime of the object to the lifetime of the application or shared library):
+ * @code
+ * static visr::ParameterRegistrar< ParameterType1, ParameterType2 > sParameterRegistrar;
+ * @endcode
+ */
+ ///@{
+ /**
+  * Base case of the recursive variadic template.
+  * An empty registrar object (with no associated parameter types)
+  */
+template< class ... Parameter >
+class ParameterRegistrar
+{
+public:
+  /**
+   * Constructor (trival).
+   */
+  ParameterRegistrar() = default;
+  /**
+   * Destructor (trival)
+   */
+  ~ParameterRegistrar() {}
+};
+
+/**
+ * Variadic template, accepting one or more parameter types as template arguments.
+ */
+template< class Parameter, class ... Parameters >
+class ParameterRegistrar< Parameter, Parameters ...> : public ParameterRegistrar< Parameters ... >
+{
+public:
+  /**
+   * Constructor, registers the first element of the template argument list and passes the remaining elements
+   * recursively to a another ParameterRegistrar template, which forms the base class of the this class.
+   */
+  ParameterRegistrar()
+    : ParameterRegistrar<Parameters...>()
+  {
+    visr::ParameterFactory::registerParameterType<Parameter>();
+  }
+
+  /**
+   * Destructors, performs unregistration of the first parameter type in the
+   * template argument list, while the remaining elements are unregistered
+   * recursively.
+   */
+  ~ParameterRegistrar()
+  {
+    visr::ParameterFactory::unregisterParameterType<Parameter>();
+  }
+};
+///@}
+
+
 // The macro does not work for multiple uses in the same .cpp file
 // (multiple definitions of 'maker'), stringization of names difficult
 // because of template brackets and namespace names.

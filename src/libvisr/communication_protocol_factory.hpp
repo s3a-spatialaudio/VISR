@@ -233,6 +233,70 @@ void CommunicationProtocolFactory::unregisterCommunicationProtocol()
 }
 
 
+/**
+ * Helper template class to register and unregister protocol types
+ * following the RAII idiom.
+ * By creating a variable of a specific template type, an arbitrary number of protocol types can be registered.
+ * They are automatically unregistered when the lifetime of the variable ends.
+ * To this end, the template accepts an arbitary number of protocol types as template arguments.
+ *
+ * Example usage (using a static variable to tie the lifetime of the object to the lifetime of the application or shared library):
+ *
+ * @code
+ *
+ * static visr::CommunicationProtocolRegistrar< ProtocolType1, ProtocolType2, ProtocolType3 > sProtocolRegistrar;
+ *
+ * @endcode
+ *
+ */
+ //@{
+ /**
+  * Base case of the recursive variadic template.
+  * An empty registrar object (with no associated protocol types)
+  */
+template< class ... Protocol >
+class CommunicationProtocolRegistrar
+{
+public:
+  /**
+   * Constructor (trival).
+   */
+  CommunicationProtocolRegistrar() = default;
+  /**
+   * Destructor (trival)
+   */
+  ~CommunicationProtocolRegistrar() {}
+};
+
+/**
+ * Variadic template, accepting one or more parameter types as template protocols.
+ */
+template< class Protocol, class ... Protocols >
+class CommunicationProtocolRegistrar< Protocol, Protocols ...> : public CommunicationProtocolRegistrar< Protocols ... >
+{
+public:
+  /**
+   * Constructor, registers the first element of the template argument list and passes the remaining elements
+   * recursively to a another CommunicationProtocolRegistrar template, which forms the base class of the this class.
+   */
+  CommunicationProtocolRegistrar()
+    : CommunicationProtocolRegistrar<Protocols...>()
+  {
+    visr::CommunicationProtocolFactory::registerCommunicationProtocol<Protocol>();
+  }
+
+  /**
+   * Destructors, performs unregistration of the first parameter type in the
+   * template argument list, while the remaining elements are unregistered
+   * recursively.
+   */
+  ~CommunicationProtocolRegistrar()
+  {
+    visr::CommunicationProtocolFactory::unregisterCommunicationProtocol<Protocol>();
+  }
+};
+//@}
+
 } // namespace visr
 
 #endif // #ifndef VISR_COMMUNICATION_PROTOCOL_FACTORY_HPP_INCLUDED
