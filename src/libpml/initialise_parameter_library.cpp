@@ -22,6 +22,8 @@
 #include <libvisr/parameter_factory.hpp>
 #include <libvisr/communication_protocol_factory.hpp>
 
+#include <vector>
+
 namespace visr
 {
 namespace pml
@@ -29,59 +31,51 @@ namespace pml
 
 void initialiseParameterLibrary()
 {
-  static bool initialised = false;
-  if( initialised )
-  {
-    return;
-  }
+  static ParameterRegistrar<
+    BiquadParameterMatrix<float>,
+    BiquadParameterMatrix<double>,
+    FilterRoutingParameter,
+    FilterRoutingListParameter,
+    IndexedVectorDoubleType,
+    IndexedVectorFloatType,
+    IndexedStringType,
+    InterpolationParameter,
+    ListenerPosition,
+    MatrixParameter<float>,
+    MatrixParameter<double>,
+    MatrixParameter<std::complex<float> >,
+    MatrixParameter<std::complex<double> >,
 
-  CommunicationProtocolFactory::registerCommunicationProtocol< DoubleBufferingProtocol >();
-  CommunicationProtocolFactory::registerCommunicationProtocol< MessageQueueProtocol >();
-  CommunicationProtocolFactory::registerCommunicationProtocol< SharedDataProtocol >();
+    ObjectVector,
 
-  // Register all supported parameter types.
-  ParameterFactory::registerParameterType< BiquadParameterMatrix<float> >( BiquadParameterMatrix<float>::staticType() );
-  ParameterFactory::registerParameterType< BiquadParameterMatrix<double> >( BiquadParameterMatrix<double>::staticType() );
+    ListenerPosition,
 
-  ParameterFactory::registerParameterType< FilterRoutingParameter >( FilterRoutingParameter::staticType() );
-  ParameterFactory::registerParameterType< FilterRoutingListParameter >( FilterRoutingListParameter::staticType() );
+    ScalarParameter<bool>,
+    ScalarParameter<int>,
+    ScalarParameter<unsigned int>,
+    ScalarParameter<float>,
+    ScalarParameter<double>,
+    ScalarParameter<std::complex<float> >,
+    ScalarParameter<std::complex<double> >,
 
-  ParameterFactory::registerParameterType< IndexedVectorDoubleType >( IndexedVectorDoubleType::staticType() );
-  ParameterFactory::registerParameterType< IndexedVectorFloatType >( IndexedVectorFloatType::staticType() );
-  ParameterFactory::registerParameterType< IndexedStringType >( IndexedStringType::staticType() );
+    SignalRoutingParameter,
 
-  ParameterFactory::registerParameterType< InterpolationParameter >( InterpolationParameter::staticType() );
+    StringParameter,
 
-  ParameterFactory::registerParameterType< ListenerPosition >( ListenerPosition::staticType() );
+    TimeFrequencyParameter<float>,
+    TimeFrequencyParameter<double>,
 
-  ParameterFactory::registerParameterType< MatrixParameter<float> >( MatrixParameter<float>::staticType() );
-  ParameterFactory::registerParameterType< MatrixParameter<double> >( MatrixParameter<double>::staticType() );
-  ParameterFactory::registerParameterType< MatrixParameter<std::complex<float> > >( MatrixParameter<std::complex<float> >::staticType() );
-  ParameterFactory::registerParameterType< MatrixParameter<std::complex<double> > >( MatrixParameter<std::complex<double> >::staticType() );
+    VectorParameter<float>,
+    VectorParameter<double> >
+ sParameterRegistrar;
 
-  ParameterFactory::registerParameterType< ObjectVector >(ObjectVector::staticType() );
+  static CommunicationProtocolRegistrar<
+    DoubleBufferingProtocol,
+    MessageQueueProtocol,
+    SharedDataProtocol >
+  sProtocolRegistrar;
 
-  ParameterFactory::registerParameterType< ListenerPosition >( );
 
-  ParameterFactory::registerParameterType< ScalarParameter<bool> >();
-  ParameterFactory::registerParameterType< ScalarParameter<int> >();
-  ParameterFactory::registerParameterType< ScalarParameter<unsigned int> >();
-  ParameterFactory::registerParameterType< ScalarParameter<float> >();
-  ParameterFactory::registerParameterType< ScalarParameter<double> >();
-  ParameterFactory::registerParameterType< ScalarParameter<std::complex<float> > >();
-  ParameterFactory::registerParameterType< ScalarParameter<std::complex<double> > >();
-
-  ParameterFactory::registerParameterType< SignalRoutingParameter >();
-
-  ParameterFactory::registerParameterType< StringParameter >();
-
-  ParameterFactory::registerParameterType< TimeFrequencyParameter<float> >();
-  ParameterFactory::registerParameterType< TimeFrequencyParameter<double> >();
-
-  ParameterFactory::registerParameterType< VectorParameter<float> >();
-  ParameterFactory::registerParameterType< VectorParameter<double> >();
-
-  initialised = true;
 }
 
 } // namespace pml

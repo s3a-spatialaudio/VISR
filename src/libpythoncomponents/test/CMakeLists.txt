@@ -3,6 +3,7 @@
 set( APPLICATION_NAME pythoncomponents_test )
 
 set( SOURCES
+pml_initialisation.cpp
 test_main.cpp
 wrapper.cpp
 )
@@ -14,11 +15,13 @@ target_include_directories( ${APPLICATION_NAME} PRIVATE ${PYTHON_INCLUDE_DIR} )
 # This avoids preprocessor magic to work around platform specifics.
 target_include_directories( ${APPLICATION_NAME} PRIVATE ${PYBIND11_INCLUDE_DIR} )
 
-target_link_libraries( ${APPLICATION_NAME} pythoncomponents_static )
-target_link_libraries( ${APPLICATION_NAME} pythonsupport_static )
-target_link_libraries( ${APPLICATION_NAME} rrl_static )
-target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
-target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE pythoncomponents_shared )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE pythonsupport_shared )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE rrl_shared )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE pml_shared )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::filesystem )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::unit_test_framework )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE ${PYTHON_LIBRARY} )
 
 if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
