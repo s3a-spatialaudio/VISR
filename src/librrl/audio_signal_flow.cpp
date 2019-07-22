@@ -40,6 +40,8 @@
 #include <sstream>
 #include <utility> // for std::pair and std::make_pair
 
+#include <mutex>
+
 // Preliminary solution agains potential additional audio dependencies if new infrastructure elements (such as input routing blocks)
 // are introduced.
 // Needs to be tested more thoroughly.
@@ -52,6 +54,7 @@ namespace rrl
 
 AudioSignalFlow::AudioSignalFlow( Component & flow )
  : mFlow( flow.implementation() )
+ , mParameterExchangeCriticalSection( new ParameterExchangeCriticalSectionType{} )
 {
   std::stringstream checkMessages;
   bool const checkResult = checkConnectionIntegrity( mFlow, true/* hierarchical*/, checkMessages );
@@ -137,6 +140,8 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
   }
   try
   {
+    std::lock_guard<ParameterExchangeCriticalSectionType>
+      guard( parameterExchangeCriticalSection() );
     executeComponents();
   }
   catch( std::exception const & ex )
@@ -888,6 +893,12 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
 
   finalConnections.swap( tmpConnections );
   return true;
+}
+
+AudioSignalFlow::ParameterExchangeCriticalSectionType &
+AudioSignalFlow::parameterExchangeCriticalSection()
+{
+  return *mParameterExchangeCriticalSection;
 }
 
 } // namespace rrl

@@ -17,6 +17,12 @@
 #include <stdexcept>
 #include <vector>
 
+// Forward declarations
+namespace std
+{
+class timed_mutex;
+}
+
 namespace visr
 {
 // Forward declarations
@@ -197,6 +203,29 @@ public:
 
   //@}
 
+  /**
+   * Support for thread-safe access to the external parameter ports.
+   */
+  //@{
+
+  /**
+   * Data type (mutex type) used to as a guard to the parameters.
+   */
+  using ParameterExchangeCriticalSectionType = std::timed_mutex;
+
+  /**
+   * Retrieve a reference to the mutex data structure guarding the
+   * external parameter ports.
+   * External users must acquire, i.e., lock, this mutex before making
+   * thread-critical accesses to parameter ports.
+   * It is advisable to use a RAII-type guard object.
+   * @note Calling code should block the critical section only for very
+   * brief durations, and not execute code that might block, because this
+   * would affect the audio rendering code.
+   */
+  ParameterExchangeCriticalSectionType & parameterExchangeCriticalSection();
+  //@}
+
 private:
   /**
    * Initialise the audio subsystem, i.e., creating audio buffers and connecting the audio ports to the sample buffers.
@@ -301,6 +330,11 @@ private:
   using ProcessingSchedule = std::vector<AtomicComponent * >;
 
   ProcessingSchedule mProcessingSchedule;
+
+  /**
+   * Synchronisation object for accesses to external parameter ports.
+   */
+  std::unique_ptr<ParameterExchangeCriticalSectionType> mParameterExchangeCriticalSection;
 };
 
 } // namespace rrl
