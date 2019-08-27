@@ -246,7 +246,7 @@ namespace // unnamed
             // This is done because PortAudio sometimes truncates its device names.
             if (std::strncmp(name.c_str(), info->name, std::strlen(info->name) ) == 0)
             {
-              deviceIdx = idx;
+              deviceIdx = globalIdx;
               break;
             }
           }
@@ -389,12 +389,11 @@ namespace // unnamed
     outputParameters.sampleFormat = cPaSampleFormat;
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outDeviceIdx )->defaultLowInputLatency;
     outputParameters.hostApiSpecificStreamInfo = nullptr;
-    
     ret = Pa_IsFormatSupported( &inputParameters, &outputParameters,
                                static_cast<double>(mSampleRate) );
     if( ret != paFormatIsSupported )
     {
-      throw std::invalid_argument( std::string("The chosen stream format is is not supported by the portaudio interface: ") + Pa_GetErrorText( ret ) );
+      throw std::invalid_argument( std::string("The chosen stream format is not supported by the portaudio interface: ") + Pa_GetErrorText( ret ) );
     }
     ret = Pa_OpenStream( &mStream,
                         &inputParameters,
