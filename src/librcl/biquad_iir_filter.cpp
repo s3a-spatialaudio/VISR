@@ -387,11 +387,16 @@ void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
   mEqInput.reset(); // Remove the parameter port first
   if( controlInput )
   {
+<<<<<<< HEAD
     mEqInput.reset(
         new ParameterInput< pml::DoubleBufferingProtocol,
                             pml::BiquadParameterMatrix< SampleType > >(
             "eqInput", *this,
             pml::MatrixParameterConfig( numberOfChannels, numberOfBiquads ) ) );
+=======
+    mEqInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::BiquadParameterMatrix<SampleType> >( "eqInput", *this,
+                                                                                                               pml::MatrixParameterConfig(numberOfChannels, numberOfBiquads)));
+>>>>>>> 310b125f... Avoid double initialisation of control input port (may have caused an exception in the ctor)
   }
   mInputChannels.resize( numberOfChannels, nullptr );
 }
