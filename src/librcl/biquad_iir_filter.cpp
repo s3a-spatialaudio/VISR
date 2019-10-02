@@ -81,7 +81,6 @@ BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
   {
     throw std::invalid_argument( "BiquadIirFilter: The length of the coefficient initialiser list does not match the number of biquads per channel." );
   }
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
   for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels; ++channelIdx )
   {
     setChannelCoefficientsInternal( channelIdx, coeffs );
@@ -101,7 +100,6 @@ BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
   {
     throw std::invalid_argument( "BiquadIirFilter: The size of the coefficient matrix does not match the dimension numberOfChannels x numberOfBiquads." );
   }
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
   setCoefficientMatrixInternal( coeffs );
 }
 
@@ -334,14 +332,11 @@ void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
 
   mInput.setWidth( mNumberOfChannels );
   mOutput.setWidth( mNumberOfChannels );
+  mEqInput.reset(); // Remove the parameter port first
   if( controlInput )
   {
     mEqInput.reset( new ParameterInput<pml::DoubleBufferingProtocol, pml::BiquadParameterMatrix<SampleType> >( "eqInput", *this,
                                                                                                                pml::MatrixParameterConfig(numberOfChannels, numberOfBiquads)));
-  }
-  else
-  {
-    mEqInput.reset();
   }
   mInputChannels.resize( numberOfChannels, nullptr );
 }
