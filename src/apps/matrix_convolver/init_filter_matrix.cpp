@@ -11,7 +11,6 @@
 #include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/spirit/include/qi.hpp>
 
 #include <memory>
 #include <numeric>
