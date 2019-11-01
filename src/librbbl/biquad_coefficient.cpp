@@ -38,6 +38,15 @@ BiquadCoefficient<CoeffType>::fromJson( std::basic_istream<char> & stream )
 
 template< typename CoeffType >
 /*static*/ BiquadCoefficient<CoeffType>
+BiquadCoefficient<CoeffType>::fromJson( std::string const & str )
+{
+  BiquadCoefficient<CoeffType> ret;
+  ret.loadJson( str );
+  return ret;
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficient<CoeffType>
 BiquadCoefficient<CoeffType>::fromXml( boost::property_tree::ptree const & tree )
 {
   BiquadCoefficient<CoeffType> res;
@@ -52,6 +61,15 @@ BiquadCoefficient<CoeffType>::fromXml( std::basic_istream<char> & stream )
   BiquadCoefficient<CoeffType> res;
   res.loadXml( stream );
   return res;
+}
+
+template< typename CoeffType >
+/*static*/ BiquadCoefficient<CoeffType>
+BiquadCoefficient<CoeffType>::fromXml( std::string const & str )
+{
+  BiquadCoefficient<CoeffType> ret;
+  ret.loadXml( str );
+  return ret;
 }
 
 template< typename CoeffType >
@@ -80,6 +98,13 @@ void BiquadCoefficient<CoeffType>::loadJson( std::basic_istream<char> & stream )
     throw std::invalid_argument( detail::composeMessageString( "Error while parsing a json BiquadCoefficient node: " , ex.what( )) );
   }
   loadJson( tree );
+}
+
+template< typename CoeffType >
+void BiquadCoefficient<CoeffType>::loadJson( std::string const & str )
+{
+  std::stringstream stream( str );
+  loadJson( stream );
 }
 
 template< typename CoeffType >
@@ -120,13 +145,20 @@ void BiquadCoefficient<CoeffType>::loadXml( std::basic_istream<char> & stream )
 }
 
 template< typename CoeffType >
+void BiquadCoefficient<CoeffType>::loadXml( std::string const & str )
+{
+  std::stringstream stream( str );
+  loadXml( stream );
+}
+
+template< typename CoeffType >
 void BiquadCoefficient<CoeffType>::writeJson( boost::property_tree::ptree & tree ) const
 {
   tree.put( "b0", b0() );
-  tree.put( "b1", b1( ) );
-  tree.put( "b2", b2( ) );
-  tree.put( "a1", a1( ) );
-  tree.put( "a2", a2( ) );
+  tree.put( "b1", b1() );
+  tree.put( "b2", b2() );
+  tree.put( "a1", a1() );
+  tree.put( "a2", a2() );
 }
 
 template< typename CoeffType >
@@ -389,7 +421,7 @@ template<typename CoeffType>
 void BiquadCoefficientMatrix<CoeffType>::resize( std::size_t numberOfFilters, std::size_t numberOfBiquads )
 {
   mRows.clear(); // Needed to trigger the re-initialisation of all rows even if the size decreases or stayed constant.
-  // Define the initial entry for all filter rows (numberOfBiquads 'default' biquad specs) 
+  // Define the initial entry for all filter rows (numberOfBiquads 'default' biquad specs)
   BiquadCoefficientList<CoeffType> templ( numberOfBiquads );
   mRows.resize( numberOfFilters, templ );
 }
