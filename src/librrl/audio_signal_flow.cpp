@@ -40,8 +40,6 @@
 #include <sstream>
 #include <utility> // for std::pair and std::make_pair
 
-#include <mutex>
-
 // Preliminary solution agains potential additional audio dependencies if new infrastructure elements (such as input routing blocks)
 // are introduced.
 // Needs to be tested more thoroughly.

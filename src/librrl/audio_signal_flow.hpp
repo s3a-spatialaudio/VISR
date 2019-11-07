@@ -15,13 +15,8 @@
 #include <memory>
 #include <set>
 #include <stdexcept>
+#include <mutex>
 #include <vector>
-
-// Forward declarations
-namespace std
-{
-class timed_mutex;
-}
 
 namespace visr
 {
