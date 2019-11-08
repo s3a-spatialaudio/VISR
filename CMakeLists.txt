@@ -237,14 +237,19 @@ IF( BUILD_PYTHON_BINDINGS )
     set( PYTHON_MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
   endif( WIN32 )
 
+  set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11 )
+
   # This variable is used by pybind11Tools
-  SET( PYBIND11_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/3rd/include/pybind11 )
+  set( PYBIND11_INCLUDE_DIR ${PYBIND11_DIR}/include)
 
   # Enable the pybind11 cmake support
-  # This takes, amongst other things, care of providing proper compile/link options.
-  include( pybind11Tools )
+  # This takes, amongst other things, care of providing proper
+  # compile/link options.
+  # Note: Because include() takes an absolute path here, we need the
+  # extension .cmake
+  include( ${PYBIND11_DIR}/tools/pybind11Tools.cmake)
 
-ENDIF( BUILD_PYTHON_BINDINGS )
+endif( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
 # Support for 3rd-party libraries.
