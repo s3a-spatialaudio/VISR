@@ -18,9 +18,9 @@ void exportFilterFunctions( pybind11::module & m );
 void exportInitialiseLibrary( pybind11::module & m );
 void exportVectorFunctions( pybind11::module & m );
 void exportVectorConversions( pybind11::module & m );
-}
-}
-}
+} // namespace python
+} // namespace efl
+} // namespace visr
 
 
 PYBIND11_MODULE( efl, m )
