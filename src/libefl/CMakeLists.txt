@@ -12,6 +12,8 @@ basic_matrix.cpp
 basic_vector.cpp
 denormalised_number_handling.cpp
 error_codes.cpp
+filter_functions.cpp
+filter_functions_reference.cpp
 initialise_library.cpp
 lagrange_coefficient_calculator.cpp
 matrix_functions.cpp
@@ -32,6 +34,9 @@ degree_radian_conversion.hpp
 denormalised_number_handling.hpp
 error_codes.hpp
 export_symbols.hpp
+filter_functions.hpp
+filter_functions_reference.hpp
+filter_functions_reference_impl.hpp
 function_wrapper.hpp
 initialise_library.hpp
 lagrange_coefficient_calculator.hpp

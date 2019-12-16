@@ -18,12 +18,9 @@ namespace visr
 namespace efl
 {
 
-VISR_EFL_CREATE_FUNCTION_WRAPPER_TEMPLATE( IirFilterBiquadsSingleChannel,
-                                           T * const, T *, T*, T const *
-                                           std::size_t, std::size_t, std::size_t, std::size_t,
-                                           std::size_t);
+VISR_EFL_CREATE_FUNCTION_WRAPPER_TEMPLATE( IirFilterBiquadsSingleChannel, T, ErrorCode, T * const, T *, T*, T const *, std::size_t, std::size_t, std::size_t, std::size_t, std::size_t );
   
-template <typename T>
+template< typename T >
 ErrorCode iirFilterBiquadsSingleChannel( T const * input,
                                          T * output,
                                          T * states,
@@ -34,13 +31,12 @@ ErrorCode iirFilterBiquadsSingleChannel( T const * input,
                                          std::size_t coeffStride,
                                          std::size_t alignment = 0)
 {
-  return VectorZeroWrapper<T>::IirFilterBiquadsSingleChannel( input, output,
-                                                              states, coeffs,
-                                                              numElements, numSections,
-                                                              stateStride, coeffStride,
-                                                              alignment);
+  return IirFilterBiquadsSingleChannel< T >( input, output,
+					     states, coeffs,
+					     numElements, numSections,
+					     stateStride, coeffStride,
+					     alignment );
 }
-
 
 } // namespace efl
 } // namespace visr
