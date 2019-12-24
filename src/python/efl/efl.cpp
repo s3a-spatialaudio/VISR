@@ -14,6 +14,8 @@ void exportBasicVectors( pybind11::module & m );
 void exportBasicMatrices( pybind11::module & m );
 void exportDenormalisedNumberHandling( pybind11::module & m );
 void exportErrorCode( pybind11::module & m );
+void exportFilterFunctions( pybind11::module & m );
+void exportInitialiseLibrary( pybind11::module & m );
 void exportVectorFunctions( pybind11::module & m );
 void exportVectorConversions( pybind11::module & m );
 }
@@ -30,6 +32,8 @@ PYBIND11_MODULE( efl, m )
   exportBasicMatrices( m );
   exportDenormalisedNumberHandling( m );
   exportErrorCode( m );
+  exportFilterFunctions( m );
+  exportInitialiseLibrary( m );
   exportVectorFunctions( m );
   exportVectorConversions( m );
 }

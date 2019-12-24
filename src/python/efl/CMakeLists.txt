@@ -6,6 +6,8 @@ basic_matrix.cpp
 denormalised_number_handling.cpp
 efl.cpp
 error_codes.cpp
+filter_functions.cpp
+initialise_library.cpp
 vector_conversions.cpp
 vector_functions.cpp
 )
