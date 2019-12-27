@@ -139,20 +139,18 @@ void BiquadIirFilter::setCoefficientsInternal(
     std::size_t biquadIndex,
     rbbl::BiquadCoefficient< SampleType > const & coeffs )
 {
-  static const std::size_t cNumCoeffs =
-      rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
-  mCoefficients( biquadIndex * cNumCoeffs + 0, channelIndex ) = coeffs[ 0 ];
-  mCoefficients( biquadIndex * cNumCoeffs + 1, channelIndex ) = coeffs[ 1 ];
-  mCoefficients( biquadIndex * cNumCoeffs + 2, channelIndex ) = coeffs[ 2 ];
-  // Negate the denominator coefficients to make the runtime processing easier
+  static const std::size_t cNumCoeffs = rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
+  mCoefficients( biquadIndex * cNumCoeffs + 0, channelIndex ) = coeffs[0];
+  mCoefficients( biquadIndex * cNumCoeffs + 1, channelIndex ) = coeffs[1];
+  mCoefficients( biquadIndex * cNumCoeffs + 2, channelIndex ) = coeffs[2];
+  // Negate the denominator coefficients to makes the runtime processing easier
   // (straightforward use of multiply-add)
-  mCoefficients( biquadIndex * cNumCoeffs + 3, channelIndex ) = -coeffs[ 3 ];
-  mCoefficients( biquadIndex * cNumCoeffs + 4, channelIndex ) = -coeffs[ 4 ];
+  mCoefficients( biquadIndex * cNumCoeffs + 3, channelIndex ) = -coeffs[3];
+  mCoefficients( biquadIndex * cNumCoeffs + 4, channelIndex ) = -coeffs[4];
 }
 
-void BiquadIirFilter::setChannelCoefficients(
-    std::size_t channelIndex,
-    rbbl::BiquadCoefficientList< SampleType > const & coeffs )
+void BiquadIirFilter::setChannelCoefficients( std::size_t channelIndex,
+                                              rbbl::BiquadCoefficientList< SampleType > const & coeffs )
 {
   if( channelIndex >= mNumberOfChannels )
   {
@@ -296,12 +294,13 @@ void BiquadIirFilter::process()
     for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections;
          ++biquadIdx )
     {
-#if 1
       // Implement transposed direct form II
+      // Note: this expects that the denominator coefficients a1 and a2 are already negated.
       // v0 = b0 * x[n] + v1
-      // y[n] = v1
-      // v1 = -a1*y[n] + b1 * x[n] + v2
-      // v2 = -a2*y[n] + b2 * x[n]
+      // y[n] = v0
+      // v1 = a1*y[n] + b1 * x[n] + v2
+      // v2 = a2*y[n] + b2 * x[n]
+      // Coefficient order in mCoefficients rows: [b0 b1 b2 a1 a2]
       efl::ErrorCode res;
       // y[n] = b0 * x[n] + v1
       if( (res = efl::vectorMultiplyAdd( mCoefficients.row( cNumBiquadCoeffs*biquadIdx ),
@@ -312,44 +311,27 @@ void BiquadIirFilter::process()
       {
         status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
       }
-      // v1 = -a1*y[n] + b1 * x[n] + v2
-      // v2 = b1 * x[n] + v2
-      if( (res = efl::vectorMultiplyAddInplace(  mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 1 ),
-                                          mCurrentInput.data(),
-                                          mState.row( 2 * biquadIdx + 1),
-                                          mNumberOfChannels, cVectorAlignmentSamples )) != efl::noError )
+      // v1 = a1*y[n] + b1 * x[n] + v2
+      // Part 1: v1 = b1 * x[n] + v2
+      if( (res = efl::vectorMultiplyAdd( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 1 ),
+                                        mCurrentInput.data(),
+                                        mState.row( 2 * biquadIdx + 1 ),
+                                        mState.row( 2 * biquadIdx ),
+                                        mNumberOfChannels, cVectorAlignmentSamples )) != efl::noError )
       {
         status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
       }
-      // Note: We overwrite v2 to use it as intermediate storage.
-      // Note: Could be more efficient if we had a vectorMultiplySubtract() function.
-      // v1 = a1 * y[n]
-      if( (res = efl::vectorMultiply(  mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 3 ),
-                                       mCurrentInput.data(),
+      // Part 2: v1 += a1*y[n]
+      if( (res = efl::vectorMultiplyAddInplace(  mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 3 ),
+                                       mCurrentOutput.data(),
                                        mState.row( 2 * biquadIdx ),
                                        mNumberOfChannels, cVectorAlignmentSamples )) != efl::noError )
       {
         status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
       }
-      // v1 = v2 - v1 (note the peculiar definition of our vectorSubtractInplace() method )
-      if( (res = efl::vectorSubtractInplace( mState.row( 2 * biquadIdx + 1 ),
-                                             mState.row( 2 * biquadIdx ),
-                                             mNumberOfChannels,
-                                             cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      // this overwrites mCurrentInput
-      // mCurrentInput = b2 * x[n] == b2 * mCurrentInput
-      if( (res = efl::vectorMultiplyInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 2 ),
-                                             mCurrentInput.data(),
-                                             mNumberOfChannels,
-                                             cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      // v2 =  a2*y[n]
-      if( (res = efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 3 ),
+      // v2 = a2*y[n] + b2 * x[n]
+      // Part 1: v2 = a2 * y[n]
+      if( (res = efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 4 ),
                                       mCurrentOutput.data(),
                                       mState.row( 2 * biquadIdx + 1 ),
                                       mNumberOfChannels,
@@ -357,72 +339,16 @@ void BiquadIirFilter::process()
       {
         status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
       }
-      // v2 = b2 * x[n]- v2 (note the peculiar definition of our vectorSubtractInplace() method )
-      if( (res = efl::vectorSubtractInplace( mCurrentInput.data(),
-                                             mState.row( 2 * biquadIdx + 1),
-                                             mNumberOfChannels,
-                                             cVectorAlignmentSamples )) != efl::noError )
+      // Part 2: v2 += b2 * x[n]
+      if( (res = efl::vectorMultiplyAddInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 2 ),
+                                                mCurrentInput.data(),
+                                                mState.row( 2 * biquadIdx + 1),
+                                                mNumberOfChannels,
+                                                cVectorAlignmentSamples )) != efl::noError )
       {
         status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
       }
       mCurrentInput.swap( mCurrentOutput ); // Use the current output as the input of the next stage.
-#else
-      if( efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 4 ),
-        mState.row( 2 * biquadIdx ),
-        mCurrentOutput.data( ),
-        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
-      {
-        throw std::runtime_error( "Numeric error during IIR computation" );
-      }
-      if( efl::vectorMultiplyAddInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 3 ),
-        mState.row( 2 * biquadIdx + 1 ),
-        mCurrentOutput.data( ),
-        mNumberOfChannels, cVectorAlignmentSamples ) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:",
-                efl::errorMessage( res ) );
-      }
-      // v1 = a1*y[n] + b1 * x[n] + v2
-      // Part 1: v1 = b1 * x[n] + v2
-      if( ( res = efl::vectorMultiplyAdd(
-                mCoefficients.row( cNumBiquadCoeffs * biquadIdx + 1 ),
-                mCurrentInput.data(), mState.row( 2 * biquadIdx + 1 ),
-                mState.row( 2 * biquadIdx ), mNumberOfChannels,
-                cVectorAlignmentSamples ) ) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:",
-                efl::errorMessage( res ) );
-      }
-      // Part 2: v1 += a1*y[n]
-      if( ( res = efl::vectorMultiplyAddInplace(
-                mCoefficients.row( cNumBiquadCoeffs * biquadIdx + 3 ),
-                mCurrentOutput.data(), mState.row( 2 * biquadIdx ),
-                mNumberOfChannels, cVectorAlignmentSamples ) ) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:",
-                efl::errorMessage( res ) );
-      }
-      // v2 = a2*y[n] + b2 * x[n]
-      // Part 1: v2 = a2 * y[n]
-      if( ( res = efl::vectorMultiply(
-                mCoefficients.row( cNumBiquadCoeffs * biquadIdx + 4 ),
-                mCurrentOutput.data(), mState.row( 2 * biquadIdx + 1 ),
-                mNumberOfChannels, cVectorAlignmentSamples ) ) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:",
-                efl::errorMessage( res ) );
-      }
-      // Part 2: v2 += b2 * x[n]
-      if( ( res = efl::vectorMultiplyAddInplace(
-                mCoefficients.row( cNumBiquadCoeffs * biquadIdx + 2 ),
-                mCurrentInput.data(), mState.row( 2 * biquadIdx + 1 ),
-                mNumberOfChannels, cVectorAlignmentSamples ) ) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:",
-                efl::errorMessage( res ) );
-      }
-      mCurrentInput.swap( mCurrentOutput ); // Use the current output as the
-                                            // input of the next stage.
     }
 
     // write the current output sample.

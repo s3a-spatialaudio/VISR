@@ -51,6 +51,7 @@ public:
   /**
    * Constructor that yields a basic, uninitialised object. 
    * A setup() method must be called before the component can be used for rendering.
+   * @deprecated use the constructors that perform a full initialisation instead (RAII-style)
    * @param context Configuration object containing basic execution parameters.
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component.
@@ -293,8 +294,9 @@ private:
    * Matrix to store the IIR coefficients.
    * Each column contains the coefficients for one output channel.
    * The five coefficients for one biquad section are stored in five consecutive columns.
-   * Thus, the coefficients \p b0, \p b1, \p b2, \p a1 and \p a2 of biquad section \p N are stored in the 
+   * Thus, the coefficients \p b0, \p b1, \p b2, \p -a1 and \p -a2 of biquad section \p N are stored in the
    * columns \p 5N...5N+4.
+   * Note that the coefficients \p a1 and \p a2 are stored in negated form, because this maps better to multiply-add oprations.
    * The dimension of the matrix is \p numberOfBiquadSections*5 x \p numberOfChannels .
    */
   efl::BasicMatrix<SampleType> mCoefficients;
