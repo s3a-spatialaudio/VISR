@@ -12,6 +12,7 @@ vector_functions.cpp
 
 set( HEADERS
 check_error.hpp
+efl_helpers.hpp
 )
 
 set(PROJECT_NAME eflpython)
