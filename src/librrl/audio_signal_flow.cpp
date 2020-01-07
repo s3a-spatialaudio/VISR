@@ -138,8 +138,6 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
   }
   try
   {
-    std::lock_guard<ParameterExchangeCriticalSectionType>
-      guard( parameterExchangeCriticalSection() );
     executeComponents();
   }
   catch( std::exception const & ex )
@@ -201,6 +199,8 @@ void AudioSignalFlow::process( SampleType const * captureSamples,
 
 void AudioSignalFlow::executeComponents()
 {
+  std::lock_guard<ParameterExchangeCriticalSectionType>
+    guard( parameterExchangeCriticalSection() );
   for( AtomicComponent * pc : mProcessingSchedule )
   {
     try
