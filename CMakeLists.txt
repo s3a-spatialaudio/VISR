@@ -210,14 +210,28 @@ ENDIF(  WIN32 OR APPLE )
 OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
 
 IF( BUILD_PYTHON_BINDINGS )
-  # Note: Disabled due to some Python binaries not working (probably due to PYTHONHOME set)
-  # if(NOT BUILD_VISR_PYTHON_VERSION)
-  #   set( BUILD_VISR_PYTHON_VERSION "" CACHE STRING "Version string to set used Python version" )
-  # endif(NOT BUILD_VISR_PYTHON_VERSION)
-  # set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 2.7)
-  # find_package(PythonLibsNew ${BUILD_VISR_PYTHON_VERSION} REQUIRED)
+  # Find the Python libraries and (if needed) the Python interpreter
 
-  find_package( PythonLibs REQUIRED )
+  # Define a sequence of Python versions which are searched in order.
+  # This is used by FindPythonInterp and FindPythonLibs (although we use the latter
+  # with a strict version specification if FindPythonInterp is used.
+  set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 2.7 )
+
+  # If testing is enabled, the Python interpreter is required to run the
+  # Python-based unit tests.
+  if( ${BUILD_TESTING} )
+    # According to the FindPythonInterp documentation, the interpreter should be found
+    # first in order to ensure a matching version of the Python libraries.
+    find_package( PythonInterp REQUIRED )
+    # Note: This could be simplified (and homogenised with finding the Python library)
+    # if find_package( Python ) or find_package( Python3 ) would be used.
+    # This would require CMake >= 3.12.
+
+    # Enforce that the interpreter version matches the Python library.
+    find_package( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED  )
+  else( ${BUILD_TESTING} )
+      find_package( PythonLibs REQUIRED )
+  endif( ${BUILD_TESTING} )
 
   # find_package does not detect if the Python include directories are not found.
   # Checking prevents strange error messages later on.
