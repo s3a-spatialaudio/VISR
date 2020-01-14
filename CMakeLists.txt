@@ -227,8 +227,14 @@ IF( BUILD_PYTHON_BINDINGS )
     # if find_package( Python ) or find_package( Python3 ) would be used.
     # This would require CMake >= 3.12.
 
+    # Take care of potential additional suffixes to the version string, e.g., "rc1"
+    # message( "STATUS PYTHON_VERSION_STRING: " ${PYTHON_VERSION_STRING})
+    string( REGEX REPLACE "^([0-9]+\\.[0-9]+\\.[0-9]+)(.*)" "\\1"
+            PYTHON_VERSION_STRING_TIDY ${PYTHON_VERSION_STRING} )
+    # message( STATUS "PYTHON_VERSION_STRING_TIDY: " ${PYTHON_VERSION_STRING_TIDY} )
+
     # Enforce that the interpreter version matches the Python library.
-    find_package( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED  )
+    find_package( PythonLibs ${PYTHON_VERSION_STRING_TIDY} EXACT REQUIRED  )
   else( ${BUILD_TESTING} )
       find_package( PythonLibs REQUIRED )
   endif( ${BUILD_TESTING} )
@@ -263,22 +269,6 @@ IF( BUILD_PYTHON_BINDINGS )
   # extension .cmake
   include( ${PYBIND11_DIR}/tools/pybind11Tools.cmake)
 
-  # If testing is enabled, the Python interpreter is required to run the
-  # Python-based unit tests.
-  if( ${BUILD_TESTING} )
-    # Note: This could be simplified (and homogenised with finding the Python library)
-    # if find_package( Python ) or find_package( Python3 ) would be used.
-    # This would require CMake >= 3.12.
-
-    # Take care of potential additional suffixes to the version string, e.g., "rc1"
-    # message( "STATUS PYTHONLIBS_VERSION_STRING: " ${PYTHONLIBS_VERSION_STRING})
-    string( REGEX REPLACE "^([0-9]+\\.[0-9]+\\.[0-9]+)(.*)" "\\1"
-            PYTHONLIBS_VERSION_STRING_TIDY ${PYTHONLIBS_VERSION_STRING} )
-    # message( STATUS "PYTHONLIBS_VERSION_STRING_TIDY: " ${PYTHONLIBS_VERSION_STRING_TIDY} )
-
-    # Enforce that the interpreter version matches the Python library.
-    find_package( PythonInterp ${PYTHONLIBS_VERSION_STRING_TIDY} EXACT REQUIRED  )
-  endif( ${BUILD_TESTING} )
 ENDIF( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
