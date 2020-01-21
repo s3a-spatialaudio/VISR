@@ -14,4 +14,5 @@ Specific reference documentation for the Python bindings will follow.
     :name: component_api_toc
     :maxdepth: 2
 
+    parameter-subsystem
     time-api
