@@ -37,6 +37,9 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE audiointerfaces_shared )
 target_link_libraries( ${PROJECT_NAME} PRIVATE rrl_shared )
 target_link_libraries( ${PROJECT_NAME} PRIVATE Boost::boost ) # Adds the boost include directory
 
+# Note: We export the target to enable dependent projects to query target properties
+# such as the library location.
 install(TARGETS ${PROJECT_NAME}
+        EXPORT VISR_exports
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
