@@ -64,7 +64,9 @@ void exportMatrixParameter( pybind11::module & m, char const * className )
     }
     return inst;
   }), pybind11::arg("data"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
   .def_static( "fromAudioFile", &MatrixParameter<DataType>::fromAudioFile, pybind11::arg("file"), pybind11::arg("alignment") = visr::cVectorAlignmentSamples )
+#endif
   .def_static( "fromTextFile", &MatrixParameter<DataType>::fromTextFile, pybind11::arg( "file" ), pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples )
   ;
 }

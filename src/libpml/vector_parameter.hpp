@@ -75,11 +75,13 @@ public:
    */
   static VectorParameter fromStream( std::istream & stream, std::size_t alignment = 0 );
 
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
   /**
    * Create a VectorParameter from an audio file (e.g., a WAV file).
    * The file must contain a single audio channel.
    */
   static VectorParameter fromAudioFile( std::string const & fileName, std::size_t alignment = 0 );
+#endif
 
   /**
    * Create a VectorParameter from a file containing a list of values.

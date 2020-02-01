@@ -206,6 +206,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
       {
         throw std::invalid_argument( "The file path \"lateReverbDecorrelationFilters\" provided in the reverb configuration does not exist." );
       }
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
       pml::MatrixParameter<SampleType> const allLateDecorrelationFilters = pml::MatrixParameter<SampleType>::fromAudioFile( lateReverbDecorrFilterName, cVectorAlignmentSamples );
       std::size_t const lateDecorrelationFilterLength = allLateDecorrelationFilters.numberOfColumns();
       if( allLateDecorrelationFilters.numberOfRows() < arrayConfig.getNumRegularSpeakers() )
@@ -225,7 +226,9 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
           throw std::runtime_error( "Copying and scaling of late decorrelation filter rows failed." );
         }
       }
-
+#else
+      throw std::invalid_argument( "To load a late reverb decorrelation filter from an audio file, VISR must be built with the BUILD_USE_SNDFILE_LIBRARY option." );
+#endif
     }
 
     std::size_t const interpolationSteps = period();

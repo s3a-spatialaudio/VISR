@@ -304,17 +304,20 @@ IF( BUILD_USE_JACK )
 ENDIF( BUILD_USE_JACK )
 
 ## Libsndfile
-# On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)
-IF( WIN32 ) # This includes 64-bit platforms!
-  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
-  # call instead of setting it globally.
-  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/sndfile) )
-  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/sndfile) )
-ENDIF( WIN32 )
-FIND_PACKAGE( SndFile REQUIRED )
+option( BUILD_USE_SNDFILE_LIBRARY "Use libsndfile functionality (loading/storing of audio files)" ON )
+if( BUILD_USE_SNDFILE_LIBRARY )
+  # On Linux and MacOS, we use the versions provided by the OS (or brew on MacOS)
+  if( WIN32 ) # This includes 64-bit platforms!
+    # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
+    # call instead of setting it globally.
+    list( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/sndfile) )
+    list( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/sndfile) )
+  endif( WIN32 )
+  find_package( SndFile REQUIRED )
+endif( BUILD_USE_SNDFILE_LIBRARY )
 
 ## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
-# This libbrary is provided by 3rd/ for all platforms, because it is no standard library (moreover, heavily tweaked to geet both float and double support)
+# This library is provided by 3rd/ for all platforms, because it is no standard library (moreover, heavily tweaked to geet both float and double support)
   LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/kissfft) )
   LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/kissfft) )
 FIND_PACKAGE( KissFFT REQUIRED )

@@ -52,8 +52,6 @@ set( HEADERS
  vector_parameter_config.hpp
 )
 
-include_directories( ${SNDFILE_INCLUDE_DIRS} )
-
 add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
 target_compile_definitions( pml_static PUBLIC VISR_PML_STATIC_LIBRARY=1)
@@ -69,7 +67,11 @@ foreach(LIB_TYPE static shared)
   target_compile_definitions( pml_${LIB_TYPE} PRIVATE VISR_BUILD_PML_LIBRARY=1 )
   target_link_libraries( pml_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
   target_link_libraries( pml_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
-  target_link_libraries( pml_${LIB_TYPE} PRIVATE ${SNDFILE_LIBRARY} )
+  if( BUILD_USE_SNDFILE_LIBRARY )
+    target_include_directories( pml_${LIB_TYPE} PRIVATE ${SNDFILE_INCLUDE_DIRS} )
+    target_compile_definitions( pml_${LIB_TYPE} PUBLIC VISR_PML_USE_SNDFILE_LIBRARY=1 )
+    target_link_libraries( pml_${LIB_TYPE} PRIVATE ${SNDFILE_LIBRARY} )
+  endif( BUILD_USE_SNDFILE_LIBRARY )
   target_link_libraries( pml_${LIB_TYPE} PUBLIC Boost::boost )
   target_link_libraries( pml_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
