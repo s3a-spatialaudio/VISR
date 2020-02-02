@@ -31,7 +31,7 @@
 
 // If active, the matrix of generated late reverb decorrelation filters is
 // written into a text file in working directory of the application.
-#define DEBUG_DECORR_FILTER_GENERATION
+// #define DEBUG_DECORR_FILTER_GENERATION
 
 #ifdef DEBUG_DECORR_FILTER_GENERATION
 #include <iterator>
@@ -105,7 +105,7 @@ namespace // unnamed
 
 #ifdef DEBUG_DECORR_FILTER_GENERATION
     std::stringstream fileName;
-    fileName << "leta_decorrelation_filters.dat";
+    fileName << "late_decorrelation_filters.dat";
     std::ofstream out(fileName.str(), std::ios_base::out);
 #endif
 
