@@ -149,27 +149,27 @@ endfunction(HtmlDocBuild)
 
 # Function to define a target building PDF documentation from a source directory containing Sphinx rst code.
 function( PdfDocBuild targetName sourceDir outputDir depends )
-  configure_file( ${sourceDir}/conf.py.in ${outputDir}/latex/conf.py @ONLY )
+  configure_file( ${sourceDir}/conf.py.in ${outputDir}/pdf/conf.py @ONLY )
   # Name (with version) of the output file. This is the main dependency of the target.
   set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
-    DEPENDS doxygen-doc ${outputDir}/latex/conf.py ${sourceDir} ${depends}
+    DEPENDS doxygen-doc ${outputDir}/pdf/conf.py ${sourceDir} ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
             ${SPHINX_EXECUTABLE}
                -q
                -b latex
-               -c ${outputDir}/latex
-               -d ${outputDir}/latex-cache
+               -c ${outputDir}/pdf
+               -d ${outputDir}/pdf-cache
                 ${sourceDir}
-                ${outputDir}/latex
+                ${outputDir}/pdf
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
-    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/latex/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
-    WORKING_DIRECTORY ${outputDir}/latex
-    BYPRODUCTS ${outputDir}/latex-cache ${outputDir}/latex
+    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
+    WORKING_DIRECTORY ${outputDir}/pdf
+    BYPRODUCTS ${outputDir}/pdf-cache ${outputDir}/pdf
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
   add_custom_target( ${targetName}-pdf
