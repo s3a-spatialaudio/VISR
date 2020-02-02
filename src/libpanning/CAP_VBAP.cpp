@@ -237,7 +237,7 @@ namespace panning
     // Find triplet with highest minimum-gain-in-triplet (may be negative)
     
     
-    SampleType  gmin, g1min, g2min, g3min;
+    SampleType g1min, g2min, g3min;
     SampleType x, y, z;
     static constexpr std::size_t invalid = std::numeric_limits<std::size_t>::max();
     std::size_t jmin = invalid;// indicate currently no triplet candidate.
@@ -245,7 +245,7 @@ namespace panning
 #ifdef CAP_VBAP_DEBUG_MESSAGES
     printf( "setListenerPosition %f %f %f\n", mListenerPos[0], mListenerPos[1], mListenerPos[2] );
 #endif
-    gmin = g1min = g2min = g3min = 0.0;
+    g1min = g2min = g3min = 0.0f;
     
     x = posX;
     y = posY;
