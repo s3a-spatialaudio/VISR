@@ -2,21 +2,43 @@
 
 set( SOURCES
 audio_interface.cpp
-portaudio_interface.cpp
 audio_interface_factory.cpp
 )
 
 set( HEADERS
 audio_interface.hpp
-export_symbols.hpp  
-portaudio_interface.hpp
 audio_interface_factory.hpp
+export_symbols.hpp
 )
 
-if( BUILD_USE_JACK )
+## Portaudio
+option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
+if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  # For windows, we ship the includes and libraries.
+  # TODO: Support system-specific library directories
+  # TODO: Provide separate libraries for debug and release builds.
+  if( WIN32 ) # This includes 64-bit platforms!
+    # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
+    # call instead of setting it globally.
+    list( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
+    list( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
+  endif( WIN32 )
+  find_package( Portaudio REQUIRED )
+  list( APPEND HEADERS portaudio_interface.hpp )
+  list( APPEND SOURCES portaudio_interface.cpp )
+endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+
+## Jack Audio Connection Kit (JACK)
+option( BUILD_AUDIOINTERFACES_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
+if( BUILD_AUDIOINTERFACES_JACK )
+  # Preliminary support for testing the Jack library on Windows platforms.
+  if( WIN32 )
+    set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{JACK_ROOT} )
+  endif( WIN32 )
+  find_package( Jack REQUIRED)
   list( APPEND HEADERS jack_interface.hpp )
   list( APPEND SOURCES jack_interface.cpp )
-endif( BUILD_USE_JACK )
+endif( BUILD_AUDIOINTERFACES_JACK )
 
 add_library( audiointerfaces_static STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( audiointerfaces_static PROPERTIES OUTPUT_NAME audiointerfaces )
@@ -34,14 +56,17 @@ foreach(LIB_TYPE static shared)
   target_compile_definitions( audiointerfaces_${LIB_TYPE} PRIVATE VISR_BUILD_AUDIOINTERFACES_LIBRARY=1)
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE rrl_${LIB_TYPE} )
   target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE Boost::boost ) # Set the boost include directory.
-  target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE ${PORTAUDIO_LIBRARIES} )
-  target_include_directories( audiointerfaces_${LIB_TYPE} PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
-  if( BUILD_USE_JACK )
+  if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+    target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE ${PORTAUDIO_LIBRARIES} )
+    target_include_directories( audiointerfaces_${LIB_TYPE} PRIVATE ${PORTAUDIO_INCLUDE_DIR} )
+    target_compile_definitions( audiointerfaces_${LIB_TYPE} PUBLIC -DVISR_AUDIOINTERFACES_PORTAUDIO_SUPPORT )
+  endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  if( BUILD_AUDIOINTERFACES_JACK )
     target_include_directories( audiointerfaces_${LIB_TYPE} PRIVATE ${JACK_INCLUDE_DIR} ) 
-    target_compile_definitions( audiointerfaces_${LIB_TYPE} PRIVATE -DVISR_JACK_SUPPORT )
     target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE ${JACK_LIBRARY} )
     target_link_libraries( audiointerfaces_${LIB_TYPE} PRIVATE rbbl_${LIB_TYPE} )
-  endif( BUILD_USE_JACK )
+    target_compile_definitions( audiointerfaces_${LIB_TYPE} PUBLIC -DVISR_AUDIOINTERFACES_JACK_SUPPORT )
+  endif( BUILD_AUDIOINTERFACES_JACK )
 endforeach()
 
 # Set public headers to be installed for the shared library target.

@@ -279,30 +279,6 @@ ENDIF( BUILD_PYTHON_BINDINGS )
 # omission will go unnoticed very often.
 FIND_PACKAGE(Threads REQUIRED)
 
-## Portaudio
-
-# For windows, we ship the includes and libraries.
-# TODO: Support system-specific library directories
-# TODO: Provide separate libraries for debug and release builds.
-IF( WIN32 ) # This includes 64-bit platforms!
-  # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
-  # call instead of setting it globally.
-  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
-  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
-
-ENDIF( WIN32 )
-FIND_PACKAGE( Portaudio REQUIRED )
-
-## Jack Audio Connection Kit (JACK)
-OPTION( BUILD_USE_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
-IF( BUILD_USE_JACK )
-  # Preliminary support for testing the Jack library on Windows platforms.
-  IF( WIN32 )
-    SET( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{JACK_ROOT} )
-  ENDIF( WIN32 )
-  FIND_PACKAGE( Jack REQUIRED)
-ENDIF( BUILD_USE_JACK )
-
 ## Libsndfile
 option( BUILD_USE_SNDFILE_LIBRARY "Use libsndfile functionality (loading/storing of audio files)" ON )
 if( BUILD_USE_SNDFILE_LIBRARY )

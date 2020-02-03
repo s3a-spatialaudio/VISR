@@ -10,12 +10,7 @@
 #include <libvisr/version.hpp>
 
 #include <libaudiointerfaces/audio_interface_factory.hpp>
-#ifdef VISR_JACK_SUPPORT
-#include <libaudiointerfaces/jack_interface.hpp>
-#endif
-#include <libaudiointerfaces/portaudio_interface.hpp>
 #include <libaudiointerfaces/audio_interface.hpp>
-
 
 #include <boost/algorithm/string.hpp> // case-insensitive string compare
 #include <boost/filesystem.hpp>
@@ -69,7 +64,7 @@ int main( int argc, char const * const * argv )
         // For the moment we check for the name 'NATIVE_JACK' and select the specialized audio interface and fall
         // back to PortAudio in all other cases.
         // TODO: Provide factory and backend-specific options) to make selection of audio interfaces more general and extendable.
-#ifdef VISR_JACK_SUPPORT
+#ifdef VISR_AUDIOINTERFACES_JACK_SUPPORT
         bool const useNativeJack = boost::iequals(audioBackend, "NATIVE_JACK");
 #endif
         
@@ -91,7 +86,7 @@ int main( int argc, char const * const * argv )
         std::unique_ptr<visr::audiointerfaces::AudioInterface> audioInterface;
         
         
-#ifdef VISR_JACK_SUPPORT
+#ifdef VISR_AUDIOINTERFACES_JACK_SUPPORT
         if (useNativeJack)
         {
             std::string pconfig = "{\"ports\":[ \n { \"captbasename\": \"input_\"}, \n ]}";
@@ -105,7 +100,7 @@ int main( int argc, char const * const * argv )
             specConf = "{\"sampleformat\": 8, \"interleaved\": \"false\", \"hostapi\" : "+audioBackend+"}";
             type = "PortAudio";
             
-#ifdef VISR_JACK_SUPPORT
+#ifdef VISR_AUDIOINTERFACES_JACK_SUPPORT
         }
 #endif
         

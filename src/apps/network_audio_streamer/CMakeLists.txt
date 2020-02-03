@@ -14,11 +14,6 @@ set( HEADERS
 )
 
 add_executable( network_audio_streamer ${SOURCES} ${HEADERS} )
-# Preliminary solution: communicate to main.cpp that Jack support is enabled.
-# TODO: Replace by factory mechanism to select audio interface.
-if( BUILD_USE_JACK )
-  target_compile_definitions( network_audio_streamer PRIVATE VISR_JACK_SUPPORT )
-endif( BUILD_USE_JACK )
 
 target_link_libraries(network_audio_streamer apputilities_shared )
 target_link_libraries(network_audio_streamer rcl_shared )
