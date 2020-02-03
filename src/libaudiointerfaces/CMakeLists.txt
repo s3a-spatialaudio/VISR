@@ -11,31 +11,12 @@ audio_interface_factory.hpp
 export_symbols.hpp
 )
 
-## Portaudio
-option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
 if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-  # For windows, we ship the includes and libraries.
-  # TODO: Support system-specific library directories
-  # TODO: Provide separate libraries for debug and release builds.
-  if( WIN32 ) # This includes 64-bit platforms!
-    # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
-    # call instead of setting it globally.
-    list( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
-    list( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
-  endif( WIN32 )
-  find_package( Portaudio REQUIRED )
   list( APPEND HEADERS portaudio_interface.hpp )
   list( APPEND SOURCES portaudio_interface.cpp )
 endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
 
-## Jack Audio Connection Kit (JACK)
-option( BUILD_AUDIOINTERFACES_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
 if( BUILD_AUDIOINTERFACES_JACK )
-  # Preliminary support for testing the Jack library on Windows platforms.
-  if( WIN32 )
-    set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{JACK_ROOT} )
-  endif( WIN32 )
-  find_package( Jack REQUIRED)
   list( APPEND HEADERS jack_interface.hpp )
   list( APPEND SOURCES jack_interface.cpp )
 endif( BUILD_AUDIOINTERFACES_JACK )
