@@ -31,7 +31,7 @@ add_definitions( -DVISR_PATCH_VERSION=${VISR_PATCH_VERSION} )
 # Add support for unit tests
 INCLUDE( CTest )
 
-## Set C++ standard used. 
+## Set C++ standard used.
 
 # Enable C++ 11 support
 # This requires CMake >= 3.1
@@ -257,17 +257,20 @@ IF( BUILD_PYTHON_BINDINGS )
     set( PYTHON_MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
   endif( WIN32 )
 
-  set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11 )
+  # set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11 )
+
+  set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE STRING "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
   # This variable is used by pybind11Tools
-  set( PYBIND11_INCLUDE_DIR ${PYBIND11_DIR}/include)
+  # set( PYBIND11_INCLUDE_DIR ${PYBIND11_DIR}/include)
 
   # Enable the pybind11 cmake support
   # This takes, amongst other things, care of providing proper
   # compile/link options.
   # Note: Because include() takes an absolute path here, we need the
   # extension .cmake
-  include( ${PYBIND11_DIR}/tools/pybind11Tools.cmake)
+  # include( ${PYBIND11_DIR}/tools/pybind11Tools.cmake)
+  add_subdirectory( ${PYBIND11_DIR} )
 
 ENDIF( BUILD_PYTHON_BINDINGS )
 
@@ -360,7 +363,7 @@ SET( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
- 
+
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
