@@ -215,7 +215,7 @@ if( BUILD_PYTHON_BINDINGS )
   # Define a sequence of Python versions which are searched in order.
   # This is used by FindPythonInterp and FindPythonLibs (although we use the latter
   # with a strict version specification if FindPythonInterp is used.
-  set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 2.7 )
+  set(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4 2.7 )
 
   # If testing is enabled, the Python interpreter is required to run the
   # Python-based unit tests.
