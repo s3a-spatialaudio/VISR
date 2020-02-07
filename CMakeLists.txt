@@ -207,9 +207,9 @@ ENDIF(  WIN32 OR APPLE )
 
 ################################################################################
 # Support for Python bindings of selected VISR functionality
-OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
+option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
 
-IF( BUILD_PYTHON_BINDINGS )
+if( BUILD_PYTHON_BINDINGS )
   # Find the Python libraries and (if needed) the Python interpreter
 
   # Define a sequence of Python versions which are searched in order.
@@ -245,34 +245,14 @@ IF( BUILD_PYTHON_BINDINGS )
     message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
   endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
 
-  # As we cannot use the PythonLibsNew package due to possible mismatches of the Python library name,
-  # we have to set the Python extensions ourselves (using the same variable names as created by
-  # PythonLibsNew.
-  # Note: The pybind11Tools mechanism apparently needs this as well.
-  if( WIN32 )
-    set( PYTHON_MODULE_EXTENSION ".pyd" )
-  elseif( APPLE )
-    set( PYTHON_MODULE_EXTENSION ".so" )
-  else( WIN32 )
-    set( PYTHON_MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
-  endif( WIN32 )
-
-  # set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11 )
-
   set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE STRING "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
-
-  # This variable is used by pybind11Tools
-  # set( PYBIND11_INCLUDE_DIR ${PYBIND11_DIR}/include)
 
   # Enable the pybind11 cmake support
   # This takes, amongst other things, care of providing proper
-  # compile/link options.
-  # Note: Because include() takes an absolute path here, we need the
-  # extension .cmake
-  # include( ${PYBIND11_DIR}/tools/pybind11Tools.cmake)
+  # compile and link options.
   add_subdirectory( ${PYBIND11_DIR} )
 
-ENDIF( BUILD_PYTHON_BINDINGS )
+endif( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
 # Support for 3rd-party libraries.
