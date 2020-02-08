@@ -207,51 +207,56 @@ ENDIF(  WIN32 OR APPLE )
 
 ################################################################################
 # Support for Python bindings of selected VISR functionality
-option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
+option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" ON )
 
 if( BUILD_PYTHON_BINDINGS )
   # Find the Python libraries and (if needed) the Python interpreter
 
-  # Define a sequence of Python versions which are searched in order.
-  # This is used by FindPythonInterp and FindPythonLibs (although we use the latter
-  # with a strict version specification if FindPythonInterp is used.
-  set(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4 2.7 )
+  # # Define a sequence of Python versions which are searched in order.
+  # # This is used by FindPythonInterp and FindPythonLibs (although we use the latter
+  # # with a strict version specification if FindPythonInterp is used.
+  # set(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4 2.7 )
 
-  # If testing is enabled, the Python interpreter is required to run the
-  # Python-based unit tests.
-  if( ${BUILD_TESTING} )
-    # According to the FindPythonInterp documentation, the interpreter should be found
-    # first in order to ensure a matching version of the Python libraries.
-    find_package( PythonInterp REQUIRED )
-    # Note: This could be simplified (and homogenised with finding the Python library)
-    # if find_package( Python ) or find_package( Python3 ) would be used.
-    # This would require CMake >= 3.12.
+  # # If testing is enabled, the Python interpreter is required to run the
+  # # Python-based unit tests.
+  # if( ${BUILD_TESTING} )
+  #   # According to the FindPythonInterp documentation, the interpreter should be found
+  #   # first in order to ensure a matching version of the Python libraries.
+  #   find_package( PythonInterp REQUIRED )
+  #   # Note: This could be simplified (and homogenised with finding the Python library)
+  #   # if find_package( Python ) or find_package( Python3 ) would be used.
+  #   # This would require CMake >= 3.12.
 
-    # Take care of potential additional suffixes to the version string, e.g., "rc1"
-    # message( "STATUS PYTHON_VERSION_STRING: " ${PYTHON_VERSION_STRING})
-    string( REGEX REPLACE "^([0-9]+\\.[0-9]+\\.[0-9]+)(.*)" "\\1"
-            PYTHON_VERSION_STRING_TIDY ${PYTHON_VERSION_STRING} )
-    # message( STATUS "PYTHON_VERSION_STRING_TIDY: " ${PYTHON_VERSION_STRING_TIDY} )
+  #   # Take care of potential additional suffixes to the version string, e.g., "rc1"
+  #   # message( "STATUS PYTHON_VERSION_STRING: " ${PYTHON_VERSION_STRING})
+  #   string( REGEX REPLACE "^([0-9]+\\.[0-9]+\\.[0-9]+)(.*)" "\\1"
+  #           PYTHON_VERSION_STRING_TIDY ${PYTHON_VERSION_STRING} )
+  #   # message( STATUS "PYTHON_VERSION_STRING_TIDY: " ${PYTHON_VERSION_STRING_TIDY} )
 
-    # Enforce that the interpreter version matches the Python library.
-    find_package( PythonLibs ${PYTHON_VERSION_STRING_TIDY} EXACT REQUIRED  )
-  else( ${BUILD_TESTING} )
-      find_package( PythonLibs REQUIRED )
-  endif( ${BUILD_TESTING} )
+  #   # Enforce that the interpreter version matches the Python library.
+  #   find_package( PythonLibs ${PYTHON_VERSION_STRING_TIDY} EXACT REQUIRED  )
+  # else( ${BUILD_TESTING} )
+  #     find_package( PythonLibs REQUIRED )
+  # endif( ${BUILD_TESTING} )
 
-  # find_package does not detect if the Python include directories are not found.
-  # Checking prevents strange error messages later on.
-  if( NOT DEFINED PYTHONLIBS_VERSION_STRING )
-    message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
-  endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
+  # # find_package does not detect if the Python include directories are not found.
+  # # Checking prevents strange error messages later on.
+  # if( NOT DEFINED PYTHONLIBS_VERSION_STRING )
+  #   message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
+  # endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
 
   set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE STRING "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
+  message( STATUS "Calling add_subdirectory( ${PYBIND11_DIR} )" )
+  
   # Enable the pybind11 cmake support
   # This takes, amongst other things, care of providing proper
   # compile and link options.
   add_subdirectory( ${PYBIND11_DIR} )
 
+  # 
+  message( STATUS "Python version:" ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH} )
+  
 endif( BUILD_PYTHON_BINDINGS )
 
 ###########################################################

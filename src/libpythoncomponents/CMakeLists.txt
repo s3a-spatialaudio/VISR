@@ -23,10 +23,11 @@ set_target_properties( pythoncomponents_shared PROPERTIES RUNTIME_OUTPUT_DIRECTO
 foreach(LIB_TYPE static shared)
   target_compile_definitions( pythoncomponents_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONCOMPONENTS_LIBRARY=1 )
 
-  target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pybind11 )
+#  target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIRS} )
   # The pybind11 header is used to include Python.h.
   # This avoids preprocessor magic to work around platform specifics.
-  target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
+#  target_include_directories( pythoncomponents_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
 
   # Transitive dependencies
   # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be

@@ -55,6 +55,8 @@ if(PYTHONLIBS_FOUND AND PYTHON_MODULE_EXTENSION)
     return()
 endif()
 
+message( STATUS "Entering FindPythonLibsNew" )
+
 # Use the Python interpreter to find the libs.
 if(PythonLibsNew_FIND_REQUIRED)
     find_package(PythonInterp ${PythonLibsNew_FIND_VERSION} REQUIRED)
@@ -67,6 +69,8 @@ if(NOT PYTHONINTERP_FOUND)
     set(PythonLibsNew_FOUND FALSE)
     return()
 endif()
+
+message( STATUS "Calling PythonInterp" )
 
 # According to http://stackoverflow.com/questions/646518/python-how-to-detect-debug-interpreter
 # testing whether sys has the gettotalrefcount function is a reliable, cross-platform
@@ -118,6 +122,8 @@ list(GET _PYTHON_VALUES 7 PYTHON_LIBRARY_SUFFIX)
 list(GET _PYTHON_VALUES 8 PYTHON_LIBDIR)
 list(GET _PYTHON_VALUES 9 PYTHON_MULTIARCH)
 
+message( STATUS "PYTHON_MODULE_EXTENSION" ${PYTHON_MODULE_EXTENSION} )
+
 # Make sure the Python has the same pointer-size as the chosen compiler
 # Skip if CMAKE_SIZEOF_VOID_P is not defined
 if(CMAKE_SIZEOF_VOID_P AND (NOT "${PYTHON_SIZEOF_VOID_P}" STREQUAL "${CMAKE_SIZEOF_VOID_P}"))
@@ -138,6 +144,10 @@ string(REGEX REPLACE "\\." ";" _PYTHON_VERSION_LIST ${_PYTHON_VERSION_LIST})
 list(GET _PYTHON_VERSION_LIST 0 PYTHON_VERSION_MAJOR)
 list(GET _PYTHON_VERSION_LIST 1 PYTHON_VERSION_MINOR)
 list(GET _PYTHON_VERSION_LIST 2 PYTHON_VERSION_PATCH)
+
+message( STATUS "_PYTHON_VERSION_LIST " ${_PYTHON_VERSION_LIST} )
+message( STATUS "PYTHON_VERSION_PATCH " ${PYTHON_VERSION_PATCH} )
+
 
 # Make sure all directory separators are '/'
 string(REGEX REPLACE "\\\\" "/" PYTHON_PREFIX ${PYTHON_PREFIX})
@@ -167,7 +177,7 @@ else()
     else()
         set(_PYTHON_LIBS_SEARCH "${PYTHON_LIBDIR}")
     endif()
-    #message(STATUS "Searching for Python libs in ${_PYTHON_LIBS_SEARCH}")
+    message(STATUS "Searching for Python libs in ${_PYTHON_LIBS_SEARCH}")
     # Probably this needs to be more involved. It would be nice if the config
     # information the python interpreter itself gave us were more complete.
     find_library(PYTHON_LIBRARY

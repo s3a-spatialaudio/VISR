@@ -15,11 +15,8 @@ set( PKG_FILE_NAME ${VISR_VERSIONED_NAME}-${CMAKE_SYSTEM_NAME})
 
 # Encode the Python major/minor version in the package file name if Python is enabled.
 if( BUILD_PYTHON_BINDINGS )
-  # Create a version string of the form "3.7"
-  string( REGEX MATCH "[0-9]+.[0-9]+" PYTHON_MAJOR_MINOR ${PYTHONLIBS_VERSION_STRING} )
-  if( ${PYTHON_MAJOR_MINOR} STREQUAL "" )
-    message( FATAL_ERROR "Could not determine Python version number." )
-  endif( ${PYTHON_MAJOR_MINOR} STREQUAL "" )
+  set( PYTHON_MAJOR_MINOR ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
+  message( STATUS "PackageConfig: Python major/minor: " ${PYTHON_MAJOR_MINOR} )
 
   set( PKG_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-Python${PYTHON_MAJOR_MINOR}-${CMAKE_SYSTEM_NAME}" )
 else( BUILD_PYTHON_BINDINGS )

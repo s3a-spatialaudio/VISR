@@ -27,11 +27,14 @@ set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY 
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
   target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
-  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIR} )
+
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE pybind11 )
+
+#  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIRS} )
   # The pybind11 header is used to include Python.h.
   # This avoids preprocessor magic to make this include statement
   # portable.
-  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
+#  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
 
   # Transitive dependencies
   target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
