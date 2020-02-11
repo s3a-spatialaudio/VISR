@@ -210,53 +210,38 @@ ENDIF(  WIN32 OR APPLE )
 option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" ON )
 
 if( BUILD_PYTHON_BINDINGS )
-  # Find the Python libraries and (if needed) the Python interpreter
+  # Finding Python and the pybind11 directory. This is done using the pybind11
+  # mechanisms.
+  # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
+  set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
-  # # Define a sequence of Python versions which are searched in order.
-  # # This is used by FindPythonInterp and FindPythonLibs (although we use the latter
-  # # with a strict version specification if FindPythonInterp is used.
-  # set(Python_ADDITIONAL_VERSIONS 3.8 3.7 3.6 3.5 3.4 2.7 )
-
-  # # If testing is enabled, the Python interpreter is required to run the
-  # # Python-based unit tests.
-  # if( ${BUILD_TESTING} )
-  #   # According to the FindPythonInterp documentation, the interpreter should be found
-  #   # first in order to ensure a matching version of the Python libraries.
-  #   find_package( PythonInterp REQUIRED )
-  #   # Note: This could be simplified (and homogenised with finding the Python library)
-  #   # if find_package( Python ) or find_package( Python3 ) would be used.
-  #   # This would require CMake >= 3.12.
-
-  #   # Take care of potential additional suffixes to the version string, e.g., "rc1"
-  #   # message( "STATUS PYTHON_VERSION_STRING: " ${PYTHON_VERSION_STRING})
-  #   string( REGEX REPLACE "^([0-9]+\\.[0-9]+\\.[0-9]+)(.*)" "\\1"
-  #           PYTHON_VERSION_STRING_TIDY ${PYTHON_VERSION_STRING} )
-  #   # message( STATUS "PYTHON_VERSION_STRING_TIDY: " ${PYTHON_VERSION_STRING_TIDY} )
-
-  #   # Enforce that the interpreter version matches the Python library.
-  #   find_package( PythonLibs ${PYTHON_VERSION_STRING_TIDY} EXACT REQUIRED  )
-  # else( ${BUILD_TESTING} )
-  #     find_package( PythonLibs REQUIRED )
-  # endif( ${BUILD_TESTING} )
-
-  # # find_package does not detect if the Python include directories are not found.
-  # # Checking prevents strange error messages later on.
-  # if( NOT DEFINED PYTHONLIBS_VERSION_STRING )
-  #   message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
-  # endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
-
-  set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE STRING "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
-
-  message( STATUS "Calling add_subdirectory( ${PYBIND11_DIR} )" )
-  
-  # Enable the pybind11 cmake support
+  # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
   # compile and link options.
-  add_subdirectory( ${PYBIND11_DIR} )
+  # The second argument specifies the binary directory and is needed if
+  # ${PYBIND11_DIR} could be outside the project source directory.
+  # EXCLUDE_FROM_ALL means that the target will not be built
+  # (which isn't relevant for a header-only library anyway), and that it
+  # is not shown in IDE project files.
+  # TODO: consider to use the binary dir only if an outside PYBIND11_DIR
+  # is used. This would avoid a 3rd/ folder in the build directory unless
+  # necessary.
+  add_subdirectory( ${PYBIND11_DIR}
+  ${CMAKE_BINARY_DIR}/3rd/pybind11 EXCLUDE_FROM_ALL )
 
-  # 
-  message( STATUS "Python version:" ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH} )
-  
+  # Define a Python version string. Note that the variables returned from
+  # the pybind11 may not contain the Python patch version.
+  # However, this is not problematic because only the major.minor
+  # version is needed to set the VISR package name.
+  set( VISR_PYTHON_VERSION_MAJOR_MINOR ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
+
+  # Define the pybind11 version as a version string.
+  # This string is imported as a target property of the
+  # VISR::pythonsupport libraries and can be used by dependent
+  # project to check whether they are using a compatible
+  # pybind11 version.
+  set( VISR_PYBIND11_VERSION
+    ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
 endif( BUILD_PYTHON_BINDINGS )
 
 ###########################################################

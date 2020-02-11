@@ -28,16 +28,8 @@ set_target_properties( pythonsupport_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY 
 foreach(LIB_TYPE static shared)
   target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
 
-  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE pybind11 )
-
-#  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_INCLUDE_DIRS} )
-  # The pybind11 header is used to include Python.h.
-  # This avoids preprocessor magic to make this include statement
-  # portable.
-#  target_include_directories( pythonsupport_${LIB_TYPE} PRIVATE ${PYBIND11_INCLUDE_DIR} )
-
   # Transitive dependencies
-  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE ${PYTHON_LIBRARY} )
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE pybind11 )
   target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
@@ -47,12 +39,26 @@ foreach(LIB_TYPE static shared)
   # Export the Python version as a compile definition.
   # This can be extracted by other projects importing this target.
   target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
-                              VISR_PYTHON_VERSION=${PYTHONLIBS_VERSION_STRING} )
-endforeach()
+    VISR_PYTHON_VERSION=${VISR_PYTHON_VERSION_MAJOR_MINOR} )
 
+  # Encode the pybind11 version as a target property.
+  # In this way dependent projects can check whether they buid against
+  # a compatible version.
+  target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
+    VISR_PYBIND11_VERSION=${VISR_PYBIND11_VERSION} )
+
+  # Export the location of the pybind11 directory tree.
+  # Dependent projects can retrieve this value to build against the
+  # same pybind11 version.
+  # For installed versions of VISR, this points to $INSTALL_DIRECTORY/3rd/pybind11,
+  # where the relevant parts of pybind11 are shipped (see PackageConfig.cmake).
+  target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
+    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>
+    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11> )
+endforeach()
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
-# installled once.
+# installed once.
 set_target_properties( pythonsupport_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
 
