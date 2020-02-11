@@ -27,9 +27,6 @@
 #include <sstream>
 #include <vector>
 
-// Used to include the main Python include file (for Py_Initialize() )
-#include <pybind11/pybind11.h>
-
 namespace visr
 {
 namespace pythoncomponents
