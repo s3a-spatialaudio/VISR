@@ -29,7 +29,7 @@ foreach(LIB_TYPE static shared)
   target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
 
   # Transitive dependencies
-  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE pybind11 )
+  target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE pybind11::embed )
   target_link_libraries( pythonsupport_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )

@@ -250,7 +250,9 @@ endif( BUILD_PYTHON_BINDINGS )
 # Threads are required wherever we link with boost_threads.
 # Note that the dependency is added automatically in most cases, so the
 # omission will go unnoticed very often.
-FIND_PACKAGE(Threads REQUIRED)
+# TODO: Is this superseded by using Boost exported targets (which should handle
+# transitive dependencies itself)?
+find_package(Threads REQUIRED)
 
 ## Portaudio
 option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
