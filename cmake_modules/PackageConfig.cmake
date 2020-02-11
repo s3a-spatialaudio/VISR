@@ -62,7 +62,7 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   set( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
   install( FILES ${PORTAUDIO_LIBRARIES} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  install( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)  
+  install( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
   install( FILES ${FLAC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
   install( FILES ${OGG_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
   install( FILES ${VORBIS_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
@@ -75,7 +75,7 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
 
-  # Prepare a example launchagent file 
+  # Prepare a example launchagent file
   set( LAUNCHAGENT_PLIST_FILENAME ${VISR_VERSIONED_NAME}.plist )
   set( LAUNCHAGENT_PLIST_FILEPATH ${PROJECT_BINARY_DIR}/package_resources/${LAUNCHAGENT_PLIST_FILENAME} )
   configure_file( ${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/VISR-launchagent.plist.in
@@ -87,7 +87,7 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   configure_file(${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
   		       "${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh" @ONLY)
   set( CPACK_POSTFLIGHT_SHARED_LIBRARIES_SCRIPT
-       ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)   
+       ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )
@@ -113,15 +113,24 @@ if( BUILD_PYTHON_BINDINGS )
   install( DIRECTORY src/python/templates
            DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
            COMPONENT python_templates
-	   PATTERN __pycache__ EXCLUDE )
+           PATTERN __pycache__ EXCLUDE )
   install( DIRECTORY src/python/packages/visr_bst
            DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
            COMPONENT python_package_bst
-	   PATTERN __pycache__ EXCLUDE )
+           PATTERN __pycache__ EXCLUDE )
   install( DIRECTORY src/python/packages/metadapter
            DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
            COMPONENT python_package_metadapter
-	   PATTERN __pycache__ EXCLUDE )
+           PATTERN __pycache__ EXCLUDE )
+
+  # Copy the pybind11 directory into the installation tree
+  # In this way the same pybind11 version can be used by dependent projects.
+  # We omit the tests/ and docs/ subdirectries to save space.
+  install( DIRECTORY ${PYBIND11_DIR}
+           DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11"
+           COMPONENT development_files
+           PATTERN tests EXCLUDE
+           PATTERN docs EXCLUDE )
 endif( BUILD_PYTHON_BINDINGS )
 
 # TODO: Decide whether this shall go into a separate component.
@@ -233,7 +242,7 @@ cpack_add_component( python_package_metadapter
 cpack_add_component( python_templates
                     DISPLAY_NAME "Python Templates"
                     DESCRIPTION "Python template files"
-                    DEPENDS python_externals 
+                    DEPENDS python_externals
                     INSTALL_TYPES python full
                    )
 endif( BUILD_PYTHON_BINDINGS )
