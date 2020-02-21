@@ -126,7 +126,7 @@ if( BUILD_PYTHON_BINDINGS )
   # Copy the pybind11 directory into the installation tree
   # In this way the same pybind11 version can be used by dependent projects.
   # We omit the tests/ and docs/ subdirectries to save space.
-  install( DIRECTORY ${PYBIND11_DIR}
+  install( DIRECTORY ${PYBIND11_DIR}/
            DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11"
            COMPONENT development_files
            PATTERN tests EXCLUDE
