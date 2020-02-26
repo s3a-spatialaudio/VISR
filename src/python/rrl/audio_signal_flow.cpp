@@ -72,9 +72,68 @@ py::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py::arra
 
 } // unnamed namespace
 
+using CriticalSection = visr::rrl::AudioSignalFlow::ParameterExchangeCriticalSectionType;
+
+/**
+ * Context manager class to use critical section guard with the Python with statement.
+ */ 
+class CriticalSectionGuard
+{
+public:
+  /**
+   * Construct a context manager object from the critical section object of the audio signal flow.
+   */
+  explicit CriticalSectionGuard( CriticalSection & section )
+   : mSection( section )
+  {}
+
+  /**
+   * Construct the context manager directly from the audio signal flow.
+   * This is a convenience constructor that avoids the need to get the criticial section object.
+   */
+  explicit CriticalSectionGuard( AudioSignalFlow & flow )
+   : mSection( flow.parameterExchangeCriticalSection() )
+  {}
+
+  ~CriticalSectionGuard() = default;
+
+  CriticalSection & enter() 
+  {
+    mSection.lock();
+    return mSection;
+  }
+
+  bool exit( py::object exceptionType, py::object exceptionValue, py::object exceptionTrace )
+  {
+    mSection.unlock();
+    return false; // Indicate that the exception has not been handled.
+  }
+private:
+  CriticalSection & mSection;
+};
+
+
 void exportAudioSignalFlow( py::module & m )
 {
-  py::class_<AudioSignalFlow>( m, "AudioSignalFlow" )
+  py::class_<AudioSignalFlow>  cls( m, "AudioSignalFlow" );
+
+  py::class_< CriticalSection >( cls, "ParameterExchangeCriticalSection",
+R"(Python binding for the mutex type used by AudioSignalFlow to guard the exchange of parameter data.)" )
+    .def( "lock", &CriticalSection::lock, R"( Acquire the lock.)" )
+    .def( "unlock", &CriticalSection::unlock, R"(Release the lock)" )
+    ;
+
+  py::class_< CriticalSectionGuard >( cls, "CriticalSectionGuard",
+R"( Context manager to acquire the parameter exchange critical section lock with the Python "with" statement.)")
+    .def( py::init< CriticalSection & >(), R"( Construct the context manager from the parameter exchange critical section mutex.)" )
+    .def( py::init< AudioSignalFlow & >(), R"(Convenience constructor the context manager directly from the AudioSignalFlow.)" )
+    .def( "__enter__", &CriticalSectionGuard::enter, py::return_value_policy::reference,
+R"(Implement the "__enter__" method of the ContextManager API. Called within the with statment, usually not called directly by users.)" )
+    .def( "__exit__", &CriticalSectionGuard::exit,
+R"(Implement the "__exit__" method of the ContextManager API. Called within the with statment, usually not called directly by users.)" )
+    ;
+
+  cls
    .def( py::init<visr::Component&>() )
    .def_property_readonly( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
    .def_property_readonly( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
@@ -88,13 +147,17 @@ void exportAudioSignalFlow( py::module & m )
    .def( "parameterSendPorts", &AudioSignalFlow::externalParameterSendEndpoints )
    .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, py::arg("index"), py::return_value_policy::reference )
    .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, py::arg( "index" ), py::return_value_policy::reference )
-  .def( "process", [](visr::rrl::AudioSignalFlow & flow, py::array const & input) /*-> py::array_t<SampleType>*/ { return wrapProcess( flow, input );}, py::arg("audioInput"), py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs" )
-  .def( "process", [](visr::rrl::AudioSignalFlow & flow) /*-> py::array_t<SampleType>*/
-  {
-    std::initializer_list<std::size_t> const shape{ 0, flow.period() };
-    py::array_t<SampleType> dummy( shape, nullptr );
-    return wrapProcess( flow, dummy );},
-    py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs" )
+   .def( "process", [](visr::rrl::AudioSignalFlow & flow, py::array const & input) /*-> py::array_t<SampleType>*/ { return wrapProcess( flow, input );}, py::arg("audioInput"), py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs" )
+   .def( "process",
+     [](visr::rrl::AudioSignalFlow & flow) /*-> py::array_t<SampleType>*/
+     {
+       std::initializer_list<std::size_t> const shape{ 0, flow.period() };
+       py::array_t<SampleType> dummy( shape, nullptr );
+       return wrapProcess( flow, dummy );
+     },
+     py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs." )
+   .def( "parameterExchangeCriticalSection", &AudioSignalFlow::parameterExchangeCriticalSection,
+     py::return_value_policy::reference, R"(Obtain the mutex for guarding the parameter data exchange,)" )
   ;
 }
 
