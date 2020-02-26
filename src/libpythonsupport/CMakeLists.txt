@@ -53,8 +53,7 @@ foreach(LIB_TYPE static shared)
   # For installed versions of VISR, this points to $INSTALL_DIRECTORY/3rd/pybind11,
   # where the relevant parts of pybind11 are shipped (see PackageConfig.cmake).
   target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
-    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>
-    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11> )
+    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11> )
 endforeach()
 # Set public headers to be installed for the shared target.
 # Because the headers are the same for the static library, the headers are only
