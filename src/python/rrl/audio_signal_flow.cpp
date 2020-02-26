@@ -99,7 +99,10 @@ public:
 
   CriticalSection & enter() 
   {
-    mSection.lock();
+    {
+      py::gil_scoped_release release;
+      mSection.lock();
+    }
     return mSection;
   }
 
@@ -119,7 +122,7 @@ void exportAudioSignalFlow( py::module & m )
 
   py::class_< CriticalSection >( cls, "ParameterExchangeCriticalSection",
 R"(Python binding for the mutex type used by AudioSignalFlow to guard the exchange of parameter data.)" )
-    .def( "lock", &CriticalSection::lock, R"( Acquire the lock.)" )
+    .def( "lock", &CriticalSection::lock, py::call_guard<py::gil_scoped_release>(), R"( Acquire the lock.)" )
     .def( "unlock", &CriticalSection::unlock, R"(Release the lock)" )
     ;
 
