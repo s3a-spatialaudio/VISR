@@ -31,7 +31,7 @@ add_definitions( -DVISR_PATCH_VERSION=${VISR_PATCH_VERSION} )
 # Add support for unit tests
 INCLUDE( CTest )
 
-## Set C++ standard used. 
+## Set C++ standard used.
 
 # Enable C++ 11 support
 # This requires CMake >= 3.1
@@ -207,69 +207,42 @@ ENDIF(  WIN32 OR APPLE )
 
 ################################################################################
 # Support for Python bindings of selected VISR functionality
-OPTION( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" OFF )
+option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" ON )
 
-IF( BUILD_PYTHON_BINDINGS )
-  # Find the Python libraries and (if needed) the Python interpreter
+if( BUILD_PYTHON_BINDINGS )
+  # Finding Python and the pybind11 directory. This is done using the pybind11
+  # mechanisms.
+  # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
+  set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
-  # Define a sequence of Python versions which are searched in order.
-  # This is used by FindPythonInterp and FindPythonLibs (although we use the latter
-  # with a strict version specification if FindPythonInterp is used.
-  set(Python_ADDITIONAL_VERSIONS 3.7 3.6 3.5 3.4 2.7 )
-
-  # If testing is enabled, the Python interpreter is required to run the
-  # Python-based unit tests.
-  if( ${BUILD_TESTING} )
-    # According to the FindPythonInterp documentation, the interpreter should be found
-    # first in order to ensure a matching version of the Python libraries.
-    find_package( PythonInterp REQUIRED )
-    # Note: This could be simplified (and homogenised with finding the Python library)
-    # if find_package( Python ) or find_package( Python3 ) would be used.
-    # This would require CMake >= 3.12.
-
-    # Take care of potential additional suffixes to the version string, e.g., "rc1"
-    # message( "STATUS PYTHON_VERSION_STRING: " ${PYTHON_VERSION_STRING})
-    string( REGEX REPLACE "^([0-9]+\\.[0-9]+\\.[0-9]+)(.*)" "\\1"
-            PYTHON_VERSION_STRING_TIDY ${PYTHON_VERSION_STRING} )
-    # message( STATUS "PYTHON_VERSION_STRING_TIDY: " ${PYTHON_VERSION_STRING_TIDY} )
-
-    # Enforce that the interpreter version matches the Python library.
-    find_package( PythonLibs ${PYTHON_VERSION_STRING_TIDY} EXACT REQUIRED  )
-  else( ${BUILD_TESTING} )
-      find_package( PythonLibs REQUIRED )
-  endif( ${BUILD_TESTING} )
-
-  # find_package does not detect if the Python include directories are not found.
-  # Checking prevents strange error messages later on.
-  if( NOT DEFINED PYTHONLIBS_VERSION_STRING )
-    message( FATAL_ERROR "Invalid setting for PYTHON_INCLUDE_DIR." )
-  endif( NOT DEFINED PYTHONLIBS_VERSION_STRING )
-
-  # As we cannot use the PythonLibsNew package due to possible mismatches of the Python library name,
-  # we have to set the Python extensions ourselves (using the same variable names as created by
-  # PythonLibsNew.
-  # Note: The pybind11Tools mechanism apparently needs this as well.
-  if( WIN32 )
-    set( PYTHON_MODULE_EXTENSION ".pyd" )
-  elseif( APPLE )
-    set( PYTHON_MODULE_EXTENSION ".so" )
-  else( WIN32 )
-    set( PYTHON_MODULE_EXTENSION ${CMAKE_SHARED_LIBRARY_SUFFIX} )
-  endif( WIN32 )
-
-  set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11 )
-
-  # This variable is used by pybind11Tools
-  set( PYBIND11_INCLUDE_DIR ${PYBIND11_DIR}/include)
-
-  # Enable the pybind11 cmake support
+  # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
-  # compile/link options.
-  # Note: Because include() takes an absolute path here, we need the
-  # extension .cmake
-  include( ${PYBIND11_DIR}/tools/pybind11Tools.cmake)
+  # compile and link options.
+  # The second argument specifies the binary directory and is needed if
+  # ${PYBIND11_DIR} could be outside the project source directory.
+  # EXCLUDE_FROM_ALL means that the target will not be built
+  # (which isn't relevant for a header-only library anyway), and that it
+  # is not shown in IDE project files.
+  # TODO: consider to use the binary dir only if an outside PYBIND11_DIR
+  # is used. This would avoid a 3rd/ folder in the build directory unless
+  # necessary.
+  add_subdirectory( ${PYBIND11_DIR}
+  ${CMAKE_BINARY_DIR}/3rd/pybind11 EXCLUDE_FROM_ALL )
 
-ENDIF( BUILD_PYTHON_BINDINGS )
+  # Define a Python version string. Note that the variables returned from
+  # the pybind11 may not contain the Python patch version.
+  # However, this is not problematic because only the major.minor
+  # version is needed to set the VISR package name.
+  set( VISR_PYTHON_VERSION_MAJOR_MINOR ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
+
+  # Define the pybind11 version as a version string.
+  # This string is imported as a target property of the
+  # VISR::pythonsupport libraries and can be used by dependent
+  # project to check whether they are using a compatible
+  # pybind11 version.
+  set( VISR_PYBIND11_VERSION
+    ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
+endif( BUILD_PYTHON_BINDINGS )
 
 ###########################################################
 # Support for 3rd-party libraries.
@@ -277,7 +250,9 @@ ENDIF( BUILD_PYTHON_BINDINGS )
 # Threads are required wherever we link with boost_threads.
 # Note that the dependency is added automatically in most cases, so the
 # omission will go unnoticed very often.
-FIND_PACKAGE(Threads REQUIRED)
+# TODO: Is this superseded by using Boost exported targets (which should handle
+# transitive dependencies itself)?
+find_package(Threads REQUIRED)
 
 ## Portaudio
 option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
@@ -348,19 +323,22 @@ FIND_PACKAGE( FFTS REQUIRED )
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
-OPTION( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
+option( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
 
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-SET( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
+set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
 # The set of all boost libraries used by the build and test stages.
-SET( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
+set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
 # However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
-FIND_PACKAGE( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
- 
+# Switch to the "-mt" set of libraries. Also prevents warnings due to already
+# defined import locations.
+set(Boost_USE_MULTITHREADED TRUE)
+find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
