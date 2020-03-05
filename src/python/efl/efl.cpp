@@ -12,6 +12,7 @@ namespace python
 {
 void exportBasicVectors( pybind11::module & m );
 void exportBasicMatrices( pybind11::module & m );
+void exportDenormalisedNumberHandling( pybind11::module & m );
 }
 }
 }
@@ -22,4 +23,5 @@ PYBIND11_MODULE( efl, m )
   using namespace visr::efl::python;
   exportBasicVectors( m );
   exportBasicMatrices( m );
+  exportDenormalisedNumberHandling( m );
 }

@@ -3,6 +3,7 @@
 set( SOURCES
 basic_vector.cpp
 basic_matrix.cpp
+denormalised_number_handling.cpp
 efl.cpp
 )
 
