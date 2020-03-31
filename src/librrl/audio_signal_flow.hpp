@@ -5,6 +5,10 @@
 
 #include "export_symbols.hpp"
 
+//#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+//#include <runtime_profiler.hpp>
+//#endif
+
 #include <libvisr/audio_port_base.hpp>
 #include <libvisr/communication_protocol_base.hpp>
 #include <libvisr/constants.hpp>
@@ -37,6 +41,9 @@ namespace rrl
 class AudioSignalPool;
 class AudioConnectionMap;
 class ParameterConnectionMap;
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+class RuntimeProfiler;
+#endif
 
 /**
  * Base class for signal flows, i.e., graphs of connected audio
@@ -218,9 +225,29 @@ public:
    * brief durations, and not execute code that might block, because this
    * would affect the audio rendering code.
    */
-  ParameterExchangeCriticalSectionType & parameterExchangeCriticalSection();
+  ParameterExchangeCriticalSectionType & parameterExchangeCriticalSection() const;
   //@}
 
+      
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+
+  /**
+   * Support for runtime profiling
+   */
+  //@{
+  friend class visr::rrl::RuntimeProfiler;
+  
+  bool runtimeProfilingEnabled() const;
+  
+  bool enableRuntimeProfiling( std::size_t measurementBufferSize );
+  
+  bool disableRuntimeProfiling();
+  
+  visr::rrl::RuntimeProfiler const & runtimeProfiler()  const;
+
+  visr::rrl::RuntimeProfiler & runtimeProfiler();
+  //@}
+#endif // VISR_RRL_RUNTIME_SYSTEM_PROFILING
 private:
   /**
    * Initialise the audio subsystem, i.e., creating audio buffers and connecting the audio ports to the sample buffers.
@@ -329,7 +356,19 @@ private:
   /**
    * Synchronisation object for accesses to external parameter ports.
    */
-  std::unique_ptr<ParameterExchangeCriticalSectionType> mParameterExchangeCriticalSection;
+  mutable std::unique_ptr<ParameterExchangeCriticalSectionType>
+    mParameterExchangeCriticalSection;
+  
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+  /**
+   *
+   */
+  //@{
+  
+  
+  std::unique_ptr< RuntimeProfiler > mRuntimeProfiler;
+  //@}
+#endif
 };
 
 } // namespace rrl

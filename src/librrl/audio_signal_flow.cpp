@@ -12,6 +12,10 @@
 
 #include "signal_routing_internal.hpp"
 
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+#include "runtime_profiler.hpp"
+#endif
+
 #include <libefl/alignment.hpp>
 #include <libefl/vector_functions.hpp>
 
@@ -39,6 +43,10 @@
 #include <numeric>
 #include <sstream>
 #include <utility> // for std::pair and std::make_pair
+
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+#include <chrono>
+#endif
 
 // Preliminary solution agains potential additional audio dependencies if new infrastructure elements (such as input routing blocks)
 // are introduced.
@@ -201,18 +209,40 @@ void AudioSignalFlow::executeComponents()
 {
   std::lock_guard<ParameterExchangeCriticalSectionType>
     guard( parameterExchangeCriticalSection() );
-  for( AtomicComponent * pc : mProcessingSchedule )
+  try
   {
-    try
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+    if( mRuntimeProfiler )
     {
-      pc->process();
+      RuntimeProfiler::MeasurementVector & timing
+       = mRuntimeProfiler->currentData();
+      std::size_t compIdx{ 0 };
+      for( AtomicComponent * pc : mProcessingSchedule )
+      {
+        auto const startTime = std::chrono::high_resolution_clock::now();
+        pc->process();
+        auto const endTime = std::chrono::high_resolution_clock::now();
+        RuntimeProfiler::TimeType const elapsed
+          = std::chrono::duration<RuntimeProfiler::TimeType>( endTime - startTime ).count();
+        timing[ compIdx ] = elapsed;
+        ++compIdx;
+      }
+      mRuntimeProfiler->finishIteration();
     }
-    catch( std::exception const & ex )
+    else
+#endif
     {
-      // TODO: Retrieve information about current object and add it to the exception message
-      // TODO: Consider adding a name() function to ProcessableInterface
-      throw std::runtime_error( std::string("Exception while executing audio signal flow: ") + ex.what() );
+      for( AtomicComponent * pc : mProcessingSchedule )
+      {
+        pc->process();
+      }
     }
+  }
+  catch( std::exception const & ex )
+  {
+    // TODO: Retrieve information about current object and add it to the exception message
+    // TODO: Consider adding a name() function to ProcessableInterface
+    throw std::runtime_error( std::string("Exception while executing audio signal flow: ") + ex.what() );
   }
 }
 
@@ -894,10 +924,51 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
 }
 
 AudioSignalFlow::ParameterExchangeCriticalSectionType &
-AudioSignalFlow::parameterExchangeCriticalSection()
+AudioSignalFlow::parameterExchangeCriticalSection() const
 {
   return *mParameterExchangeCriticalSection;
 }
+
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+visr::rrl::RuntimeProfiler const &
+AudioSignalFlow::runtimeProfiler()  const
+{
+  if( not mRuntimeProfiler )
+  {
+    throw std::logic_error( "Runtime profiling is not enabled." );
+  }
+  return *mRuntimeProfiler;
+}
+
+visr::rrl::RuntimeProfiler &
+AudioSignalFlow::runtimeProfiler()
+{
+  if( not mRuntimeProfiler )
+  {
+    throw std::logic_error( "Runtime profiling is not enabled." );
+  }
+  return *mRuntimeProfiler;
+}
+
+bool AudioSignalFlow::runtimeProfilingEnabled() const
+{
+  return mRuntimeProfiler != nullptr;
+}
+
+bool AudioSignalFlow::enableRuntimeProfiling( std::size_t measurementBufferSize )
+{
+  bool const previous = runtimeProfilingEnabled();
+  mRuntimeProfiler.reset( new RuntimeProfiler( *this, measurementBufferSize ) );
+  return previous;
+}
+
+bool AudioSignalFlow::disableRuntimeProfiling()
+{
+  bool const previous = runtimeProfilingEnabled();
+  mRuntimeProfiler.reset();
+  return previous;
+}
+#endif
 
 } // namespace rrl
 } // namespace visr

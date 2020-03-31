@@ -5,6 +5,7 @@ add_library( pythonbindinghelpers INTERFACE )
 
 # Define the header files to be installed.
 SET( PUBLIC_HEADERS
+  ndarray_from_basic_vector.hpp
   matrix_from_ndarray.hpp
   vector_from_ndarray.hpp
 )
@@ -22,6 +23,6 @@ install( TARGETS pythonbindinghelpers
 
 # Install files (this need to be done separately for interface targets)
 # (see https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#interface-libraries)
-install( FILES ${PUBLIC_HEADERS} 
+install( FILES ${PUBLIC_HEADERS}
          DESTINATION include/visr/python/libpythonbindinghelpers
          COMPONENT development_files )

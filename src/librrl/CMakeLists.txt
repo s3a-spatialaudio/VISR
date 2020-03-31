@@ -28,6 +28,13 @@ scheduling_graph.hpp
 signal_routing_internal.hpp
 )
 
+option( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING "Enable optional measurement of runtime statistics." OFF )
+
+if( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+  list( APPEND SOURCES runtime_profiler.cpp )
+  list( APPEND PUBLIC_HEADERS runtime_profiler.hpp )
+endif( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+
 add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
 set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
 target_compile_definitions( rrl_static PUBLIC VISR_RRL_STATIC_LIBRARY=1)
@@ -40,6 +47,10 @@ set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
 # Set target properties common to both library types.
 foreach(LIB_TYPE static shared)
   target_compile_definitions( rrl_${LIB_TYPE} PRIVATE VISR_BUILD_RRL_LIBRARY=1)
+  if( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+    target_compile_definitions( rrl_${LIB_TYPE} PUBLIC
+      VISR_RRL_RUNTIME_SYSTEM_PROFILING=1)
+  endif( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
   # Transitive link dependencies
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
@@ -65,7 +76,7 @@ if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS rrl_static
           EXPORT VISR_exports
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
-endif( BUILD_INSTALL_STATIC_LIBRARIES )	  
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 install(TARGETS rrl_shared
         EXPORT VISR_exports
         ARCHIVE DESTINATION lib COMPONENT development_files

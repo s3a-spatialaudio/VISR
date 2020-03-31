@@ -1,6 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include <librrl/audio_signal_flow.hpp> 
+#include <librrl/audio_signal_flow.hpp>
+
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+#include <librrl/runtime_profiler.hpp>
+#endif
 
 #include <libvisr/component.hpp>
 
@@ -161,6 +165,13 @@ R"(Implement the "__exit__" method of the ContextManager API. Called within the 
      py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs." )
    .def( "parameterExchangeCriticalSection", &AudioSignalFlow::parameterExchangeCriticalSection,
      py::return_value_policy::reference, R"(Obtain the mutex for guarding the parameter data exchange,)" )
+#ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
+   .def( "runtimeProfilingEnabled", &AudioSignalFlow::runtimeProfilingEnabled )
+   .def( "enableRuntimeProfiling", &AudioSignalFlow::enableRuntimeProfiling, py::arg( "measurementBufferSize" ) )
+   .def( "disableRuntimeProfiling", &AudioSignalFlow::disableRuntimeProfiling )
+   .def( "runtimeProfiler", static_cast< visr::rrl::RuntimeProfiler &(AudioSignalFlow::*)()>(
+      &AudioSignalFlow::runtimeProfiler ), py::return_value_policy::reference )
+#endif
   ;
 }
 
