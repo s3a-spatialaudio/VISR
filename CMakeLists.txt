@@ -111,18 +111,22 @@ ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 if(UNIX)
   # Support for the Raspberry Pi: Enable hardware floating-point arithmetic
   if( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpu=neon -march=armv7-a -mfloat-abi=hard" )
+    add_compile_options( -mfpu=neon -march=armv7-a -mfloat-abi=hard )
   endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture
   # features of the machine it is compiled on.
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall --pedantic" )
+  add_compile_options( -Wall --pedantic )
   # Avoid super-picky 'nested anon types' warning
   if (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang") # Matches regular Clang and AppleClang (XCode)
     # message( STATUS "Detected LLVM C++ compiler" )
     # Remove nonsensical warnings due to unknown pragmas introduced by -pedantic
     # (as pragmas are compiler-specific, unknown ones should be ignored silently anyway)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-nested-anon-types -Wno-unknown-pragmas" )
+    add_compile_options( -Wno-nested-anon-types -Wno-unknown-pragmas )
+    # Avoid warnings if (static) member variables of templates are not explicitly defined in the same translation unit.
+    # This happens, for example, with the function pointer dispatch mechanism in libefl.
+    # A missing definition of a variable in question results in an undefined reference at the linking stage anyway.
+    add_compile_options( -Wno-undefined-var-template )
   endif (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
 endif(UNIX)
 
@@ -144,14 +148,42 @@ if( WIN32 ) # Covers 64-bit Windows as well
   add_definitions( -D_SCL_SECURE_NO_WARNINGS ) # STL algorithms with pointers instead of 'real' iterators are perfectly legal.
   # Avoid complaints about STL members in classes with VISR_CORE_LIBRARY_SYMBOL not having DLL interfaces.
   add_definitions( "/wd4251" )
-  #
-#   ADD_DEFINITIONS( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /wd4251 /nologo" )
-   add_definitions( "-D_WIN32_WINNT=0x0601" )
 
+  # TODO: Fine to remove commented-out next line?
+  # add_definitions( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /wd4251 /nologo" )
+  add_definitions( "-D_WIN32_WINNT=0x0601" )
 
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3" ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+  add_compile_options( /W3 ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
 endif( WIN32 )
+
+############################################################
+# Set architecture options.
+set( BUILD_PROCESSOR_GENERATION "generic" CACHE STRING "CPU Architecture for which the binaries are built." )
+if( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
+  # These values work both for GCC and CLANG
+  set( PROCESSOR_GENERATION_LIST "generic;native;skylake-avx512;skylake;broadwell;haswell;ivybridge;sandybridge;westmere;nehalem"  )
+endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
+set_property( CACHE BUILD_PROCESSOR_GENERATION PROPERTY STRINGS ${PROCESSOR_GENERATION_LIST} )
+
+if( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
+  if( WIN32 )
+    # TODO: Translate into Windows flags (AFAIK only
+    # /arch:AVX and /arch:AVX2 are supported)
+  else( WIN32 )
+    # '-march=generic' is not supported by GCC and Clang
+    # because it is the default anyway.
+    if( NOT ${BUILD_PROCESSOR_GENERATION} MATCHES "generic" )
+        add_compile_options( -march=${BUILD_PROCESSOR_GENERATION} )
+    endif( NOT ${BUILD_PROCESSOR_GENERATION} MATCHES "generic" )
+    # Tune for the same architecture.
+    # This might make a difference especially if '-march=native' is chosen.
+    # https://lemire.me/blog/2018/07/25/it-is-more-complicated-than-i-thought-mtune-march-in-gcc/
+    add_compile_options( -mtune=${BUILD_PROCESSOR_GENERATION} )
+  endif( WIN32 )
+endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
+
+# TODO: Generate architecture flags for other platforms (e.g., ARM)
+
 
 ############################################################
 # Create universal binaries on MacOS

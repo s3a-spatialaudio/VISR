@@ -1,11 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_IMPL_HPP_INCLUDED
-#define VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_IMPL_HPP_INCLUDED
+#ifndef VISR_LIBEFL_REFERENCE_VECTOR_FUNCTIONS_IMPL_HPP_INCLUDED
+#define VISR_LIBEFL_REFERENCE_VECTOR_FUNCTIONS_IMPL_HPP_INCLUDED
 
-#include "vector_functions_reference.hpp"
+#include "vector_functions.hpp"
 
-#include "alignment.hpp"
+#include "../alignment.hpp"
 
 #include <complex>
 
@@ -41,6 +41,23 @@ ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, st
   return noError;
 }
 
+namespace // unnamed
+{
+  /**
+   * Type trait to translate a complex type to its element type, and leave other types unchanged.
+   * This is used in vectorRamp() to avoid a type conversion warning in MSVC.
+   */
+  template< typename T > struct RealType
+  {
+    using type = T;
+  };
+  template<typename T>
+  struct RealType< std::complex<T> >
+  {
+    using type = T;
+  };
+}
+
 template <typename T>
 ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T endVal,
   bool startInclusive, bool endInclusive, std::size_t alignment /*= 0*/ )
@@ -58,9 +75,9 @@ ErrorCode vectorRamp( T * const dest, std::size_t numElements, T startVal, T end
     return noError;
   }
   std::size_t const numSteps = numElements + 1 - (startInclusive ? 1 : 0) - (endInclusive ? 1 : 0);
-  T const step = (endVal - startVal) / static_cast<T>(numSteps);
+  T const step = (endVal - startVal) / static_cast< typename RealType<T>::type >(numSteps);
   std::size_t calcIdx( startInclusive ? 0 : 1 );
-  std::generate( dest, dest + numElements, [&] { return startVal + static_cast<T>(calcIdx++) * step; } );
+  std::generate( dest, dest + numElements, [&] { return startVal + static_cast<typename RealType<T>::type >(calcIdx++) * step; } );
   return noError;
 }
 
@@ -127,7 +144,7 @@ ErrorCode vectorAddConstantInplace( T constantValue,
 {
   if( not checkAlignment( opResult, alignment ) ) return alignmentError;
   std::for_each( opResult, opResult + numElements,
-     [=](T const & x){return x + constantValue;} );
+     [=](T & x){ x += constantValue;} );
   return noError;
 }
 
@@ -142,7 +159,7 @@ ErrorCode vectorSubtract( T const * const subtrahend,
   if( not checkAlignment( minuend, alignment ) ) return alignmentError;
   if( not checkAlignment( result, alignment ) ) return alignmentError;
 
-  std::transform( subtrahend, subtrahend + numElements, minuend, result, [=]( T x, T y ) { return x + y; } );
+  std::transform( subtrahend, subtrahend + numElements, minuend, result, [=]( T x, T y ) { return x - y; } );
   return noError;
 }
 
@@ -156,7 +173,7 @@ ErrorCode vectorSubtractInplace( T const * const minuend,
   if( not checkAlignment( subtrahendResult, alignment ) ) return alignmentError;
   for( std::size_t idx( 0 ); idx < numElements; ++idx )
   {
-    subtrahendResult[idx] -= minuend[idx];
+    subtrahendResult[idx] = minuend[idx] - subtrahendResult[idx];
   }
   return noError;
 }
@@ -175,7 +192,7 @@ ErrorCode vectorSubtractConstant( T constantMinuend,
 }
 
 template<typename T>
-ErrorCode vectorSubConstantInplace( T constantMinuend,
+ErrorCode vectorSubtractConstantInplace( T constantMinuend,
                                     T * const subtrahendResult,
                                     std::size_t numElements,
                                     std::size_t alignment /*= 0*/ )
@@ -317,8 +334,70 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   return noError;
 }
 
+template<typename DataType>
+ErrorCode vectorCopyStrided( DataType const * src, DataType * dest, std::size_t srcStrideElements,
+  std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements )
+{
+  if( not checkAlignment( src, alignmentElements ) ) return efl::alignmentError;
+  if( not checkAlignment( dest, alignmentElements ) ) return efl::alignmentError;
+  // TODO: check whether the strides are compatible with the alignment
+
+  for( std::size_t elIdx( 0 ); elIdx < numberOfElements; ++elIdx, src += srcStrideElements, dest += destStrideElements )
+  {
+    *dest = *src;
+  }
+  return noError;
+}
+
+template<typename DataType>
+ErrorCode vectorFillStrided( DataType val, DataType * dest, std::size_t destStrideElements, std::size_t numberOfElements, std::size_t alignmentElements )
+{
+  if( not checkAlignment( dest, alignmentElements ) ) return alignmentError;
+  for( std::size_t elIdx( 0 ); elIdx < numberOfElements; ++elIdx, dest += destStrideElements )
+  {
+    *dest = val;
+  }
+  return noError;
+}
+
+template<typename T>
+ErrorCode vectorRampScaling(T const * input,
+  T const * ramp,
+  T * output,
+  T baseGain,
+  T rampGain,
+  std::size_t numberOfElements,
+  bool accumulate /*= false*/,
+  std::size_t alignmentElements /*= 0*/)
+{
+#ifndef NDEBUG
+  if( not checkAlignment(input, alignmentElements)) return alignmentError;
+  if( not checkAlignment(ramp, alignmentElements)) return alignmentError;
+  if (not checkAlignment(output, alignmentElements)) return alignmentError;
+#endif
+  if (accumulate)
+  {
+    for (std::size_t elIdx(0); elIdx < numberOfElements;
+      ++elIdx, ++input, ++output, ++ramp)
+    {
+      T const scale{ baseGain + rampGain * *ramp};
+      *output +=  scale * *input;
+    }
+  }
+  else
+  {
+    for (std::size_t elIdx(0); elIdx < numberOfElements;
+      ++elIdx, ++input, ++output, ++ramp)
+    {
+      T const scale{ baseGain + rampGain * *ramp };
+      *output = scale * *input;
+    }
+  }
+  return efl::noError;
+}
+
 } // namespace reference
 } // namespace efl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_IMPL_HPP_INCLUDED
+#endif // #ifndef VISR_LIBEFL_REFERENCE_VECTOR_FUNCTIONS_IMPL_HPP_INCLUDED

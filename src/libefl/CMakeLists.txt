@@ -1,7 +1,7 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 IF( BUILD_USE_IPP )
- INCLUDE_DIRECTORIES( ${IPP_INCLUDE_DIR} ) 
+ INCLUDE_DIRECTORIES( ${IPP_INCLUDE_DIR} )
  LIST( APPEND SOURCES vector_functions_ipp.cpp)
 ELSE( BUILD_USE_IPP )
  LIST( APPEND SOURCES vector_functions.cpp)
@@ -12,11 +12,13 @@ basic_matrix.cpp
 basic_vector.cpp
 denormalised_number_handling.cpp
 error_codes.cpp
+initialise_library.cpp
 lagrange_coefficient_calculator.cpp
 matrix_functions.cpp
 vector_conversions.cpp
-vector_functions_reference.cpp
 vector_functions.cpp
+reference/vector_conversions.cpp
+reference/vector_functions.cpp
 )
 
 SET( HEADERS
@@ -30,12 +32,16 @@ degree_radian_conversion.hpp
 denormalised_number_handling.hpp
 error_codes.hpp
 export_symbols.hpp
+function_wrapper.hpp
+initialise_library.hpp
 lagrange_coefficient_calculator.hpp
 matrix_functions.hpp
 vector_conversions.hpp
 vector_functions.hpp
-vector_functions_reference.hpp
-vector_functions_reference_impl.hpp
+reference/vector_conversions.hpp
+reference/vector_conversions_impl.hpp
+reference/vector_functions.hpp
+reference/vector_functions_impl.hpp
 )
 
 add_library( efl_static STATIC ${SOURCES} ${HEADERS} )
@@ -49,6 +55,7 @@ set_target_properties( efl_shared PROPERTIES ARCHIVE_OUTPUT_NAME efl_shared )
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 
 foreach( LIB_TYPE static shared)
+  target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
   target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
 endforeach()
 
@@ -67,17 +74,29 @@ foreach(TARGET_TYPE static shared)
   )
 endforeach()
 
+if( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
+  add_subdirectory( intel_x86_64 )
+endif( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
+
+if( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
+  add_subdirectory( armv7l_neon_32bit )
+endif( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
+
+
+# TODO: Do the same for other architectures with platform-specific implementations
+# (e.g., ARM)
+
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS efl_static
-          EXPORT VISR_exports
-          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+	  EXPORT VISR_exports
+	  ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 install(TARGETS efl_shared
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT development_files
-        RUNTIME DESTINATION lib COMPONENT shared_libraries
-        LIBRARY DESTINATION lib COMPONENT shared_libraries
-        PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
+	EXPORT VISR_exports
+	ARCHIVE DESTINATION lib COMPONENT development_files
+	RUNTIME DESTINATION lib COMPONENT shared_libraries
+	LIBRARY DESTINATION lib COMPONENT shared_libraries
+	PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

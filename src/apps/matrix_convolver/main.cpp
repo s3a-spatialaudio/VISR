@@ -4,6 +4,7 @@
 #include "init_filter_matrix.hpp"
 
 #include <libefl/denormalised_number_handling.hpp>
+#include <libefl/initialise_library.hpp>
 
 #include <librbbl/fft_wrapper_factory.hpp>
 #include <librbbl/filter_routing.hpp>
@@ -99,6 +100,15 @@ int main( int argc, char const * const * argv )
     SamplingFrequencyType const samplingFrequency = cmdLineOptions.getDefaultedOption<SamplingFrequencyType>( "sampling-frequency", 48000 );
 
     std::string const fftLibrary = cmdLineOptions.getDefaultedOption<std::string>( "fft-library", "default" );
+
+    bool const optDsp = cmdLineOptions.getDefaultedOption<bool>("dsp-optimisation", false );
+    if( optDsp )
+    {
+      if( not efl::initialiseLibrary("") )
+      {
+	throw std::runtime_error( "Error initialising DSP function library." );
+      }
+    }
 
     SignalFlowContext const context{ periodSize, samplingFrequency };
 

@@ -1,9 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_HPP_INCLUDED
-#define VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_HPP_INCLUDED
+#ifndef VISR_LIBEFL_REFERENCE_VECTOR_FUNCTIONS_HPP_INCLUDED
+#define VISR_LIBEFL_REFERENCE_VECTOR_FUNCTIONS_HPP_INCLUDED
 
-#include "error_codes.hpp"
+#include "../vector_functions.hpp"
+#include "../error_codes.hpp"
 
 #include <cstddef>
 
@@ -15,13 +16,13 @@ namespace reference
 {
 
 template <typename T>
-ErrorCode vectorZeroReference( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+ErrorCode vectorZero( T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
 template <typename T>
-ErrorCode vectorFillReference( const T value, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+ErrorCode vectorFill( const T value, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
 template <typename T>
-ErrorCode vectorCopyReference( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
+ErrorCode vectorCopy( T const * const source, T * const dest, std::size_t numElements, std::size_t alignment = 0 );
 
 /**
  * Fill an array with a ramp defined by its start and end value.
@@ -88,7 +89,7 @@ ErrorCode vectorSubtractConstant( T constantMinuend,
   std::size_t alignment = 0 );
 
 template<typename T>
-ErrorCode vectorSubConstantInplace( T constantMinuend,
+ErrorCode vectorSubtractConstantInplace( T constantMinuend,
   T * const subtrahendResult,
   std::size_t numElements,
   std::size_t alignment = 0 );
@@ -184,9 +185,51 @@ ErrorCode vectorMultiplyConstantAddInplace( T constFactor,
   std::size_t numElements,
   std::size_t alignment = 0 );
 
+template<typename DataType>
+ErrorCode vectorCopyStrided( DataType const * src,
+			     DataType * dest,
+			     std::size_t srcStrideElements,
+			     std::size_t destStrideElements,
+			     std::size_t numberOfElements,
+			     std::size_t alignmentElements );
+
+template<typename DataType>
+ErrorCode vectorFillStrided( DataType val,
+			     DataType * dest,
+			     std::size_t destStrideElements,
+			     std::size_t numberOfElements,
+			     std::size_t alignmentElements );
+/**
+ * Apply a ramp-shaped gain scaling to an input signal.
+ * The gain applied to the sample $input[i]$ is $baseGain+rampGain*ramp[i]$
+ * @param input The signal to be scaled.
+ * @param ramp The shape of the scaling, must match the signal length
+ * \p numberOfElements.
+ * @param [in,out] output The output signal. When the parameter 
+ * \p accumulate is true, the result is added to \p output, and overwrites
+ * the present value of \p output otherwise
+ * @param baseGain The scalar base value of the gain, which is added to the
+ * scaled ramp gain.
+ * @param rampGain Scalar scaling factor to be applied to the gain ramp.
+ * @param numberOfElements The number of elements in the \p input, \p ramp, and
+ * \p output vectors.
+ * @param accumulate Flag specifying whether the result overwrites the \p output
+ * vector (if false), or whether it is added to \p output (if true).
+ * @param alignmentElements Minimum alignment of the vector arguments \p input,
+ * \p ramp, and \p output, measured in multiples of the element size. 
+ */
+template<typename T>
+efl::ErrorCode vectorRampScaling(T const * input,
+  T const * ramp,
+  T * output,
+  T baseGain,
+  T rampGain,
+  std::size_t numberOfElements,
+  bool accumulate /*= false*/,
+  std::size_t alignmentElements /*= 0*/);
 
 } // namespace reference
 } // namespace efl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBEFL_VECTOR_FUNCTIONS_REFERENCE_HPP_INCLUDED
+#endif // #ifndef VISR_LIBEFL_REFERENCE_VECTOR_FUNCTIONS_HPP_INCLUDED
