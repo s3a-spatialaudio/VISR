@@ -13,27 +13,27 @@ namespace efl
 namespace reference
 {
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvert( InputType const * src,
                          OutputType * dest,
                          std::size_t numElements,
                          std::size_t alignment=0 );
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvertInputStride( InputType const * src,
                                     OutputType * dest,
                                     std::size_t numElements,
                                     std::size_t inputStride,
                                     std::size_t alignment = 0 );
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvertOutputStride( InputType const * src,
                                      OutputType * dest,
                                      std::size_t numElements,
                                      std::size_t outputStride,
                                      std::size_t alignment = 0 );
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvertInputOutputStride( InputType const * src,
                                           OutputType * dest,
                                           std::size_t numElements,

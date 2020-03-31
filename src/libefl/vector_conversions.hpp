@@ -50,7 +50,6 @@ VISR_EFL_CREATE_FUNCTION_WRAPPER_TEMPLATE_TWO_TYPES( VectorConvertWrapper, T1, T
  * measured in number of elements.
  */
 template< typename InputType, typename OutputType >
-VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvert( InputType const * src,
                          OutputType * dest,
                          std::size_t numElements,
@@ -73,7 +72,6 @@ VISR_EFL_CREATE_FUNCTION_WRAPPER_TEMPLATE_TWO_TYPES( VectorConvertInputStrideWra
  * measured in number of elements.
  */
 template< typename InputType, typename OutputType >
-VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertInputStride( InputType const * src,
                                     OutputType * dest,
                                     std::size_t numElements,
@@ -98,7 +96,6 @@ VISR_EFL_CREATE_FUNCTION_WRAPPER_TEMPLATE_TWO_TYPES( VectorConvertOutputStrideWr
  * measured in number of elements.
  */
 template< typename InputType, typename OutputType >
-VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertOutputStride( InputType const * src,
                                      OutputType * dest,
                                      std::size_t numElements,
@@ -124,7 +121,6 @@ VISR_EFL_CREATE_FUNCTION_WRAPPER_TEMPLATE_TWO_TYPES( VectorConvertInputOutputStr
  * measured in number of elements.
  */
 template< typename InputType, typename OutputType >
-VISR_EFL_LIBRARY_SYMBOL
 ErrorCode vectorConvertInputOutputStride( InputType const * src,
                                           OutputType * dest,
                                           std::size_t numElements,

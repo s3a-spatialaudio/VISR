@@ -64,7 +64,7 @@ struct Converter< InputType, OutputType, typename std::enable_if<std::is_floatin
 
 } // unnamed namespace;
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvert( InputType const * src,
                          OutputType * dest,
                          std::size_t numElements,
@@ -73,7 +73,7 @@ ErrorCode vectorConvert( InputType const * src,
   return vectorConvertInputOutputStride( src, dest, numElements, 1, 1, alignment );
 }
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvertInputStride( InputType const * src,
                                     OutputType * dest,
                                     std::size_t numElements,
@@ -83,7 +83,7 @@ ErrorCode vectorConvertInputStride( InputType const * src,
   return vectorConvertInputOutputStride( src, dest, numElements, inputStride, 1, alignment );
 }
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvertOutputStride( InputType const * src,
                                      OutputType * dest,
                                      std::size_t numElements,
@@ -93,7 +93,7 @@ ErrorCode vectorConvertOutputStride( InputType const * src,
   return vectorConvertInputOutputStride( src, dest, numElements, 1, outputStride, alignment );
 }
 
-template< typename InputType, typename OutputType > VISR_EFL_LIBRARY_SYMBOL
+template< typename InputType, typename OutputType >
 ErrorCode vectorConvertInputOutputStride( InputType const * src,
                                           OutputType * dest,
                                           std::size_t numElements,
