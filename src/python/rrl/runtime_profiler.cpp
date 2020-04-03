@@ -32,14 +32,17 @@ void exportRuntimeProfiler( py::module & m )
   // from the audio signal flow.
   .def_property_readonly( "numberOfComponents", &RuntimeProfiler::numberOfComponents )
   .def( "getComponentNames", &RuntimeProfiler::getComponentNames )
-  .def( "measurementSamples", &RuntimeProfiler::measurementSamples )
-  .def( "statisticsSamples", &RuntimeProfiler::statisticsSamples )
+  .def( "measurementSamples", &RuntimeProfiler::measurementSamples, py::call_guard<py::gil_scoped_release>() )
+  .def( "statisticsSamples", &RuntimeProfiler::statisticsSamples, py::call_guard<py::gil_scoped_release>() )
   .def( "getMeasurements", [](RuntimeProfiler & self )
   {
     std::size_t numAllTimings;
     // This swaps the measurment buffer and returns the number of // currently recorded measurements.
-    RuntimeProfiler::MeasurementBuffer const & measurements
-      = self.getMeasurements( numAllTimings );
+    RuntimeProfiler::MeasurementBuffer const * measurements{ nullptr };
+    {
+      py::gil_scoped_release guard;
+      measurements = &(self.getMeasurements( numAllTimings ));
+    }
     std::size_t numTimings{ std::min( numAllTimings, 
       self.measurementBufferSize() ) };
     py::array_t<RuntimeProfiler::TimeType > ret( 
@@ -54,7 +57,7 @@ void exportRuntimeProfiler( py::module & m )
       for( std::size_t srcRowIdx{ currentPos }; destRowIdx < wrappedTimings;
         ++srcRowIdx, ++destRowIdx )
       {
-        efl::vectorCopy( measurements.row( srcRowIdx ),
+        efl::vectorCopy( measurements->row( srcRowIdx ),
           ret.mutable_data( destRowIdx ), 
           self.numberOfComponents(),
           0/*alignment*/ );
@@ -64,7 +67,7 @@ void exportRuntimeProfiler( py::module & m )
     for( std::size_t srcRowIdx{ 0 }; destRowIdx < numTimings;
       ++srcRowIdx, ++destRowIdx )
     {
-      efl::vectorCopy( measurements.row( srcRowIdx ),
+      efl::vectorCopy( measurements->row( srcRowIdx ),
         ret.mutable_data( destRowIdx ), 
         self.numberOfComponents(),
         0/*alignment*/ );
@@ -74,14 +77,20 @@ void exportRuntimeProfiler( py::module & m )
   .def( "getMean", []( RuntimeProfiler const & self )
   {
     visr::efl::BasicVector<RuntimeProfiler::TimeType> res( self.numberOfComponents(), 0/*alignment*/ );
-    self.getMean( res );
+    {
+      py::gil_scoped_release guard;
+      self.getMean( res );
+    }
     auto retVal = ::visr::python::bindinghelpers::ndArrayFromBasicVector( res );
     return retVal;
   })
   .def( "getVariance", []( RuntimeProfiler const & self )
   {
     visr::efl::BasicVector<RuntimeProfiler::TimeType> res( self.numberOfComponents(), 0/*alignment*/ );
-    self.getVariance( res );
+    {
+      py::gil_scoped_release guard;
+      self.getVariance( res );
+    }
     auto retVal = ::visr::python::bindinghelpers::ndArrayFromBasicVector( res );
     return retVal;
   })
@@ -89,7 +98,11 @@ void exportRuntimeProfiler( py::module & m )
    { 
     visr::efl::BasicVector<RuntimeProfiler::TimeType> mean( self.numberOfComponents(), 0/*alignment*/ );
     visr::efl::BasicVector<RuntimeProfiler::TimeType> variance( self.numberOfComponents(), 0/*alignment*/ );
-    std::size_t numCycles = self.getStatistics( mean, variance );
+    std::size_t numCycles;
+    {
+      py::gil_scoped_release guard;
+      numCycles = self.getStatistics( mean, variance );
+    }
     py::array_t<RuntimeProfiler::TimeType> meanArray = ::visr::python::bindinghelpers::ndArrayFromBasicVector( mean );
     py::array_t<RuntimeProfiler::TimeType> varianceArray = ::visr::python::bindinghelpers::ndArrayFromBasicVector( variance );
     py::tuple ret = py::make_tuple( numCycles, meanArray, varianceArray );
@@ -99,7 +112,11 @@ void exportRuntimeProfiler( py::module & m )
    { 
     visr::efl::BasicVector<RuntimeProfiler::TimeType> mean( self.numberOfComponents(), 0/*alignment*/ );
     visr::efl::BasicVector<RuntimeProfiler::TimeType> variance( self.numberOfComponents(), 0/*alignment*/ );
-    std::size_t numCycles = self.getAndResetStatistics( mean, variance );
+    std::size_t numCycles;
+    {
+      py::gil_scoped_release guard;
+      numCycles = self.getAndResetStatistics( mean, variance );
+    }
     py::array_t<RuntimeProfiler::TimeType> meanArray = ::visr::python::bindinghelpers::ndArrayFromBasicVector( mean );
     py::array_t<RuntimeProfiler::TimeType> varianceArray = ::visr::python::bindinghelpers::ndArrayFromBasicVector( variance );
     py::tuple ret = py::make_tuple( numCycles, meanArray, varianceArray );
