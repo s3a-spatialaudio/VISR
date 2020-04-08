@@ -58,14 +58,13 @@ void parseJSON(std::istream &  inputStream, pml::ListenerPosition & pos)
 
   pt::ptree tree;
   pt::read_json( inputStream, tree );
-
   pos.setTimeNs( tree.get<pml::ListenerPosition::TimeType>( "nTime" ) * 100 );
   pos.setFaceID( tree.get<pml::ListenerPosition::IdType>( "iFace" ) );
   pos.set( tree.get<pml::ListenerPosition::Coordinate>( "headJoint.X" ),
           tree.get<pml::ListenerPosition::Coordinate>( "headJoint.Y" ),
           tree.get<pml::ListenerPosition::Coordinate>( "headJoint.Z" ) );
   // TODO: Implement parsing of orientation
-  pos.setOrientation( 0.0f, 0.0f, 0.0f );
+  pos.setOrientationYPR( 0.0f, 0.0f, 0.0f );
 }
 
 }

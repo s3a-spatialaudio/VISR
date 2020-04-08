@@ -10,6 +10,8 @@
 #include <libvisr/parameter_type.hpp>
 #include <libvisr/typed_parameter_base.hpp>
 
+#include <boost/math/quaternion.hpp>
+
 #include <array>
 #include <cstdint>
 #include <iosfwd>
@@ -54,11 +56,14 @@ public:
    */
   using PositionType = std::array<Coordinate,3>;
 
+
+  using OrientationQuaternion = boost::math::quaternion< Coordinate >;
+
   /**
-   * Data type representing the orientation of the listener.
+   * Data type representing the orientation of the listener as Euler angles.
    * A size-3 array containing yaw, pitch, and roll angles (in radian)
    */
-  using OrientationType = std::array<Coordinate, 3>;
+  using OrientationYPR = std::array<Coordinate, 3>;
 
   /**
    * Construction from a parameter configuration parameter.
@@ -102,10 +107,12 @@ public:
    * @param position Cartesian position vector {x y z}, unit [m]
    * @param orientation Orientation vector [yaw pitch roll], unit [radian]. Default [0 0 0]
    */
-  ListenerPosition( PositionType const & position, OrientationType const & orientation );
+  ListenerPosition( PositionType const & position, OrientationYPR const & orientation );
+
+  ListenerPosition( PositionType const & position, OrientationQuaternion const & orientation );
 
   /**
-   * DEstructor (virtual)
+   * Destructor (virtual)
    */
   virtual ~ListenerPosition() override;
 
@@ -177,24 +184,27 @@ public:
   /**
    * Return the yaw angle of the listener's orientation [radian]
    */
-  Coordinate yaw() const { return mOrientation[0]; }
+  Coordinate yaw() const;
 
   /**
    * Return the pitch angle of the listener's orientation [radian]
    */
-  Coordinate pitch() const { return mOrientation[1]; }
+  Coordinate pitch() const;
 
   /**
    * Return the roll angle of the listener's orientation [radian]
    */
-  Coordinate roll() const { return mOrientation[2]; }
+  Coordinate roll() const;
 
   /**
    * Return the listener's orientation as a 3-element vector.
    * Layout: [yaw pitch roll], unit: [radian]
    */
-  OrientationType const & orientation() const { return mOrientation; }
+  OrientationYPR orientationYPR() const;
 
+  OrientationQuaternion const & orientationQuaternion() const;
+
+#if 0
   /**
    * Set the yaw angle of the listener's orientation
    * @param yaw New yaw angle [radian]
@@ -212,6 +222,7 @@ public:
   * @param roll New roll angle [radian]
   */
   void setRoll( Coordinate roll );
+#endif
 
   /**
   * Set the listener's orientation using scalar values.
@@ -219,13 +230,31 @@ public:
   * @param pitch New pitch angle [radian]
   * @param roll New roll angle [radian]
   */
-  void setOrientation( Coordinate yaw, Coordinate pitch, Coordinate roll );
+  void setOrientationYPR( Coordinate yaw, Coordinate pitch, Coordinate roll );
 
   /**
    * Set the listener's orientation as a 3-element vector.
    * @param orientation New orientation vector, layout: [yaw pitch roll], unit: [radian]
    */
-  void setOrientation( OrientationType const & orientation );
+  void setOrientationYPR( OrientationYPR const & orientation );
+
+  void setOrientationQuaternion( OrientationQuaternion const & orientation );
+
+  void translate( PositionType const translationVec );
+
+  void rotate( OrientationQuaternion const & rotation );
+
+  /**
+   * Rotate the listener orientation.
+   * This leaves the position component unchanged.
+   */
+  void rotateOrientation( OrientationQuaternion const & rotation );
+
+  /**
+   * General transformation consisting of a rotation around the origin of the coordinate
+   * system followed by a translation of the position.
+   */
+  void transform( OrientationQuaternion const & rotation, PositionType translation );
 
   /**
    * Return the time stamp of the position parameter.
@@ -257,12 +286,12 @@ private:
   /**
    * Cartesian listener coordinates as a 3D vector [xyz], in [m]
    */
-  std::array<Coordinate, 3> mPosition;
+  PositionType mPosition;
 
   /**
-   * Listener orientation as a 3D vector [yaw pitch roll], in [radian]
+   * Listener orientation, stored as a quaternion.
    */
-  std::array<Coordinate,3> mOrientation;
+  OrientationQuaternion mOrientation;
 
   /**
    * Time stamp, in [ns]
@@ -276,6 +305,33 @@ private:
    */
   IdType mFaceID;
 };
+
+/**
+ * Multiplicative identity element
+ */
+extern const ListenerPosition::OrientationQuaternion
+cMpyIdentityQuaternion;
+
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::OrientationQuaternion
+ypr2Quaternion( ListenerPosition::Coordinate yaw,
+  ListenerPosition::Coordinate pitch,
+  ListenerPosition::Coordinate roll );
+
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::OrientationQuaternion ypr2Quaternion( ListenerPosition::OrientationYPR const & ypr );
+
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::Coordinate yawFromQuaternion( ListenerPosition::OrientationQuaternion const & q );
+
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::Coordinate pitchFromQuaternion( ListenerPosition::OrientationQuaternion const & q );
+
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::Coordinate rollFromQuaternion( ListenerPosition::OrientationQuaternion const & q );
+
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::OrientationYPR yprFromQuaternion( ListenerPosition::OrientationQuaternion const & quat );
 
 VISR_PML_LIBRARY_SYMBOL std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
 
