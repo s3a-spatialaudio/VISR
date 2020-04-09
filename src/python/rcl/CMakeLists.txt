@@ -58,3 +58,6 @@ install(TARGETS ${PROJECT_NAME}
         EXPORT VISR_exports
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
+
+# Recurse into the unit test directory.
+add_subdirectory( test )
