@@ -20,7 +20,6 @@ bool initialiseLibrary( char const * processor /*= ""*/ )
 {
   // Determine CPU features
   CpuFeatures features{};
-
   // TODO: Set specialised versions based on the processor features.
   // NOTE: Functions that are not yet implemented are commented out.
   
@@ -51,6 +50,7 @@ bool initialiseLibrary( char const * processor /*= ""*/ )
   VectorMultiplyConstantAddInplaceWrapper< float >::set( &intel_x86_64::vectorMultiplyConstantAddInplace<float> );
   VectorMultiplyConstantAddInplaceWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiplyConstantAddInplace<std::complex<float> > );
 
+  VectorRampScalingWrapper< float >::set( &intel_x86_64::vectorRampScaling<float> );
   return true;
 }
 
@@ -73,7 +73,8 @@ bool uninitialiseLibrary()
   VectorMultiplyConstantAddWrapper< std::complex<float> >::set( &reference::vectorMultiplyConstantAdd<std::complex<float> > );
   VectorMultiplyConstantAddInplaceWrapper< float >::set( &reference::vectorMultiplyConstantAddInplace<float> );
   VectorMultiplyConstantAddInplaceWrapper< std::complex<float> >::set( &reference::vectorMultiplyConstantAddInplace<std::complex<float> > );
-  
+
+  VectorRampScalingWrapper< float >::set( &intel_x86_64::vectorRampScaling<float> );
   return true;
 }
 
