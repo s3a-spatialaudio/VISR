@@ -1,6 +1,8 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "container_helpers.hpp"
+#include "check_error.hpp"
+
+#include <python/libpythonbindinghelpers/container_access.hpp>
 
 #include <libefl/vector_conversions.hpp>
 
@@ -36,8 +38,8 @@ void exportVectorConvert( py::module & m )
   m.def( "vectorConvert",
          []( Container<InputType> const & src, Container<OutputType> & dest, std::size_t numElements, std::size_t alignment )
    {
-     InputType const * const srcPtr = detail::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
-     OutputType * const destPtr = detail::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
+     InputType const * const srcPtr = visr::python::bindinghelpers::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
+     OutputType * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
      detail::checkError( efl::vectorConvert<InputType, OutputType>( srcPtr, destPtr, numElements, alignment ) );
    }, py::arg( "src" ), py::arg("dest"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -56,8 +58,8 @@ void exportVectorConvertInputStride( py::module & m )
          []( Container<InputType> const & src, Container<OutputType> & dest, std::size_t numElements,
          std::size_t inputStride,  std::size_t alignment )
    {
-     InputType const * const srcPtr = detail::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
-     OutputType * const destPtr = detail::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
+     InputType const * const srcPtr = visr::python::bindinghelpers::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
+     OutputType * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
      detail::checkError( efl::vectorConvertInputStride<InputType,
        OutputType>( srcPtr, destPtr, numElements, inputStride,
        alignment ) );
@@ -79,8 +81,8 @@ void exportVectorConvertOutputStride( py::module & m )
          []( Container<InputType> const & src, Container<OutputType> & dest, std::size_t numElements,
          std::size_t outputStride,  std::size_t alignment )
    {
-     InputType const * const srcPtr = detail::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
-     OutputType * const destPtr = detail::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
+     InputType const * const srcPtr = visr::python::bindinghelpers::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
+     OutputType * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
      detail::checkError( efl::vectorConvertOutputStride<InputType,
        OutputType>( srcPtr, destPtr, numElements, outputStride,
        alignment ) );
@@ -103,8 +105,8 @@ void exportVectorConvertInputOutputStride( py::module & m )
          []( Container<InputType> const & src, Container<OutputType> & dest, std::size_t numElements,
          std::size_t inputStride, std::size_t outputStride,  std::size_t alignment )
    {
-     InputType const * const srcPtr = detail::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
-     OutputType * const destPtr = detail::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
+     InputType const * const srcPtr = visr::python::bindinghelpers::ContainerAccess<Container, InputType >::constantPointer( src, numElements, "src" );
+     OutputType * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, OutputType >::mutablePointer( dest, numElements, "dest" );
      detail::checkError( efl::vectorConvertInputOutputStride<InputType,
        OutputType>( srcPtr, destPtr, numElements, inputStride, outputStride,
        alignment ) );
@@ -119,7 +121,7 @@ void exportVectorConvertInputOutputStride( py::module & m )
   (ConvertInputOutputStride)
 
 #define CONTAINER_TYPES \
-  (detail::PyArray) (efl::BasicVector)
+  (visr::python::bindinghelpers::PyArray) (efl::BasicVector)
 
 #define REGISTER_CONVERSION_FUNCTION( R, PRODUCT ) \
   BOOST_PP_CAT( exportVector, BOOST_PP_SEQ_ELEM( 0, PRODUCT ))<BOOST_PP_SEQ_ELEM( 1, PRODUCT ), BOOST_PP_SEQ_ELEM( 2, PRODUCT ), BOOST_PP_SEQ_ELEM( 3, PRODUCT ) >( m );
@@ -127,7 +129,7 @@ void exportVectorConvertInputOutputStride( py::module & m )
 void exportVectorConversions( py::module & m)
 {
     BOOST_PP_SEQ_FOR_EACH_PRODUCT( REGISTER_CONVERSION_FUNCTION,\
-    (ALL_CONVERSION_FUNCTIONS)((detail::PyArray))\
+    (ALL_CONVERSION_FUNCTIONS)((visr::python::bindinghelpers::PyArray))\
     (VISR_EFL_CONVERSION_FUNCTION_ALL_TYPES)(VISR_EFL_CONVERSION_FUNCTION_ALL_TYPES))
 
     // BasicVectors are instantiated only for float types, therefor we restrict the conversion

@@ -1,6 +1,10 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#include "container_helpers.hpp"
+#include "check_error.hpp"
+
+#include <libefl/vector_functions.hpp>
+
+#include <python/libpythonbindinghelpers/container_access.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -27,7 +31,7 @@ void exportVectorZero( py::module & m )
   m.def( "vectorZero",
          []( Container<T> & dest, std::size_t numElements, std::size_t alignment )
 	 {
-	   T * const destPtr = detail::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
+	   T * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
 	   detail::checkError( visr::efl::vectorZero<T>( destPtr, numElements, alignment ) );
 	 }, py::arg("dest"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -38,7 +42,7 @@ void exportVectorFill( py::module & m )
   m.def( "vectorFill",
          []( const T value, Container<T> & dest, std::size_t numElements, std::size_t alignment )
 	 {
-	   T * const destPtr = detail::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
+	   T * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
 	   detail::checkError( visr::efl::vectorFill<T>( value, destPtr, numElements, alignment ) );
 	 }, py::arg("value"), py::arg("dest"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -49,8 +53,8 @@ void exportVectorCopy( py::module & m )
   m.def( "vectorCopy",
          []( Container<T> const & src, Container<T> & dest, std::size_t numElements, std::size_t alignment )
 	 {
-	   T const * const srcPtr = detail::ContainerAccess<Container, T >::constantPointer( src, numElements, "src" );
-	   T * const destPtr = detail::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
+	   T const * const srcPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( src, numElements, "src" );
+	   T * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
 	   detail::checkError( visr::efl::vectorCopy<T>( srcPtr, destPtr, numElements, alignment ) );
 	 }, py::arg("src"), py::arg("dest"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -62,7 +66,7 @@ void exportVectorRamp( py::module & m )
          []( Container<T> & dest, std::size_t numElements, T startVal, T endVal,
              bool startInclusive, bool endInclusive, std::size_t alignment )
 	 {
-	   T * const destPtr = detail::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
+	   T * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( dest, numElements, "dest" );
 	   detail::checkError( visr::efl::vectorRamp<T>( destPtr, numElements,
 						 startVal, endVal, startInclusive, endInclusive, alignment ) );
 	 }, py::arg("dest"), py::arg("numElements"), py::arg("startVal"), py::arg("endVal"),
@@ -76,9 +80,9 @@ void exportVectorAdd( py::module & m )
          []( Container<T> const & op1, Container<T> const & op2, Container<T> & result,
 	     std::size_t numElements, std::size_t alignment )
 	 {
-	   T const * const op1Ptr = detail::ContainerAccess<Container, T >::constantPointer( op1, numElements, "op1" );
-	   T const * const op2Ptr = detail::ContainerAccess<Container, T >::constantPointer( op2, numElements, "op2" );
-	   T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer( result, numElements, "result" );
+	   T const * const op1Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( op1, numElements, "op1" );
+	   T const * const op2Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( op2, numElements, "op2" );
+	   T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( result, numElements, "result" );
 	   detail::checkError( visr::efl::vectorAdd<T>( op1Ptr, op2Ptr, resultPtr, numElements, alignment ) );
 	 }, py::arg("op1"), py::arg("op2"), py::arg("result"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -95,8 +99,8 @@ void exportVectorAddInplace(py::module & m)
     [](Container<T> const & addend1, Container<T> & addend2Result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const addend1Ptr = detail::ContainerAccess<Container, T >::constantPointer(addend1, numElements, "addend1");
-    T * const addend2ResultPtr = detail::ContainerAccess<Container, T >::mutablePointer(addend2Result, numElements, "addend2Result");
+    T const * const addend1Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(addend1, numElements, "addend1");
+    T * const addend2ResultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(addend2Result, numElements, "addend2Result");
     detail::checkError(visr::efl::vectorAddInplace<T>(addend1Ptr, addend2ResultPtr, numElements, alignment));
   }, py::arg("addend1"), py::arg("addend2Result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -114,8 +118,8 @@ void exportVectorAddConstant(py::module & m)
     []( T constantValue, Container<T> const & addend, Container<T> & result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const addendPtr = detail::ContainerAccess<Container, T >::constantPointer(addend, numElements, "addend");
-    T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
+    T const * const addendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(addend, numElements, "addend");
+    T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
     detail::checkError(visr::efl::vectorAddConstant<T>(constantValue, addendPtr, resultPtr, numElements, alignment));
   }, py::arg("constantValue"), py::arg("addend"), py::arg("result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -132,7 +136,7 @@ void exportVectorAddConstantInplace(py::module & m)
     [](T constantValue, Container<T> & addendResult,
       std::size_t numElements, std::size_t alignment)
   {
-    T * const addendResultPtr = detail::ContainerAccess<Container, T >::mutablePointer(addendResult, numElements, "addendResult");
+    T * const addendResultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(addendResult, numElements, "addendResult");
     detail::checkError(visr::efl::vectorAddConstantInplace<T>(constantValue, addendResultPtr, numElements, alignment));
   }, py::arg("constantValue"), py::arg("addendResult"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -150,9 +154,9 @@ void exportVectorSubtract(py::module & m)
     [](Container<T> const & subtrahend, Container<T> const & minuend, Container<T> & result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const subtrahendPtr = detail::ContainerAccess<Container, T >::constantPointer(subtrahend, numElements, "op1");
-    T const * const minuendPtr = detail::ContainerAccess<Container, T >::constantPointer(minuend, numElements, "op2");
-    T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
+    T const * const subtrahendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(subtrahend, numElements, "op1");
+    T const * const minuendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(minuend, numElements, "op2");
+    T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
     detail::checkError(visr::efl::vectorSubtract<T>(subtrahendPtr, minuendPtr, resultPtr, numElements, alignment));
   }, py::arg("subtrahend"), py::arg("minuend"), py::arg("result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -169,8 +173,8 @@ void exportVectorSubtractInplace(py::module & m)
     [](Container<T> const & minuend, Container<T> & subtrahendResult,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const minuendPtr = detail::ContainerAccess<Container, T >::constantPointer(minuend, numElements, "addend1");
-    T * const subtrahendResultPtr = detail::ContainerAccess<Container, T >::mutablePointer(subtrahendResult, numElements, "addend2Result");
+    T const * const minuendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(minuend, numElements, "addend1");
+    T * const subtrahendResultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(subtrahendResult, numElements, "addend2Result");
     detail::checkError(visr::efl::vectorSubtractInplace<T>(minuendPtr, subtrahendResultPtr, numElements, alignment));
   }, py::arg("minuend"), py::arg("subtrahendResult"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -188,8 +192,8 @@ void exportVectorSubtractConstant(py::module & m)
     [](T constantMinuend, Container<T> const & subtrahend, Container<T> & result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const subtrahendPtr = detail::ContainerAccess<Container, T >::constantPointer(subtrahend, numElements, "subtrahend");
-    T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
+    T const * const subtrahendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(subtrahend, numElements, "subtrahend");
+    T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
     detail::checkError(visr::efl::vectorSubtractConstant<T>(constantMinuend, subtrahendPtr, resultPtr, numElements, alignment));
   }, py::arg("constantMinuend"), py::arg("subtrahend"), py::arg("result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -206,7 +210,7 @@ void exportVectorSubtractConstantInplace(py::module & m)
     [](T constantMinuend, Container<T> & subtrahendResult,
       std::size_t numElements, std::size_t alignment)
   {
-    T * const subtrahendResultPtr = detail::ContainerAccess<Container, T >::mutablePointer(subtrahendResult, numElements, "subtrahendResult");
+    T * const subtrahendResultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(subtrahendResult, numElements, "subtrahendResult");
     detail::checkError(visr::efl::vectorSubtractConstantInplace<T>(constantMinuend, subtrahendResultPtr, numElements, alignment));
   }, py::arg("constantMinuend"), py::arg("subtrahendResult"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -218,9 +222,9 @@ void exportVectorMultiply( py::module & m )
          []( Container<T> const & op1, Container<T> const & op2, Container<T> & result,
 	     std::size_t numElements, std::size_t alignment )
 	 {
-	   T const * const op1Ptr = detail::ContainerAccess<Container, T >::constantPointer( op1, numElements, "op1" );
-	   T const * const op2Ptr = detail::ContainerAccess<Container, T >::constantPointer( op2, numElements, "op2" );
-	   T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer( result, numElements, "result" );
+	   T const * const op1Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( op1, numElements, "op1" );
+	   T const * const op2Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( op2, numElements, "op2" );
+	   T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( result, numElements, "result" );
 	   detail::checkError( visr::efl::vectorMultiply<T>( op1Ptr, op2Ptr, resultPtr, numElements, alignment ) );
 	 }, py::arg("factor1"), py::arg("factor2"), py::arg("result"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -237,8 +241,8 @@ void exportVectorMultiplyInplace( py::module & m )
          []( Container<T> const & factor1, Container<T> & factor2Result,
              std::size_t numElements, std::size_t alignment )
            {
-             T const * const factor1Ptr = detail::ContainerAccess<Container, T >::constantPointer( factor1, numElements, "factor1" );
-             T * const factor2ResultPtr = detail::ContainerAccess<Container, T >::mutablePointer( factor2Result, numElements, "factor2Result" );
+             T const * const factor1Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( factor1, numElements, "factor1" );
+             T * const factor2ResultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( factor2Result, numElements, "factor2Result" );
              detail::checkError( visr::efl::vectorMultiplyInplace<T>( factor1Ptr, factor2ResultPtr, numElements, alignment ) );
            }, py::arg("factor1"), py::arg("factor2Result"), py::arg("numElements"), py::arg("alignment")=0 );
 }
@@ -256,8 +260,8 @@ void exportVectorMultiplyConstant(py::module & m)
     [](T constantValue, Container<T> const & factor, Container<T> & result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const factorPtr = detail::ContainerAccess<Container, T >::constantPointer(factor, numElements, "factor");
-    T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
+    T const * const factorPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor, numElements, "factor");
+    T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(result, numElements, "result");
     detail::checkError(visr::efl::vectorMultiplyConstant<T>(constantValue, factorPtr, resultPtr, numElements, alignment));
   }, py::arg("constantValue"), py::arg("factor"), py::arg("result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -274,7 +278,7 @@ void exportVectorMultiplyConstantInplace(py::module & m)
     [](T constantValue, Container<T> & factorResult,
       std::size_t numElements, std::size_t alignment)
   {
-    T * const factorResultPtr = detail::ContainerAccess<Container, T >::mutablePointer(factorResult, numElements, "factorResult");
+    T * const factorResultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(factorResult, numElements, "factorResult");
     detail::checkError(visr::efl::vectorMultiplyConstantInplace<T>( constantValue, factorResultPtr, numElements, alignment));
   }, py::arg("constantValue"), py::arg("factorResult"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -294,10 +298,10 @@ void exportVectorMultiplyAdd(py::module & m)
       Container<T> const & addend, Container<T> & result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const factor1Ptr = detail::ContainerAccess<Container, T >::constantPointer(factor1, numElements, "factor1");
-    T const * const factor2Ptr = detail::ContainerAccess<Container, T >::constantPointer(factor2, numElements, "factor2");
-    T const * const addendPtr = detail::ContainerAccess<Container, T >::constantPointer(addend, numElements, "addend");
-    T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer(result, numElements, "");
+    T const * const factor1Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor1, numElements, "factor1");
+    T const * const factor2Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor2, numElements, "factor2");
+    T const * const addendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(addend, numElements, "addend");
+    T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(result, numElements, "");
     detail::checkError(visr::efl::vectorMultiplyAdd<T>(factor1Ptr, factor2Ptr, addendPtr, resultPtr, numElements, alignment));
   }, py::arg("factor1"), py::arg("factor2"), py::arg("addend"), py::arg("result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -316,9 +320,9 @@ void exportVectorMultiplyAddInplace(py::module & m)
        Container<T> & accumulator,
        std::size_t numElements, std::size_t alignment)
   {
-    T const * const factor1Ptr = detail::ContainerAccess<Container, T >::constantPointer(factor1, numElements, "factor1");
-    T const * const factor2Ptr = detail::ContainerAccess<Container, T >::constantPointer(factor2, numElements, "factor2");
-    T * const accumulatorPtr = detail::ContainerAccess<Container, T >::mutablePointer(accumulator, numElements, "accumulator");
+    T const * const factor1Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor1, numElements, "factor1");
+    T const * const factor2Ptr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor2, numElements, "factor2");
+    T * const accumulatorPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(accumulator, numElements, "accumulator");
     detail::checkError(visr::efl::vectorMultiplyAddInplace<T>(factor1Ptr, factor2Ptr, accumulatorPtr, numElements, alignment));
   }, py::arg("factor1"), py::arg("factor2"), py::arg("accumulator"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -337,9 +341,9 @@ void exportVectorMultiplyConstantAdd(py::module & m)
     [](T constFactor, Container<T> const & factor, Container<T> const & addend, Container<T> & result,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const factorPtr = detail::ContainerAccess<Container, T >::constantPointer(factor, numElements, "factor");
-    T const * const addendPtr = detail::ContainerAccess<Container, T >::constantPointer(addend, numElements, "addend");
-    T * const resultPtr = detail::ContainerAccess<Container, T >::mutablePointer(result, numElements, "");
+    T const * const factorPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor, numElements, "factor");
+    T const * const addendPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(addend, numElements, "addend");
+    T * const resultPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(result, numElements, "");
     detail::checkError(visr::efl::vectorMultiplyConstantAdd<T>(constFactor, factorPtr, addendPtr, resultPtr, numElements, alignment));
   }, py::arg("constantFactor"), py::arg("factor"), py::arg("addend"), py::arg("result"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -357,8 +361,8 @@ void exportVectorMultiplyConstantAddInplace(py::module & m)
     [](T constFactor, Container<T> const & factor,Container<T> & accumulator,
       std::size_t numElements, std::size_t alignment)
   {
-    T const * const factorPtr = detail::ContainerAccess<Container, T >::constantPointer(factor, numElements, "factor");
-    T * const accumulatorPtr = detail::ContainerAccess<Container, T >::mutablePointer(accumulator, numElements, "accumulator");
+    T const * const factorPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(factor, numElements, "factor");
+    T * const accumulatorPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(accumulator, numElements, "accumulator");
     detail::checkError(visr::efl::vectorMultiplyConstantAddInplace<T>(constFactor, factorPtr, accumulatorPtr, numElements, alignment));
   }, py::arg("constantValue"), py::arg("factor"), py::arg("accumulator"), py::arg("numElements"), py::arg("alignment") = 0);
 }
@@ -381,9 +385,9 @@ void exportVectorRampScaling(py::module & m)
       T rampGain,
       std::size_t numElements, bool accumulate, std::size_t alignment)
   {
-    T const * const inputPtr = detail::ContainerAccess<Container, T >::constantPointer(input, numElements, "input");
-    T const * const rampPtr = detail::ContainerAccess<Container, T >::constantPointer( ramp, numElements, "ramp`");
-    T * const outputPtr = detail::ContainerAccess<Container, T >::mutablePointer(output, numElements, "output");
+    T const * const inputPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer(input, numElements, "input");
+    T const * const rampPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( ramp, numElements, "ramp`");
+    T * const outputPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer(output, numElements, "output");
     detail::checkError(visr::efl::vectorRampScaling<T>(inputPtr, rampPtr, outputPtr,
       baseGain, rampGain, numElements, accumulate, alignment));
   }, py::arg("input"), py::arg("ramp"), py::arg("output"), py::arg( "baseGain" ),
@@ -404,7 +408,7 @@ void exportVectorRampScaling(py::module & m)
  * The container types to be supported by the bindings.
  */
 #define CONTAINER_TYPES \
-  (detail::PyArray) (efl::BasicVector)
+  (visr::python::bindinghelpers::PyArray) (efl::BasicVector)
 
 /**
  * The numeric data types
@@ -424,7 +428,7 @@ void exportVectorFunctions( py::module & m)
   BOOST_PP_SEQ_FOR_EACH_PRODUCT( REGISTER_VECTOR_FUNCTION, (ALL_VECTOR_FUNCTIONS)(CONTAINER_TYPES)(STANDARD_NUMERIC_DATATYPES))
 
   // Register vectorCopy() for a number of additional datatypes (only for py::array_t)
-  BOOST_PP_SEQ_FOR_EACH_PRODUCT(REGISTER_VECTOR_FUNCTION, ((Copy))((detail::PyArray))\
+  BOOST_PP_SEQ_FOR_EACH_PRODUCT(REGISTER_VECTOR_FUNCTION, ((Copy))((visr::python::bindinghelpers::PyArray))\
       ((long double)(int8_t)(uint8_t)(int16_t)(uint16_t)(int32_t)(uint32_t)))
 }
 
