@@ -5,8 +5,11 @@ biquad_coefficient.cpp
 core_convolver_uniform.cpp
 crossfading_convolver_uniform.cpp
 filter_routing.cpp
+fractional_delay_base.cpp
+fractional_delay_factory.cpp
 interpolating_convolver_uniform.cpp
 interpolation_parameter.cpp
+lagrange_interpolator.cpp
 multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 parametric_iir_coefficient.cpp
@@ -41,3 +44,5 @@ install(TARGETS ${PROJECT_NAME}
         EXPORT VISR_exports
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
+
+add_subdirectory( test )
