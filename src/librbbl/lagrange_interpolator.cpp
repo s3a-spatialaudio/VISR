@@ -86,7 +86,7 @@ void LagrangeInterpolator<SampleType, order>::interpolate( SampleType const * ba
   {
     mCoeffCalculator.calculateCoefficients( mIntersamplePositions[sampleIdx],
                                             &lagrangeCoefficients[0] );
-    result[sampleIdx] = mGains[sampleIdx] * std::inner_product( lagrangeCoefficients.begin(), lagrangeCoefficients.end(),
+    result[sampleIdx] = mGains[sampleIdx] * std::inner_product( lagrangeCoefficients.rbegin(), lagrangeCoefficients.rend(),
                                                                 basePointer + mBaseOffsets[sampleIdx],
                                                                 static_cast<SampleType>(0.0) );
   }
