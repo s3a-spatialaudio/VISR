@@ -5,7 +5,7 @@ add_library( pythonbindinghelpers INTERFACE )
 
 # Define the header files to be installed.
 SET( PUBLIC_HEADERS
-  container_helpers.hpp
+  container_access.hpp
   ndarray_from_basic_vector.hpp
   matrix_from_ndarray.hpp
   vector_from_ndarray.hpp
