@@ -21,11 +21,19 @@ void exportPositionDecoder( pybind11::module & m )
 {
   pybind11::class_<visr::rcl::PositionDecoder, visr::AtomicComponent >( m, "PositionDecoder" )
     .def( pybind11::init<visr::SignalFlowContext const &, char const *, visr::CompositeComponent*,
-          panning::XYZ const &, float, float, float, float>(),
+          pml::ListenerPosition::PositionType const &,
+          pml::ListenerPosition::OrientationYPR const &>(),
           pybind11::arg( "context" ), pybind11::arg( "name" ),
           pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
-          pybind11::arg("offset"),
-          pybind11::arg("qw")=0.0f, pybind11::arg("qx")=0.0f,pybind11::arg("qy")=0.0f,pybind11::arg("qz")=0.0f )
+          pybind11::arg("positionOffset") = pml:: ListenerPosition::OrientationQuaternion(),
+          pybind11::arg("orientationRotation") = pml:: ListenerPosition::OrientationQuaternion() )
+    .def( pybind11::init<visr::SignalFlowContext const &, char const *, visr::CompositeComponent*,
+          pml::ListenerPosition::PositionType const &,
+          pml::ListenerPosition::OrientationQuaternion const &>(),
+          pybind11::arg( "context" ), pybind11::arg( "name" ),
+          pybind11::arg("parent") = static_cast<visr::CompositeComponent*>(nullptr),
+          pybind11::arg("positionOffset") = pml:: ListenerPosition::OrientationQuaternion(),
+          pybind11::arg("orientationRotation") )
   ;
 }
 

@@ -21,29 +21,33 @@ namespace visr
 namespace rcl
 {
 
-  PositionDecoder::PositionDecoder( SignalFlowContext const & context,
-                                    char const * name,
-                                    CompositeComponent * parent,
-                                    panning::XYZ const &offsetKinect,
-                                    float qw /*=1.0f*/,
-                                    float qx /*= 0.0f*/,
-                                    float qy /*= 0.0f*/,
-                                    float qz /*= 0.0f*/ )
-  : AtomicComponent( context, name, parent )
-  , mDatagramInput( "messageInput", *this, pml::EmptyParameterConfig() )
-  , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )
+PositionDecoder::PositionDecoder( SignalFlowContext const & context,
+  char const * name,
+  CompositeComponent * parent,
+  pml::ListenerPosition::PositionType const & positionOffset
+   /*= pml:: ListenerPosition::PositionType()*/,
+  pml::ListenerPosition::OrientationQuaternion const & orientationRotation
+   /* = pml:: ListenerPosition::OrientationQuaternion()*/ )
+ : AtomicComponent( context, name, parent )
+ , mDatagramInput( "messageInput", *this, pml::EmptyParameterConfig() )
+ , mPositionOutput( "positionOutput", *this, pml::EmptyParameterConfig() )
+ , cOffsetPosition( positionOffset )
+ , cOrientationRotation( orientationRotation )
 {
-    mOffsetKinect = offsetKinect;
-    mQw = qw;
-    mQx = qx;
-    mQy = qy;
-    mQz = qz;
+
 }
 
-PositionDecoder::~PositionDecoder()
+PositionDecoder::PositionDecoder( SignalFlowContext const & context,
+  char const * name,
+  CompositeComponent * parent,
+  pml:: ListenerPosition::PositionType const & positionOffset,
+  pml:: ListenerPosition::OrientationYPR const & orientationRotation )
+ : PositionDecoder( context, name, parent, positionOffset, 
+   pml::ypr2Quaternion( orientationRotation ) )
 {
 }
 
+PositionDecoder::~PositionDecoder() = default;
 
 namespace // unnamed
 {
@@ -112,22 +116,9 @@ void PositionDecoder::process()
 
 pml::ListenerPosition PositionDecoder::translatePosition( const pml::ListenerPosition &pos )
 {
-#if 0
-  {
-    std::array <float, 3> u{ { mQx, mQy, mQz } }; // the ijk components of the quaternion
-
-    std::array <float, 3> v{ { pos.x(), pos.y(), pos.z() } }; //the vector to rotate
-
-
-    // Extract the scalar part of the quaternion
-    float s = mQw; //the quaternion w components
-
-    // Do the math
-    2.0f * dot(u, v) * u + (s*s - dot(u, u)) * v + 2.0f * s * cross(u, v);
-  }
-#endif
-
-  return pml::ListenerPosition( -pos.z() + mOffsetKinect.x, -pos.x() + mOffsetKinect.y, pos.y() + mOffsetKinect.z );
+  pml::ListenerPosition res( pos );
+  res.transform( cOrientationRotation, cOffsetPosition );
+  return res;
 }
 
 } // namespace rcl
