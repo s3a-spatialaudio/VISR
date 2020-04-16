@@ -2,17 +2,23 @@
 
 #include "listener_position.hpp"
 
-#include <libvisr/parameter_factory.hpp>
+// #include <libvisr/parameter_factory.hpp>
 
+#include <libefl/degree_radian_conversion.hpp>
+
+#include <boost/math/constants/constants.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <ciso646>
 #include <cmath>
+#include <sstream>
+#include <stdexcept>
 
 namespace visr
 {
 namespace pml
 {
-
-const ListenerPosition::OrientationQuaternion
- cMpyIdentityQuaternion{ 1.0f, 0.0f, 0.0f, 0.0f };
 
 // Note: Conversion between Euler angles and quaternions inspired by
 // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
@@ -30,10 +36,10 @@ ypr2Quaternion( ListenerPosition::Coordinate yaw,
   T const cr = std::cos(roll * 0.5);
   T const sr = std::sin(roll * 0.5);
   return ListenerPosition::OrientationQuaternion{
+    cy * cp * cr + sy * sp * sr, // r component
     cy * cp * sr - sy * sp * cr, // x component
     sy * cp * sr + cy * sp * cr, // y component
-    sy * cp * cr - cy * sp * sr, // z component
-    cy * cp * cr + sy * sp * sr  // r component
+    sy * cp * cr - cy * sp * sr  // z component
   };
 }
 
@@ -44,24 +50,31 @@ ListenerPosition::OrientationQuaternion ypr2Quaternion( ListenerPosition::Orient
 
 ListenerPosition::Coordinate yawFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
 {
+  // yaw = atan2( 2*(q.w*q.z+q.x*q.y), 1-2*(q.y * q.y + q.z * q.z) )
   using T = ListenerPosition::Coordinate;
-  return std::atan2( static_cast<T>(2.0)*(q.R_component_4()*q.R_component_3()
-    +q.R_component_1()*q.R_component_2()),
-   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_2()*q.R_component_2()
-     +q.R_component_3()*q.R_component_3()));
+  return std::atan2( static_cast<T>(2.0)*(q.R_component_1()*q.R_component_4()
+    +q.R_component_2()*q.R_component_3()),
+   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_3()*q.R_component_3()
+     +q.R_component_4()*q.R_component_4()));
 }
 
 ListenerPosition::Coordinate pitchFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
 {
   using T = ListenerPosition::Coordinate;
-  return std::asin( static_cast<T>(2.0)*(q.R_component_4()*q.R_component_2()-q.R_component_3()*q.R_component_1()) );
+  T const arg = static_cast<T>(2.0)*(q.R_component_1()*q.R_component_3()-q.R_component_4()*q.R_component_2());
+  // Check for 'out of range' arguments. 
+  if( std::abs(arg) >= static_cast<T>(1.0) )
+  {
+    return std::copysign( boost::math::constants::half_pi<T>(), arg );
+  }
+  return std::asin( arg );
 }
 
 ListenerPosition::Coordinate rollFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
 {
   using T = ListenerPosition::Coordinate;
-  return std::atan2( static_cast<T>(2.0)*(q.R_component_4()*q.R_component_1()+q.R_component_2()*q.R_component_3()),
-   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_1()*q.R_component_1()+q.R_component_2()*q.R_component_2()));
+  return std::atan2( static_cast<T>(2.0)*(q.R_component_1()*q.R_component_2()+q.R_component_3()*q.R_component_4()),
+   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_2()*q.R_component_2()+q.R_component_3()*q.R_component_3()));
 }
 
 ListenerPosition::OrientationYPR yprFromQuaternion( ListenerPosition::OrientationQuaternion const & quat )
@@ -110,6 +123,22 @@ ListenerPosition::ListenerPosition( ListenerPosition && rhs ) = default;
 ListenerPosition & ListenerPosition::operator=( ListenerPosition const & rhs ) = default;
 
 ListenerPosition & ListenerPosition::operator=( ListenerPosition && rhs ) = default;
+
+/*static*/ ListenerPosition
+ListenerPosition::fromJson( std::istream & stream )
+{
+  ListenerPosition res;
+  res.parseJson( stream );
+  return res;
+}
+
+/*static*/ ListenerPosition
+ListenerPosition::fromJson( std::string const & str )
+{
+  ListenerPosition res;
+  res.parseJson( str );
+  return res;
+}
 
 ListenerPosition::~ListenerPosition() = default;
 
@@ -195,8 +224,8 @@ void ListenerPosition::translate( ListenerPosition::PositionType const translati
 
 void ListenerPosition::rotate( ListenerPosition::OrientationQuaternion const & rotation )
 {
-  OrientationQuaternion const posQuat{ mPosition[0], mPosition[1], mPosition[2], 0.0f };
-  OrientationQuaternion res = rotation * posQuat * (-rotation); 
+  OrientationQuaternion const posQuat{ 0.0f, mPosition[0], mPosition[1], mPosition[2] };
+  OrientationQuaternion res = rotation * posQuat * conj(rotation); 
   mPosition[0] = res.R_component_2();
   mPosition[1] = res.R_component_3();
   mPosition[2] = res.R_component_4();
@@ -208,36 +237,12 @@ void ListenerPosition::rotateOrientation( ListenerPosition::OrientationQuaternio
   mOrientation = rotation * mOrientation;
 }
 
-
-#if 0
-void ListenerPosition::setOrientationYPR( Coordinate yaw, Coordinate pitch, Coordinate roll )
+void ListenerPosition::transform(  ListenerPosition::OrientationQuaternion const & rotation,
+  ListenerPosition::PositionType translation )
 {
-  mOrientation[0] = yaw;
-  mOrientation[1] = pitch;
-  mOrientation[2] = roll;
+  rotate( rotation );
+  translate( translation );
 }
-
-void ListenerPosition::setYaw( Coordinate yaw )
-{
-  mOrientation[0] = yaw;
-}
-
-void ListenerPosition::setPitch( Coordinate pitch )
-{
-  mOrientation[1] = pitch;
-}
-
-void ListenerPosition::setRoll( Coordinate roll )
-{
-  mOrientation[2] = roll;
-}
-
-
-void ListenerPosition::setOrientation( OrientationType const & orientation )
-{
-  mOrientation = orientation;
-}
-#endif
 
 void ListenerPosition::setTimeNs( TimeType timeNs )
 {
@@ -247,6 +252,93 @@ void ListenerPosition::setTimeNs( TimeType timeNs )
 void ListenerPosition::setFaceID( IdType faceID )
 {
   mFaceID = faceID;
+}
+
+
+void ListenerPosition::parseJson( std::istream & stream )
+{
+  namespace pt = boost::property_tree;
+  pt::ptree tree;
+  pt::read_json( stream, tree );
+  Coordinate const x = tree.get<Coordinate>( "x", 0.0f );
+  Coordinate const y = tree.get<Coordinate>( "y", 0.0f );
+  Coordinate const z = tree.get<Coordinate>( "z", 0.0f );
+  if( tree.count( "orientation" ) > 0 )
+  {
+    pt::ptree const & orTree = tree.get_child( "orientation" );
+    bool const hasQuat{ orTree.count( "quaternion" ) > 0 };
+    bool const hasYpr{ (orTree.count( "yaw" ) > 0)
+      or (orTree.count( "pitch" ) > 0) or (orTree.count( "roll" ) > 0) };
+    if( hasQuat == hasYpr )
+    {
+      throw std::invalid_argument( "ListenerPosition::parseJson():"
+        " Orientation must be provided either as yaw,pitch,roll or as a quaternion" );
+    }
+    if( hasQuat )
+    {
+      pt::ptree const & quatTree = orTree.get_child( "quaternion" );
+      Coordinate const qw = quatTree.get<Coordinate>( "w", 1.0f );
+      Coordinate const qx = quatTree.get<Coordinate>( "x", 0.0f );
+      Coordinate const qy = quatTree.get<Coordinate>( "y", 0.0f );
+      Coordinate const qz = quatTree.get<Coordinate>( "z", 0.0f );
+      setOrientationQuaternion( OrientationQuaternion( qw, qx, qy, qz ) );
+    }
+    else
+    {
+      Coordinate const yaw = efl::degree2radian( orTree.get<Coordinate>( "yaw", 0.0f ));
+      Coordinate const pitch = efl::degree2radian( orTree.get<Coordinate>( "pitch", 0.0f ));
+      Coordinate const roll = efl::degree2radian( orTree.get<Coordinate>( "roll", 0.0f ));
+      setOrientationYPR( yaw, pitch, roll );
+    }
+  }
+  else
+  {
+    // set default rotation
+    setOrientationQuaternion( OrientationQuaternion() );
+  }
+  set( x, y, z );
+}
+
+void ListenerPosition::parseJson( std::string const & str )
+{
+  std::stringstream stream{ str };
+  parseJson( stream );
+}
+
+void ListenerPosition::writeJson( std::ostream & stream, bool ypr /*= false*/, bool prettyPrint /*=false*/ ) const
+{
+  namespace pt = boost::property_tree;
+  pt::ptree tree;
+  tree.put<Coordinate>( "x", x() );
+  tree.put<Coordinate>( "y", y() );
+  tree.put<Coordinate>( "z", z() );
+  pt::ptree orientationTree;
+  if( ypr )
+  {
+    OrientationYPR const ypr{ orientationYPR() };
+    orientationTree.put<Coordinate>( "yaw", efl::radian2degree( ypr[0] ) );
+    orientationTree.put<Coordinate>( "pitch", efl::radian2degree( ypr[1] ) );
+    orientationTree.put<Coordinate>( "roll", efl::radian2degree( ypr[2] ) );
+  }
+  else
+  {
+    pt::ptree quatTree;
+    OrientationQuaternion const quat{ orientationQuaternion() };
+    quatTree.put<Coordinate>( "w", quat.R_component_1() );
+    quatTree.put<Coordinate>( "x", quat.R_component_2() );
+    quatTree.put<Coordinate>( "y", quat.R_component_3() );
+    quatTree.put<Coordinate>( "z", quat.R_component_4() );
+    orientationTree.add_child( "quaternion", quatTree );
+  }
+  tree.add_child( "orientation", orientationTree );
+  pt::write_json( stream, tree, prettyPrint );
+}
+
+std::string ListenerPosition::writeJson( bool ypr /*= false*/, bool prettyPrint /*=false*/ ) const
+{
+  std::stringstream stream;
+  writeJson( stream, ypr );
+  return stream.str();
 }
 
 std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)

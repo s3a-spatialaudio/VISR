@@ -15,7 +15,8 @@
 #include <array>
 #include <cstdint>
 #include <iosfwd>
-#include <istream>
+#include <iosfwd>
+#include <string>
 
 namespace visr
 {
@@ -111,6 +112,10 @@ public:
 
   ListenerPosition( PositionType const & position, OrientationQuaternion const & orientation );
 
+  static ListenerPosition fromJson( std::istream & stream );
+
+  static ListenerPosition fromJson( std::string const & str );
+
   /**
    * Destructor (virtual)
    */
@@ -204,26 +209,6 @@ public:
 
   OrientationQuaternion const & orientationQuaternion() const;
 
-#if 0
-  /**
-   * Set the yaw angle of the listener's orientation
-   * @param yaw New yaw angle [radian]
-   */
-  void setYaw( Coordinate yaw );
-
-  /**
-  * Set the pitch angle of the listener's orientation
-  * @param pitch New pitch angle [radian]
-  */
-  void setPitch( Coordinate pitch );
-
-  /**
-  * Set the roll angle of the listener's orientation
-  * @param roll New roll angle [radian]
-  */
-  void setRoll( Coordinate roll );
-#endif
-
   /**
   * Set the listener's orientation using scalar values.
   * @param yaw New yaw angle [radian]
@@ -282,6 +267,14 @@ public:
   */
   void setFaceID( IdType faceID );
 
+  void parseJson( std::istream & stream );
+
+  void parseJson( std::string const & str );
+
+  void writeJson( std::ostream & stream, bool ypr = false, bool prettyPrint = false ) const;
+
+  std::string writeJson( bool ypr = false, bool prettyPrint = false ) const;
+
 private:
   /**
    * Cartesian listener coordinates as a 3D vector [xyz], in [m]
@@ -307,11 +300,10 @@ private:
 };
 
 /**
- * Multiplicative identity element
+ * Quaternion functions.
+ * @todo Move to a different location and out of the pml namespace.
  */
-extern const ListenerPosition::OrientationQuaternion
-cMpyIdentityQuaternion;
-
+//@{
 VISR_PML_LIBRARY_SYMBOL 
 ListenerPosition::OrientationQuaternion
 ypr2Quaternion( ListenerPosition::Coordinate yaw,
@@ -334,6 +326,7 @@ VISR_PML_LIBRARY_SYMBOL
 ListenerPosition::OrientationYPR yprFromQuaternion( ListenerPosition::OrientationQuaternion const & quat );
 
 VISR_PML_LIBRARY_SYMBOL std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
+//@}
 
 } // namespace pml
 } // namespace visr
