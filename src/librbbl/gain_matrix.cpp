@@ -147,7 +147,7 @@ void GainMatrix<ElementType>::setGainsInternal( efl::BasicMatrix<ElementType> co
         }
         else
         {
-          mPreviousGains.copy( mNextGains );
+          mPreviousGains( outputIdx, inputIdx ) = mNextGains( outputIdx, inputIdx );
         }
       }
     }
