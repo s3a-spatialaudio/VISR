@@ -297,6 +297,8 @@ void ListenerPosition::parseJson( std::istream & stream )
     setOrientationQuaternion( OrientationQuaternion() );
   }
   set( x, y, z );
+  setTimeNs( tree.get<pml::ListenerPosition::TimeType>( "timeStamp", 0 ) );
+  setFaceID( tree.get<pml::ListenerPosition::IdType>( "faceId", 0 ) );
 }
 
 void ListenerPosition::parseJson( std::string const & str )
@@ -331,6 +333,14 @@ void ListenerPosition::writeJson( std::ostream & stream, bool ypr /*= false*/, b
     orientationTree.add_child( "quaternion", quatTree );
   }
   tree.add_child( "orientation", orientationTree );
+  if( timeNs() != 0 )
+  {
+    tree.put<pml::ListenerPosition::TimeType>( "timeStamp", this->timeNs() );
+  }
+  if( faceID() != 0 )
+  {
+    tree.put<pml::ListenerPosition::IdType>( "faceId", faceID() );
+  }
   pt::write_json( stream, tree, prettyPrint );
 }
 

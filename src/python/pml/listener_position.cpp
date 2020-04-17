@@ -109,6 +109,7 @@ void exportListenerPosition( pybind11::module & m)
     .def_property( "orientationYPR", &ListenerPosition::orientationYPR, 
                    static_cast<void(ListenerPosition::*)(ListenerPosition::OrientationYPR const &)>(&ListenerPosition::setOrientationYPR) )
     .def_property( "faceId", &ListenerPosition::faceID, &ListenerPosition::setFaceID )
+    .def_property( "timeStamp", &ListenerPosition::timeNs, &ListenerPosition::setTimeNs )
     .def( "translate", &ListenerPosition::translate, py::arg( "translationVector" ) )
     .def( "rotate", &ListenerPosition::rotate, py::arg( "rotationQuaternion" ) )
     .def( "rotateOrientation", &ListenerPosition::rotateOrientation, py::arg( "rotationQuaternion" ) )
