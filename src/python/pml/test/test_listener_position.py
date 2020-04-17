@@ -197,19 +197,50 @@ def test_transformation():
     assert np.linalg.norm( yprNew - resRotRefYPR ) < tol
 
 def test_parseJson():
-    initStrQuat = """{"x":"0.5","y":"-0.25","z":"-0.3",
-    "orientation":{"quaternion":{"w":"0.871836424","x":"-0.285320133","y":"0.335270375","z":"0.214679867"}}}"""
+    initStrQuat = """{"x":0.5,"y":-0.25,"z":-0.3,
+    "orientation":{"quaternion":{"w":0.871836424,"x":-0.285320133,"y":0.335270375,"z":0.214679867}}}"""
     lp = pml.ListenerPosition()
+    lp.faceId = 27 # Set to non-default values
+    lp.timeStamp = 321 # Dito
     lp.parseJson( initStrQuat )
+
+    posRef = np.asarray( [0.5,-0.25,-0.3 ] );
+    quatRef = np.asarray( [0.871836424, -0.285320133, 0.335270375, 0.214679867] )
+
+    assert np.linalg.norm( lp.position - posRef ) < 1e-6
+    assert np.linalg.norm( np.asarray(lp.orientationQuaternion.data)
+     - np.asarray(quatRef) ) < 1e-6
+    # Check for default values
+    assert lp.faceId == 0
+    assert lp.timeStamp == 0
 
 
 def test_fromJson():
+    posRef = np.asarray( [0.5,-0.25,-0.3 ] );
+    quatRef = pml.ListenerPosition.OrientationQuaternion(
+      0.871836424, -0.285320133, 0.335270375, 0.214679867 )
+
+    initYPR = np.rad2deg(pml.yprFromQuaternion(quatRef))
+
+    initStr = """{"x":%f,"y":%f,"z":%f,
+    "orientation":{ "yaw":%f,"pitch": %f,"roll": %f}, "faceId": 13, "timeStamp": 98765 }"""\
+       % (posRef[0], posRef[1], posRef[2], initYPR[0], initYPR[1], initYPR[2])
+    lp = pml.ListenerPosition()
+    lp.parseJson( initStr )
+
+    assert np.linalg.norm( lp.position - posRef ) < 1e-6
+    assert np.linalg.norm( np.asarray(lp.orientationQuaternion.data)
+      - np.asarray(quatRef.data) ) < 1e-6
+    assert lp.faceId == 13
+    assert lp.timeStamp == 98765
+
     initStr = """{}"""
 
 def test_writeJson():
     posInit=np.array( [ 0.3, -0.25, 1.35 ])
     yprInit=np.deg2rad(np.array([15, 45, -30]))
     lp=pml.ListenerPosition(posInit, yprInit )
+    lp.faceId = 1
     msg= lp.writeJson(ypr=False)
 
     rep = json.loads( msg )
@@ -221,11 +252,9 @@ def test_writeJson():
     assert "quaternion" in rep["orientation"].keys()
     quat = rep["orientation"]["quaternion"]
 
-    quatRead =
-
-
-
-
+    quatRead = np.asarray([quat["w"], quat["x"], quat["y"], quat["z"]], dtype=np.float)
+    quatRef = pml.ypr2Quaternion(yprInit)
+    assert np.linalg.norm(quatRead-np.asarray(quatRef.data)) < 1e-5
 
 # Allow running the tests as a script (as opposed to through pytest)
 if __name__ == "__main__":

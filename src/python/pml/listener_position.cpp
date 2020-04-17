@@ -31,13 +31,13 @@ void exportListenerPosition( pybind11::module & m)
 
   py::class_<ListenerPosition::OrientationQuaternion>( lp, "OrientationQuaternion" )
     .def( py::init<>() )
-    .def( py::init( []( ListenerPosition::Coordinate r,
+    .def( py::init( []( ListenerPosition::Coordinate w,
       ListenerPosition::Coordinate x,
       ListenerPosition::Coordinate y,
       ListenerPosition::Coordinate z ){
-      return ListenerPosition::OrientationQuaternion{ x, y, z, r };
-    } ), py::arg("r"), py::arg("x"), py::arg("y"), py::arg("z") )
-    .def_property_readonly( "r", &ListenerPosition::OrientationQuaternion::R_component_1 )
+      return ListenerPosition::OrientationQuaternion{ w, x, y, z };
+    } ), py::arg("w"), py::arg("x"), py::arg("y"), py::arg("z") )
+    .def_property_readonly( "w", &ListenerPosition::OrientationQuaternion::R_component_1 )
     .def_property_readonly( "x", &ListenerPosition::OrientationQuaternion::R_component_2 )
     .def_property_readonly( "y", &ListenerPosition::OrientationQuaternion::R_component_3 )
     .def_property_readonly( "z", &ListenerPosition::OrientationQuaternion::R_component_4 )
