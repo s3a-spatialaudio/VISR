@@ -25,13 +25,14 @@ class AudioSignalFlow;
 
 
 /**
- * Base class for signal flows, i.e., graphs of connected audio
- * components which perform an audio signal processing operation.
- * This base class provides the infrastructure for setting up the
- * graphs and for transferring the input and output samples.
- * For the audio processing, this class provides a callback interface
- * that must be called in regular intervals (i.e., for a fixed number
- * of samples consumed and generated, respectively).
+ * Class for collecting and calculating runtime performance statistics 
+ * on the per-component level.
+ * A RuntimeProfiler is instantiated in an AudioSignalFlow instance 
+ * if profiling support is active in the build and it is activated 
+ * for the AudioSignalFlow instance.
+ * Profiling data is either calculated in the form of running mean and variance,
+ * or accessible as raw data, that is execution times for each
+ * iteration.
  */
 class VISR_RRL_LIBRARY_SYMBOL RuntimeProfiler
 {
