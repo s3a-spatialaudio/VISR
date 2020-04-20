@@ -36,7 +36,7 @@ ypr2Quaternion( ListenerPosition::Coordinate yaw,
   T const cr = std::cos(roll * 0.5);
   T const sr = std::sin(roll * 0.5);
   return ListenerPosition::OrientationQuaternion{
-    cy * cp * cr + sy * sp * sr, // r component
+    cy * cp * cr + sy * sp * sr, // w component
     cy * cp * sr - sy * sp * cr, // x component
     sy * cp * sr + cy * sp * cr, // y component
     sy * cp * cr - cy * sp * sr  // z component
