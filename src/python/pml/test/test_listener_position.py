@@ -75,6 +75,40 @@ def test_quaternionInit():
     assert np.abs( lp.pitch - yprInit[1] ) < tol
     assert np.abs( lp.roll - yprInit[2] ) < tol
 
+def test_rotationVectorInit():
+    posInit = np.array( [ 0.3, -0.25, 1.35 ])
+    yprInit = np.deg2rad(np.array([15, -45, -90]))
+
+    rotInit = Rotation.from_euler('ZYX', yprInit )
+    rotVecInitRaw = rotInit.as_rotvec()
+    rotVecInitAngle = np.linalg.norm(rotVecInitRaw)
+    rotVecInit = 1.0/rotVecInitAngle * rotVecInitRaw
+
+    initQuat = pml.ypr2Quaternion( yprInit )
+
+    lp = pml.ListenerPosition.fromRotationVector( posInit, rotVecInit,
+                                                 rotVecInitAngle )
+
+    pos = lp.position
+    assert np.linalg.norm( pos - posInit ) < np.finfo(np.float32).eps
+
+    tol = 4*np.finfo(np.float32).eps # Reasonable error limit
+
+    ypr = lp.orientationYPR
+    assert np.linalg.norm( ypr - yprInit ) < tol
+
+    lpQuat = np.asarray(lp.orientationQuaternion.data)
+    # Ensure the w component is positive because quaternions
+    # q and -q represent the same orientation.
+    if lpQuat[0] < 0:
+        lpQuat = -1.0 * lpQuat
+    assert np.linalg.norm( lpQuat - np.asarray(initQuat.data) ) < tol
+
+    assert np.abs( lp.yaw - yprInit[0] ) < tol
+    assert np.abs( lp.pitch - yprInit[1] ) < tol
+    assert np.abs( lp.roll - yprInit[2] ) < tol
+
+
 def test_translation():
     posInit = np.array( [ 0.3, -0.25, 1.35 ])
     yprInit = np.deg2rad(np.array([30, -15, 35]))
@@ -262,6 +296,7 @@ if __name__ == "__main__":
     test_positionInit()
     test_yprInit()
     test_quaternionInit()
+    test_rotationVectorInit()
     test_translation()
     test_rotateOrientation()
     test_rotation()

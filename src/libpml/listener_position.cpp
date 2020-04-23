@@ -2,16 +2,16 @@
 
 #include "listener_position.hpp"
 
-// #include <libvisr/parameter_factory.hpp>
-
 #include <libefl/degree_radian_conversion.hpp>
 
 #include <boost/math/constants/constants.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <algorithm>
 #include <ciso646>
 #include <cmath>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 
@@ -19,72 +19,6 @@ namespace visr
 {
 namespace pml
 {
-
-// Note: Conversion between Euler angles and quaternions inspired by
-// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-
-ListenerPosition::OrientationQuaternion
-ypr2Quaternion( ListenerPosition::Coordinate yaw,
-  ListenerPosition::Coordinate pitch,
-  ListenerPosition::Coordinate roll )
-{
-  using T = ListenerPosition::Coordinate;
-  T const cy = std::cos(yaw * 0.5);
-  T const sy = std::sin(yaw * 0.5);
-  T const cp = std::cos(pitch * 0.5);
-  T const sp = std::sin(pitch * 0.5);
-  T const cr = std::cos(roll * 0.5);
-  T const sr = std::sin(roll * 0.5);
-  return ListenerPosition::OrientationQuaternion{
-    cy * cp * cr + sy * sp * sr, // w component
-    cy * cp * sr - sy * sp * cr, // x component
-    sy * cp * sr + cy * sp * cr, // y component
-    sy * cp * cr - cy * sp * sr  // z component
-  };
-}
-
-ListenerPosition::OrientationQuaternion ypr2Quaternion( ListenerPosition::OrientationYPR const & ypr )
-{
-  return ypr2Quaternion( ypr[0], ypr[1], ypr[2] );
-}
-
-ListenerPosition::Coordinate yawFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
-{
-  // yaw = atan2( 2*(q.w*q.z+q.x*q.y), 1-2*(q.y * q.y + q.z * q.z) )
-  using T = ListenerPosition::Coordinate;
-  return std::atan2( static_cast<T>(2.0)*(q.R_component_1()*q.R_component_4()
-    +q.R_component_2()*q.R_component_3()),
-   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_3()*q.R_component_3()
-     +q.R_component_4()*q.R_component_4()));
-}
-
-ListenerPosition::Coordinate pitchFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
-{
-  using T = ListenerPosition::Coordinate;
-  T const arg = static_cast<T>(2.0)*(q.R_component_1()*q.R_component_3()-q.R_component_4()*q.R_component_2());
-  // Check for 'out of range' arguments. 
-  if( std::abs(arg) >= static_cast<T>(1.0) )
-  {
-    return std::copysign( boost::math::constants::half_pi<T>(), arg );
-  }
-  return std::asin( arg );
-}
-
-ListenerPosition::Coordinate rollFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
-{
-  using T = ListenerPosition::Coordinate;
-  return std::atan2( static_cast<T>(2.0)*(q.R_component_1()*q.R_component_2()+q.R_component_3()*q.R_component_4()),
-   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_2()*q.R_component_2()+q.R_component_3()*q.R_component_3()));
-}
-
-ListenerPosition::OrientationYPR yprFromQuaternion( ListenerPosition::OrientationQuaternion const & quat )
-{
-  return ListenerPosition::OrientationYPR{
-    yawFromQuaternion( quat ),
-    pitchFromQuaternion( quat ),
-    rollFromQuaternion( quat )
-  };
-}
 
 ListenerPosition::ListenerPosition( ParameterConfigBase const & config )
   : ListenerPosition( dynamic_cast<EmptyParameterConfig const &>(config) )
@@ -111,9 +45,7 @@ ListenerPosition::ListenerPosition( ListenerPosition::PositionType const & posit
 ListenerPosition::ListenerPosition( PositionType const & position, OrientationQuaternion const & orientation )
   : mPosition( position )
   , mOrientation( orientation )
-#if 0
   , mTimeNs{ 0 }
-#endif
   , mFaceID{ 0 }
 {
 }
@@ -123,6 +55,14 @@ ListenerPosition::ListenerPosition( ListenerPosition && rhs ) = default;
 ListenerPosition & ListenerPosition::operator=( ListenerPosition const & rhs ) = default;
 
 ListenerPosition & ListenerPosition::operator=( ListenerPosition && rhs ) = default;
+
+/*static*/ ListenerPosition 
+ListenerPosition::fromRotationVector( ListenerPosition::PositionType const & position,
+  ListenerPosition::RotationVector const & rotationVector,
+  ListenerPosition::Coordinate rotationAngle )
+{
+  return ListenerPosition{ position, rotationVector2Quaternion( rotationVector, rotationAngle ) };
+}
 
 /*static*/ ListenerPosition
 ListenerPosition::fromJson( std::istream & stream )
@@ -198,6 +138,18 @@ ListenerPosition::orientationQuaternion() const
   return mOrientation;
 }
 
+ListenerPosition::RotationVector 
+ListenerPosition::orientationRotationVector() const
+{
+  return quaternion2RotationVector( mOrientation );
+}
+
+ListenerPosition::Coordinate 
+ListenerPosition::orientationRotationAngle() const
+{
+  return quaternion2RotationAngle( mOrientation );
+}
+
 void ListenerPosition::setOrientationYPR( ListenerPosition::Coordinate yaw,
   ListenerPosition::Coordinate pitch,
   ListenerPosition::Coordinate roll )
@@ -215,7 +167,15 @@ void ListenerPosition::setOrientationQuaternion( ListenerPosition::OrientationQu
   mOrientation = orientation;
 }
 
-void ListenerPosition::translate( ListenerPosition::PositionType const translationVec )
+void ListenerPosition::setOrientationRotationVector(
+  ListenerPosition::RotationVector const & rotationVector,
+  ListenerPosition::Coordinate angle )
+{
+  setOrientationQuaternion( rotationVector2Quaternion( rotationVector,
+    angle ) );
+}
+
+void ListenerPosition::translate( ListenerPosition::PositionType const & translationVec )
 {
   mPosition[0] += translationVec[0];
   mPosition[1] += translationVec[1];
@@ -358,6 +318,121 @@ std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)
     << ", pos: (" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")"
     << ", orientation: (" << pos.yaw() << ", " << pos.pitch() << ", " << pos.roll() << " )";
   return stream;
+}
+
+// Note: Conversion between Euler angles and quaternions inspired by
+// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+
+ListenerPosition::OrientationQuaternion
+ypr2Quaternion( ListenerPosition::Coordinate yaw,
+  ListenerPosition::Coordinate pitch,
+  ListenerPosition::Coordinate roll )
+{
+  using T = ListenerPosition::Coordinate;
+  T const cy = std::cos(yaw * 0.5);
+  T const sy = std::sin(yaw * 0.5);
+  T const cp = std::cos(pitch * 0.5);
+  T const sp = std::sin(pitch * 0.5);
+  T const cr = std::cos(roll * 0.5);
+  T const sr = std::sin(roll * 0.5);
+  return ListenerPosition::OrientationQuaternion{
+    cy * cp * cr + sy * sp * sr, // w component
+    cy * cp * sr - sy * sp * cr, // x component
+    sy * cp * sr + cy * sp * cr, // y component
+    sy * cp * cr - cy * sp * sr  // z component
+  };
+}
+
+ListenerPosition::OrientationQuaternion ypr2Quaternion( ListenerPosition::OrientationYPR const & ypr )
+{
+     return ypr2Quaternion( ypr[0], ypr[1], ypr[2] );
+}
+
+namespace // unnamed
+{
+
+/**
+ * Normalise a vector to unit norm.
+ */
+ListenerPosition::RotationVector normalise( ListenerPosition::RotationVector const & vec )
+{
+  using DataType = ListenerPosition::RotationVector::value_type;
+  DataType const norm = std::sqrt( std::accumulate( vec.begin(),
+   vec.end(), static_cast<DataType>(0.0),
+   []( DataType acc, DataType val ){ return acc + val * val; } ) );
+  DataType const scale = static_cast< DataType >(1.0) / norm;
+  ListenerPosition::RotationVector ret;
+  std::transform( vec.begin(), vec.end(), ret.begin(),
+   [scale]( DataType val ){ return val * scale; });
+  return ret;
+}
+
+} // unamed namespace
+
+ListenerPosition::Coordinate yawFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
+{
+  // yaw = atan2( 2*(q.w*q.z+q.x*q.y), 1-2*(q.y * q.y + q.z * q.z) )
+  using T = ListenerPosition::Coordinate;
+  return std::atan2( static_cast<T>(2.0)*(q.R_component_1()*q.R_component_4()
+    +q.R_component_2()*q.R_component_3()),
+   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_3()*q.R_component_3()
+     +q.R_component_4()*q.R_component_4()));
+}
+
+ListenerPosition::Coordinate pitchFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
+{
+  using T = ListenerPosition::Coordinate;
+  T const arg = static_cast<T>(2.0)*(q.R_component_1()*q.R_component_3()-q.R_component_4()*q.R_component_2());
+  // Check for 'out of range' arguments. 
+  if( std::abs(arg) >= static_cast<T>(1.0) )
+  {
+    return std::copysign( boost::math::constants::half_pi<T>(), arg );
+  }
+  return std::asin( arg );
+}
+
+ListenerPosition::Coordinate rollFromQuaternion( ListenerPosition::OrientationQuaternion const & q )
+{
+  using T = ListenerPosition::Coordinate;
+  return std::atan2( static_cast<T>(2.0)*(q.R_component_1()*q.R_component_2()+q.R_component_3()*q.R_component_4()),
+   static_cast<T>(1.0)-static_cast<T>(2.0)*(q.R_component_2()*q.R_component_2()+q.R_component_3()*q.R_component_3()));
+}
+
+ListenerPosition::OrientationYPR yprFromQuaternion( ListenerPosition::OrientationQuaternion const & quat )
+{
+  return ListenerPosition::OrientationYPR{
+    yawFromQuaternion( quat ),
+    pitchFromQuaternion( quat ),
+    rollFromQuaternion( quat )
+  };
+}
+
+ListenerPosition::OrientationQuaternion rotationVector2Quaternion( ListenerPosition::RotationVector const & axis,
+  ListenerPosition::Coordinate angle )
+{
+  ListenerPosition::RotationVector const normVec{ normalise( axis ) };
+  ListenerPosition::Coordinate const sinPhi2{ std::sin( static_cast< ListenerPosition::Coordinate >(0.5) * angle ) };
+  return ListenerPosition::OrientationQuaternion{
+    std::cos( static_cast< ListenerPosition::Coordinate >(0.5) * angle ),
+    sinPhi2 * normVec[0], sinPhi2 * normVec[1], sinPhi2 * normVec[2] };
+  ;
+}
+
+ListenerPosition::RotationVector quaternion2RotationVector( ListenerPosition::OrientationQuaternion const & quat )
+{
+  using T = ListenerPosition::Coordinate;
+  // sin( phi/2 ) = sqrt( 1 - cos(phi/2)^2 ) with cos( phi/2 ) = w
+  T const sinPhi2{ std::sqrt( static_cast<T>(1.0)
+   - quat.R_component_1()*quat.R_component_1()) };
+   T const scale = static_cast<T>(1.0)/sinPhi2;
+  return ListenerPosition::RotationVector{ scale * quat.R_component_2(),
+    scale * quat.R_component_3(), scale * quat.R_component_4() };
+}
+
+ListenerPosition::Coordinate quaternion2RotationAngle( ListenerPosition::OrientationQuaternion const & quat )
+{
+  using T = ListenerPosition::Coordinate;
+  return std::acos( static_cast<T>( 2.0) * quat.R_component_1() );
 }
 
 } // namespace pml

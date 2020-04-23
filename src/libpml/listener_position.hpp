@@ -67,6 +67,12 @@ public:
   using OrientationYPR = std::array<Coordinate, 3>;
 
   /**
+   * Data type for roation vectors. Used for representing the orientation 
+   * as a rotation (with a given angle) around an arbitrary unit vector.
+   */
+  using RotationVector = std::array<Coordinate, 3>;
+
+  /**
    * Construction from a parameter configuration parameter.
    * @param config Configuration parameter, the dynamic type must be pml::EmptyParameterConfig()
    * Also acts as default constructor.
@@ -111,6 +117,19 @@ public:
   ListenerPosition( PositionType const & position, OrientationYPR const & orientation );
 
   ListenerPosition( PositionType const & position, OrientationQuaternion const & orientation );
+
+  /**
+   * Create a ListenerPosition object from a position and a rotation around an 
+   * arbitrary rotation axis.
+   * This function implements the 'named constructor' idiom.
+   * @param position The listner position in Cartesian coordinates [in m]
+   * @param rotationVector 3D vector (Cartesian coordinates) representing the orientation in 
+   * rotation axis /  rotation angle form.
+   * @param rotationAngle rotationAngle Rotation angle around the \p rotationVector to represent the 
+   * listener orientation [in radian].
+   */
+  static ListenerPosition fromRotationVector( PositionType const & position,
+    RotationVector const & rotationVector, Coordinate rotationAngle );
 
   static ListenerPosition fromJson( std::istream & stream );
 
@@ -210,6 +229,18 @@ public:
   OrientationQuaternion const & orientationQuaternion() const;
 
   /**
+   * Return the rotation vector representing the listener orientation in rotation vector / angle form.
+   * @return Unit vector in Cartesian coordinates.
+   */
+  RotationVector orientationRotationVector() const;
+
+  /**
+   * Return the angle part of the listener orientation in rotation vector/angle form.
+   * @return Rotation angle [radian].
+   */
+  Coordinate orientationRotationAngle() const;
+
+  /**
   * Set the listener's orientation using scalar values.
   * @param yaw New yaw angle [radian]
   * @param pitch New pitch angle [radian]
@@ -223,21 +254,43 @@ public:
    */
   void setOrientationYPR( OrientationYPR const & orientation );
 
+  /**
+   * Set the object's orientation.
+   * @param orientation The new orientation, specified as a unit quaternion.
+   */
   void setOrientationQuaternion( OrientationQuaternion const & orientation );
 
-  void translate( PositionType const translationVec );
+  /**
+   * Set the listener orientation in rotation axis / rotation angle format.
+   * @param rotationVector The rotation axis in Cartesian coordinates [units irelevant].
+   * @param angle Rotation angle [radian].
+   */
+  void setOrientationRotationVector( RotationVector const & rotationVector, Coordinate angle );
 
+  /** 
+   * Shift the position part.
+   * @param translationVector The position shift, vector in Cartesian coordinate [m].
+   */
+  void translate( PositionType const & translationVector );
+
+  /**
+   * Rotate the object's postion and orientation.
+   * @param rotation The desired rotation, specified as a unit quaternion.
+   */
   void rotate( OrientationQuaternion const & rotation );
 
   /**
    * Rotate the listener orientation.
    * This leaves the position component unchanged.
+   * @param rotation The desired rotation, specified as a unit quaternion.
    */
   void rotateOrientation( OrientationQuaternion const & rotation );
 
   /**
    * General transformation consisting of a rotation around the origin of the coordinate
    * system followed by a translation of the position.
+   * @param rotation The desired rotation, specified as a unit quaternion.
+   * @param translation The position shift, vector in Cartesian coordinate [m].
    */
   void transform( OrientationQuaternion const & rotation, PositionType translation );
 
@@ -299,6 +352,8 @@ private:
   IdType mFaceID;
 };
 
+VISR_PML_LIBRARY_SYMBOL std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
+
 /**
  * Quaternion functions.
  * @todo Move to a different location and out of the pml namespace.
@@ -322,10 +377,19 @@ ListenerPosition::Coordinate pitchFromQuaternion( ListenerPosition::OrientationQ
 VISR_PML_LIBRARY_SYMBOL 
 ListenerPosition::Coordinate rollFromQuaternion( ListenerPosition::OrientationQuaternion const & q );
 
-VISR_PML_LIBRARY_SYMBOL 
+VISR_PML_LIBRARY_SYMBOL
 ListenerPosition::OrientationYPR yprFromQuaternion( ListenerPosition::OrientationQuaternion const & quat );
 
-VISR_PML_LIBRARY_SYMBOL std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos);
+VISR_PML_LIBRARY_SYMBOL
+ListenerPosition::OrientationQuaternion rotationVector2Quaternion( ListenerPosition::RotationVector const & axis,
+  ListenerPosition::Coordinate angle );
+
+VISR_PML_LIBRARY_SYMBOL
+ListenerPosition::RotationVector quaternion2RotationVector( ListenerPosition::OrientationQuaternion const & quat );
+
+VISR_PML_LIBRARY_SYMBOL
+ListenerPosition::Coordinate quaternion2RotationAngle( ListenerPosition::OrientationQuaternion const & quat );
+
 //@}
 
 } // namespace pml
