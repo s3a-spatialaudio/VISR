@@ -26,8 +26,11 @@ ADD_SUBDIRECTORY( libefl )
 # Object model library.
 ADD_SUBDIRECTORY( libobjectmodel )
 
-# Panning library, compute a panning gains for a loudspeaker configuration 
+# Panning library, compute a panning gains for a loudspeaker configuration
 ADD_SUBDIRECTORY( libpanning )
+
+# Signal processing components and data types related to panning.
+add_subdirectory( libpanningdsp )
 
 # Parameter message library
 ADD_SUBDIRECTORY( libpml )
@@ -41,7 +44,7 @@ endif( BUILD_PYTHON_BINDINGS )
 ADD_SUBDIRECTORY( libsignalflows )
 
 # Library for signal flows that use Python.
-# Temporary solution to avoid a link dependency on Python 
+# Temporary solution to avoid a link dependency on Python
 # for the majority of signal flows.
 # Note that this library is also build if BUILD_PYTHON_BINDINGS is unselected.
 # In this case, it contains a reduced functionality that does not use Python.
@@ -54,7 +57,7 @@ ADD_SUBDIRECTORY( librbbl )
 # Rendering component library
 ADD_SUBDIRECTORY( librcl )
 
-# Rendering runtime library 
+# Rendering runtime library
 ADD_SUBDIRECTORY( librrl )
 
 # Data types and components related to the reverb audio object.
@@ -93,7 +96,7 @@ install(EXPORT VISR_exports
   NAMESPACE VISR::
   FILE visr_exports.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
-  COMPONENT development_files 
+  COMPONENT development_files
   )
 
 # Create config files for exported targets
