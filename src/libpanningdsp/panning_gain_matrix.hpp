@@ -51,7 +51,7 @@ public:
     CompositeComponent * parent,
     std::size_t numberOfObjects,
     std::size_t numberOfLoudspeakers,
-    visr::efl::BasicMatrix<SampleType> const & initialGains);
+    efl::BasicMatrix<SampleType> const & initialGains);
 
   ~PanningGainMatrix() override;
 

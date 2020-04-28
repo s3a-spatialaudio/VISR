@@ -1,22 +1,25 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 set( SOURCES
+initialise_parameter_library.cpp
 panning_gain_matrix.cpp
 panning_matrix_parameter.cpp
 )
 
 set( HEADERS
 export_symbols.hpp
+initialise_parameter_library.hpp
 panning_gain_matrix.hpp
 panning_matrix_parameter.hpp
+types.hpp
 )
 
 add_library( panningdsp_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( panningdsp_static PROPERTIES OUTPUT_NAME rcl )
+set_target_properties( panningdsp_static PROPERTIES OUTPUT_NAME panningdsp )
 target_compile_definitions( panningdsp_static PUBLIC VISR_PANNINGDSP_STATIC_LIBRARY=1)
 
 add_library( panningdsp_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( panningdsp_shared PROPERTIES OUTPUT_NAME rcl )
+set_target_properties( panningdsp_shared PROPERTIES OUTPUT_NAME panningdsp )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( panningdsp_shared PROPERTIES ARCHIVE_OUTPUT_NAME panningdsp_shared )
 set_target_properties( panningdsp_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
@@ -54,4 +57,4 @@ install(TARGETS panningdsp_shared
         ARCHIVE DESTINATION lib COMPONENT development_files
         RUNTIME DESTINATION lib COMPONENT shared_libraries
         LIBRARY DESTINATION lib COMPONENT shared_libraries
-        PUBLIC_HEADER DESTINATION include/visr/librcl COMPONENT development_files )
+        PUBLIC_HEADER DESTINATION include/visr/libpanningdsp COMPONENT development_files )

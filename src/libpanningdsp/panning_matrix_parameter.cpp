@@ -99,9 +99,9 @@ PanningMatrixParameter::PanningMatrixParameter( std::size_t numberOfObjects,
   mGains.zeroFill();
 }
 
-PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<DataType> const & gains,
-  visr::efl::AlignedArray<TimeType> const & timeStamps,
-  visr::efl::AlignedArray<TimeType> const & interpolationIntervals)
+PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
+  visr::efl::AlignedArray< TimeType > const & timeStamps,
+  visr::efl::AlignedArray< InterpolationIntervalType > const & interpolationIntervals)
  : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
  , mTimeStamps( timeStamps.size(), gains.alignmentElements())
  , mInterpolationIntervals( interpolationIntervals.size(), gains.alignmentElements())
@@ -109,9 +109,9 @@ PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<DataType> 
 
 }
 
-PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<DataType> const & gains,
-  std::initializer_list<TimeType> const & timeStamps,
-  std::initializer_list<TimeType> const & interpolationIntervals)
+PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
+  std::initializer_list< TimeType > const & timeStamps,
+  std::initializer_list< InterpolationIntervalType > const & interpolationIntervals)
  : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
  , mTimeStamps( arrayFromInitializerList( timeStamps,
      gains.numberOfColumns(), gains.alignmentElements() ) )
@@ -122,9 +122,9 @@ PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<DataType> 
 }
 
 PanningMatrixParameter::PanningMatrixParameter(
-  std::initializer_list< std::initializer_list< PanningMatrixParameter::DataType > > const & gains,
-  std::initializer_list<PanningMatrixParameter::TimeType> const & timeStamps,
-  std::initializer_list<PanningMatrixParameter::TimeType> const & interpolationIntervals,
+  std::initializer_list< std::initializer_list< SampleType > > const & gains,
+  std::initializer_list< TimeType > const & timeStamps,
+  std::initializer_list< InterpolationIntervalType > const & interpolationIntervals,
   std::size_t alignment /*= 0*/ )
  : mGains()
  , mTimeStamps(arrayFromInitializerList(timeStamps,
@@ -186,38 +186,38 @@ std::size_t PanningMatrixParameter::alignmentElements() const
   return mGains.alignmentElements();
 }
 
-PanningMatrixParameter::GainMatrixType const &
+GainMatrixType const &
 PanningMatrixParameter::gains() const
 {
   return mGains;
 }
 
-PanningMatrixParameter::GainMatrixType &
+GainMatrixType &
 PanningMatrixParameter::gains()
 {
   return mGains;
 }
 
 
-PanningMatrixParameter::TimeStampVector const &
+TimeStampVector const &
 PanningMatrixParameter::timeStamps() const
 {
   return mTimeStamps;
 }
 
-PanningMatrixParameter::TimeStampVector & 
+TimeStampVector & 
 PanningMatrixParameter::timeStamps()
 {
   return mTimeStamps;
 }
 
-PanningMatrixParameter::InterpolationIntervalVector const & 
+InterpolationIntervalVector const & 
 PanningMatrixParameter::interpolationIntervals() const
 {
   return mInterpolationIntervals;
 }
 
-PanningMatrixParameter::InterpolationIntervalVector &
+InterpolationIntervalVector &
 PanningMatrixParameter::interpolationIntervals()
 {
   return mInterpolationIntervals;
