@@ -33,6 +33,7 @@
 #include <libvisr/impl/component_implementation.hpp>
 #include <libvisr/impl/composite_component_implementation.hpp>
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/time_implementation.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -108,6 +109,9 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
     throw std::runtime_error( detail::composeMessageString( "AudioSignalFlow: Execution schedule could not be created.",
                                                              checkMessages.str()) );
   }
+
+  visr::impl::TimeImplementation & timeImpl = mFlow.timeImplementation();
+  timeImpl.resetCounter();
 }
 
 AudioSignalFlow::~AudioSignalFlow()
@@ -209,6 +213,8 @@ void AudioSignalFlow::executeComponents()
 {
   std::lock_guard<ParameterExchangeCriticalSectionType>
     guard( parameterExchangeCriticalSection() );
+  visr::impl::TimeImplementation & timeImpl = mFlow.timeImplementation();
+  timeImpl.advanceBlockCounter();
   try
   {
 #ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING

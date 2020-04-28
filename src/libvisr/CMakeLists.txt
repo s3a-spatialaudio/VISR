@@ -27,6 +27,7 @@ polymorphic_parameter_output.hpp
 port_base.hpp
 signal_flow_context.hpp
 status_message.hpp
+time.hpp
 typed_parameter_base.hpp
 version.hpp
 )
@@ -68,6 +69,7 @@ polymorphic_parameter_input.cpp
 polymorphic_parameter_output.cpp
 port_base.cpp
 signal_flow_context.cpp
+time.cpp
 version.cpp
 impl/audio_connection_descriptor.cpp
 impl/audio_port_base_implementation.cpp
@@ -76,6 +78,7 @@ impl/composite_component_implementation.cpp
 impl/parameter_connection_descriptor.cpp
 impl/parameter_port_base_implementation.cpp
 impl/port_base_implementation.cpp
+impl/time_implementation.cpp
 )
 
 add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )

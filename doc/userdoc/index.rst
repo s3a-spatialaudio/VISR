@@ -22,4 +22,5 @@ VISR User Manual
    object-based-audio-with-visr
    rcl_component_documentation
    binaural-synthesis-toolkit
+   visr-component-api
    references

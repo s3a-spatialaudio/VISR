@@ -17,6 +17,7 @@ parameter_factory.cpp
 parameter_port.cpp
 port.cpp
 signal_flow_context.cpp
+time.cpp
 visr.cpp
 )
 
