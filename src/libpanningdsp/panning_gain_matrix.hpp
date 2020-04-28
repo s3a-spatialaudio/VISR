@@ -46,7 +46,7 @@ public:
    * @param name The name of the component. Must be unique within the containing composite component (if there is one).
    * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
    */
-  PanningGainMatrix::PanningGainMatrix(SignalFlowContext const & context,
+  PanningGainMatrix(SignalFlowContext const & context,
     char const * name,
     CompositeComponent * parent,
     std::size_t numberOfObjects,

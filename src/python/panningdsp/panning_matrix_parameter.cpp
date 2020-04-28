@@ -54,8 +54,8 @@ efl::AlignedArray< T > arrayFromNdArray(py::array_t< T > const & array, std::siz
 template< typename T >
 py::array_t< T > arrayToNdArray(efl::AlignedArray< T > const & array )
 {
-  py::array_t< T > ret({ array.size() }, { 1 }, array.data() );
-//  std::copy(array.mutable_data(), array.data() + array.size(), ret.data();)
+  py::array_t< T > ret( array.size(), array.data() );
+  // std::copy(array.data(), array.data() + array.size(), ret.mutable_data() );
   return ret;
 }
 
@@ -82,16 +82,19 @@ void exportPanningMatrixParameter(pybind11::module & m)
      pybind11::arg( "numberOfObjects" ), pybind11::arg( "numberOfLoudspeakers" ),
      pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples)
     .def(py::init([](py::array_t< SampleType > const & gains,
-      py::array_t< TimeType > const & timeStamps, py::array_t< TimeType > const & interpolationIntervals )
+      py::array_t< TimeType > const & timeStamps, py::array_t< TimeType > const & interpolationIntervals,
+      std::size_t alignment )
       {
-        visr::efl::BasicMatrix<SampleType> const gainMtx = visr::python::bindinghelpers::matrixFromNdArray(gains);
-        visr::efl::AlignedArray<TimeType> const timeStampArray = arrayFromNdArray< TimeType >( timeStamps );
+        visr::efl::BasicMatrix<SampleType> const gainMtx
+          = visr::python::bindinghelpers::matrixFromNdArray(gains, alignment);
+        visr::efl::AlignedArray<TimeType> const timeStampArray
+          = arrayFromNdArray< TimeType >( timeStamps, alignment );
         visr::efl::AlignedArray<TimeType> const & interpolationIntervalArray
-          = arrayFromNdArray< InterpolationIntervalType >( interpolationIntervals );
+          = arrayFromNdArray< InterpolationIntervalType >( interpolationIntervals, alignment );
         return new PanningMatrixParameter( gainMtx, timeStampArray, interpolationIntervalArray );
       } ),
        pybind11::arg( "gains" ), pybind11::arg( "timeStamps" ),
-       pybind11::arg( "interpolationIntervals" ) )
+       pybind11::arg( "interpolationIntervals" ), pybind11::arg( "alignment") = 0 )
     .def( pybind11::init< visr::ParameterConfigBase const & >(), py::arg( "config" ) )
     .def(pybind11::init< pml::MatrixParameterConfig const & >(), py::arg( "config" ) )
     .def_property_readonly( "numberOfObjects", &PanningMatrixParameter::numberOfObjects )

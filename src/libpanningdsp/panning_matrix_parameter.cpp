@@ -42,9 +42,9 @@ void copy(visr::efl::AlignedArray< T> const & src,
  * in efl::AlignedArray.
  */
 template< typename T >
-efl::AlignedArray< T > createCopy( efl::AlignedArray< T > const & src )
+efl::AlignedArray< T > createCopy( efl::AlignedArray< T > const & src, std::size_t alignment )
 {
-  efl::AlignedArray< T > res( src.size(), src.alignmentElements() );
+  efl::AlignedArray< T > res( src.size(), alignment );
   copy(src, res);
   return res;
 }
@@ -75,7 +75,7 @@ efl::AlignedArray< T > arrayFromInitializerList(std::initializer_list< T > list,
 {
   if (list.size() != size)
   {
-    throw std::invalid_argument( "INitializer list size does not match expected size." );
+    throw std::invalid_argument( "Initializer list size does not match expected size." );
   }
   efl::AlignedArray< T > res( size , alignment);
   std::copy(list.begin(), list.end(), res.data());
@@ -89,13 +89,9 @@ efl::AlignedArray< T > arrayFromInitializerList(std::initializer_list< T > list,
 PanningMatrixParameter::PanningMatrixParameter( std::size_t numberOfObjects,
   std::size_t numberOfLoudspeakers, std::size_t alignment /*= 0*/ )
  : mGains( numberOfLoudspeakers, numberOfObjects, alignment )
- , mTimeStamps( createConstantArray(numberOfObjects, alignment, cTimeStampInfinity ) )
- , mInterpolationIntervals(numberOfObjects, alignment )
+ , mTimeStamps( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
+ , mInterpolationIntervals( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
 {
-  fill( mTimeStamps, cTimeStampInfinity );
-  // Why does the template above need the cast?
-  fill( mInterpolationIntervals,
-    static_cast<InterpolationIntervalType>(0) );
   mGains.zeroFill();
 }
 
@@ -103,23 +99,29 @@ PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType
   visr::efl::AlignedArray< TimeType > const & timeStamps,
   visr::efl::AlignedArray< InterpolationIntervalType > const & interpolationIntervals)
  : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
- , mTimeStamps( timeStamps.size(), gains.alignmentElements())
- , mInterpolationIntervals( interpolationIntervals.size(), gains.alignmentElements())
+ , mTimeStamps( createCopy( timeStamps, gains.alignmentElements() ) )
+ , mInterpolationIntervals( createCopy( interpolationIntervals, gains.alignmentElements() ) )
 {
-
+  mGains.copy( gains );
 }
 
 PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
   std::initializer_list< TimeType > const & timeStamps,
   std::initializer_list< InterpolationIntervalType > const & interpolationIntervals)
- : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
- , mTimeStamps( arrayFromInitializerList( timeStamps,
-     gains.numberOfColumns(), gains.alignmentElements() ) )
- , mInterpolationIntervals( arrayFromInitializerList( interpolationIntervals,
-     gains.numberOfColumns(), gains.alignmentElements()))
+ : PanningMatrixParameter( gains,
+     arrayFromInitializerList( timeStamps, gains.numberOfColumns(), gains.alignmentElements() ),
+     arrayFromInitializerList( interpolationIntervals,
+       gains.numberOfColumns(), gains.alignmentElements()) )
 {
-
 }
+//  : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
+//  , mTimeStamps( arrayFromInitializerList( timeStamps,
+//      gains.numberOfColumns(), gains.alignmentElements() ) )
+//  , mInterpolationIntervals( arrayFromInitializerList( interpolationIntervals,
+//      gains.numberOfColumns(), gains.alignmentElements()))
+// {
+//   mGains.copy( gains );
+// }
 
 PanningMatrixParameter::PanningMatrixParameter(
   std::initializer_list< std::initializer_list< SampleType > > const & gains,
@@ -145,11 +147,10 @@ PanningMatrixParameter::PanningMatrixParameter( ParameterConfigBase const & conf
   // Todo: handle exceptions
 }
 
-
 PanningMatrixParameter::PanningMatrixParameter( PanningMatrixParameter const & rhs )
  : mGains(rhs.gains().numberOfRows(), rhs.gains().numberOfColumns(), rhs.alignmentElements())
- , mTimeStamps( createCopy( rhs.timeStamps() ) )
- , mInterpolationIntervals( createCopy( rhs.interpolationIntervals() ) )
+ , mTimeStamps( createCopy( rhs.timeStamps(),  rhs.alignmentElements() ) )
+ , mInterpolationIntervals( createCopy( rhs.interpolationIntervals(), rhs.alignmentElements() ) )
 {
   mGains.copy( rhs.gains() );
 }
