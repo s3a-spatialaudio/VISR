@@ -14,7 +14,8 @@
 
 #include <libpml/double_buffering_protocol.hpp>
 
-#include <libefl/aligned_array.hpp>
+#include <libefl/basic_matrix.hpp>
+#include <libefl/basic_vector.hpp>
 
 #include <cstddef> // for std::size_t
 #include <memory>
@@ -40,6 +41,12 @@ class VISR_PANNINGDSP_LIBRARY_SYMBOL PanningGainMatrix: public AtomicComponent
 public:
   using SampleType = visr::SampleType;
 
+  PanningGainMatrix(SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfObjects,
+    std::size_t numberOfLoudspeakers );
+
   /**
    * Constructor.
    * @param context Configuration object containing basic execution parameters.
@@ -53,6 +60,14 @@ public:
     std::size_t numberOfLoudspeakers,
     efl::BasicMatrix<SampleType> const & initialGains);
 
+  PanningGainMatrix(SignalFlowContext const & context,
+    char const * name,
+    CompositeComponent * parent,
+    std::size_t numberOfObjects,
+    std::size_t numberOfLoudspeakers,
+    efl::BasicMatrix<SampleType> const & initialGains,
+    PanningMatrixParameter const & initialSlope );
+
   ~PanningGainMatrix() override;
 
   void process() override;
@@ -63,10 +78,41 @@ private:
 
   void processAudio();
 
+  /**
+   * Process the audio signal for a single 'slope', that is, a number 
+   * of samples with no change if the gain increase. 
+   */
+  void processAudioSingleSlope( std::size_t objIdx, TimeType currentTime, 
+    std::size_t duration, bool accumulate, std::size_t alignment );
+
+  void updateSlopeParameters( PanningMatrixParameter const & newParams );
+
+  void updateSlopeParameter( std::size_t objIndex,
+                             TimeType startTime,
+                             InterpolationIntervalType duration,
+                             SampleType const * gains );
+
+  void scaleSignal( SampleType const * input, SampleType * output,
+    std::size_t startIdx, std::size_t duration,
+    SampleType gainStart, SampleType gainInc,
+    bool accumulate, std::size_t alignment );
+
   AudioInput mAudioInput;
   AudioOutput mAudioOutput;
 
-  // std::unique_ptr<ParameterInput<pml::SharedDataProtocol, pml::MatrixParameter<SampleType> > > mGainInput;
+  using GainInput = ParameterInput< pml::DoubleBufferingProtocol, PanningMatrixParameter >; 
+
+  GainInput mGainInput;
+
+  TimeStampVector mPreviousTime;
+  TimeStampVector mCurrentTargetTime;
+  TimeStampVector mNextTargetTime;
+
+  visr::efl::BasicMatrix< SampleType > mPreviousGains;
+  visr::efl::BasicMatrix< SampleType > mCurrentTargetGains;
+  visr::efl::BasicMatrix< SampleType > mNextTargetGains;
+
+  visr::efl::BasicVector< SampleType > mScalingRamp;
 };
 
 } // namespace panningdsp

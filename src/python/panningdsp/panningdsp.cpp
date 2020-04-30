@@ -1,8 +1,11 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include <libpanningdsp/types.hpp>
+#include <libpanningdsp/initialise_parameter_library.hpp>
 
 #include <pybind11/pybind11.h>
+
+namespace py = pybind11;
 
 // Forward declarations
 namespace visr
@@ -11,16 +14,14 @@ namespace panningdsp
 {
 namespace python
 {
-  void exportPanningGainMatrix( pybind11::module & m );
-  void exportPanningMatrixParameter(pybind11::module & m);
+void exportPanningGainMatrix( py::module & m );
+void exportPanningMatrixParameter(py::module & m);
 } // namespace python
 } // namespace panningdsp
 } // namespace visr
 
 PYBIND11_MODULE(panningdsp, m)
 {
-  namespace py = pybind11;
-
   py::module::import( "visr" );
   py::module::import( "efl" );
   py::module::import( "pml" );
@@ -29,8 +30,10 @@ PYBIND11_MODULE(panningdsp, m)
 R"(VISR component library for panning-specific processing.
 )";
 
-  using namespace visr::panningdsp::python;
+  visr::panningdsp::initialiseParameterLibrary();
 
+  using namespace visr::panningdsp::python;
+  // Define the literal constant.
   m.attr( "timeStampInfinity" ) = py::int_( visr::panningdsp::cTimeStampInfinity );
 
   exportPanningGainMatrix( m );
