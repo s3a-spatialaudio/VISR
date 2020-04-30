@@ -213,8 +213,6 @@ void AudioSignalFlow::executeComponents()
 {
   std::lock_guard<ParameterExchangeCriticalSectionType>
     guard( parameterExchangeCriticalSection() );
-  visr::impl::TimeImplementation & timeImpl = mFlow.timeImplementation();
-  timeImpl.advanceBlockCounter();
   try
   {
 #ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
@@ -243,6 +241,8 @@ void AudioSignalFlow::executeComponents()
         pc->process();
       }
     }
+    visr::impl::TimeImplementation & timeImpl = mFlow.timeImplementation();
+    timeImpl.advanceBlockCounter();
   }
   catch( std::exception const & ex )
   {
