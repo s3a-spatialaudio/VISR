@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <ciso646>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
@@ -177,18 +178,12 @@ void ListenerPosition::setOrientationRotationVector(
 
 void ListenerPosition::translate( ListenerPosition::PositionType const & translationVec )
 {
-  mPosition[0] += translationVec[0];
-  mPosition[1] += translationVec[1];
-  mPosition[2] += translationVec[2];
+  translatePosition( mPosition, translationVec );
 }
 
 void ListenerPosition::rotate( ListenerPosition::OrientationQuaternion const & rotation )
 {
-  OrientationQuaternion const posQuat{ 0.0f, mPosition[0], mPosition[1], mPosition[2] };
-  OrientationQuaternion res = rotation * posQuat * conj(rotation); 
-  mPosition[0] = res.R_component_2();
-  mPosition[1] = res.R_component_3();
-  mPosition[2] = res.R_component_4();
+  rotatePosition( mPosition, rotation );
   rotateOrientation( rotation ); 
 }
 
@@ -433,6 +428,94 @@ ListenerPosition::Coordinate quaternion2RotationAngle( ListenerPosition::Orienta
 {
   using T = ListenerPosition::Coordinate;
   return std::acos( static_cast<T>( 2.0) * quat.R_component_1() );
+}
+
+ListenerPosition::OrientationQuaternion normalise( ListenerPosition::OrientationQuaternion const & quat, bool adjustSign = false )
+{
+  ListenerPosition::Coordinate const norm{ quat.R_component_1() * quat.R_component_1() + 
+    quat.R_component_2() * quat.R_component_2() + quat.R_component_3() * quat.R_component_3() +
+    quat.R_component_4() * quat.R_component_4() };
+  if( norm < std::numeric_limits< ListenerPosition::Coordinate >::epsilon() )
+  {
+    return ListenerPosition::OrientationQuaternion(); // Too close to zero, return the default quaternion.
+  }
+  ListenerPosition::Coordinate const sign = adjustSign
+    ? std::copysign(  static_cast<ListenerPosition::Coordinate>(1.0), quat.R_component_1() )
+    : static_cast<ListenerPosition::Coordinate>(1.0);
+  ListenerPosition::Coordinate const scale = sign / std::sqrt( norm );
+  return ListenerPosition::OrientationQuaternion{ scale * quat.R_component_1(),
+   scale * quat.R_component_2(), scale * quat.R_component_3(), scale * quat.R_component_4() };
+}
+
+ListenerPosition::Coordinate quaternionDistance( ListenerPosition::OrientationQuaternion const & quat1,
+  ListenerPosition::OrientationQuaternion const quat2 )
+{
+  using CT = ListenerPosition::Coordinate;
+  // See http://www.boris-belousov.net/2016/12/01/quat-dist/
+
+  // Note: Not necessary if we know that the arguments are unit quaternions.
+  // Use 'adjustSign=true' to make sure that the w components have the same sign,
+  // because quaternions with opposite signs represent the same rotation.
+  ListenerPosition::OrientationQuaternion const q1Norm = normalise( quat1, true );
+  ListenerPosition::OrientationQuaternion const q2Norm = normalise( quat2, true );
+  // First (w) component of the different rotation quaternion q1Norm*conj(q2Norm)
+  CT const wDiff{ q1Norm.R_component_1() * q2Norm.R_component_1() + 
+    q1Norm.R_component_2() * q2Norm.R_component_2() + q1Norm.R_component_3() * q2Norm.R_component_3() +
+    q1Norm.R_component_4() * q2Norm.R_component_4() };
+  return std::acos( std::max( std::min( static_cast<CT>(0.5)*std::sqrt(wDiff), static_cast<CT>(1.0) ),
+    static_cast<CT>(-1.0) ) );
+}
+
+void translatePosition( ListenerPosition::PositionType & pos,
+  ListenerPosition::PositionType const & shift )
+{
+  pos[0] += shift[0];
+  pos[1] += shift[1];
+  pos[2] += shift[2];
+}
+
+ListenerPosition::PositionType translatePosition( ListenerPosition::PositionType const & pos,
+  ListenerPosition::PositionType const & shift )
+{
+  ListenerPosition::PositionType ret{ pos };
+  translatePosition( ret, shift );
+  return ret;
+}
+
+void rotatePosition( ListenerPosition::PositionType & pos,
+  ListenerPosition::OrientationQuaternion const & rotation )
+{
+  ListenerPosition::OrientationQuaternion const posQuat{ 0.0f, pos[0], pos[1], pos[2] };
+  ListenerPosition::OrientationQuaternion const res
+   = rotation * posQuat * conj( rotation ); 
+  pos[0] = res.R_component_2();
+  pos[1] = res.R_component_3();
+  pos[2] = res.R_component_4();
+}
+
+ListenerPosition::PositionType rotatePosition( ListenerPosition::PositionType const & pos,
+  ListenerPosition::OrientationQuaternion const & rotation )
+{
+  ListenerPosition::PositionType ret{ pos };
+  rotatePosition( pos, rotation );
+  return ret;
+}
+
+void transformPosition( ListenerPosition::PositionType & pos,
+  ListenerPosition::OrientationQuaternion const & rotation,
+  ListenerPosition::PositionType const & shift )
+{
+  rotatePosition( pos, rotation );
+  translatePosition( pos, shift );
+}
+
+ListenerPosition::PositionType transformPosition( ListenerPosition::PositionType const & pos,
+  ListenerPosition::OrientationQuaternion const & rotation,
+  ListenerPosition::PositionType const & shift )
+{
+  ListenerPosition::PositionType ret{ pos };
+  transformPosition( ret, rotation, shift );
+  return ret;
 }
 
 } // namespace pml

@@ -80,6 +80,7 @@ void exportListenerPosition( pybind11::module & m)
     .def( "yawFromQuaternion", &visr::pml::yawFromQuaternion, py::arg( "quat" ) )
     .def( "pitchFromQuaternion", &visr::pml::pitchFromQuaternion, py::arg( "quat" ) )
     .def( "rollFromQuaternion", &visr::pml::rollFromQuaternion, py::arg( "quat" ) )
+    .def( "quaternionDistance", &visr::pml::quaternionDistance, py::arg( "quat1"), py::arg( "quat2" ) )
   ;
 
   lp

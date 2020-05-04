@@ -390,6 +390,39 @@ ListenerPosition::RotationVector quaternion2RotationVector( ListenerPosition::Or
 VISR_PML_LIBRARY_SYMBOL
 ListenerPosition::Coordinate quaternion2RotationAngle( ListenerPosition::OrientationQuaternion const & quat );
 
+/**
+ * Return the distance between two rotations.
+ */
+VISR_PML_LIBRARY_SYMBOL 
+ListenerPosition::Coordinate quaternionDistance( ListenerPosition::OrientationQuaternion const & quat1,
+  ListenerPosition::OrientationQuaternion const quat2 );
+
+VISR_PML_LIBRARY_SYMBOL
+void rotatePosition( ListenerPosition::PositionType & pos,
+  ListenerPosition::OrientationQuaternion const & rotation );
+
+VISR_PML_LIBRARY_SYMBOL
+ListenerPosition::PositionType rotatePosition( ListenerPosition::PositionType const & pos,
+  ListenerPosition::OrientationQuaternion const & rotation );
+
+VISR_PML_LIBRARY_SYMBOL
+void translatePosition( ListenerPosition::PositionType & pos,
+  ListenerPosition::PositionType const & shift );
+
+VISR_PML_LIBRARY_SYMBOL
+ListenerPosition::PositionType translatePosition( ListenerPosition::PositionType const & pos,
+  ListenerPosition::PositionType const & shift );
+
+VISR_PML_LIBRARY_SYMBOL
+void transformPosition( ListenerPosition::PositionType & pos,
+  ListenerPosition::OrientationQuaternion const & rotation,
+  ListenerPosition::PositionType const & shift );
+
+VISR_PML_LIBRARY_SYMBOL
+ListenerPosition::PositionType transformPosition( ListenerPosition::PositionType const & pos,
+  ListenerPosition::OrientationQuaternion const & rotation,
+  ListenerPosition::PositionType const & shift );
+
 //@}
 
 } // namespace pml
