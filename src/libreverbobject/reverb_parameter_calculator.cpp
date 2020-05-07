@@ -246,7 +246,7 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
     }
 
     // Set the gain and delay for each discrete reflection
-    discreteReflGains[matrixIdx] = rsao.level() * discRefl.level();
+    discreteReflGains[matrixIdx] = discRefl.level();
     discreteReflDelays[matrixIdx] = discRefl.delay();
   }
 
@@ -272,8 +272,13 @@ void ReverbParameterCalculator::processSingleObject( objectmodel::PointSourceWit
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Late reflection part.
+
+  // TODO: As of now, both the gain and dely are unused. If it remains this way, 
+  // consider to remove the 'LateReverbGainDelay' component and associated
+  // parameter connections from the reverb renderer signal flow.
   lateReverbDelays[renderChannel] = 0.0f; // Unused for now.  We might apply the frequency-independent offset delay here.
-  lateReverbGains[renderChannel] = rsao.level(); // Adjust to the object level.
+  lateReverbGains[renderChannel] = 1.0f; // The object level is already applied
+  // to the audio signal received in the reverb renderer.
   if( not equal( mPreviousLateReverbs[renderChannel], rsao.lateReverb(), cLateReverbParameterComparisonLimit ))
   {
     mPreviousLateReverbs[renderChannel] = rsao.lateReverb();
