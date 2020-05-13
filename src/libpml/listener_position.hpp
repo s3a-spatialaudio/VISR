@@ -11,6 +11,7 @@
 #include <libvisr/typed_parameter_base.hpp>
 
 #include <boost/math/quaternion.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 #include <array>
 #include <cstdint>
@@ -134,6 +135,8 @@ public:
   static ListenerPosition fromJson( std::istream & stream );
 
   static ListenerPosition fromJson( std::string const & str );
+
+  static ListenerPosition fromJson( boost::property_tree::ptree const & config );
 
   /**
    * Destructor (virtual)
@@ -324,7 +327,11 @@ public:
 
   void parseJson( std::string const & str );
 
+  void parseJson( boost::property_tree::ptree const & config );
+
   void writeJson( std::ostream & stream, bool ypr = false, bool prettyPrint = false ) const;
+
+  void writeJson( boost::property_tree::ptree & tree, bool ypr = false ) const;
 
   std::string writeJson( bool ypr = false, bool prettyPrint = false ) const;
 

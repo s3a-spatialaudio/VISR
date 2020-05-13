@@ -65,6 +65,14 @@ ListenerPosition::fromRotationVector( ListenerPosition::PositionType const & pos
   return ListenerPosition{ position, rotationVector2Quaternion( rotationVector, rotationAngle ) };
 }
 
+/*static*/ ListenerPosition 
+ListenerPosition::fromJson( boost::property_tree::ptree const & config )
+{
+  ListenerPosition res;
+  res.parseJson( config );
+  return res;
+}
+
 /*static*/ ListenerPosition
 ListenerPosition::fromJson( std::istream & stream )
 {
@@ -209,12 +217,17 @@ void ListenerPosition::setFaceID( IdType faceID )
   mFaceID = faceID;
 }
 
-
 void ListenerPosition::parseJson( std::istream & stream )
 {
   namespace pt = boost::property_tree;
   pt::ptree tree;
-  pt::read_json( stream, tree );
+  read_json( stream, tree );
+  parseJson( tree );
+}
+
+void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )  
+{
+  namespace pt = boost::property_tree;
   Coordinate const x = tree.get<Coordinate>( "x", 0.0f );
   Coordinate const y = tree.get<Coordinate>( "y", 0.0f );
   Coordinate const z = tree.get<Coordinate>( "z", 0.0f );
@@ -266,6 +279,12 @@ void ListenerPosition::writeJson( std::ostream & stream, bool ypr /*= false*/, b
 {
   namespace pt = boost::property_tree;
   pt::ptree tree;
+  pt::write_json( stream, tree, prettyPrint );
+}
+
+void ListenerPosition::writeJson( boost::property_tree::ptree & tree, bool ypr /*= false*/ ) const
+{
+  namespace pt = boost::property_tree;
   tree.put<Coordinate>( "x", x() );
   tree.put<Coordinate>( "y", y() );
   tree.put<Coordinate>( "z", z() );
@@ -296,7 +315,6 @@ void ListenerPosition::writeJson( std::ostream & stream, bool ypr /*= false*/, b
   {
     tree.put<pml::ListenerPosition::IdType>( "faceId", faceID() );
   }
-  pt::write_json( stream, tree, prettyPrint );
 }
 
 std::string ListenerPosition::writeJson( bool ypr /*= false*/, bool prettyPrint /*=false*/ ) const
@@ -454,15 +472,16 @@ ListenerPosition::Coordinate quaternionDistance( ListenerPosition::OrientationQu
   // See http://www.boris-belousov.net/2016/12/01/quat-dist/
 
   // Note: Not necessary if we know that the arguments are unit quaternions.
-  // Use 'adjustSign=true' to make sure that the w components have the same sign,
-  // because quaternions with opposite signs represent the same rotation.
-  ListenerPosition::OrientationQuaternion const q1Norm = normalise( quat1, true );
-  ListenerPosition::OrientationQuaternion const q2Norm = normalise( quat2, true );
+  // We don't need to use 'adjustSign=true' because only the abs value of the dot product is used.
+  ListenerPosition::OrientationQuaternion const q1Norm = normalise( quat1 );
+  ListenerPosition::OrientationQuaternion const q2Norm = normalise( quat2 );
   // First (w) component of the different rotation quaternion q1Norm*conj(q2Norm)
-  CT const wDiff{ q1Norm.R_component_1() * q2Norm.R_component_1() + 
+  CT const wDot{ q1Norm.R_component_1() * q2Norm.R_component_1() + 
     q1Norm.R_component_2() * q2Norm.R_component_2() + q1Norm.R_component_3() * q2Norm.R_component_3() +
     q1Norm.R_component_4() * q2Norm.R_component_4() };
-  return std::acos( std::max( std::min( static_cast<CT>(0.5)*std::sqrt(wDiff), static_cast<CT>(1.0) ),
+  CT const wDiff{ std::sqrt( std::abs( wDot ) ) };
+  // Clip using min/max to avoid arguments with  abs( x ) > 1.0 due to numerical errors.
+  return static_cast<CT>(2.0)* std::acos( std::max( std::min( wDiff, static_cast<CT>(1.0) ),
     static_cast<CT>(-1.0) ) );
 }
 
