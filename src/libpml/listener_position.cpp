@@ -27,7 +27,7 @@ ListenerPosition::ListenerPosition( ParameterConfigBase const & config )
 }
 
 ListenerPosition::ListenerPosition( EmptyParameterConfig const & /* = EmptyParameterConfig( )*/ )
-  : ListenerPosition{ {{0.0f, 0.0f, 0.0f}}, ListenerPosition::OrientationQuaternion{} }
+  : ListenerPosition{ {{0.0f, 0.0f, 0.0f}}, ListenerPosition::OrientationQuaternion{1.0f, 0.0f, 0.0f, 0.0f} }
 {}
 
 ListenerPosition::ListenerPosition( ListenerPosition const & rhs ) = default;
