@@ -82,8 +82,9 @@ private:
    * Process the audio signal for a single 'slope', that is, a number 
    * of samples with no change if the gain increase. 
    */
-  void processAudioSingleSlope( std::size_t objIdx, TimeType currentTime, 
-    std::size_t duration, bool accumulate, std::size_t alignment );
+  void processAudioSingleSlope( std::size_t objIdx, TimeType currentTime,
+    std::size_t startIdx, std::size_t duration,
+    bool accumulate, std::size_t alignment );
 
   void updateSlopeParameters( PanningMatrixParameter const & newParams );
 
