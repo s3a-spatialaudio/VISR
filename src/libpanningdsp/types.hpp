@@ -24,15 +24,7 @@ using SampleType = ::visr::SampleType;
  */
 using TimeType = Time::IntegerTimeType;
 
-/**
- * Type to represent the length of an gain interpolation.
- * @notr this is an unsigned type, i.e., intervals are supposed to be nonnegative.
- */
-using InterpolationIntervalType = TimeType;
-
-using TimeStampVector = visr::efl::AlignedArray< TimeType >;
-
-using InterpolationIntervalVector = visr::efl::AlignedArray< InterpolationIntervalType >;
+using TimeVector = visr::efl::AlignedArray< TimeType >;
 
 using GainMatrixType = visr::efl::BasicMatrix< SampleType >;
 

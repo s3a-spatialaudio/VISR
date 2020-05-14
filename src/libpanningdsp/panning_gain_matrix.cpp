@@ -208,7 +208,7 @@ void PanningGainMatrix::processAudio()
     processAudioSingleSlope( objIdx, currentTime, 0, firstDuration, accumulateFlag, 
       visr::cVectorAlignmentSamples );
 
-    // Is there a slope change or at the end of the current period?
+    // Is there a slope change within or at the end of the current period?
     if( currentTime + bufSize >= mCurrentTargetTime[ objIdx ] )
     {
       mPreviousTime[objIdx] = mCurrentTargetTime[objIdx];
@@ -219,9 +219,9 @@ void PanningGainMatrix::processAudio()
       // Intentionally leave the mNextTargetGains unchanged.
       if( firstDuration < bufSize ) // Are there unprocessed samples?
       {
-        std::size_t const remainingSamples = bufSize - firstDuration;
+        std::size_t const secondDuration = bufSize - firstDuration;
         processAudioSingleSlope( objIdx, currentTime + firstDuration, 
-          firstDuration, remainingSamples, accumulateFlag,
+          firstDuration, secondDuration, accumulateFlag,
           0/*no alignment spec possible because this may start at an arbitrary position */ );
       }
     }
@@ -272,14 +272,14 @@ updateSlopeParameters( PanningMatrixParameter const & newParams )
   for( std::size_t objIdx{ 0 }; objIdx < numObjs; ++objIdx )
   {
     updateSlopeParameter( objIdx, newParams.timeStamps()[objIdx],
-      newParams.interpolationIntervals()[objIdx],
+      newParams.transitionTimes()[objIdx],
       newParams.gains().row( objIdx ) );
   }
 }
 
 void PanningGainMatrix::updateSlopeParameter( std::size_t objIdx,
   TimeType startTime,
-  InterpolationIntervalType duration,
+  TimeType duration,
   SampleType const * gains )
 {
   if( startTime == cTimeStampInfinity )

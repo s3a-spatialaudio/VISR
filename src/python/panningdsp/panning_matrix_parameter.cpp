@@ -82,19 +82,20 @@ void exportPanningMatrixParameter(pybind11::module & m)
      pybind11::arg( "numberOfObjects" ), pybind11::arg( "numberOfLoudspeakers" ),
      pybind11::arg( "alignment" ) = visr::cVectorAlignmentSamples)
     .def(py::init([](py::array_t< SampleType > const & gains,
-      py::array_t< TimeType > const & timeStamps, py::array_t< TimeType > const & interpolationIntervals,
+      py::array_t< TimeType > const & timeStamps,
+      py::array_t< TimeType > const & transitionTimes,
       std::size_t alignment )
       {
         visr::efl::BasicMatrix<SampleType> const gainMtx
           = visr::python::bindinghelpers::matrixFromNdArray(gains, alignment);
         visr::efl::AlignedArray<TimeType> const timeStampArray
           = arrayFromNdArray< TimeType >( timeStamps, alignment );
-        visr::efl::AlignedArray<TimeType> const & interpolationIntervalArray
-          = arrayFromNdArray< InterpolationIntervalType >( interpolationIntervals, alignment );
-        return new PanningMatrixParameter( gainMtx, timeStampArray, interpolationIntervalArray );
+        visr::efl::AlignedArray<TimeType> const & transitionTimesArray
+          = arrayFromNdArray< TimeType >( transitionTimes, alignment );
+        return new PanningMatrixParameter( gainMtx, timeStampArray, transitionTimesArray );
       } ),
        pybind11::arg( "gains" ), pybind11::arg( "timeStamps" ),
-       pybind11::arg( "interpolationIntervals" ), pybind11::arg( "alignment") = 0 )
+       pybind11::arg( "transitionTime" ), pybind11::arg( "alignment") = 0 )
     .def( pybind11::init< visr::ParameterConfigBase const & >(), py::arg( "config" ) )
     .def(pybind11::init< pml::MatrixParameterConfig const & >(), py::arg( "config" ) )
     .def_property_readonly( "numberOfObjects", &PanningMatrixParameter::numberOfObjects )
@@ -114,18 +115,18 @@ void exportPanningMatrixParameter(pybind11::module & m)
       },
       [](PanningMatrixParameter & self, py::array_t< TimeType > const & timeStamps )
       {
-        TimeStampVector tsVec = arrayFromNdArray< TimeType >( timeStamps );
+        TimeVector tsVec = arrayFromNdArray< TimeType >( timeStamps );
         copy( tsVec, self.timeStamps() );
       })
-      .def_property("interpolationIntervals",
+      .def_property("transitionTimes",
           [](PanningMatrixParameter & self)
       {
-        return arrayToNdArray< TimeType >(self.interpolationIntervals());
+        return arrayToNdArray< TimeType >(self.transitionTimes());
       },
-          [](PanningMatrixParameter & self, py::array_t< TimeType > const & interpolationIntervals)
+          [](PanningMatrixParameter & self, py::array_t< TimeType > const & transitionTimes)
       {
-        TimeStampVector iiVec = arrayFromNdArray< TimeType >(interpolationIntervals);
-        copy( iiVec, self.interpolationIntervals() );
+        TimeVector ttVec = arrayFromNdArray< TimeType >(transitionTimes);
+        copy( ttVec, self.transitionTimes() );
       })
     ;
 }

@@ -90,48 +90,40 @@ PanningMatrixParameter::PanningMatrixParameter( std::size_t numberOfObjects,
   std::size_t numberOfLoudspeakers, std::size_t alignment /*= 0*/ )
  : mGains( numberOfLoudspeakers, numberOfObjects, alignment )
  , mTimeStamps( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
- , mInterpolationIntervals( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
+ , mTransitionTimes( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
 {
   mGains.zeroFill();
 }
 
 PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
   visr::efl::AlignedArray< TimeType > const & timeStamps,
-  visr::efl::AlignedArray< InterpolationIntervalType > const & interpolationIntervals)
+  visr::efl::AlignedArray< TimeType > const & transitionTimes)
  : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
  , mTimeStamps( createCopy( timeStamps, gains.alignmentElements() ) )
- , mInterpolationIntervals( createCopy( interpolationIntervals, gains.alignmentElements() ) )
+ , mTransitionTimes( createCopy( transitionTimes, gains.alignmentElements() ) )
 {
   mGains.copy( gains );
 }
 
 PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
   std::initializer_list< TimeType > const & timeStamps,
-  std::initializer_list< InterpolationIntervalType > const & interpolationIntervals)
+  std::initializer_list< TimeType > const & transitionTimes)
  : PanningMatrixParameter( gains,
      arrayFromInitializerList( timeStamps, gains.numberOfColumns(), gains.alignmentElements() ),
-     arrayFromInitializerList( interpolationIntervals,
+     arrayFromInitializerList( transitionTimes,
        gains.numberOfColumns(), gains.alignmentElements()) )
 {
 }
-//  : mGains(gains.numberOfRows(), gains.numberOfColumns(), gains.alignmentElements())
-//  , mTimeStamps( arrayFromInitializerList( timeStamps,
-//      gains.numberOfColumns(), gains.alignmentElements() ) )
-//  , mInterpolationIntervals( arrayFromInitializerList( interpolationIntervals,
-//      gains.numberOfColumns(), gains.alignmentElements()))
-// {
-//   mGains.copy( gains );
-// }
 
 PanningMatrixParameter::PanningMatrixParameter(
   std::initializer_list< std::initializer_list< SampleType > > const & gains,
   std::initializer_list< TimeType > const & timeStamps,
-  std::initializer_list< InterpolationIntervalType > const & interpolationIntervals,
+  std::initializer_list< TimeType > const & transitionTimes,
   std::size_t alignment /*= 0*/ )
  : mGains()
  , mTimeStamps(arrayFromInitializerList(timeStamps,
      mGains.numberOfColumns(), alignment ) )
- , mInterpolationIntervals(arrayFromInitializerList(interpolationIntervals,
+ , mTransitionTimes(arrayFromInitializerList( transitionTimes,
      mGains.numberOfColumns(), alignment ))
 {
 }
@@ -150,7 +142,7 @@ PanningMatrixParameter::PanningMatrixParameter( ParameterConfigBase const & conf
 PanningMatrixParameter::PanningMatrixParameter( PanningMatrixParameter const & rhs )
  : mGains(rhs.gains().numberOfRows(), rhs.gains().numberOfColumns(), rhs.alignmentElements())
  , mTimeStamps( createCopy( rhs.timeStamps(),  rhs.alignmentElements() ) )
- , mInterpolationIntervals( createCopy( rhs.interpolationIntervals(), rhs.alignmentElements() ) )
+ , mTransitionTimes( createCopy( rhs.transitionTimes(), rhs.alignmentElements() ) )
 {
   mGains.copy( rhs.gains() );
 }
@@ -162,11 +154,11 @@ PanningMatrixParameter& PanningMatrixParameter::operator=(PanningMatrixParameter
   if (&rhs != this)
   {
     mTimeStamps.resize(rhs.numberOfObjects());
-    mInterpolationIntervals.resize(rhs.numberOfObjects());
+    mTransitionTimes.resize(rhs.numberOfObjects());
     mGains.resize(rhs.numberOfLoudspeakers(),
       rhs.numberOfObjects());
     copy(rhs.timeStamps(), timeStamps());
-    copy(rhs.interpolationIntervals(), interpolationIntervals());
+    copy(rhs.transitionTimes(), transitionTimes());
     mGains.copy(rhs.gains());
   }
   return *this;
@@ -200,28 +192,28 @@ PanningMatrixParameter::gains()
 }
 
 
-TimeStampVector const &
+TimeVector const &
 PanningMatrixParameter::timeStamps() const
 {
   return mTimeStamps;
 }
 
-TimeStampVector & 
+TimeVector & 
 PanningMatrixParameter::timeStamps()
 {
   return mTimeStamps;
 }
 
-InterpolationIntervalVector const & 
-PanningMatrixParameter::interpolationIntervals() const
+TimeVector const & 
+PanningMatrixParameter::transitionTimes() const
 {
-  return mInterpolationIntervals;
+  return mTransitionTimes;
 }
 
-InterpolationIntervalVector &
-PanningMatrixParameter::interpolationIntervals()
+TimeVector &
+PanningMatrixParameter::transitionTimes()
 {
-  return mInterpolationIntervals;
+  return mTransitionTimes;
 }
 
 } // namespace panningdsp

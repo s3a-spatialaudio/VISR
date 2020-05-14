@@ -39,6 +39,8 @@ class VISR_PANNINGDSP_LIBRARY_SYMBOL
 public:
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
+   * @param numberOfObjects The number of audio objects processed in the panning gain mattrix.
+   * @param numberOfLouudpeakers Numer of loudspeaker gains per object.
    * @param alignment The alignment of the data, given in in multiples of the element size.
    */
   explicit PanningMatrixParameter( std::size_t numberObjects, std::size_t numberOfLoudspeakers,
@@ -46,16 +48,16 @@ public:
 
   explicit PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
     visr::efl::AlignedArray<TimeType> const & timeStamps,
-    visr::efl::AlignedArray<InterpolationIntervalType> const & interpolationIntervals);
+    visr::efl::AlignedArray<TimeType> const & transitionTimes );
 
   explicit PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
     std::initializer_list<TimeType> const & timeStamps,
-    std::initializer_list<InterpolationIntervalType> const & interpolationIntervals );
+    std::initializer_list<TimeType> const & transitionTimes );
 
   explicit PanningMatrixParameter(
     std::initializer_list < std::initializer_list <SampleType > > const & gains,
     std::initializer_list<TimeType> const & timeStamps,
-    std::initializer_list<InterpolationIntervalType> const & interpolationIntervals,
+    std::initializer_list<TimeType> const & transitionTimes,
     std::size_t alignment = 0 );
 
   explicit PanningMatrixParameter( ParameterConfigBase const & config );
@@ -78,27 +80,48 @@ public:
   std::size_t numberOfLoudspeakers() const;
 
   /**
+   * Return the alignment of the gain matrix.
    */
   std::size_t alignmentElements() const;
 
+  /**
+   * Return the gain mtrix, const version.
+   * Dimension numberOfObjects x numberOfLoudpeakers.
+   */
   GainMatrixType const & gains() const;
 
+  /**
+   * Return the gain mtrix, nonconst version.
+   * Dimension numberOfObjects x numberOfLoudpeakers.
+   */
   GainMatrixType & gains();
 
-  TimeStampVector const & timeStamps() const;
+  /**
+   * Return the start time stamps of the transitions, const version
+   * Dimension: numberOfLoudpeakers
+   * A value of cTimeStampInfinity denotes that there is no transition
+   * for th object at this index.
+   */
+  TimeVector const & timeStamps() const;
 
-  TimeStampVector & timeStamps();
+  /**
+   * Return the start time stamps of the transitions.
+   * Dimension: numberOfLoudpeakers
+   * A value of cTimeStampInfinity denotes that there is no transition
+   * for th object at this index.
+   */
+  TimeVector & timeStamps();
 
-  InterpolationIntervalVector const & interpolationIntervals() const;
+  TimeVector const & transitionTimes() const;
 
-  InterpolationIntervalVector & interpolationIntervals();
+  TimeVector & transitionTimes();
 
 private:
   GainMatrixType mGains;
 
-  TimeStampVector mTimeStamps;
+  TimeVector mTimeStamps;
 
-  InterpolationIntervalVector mInterpolationIntervals;
+  TimeVector mTransitionTimes;
 };
 
 } // namespace panningdsp

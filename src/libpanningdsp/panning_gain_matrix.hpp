@@ -90,7 +90,7 @@ private:
 
   void updateSlopeParameter( std::size_t objIndex,
                              TimeType startTime,
-                             InterpolationIntervalType duration,
+                             TimeType duration,
                              SampleType const * gains );
 
   void scaleSignal( SampleType const * input, SampleType * output,
@@ -105,9 +105,9 @@ private:
 
   GainInput mGainInput;
 
-  TimeStampVector mPreviousTime;
-  TimeStampVector mCurrentTargetTime;
-  TimeStampVector mNextTargetTime;
+  TimeVector mPreviousTime;
+  TimeVector mCurrentTargetTime;
+  TimeVector mNextTargetTime;
 
   visr::efl::BasicMatrix< SampleType > mPreviousGains;
   visr::efl::BasicMatrix< SampleType > mCurrentTargetGains;
