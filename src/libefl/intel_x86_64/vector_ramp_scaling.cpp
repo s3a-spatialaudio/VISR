@@ -79,7 +79,7 @@ vectorRampScaling( float const * input,
         __m256 res =  _mm256_fmadd_ps( scale, inPart, outPart );
 #else
         __m256 scale = _mm256_add_ps( _mm256_mul_ps( rampPart, gain ), base );
-        __m256 res = _m256_add_ps( _mm256_mul_ps( scale, inPart ), outPart );
+        __m256 res = _mm256_add_ps( _mm256_mul_ps( scale, inPart ), outPart );
 #endif
         _mm256_storeu_ps( output, res );
         output += 8;
