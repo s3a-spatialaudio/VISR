@@ -88,7 +88,7 @@ efl::AlignedArray< T > arrayFromInitializerList(std::initializer_list< T > list,
 
 PanningMatrixParameter::PanningMatrixParameter( std::size_t numberOfObjects,
   std::size_t numberOfLoudspeakers, std::size_t alignment /*= 0*/ )
- : mGains( numberOfLoudspeakers, numberOfObjects, alignment )
+ : mGains( numberOfObjects, numberOfLoudspeakers, alignment )
  , mTimeStamps( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
  , mTransitionTimes( createConstantArray( cTimeStampInfinity, numberOfObjects, alignment ) )
 {
@@ -109,9 +109,9 @@ PanningMatrixParameter::PanningMatrixParameter(visr::efl::BasicMatrix<SampleType
   std::initializer_list< TimeType > const & timeStamps,
   std::initializer_list< TimeType > const & transitionTimes)
  : PanningMatrixParameter( gains,
-     arrayFromInitializerList( timeStamps, gains.numberOfColumns(), gains.alignmentElements() ),
+     arrayFromInitializerList( timeStamps, gains.numberOfRows(), gains.alignmentElements() ),
      arrayFromInitializerList( transitionTimes,
-       gains.numberOfColumns(), gains.alignmentElements()) )
+       gains.numberOfRows(), gains.alignmentElements()) )
 {
 }
 
@@ -120,11 +120,13 @@ PanningMatrixParameter::PanningMatrixParameter(
   std::initializer_list< TimeType > const & timeStamps,
   std::initializer_list< TimeType > const & transitionTimes,
   std::size_t alignment /*= 0*/ )
- : mGains()
+ : mGains( gains.size(),
+     gains.begin() == gains.end() ? 0 : gains.begin()->size(),
+     gains, alignment )
  , mTimeStamps(arrayFromInitializerList(timeStamps,
-     mGains.numberOfColumns(), alignment ) )
+     numberOfObjects(), alignment ) )
  , mTransitionTimes(arrayFromInitializerList( transitionTimes,
-     mGains.numberOfColumns(), alignment ))
+     numberOfObjects(), alignment ))
 {
 }
 
@@ -166,12 +168,12 @@ PanningMatrixParameter& PanningMatrixParameter::operator=(PanningMatrixParameter
 
 std::size_t PanningMatrixParameter::numberOfObjects() const
 {
-  return mGains.numberOfColumns();
+  return mGains.numberOfRows();
 }
 
 std::size_t PanningMatrixParameter::numberOfLoudspeakers() const
 {
-  return mGains.numberOfRows();
+  return mGains.numberOfColumns();
 }
 
 std::size_t PanningMatrixParameter::alignmentElements() const

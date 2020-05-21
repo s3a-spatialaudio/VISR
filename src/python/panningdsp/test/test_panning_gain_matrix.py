@@ -3,31 +3,74 @@ import visr
 import panningdsp
 import rrl
 
+from operator import itemgetter
 import numpy as np
-import matplotlib.pyplot as plt
 
+def referenceGainScalar( sigLen, initialGain, transitions ):
+    """
+    Internal function to compute the gain trajectory for an arbitra
+    """
+    out = np.full( sigLen, initialGain, dtype=np.float )
+    currGain = initialGain
+    for trans in transitions:
+        start = trans["s"]
+        duration = trans["d"]
+        gain = trans["g"]
+        if start >= sigLen:
+            break
+        gainRamp = np.flip(np.linspace(gain, currGain,
+                                       duration, endpoint=False))
+        remLen = sigLen - start
+        if remLen >= duration:
+            out[start:start+duration] = gainRamp
+            out[start+duration:] = gain
+        else:
+            out[-remLen:] = gainRamp[:remLen]
+        currGain=gain
 
-def test_constantGain():
-    fs=48000
-    bs=64
+    return out
+
+def plotPanningScalar( inSig, outSig, refSig, title, fig=None):
+    fig, axs = plt.subplots(3,1)
+    axs[0].plot( inSig, 'g-', label='input' )
+    axs[0].plot( refSig, 'bo-', label='output' )
+    axs[0].plot( outSig, 'm.-', label='reference' )
+
+    axs[1].plot( outSig - refSig, 'r.-')
+    axs[1].set_title('Error (output-reference)')
+
+    axs[2].plot( np.diff(refSig), 'bo-', label='reference' )
+    axs[2].plot( np.diff(outSig), 'm.-', label='output')
+    axs[2].set_title( 'Finite differences' )
+    axs[2].legend()
+    fig.suptitle( title )
+
+def scalarPanning( signal, transitions=[], bs=64, fs=48000, initialGain=0.0 ):
+    """
+    Internal implementation function for applying a panning gain to a scalar
+    signal with an arbitrary sequence of transition messages.
+    """
     numIns=1
     numOuts=1
 
     activeIn=0
     activeOut=0
 
-    numBlocks=8
-    signalLength=numBlocks*bs
-    inSig=np.asarray(2.0*np.random.rand( numIns, signalLength )-1,
-                     dtype=np.float32)
-    inSig[activeIn,:]=0.75*np.sin( 2*np.pi*880/fs*np.arange(signalLength))
+    inSig = np.asarray( np.atleast_2d( signal), dtype=np.float32)
+    signalLength=inSig.shape[-1]
+    numBlocks=signalLength // bs
+    assert numBlocks*bs == signalLength
     outSig = np.zeros( (numOuts, signalLength), dtype=np.float32)
 
     gains = np.zeros((numOuts, numIns), dtype=np.float32)
-    gains[activeOut, activeIn] = 0.75
+    gains[activeOut, activeIn] = initialGain
 
+    transitions.sort( key=itemgetter( 'i' ))
 
-    refOutput = gains @ inSig
+    refGain = referenceGainScalar( signalLength, initialGain, transitions )
+
+    # Works only for scalar input
+    refOutput = refGain * inSig
 
     ctxt=visr.SignalFlowContext(period=bs, samplingFrequency=fs)
 
@@ -39,102 +82,248 @@ def test_constantGain():
     gainInput = flow.parameterReceivePort("gainInput")
 
     for bIdx in range(numBlocks):
+        param = gainInput.data()
+        for t in [ p for p in transitions if p['i'] == bIdx]:
+            param.timeStamps = [t['s']]
+            param.transitionTimes = [t['d']]
+            np.asarray(param.gains)[activeOut,activeIn] = t['g']
+            gainInput.swapBuffers()
         outSig[:,bIdx*bs:(bIdx+1)*bs] = flow.process(inSig[:,bIdx*bs:(bIdx+1)*bs])
 
-    fig, ax = plt.subplots(1,1)
-    ax.plot( inSig[activeIn,:], 'g-' )
-    ax.plot( refOutput[activeOut,:], 'bo-' )
-    ax.plot( outSig[activeOut,:], 'm.-')
-
-    fig2, ax2 = plt.subplots(1,1)
-    ax2.plot( outSig[activeOut,:]-refOutput[activeOut], 'r.-')
-    fig2.suptitle('Error (output-reference)')
-
-    fig3, ax3 = plt.subplots(1,1)
-    ax3.plot( np.diff(refOutput[activeOut,:]), 'bo-', label='ref' )
-    ax3.plot( np.diff(outSig[activeOut,:]), 'm.-', label='output')
-    fig3.suptitle( 'Finite differences' )
-    ax3.legend()
-    plt.show(block=True)
-
-    assert np.all(np.abs(outSig[activeOut,:] - refOutput )
-                  <= 5*np.finfo(np.float32).eps)
+    return outSig[activeOut,:], refOutput[activeOut,:]
 
 
-def test_rampGain():
+def test_constantGain( plot=False ):
     fs=48000
     bs=64
-    numIns=1
-    numOuts=1
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.sin( 2*np.pi*880/fs*np.arange(signalLength))
+    out, ref = scalarPanning(inSig, transitions=[], bs=bs, fs=fs,
+                             initialGain=0.35)
 
-    activeIn=0
-    activeOut=0
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Constant gain")
 
-    startGain = 0.0
-    endGain = 1.0
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+def test_rampGain(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    endGain = 0.725
     transitionTime = 17
     transitionStartTime = 137
     parameterSendBlock = 1
     assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
 
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Ramp gain")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+def test_rampGainCrossBlockBoundary(plot=False):
+    fs=48000
+    bs=64
     numBlocks=8
     signalLength=numBlocks*bs
-    inSig=np.asarray(2.0*np.random.rand( numIns, signalLength )-1,
-                     dtype=np.float32)
-    inSig[activeIn,:]=  1.0 # 0.75*np.sin( 2*np.pi*880/fs*np.arange(signalLength))
-    outSig = np.zeros( (numOuts, signalLength), dtype=np.float32)
+    inSig=0.75*np.ones(signalLength)
 
-    gains = np.zeros((numOuts, numIns), dtype=np.float32)
-    gains[activeOut, activeIn] = startGain
+    startGain = 0.2
+    endGain = 0.725
+    transitionTime = 139
+    transitionStartTime = 137
+    parameterSendBlock = 1
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
 
-    gainRef = np.full((signalLength,), startGain )
-    gainRef[transitionStartTime:transitionStartTime+transitionTime] = \
-        np.flip( np.linspace( endGain, startGain, transitionTime, endpoint=False))
-    gainRef[transitionStartTime+transitionTime:] = endGain
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Ramp gain crossing block boundary")
 
-    # Works only for scalar input
-    refOutput = gainRef * inSig
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
 
-    ctxt=visr.SignalFlowContext(period=bs, samplingFrequency=fs)
 
-    comp=panningdsp.PanningGainMatrix(ctxt, "GainMatrix", None,
-      numberOfObjects=numIns, numberOfLoudspeakers=numOuts,
-      initialGains=gains )
+def test_rampGainStartAtBlockBoundary(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
 
-    flow = rrl.AudioSignalFlow( comp )
-    gainInput = flow.parameterReceivePort("gainInput")
+    startGain = 0.2
+    endGain = 0.725
+    transitionTime = 2*bs
+    transitionStartTime = 137
+    parameterSendBlock = 1
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
 
-    for bIdx in range(numBlocks):
-        if bIdx == parameterSendBlock:
-            param = gainInput.data()
-            param.timeStamps = [transitionStartTime]
-            param.transtionTimes = [transitionTime]
-            np.asarray(param.gains)[activeOut,activeIn] = endGain
-            gainInput.swapBuffers()
-        outSig[:,bIdx*bs:(bIdx+1)*bs] = flow.process(inSig[:,bIdx*bs:(bIdx+1)*bs])
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Ramp starting at block boundary")
 
-    fig, ax = plt.subplots(1,1)
-    ax.plot( inSig[activeIn,:], 'g-' )
-    ax.plot( refOutput[activeOut,:], 'bo-' )
-    ax.plot( outSig[activeOut,:], 'm.-')
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
 
-    fig2, ax2 = plt.subplots(1,1)
-    ax2.plot( outSig[activeOut,:]-refOutput[activeOut], 'r.-')
-    fig2.suptitle('Error (output-reference)')
 
-    fig3, ax3 = plt.subplots(1,1)
-    ax3.plot( np.diff(refOutput[activeOut,:]), 'bo-', label='ref' )
-    ax3.plot( np.diff(outSig[activeOut,:]), 'm.-', label='output')
-    fig3.suptitle( 'Finite differences' )
-    ax3.legend()
-    # plt.show(block=True)
+def test_rampGainEndAtBlockBoundary(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
 
-    assert np.all(np.abs(outSig[activeOut,:] - refOutput )
-                  <= 5*np.finfo(np.float32).eps)
+    startGain = 0.2
+    endGain = 0.725
+    transitionTime = 34
+    transitionStartTime = 2*bs - transitionTime
+    parameterSendBlock = 1
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
 
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Ramp endig at block boundary")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+def test_multipleTransitionsSeparate(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    transitions = [ dict(i=0, s=13, d=75, g=1.0),
+                   dict(i=2, s=143, d=75, g=0.5)]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Two non-overlappping transactions")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+def test_multipleTransitionsSeparateSend2ndBefore1stFinished(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    transitions = [ dict(i=0, s=13, d=75, g=1.0),
+                   dict(i=2, s=143, d=75, g=0.5)]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Two non-overlappping transactions, second is sent before first is finished.")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+def test_multipleTransitionsAdjoining(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    start1 = 88
+    duration1 = 75
+    start2 = start1+duration1
+    duration2 = 135
+    transitions = [ dict(i=0, s=start1, d=duration1, g=1.0),
+                   dict(i=2, s=start2, d=duration2, g=0.5)]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Two adjoining transactions")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+def test_multipleTransitionsOverlapping(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    start1 = 88
+    duration1 = 75
+    start2 = start1+duration1+12
+    duration2 = 135
+    transitions = [ dict(i=0, s=start1, d=duration1, g=1.0),
+                   dict(i=2, s=start2, d=duration2, g=0.5)]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Two overlappping transactions")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+def test_jumpGain(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.7
+    endGain = 0.4
+    transitionTime = 0
+    transitionStartTime = 137
+    parameterSendBlock = 1
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Jump gain")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
 
 
 # Enable to run the unit test as a script.
 if __name__ == "__main__":
-#     test_constantGain()
-    test_rampGain()
+    plotData = True # Set to show plots
+    if plotData:
+        import matplotlib.pyplot as plt
+
+    test_constantGain(plot=plotData)
+    test_rampGain(plot=plotData)
+    test_rampGainCrossBlockBoundary(plot=plotData)
+    test_rampGainStartAtBlockBoundary(plot=plotData)
+    test_rampGainEndAtBlockBoundary(plot=plotData)
+    test_multipleTransitionsSeparate(plot=plotData)
+    test_multipleTransitionsSeparateSend2ndBefore1stFinished(plot=plotData)
+    test_multipleTransitionsAdjoining(plot=plotData)
+    test_multipleTransitionsOverlapping(plot=plotData)
+    test_jumpGain(plot=plotData)

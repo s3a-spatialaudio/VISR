@@ -69,11 +69,12 @@ PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
  , mAudioOutput( "out", *this, numberOfLoudspeakers )
  , mGainInput( "gainInput", *this, pml::MatrixParameterConfig( numberOfLoudspeakers, numberOfObjects ) )
  , mPreviousTime{ constantArray( 0ul, numberOfObjects, visr::cVectorAlignmentSamples ) }
- , mCurrentTargetTime{ constantArray( cTimeStampInfinity, numberOfObjects, visr::cVectorAlignmentSamples ) }
- , mNextTargetTime{ constantArray( cTimeStampInfinity, numberOfObjects, visr::cVectorAlignmentSamples ) }
+ , mTargetTime{ constantArray( cTimeStampInfinity, numberOfObjects, visr::cVectorAlignmentSamples ) }
  , mPreviousGains{ numberOfLoudspeakers, numberOfObjects, visr::cVectorAlignmentSamples }
- , mCurrentTargetGains{ numberOfLoudspeakers, numberOfObjects, visr::cVectorAlignmentSamples }
- , mNextTargetGains{ numberOfLoudspeakers, numberOfObjects, visr::cVectorAlignmentSamples }
+ , mTargetGains{ numberOfLoudspeakers, numberOfObjects, visr::cVectorAlignmentSamples }
+ , mPendingTransitions( cNumPendingTransitions,
+       PanningMatrixParameter( numberOfObjects, numberOfLoudspeakers, 
+       visr::cVectorAlignmentSamples ) )
  , mScalingRamp{ createRamp( static_cast<SampleType>(1.0), 
     static_cast<SampleType>(1.0),
     period(), visr::cVectorAlignmentSamples )}
@@ -85,8 +86,7 @@ PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
       " the dimension numberOfLoudspeakers x numberOfObjects." );
   }
   mPreviousGains.copy( initialGains );
-  mCurrentTargetGains.copy( initialGains );
-  mNextTargetGains.copy( initialGains );
+  mTargetGains.copy( initialGains );
 }
 
 PanningGainMatrix::PanningGainMatrix(SignalFlowContext const & context,
@@ -95,11 +95,11 @@ PanningGainMatrix::PanningGainMatrix(SignalFlowContext const & context,
   std::size_t numberOfObjects,
   std::size_t numberOfLoudspeakers,
   efl::BasicMatrix<SampleType> const & initialGains,
-  PanningMatrixParameter const & initialSlope )
+  PanningMatrixParameter const & initialTransitions )
  : PanningGainMatrix{ context, name, parent,
     numberOfObjects, numberOfLoudspeakers, initialGains }
 {
-  updateSlopeParameters( initialSlope );
+  updateTransitions( 0, initialTransitions );
 }
 
 PanningGainMatrix::~PanningGainMatrix() = default;
@@ -115,7 +115,11 @@ namespace // unnamed
 
 using GainType = PanningGainMatrix::SampleType;
 
-GainType startGainRatio( TimeType currentTime, 
+/**
+ * Compute the slope value of currentTime between previousTime
+ * and targetTime  
+ */
+GainType interpolationRatio( TimeType currentTime, 
     TimeType previousTime, TimeType targetTime )
 {
   return (targetTime == cTimeStampInfinity )
@@ -132,46 +136,140 @@ GainType gainIncRatio( TimeType previousTime, TimeType targetTime )
     static_cast<GainType>( targetTime - previousTime );
 }
 
-template< typename T >
-void copyColumn( efl::BasicMatrix< T > const & src, efl::BasicMatrix< T > & dest,
-  std::size_t colIdx )
-{
-  std::size_t const numEl{ src.numberOfRows() };
-  assert( dest.numberOfRows() == numEl );
-  assert( colIdx < src.numberOfColumns() );
-  assert( colIdx < dest.numberOfColumns() );
+// template< typename T >
+// void copyColumn( efl::BasicMatrix< T > const & src, efl::BasicMatrix< T > & dest,
+//   std::size_t colIdx )
+// {
+//   std::size_t const numEl{ src.numberOfRows() };
+//   assert( dest.numberOfRows() == numEl );
+//   assert( colIdx < src.numberOfColumns() );
+//   assert( colIdx < dest.numberOfColumns() );
 
-  efl::ErrorCode const res = efl::vectorCopyStrided( &src( 0, colIdx ),
-    &dest( 0, colIdx ), src.stride(), dest.stride(), numEl,
-    0 /* No alignment for arbitary columns.*/ );
+//   efl::ErrorCode const res = efl::vectorCopyStrided( &src( 0, colIdx ),
+//     &dest( 0, colIdx ), src.stride(), dest.stride(), numEl,
+//     0 /* No alignment for arbitary columns.*/ );
+//   if( res != efl::noError )
+//   {
+//     throw std::invalid_argument( visr::detail::composeMessageString(
+//       "Error while copying matrix column: ", efl::errorMessage( res) ) );
+//   }
+// }
+
+// /**
+//  * Copy a continuous array to a column in the destination array.
+//  * @param src Source array, holds at least \p dest.numberOfRows() elements.
+//  */
+// template< typename T >
+// void copyArrayToColumn( T const * src, efl::BasicMatrix< T > & dest,
+//   std::size_t colIdx )
+// {
+//   std::size_t const numEl{ dest.numberOfRows() };
+//   efl::ErrorCode const res = efl::vectorCopyStrided( src,
+//     &dest( 0, colIdx ), 1, dest.stride(), numEl,
+//     0 /* No alignment for arbitary columns.*/ );
+//   if( res != efl::noError )
+//   {
+//     throw std::invalid_argument( visr::detail::composeMessageString(
+//       "Error while copying matrix column: ", efl::errorMessage( res) ) );
+//   }
+// }
+
+template< typename T >
+void copyRow( T const * src, T * dest,
+std::size_t numElements, std::size_t alignment = 0 )
+{
+  efl::ErrorCode const res = efl::vectorCopy( src,
+    dest, numElements, alignment );
   if( res != efl::noError )
   {
     throw std::invalid_argument( visr::detail::composeMessageString(
-      "Error while copying matrix column: ", efl::errorMessage( res) ) );
+      "Error while copying vector: ", efl::errorMessage( res) ) );
   }
 }
 
-/**
- * Copy a continuous array to a column in the destination array.
- * @param src Source array, holds at least \p dest.numberOfRows() elements.
- */
-template< typename T >
-void copyArrayToColumn( T const * src, efl::BasicMatrix< T > & dest,
-  std::size_t colIdx )
+} // unnamed namespace
+
+#if 1
+void PanningGainMatrix::processAudio()
 {
-  std::size_t const numEl{ dest.numberOfRows() };
-  efl::ErrorCode const res = efl::vectorCopyStrided( src,
-    &dest( 0, colIdx ), 1, dest.stride(), numEl,
-    0 /* No alignment for arbitary columns.*/ );
-  if( res != efl::noError )
+  std::size_t const numObjs{ mAudioInput.width() };
+  std::size_t const numLsp{ mAudioOutput.width() };
+  std::size_t const bufSize{ period() };
+  if( numObjs == 0 )
   {
-    throw std::invalid_argument( visr::detail::composeMessageString(
-      "Error while copying matrix column: ", efl::errorMessage( res) ) );
+    efl::ErrorCode const res
+      = efl::vectorZero( mAudioOutput.data(),
+        numLsp * mAudioOutput.channelStrideSamples() );
+    if( res != efl::noError )
+    {
+      status( StatusMessage::Error, "Error during zeroing of output signal: ",
+        efl::errorMessage( res ) );
+    }
+    return;
+  }
+  TimeType currentTime{ time().sampleCount() };
+  TimeType const blockEndTime{ currentTime + bufSize };
+  std::size_t bufferOffset{ 0 };
+
+  // Time::IntegerTimeType const periodEndTime{ currentTime + bufSize };
+  for( std::size_t objIdx{ 0 }; objIdx < numObjs; ++objIdx )
+  {
+    // Add to the output signals for all but the first (zeroth) object
+    bool const accumulateFlag = (objIdx != 0);
+
+    while( currentTime < blockEndTime )
+    {
+      assert( mPreviousTime[ objIdx ] < mTargetTime[ objIdx ] );
+      assert( currentTime >= mPreviousTime[ objIdx ] );
+      assert( currentTime < mTargetTime[ objIdx ] );
+      assert( mPendingTransitions[0].timeStamps()[objIdx] > currentTime );
+      Time::IntegerTimeType const duration{ std::min( 
+        mTargetTime[ objIdx ], blockEndTime ) - currentTime };
+      assert( duration > 0 ); // Otherwise this is a logical error,
+      processAudioSingleSlope( objIdx, currentTime, bufferOffset, duration, accumulateFlag, 
+        0 /*Alignment not guaranteed for arbitrary offsets.*/  );
+
+      currentTime += duration;
+      bufferOffset += duration;
+      if( currentTime == mTargetTime[objIdx] )
+      {
+        mPreviousTime[ objIdx ] = currentTime;
+        TimeType const nextStartTime{ mPendingTransitions[0].timeStamps()[ objIdx ] };
+        if( nextStartTime == currentTime ) // next transition starts immediately
+        {
+          TimeType const transitionTime{ mPendingTransitions[0].transitionTimes()[ objIdx ] };
+          if( transitionTime == 0 )
+          {
+            copyRow( mPendingTransitions[0].gains().row( objIdx ),
+                mPreviousGains.row( objIdx ),
+                numLsp, visr::cVectorAlignmentSamples );
+            mTargetTime[ objIdx ] = cTimeStampInfinity;
+          }
+          else
+          {
+            copyRow( mTargetGains.row( objIdx ), mPreviousGains.row( objIdx ),
+                numLsp, visr::cVectorAlignmentSamples );
+            mTargetTime[ objIdx ] = currentTime + transitionTime;
+          }
+          copyRow( mPendingTransitions[0].gains().row( objIdx ),
+              mTargetGains.row( objIdx ),
+              numLsp, visr::cVectorAlignmentSamples );
+          mPendingTransitions[0].timeStamps()[ objIdx ] = cTimeStampInfinity;
+          mPendingTransitions[0].transitionTimes()[ objIdx ] = cTimeStampInfinity;
+        }
+        else // There's a gap to the next transition
+        {
+          mTargetTime[ objIdx ] = nextStartTime;
+          copyRow( mTargetGains.row( objIdx ), mPreviousGains.row( objIdx ),
+              numLsp, visr::cVectorAlignmentSamples );
+          // mTargetGains remain unchanged.
+
+        }
+      }
+    } // while(true)
   }
 }
-
-} // unnamed namspace
-
+#else
 void PanningGainMatrix::processAudio()
 {
   std::size_t const numObjs{ mAudioInput.width() };
@@ -232,23 +330,24 @@ void PanningGainMatrix::processAudio()
     assert( currentTime + bufSize <= mCurrentTargetTime[ objIdx ] );
   }
 }
+#endif
 
 void PanningGainMatrix::processAudioSingleSlope( std::size_t objIdx, TimeType currentTime, 
   std::size_t startIdx,
   std::size_t duration, bool accumulate, std::size_t alignment )
 {
   std::size_t const numLsp{ mAudioOutput.width() };
-  SampleType const startRatio = startGainRatio( currentTime, mPreviousTime[objIdx], 
-    mCurrentTargetTime[objIdx] );
+  SampleType const startRatio = interpolationRatio( currentTime, mPreviousTime[objIdx], 
+    mTargetTime[objIdx] );
   SampleType const incRatio = gainIncRatio( mPreviousTime[objIdx], 
-    mCurrentTargetTime[objIdx] );
+    mTargetTime[objIdx] );
   for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx )
   {
     // Could be vectorised (but the gain matrix entries are non)
-    SampleType const startGain = mPreviousGains( lspIdx, objIdx )
-      + startRatio * (mCurrentTargetGains( lspIdx, objIdx ) - mPreviousGains( lspIdx, objIdx ) );
+    SampleType const startGain = mPreviousGains( objIdx, lspIdx )
+      + startRatio * (mTargetGains( objIdx, lspIdx ) - mPreviousGains( objIdx, lspIdx ) );
     SampleType const gainInc = incRatio
-      * (mCurrentTargetGains( lspIdx, objIdx ) - mPreviousGains( lspIdx, objIdx ) );
+      * (mTargetGains( objIdx, lspIdx ) - mPreviousGains( objIdx, lspIdx ) );
 
     // Alignment is ensured because we start from the beginning of the input and output buffers.
     scaleSignal( mAudioInput[objIdx], mAudioOutput[lspIdx],
@@ -260,24 +359,28 @@ void PanningGainMatrix::processParameters()
 {
   if( mGainInput.changed() )
   {
-    updateSlopeParameters( mGainInput.data() );
+    TimeType const currentTime{ time().sampleCount() };
+    updateTransitions( currentTime, mGainInput.data() );
     mGainInput.resetChanged();
   }
 }
 
 void PanningGainMatrix::
-updateSlopeParameters( PanningMatrixParameter const & newParams )
+updateTransitions(  TimeType currentTime,
+    PanningMatrixParameter const & newParams )
 {
-  std::size_t const numObjs{ mCurrentTargetGains.numberOfColumns() };
+  std::size_t const numObjs{ mTargetGains.numberOfRows() };
   for( std::size_t objIdx{ 0 }; objIdx < numObjs; ++objIdx )
   {
-    updateSlopeParameter( objIdx, newParams.timeStamps()[objIdx],
+    updateTransition( objIdx, currentTime,
+      newParams.timeStamps()[objIdx],
       newParams.transitionTimes()[objIdx],
       newParams.gains().row( objIdx ) );
   }
 }
 
-void PanningGainMatrix::updateSlopeParameter( std::size_t objIdx,
+void PanningGainMatrix::updateTransition( std::size_t objIdx,
+  TimeType currentTime,
   TimeType startTime,
   TimeType duration,
   SampleType const * gains )
@@ -286,6 +389,31 @@ void PanningGainMatrix::updateSlopeParameter( std::size_t objIdx,
   {
     return;
   }
+  if( startTime < currentTime )
+  {
+    status( StatusMessage::Error, "Time stamp of gain change is in the past." );
+    return;
+  }
+#if 1
+  if( startTime < mTargetTime[ objIdx ] )
+  {
+    // Adjust the current target gains by computing the value at 
+    // startTime
+    GainType const alpha = interpolationRatio( currentTime,
+        mPreviousTime[ objIdx ], mTargetTime[ objIdx ] );
+    std::size_t const numLsp{ mTargetGains.numberOfColumns() };
+    // TODO: turn into a vector function.
+    for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
+    {
+      mTargetGains( lspIdx, objIdx ) = alpha * mTargetGains( objIdx, lspIdx )
+        + (1.0f - alpha ) * mPreviousGains( objIdx, lspIdx );
+    }
+    mTargetTime[ objIdx ] = startTime;
+  }
+  mPendingTransitions[0].timeStamps()[ objIdx ] = startTime;
+  mPendingTransitions[0].transitionTimes()[ objIdx ] = duration;
+  mPendingTransitions[0].gains().setRow( objIdx, gains );
+#else
   TimeType const currentTime = time().sampleCount();
   if( startTime < currentTime )
   {
@@ -293,37 +421,29 @@ void PanningGainMatrix::updateSlopeParameter( std::size_t objIdx,
     status( StatusMessage::Error, "Tie stamp of gain change is in the past." );
     return;
   }
-  else if( startTime == mCurrentTargetTime[objIdx] )
+  else if( startTime == mTargetTime[objIdx] )
   {
     // This is a special case, because the next slope starts immediately
 
     // TODO: Factor out into a method (similar code is used above)
-    mPreviousTime[objIdx] = mCurrentTargetTime[objIdx];
-    mCurrentTargetTime[objIdx] = startTime + duration;
-    mNextTargetTime[objIdx] = cTimeStampInfinity;
-    copyColumn( mCurrentTargetGains, mPreviousGains, objIdx );
-    copyArrayToColumn( gains, mCurrentTargetGains, objIdx );
+    mPreviousTime[objIdx] = mTargetTime[objIdx];
+    mTargetTime[objIdx] = startTime + duration;
+    // copyColumn( mCurrentTargetGains, mPreviousGains, objIdx );
+    // copyArrayToColumn( gains, mCurrentTargetGains, objIdx );
   }
   else // if( startTime < mCurrentTargetTime[objIdx] )
   {
     // Determine the current gain value
     SampleType const currScale = startGainRatio( currentTime, mPreviousTime[objIdx],
-        mCurrentTargetTime[objIdx] );
-    for( std::size_t lspIdx{ 0 }; lspIdx < mCurrentTargetGains.numberOfRows(); ++lspIdx)
+        mTargetTime[objIdx] );
+    std::size_t const numLsp{ mTargetGains.numberOfColumns() };
+    for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
     {
-      mCurrentTargetGains( lspIdx, objIdx ) = currScale * mCurrentTargetGains( lspIdx, objIdx )
-        + (1.0 - currScale ) * mPreviousGains( lspIdx, objIdx );
+      mTargetGains( lspIdx, objIdx ) = currScale * mTargetGains( objIdx, lspIdx )
+        + (1.0 - currScale ) * mPreviousGains( objIdx, lspIdx );
     }
-    copyArrayToColumn( gains, mNextTargetGains, objIdx  );
-    mCurrentTargetTime[objIdx] = startTime;
-    mNextTargetTime[objIdx] = startTime + duration;
-  }
-#if 0
-  else
-  {
-    copyArrayToColumn( gains, mNextTargetGains, objIdx  );
-    mCurrentTargetTime[objIdx] = startTime;
-    mNextTargetTime[objIdx] = startTime + duration;
+    // copyArrayToColumn( gains, mNextTargetGains, objIdx  );
+    mTargetTime[objIdx] = startTime;
   }
 #endif
 }

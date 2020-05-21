@@ -38,12 +38,12 @@ class VISR_PANNINGDSP_LIBRARY_SYMBOL
 {
 public:
   /**
-   * Default constructor, creates an empty matrix of dimension 0 x 0.
+   * Default constructor, creates a zero-initialised tranisitions structure.
    * @param numberOfObjects The number of audio objects processed in the panning gain mattrix.
-   * @param numberOfLouudpeakers Numer of loudspeaker gains per object.
+   * @param numberOfLoudspeakers Numer of loudspeaker gains per object.
    * @param alignment The alignment of the data, given in in multiples of the element size.
    */
-  explicit PanningMatrixParameter( std::size_t numberObjects, std::size_t numberOfLoudspeakers,
+  explicit PanningMatrixParameter( std::size_t numberOfObjects, std::size_t numberOfLoudspeakers,
     std::size_t alignment = 0 );
 
   explicit PanningMatrixParameter(visr::efl::BasicMatrix<SampleType> const & gains,
