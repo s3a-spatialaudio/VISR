@@ -95,7 +95,7 @@ void exportListenerPosition( pybind11::module & m)
           py::arg("quaternion") )
     .def( py::init<ListenerPosition const &>() ) // Copy constructor
     .def_static( "fromRotationVector", &ListenerPosition::fromRotationVector,
-      py::arg( "positon"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
+      py::arg( "position"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
     .def_static( "fromJson", static_cast<ListenerPosition(*)(std::string const &)>(&ListenerPosition::fromJson) )
     .def( "parseJson", static_cast<void(ListenerPosition::*)(std::string const &)>(&ListenerPosition::parseJson), py::arg("string") )
     .def( "writeJson", static_cast<std::string(ListenerPosition::*)(bool, bool)const>(&ListenerPosition::writeJson),
