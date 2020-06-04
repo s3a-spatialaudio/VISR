@@ -125,7 +125,7 @@ public:
 
   /**
    * Return the start time stamps of the transitions, const version
-   * Dimension: numberOfLoudpeakers
+   * Dimension: numberOfObjects
    * A value of cTimeStampInfinity denotes that there is no transition
    * for th object at this index.
    */
@@ -133,7 +133,7 @@ public:
 
   /**
    * Return the start time stamps of the transitions.
-   * Dimension: numberOfLoudpeakers
+   * Dimension: numberOfObjects
    * A value of cTimeStampInfinity denotes that there is no transition
    * for th object at this index.
    */
