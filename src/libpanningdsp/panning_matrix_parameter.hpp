@@ -127,7 +127,7 @@ public:
    * Return the start time stamps of the transitions, const version
    * Dimension: numberOfObjects
    * A value of cTimeStampInfinity denotes that there is no transition
-   * for th object at this index.
+   * for the object at this index.
    */
   TimeVector const & timeStamps() const;
 
@@ -135,7 +135,7 @@ public:
    * Return the start time stamps of the transitions.
    * Dimension: numberOfObjects
    * A value of cTimeStampInfinity denotes that there is no transition
-   * for th object at this index.
+   * for the object at this index.
    */
   TimeVector & timeStamps();
 
