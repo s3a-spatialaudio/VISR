@@ -6,9 +6,8 @@ import rrl
 
 import numpy as np
 from scipy import signal
-import matplotlib.pyplot as plt
 
-def test_singleChannel():
+def test_singleChannel(plot=False):
     fs=48000
     bs=256
     numSignals=3
@@ -51,7 +50,7 @@ def test_singleChannel():
 
     comp = rcl.TimeFrequencyTransform(cc, "TFT", None,
                                       numberOfChannels=numSignals,
-                                      dftLength=dftLen, hopSize=hopSize,
+                                      dftSize=dftLen, hopSize=hopSize,
                                       window=window,
                                       fftImplementation='kissfft',
                                       normalisation=rcl.TimeFrequencyTransform.Normalisation.One )
@@ -63,9 +62,9 @@ def test_singleChannel():
         flow.process( inputSignal[:,bs*bIdx:bs*(bIdx+1)])
         tfBlock=tfOut.data()
 
-        assert tfBlock.dftSize == numFdBins
+        assert tfBlock.numberOfDftBins == numFdBins
         assert tfBlock.numberOfChannels == numSignals
-        assert tfBlock.dftBlocks == dftBlocksPerPeriod
+        assert tfBlock.numberOfFrames == dftBlocksPerPeriod
 
         outputData[:,:, bIdx*dftBlocksPerPeriod:(bIdx+1)*dftBlocksPerPeriod]=\
             np.asarray(tfBlock).transpose( (1,2,0) )
@@ -82,20 +81,16 @@ def test_singleChannel():
         bl = inputSignal[sigIdx,endIdx-dftLen:endIdx]
     Bl = np.fft.rfft( bl * window )
 
-    plt.figure()
-    plt.plot(fBins, np.abs(Bl), 'rs-', label='Ref')
-    plt.plot(fBins, np.abs(refOutput[sigIdx,:,blockIdx]), 'bo-', label='STFT')
-    plt.plot(fBins, np.abs(outputData[sigIdx,:,blockIdx]), 'm.-', label='VISR TFT')
-    # plt.plot(fBins, (np.abs(Bl)/
-    #                  np.max(np.abs(Bl))), 'rs-', label='Ref')
-    # plt.plot(fBins, (np.abs(refOutput[sigIdx,:,blockIdx])/
-    #                  np.max(np.abs(refOutput[sigIdx,:,blockIdx]))), 'bo-', label='STFT')
-    # plt.plot(fBins, (np.abs(outputData[sigIdx,:,blockIdx])/
-    #                  np.max(np.abs(outputData[sigIdx,:,blockIdx]))), 'm.-', label='VISR TFT')
+    if(plot):
+        import matplotlib.pyplot as plt
+        plt.figure()
+        plt.plot(fBins, np.abs(Bl), 'rs-', label='Ref')
+        plt.plot(fBins, np.abs(outputData[sigIdx,:,blockIdx]), 'm.-', label='VISR TFT')
+        plt.legend()
 
-    # errPerSegment = np.abs( )
+    assert np.linalg.norm(Bl - outputData[sigIdx,:,blockIdx]) < 5e-5
 
 
 # Enable to run the unit test as a script.
 if __name__ == "__main__":
-    test_singleChannel()
+    test_singleChannel(plot=True)

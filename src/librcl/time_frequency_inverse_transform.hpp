@@ -63,21 +63,23 @@ public:
   void process( ) override;
 
 private:
-  std::size_t const mAlignment;
+  std::size_t const cAlignment;
 
   /**
    * 
    */
-  std::size_t const mNumberOfChannels;
+  std::size_t const cNumberOfChannels;
 
   /**
-   * The length of the Fourier transform;
+   * The size of the Fourier transform;
    */
-  std::size_t const mDftLength;
+  std::size_t const cDftSize;
 
-  std::size_t const mDftSamplesPerPeriod;
+  std::size_t const cNumberOfDftBins;
 
-  std::size_t const mHopSize;
+  std::size_t const cFramesPerPeriod;
+
+  std::size_t const cHopSize;
 
   efl::BasicMatrix<SampleType> mAccumulationBuffer;
 

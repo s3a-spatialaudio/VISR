@@ -26,19 +26,20 @@ TimeFrequencyInverseTransform::TimeFrequencyInverseTransform( SignalFlowContext 
                                                               char const * name,
                                                               CompositeComponent * parent,
                                                               std::size_t numberOfChannels,
-                                                              std::size_t dftLength,
+                                                              std::size_t dftSize,
                                                               std::size_t hopSize,
                                                               char const * fftImplementation /*= "default"*/ )
  : AtomicComponent( context, name, parent )
- , mAlignment( cVectorAlignmentSamples )
- , mNumberOfChannels( numberOfChannels )
- , mDftLength( dftLength )
- , mDftSamplesPerPeriod( period() / hopSize )
- , mHopSize( hopSize )
- , mAccumulationBuffer( mNumberOfChannels, mDftLength - mHopSize, mAlignment )
- , mFftWrapper( rbbl::FftWrapperFactory<SampleType>::create( fftImplementation, dftLength, mAlignment ) )
- , mCalcBuffer(mDftLength, mAlignment )
- , mInput( "in", *this, pml::TimeFrequencyParameterConfig( dftLength, hopSize, numberOfChannels, mDftSamplesPerPeriod ) )
+ , cAlignment( cVectorAlignmentSamples )
+ , cNumberOfChannels( numberOfChannels )
+ , cDftSize( dftSize )
+ , cNumberOfDftBins( pml::TimeFrequencyParameter<SampleType>::numberOfBinsRealToComplex( dftSize ) )
+ , cFramesPerPeriod( period() / hopSize )
+ , cHopSize( hopSize )
+ , mAccumulationBuffer( cNumberOfChannels, dftSize - cHopSize, cAlignment )
+ , mFftWrapper( rbbl::FftWrapperFactory<SampleType>::create( fftImplementation, dftSize, cAlignment ) )
+ , mCalcBuffer( dftSize, cAlignment )
+ , mInput( "in", *this, pml::TimeFrequencyParameterConfig( cDftSize, numberOfChannels, cFramesPerPeriod ) )
  , mOutput( "out", *this, numberOfChannels )
 {
   if( period() % hopSize != 0 )
@@ -52,32 +53,32 @@ TimeFrequencyInverseTransform::~TimeFrequencyInverseTransform() = default;
 void TimeFrequencyInverseTransform::process()
 {
   pml::TimeFrequencyParameter<SampleType> const & inMtx = mInput.data();
-  const std::size_t accuElementsToCopy = mDftLength - mHopSize;
+  const std::size_t accuElementsToCopy = cDftSize - cHopSize;
   // operating channel by channel might save copying to and fro the accumulation buffer in case of multiple hops per period.
-  for( std::size_t channelIndex( 0 ); channelIndex < mNumberOfChannels; ++channelIndex )
+  for( std::size_t channelIdx( 0 ); channelIdx < cNumberOfChannels; ++channelIdx )
   {
     efl::ErrorCode res;
-    for( std::size_t hopIndex( 0 ); hopIndex < mDftSamplesPerPeriod; ++hopIndex )
+    for( std::size_t frameIdx( 0 ); frameIdx < cFramesPerPeriod; ++frameIdx )
     {
-      std::complex<SampleType> const * dftPtr = inMtx.dftSlice( channelIndex, hopIndex );
+      std::complex<SampleType> const * dftPtr = inMtx.channelSlice( frameIdx, channelIdx );
       res = mFftWrapper->inverseTransform( dftPtr, mCalcBuffer.data() );
       if( res != efl::noError )
       {
         throw std::runtime_error( "TimeFrequencyInverseTransform: Error during FFT operation." );
       }
-      res = efl::vectorAddInplace( mAccumulationBuffer.row(channelIndex), mCalcBuffer.data(), accuElementsToCopy );
+      res = efl::vectorAddInplace( mAccumulationBuffer.row(channelIdx), mCalcBuffer.data(), accuElementsToCopy );
       if( res != efl::noError )
       {
         throw std::runtime_error( "TimeFrequencyInverseTransform: Updating of output accumulator failed." );
       }
       // Copy the output buffer back into storage (skip first block to implement the shift)
-      if( (res = efl::vectorCopy( mCalcBuffer.data() + mHopSize, mAccumulationBuffer.row( channelIndex ), accuElementsToCopy )) != efl::noError )
+      if( (res = efl::vectorCopy( mCalcBuffer.data() + cHopSize, mAccumulationBuffer.row( channelIdx ), accuElementsToCopy )) != efl::noError )
       {
         throw std::runtime_error( "TimeFrequencyInverseTransform: Storing partial results failed." );
       }
     }
     // Copy first portion of accumulated result to output port.
-    if( (res = efl::vectorCopy( mCalcBuffer.data(), mOutput[channelIndex], period(), mAlignment )) != efl::noError )
+    if( (res = efl::vectorCopy( mCalcBuffer.data(), mOutput[channelIdx], period(), cAlignment )) != efl::noError )
     {
       throw std::runtime_error( "TimeFrequencyInverseTransform: Error while copying output data." );
     }

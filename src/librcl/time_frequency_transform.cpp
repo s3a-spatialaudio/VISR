@@ -60,21 +60,14 @@ std::size_t inputBufferSize( std::size_t windowLen,
   return windowLen + ( hopsPerPeriod - 1 ) * hopSize;
 }
 
-/**
- * Return the size of the output data for real-valued FFTs:
- * N/2+1   for N even
- * (N+1)/2 for N odd
- */
-std::size_t realDftOutputSize( std::size_t dftSize ) { return dftSize / 2 + 1; }
-
-} // namespace
+} // unnamed namespace
 
 TimeFrequencyTransform::TimeFrequencyTransform(
     SignalFlowContext const & context,
     char const * name,
     CompositeComponent * parent,
     std::size_t numberOfChannels,
-    std::size_t dftLength,
+    std::size_t dftSize,
     std::size_t windowLength,
     std::size_t hopSize,
     char const * fftImplementation /*= "default"*/,
@@ -83,7 +76,7 @@ TimeFrequencyTransform::TimeFrequencyTransform(
                            name,
                            parent,
                            numberOfChannels,
-                           dftLength,
+                           dftSize,
                            unityHannWindow< SampleType >( windowLength ),
                            hopSize,
                            fftImplementation,
@@ -96,32 +89,32 @@ TimeFrequencyTransform::TimeFrequencyTransform(
     char const * name,
     CompositeComponent * parent,
     std::size_t numberOfChannels,
-    std::size_t dftLength,
+    std::size_t dftSize,
     efl::BasicVector< SampleType > const & window,
     std::size_t hopSize,
     char const * fftImplementation /*= "default"*/,
     Normalisation normalisation /*= Normalisation::Unitary*/ )
  : AtomicComponent( context, name, parent )
- , mAlignment( cVectorAlignmentSamples )
- , mNumberOfChannels( numberOfChannels )
- , mDftlength( dftLength )
- , mWindowLength( window.size() )
- , mDftSamplesPerPeriod( context.period() / hopSize )
- , mHopSize( hopSize )
+ , cAlignment( cVectorAlignmentSamples )
+ , cNumberOfChannels( numberOfChannels )
+ , cDftSize( dftSize )
+ , cNumberOfDftBins( pml::TimeFrequencyParameter<SampleType>::numberOfBinsRealToComplex( dftSize ) )
+ , cWindowLength( window.size() )
+ , cFramesPerPeriod( context.period() / hopSize )
+ , cHopSize( hopSize )
  , mInputBuffer( numberOfChannels,
                  inputBufferSize( window.size(), hopSize, period() ),
-                 mAlignment )
+                 cAlignment )
  , mFftWrapper( rbbl::FftWrapperFactory< SampleType >::create(
-       fftImplementation, dftLength, mAlignment ) )
- , mWindow( window.size(), mAlignment )
- , mCalcBuffer( dftLength, mAlignment )
+       fftImplementation, dftSize, cAlignment ) )
+ , mWindow( window.size(), cAlignment )
+ , mCalcBuffer( dftSize, cAlignment )
  , mInput( "in", *this, numberOfChannels )
  , mOutput( "out",
             *this,
-            pml::TimeFrequencyParameterConfig( realDftOutputSize( dftLength ),
-                                               hopSize,
-                                               numberOfChannels,
-                                               mDftSamplesPerPeriod ) )
+            pml::TimeFrequencyParameterConfig( cNumberOfDftBins,
+                                               cNumberOfChannels,
+                                               cFramesPerPeriod ) )
 {
   if( period() % hopSize != 0 )
   {
@@ -134,8 +127,8 @@ TimeFrequencyTransform::TimeFrequencyTransform(
 
   SampleType const desiredNormalisation =
     (normalisation == Normalisation::One) ? 1.0f
-    : ((normalisation == Normalisation::Unitary) ? 1.0f/std::sqrt(static_cast<SampleType>(dftLength))
-    : 1.0f/static_cast<SampleType>(dftLength) );
+    : ((normalisation == Normalisation::Unitary) ? 1.0f/std::sqrt(static_cast<SampleType>(dftSize))
+    : 1.0f/static_cast<SampleType>(dftSize) );
 
   // Scale the window to account for the FFT scaling and the DFT length
 #if 0
@@ -159,14 +152,14 @@ TimeFrequencyTransform::TimeFrequencyTransform(
 
   // If the transform size is larger than the hop size, we have to prepend
   // the input signal with zeros for the first transforms.
-  if( dftLength > hopSize )
+  if( dftSize > hopSize )
   {
-    std::size_t const padSamples{ dftLength - hopSize };
-    efl::BasicVector< SampleType > initData( padSamples, mAlignment );
+    std::size_t const padSamples{ cDftSize - hopSize };
+    efl::BasicVector< SampleType > initData( padSamples, cAlignment );
     initData.zeroFill();
     mInputBuffer.write(
         initData.data(), 0 /*stride=0 means writing same vector*/,
-        mNumberOfChannels, padSamples, cVectorAlignmentSamples );
+        cNumberOfChannels, padSamples, cVectorAlignmentSamples );
   }
 }
 
@@ -176,24 +169,24 @@ void TimeFrequencyTransform::process()
 {
   pml::TimeFrequencyParameter< SampleType > & outMtx = mOutput.data();
   mInputBuffer.write( mInput.data(), mInput.channelStrideSamples(),
-                      mNumberOfChannels, period(), cVectorAlignmentSamples );
-  for( std::size_t hopIndex( 0 ); hopIndex < mDftSamplesPerPeriod; ++hopIndex )
+                      cNumberOfChannels, period(), cVectorAlignmentSamples );
+  for( std::size_t frameIdx( 0 ); frameIdx < cFramesPerPeriod; ++frameIdx )
   {
     std::size_t const blockStartIndex =
-        mWindowLength + ( mDftSamplesPerPeriod - hopIndex - 1 ) * mHopSize;
-    for( std::size_t channelIndex( 0 ); channelIndex < mNumberOfChannels;
+        cWindowLength + ( cFramesPerPeriod - frameIdx - 1 ) * cHopSize;
+    for( std::size_t channelIndex( 0 ); channelIndex < cNumberOfChannels;
          ++channelIndex )
     {
       efl::ErrorCode res = efl::vectorMultiply(
           mInputBuffer.getReadPointer( channelIndex, blockStartIndex ),
-          mWindow.data(), mCalcBuffer.data(), mWindowLength, mAlignment );
+          mWindow.data(), mCalcBuffer.data(), cWindowLength, cAlignment );
       if( res != efl::noError )
       {
         throw std::runtime_error(
             "TimeFrequencyTransform: Error during input windowing." );
       }
       std::complex< SampleType > * dftPtr =
-          outMtx.dftSlice( channelIndex, hopIndex );
+          outMtx.channelSlice( frameIdx, channelIndex );
       res = mFftWrapper->forwardTransform( mCalcBuffer.data(), dftPtr );
       if( res != efl::noError )
       {

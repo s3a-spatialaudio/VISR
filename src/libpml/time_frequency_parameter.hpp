@@ -48,6 +48,12 @@ class VISR_PML_LIBRARY_SYMBOL TimeFrequencyParameter: public TypedParameterBase<
 public:
   using ComplexType = std::complex< ElementType >;
 
+
+  static std::size_t numberOfBinsRealToComplex( std::size_t dftSize )
+  {
+    return (dftSize + 2 ) / 2;
+  }
+
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
    * @param alignment The alignment of the data, given in in multiples of the element size.
@@ -69,10 +75,12 @@ public:
 
   /**
    * Construct a time-frequency parameter.
-   * @param dftSize The size of the DFT transform.
-   * @param numDftSamples The number of DFT vectors containe in one parameter
-   * @param numChannels The number of audio channels that are simultaneously transmitted 
+   * @param numberOfDftBins The size of the DFT samples per signal and frame.
+   * For real-valued transforms, this number typically differs from the size of the transform,
+   * because conjugate symmetric elements are stored just once.
+   * @param numberOfChannels The number of audio channels that are simultaneously transmitted 
    * in a time-frequency parameter.
+   * @param numDftSamples The number of DFT vectors containe in one parameter
    * @param alignment The alignment of the data, given in in multiples of the element size.
    */
   explicit TimeFrequencyParameter( std::size_t dftSize,
@@ -94,36 +102,36 @@ public:
   /**
    * Change the matrix dimension.
    * The content of the matrix is not kept, but reset to zeros.
-   * @param dftSize Size of the DFT.
-   * @param numDftSamples The number of DFT coefficient sets in a single TimeFrequencyParameter
-   * @param numChannels Number of parallel audio channels conted in one parameter.
+   * @param numberOfDftBins Number of DFT samples per channel and frame.
+   * @param numberOfChannels Number of parallel audio channels conted in one parameter.
+   * @param numberOfFrames The number of DFT coefficient sets in a single TimeFrequencyParameter
    * @throw std::bad_alloc If the creation of the new matrix fails.
    */
-  void resize( std::size_t dftSize, std::size_t numDftSamples, std::size_t numChannels );
+  void resize( std::size_t numberOfDftBins, std::size_t numberOfChannels, std::size_t numberOfFrames );
 
   std::size_t alignment() const { return mData.alignmentElements(); }
 
-  std::size_t dftSize() const { return mData.numberOfColumns(); }
-
-  std::size_t dftSamples() const { return mData.numberOfRows() / mNumberOfChannels; }
-
-  std::size_t channelStride() const { return mData.stride(); }
-
-  std::size_t dftSampleStride() const { return mData.stride() * numberOfChannels(); }
+  std::size_t numberOfDftBins() const { return mData.numberOfColumns(); }
 
   std::size_t numberOfChannels() const { return mNumberOfChannels; }
 
-  ComplexType const & at( std::size_t dftBlockIdx,
+  std::size_t numberOfFrames() const { return mData.numberOfRows() / mNumberOfChannels; }
+
+  std::size_t channelStride() const { return mData.stride(); }
+
+  std::size_t frameStride() const { return mData.stride() * numberOfChannels(); }
+
+  ComplexType const & at( std::size_t frameIdx,
     std::size_t channelIdx, std::size_t dftBinIdx ) const
   {
-    return *(mData.row( dftBlockIdx * numberOfChannels() + channelIdx )
+    return *(mData.row( frameIdx * numberOfChannels() + channelIdx )
       + dftBinIdx);
   }
 
-  ComplexType & at( std::size_t dftBlockIdx,
+  ComplexType & at( std::size_t frameIdx,
     std::size_t channelIdx, std::size_t dftBinIdx )
   {
-    return *(mData.row( dftBlockIdx * numberOfChannels() + channelIdx )
+    return *(mData.row( frameIdx * numberOfChannels() + channelIdx )
       + dftBinIdx);
   }
 
@@ -136,24 +144,45 @@ public:
   }
 
   /**
+   * Return a pointer to the start of the complex data, nonconst version.
    */
-  ComplexType *  data()
+  ComplexType * data()
   {
     return mData.data();
   }
 
   /**
-   * Return a pointer to the start of an DFT block, (i.e., one ) 
+   * Return a pointer to the start of an DFT frame, const version
    */
-  ComplexType const * dftSlice( std::size_t channelIdx, std::size_t dftSampleIdx ) const
+  ComplexType const * frameSlice( std::size_t frameIdx ) const
   {
-    return mData.row( dftSampleIdx * numberOfChannels() + channelIdx );
+    return mData.row( frameIdx * numberOfChannels() );
   }
 
-  ComplexType * dftSlice( std::size_t channelIdx, std::size_t dftSampleIdx )
+  /**
+   * Return a pointer to the start of an DFT frame, non-const version
+   */
+  ComplexType * frameSlice( std::size_t frameIdx )
   {
-    return mData.row( dftSampleIdx * numberOfChannels() + channelIdx );
+    return mData.row( frameIdx * numberOfChannels() );
   }
+
+  /**
+   * Return a pointer to the start of an DFT channel vector, const version
+   */
+  ComplexType const * channelSlice( std::size_t frameIdx, std::size_t channelIdx ) const
+  {
+    return mData.row( frameIdx * numberOfChannels() + channelIdx );
+  }
+
+  /**
+   * Return a pointer to the start of an DFT channel vector, non-const version
+   */
+  ComplexType * channelSlice( std::size_t frameIdx, std::size_t channelIdx )
+  {
+    return mData.row( frameIdx * numberOfChannels() + channelIdx );
+  }
+
 private:
   efl::BasicMatrix< ComplexType > mData;
 

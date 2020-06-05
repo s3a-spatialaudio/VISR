@@ -65,7 +65,7 @@ public:
                                    char const * name,
                                    CompositeComponent * parent,
                                    std::size_t numberOfChannels,
-                                   std::size_t dftLength,
+                                   std::size_t dftSize,
                                    std::size_t windowLength,
                                    std::size_t hopSize,
                                    char const * fftImplementation = "default",
@@ -77,17 +77,17 @@ public:
   * @param name The name of the component. Must be unique within the containing composite component (if there is one).
   * @param parent Pointer to a containing component if there is one. Specify \p nullptr in case of a top-level component
   * @param numberOfChannels The number of distinct audio waveforms received through the input audio port.
-  * @param dftLength The size of the DFT transform used. Must be a power of two for most FFT implementations.
+  * @param dftSize The size of the DFT transform used. Must be a power of two for most FFT implementations.
   * @param window The coefficients of the window applied to the time-domain input frames.
   * @param hopSize Advance (in samples) between successive frames. The component's period size must be an ineger multiple of the hop size.
-  * @param fftImplementation String desribing the FFT implementation to be used. Optional parameter, defaults to the
+  * @param fftImplementation String naming the FFT implementation to be used. Optional parameter, defaults to the
   * platform's default FFT implementation.
   */
   explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
                                    CompositeComponent * parent,
                                    std::size_t numberOfChannels,
-                                   std::size_t dftLength,
+                                   std::size_t dftSize,
                                    efl::BasicVector<SampleType> const & window,
                                    std::size_t hopSize,
                                    char const * fftImplementation = "default",
@@ -102,23 +102,33 @@ public:
 
 private:
 
-  std::size_t const mAlignment;
+  std::size_t const cAlignment;
 
   /**
    * The number of simulataneously processed audio channels.
    */
-  std::size_t const mNumberOfChannels;
+  std::size_t const cNumberOfChannels;
 
   /**
-   * The length of the Fourier transform;
+   * The size of the discreteFourier transform;
    */
-  std::size_t const mDftlength;
+  std::size_t const cDftSize;
 
-  std::size_t const mWindowLength;
+  /**
+   * The number of unique DFT frequency bins of the real-to-complex conversion. 
+   */
+  std::size_t const cNumberOfDftBins;
 
-  std::size_t mDftSamplesPerPeriod;
+  /**
+   * Size of the window that is multiplied with the input samples.
+   * If the window length is smaller than the DFT size, then the remaining input 
+   * samples before the start of the window are zeroed out.
+   */
+  std::size_t const cWindowLength;
 
-  std::size_t const mHopSize;
+  std::size_t cFramesPerPeriod;
+
+  std::size_t const cHopSize;
 
   rbbl::CircularBuffer<SampleType> mInputBuffer;
 
