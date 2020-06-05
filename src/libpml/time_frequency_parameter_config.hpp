@@ -25,21 +25,18 @@ class VISR_PML_LIBRARY_SYMBOL TimeFrequencyParameterConfig
 public:
   /**
    * Constructor, creates an instance of TimeFrequencyParameterConfig.
-   * @param dftSize The size of the DFT (number of frequency-doain samples).
-   * Note that in case of real-valued transforms, this number normally differs
-   * from the size of the * DFT (i.e., the number of time-domain samples
-   * transformed in a block.)
-   * @param hopSize The sample increment between successive time-frequency
-   * transforms.
+   * @param numberOfDftBins The number of discrete frequency samples per frame
+   * and audio channel. Note that in case of real-valued transforms, this number
+   * normally differs from the size of the DFT (i.e., the number of time-domain
+   * samples transformed in a block.)
    * @param numberOfChannels The number of separate audio signals contained in
    * the multi-channel time-frequency representation.
-   * @param numberOfDftSamples The number of consecutive time-frequency blocks
+   * @param numberOfDftFrames The number of consecutive time-frequency blocks
    * (per audio signal) contained in a single message.
    */
-  TimeFrequencyParameterConfig( std::size_t dftSize,
-                                std::size_t hopSize,
+  TimeFrequencyParameterConfig( std::size_t numberOfDftBins,
                                 std::size_t numberOfChannels,
-                                std::size_t numberOfDftSamples );
+                                std::size_t numberOfDftFrames = 1 );
 
   /**
    * Destructor (virtual)
@@ -74,29 +71,22 @@ public:
    * only a smaller number of DFT samples (e.g., ceil((N+1)/2) is stored due to
    * symmetry of the frequency-domain values..
    */
-  std::size_t dftSize() const { return mDftSize; }
+  std::size_t numberOfDftBins() const { return mNumberOfDftBins; }
 
   /**
-   * Sample increment between consecutive transforms.
-   */
-  std::size_t hopSize() const { return mHopSize; }
-
-  /**
-   * Number of separate signals in the TimeFrequencyParameter messages.
+   * Number of separate audio signals in the TimeFrequencyParameter messages.
    */
   std::size_t numberOfChannels() const { return mNumberOfChannels; }
 
   /**
-   * The number of DFT blocks contained in a single message.
+   * The number of DFT frames contained in each message.
    */
-  std::size_t numberOfDftSamples() const { return mNumberOfDftSamples; }
+  std::size_t numberOfFrames() const { return mNumberOfFrames; }
 
 private:
-  std::size_t const mDftSize;
+  std::size_t const mNumberOfDftBins;
 
-  std::size_t const mHopSize;
-
-  std::size_t const mNumberOfDftSamples;
+  std::size_t const mNumberOfFrames;
 
   std::size_t const mNumberOfChannels;
 };

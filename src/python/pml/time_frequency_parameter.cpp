@@ -91,20 +91,32 @@ void exportTimeFrequencyParameter( py::module & m, char const * className )
 
 void exportTimeFrequencyParameter( py::module & m)
 {
-  py::class_<TimeFrequencyParameterConfig, ParameterConfigBase >( m, "TimeFrequencyParameterConfig" )
-    .def( py::init<std::size_t, std::size_t, std::size_t, std::size_t>(), py::arg("dftSize" ), py::arg("hopSize"), py::arg("numberOfChannels")=1, py::arg("numberOfDftBlocks")=1 )
-    .def_property_readonly( "dftSize", &TimeFrequencyParameterConfig::dftSize )
-    .def_property_readonly( "hopSize", &TimeFrequencyParameterConfig::hopSize )
-    .def_property_readonly( "numberOfChannels", &TimeFrequencyParameterConfig::numberOfChannels )
-    .def_property_readonly( "numberOfDftSamples", &TimeFrequencyParameterConfig::numberOfDftSamples )
-    .def( "compare", static_cast<bool(TimeFrequencyParameterConfig::*)(TimeFrequencyParameterConfig const&) const>(&TimeFrequencyParameterConfig::compare),  py::arg("rhs") )
-    .def( "compare", static_cast<bool(TimeFrequencyParameterConfig::*)(ParameterConfigBase const&) const>(&TimeFrequencyParameterConfig::compare),  py::arg("rhs") )
-  ;
+  py::class_< TimeFrequencyParameterConfig, ParameterConfigBase >(
+      m, "TimeFrequencyParameterConfig" )
+      .def( py::init< std::size_t, std::size_t, std::size_t >(),
+            py::arg( "numberOfDftBins" ), py::arg( "numberOfChannels" ) = 1,
+            py::arg( "numberOfFrames" ) = 1 )
+      .def_property_readonly( "dftSize",
+                              &TimeFrequencyParameterConfig::numberOfDftBins )
+      .def_property_readonly( "numberOfChannels",
+                              &TimeFrequencyParameterConfig::numberOfChannels )
+      .def_property_readonly( "numberOfFrames",
+                              &TimeFrequencyParameterConfig::numberOfFrames )
+      .def( "compare",
+            static_cast< bool ( TimeFrequencyParameterConfig::* )(
+                TimeFrequencyParameterConfig const & ) const >(
+                &TimeFrequencyParameterConfig::compare ),
+            py::arg( "rhs" ) )
+      .def( "compare",
+            static_cast< bool ( TimeFrequencyParameterConfig::* )(
+                ParameterConfigBase const & ) const >(
+                &TimeFrequencyParameterConfig::compare ),
+            py::arg( "rhs" ) );
 
   exportTimeFrequencyParameter< float >( m, "TimeFrequencyParameterFloat" );
   exportTimeFrequencyParameter< double >( m, "TimeFrequencyParameterDouble" );
 }
 
-} // namepace pml
+} // namespace pml
 } // namespace python
 } // namespace visr
