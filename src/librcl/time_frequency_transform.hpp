@@ -41,6 +41,13 @@ class VISR_RCL_LIBRARY_SYMBOL TimeFrequencyTransform: public AtomicComponent
 public:
   using SampleType = visr::SampleType;
 
+  enum class Normalisation
+  {
+    One,      /**< No normalisation applied. */
+    Unitary,  /**< Normalisation (scaling) factor 1/sqrt(N) */
+    OneOverN  /**< Scaling factor 1/N, which means that the corresponding inverse FFT has a normalisation of "One". */
+  };
+
   /**
    * Constructor. Creates a time-frequency transformation component with a default window shape.
    * @param context Configuration object containing basic execution parameters.
@@ -52,6 +59,7 @@ public:
    * @param hopSize Advance (in samples) between successive frames. The component's period size must be an ineger multiple of the hop size.
    * @param fftImplementation String desribing the FFT implementation to be used. Optional parameter, defaults to the
    * platform's default FFT implementation.
+   * @param normalisation The DFT normalisation policy, defaults to 'Unitary'
    */
   explicit TimeFrequencyTransform( SignalFlowContext const & context,
                                    char const * name,
@@ -60,7 +68,8 @@ public:
                                    std::size_t dftLength,
                                    std::size_t windowLength,
                                    std::size_t hopSize,
-                                   char const * fftImplementation = "default" );
+                                   char const * fftImplementation = "default",
+                                   Normalisation normalisation = Normalisation::Unitary );
 
   /**
   * Constructor. Creates a time-frequency transformation component with a user-defined window shape.
@@ -81,7 +90,8 @@ public:
                                    std::size_t dftLength,
                                    efl::BasicVector<SampleType> const & window,
                                    std::size_t hopSize,
-                                   char const * fftImplementation = "default" );
+                                   char const * fftImplementation = "default",
+                                   Normalisation normalisation = Normalisation::Unitary );
 
   /**
    * Destructor (virtual)
