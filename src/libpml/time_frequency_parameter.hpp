@@ -38,17 +38,19 @@ namespace // unnamed
 } // unnamed
 
 /**
- * A type for passing matrixes between processing components.
+ * A type for passing time-frequency data between processing components.
  * The template class is explicitly instantiated for the element types float and double.
- * @tparam ElementType The data type of the elements of the matrix.
+ * @tparam ElementType The underlying real-valued data type of the elements of the matrix.
  */
 template<typename ElementType >
 class VISR_PML_LIBRARY_SYMBOL TimeFrequencyParameter: public TypedParameterBase<TimeFrequencyParameter<ElementType>, TimeFrequencyParameterConfig, TimeFrequencyParameterType<ElementType>::ptype() >
 {
 public:
+  using ComplexType = std::complex< ElementType >;
+
   /**
    * Default constructor, creates an empty matrix of dimension 0 x 0.
-   * @param alignment The alignment of the data, given in in multiples of the eleement size.
+   * @param alignment The alignment of the data, given in in multiples of the element size.
    */
   TimeFrequencyParameter( std::size_t alignment = 0 );
 
@@ -111,17 +113,49 @@ public:
 
   std::size_t numberOfChannels() const { return mNumberOfChannels; }
 
-  std::complex< ElementType > const *  dftSlice( std::size_t channelIdx, std::size_t dftSampleIdx ) const
+  ComplexType const & at( std::size_t dftBlockIdx,
+    std::size_t channelIdx, std::size_t dftBinIdx ) const
+  {
+    return *(mData.row( dftBlockIdx * numberOfChannels() + channelIdx )
+      + dftBinIdx);
+  }
+
+  ComplexType & at( std::size_t dftBlockIdx,
+    std::size_t channelIdx, std::size_t dftBinIdx )
+  {
+    return *(mData.row( dftBlockIdx * numberOfChannels() + channelIdx )
+      + dftBinIdx);
+  }
+
+  /**
+   * Return a pointer to the complex data, const version
+   */
+  ComplexType const *  data() const
+  {
+    return mData.data();
+  }
+
+  /**
+   */
+  ComplexType *  data()
+  {
+    return mData.data();
+  }
+
+  /**
+   * Return a pointer to the start of an DFT block, (i.e., one ) 
+   */
+  ComplexType const * dftSlice( std::size_t channelIdx, std::size_t dftSampleIdx ) const
   {
     return mData.row( dftSampleIdx * numberOfChannels() + channelIdx );
   }
 
-  std::complex< ElementType > *  dftSlice( std::size_t channelIdx, std::size_t dftSampleIdx )
+  ComplexType * dftSlice( std::size_t channelIdx, std::size_t dftSampleIdx )
   {
     return mData.row( dftSampleIdx * numberOfChannels() + channelIdx );
   }
 private:
-  efl::BasicMatrix< std::complex< ElementType > > mData;
+  efl::BasicMatrix< ComplexType > mData;
 
   std::size_t mNumberOfChannels;
 };
