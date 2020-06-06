@@ -237,10 +237,11 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
     bool const hasQuat{ orTree.count( "quaternion" ) > 0 };
     bool const hasYpr{ (orTree.count( "yaw" ) > 0)
       or (orTree.count( "pitch" ) > 0) or (orTree.count( "roll" ) > 0) };
+    bool const hasRotationVec{ orTree.count( "rotationVector" ) > 0 };
     if( hasQuat == hasYpr )
     {
       throw std::invalid_argument( "ListenerPosition::parseJson():"
-        " Orientation must be provided either as yaw,pitch,roll or as a quaternion" );
+        " Orientation must be provided either as yaw,pitch,roll, a rotation vector/angle or as a quaternion" );
     }
     if( hasQuat )
     {
@@ -250,6 +251,16 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
       Coordinate const qy = quatTree.get<Coordinate>( "y", 0.0f );
       Coordinate const qz = quatTree.get<Coordinate>( "z", 0.0f );
       setOrientationQuaternion( OrientationQuaternion( qw, qx, qy, qz ) );
+    }
+    else if( hasRotationVec )
+    {
+      pt::ptree const & vecTree = orTree.get_child( "rotationVector" );
+      Coordinate const rx = vecTree.get<Coordinate>( "w", 1.0f );
+      Coordinate const ry = vecTree.get<Coordinate>( "x", 0.0f );
+      Coordinate const rz = vecTree.get<Coordinate>( "y", 0.0f );
+      Coordinate const angle = vecTree.get<Coordinate>( "angle", 0.0f );
+      RotationVector const vec{ rx, ry, rz };
+      setOrientationRotationVector( vec, efl::degree2radian(angle) );
     }
     else
     {
@@ -275,36 +286,56 @@ void ListenerPosition::parseJson( std::string const & str )
   parseJson( stream );
 }
 
-void ListenerPosition::writeJson( std::ostream & stream, bool ypr /*= false*/, bool prettyPrint /*=false*/ ) const
+void ListenerPosition::writeJson( std::ostream & stream,
+  RotationFormat rotationFormat, bool prettyPrint /*=false*/ ) const
 {
   namespace pt = boost::property_tree;
   pt::ptree tree;
+  writeJson( tree, rotationFormat );
   pt::write_json( stream, tree, prettyPrint );
 }
 
-void ListenerPosition::writeJson( boost::property_tree::ptree & tree, bool ypr /*= false*/ ) const
+void ListenerPosition::writeJson( boost::property_tree::ptree & tree, 
+   RotationFormat rotationFormat ) const
 {
   namespace pt = boost::property_tree;
   tree.put<Coordinate>( "x", x() );
   tree.put<Coordinate>( "y", y() );
   tree.put<Coordinate>( "z", z() );
   pt::ptree orientationTree;
-  if( ypr )
+  switch( rotationFormat )
   {
-    OrientationYPR const ypr{ orientationYPR() };
-    orientationTree.put<Coordinate>( "yaw", efl::radian2degree( ypr[0] ) );
-    orientationTree.put<Coordinate>( "pitch", efl::radian2degree( ypr[1] ) );
-    orientationTree.put<Coordinate>( "roll", efl::radian2degree( ypr[2] ) );
-  }
-  else
-  {
-    pt::ptree quatTree;
-    OrientationQuaternion const quat{ orientationQuaternion() };
-    quatTree.put<Coordinate>( "w", quat.R_component_1() );
-    quatTree.put<Coordinate>( "x", quat.R_component_2() );
-    quatTree.put<Coordinate>( "y", quat.R_component_3() );
-    quatTree.put<Coordinate>( "z", quat.R_component_4() );
-    orientationTree.add_child( "quaternion", quatTree );
+    case RotationFormat::YPR:
+    {
+      OrientationYPR const ypr{ orientationYPR() };
+      orientationTree.put<Coordinate>( "yaw", efl::radian2degree( ypr[0] ) );
+      orientationTree.put<Coordinate>( "pitch", efl::radian2degree( ypr[1] ) );
+      orientationTree.put<Coordinate>( "roll", efl::radian2degree( ypr[2] ) );
+      break;
+    }
+    case RotationFormat::RotationVector:
+    {
+      pt::ptree rvTree;
+      RotationVector const vec{ orientationRotationVector() };
+      Coordinate const angle = efl::radian2degree( orientationRotationAngle() );
+      rvTree.put<Coordinate>( "angle", angle );
+      rvTree.put<Coordinate>( "x", vec[0] );
+      rvTree.put<Coordinate>( "y", vec[1] );
+      rvTree.put<Coordinate>( "z", vec[2] );
+      orientationTree.add_child( "rotationVVector", rvTree );
+      break;
+    }
+    case RotationFormat::Quaternion:
+    {
+      pt::ptree quatTree;
+      OrientationQuaternion const quat{ orientationQuaternion() };
+      quatTree.put<Coordinate>( "w", quat.R_component_1() );
+      quatTree.put<Coordinate>( "x", quat.R_component_2() );
+      quatTree.put<Coordinate>( "y", quat.R_component_3() );
+      quatTree.put<Coordinate>( "z", quat.R_component_4() );
+      orientationTree.add_child( "quaternion", quatTree );
+      break;
+    }
   }
   tree.add_child( "orientation", orientationTree );
   if( timeNs() != 0 )
@@ -317,19 +348,23 @@ void ListenerPosition::writeJson( boost::property_tree::ptree & tree, bool ypr /
   }
 }
 
-std::string ListenerPosition::writeJson( bool ypr /*= false*/, bool prettyPrint /*=false*/ ) const
+std::string ListenerPosition::writeJson( RotationFormat rotationFormat,
+  bool prettyPrint /*=false*/ ) const
 {
   std::stringstream stream;
-  writeJson( stream, ypr );
+  writeJson( stream, rotationFormat );
   return stream.str();
 }
 
 std::ostream & operator<<(std::ostream & stream, const ListenerPosition & pos)
 {
+  using T = ListenerPosition::Coordinate;
   stream 
     << "time: " << static_cast<double>(pos.timeNs())/1.0e9 << " s, face ID " << pos.faceID()
     << ", pos: (" << pos.x() << ", " << pos.y() << ", " << pos.z() << ")"
-    << ", orientation: (" << pos.yaw() << ", " << pos.pitch() << ", " << pos.roll() << " )";
+    << ", orientation ypr: (" << efl::radian2degree<T>(pos.yaw()) << ", "
+    << efl::radian2degree<T>(pos.pitch()) << ", "
+    << efl::radian2degree<T>(pos.roll()) << " )";
   return stream;
 }
 

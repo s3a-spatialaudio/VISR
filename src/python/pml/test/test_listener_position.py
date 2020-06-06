@@ -275,7 +275,7 @@ def test_writeJson():
     yprInit=np.deg2rad(np.array([15, 45, -30]))
     lp=pml.ListenerPosition(posInit, yprInit )
     lp.faceId = 1
-    msg= lp.writeJson(ypr=False)
+    msg= lp.writeJson(rotationFormat=pml.ListenerPosition.RotationFormat.Quaternion)
 
     rep = json.loads( msg )
     posRead = np.asarray([ rep["x"], rep["y"], rep["z"] ], dtype = posInit.dtype )

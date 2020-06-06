@@ -83,6 +83,12 @@ void exportListenerPosition( pybind11::module & m)
     .def( "quaternionDistance", &visr::pml::quaternionDistance, py::arg( "quat1"), py::arg( "quat2" ) )
   ;
 
+  py::enum_<ListenerPosition::RotationFormat>( lp, "RotationFormat" )
+    .value( "YPR", ListenerPosition::RotationFormat::YPR )
+    .value( "RotationVector", ListenerPosition::RotationFormat::RotationVector )
+    .value( "Quaternion", ListenerPosition::RotationFormat::Quaternion )
+  ;
+
   lp
     .def_property_readonly_static( "staticType", [](py::object /*self*/) {return ListenerPosition::staticType(); } )
     .def( py::init<visr::pml::EmptyParameterConfig const &>(), py::arg("config") = visr::pml::EmptyParameterConfig() )
@@ -98,8 +104,9 @@ void exportListenerPosition( pybind11::module & m)
       py::arg( "position"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
     .def_static( "fromJson", static_cast<ListenerPosition(*)(std::string const &)>(&ListenerPosition::fromJson) )
     .def( "parseJson", static_cast<void(ListenerPosition::*)(std::string const &)>(&ListenerPosition::parseJson), py::arg("string") )
-    .def( "writeJson", static_cast<std::string(ListenerPosition::*)(bool, bool)const>(&ListenerPosition::writeJson),
-      py::arg("ypr")=false, py::arg("prettyPrint")=false )
+    .def( "writeJson", static_cast<std::string(ListenerPosition::*)(ListenerPosition::RotationFormat, bool)const>(&ListenerPosition::writeJson),
+      py::arg("rotationFormat")=ListenerPosition::RotationFormat::Quaternion,
+      py::arg("prettyPrint")=false )
     .def_property( "x", &ListenerPosition::x, &ListenerPosition::setX )
     .def_property( "y", &ListenerPosition::y, &ListenerPosition::setY )
     .def_property( "z", &ListenerPosition::z, &ListenerPosition::setZ )
