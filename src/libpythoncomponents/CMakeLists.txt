@@ -35,7 +35,7 @@ foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pybind11::embed )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE Boost::boost )
   # Set public headers to be installed.
-  set_target_properties( pythoncomponents_${LIBTYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+  set_target_properties( pythoncomponents_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
   # Set include paths for dependent projects
   get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
   target_include_directories(pythoncomponents_${LIB_TYPE}

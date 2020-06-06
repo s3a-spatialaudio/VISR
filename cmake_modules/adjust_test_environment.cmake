@@ -1,0 +1,21 @@
+# Copyright (c) 2014-2020 Andreas Franck a.franck@soton.ac.uk --- All rights reserved.
+# Copyright (c) 2014-2019 Institute of Sound and Vibration Research,
+#   University of Southampton and VISR contributors --- All rights reserved.
+
+# Adjust the system environment of a unit test target.
+# This is mainly needed on Windows to put the paths containing the 3rd party
+# libraries and the VISR DLLs on the system path.
+function( adjustTestEnvironment target )
+  if(VISR_SYSTEM_NAME MATCHES "Windows")
+    # Prevent CMake from interpreting the semicolon (the separator in Windows path lists) as list separator.
+    # Double quoting required because the variable is evaluated twice.
+    string(REPLACE ";" "\\\;"  QUOTED_PATH "$ENV{PATH}" )
+    if( BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
+      set_property(TEST ${target} PROPERTY ENVIRONMENT
+        "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;$<TARGET_FILE_DIR:visr_shared>\;${QUOTED_PATH}" )
+    else()
+     set_property(TEST ${APPLICATION_NAME} PROPERTY ENVIRONMENT
+        "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;${QUOTED_PATH}" )
+    endif( BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
+  endif(VISR_SYSTEM_NAME MATCHES "Windows")
+endfunction()

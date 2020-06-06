@@ -41,5 +41,11 @@ if(VISR_SYSTEM_NAME MATCHES "Windows")
   # Prevent CMake from interpreting the semicolon (the separator in Windows path lists) as list separator.
   # Double quoting required because the variable is evaluated twice.
   string(REPLACE ";" "\\\;"  QUOTED_PATH "$ENV{PATH}" )
-  set_property(TEST ${APPLICATION_NAME} PROPERTY ENVIRONMENT "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;$<TARGET_FILE_DIR:visr_shared>\;${QUOTED_PATH}" )
+  if( VISR_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
+    set_property(TEST ${APPLICATION_NAME} PROPERTY ENVIRONMENT
+      "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;$<TARGET_FILE_DIR:visr_shared>\;${QUOTED_PATH}" )
+  else()
+   set_property(TEST ${APPLICATION_NAME} PROPERTY ENVIRONMENT
+      "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;${QUOTED_PATH}" )
+  endif( VISR_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
 endif(VISR_SYSTEM_NAME MATCHES "Windows")
