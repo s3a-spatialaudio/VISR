@@ -14,10 +14,10 @@ test_main.cpp
 
 add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
-target_link_libraries( ${APPLICATION_NAME} visr_static)
-target_link_libraries( ${APPLICATION_NAME} pml_static )
-target_link_libraries( ${APPLICATION_NAME} rcl_static )
-target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE visr_${BUILD_LIBRARY_TYPE_FOR_APPS})
+target_link_libraries( ${APPLICATION_NAME} PRIVATE pml_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE rcl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::unit_test_framework )
 if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
 endif( NOT Boost_USE_STATIC_LIBS )

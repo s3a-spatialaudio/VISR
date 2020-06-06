@@ -1,59 +1,55 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-SET( SOURCES 
+SET( SOURCES
 core_renderer.cpp
-baseline_renderer.cpp 
-bunch_renderer.cpp 
-delay_vector.cpp 
+baseline_renderer.cpp
+bunch_renderer.cpp
+delay_vector.cpp
 gain_matrix.cpp
 time_frequency_feedthrough.cpp
 )
 
 # Basically, this makes the headers show up in the Visual studio project.
-SET( HEADERS 
+SET( HEADERS
 baseline_renderer.hpp
 bunch_renderer.hpp
 core_renderer.hpp
-delay_vector.hpp 
+delay_vector.hpp
 export_symbols.hpp
 gain_matrix.hpp
 time_frequency_feedthrough.hpp
 )
 
-add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( signalflows_static PROPERTIES OUTPUT_NAME signalflows )
-target_compile_definitions( signalflows_static PUBLIC VISR_SIGNALFLOWS_STATIC_LIBRARY=1)
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( signalflows_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( signalflows_static PROPERTIES OUTPUT_NAME signalflows )
+  target_compile_definitions( signalflows_static PUBLIC VISR_SIGNALFLOWS_STATIC_LIBRARY=1)
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-add_library( signalflows_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( signalflows_shared PROPERTIES OUTPUT_NAME signalflows )
-# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
-set_target_properties( signalflows_shared PROPERTIES ARCHIVE_OUTPUT_NAME signalflows_shared )
-set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
-
+if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( signalflows_shared SHARED ${SOURCES} ${HEADERS} )
+  set_target_properties( signalflows_shared PROPERTIES OUTPUT_NAME signalflows )
+  # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+  set_target_properties( signalflows_shared PROPERTIES ARCHIVE_OUTPUT_NAME signalflows_shared )
+  set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.
-foreach(LIB_TYPE static shared)
+foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES})
   target_compile_definitions( signalflows_${LIB_TYPE} PRIVATE VISR_BUILD_SIGNALFLOWS_LIBRARY=1)
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC rcl_${LIB_TYPE} )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC reverbobject_${LIB_TYPE} )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
-
   target_link_libraries( signalflows_${LIB_TYPE} PRIVATE Boost::system )
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( signalflows_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
   target_link_libraries( signalflows_${LIB_TYPE} PUBLIC Boost::disable_autolinking )
-endforeach()
-
-# Set public headers to be installed for the shared target.
-# Because the headers are the same for the static library, the headers are only
-# installled once.
-set_target_properties( signalflows_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-
-# Set include paths for dependent projects
-get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-foreach(TARGET_TYPE static shared)
-  target_include_directories(signalflows_${TARGET_TYPE}
+  # Set public headers to be installed.
+  set_target_properties( signalflows_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+  # Set include paths for dependent projects
+  get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+  target_include_directories(signalflows_${LIB_TYPE}
     PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/visr>
@@ -63,15 +59,18 @@ endforeach()
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS signalflows_static
           EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
-install(TARGETS signalflows_shared
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT development_files
-        RUNTIME DESTINATION lib COMPONENT shared_libraries
-        LIBRARY DESTINATION lib COMPONENT shared_libraries
-        PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files )
 
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  install(TARGETS signalflows_shared
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT development_files
+          RUNTIME DESTINATION lib COMPONENT shared_libraries
+          LIBRARY DESTINATION lib COMPONENT shared_libraries
+          PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

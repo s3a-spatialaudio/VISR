@@ -1,9 +1,9 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 
-set( SOURCES 
+set( SOURCES
 biquad_coefficient.cpp
-circular_buffer.cpp 
+circular_buffer.cpp
 crossfading_convolver_uniform.cpp
 core_convolver_uniform.cpp
 fft_wrapper_factory.cpp
@@ -64,42 +64,39 @@ if( BUILD_USE_IPP )
   list( APPEND HEADERS ipp_fft_wrapper.hpp )
 endif( BUILD_USE_IPP )
 
-add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
-target_compile_definitions( rbbl_static PUBLIC VISR_RBBL_STATIC_LIBRARY=1)
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( rbbl_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( rbbl_static PROPERTIES OUTPUT_NAME rbbl )
+  target_compile_definitions( rbbl_static PUBLIC VISR_RBBL_STATIC_LIBRARY=1)
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( rbbl_shared PROPERTIES OUTPUT_NAME rbbl )
-# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
-set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
-
-set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( rbbl_shared SHARED ${SOURCES} ${HEADERS} )
+  set_target_properties( rbbl_shared PROPERTIES OUTPUT_NAME rbbl )
+  # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+  set_target_properties( rbbl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rbbl_shared )
+  set_target_properties( rbbl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.
-foreach(LIB_TYPE static shared)
+foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE VISR_BUILD_RBBL_LIBRARY=1)
   target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${FFTS_INCLUDE_DIR} )
   target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_INCLUDE_DIR} )
   target_link_libraries( rbbl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
   target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${FFTS_LIBRARY} )
   target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_LIBRARY} )
-  target_link_libraries( rbbl_${LIB_TYPE} PUBLIC Boost::boost ) # Adds the boost include directory 
+  target_link_libraries( rbbl_${LIB_TYPE} PUBLIC Boost::boost ) # Adds the boost include directory
   if( BUILD_USE_IPP )
     target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE -DBUILD_USE_IPP )
     target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${IPP_INCLUDE_DIR} )
     target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${IPP_LIB_S} ${IPP_LIB_VM} ${IPP_LIB_CORE} )
   endif( BUILD_USE_IPP )
-endforeach()
-
-# Set public headers to be installed for the shared target.
-# Because the headers are the same for the static library, the headers are only
-# installled once.
-set_target_properties( rbbl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-
-# Set include paths for dependent projects
-get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-foreach(TARGET_TYPE static shared)
-  target_include_directories(rbbl_${TARGET_TYPE}
+  # Set public headers to be installed.
+  set_target_properties( rbbl_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+  # Set include paths for dependent projects
+  get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+  target_include_directories(rbbl_${LIB_TYPE}
     PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/visr>
@@ -109,14 +106,18 @@ endforeach()
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS rbbl_static
           EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/librbbl COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
-install(TARGETS rbbl_shared
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT development_files 
-        RUNTIME DESTINATION lib COMPONENT shared_libraries
-        LIBRARY DESTINATION lib COMPONENT shared_libraries
-        PUBLIC_HEADER DESTINATION include/visr/librbbl COMPONENT development_files )
+
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  install(TARGETS rbbl_shared
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT development_files
+          RUNTIME DESTINATION lib COMPONENT shared_libraries
+          LIBRARY DESTINATION lib COMPONENT shared_libraries
+          PUBLIC_HEADER DESTINATION include/visr/librbbl COMPONENT development_files )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

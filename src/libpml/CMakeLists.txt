@@ -52,18 +52,22 @@ set( HEADERS
  vector_parameter_config.hpp
 )
 
-add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
-target_compile_definitions( pml_static PUBLIC VISR_PML_STATIC_LIBRARY=1)
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( pml_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( pml_static PROPERTIES OUTPUT_NAME pml )
+  target_compile_definitions( pml_static PUBLIC VISR_PML_STATIC_LIBRARY=1)
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
-# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
-set_target_properties( pml_shared PROPERTIES ARCHIVE_OUTPUT_NAME pml_shared )
-set_target_properties( pml_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( pml_shared SHARED ${SOURCES} ${HEADERS} )
+  set_target_properties( pml_shared PROPERTIES OUTPUT_NAME pml )
+  # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+  set_target_properties( pml_shared PROPERTIES ARCHIVE_OUTPUT_NAME pml_shared )
+  set_target_properties( pml_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.
-foreach(LIB_TYPE static shared)
+foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( pml_${LIB_TYPE} PRIVATE VISR_BUILD_PML_LIBRARY=1 )
   target_link_libraries( pml_${LIB_TYPE} PUBLIC objectmodel_${LIB_TYPE} )
   target_link_libraries( pml_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
@@ -78,17 +82,11 @@ foreach(LIB_TYPE static shared)
     target_compile_definitions( pml_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions( pml_${LIB_TYPE} PRIVATE -DBOOST_ALL_NO_LIB )
-endforeach()
-
-# Set public headers to be installed for the shared library target.
-# Because the headers are the same for the static library, the headers are only
-# installed once.
-set_target_properties(pml_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-
-# Set include paths for dependent projects
-get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-foreach(TARGET_TYPE static shared)
-  target_include_directories(pml_${TARGET_TYPE}
+  # Set public headers to be installed.
+  set_target_properties(pml_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+  # Set include paths for dependent projects
+  get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+  target_include_directories(pml_${LIB_TYPE}
     PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/visr>
@@ -98,14 +96,18 @@ endforeach()
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS pml_static
           EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libpml COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
-install(TARGETS pml_shared
-        EXPORT VISR_exports
-        ARCHIVE DESTINATION lib COMPONENT development_files
-        RUNTIME DESTINATION lib COMPONENT shared_libraries
-        LIBRARY DESTINATION lib  COMPONENT shared_libraries
-        PUBLIC_HEADER DESTINATION include/visr/libpml COMPONENT development_files )
+
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  install(TARGETS pml_shared
+          EXPORT VISR_exports
+          ARCHIVE DESTINATION lib COMPONENT development_files
+          RUNTIME DESTINATION lib COMPONENT shared_libraries
+          LIBRARY DESTINATION lib  COMPONENT shared_libraries
+          PUBLIC_HEADER DESTINATION include/visr/libpml COMPONENT development_files )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 # Add the unit test directory.
 add_subdirectory( test )

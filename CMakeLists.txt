@@ -4,7 +4,8 @@
 
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
-CMAKE_MINIMUM_REQUIRED (VERSION 3.1.0)
+# 3.3 for IN_LIST operator in if() conditions
+CMAKE_MINIMUM_REQUIRED (VERSION 3.3.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
@@ -14,6 +15,12 @@ endif( POLICY CMP0063 )
 if( POLICY CMP0074 )
   CMAKE_POLICY(SET CMP0074 NEW)
 endif( POLICY CMP0074 )
+if( POLICY CMP0057 )
+  CMAKE_POLICY(SET CMP0057 NEW)
+else( POLICY CMP0057 )
+  message( FATAL_ERROR "Policy CMP0057 not supported (IN_LIST operator), although CMake version requirement is met.")
+endif( POLICY CMP0057 )
+
 
 # The name of our top-level project.
 PROJECT( VISR CXX C )
@@ -184,6 +191,34 @@ endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
 
 # TODO: Generate architecture flags for other platforms (e.g., ARM)
 
+
+option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR applications." ON)
+
+############################################################
+# Logic for building, using, and installing libraries
+
+option( BUILD_INSTALL_SHARED_LIBRARIES "Whether to provide shared libraries in the installation packages." ON )
+option( BUILD_INSTALL_STATIC_LIBRARIES "Whether to provide static libraries in the installation packages." OFF )
+
+set( BUILD_LIBRARY_TYPE_FOR_APPS "shared" CACHE STRING "The library type used for standalone applications." )
+set( VISR_LIBRARY_TYPES "shared;static" )
+set_property( CACHE BUILD_LIBRARY_TYPE_FOR_APPS PROPERTY STRINGS ${VISR_LIBRARY_TYPES} )
+
+
+set( VISR_BUILD_LIBRARY_TYPES )
+
+# Decide which library types are built and store them in a list that is used in
+# subdirectories.
+# Static libraries are built if they are used in the standalone applications or
+# if they are to be installed.
+if( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
+  OR BUILD_INSTALL_STATIC_LIBRARIES )
+  list( APPEND VISR_BUILD_LIBRARY_TYPES "static")
+endif( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
+  OR BUILD_INSTALL_STATIC_LIBRARIES )
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  list( APPEND VISR_BUILD_LIBRARY_TYPES "shared")
+endif()
 
 ############################################################
 # Create universal binaries on MacOS

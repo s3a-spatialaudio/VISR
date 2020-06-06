@@ -44,30 +44,26 @@ reference/vector_functions.hpp
 reference/vector_functions_impl.hpp
 )
 
-add_library( efl_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( efl_static PROPERTIES OUTPUT_NAME efl )
-target_compile_definitions( efl_static PUBLIC VISR_EFL_STATIC_LIBRARY=1)
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( efl_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( efl_static PROPERTIES OUTPUT_NAME efl )
+  target_compile_definitions( efl_static PUBLIC VISR_EFL_STATIC_LIBRARY=1)
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
+if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 add_library( efl_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( efl_shared PROPERTIES OUTPUT_NAME efl )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
 set_target_properties( efl_shared PROPERTIES ARCHIVE_OUTPUT_NAME efl_shared )
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-foreach( LIB_TYPE static shared)
+foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
   target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
-endforeach()
-
-# Set public headers to be installed for the shared library target.
-# Because the headers are the same for the static library, the headers are only
-# installed once.
-set_target_properties( efl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-
-# Set include paths for dependent projects
-get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-foreach(TARGET_TYPE static shared)
-  target_include_directories(efl_${TARGET_TYPE}
+  set_target_properties( efl_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+  target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
+  target_include_directories(efl_${LIB_TYPE}
     PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/visr>
@@ -82,21 +78,21 @@ if( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
   add_subdirectory( armv7l_neon_32bit )
 endif( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
 
-
-# TODO: Do the same for other architectures with platform-specific implementations
-# (e.g., ARM)
-
-if( BUILD_INSTALL_STATIC_LIBRARIES )
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   install(TARGETS efl_static
 	  EXPORT VISR_exports
+    PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files
 	  ARCHIVE DESTINATION lib COMPONENT static_libraries )
-endif( BUILD_INSTALL_STATIC_LIBRARIES )
-install(TARGETS efl_shared
-	EXPORT VISR_exports
-	ARCHIVE DESTINATION lib COMPONENT development_files
-	RUNTIME DESTINATION lib COMPONENT shared_libraries
-	LIBRARY DESTINATION lib COMPONENT shared_libraries
-	PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+
+if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  install(TARGETS efl_shared
+  	EXPORT VISR_exports
+  	ARCHIVE DESTINATION lib COMPONENT development_files
+  	RUNTIME DESTINATION lib COMPONENT shared_libraries
+  	LIBRARY DESTINATION lib COMPONENT shared_libraries
+  	PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
+endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Add the unit test directory.
 ADD_SUBDIRECTORY( test )

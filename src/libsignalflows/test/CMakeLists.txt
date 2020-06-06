@@ -9,10 +9,10 @@ baseline_renderer.cpp
 delay_vector.cpp
 test_main.cpp )
 
-target_link_libraries(${APPLICATION_NAME} signalflows_static )
-target_link_libraries(${APPLICATION_NAME} rrl_static )
-target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
-target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
+target_link_libraries(${APPLICATION_NAME} PRIVATE signalflows_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries(${APPLICATION_NAME} PRIVATE rrl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::filesystem )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::unit_test_framework )
 if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions(${APPLICATION_NAME} PRIVATE BOOST_ALL_DYN_LINK )
 endif( NOT Boost_USE_STATIC_LIBS )

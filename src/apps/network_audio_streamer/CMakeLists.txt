@@ -15,11 +15,11 @@ set( HEADERS
 
 add_executable( network_audio_streamer ${SOURCES} ${HEADERS} )
 
-target_link_libraries(network_audio_streamer apputilities_shared )
-target_link_libraries(network_audio_streamer rcl_shared )
-target_link_libraries(network_audio_streamer rrl_shared )
-target_link_libraries(network_audio_streamer audiointerfaces_shared )
-target_link_libraries(network_audio_streamer Boost::filesystem )
+target_link_libraries(network_audio_streamer PRIVATE apputilities_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries(network_audio_streamer PRIVATE rcl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries(network_audio_streamer PRIVATE rrl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries(network_audio_streamer PRIVATE audiointerfaces_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries(network_audio_streamer PRIVATE Boost::filesystem )
 
 install( TARGETS network_audio_streamer
          DESTINATION bin

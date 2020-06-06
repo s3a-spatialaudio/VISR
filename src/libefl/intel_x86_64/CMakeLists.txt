@@ -17,6 +17,6 @@ set( SOURCES
 )
 
 # Add the architecture-specific files to the efl libraries.
-foreach(TARGET_TYPE static shared)
+foreach(TARGET_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_sources( efl_${TARGET_TYPE} PRIVATE ${HEADERS} ${SOURCES} )
 endforeach()

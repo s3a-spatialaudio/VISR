@@ -10,10 +10,11 @@ add_executable( ${APPLICATION_NAME}
 audio_interface_configuration.cpp
 )
 
-target_link_libraries( ${APPLICATION_NAME} audiointerfaces_static )
-target_link_libraries( ${APPLICATION_NAME} rcl_static )
-target_link_libraries( ${APPLICATION_NAME} rrl_static )
-target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE audiointerfaces_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE rcl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE rrl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::filesystem )
+target_link_libraries( ${APPLICATION_NAME} PRIVATE Boost::unit_test_framework )
 if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions(${APPLICATION_NAME} PRIVATE -DBOOST_ALL_DYN_LINK )
 endif( NOT Boost_USE_STATIC_LIBS )

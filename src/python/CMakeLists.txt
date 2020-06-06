@@ -1,5 +1,15 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+# This is not possible because the static boost libraries are normally not
+# compiled as position-independent code, which means they cannot used in shared
+# objects as Python externals.
+# This definitely leads to link errors on Linux and MacOS, but it should
+# conceptually be the same problem on Windows.
+if( Boost_USE_STATIC_LIBS )
+  message( SEND_ERROR
+   "Cannot build Python bindings when using static boost libraries." )
+endif( Boost_USE_STATIC_LIBS )
+
 add_subdirectory( visr )
 
 add_subdirectory( efl )

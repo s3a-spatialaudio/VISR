@@ -14,7 +14,7 @@ point_source_with_reverb.cpp
 test_main.cpp 
 )
 
-target_link_libraries( ${APPLICATION_NAME} objectmodel_static )
+target_link_libraries( ${APPLICATION_NAME} objectmodel_${BUILD_LIBRARY_TYPE_FOR_APPS} )
 target_link_libraries( ${APPLICATION_NAME} Boost::unit_test_framework )
 target_link_libraries( ${APPLICATION_NAME} Boost::filesystem )
 if( NOT Boost_USE_STATIC_LIBS )

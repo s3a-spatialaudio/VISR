@@ -62,18 +62,22 @@ udp_receiver.hpp
 udp_sender.hpp
 )
 
-add_library( rcl_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
-target_compile_definitions( rcl_static PUBLIC VISR_RCL_STATIC_LIBRARY=1)
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( rcl_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( rcl_static PROPERTIES OUTPUT_NAME rcl )
+  target_compile_definitions( rcl_static PUBLIC VISR_RCL_STATIC_LIBRARY=1)
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
-# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
-set_target_properties( rcl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rcl_shared )
-set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( rcl_shared SHARED ${SOURCES} ${HEADERS} )
+  set_target_properties( rcl_shared PROPERTIES OUTPUT_NAME rcl )
+  # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+  set_target_properties( rcl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rcl_shared )
+  set_target_properties( rcl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.
-foreach(LIB_TYPE static shared)
+foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( rcl_${LIB_TYPE} PRIVATE VISR_BUILD_RCL_LIBRARY=1)
   # Not ideal. This is only used by certain files (scalar_osc_decoder.cpp)
   # But INCLUDE_DIRECTORIES is a source file peroperty only since Cmake 3.11
@@ -92,20 +96,14 @@ foreach(LIB_TYPE static shared)
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( rcl_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )
-  # Apparently the Boost::disable_autolinking directive must be public even if the 
+  # Apparently the Boost::disable_autolinking directive must be public even if the
   # boost libs are used only private
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC Boost::disable_autolinking )
-endforeach()
-
-# Set public headers to be installed for the shared target.
-# Because the headers are the same for the static library, the headers are only
-# installled once.
-set_target_properties(rcl_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-
-# Set include paths for dependent projects
-get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
-foreach(TARGET_TYPE static shared)
-  target_include_directories(rcl_${TARGET_TYPE}
+  # Set public headers to be installed.
+  set_target_properties(rcl_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+  # Set include paths for dependent projects
+  get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+  target_include_directories(rcl_${LIB_TYPE}
     PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/visr>
@@ -115,14 +113,18 @@ endforeach()
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS rcl_static
           EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/librcl COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
+
+if( BUILD_INSTALL_SHARED_LIBRARIES )
 install(TARGETS rcl_shared
         EXPORT VISR_exports
         ARCHIVE DESTINATION lib COMPONENT development_files
         RUNTIME DESTINATION lib COMPONENT shared_libraries
         LIBRARY DESTINATION lib COMPONENT shared_libraries
         PUBLIC_HEADER DESTINATION include/visr/librcl COMPONENT development_files )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 # Add the unit test directory.
 add_subdirectory( test )
