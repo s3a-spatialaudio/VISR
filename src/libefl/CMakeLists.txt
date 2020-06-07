@@ -51,10 +51,10 @@ if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-add_library( efl_shared SHARED ${SOURCES} ${HEADERS} )
-set_target_properties( efl_shared PROPERTIES OUTPUT_NAME efl )
-# Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
-set_target_properties( efl_shared PROPERTIES ARCHIVE_OUTPUT_NAME efl_shared )
+  add_library( efl_shared SHARED ${SOURCES} ${HEADERS} )
+  set_target_properties( efl_shared PROPERTIES OUTPUT_NAME efl )
+  # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
+  set_target_properties( efl_shared PROPERTIES ARCHIVE_OUTPUT_NAME efl_shared )
 set_target_properties( efl_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
@@ -63,11 +63,12 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
   set_target_properties( efl_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
   target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
+  get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
   target_include_directories(efl_${LIB_TYPE}
     PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include/visr>
-  )
+      $<INSTALL_INTERFACE:include/visr>
+    )
 endforeach()
 
 if( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
