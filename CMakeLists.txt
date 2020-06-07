@@ -191,9 +191,6 @@ endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
 
 # TODO: Generate architecture flags for other platforms (e.g., ARM)
 
-
-option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR applications." ON)
-
 ############################################################
 # Logic for building, using, and installing libraries
 
@@ -204,6 +201,9 @@ set( BUILD_LIBRARY_TYPE_FOR_APPS "shared" CACHE STRING "The library type used fo
 set( VISR_LIBRARY_TYPES "shared;static" )
 set_property( CACHE BUILD_LIBRARY_TYPE_FOR_APPS PROPERTY STRINGS ${VISR_LIBRARY_TYPES} )
 
+# We need to know whether the standalone applications are built, because this influences which 
+# library types are built.
+option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR applications." ON)
 
 set( VISR_BUILD_LIBRARY_TYPES )
 
@@ -214,7 +214,7 @@ set( VISR_BUILD_LIBRARY_TYPES )
 if( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
   OR BUILD_INSTALL_STATIC_LIBRARIES )
   list( APPEND VISR_BUILD_LIBRARY_TYPES "static")
-endif( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
+endif( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared"))
   OR BUILD_INSTALL_STATIC_LIBRARIES )
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   list( APPEND VISR_BUILD_LIBRARY_TYPES "shared")
@@ -405,6 +405,14 @@ set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # defined import locations.
 set(Boost_USE_MULTITHREADED TRUE)
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+
+# Sanity check: Static Boost libraries cannot be used in shared libraries or loadable modules
+if( Boost_USE_STATIC_LIBS )
+  if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+    message( SEND_ERROR "Cannot build shared libraries if Boost_USE_STATIC_LIBS is on." )
+  endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+endif(  Boost_USE_STATIC_LIBS )
+
 
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
