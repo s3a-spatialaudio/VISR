@@ -81,5 +81,7 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           PUBLIC_HEADER DESTINATION include/visr/libpanning COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
-# Add the unit tests.
-ADD_SUBDIRECTORY( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )
+

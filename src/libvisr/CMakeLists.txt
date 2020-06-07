@@ -131,5 +131,7 @@ if( BUILD_INSTALL_SHARED_LIBRARIES OR BUILD_INSTALL_SHARED_LIBRARIES )
   install( FILES ${PUBLIC_HEADERS_DETAIL} DESTINATION include/visr/libvisr/detail COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES OR BUILD_INSTALL_SHARED_LIBRARIES )
 
-# Add the unit test directory.
-ADD_SUBDIRECTORY( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )
+

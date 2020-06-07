@@ -40,5 +40,6 @@ install(TARGETS ${PROJECT_NAME}
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
 
-# Recurse into the unit test directory.
-add_subdirectory( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )

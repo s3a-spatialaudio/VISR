@@ -95,5 +95,6 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   	PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-# Add the unit test directory.
-ADD_SUBDIRECTORY( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )

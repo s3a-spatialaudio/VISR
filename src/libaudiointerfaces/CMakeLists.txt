@@ -78,5 +78,7 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           PUBLIC_HEADER DESTINATION include/visr/libaudiointerfaces COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
-# Add the unit test directory.
-add_subdirectory( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )
+
