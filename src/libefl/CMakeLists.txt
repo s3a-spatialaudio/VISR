@@ -86,21 +86,21 @@ if( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
   add_subdirectory( armv7l_neon_32bit )
 endif( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
 
-if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS efl_static
 	  EXPORT VISR_exports
     PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files
 	  ARCHIVE DESTINATION lib COMPONENT static_libraries )
-endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
-if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS efl_shared
   	EXPORT VISR_exports
   	ARCHIVE DESTINATION lib COMPONENT development_files
   	RUNTIME DESTINATION lib COMPONENT shared_libraries
   	LIBRARY DESTINATION lib COMPONENT shared_libraries
   	PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
-endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
   install(TARGETS efl_static_pic EXPORT VISR_exports
