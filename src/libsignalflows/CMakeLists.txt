@@ -34,6 +34,13 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( signalflows_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
+if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( signalflows_static_pic STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( signalflows_static_pic PROPERTIES OUTPUT_NAME signalflows_pic )
+  set_target_properties( signalflows_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_compile_definitions( signalflows_static_pic PUBLIC VISR_SIGNALFLOWS_STATIC_LIBRARY=1)
+endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+
 # Set target properties common to both library types.
 foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES})
   target_compile_definitions( signalflows_${LIB_TYPE} PRIVATE VISR_BUILD_SIGNALFLOWS_LIBRARY=1)
@@ -72,7 +79,12 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  install(TARGETS signalflows_static_pic EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files
+          ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+
 if( BUILD_TESTING )
   add_subdirectory( test )
 endif( BUILD_TESTING )
-

@@ -30,6 +30,13 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( reverbobject_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
+if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( reverbobject_static_pic STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( reverbobject_static_pic PROPERTIES OUTPUT_NAME reverbobject_pic )
+  set_target_properties( reverbobject_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_compile_definitions( reverbobject_static_pic PUBLIC VISR_REVERBOBJECT_STATIC_LIBRARY=1)
+endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+
 # Set target properties common to both library types.
 foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( reverbobject_${LIB_TYPE} PRIVATE VISR_BUILD_REVERBOBJECT_LIBRARY=1)
@@ -70,3 +77,9 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           LIBRARY DESTINATION lib COMPONENT shared_libraries
           PUBLIC_HEADER DESTINATION include/visr/libreverbobject COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
+
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  install(TARGETS reverbobject_static_pic EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libreverbobject COMPONENT development_files
+          ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )

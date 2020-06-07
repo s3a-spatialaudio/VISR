@@ -165,11 +165,13 @@ cpack_add_component( thirdparty_libraries
                      REQUIRED HIDDEN
                    )
 
-cpack_add_component(shared_libraries
-                    DISPLAY_NAME "Shared Libraries"
-                    DESCRIPTION "Core VISR libraries (shared)"
-                    REQUIRED
-                   )
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  cpack_add_component(shared_libraries
+                      DISPLAY_NAME "Shared Libraries"
+                      DESCRIPTION "Core VISR libraries (shared)"
+                      REQUIRED
+                     )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   cpack_add_component(static_libraries
@@ -179,6 +181,15 @@ if( BUILD_INSTALL_STATIC_LIBRARIES )
                       DISABLED
                      )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
+
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  cpack_add_component(static_pic_libraries
+                      DISPLAY_NAME "Static Libraries with position-independent code"
+                      DESCRIPTION "Core VISR libraries (static and position-independent, for building loadable modules)"
+                      INSTALL_TYPES full developer
+                      DISABLED
+                     )
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 
 cpack_add_component( standalone_applications
                     DISPLAY_NAME "Standalone applications"

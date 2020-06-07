@@ -42,6 +42,13 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( panning_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
+if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( panning_static_pic STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( panning_static_pic PROPERTIES OUTPUT_NAME panning_pic )
+  set_target_properties( panning_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_compile_definitions( panning_static_pic PUBLIC VISR_PANNING_STATIC_LIBRARY=1)
+endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+
 # Set target properties common to both library types.
 foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( panning_${LIB_TYPE} PRIVATE VISR_BUILD_PANNING_LIBRARY=1)
@@ -81,7 +88,12 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           PUBLIC_HEADER DESTINATION include/visr/libpanning COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  install(TARGETS panning_static_pic EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libpanning COMPONENT development_files
+          ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+
 if( BUILD_TESTING )
   add_subdirectory( test )
 endif( BUILD_TESTING )
-

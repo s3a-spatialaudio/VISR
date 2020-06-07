@@ -94,6 +94,14 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties(visr_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
+if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( visr_static_pic STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
+  set_target_properties( visr_static_pic PROPERTIES OUTPUT_NAME visr_pic)
+  set_target_properties(visr_static_pic PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+  set_target_properties(visr_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_compile_definitions( visr_static_pic PUBLIC -DVISR_CORE_STATIC_LIBRARY=1 )
+endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+
 foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( visr_${LIB_TYPE} PRIVATE VISR_BUILD_CORE_LIBRARY=1 )
   # Set public headers to be installed.
@@ -126,6 +134,12 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           PUBLIC_HEADER DESTINATION include/visr/libvisr COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  install(TARGETS visr_static_pic EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libvisr COMPONENT development_files
+          ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+
 # TODO: Try to install the detail/ headers as part of the ordinary PUBLIC_HEADER installation.
 if( BUILD_INSTALL_SHARED_LIBRARIES OR BUILD_INSTALL_SHARED_LIBRARIES )
   install( FILES ${PUBLIC_HEADERS_DETAIL} DESTINATION include/visr/libvisr/detail COMPONENT development_files )
@@ -134,4 +148,3 @@ endif( BUILD_INSTALL_SHARED_LIBRARIES OR BUILD_INSTALL_SHARED_LIBRARIES )
 if( BUILD_TESTING )
   add_subdirectory( test )
 endif( BUILD_TESTING )
-

@@ -196,12 +196,13 @@ endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
 
 option( BUILD_INSTALL_SHARED_LIBRARIES "Whether to provide shared libraries in the installation packages." ON )
 option( BUILD_INSTALL_STATIC_LIBRARIES "Whether to provide static libraries in the installation packages." OFF )
+option( BUILD_INSTALL_STATIC_PIC_LIBRARIES "Whether to provide static position-independent libraries in the installation packages." OFF )
 
 set( BUILD_LIBRARY_TYPE_FOR_APPS "shared" CACHE STRING "The library type used for standalone applications." )
 set( VISR_LIBRARY_TYPES "shared;static" )
 set_property( CACHE BUILD_LIBRARY_TYPE_FOR_APPS PROPERTY STRINGS ${VISR_LIBRARY_TYPES} )
 
-# We need to know whether the standalone applications are built, because this influences which 
+# We need to know whether the standalone applications are built, because this influences which
 # library types are built.
 option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR applications." ON)
 
@@ -214,11 +215,15 @@ set( VISR_BUILD_LIBRARY_TYPES )
 if( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
   OR BUILD_INSTALL_STATIC_LIBRARIES )
   list( APPEND VISR_BUILD_LIBRARY_TYPES "static")
-endif( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared"))
+endif( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
   OR BUILD_INSTALL_STATIC_LIBRARIES )
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   list( APPEND VISR_BUILD_LIBRARY_TYPES "shared")
-endif()
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  list( APPEND VISR_BUILD_LIBRARY_TYPES "static_pic" )
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+
 
 ############################################################
 # Create universal binaries on MacOS
@@ -283,10 +288,10 @@ if( BUILD_PYTHON_BINDINGS )
   set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
   # Ensure that pybind11's targets are exported within the VISR export set.
-  # This is necessary to export static versions of libpythonsupport 
+  # This is necessary to export static versions of libpythonsupport
   # and libpythoncomponents, which have a private link dependency to pybind11::embed.
   # A drawback of the current approach is that the targets are exported as,
-  # e.g., VISR::embed, but we cannot set the namespace because this is done in 
+  # e.g., VISR::embed, but we cannot set the namespace because this is done in
   # the pybind11 tree.
   set( PYBIND11_EXPORT_NAME VISR_exports )
   # Force setting of pybind11 option (necessary in order to get the targets exported)
