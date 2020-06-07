@@ -14,10 +14,11 @@ initialisation_guard.hpp
 load_module.hpp
 )
 
-# There is no static variant of libpythonsupport, because the singleton
-# InitialisationGuard must be unique withon the process (i.e., the calling application
-# and the VISR externals within the Python interpreter must share the same
-# instance)
+if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  add_library( pythonsupport_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( pythonsupport_static PROPERTIES OUTPUT_NAME pythonsupport )
+  target_compile_definitions( pythonsupport_static PUBLIC VISR_PYTHONSUPPORT_STATIC_LIBRARY=1 )
+endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   add_library( pythonsupport_shared SHARED ${SOURCES} ${HEADERS} )
@@ -28,7 +29,7 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common for all library types.
-foreach(LIB_TYPE shared)
+foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( pythonsupport_${LIB_TYPE} PRIVATE VISR_BUILD_PYTHONSUPPORT_LIBRARY=1)
 
   # Transitive dependencies
@@ -68,6 +69,13 @@ foreach(LIB_TYPE shared)
     $<INSTALL_INTERFACE:include/visr>
   )
 endforeach()
+
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  install(TARGETS pythonsupport_static
+          EXPORT VISR_exports
+          PUBLIC_HEADER DESTINATION include/visr/libpythonsupport COMPONENT development_files
+          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS pythonsupport_shared
