@@ -19,3 +19,14 @@ function( adjustTestEnvironment target )
     endif( BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
   endif(VISR_SYSTEM_NAME MATCHES "Windows")
 endfunction()
+
+
+# Adjust the system environment of a Python-based unit test target.
+# In addition to the adjustments needed for all unit tests, the PYTHONPATH must contain 
+# the directory holding all used VISR Python externals.
+# This is done by passing a CMake target pythonpackage.
+# TODO: consider list of PYTHONPATH entries as (additional?) option.
+function( adjustPythonTestEnvironment target pythonpackage )
+  adjustTestEnvironment( ${target} )
+  set_tests_properties( ${target} PROPERTIES ENVIRONMENT PYTHONPATH=$<TARGET_FILE_DIR:${pythonpackage}> )
+endfunction()
