@@ -282,6 +282,16 @@ if( BUILD_PYTHON_BINDINGS )
   # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
   set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
+  # Ensure that pybind11's targets are exported within the VISR export set.
+  # This is necessary to export static versions of libpythonsupport 
+  # and libpythoncomponents, which have a private link dependency to pybind11::embed.
+  # A drawback of the current approach is that the targets are exported as,
+  # e.g., VISR::embed, but we cannot set the namespace because this is done in 
+  # the pybind11 tree.
+  set( PYBIND11_EXPORT_NAME VISR_exports )
+  # Force setting of pybind11 option (necessary in order to get the targets exported)
+  set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets.")
+
   # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
   # compile and link options.
