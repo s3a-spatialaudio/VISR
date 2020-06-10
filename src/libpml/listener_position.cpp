@@ -322,7 +322,7 @@ void ListenerPosition::writeJson( boost::property_tree::ptree & tree,
       rvTree.put<Coordinate>( "x", vec[0] );
       rvTree.put<Coordinate>( "y", vec[1] );
       rvTree.put<Coordinate>( "z", vec[2] );
-      orientationTree.add_child( "rotationVVector", rvTree );
+      orientationTree.add_child( "rotationVector", rvTree );
       break;
     }
     case RotationFormat::Quaternion:
@@ -469,10 +469,16 @@ ListenerPosition::OrientationQuaternion rotationVector2Quaternion( ListenerPosit
 ListenerPosition::RotationVector quaternion2RotationVector( ListenerPosition::OrientationQuaternion const & quat )
 {
   using T = ListenerPosition::Coordinate;
-  // sin( phi/2 ) = sqrt( 1 - cos(phi/2)^2 ) with cos( phi/2 ) = w
-  T const sinPhi2{ std::sqrt( static_cast<T>(1.0)
-   - quat.R_component_1()*quat.R_component_1()) };
-   T const scale = static_cast<T>(1.0)/sinPhi2;
+  T const norm{ std::sqrt(quat.R_component_2() * quat.R_component_2()
+    + quat.R_component_3() * quat.R_component_3()
+    + quat.R_component_4() * quat.R_component_4()) };
+  T const scale = 1.0f/norm;
+  if( scale <= std::numeric_limits<T>::epsilon() )
+  {
+    // Degenerate case, there is no rotation.
+    // Return an arbitrary unit vector instead.
+    ListenerPosition::RotationVector{ 1.0f, 0.0f, 0.0f };
+  }
   return ListenerPosition::RotationVector{ scale * quat.R_component_2(),
     scale * quat.R_component_3(), scale * quat.R_component_4() };
 }
@@ -480,7 +486,10 @@ ListenerPosition::RotationVector quaternion2RotationVector( ListenerPosition::Or
 ListenerPosition::Coordinate quaternion2RotationAngle( ListenerPosition::OrientationQuaternion const & quat )
 {
   using T = ListenerPosition::Coordinate;
-  return std::acos( static_cast<T>( 2.0) * quat.R_component_1() );
+  T const norm{ std::sqrt(quat.R_component_2() * quat.R_component_2()
+    + quat.R_component_3() * quat.R_component_3()
+    + quat.R_component_4() * quat.R_component_4()) };
+    return static_cast<T>( 2.0) * std::atan2( norm, quat.R_component_1() );
 }
 
 ListenerPosition::OrientationQuaternion normalise( ListenerPosition::OrientationQuaternion const & quat, bool adjustSign = false )
