@@ -42,10 +42,10 @@ public:
   explicit PositionDecoder( SignalFlowContext const & context,
                             char const * name,
                             CompositeComponent * parent,
-                            pml:: ListenerPosition::PositionType const & positionOffset
-                              = pml:: ListenerPosition::PositionType(),
-                            pml:: ListenerPosition::OrientationQuaternion const & orientationRotation
-                              = pml:: ListenerPosition::OrientationQuaternion() );
+                            pml::ListenerPosition::PositionType const & positionOffset
+                              = pml::ListenerPosition::PositionType(),
+                            pml::ListenerPosition::OrientationQuaternion const & orientationRotation
+                              = pml::ListenerPosition::OrientationQuaternion{1.0f, 0.0f, 0.0f, 0.0f} );
 
   explicit PositionDecoder( SignalFlowContext const & context,
                             char const * name,
