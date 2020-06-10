@@ -238,7 +238,7 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
     bool const hasYpr{ (orTree.count( "yaw" ) > 0)
       or (orTree.count( "pitch" ) > 0) or (orTree.count( "roll" ) > 0) };
     bool const hasRotationVec{ orTree.count( "rotationVector" ) > 0 };
-    if( hasQuat == hasYpr )
+    if( (hasQuat ? 1 : 0) + (hasYpr ? 1 : 0) + (hasRotationVec ? 1 : 0) > 1 )
     {
       throw std::invalid_argument( "ListenerPosition::parseJson():"
         " Orientation must be provided either as yaw,pitch,roll, a rotation vector/angle or as a quaternion" );
@@ -252,6 +252,13 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
       Coordinate const qz = quatTree.get<Coordinate>( "z", 0.0f );
       setOrientationQuaternion( OrientationQuaternion( qw, qx, qy, qz ) );
     }
+    else if( hasYpr )
+    {
+      Coordinate const yaw = efl::degree2radian( orTree.get<Coordinate>( "yaw", 0.0f ));
+      Coordinate const pitch = efl::degree2radian( orTree.get<Coordinate>( "pitch", 0.0f ));
+      Coordinate const roll = efl::degree2radian( orTree.get<Coordinate>( "roll", 0.0f ));
+      setOrientationYPR( yaw, pitch, roll );
+    }
     else if( hasRotationVec )
     {
       pt::ptree const & vecTree = orTree.get_child( "rotationVector" );
@@ -264,10 +271,7 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
     }
     else
     {
-      Coordinate const yaw = efl::degree2radian( orTree.get<Coordinate>( "yaw", 0.0f ));
-      Coordinate const pitch = efl::degree2radian( orTree.get<Coordinate>( "pitch", 0.0f ));
-      Coordinate const roll = efl::degree2radian( orTree.get<Coordinate>( "roll", 0.0f ));
-      setOrientationYPR( yaw, pitch, roll );
+      setOrientationYPR( 0.0f, 0.0f, 0.0f );
     }
   }
   else
