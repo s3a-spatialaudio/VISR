@@ -202,8 +202,14 @@ public:
   /**
    * Set an interpolation parameter, i.e., a set of interpolation indices and
    * weights for one filter routing.
+   * @param interpolant New interpolation parameter, including routing id,
+   * indices of the filters to be interpolated, and interpolation weights.
+   * @param startTransition Whether to start a new crossfade transition. If
+   * false, the new interpolant is set immediately, or a currently active
+   * crossfade is continued with the new target value,
    */
-  void setInterpolant( rbbl::InterpolationParameter const & interpolant );
+  void setInterpolant( rbbl::InterpolationParameter const & interpolant,
+                       bool startTransition );
 
   /**
    * Set the interpolant indices and weigths for a filter routing.
@@ -213,10 +219,14 @@ public:
    * @param weights The interpolation weights for superimposing the interpolant
    * filters. Must match the number of interpolants per routing entry set in the
    * constructor.
+   * @param startTransition Whether to start a new crossfade transition. If
+   * false, the new interpolant is set immediately, or a currently active
+   * crossfade is continued with the new target value,
    */
   void setInterpolant( std::size_t id,
                        std::vector< std::size_t > const & indices,
-                       std::vector< float > const & weights );
+                       std::vector< float > const & weights,
+                       bool startTransition );
 
   /**
    * Set the interpolant indices and weigths for a filter routing using
@@ -227,10 +237,14 @@ public:
    * @param weights The interpolation weights for superimposing the interpolant
    * filters. Must match the number of interpolants per routing entry set in the
    * constructor.
+   * @param startTransition Whether to start a new crossfade transition. If
+   * false, the new interpolant is set immediately, or a currently active
+   * crossfade is continued with the new target value,
    */
   void setInterpolant( std::size_t id,
                        std::initializer_list< std::size_t > const & indices,
-                       std::initializer_list< float > const & weights );
+                       std::initializer_list< float > const & weights,
+                       bool startTransition );
 
 private:
   /**

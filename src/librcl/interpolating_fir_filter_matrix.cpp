@@ -126,7 +126,7 @@ void InterpolatingFirFilterMatrix::process()
       {
         rbbl::InterpolationParameter const & param = mInterpolantInput->front();
 
-        mConvolver->setInterpolant( param );
+        setInterpolant( param, true/*startTransition*/ );
         // Argument checking is done inside the method.
         mInterpolantInput->pop();
       }
@@ -210,27 +210,32 @@ void InterpolatingFirFilterMatrix::setFilters(
 }
 
 void InterpolatingFirFilterMatrix::setInterpolant(
-    rbbl::InterpolationParameter const & interpolant )
+    rbbl::InterpolationParameter const & interpolant,
+    bool startTransition )
 {
-  mConvolver->setInterpolant( interpolant );
+  mConvolver->setInterpolant( interpolant, startTransition );
 }
 
 void InterpolatingFirFilterMatrix::setInterpolant(
     std::size_t id,
     std::vector< std::size_t > const & indices,
-    std::vector< float > const & weights )
+    std::vector< float > const & weights,
+    bool startTransition )
 {
   mConvolver->setInterpolant(
-      rbbl::InterpolationParameter( id, indices, weights ) );
+      rbbl::InterpolationParameter( id, indices, weights ),
+      startTransition );
 }
 
 void InterpolatingFirFilterMatrix::setInterpolant(
     std::size_t id,
     std::initializer_list< std::size_t > const & indices,
-    std::initializer_list< float > const & weights )
+    std::initializer_list< float > const & weights,
+    bool startTransition )
 {
   mConvolver->setInterpolant(
-      rbbl::InterpolationParameter( id, indices, weights ) );
+      rbbl::InterpolationParameter( id, indices, weights ),
+      startTransition );
 }
 
 } // namespace rcl
