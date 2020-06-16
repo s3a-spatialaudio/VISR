@@ -37,7 +37,7 @@ public:
    * @param parameterType The parameter type of the terminator's output port.
    * @param protocolType The communication protocol type of the terminator's
    * output port.
-   * @param parameterConfigType The parameter configuration (e.g., dimensions)
+   * @param parameterConfig The parameter configuration (e.g., dimensions)
    * of the output port.
    */
   explicit ParameterInputTerminator(
