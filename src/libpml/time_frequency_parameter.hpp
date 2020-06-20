@@ -80,12 +80,12 @@ public:
    * because conjugate symmetric elements are stored just once.
    * @param numberOfChannels The number of audio channels that are simultaneously transmitted 
    * in a time-frequency parameter.
-   * @param numDftSamples The number of DFT vectors containe in one parameter
+   * @param numberOfFrames The number of separate DFT vectors contained.
    * @param alignment The alignment of the data, given in in multiples of the element size.
    */
-  explicit TimeFrequencyParameter( std::size_t dftSize,
-                                   std::size_t numDftSamples, 
-                                   std::size_t numChannels, 
+  explicit TimeFrequencyParameter( std::size_t numberOfDftBins,
+                                   std::size_t numberOfChannels, 
+                                   std::size_t numberOfFrames, 
                                    size_t alignment = 0 );
 
   /**
