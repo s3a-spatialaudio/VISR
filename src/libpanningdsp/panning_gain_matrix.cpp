@@ -55,7 +55,7 @@ PanningGainMatrix::PanningGainMatrix(SignalFlowContext const & context,
   std::size_t numberOfLoudspeakers )
  : PanningGainMatrix{ context, name, parent,
     numberOfObjects, numberOfLoudspeakers,
-    zeroMatrix<SampleType>( numberOfLoudspeakers, numberOfObjects, cVectorAlignmentSamples ) }
+    zeroMatrix<SampleType>( numberOfObjects, numberOfLoudspeakers , cVectorAlignmentSamples ) }
 {}
 
 PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
@@ -67,7 +67,7 @@ PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
  : AtomicComponent( context, name, parent )
  , mAudioInput( "in", *this, numberOfObjects )
  , mAudioOutput( "out", *this, numberOfLoudspeakers )
- , mGainInput( "gainInput", *this, pml::MatrixParameterConfig( numberOfLoudspeakers, numberOfObjects ) )
+ , mGainInput( "gainInput", *this, pml::MatrixParameterConfig(  numberOfObjects, numberOfLoudspeakers ) )
  , mPreviousTime{ constantArray( 0ul, numberOfObjects, visr::cVectorAlignmentSamples ) }
  , mTargetTime{ constantArray( cTimeStampInfinity, numberOfObjects, visr::cVectorAlignmentSamples ) }
  , mPreviousGains{ numberOfObjects, numberOfLoudspeakers, visr::cVectorAlignmentSamples }
@@ -79,11 +79,11 @@ PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
     static_cast<SampleType>(1.0),
     period(), visr::cVectorAlignmentSamples )}
 {
-  if( (initialGains.numberOfRows() != numberOfLoudspeakers)
-   or (initialGains.numberOfColumns() != numberOfObjects) )
+  if( (initialGains.numberOfRows() != numberOfObjects) 
+   or (initialGains.numberOfColumns() != numberOfLoudspeakers) )
   {
     throw std::invalid_argument( "The parameter \"initialGains\" does not match"
-      " the dimension numberOfLoudspeakers x numberOfObjects." );
+      " the dimension numberOfObjects x numberOfLoudspeakers." );
   }
   mPreviousGains.copy( initialGains );
   mTargetGains.copy( initialGains );
@@ -168,15 +168,16 @@ void PanningGainMatrix::processAudio()
     }
     return;
   }
-  TimeType currentTime{ time().sampleCount() };
-  TimeType const blockEndTime{ currentTime + bufSize };
-  std::size_t bufferOffset{ 0 };
 
   // Time::IntegerTimeType const periodEndTime{ currentTime + bufSize };
   for( std::size_t objIdx{ 0 }; objIdx < numObjs; ++objIdx )
   {
     // Add to the output signals for all but the first (zeroth) object
     bool const accumulateFlag = (objIdx != 0);
+
+    TimeType currentTime{ time().sampleCount() };
+    TimeType const blockEndTime{ currentTime + bufSize };
+    std::size_t bufferOffset{ 0 };
 
     while( currentTime < blockEndTime )
     {

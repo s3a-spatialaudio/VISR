@@ -403,6 +403,159 @@ def test_jumpGainImmediatelyStartTime0(plot=False):
 
     assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
 
+    # %% Multiple-input / multiple-output tests
+
+
+def referenceGainMimo(sigLen, initialGains, transitions):
+    numOuts, numIns= initialGains.shape
+
+    # Note: this can yield rather large matrices
+    refGains = np.repeat(initialGains[...,np.newaxis], sigLen, axis=-1)
+
+    # We assume that the transitions are sorted.
+    for trans in transitions:
+        objIdx = trans["o"]
+        start = trans["s"]
+        duration = trans["d"]
+        gains = trans["g"]
+        if start >= sigLen:
+            break
+
+        startGains = refGains[objIdx,:,start]
+        scaleRamp= np.flip(np.linspace(1.0, 0.0, duration, endpoint=False))
+        gainRamp = startGains[:,np.newaxis]\
+            + (gains-startGains)[:,np.newaxis]*scaleRamp[np.newaxis,:]
+
+        remLen = sigLen - start
+        if remLen >= duration:
+            refGains[objIdx,:,start:start+duration] = gainRamp
+            refGains[objIdx,:,start+duration:] = gains[...,np.newaxis]
+        else:
+            refGains[objIdx,:,-remLen:] = gainRamp[objIdx,:,:remLen]
+    return refGains
+
+def mimoPanning(signal, initialGains, transitions=[], bs=64, fs=48000):
+    """
+    Internal implementation function for applying a panning gain to a
+    multichannel signal signal with an arbitrary sequence of transition messages.
+    """
+
+    initialGains=np.asarray(initialGains, dtype=np.float32)
+    numObj, numLsp= initialGains.shape
+
+    inSig = np.asarray( np.atleast_2d(signal), dtype=np.float32)
+    assert inSig.shape[0] == numObj
+    signalLength=inSig.shape[-1]
+    numBlocks=signalLength // bs
+    assert numBlocks*bs == signalLength
+    outSig = np.zeros( (numLsp, signalLength), dtype=np.float32)
+
+    transitions.sort( key=itemgetter( 'i' ))
+
+    refGain = referenceGainMimo( signalLength, initialGains, transitions )
+
+    refOutput = np.einsum( 'jik,jk->ik', refGain, inSig )
+
+    ctxt=visr.SignalFlowContext(period=bs, samplingFrequency=fs)
+
+    comp=panningdsp.PanningGainMatrix(ctxt, "GainMatrix", None,
+      numberOfObjects=numObj, numberOfLoudspeakers=numLsp,
+      initialGains=initialGains )
+
+    flow = rrl.AudioSignalFlow( comp )
+    gainInput = flow.parameterReceivePort("gainInput")
+
+    for bIdx in range(numBlocks):
+        param = gainInput.data()
+        for t in [ p for p in transitions if p['i'] == bIdx]:
+            objIdx=t['o']
+            timeStamps = [panningdsp.timeStampInfinity]*numObj
+            transitionTimes =[panningdsp.timeStampInfinity]*numObj
+            timeStamps[objIdx] = t['s']
+            transitionTimes[objIdx] = t['d']
+            param.timeStamps = timeStamps
+            param.transitionTimes = transitionTimes
+            np.asarray(param.gains)[...] = np.NaN
+            newGains = t['g']
+            np.asarray(param.gains)[objIdx,:] = newGains
+            gainInput.swapBuffers()
+        outSig[:,bIdx*bs:(bIdx+1)*bs] = flow.process(inSig[:,bIdx*bs:(bIdx+1)*bs])
+
+    return outSig, refOutput
+
+
+def test_mimoStatic(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+
+    numObj=3
+    numLsp=5
+
+    sigLen=numBlocks*bs
+
+    inSig=2*(np.random.random_sample((numObj, sigLen))-0.5)
+    # inSig=np.zeros((numObj, sigLen), dtype=np.float32)
+    # inSig[1,:] = 0.3
+
+    initGains = np.random.random_sample((numObj, numLsp))
+    # initGains=np.zeros((numObj, numLsp), dtype=np.float32)
+    # initGains[0,0] = 0.5
+    # initGains[1,3] = 0.2
+
+    transitions = []
+
+    out, ref = mimoPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                         initialGains=initGains )
+    if plot:
+        plotPanningScalar( inSig[0,:], out[0,:], ref[0,:], title="static MIMO")
+
+    assert np.max(np.abs(out-ref)) < 1e-5
+
+def test_mimoRampGainMultipleBlocks(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+
+    numObj=3
+    numLsp=5
+
+    sigLen=numBlocks*bs
+
+    objIdx = 1
+
+    inSig=2*(np.random.random_sample((numObj, sigLen))-0.5)
+    # inSig=np.zeros((numObj, sigLen), dtype=np.float32)
+    # inSig[objIdx,:] = 1
+
+    initGains = np.random.random_sample((numObj, numLsp))
+    # initGains=np.zeros((numObj, numLsp), dtype=np.float32)
+    # initGains[0,0] = 0.5
+    # initGains[1,3] = 0.2
+
+    initGains[objIdx,:] = [0.5, 0.7, 0.1, 0.3, 1.0 ]
+
+    newGains = np.array([0.7, 0.1, 0.3, 1.0, 0.2 ], dtype=np.float32 )
+    # newGains = np.array([0, 0, 0.5, 0, 0 ], dtype=np.float32 )
+
+    parameterSendBlock = 1
+    transitionStartTime = 135
+    transitionTime = 153
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    # newGainMtx = np.full( initGains.shape, np.NaN, dtype=np.float32)
+    # newGainMtx[objIdx] = newGains
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime,
+                         o=objIdx, g=newGains )
+                  ]
+
+    out, ref = mimoPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                         initialGains=initGains )
+    if plot:
+        plotPanningScalar( inSig[objIdx,:], out[2,:], ref[2,:], title="MIMO ramp gain.")
+
+    assert np.max(np.abs(out-ref)) < 1e-5
+
 
 # Enable to run the unit test as a script.
 if __name__ == "__main__":
@@ -425,3 +578,6 @@ if __name__ == "__main__":
     test_rampGainImmediatelyStartTime0(plot=plotData)
     test_jumpGainImmediately(plot=plotData)
     test_jumpGainImmediatelyStartTime0(plot=plotData)
+
+    test_mimoStatic(plot=plotData)
+    test_mimoRampGainMultipleBlocks(plot=plotData)
