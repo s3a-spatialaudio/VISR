@@ -68,7 +68,7 @@ PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
  , mAudioInput( "in", *this, numberOfObjects )
  , mAudioOutput( "out", *this, numberOfLoudspeakers )
  , mGainInput( "gainInput", *this, pml::MatrixParameterConfig(  numberOfObjects, numberOfLoudspeakers ) )
- , mPreviousTime{ constantArray( 0ul, numberOfObjects, visr::cVectorAlignmentSamples ) }
+ , mPreviousTime{ constantArray( size_t(0), numberOfObjects, visr::cVectorAlignmentSamples ) }
  , mTargetTime{ constantArray( cTimeStampInfinity, numberOfObjects, visr::cVectorAlignmentSamples ) }
  , mPreviousGains{ numberOfObjects, numberOfLoudspeakers, visr::cVectorAlignmentSamples }
  , mTargetGains{ numberOfObjects, numberOfLoudspeakers, visr::cVectorAlignmentSamples }
