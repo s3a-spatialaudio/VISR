@@ -70,8 +70,8 @@ PanningGainMatrix::PanningGainMatrix( SignalFlowContext const & context,
  , mGainInput( "gainInput", *this, pml::MatrixParameterConfig( numberOfLoudspeakers, numberOfObjects ) )
  , mPreviousTime{ constantArray( 0ul, numberOfObjects, visr::cVectorAlignmentSamples ) }
  , mTargetTime{ constantArray( cTimeStampInfinity, numberOfObjects, visr::cVectorAlignmentSamples ) }
- , mPreviousGains{ numberOfLoudspeakers, numberOfObjects, visr::cVectorAlignmentSamples }
- , mTargetGains{ numberOfLoudspeakers, numberOfObjects, visr::cVectorAlignmentSamples }
+ , mPreviousGains{ numberOfObjects, numberOfLoudspeakers, visr::cVectorAlignmentSamples }
+ , mTargetGains{ numberOfObjects, numberOfLoudspeakers, visr::cVectorAlignmentSamples }
  , mPendingTransitions( cNumPendingTransitions,
        PanningMatrixParameter( numberOfObjects, numberOfLoudspeakers, 
        visr::cVectorAlignmentSamples ) )
@@ -402,17 +402,17 @@ void PanningGainMatrix::updateTransition( std::size_t objIdx,
     GainType const alpha = interpolationRatio( currentTime,
         mPreviousTime[ objIdx ], mTargetTime[ objIdx ] );
     std::size_t const numLsp{ mTargetGains.numberOfColumns() };
-    // TODO: turn into a vector function.
-    for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
-    {
-      mTargetGains( lspIdx, objIdx ) = alpha * mTargetGains( objIdx, lspIdx )
-        + (1.0f - alpha ) * mPreviousGains( objIdx, lspIdx );
+      // TODO: turn into a vector function.
+      for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
+      {
+        mTargetGains( objIdx, lspIdx ) = alpha * mTargetGains( objIdx, lspIdx )
+          + (1.0f - alpha ) * mPreviousGains( objIdx, lspIdx );
+      }
+      mTargetTime[ objIdx ] = startTime;
     }
-    mTargetTime[ objIdx ] = startTime;
-  }
-  mPendingTransitions[0].timeStamps()[ objIdx ] = startTime;
-  mPendingTransitions[0].transitionTimes()[ objIdx ] = duration;
-  mPendingTransitions[0].gains().setRow( objIdx, gains );
+    mPendingTransitions[0].timeStamps()[ objIdx ] = startTime;
+    mPendingTransitions[0].transitionTimes()[ objIdx ] = duration;
+    mPendingTransitions[0].gains().setRow( objIdx, gains );
 #else
   TimeType const currentTime = time().sampleCount();
   if( startTime < currentTime )
