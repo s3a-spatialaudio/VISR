@@ -310,6 +310,98 @@ def test_jumpGain(plot=False):
 
     assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
 
+def test_rampGainImmediately(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    endGain = 0.725
+    transitionTime = 17
+    parameterSendBlock = 1
+    transitionStartTime = parameterSendBlock * bs
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Ramp gain")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+def test_rampGainImmediatelyStartTime0(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.2
+    endGain = 0.725
+    transitionTime = 17
+    parameterSendBlock = 0
+    transitionStartTime = parameterSendBlock * bs
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Ramp gain")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+
+# def test_rampGainCrossBlockBoundary(plot=False):
+#     fs=48000
+#     bs=64
+#     numBlocks=8
+#     signalLength=numBlocks*bs
+#     inSig=0.75*np.ones(signalLength)
+
+#     startGain = 0.2
+#     endGain = 0.725
+#     transitionTime = 139
+#     transitionStartTime = 137
+#     parameterSendBlock = 1
+#     assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+#     transitions = [ dict(i=parameterSendBlock,
+#                          s=transitionStartTime, d=transitionTime, g=endGain) ]
+
+#     out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+#                              initialGain=startGain )
+#     if plot:
+#         plotPanningScalar(inSig, out, ref, title="Ramp gain crossing block boundary")
+
+#     assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
+
+def test_jumpGainImmediately(plot=False):
+    fs=48000
+    bs=64
+    numBlocks=8
+    signalLength=numBlocks*bs
+    inSig=0.75*np.ones(signalLength)
+
+    startGain = 0.7
+    endGain = 0.4
+    transitionTime = 0
+    parameterSendBlock = 1
+    transitionStartTime = parameterSendBlock * bs
+    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
+    transitions = [ dict(i=parameterSendBlock,
+                         s=transitionStartTime, d=transitionTime, g=endGain) ]
+
+    out, ref = scalarPanning(inSig, transitions=transitions, bs=bs, fs=fs,
+                             initialGain=startGain )
+    if plot:
+        plotPanningScalar(inSig, out, ref, title="Jump gain")
+
+    assert np.all(np.abs(out - ref ) <= 5*np.finfo(np.float32).eps)
 
 # Enable to run the unit test as a script.
 if __name__ == "__main__":
@@ -327,3 +419,7 @@ if __name__ == "__main__":
     test_multipleTransitionsAdjoining(plot=plotData)
     test_multipleTransitionsOverlapping(plot=plotData)
     test_jumpGain(plot=plotData)
+
+    test_rampGainImmediately(plot=plotData)
+    test_rampGainImmediatelyStartTime0(plot=plotData)
+    test_jumpGainImmediately(plot=plotData)

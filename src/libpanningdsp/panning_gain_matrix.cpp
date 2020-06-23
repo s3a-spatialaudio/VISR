@@ -395,13 +395,49 @@ void PanningGainMatrix::updateTransition( std::size_t objIdx,
     return;
   }
 #if 1
-  if( startTime < mTargetTime[ objIdx ] )
+  std::size_t const numLsp{ mTargetGains.numberOfColumns() };
+  // Special case: we have to update the data members immediately.
+  if( startTime == currentTime )
   {
-    // Adjust the current target gains by computing the value at 
-    // startTime
-    GainType const alpha = interpolationRatio( currentTime,
-        mPreviousTime[ objIdx ], mTargetTime[ objIdx ] );
-    std::size_t const numLsp{ mTargetGains.numberOfColumns() };
+    mPreviousTime[ objIdx ] = currentTime;
+    if( duration == 0 ) // Immediate change w/o interpolation (e.g., jump position)
+    {
+      copyRow( gains, mPreviousGains.row( objIdx ), numLsp, 
+        0 /*Do not assume special alignment*/ );
+      copyRow( gains, mTargetGains.row( objIdx ), numLsp, 
+        0 /*Do not assume special alignment*/ );
+      mTargetTime[ objIdx ] = cTimeStampInfinity;
+    }
+    else
+    {
+      // Adjust the current target gains by computing the value at 
+      // startTime
+      GainType const alpha = interpolationRatio( currentTime,
+          mPreviousTime[ objIdx ], mTargetTime[ objIdx ] );
+      // TODO: turn into a vector function.
+      for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
+      {
+        mPreviousGains( objIdx, lspIdx ) = alpha * mTargetGains( lspIdx, objIdx )
+          + (1.0f - alpha ) * mPreviousGains( objIdx, lspIdx );
+      }
+      copyRow( gains, mTargetGains.row( objIdx ), numLsp, 
+        0 /*Do not assume special alignment*/ );
+      mTargetTime[ objIdx ] = currentTime + duration;
+    }
+    // Clear next pending transition
+    mPendingTransitions[0].timeStamps()[ objIdx ] = cTimeStampInfinity;
+    mPendingTransitions[0].transitionTimes()[ objIdx ] = cTimeStampInfinity;
+    mPendingTransitions[0].gains().setRow( objIdx, mTargetGains.row( objIdx ) );
+  }
+  else
+  {
+    if( startTime < mTargetTime[ objIdx ] )
+    {
+      // Adjust the current target gains by computing the value at 
+      // startTime
+      GainType const alpha = interpolationRatio( currentTime,
+          mPreviousTime[ objIdx ], mTargetTime[ objIdx ] );
+      std::size_t const numLsp{ mTargetGains.numberOfColumns() };
       // TODO: turn into a vector function.
       for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
       {
@@ -413,6 +449,7 @@ void PanningGainMatrix::updateTransition( std::size_t objIdx,
     mPendingTransitions[0].timeStamps()[ objIdx ] = startTime;
     mPendingTransitions[0].transitionTimes()[ objIdx ] = duration;
     mPendingTransitions[0].gains().setRow( objIdx, gains );
+  }
 #else
   TimeType const currentTime = time().sampleCount();
   if( startTime < currentTime )
