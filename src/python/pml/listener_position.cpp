@@ -29,60 +29,6 @@ void exportListenerPosition( pybind11::module & m)
 {
   py::class_<ListenerPosition, ParameterBase> lp( m, "ListenerPosition" );
 
-  py::class_<ListenerPosition::OrientationQuaternion>( lp, "OrientationQuaternion" )
-    .def( py::init<>() )
-    .def( py::init( []( ListenerPosition::Coordinate w,
-      ListenerPosition::Coordinate x,
-      ListenerPosition::Coordinate y,
-      ListenerPosition::Coordinate z ){
-      return ListenerPosition::OrientationQuaternion{ w, x, y, z };
-    } ), py::arg("w"), py::arg("x"), py::arg("y"), py::arg("z") )
-    .def_property_readonly( "w", &ListenerPosition::OrientationQuaternion::R_component_1 )
-    .def_property_readonly( "x", &ListenerPosition::OrientationQuaternion::R_component_2 )
-    .def_property_readonly( "y", &ListenerPosition::OrientationQuaternion::R_component_3 )
-    .def_property_readonly( "z", &ListenerPosition::OrientationQuaternion::R_component_4 )
-    .def_property( "data", [](ListenerPosition::OrientationQuaternion const & self )
-      { return std::array<ListenerPosition::Coordinate, 4 >( {self.R_component_1(),
-         self.R_component_2(), self.R_component_3(), self.R_component_4()} ); },
-      [](ListenerPosition::OrientationQuaternion & self, std::array<ListenerPosition::Coordinate, 4 > const data )
-      { self = ListenerPosition::OrientationQuaternion{ data[0], data[1], data[2], data[3] }; } )
-    .def( "__str__", [](ListenerPosition::OrientationQuaternion const & self )
-       {
-         std::stringstream str;
-         str << "[ " << self.R_component_1() << ", " << self.R_component_2() << ", "
-           << self.R_component_3() << ", " << self.R_component_4() << " ]";
-         return str.str();
-       } )
-    .def( "__add__", []( ListenerPosition::OrientationQuaternion const & self,
-      ListenerPosition::OrientationQuaternion const & rhs )
-      { return self * rhs; }  )
-    .def( "__sub__", []( ListenerPosition::OrientationQuaternion const & self,
-      ListenerPosition::OrientationQuaternion const & rhs )
-      { return self * rhs; }  )
-    .def( "__mul__", []( ListenerPosition::OrientationQuaternion const & self,
-      ListenerPosition::OrientationQuaternion const & rhs )
-      { return self * rhs; }  )
-    .def( "__imul__", []( ListenerPosition::OrientationQuaternion & self,
-      ListenerPosition::OrientationQuaternion const & rhs )
-      { return self.operator*=(rhs); }  )
-    .def( "conjugate", []( ListenerPosition::OrientationQuaternion const & self )
-      { return conj(self); }  )
-  ;
-
-  m
-    .def( "ypr2Quaternion", 
-    static_cast<ListenerPosition::OrientationQuaternion(*)(ListenerPosition::OrientationYPR const&)>(&visr::pml::ypr2Quaternion), py::arg( "ypr" ) )
-    .def( "ypr2Quaternion", 
-    static_cast<ListenerPosition::OrientationQuaternion(*)(ListenerPosition::Coordinate,
-      ListenerPosition::Coordinate,ListenerPosition::Coordinate)>(&visr::pml::ypr2Quaternion),
-      py::arg( "yaw" ), py::arg( "pitch" ), py::arg( "roll" ) )
-    .def( "yprFromQuaternion", &visr::pml::yprFromQuaternion, py::arg( "quat" ) )
-    .def( "yawFromQuaternion", &visr::pml::yawFromQuaternion, py::arg( "quat" ) )
-    .def( "pitchFromQuaternion", &visr::pml::pitchFromQuaternion, py::arg( "quat" ) )
-    .def( "rollFromQuaternion", &visr::pml::rollFromQuaternion, py::arg( "quat" ) )
-    .def( "quaternionDistance", &visr::pml::quaternionDistance, py::arg( "quat1"), py::arg( "quat2" ) )
-  ;
-
   py::enum_<ListenerPosition::RotationFormat>( lp, "RotationFormat" )
     .value( "YPR", ListenerPosition::RotationFormat::YPR )
     .value( "RotationVector", ListenerPosition::RotationFormat::RotationVector )
@@ -92,15 +38,26 @@ void exportListenerPosition( pybind11::module & m)
   lp
     .def_property_readonly_static( "staticType", [](py::object /*self*/) {return ListenerPosition::staticType(); } )
     .def( py::init<visr::pml::EmptyParameterConfig const &>(), py::arg("config") = visr::pml::EmptyParameterConfig() )
+    .def( py::init<ListenerPosition::PositionType const &, ListenerPosition::OrientationQuaternion const &>(), py::arg("position"),
+      py::arg("quaternion") )
     .def( py::init<ListenerPosition::Coordinate, ListenerPosition::Coordinate, ListenerPosition::Coordinate,
       ListenerPosition::Coordinate, ListenerPosition::Coordinate, ListenerPosition::Coordinate>(), py::arg("x"), py::arg("y"), py::arg("z") = 0.0f,
       py::arg("yaw")=0.0f, py::arg("pitch")=0.0f, py::arg("roll") = 0.0f)
     .def( py::init<ListenerPosition::PositionType const &, ListenerPosition::OrientationYPR const &>(), py::arg("position"),
-          py::arg("orientation") = ListenerPosition::OrientationYPR{ {0.0f,0.0f,0.0f} } )
-    .def( py::init<ListenerPosition::PositionType const &, ListenerPosition::OrientationQuaternion const &>(), py::arg("position"),
-          py::arg("quaternion") )
+      py::arg("orientation") = ListenerPosition::OrientationYPR{ {0.0f,0.0f,0.0f} } )
+    .def( py::init( []( std::array<ListenerPosition::Coordinate, 3> const & pos,
+       std::array<ListenerPosition::Coordinate, 3> const & ypr )
+       {
+         return ListenerPosition( pos[0], pos[1], pos[2], ypr[0], ypr[1], ypr[2] );
+      } ), py::arg( "pos" ), py::arg("orientation") = std::array<ListenerPosition::Coordinate, 3>{ {0.0f,0.0f,0.0f} } )
     .def( py::init<ListenerPosition const &>() ) // Copy constructor
     .def_static( "fromRotationVector", &ListenerPosition::fromRotationVector,
+      py::arg( "position"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
+    .def_static( "fromRotationVector",
+      []( std::array<ListenerPosition::Coordinate, 3> const & pos,
+          std::array<ListenerPosition::Coordinate, 3> const rot, ListenerPosition::Coordinate angle )
+      { return ListenerPosition::fromRotationVector( ListenerPosition::PositionType(pos[0], pos[1], pos[2] ),
+         ListenerPosition::PositionType( rot[0], rot[1], rot[2] ), angle ); },
       py::arg( "position"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
     .def_static( "fromJson", static_cast<ListenerPosition(*)(std::string const &)>(&ListenerPosition::fromJson) )
     .def( "parseJson", static_cast<void(ListenerPosition::*)(std::string const &)>(&ListenerPosition::parseJson), py::arg("string") )
@@ -110,7 +67,8 @@ void exportListenerPosition( pybind11::module & m)
     .def_property( "x", &ListenerPosition::x, &ListenerPosition::setX )
     .def_property( "y", &ListenerPosition::y, &ListenerPosition::setY )
     .def_property( "z", &ListenerPosition::z, &ListenerPosition::setZ )
-    .def_property( "position", &ListenerPosition::position, &ListenerPosition::setPosition )
+    .def_property( "position", &ListenerPosition::position,
+      static_cast<void(ListenerPosition::*)(ListenerPosition::PositionType const &)>(&ListenerPosition::setPosition) )
     .def_property_readonly( "yaw", &ListenerPosition::yaw)
     .def_property_readonly( "pitch", &ListenerPosition::pitch )
     .def_property_readonly( "roll", &ListenerPosition::roll )

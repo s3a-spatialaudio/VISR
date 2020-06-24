@@ -10,7 +10,9 @@
 #include <libvisr/parameter_type.hpp>
 #include <libvisr/typed_parameter_base.hpp>
 
-#include <boost/math/quaternion.hpp>
+#include <librbbl/position_3d.hpp>
+#include <librbbl/quaternion.hpp>
+
 #include <boost/property_tree/ptree_fwd.hpp>
 
 #include <array>
@@ -62,9 +64,9 @@ public:
    * Data type representing the position of the listener.
    * An array containing x, y, z as Caertesian coordinates [in metre]
    */
-  using PositionType = std::array< Coordinate, 3 >;
+  using PositionType = rbbl::Position3D<Coordinate>;
 
-  using OrientationQuaternion = boost::math::quaternion< Coordinate >;
+  using OrientationQuaternion = rbbl::Quaternion< Coordinate >;
 
   /**
    * Data type representing the orientation of the listener as Euler angles.
@@ -76,7 +78,7 @@ public:
    * Data type for roation vectors. Used for representing the orientation
    * as a rotation (with a given angle) around an arbitrary unit vector.
    */
-  using RotationVector = std::array< Coordinate, 3 >;
+  using RotationVector = PositionType;
 
   /**
    * Construction from a parameter configuration parameter.
@@ -171,17 +173,17 @@ public:
   /**
    * Return the x coordinate [m]
    */
-  Coordinate x() const { return mPosition[ 0 ]; }
+  Coordinate x() const { return mPosition.x(); }
 
   /**
    * Return the y coordinate [m]
    */
-  Coordinate y() const { return mPosition[ 1 ]; }
+  Coordinate y() const { return mPosition.y(); }
 
   /**
    * Return the z coordinate [m]
    */
-  Coordinate z() const { return mPosition[ 2 ]; }
+  Coordinate z() const { return mPosition.z(); }
 
   /**
    * Return the position as a 3D Cartesian vector unit: [m]
@@ -193,7 +195,7 @@ public:
    * @param newX New x coordinate [m]
    * @param newY New y coordinate [m]
    * @param newZ New z coordinate [m]
-   * @todo rename to setPosition()
+   * @deprecated Use setPosition() instead.
    */
   void set( Coordinate newX, Coordinate newY, Coordinate newZ = 0.0f );
 
@@ -202,6 +204,15 @@ public:
    * @param position New position.
    */
   void setPosition( PositionType const& position );
+
+  /**
+   * Set the position using scalar values.
+   * @param newX New x coordinate [m]
+   * @param newY New y coordinate [m]
+   * @param newZ New z coordinate [m]
+   */
+  void setPosition( Coordinate newX, Coordinate newY, Coordinate newZ = 0.0f );
+
 
   /**
    * Set the x position.
@@ -302,6 +313,13 @@ public:
   void rotate( OrientationQuaternion const& rotation );
 
   /**
+   * Rotate the listener position around the origin.
+   * This leaves the orientation component unchanged.
+   * @param rotation The desired rotation, specified as a unit quaternion.
+   */
+  void rotatePosition( OrientationQuaternion const& rotation );
+
+  /**
    * Rotate the listener orientation.
    * This leaves the position component unchanged.
    * @param rotation The desired rotation, specified as a unit quaternion.
@@ -398,88 +416,6 @@ private:
 
 VISR_PML_LIBRARY_SYMBOL std::ostream& operator<<( std::ostream& stream,
                                                   const ListenerPosition& pos );
-
-/**
- * Quaternion functions.
- * @todo Move to a different location and out of the pml namespace.
- */
-//@{
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::OrientationQuaternion ypr2Quaternion(
-    ListenerPosition::Coordinate yaw, ListenerPosition::Coordinate pitch,
-    ListenerPosition::Coordinate roll );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::OrientationQuaternion ypr2Quaternion(
-    ListenerPosition::OrientationYPR const& ypr );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::Coordinate yawFromQuaternion(
-    ListenerPosition::OrientationQuaternion const& q );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::Coordinate pitchFromQuaternion(
-    ListenerPosition::OrientationQuaternion const& q );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::Coordinate rollFromQuaternion(
-    ListenerPosition::OrientationQuaternion const& q );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::OrientationYPR yprFromQuaternion(
-    ListenerPosition::OrientationQuaternion const& quat );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::OrientationQuaternion rotationVector2Quaternion(
-    ListenerPosition::RotationVector const& axis,
-    ListenerPosition::Coordinate angle );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::RotationVector quaternion2RotationVector(
-    ListenerPosition::OrientationQuaternion const& quat );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::Coordinate quaternion2RotationAngle(
-    ListenerPosition::OrientationQuaternion const& quat );
-
-/**
- * Return the distance between two rotations.
- */
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::Coordinate quaternionDistance(
-    ListenerPosition::OrientationQuaternion const& quat1,
-    ListenerPosition::OrientationQuaternion const quat2 );
-
-VISR_PML_LIBRARY_SYMBOL
-void rotatePosition( ListenerPosition::PositionType& pos,
-                     ListenerPosition::OrientationQuaternion const& rotation );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::PositionType rotatePosition(
-    ListenerPosition::PositionType const& pos,
-    ListenerPosition::OrientationQuaternion const& rotation );
-
-VISR_PML_LIBRARY_SYMBOL
-void translatePosition( ListenerPosition::PositionType& pos,
-                        ListenerPosition::PositionType const& shift );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::PositionType translatePosition(
-    ListenerPosition::PositionType const& pos,
-    ListenerPosition::PositionType const& shift );
-
-VISR_PML_LIBRARY_SYMBOL
-void transformPosition( ListenerPosition::PositionType& pos,
-                        ListenerPosition::OrientationQuaternion const& rotation,
-                        ListenerPosition::PositionType const& shift );
-
-VISR_PML_LIBRARY_SYMBOL
-ListenerPosition::PositionType transformPosition(
-    ListenerPosition::PositionType const& pos,
-    ListenerPosition::OrientationQuaternion const& rotation,
-    ListenerPosition::PositionType const& shift );
-
-//@}
 
 } // namespace pml
 } // namespace visr

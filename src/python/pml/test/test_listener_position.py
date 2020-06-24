@@ -2,6 +2,7 @@
 import pytest
 
 import pml
+import rbbl
 
 import numpy as np
 import json
@@ -12,7 +13,7 @@ def test_defaultInit():
     lp = pml.ListenerPosition()
 
     pos = lp.position
-    assert np.linalg.norm( pos - np.zeros(3, dtype=np.float32) ) < np.finfo(np.float32).eps
+    assert np.linalg.norm( np.array(pos) - np.zeros(3, dtype=np.float32) ) < np.finfo(np.float32).eps
 
     ypr = lp.orientationYPR
     assert np.linalg.norm( ypr - np.zeros(3, dtype=np.float32) ) < np.finfo(np.float32).eps
@@ -22,12 +23,12 @@ def test_defaultInit():
     assert np.abs( lp.roll - ypr[2] ) < np.finfo(np.float32).eps
 
 def test_positionInit():
-    posInit = np.array( [ 0.3, -0.25, 1.35 ])
+    posInit = np.array([ 0.3, -0.25, 1.35 ])
 
     lp = pml.ListenerPosition(posInit)
 
     pos = lp.position
-    assert np.linalg.norm( pos - posInit ) < np.finfo(np.float32).eps
+    assert np.linalg.norm( np.array(pos) - posInit ) < np.finfo(np.float32).eps
 
     ypr = lp.orientationYPR
     assert np.linalg.norm( ypr - np.zeros(3, dtype=np.float32) ) < np.finfo(np.float32).eps
@@ -56,15 +57,15 @@ def test_yprInit():
 
 
 def test_quaternionInit():
-    posInit = np.array( [ 0.3, -0.25, 1.35 ])
+    posInit = rbbl.Position3D( 0.3, -0.25, 1.35 )
     yprInit = np.deg2rad(np.array([15, -45, -90]))
 
-    initQuat = pml.ypr2Quaternion( yprInit[0], yprInit[1], yprInit[2] )
+    initQuat = rbbl.Quaternion.fromYPR( yprInit[0], yprInit[1], yprInit[2] )
 
     lp = pml.ListenerPosition(posInit, initQuat )
 
     pos = lp.position
-    assert np.linalg.norm( pos - posInit ) < np.finfo(np.float32).eps
+    assert np.linalg.norm( np.asarray(pos) - np.asarray(posInit) ) < np.finfo(np.float32).eps
 
     tol = 4*np.finfo(np.float32).eps # Reasonable error limit
 
@@ -84,7 +85,7 @@ def test_rotationVectorInit():
     rotVecInitAngle = np.linalg.norm(rotVecInitRaw)
     rotVecInit = 1.0/rotVecInitAngle * rotVecInitRaw
 
-    initQuat = pml.ypr2Quaternion( yprInit )
+    initQuat = rbbl.Quaternion.fromYPR( yprInit )
 
     lp = pml.ListenerPosition.fromRotationVector( posInit, rotVecInit,
                                                  rotVecInitAngle )

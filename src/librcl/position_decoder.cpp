@@ -6,6 +6,8 @@
 #include <libpml/listener_position.hpp>
 #include <libpml/string_parameter.hpp>
 
+#include <librbbl/quaternion.hpp>
+
 #include <algorithm>
 #include <iostream>
 #include <limits>
@@ -38,7 +40,8 @@ PositionDecoder::PositionDecoder( SignalFlowContext const & context,
   pml:: ListenerPosition::PositionType const & positionOffset,
   pml:: ListenerPosition::OrientationYPR const & orientationRotation )
  : PositionDecoder( context, name, parent, positionOffset, 
-   pml::ypr2Quaternion( orientationRotation ) )
+    pml::ListenerPosition::OrientationQuaternion::fromYPR( orientationRotation[0],
+     orientationRotation[1], orientationRotation[2] ) )
 {
 }
 
