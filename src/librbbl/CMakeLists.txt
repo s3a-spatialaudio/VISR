@@ -26,6 +26,8 @@ multichannel_delay_line.cpp
 object_channel_allocator.cpp
 parametric_iir_coefficient.cpp
 parametric_iir_coefficient_calculator.cpp
+position_3d.cpp
+quaternion.cpp
 sparse_gain_routing.cpp
 )
 
@@ -56,6 +58,8 @@ multichannel_delay_line.hpp
 object_channel_allocator.hpp
 parametric_iir_coefficient.hpp
 parametric_iir_coefficient_calculator.hpp
+position_3d.hpp
+quaternion.hpp
 sparse_gain_routing.hpp
 )
 
