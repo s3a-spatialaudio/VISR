@@ -40,12 +40,16 @@ class VISR_RCL_LIBRARY_SYMBOL TimeFrequencyTransform: public AtomicComponent
 public:
   using SampleType = visr::SampleType;
 
+  /**
+   * Enumeration to select the FFT normalisation applied to the forward Fourier
+   * transform.
+   */
   enum class Normalisation
   {
     One,     /**< No normalisation applied. */
     Unitary, /**< Normalisation (scaling) factor 1/sqrt(N) */
     OneOverN /**< Scaling factor 1/N, which means that the corresponding inverse
-                FFT has a normalisation of "One". */
+                FFT should have a normalisation of "One" to preserve an overall scaling of 1. */
   };
 
   /**
