@@ -62,7 +62,7 @@ def test_quaternionInit():
 
     initQuat = rbbl.Quaternion.fromYPR( yprInit[0], yprInit[1], yprInit[2] )
 
-    lp = pml.ListenerPosition(posInit, initQuat )
+    lp = pml.ListenerPosition.fromQuaternion(posInit, initQuat)
 
     pos = lp.position
     assert np.linalg.norm( np.asarray(pos) - np.asarray(posInit) ) < np.finfo(np.float32).eps
@@ -109,6 +109,26 @@ def test_rotationVectorInit():
     assert np.abs( lp.pitch - yprInit[1] ) < tol
     assert np.abs( lp.roll - yprInit[2] ) < tol
 
+def test_rotationVectorInit2():
+    posInit = np.array( [ 0.3, -0.25, 1.35 ])
+    rotVecInitRaw = np.asarray( [0.2,-1.0,0.0], dtype=np.float32)
+    rotVecInit = 1.0/np.linalg.norm(rotVecInitRaw) * rotVecInitRaw
+
+    rotAngleInit = np.deg2rad( 25.0 )
+
+    lp = pml.ListenerPosition.fromRotationVector(posInit, rotVecInit,
+                                                 rotAngleInit)
+
+    tol = 4*np.finfo(np.float32).eps # Reasonable error limit
+    pos = lp.position
+    assert np.linalg.norm( pos - posInit ) <= tol
+
+    rotVec = lp.orientationRotationVector
+    rotAngle = lp.orientationRotationAngle
+
+    assert np.linalg.norm(np.asarray(rotVec) - np.asarray(rotVecInit)) <= tol
+    assert np.abs(rotAngle-rotAngleInit) <= tol
+
 
 def test_translation():
     posInit = np.array( [ 0.3, -0.25, 1.35 ])
@@ -145,7 +165,7 @@ def test_rotateOrientation():
     assert np.abs( lp.roll - yprInit[2] ) < tol
 
     rotateYpr = np.deg2rad( np.array([0,0,0]))
-    rotateQuat = pml.ypr2Quaternion( rotateYpr )
+    rotateQuat = rbbl.Quaternion.fromYPR(rotateYpr)
 
     initRot= Rotation.from_euler('ZYX', yprInit)
     rotationRef = Rotation.from_euler('ZYX', rotateYpr)
@@ -176,7 +196,7 @@ def test_rotation():
     assert np.abs( lp.roll - yprInit[2] ) < tol
 
     rotateYpr = np.deg2rad( np.array([-90, 30, -15]))
-    rotateQuat = pml.ypr2Quaternion( rotateYpr )
+    rotateQuat = rbbl.Quaternion.fromYPR(rotateYpr)
 
     initRot= Rotation.from_euler('ZYX', yprInit)
     rotationRef = Rotation.from_euler('ZYX', rotateYpr)
@@ -189,7 +209,6 @@ def test_rotation():
 
     posNew = lp.position
     assert np.linalg.norm(posNew - resPosition ) < tol
-
 
     yprNew=lp.orientationYPR
     assert np.linalg.norm( yprNew - resRotRefYPR ) < tol
@@ -211,9 +230,9 @@ def test_transformation():
     assert np.abs( lp.roll - yprInit[2] ) < tol
 
     rotateYpr = np.deg2rad( np.array([25,-90,120]))
-    rotateQuat = pml.ypr2Quaternion( rotateYpr )
+    rotateQuat = rbbl.Quaternion.fromYPR( rotateYpr )
 
-    translateVec = np.asarray([ -2.75, 1.83, -0.387 ])
+    translateVec = rbbl.Position3D( -2.75, 1.83, -0.387 )
 
     initRot= Rotation.from_euler('ZYX', yprInit)
     rotationRef = Rotation.from_euler('ZYX', rotateYpr)
@@ -226,7 +245,6 @@ def test_transformation():
 
     posNew = lp.position
     assert np.linalg.norm(posNew - resPosition ) < tol
-
 
     yprNew=lp.orientationYPR
     assert np.linalg.norm( yprNew - resRotRefYPR ) < tol
@@ -252,10 +270,9 @@ def test_parseJson():
 
 def test_fromJson():
     posRef = np.asarray( [0.5,-0.25,-0.3 ] );
-    quatRef = pml.ListenerPosition.OrientationQuaternion(
-      0.871836424, -0.285320133, 0.335270375, 0.214679867 )
+    quatRef = rbbl.Quaternion( 0.871836424, -0.285320133, 0.335270375, 0.214679867 )
 
-    initYPR = np.rad2deg(pml.yprFromQuaternion(quatRef))
+    initYPR = np.rad2deg([quatRef.yaw, quatRef.pitch, quatRef.roll])
 
     initStr = """{"x":%f,"y":%f,"z":%f,
     "orientation":{ "yaw":%f,"pitch": %f,"roll": %f}, "faceId": 13, "timeStamp": 98765 }"""\
@@ -269,7 +286,6 @@ def test_fromJson():
     assert lp.faceId == 13
     assert lp.timeStamp == 98765
 
-    initStr = """{}"""
 
 def test_writeJson():
     posInit=np.array( [ 0.3, -0.25, 1.35 ])
@@ -288,7 +304,7 @@ def test_writeJson():
     quat = rep["orientation"]["quaternion"]
 
     quatRead = np.asarray([quat["w"], quat["x"], quat["y"], quat["z"]], dtype=np.float)
-    quatRef = pml.ypr2Quaternion(yprInit)
+    quatRef = rbbl.Quaternion.fromYPR(yprInit)
     assert np.linalg.norm(quatRead-np.asarray(quatRef.data)) < 1e-5
 
 # Allow running the tests as a script (as opposed to through pytest)
@@ -298,6 +314,7 @@ if __name__ == "__main__":
     test_yprInit()
     test_quaternionInit()
     test_rotationVectorInit()
+    test_rotationVectorInit2()
     test_translation()
     test_rotateOrientation()
     test_rotation()

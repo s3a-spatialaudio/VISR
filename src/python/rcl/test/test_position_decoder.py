@@ -5,6 +5,7 @@ from scipy.spatial.transform import Rotation
 import numpy as np
 
 import visr
+import rbbl
 import rcl
 import pml
 import rrl
@@ -61,7 +62,7 @@ def test_parseListenerPositionOrientationYPR():
                             dtype=np.float32)
     # Store and compare them as quaternions, because the same orientation could
     # be represented by different Euler angle triplets
-    orientationsQuat = np.asarray([pml.ypr2Quaternion ( o).data
+    orientationsQuat = np.asarray([rbbl.Quaternion.fromYPR(o).data
                                    for o in orientationsYPR] )
     orientationsQuat = homogeniseQuaternions( orientationsQuat )
 
@@ -101,6 +102,7 @@ def test_parseListenerPositionTranslation():
     cc = visr.SignalFlowContext( bs, fs )
 
     coordTranslation = np.asarray( [0.328, -3.786, 0.15386] )
+    coordTranslationPos = rbbl.Position3D(coordTranslation)
 
     numOrientations = 1000
     positions = np.array(10*(np.random.random_sample( (numOrientations, 3) )-0.5),
@@ -108,15 +110,15 @@ def test_parseListenerPositionTranslation():
     positionsRef = positions + coordTranslation[np.newaxis,:]
     orientationsYPR = np.array(2*np.pi*np.random.random_sample( (numOrientations, 3)),
                             dtype=np.float32)
-    orientationsQuat = np.asarray([pml.ypr2Quaternion ( o).data
+    orientationsQuat = np.asarray([rbbl.Quaternion.fromYPR(o).data
                                    for o in orientationsYPR] )
     orientationsQuat = homogeniseQuaternions( orientationsQuat )
 
     posRet = np.full( positions.shape, np.inf, positions.dtype )
     orRet = np.full( orientationsQuat.shape, np.inf, positions.dtype )
 
-    comp = rcl.PositionDecoder( context=cc, name="decoder", parent=None,
-                               positionOffset=coordTranslation )
+    comp = rcl.PositionDecoder(context=cc, name="decoder", parent=None,
+                               positionOffset=coordTranslationPos)
     flow = rrl.AudioSignalFlow( comp )
     msgIn = flow.parameterReceivePort( 'messageInput' )
     msgOut = flow.parameterSendPort( 'positionOutput' )
@@ -152,6 +154,8 @@ def test_parseListenerPositionTransformation():
     cc = visr.SignalFlowContext( bs, fs )
 
     coordTranslation = np.asarray( [0.5, -0.1, 0.3])
+    coordTranslationPos = rbbl.Position3D(coordTranslation)
+
     rotationYPRdeg = np.asarray([30, -45, 70])
     rotationYPR = np.deg2rad(rotationYPRdeg)
     # rotationQuat = pml.ypr2Quaternion(rotationYPR)
@@ -164,7 +168,7 @@ def test_parseListenerPositionTransformation():
     orientationsYPR = np.hstack((2*np.pi*(np.random.random_sample((numOrientations,3))-0.5),
                                  np.zeros((numOrientations,0))))
 
-    orientationsQuat = np.asarray([pml.ypr2Quaternion(o).data
+    orientationsQuat = np.asarray([rbbl.Quaternion.fromYPR(o).data
                                   for o in orientationsYPR] )
     orientationsQuat = homogeniseQuaternions( orientationsQuat )
 
@@ -175,7 +179,7 @@ def test_parseListenerPositionTransformation():
     orRefYPR = np.asarray([(rotationRef*Rotation.from_euler('ZYX', ypr )).as_euler('ZYX')
                 for ypr in orientationsYPR])
 
-    orRefQuat = np.asarray([pml.ypr2Quaternion( ypr ).data
+    orRefQuat = np.asarray([rbbl.Quaternion.fromYPR(ypr).data
       for ypr in orRefYPR] )
     # Quaternions with opposite signs denote equal rotations. To resolve this ambiguity,
     # adapt the sign such that the w component is positive.
@@ -186,7 +190,7 @@ def test_parseListenerPositionTransformation():
     orRet = np.full( orientationsQuat.shape, np.inf, positions.dtype )
 
     comp = rcl.PositionDecoder(context=cc, name="decoder", parent=None,
-                               positionOffset=coordTranslation,
+                               positionOffset=coordTranslationPos,
                                orientation=rotationYPR )
     flow = rrl.AudioSignalFlow( comp )
     msgIn = flow.parameterReceivePort( 'messageInput' )
