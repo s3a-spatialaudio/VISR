@@ -236,51 +236,50 @@ Position3D< CoordinateType > transform( Position3D< CoordinateType > const& pos,
 template class Position3D< float >;
 template class Position3D< double >;
 
-
-template float angle< float >( Position3D< float  > const &,
+template VISR_RBBL_LIBRARY_SYMBOL float angle< float >( Position3D< float  > const &,
                       Position3D< float  > const & );
-template double angle< double >( Position3D< double  > const &,
+template VISR_RBBL_LIBRARY_SYMBOL double angle< double >( Position3D< double  > const &,
                       Position3D< double  > const & );
 
-template float angleNormalised< float >( Position3D< float  > const&,
+template VISR_RBBL_LIBRARY_SYMBOL float angleNormalised< float >( Position3D< float  > const&,
                                 Position3D< float > const &);
-template double angleNormalised< double >( Position3D< double  > const&,
+template VISR_RBBL_LIBRARY_SYMBOL double angleNormalised< double >( Position3D< double  > const&,
                                 Position3D< double > const &);
 
-template Position3D< float > operator+< float >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > operator+< float >(
     Position3D< float > const&, Position3D< float > const& );
-template Position3D< double > operator+< double >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > operator+< double >(
     Position3D< double > const&, Position3D< double > const& );
 
-template Position3D< float > operator-< float >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > operator-< float >(
     Position3D< float > const&, Position3D< float > const& );
-template Position3D< double > operator-< double >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > operator-< double >(
     Position3D< double > const&, Position3D< double > const& );
 
-template Position3D< float > operator-< float >( Position3D< float > const& );
-template Position3D< double > operator-< double >( Position3D< double > const& );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > operator-< float >( Position3D< float > const& );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > operator-< double >( Position3D< double > const& );
 
-template Position3D< float > operator*< float >( float scale, Position3D< float > const& );
-template Position3D< double > operator*< double >( double scale, Position3D< double > const& );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > operator*< float >( float scale, Position3D< float > const& );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > operator*< double >( double scale, Position3D< double > const& );
 
-template Position3D< float > operator/< float >( Position3D< float > const& val, float );
-template Position3D< double > operator/< double >( Position3D< double > const& val, double );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > operator/< float >( Position3D< float > const& val, float );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > operator/< double >( Position3D< double > const& val, double );
 
-template Position3D< float > normalise< float >( Position3D< float > const&, bool );
-template Position3D< double > normalise< double >( Position3D< double > const&, bool );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > normalise< float >( Position3D< float > const&, bool );
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > normalise< double >( Position3D< double > const&, bool );
 
-template float dot<float>( Position3D< float > const&, Position3D< float > const& op2 );
-template double dot<double>( Position3D< double > const&, Position3D< double > const& op2 );
+template VISR_RBBL_LIBRARY_SYMBOL float dot<float>( Position3D< float > const&, Position3D< float > const& op2 );
+template VISR_RBBL_LIBRARY_SYMBOL double dot<double>( Position3D< double > const&, Position3D< double > const& op2 );
 
-template Position3D< float > rotate< float >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > rotate< float >(
    Position3D< float > const &, Quaternion< float > const & );
-template Position3D< double > rotate< double >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > rotate< double >(
    Position3D< double > const &, Quaternion< double > const & );
 
-template Position3D< float > transform< float >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > transform< float >(
   Position3D< float > const&, Quaternion< float > const&,
   Position3D< float > const& );
-template Position3D< double > transform< double >(
+template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > transform< double >(
   Position3D< double > const&, Quaternion< double > const&,
   Position3D< double > const& );
 

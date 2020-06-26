@@ -229,7 +229,7 @@ void Quaternion< CoordinateType >::normalise( bool silentDivideByZero /*= false*
   {
     throw std::runtime_error( "Quaternion::normalise(): Quaternion to close to zero." );
   }
-  operator*=( 1.0/l2 );
+  operator*=( static_cast<CoordinateType>(1.0)/l2 );
 }
 
 template< typename CoordinateType >
@@ -373,7 +373,7 @@ interpolateSpherical( Quaternion< CoordinateType > const& pos0,
       std::max( static_cast< CoordinateType >(-1.0),
         dot( normalise(pos0), normalise(pos1) ) ) ) );
   CoordinateType const sinOmega = std::sin( omega );
-  CoordinateType const sf1 = std::sin((1.0-tInterp)*omega) / sinOmega;
+  CoordinateType const sf1 = std::sin((static_cast<CoordinateType>(1.0)-tInterp)*omega) / sinOmega;
   CoordinateType const sf2 = std::sin(tInterp*omega) / sinOmega;
   return sf1 * pos0 + sf2 * pos1;
 }
@@ -382,111 +382,111 @@ interpolateSpherical( Quaternion< CoordinateType > const& pos0,
 template class Quaternion< float >;
 template class Quaternion< double >;
 
-template Quaternion< float > 
+template VISR_RBBL_LIBRARY_SYMBOL Quaternion< float > 
 conjugate< float >( Quaternion< float > const& );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > operator+< float >(
     Quaternion< float > const &,
     Quaternion< float > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > operator-< float >(
     Quaternion< float > const&,
     Quaternion< float > const& );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > operator*< float >(
     Quaternion< float > const&,
     Quaternion< float > const& );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 float angle< float >(
     Quaternion< float > const &,
     Quaternion< float > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 float angleNormalised< float >(
     Quaternion< float > const &,
     Quaternion< float > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > operator-< float >(
     Quaternion< float > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > operator*< float >(
     float, Quaternion< float > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > operator/< float >(
     Quaternion< float > const&, float );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > normalise< float >(
     Quaternion< float > const &, bool );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 float dot< float >(
     Quaternion< float > const &,
     Quaternion< float > const & );
 
-template Quaternion< float > interpolateSpherical< float >(
+template VISR_RBBL_LIBRARY_SYMBOL Quaternion< float > interpolateSpherical< float >(
   Quaternion< float > const &,
   Quaternion< float > const&,
   float );
 
 
-template Quaternion< double > 
+template VISR_RBBL_LIBRARY_SYMBOL Quaternion< double > 
 conjugate< double >( Quaternion< double > const& );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > operator+< double >(
     Quaternion< double > const &,
     Quaternion< double > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > operator-< double >(
     Quaternion< double > const&,
     Quaternion< double > const& );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > operator*< double >(
     Quaternion< double > const&,
     Quaternion< double > const& );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 double angle< double >(
     Quaternion< double > const &,
     Quaternion< double > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 double angleNormalised< double >(
     Quaternion< double > const &,
     Quaternion< double > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > operator-< double >(
     Quaternion< double > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > operator*< double >(
     double, Quaternion< double > const & );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > operator/< double >(
     Quaternion< double > const&, double );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > normalise< double >(
     Quaternion< double > const &, bool );
 
-template
+template VISR_RBBL_LIBRARY_SYMBOL
 double dot< double >(
     Quaternion< double > const &,
     Quaternion< double > const & );
 
-template Quaternion< double > interpolateSpherical< double >(
+template VISR_RBBL_LIBRARY_SYMBOL Quaternion< double > interpolateSpherical< double >(
   Quaternion< double > const &,
   Quaternion< double > const&,
   double );
