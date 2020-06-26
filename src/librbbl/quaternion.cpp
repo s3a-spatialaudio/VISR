@@ -140,13 +140,13 @@ Position3D< CoordinateType > Quaternion< CoordinateType >::rotationVector()
   T const norm{ std::sqrt(x() * x()
     + y() * y()
     + z() * z()) };
-  T const scale = 1.0f/norm;
-  if( scale <= std::numeric_limits<T>::epsilon() )
+  if( norm <= std::numeric_limits<T>::epsilon() )
   {
     // Degenerate case, there is no rotation.
     // Return an arbitrary unit vector instead.
     return Position3D<T>{ 1.0f, 0.0f, 0.0f };
   }
+  T const scale = 1.0f/norm;
   return Position3D< T >{ scale * x(), scale * y(), scale * z() };
 }
 
