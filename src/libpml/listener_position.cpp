@@ -264,10 +264,10 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
     if( hasQuat )
     {
       pt::ptree const & quatTree = orTree.get_child( "quaternion" );
-      Coordinate const qw = quatTree.get< Coordinate >( "w", 1.0f );
-      Coordinate const qx = quatTree.get< Coordinate >( "x", 0.0f );
-      Coordinate const qy = quatTree.get< Coordinate >( "y", 0.0f );
-      Coordinate const qz = quatTree.get< Coordinate >( "z", 0.0f );
+      Coordinate const qw = quatTree.get< Coordinate >( "w" );
+      Coordinate const qx = quatTree.get< Coordinate >( "x" );
+      Coordinate const qy = quatTree.get< Coordinate >( "y" );
+      Coordinate const qz = quatTree.get< Coordinate >( "z" );
       setOrientationQuaternion( OrientationQuaternion( qw, qx, qy, qz ) );
     }
     else if( hasYpr )
@@ -283,10 +283,10 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
     else if( hasRotationVec )
     {
       pt::ptree const & vecTree = orTree.get_child( "rotationVector" );
-      Coordinate const rx = vecTree.get< Coordinate >( "w", 1.0f );
-      Coordinate const ry = vecTree.get< Coordinate >( "x", 0.0f );
-      Coordinate const rz = vecTree.get< Coordinate >( "y", 0.0f );
-      Coordinate const angle = vecTree.get< Coordinate >( "angle", 0.0f );
+      Coordinate const rx = vecTree.get< Coordinate >( "x" );
+      Coordinate const ry = vecTree.get< Coordinate >( "y" );
+      Coordinate const rz = vecTree.get< Coordinate >( "z" );
+      Coordinate const angle = vecTree.get< Coordinate >( "angle" );
       RotationVector const vec{ rx, ry, rz };
       setOrientationRotationVector( vec, efl::degree2radian( angle ) );
     }
