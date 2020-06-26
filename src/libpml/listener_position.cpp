@@ -195,9 +195,9 @@ void ListenerPosition::setOrientationRotationVector(
 }
 
 void ListenerPosition::translate(
-    ListenerPosition::PositionType const & translationVec )
+    ListenerPosition::PositionType const & translationVector )
 {
-  mPosition += translationVec;
+  mPosition += translationVector;
 }
 
 void ListenerPosition::rotate(
