@@ -51,11 +51,22 @@ void exportListenerPosition( pybind11::module & m)
          return ListenerPosition( pos[0], pos[1], pos[2], ypr[0], ypr[1], ypr[2] );
       } ), py::arg( "pos" ), py::arg("orientation") = std::array<ListenerPosition::Coordinate, 3>{ {0.0f,0.0f,0.0f} } )
     .def( py::init<ListenerPosition const &>() ) // Copy constructor
+    .def_static( "fromQuaternion",
+      []( ListenerPosition::PositionType const & pos,
+          ListenerPosition::OrientationQuaternion const & quat )
+      { return ListenerPosition( pos, quat ); },
+      py::arg( "position"), py::arg( "quaternion" ) )
+    .def_static( "fromQuaternion",
+      []( std::array<ListenerPosition::Coordinate, 3> const & pos,
+          std::array<ListenerPosition::Coordinate, 4> const & quat )
+      { return ListenerPosition( ListenerPosition::PositionType(pos[0], pos[1], pos[2] ),
+         ListenerPosition::OrientationQuaternion( quat[0], quat[1], quat[2], quat[3] ) ); },
+      py::arg( "position"), py::arg( "quaternion" ) )
     .def_static( "fromRotationVector", &ListenerPosition::fromRotationVector,
       py::arg( "position"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
     .def_static( "fromRotationVector",
       []( std::array<ListenerPosition::Coordinate, 3> const & pos,
-          std::array<ListenerPosition::Coordinate, 3> const rot, ListenerPosition::Coordinate angle )
+          std::array<ListenerPosition::Coordinate, 3> const & rot, ListenerPosition::Coordinate angle )
       { return ListenerPosition::fromRotationVector( ListenerPosition::PositionType(pos[0], pos[1], pos[2] ),
          ListenerPosition::PositionType( rot[0], rot[1], rot[2] ), angle ); },
       py::arg( "position"), py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
@@ -83,6 +94,8 @@ void exportListenerPosition( pybind11::module & m)
     .def_property( "faceId", &ListenerPosition::faceID, &ListenerPosition::setFaceID )
     .def_property( "timeStamp", &ListenerPosition::timeNs, &ListenerPosition::setTimeNs )
     .def( "translate", &ListenerPosition::translate, py::arg( "translationVector" ) )
+    .def( "translate", []( ListenerPosition & self, std::array< ListenerPosition::Coordinate, 3 > const & pos )
+      { self.translate( ListenerPosition::PositionType( pos[0], pos[1], pos[2] ) ); }, py::arg( "translationVector" ) )
     .def( "rotate", &ListenerPosition::rotate, py::arg( "rotationQuaternion" ) )
     .def( "rotateOrientation", &ListenerPosition::rotateOrientation, py::arg( "rotationQuaternion" ) )
     .def( "transform", &ListenerPosition::transform,  py::arg( "translationVector" ), py::arg( "rotationQuaternion" ) )
