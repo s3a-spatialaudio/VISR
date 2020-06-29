@@ -319,14 +319,14 @@ void PanningGainMatrix::updateTransition( std::size_t objIdx,
         mPreviousGains( objIdx, lspIdx ) = alpha * mTargetGains( lspIdx, objIdx )
           + (1.0f - alpha ) * mPreviousGains( objIdx, lspIdx );
       }
-      copyRow( gains, mTargetGains.row( objIdx ), numLsp, 
+      copyRow( gains, mTargetGains.row( objIdx ), numLsp,
         0 /*Do not assume special alignment*/ );
       mTargetTime[ objIdx ] = currentTime + duration;
     }
     // Clear next pending transition
     mPendingTransitions[0].timeStamps()[ objIdx ] = cTimeStampInfinity;
     mPendingTransitions[0].transitionTimes()[ objIdx ] = cTimeStampInfinity;
-    mPendingTransitions[0].gains().setRow( objIdx, mTargetGains.row( objIdx ) );
+    copyRow( mTargetGains.row( objIdx ), mPendingTransitions[0].gains().row( objIdx ), numLsp );
   }
   else
   {
@@ -347,7 +347,8 @@ void PanningGainMatrix::updateTransition( std::size_t objIdx,
     }
     mPendingTransitions[0].timeStamps()[ objIdx ] = startTime;
     mPendingTransitions[0].transitionTimes()[ objIdx ] = duration;
-    mPendingTransitions[0].gains().setRow( objIdx, gains );
+    copyRow( gains, mPendingTransitions[0].gains().row( objIdx ),
+      numLsp );
   }
 }
 
