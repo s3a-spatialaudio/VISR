@@ -316,7 +316,7 @@ void PanningGainMatrix::updateTransition( std::size_t objIdx,
       // TODO: turn into a vector function.
       for( std::size_t lspIdx{ 0 }; lspIdx < numLsp; ++lspIdx)
       {
-        mPreviousGains( objIdx, lspIdx ) = alpha * mTargetGains( lspIdx, objIdx )
+        mPreviousGains( objIdx, lspIdx ) = alpha * mTargetGains( objIdx, lspIdx )
           + (1.0f - alpha ) * mPreviousGains( objIdx, lspIdx );
       }
       copyRow( gains, mTargetGains.row( objIdx ), numLsp,
