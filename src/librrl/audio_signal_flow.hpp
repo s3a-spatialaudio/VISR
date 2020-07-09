@@ -73,11 +73,17 @@ public:
   /**
    * Method to transfer the capture and playback samples to and from
    * the locations where they are expected, and execute the contained atomic components.
-   * Called from processFunction(). For a parameter description
-   * (except userData), see @see processFunction().
+   * @param captureSamples Array of pointers to the first sample of each channel
+   * @param playbackSamples samples Array of pointers to the first sample in each playback channel
+   * @param captureStrideSamples Stride (in number of elements) between successive samples
+   * in the capture channel buffers. A value of 1 (default) denotes contiguous samples.
+   * @param playbackStrideSamples Stride (in number of elements) between successive samples
+   * in the playback channel buffers. A value of 1 (default) denotes contiguous samples.
    */
   bool process( SampleType const * const * captureSamples,
-                SampleType * const * playbackSamples );
+                SampleType * const * playbackSamples,
+                std::size_t captureStrideSamples = 1,
+                std::size_t playbackStrideSamples = 1 );
 
   /**
    * Alternative process() function assuming matrices with fixed channel and element strides for the inputs and outputs.
