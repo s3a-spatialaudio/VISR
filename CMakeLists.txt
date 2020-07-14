@@ -295,7 +295,7 @@ if( BUILD_PYTHON_BINDINGS )
   # the pybind11 tree.
   set( PYBIND11_EXPORT_NAME VISR_exports )
   # Force setting of pybind11 option (necessary in order to get the targets exported)
-  set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets.")
+  set( PYBIND11_INSTALL ON CACHE BOOL FORCE "Force exporting of pybind11 targets.")
 
   # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
