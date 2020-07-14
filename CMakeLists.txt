@@ -206,8 +206,9 @@ set_property( CACHE BUILD_LIBRARY_TYPE_FOR_APPS PROPERTY STRINGS ${VISR_LIBRARY_
 # library types are built.
 option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR applications." ON)
 
-set( VISR_BUILD_LIBRARY_TYPES )
-
+# List to contain the library variants (static, shared, static_pic) to be built.
+# Start with an empty list which is populated below
+set( VISR_BUILD_LIBRARY_TYPES ) 
 # Decide which library types are built and store them in a list that is used in
 # subdirectories.
 # Static libraries are built if they are used in the standalone applications or
@@ -241,9 +242,6 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
 #  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
-
-
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
@@ -326,18 +324,22 @@ if( BUILD_PYTHON_BINDINGS )
     ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
 endif( BUILD_PYTHON_BINDINGS )
 
+option( BUILD_DISABLE_THREADS "Whether to disable the use of threads. This is mainly useful mainly specialised purposes, e.g., Web assembly" OFF )
+
 ###########################################################
 # Support for 3rd-party libraries.
 
-# Add 3rd-party libraries that are built locally.
-add_subdirectory( 3rd )
-
-# Threads are required wherever we link with boost_threads.
+# Threads might be used through boost::filesystem, the C++11 threads functionality,
+# or through direct OS calls.
 # Note that the dependency is added automatically in most cases, so the
 # omission will go unnoticed very often.
 # TODO: Is this superseded by using Boost exported targets (which should handle
 # transitive dependencies itself)?
-find_package(Threads REQUIRED)
+if( BUILD_DISABLE_THREADS )
+  add_definitions( -DVISR_DISABLE_THREADS=1 )
+else()
+  find_package(Threads REQUIRED)
+endif( BUILD_DISABLE_THREADS )
 
 ## Portaudio
 option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
@@ -400,7 +402,10 @@ option( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost librari
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
+set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system regex timer atomic )
+if( NOT VISR_DISABLE_THREADS )
+  list( APPEND VISR_BOOST_INSTALL_LIBRARIES thread)
+endif( NOT VISR_DISABLE_THREADS )
 # The set of all boost libraries used by the build and test stages.
 set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
@@ -416,7 +421,7 @@ if( Boost_USE_STATIC_LIBS )
   if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
     message( SEND_ERROR "Cannot build shared libraries if Boost_USE_STATIC_LIBS is on." )
   endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-endif(  Boost_USE_STATIC_LIBS )
+endif( Boost_USE_STATIC_LIBS )
 
 
 ############################################################
