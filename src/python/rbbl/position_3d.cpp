@@ -83,8 +83,27 @@ namespace
         py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "__mul__", []( Coordinate scale, Position3D< Coordinate > const & val ){ return scale * val; },
         py::arg( "scale" ), py::arg( "vec" ) )
+     .def( "__div__", []( Position3D< Coordinate > const & val, Coordinate scale ){ return val / scale; },
+        py::arg( "vec" ), py::arg( "scale" ) )
      .def( "angle", static_cast<Coordinate (*)( Position3D< Coordinate > const&, Position3D< Coordinate > const &)>(&visr::rbbl::angle), py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "angleNormalised", static_cast<Coordinate (*)( Position3D< Coordinate > const&, Position3D< Coordinate > const &)>(&visr::rbbl::angleNormalised), py::arg( "lhs" ), py::arg( "rhs" ) )
+     .def( "normalise", static_cast< Position3D< Coordinate > (*)(
+        Position3D< Coordinate > const &, bool )>(
+          &visr::rbbl::normalise), py::arg( "val" ), py::arg( "silentDivideByZer0" ) = false )
+     .def( "dot", static_cast<Coordinate (*)( Position3D< Coordinate > const&,
+       Position3D< Coordinate > const &)>(&visr::rbbl::dot), py::arg( "lhs" ), py::arg( "rhs" ) )
+     .def( "rotate", static_cast< Position3D< Coordinate > (*)(
+        Position3D< Coordinate > const &, Quaternion< Coordinate > const & )>(
+          &visr::rbbl::rotate), py::arg( "val" ), py::arg( "rotation" ) )
+     .def( "transform", static_cast< Position3D< Coordinate > (*)(
+        Position3D< Coordinate > const &, Quaternion< Coordinate > const &,
+          Position3D< Coordinate > const & )>(
+          &visr::rbbl::transform), py::arg( "val" ), py::arg( "rotation" ),
+          py::arg( "shift" ) )
+     .def( "interpolateSpherical", static_cast< Position3D< Coordinate >(*)(
+        Position3D< Coordinate > const&, Position3D< Coordinate > const &, Coordinate ) >(
+        &visr::rbbl::interpolateSpherical), py::arg( "pos0" ), py::arg( "pos1" ),
+        py::arg( "tInterp" ) )
     ;
 #if 0
 /**
@@ -119,16 +138,6 @@ CoordinateType transform( Position3D< CoordinateType > const& pos,
                           Quaternion< CoordinateType > const& rot,
                           Position3D< CoordinateType > const& shift );
 
-/**
- * Perform a spherical interpolation between two vectors.
- * 
- */
-template< typename CoordinateType >
-void interpolateSpherical( Quaternion< CoordinateType > const& pos0,
-                           Quaternion< CoordinateType > const& pos1,
-                           CoordinateType tInterp );
-
-    ;
 #endif
   }
 } // unnamed namespace

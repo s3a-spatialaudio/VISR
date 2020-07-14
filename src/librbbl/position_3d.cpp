@@ -4,6 +4,8 @@
 
 #include "quaternion.hpp"
 
+#include <libefl/cartesian_spherical_conversion.hpp>
+
 #include <array>
 #include <algorithm>
 #include <ciso646>
@@ -153,7 +155,7 @@ Position3D< CoordinateType > operator+(
     Position3D< CoordinateType > const& lhs,
     Position3D< CoordinateType > const& rhs )
 {
-  Position3D< CoordinateType > ret{ lhs.x() + rhs.x(), lhs.y() + rhs.z(),
+  Position3D< CoordinateType > ret{ lhs.x() + rhs.x(), lhs.y() + rhs.y(),
                                     lhs.z() + rhs.z() };
   return ret;
 }
@@ -232,6 +234,42 @@ Position3D< CoordinateType > transform( Position3D< CoordinateType > const& pos,
   return ret;
 }
 
+template< typename CoordinateType >
+Position3D< CoordinateType > interpolateSpherical(
+  Position3D< CoordinateType > const& pos0,
+  Position3D< CoordinateType > const& pos1,
+  CoordinateType tInterp )
+{
+#if 1
+  Position3D< CoordinateType > const pos0Normed{ normalise( pos0 ) };
+  Position3D< CoordinateType > const pos1Normed{ normalise( pos1 ) };
+  CoordinateType const omega = angleNormalised( pos0Normed, pos1Normed );
+  if( omega < std::numeric_limits< CoordinateType >::epsilon() )
+  {
+    return (static_cast< CoordinateType >(1.0) - tInterp) * pos0
+      + tInterp * pos1;
+  }
+  CoordinateType const sf = static_cast< CoordinateType >(1.0)/std::sin( omega );
+  CoordinateType const c0 = sf * std::sin( (static_cast< CoordinateType >(1.0) - tInterp) * omega );
+  CoordinateType const c1 = sf * std::sin( tInterp * omega );
+  Position3D< CoordinateType > const resDir{ c0 * pos0Normed + c1 * pos1Normed };
+  CoordinateType const resRadius{ (static_cast< CoordinateType >(1.0) - tInterp) * pos0.norm()
+    + tInterp * pos1.norm() };
+  return resRadius * resDir;
+#else
+  Coordinate const omega = angle( pos1, pos2 );
+  if( omega < std::numeric_limits< CoordinateType >::epsilon() )
+  {
+    return (static_cast< CoordinateTyp >(1.0) - tInterp) * pos0
+      + tInterp * pos1;
+  }
+  Coordinate const sf = static_cast< CoordinateTyp >(1.0)/std::sin( omega );
+  Coordinate const c0 = sf * std::sin( (static_cast< CoordinateTyp >(1.0) - tInterp) * omega );
+  Coordinate const c1 = sf * std::sin( tInterp * omega );
+  return c0 * pos0 + c1 * pos1;
+#endif
+}
+
 // Explicit instantiations
 template class Position3D< float >;
 template class Position3D< double >;
@@ -282,6 +320,13 @@ template VISR_RBBL_LIBRARY_SYMBOL Position3D< float > transform< float >(
 template VISR_RBBL_LIBRARY_SYMBOL Position3D< double > transform< double >(
   Position3D< double > const&, Quaternion< double > const&,
   Position3D< double > const& );
+
+template  VISR_RBBL_LIBRARY_SYMBOL 
+Position3D< float > interpolateSpherical( Position3D< float > const&,
+  Position3D< float > const& pos1, float );
+template  VISR_RBBL_LIBRARY_SYMBOL 
+Position3D< double > interpolateSpherical( Position3D< double > const&,
+  Position3D< double > const& pos1, double );
 
 } // namespace rbbl
 } // namespace visr
