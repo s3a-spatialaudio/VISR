@@ -30,7 +30,7 @@ def quaternionType( pos ):
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionDefaultInit(posType):
     dtype = coordinateType(posType)
-    pos = rbbl.Position3D()
+    pos = posType()
     refPos = np.zeros(3, dtype=dtype)
     assert np.linalg.norm( np.asarray(pos) - refPos ) < 1e-7
 
@@ -38,32 +38,32 @@ def test_positionDefaultInit(posType):
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionInit(posType):
     dtype = coordinateType(posType)
-    posVec = np.asarray( [0.3, -0.3251, 0.75])
-    pos = rbbl.Position3D( posVec[0], posVec[1], posVec[2])
+    posVec = np.asarray( [0.3, -0.3251, 0.75], dtype=dtype)
+    pos = posType( posVec[0], posVec[1], posVec[2])
     assert np.linalg.norm( np.asarray(pos) - posVec ) < 1e-7
 
 
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionKeywordInit(posType):
     dtype = coordinateType(posType)
-    posVec = np.asarray( [0.3, -0.3251, 0.75])
-    pos = rbbl.Position3D( z=posVec[2], x=posVec[0], y=posVec[1])
+    posVec = np.asarray( [0.3, -0.3251, 0.75], dtype=dtype)
+    pos = posType( z=posVec[2], x=posVec[0], y=posVec[1])
     assert np.linalg.norm( np.asarray(pos) - posVec ) < 1e-7
 
 
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionVecInit(posType):
     dtype = coordinateType(posType)
-    posVec = np.asarray( [0.3, -0.3251, 0.75])
-    pos = rbbl.Position3D( posVec )
+    posVec = np.asarray( [0.3, -0.3251, 0.75], dtype=dtype)
+    pos = posType( posVec )
     assert np.linalg.norm( np.asarray(pos) - posVec ) < 1e-7
 
 
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionIndexAccess(posType):
     dtype = coordinateType(posType)
-    posVec = np.asarray( [1.3, 0.3251, -0.75])
-    pos = rbbl.Position3D( posVec )
+    posVec = np.asarray( [1.3, 0.3251, -0.75], dtype=dtype)
+    pos = posType( posVec )
     assert np.abs( pos[0] - posVec[0] ) < 1e-7
     assert np.abs( pos[1] - posVec[1] ) < 1e-7
     assert np.abs( pos[2] - posVec[2] ) < 1e-7
@@ -73,7 +73,7 @@ def test_positionIndexAccess(posType):
 def test_positionElementAccess(posType):
     dtype = coordinateType(posType)
     posVec = np.asarray( [1.3, 0.3251, -0.75])
-    pos = rbbl.Position3D( posVec )
+    pos = posType( posVec )
     assert np.abs( pos.x - posVec[0] ) < 1e-7
     assert np.abs( pos.y - posVec[1] ) < 1e-7
     assert np.abs( pos.z - posVec[2] ) < 1e-7
@@ -82,9 +82,9 @@ def test_positionElementAccess(posType):
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionIndexedSet(posType):
     dtype = coordinateType(posType)
-    initPos = np.asarray( [1.3, 0.3251, -0.75])
-    newPos = np.asarray( [-0.35, 0.251, 1.75])
-    pos = rbbl.Position3D( initPos )
+    initPos = np.asarray( [1.3, 0.3251, -0.75], dtype=dtype)
+    newPos = np.asarray( [-0.35, 0.251, 1.75], dtype=dtype)
+    pos = posType( initPos )
     assert np.linalg.norm( np.asarray(pos) - initPos ) < 1e-7
 
     pos[0] = newPos[0]
@@ -104,9 +104,9 @@ def test_positionIndexedSet(posType):
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionPropertySet(posType):
     dtype = coordinateType(posType)
-    initPos = np.asarray( [1.3, 0.3251, -0.75])
-    newPos = np.asarray( [-0.35, 0.251, 1.75])
-    pos = rbbl.Position3D( initPos )
+    initPos = np.asarray( [1.3, 0.3251, -0.75], dtype=dtype)
+    newPos = np.asarray( [-0.35, 0.251, 1.75], dtype=dtype)
+    pos = posType( initPos )
     assert np.linalg.norm( np.asarray(pos) - initPos ) < 1e-7
 
     pos.x = newPos[0]
@@ -207,11 +207,11 @@ def test_positionTranslate(posType):
     assert np.linalg.norm(np.array(pos)-refPos) < np.finfo(dtype).eps
     
 @pytest.mark.parametrize("posType", positionTypes)
-def test_positionRotation(posType):
+def test_positionRotate(posType):
     quatType = quaternionType(posType)
     dtype = coordinateType(posType)
-    posInit = np.array( [ 0.3, -0.25, 1.35 ])
-    rotYPR = np.deg2rad(np.array([15, 45, -30]))
+    posInit = np.array( [ 0.3, -0.25, 1.35 ], dtype=dtype)
+    rotYPR = np.deg2rad(np.array([15, 45, -30], dtype=dtype))
     rotQuat = quatType.fromYPR(rotYPR)
     refRot= Rotation.from_euler('ZYX', rotYPR)
     refPos = refRot.apply(posInit)
@@ -221,21 +221,146 @@ def test_positionRotation(posType):
     assert np.linalg.norm(np.asarray(pos)-refPos) < tol
 
 @pytest.mark.parametrize("posType", positionTypes)
+def test_positionTransform(posType):
+    quatType = quaternionType(posType)
+    dtype = coordinateType(posType)
+    posInit = np.array( [ 0.3, -0.25, 1.35 ], dtype=dtype)
+    transVec = np.array([-0.7, 0.34, -12.3], dtype=dtype)
+    transPos = posType(transVec)
+    
+    rotYPR = np.deg2rad(np.array([15, 45, -30], dtype=dtype))
+    rotQuat = quatType.fromYPR(rotYPR)
+    refRot= Rotation.from_euler('ZYX', rotYPR)
+    refPos = refRot.apply(posInit) + transVec
+    pos = posType(posInit )
+    pos.transform(rotQuat, transPos)
+    tol = 10.0*np.finfo(dtype).eps # Reasonable error limit
+    assert np.linalg.norm(np.asarray(pos)-refPos) < tol
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionAddFunction(posType):
+    dtype = coordinateType(posType)
+    pos1Vec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos1 = posType( pos1Vec )
+    pos2Vec = np.asarray( [0.5, 0.25, -0.333], dtype=dtype)
+    pos2 = posType(pos2Vec)
+    resVec = pos1Vec + pos2Vec
+    resPos = pos1 + pos2
+    assert np.linalg.norm(np.array(resPos)-resVec) < np.finfo(dtype).eps
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionSubFunction(posType):
+    dtype = coordinateType(posType)
+    pos1Vec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos1 = posType( pos1Vec )
+    pos2Vec = np.asarray( [0.5, 0.25, -0.333], dtype=dtype)
+    pos2 = posType(pos2Vec)
+    resVec = pos1Vec - pos2Vec
+    resPos = pos1 - pos2
+    assert np.linalg.norm(np.array(resPos)-resVec) < np.finfo(dtype).eps
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionNegFunction(posType):
+    dtype = coordinateType(posType)
+    posVec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos = posType( posVec )
+    resVec = -posVec
+    resPos = -pos
+    assert np.linalg.norm(np.array(resPos)-resVec) < np.finfo(dtype).eps
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionMulScalarFunction(posType):
+    dtype = coordinateType(posType)
+    posVec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos = posType( posVec )
+    scale = 0.3754
+    resVec = scale * posVec
+    resPos = scale * pos
+    assert np.linalg.norm(np.array(resPos)-resVec) < np.finfo(dtype).eps
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionDivScalarFunction(posType):
+    dtype = coordinateType(posType)
+    posVec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos = posType( posVec )
+    scale = 0.3754
+    resVec = posVec / scale
+    resPos = pos / scale
+    assert np.linalg.norm(np.array(resPos)-resVec) < np.finfo(dtype).eps
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionAngleFunction(posType):
+    dtype = coordinateType(posType)
+    pos1Vec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos1 = posType( pos1Vec )
+    pos2Vec = np.asarray( [0.5, 0.25, -0.333], dtype=dtype)
+    pos2 = posType(pos2Vec)
+    refAngle = np.arccos(np.dot(pos1,pos2)/
+                         (np.linalg.norm(pos1)*np.linalg.norm(pos2)))
+    angle = rbbl.angle( pos1Vec, pos2Vec )
+    assert np.abs(angle-refAngle) < np.finfo(dtype).eps
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionAngleNormalisedFunction(posType):
+    dtype = coordinateType(posType)
+    pos1Vec = np.asarray( [1.0, -0.5, 0.25], dtype=dtype)
+    pos1Vec = pos1Vec / np.linalg.norm(pos1Vec)
+    pos1 = posType( pos1Vec )
+    pos2Vec = np.asarray( [0.5, 0.25, -0.333], dtype=dtype)
+    pos1Vec = pos2Vec / np.linalg.norm(pos2Vec)
+    pos2 = posType(pos2Vec)
+    refAngle = np.arccos(np.dot(pos1, pos2))
+    angle = rbbl.angleNormalised( pos1Vec, pos2Vec )
+    assert np.abs(angle-refAngle) < np.finfo(dtype).eps
+
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionNormaliseFunction(posType):
+    dtype = coordinateType(posType)
+    posVec = np.asarray( [-0.35, 0.251, 1.75], dtype=dtype)
+    pos = posType( posVec )
+    posNorm = rbbl.normalise(pos)
+    assert np.abs( posNorm.norm() - 1.0 ) < np.finfo(dtype).eps
+    assert np.abs( np.linalg.norm(np.array(posNorm)) - 1.0 ) < np.finfo(dtype).eps
+    refNormed = posVec / np.linalg.norm(posVec)
+    assert np.linalg.norm(np.array(posNorm) - refNormed) < np.finfo(dtype).eps
+
+@pytest.mark.parametrize("posType", positionTypes)
+def test_positionNormaliseFunctionZero(posType):
+    dtype = coordinateType(posType)
+    posVec = np.asarray( [0,0,0], dtype=dtype)
+    pos = posType( posVec )
+    with pytest.raises(Exception):
+        rbbl.normalise( pos, silentDivideByZero=False)
+    with pytest.raises(Exception):
+        rbbl.normalise(pos) # Default does the same
+
+    posNormed = rbbl.normalise(pos, silentDivideByZero=True)
+    assert not np.any( np.isfinite(np.array(posNormed)))
+
+
+@pytest.mark.parametrize("posType", positionTypes)
 def test_positionSphericalInterpolationNormalised(posType, plot=False):
     dtype = coordinateType(posType)
-    pos0Ref = np.array( [0.2, 0.7, -0.5], dtype=np.float32 )
-    pos1Ref = np.array( [0.2, -0.5, 0.3], dtype=np.float32 )
+    pos0Ref = np.array( [0.2, 0.7, -0.5], dtype=dtype )
+    pos1Ref = np.array( [0.2, -0.5, 0.3], dtype=dtype )
     pos0Ref /= np.linalg.norm(pos0Ref)
     pos1Ref /= np.linalg.norm(pos1Ref)
-    pos0 = rbbl.Position3D(pos0Ref)
-    pos1 = rbbl.Position3D(pos1Ref)
+    pos0 = posType(pos0Ref)
+    pos1 = posType(pos1Ref)
 
     numVals = 101
     t = np.linspace( 0.0, 1.0, numVals, endpoint=True)
     # Requitres SciPy >= 1.5
     # refOut = ssp.geometric_slerp( pos0Ref, pos1Ref, t )
 
-    out = np.full((numVals,3), fill_value=np.NaN, dtype=np.float32)
+    out = np.full((numVals,3), fill_value=np.NaN, dtype=dtype)
     for idx in range(numVals):
         interpOut = rbbl.interpolateSpherical(pos0, pos1, t[idx])
         out[idx,:] = np.asarray(interpOut)
@@ -267,19 +392,19 @@ def test_positionSphericalInterpolationNormalised(posType, plot=False):
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionSphericalInterpolation(posType, plot=False):
     dtype = coordinateType(posType)
-    pos0Ref = np.array( [0.2, 0.7, -0.5], dtype=np.float32 )
-    pos1Ref = np.array( [0.2, -0.5, 0.3], dtype=np.float32 )
+    pos0Ref = np.array( [0.2, 0.7, -0.5], dtype=dtype )
+    pos1Ref = np.array( [0.2, -0.5, 0.3], dtype=dtype )
     pos0Ref *= 0.75 / np.linalg.norm(pos0Ref)
     pos1Ref /= np.linalg.norm(pos1Ref)
-    pos0 = rbbl.Position3D(pos0Ref)
-    pos1 = rbbl.Position3D(pos1Ref)
+    pos0 = posType(pos0Ref)
+    pos1 = posType(pos1Ref)
 
     numVals = 101
     t = np.linspace( 0.0, 1.0, numVals, endpoint=True)
     # Requitres SciPy >= 1.5
     # refOut = ssp.geometric_slerp( pos0Ref, pos1Ref, t )
 
-    out = np.full((numVals,3), fill_value=np.NaN, dtype=np.float32)
+    out = np.full((numVals,3), fill_value=np.NaN, dtype=np.dtype)
     for idx in range(numVals):
         interpOut = rbbl.interpolateSpherical(pos0, pos1, t[idx])
         out[idx,:] = np.asarray(interpOut)
@@ -306,6 +431,35 @@ def test_positionSphericalInterpolation(posType, plot=False):
         plt.show()
 
 
+#template< typename CoordinateType >
+#VISR_RBBL_LIBRARY_SYMBOL CoordinateType
+#dot( Position3D< CoordinateType > const & op1,
+#     Position3D< CoordinateType > const & op2 );
+#
+#template< typename CoordinateType >
+#VISR_RBBL_LIBRARY_SYMBOL Position3D< CoordinateType > rotate(
+#    Position3D< CoordinateType > const & pos,
+#    Quaternion< CoordinateType > const & rot );
+#
+#template< typename CoordinateType >
+#VISR_RBBL_LIBRARY_SYMBOL Position3D< CoordinateType > transform(
+#    Position3D< CoordinateType > const & pos,
+#    Quaternion< CoordinateType > const & rot,
+#    Position3D< CoordinateType > const & shift );
+#
+#/**
+# * Perform a spherical interpolation between two vectors.
+# * It uses spherical linear interpolation for the directon, and linear
+# * interpolation for the radius component.
+# */
+#template< typename CoordinateType >
+#VISR_RBBL_LIBRARY_SYMBOL Position3D< CoordinateType > interpolateSpherical(
+#    Position3D< CoordinateType > const & pos0,
+#    Position3D< CoordinateType > const & pos1,
+#    CoordinateType tInterp );
+
+
+
 if __name__ == "__main__":
     for posType in positionTypes:
         test_positionDefaultInit(posType)
@@ -323,6 +477,19 @@ if __name__ == "__main__":
         test_positionUnaryAdd(posType)
         test_positionUnarySub(posType)
         test_positionUnaryScale(posType)
+        test_positionTranslate(posType)
+        test_positionRotate(posType)
+        test_positionTransform(posType)
+        test_positionAddFunction(posType)
+#        test_positionSubFunction(posType)
+        test_positionNegFunction(posType)
+        test_positionMulScalarFunction(posType)
+        test_positionDivScalarFunction(posType)
+        test_positionAngleFunction(posType)
+        test_positionAngleNormalisedFunction(posType)
+        test_positionNormaliseFunction(posType)
+        test_positionNormaliseFunctionZero(posType)
+
         
         test_positionSphericalInterpolationNormalised(posType, plot=True)
         test_positionSphericalInterpolation(posType, plot=True)

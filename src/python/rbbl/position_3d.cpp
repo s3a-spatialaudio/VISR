@@ -4,6 +4,7 @@
 #include <librbbl/quaternion.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
 #include <array>
@@ -67,6 +68,8 @@ namespace
         py::arg( "silentDivideByZero" ) = false )
       .def( "__iadd__", &Position3D< Coordinate >::operator+=,
         py::arg( "rhs" ) )
+      .def( -py::self )
+      .def( py::self + py::self )
       .def( "__isub__", &Position3D< Coordinate >::operator-=,
         py::arg( "rhs" ) )
       .def( "__imul__", &Position3D< Coordinate >::operator*=,
@@ -76,9 +79,9 @@ namespace
       .def( "transform", &Position3D< Coordinate >::transform, py::arg( "rot" ),
         py::arg( "shift" ) )
     ;
-
-    m.def( "__add__", [](Position3D< Coordinate > const & lhs, Position3D< Coordinate > const & rhs ){ return lhs + rhs; },
-        py::arg( "lhs" ), py::arg( "rhs" ) )
+    m
+    // m.def( "__add__", [](Position3D< Coordinate > const & lhs, Position3D< Coordinate > const & rhs ){ return lhs + rhs; },
+    //     py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "__sub__", [](Position3D< Coordinate > const & lhs, Position3D< Coordinate > const & rhs ){ return lhs - rhs; },
         py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "__mul__", []( Coordinate scale, Position3D< Coordinate > const & val ){ return scale * val; },
