@@ -275,7 +275,8 @@ def test_fromJson():
     initYPR = np.rad2deg([quatRef.yaw, quatRef.pitch, quatRef.roll])
 
     initStr = """{"x":%f,"y":%f,"z":%f,
-    "orientation":{ "yaw":%f,"pitch": %f,"roll": %f}, "faceId": 13, "timeStamp": 98765 }"""\
+    "orientation":{ "yaw":%f,"pitch": %f,"roll": %f}, "faceId": 13,
+    "timeStamp": 98765, "numListeners": 3 }"""\
        % (posRef[0], posRef[1], posRef[2], initYPR[0], initYPR[1], initYPR[2])
     lp = pml.ListenerPosition()
     lp.parseJson( initStr )
@@ -285,6 +286,7 @@ def test_fromJson():
       - np.asarray(quatRef.data) ) < 1e-6
     assert lp.faceId == 13
     assert lp.timeStamp == 98765
+    assert lp.numberOfListeners == 3
 
 
 def test_writeJson():
@@ -292,6 +294,9 @@ def test_writeJson():
     yprInit=np.deg2rad(np.array([15, 45, -30]))
     lp=pml.ListenerPosition(posInit, yprInit )
     lp.faceId = 1
+    numListeners = 42
+    lp.numberOfListeners = numListeners
+
     msg= lp.writeJson(rotationFormat=pml.ListenerPosition.RotationFormat.Quaternion)
 
     rep = json.loads( msg )
@@ -306,6 +311,10 @@ def test_writeJson():
     quatRead = np.asarray([quat["w"], quat["x"], quat["y"], quat["z"]], dtype=np.float)
     quatRef = rbbl.Quaternion.fromYPR(yprInit)
     assert np.linalg.norm(quatRead-np.asarray(quatRef.data)) < 1e-5
+
+    assert "numListeners" in rep.keys()
+    assert int(rep["numListeners"]) == numListeners
+
 
 # Allow running the tests as a script (as opposed to through pytest)
 if __name__ == "__main__":

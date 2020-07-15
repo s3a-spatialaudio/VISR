@@ -63,6 +63,7 @@ ListenerPosition::ListenerPosition( PositionType const & position,
  , mOrientation( orientation )
  , mTimeNs{ 0 }
  , mFaceID{ 0 }
+ , mNumberOfListeners{ 1 }
 {
 }
 
@@ -231,6 +232,17 @@ void ListenerPosition::setTimeNs( TimeType timeNs ) { mTimeNs = timeNs; }
 
 void ListenerPosition::setFaceID( IdType faceID ) { mFaceID = faceID; }
 
+std::size_t ListenerPosition::numberOfListeners() const
+{
+  return mNumberOfListeners;
+}
+
+void ListenerPosition::setNumberOfListeners( std::size_t numListeners )
+{
+  mNumberOfListeners = numListeners;
+}
+
+
 void ListenerPosition::parseJson( std::istream & stream )
 {
   namespace pt = boost::property_tree;
@@ -303,6 +315,7 @@ void ListenerPosition::parseJson( boost::property_tree::ptree const & tree )
   set( x, y, z );
   setTimeNs( tree.get< pml::ListenerPosition::TimeType >( "timeStamp", 0 ) );
   setFaceID( tree.get< pml::ListenerPosition::IdType >( "faceId", 0 ) );
+  setNumberOfListeners( tree.get< std::size_t >( "numListeners", 1 ) );
 }
 
 void ListenerPosition::parseJson( std::string const & str )
@@ -375,6 +388,7 @@ void ListenerPosition::writeJson( boost::property_tree::ptree & tree,
   {
     tree.put< pml::ListenerPosition::IdType >( "faceId", faceID() );
   }
+  tree.put< std::size_t >( "numListeners", numberOfListeners() );
 }
 
 std::string ListenerPosition::writeJson( RotationFormat rotationFormat,

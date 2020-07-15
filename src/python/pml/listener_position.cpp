@@ -93,6 +93,8 @@ void exportListenerPosition( pybind11::module & m)
       py::arg( "rotationVector" ), py::arg( "rotationAngle" ) )
     .def_property( "faceId", &ListenerPosition::faceID, &ListenerPosition::setFaceID )
     .def_property( "timeStamp", &ListenerPosition::timeNs, &ListenerPosition::setTimeNs )
+    .def_property( "numberOfListeners", &ListenerPosition::numberOfListeners,
+       &ListenerPosition::setNumberOfListeners )
     .def( "translate", &ListenerPosition::translate, py::arg( "translationVector" ) )
     .def( "translate", []( ListenerPosition & self, std::array< ListenerPosition::Coordinate, 3 > const & pos )
       { self.translate( ListenerPosition::PositionType( pos[0], pos[1], pos[2] ) ); }, py::arg( "translationVector" ) )

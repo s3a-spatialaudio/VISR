@@ -365,6 +365,31 @@ public:
    */
   void setFaceID( IdType faceID );
 
+  /**
+   * Return the number of listeners currently detected.
+   * Although a ListenerPosition object always contains position data for a
+   * single listener, this attribute can be used to signal whether there are
+   * multiple listeners in the range of a capturing device, or whether the
+   * tracking data might be outdated (value of zero).
+   * Valid values are 1 (one listener is tracked and its coordinates are
+   * sent in the position and orientaton members), 0 (no listener is currently
+   * detected, and the position and orientation members represent either default
+   * values or the last detected state), or more than one (the coordinates of
+   * the active, tracked user are contained in the position and orientation
+   * members, but additional users are present).
+   */
+  std::size_t numberOfListeners() const;
+
+  /**
+   * Set the number of listners currently sensed.
+   * This does not change the amount of tracking data, which is always
+   * transmitted for one user, but to provide additional metadata about the
+   * listening environment.
+   * This value is initialised to 1 (for backward compatibility with
+   * applications that do not consider this additional listener metadata.)
+   */
+  void setNumberOfListeners( std::size_t numListeners );
+
   void parseJson( std::istream& stream );
 
   void parseJson( std::string const& str );
@@ -412,6 +437,8 @@ private:
    * @note Subject to removal, see faceID()
    */
   IdType mFaceID;
+
+  std::size_t mNumberOfListeners;
 };
 
 VISR_PML_LIBRARY_SYMBOL std::ostream& operator<<( std::ostream& stream,
