@@ -62,7 +62,7 @@ CoordinateType Position3D< CoordinateType >::normSquare() const
 template< typename CoordinateType >
 void Position3D< CoordinateType >::normalise( bool silentDivideByZero )
 {
-  rbbl::normalise( *this, silentDivideByZero );
+  *this = rbbl::normalise( *this, silentDivideByZero );
 }
 
 template< typename CoordinateType >

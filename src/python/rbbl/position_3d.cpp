@@ -105,40 +105,6 @@ namespace
         &visr::rbbl::interpolateSpherical), py::arg( "pos0" ), py::arg( "pos1" ),
         py::arg( "tInterp" ) )
     ;
-#if 0
-/**
- * Unary minus operator, returns the opposite vector.
- */
-template< typename CoordinateType >
-Position3D< CoordinateType > operator-(
-    Position3D< CoordinateType > const& val );
-
-template< typename CoordinateType >
-Position3D< CoordinateType > operator*(
-    CoordinateType scale, Position3D< CoordinateType > const& val );
-
-Position3D< CoordinateType > operator/(
-template< typename CoordinateType >
-    CoordinateType scale, Position3D< CoordinateType > const& val );
-
-template< typename CoordinateType >
-Position3D< CoordinateType > normalise( Position3D< CoordinateType > const& val,
-                                        bool silentDivideByZero = false );
-
-template< typename CoordinateType >
-CoordinateType dot( Position3D< CoordinateType > const& op1,
-                    Position3D< CoordinateType > const& op2 );
-
-template< typename CoordinateType >
-CoordinateType rotate( Position3D< CoordinateType > const& pos,
-                       Quaternion< CoordinateType > const& rot );
-
-template< typename CoordinateType >
-CoordinateType transform( Position3D< CoordinateType > const& pos,
-                          Quaternion< CoordinateType > const& rot,
-                          Position3D< CoordinateType > const& shift );
-
-#endif
   }
 } // unnamed namespace
 
