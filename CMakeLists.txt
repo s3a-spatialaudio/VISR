@@ -329,6 +329,9 @@ endif( BUILD_PYTHON_BINDINGS )
 ###########################################################
 # Support for 3rd-party libraries.
 
+# Add 3rd-party libraries that are built locally.
+add_subdirectory( 3rd )
+
 # Threads are required wherever we link with boost_threads.
 # Note that the dependency is added automatically in most cases, so the
 # omission will go unnoticed very often.
@@ -374,25 +377,12 @@ if( BUILD_USE_SNDFILE_LIBRARY )
   find_package( SndFile REQUIRED )
 endif( BUILD_USE_SNDFILE_LIBRARY )
 
-## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
-# This library is provided by 3rd/ for all platforms, because it is no standard library (moreover, heavily tweaked to geet both float and double support)
-  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/kissfft) )
-  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/kissfft) )
-FIND_PACKAGE( KissFFT REQUIRED )
-
 # IPP
 OPTION( BUILD_USE_IPP "Use the Intel IPP for fast arithmetic functions and trasnforms. Set the environment variable IPP_ROOT accordingly." OFF )
 IF( BUILD_USE_IPP )
   # Use the variable IPP_ROOT to point to the base directory of the library.
   FIND_PACKAGE( IPP REQUIRED )
 ENDIF( BUILD_USE_IPP )
-
-## FFTS (Fastest Fourier Transform in the south)
-# Because this is a non-standard library, we provide it for all platforms.
-# TODO: Consider making this library optional
-LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/ffts) )
-LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/ffts) )
-FIND_PACKAGE( FFTS REQUIRED )
 
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)

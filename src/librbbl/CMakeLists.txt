@@ -88,11 +88,9 @@ endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 # Set target properties common to both library types.
 foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE VISR_BUILD_RBBL_LIBRARY=1)
-  target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${FFTS_INCLUDE_DIR} )
-  target_include_directories( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_INCLUDE_DIR} )
   target_link_libraries( rbbl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
-  target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${FFTS_LIBRARY} )
-  target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ${KISSFFT_LIBRARY} )
+  target_link_libraries( rbbl_${LIB_TYPE} PRIVATE ffts_static )
+  target_link_libraries( rbbl_${LIB_TYPE} PRIVATE kissfft_static )
   target_link_libraries( rbbl_${LIB_TYPE} PUBLIC Boost::boost ) # Adds the boost include directory
   if( BUILD_USE_IPP )
     target_compile_definitions( rbbl_${LIB_TYPE} PRIVATE -DBUILD_USE_IPP )
