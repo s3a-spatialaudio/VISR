@@ -76,7 +76,7 @@ set_property( TARGET ffts_test PROPERTY FOLDER 3rd/test)
 set_property( TARGET ffts_trig_test PROPERTY FOLDER 3rd/test)
 
 # KissFFT
-add_subdirectory( kissFFT ${CMAKE_BINARY_DIR}/3rd/kissFFT )
+add_subdirectory( kissfft ${CMAKE_BINARY_DIR}/3rd/kissfft )
 set_target_properties( kissfft_static PROPERTIES FOLDER 3rd)
 # Override global visibility preset to avoid warnings.
 # This is necessary because the global setting for policy CMP0063 is not heeded

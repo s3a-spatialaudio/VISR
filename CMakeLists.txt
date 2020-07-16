@@ -328,6 +328,9 @@ option( BUILD_DISABLE_THREADS "Whether to disable the use of threads. This is ma
 
 ###########################################################
 # Support for 3rd-party libraries.
+ 
+# Add 3rd-party libraries that are built locally.
+add_subdirectory( 3rd )
 
 # Threads might be used through boost::filesystem, the C++11 threads functionality,
 # or through direct OS calls.
