@@ -4,7 +4,7 @@
 
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
-# 3.3 for IN_LIST operator in if() conditions
+# >= 3.3 for IN_LIST operator in if() conditions
 CMAKE_MINIMUM_REQUIRED (VERSION 3.3.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
@@ -343,31 +343,6 @@ if( BUILD_DISABLE_THREADS )
 else()
   find_package(Threads REQUIRED)
 endif( BUILD_DISABLE_THREADS )
-
-## Portaudio
-option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
-if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-  # For windows, we ship the includes and libraries.
-  # TODO: Support system-specific library directories
-  # TODO: Provide separate libraries for debug and release builds.
-  if( WIN32 ) # This includes 64-bit platforms!
-    # NOTE: It would be nicer to pass the search path to the FIND_PACKAGE
-    # call instead of setting it globally.
-    list( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/portaudio) )
-    list( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/portaudio) )
-  endif( WIN32 )
-  find_package( Portaudio REQUIRED )
-endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
-
-## Jack Audio Connection Kit (JACK)
-option( BUILD_AUDIOINTERFACES_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
-if( BUILD_AUDIOINTERFACES_JACK )
-  # Preliminary support for testing the Jack library on Windows platforms.
-  if( WIN32 )
-    set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{JACK_ROOT} )
-  endif( WIN32 )
-  find_package( Jack REQUIRED)
-endif( BUILD_AUDIOINTERFACES_JACK )
 
 ## Libsndfile
 option( BUILD_USE_SNDFILE_LIBRARY "Use libsndfile functionality (loading/storing of audio files)" ON )
