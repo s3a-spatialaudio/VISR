@@ -88,18 +88,18 @@ endif( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS efl_static
-	  EXPORT VISR_exports
+    EXPORT VISR_exports
     PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files
-	  ARCHIVE DESTINATION lib COMPONENT static_libraries )
+    ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS efl_shared
-  	EXPORT VISR_exports
-  	ARCHIVE DESTINATION lib COMPONENT development_files
-  	RUNTIME DESTINATION lib COMPONENT shared_libraries
-  	LIBRARY DESTINATION lib COMPONENT shared_libraries
-  	PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
+    EXPORT VISR_exports
+    ARCHIVE DESTINATION lib COMPONENT development_files
+    RUNTIME DESTINATION lib COMPONENT shared_libraries
+    LIBRARY DESTINATION lib COMPONENT shared_libraries
+    PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
