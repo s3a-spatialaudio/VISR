@@ -32,6 +32,8 @@ if( BUILD_USE_IPP )
   target_link_libraries(${APPLICATION_NAME} ${IPP_LIB_S} ${IPP_LIB_CORE} )
 endif( BUILD_USE_IPP )
 
+set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER unit_tests )
+
 add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
          COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
 

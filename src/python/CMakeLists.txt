@@ -40,3 +40,4 @@ add_custom_target( pythonexternals
   rclpython rrlpython panningpython pmlpython
   objectmodelpython objectmodelpython reverbobjectpython
   audiointerfacespython )
+set_target_properties( pythonexternals PROPERTIES FOLDER python_externals )

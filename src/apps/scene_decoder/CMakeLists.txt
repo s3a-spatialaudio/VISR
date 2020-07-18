@@ -12,3 +12,5 @@ if( NOT Boost_USE_STATIC_LIBS )
   target_compile_definitions( scene_decoder_app PRIVATE -DBOOST_ALL_DYN_LINK )
 endif( NOT Boost_USE_STATIC_LIBS )
 target_compile_definitions( scene_decoder_app PRIVATE -DBOOST_ALL_NO_LIB )
+
+set_target_properties( scene_decoder_app PROPERTIES FOLDER applications )

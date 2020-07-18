@@ -12,3 +12,4 @@ add_library( mexsupport STATIC ${SOURCES} ${HEADERS} )
 # This also helps us to avoid writing the Matlab library dependencies for all our externals.
 target_link_libraries( mexsupport ${MATLAB_MEX_LIBRARY} )
 target_link_libraries( mexsupport ${MATLAB_MX_LIBRARY} )
+set_target_properties( mexsupport PROPERTIES FOLDER static_libraries )

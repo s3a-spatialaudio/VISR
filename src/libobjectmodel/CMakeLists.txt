@@ -56,9 +56,10 @@ point_source_with_reverb_parser.hpp
 )
 
 if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-add_library( objectmodel_static STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( objectmodel_static PROPERTIES OUTPUT_NAME objectmodel )
-target_compile_definitions( objectmodel_static PUBLIC -DVISR_OBJECTMODEL_STATIC_LIBRARY=1 )
+  add_library( objectmodel_static STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( objectmodel_static PROPERTIES OUTPUT_NAME objectmodel )
+  target_compile_definitions( objectmodel_static PUBLIC -DVISR_OBJECTMODEL_STATIC_LIBRARY=1 )
+  set_target_properties( objectmodel_static PROPERTIES FOLDER static_libraries )
 endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -67,12 +68,14 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
   set_target_properties( objectmodel_shared PROPERTIES ARCHIVE_OUTPUT_NAME objectmodel_shared )
   set_target_properties( objectmodel_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+  set_target_properties( objectmodel_shared PROPERTIES FOLDER shared_libraries )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 add_library( objectmodel_static_pic STATIC ${SOURCES} ${HEADERS} )
 set_target_properties( objectmodel_static_pic PROPERTIES OUTPUT_NAME objectmodel_pic )
 target_compile_definitions( objectmodel_static_pic PUBLIC -DVISR_OBJECTMODEL_STATIC_LIBRARY=1 )
+set_target_properties( objectmodel_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.

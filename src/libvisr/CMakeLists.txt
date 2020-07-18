@@ -83,6 +83,7 @@ if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( visr_static PROPERTIES OUTPUT_NAME visr)
   set_target_properties(visr_static PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
   target_compile_definitions( visr_static PUBLIC -DVISR_CORE_STATIC_LIBRARY=1 )
+  set_target_properties( visr_static PROPERTIES FOLDER static_libraries )
 endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -92,6 +93,7 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( visr_shared PROPERTIES ARCHIVE_OUTPUT_NAME visr_shared )
   # Set this definition only when building the present target.
   set_target_properties(visr_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+  set_target_properties( visr_shared PROPERTIES FOLDER shared_libraries )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -100,6 +102,7 @@ if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties(visr_static_pic PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
   set_target_properties(visr_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
   target_compile_definitions( visr_static_pic PUBLIC -DVISR_CORE_STATIC_LIBRARY=1 )
+  set_target_properties( visr_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )

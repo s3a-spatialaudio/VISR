@@ -32,6 +32,7 @@ if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   add_library( panning_static STATIC ${SOURCES} ${HEADERS} )
   set_target_properties( panning_static PROPERTIES OUTPUT_NAME panning )
   target_compile_definitions( panning_static PUBLIC VISR_PANNING_STATIC_LIBRARY=1)
+  set_target_properties( panning_static PROPERTIES FOLDER static_libraries )
 endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -40,6 +41,7 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
   set_target_properties( panning_shared PROPERTIES ARCHIVE_OUTPUT_NAME panning_shared )
   set_target_properties( panning_shared PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib" )
+  set_target_properties( panning_shared PROPERTIES FOLDER shared_libraries )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -47,6 +49,7 @@ if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( panning_static_pic PROPERTIES OUTPUT_NAME panning_pic )
   set_target_properties( panning_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
   target_compile_definitions( panning_static_pic PUBLIC VISR_PANNING_STATIC_LIBRARY=1)
+  set_target_properties( panning_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.

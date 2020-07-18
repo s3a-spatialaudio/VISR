@@ -27,6 +27,8 @@ target_link_libraries(visr_renderer PRIVATE rrl_${VISR_RENDERER_LIBRARY_TYPE} )
 target_link_libraries(visr_renderer PRIVATE visr_${VISR_RENDERER_LIBRARY_TYPE} )
 target_link_libraries(visr_renderer PRIVATE Boost::filesystem )
 
+set_target_properties( visr_renderer PROPERTIES FOLDER applications )
+
 install( TARGETS visr_renderer
          RUNTIME DESTINATION bin
          COMPONENT standalone_applications )

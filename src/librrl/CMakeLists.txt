@@ -39,6 +39,7 @@ if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
   set_target_properties( rrl_static PROPERTIES OUTPUT_NAME rrl )
   target_compile_definitions( rrl_static PUBLIC VISR_RRL_STATIC_LIBRARY=1)
+  set_target_properties( rrl_static PROPERTIES FOLDER static_libraries )
 endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -46,6 +47,7 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( rrl_shared PROPERTIES OUTPUT_NAME rrl )
   # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
   set_target_properties( rrl_shared PROPERTIES ARCHIVE_OUTPUT_NAME rrl_shared )
+  set_target_properties( rrl_shared PROPERTIES FOLDER shared_libraries )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -53,6 +55,7 @@ if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( rrl_static_pic PROPERTIES OUTPUT_NAME rrl_pic )
   set_target_properties( rrl_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
   target_compile_definitions( rrl_static_pic PUBLIC VISR_RRL_STATIC_LIBRARY=1)
+  set_target_properties( rrl_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.

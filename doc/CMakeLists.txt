@@ -39,7 +39,7 @@ if(VISR_SYSTEM_NAME MATCHES "Windows")
   # The VISR DLLs as well as the 3rd party libraries must be added to the path.
   list( APPEND VISR_PYTHON_EXEC_ENVIRONMENT PATH="$<SHELL_PATH:$<TARGET_FILE_DIR:visr_shared>>${VISR_ENVIRONMENT_PATH_SEPARATOR}$<SHELL_PATH:${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}>${VISR_ENVIRONMENT_PATH_SEPARATOR}%PATH%" )
 endif(VISR_SYSTEM_NAME MATCHES "Windows")
-# No special handling is required on Linux, because the paths of dependent shared libraries are automatically encoded in the binaries. 
+# No special handling is required on Linux, because the paths of dependent shared libraries are automatically encoded in the binaries.
 
 # Set the dependencies needed to build the documentation. For sphinx.autodoc,
 # the Python externals need to be built before the documentation can be extracted.
@@ -88,11 +88,13 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
 		  MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
 		  DEPENDS ${doxy_extra_files} # TODO <AF> Decide whether the subprojects should be added as dependency.
 		  COMMENT "Generating Doxygen HTML and XML documentation")
-		  
+
 add_custom_target( doxygen-doc DEPENDS ${doxy_html_index_file}  )
+set_target_properties( doxygen-doc PROPERTIES FOLDER documentation )
 
 # "Meta-target" to trigger build of all documentation outputs
 add_custom_target( doc ALL DEPENDS doxygen-doc )
+set_target_properties( doc PROPERTIES FOLDER documentation )
 
 find_package(Sphinx)
 if(NOT Sphinx_FOUND)
@@ -123,7 +125,7 @@ endif()
 function( HtmlDocBuild targetName sourceDir outputDir depends )
   configure_file( ${sourceDir}/conf.py.in ${outputDir}/html/conf.py @ONLY )
   # Define an empty file that gets updated when the target is build, such that it can be used as
-  # a dependency for other targets. 
+  # a dependency for other targets.
   set( STAMP ${outputDir}/htmlbuild.stamp )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
@@ -145,6 +147,7 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   add_custom_target( ${targetName}-html
     DEPENDS ${STAMP}
   )
+  set_target_properties( ${targetName}-html PROPERTIES FOLDER documentation )
 endfunction(HtmlDocBuild)
 
 # Function to define a target building PDF documentation from a source directory containing Sphinx rst code.
@@ -175,6 +178,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
   add_custom_target( ${targetName}-pdf
     DEPENDS ${OUTPUTFILE}
   )
+  set_target_properties( ${targetName}-pdf PROPERTIES FOLDER documentation )
 endfunction(PdfDocBuild)
 
 PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} "${VISR_USERDOC_DEPENDENCIES}" )
@@ -184,7 +188,7 @@ HtmlDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} "${VISR_USER
 HtmlDocBuild( apidoc ${apidoc_source_root} ${apidoc_output_root} "${VISR_APIDOC_DEPENDENCIES}" )
 
 # Add the Sphinx-generated targets to the "doc" meta-target
-add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf ) 
+add_dependencies( doc apidoc-html apidoc-pdf userdoc-html userdoc-pdf )
 
 # Include the Doxygen documentation in the package installer
 # Note: Doxygen as output format is deprecated, so it won't be externally visible in the future.
@@ -197,4 +201,3 @@ install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html
 # TODO: Remove construction of file name with full version string.
 install( FILES  ${userdoc_output_root}/userdoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT user_documentation_pdf )
 install( FILES  ${apidoc_output_root}/apidoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT api_documentation_pdf )
-

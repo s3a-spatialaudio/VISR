@@ -10,4 +10,6 @@ target_link_libraries(baseline_renderer PRIVATE audiointerfaces_${BUILD_LIBRARY_
 target_link_libraries(baseline_renderer PRIVATE rrl_${BUILD_LIBRARY_TYPE_FOR_APPS} )
 target_link_libraries(baseline_renderer PRIVATE Boost::filesystem )
 
+set_target_properties( baseline_renderer PROPERTIES FOLDER applications )
+
 install( TARGETS baseline_renderer DESTINATION bin COMPONENT standalone_applications )

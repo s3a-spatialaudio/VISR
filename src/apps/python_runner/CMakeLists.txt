@@ -13,4 +13,6 @@ target_link_libraries(${APPLICATION_NAME} PRIVATE rrl_${BUILD_LIBRARY_TYPE_FOR_A
 target_link_libraries(${APPLICATION_NAME} PRIVATE visr_${BUILD_LIBRARY_TYPE_FOR_APPS} )
 target_link_libraries(${APPLICATION_NAME} PRIVATE Boost::filesystem )
 
+set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER applications )
+
 install( TARGETS ${APPLICATION_NAME} DESTINATION bin COMPONENT standalone_applications )

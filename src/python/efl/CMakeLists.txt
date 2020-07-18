@@ -33,6 +33,8 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT
 target_link_libraries( ${PROJECT_NAME} PRIVATE efl_shared )
 target_link_libraries( ${PROJECT_NAME} PRIVATE Boost::boost ) # For boost::preprocessor, only at compile time
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
+
 # Note: We export the target to enable dependent projects to query target properties
 # such as the library location.
 install(TARGETS ${PROJECT_NAME}
