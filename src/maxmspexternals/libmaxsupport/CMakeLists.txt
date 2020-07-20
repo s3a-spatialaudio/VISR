@@ -32,6 +32,8 @@ target_link_libraries( maxsupport_static PUBLIC ${MAXSDK_AUDIO_LIBRARY} )
 target_link_libraries( maxsupport_static PUBLIC ${MAXSDK_API_LIBRARY} )
 target_link_libraries( maxsupport_static PRIVATE Boost::boost ) # Adds the boost include directory
 
+set_target_properties( maxsupport_static PROPERTIES FOLDER static_libraries )
+
 add_library( maxsupport_shared SHARED ${SOURCES} ${HEADERS} )
 set_target_properties( maxsupport_shared PROPERTIES OUTPUT_NAME maxsupport )
 # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
@@ -51,6 +53,8 @@ target_link_libraries( maxsupport_shared PRIVATE Boost::boost ) # Adds the boost
 # Because the headers are the same for the static library, the headers are only
 # installed once.
 set_target_properties( maxsupport_shared PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+
+set_target_properties( maxsupport_shared PROPERTIES FOLDER shared_libraries )
 
 install( TARGETS maxsupport_static
          ARCHIVE DESTINATION staticlib COMPONENT max_externals
