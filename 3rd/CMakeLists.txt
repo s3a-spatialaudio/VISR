@@ -10,6 +10,8 @@ if( VISR_SYSTEM_PROCESSOR STREQUAL 'armv7l' )
   set( ENABLE_NEON ON CACHE BOOL "FFTS: Enable double-precision arithmethic." FORCE )
 endif( VISR_SYSTEM_PROCESSOR STREQUAL 'armv7l' )
 set( ENABLE_DOUBLE ON CACHE BOOL "FFTS: Enable double-precision arithmethic." FORCE )
+# It is not clear whether and where the shared variant will be used,
+# but certainly only if VISR shared libraries are also built.
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set( ENABLE_SHARED ON CACHE BOOL "FFTS: Enable building a shared library." FORCE )
 else( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -81,8 +83,11 @@ set_property( TARGET ffts_test PROPERTY FOLDER 3rd/test)
 set_property( TARGET ffts_trig_test PROPERTY FOLDER 3rd/test)
 
 # KissFFT
+
+# It is not clear whether and where the shared variant will be used,
+# but certainly only if VISR shared libraries are also built.
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-  set( KISSFFT_BUILD_SHARED_LIBRARY OFF CACHE BOOL "KissFFT: Build shared library" FORCE )
+  set( KISSFFT_BUILD_SHARED_LIBRARY ON CACHE BOOL "KissFFT: Build shared library" FORCE )
 else( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set( KISSFFT_BUILD_SHARED_LIBRARY OFF CACHE BOOL "KissFFT: Build shared library" FORCE )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -99,6 +104,10 @@ target_include_directories(kissfft_static PUBLIC
     $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}/3rd/kissfft>
     $<INSTALL_INTERFACE:include/visr/3rd/kissfft>
 )
+set_target_properties( kissfft_static PROPERTIES
+  ARCHIVE_OUTPUT_NAME kissfft
+  ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
+)
 install(TARGETS kissfft_static
         EXPORT VISR_exports
         PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT   development_files
@@ -110,6 +119,14 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   target_include_directories(kissfft_shared PUBLIC
       $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}/3rd/kissfft>
       $<INSTALL_INTERFACE:include/visr/3rd/kissfft>
+  )
+  set_target_properties( kissfft_shared PROPERTIES
+    ARCHIVE_OUTPUT_NAME kissfft_shared # Import library on Windows
+    LIBRARY_OUTPUT_NAME kissfft # Shared library on Unix platforms
+    RUNTIME_OUTPUT_NAME kissfft # DLL on Windows
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
   )
   install(TARGETS kissfft_shared
           EXPORT VISR_exports
