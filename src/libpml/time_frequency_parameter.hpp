@@ -49,6 +49,10 @@ public:
   using ComplexType = std::complex< ElementType >;
 
 
+  /**
+   * Static member function to compute the number of unique DFT values for a real-to-complex
+   * DFT operation.
+   */
   static std::size_t numberOfBinsRealToComplex( std::size_t dftSize )
   {
     return (dftSize + 2 ) / 2;
@@ -109,18 +113,41 @@ public:
    */
   void resize( std::size_t numberOfDftBins, std::size_t numberOfChannels, std::size_t numberOfFrames );
 
+  /**
+   * Return the data alignment (in number of complex elements) of the cotained DFT data.
+   */
   std::size_t alignment() const { return mData.alignmentElements(); }
 
+  /**
+   * Return the number of DFT bins of the time/frequency representation.
+   */
   std::size_t numberOfDftBins() const { return mData.numberOfColumns(); }
 
+  /**
+   * Return the number of audio channels containe in the time/frequency matrix.
+   */
   std::size_t numberOfChannels() const { return mNumberOfChannels; }
 
+  /**
+   * Return the number of time/frequency frames in a single TimeFrequencyParameter message.
+   */
   std::size_t numberOfFrames() const { return mData.numberOfRows() / mNumberOfChannels; }
 
+  /**
+   * Return the stride (in number of complex elements) between successive audio channels within the same frame.
+   */
   std::size_t channelStride() const { return mData.stride(); }
 
+  /**
+   * Return the stride (counted in number of complex elements) between successive frames within the same
+   * TimeFrequencyParameter message.
+   */
   std::size_t frameStride() const { return mData.stride() * numberOfChannels(); }
 
+  /**
+   * Indexed access to a time/frequency sample.
+   * Const version.
+   */
   ComplexType const & at( std::size_t frameIdx,
     std::size_t channelIdx, std::size_t dftBinIdx ) const
   {
@@ -128,6 +155,10 @@ public:
       + dftBinIdx);
   }
 
+  /**
+   * Indexed access to a time/frequency sample.
+   * Non-constant version, returns a writable reference.
+   */
   ComplexType & at( std::size_t frameIdx,
     std::size_t channelIdx, std::size_t dftBinIdx )
   {

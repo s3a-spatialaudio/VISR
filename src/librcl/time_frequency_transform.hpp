@@ -158,16 +158,22 @@ private:
   std::unique_ptr< rbbl::FftWrapperBase< SampleType > > mFftWrapper;
 
   /**
-   * The window
+   * The window sequence.
    */
   efl::BasicVector< SampleType > mWindow;
 
+  /**
+   * Vector to hold temporary results.
+   */
   efl::BasicVector< SampleType > mCalcBuffer;
 
+  /**
+   * Input audio port, name "in", width numberOfChannels.
+   */
   AudioInput mInput;
 
   /**
-   *
+   * Output parameter port.
    */
   ParameterOutput< pml::SharedDataProtocol,
                    pml::TimeFrequencyParameter< SampleType > >
