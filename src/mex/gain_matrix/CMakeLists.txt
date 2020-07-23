@@ -24,5 +24,7 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX 
 # Add any extras dependencies
 target_link_libraries(${PROJECT_NAME} rbbl rcl visr_static efl mexsupport ${MATLAB_LIBRARIES})
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER matlab_externals )
+
 # Install the .mexXXX file to mex/
 INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION mex)

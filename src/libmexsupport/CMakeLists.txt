@@ -9,7 +9,9 @@ SET( HEADERS export_symbol.hpp mex_wrapper.hpp )
 
 add_library( mexsupport STATIC ${SOURCES} ${HEADERS} )
 # Transitive link dependencies
-# This also helps us to avoid writing the Matlab library dependencies for all our externals.
-target_link_libraries( mexsupport ${MATLAB_MEX_LIBRARY} )
-target_link_libraries( mexsupport ${MATLAB_MX_LIBRARY} )
+target_link_libraries( mexsupport PRIVATE visr_shared )
+target_link_libraries( mexsupport PRIVATE ${MATLAB_MEX_LIBRARY} )
+target_link_libraries( mexsupport PRIVATE ${MATLAB_MX_LIBRARY} )
 set_target_properties( mexsupport PROPERTIES FOLDER static_libraries )
+
+set_target_properties( mexsupport PROPERTIES FOLDER matlab_externals )

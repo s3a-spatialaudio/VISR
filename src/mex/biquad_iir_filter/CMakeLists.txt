@@ -28,5 +28,7 @@ ENDIF( BUILD_USE_IPP )
 # Also set the file extension according to the operating system.
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CPP_FILE} SUFFIX ${MATLAB_MEX_SUFFIX} PREFIX "")
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER matlab_externals )
+
 # Install the .mexXXX file to mex/
 INSTALL(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION mex)
