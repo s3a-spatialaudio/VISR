@@ -33,6 +33,8 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT
 target_link_libraries( ${PROJECT_NAME} PRIVATE efl_shared )
 target_link_libraries( ${PROJECT_NAME} PRIVATE Boost::boost ) # For boost::preprocessor, only at compile time
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
+
 # Note: We export the target to enable dependent projects to query target properties
 # such as the library location.
 install(TARGETS ${PROJECT_NAME}
@@ -40,5 +42,6 @@ install(TARGETS ${PROJECT_NAME}
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
 
-# Recurse into the unit test directory.
-add_subdirectory( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )

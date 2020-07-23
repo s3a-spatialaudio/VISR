@@ -4,7 +4,8 @@
 
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
-CMAKE_MINIMUM_REQUIRED (VERSION 3.1.0)
+# 3.3 for IN_LIST operator in if() conditions
+CMAKE_MINIMUM_REQUIRED (VERSION 3.3.0)
 
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
@@ -14,6 +15,12 @@ endif( POLICY CMP0063 )
 if( POLICY CMP0074 )
   CMAKE_POLICY(SET CMP0074 NEW)
 endif( POLICY CMP0074 )
+if( POLICY CMP0057 )
+  CMAKE_POLICY(SET CMP0057 NEW)
+else( POLICY CMP0057 )
+  message( FATAL_ERROR "Policy CMP0057 not supported (IN_LIST operator), although CMake version requirement is met.")
+endif( POLICY CMP0057 )
+
 
 # The name of our top-level project.
 PROJECT( VISR CXX C )
@@ -184,6 +191,40 @@ endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "x86_64" )
 
 # TODO: Generate architecture flags for other platforms (e.g., ARM)
 
+############################################################
+# Logic for building, using, and installing libraries
+
+option( BUILD_INSTALL_SHARED_LIBRARIES "Whether to provide shared libraries in the installation packages." ON )
+option( BUILD_INSTALL_STATIC_LIBRARIES "Whether to provide static libraries in the installation packages." OFF )
+option( BUILD_INSTALL_STATIC_PIC_LIBRARIES "Whether to provide static position-independent libraries in the installation packages." OFF )
+
+set( BUILD_LIBRARY_TYPE_FOR_APPS "shared" CACHE STRING "The library type used for standalone applications." )
+set( VISR_LIBRARY_TYPES "shared;static" )
+set_property( CACHE BUILD_LIBRARY_TYPE_FOR_APPS PROPERTY STRINGS ${VISR_LIBRARY_TYPES} )
+
+# We need to know whether the standalone applications are built, because this influences which
+# library types are built.
+option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR applications." ON)
+
+# List to contain the library variants (static, shared, static_pic) to be built.
+# Start with an empty list which is populated below
+set( VISR_BUILD_LIBRARY_TYPES ) 
+# Decide which library types are built and store them in a list that is used in
+# subdirectories.
+# Static libraries are built if they are used in the standalone applications or
+# if they are to be installed.
+if( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
+  OR BUILD_INSTALL_STATIC_LIBRARIES )
+  list( APPEND VISR_BUILD_LIBRARY_TYPES "static")
+endif( (BUILD_STANDALONE_APPLICATIONS AND (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static"))
+  OR BUILD_INSTALL_STATIC_LIBRARIES )
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  list( APPEND VISR_BUILD_LIBRARY_TYPES "shared")
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  list( APPEND VISR_BUILD_LIBRARY_TYPES "static_pic" )
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+
 
 ############################################################
 # Create universal binaries on MacOS
@@ -201,9 +242,6 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
 #  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
-
-
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
@@ -247,6 +285,16 @@ if( BUILD_PYTHON_BINDINGS )
   # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
   set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
+  # Ensure that pybind11's targets are exported within the VISR export set.
+  # This is necessary to export static versions of libpythonsupport
+  # and libpythoncomponents, which have a private link dependency to pybind11::embed.
+  # A drawback of the current approach is that the targets are exported as,
+  # e.g., VISR::embed, but we cannot set the namespace because this is done in
+  # the pybind11 tree.
+  set( PYBIND11_EXPORT_NAME VISR_exports )
+  # Force setting of pybind11 option (necessary in order to get the targets exported)
+  set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets." FORCE )
+
   # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
   # compile and link options.
@@ -276,15 +324,21 @@ if( BUILD_PYTHON_BINDINGS )
     ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
 endif( BUILD_PYTHON_BINDINGS )
 
+option( BUILD_DISABLE_THREADS "Whether to disable the use of threads. This is mainly useful mainly specialised purposes, e.g., Web assembly" OFF )
+
 ###########################################################
 # Support for 3rd-party libraries.
+ 
+# Add 3rd-party libraries that are built locally.
+add_subdirectory( 3rd )
 
-# Threads are required wherever we link with boost_threads.
-# Note that the dependency is added automatically in most cases, so the
-# omission will go unnoticed very often.
-# TODO: Is this superseded by using Boost exported targets (which should handle
-# transitive dependencies itself)?
-find_package(Threads REQUIRED)
+# Threads might be used through boost::filesystem, the C++11 threads functionality,
+# or through direct OS calls.
+if( BUILD_DISABLE_THREADS )
+  add_definitions( -DVISR_DISABLE_THREADS=1 )
+else()
+  find_package(Threads REQUIRED)
+endif( BUILD_DISABLE_THREADS )
 
 ## Portaudio
 option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
@@ -324,25 +378,12 @@ if( BUILD_USE_SNDFILE_LIBRARY )
   find_package( SndFile REQUIRED )
 endif( BUILD_USE_SNDFILE_LIBRARY )
 
-## KissFFT: Basic FFT support (portable, slow and with a permissive licence)
-# This library is provided by 3rd/ for all platforms, because it is no standard library (moreover, heavily tweaked to geet both float and double support)
-  LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/kissfft) )
-  LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/kissfft) )
-FIND_PACKAGE( KissFFT REQUIRED )
-
 # IPP
 OPTION( BUILD_USE_IPP "Use the Intel IPP for fast arithmetic functions and trasnforms. Set the environment variable IPP_ROOT accordingly." OFF )
 IF( BUILD_USE_IPP )
   # Use the variable IPP_ROOT to point to the base directory of the library.
   FIND_PACKAGE( IPP REQUIRED )
 ENDIF( BUILD_USE_IPP )
-
-## FFTS (Fastest Fourier Transform in the south)
-# Because this is a non-standard library, we provide it for all platforms.
-# TODO: Consider making this library optional
-LIST( APPEND CMAKE_INCLUDE_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/include/ffts) )
-LIST( APPEND CMAKE_LIBRARY_PATH TO_CMAKE_PATH(${PROJECT_SOURCE_DIR}/3rd/lib/${VISR_PLATFORM_NAME}/ffts) )
-FIND_PACKAGE( FFTS REQUIRED )
 
 ## Boost support
 # On Linux and Windows, the boost libraries provided by the OS image (or brew on MacOS)
@@ -360,7 +401,10 @@ option( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost librari
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system thread regex timer atomic )
+set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system regex timer )
+if( NOT BUILD_DISABLE_THREADS )
+  list( APPEND VISR_BOOST_INSTALL_LIBRARIES thread atomic)
+endif( NOT BUILD_DISABLE_THREADS )
 # The set of all boost libraries used by the build and test stages.
 set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
@@ -370,6 +414,14 @@ set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # defined import locations.
 set(Boost_USE_MULTITHREADED TRUE)
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+
+# Sanity check: Static Boost libraries cannot be used in shared libraries or loadable modules
+if( Boost_USE_STATIC_LIBS )
+  if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+    message( SEND_ERROR "Cannot build shared libraries if Boost_USE_STATIC_LIBS is on." )
+  endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+endif( Boost_USE_STATIC_LIBS )
+
 
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs

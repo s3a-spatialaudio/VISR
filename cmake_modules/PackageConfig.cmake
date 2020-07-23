@@ -29,11 +29,14 @@ if( WIN32 )
   set( CPACK_GENERATOR NSIS )
   set( CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
   set( CPACK_PACKAGE_INSTALL_DIRECTORY ${VISR_VERSIONED_NAME} )
-  get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
-  install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
-
-  get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY} DIRECTORY )
-  install( FILES ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
+  if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
+    install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
+  endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  if( BUILD_USE_SNDFILE_LIBRARY )
+    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY} DIRECTORY )
+    install( FILES ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
+  endif( BUILD_USE_SNDFILE_LIBRARY )
 
   # Boost
   if( NOT Boost_USE_STATIC_LIBS )
@@ -61,13 +64,16 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
   set( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
-  install( FILES ${PORTAUDIO_LIBRARIES} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  install( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  install( FILES ${FLAC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  install( FILES ${OGG_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  install( FILES ${VORBIS_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-  install( FILES ${VORBISENC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-
+  if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+    install( FILES ${PORTAUDIO_LIBRARIES} DESTINATION 3rd COMPONENT thirdparty_libraries)
+  endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  if( BUILD_USE_SNDFILE_LIBRARY )
+    install( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    install( FILES ${FLAC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    install( FILES ${OGG_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    install( FILES ${VORBIS_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    install( FILES ${VORBISENC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+  endif( BUILD_USE_SNDFILE_LIBRARY )
   if( NOT Boost_USE_STATIC_LIBS )
     foreach( BOOSTLIB ${VISR_BOOST_INSTALL_LIBRARIES} )
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION )
@@ -165,11 +171,13 @@ cpack_add_component( thirdparty_libraries
                      REQUIRED HIDDEN
                    )
 
-cpack_add_component(shared_libraries
-                    DISPLAY_NAME "Shared Libraries"
-                    DESCRIPTION "Core VISR libraries (shared)"
-                    REQUIRED
-                   )
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  cpack_add_component(shared_libraries
+                      DISPLAY_NAME "Shared Libraries"
+                      DESCRIPTION "Core VISR libraries (shared)"
+                      REQUIRED
+                     )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   cpack_add_component(static_libraries
@@ -179,6 +187,15 @@ if( BUILD_INSTALL_STATIC_LIBRARIES )
                       DISABLED
                      )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
+
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  cpack_add_component(static_pic_libraries
+                      DISPLAY_NAME "Static Libraries with position-independent code"
+                      DESCRIPTION "Core VISR libraries (static and position-independent, for building loadable modules)"
+                      INSTALL_TYPES full developer
+                      DISABLED
+                     )
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 
 cpack_add_component( standalone_applications
                     DISPLAY_NAME "Standalone applications"

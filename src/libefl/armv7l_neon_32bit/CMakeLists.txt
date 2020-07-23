@@ -4,7 +4,7 @@ set( HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/initialise_library.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vector_functions.hpp
 )
-  
+
 set( SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/initialise_library.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/vector_add.cpp
@@ -13,6 +13,6 @@ set( SOURCES
 )
 
 # Add the architecture-specific files to the efl libraries.
-foreach(TARGET_TYPE static shared)
+foreach(TARGET_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_sources(efl_${TARGET_TYPE} PRIVATE ${HEADERS} ${SOURCES} )
 endforeach()

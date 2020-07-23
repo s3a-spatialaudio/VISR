@@ -27,4 +27,6 @@ target_link_libraries(${PROJECT_NAME} signalflows rbbl rcl visr_static efl mexsu
 # Put directly into the mex/ subdirectory
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/mex" )
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER matlab_externals )
+
 install(TARGETS ${PROJECT_NAME} DESTINATION ${PROJECT_BINARY_DIR}/mex )

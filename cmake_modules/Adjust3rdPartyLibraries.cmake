@@ -67,12 +67,19 @@ file( MAKE_DIRECTORY ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
 
 # List of 3rd party libraries that are not boost.
 # More specifically, these are not imported targets as preferred in modern CMake.
-set( FIX_LIBRARIES SNDFILE_LIBRARY PORTAUDIO_LIBRARIES)
+set( FIX_LIBRARIES )
 
-# On MacOS, sndfile depends on FLAC, OGG, and Vorbis.
-if( VISR_SYSTEM_NAME MATCHES "MacOS" )
- list( APPEND FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY )
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  list( APPEND FIX_LIBRRIES PORTAUDIO_LIBRARIES )
+endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+
+if( BUILD_USE_SNDFILE_LIBRARY )
+  list( APPEND FIX_LIBRARIES SNDFILE_LIBRARY )
+  # On MacOS, sndfile depends on FLAC, OGG, and Vorbis.
+  if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+   list( APPEND FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY )
+  endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+endif( BUILD_USE_SNDFILE_LIBRARY )
 
 # On Mac OS, the Python library must also be treated because of the rpath.
 if( BUILD_PYTHON_BINDINGS AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
@@ -84,9 +91,11 @@ if(VISR_SYSTEM_NAME MATCHES "MacOS")
     fix_rpath(${v})
   endforeach()
   # Do the same for the boost libs.
-  foreach( BOOSTLIB ${VISR_BOOST_LIBRARIES} )
-    fixBoostLibrary( ${BOOSTLIB} )
-  endforeach()
+  if( NOT BOOST_USE_STATIC_LIBS )
+    foreach( BOOSTLIB ${VISR_BOOST_LIBRARIES} )
+      fixBoostLibrary( ${BOOSTLIB} )
+    endforeach()
+  endif( NOT BOOST_USE_STATIC_LIBS )
 endif(VISR_SYSTEM_NAME MATCHES "MacOS")
 
 if(VISR_SYSTEM_NAME MATCHES "Windows")
@@ -95,20 +104,25 @@ if(VISR_SYSTEM_NAME MATCHES "Windows")
 #  foreach(v ${FIX_LIBRARIES} )
 #    copyDllFromLibName( ${${v}} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
 #  endforeach()
-  foreach( BOOST_LIBRARY IN LISTS VISR_BOOST_LIBRARIES )
-    copyDllFromTarget( Boost::${BOOST_LIBRARY} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
-  endforeach()
-  # special treatment for the PortAudio DLL, because its DLL has a non-matching file name.
-  get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARIES} DIRECTORY )
-  get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY_DIR} REALPATH )
-  set( PORTAUDIO_DLL_NAME ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll )
-  copyLibrary( ${PORTAUDIO_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
-  # Same for sndfile, because the DLL name differs from the name of the import lib.
-  get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARIES} DIRECTORY )
-  get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY_DIR} REALPATH )
-  set( SNDFILE_DLL_NAME ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll )
-  copyLibrary( ${SNDFILE_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
-
+  if( NOT BOOST_USE_STATIC_LIBS )
+    foreach( BOOST_LIBRARY IN LISTS VISR_BOOST_LIBRARIES )
+      copyDllFromTarget( Boost::${BOOST_LIBRARY} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
+    endforeach()
+  endif( NOT BOOST_USE_STATIC_LIBS )
+  if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+    # special treatment for the PortAudio DLL, because its DLL has a non-matching file name.
+    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARIES} DIRECTORY )
+    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY_DIR} REALPATH )
+    set( PORTAUDIO_DLL_NAME ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll )
+    copyLibrary( ${PORTAUDIO_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
+  endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  if( BUILD_USE_SNDFILE_LIBRARY )
+    # Same for sndfile, because the DLL name differs from the name of the import lib.
+    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARIES} DIRECTORY )
+    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY_DIR} REALPATH )
+    set( SNDFILE_DLL_NAME ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll )
+    copyLibrary( ${SNDFILE_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
+  endif( BUILD_USE_SNDFILE_LIBRARY )
 endif(VISR_SYSTEM_NAME MATCHES "Windows")
 
 ################################################################################
@@ -120,7 +134,7 @@ function(fix_dependencies_of_3rdparty depname libpath)
   execute_process(COMMAND ${EXECUTE_COMMAND} OUTPUT_VARIABLE rv)
 endfunction()
 
-if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+if( VISR_SYSTEM_NAME MATCHES "MacOS" AND BUILD_USE_SNDFILE_LIBRARY )
   get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
   get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
   get_filename_component(VORBIS_LIBRARY_NAME ${VORBIS_LIBRARY} NAME_WE)
@@ -134,4 +148,4 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBIS_LIBRARY})
   fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
   fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${VORBISENC_LIBRARY})
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" AND BUILD_USE_SNDFILE_LIBRARY )

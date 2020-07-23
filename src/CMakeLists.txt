@@ -1,13 +1,11 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-option( BUILD_INSTALL_STATIC_LIBRARIES "Whether to provide static libraries in the installation packages." OFF )
-
 # Set the installation directory for the export and version files
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
   # On  Linux, there's a predefined directory structure under /usr/lib
   set( VISR_INSTALL_EXPORT_CONFIG_DIRECTORY lib/cmake/visr )
 else( VISR_SYSTEM_NAME MATCHES "Linux" )
-  # On Windows and MacOS, install it in a cmake/ directory within the appication's install directory,
+  # On Windows and MacOS, install it in a cmake/ directory within the application's install directory,
   # e.g. c:\Program Files\VISR-X.X.X/cmake or /Applications/VISR-X.X.X/cmake
   set( VISR_INSTALL_EXPORT_CONFIG_DIRECTORY cmake )
 endif( VISR_SYSTEM_NAME MATCHES "Linux" )
@@ -26,7 +24,7 @@ ADD_SUBDIRECTORY( libefl )
 # Object model library.
 ADD_SUBDIRECTORY( libobjectmodel )
 
-# Panning library, compute a panning gains for a loudspeaker configuration 
+# Panning library, compute a panning gains for a loudspeaker configuration
 ADD_SUBDIRECTORY( libpanning )
 
 # Parameter message library
@@ -41,7 +39,7 @@ endif( BUILD_PYTHON_BINDINGS )
 ADD_SUBDIRECTORY( libsignalflows )
 
 # Library for signal flows that use Python.
-# Temporary solution to avoid a link dependency on Python 
+# Temporary solution to avoid a link dependency on Python
 # for the majority of signal flows.
 # Note that this library is also build if BUILD_PYTHON_BINDINGS is unselected.
 # In this case, it contains a reduced functionality that does not use Python.
@@ -54,7 +52,7 @@ ADD_SUBDIRECTORY( librbbl )
 # Rendering component library
 ADD_SUBDIRECTORY( librcl )
 
-# Rendering runtime library 
+# Rendering runtime library
 ADD_SUBDIRECTORY( librrl )
 
 # Data types and components related to the reverb audio object.
@@ -63,8 +61,10 @@ ADD_SUBDIRECTORY( libreverbobject )
 # VISR main library
 ADD_SUBDIRECTORY( libvisr )
 
-# Hold applications in a separate subdirectory
-ADD_SUBDIRECTORY( apps )
+if( BUILD_STANDALONE_APPLICATIONS )
+  # Hold applications in a separate subdirectory
+  add_subdirectory( apps )
+endif( BUILD_STANDALONE_APPLICATIONS )
 
 # Subdirectory for Matlab Mex externals
 IF( BUILD_MATLAB_EXTERNALS )
@@ -93,7 +93,7 @@ install(EXPORT VISR_exports
   NAMESPACE VISR::
   FILE visr_exports.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
-  COMPONENT development_files 
+  COMPONENT development_files
   )
 
 # Create config files for exported targets

@@ -49,8 +49,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PRO
 set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 set_target_properties( ${PROJECT_NAME} PROPERTIES ARCHIVE_OUTPUT_NAME "${PROJECT_NAME}_import" )
 
-target_link_libraries( ${PROJECT_NAME} PRIVATE rcl_shared ) 
-target_link_libraries( ${PROJECT_NAME} PRIVATE pythonbindinghelpers ) 
+target_link_libraries( ${PROJECT_NAME} PRIVATE rcl_shared )
+target_link_libraries( ${PROJECT_NAME} PRIVATE pythonbindinghelpers )
+
+set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
 
 # Note: We export the target to enable dependent projects to query target properties
 # such as the library location.
@@ -59,5 +61,6 @@ install(TARGETS ${PROJECT_NAME}
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
 
-# Recurse into the unit test directory.
-add_subdirectory( test )
+if( BUILD_TESTING )
+  add_subdirectory( test )
+endif( BUILD_TESTING )
