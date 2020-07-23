@@ -67,12 +67,19 @@ file( MAKE_DIRECTORY ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
 
 # List of 3rd party libraries that are not boost.
 # More specifically, these are not imported targets as preferred in modern CMake.
-set( FIX_LIBRARIES SNDFILE_LIBRARY PORTAUDIO_LIBRARIES)
+set( FIX_LIBRARIES )
 
-# On MacOS, sndfile depends on FLAC, OGG, and Vorbis.
-if( VISR_SYSTEM_NAME MATCHES "MacOS" )
- list( APPEND FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY )
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  list( APPEND FIX_LIBRRIES PORTAUDIO_LIBRARIES )
+endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+
+if( BUILD_USE_SNDFILE_LIBRARY )
+  list( APPEND FIX_LIBRRIES SNDFILE_LIBRARY )
+  # On MacOS, sndfile depends on FLAC, OGG, and Vorbis.
+  if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+   list( APPEND FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY )
+  endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+endif( BUILD_USE_SNDFILE_LIBRARY )
 
 # On Mac OS, the Python library must also be treated because of the rpath.
 if( BUILD_PYTHON_BINDINGS AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
@@ -102,17 +109,20 @@ if(VISR_SYSTEM_NAME MATCHES "Windows")
       copyDllFromTarget( Boost::${BOOST_LIBRARY} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
     endforeach()
   endif( NOT BOOST_USE_STATIC_LIBS )
-  # special treatment for the PortAudio DLL, because its DLL has a non-matching file name.
-  get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARIES} DIRECTORY )
-  get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY_DIR} REALPATH )
-  set( PORTAUDIO_DLL_NAME ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll )
-  copyLibrary( ${PORTAUDIO_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
-  # Same for sndfile, because the DLL name differs from the name of the import lib.
-  get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARIES} DIRECTORY )
-  get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY_DIR} REALPATH )
-  set( SNDFILE_DLL_NAME ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll )
-  copyLibrary( ${SNDFILE_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
-
+  if( BUILD_AUDIOINTERFACES_PORTAUDIO )
+    # special treatment for the PortAudio DLL, because its DLL has a non-matching file name.
+    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARIES} DIRECTORY )
+    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY_DIR} REALPATH )
+    set( PORTAUDIO_DLL_NAME ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll )
+    copyLibrary( ${PORTAUDIO_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
+  endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+  if( BUILD_USE_SNDFILE_LIBRARY )
+    # Same for sndfile, because the DLL name differs from the name of the import lib.
+    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARIES} DIRECTORY )
+    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY_DIR} REALPATH )
+    set( SNDFILE_DLL_NAME ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll )
+    copyLibrary( ${SNDFILE_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
+  endif( BUILD_USE_SNDFILE_LIBRARY )
 endif(VISR_SYSTEM_NAME MATCHES "Windows")
 
 ################################################################################
