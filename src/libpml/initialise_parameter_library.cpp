@@ -66,7 +66,10 @@ void initialiseParameterLibrary()
     TimeFrequencyParameter<double>,
 
     VectorParameter<float>,
-    VectorParameter<double> >
+    VectorParameter<double>,
+    VectorParameter< std::complex<float> >,
+    VectorParameter< std::complex<double> > >
+
  sParameterRegistrar;
 
   static CommunicationProtocolRegistrar<
