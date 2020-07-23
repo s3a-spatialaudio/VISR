@@ -27,6 +27,9 @@ ADD_SUBDIRECTORY( libobjectmodel )
 # Panning library, compute a panning gains for a loudspeaker configuration
 ADD_SUBDIRECTORY( libpanning )
 
+# Signal processing components and data types related to panning.
+add_subdirectory( libpanningdsp )
+
 # Parameter message library
 ADD_SUBDIRECTORY( libpml )
 

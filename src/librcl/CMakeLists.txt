@@ -18,6 +18,8 @@ listener_compensation.cpp
 null_source.cpp
 object_gain_eq_calculator.cpp
 panning_calculator.cpp
+parameter_output_terminator.cpp
+parameter_input_terminator.cpp
 position_decoder.cpp
 scalar_osc_decoder.cpp
 scene_decoder.cpp
@@ -50,6 +52,8 @@ listener_compensation.hpp
 null_source.hpp
 object_gain_eq_calculator.hpp
 panning_calculator.hpp
+parameter_output_terminator.hpp
+parameter_output_terminator.hpp
 position_decoder.hpp
 scalar_osc_decoder.hpp
 scene_decoder.hpp

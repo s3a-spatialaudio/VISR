@@ -47,6 +47,7 @@ convolver = rbbl.CrossfadingConvolverUniformFloat(
         transitionSamples = 3, # blockLength,
         initialRoutings = routings,
         initialFilters = filterMtx,
+        alignment=4, # Alignment in samples, minimum alignment required by ffts.
         fftImplementation = "ffts"
         )
 

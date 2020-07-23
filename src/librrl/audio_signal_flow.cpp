@@ -33,6 +33,7 @@
 #include <libvisr/impl/component_implementation.hpp>
 #include <libvisr/impl/composite_component_implementation.hpp>
 #include <libvisr/impl/parameter_port_base_implementation.hpp>
+#include <libvisr/impl/time_implementation.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -108,6 +109,9 @@ AudioSignalFlow::AudioSignalFlow( Component & flow )
     throw std::runtime_error( detail::composeMessageString( "AudioSignalFlow: Execution schedule could not be created.",
                                                              checkMessages.str()) );
   }
+
+  visr::impl::TimeImplementation & timeImpl = mFlow.timeImplementation();
+  timeImpl.resetCounter();
 }
 
 AudioSignalFlow::~AudioSignalFlow()
@@ -132,13 +136,18 @@ AudioSignalFlow::processFunction( void* userData,
 
 bool
 AudioSignalFlow::process( SampleType const * const * captureSamples,
-                          SampleType * const * playbackSamples )
+                          SampleType * const * playbackSamples,
+                          std::size_t captureStrideSamples /*= 1*/,
+                          std::size_t playbackStrideSamples /*= 1*/ )
 {
   // This assumes that all capture ports have the default sample type "SampleType"
   for( std::size_t chIdx( 0 ); chIdx < numberOfCaptureChannels(); ++chIdx )
   {
     SampleType * chPtr = reinterpret_cast<SampleType*>(mCaptureChannels[chIdx]);
-    efl::ErrorCode const res = efl::vectorCopy( captureSamples[chIdx], chPtr, mFlow.period(), 0 );
+    efl::ErrorCode const res = (captureStrideSamples == 1)
+     ? efl::vectorCopy( captureSamples[chIdx], chPtr, mFlow.period(), 0 )
+     : efl::vectorCopyStrided( captureSamples[chIdx], chPtr, captureStrideSamples,
+                              1 /*destination stride*/, mFlow.period(), 0);
     if( res != efl::noError )
     {
       throw std::runtime_error( "AudioSignalFlow: Error while copying input samples samples." );
@@ -156,7 +165,10 @@ AudioSignalFlow::process( SampleType const * const * captureSamples,
   for( std::size_t chIdx( 0 ); chIdx < numberOfPlaybackChannels(); ++chIdx )
   {
     SampleType const * chPtr = reinterpret_cast<SampleType const*>(mPlaybackChannels[chIdx]);
-    efl::ErrorCode const res = efl::vectorCopy( chPtr, playbackSamples[chIdx], mFlow.period(), 0 );
+    efl::ErrorCode const res = ( playbackStrideSamples == 1 )
+     ? efl::vectorCopy( chPtr, playbackSamples[chIdx], mFlow.period(), 0 )
+     : efl::vectorCopyStrided( chPtr, playbackSamples[chIdx], 1 /*source stride*/,
+                               playbackStrideSamples, mFlow.period(), 0);
     if( res != efl::noError )
     {
       throw std::runtime_error( "AudioSignalFlow: Error while copying output samples samples." );
@@ -237,6 +249,8 @@ void AudioSignalFlow::executeComponents()
         pc->process();
       }
     }
+    visr::impl::TimeImplementation & timeImpl = mFlow.timeImplementation();
+    timeImpl.advanceBlockCounter();
   }
   catch( std::exception const & ex )
   {

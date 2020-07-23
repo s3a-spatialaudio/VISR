@@ -60,6 +60,20 @@ void exportVectorCopy( py::module & m )
 }
 
 template< template<typename> class Container, typename T >
+void exportVectorCopyStrided( py::module & m )
+{
+  m.def( "vectorCopyStrided",
+         []( Container<T> const & src, Container<T> & dest, std::size_t sourceStrideSamples, std::size_t destStrideSamples,
+         std::size_t numElements, std::size_t alignment )
+	 {
+	   T const * const srcPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::constantPointer( src, numElements*sourceStrideSamples, "src" );
+	   T * const destPtr = visr::python::bindinghelpers::ContainerAccess<Container, T >::mutablePointer( dest, numElements*destStrideSamples, "dest" );
+	   detail::checkError( visr::efl::vectorCopyStrided<T>( srcPtr, destPtr, sourceStrideSamples,
+                                                          destStrideSamples, numElements, alignment ) );
+	 }, py::arg("src"), py::arg("dest"), py::arg( "srcStride")=1, py::arg( "destStride")=1, py::arg("numElements"), py::arg("alignment")=0 );
+}
+
+template< template<typename> class Container, typename T >
 void exportVectorRamp( py::module & m )
 {
   m.def( "vectorRamp",
@@ -398,7 +412,7 @@ void exportVectorRampScaling(py::module & m)
 
 #define ALL_VECTOR_FUNCTIONS \
   (Zero)\
-  (Fill) (Ramp) (Copy) \
+  (Fill) (Ramp) (Copy) (CopyStrided) \
   (Add) (AddInplace) (AddConstant) (AddConstantInplace) \
   (Subtract) (SubtractInplace) (SubtractConstant) (SubtractConstantInplace) \
   (Multiply) (MultiplyInplace) (MultiplyConstant) (MultiplyConstantInplace) \

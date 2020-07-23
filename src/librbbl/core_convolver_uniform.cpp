@@ -36,7 +36,9 @@ CoreConvolverUniform( std::size_t numberOfInputs,
  , mTimeDomainTransformBuffer( mDftSize, mAlignment )
  , mFilterPartitionsFrequencyDomain( maxFilterEntries, mDftRepresentationSizePadded * mNumberOfFilterPartitions, mComplexAlignment )
  , mFrequencyDomainAccumulator( mDftRepresentationSizePadded, mComplexAlignment )
- , mFftRepresentation( FftWrapperFactory<SampleType>::create( fftImplementation, mDftSize, alignment ) )
+ // Note: the FFT wrapper expects the alignmnent as number complex elements, whereas alignmnet is given as a
+ //  multiple of the real-valued sampe size.
+ , mFftRepresentation( FftWrapperFactory<SampleType>::create( fftImplementation, mDftSize, alignment/2 ) )
  , mFilterScalingFactor( calculateFilterScalingFactor() )
 {
   initFilters( initialFilters );

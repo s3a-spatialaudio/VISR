@@ -141,7 +141,7 @@ R"(Implement the "__exit__" method of the ContextManager API. Called within the 
     ;
 
   cls
-   .def( py::init<visr::Component&>() )
+   .def( py::init<visr::Component&>(), py::keep_alive<1, 2>() )
    .def_property_readonly( "numberOfAudioCapturePorts", &AudioSignalFlow::numberOfAudioCapturePorts )
    .def_property_readonly( "numberOfAudioPlaybackPorts", &AudioSignalFlow::numberOfAudioPlaybackPorts )
    .def_property_readonly( "numberOfCaptureChannels", &AudioSignalFlow::numberOfCaptureChannels )

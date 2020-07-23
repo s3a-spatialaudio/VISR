@@ -24,6 +24,8 @@ add_subdirectory( rrl )
 
 add_subdirectory( panning )
 
+add_subdirectory( panningdsp )
+
 add_subdirectory( pml )
 
 add_subdirectory( objectmodel )
