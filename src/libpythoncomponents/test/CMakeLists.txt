@@ -45,7 +45,16 @@ set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER unit_tests )
 
 add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
          COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
-set_property(TEST ${APPLICATION_NAME} PROPERTY ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:visrpython>" )
 
 include( adjust_test_environment )
-adjustTestEnvironment( ${APPLICATION_NAME} )
+adjustPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
+
+# The PYTHONHOME environment variabl must be set in order to let the Python interpreter embedded in the unit test binary start the correct interpreter,
+# i.e., the one corresponding to the Python environment used for building
+# the externals.
+# Retrieve the correct setting for PYTHONHOME from the Python executable.
+execute_process(
+  COMMAND ${PYTHON_EXECUTABLE} -c "import sys;print(sys.base_prefix)"
+OUTPUT_VARIABLE PYTHON_BASE_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE )
+set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
+  "PYTHONHOME=${PYTHON_BASE_PREFIX}" )
