@@ -154,6 +154,14 @@ R"(Implement the "__exit__" method of the ContextManager API. Called within the 
    .def( "parameterSendPorts", &AudioSignalFlow::externalParameterSendEndpoints )
    .def( "audioCapturePortName", &AudioSignalFlow::audioCapturePortName, py::arg("index"), py::return_value_policy::reference )
    .def( "audioPlaybackPortName", &AudioSignalFlow::audioPlaybackPortName, py::arg( "index" ), py::return_value_policy::reference )
+   .def( "audioCapturePortWidth", &AudioSignalFlow::audioCapturePortWidth, py::arg( "index" ) )
+   .def( "audioPlaybackPortWidth", &AudioSignalFlow::audioPlaybackPortWidth, py::arg( "index" ) )
+   .def( "audioCapturePortOffset", &AudioSignalFlow::audioCapturePortOffset, py::arg( "index" ) )
+   .def( "audioPlaybackPortOffset", &AudioSignalFlow::audioPlaybackPortOffset, py::arg( "index" ) )
+   .def( "audioCapturePortSampleType", &AudioSignalFlow::audioCapturePortSampleType, py::arg( "index" ) )
+   .def( "audioPlaybackPortSampleType", &AudioSignalFlow::audioPlaybackPortSampleType, py::arg( "index" ) )
+   .def( "audioCapturePortIndex", &AudioSignalFlow::audioCapturePortIndex, py::arg( "name" ) )
+   .def( "audioPlaybackPortIndex", &AudioSignalFlow::audioPlaybackPortIndex, py::arg( "name" ) )
    .def( "process", [](visr::rrl::AudioSignalFlow & flow, py::array const & input) /*-> py::array_t<SampleType>*/ { return wrapProcess( flow, input );}, py::arg("audioInput"), py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs" )
    .def( "process",
      [](visr::rrl::AudioSignalFlow & flow) /*-> py::array_t<SampleType>*/

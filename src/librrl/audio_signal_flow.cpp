@@ -256,30 +256,106 @@ std::size_t AudioSignalFlow::numberOfAudioPlaybackPorts() const
   return mTopLevelAudioOutputs.size( );
 }
 
-/**
-* Return the name of the capture port indexed by \p idx
-* @throw std::out_of_range If the \p idx exceeds the number of capture ports.
-*/
 char const * AudioSignalFlow::audioCapturePortName( std::size_t idx ) const
 {
   if( idx >= numberOfAudioCapturePorts() )
   {
-    throw(std::out_of_range("AudioSignalFlow::audioCapturePortName(): index exceeds number of ports"));
+    throw std::out_of_range("AudioSignalFlow::audioCapturePortName(): index exceeds number of ports" );
   }
   return mTopLevelAudioInputs.at( idx )->name();
 }
 
-/**
-* Return the name of the playback port indexed by \p idx
-* @throw std::out_of_range If the \p idx exceeds the number of playback ports.
-*/
 char const * AudioSignalFlow::audioPlaybackPortName( std::size_t idx ) const
 {
   if( idx >= numberOfAudioPlaybackPorts( ) )
   {
-    throw(std::out_of_range( "AudioSignalFlow::audioPlaybackPortName(): index exceeds number of ports" ));
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortName(): index exceeds number of ports" );
   }
   return mTopLevelAudioOutputs.at( idx )->name( );
+}
+
+std::size_t AudioSignalFlow::audioCapturePortWidth( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioCapturePorts() )
+  {
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+  }
+  return mTopLevelAudioInputs.at( idx )->width( );
+}
+
+std::size_t AudioSignalFlow::audioPlaybackPortWidth( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioPlaybackPorts() )
+  {
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+  }
+  return mTopLevelAudioOutputs.at( idx )->width( );
+}
+
+std::size_t AudioSignalFlow::audioCapturePortOffset( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioCapturePorts() )
+  {
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+  }
+  return std::accumulate( mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.begin()+idx, 0,
+      []( std::size_t acc, impl::AudioPortBaseImplementation const * port )
+      { return acc + port->width(); } );
+}
+
+std::size_t AudioSignalFlow::audioPlaybackPortOffset( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioPlaybackPorts() )
+  {
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+  }
+  return std::accumulate( mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.begin()+idx, 0,
+      []( std::size_t acc, impl::AudioPortBaseImplementation const * port )
+      { return acc + port->width(); } );
+}
+
+std::size_t AudioSignalFlow::audioCapturePortIndex( char const * name ) const
+{
+  for( std::size_t idx{ 0 }; idx < mTopLevelAudioInputs.size(); ++idx )
+  {
+    if( std::strcmp( mTopLevelAudioInputs.at( idx )->name(), name ) == 0 )
+    {
+      return idx;
+    }
+  }
+  throw std::out_of_range( "AudioSignalFlow::audioCapturePortWidth(): index exceeds number of ports" );
+}
+
+std::size_t AudioSignalFlow::audioPlaybackPortIndex( char const * name ) const
+{
+  for( std::size_t idx{ 0 }; idx < mTopLevelAudioOutputs.size(); ++idx )
+  {
+    if( std::strcmp( mTopLevelAudioOutputs.at( idx )->name(), name ) == 0 )
+    {
+      return idx;
+    }
+  }
+  throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+}
+
+visr::AudioSampleType::Id AudioSignalFlow::
+audioCapturePortSampleType( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioCapturePorts() )
+  {
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+  }
+  return mTopLevelAudioInputs.at( idx )->sampleType();
+}
+
+visr::AudioSampleType::Id AudioSignalFlow::
+audioPlaybackPortSampleType( std::size_t idx ) const
+{
+  if( idx >= numberOfAudioPlaybackPorts() )
+  {
+    throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
+  }
+  return mTopLevelAudioOutputs.at( idx )->sampleType();
 }
 
 std::size_t AudioSignalFlow::numberOfCaptureChannels() const
