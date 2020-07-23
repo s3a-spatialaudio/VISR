@@ -11,10 +11,10 @@ function( adjustTestEnvironment target )
     # Double quoting required because the variable is evaluated twice.
     string(REPLACE ";" "\\\;"  QUOTED_PATH "$ENV{PATH}" )
     if( BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
-      set_property(TEST ${target} PROPERTY ENVIRONMENT
+      set_property(TEST ${target} APPEND PROPERTY ENVIRONMENT
         "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;$<TARGET_FILE_DIR:visr_shared>\;${QUOTED_PATH}" )
     else()
-     set_property(TEST ${APPLICATION_NAME} PROPERTY ENVIRONMENT
+     set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
         "PATH=${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR}\;${QUOTED_PATH}" )
     endif( BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "shared" )
   endif(VISR_SYSTEM_NAME MATCHES "Windows")
