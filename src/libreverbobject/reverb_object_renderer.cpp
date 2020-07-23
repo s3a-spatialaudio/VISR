@@ -82,10 +82,11 @@ namespace // unnamed
    * Create a set of random-phase allpass filters. The frequency response is unity at the frequency grid points, but the phase is unformly
    * distributed in [-pi,pi].
    * @param filters The matrix to be filled. Must be set to the desired dimensions beforehand.
+   * @param decorrelatorGain Scaling factor (linear scale) for the filter gain. 
    * @todo Consider promoting this into a general-purpose library function (rbbl or efl).
    */
   template<typename DataType>
-  void generateRandomPhaseAllpass(efl::BasicMatrix<DataType> & filters)
+  void generateRandomPhaseAllpass(efl::BasicMatrix<DataType> & filters, DataType decorrelatorGain )
   {
     std::size_t const numFilters{ filters.numberOfRows() };
     std::size_t const filterLength{ filters.numberOfColumns() };
@@ -98,7 +99,7 @@ namespace // unnamed
 
     std::unique_ptr<rbbl::FftWrapperBase<DataType> >  fft
       = rbbl::FftWrapperFactory<DataType>::create("default", filterLength, 0 /*no alignment specified*/);
-    DataType const scaleFactor{ static_cast<DataType>(1.0) / (static_cast<DataType>(filterLength) * fft->inverseScalingFactor()) };
+    DataType const scaleFactor{ decorrelatorGain / (static_cast<DataType>(filterLength) * fft->inverseScalingFactor()) };
 
     boost::random::mt19937 gen;
     boost::random::uniform_real_distribution<DataType> uniformPhaseGen{ -boost::math::constants::pi<DataType>(), boost::math::constants::pi<DataType>() };
@@ -197,7 +198,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
     if( lateReverbDecorrFilterName.empty() )
     {
       lateDecorrelationFilters.resize( arrayConfig.getNumRegularSpeakers(), 512 ); // default filter length
-      generateRandomPhaseAllpass( lateDecorrelationFilters );
+      generateRandomPhaseAllpass( lateDecorrelationFilters, lateReverbDecorrelatorGain );
     }
     else
     {
