@@ -5,6 +5,7 @@ audio_connection_map.cpp
 audio_signal_flow.cpp
 communication_area.cpp
 integrity_checking.cpp
+flexible_buffer_wrapper.cpp
 parameter_connection_graph.cpp
 parameter_connection_map.cpp
 port_utilities.cpp
@@ -15,6 +16,7 @@ signal_routing_internal.cpp
 SET( PUBLIC_HEADERS
 audio_signal_flow.hpp
 export_symbols.hpp
+flexible_buffer_wrapper.hpp
 integrity_checking.hpp
 )
 
@@ -68,6 +70,7 @@ foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   # Transitive link dependencies
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
+  target_link_libraries( rrl_${LIB_TYPE} PRIVATE rbbl_${LIB_TYPE} )
   target_link_libraries( rrl_${LIB_TYPE} PRIVATE Boost::boost ) # Adds the boost include directory
   # Set public headers to be installed.
   set_target_properties(rrl_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
