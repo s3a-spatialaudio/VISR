@@ -4,6 +4,8 @@
 
 #include "audio_interface.hpp"
 
+#include <stdexcept>
+
 #ifdef VISR_AUDIOINTERFACES_JACK_SUPPORT
 #include <libaudiointerfaces/jack_interface.hpp>
 #endif
