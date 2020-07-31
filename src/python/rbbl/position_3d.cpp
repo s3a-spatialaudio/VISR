@@ -66,33 +66,25 @@ namespace
       .def( "normSquare", &Position3D< Coordinate >::normSquare )
       .def( "normalise", &Position3D< Coordinate >::normalise,
         py::arg( "silentDivideByZero" ) = false )
-      .def( "__iadd__", &Position3D< Coordinate >::operator+=,
-        py::arg( "rhs" ) )
-      .def( -py::self )
+      .def( -py::self ) // Unary minus (negation) operator
+      .def( py::self += py::self )
+      .def( py::self -= py::self )
+      .def( py::self *= Coordinate() )
       .def( py::self + py::self )
-      .def( "__isub__", &Position3D< Coordinate >::operator-=,
-        py::arg( "rhs" ) )
-      .def( "__imul__", &Position3D< Coordinate >::operator*=,
-        py::arg( "rhs" ) )
+      .def( py::self - py::self )
+      .def( Coordinate() * py::self )
+      .def( py::self / Coordinate() )
       .def( "rotate", &Position3D< Coordinate >::rotate, py::arg( "rot" ) )
       .def( "translate", &Position3D< Coordinate >::translate, py::arg( "shift" ) )
       .def( "transform", &Position3D< Coordinate >::transform, py::arg( "rot" ),
         py::arg( "shift" ) )
     ;
     m
-    // m.def( "__add__", [](Position3D< Coordinate > const & lhs, Position3D< Coordinate > const & rhs ){ return lhs + rhs; },
-    //     py::arg( "lhs" ), py::arg( "rhs" ) )
-     .def( "__sub__", [](Position3D< Coordinate > const & lhs, Position3D< Coordinate > const & rhs ){ return lhs - rhs; },
-        py::arg( "lhs" ), py::arg( "rhs" ) )
-     .def( "__mul__", []( Coordinate scale, Position3D< Coordinate > const & val ){ return scale * val; },
-        py::arg( "scale" ), py::arg( "vec" ) )
-     .def( "__div__", []( Position3D< Coordinate > const & val, Coordinate scale ){ return val / scale; },
-        py::arg( "vec" ), py::arg( "scale" ) )
      .def( "angle", static_cast<Coordinate (*)( Position3D< Coordinate > const&, Position3D< Coordinate > const &)>(&visr::rbbl::angle), py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "angleNormalised", static_cast<Coordinate (*)( Position3D< Coordinate > const&, Position3D< Coordinate > const &)>(&visr::rbbl::angleNormalised), py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "normalise", static_cast< Position3D< Coordinate > (*)(
         Position3D< Coordinate > const &, bool )>(
-          &visr::rbbl::normalise), py::arg( "val" ), py::arg( "silentDivideByZer0" ) = false )
+          &visr::rbbl::normalise), py::arg( "val" ), py::arg( "silentDivideByZero" ) = false )
      .def( "dot", static_cast<Coordinate (*)( Position3D< Coordinate > const&,
        Position3D< Coordinate > const &)>(&visr::rbbl::dot), py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "rotate", static_cast< Position3D< Coordinate > (*)(
