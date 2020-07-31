@@ -222,14 +222,17 @@ CoordinateType Quaternion< CoordinateType >::normSquare() const
 }
 
 template< typename CoordinateType >
-void Quaternion< CoordinateType >::normalise( bool silentDivideByZero /*= false*/ )
+void Quaternion< CoordinateType >::normalise(bool adjustSign /*= false*/,
+                                             bool silentDivideByZero /*= false*/ )
 {
   CoordinateType const l2( norm() );
   if( not silentDivideByZero and (l2 < std::numeric_limits<CoordinateType>::epsilon() ))
   {
     throw std::runtime_error( "Quaternion::normalise(): Quaternion to close to zero." );
   }
-  operator*=( static_cast<CoordinateType>(1.0)/l2 );
+  CoordinateType const scale = adjustSign and (w() < static_cast<CoordinateType>(0.0))
+  ? static_cast<CoordinateType>(-1.0) : static_cast<CoordinateType>(1.0);
+  operator*=( scale / l2 );
 }
 
 template< typename CoordinateType >
@@ -339,10 +342,11 @@ CoordinateType angleNormalised( Quaternion< CoordinateType > const& q1,
 
 template< typename CoordinateType >
 Quaternion< CoordinateType > normalise( Quaternion< CoordinateType > const& val,
+                                        bool adjustSign /*=false*/,
                                         bool silentDivideByZero /*= false*/ )
 {
   Quaternion< CoordinateType > ret{ val };
-  ret.normalise( silentDivideByZero );
+  ret.normalise( adjustSign, silentDivideByZero );
   return ret;
 }
 
@@ -424,7 +428,7 @@ Quaternion< float > operator/< float >(
 
 template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< float > normalise< float >(
-    Quaternion< float > const &, bool );
+    Quaternion< float > const &, bool, bool );
 
 template VISR_RBBL_LIBRARY_SYMBOL
 float dot< float >(
@@ -479,7 +483,7 @@ Quaternion< double > operator/< double >(
 
 template VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< double > normalise< double >(
-    Quaternion< double > const &, bool );
+    Quaternion< double > const &, bool, bool );
 
 template VISR_RBBL_LIBRARY_SYMBOL
 double dot< double >(

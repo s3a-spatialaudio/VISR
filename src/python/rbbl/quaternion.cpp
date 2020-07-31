@@ -4,6 +4,7 @@
 #include <librbbl/position_3d.hpp>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
 #include <array>
@@ -62,44 +63,38 @@ namespace
          py::arg("y"), py::arg("z") )
       .def( "setYPR", &Quaternion< Coordinate >::setYPR, py::arg("yaw"),
          py::arg("pitch"), py::arg("roll") )
-      .def( "setRotationAngle", &Quaternion< Coordinate >::setRotationVector,
+      .def( "setRotationVector", &Quaternion< Coordinate >::setRotationVector,
          py::arg("rotVector"), py::arg("angle") )
       .def( "conjugate", &Quaternion< Coordinate >::conjugate )
       .def( "normalise", &Quaternion< Coordinate >::normalise,
-         py::arg( "adjustSign" ) = false )
+         py::arg( "adjustSign" ) = false, py::arg( "silentDivideByZero" ) = false )
       .def( "norm", &Quaternion< Coordinate >::norm )
       .def( "normSquare", &Quaternion< Coordinate >::normSquare )
-      .def( "__iadd__", &Quaternion< Coordinate >::operator+= )
-      .def( "__isub__", &Quaternion< Coordinate >::operator+= )
-      .def( "__imul__", static_cast< Quaternion< Coordinate >&(Quaternion< Coordinate >::*)( Quaternion< Coordinate > const & )>
-        (&Quaternion< Coordinate >::operator*=) )
-      .def( "__imul__", static_cast< Quaternion< Coordinate >&(Quaternion< Coordinate >::*)( Coordinate )>
-        (&Quaternion< Coordinate >::operator*=) )
+      .def( -py::self ) // Negation operator
+      .def( py::self += py::self)
+      .def( py::self -= py::self )
+      .def( py::self *= py::self )
+      .def( py::self *= Coordinate() )
+      .def( py::self + py::self)
+      .def( py::self - py::self)
+      .def( py::self * py::self)
+      .def( Coordinate() * py::self )
+      .def( py::self / Coordinate() )
       .def( "rotate", &Quaternion< Coordinate >::rotate, py::arg( "rotation" ) )
     ;
       
     m.def( "conjugate", static_cast<Quaternion< Coordinate >(*)( Quaternion< Coordinate > const&)>(
-      &visr::rbbl::conjugate) )
-     .def( "__add__", [](Quaternion< Coordinate > const& lhs, Quaternion< Coordinate > const& rhs)
-       { return lhs + rhs; }, py::arg( "lhs" ), py::arg( "rhs" ) )
-     .def( "__sub__", [](Quaternion< Coordinate > const& lhs, Quaternion< Coordinate > const& rhs)
-       { return lhs - rhs; }, py::arg( "lhs" ), py::arg( "rhs" ) )
-     .def( "__mul__", [](Quaternion< Coordinate > const& lhs, Quaternion< Coordinate > const& rhs)
-       { return lhs * rhs; }, py::arg( "lhs" ), py::arg( "rhs" ) )
-     .def( "__mul__", [](Coordinate scale, Quaternion< Coordinate > const& val)
-       { return scale * val; }, py::arg( "scale" ), py::arg( "val" ) )
-     .def( "__div__", [](Coordinate scale, Quaternion< Coordinate > const& val)
-       { return val / scale; }, py::arg( "val" ), py::arg( "scale" ) )
-     .def( "__neg__", [](Quaternion< Coordinate > const& val )
-       { return -val; }, py::arg( "val" ) )    
+      &visr::rbbl::conjugate) ) 
      .def( "angle", static_cast< Coordinate(*)( Quaternion< Coordinate > const &, Quaternion< Coordinate > const & )>
         (&visr::rbbl::angle), py::arg( "lhs" ), py::arg( "rhs" ) )
      .def( "angleNormalised", static_cast< Coordinate(*)( Quaternion< Coordinate > const &, Quaternion< Coordinate > const & )>
         (&visr::rbbl::angleNormalised), py::arg( "lhs" ), py::arg( "rhs" ) )
-     .def( "normalise", static_cast< Quaternion< Coordinate >(*)( Quaternion< Coordinate > const &, bool )>
-        (&visr::rbbl::normalise), py::arg( "val" ), py::arg( "silentDivideByZero" )=false )
+     .def( "normalise", static_cast< Quaternion< Coordinate >(*)( Quaternion< Coordinate > const &, bool, bool )>
+        (&visr::rbbl::normalise), py::arg( "val" ), py::arg( "adjustSign" )=false, py::arg( "silentDivideByZero" )=false )
      .def( "angle", static_cast< Coordinate(*)( Quaternion< Coordinate > const &, Quaternion< Coordinate > const & )>
-        (&visr::rbbl::dot), py::arg( "op1" ), py::arg( "op2" ) )
+        (&visr::rbbl::angle), py::arg( "op1" ), py::arg( "op2" ) )
+    .def( "dot", static_cast< Coordinate(*)( Quaternion< Coordinate > const &, Quaternion< Coordinate > const & )>
+       (&visr::rbbl::dot), py::arg( "op1" ), py::arg( "op2" ) )
      .def( "interpolateSpherical", static_cast< Quaternion< Coordinate >(*)( Quaternion< Coordinate > const &,
         Quaternion< Coordinate > const &, Coordinate tInterp )>(&visr::rbbl::interpolateSpherical),
         py::arg( "pos0" ), py::arg( "pos1" ), py::arg( "tInterp" ) )

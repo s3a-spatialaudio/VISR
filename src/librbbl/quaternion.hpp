@@ -84,7 +84,14 @@ public:
    */
   void conjugate();
 
-  void normalise( bool adustSign = false );
+  /**
+   * Normalise to a unit quaternion.
+   * @param adjustSign Whether to negate the quaternion to make the w component nonnegative.
+   * @param silentDivideByZero If set to false throw an exception if the norm of the quaternion is very close to zero.
+   * This results in inaccurate values or NaNs.
+   */
+  void normalise( bool adustSign = false,
+                  bool silentDivideByZero = false);
 
   /**
    * Return the Euclidean (L2) norm of the vector.
@@ -183,9 +190,17 @@ VISR_RBBL_LIBRARY_SYMBOL
 CoordinateType angleNormalised( Quaternion< CoordinateType > const& lhs,
                                 Quaternion< CoordinateType > const& rhs );
 
+/**
+  * Create a unit quaternion by scaling an existing one.
+ * @param val the quaternion to scale.
+ * @param adjustSign If set to true, the resulting quaternion will negated if the w component is negative.
+ * @param If set to false (the default), this throws an exception if the norm is very close to zero. If set to true,
+ * no exception is thrown, but it may yoeld increased errors or NaNs.
+ */
 template< typename CoordinateType >
 VISR_RBBL_LIBRARY_SYMBOL
 Quaternion< CoordinateType > normalise( Quaternion< CoordinateType > const& val,
+                                        bool adjustSign = false,
                                         bool silentDivideByZero = false );
 
 template< typename CoordinateType >
