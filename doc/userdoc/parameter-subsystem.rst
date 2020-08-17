@@ -38,7 +38,7 @@ Parameter types must be unique within the VISR framework. For this reason they
 are identified by a unique identifier of type :code:`visr::ParameterType`.
 This is essentially an integer value, and the implementers are required to ensure that they are unique.
 
-We suggest to iuse the function :code:`visr::detail::compileTimeHashFNV1`, which creates a (almost
+We suggest to use the function :code:`visr::detail::compileTimeHashFNV1`, which creates an (almost
 certainly) unique identifier from the class name.
 
 .. doxygenfunction:: visr::detail::compileTimeHashFNV1
