@@ -312,7 +312,7 @@ std::size_t AudioSignalFlow::audioCapturePortOffset( std::size_t idx ) const
   {
     throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
   }
-  return std::accumulate( mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.begin()+idx, 0,
+  return std::accumulate( mTopLevelAudioInputs.begin(), mTopLevelAudioInputs.begin()+idx, static_cast<std::size_t>(0),
       []( std::size_t acc, impl::AudioPortBaseImplementation const * port )
       { return acc + port->width(); } );
 }
@@ -323,7 +323,7 @@ std::size_t AudioSignalFlow::audioPlaybackPortOffset( std::size_t idx ) const
   {
     throw std::out_of_range( "AudioSignalFlow::audioPlaybackPortWidth(): index exceeds number of ports" );
   }
-  return std::accumulate( mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.begin()+idx, 0,
+  return std::accumulate( mTopLevelAudioOutputs.begin(), mTopLevelAudioOutputs.begin()+idx, static_cast<std::size_t>(0),
       []( std::size_t acc, impl::AudioPortBaseImplementation const * port )
       { return acc + port->width(); } );
 }
