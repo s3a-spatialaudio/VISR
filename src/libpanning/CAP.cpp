@@ -85,7 +85,7 @@ int CAP::calcGains(){
                 c += a[i] * a[i];
             }
             
-            Afloat d = (c*n - b*b)   * (rI_ + 0.01) / rI0_;  // image distance correction added
+            Afloat d = (c*n - b*b)   * (rI_ + 0.01f) / rI0_;  // image distance correction added
             Afloat g;
             Afloat gMax = 0;
             
