@@ -62,7 +62,7 @@ public:
    * nullptr in case of a top-level component
    * @param numberOfChannels The number of distinct audio waveforms received
    * through the input audio port.
-   * @param dftLength The size of the DFT transform used. Must be a power of two
+   * @param dftSize The size of the DFT transform used. Must be a power of two
    * for most FFT implementations.
    * @param windowLength The length of the window. A Hann window modified to
    * satisfy the Constant Overlap-Add (COLA) property is used.
@@ -102,6 +102,7 @@ public:
    * component's period size must be an ineger multiple of the hop size.
    * @param fftImplementation String naming the FFT implementation to be used.
    * Optional parameter, defaults to the platform's default FFT implementation.
+   * @param normalisation The DFT normalisation policy, defaults to 'Unitary'
    */
   explicit TimeFrequencyTransform(
       SignalFlowContext const & context,
