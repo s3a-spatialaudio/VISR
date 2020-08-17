@@ -36,6 +36,12 @@ if( ENABLE_STATIC )
       $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}/3rd/ffts/include>
       $<INSTALL_INTERFACE:include/visr/3rd/ffts>
   )
+  # Disable specific warning for 3rd-party projects.
+  if( WIN32 )
+    target_compile_options( ffts_static PRIVATE /wd4244 /wd4267 )
+  else() # Covers gcc and clang, incl. Xcode
+    target_compile_options( ffts_static PRIVATE -Wno-unused-function)
+  endif( WIN32 )
   set_target_properties( ffts_static PROPERTIES
     ARCHIVE_OUTPUT_NAME ffts
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
@@ -50,6 +56,13 @@ if( ENABLE_SHARED )
   set_property( TARGET ffts_static PROPERTY PUBLIC_HEADER
     "${FFTS_PUBLIC_HEADERS}" )
   set_property( TARGET ffts_shared PROPERTY FOLDER 3rd)
+  if( WIN32 )
+    # Avoid warnings about potentially lossy conversions at 'pedantic'
+    # warning level.
+    target_compile_options( ffts_shared PRIVATE /wd4244 /wd4267 )
+  else() # Covers gcc and clang, incl. Xcode
+    target_compile_options( ffts_shared PRIVATE -Wno-unused-function)
+  endif( WIN32 )
   set_target_properties( ffts_shared PROPERTIES
     ARCHIVE_OUTPUT_NAME ffts_shared # Import library on Windows
     LIBRARY_OUTPUT_NAME ffts # Shared library on Unix platforms
@@ -92,6 +105,11 @@ else( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set( KISSFFT_BUILD_SHARED_LIBRARY OFF CACHE BOOL "KissFFT: Build shared library" FORCE )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 add_subdirectory( kissfft ${CMAKE_BINARY_DIR}/3rd/kissfft )
+if( WIN32 )
+  # Avoid warnings about potentially lossy conversions at 'pedantic'
+  # warning level.
+  target_compile_options( kissfft_static PRIVATE /wd4244 /wd4267 )
+endif( WIN32 )
 set_target_properties( kissfft_static PROPERTIES FOLDER 3rd)
 # Override global visibility preset to avoid warnings.
 # This is necessary because the global setting for policy CMP0063 is not heeded
@@ -110,11 +128,16 @@ set_target_properties( kissfft_static PROPERTIES
 )
 install(TARGETS kissfft_static
         EXPORT VISR_exports
-        PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT   development_files
+        PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
         ARCHIVE DESTINATION 3rd COMPONENT development_files
         )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  if( WIN32 )
+    # Avoid warnings about potentially lossy conversions at 'pedantic'
+    # warning level.
+    target_compile_options( kissfft_shared PRIVATE /wd4244 /wd4267 )
+  endif( WIN32 )
   set_target_properties( kissfft_shared PROPERTIES FOLDER 3rd)
   target_include_directories(kissfft_shared PUBLIC
       $<BUILD_INTERFACE:${PARENT_SOURCE_DIR}/3rd/kissfft>
