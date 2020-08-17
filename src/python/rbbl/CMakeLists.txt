@@ -14,6 +14,8 @@ multichannel_convolver_uniform.cpp
 object_channel_allocator.cpp
 parametric_iir_coefficient.cpp
 parametric_iir_coefficient_calculator.cpp
+position_3d.cpp
+quaternion.cpp
 sparse_gain_routing.cpp
 rbbl.cpp
 )

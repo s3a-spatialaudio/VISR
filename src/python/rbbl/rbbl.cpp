@@ -21,8 +21,10 @@ namespace python
   void exportLagrangeInterpolator( pybind11::module & m );
   void exportMultichannelConvolversUniform( pybind11::module & m );
   void exportObjectChannelAllocator( pybind11::module & m );
-  void exportParametricIirCoefficient(pybind11::module & m);
-  void exportParametricIirCoefficientCalculator(pybind11::module & m);
+  void exportParametricIirCoefficient( pybind11::module & m );
+  void exportParametricIirCoefficientCalculator( pybind11::module & m );
+  void exportPosition3D(pybind11::module & m );
+  void exportQuaternion( pybind11::module & m );
   void exportSparseGainRouting( pybind11::module & m );
 }
 }
@@ -43,6 +45,8 @@ PYBIND11_MODULE( rbbl, m )
   exportMultichannelConvolversUniform( m );
   exportObjectChannelAllocator( m );
   exportParametricIirCoefficient( m );
-  exportParametricIirCoefficientCalculator(m);
+  exportParametricIirCoefficientCalculator( m );
+  exportPosition3D( m );
+  exportQuaternion( m );
   exportSparseGainRouting( m );
 }
