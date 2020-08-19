@@ -7,6 +7,7 @@ add_library( pythonbindinghelpers INTERFACE )
 SET( PUBLIC_HEADERS
   container_access.hpp
   ndarray_from_basic_vector.hpp
+  ndarray_from_basic_matrix.hpp
   matrix_from_ndarray.hpp
   vector_from_ndarray.hpp
 )
