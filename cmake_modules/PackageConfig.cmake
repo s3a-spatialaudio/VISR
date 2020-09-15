@@ -31,11 +31,13 @@ if( WIN32 )
   set( CPACK_PACKAGE_INSTALL_DIRECTORY ${VISR_VERSIONED_NAME} )
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
     get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
-    install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
+    install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
   if( BUILD_USE_SNDFILE_LIBRARY )
     get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY} DIRECTORY )
-    install( FILES ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll DESTINATION 3rd COMPONENT thirdparty_libraries )
+    install( FILES ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
   endif( BUILD_USE_SNDFILE_LIBRARY )
 
   # Boost
@@ -45,7 +47,8 @@ if( WIN32 )
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION_RELEASE )
       get_filename_component( BOOSTLIBNAME ${BOOSTLIBPATH} NAME_WE )
       get_filename_component( BOOSTLIBDIR ${BOOSTLIBPATH} DIRECTORY )
-      install( FILES ${BOOSTLIBDIR}/${BOOSTLIBNAME}.dll DESTINATION 3rd COMPONENT thirdparty_libraries)
+      install( FILES ${BOOSTLIBDIR}/${BOOSTLIBNAME}.dll
+               DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
 endif( WIN32 )
@@ -65,19 +68,26 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   set( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-    install( FILES ${PORTAUDIO_LIBRARIES} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    install( FILES ${PORTAUDIO_LIBRARIES}
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
   if( BUILD_USE_SNDFILE_LIBRARY )
-    install( FILES ${SNDFILE_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    install( FILES ${FLAC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    install( FILES ${OGG_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    install( FILES ${VORBIS_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
-    install( FILES ${VORBISENC_LIBRARY} DESTINATION 3rd COMPONENT thirdparty_libraries)
+    install( FILES ${SNDFILE_LIBRARY} 
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+    install( FILES ${FLAC_LIBRARY}
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+    install( FILES ${OGG_LIBRARY}
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+    install( FILES ${VORBIS_LIBRARY}
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+    install( FILES ${VORBISENC_LIBRARY}
+             DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
   endif( BUILD_USE_SNDFILE_LIBRARY )
   if( NOT Boost_USE_STATIC_LIBS )
     foreach( BOOSTLIB ${VISR_BOOST_INSTALL_LIBRARIES} )
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION )
-      install( FILES ${BOOSTLIBPATH} DESTINATION 3rd COMPONENT thirdparty_libraries)
+      install( FILES ${BOOSTLIBPATH}
+               DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
 

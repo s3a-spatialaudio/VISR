@@ -49,7 +49,7 @@ if( ENABLE_STATIC )
   install(TARGETS ffts_static
           EXPORT VISR_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT   development_files
-          ARCHIVE DESTINATION 3rd COMPONENT development_files
+          ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           )
 endif( ENABLE_STATIC )
 if( ENABLE_SHARED )
@@ -79,10 +79,10 @@ if( ENABLE_SHARED )
   )
   install(TARGETS ffts_shared
           EXPORT VISR_exports
-          PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT   development_files
-          ARCHIVE DESTINATION 3rd COMPONENT development_files
-          LIBRARY DESTINATION 3rd COMPONENT shared_libraries
-          RUNTIME DESTINATION 3rd COMPONENT shared_libraries
+          PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT development_files
+          ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
+          LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT shared_libraries
+          RUNTIME DESTINATION ${THIRDPARTY_RUNTIME_INSTALL_DIRECTORY} COMPONENT shared_libraries
           )
 endif( ENABLE_SHARED )
 # Override global visibility preset to avoid warnings.
@@ -129,7 +129,7 @@ set_target_properties( kissfft_static PROPERTIES
 install(TARGETS kissfft_static
         EXPORT VISR_exports
         PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
-        ARCHIVE DESTINATION 3rd COMPONENT development_files
+        ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
         )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
@@ -153,9 +153,9 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   )
   install(TARGETS kissfft_shared
           EXPORT VISR_exports
-          PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT   development_files
-          ARCHIVE DESTINATION 3rd COMPONENT development_files
-          LIBRARY DESTINATION 3rd COMPONENT shared_libraries
-          RUNTIME DESTINATION 3rd COMPONENT shared_libraries
+          PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
+          ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
+          LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT shared_libraries
+          RUNTIME DESTINATION ${THIRDPARTY_RUNTIME_INSTALL_DIRECTORY} COMPONENT shared_libraries
           )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
