@@ -128,5 +128,5 @@ write_basic_package_version_file(visr-config-version.cmake
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config-version.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
-# Register visr package in user registry
+# Register visr package in user registry (if this behaviour activated).
 export(PACKAGE visr)

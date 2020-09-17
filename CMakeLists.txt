@@ -20,6 +20,11 @@ if( POLICY CMP0057 )
 else( POLICY CMP0057 )
   message( FATAL_ERROR "Policy CMP0057 not supported (IN_LIST operator), although CMake version requirement is met.")
 endif( POLICY CMP0057 )
+if( POLICY CMP0090 ) # Disable writing into CMake registry.
+  CMAKE_POLICY(SET CMP0090 NEW) # Do not write into the package registry.
+else( POLICY CMP0090 )
+  set( CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON ) # Emulate the NEW behaviour)
+endif( POLICY CMP0090 )
 
 
 # The name of our top-level project.
