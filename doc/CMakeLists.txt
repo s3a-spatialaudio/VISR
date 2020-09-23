@@ -70,7 +70,8 @@ set( doxyfile             ${PROJECT_BINARY_DIR}/doc/doxygen/Doxyfile )
 set( doxy_html_index_file ${PROJECT_BINARY_DIR}/doc/doxygen/html/index.html )
 set( doxy_output_root     ${PROJECT_BINARY_DIR}/doc/doxygen/ )
 set( doxy_input           ${PROJECT_SOURCE_DIR}/src )
-file( GLOB doxy_extra_files ${PROJECT_SOURCE_DIR}/doc/doxygen/*.dox )
+set( doxy_extra_files ${PROJECT_SOURCE_DIR}/doc/doxygen )
+file( GLOB doxy_extra_file_list ${doxy_extra_files}/*.dox )
 # Used for checking dependencies when using Sphinx custom commands
 set( doxy_xml_index_file ${PROJECT_BINARY_DIR}/doc/doxygen/xml/index.xml )
 # Used as a variable in config.py.in with Sphinx to configure the breathe extension.
@@ -86,7 +87,7 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
 		  # custom_command for ${doxyfile} generation
 		  # but I still have to figure out how...
 		  MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-		  DEPENDS ${doxy_extra_files}
+		  DEPENDS ${doxy_extra_file_list}
 		  COMMENT "Generating Doxygen HTML and XML documentation")
 
 add_custom_target( doxygen-doc DEPENDS ${doxy_html_index_file}  )
