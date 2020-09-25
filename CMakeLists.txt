@@ -326,6 +326,32 @@ endif( BUILD_PYTHON_BINDINGS )
 
 option( BUILD_DISABLE_THREADS "Whether to disable the use of threads. This is mainly useful mainly specialised purposes, e.g., Web assembly" OFF )
 
+################################################################################
+# Set the install directories of special output types.
+# For Linux this adjusts the path to put the items under /usr/share/visr
+
+if( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "share/visr" ) # Directory under CMAKE_INSTALL_PREFIX where visr-specific content is placed.
+else( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "./" ) # CMAKE_INSTALL_PREFIX is already OK
+endif( VISR_SYSTEM_NAME MATCHES "Linux" )
+
+# Installation destination for third-party libraries: shared libs (incl. the DLL part and
+# import lib on Windows) and static libs.
+# This will be appended to the installation prefix.
+if( VISR_SYSTEM_NAME MATCHES Linux )
+  # Installed files go into the /usr tree, so we must use the standard location for the libs.
+  set( THIRDPARTY_LIBRARY_INSTALL_DIRECTORY lib )
+  set( THIRDPARTY_RUNTIME_INSTALL_DIRECTORY lib)
+  set( THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY lib )
+else()
+  # TODO: Decide whether this should go into lib/ on Windows to avoid an
+  # additional entry to be added to %PATH%
+  set( THIRDPARTY_LIBRARY_INSTALL_DIRECTORY 3rd )
+  set( THIRDPARTY_RUNTIME_INSTALL_DIRECTORY 3rd )
+  set( THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY 3rd )
+endif( VISR_SYSTEM_NAME MATCHES Linux )
+
 ###########################################################
 # Support for 3rd-party libraries.
  
@@ -429,32 +455,6 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   find_package(Flac REQUIRED)
   find_package(OggVorbis REQUIRED)
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
-################################################################################
-# Set the install directories of special output types.
-# For Linux this adjusts the path to put the items under /usr/share/visr
-
-if( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "share/visr" ) # Directory under CMAKE_INSTALL_PREFIX where visr-specific content is placed.
-else( VISR_SYSTEM_NAME MATCHES "Linux" )
-  set( VISR_TOPLEVEL_INSTALL_DIRECTORY "./" ) # CMAKE_INSTALL_PREFIX is already OK
-endif( VISR_SYSTEM_NAME MATCHES "Linux" )
-
-# Installation destination for third-party libraries: shared libs (incl. the DLL part and
-# import lib on Windows) and static libs.
-# This will be appended to the installation prefix.
-if( VISR_SYSTEM_NAME MATCHES Linux )
-  # Installed files go into the /usr tree, so we must use the standard location for the libs.
-  set( THIRDPARTY_LIBRARY_INSTALL_DIRECTORY lib )
-  set( THIRDPARTY_RUNTIME_INSTALL_DIRECTORY lib )
-  set( THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY lib )
-else()
-  # TODO: Decide whether this should go into lib/ on Windows to avoid an 
-  # additional entry to be added to %PATH% 
-  set( THIRDPARTY_LIBRARY_INSTALL_DIRECTORY 3rd )
-  set( THIRDPARTY_RUNTIME_INSTALL_DIRECTORY 3rd )
-  set( THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY 3rd )
-endif( VISR_SYSTEM_NAME MATCHES Linux )
 
 set( PYTHON_MODULE_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
