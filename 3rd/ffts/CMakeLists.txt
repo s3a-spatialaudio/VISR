@@ -384,7 +384,7 @@ if(MSVC)
   set(CMAKE_DEBUG_POSTFIX "d")
 
   add_definitions(-D_USE_MATH_DEFINES)
-elseif(CMAKE_COMPILER_IS_GNUCC)
+elseif((CMAKE_C_COMPILER_ID STREQUAL "GNU") OR (CMAKE_C_COMPILER_ID STREQUAL "Clang") )
   include(CheckCCompilerFlag)
   include(CheckLibraryExists)
 
