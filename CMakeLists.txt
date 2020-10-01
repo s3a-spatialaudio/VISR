@@ -25,6 +25,12 @@ if( POLICY CMP0090 ) # Disable writing into CMake registry.
 else( POLICY CMP0090 )
   set( CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON ) # Emulate the NEW behaviour)
 endif( POLICY CMP0090 )
+# Enable setting the runtime library type on MSVC platforms.
+# This is done by setting CMAKE_MSVC_RUNTIME_LIBRARY, for example
+# -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>
+if( POLICY CMP0091 )
+  CMAKE_POLICY(SET CMP0091 NEW)
+endif( POLICY CMP0091 )
 
 
 # The name of our top-level project.
