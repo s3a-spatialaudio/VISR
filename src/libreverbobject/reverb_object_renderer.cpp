@@ -15,6 +15,7 @@
 #include <librbbl/fft_wrapper_factory.hpp>
 #include <librbbl/fft_wrapper_base.hpp>
 
+#include <librcl/biquad_iir_filter.hpp>
 #include <librcl/fir_filter_matrix.hpp>
 #include <librcl/crossfading_fir_filter_matrix.hpp>
 
@@ -149,7 +150,6 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   , mReverbParameterCalculator( context, "parameterCalculator", this )
   , mReverbSignalRouting( context, "signalRouting", this )
   , mDiscreteReverbDelay( context, "discreteReverbDelay", this )
-  , mDiscreteReverbReflFilters( context, "discreteReverbReflectionFilters", this )
   , mDiscreteReverbPanningMatrix( context, "discretePanningMatrix", this )
   , mLateReverbFilterCalculator()
   , mLateReverbGainDelay( context, "lateReverbGainDelay", this )
@@ -246,7 +246,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
                                 interpolationSteps, maxDiscreteReflectionDelay, "lagrangeOrder3",
                                 rcl::DelayVector::MethodDelayPolicy::Limit,
                                 rcl::DelayVector::ControlPortConfig::All, 0.0f, 0.0f );
-    mDiscreteReverbReflFilters.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject, numWallReflBiquads, true /*controlInputs*/ );
+    mDiscreteReverbReflFilters.reset( new rcl::BiquadIirFilter( context, "discreteReverbReflectionFilters", this,
+                                      maxNumReverbObjects*numDiscreteReflectionsPerObject, numWallReflBiquads, true /*controlInputs*/ ) );
     mDiscreteReverbPanningMatrix.setup( maxNumReverbObjects*numDiscreteReflectionsPerObject,
                                         arrayConfig.getNumRegularSpeakers(),
                                         interpolationSteps );
@@ -314,8 +315,8 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   }
   audioConnection( mReverbSignalRouting.audioPort("out"), ChannelList(discreteFanOut),
                    mDiscreteReverbDelay.audioPort("in"), ChannelRange(0,totalDiscreteReflections) );
-  audioConnection( mDiscreteReverbDelay.audioPort("out"), mDiscreteReverbReflFilters.audioPort("in") );
-  audioConnection( mDiscreteReverbReflFilters.audioPort("out"), mDiscreteReverbPanningMatrix.audioPort("in") );
+  audioConnection( mDiscreteReverbDelay.audioPort("out"), mDiscreteReverbReflFilters->audioPort("in") );
+  audioConnection( mDiscreteReverbReflFilters->audioPort("out"), mDiscreteReverbPanningMatrix.audioPort("in") );
   audioConnection( mDiscreteReverbPanningMatrix.audioPort("out"), mReverbMix.audioPort("in0") );
 
   audioConnection( mReverbSignalRouting.audioPort("out"), mLateReverbGainDelay.audioPort("in") );
@@ -329,7 +330,7 @@ ReverbObjectRenderer::ReverbObjectRenderer( SignalFlowContext const & context,
   parameterConnection( mReverbParameterCalculator.parameterPort("signalRoutingOut"), mReverbSignalRouting.parameterPort("controlInput") );
   parameterConnection( mReverbParameterCalculator.parameterPort("discreteGainOut"), mDiscreteReverbDelay.parameterPort( "gainInput" ) );
   parameterConnection( mReverbParameterCalculator.parameterPort("discreteDelayOut"), mDiscreteReverbDelay.parameterPort( "delayInput" ) );
-  parameterConnection( mReverbParameterCalculator.parameterPort("discreteEqOut"), mDiscreteReverbReflFilters.parameterPort( "eqInput" ) );
+  parameterConnection( mReverbParameterCalculator.parameterPort("discreteEqOut"), mDiscreteReverbReflFilters->parameterPort( "eqInput" ) );
   parameterConnection( mReverbParameterCalculator.parameterPort("discretePanningGainOut"), mDiscreteReverbPanningMatrix.parameterPort( "gainInput" ) );
   parameterConnection( mReverbParameterCalculator.parameterPort("lateGainOut"), mLateReverbGainDelay.parameterPort( "gainInput" ) );
   parameterConnection( mReverbParameterCalculator.parameterPort("lateDelayOut"), mLateReverbGainDelay.parameterPort( "delayInput" ) );

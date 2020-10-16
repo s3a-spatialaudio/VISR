@@ -2,7 +2,8 @@
 
 #include "biquad_iir_filter.hpp"
 
-#include <libefl/vector_functions.hpp>
+#include <libefl/error_codes.hpp>
+#include <libefl/filter_functions.hpp>
 
 #include <libpml/matrix_parameter_config.hpp>
 
@@ -11,25 +12,12 @@
 #include <libvisr/constants.hpp>
 
 #include <ciso646>
+#include <stdexcept>
 
 namespace visr
 {
 namespace rcl
 {
-BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
-                                  char const * name,
-                                  CompositeComponent * parent /*= nullptr*/ )
- : AtomicComponent( context, name, parent )
- , mInput( "in", *this )
- , mOutput( "out", *this )
- , mEqInput( nullptr )
- , mCoefficients( cVectorAlignmentSamples )
- , mState( cVectorAlignmentSamples )
- , mCurrentInput( cVectorAlignmentSamples )
- , mCurrentOutput( cVectorAlignmentSamples )
-{
-}
-
 BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
                                   char const * name,
                                   CompositeComponent * parent,
@@ -40,12 +28,24 @@ BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
  , mInput( "in", *this, numberOfChannels )
  , mOutput( "out", *this, numberOfChannels )
  , mEqInput( nullptr )
- , mCoefficients( cVectorAlignmentSamples )
- , mState( cVectorAlignmentSamples )
- , mCurrentInput( cVectorAlignmentSamples )
- , mCurrentOutput( cVectorAlignmentSamples )
+ , cNumberOfChannels( numberOfChannels )
+ , cNumberOfBiquadSections( numberOfBiquads )
+ , mCoefficients( numberOfChannels,
+                  numberOfBiquads * cBiquadCoefficientsStride,
+                  cVectorAlignmentSamples )
+ , mState( numberOfChannels,
+           numberOfBiquads * cBiquadStateStride,
+           cVectorAlignmentSamples )
 {
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
+  mState.zeroFill();
+  if( controlInput )
+  {
+    mEqInput = std::make_unique< ParameterInput<
+        pml::DoubleBufferingProtocol,
+        pml::BiquadParameterMatrix< SampleType > > >(
+        "eqInput", *this,
+        pml::MatrixParameterConfig( numberOfChannels, numberOfBiquads ) );
+  }
 }
 
 BiquadIirFilter::BiquadIirFilter(
@@ -59,10 +59,10 @@ BiquadIirFilter::BiquadIirFilter(
  : BiquadIirFilter(
        context, name, parent, numberOfChannels, numberOfBiquads, controlInput )
 {
-  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
+  for( std::size_t channelIdx( 0 ); channelIdx < cNumberOfChannels;
        ++channelIdx )
   {
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections;
+    for( std::size_t biquadIdx( 0 ); biquadIdx < cNumberOfBiquadSections;
          ++biquadIdx )
     {
       setCoefficientsInternal( channelIdx, biquadIdx, initialBiquad );
@@ -87,7 +87,7 @@ BiquadIirFilter::BiquadIirFilter(
         "BiquadIirFilter: The length of the coefficient initialiser list does "
         "not match the number of biquads per channel." );
   }
-  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
+  for( std::size_t channelIdx( 0 ); channelIdx < cNumberOfChannels;
        ++channelIdx )
   {
     setChannelCoefficientsInternal( channelIdx, coeffs );
@@ -120,12 +120,12 @@ void BiquadIirFilter::setCoefficients(
     std::size_t biquadIndex,
     rbbl::BiquadCoefficient< SampleType > const & coeffs )
 {
-  if( channelIndex >= mNumberOfChannels )
+  if( channelIndex >= cNumberOfChannels )
   {
     throw std::invalid_argument(
         "BiquadIirFilter: The channel index exceeds the number of channels." );
   }
-  if( biquadIndex >= mNumberOfBiquadSections )
+  if( biquadIndex >= cNumberOfBiquadSections )
   {
     throw std::invalid_argument(
         "BiquadIirFilter: The biquad index exceeds the number of biquad "
@@ -139,25 +139,23 @@ void BiquadIirFilter::setCoefficientsInternal(
     std::size_t biquadIndex,
     rbbl::BiquadCoefficient< SampleType > const & coeffs )
 {
-  static const std::size_t cNumCoeffs = rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
-  mCoefficients( biquadIndex * cNumCoeffs + 0, channelIndex ) = coeffs[0];
-  mCoefficients( biquadIndex * cNumCoeffs + 1, channelIndex ) = coeffs[1];
-  mCoefficients( biquadIndex * cNumCoeffs + 2, channelIndex ) = coeffs[2];
-  // Negate the denominator coefficients to makes the runtime processing easier
-  // (straightforward use of multiply-add)
-  mCoefficients( biquadIndex * cNumCoeffs + 3, channelIndex ) = -coeffs[3];
-  mCoefficients( biquadIndex * cNumCoeffs + 4, channelIndex ) = -coeffs[4];
+  SampleType * startVal = mCoefficients.row( channelIndex ) +
+                          biquadIndex * cBiquadCoefficientsStride;
+  std::copy( coeffs.data(),
+             coeffs.data() +
+                 rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs,
+             startVal );
 }
 
 void BiquadIirFilter::setChannelCoefficients( std::size_t channelIndex,
                                               rbbl::BiquadCoefficientList< SampleType > const & coeffs )
 {
-  if( channelIndex >= mNumberOfChannels )
+  if( channelIndex >= cNumberOfChannels )
   {
     throw std::invalid_argument(
         "BiquadIirFilter: The channel index exceeds the number of channels." );
   }
-  if( coeffs.size() != mNumberOfBiquadSections )
+  if( coeffs.size() != cNumberOfBiquadSections )
   {
     throw std::invalid_argument(
         "BiquadIirFilter: The filter coefficient list does not match the "
@@ -170,7 +168,7 @@ void BiquadIirFilter::setChannelCoefficientsInternal(
     std::size_t channelIndex,
     rbbl::BiquadCoefficientList< SampleType > const & coeffs )
 {
-  for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections;
+  for( std::size_t biquadIdx( 0 ); biquadIdx < cNumberOfBiquadSections;
        ++biquadIdx )
   {
     setCoefficientsInternal( channelIndex, biquadIdx, coeffs[ biquadIdx ] );
@@ -180,15 +178,15 @@ void BiquadIirFilter::setChannelCoefficientsInternal(
 void BiquadIirFilter::setCoefficientMatrix(
     rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs )
 {
-  if( coeffs.numberOfFilters() != mNumberOfChannels )
+  if( coeffs.numberOfFilters() != cNumberOfChannels )
   {
     throw std::invalid_argument(
         "BiquadIirFilter: The number of filters in the coefficient matrix does "
         "not match the number of channels of this component." );
   }
   // Special case if the parameter has zero channels (i.e., inactive)
-  if( ( mNumberOfChannels > 0 ) and
-      coeffs.numberOfSections() != mNumberOfBiquadSections )
+  if( ( cNumberOfChannels > 0 ) and
+      coeffs.numberOfSections() != cNumberOfBiquadSections )
   {
     throw std::invalid_argument(
         "BiquadIirFilter: The number of biquad section in the coefficient "
@@ -200,73 +198,11 @@ void BiquadIirFilter::setCoefficientMatrix(
 void BiquadIirFilter::setCoefficientMatrixInternal(
     rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs )
 {
-  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
+  for( std::size_t channelIdx( 0 ); channelIdx < cNumberOfChannels;
        ++channelIdx )
   {
     setChannelCoefficientsInternal( channelIdx, coeffs[ channelIdx ] );
   }
-}
-
-void BiquadIirFilter::setup( std::size_t numberOfChannels,
-                             std::size_t numberOfBiquads,
-                             bool controlInput /*= false*/ )
-{
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
-}
-
-void BiquadIirFilter::setup(
-    std::size_t numberOfChannels,
-    std::size_t numberOfBiquads,
-    rbbl::BiquadCoefficient< SampleType > const & defaultBiquad,
-    bool controlInput /*= false*/ )
-{
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
-  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
-       ++channelIdx )
-  {
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections;
-         ++biquadIdx )
-    {
-      setCoefficientsInternal( channelIdx, biquadIdx, defaultBiquad );
-    }
-  }
-}
-
-void BiquadIirFilter::setup(
-    std::size_t numberOfChannels,
-    std::size_t numberOfBiquads,
-    rbbl::BiquadCoefficientList< SampleType > const & coeffs,
-    bool controlInput )
-{
-  if( coeffs.size() != numberOfBiquads )
-  {
-    throw std::invalid_argument(
-        "BiquadIirFilter: The length of the coefficient initialiser list does "
-        "not match the number of biquads per channel." );
-  }
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
-  for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
-       ++channelIdx )
-  {
-    setChannelCoefficientsInternal( channelIdx, coeffs );
-  }
-}
-
-void BiquadIirFilter::setup(
-    std::size_t numberOfChannels,
-    std::size_t numberOfBiquads,
-    rbbl::BiquadCoefficientMatrix< SampleType > const & coeffs,
-    bool controlInput )
-{
-  if( ( coeffs.numberOfFilters() != numberOfChannels ) or
-      ( coeffs.numberOfSections() != numberOfBiquads ) )
-  {
-    throw std::invalid_argument(
-        "BiquadIirFilter: The size of the coefficient matrix does not match "
-        "the dimension numberOfChannels x numberOfBiquads." );
-  }
-  setupDataMembers( numberOfChannels, numberOfBiquads, controlInput );
-  setCoefficientMatrixInternal( coeffs );
 }
 
 void BiquadIirFilter::process()
@@ -276,120 +212,20 @@ void BiquadIirFilter::process()
     setCoefficientMatrix( mEqInput->data() );
     mEqInput->resetChanged();
   }
-
-  mInput.getChannelPointers( &mInputChannels[ 0 ] );
-
-  static const std::size_t cNumBiquadCoeffs =
-      rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
-  std::size_t const blockSamples = period();
-  for( std::size_t sampleIdx( 0 ); sampleIdx < blockSamples; ++sampleIdx )
+  std::size_t const numSamples{ period() };
+  std::size_t const alignment{ mInput.alignmentSamples() };
+  for( std::size_t chIdx{ 0 }; chIdx < cNumberOfChannels; ++chIdx )
   {
-    // read the current input sample.
-    for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
-         ++channelIdx )
+    efl::ErrorCode const res = efl::iirFilterBiquadsSingleChannel(
+        mInput[ chIdx ], mOutput[ chIdx ], mState.row( chIdx ),
+        mCoefficients.row( chIdx ), numSamples, cNumberOfBiquadSections,
+        cBiquadStateStride, cBiquadCoefficientsStride, alignment );
+    if( res != efl::noError )
     {
-      mCurrentInput[ channelIdx ] = mInputChannels[ channelIdx ][ sampleIdx ];
-    }
-
-    for( std::size_t biquadIdx( 0 ); biquadIdx < mNumberOfBiquadSections;
-         ++biquadIdx )
-    {
-      // Implement transposed direct form II
-      // Note: this expects that the denominator coefficients a1 and a2 are already negated.
-      // v0 = b0 * x[n] + v1
-      // y[n] = v0
-      // v1 = a1*y[n] + b1 * x[n] + v2
-      // v2 = a2*y[n] + b2 * x[n]
-      // Coefficient order in mCoefficients rows: [b0 b1 b2 a1 a2]
-      efl::ErrorCode res;
-      // y[n] = b0 * x[n] + v1
-      if( (res = efl::vectorMultiplyAdd( mCoefficients.row( cNumBiquadCoeffs*biquadIdx ),
-                                         mCurrentInput.data(),
-                                         mState.row( 2 * biquadIdx ),
-                                         mCurrentOutput.data( ),
-                                         mNumberOfChannels, cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      // v1 = a1*y[n] + b1 * x[n] + v2
-      // Part 1: v1 = b1 * x[n] + v2
-      if( (res = efl::vectorMultiplyAdd( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 1 ),
-                                        mCurrentInput.data(),
-                                        mState.row( 2 * biquadIdx + 1 ),
-                                        mState.row( 2 * biquadIdx ),
-                                        mNumberOfChannels, cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      // Part 2: v1 += a1*y[n]
-      if( (res = efl::vectorMultiplyAddInplace(  mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 3 ),
-                                       mCurrentOutput.data(),
-                                       mState.row( 2 * biquadIdx ),
-                                       mNumberOfChannels, cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      // v2 = a2*y[n] + b2 * x[n]
-      // Part 1: v2 = a2 * y[n]
-      if( (res = efl::vectorMultiply( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 4 ),
-                                      mCurrentOutput.data(),
-                                      mState.row( 2 * biquadIdx + 1 ),
-                                      mNumberOfChannels,
-                                      cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      // Part 2: v2 += b2 * x[n]
-      if( (res = efl::vectorMultiplyAddInplace( mCoefficients.row( cNumBiquadCoeffs*biquadIdx + 2 ),
-                                                mCurrentInput.data(),
-                                                mState.row( 2 * biquadIdx + 1),
-                                                mNumberOfChannels,
-                                                cVectorAlignmentSamples )) != efl::noError )
-      {
-        status( StatusMessage::Error, "Numeric error during IIR computation:", efl::errorMessage( res ) );
-      }
-      mCurrentInput.swap( mCurrentOutput ); // Use the current output as the input of the next stage.
-    }
-
-    // write the current output sample.
-    for( std::size_t channelIdx( 0 ); channelIdx < mNumberOfChannels;
-         ++channelIdx )
-    {
-      // We assign from mCurrentInput as this variable has been assigned as the
-      // input to the next biquad stage.
-      mOutput[ channelIdx ][ sampleIdx ] = mCurrentInput[ channelIdx ];
+      status( StatusMessage::Error,
+              "Error during IIR filtering: ", efl::errorMessage( res ) );
     }
   }
-}
-
-void BiquadIirFilter::setupDataMembers( std::size_t numberOfChannels,
-                                        std::size_t numberOfBiquads,
-                                        bool controlInput )
-{
-  static const std::size_t cCoeffsPerBiquad =
-      rbbl::BiquadCoefficient< SampleType >::cNumberOfCoeffs;
-
-  mNumberOfChannels = numberOfChannels;
-  mNumberOfBiquadSections = numberOfBiquads;
-  // Note: the resize() operations for BasicMatrix and BasicVector zero all data
-  // members.
-  mCoefficients.resize( numberOfBiquads * cCoeffsPerBiquad, numberOfChannels );
-  mState.resize( numberOfBiquads * 2, numberOfChannels );
-  mCurrentInput.resize( numberOfChannels );
-  mCurrentOutput.resize( numberOfChannels );
-
-  mInput.setWidth( mNumberOfChannels );
-  mOutput.setWidth( mNumberOfChannels );
-  mEqInput.reset(); // Remove the parameter port first
-  if( controlInput )
-  {
-    mEqInput.reset(
-        new ParameterInput< pml::DoubleBufferingProtocol,
-                            pml::BiquadParameterMatrix< SampleType > >(
-            "eqInput", *this,
-            pml::MatrixParameterConfig( numberOfChannels, numberOfBiquads ) ) );
-  }
-  mInputChannels.resize( numberOfChannels, nullptr );
 }
 
 } // namespace rcl
