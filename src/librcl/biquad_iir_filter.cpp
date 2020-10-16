@@ -27,7 +27,15 @@ BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
  : AtomicComponent( context, name, parent )
  , mInput( "in", *this, numberOfChannels )
  , mOutput( "out", *this, numberOfChannels )
- , mEqInput( nullptr )
+ , mEqInput(
+       controlInput
+           ? new ParameterInput< pml::DoubleBufferingProtocol,
+                                 pml::BiquadParameterMatrix< SampleType > >(
+                 "eqInput",
+                 *this,
+                 pml::MatrixParameterConfig( numberOfChannels,
+                                             numberOfBiquads ) )
+           : nullptr )
  , cNumberOfChannels( numberOfChannels )
  , cNumberOfBiquadSections( numberOfBiquads )
  , mCoefficients( numberOfChannels,
@@ -38,14 +46,6 @@ BiquadIirFilter::BiquadIirFilter( SignalFlowContext const & context,
            cVectorAlignmentSamples )
 {
   mState.zeroFill();
-  if( controlInput )
-  {
-    mEqInput = std::make_unique< ParameterInput<
-        pml::DoubleBufferingProtocol,
-        pml::BiquadParameterMatrix< SampleType > > >(
-        "eqInput", *this,
-        pml::MatrixParameterConfig( numberOfChannels, numberOfBiquads ) );
-  }
 }
 
 BiquadIirFilter::BiquadIirFilter(
