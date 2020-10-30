@@ -72,10 +72,11 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-add_library( objectmodel_static_pic STATIC ${SOURCES} ${HEADERS} )
-set_target_properties( objectmodel_static_pic PROPERTIES OUTPUT_NAME objectmodel_pic )
-target_compile_definitions( objectmodel_static_pic PUBLIC -DVISR_OBJECTMODEL_STATIC_LIBRARY=1 )
-set_target_properties( objectmodel_static_pic PROPERTIES FOLDER static_pic_libraries )
+  add_library( objectmodel_static_pic STATIC ${SOURCES} ${HEADERS} )
+  set_target_properties( objectmodel_static_pic PROPERTIES OUTPUT_NAME objectmodel_pic )
+  set_target_properties( objectmodel_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_compile_definitions( objectmodel_static_pic PUBLIC -DVISR_OBJECTMODEL_STATIC_LIBRARY=1 )
+  set_target_properties( objectmodel_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 # Set target properties common to both library types.
