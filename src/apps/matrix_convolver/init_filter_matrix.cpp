@@ -8,7 +8,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
