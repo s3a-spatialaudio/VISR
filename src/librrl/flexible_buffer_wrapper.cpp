@@ -74,7 +74,7 @@ void FlexibleBufferWrapper::process( SampleType const * const * captureSamples,
     SampleType * writePtr = mInputBuffer.getFirstWritePointer();
     for( std::size_t chIdx{ 0 }; chIdx < numCaptureChannels; ++chIdx )
     {
-      copyBuffer( captureSamples[ chIdx ],
+      copyBuffer( captureSamples[ chIdx ] + processedFrames,
                   writePtr + chIdx * mInputBuffer.stride(), chunkFrames,
                   1 /*source stride*/, 1 /*destination stride*/ );
     }
@@ -99,8 +99,8 @@ void FlexibleBufferWrapper::process( SampleType const * const * captureSamples,
     for( std::size_t chIdx{ 0 }; chIdx < numPlaybackChannels; ++chIdx )
     {
       copyBuffer( readPtr + chIdx * mOutputBuffer.stride(),
-                  playbackSamples[ chIdx ], chunkFrames, 1 /*source stride*/,
-                  1 /*destination stride*/ );
+                  playbackSamples[ chIdx ] + processedFrames, chunkFrames,
+                  1 /*source stride*/, 1 /*destination stride*/ );
     }
     mOutputBufferLevel -= chunkFrames;
     processedFrames += chunkFrames;
