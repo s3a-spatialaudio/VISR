@@ -465,10 +465,10 @@ endif( Boost_USE_STATIC_LIBS )
 
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
-if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
   find_package(Flac REQUIRED)
   find_package(OggVorbis REQUIRED)
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
 if( BUILD_PYTHON_BINDINGS )
   set( PYTHON_MODULE_INSTALL_DIRECTORY "${PYTHON_SITE_PACKAGES}" )
