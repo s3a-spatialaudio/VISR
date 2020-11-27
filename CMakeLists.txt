@@ -87,17 +87,23 @@ if( VISR_SYSTEM_NAME MATCHES "Darwin" )
     SET(CMAKE_INSTALL_PREFIX /Applications/${VISR_VERSIONED_NAME} CACHE PATH "install prefix" FORCE)
   ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-  # Activate rpath support
-  set( CMAKE_MACOSX_RPATH ON)
-  # Use, i.e., don't skip rpaths in the build tree
-  set( CMAKE_SKIP_BUILD_RPATH FALSE)
-  set( CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
-  # When building, set the rpath to the libraries in the build tree, not to the install tree
-  set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-  set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
-  # Add the automatically determined parts of the RPATH
-  # which point to directories outside the build tree to the install RPATH
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+  # Allow disabling of setting rpath - parent projects may want to customise it, based on installation
+  OPTION( AUTOSET_RPATH "Automatically set rpath" ON )
+  if(AUTOSET_RPATH)
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
+
+    # Activate rpath support
+    set( CMAKE_MACOSX_RPATH ON)
+    # Use, i.e., don't skip rpaths in the build tree
+    set( CMAKE_SKIP_BUILD_RPATH FALSE)
+    set( CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
+    # When building, set the rpath to the libraries in the build tree, not to the install tree
+    set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+    # Add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+  endif(AUTOSET_RPATH)
 endif( VISR_SYSTEM_NAME MATCHES "Darwin" )
 
 SET( VISR_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} )
