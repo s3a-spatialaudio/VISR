@@ -290,7 +290,7 @@ if( BUILD_PYTHON_BINDINGS )
   # Finding Python and the pybind11 directory. This is done using the pybind11
   # mechanisms.
   # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
-  set( PYBIND11_DIR ${CMAKE_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
+  set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
   # Ensure that pybind11's targets are exported within the VISR export set.
   # This is necessary to export static versions of libpythonsupport

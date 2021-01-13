@@ -95,7 +95,7 @@ foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( rcl_${LIB_TYPE} PRIVATE VISR_BUILD_RCL_LIBRARY=1)
   # Not ideal. This is only used by certain files (scalar_osc_decoder.cpp)
   # But INCLUDE_DIRECTORIES is a source file peroperty only since Cmake 3.11
-  target_include_directories( rcl_${LIB_TYPE} PRIVATE ${CMAKE_SOURCE_DIR}/3rd/include/oscpkt )
+  target_include_directories( rcl_${LIB_TYPE} PRIVATE ${PROJECT_SOURCE_DIR}/3rd/include/oscpkt )
   # Transitive dependencies
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC pml_${LIB_TYPE} )
   target_link_libraries( rcl_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )

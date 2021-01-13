@@ -94,32 +94,32 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   # Prepare a example launchagent file
   set( LAUNCHAGENT_PLIST_FILENAME ${VISR_VERSIONED_NAME}.plist )
   set( LAUNCHAGENT_PLIST_FILEPATH ${PROJECT_BINARY_DIR}/package_resources/${LAUNCHAGENT_PLIST_FILENAME} )
-  configure_file( ${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/VISR-launchagent.plist.in
+  configure_file( ${PROJECT_SOURCE_DIR}/cmake_modules/package_resources/VISR-launchagent.plist.in
                   ${LAUNCHAGENT_PLIST_FILEPATH}	@ONLY )
   # Hack: we treat the launchagents file as part of shared_libraries because we want to use the same script.
   install( FILES ${LAUNCHAGENT_PLIST_FILEPATH}
            DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY}/etc COMPONENT shared_libraries )
 
-  configure_file(${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
+  configure_file(${PROJECT_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
   		       "${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh" @ONLY)
   set( CPACK_POSTFLIGHT_SHARED_LIBRARIES_SCRIPT
        ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )
-install( FILES ${CMAKE_SOURCE_DIR}/LICENSE.md
-               ${CMAKE_SOURCE_DIR}/Contributors.md
-               ${CMAKE_SOURCE_DIR}/Readme.md
-               ${CMAKE_SOURCE_DIR}/ChangeLog.txt
+install( FILES ${PROJECT_SOURCE_DIR}/LICENSE.md
+               ${PROJECT_SOURCE_DIR}/Contributors.md
+               ${PROJECT_SOURCE_DIR}/Readme.md
+               ${PROJECT_SOURCE_DIR}/ChangeLog.txt
                DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
 # Allow for text substitution in the files and change names from .md to .txt (the former is not currently supported by CMake).
-configure_file (${CMAKE_SOURCE_DIR}/LICENSE.md
+configure_file (${PROJECT_SOURCE_DIR}/LICENSE.md
         "${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt" @ONLY)
 set( CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt )
-configure_file (${CMAKE_SOURCE_DIR}/Readme.md
+configure_file (${PROJECT_SOURCE_DIR}/Readme.md
         "${PROJECT_BINARY_DIR}/package_resources/Readme.txt" @ONLY)
 set( CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/package_resources/Readme.txt )
-configure_file (${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/welcome.txt.in
+configure_file (${PROJECT_SOURCE_DIR}/cmake_modules/package_resources/welcome.txt.in
         "${PROJECT_BINARY_DIR}/package_resources/welcome.txt" @ONLY)
 set(CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/package_resources/welcome.txt)
 
