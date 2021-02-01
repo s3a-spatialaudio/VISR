@@ -222,7 +222,7 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
       acc = _mm256_fmadd_pd( a, b, acc );
 #else
       __m256d mulRes = _mm256_mul_pd( a, b );
-      acc = _mm256_mul_pd( mulRes, acc );
+      acc = _mm256_add_pd( mulRes, acc );
 #endif
       _mm256_store_pd( y, acc );
       y += 4;
@@ -242,7 +242,7 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
       acc = _mm256_fmadd_pd( a, b, acc );
 #else
       __m256d mulRes = _mm256_mul_pd( a, b );
-      acc = _mm256_mul_pd( mulRes, acc );
+      acc = _mm256_add_pd( mulRes, acc );
 #endif
       _mm256_storeu_pd( y, acc );
       y += 4;
@@ -266,7 +266,7 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
     acc = _mm_fmadd_pd( a, b, acc );
 #else
     __m128d mulRes = _mm_mul_pd( a, b );
-    acc = _mm_mul_pd( mulRes, acc );
+    acc = _mm_add_pd( mulRes, acc );
 #endif
     _mm_storeu_pd( y, acc );
     y += 2;
@@ -283,7 +283,7 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
     acc = _mm_fmadd_sd( a, b, acc );
 #else
     __m128d mulRes = _mm_mul_sd( a, b );
-    acc = _mm_mul_sd( mulRes, acc );
+    acc = _mm_add_sd( mulRes, acc );
 #endif    
     _mm_store_sd( y, acc );
     ++y;
