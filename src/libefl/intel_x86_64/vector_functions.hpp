@@ -31,7 +31,7 @@ enum class Feature
  * @param numElements The number of elements to be multiplied.
  * @param alignment Assured alignment of all vector arguments (measured in elements).
  */
-  template<typename T>
+  template<typename T, Feature f>
 VISR_EFL_LIBRARY_SYMBOL 
 ErrorCode vectorMultiply( T const * const factor1,
                           T const * const factor2,

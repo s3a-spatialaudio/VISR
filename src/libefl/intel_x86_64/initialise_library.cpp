@@ -19,6 +19,10 @@ namespace intel_x86_64
 // initialise vector functions for a given CPU feature set
 template <Feature f>
 static void initialiseFeatureFunctions() {
+  VectorMultiplyWrapper< float >::set( &intel_x86_64::vectorMultiply<float, f> );
+  VectorMultiplyWrapper< double >::set( &intel_x86_64::vectorMultiply<double, f> );
+  VectorMultiplyWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiply<std::complex<float>, f> );
+
   VectorMultiplyAddInplaceWrapper< float >::set( &intel_x86_64::vectorMultiplyAddInplace<float, f> );
   VectorMultiplyAddInplaceWrapper< double >::set( &intel_x86_64::vectorMultiplyAddInplace<double, f> );
   VectorMultiplyAddInplaceWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiplyAddInplace<std::complex<float>, f> );
@@ -36,9 +40,6 @@ bool initialiseLibrary( char const * processor /*= ""*/ )
   // TODO: Set specialised versions based on the processor features.
   // NOTE: Functions that are not yet implemented are commented out.
   
-  VectorMultiplyWrapper< float >::set( &intel_x86_64::vectorMultiply<float> );
-  VectorMultiplyWrapper< double >::set( &intel_x86_64::vectorMultiply<double> );
-  VectorMultiplyWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiply<std::complex<float> > );
   // VectorMultiplyInplaceWrapper< float >::set( &intel_x86_64::vectorMultiplyInplace<float> );
   // VectorMultiplyInplaceWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiplyInplace<std::complex<float> > );
   // VectorMultiplyConstantWrapper< float >::set( &intel_x86_64::vectorMultiplyConstant<float> );

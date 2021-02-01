@@ -22,11 +22,12 @@ namespace intel_x86_64
 {
 
 template<>
-ErrorCode vectorMultiply( float const * const factor1,
-                          float const * const factor2,
-                          float * const result,
-                          std::size_t numElements,
-                          std::size_t alignment /*= 0*/ )
+ErrorCode vectorMultiply<float, Feature::VISR_SIMD_FEATURE>(
+    float const * const factor1,
+    float const * const factor2,
+    float * const result,
+    std::size_t numElements,
+    std::size_t alignment /*= 0*/ )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;
@@ -83,11 +84,12 @@ ErrorCode vectorMultiply( float const * const factor1,
 }
 
 template<>
-ErrorCode vectorMultiply( double const * const factor1,
-			  double const * const factor2,
-			  double * const result,
-			  std::size_t numElements,
-			  std::size_t alignment /*= 0*/ )
+ErrorCode vectorMultiply<double, Feature::VISR_SIMD_FEATURE>(
+    double const * const factor1,
+    double const * const factor2,
+    double * const result,
+    std::size_t numElements,
+    std::size_t alignment /*= 0*/ )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;
@@ -143,11 +145,12 @@ ErrorCode vectorMultiply( double const * const factor1,
 }
 
 template<>
-ErrorCode vectorMultiply( std::complex<float> const * const factor1,
-			  std::complex<float> const * const factor2,
-			  std::complex<float> * const result,
-			  std::size_t numElements,
-			  std::size_t alignment )
+ErrorCode vectorMultiply<std::complex<float>, Feature::VISR_SIMD_FEATURE>(
+    std::complex<float> const * const factor1,
+    std::complex<float> const * const factor2,
+    std::complex<float> * const result,
+    std::size_t numElements,
+    std::size_t alignment )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;

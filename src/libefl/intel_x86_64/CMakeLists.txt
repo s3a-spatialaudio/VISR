@@ -11,7 +11,6 @@ set( HEADERS
 set( SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/cpu_features.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/initialise_library.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/vector_multiply.cpp
 )
 
 # sources which are compiled multiple times with different VISR_SIMD_FEATURE
@@ -20,6 +19,7 @@ set( SOURCES
 set( FEATURE_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/vector_multiply_add.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/vector_ramp_scaling.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/vector_multiply.cpp
 )
 
 # add $FEATURE_SOURCES to $TARGET while setting VISR_SIMD_FEATURE=$FEATURE and
