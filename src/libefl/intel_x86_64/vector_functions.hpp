@@ -112,7 +112,7 @@ vectorMultiplyAddInplace( T const * const factor1,
 			  std::size_t numElements,
 			  std::size_t alignment /*= 0*/ );
 
-template<typename T>
+template<typename T, Feature f>
 VISR_EFL_LIBRARY_SYMBOL ErrorCode
 vectorMultiplyConstantAddInplace( T constFactor,
 				  T const * const factor,
