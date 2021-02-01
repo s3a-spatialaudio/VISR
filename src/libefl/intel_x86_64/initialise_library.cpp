@@ -57,6 +57,7 @@ bool initialiseLibrary( char const * processor /*= ""*/ )
 bool uninitialiseLibrary()
 {
   VectorMultiplyWrapper< float >::set( &reference::vectorMultiply<float> );
+  VectorMultiplyWrapper< double >::set( &reference::vectorMultiply<double> );
   VectorMultiplyWrapper< std::complex<float> >::set( &reference::vectorMultiply<std::complex<float> > );
   VectorMultiplyInplaceWrapper< float >::set( &reference::vectorMultiplyInplace<float> );
   VectorMultiplyInplaceWrapper< std::complex<float> >::set( &reference::vectorMultiplyInplace<std::complex<float> > );
