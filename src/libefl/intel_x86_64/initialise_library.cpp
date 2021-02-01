@@ -74,7 +74,7 @@ bool uninitialiseLibrary()
   VectorMultiplyConstantAddInplaceWrapper< float >::set( &reference::vectorMultiplyConstantAddInplace<float> );
   VectorMultiplyConstantAddInplaceWrapper< std::complex<float> >::set( &reference::vectorMultiplyConstantAddInplace<std::complex<float> > );
 
-  VectorRampScalingWrapper< float >::set( &intel_x86_64::vectorRampScaling<float> );
+  VectorRampScalingWrapper< float >::set( &reference::vectorRampScaling<float> );
   return true;
 }
 
