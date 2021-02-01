@@ -25,6 +25,8 @@ static void initialiseFeatureFunctions() {
 
   VectorMultiplyConstantAddInplaceWrapper< float >::set( &intel_x86_64::vectorMultiplyConstantAddInplace<float, f> );
   VectorMultiplyConstantAddInplaceWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiplyConstantAddInplace<std::complex<float>, f> );
+
+  VectorRampScalingWrapper< float >::set( &intel_x86_64::vectorRampScaling<float, f> );
 }
 
 bool initialiseLibrary( char const * processor /*= ""*/ )
@@ -65,7 +67,6 @@ bool initialiseLibrary( char const * processor /*= ""*/ )
   // VectorMultiplyConstantAddWrapper< float >::set( &intel_x86_64::vectorMultiplyConstantAdd<float> );
   // VectorMultiplyConstantAddWrapper< std::complex<float> >::set( &intel_x86_64::vectorMultiplyConstantAdd<std::complex<float> > );
 
-  VectorRampScalingWrapper< float >::set( &intel_x86_64::vectorRampScaling<float> );
   return true;
 }
 

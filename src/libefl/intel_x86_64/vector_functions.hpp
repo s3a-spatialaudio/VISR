@@ -139,7 +139,7 @@ vectorMultiplyConstantAddInplace( T constFactor,
  * @param alignmentElements Minimum alignment of the vector arguments \p input,
  * \p ramp, and \p output, measured in multiples of the element size. 
  */
-template<typename T>
+template<typename T, Feature f>
 VISR_EFL_LIBRARY_SYMBOL ErrorCode
 vectorRampScaling( T const * input,
   T const * ramp,

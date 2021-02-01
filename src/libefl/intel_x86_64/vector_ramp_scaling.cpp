@@ -19,7 +19,8 @@ namespace intel_x86_64
 
 template<>
 ErrorCode
-vectorRampScaling( float const * input,
+vectorRampScaling< float, Feature::VISR_SIMD_FEATURE >(
+  float const * input,
   float const * ramp,
   float * output,
   float baseGain,
@@ -53,7 +54,7 @@ vectorRampScaling( float const * input,
         ramp += 8;
         input += 8;
         __m256 outPart = _mm256_load_ps( output );
-#ifdef __FMA__
+#ifdef __AVX2__
         __m256 scale = _mm256_fmadd_ps( rampPart, gain, base );
         __m256 res =  _mm256_fmadd_ps( scale, inPart, outPart );
 #else
@@ -74,7 +75,7 @@ vectorRampScaling( float const * input,
         ramp += 8;
         input += 8;
         __m256 outPart = _mm256_loadu_ps( output );
-#ifdef __FMA__
+#ifdef __AVX2__
         __m256 scale = _mm256_fmadd_ps( rampPart, gain, base );
         __m256 res =  _mm256_fmadd_ps( scale, inPart, outPart );
 #else
@@ -97,7 +98,7 @@ vectorRampScaling( float const * input,
         __m256 inPart = _mm256_load_ps( input );
         ramp += 8;
         input += 8;
-#ifdef __FMA__
+#ifdef __AVX2__
         __m256 scale = _mm256_fmadd_ps( rampPart, gain, base );
 #else
         __m256 scale = _mm256_add_ps( _mm256_mul_ps( rampPart, gain ), base );
@@ -116,7 +117,7 @@ vectorRampScaling( float const * input,
         __m256 inPart = _mm256_loadu_ps( input );
         ramp += 8;
         input += 8;
-#ifdef __FMA__
+#ifdef __AVX2__
         __m256 scale = _mm256_fmadd_ps( rampPart, gain, base );
 #else
         __m256 scale = _mm256_add_ps( _mm256_mul_ps( rampPart, gain ), base );
@@ -150,7 +151,7 @@ vectorRampScaling( float const * input,
           __m128 outPart = _mm_load_ps( output );
           ramp += 4;
           input += 4;
-#ifdef __FMA__
+#ifdef __AVX2__
           __m128 scale = _mm_fmadd_ps( rampPart, gain, base );
           __m128 res =  _mm_fmadd_ps( scale, inPart, outPart );
 #else
@@ -171,7 +172,7 @@ vectorRampScaling( float const * input,
           __m128 outPart = _mm_loadu_ps( output );
           ramp += 4;
           input += 4;
-#ifdef __FMA__
+#ifdef __AVX2__
           __m128 scale = _mm_fmadd_ps( rampPart, gain, base );
           __m128 res =  _mm_fmadd_ps( scale, inPart, outPart );
 #else
@@ -194,7 +195,7 @@ vectorRampScaling( float const * input,
           __m128 inPart = _mm_load_ps( input );
           ramp += 4;
           input += 4;
-#ifdef __FMA__
+#ifdef __AVX2__
           __m128 scale = _mm_fmadd_ps( rampPart, gain, base );
 #else
           __m128 scale = _mm_add_ps( _mm_mul_ps( rampPart, gain ), base );
@@ -213,7 +214,7 @@ vectorRampScaling( float const * input,
           __m128 inPart = _mm_loadu_ps( input );
           ramp += 4;
           input += 4;
-#ifdef __FMA__
+#ifdef __AVX2__
           __m128 scale = _mm_fmadd_ps( rampPart, gain, base );
 #else
           __m128 scale = _mm_add_ps( _mm_mul_ps( rampPart, gain ), base );
