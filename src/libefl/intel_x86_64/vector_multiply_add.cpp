@@ -4,10 +4,6 @@
 
 #include "vector_functions.hpp"
 
-#ifndef __SSE3__
-#include "emulate_addsub.hpp"
-#endif
-
 #include "../alignment.hpp"
 
 #include <immintrin.h>
@@ -371,12 +367,7 @@ ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::VISR_SIMD_FEATU
       b = _mm_permute_ps( b, 0xB1 /*0b10110001*/ );
       __m128 acc = _mm_load_ps( pAcc );
       __m128 partRes2 = _mm_mul_ps( b, a );
-      __m128 res =
-#ifdef __SSE3__
-	_mm_addsub_ps( partRes1, partRes2 );
-#else
-      detail::emulateAddsubFloat( partRes1, partRes2 );
-#endif
+      __m128 res = _mm_addsub_ps( partRes1, partRes2 );
       __m128 finalRes = _mm_add_ps( acc, res );
       _mm_store_ps( pAcc, finalRes );
       countN -= 2;
@@ -400,12 +391,7 @@ ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::VISR_SIMD_FEATU
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 acc = _mm_loadl_pi( cReal, yL );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-      __m128 res =
-#ifdef __SSE3__
-	_mm_addsub_ps( acbc, bdad );
-#else
-      detail::emulateAddsubFloat(  acbc, bdad );
-#endif
+      __m128 res = _mm_addsub_ps( acbc, bdad );
       __m128 finalRes = _mm_add_ps( res, acc );
       _mm_storel_pi( yL, finalRes );
 
@@ -579,12 +565,7 @@ ErrorCode vectorMultiplyConstantAddInplace<std::complex<float>, Feature::VISR_SI
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 acc = _mm_load_ps( y );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-      __m128 res =
-#ifdef __SSE3__
-        _mm_addsub_ps( acbc, bdad );
-#else
-      detail::emulateAddsubFloat(  acbc, bdad );
-#endif
+      __m128 res = _mm_addsub_ps( acbc, bdad );
       res = _mm_add_ps( res, acc );
       _mm_store_ps( y, res );
       x += 4;
@@ -606,12 +587,7 @@ ErrorCode vectorMultiplyConstantAddInplace<std::complex<float>, Feature::VISR_SI
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 acc = _mm_loadl_pi( cReal, yL );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-      __m128 res =
-#ifdef __SSE3__
-	_mm_addsub_ps( acbc, bdad );
-#else
-      detail::emulateAddsubFloat(  acbc, bdad );
-#endif
+      __m128 res = _mm_addsub_ps( acbc, bdad );
       res = _mm_add_ps( res, acc );
       _mm_storel_pi( yL, res );
       x += 2;

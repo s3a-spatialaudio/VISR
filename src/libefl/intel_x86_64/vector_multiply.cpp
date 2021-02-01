@@ -4,10 +4,6 @@
 
 #include "vector_functions.hpp"
 
-#ifndef __SSE3__
-#include "emulate_addsub.hpp"
-#endif
-
 #include "../alignment.hpp"
 
 #include <immintrin.h>
@@ -218,11 +214,7 @@ ErrorCode vectorMultiply<std::complex<float>, Feature::VISR_SIMD_FEATURE>(
       __m128 partRes1 = _mm_mul_ps( b, aHigh );
       b = _mm_permute_ps( b, 0xB1 /*0b10110001*/ );
       __m128 partRes2 = _mm_mul_ps( b, a );
-#ifdef __SSE3__
       __m128 res = _mm_addsub_ps( partRes1, partRes2 );
-#else
-      __m128 res = detail::emulateAddsubFloat( partRes1, partRes2 );
-#endif
       _mm_store_ps( pRes, res );
       countN -= 2;
       pf1 += 4;
@@ -245,11 +237,7 @@ ErrorCode vectorMultiply<std::complex<float>, Feature::VISR_SIMD_FEATURE>(
       __m128 acbc = _mm_mul_ps( cReal, ab );
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-#ifdef __SSE3__
       __m128 res = _mm_addsub_ps( acbc, bdad );
-#else
-      __m128 res = detail::emulateAddsubFloat( acbc, bdad );
-#endif
       _mm_storel_pi( yL, res );
 
       pf1 += 2;

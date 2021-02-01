@@ -3,7 +3,6 @@
 
 set( HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/cpu_features.hpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/emulate_addsub.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/initialise_library.hpp
   ${CMAKE_CURRENT_SOURCE_DIR}/vector_functions.hpp
 )
