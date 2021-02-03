@@ -24,7 +24,10 @@ public:
   {
     pybind11::initialize_interpreter();
 
+#if PY_VERSION_HEX < ((3 << 24) | (9 << 16))
+    // does nothing in 3.9 and will be removed in 3.11
     PyEval_InitThreads();
+#endif
     // After this call, the GIL is held by the calling thread.
     // We must release it because other threads might be created that might need the GIL 
     // to create their internal thread state.
