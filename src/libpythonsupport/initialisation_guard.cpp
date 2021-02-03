@@ -32,7 +32,7 @@ public:
     // We must release it because other threads might be created that might need the GIL 
     // to create their internal thread state.
     mState = PyEval_SaveThread();
-#if PY_VERSION_HEX >= (3 << 24) | (4 << 16)
+#if PY_VERSION_HEX >= ((3 << 24) | (4 << 16))
     assert( PyGILState_Check()  == 0 );
 #endif
     mInitialised = true;
