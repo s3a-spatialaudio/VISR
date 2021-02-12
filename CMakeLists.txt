@@ -467,12 +467,14 @@ set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 set(Boost_USE_MULTITHREADED TRUE)
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 
-# Sanity check: Static Boost libraries (at least in standard builds)
-# cannot be used in shared libraries or loadable modules because they lack
-# position-independent code support (this is not relevant on Windows)
+# Static Boost libraries might not be usable in shared libraries or loadable
+# modules, depending on how they are compiled
 if( Boost_USE_STATIC_LIBS AND NOT WIN32 )
   if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-    message( SEND_ERROR "Cannot build shared libraries if Boost_USE_STATIC_LIBS is on, because these are not position-" )
+    message( WARNING
+        "Building shared libraries if Boost_USE_STATIC_LIBS is on. "
+        "This might break if Boost was compiled without position-independent code."
+        )
   endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( Boost_USE_STATIC_LIBS AND NOT WIN32 )
 
