@@ -1,11 +1,30 @@
+@PACKAGE_INIT@
 
-# Export the Boost dependency for imported targets.
-set(BOOST_ROOT @BOOST_ROOT@ CACHE PATH "In case boost was relocated.")
-set(Boost_USE_MULTITHREADED @Boost_USE_MULTITHREADED@)
-set(Boost_USE_STATIC LIBS @Boost_USE_STATIC_LIBS@)
-find_package(Boost @VISR_BOOST_MINIMUM_VERSION@ REQUIRED COMPONENTS @VISR_BOOST_LIBRARIES@ )
+set( VISR_STATIC_LIBRARIES @BUILD_INSTALL_STATIC_LIBRARIES@ )
+set( VISR_STATIC_PIC_LIBRARIES @BUILD_INSTALL_STATIC_PIC_LIBRARIES@ )
+set( VISR_SHARED_LIBRARIES @BUILD_INSTALL_SHARED_LIBRARIES@ )
 
-# TODO Resolve other third party dependencies if required.
+set( VISR_USE_STATIC_BOOST_LIBRARIES @Boost_USE_STATIC_LIBS@ )
+set( VISR_THREAD_SUPPORT_DISABLED @BUILD_DISABLE_THREADS@ )
+
+if( ${VISR_STATIC_LIBRARIES} OR ${VISR_STATIC_PIC_LIBRARIES} )
+  # Export dependencies for exported static targets (incl. static_pic)
+  # if any of these variants is built.
+  include(CMakeFindDependencyMacro)
+
+  set( Boost_USE_MULTITHREADED @Boost_USE_MULTITHREADED@ )
+  set( Boost_USE_STATIC_LIBS @Boost_USE_STATIC_LIBS@ )
+
+  message( STATUS "visr-config.cmake: Boost_USE_STATIC_LIBS" ${Boost_USE_STATIC_LIBS} )
+  find_dependency(Boost @Boost_VERSION_STRING@ EXACT
+    COMPONENTS @VISR_BOOST_LIBRARIES@ )
+
+  if( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
+    find_dependency( Threads )
+  endif( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
+
+  # TODO: Soundfile, portaudio, Jack
+endif( ${VISR_STATIC_LIBRARIES} OR ${VISR_STATIC_PIC_LIBRARIES} )
 
 # import targets
 include(${CMAKE_CURRENT_LIST_DIR}/visr_exports.cmake)

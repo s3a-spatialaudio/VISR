@@ -111,12 +111,11 @@ export(EXPORT VISR_exports
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
-# Copy package config file
-# for use from build tree, substituting Boost setting variables
-configure_file(visr-config.cmake
-  visr-config.cmake @ONLY)
-
+# Configure and write package config file
 include(CMakePackageConfigHelpers)
+configure_package_config_file(visr-config.cmake
+  visr-config.cmake
+  INSTALL_DESTINATION lib )
 
 # Create package version file
 # Assuming major version bump = breaking API changes
