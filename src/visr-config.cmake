@@ -15,10 +15,8 @@ if( ${VISR_STATIC_LIBRARIES} OR ${VISR_STATIC_PIC_LIBRARIES} )
   set( Boost_USE_MULTITHREADED @Boost_USE_MULTITHREADED@ )
   set( Boost_USE_STATIC_LIBS @Boost_USE_STATIC_LIBS@ )
 
-  message( STATUS "visr-config.cmake: Boost_USE_STATIC_LIBS" ${Boost_USE_STATIC_LIBS} )
   find_dependency(Boost @Boost_VERSION_STRING@ EXACT
     COMPONENTS @VISR_BOOST_LIBRARIES@ )
-
   if( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
     find_dependency( Threads )
   endif( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
