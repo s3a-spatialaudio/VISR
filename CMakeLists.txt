@@ -448,7 +448,7 @@ ENDIF( BUILD_USE_IPP )
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
-option( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries." )
+option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries." OFF)
 
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
