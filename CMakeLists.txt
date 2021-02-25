@@ -465,7 +465,11 @@ set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # Switch to the "-mt" set of libraries. Also prevents warnings due to already
 # defined import locations.
 set(Boost_USE_MULTITHREADED TRUE)
+
+# Store/restore value of Boost_USE_STATIC_LIBS - vcpkg on Windows will reset it during find_package
+set(_Boost_USE_STATIC_LIBS ${Boost_USE_STATIC_LIBS})
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
 
 # Static Boost libraries might not be usable in shared libraries or loadable
 # modules, depending on how they are compiled
