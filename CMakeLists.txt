@@ -442,7 +442,7 @@ ENDIF( BUILD_USE_IPP )
 # Todo: Replace by a substantiated version requirement.
 set( VISR_BOOST_MINIMUM_VERSION 1.50 )
 
-option( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries. Note: Static libraries will often not work for targets that are shared libraries themselves (Python packages, DAW plugins, Matlab or MaxMSP externals) because the library code is not position-independent" )
+option( Boost_USE_STATIC_LIBS OFF "Whether to use static or shared boost libraries." )
 
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
@@ -461,12 +461,14 @@ set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 set(Boost_USE_MULTITHREADED TRUE)
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 
-# Sanity check: Static Boost libraries cannot be used in shared libraries or loadable modules
-if( Boost_USE_STATIC_LIBS )
+# Sanity check: Static Boost libraries (at least in standard builds)
+# cannot be used in shared libraries or loadable modules because they lack
+# position-independent code support (this is not relevant on Windows)
+if( Boost_USE_STATIC_LIBS AND NOT WIN32 )
   if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-    message( SEND_ERROR "Cannot build shared libraries if Boost_USE_STATIC_LIBS is on." )
+    message( SEND_ERROR "Cannot build shared libraries if Boost_USE_STATIC_LIBS is on, because these are not position-" )
   endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-endif( Boost_USE_STATIC_LIBS )
+endif( Boost_USE_STATIC_LIBS AND NOT WIN32 )
 
 
 ############################################################
