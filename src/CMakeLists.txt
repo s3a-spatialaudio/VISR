@@ -12,34 +12,46 @@ endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 
 # Build configuration for the top-level src/ directory
 
+# Define a list of all built libraries (to be used, e.g., in the export config)
+set( VISR_LIBRARIES )
+
 # Common functionalties for realtime applications
-ADD_SUBDIRECTORY( libapputilities )
+add_subdirectory( libapputilities )
+list( APPEND VISR_LIBRARIES apputilities )
 
 # Audio interfaces library
-ADD_SUBDIRECTORY( libaudiointerfaces )
+add_subdirectory( libaudiointerfaces )
+list( APPEND VISR_LIBRARIES audiointerfaces )
 
 # Elementary functions library
-ADD_SUBDIRECTORY( libefl )
+add_subdirectory( libefl )
+list( APPEND VISR_LIBRARIES efl )
 
 # Object model library.
-ADD_SUBDIRECTORY( libobjectmodel )
+add_subdirectory( libobjectmodel )
+list( APPEND VISR_LIBRARIES objectmodel )
 
 # Panning library, compute a panning gains for a loudspeaker configuration
-ADD_SUBDIRECTORY( libpanning )
+add_subdirectory( libpanning )
+list( APPEND VISR_LIBRARIES panning )
 
 # Signal processing components and data types related to panning.
 add_subdirectory( libpanningdsp )
+list( APPEND VISR_LIBRARIES panningdsp )
 
 # Parameter message library
-ADD_SUBDIRECTORY( libpml )
+add_subdirectory( libpml )
+list( APPEND VISR_LIBRARIES pml )
 
 # Python support for calling Python functionality from C++
 if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( libpythonsupport )
+  list( APPEND VISR_LIBRARIES pythonsupport )
 endif( BUILD_PYTHON_BINDINGS )
 
 # Library for signal flows.
-ADD_SUBDIRECTORY( libsignalflows )
+add_subdirectory( libsignalflows )
+list( APPEND VISR_LIBRARIES signalflows )
 
 # Library for signal flows that use Python.
 # Temporary solution to avoid a link dependency on Python
@@ -47,22 +59,28 @@ ADD_SUBDIRECTORY( libsignalflows )
 # Note that this library is also build if BUILD_PYTHON_BINDINGS is unselected.
 # In this case, it contains a reduced functionality that does not use Python.
 add_subdirectory( libsignalflowspython )
+list( APPEND VISR_LIBRARIES signalflowspython )
 
 
 # Rendering building block library
-ADD_SUBDIRECTORY( librbbl )
+add_subdirectory( librbbl )
+list( APPEND VISR_LIBRARIES rbbl )
 
 # Rendering component library
-ADD_SUBDIRECTORY( librcl )
+add_subdirectory( librcl )
+list( APPEND VISR_LIBRARIES rcl )
 
 # Rendering runtime library
-ADD_SUBDIRECTORY( librrl )
+add_subdirectory( librrl )
+list( APPEND VISR_LIBRARIES rrl )
 
 # Data types and components related to the reverb audio object.
-ADD_SUBDIRECTORY( libreverbobject )
+add_subdirectory( libreverbobject )
+list( APPEND VISR_LIBRARIES reverbobject )
 
 # VISR main library
-ADD_SUBDIRECTORY( libvisr )
+add_subdirectory( libvisr )
+list( APPEND VISR_LIBRARIES visr )
 
 if( BUILD_STANDALONE_APPLICATIONS )
   # Hold applications in a separate subdirectory
@@ -72,20 +90,22 @@ endif( BUILD_STANDALONE_APPLICATIONS )
 # Subdirectory for Matlab Mex externals
 IF( BUILD_MATLAB_EXTERNALS )
   # Library containing general support classes and functions for Matlab Mex externals
-  ADD_SUBDIRECTORY( libmexsupport )
+  add_subdirectory( libmexsupport )
+  list( APPEND VISR_LIBRARIES mexsupport )
 
   # Directory containing the Mex externals itself
-  ADD_SUBDIRECTORY( mex )
+  add_subdirectory( mex )
 ENDIF(BUILD_MATLAB_EXTERNALS)
 
 IF( BUILD_MAX_MSP_EXTERNALS )
-  ADD_SUBDIRECTORY( maxmspexternals )
+  add_subdirectory( maxmspexternals )
 ENDIF( BUILD_MAX_MSP_EXTERNALS )
 
 # Python bindings for the rendering framework
 if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( python )
   add_subdirectory( libpythoncomponents )
+  list( APPEND VISR_LIBRARIES pythoncomponents )
 endif( BUILD_PYTHON_BINDINGS )
 
 ##### CMake packaging
