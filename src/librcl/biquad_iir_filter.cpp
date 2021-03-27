@@ -147,8 +147,9 @@ void BiquadIirFilter::setCoefficientsInternal(
              startVal );
 }
 
-void BiquadIirFilter::setChannelCoefficients( std::size_t channelIndex,
-                                              rbbl::BiquadCoefficientList< SampleType > const & coeffs )
+void BiquadIirFilter::setChannelCoefficients(
+    std::size_t channelIndex,
+    rbbl::BiquadCoefficientList< SampleType > const & coeffs )
 {
   if( channelIndex >= cNumberOfChannels )
   {
