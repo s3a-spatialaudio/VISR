@@ -109,18 +109,6 @@ struct ContainerAccess< PyArray, T >
   }
 };
 
-/**
- * Helper function to transoform efl error codes to exceptions
- */
-inline void checkError( efl::ErrorCode res )
-{
-  if( res != efl::noError )
-  {
-    throw std::runtime_error( visr::detail::composeMessageString("Vector function failed with error: ",
-								 errorMessage( res ) ) );
-  }
-}
-
 } // namespace detail
 } // namespace python
 } // namespace efl

@@ -1,7 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "check_error.hpp"
-#include "efl_helpers.hpp"
 
 #include <libefl/vector_functions.hpp>
 
@@ -22,8 +21,6 @@ namespace python
 {
 
 namespace py = pybind11;
-
-using namespace detail;
 
 namespace // unnamed
 {

@@ -13,12 +13,12 @@ basic_vector.cpp
 denormalised_number_handling.cpp
 error_codes.cpp
 filter_functions.cpp
-filter_functions_reference.cpp
 initialise_library.cpp
 lagrange_coefficient_calculator.cpp
 matrix_functions.cpp
 vector_conversions.cpp
 vector_functions.cpp
+reference/filter_functions.cpp
 reference/vector_conversions.cpp
 reference/vector_functions.cpp
 )
@@ -35,8 +35,6 @@ denormalised_number_handling.hpp
 error_codes.hpp
 export_symbols.hpp
 filter_functions.hpp
-filter_functions_reference.hpp
-filter_functions_reference_impl.hpp
 function_wrapper.hpp
 initialise_library.hpp
 lagrange_coefficient_calculator.hpp
@@ -46,6 +44,8 @@ vector_functions.hpp
 )
 
 SET( PRIVATE_HEADERS
+reference/filter_functions.hpp
+reference/filter_functions_impl.hpp
 reference/vector_conversions.hpp
 reference/vector_conversions_impl.hpp
 reference/vector_functions.hpp

@@ -1,9 +1,9 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
-#ifndef VISR_LIBEFL_FILTER_FUNCTIONS_REFERENCE_HPP_INCLUDED
-#define VISR_LIBEFL_FILTER_FUNCTIONS_REFERENCE_HPP_INCLUDED
+#ifndef VISR_LIBEFL_REFERENCE_FILTER_FUNCTIONS_HPP_INCLUDED
+#define VISR_LIBEFL_REFERENCE_FILTER_FUNCTIONS_HPP_INCLUDED
 
-#include "error_codes.hpp"
+#include "../error_codes.hpp"
 
 #include <cstddef>
 
@@ -29,4 +29,4 @@ ErrorCode iirFilterBiquadsSingleChannel( T const * input,
 } // namespace efl
 } // namespace visr
 
-#endif // #ifndef VISR_LIBEFL_FILTER_FUNCTIONS_REFERENCE_HPP_INCLUDED
+#endif // #ifndef VISR_LIBEFL_REFERENCE_FILTER_FUNCTIONS_HPP_INCLUDED

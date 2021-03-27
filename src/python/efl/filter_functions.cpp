@@ -1,5 +1,6 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
+#include "check_error.hpp"
 #include "efl_helpers.hpp"
 
 #include <libefl/filter_functions.hpp>

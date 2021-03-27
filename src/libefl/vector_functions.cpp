@@ -6,143 +6,54 @@
 
 #include "reference/vector_functions.hpp"
 
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/seq/for_each_product.hpp>
+
 namespace visr
 {
-  namespace efl
-  {
+namespace efl
+{
 
-    /**
-     * Convenience macro to define the function pointers (explicit template instantiations)
-     * for a given vector function and a data type.
-     */
+#define ALL_NUMERIC_VECTOR_FUNCTIONS \
+  (Zero) (Fill) (Copy) (Ramp) \
+  (Add) (AddInplace) (AddConstant) (AddConstantInplace) \
+  (Subtract) (SubtractInplace) (SubtractConstant) (SubtractConstantInplace) \
+  (Multiply) (MultiplyInplace) (MultiplyConstant) (MultiplyConstantInplace) \
+  (MultiplyAdd) (MultiplyAddInplace) (MultiplyConstantAdd) (MultiplyConstantAddInplace) \
+  (CopyStrided) (FillStrided) (RampScaling)
+
+/**
+ * The numeric data types
+ */
+#define NUMERIC_DATATYPES \
+  (float) (double)(std::complex<float>)(std::complex<double>)
+
+/**
+ * Convenience macro to define the function pointers (explicit template instantiations)
+ * for a given vector function and a data type.
+ * @note Not used anymore because explicit instantiation is performed directly in EXPLICIT_WRAPPER_INSTANTIATION
+ */
 #define EFL_FUNCTION_WRAPPER_INSTANTIATION( Wrapper, DataType, referenceFunction )\
 template<> VISR_EFL_LIBRARY_SYMBOL decltype(Wrapper< DataType >::sPtr) Wrapper< DataType >::sPtr{ &referenceFunction< DataType > };
 
-     // TODO: Consider use of boost preprocessor.
+/**
+ * Macro to perform an explicit instantation of a function wrapper class.
+ * TO be used in a Boost preprocessor 'loop' construct to initialise all wrappers.
+ */
+#define EXPLICIT_WRAPPER_INSTANTIATION( R, PRODUCT ) \
+  template<> VISR_EFL_LIBRARY_SYMBOL decltype( BOOST_PP_CAT(Vector,  BOOST_PP_CAT(BOOST_PP_SEQ_ELEM( 0, PRODUCT ),Wrapper))< BOOST_PP_SEQ_ELEM( 1, PRODUCT ) >::sPtr) \
+  BOOST_PP_CAT(Vector,  BOOST_PP_CAT(BOOST_PP_SEQ_ELEM( 0, PRODUCT ),Wrapper))< BOOST_PP_SEQ_ELEM( 1, PRODUCT ) >::sPtr{ \
+  BOOST_PP_CAT( reference::vector, BOOST_PP_SEQ_ELEM( 0, PRODUCT ))<  BOOST_PP_SEQ_ELEM( 1, PRODUCT ) > };
 
-     // Instantiate the funtion pointers for the different explicit instantiations of vectorZero.
-    EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorZeroWrapper, float, reference::vectorZero)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorZeroWrapper, double, reference::vectorZero)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorZeroWrapper, std::complex<float>, reference::vectorZero)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorZeroWrapper, std::complex<double>, reference::vectorZero)
+BOOST_PP_SEQ_FOR_EACH_PRODUCT( EXPLICIT_WRAPPER_INSTANTIATION, (ALL_NUMERIC_VECTOR_FUNCTIONS)(NUMERIC_DATATYPES))
 
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillWrapper, float, reference::vectorFill)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillWrapper, double, reference::vectorFill)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillWrapper, std::complex<float>, reference::vectorFill)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillWrapper, std::complex<double>, reference::vectorFill)
+/**
+ * LIst additional data type for which vectorCopy() is defined.
+ */
+#define ADDITIONAL_COPY_DATATYPES \
+  (int8_t)(uint8_t)(int16_t)(uint16_t)(int32_t)(uint32_t)(int64_t)(uint64_t)(long double)
 
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampWrapper, float, reference::vectorRamp)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampWrapper, double, reference::vectorRamp)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampWrapper, std::complex<float>, reference::vectorRamp)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampWrapper, std::complex<double>, reference::vectorRamp)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, float, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, double, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, long double, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, int8_t, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, uint8_t, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, int16_t, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, uint16_t, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, int32_t, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, uint32_t, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, std::complex<float>, reference::vectorCopy)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyWrapper, std::complex<double>, reference::vectorCopy)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddWrapper, float, reference::vectorAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddWrapper, double, reference::vectorAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddWrapper, std::complex<float>, reference::vectorAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddWrapper, std::complex<double>, reference::vectorAdd)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddInplaceWrapper, float, reference::vectorAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddInplaceWrapper, double, reference::vectorAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddInplaceWrapper, std::complex<float>, reference::vectorAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddInplaceWrapper, std::complex<double>, reference::vectorAddInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantWrapper, float, reference::vectorAddConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantWrapper, double, reference::vectorAddConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantWrapper, std::complex<float>, reference::vectorAddConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantWrapper, std::complex<double>, reference::vectorAddConstant)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantInplaceWrapper, float, reference::vectorAddConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantInplaceWrapper, double, reference::vectorAddConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantInplaceWrapper, std::complex<float>, reference::vectorAddConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorAddConstantInplaceWrapper, std::complex<double>, reference::vectorAddConstantInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractWrapper, float, reference::vectorSubtract)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractWrapper, double, reference::vectorSubtract)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractWrapper, std::complex<float>, reference::vectorSubtract)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractWrapper, std::complex<double>, reference::vectorSubtract)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractInplaceWrapper, float, reference::vectorSubtractInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractInplaceWrapper, double, reference::vectorSubtractInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractInplaceWrapper, std::complex<float>, reference::vectorSubtractInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractInplaceWrapper, std::complex<double>, reference::vectorSubtractInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantWrapper, float, reference::vectorSubtractConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantWrapper, double, reference::vectorSubtractConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantWrapper, std::complex<float>, reference::vectorSubtractConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantWrapper, std::complex<double>, reference::vectorSubtractConstant)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantInplaceWrapper, float, reference::vectorSubtractConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantInplaceWrapper, double, reference::vectorSubtractConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantInplaceWrapper, std::complex<float>, reference::vectorSubtractConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorSubtractConstantInplaceWrapper, std::complex<double>, reference::vectorSubtractConstantInplace)
-
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyWrapper, float, reference::vectorMultiply)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyWrapper, double, reference::vectorMultiply)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyWrapper, std::complex<float>, reference::vectorMultiply)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyWrapper, std::complex<double>, reference::vectorMultiply)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyInplaceWrapper, float, reference::vectorMultiplyInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyInplaceWrapper, double, reference::vectorMultiplyInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyInplaceWrapper, std::complex<float>, reference::vectorMultiplyInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyInplaceWrapper, std::complex<double>, reference::vectorMultiplyInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantWrapper, float, reference::vectorMultiplyConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantWrapper, double, reference::vectorMultiplyConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantWrapper, std::complex<float>, reference::vectorMultiplyConstant)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantWrapper, std::complex<double>, reference::vectorMultiplyConstant)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantInplaceWrapper, float, reference::vectorMultiplyConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantInplaceWrapper, double, reference::vectorMultiplyConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantInplaceWrapper, std::complex<float>, reference::vectorMultiplyConstantInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantInplaceWrapper, std::complex<double>, reference::vectorMultiplyConstantInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddWrapper, float, reference::vectorMultiplyAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddWrapper, double, reference::vectorMultiplyAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddWrapper, std::complex<float>, reference::vectorMultiplyAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddWrapper, std::complex<double>, reference::vectorMultiplyAdd)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddInplaceWrapper, float, reference::vectorMultiplyAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddInplaceWrapper, double, reference::vectorMultiplyAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddInplaceWrapper, std::complex<float>, reference::vectorMultiplyAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyAddInplaceWrapper, std::complex<double>, reference::vectorMultiplyAddInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddWrapper, float, reference::vectorMultiplyConstantAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddWrapper, double, reference::vectorMultiplyConstantAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddWrapper, std::complex<float>, reference::vectorMultiplyConstantAdd)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddWrapper, std::complex<double>, reference::vectorMultiplyConstantAdd)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddInplaceWrapper, float, reference::vectorMultiplyConstantAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddInplaceWrapper, double, reference::vectorMultiplyConstantAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddInplaceWrapper, std::complex<float>, reference::vectorMultiplyConstantAddInplace)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorMultiplyConstantAddInplaceWrapper, std::complex<double>, reference::vectorMultiplyConstantAddInplace)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyStridedWrapper, float, reference::vectorCopyStrided)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyStridedWrapper, double, reference::vectorCopyStrided)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyStridedWrapper, std::complex<float>, reference::vectorCopyStrided)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorCopyStridedWrapper, std::complex<double>, reference::vectorCopyStrided)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillStridedWrapper, float, reference::vectorFillStrided)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillStridedWrapper, double, reference::vectorFillStrided)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillStridedWrapper, std::complex<float>, reference::vectorFillStrided)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorFillStridedWrapper, std::complex<double>, reference::vectorFillStrided)
-
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampScalingWrapper, float, reference::vectorRampScaling)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampScalingWrapper, double, reference::vectorRampScaling)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampScalingWrapper, std::complex<float>, reference::vectorRampScaling)
-      EFL_FUNCTION_WRAPPER_INSTANTIATION(VectorRampScalingWrapper, std::complex<double>, reference::vectorRampScaling)
+BOOST_PP_SEQ_FOR_EACH_PRODUCT( EXPLICIT_WRAPPER_INSTANTIATION, ((Copy))(ADDITIONAL_COPY_DATATYPES))
 
 } // namespace efl
 } // namespace visr

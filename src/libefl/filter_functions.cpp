@@ -4,7 +4,7 @@
 
 #include "function_wrapper.hpp"
 
-#include "filter_functions_reference_impl.hpp"
+#include "reference/filter_functions.hpp"
 
 namespace visr
 {
