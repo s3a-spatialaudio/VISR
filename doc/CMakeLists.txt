@@ -134,7 +134,7 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
     DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
               ${SPHINX_EXECUTABLE}
-	       -a
+               -a
                -q
                -b html
                -c ${outputDir}/html
@@ -173,7 +173,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/pdf
-    BYPRODUCTS ${outputDir}/pdf-cache ${outputDir}/pdf
+    BYPRODUCTS ${outputDir}/pdf-cache
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
   add_custom_target( ${targetName}-pdf

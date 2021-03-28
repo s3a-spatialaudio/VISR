@@ -17,6 +17,10 @@ namespace efl
 namespace intel_x86_64
 {
 
+// Doxygen fails to find the corresponding declarations, therefore we 
+// exclude the definitions here.
+/// @cond NEVER
+
 template<>
 ErrorCode vectorMultiply<float, Feature::VISR_SIMD_FEATURE>(
     float const * const factor1,
@@ -248,6 +252,8 @@ ErrorCode vectorMultiply<std::complex<float>, Feature::VISR_SIMD_FEATURE>(
   }
   return noError;
 }
+
+/// @endcond NEVER
 
 } // namespace intel_x86_64
 } // namespace efl

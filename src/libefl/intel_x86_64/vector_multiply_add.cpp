@@ -17,76 +17,10 @@ namespace efl
 namespace intel_x86_64
 {
 
-#if 1
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_FMA_ALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_load_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_load_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_load_ps( y ); count -= 8;\
-      acc = _mm256_fmadd_ps( a, b, acc );\
-      _mm256_store_ps( acc, y ); y += 8;\
-    }
+// Doxygen fails to find the corresponding declarations, therefore we 
+// exclude the definitions here.
+/// @cond NEVER
 
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_FMA_UNALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_loadu_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_loadu_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_loadu_ps( y ); count -= 8;\
-      acc = _mm256_fmadd_ps( a, b, acc );\
-      _mm256_storeu_ps( acc, y ); y += 8;\
-    }
-  
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_AVX_ALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_load_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_load_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_load_ps( y ); count -= 8;\
-      __m256 res = _mm256_mul_ps( a, b );\
-      acc = _mm256_add_ps( res, acc );\
-      _mm256_store_ps( acc, y ); y += 8;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_AVX_UNALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_loadu_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_loadu_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_loadu_ps( y ); count -= 8;\
-      __m256 res = _mm256_mul_ps( a, b );\
-      acc = _mm256_add_ps( res, acc );\
-      _mm256_storeu_ps( acc, y ); y += 8;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_SSE_ALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m128 a = _mm_load_ps( f1 ); f1 += 4;\
-      __m128 b = _mm_load_ps( f2 ); f2 += 4;\
-      __m128 y = _mm_load_ps( y ); count -= 4;\
-      __m128 res = _mm_mul_ps( a, b );\
-      acc = _mm_add_ps( res, acc );\
-      _mm_store_ps( acc, y ); y += 4;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_SSE_UNALIGNED( f1, f2, res, count )\
-    while( cnt >= 4 ){\
-      __m128 a = _mm_loadu_ps( f1 ); f1 += 4;\
-      __m128 b = _mm_loadu_ps( f2 ); f2 += 4;\
-      __m128 y = _mm_loadu_ps( y ); count -= 4;\
-      __m128 res = _mm_mul_ps( a, b );\
-      acc = _mm_add_ps( res, acc );\
-      _mm_storeu_ps( acc, y ); y += 4;\
-    }
-
-// Aligned 
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_SCALAR( f1, f2, res, count )\
-    while( cnt > 0 ){\
-      __m128 a = _mm_loadu_ps( f1 ); ++f1;\
-      __m128 b = _mm_loadu_ps( f2 ); ++f2;\
-      __m128 y = _mm_loadu_ps( y ); --count;\
-      __m128 res = _mm_mul_ps( a, b );\
-      acc = _mm_add_ps( res, acc );\
-      _mm_storeu_ps( acc, y ); ++y;\
-    }
-#endif
 
 template<>
 ErrorCode vectorMultiplyAddInplace<float, Feature::VISR_SIMD_FEATURE>( float const * const factor1,
@@ -403,7 +337,6 @@ ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::VISR_SIMD_FEATU
   }
   return noError;
 }
-/// @endcond
 
 template<>
 ErrorCode vectorMultiplyConstantAddInplace<float, Feature::VISR_SIMD_FEATURE>( float constFactor,
@@ -597,6 +530,8 @@ ErrorCode vectorMultiplyConstantAddInplace<std::complex<float>, Feature::VISR_SI
   }
   return ErrorCode::noError;
 }
+
+/// @endcond NEVER
 
 } // namespace intel_x86_64
 } // namespace efl
