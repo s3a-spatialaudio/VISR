@@ -14,6 +14,7 @@ target_link_libraries(matrix_convolver_app PRIVATE audiointerfaces_${BUILD_LIBRA
 target_link_libraries(matrix_convolver_app PRIVATE visr_${BUILD_LIBRARY_TYPE_FOR_APPS} )
 target_link_libraries(matrix_convolver_app PRIVATE Boost::filesystem )
 
+set_target_properties( matrix_convolver_app PROPERTIES OUTPUT_NAME matrix_convolver )
 set_target_properties( matrix_convolver_app PROPERTIES FOLDER applications )
 
 install( TARGETS matrix_convolver_app DESTINATION bin COMPONENT standalone_applications )
