@@ -91,11 +91,11 @@ if(VISR_SYSTEM_NAME MATCHES "MacOS")
     fix_rpath(${v})
   endforeach()
   # Do the same for the boost libs.
-  if( NOT BOOST_USE_STATIC_LIBS )
+  if( NOT Boost_USE_STATIC_LIBS )
     foreach( BOOSTLIB ${VISR_BOOST_LIBRARIES} )
       fixBoostLibrary( ${BOOSTLIB} )
     endforeach()
-  endif( NOT BOOST_USE_STATIC_LIBS )
+  endif( NOT Boost_USE_STATIC_LIBS )
 endif(VISR_SYSTEM_NAME MATCHES "MacOS")
 
 if(VISR_SYSTEM_NAME MATCHES "Windows")
