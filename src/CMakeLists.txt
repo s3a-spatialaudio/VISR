@@ -123,28 +123,29 @@ install(EXPORT VISR_exports
 # for use from build tree
 export(EXPORT VISR_exports
   NAMESPACE VISR::
-  FILE visr_exports.cmake
+  FILE ${CMAKE_BINARY_DIR}/visr_exports.cmake
   )
 
 # Install package config file
 # for use from install tree
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config.cmake
+install(FILES ${CMAKE_BINARY_DIR}/visr-config.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Configure and write package config file
 include(CMakePackageConfigHelpers)
-configure_package_config_file(visr-config.cmake
-  visr-config.cmake
+configure_package_config_file(visr-config.cmake.in
+  ${CMAKE_BINARY_DIR}/visr-config.cmake
   INSTALL_DESTINATION lib )
 
 # Create package version file
 # Assuming major version bump = breaking API changes
-write_basic_package_version_file(visr-config-version.cmake
+write_basic_package_version_file(
+  ${CMAKE_BINARY_DIR}/visr-config-version.cmake
   VERSION ${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}
   COMPATIBILITY SameMajorVersion)
 
 # Install package version file
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/visr-config-version.cmake
+install(FILES ${CMAKE_BINARY_DIR}/visr-config-version.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Register visr package in user registry (if this behaviour activated).
