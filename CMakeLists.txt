@@ -39,8 +39,8 @@ PROJECT( VISR CXX C )
 # Define central version numbers for the project
 # TODO: Decide whether to move that to an external CMake file .
 set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 12 )
-set( VISR_PATCH_VERSION 2 )
+set( VISR_MINOR_VERSION 13 )
+set( VISR_PATCH_VERSION 0 )
 
 add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
 add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
@@ -227,7 +227,7 @@ option( BUILD_STANDALONE_APPLICATIONS "Whether to build the standalone VISR appl
 
 # List to contain the library variants (static, shared, static_pic) to be built.
 # Start with an empty list which is populated below
-set( VISR_BUILD_LIBRARY_TYPES ) 
+set( VISR_BUILD_LIBRARY_TYPES )
 # Decide which library types are built and store them in a list that is used in
 # subdirectories.
 # Static libraries are built if they are used in the standalone applications or
@@ -380,7 +380,7 @@ endif( VISR_SYSTEM_NAME MATCHES Linux )
 
 ###########################################################
 # Support for 3rd-party libraries.
- 
+
 # Add 3rd-party libraries that are built locally.
 add_subdirectory( 3rd )
 
