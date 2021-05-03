@@ -7,9 +7,9 @@ flexible_buffer_wrapper.cpp
 rrl.cpp
 )
 
-if( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+if( BUILD_RUNTIME_SYSTEM_PROFILING )
   list( APPEND SOURCES runtime_profiler.cpp )
-endif( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+endif( BUILD_RUNTIME_SYSTEM_PROFILING )
 
 # We don't need header files
 set( HEADERS
