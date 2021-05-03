@@ -1,4 +1,9 @@
 
+
+# Put binaries built within 3rd/ into 3rd/bin.
+# This avoids cluttering the main $VISR-build/bin directory with ffts unit tests.
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin )
+
 # Build the FFTS library.
 # First, provide hard-coded settings for the FFTS'configuration options
 set( GENERATE_POSITION_INDEPENDENT_CODE ON CACHE BOOL
