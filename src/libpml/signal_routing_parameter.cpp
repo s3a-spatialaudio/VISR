@@ -13,17 +13,9 @@ namespace visr
 {
 namespace pml
 {
-/**
- * Provide definition for the static const class member in order to allow their
- * address to be taken. The value is taken from their declaration within the
- * class.
- * @note Microsoft Visual Studio neither allows or requires this
- * standard-compliant explicit definition.
- */
-#ifndef _MSC_VER
+
 /*static*/ const SignalRoutingParameter::IndexType
     SignalRoutingParameter::cInvalidIndex;
-#endif
 
 SignalRoutingParameter::SignalRoutingParameter(
     std::initializer_list< Entry > const & entries )
