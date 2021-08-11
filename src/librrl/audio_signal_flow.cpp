@@ -61,7 +61,7 @@ namespace rrl
 
 AudioSignalFlow::AudioSignalFlow( Component & flow )
  : mFlow( flow.implementation() )
- , mParameterExchangeCriticalSection( new ParameterExchangeCriticalSectionType{} )
+ , mParameterExchangeMutex( new ParameterExchangeMutexType{} )
 {
   std::stringstream checkMessages;
   bool const checkResult = checkConnectionIntegrity( mFlow, true/* hierarchical*/, checkMessages );
@@ -219,8 +219,8 @@ void AudioSignalFlow::process( SampleType const * captureSamples,
 
 void AudioSignalFlow::executeComponents()
 {
-  std::lock_guard<ParameterExchangeCriticalSectionType>
-    guard( parameterExchangeCriticalSection() );
+  std::lock_guard<ParameterExchangeMutexType>
+    guard( parameterExchangeMutex() );
   try
   {
 #ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
@@ -1013,10 +1013,10 @@ bool AudioSignalFlow::initialiseAudioConnections( std::ostream & messages, Audio
   return true;
 }
 
-AudioSignalFlow::ParameterExchangeCriticalSectionType &
-AudioSignalFlow::parameterExchangeCriticalSection() const
+AudioSignalFlow::ParameterExchangeMutexType &
+AudioSignalFlow::parameterExchangeMutex() const
 {
-  return *mParameterExchangeCriticalSection;
+  return *mParameterExchangeMutex;
 }
 
 #ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING

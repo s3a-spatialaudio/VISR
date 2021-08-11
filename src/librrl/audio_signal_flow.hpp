@@ -303,7 +303,7 @@ public:
   /**
    * Data type (mutex type) used to as a guard to the parameters.
    */
-  using ParameterExchangeCriticalSectionType = std::timed_mutex;
+  using ParameterExchangeMutexType = std::timed_mutex;
 
   /**
    * Retrieve a reference to the mutex data structure guarding the
@@ -315,7 +315,7 @@ public:
    * brief durations, and not execute code that might block, because this
    * would affect the audio rendering code.
    */
-  ParameterExchangeCriticalSectionType & parameterExchangeCriticalSection()
+  ParameterExchangeMutexType & parameterExchangeMutex()
       const;
   //@}
 
@@ -463,8 +463,8 @@ private:
   /**
    * Synchronisation object for accesses to external parameter ports.
    */
-  mutable std::unique_ptr< ParameterExchangeCriticalSectionType >
-      mParameterExchangeCriticalSection;
+  mutable std::unique_ptr< ParameterExchangeMutexType >
+      mParameterExchangeMutex;
 
 #ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
   /**
