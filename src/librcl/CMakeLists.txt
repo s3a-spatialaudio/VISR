@@ -128,14 +128,14 @@ endforeach()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS rcl_static
-          EXPORT VISR_exports
+          EXPORT VISR_static_library_exports
           PUBLIC_HEADER DESTINATION include/visr/librcl COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
 install(TARGETS rcl_shared
-        EXPORT VISR_exports
+        EXPORT VISR_shared_library_exports
         ARCHIVE DESTINATION lib COMPONENT development_files
         RUNTIME DESTINATION lib COMPONENT shared_libraries
         LIBRARY DESTINATION lib COMPONENT shared_libraries
@@ -143,7 +143,8 @@ install(TARGETS rcl_shared
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-  install(TARGETS rcl_static_pic EXPORT VISR_exports
+  install(TARGETS rcl_static_pic
+          EXPORT VISR_static_pic_library_exports
           PUBLIC_HEADER DESTINATION include/visr/librcl COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )

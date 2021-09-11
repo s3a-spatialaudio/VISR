@@ -40,7 +40,8 @@ foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   # Note: We always need to link the Pythonsupport shared library as a shared library, because there must be
   # exactly one instance of pythonsupport::InitialisationGuard that is shared by the
   # containing application and the VISR externals instantiated within Python
-  target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pythonsupport_shared )
+  target_link_libraries( pythoncomponents_${LIB_TYPE} 
+    PRIVATE pythonsupport_${LIB_TYPE} )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE pybind11::embed )
   target_link_libraries( pythoncomponents_${LIB_TYPE} PRIVATE Boost::boost )
@@ -57,14 +58,14 @@ endforeach()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS pythoncomponents_static
-          EXPORT VISR_exports
+          EXPORT VISR_static_library_exports
           PUBLIC_HEADER DESTINATION include/visr/libpythoncomponents COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS pythoncomponents_shared
-          EXPORT VISR_exports
+          EXPORT VISR_shared_library_exports
           ARCHIVE DESTINATION lib COMPONENT development_files
           RUNTIME DESTINATION lib COMPONENT shared_libraries
           LIBRARY DESTINATION lib COMPONENT shared_libraries
@@ -72,7 +73,8 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-  install(TARGETS pythoncomponents_static_pic EXPORT VISR_exports
+  install(TARGETS pythoncomponents_static_pic
+          EXPORT VISR_static_pic_library_exports
           PUBLIC_HEADER DESTINATION include/visr/libpythoncomponents COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )

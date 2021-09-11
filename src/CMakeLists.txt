@@ -135,7 +135,9 @@ install(FILES ${CMAKE_BINARY_DIR}/visr-config.cmake
 include(CMakePackageConfigHelpers)
 configure_package_config_file(visr-config.cmake.in
   ${CMAKE_BINARY_DIR}/visr-config.cmake
-  INSTALL_DESTINATION lib )
+  INSTALL_DESTINATION lib
+#  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
 
 # Create package version file
 # Assuming major version bump = breaking API changes
@@ -147,6 +149,75 @@ write_basic_package_version_file(
 # Install package version file
 install(FILES ${CMAKE_BINARY_DIR}/visr-config-version.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
+
+## Component for shared 3rd-static components provided by VISR
+export(EXPORT VISR_3rd_party_static_exports
+       NAMESPACE VISR::
+       FILE ${CMAKE_BINARY_DIR}/visr-3rd_party_static-targets.cmake
+)
+install( 
+    EXPORT VISR_3rd_party_static_exports
+    FILE visr-3rd_party_static-targets.cmake
+    NAMESPACE VISR::
+    DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
+    COMPONENT development_files
+)
+
+## Component for shared 3rd-party components provided by VISR
+export(EXPORT VISR_3rd_party_shared_exports
+       NAMESPACE VISR::
+       FILE ${CMAKE_BINARY_DIR}/visr-3rd_party_shared-targets.cmake
+)
+install( 
+    EXPORT VISR_3rd_party_shared_exports
+    FILE visr-3rd_party_shared-targets.cmake
+    NAMESPACE VISR::
+    DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
+    COMPONENT development_files
+)
+
+
+if( BUILD_INSTALL_SHARED_LIBRARIES )
+  # Create component export config in build tree.
+  export(EXPORT VISR_shared_library_exports
+         NAMESPACE VISR::
+         FILE ${CMAKE_BINARY_DIR}/visr-shared_libraries-targets.cmake
+  )
+  install( 
+    EXPORT VISR_shared_library_exports
+    FILE visr-shared_libraries-targets.cmake
+    NAMESPACE VISR::
+    DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files
+  )
+endif( BUILD_INSTALL_SHARED_LIBRARIES )
+
+if( BUILD_INSTALL_STATIC_LIBRARIES )
+  # Create component export config in build tree.
+  export(EXPORT VISR_static_library_exports
+         NAMESPACE VISR::
+         FILE ${CMAKE_BINARY_DIR}/visr-static_libraries-targets.cmake
+  )
+  install( 
+    EXPORT VISR_static_library_exports
+    FILE visr-static_libraries-targets.cmake
+    NAMESPACE VISR::
+    DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files
+  )
+endif( BUILD_INSTALL_STATIC_LIBRARIES )
+
+if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+  # Create component export config in build tree.
+  export(EXPORT VISR_static_pic_library_exports
+         NAMESPACE VISR::
+         FILE ${CMAKE_BINARY_DIR}/visr-static_pic_libraries-targets.cmake
+  )
+  install( 
+    EXPORT VISR_static_pic_library_exports
+    FILE visr-static_pic_libraries-targets.cmake
+    NAMESPACE VISR::
+    DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files
+  )
+endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 
 # Register visr package in user registry (if this behaviour activated).
 export(PACKAGE visr)

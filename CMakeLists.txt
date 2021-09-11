@@ -304,6 +304,8 @@ if( BUILD_PYTHON_BINDINGS )
   # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
   set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
+  message( STATUS "Using PYBIND11_DIR: " ${PYBIND11_DIR} )
+
   # Ensure that pybind11's targets are exported within the VISR export set.
   # This is necessary to export static versions of libpythonsupport
   # and libpythoncomponents, which have a private link dependency to pybind11::embed.
@@ -339,8 +341,18 @@ if( BUILD_PYTHON_BINDINGS )
   # VISR::pythonsupport libraries and can be used by dependent
   # project to check whether they are using a compatible
   # pybind11 version.
+  get_directory_property(PYBIND11_VERSION_MAJOR DIRECTORY ${PYBIND11_DIR}
+  DEFINITION PYBIND11_VERSION_MAJOR )
+  get_directory_property(PYBIND11_VERSION_MINOR DIRECTORY ${PYBIND11_DIR}
+  DEFINITION PYBIND11_VERSION_MINOR )
+  get_directory_property(PYBIND11_VERSION_PATCH DIRECTORY ${PYBIND11_DIR}
+  DEFINITION PYBIND11_VERSION_PATCH )
   set( VISR_PYBIND11_VERSION
     ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
+
+    message( STATUS "AAAAAAAAAAAAA PYBIND11_VERSION: " ${PYBIND11_VERSION_MAJOR} )
+
+  message( STATUS "AAAAAAAAAAAAA VISR_PYBIND11_VERSION: " ${VISR_PYBIND11_VERSION} )
 
   # get PYTHON_SITE_PACKAGES to figure out where to install; this looks at
   # PYTHON_EXECUTABLE to figure out which python to use, which makes sure that

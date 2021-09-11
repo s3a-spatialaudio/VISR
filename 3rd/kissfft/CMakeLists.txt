@@ -86,7 +86,7 @@ if( KISSFFT_BUILD_STATIC_LIBRARY )
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
   )
   install(TARGETS kissfft_static
-          EXPORT VISR_exports
+          EXPORT VISR_3rd_party_static_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           )
@@ -107,7 +107,7 @@ if( KISSFFT_BUILD_SHARED_LIBRARY )
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
   )
   install(TARGETS kissfft_shared
-          EXPORT VISR_exports
+          EXPORT VISR_3rd_party_shared_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT shared_libraries
