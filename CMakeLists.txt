@@ -312,7 +312,7 @@ if( BUILD_PYTHON_BINDINGS )
   # A drawback of the current approach is that the targets are exported as,
   # e.g., VISR::embed, but we cannot set the namespace because this is done in
   # the pybind11 tree.
-  set( PYBIND11_EXPORT_NAME VISR_exports )
+  set( PYBIND11_EXPORT_NAME VISR-3rd_party_static-exports )
   # Force setting of pybind11 option (necessary in order to get the targets exported)
   set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets." FORCE )
 
