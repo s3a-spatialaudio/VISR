@@ -212,7 +212,7 @@ endif( BUILD_PYTHON_BINDINGS )
 
 # Install package config file
 # for use from install tree
-install(FILES ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_config.cmake
+install(FILES ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr-config.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
 # Configure and write package config file
