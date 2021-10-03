@@ -23,7 +23,8 @@ set( FEATURE_SOURCES
 
 # add $FEATURE_SOURCES to $TARGET while setting VISR_SIMD_FEATURE=$FEATURE and
 # setting compile options to $FLAGS
-function(add_feature_sources TARGET FEATURE FLAGS MSVC_FLAGS)
+function(add_feature_sources TARGET_NAME TARGET_TYPE FEATURE FLAGS MSVC_FLAGS)
+  set( TARGET ${TARGET_NAME}_${TARGET_TYPE} )
   add_library(${TARGET}_${FEATURE} OBJECT ${FEATURE_SOURCES})
   target_sources(${TARGET} PRIVATE $<TARGET_OBJECTS:${TARGET}_${FEATURE}>)
 
@@ -38,14 +39,16 @@ function(add_feature_sources TARGET FEATURE FLAGS MSVC_FLAGS)
   if(MSVC)
     target_compile_options(${TARGET}_${FEATURE} PRIVATE ${MSVC_FLAGS})
   else()
-    target_compile_options(${TARGET}_${FEATURE} PRIVATE ${FLAGS})
+    target_compile_options(${TARGET}}_${FEATURE} PRIVATE ${FLAGS})
   endif()
+
+  set_target_properties( ${TARGET}_${FEATURE} PROPERTIES FOLDER ${TARGET_TYPE}_libraries/internal )
 endfunction()
 
 # Add the architecture-specific files to the efl libraries.
 foreach(TARGET_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_sources( efl_${TARGET_TYPE} PRIVATE ${HEADERS} ${SOURCES} )
-  add_feature_sources( efl_${TARGET_TYPE} FMA "-mfma;-mavx2;-mavx;-msse4.2" "/arch:AVX2" )
-  add_feature_sources( efl_${TARGET_TYPE} AVX "-mavx;-msse4.2" "/arch:AVX" )
-  add_feature_sources( efl_${TARGET_TYPE} SSE "-msse4.2" "")
+  add_feature_sources( efl ${TARGET_TYPE} FMA "-mfma;-mavx2;-mavx;-msse4.2" "/arch:AVX2" )
+  add_feature_sources( efl ${TARGET_TYPE} AVX "-mavx;-msse4.2" "/arch:AVX" )
+  add_feature_sources( efl ${TARGET_TYPE} SSE "-msse4.2" "")
 endforeach()
