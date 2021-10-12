@@ -72,6 +72,17 @@ if( (static_libraries IN_LIST VISR_FIND_COMPONENTS_ADJUSTED )
     find_dependency( Threads )
   endif( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
 
+  # Put the FindSndFile.cmake and FindPortaudio.cmake files, 
+  # which have been copied into this directory, onto the CMake
+  # module search path.
+  list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} )
+  if( ${VISR_USE_SNDFILE_LIBRARY} )
+    find_dependency( SndFile )
+  endif( ${VISR_USE_SNDFILE_LIBRARY} )
+  if( VISR_AUDIOINTERFACES_PORTAUDIO )
+    find_dependency( Portaudio )
+  endif( VISR_AUDIOINTERFACES_PORTAUDIO )
+
   # Note: we do not list the dependencies SndFile, Portaudio, Jack
   # here, because they are non-standard and cannot imported through
   # an export config. I.e., it would require a FindXXX.cmake file in

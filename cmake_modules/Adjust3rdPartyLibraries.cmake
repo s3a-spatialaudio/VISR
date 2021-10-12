@@ -110,18 +110,10 @@ if(VISR_SYSTEM_NAME MATCHES "Windows")
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-    # special treatment for the PortAudio DLL, because its DLL has a non-matching file name.
-    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARIES} DIRECTORY )
-    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY_DIR} REALPATH )
-    set( PORTAUDIO_DLL_NAME ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll )
-    copyLibrary( ${PORTAUDIO_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
+    copyDllFromTarget( Portudio::portaudio ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} )
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
   if( BUILD_USE_SNDFILE_LIBRARY )
-    # Same for sndfile, because the DLL name differs from the name of the import lib.
-    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARIES} DIRECTORY )
-    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY_DIR} REALPATH )
-    set( SNDFILE_DLL_NAME ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll )
-    copyLibrary( ${SNDFILE_DLL_NAME} ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR})
+    copyDllFromTarget( Portudio::portaudio ${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} 
   endif( BUILD_USE_SNDFILE_LIBRARY )
 endif(VISR_SYSTEM_NAME MATCHES "Windows")
 

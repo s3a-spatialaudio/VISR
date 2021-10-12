@@ -11,7 +11,7 @@ else( VISR_SYSTEM_NAME MATCHES "Linux" )
 endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 
 # Location of export files in build tree
-set( VISR_BUILD_EXPORT_CONFIG_DIRECTORY ${CMAKE_BINARY_DIR}/cmake ) 
+set( VISR_BUILD_EXPORT_CONFIG_DIRECTORY ${CMAKE_BINARY_DIR}/cmake )
 
 # Build configuration for the top-level src/ directory
 
@@ -114,7 +114,7 @@ endif( BUILD_PYTHON_BINDINGS )
 ##### CMake packaging
 
 # Define a list for the exported components (will be populated below).
-# This will be written into the visr-config.cmake file. 
+# This will be written into the visr-config.cmake file.
 set( VISR_EXPORTED_COMPONENTS )
 
 if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
@@ -124,7 +124,7 @@ if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
         NAMESPACE VISR::
         FILE ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_3rd_party_static_targets.cmake
   )
-  install( 
+  install(
       EXPORT VISR_3rd_party_static_exports
       FILE visr_3rd_party_static_targets.cmake
       NAMESPACE VISR::
@@ -132,6 +132,13 @@ if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
       COMPONENT development_files
   )
   list( APPEND VISR_EXPORTED_COMPONENTS 3rd_party_static )
+
+  install(
+    FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
+    ${CMAKE_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
+    DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
+    COMPONENT development_files
+  )
 endif( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
@@ -140,7 +147,7 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
         NAMESPACE VISR::
         FILE ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_3rd_party_shared_targets.cmake
   )
-  install( 
+  install(
       EXPORT VISR_3rd_party_shared_exports
       FILE visr_3rd_party_shared_targets.cmake
       NAMESPACE VISR::
@@ -156,7 +163,7 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
          NAMESPACE VISR::
          FILE ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_shared_libraries_targets.cmake
   )
-  install( 
+  install(
     EXPORT VISR_shared_library_exports
     FILE visr_shared_libraries_targets.cmake
     NAMESPACE VISR::
@@ -171,7 +178,7 @@ if( BUILD_INSTALL_STATIC_LIBRARIES )
          NAMESPACE VISR::
          FILE ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_static_libraries_targets.cmake
   )
-  install( 
+  install(
     EXPORT VISR_static_library_exports
     FILE visr_static_libraries_targets.cmake
     NAMESPACE VISR::
@@ -186,7 +193,7 @@ if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
          NAMESPACE VISR::
          FILE ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_static_pic_libraries_targets.cmake
   )
-  install( 
+  install(
     EXPORT VISR_static_pic_library_exports
     FILE visr_static_pic_libraries_targets.cmake
     NAMESPACE VISR::
@@ -201,7 +208,7 @@ if( BUILD_PYTHON_BINDINGS )
          NAMESPACE VISR::
          FILE ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr_python_externals_targets.cmake
   )
-  install( 
+  install(
     EXPORT VISR_python_externals_exports
     FILE visr_python_externals_targets.cmake
     NAMESPACE VISR::
