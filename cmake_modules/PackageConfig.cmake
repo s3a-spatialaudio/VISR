@@ -53,6 +53,14 @@ if( WIN32 )
   endif( NOT Boost_USE_STATIC_LIBS )
 endif( WIN32 )
 
+install( FILES ${Portaudio_INCLUDE_DIRS}/portaudio.h
+  DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
+  COMPONENT development_files )
+
+install( FILES ${SndFile_INCLUDE_DIR}/sndfile.h
+  DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
+  COMPONENT development_files )
+
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
   set( CPACK_GENERATOR DEB )
   set( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
@@ -72,7 +80,7 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
   if( BUILD_USE_SNDFILE_LIBRARY )
-    install( FILES ${SNDFILE_LIBRARY} 
+    install( FILES ${SNDFILE_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
     install( FILES ${FLAC_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
@@ -143,7 +151,7 @@ if( BUILD_PYTHON_BINDINGS )
   # In this way the same pybind11 version can be used by dependent projects.
   # We omit the tests/ and docs/ subdirectries to save space.
   install( DIRECTORY ${PYBIND11_DIR}/
-           DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11"
+           DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/pybind11"
            COMPONENT development_files
            PATTERN tests EXCLUDE
            PATTERN docs EXCLUDE )
