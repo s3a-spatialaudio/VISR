@@ -61,6 +61,7 @@ if( KISSFFT_BUILD_SHARED_LIBRARY )
   # declarations)
   set_property( TARGET kissfft_shared PROPERTY C_VISIBILITY_PRESET default )
   set_property( TARGET kissfft_shared PROPERTY LIBRARY_OUTPUT_NAME kissfft )
+  set_property( TARGET kissfft_shared PROPERTY ARCHIVE_OUTPUT_NAME kissfft_shared )
 endif( KISSFFT_BUILD_SHARED_LIBRARY )
 
 # =============================================================================
