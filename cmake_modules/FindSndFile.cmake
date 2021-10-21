@@ -75,7 +75,6 @@ endif (SndFile_LIBRARIES AND SndFile_INCLUDE_DIRS)
 
 add_library(SndFile::sndfile SHARED IMPORTED)
 set_target_properties( SndFile::sndfile PROPERTIES
-  IMPORTED_LOCATION ${SndFile_LIBRARIES}
   INTERFACE_INCLUDE_DIRECTORIES ${SndFile_INCLUDE_DIRS}
 )
 
@@ -86,6 +85,11 @@ if( WIN32 )
   set_target_properties( SndFile::sndfile PROPERTIES
     IMPORTED_IMPLIB ${SndFile_LIBRARIES}
   )
+  get_filename_component( _SndFile_LIBRARY_DIR ${SndFile_LIBRARIES} DIRECTORY )
+  get_filename_component( _SndFile_LIBRARY_NAME_WE ${SndFile_LIBRARIES} NAME_WE )
+  get_filename_component( _SndFile_DLL_PATH ${_SndFile_LIBRARY_DIR}/${_SndFile_LIBRARY_NAME_WE}.dll ABSOLUTE )
+  set_target_properties( SndFile::sndfile PROPERTIES
+    IMPORTED_LOCATION ${_SndFile_DLL_PATH} )
 else()
 set_target_properties( SndFile::sndfile PROPERTIES
   IMPORTED_LOCATION ${SndFile_LIBRARIES}

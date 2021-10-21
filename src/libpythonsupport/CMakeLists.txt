@@ -67,7 +67,7 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   # For installed versions of VISR, this points to $INSTALL_DIRECTORY/3rd/pybind11,
   # where the relevant parts of pybind11 are shipped (see PackageConfig.cmake).
   target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
-    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11> )
+    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/pybind11> )
 
   # Set public headers to be installed.
   set_target_properties( pythonsupport_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )

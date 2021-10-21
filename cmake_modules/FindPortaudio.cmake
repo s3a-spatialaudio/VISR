@@ -108,6 +108,16 @@ endif (Portaudio_LIBRARIES AND Portaudio_INCLUDE_DIRS)
 add_library( Portaudio::portaudio SHARED IMPORTED )
 set_target_properties( Portaudio::portaudio PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES ${Portaudio_INCLUDE_DIRS}
-  IMPORTED_LOCATION ${Portaudio_LIBRARIES}
-  IMPORTED_IMPLIB  ${Portaudio_LIBRARIES}
 )
+if( WIN32 )
+  get_filename_component( PORTAUDIO_LIB_DIRECTORY ${Portaudio_LIBRARIES} DIRECTORY )
+  set_target_properties( Portaudio::portaudio PROPERTIES
+    IMPORTED_LOCATION ${PORTAUDIO_LIB_DIRECTORY}/portaudio_x64.dll
+    IMPORTED_IMPLIB  ${Portaudio_LIBRARIES}
+  )
+else()
+  set_target_properties( Portaudio::portaudio PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES ${Portaudio_INCLUDE_DIRS}
+    IMPORTED_LOCATION ${Portaudio_LIBRARIES}
+  )
+endif( WIN32 )

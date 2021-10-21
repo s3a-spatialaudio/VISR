@@ -1,7 +1,6 @@
 # Copyright Andreas Franck 2019 - All rights reserved.
 # Copyright (c) 2019 Institute of Sound and Vibration Research, University of Southampton and VISR contributors --- All rights reserved.
 
-from scipy.spatial.transform import Rotation
 import numpy as np
 
 import visr

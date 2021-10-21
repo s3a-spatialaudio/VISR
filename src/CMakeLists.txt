@@ -133,6 +133,12 @@ if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
   )
   list( APPEND VISR_EXPORTED_COMPONENTS 3rd_party_static )
 
+  file( COPY
+    ${CMAKE_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
+    ${CMAKE_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
+    DESTINATION ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}
+  )
+
   install(
     FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
     ${CMAKE_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
@@ -222,11 +228,16 @@ endif( BUILD_PYTHON_BINDINGS )
 install(FILES ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr-config.cmake
   DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY} COMPONENT development_files )
 
+set( VISR_3RD_PARTY_DIR ${CMAKE_BINARY_DIR}/3rd )
+ 
 # Configure and write package config file
 include(CMakePackageConfigHelpers)
 configure_package_config_file(visr-config.cmake.in
   ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr-config.cmake
+  INSTALL_DESTINATION cmake
+  PATH_VARS VISR_3RD_PARTY_DIR
   INSTALL_DESTINATION lib
+  INSTALL_PREFIX ${CMAKE_BINARY_DIR}
 #  NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
 

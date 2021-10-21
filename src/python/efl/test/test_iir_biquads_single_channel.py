@@ -6,12 +6,9 @@ import efl
 import numpy as np
 from scipy import signal
 
-import matplotlib.pyplot as plt
-
 from uniform_sequence import uniformSequence, uniformBasicVector, uniformScalar, typedVector
 
-if __name__ == "__main__":
-
+def test_biquad_iir_filter_single_channel(plot=False):
     sigLen = 1024
     t = np.arange( sigLen )
     
@@ -57,11 +54,19 @@ if __name__ == "__main__":
                                           coeffStride = 5,
                                           stateStride = 2,
                                           alignment = 0 )
-    plt.figure()
-    plt.plot( t, outputRef, 'bo-' )
-    plt.plot( t, outputSignal, 'mx-' )
-    plt.show()
+        
+    if plot:
+        import matplotlib.pyplot as plt
     
-    plt.figure()
-    plt.plot( t, outputSignal - outputRef, 'mx-' )
-    plt.show()
+        plt.figure()
+        plt.plot( t, outputRef, 'bo-' )
+        plt.plot( t, outputSignal, 'mx-' )
+        plt.show()
+        
+        plt.figure()
+        plt.plot( t, outputSignal - outputRef, 'mx-' )
+        plt.show()
+    
+if __name__ == "__main__":
+    test_biquad_iir_filter_single_channel(plot=True)
+    

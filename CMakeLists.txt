@@ -404,6 +404,7 @@ else()
   find_package(Threads REQUIRED)
 endif( BUILD_DISABLE_THREADS )
 
+# if( NOT WIN32 )
 ## Portaudio
 option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
 if( BUILD_AUDIOINTERFACES_PORTAUDIO )
@@ -418,6 +419,7 @@ if( BUILD_AUDIOINTERFACES_PORTAUDIO )
   endif( WIN32 )
   find_package( Portaudio REQUIRED )
 endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+# endif( NOT WIN32 )
 
 ## Jack Audio Connection Kit (JACK)
 option( BUILD_AUDIOINTERFACES_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )

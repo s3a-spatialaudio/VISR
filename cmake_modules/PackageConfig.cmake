@@ -30,13 +30,16 @@ if( WIN32 )
   set( CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
   set( CPACK_PACKAGE_INSTALL_DIRECTORY ${VISR_VERSIONED_NAME} )
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
-    install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll
+    get_target_property( Portaudio_IMPORT_LIBRARY Portaudio::portaudio IMPORTED_IMPLIB )
+    get_target_property( Portaudio_RUNTIME_LIBRARY Portaudio::portaudio IMPORTED_LOCATION )
+    install( FILES ${Portaudio_IMPORT_LIBRARY} ${Portaudio_RUNTIME_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+
   if( BUILD_USE_SNDFILE_LIBRARY )
-    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY} DIRECTORY )
-    install( FILES ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll
+    get_target_property( SndFile_IMPORT_LIBRARY SndFile::sndfile IMPORTED_IMPLIB )
+    get_target_property( SndFile_RUNTIME_LIBRARY SndFile::sndfile IMPORTED_LOCATION )
+    install( FILES ${SndFile_IMPORT_LIBRARY} ${SndFile_RUNTIME_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
   endif( BUILD_USE_SNDFILE_LIBRARY )
 
@@ -57,7 +60,7 @@ install( FILES ${Portaudio_INCLUDE_DIRS}/portaudio.h
   DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
   COMPONENT development_files )
 
-install( FILES ${SndFile_INCLUDE_DIR}/sndfile.h
+install( FILES ${SndFile_INCLUDE_DIRS}/sndfile.h
   DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
   COMPONENT development_files )
 
