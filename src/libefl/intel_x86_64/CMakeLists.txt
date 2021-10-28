@@ -39,7 +39,7 @@ function(add_feature_sources TARGET_NAME TARGET_TYPE FEATURE FLAGS MSVC_FLAGS)
   if(MSVC)
     target_compile_options(${TARGET}_${FEATURE} PRIVATE ${MSVC_FLAGS})
   else()
-    target_compile_options(${TARGET}}_${FEATURE} PRIVATE ${FLAGS})
+    target_compile_options(${TARGET}_${FEATURE} PRIVATE ${FLAGS})
   endif()
 
   set_target_properties( ${TARGET}_${FEATURE} PROPERTIES FOLDER ${TARGET_TYPE}_libraries/internal )
