@@ -117,7 +117,7 @@ endif( BUILD_PYTHON_BINDINGS )
 # This will be written into the visr-config.cmake file.
 set( VISR_EXPORTED_COMPONENTS )
 
-if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
+if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
   ## Component for 3rd-static components provided by VISR
   # These are needed to link dependent projects against static VISR libraries.
   export(EXPORT VISR_3rd_party_static_exports
@@ -145,7 +145,7 @@ if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
     DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
     COMPONENT development_files
   )
-endif( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC__PIC_LIBRARIES )
+endif( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   ## Component for shared 3rd-party components provided by VISR
