@@ -350,10 +350,6 @@ if( BUILD_PYTHON_BINDINGS )
   set( VISR_PYBIND11_VERSION
     ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
 
-    message( STATUS "AAAAAAAAAAAAA PYBIND11_VERSION: " ${PYBIND11_VERSION_MAJOR} )
-
-  message( STATUS "AAAAAAAAAAAAA VISR_PYBIND11_VERSION: " ${VISR_PYBIND11_VERSION} )
-
   # get PYTHON_SITE_PACKAGES to figure out where to install; this looks at
   # PYTHON_EXECUTABLE to figure out which python to use, which makes sure that
   # it's always compatible with the python found by the pybind11 add_subdirectory
