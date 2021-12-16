@@ -480,7 +480,16 @@ set(Boost_USE_MULTITHREADED TRUE)
 # Store/restore value of Boost_USE_STATIC_LIBS - vcpkg on Windows will reset it during find_package
 set(_Boost_USE_STATIC_LIBS ${Boost_USE_STATIC_LIBS})
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
-set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
+
+# Avoid a pragma message caused by an internal inconsistency between boost::bind and
+# boost::property_tree.
+message( STATUS "Boost_VERSION_STRING " ${Boost_VERSION_STRING} )
+if( (${Boost_VERSION_STRING} VERSION_GREATER 1.72.0)
+ AND (${Boost_VERSION_STRING} VERSION_LESS 1.76.0) )
+  add_definitions( -DBOOST_BIND_GLOBAL_PLACEHOLDERS=1 )
+endif( (${Boost_VERSION_STRING} VERSION_GREATER 1.72.0)
+ AND (${Boost_VERSION_STRING} VERSION_LESS 1.76.0) )
+
 
 # Static Boost libraries might not be usable in shared libraries or loadable
 # modules, depending on how they are compiled
