@@ -3,6 +3,8 @@
 
 import numpy as np
 
+import pytest
+
 import visr
 import rbbl
 import rcl
@@ -148,6 +150,10 @@ def test_parseListenerPositionTranslation():
 
 
 def test_parseListenerPositionTransformation():
+
+    sptr=pytest.importorskip("scipy.spatial.transform",
+      reason="Package scipy.spatial.transform not installed.")
+
     bs = 64
     fs = 48000
     cc = visr.SignalFlowContext( bs, fs )
@@ -158,7 +164,7 @@ def test_parseListenerPositionTransformation():
     rotationYPRdeg = np.asarray([30, -45, 70])
     rotationYPR = np.deg2rad(rotationYPRdeg)
     # rotationQuat = pml.ypr2Quaternion(rotationYPR)
-    rotationRef = Rotation.from_euler('ZYX', rotationYPR )
+    rotationRef = sptr.Rotation.from_euler('ZYX', rotationYPR )
 
     numOrientations = 1000
     positions = np.array(10*(np.random.random_sample( (numOrientations, 3) )-0.5),
@@ -172,10 +178,11 @@ def test_parseListenerPositionTransformation():
     orientationsQuat = homogeniseQuaternions( orientationsQuat )
 
     # Compute the reference orientation (after transformation in the decoder)
-    # We try to compute it as differently to the internal transformation as position.
+    # We try to compute it as differently as possible to the internal
+    # transformation.
     # orRefYPR = np.asarray([(Rotation.from_euler('ZYX', ypr )*rotationRef).as_euler('ZYX')
     #             for ypr in orientationsYPR])
-    orRefYPR = np.asarray([(rotationRef*Rotation.from_euler('ZYX', ypr )).as_euler('ZYX')
+    orRefYPR = np.asarray([(rotationRef*sptr.Rotation.from_euler('ZYX', ypr )).as_euler('ZYX')
                 for ypr in orientationsYPR])
 
     orRefQuat = np.asarray([rbbl.Quaternion.fromYPR(ypr).data
