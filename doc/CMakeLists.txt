@@ -142,13 +142,13 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
                 ${sourceDir}
                 ${outputDir}/html
      COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
-    BYPRODUCTS ${outputDir}/html-cache
-    COMMENT "HTML generation for target ${targetName}-html."
+     COMMENT "HTML generation for target ${targetName}-html."
     )
   add_custom_target( ${targetName}-html
     DEPENDS ${STAMP}
   )
   set_target_properties( ${targetName}-html PROPERTIES FOLDER documentation )
+  set_target_properties( ${targetName}-html PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/html-cache )
 endfunction(HtmlDocBuild)
 
 # Function to define a target building PDF documentation from a source directory containing Sphinx rst code.
@@ -173,13 +173,13 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/pdf
-    BYPRODUCTS ${outputDir}/pdf-cache
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
   add_custom_target( ${targetName}-pdf
     DEPENDS ${OUTPUTFILE}
   )
   set_target_properties( ${targetName}-pdf PROPERTIES FOLDER documentation )
+  set_target_properties( ${targetName}-pdf PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/pdf-cache )
 endfunction(PdfDocBuild)
 
 PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} "${VISR_USERDOC_DEPENDENCIES}" )
