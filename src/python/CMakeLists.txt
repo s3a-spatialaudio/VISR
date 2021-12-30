@@ -5,10 +5,10 @@
 # objects as Python externals.
 # This definitely leads to link errors on Linux and MacOS, but it should
 # conceptually be the same problem on Windows.
-if( Boost_USE_STATIC_LIBS )
-  message( SEND_ERROR
-   "Cannot build Python bindings when using static boost libraries." )
-endif( Boost_USE_STATIC_LIBS )
+if( Boost_USE_STATIC_LIBS AND NOT WIN32 )
+  message( WARNING
+   "Build Python bindings when using static boost libraries will fail if libraries are not position-independent." )
+endif( Boost_USE_STATIC_LIBS AND NOT WIN32 )
 
 add_subdirectory( visr )
 
