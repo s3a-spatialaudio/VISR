@@ -61,7 +61,8 @@ endforeach()
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS panningdsp_static
           EXPORT VISR_exports
-          ARCHIVE DESTINATION lib COMPONENT static_libraries )
+          ARCHIVE DESTINATION lib COMPONENT static_libraries
+          PUBLIC_HEADER DESTINATION include/visr/libpanningdsp COMPONENT development_files )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
