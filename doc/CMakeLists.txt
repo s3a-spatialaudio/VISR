@@ -131,7 +131,7 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
     OUTPUT ${STAMP}
-    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
+    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
               ${SPHINX_EXECUTABLE}
                -a
@@ -142,12 +142,11 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
                 ${sourceDir}
                 ${outputDir}/html
      COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
-    BYPRODUCTS ${outputDir}/html-cache
-    COMMENT "HTML generation for target ${targetName}-html."
+     WORKING_DIRECTORY ${outputDir}/html
+     COMMENT "HTML generation for target ${targetName}-html."
     )
-  add_custom_target( ${targetName}-html
-    DEPENDS ${STAMP}
-  )
+  add_custom_target( ${targetName}-html DEPENDS ${STAMP} )
+  set_target_properties( ${targetName}-html PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/html-cache )
   set_target_properties( ${targetName}-html PROPERTIES FOLDER documentation )
 endfunction(HtmlDocBuild)
 
@@ -159,7 +158,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
-    DEPENDS doxygen-doc ${outputDir}/pdf/conf.py ${sourceDir} ${depends}
+    DEPENDS doxygen-doc ${outputDir}/pdf/conf.py ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
             ${SPHINX_EXECUTABLE}
                -q
@@ -176,9 +175,8 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     BYPRODUCTS ${outputDir}/pdf-cache
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
-  add_custom_target( ${targetName}-pdf
-    DEPENDS ${OUTPUTFILE}
-  )
+  add_custom_target( ${targetName}-pdf DEPENDS ${OUTPUTFILE} )
+  set_target_properties( ${targetName}-pdf PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/pdf-cache )
   set_target_properties( ${targetName}-pdf PROPERTIES FOLDER documentation )
 endfunction(PdfDocBuild)
 
