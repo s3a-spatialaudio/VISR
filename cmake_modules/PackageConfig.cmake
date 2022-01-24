@@ -56,14 +56,6 @@ if( WIN32 )
   endif( NOT Boost_USE_STATIC_LIBS )
 endif( WIN32 )
 
-install( FILES ${Portaudio_INCLUDE_DIRS}/portaudio.h
-  DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
-  COMPONENT development_files )
-
-install( FILES ${SndFile_INCLUDE_DIRS}/sndfile.h
-  DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
-  COMPONENT development_files )
-
 if( VISR_SYSTEM_NAME MATCHES "Linux" )
   set( CPACK_GENERATOR DEB )
   set( CPACK_DEBIAN_HOMEPAGE "http://www.s3a-spatialaudio.org" )
