@@ -134,14 +134,14 @@ if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
   list( APPEND VISR_EXPORTED_COMPONENTS 3rd_party_static )
 
   file( COPY
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
+    ${PROJECT_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
+    ${PROJECT_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
     DESTINATION ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}
   )
 
   install(
-    FILES ${CMAKE_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
-    ${CMAKE_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
+    FILES ${PROJECT_SOURCE_DIR}/cmake_modules/FindSndFile.cmake
+    ${PROJECT_SOURCE_DIR}/cmake_modules/FindPortaudio.cmake
     DESTINATION ${VISR_INSTALL_EXPORT_CONFIG_DIRECTORY}
     COMPONENT development_files
   )

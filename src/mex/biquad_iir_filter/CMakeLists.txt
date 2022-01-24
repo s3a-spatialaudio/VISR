@@ -14,7 +14,7 @@ set(CPP_FILE_NAME ${CPP_FILE}.cpp)
 INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIR})
 
 # <AF> Don't use export files, put export the mexFunction explicitly.
-add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${CMAKE_SOURCE_DIR}/cmake_modules/Matlabdef.def )
+add_library(${PROJECT_NAME} MODULE ${CPP_FILE_NAME} ${ADDITIONAL_CPP_FILES}  ${PROJECT_SOURCE_DIR}/cmake_modules/Matlabdef.def )
 
 # Add any extras dependencies
 target_link_libraries(${PROJECT_NAME} rcl_static visr_static mexsupport ${MATLAB_LIBRARIES})

@@ -127,7 +127,7 @@ endif(VISR_SYSTEM_NAME MATCHES "Windows")
 # This is no longer required for boost libraries when using the imported target "Boost::<libraryname>" syntax
 
 function(fix_dependencies_of_3rdparty depname libpath)
-  set (EXECUTE_COMMAND bash "-c" "${CMAKE_SOURCE_DIR}/cmake_modules/./change_dependency_installname.sh ${depname} ${libpath}" )
+  set (EXECUTE_COMMAND bash "-c" "${PROJECT_SOURCE_DIR}/cmake_modules/./change_dependency_installname.sh ${depname} ${libpath}" )
   execute_process(COMMAND ${EXECUTE_COMMAND} OUTPUT_VARIABLE rv)
 endfunction()
 
