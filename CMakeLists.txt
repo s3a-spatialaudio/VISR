@@ -480,6 +480,7 @@ set(Boost_USE_MULTITHREADED TRUE)
 # Store/restore value of Boost_USE_STATIC_LIBS - vcpkg on Windows will reset it during find_package
 set(_Boost_USE_STATIC_LIBS ${Boost_USE_STATIC_LIBS})
 find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
 
 # Avoid a pragma message caused by an internal inconsistency between boost::bind and
 # boost::property_tree.
