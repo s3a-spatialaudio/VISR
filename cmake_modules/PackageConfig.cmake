@@ -34,6 +34,12 @@ if( WIN32 )
     get_target_property( Portaudio_RUNTIME_LIBRARY Portaudio::portaudio IMPORTED_LOCATION )
     install( FILES ${Portaudio_IMPORT_LIBRARY} ${Portaudio_RUNTIME_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
+
+    if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+      install( FILES ${Portaudio_INCLUDE_DIRS}/portaudio.h
+        DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
+        COMPONENT development_files )
+    endif()
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
 
   if( BUILD_USE_SNDFILE_LIBRARY )
@@ -41,6 +47,13 @@ if( WIN32 )
     get_target_property( SndFile_RUNTIME_LIBRARY SndFile::sndfile IMPORTED_LOCATION )
     install( FILES ${SndFile_IMPORT_LIBRARY} ${SndFile_RUNTIME_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
+
+    if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+      install( FILES ${SndFile_INCLUDE_DIRS}/sndfile.h
+        DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
+        COMPONENT development_files
+    )
+    endif()
   endif( BUILD_USE_SNDFILE_LIBRARY )
 
   # Boost
