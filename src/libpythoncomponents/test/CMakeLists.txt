@@ -42,7 +42,8 @@ add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 include( adjust_test_environment )
 adjustPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
 
-# The PYTHONHOME environment variabl must be set in order to let the Python interpreter embedded in the unit test binary start the correct interpreter,
+# The PYTHONHOME environment variable must be set in order to let the Python
+# interpreter embedded in the unit test binary start the correct interpreter,
 # i.e., the one corresponding to the Python environment used for building
 # the externals.
 # Retrieve the correct setting for PYTHONHOME from the Python executable.
@@ -51,3 +52,7 @@ execute_process(
 OUTPUT_VARIABLE PYTHON_BASE_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE )
 set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
   "PYTHONHOME=${PYTHON_BASE_PREFIX}" )
+# Disable leak checking because the memory handling of Python interpreter
+# causes leak reports (false positives?) that are outside our responsibility.
+set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
+  "BOOST_TEST_DETECT_MEMORY_LEAK=0" )
