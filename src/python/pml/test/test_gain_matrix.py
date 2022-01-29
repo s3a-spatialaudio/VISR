@@ -7,9 +7,8 @@ import pml
 import rrl
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-def test_rampGain():
+def test_rampGain(plot=False):
     fs=48000
     bs=64
     interpolationLength=2*bs
@@ -47,8 +46,12 @@ def test_rampGain():
         outSig[:,bIdx*bs:(bIdx+1)*bs] = flow.process(inSig[:,bIdx*bs:(bIdx+1)*bs])
 
     print( np.max(np.abs(outSig), axis=1))
-    fig, ax = plt.subplots(1,1)
-    ax.plot( outSig[activeOut,:], 'b.-')
+
+    if plot:
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots(1,1)
+        ax.plot( outSig[activeOut,:], 'b.-')
 
 if __name__ == "__main__":
-    test_rampGain()
+    test_rampGain(plot=True)

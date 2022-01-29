@@ -6,7 +6,6 @@ import rrl
 import rbbl
 
 import numpy as np
-from scipy import signal
 
 def test_startupSingleChannel(plot=False):
     fs=48000

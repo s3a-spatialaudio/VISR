@@ -5,6 +5,7 @@ set( APPLICATION_NAME audiointerfaces_test )
 # Make the current source directory known to the source code to create absolute file paths.
 add_definitions( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
+add_definitions( -DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}" )
 
 add_executable( ${APPLICATION_NAME}
 audio_interface_configuration.cpp

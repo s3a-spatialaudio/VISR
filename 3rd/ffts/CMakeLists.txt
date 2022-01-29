@@ -655,8 +655,8 @@ if( ENABLE_STATIC )
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
   )
   install(TARGETS ffts_static
-          EXPORT VISR_exports
-          PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT   development_files
+          EXPORT VISR_3rd_party_static_exports
+          PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           )
 endif( ENABLE_STATIC )
@@ -686,7 +686,7 @@ if( ENABLE_SHARED )
     $<INSTALL_INTERFACE:include/visr/3rd/ffts>
   )
   install(TARGETS ffts_shared
-          EXPORT VISR_exports
+          EXPORT VISR_3rd_party_shared_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT shared_libraries

@@ -64,8 +64,7 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules")
-
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_modules)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake_modules")
 
 # Default path for static libraries
 SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/staticlib )
@@ -92,25 +91,26 @@ if( VISR_SYSTEM_NAME MATCHES "Darwin" )
   IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     SET(CMAKE_INSTALL_PREFIX /Applications/${VISR_VERSIONED_NAME} CACHE PATH "install prefix" FORCE)
   ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
-  # Allow disabling of setting rpath - parent projects may want to customise it, based on installation
-  OPTION( AUTOSET_RPATH "Automatically set rpath" ON )
-  if(AUTOSET_RPATH)
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
-
-    # Activate rpath support
-    set( CMAKE_MACOSX_RPATH ON)
-    # Use, i.e., don't skip rpaths in the build tree
-    set( CMAKE_SKIP_BUILD_RPATH FALSE)
-    set( CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
-    # When building, set the rpath to the libraries in the build tree, not to the install tree
-    set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-    # Add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
-  endif(AUTOSET_RPATH)
 endif( VISR_SYSTEM_NAME MATCHES "Darwin" )
+
+# Allow disabling of setting rpath - parent projects may want to customise it, based on installation
+OPTION( AUTOSET_RPATH "Automatically set rpath" ON )
+if(AUTOSET_RPATH)
+  
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
+
+  # Activate rpath support
+  set( CMAKE_MACOSX_RPATH ON)
+  # Use, i.e., don't skip rpaths in the build tree
+  set( CMAKE_SKIP_BUILD_RPATH FALSE)
+  set( CMAKE_BUILD_WITH_INSTALL_NAME_DIR TRUE)
+  # When building, set the rpath to the libraries in the build tree, not to the install tree
+  set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+  # Add the automatically determined parts of the RPATH
+  # which point to directories outside the build tree to the install RPATH
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+endif(AUTOSET_RPATH)
 
 SET( VISR_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR} )
 IF( VISR_SYSTEM_PROCESSOR MATCHES "AMD64" )
@@ -304,13 +304,15 @@ if( BUILD_PYTHON_BINDINGS )
   # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
   set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
 
+  message( STATUS "Using PYBIND11_DIR: " ${PYBIND11_DIR} )
+
   # Ensure that pybind11's targets are exported within the VISR export set.
   # This is necessary to export static versions of libpythonsupport
   # and libpythoncomponents, which have a private link dependency to pybind11::embed.
   # A drawback of the current approach is that the targets are exported as,
   # e.g., VISR::embed, but we cannot set the namespace because this is done in
   # the pybind11 tree.
-  set( PYBIND11_EXPORT_NAME VISR_exports )
+  set( PYBIND11_EXPORT_NAME VISR-3rd_party_static-exports )
   # Force setting of pybind11 option (necessary in order to get the targets exported)
   set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets." FORCE )
 
@@ -339,6 +341,12 @@ if( BUILD_PYTHON_BINDINGS )
   # VISR::pythonsupport libraries and can be used by dependent
   # project to check whether they are using a compatible
   # pybind11 version.
+  get_directory_property(PYBIND11_VERSION_MAJOR DIRECTORY ${PYBIND11_DIR}
+  DEFINITION PYBIND11_VERSION_MAJOR )
+  get_directory_property(PYBIND11_VERSION_MINOR DIRECTORY ${PYBIND11_DIR}
+  DEFINITION PYBIND11_VERSION_MINOR )
+  get_directory_property(PYBIND11_VERSION_PATCH DIRECTORY ${PYBIND11_DIR}
+  DEFINITION PYBIND11_VERSION_PATCH )
   set( VISR_PYBIND11_VERSION
     ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
 
@@ -392,6 +400,7 @@ else()
   find_package(Threads REQUIRED)
 endif( BUILD_DISABLE_THREADS )
 
+# if( NOT WIN32 )
 ## Portaudio
 option( BUILD_AUDIOINTERFACES_PORTAUDIO "Support PortAudio audio interface" ON )
 if( BUILD_AUDIOINTERFACES_PORTAUDIO )
@@ -406,6 +415,7 @@ if( BUILD_AUDIOINTERFACES_PORTAUDIO )
   endif( WIN32 )
   find_package( Portaudio REQUIRED )
 endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+# endif( NOT WIN32 )
 
 ## Jack Audio Connection Kit (JACK)
 option( BUILD_AUDIOINTERFACES_JACK "Support the Jack (Jack Audio Connection Kit) audio interface" OFF )
@@ -473,9 +483,13 @@ set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
 
 # Avoid a pragma message caused by an internal inconsistency between boost::bind and
 # boost::property_tree.
-if( (${Boost_VERSION_STRING} VERSION_GREATER 1.72.0) AND (${Boost_VERSION_STRING} VERSION_LESS 1.76.0) )
+message( STATUS "Boost_VERSION_STRING " ${Boost_VERSION_STRING} )
+if( (${Boost_VERSION_STRING} VERSION_GREATER 1.72.0)
+ AND (${Boost_VERSION_STRING} VERSION_LESS 1.76.0) )
   add_definitions( -DBOOST_BIND_GLOBAL_PLACEHOLDERS=1 )
-endif( (${Boost_VERSION_STRING} VERSION_GREATER 1.72.0) AND (${Boost_VERSION_STRING} VERSION_LESS 1.76.0) )
+endif( (${Boost_VERSION_STRING} VERSION_GREATER 1.72.0)
+ AND (${Boost_VERSION_STRING} VERSION_LESS 1.76.0) )
+
 
 # Static Boost libraries might not be usable in shared libraries or loadable
 # modules, depending on how they are compiled

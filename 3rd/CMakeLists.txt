@@ -22,6 +22,7 @@ else( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set( ENABLE_SHARED OFF CACHE BOOL "FFTS: Enable building a shared library." FORCE )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 set( DISABLE_DYNAMIC_CODE ON CACHE BOOL "FFTS: Disable dynamic code generation." FORCE )
+set( ENABLE_STATIC ON CACHE BOOL "FFTS: Enable building a static library." FORCE )
 # Make these options less visible
 mark_as_advanced( FORCE GENERATE_POSITION_INDEPENDENT_CODE ENABLE_AVX ENABLE_NEON ENABLE_DOUBLE ENABLE_SHARED ENABLE_STATIC ENABLE_VFP DISABLE_DYNAMIC_CODE )
 add_subdirectory( ffts ${CMAKE_BINARY_DIR}/3rd/ffts )

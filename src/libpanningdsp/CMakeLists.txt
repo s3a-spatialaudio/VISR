@@ -60,14 +60,15 @@ endforeach()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS panningdsp_static
-          EXPORT VISR_exports
+          EXPORT VISR_static_library_exports
           ARCHIVE DESTINATION lib COMPONENT static_libraries
-          PUBLIC_HEADER DESTINATION include/visr/libpanningdsp COMPONENT development_files )
+          PUBLIC_HEADER DESTINATION include/visr/libpanningdsp COMPONENT development_files
+  )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS panningdsp_shared
-          EXPORT VISR_exports
+          EXPORT VISR_shared_library_exports
           ARCHIVE DESTINATION lib COMPONENT development_files
           RUNTIME DESTINATION lib COMPONENT shared_libraries
           LIBRARY DESTINATION lib COMPONENT shared_libraries
@@ -75,7 +76,8 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-  install(TARGETS panningdsp_static_pic EXPORT VISR_exports
+  install(TARGETS panningdsp_static_pic
+          EXPORT VISR_static_pic_library_exports
           PUBLIC_HEADER DESTINATION include/visr/libpanningdsp COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
