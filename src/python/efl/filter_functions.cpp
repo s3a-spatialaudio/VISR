@@ -1,13 +1,14 @@
 /* Copyright Institute of Sound and Vibration Research - All rights reserved */
 
 #include "check_error.hpp"
-#include "efl_helpers.hpp"
 
 #include <libefl/filter_functions.hpp>
 
 #include <libefl/basic_vector.hpp>
 
 #include <libvisr/detail/compose_message_string.hpp>
+
+#include <python/libpythonbindinghelpers/container_access.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -26,6 +27,8 @@ namespace python
 namespace py = pybind11;
 
 using namespace detail;
+
+using visr::python::bindinghelpers::ContainerAccess;
 
 template< template<typename> class Container, typename T >
 void export_iirFilterBiquadsSingleChannel( py::module & m )
@@ -51,7 +54,6 @@ void export_iirFilterBiquadsSingleChannel( py::module & m )
     py::arg("alignment")=0 );
 }
 
-
 #define ALL_FILTER_FUNCTIONS \
   (iirFilterBiquadsSingleChannel)
 
@@ -59,7 +61,7 @@ void export_iirFilterBiquadsSingleChannel( py::module & m )
  * The container types to be supported by the bindings.
  */
 #define CONTAINER_TYPES \
-(detail::PyArray) (efl::BasicVector)
+( visr::python::bindinghelpers::PyArray )( efl::BasicVector )
 
 /**
  * The numeric data types

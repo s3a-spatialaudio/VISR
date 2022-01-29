@@ -13,7 +13,6 @@ vector_functions.cpp
 )
 
 set( HEADERS
-efl_helpers.hpp
 check_error.hpp
 )
 
