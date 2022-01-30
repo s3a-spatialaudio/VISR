@@ -80,7 +80,7 @@ struct ContainerAccess< PyArray, T >
   {
     throw std::invalid_argument( "Vector function wrapper: Input arrays must be contiguous" );
   }
-  if( info.shape[0] < static_cast<ssize_t>(requestedSize) )
+  if( info.shape[ 0 ] < static_cast< pybind11::ssize_t >( requestedSize ) )
   {
     throw std::invalid_argument( "Vector function wrapper: Input array too small" );
   }
@@ -99,7 +99,7 @@ struct ContainerAccess< PyArray, T >
   {
     throw std::invalid_argument( "Vector function wrapper: Input arrays must be contiguous" );
   }
-  if( info.shape[0] < static_cast<ssize_t>(requestedSize) )
+  if( info.shape[ 0 ] < static_cast< pybind11::ssize_t >( requestedSize ) )
   {
     throw std::invalid_argument( "Vector function wrapper: Input array too small" );
   }
