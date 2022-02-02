@@ -42,15 +42,17 @@ Release 0.13.0
   BUILD_STANDALONE_APPLICATIONS is activated.
 * CLEANUP: Renamed test application binary names: feedthrough_app->feedthrough,
   matrix_convolver_app->matrix_convolver
-* 3RDPARTY: Updated pybind11 to version 2.6.2
-* 3RDPARTY: Added FFT libraries kissfft and ffts as git submodules and build them internally.
   This is to ease porting of VISR to new platforms and to avoid binary compatibility
   issues with different compilers/standard libraries.
+* BUILD: Support component-based exporting. This allows the use in external projects
+  with a smaller number of dependencies (especially if only shared VISR libraries
+  are used by external projects.) This is optional, not using COMPONENTS in
+  find_package(VISR) retains the previous behaviour.
 * BUILD: Revised target exporting configuration to add find_dependency directives
-  for 3rdparty libraries (Boost and Threads) if either BUILD_INSTALL_STATIC_LIBRARIES or
-  BUILD_INSTALL_STATIC_PIC_LIBRARIES is selected.
+  for 3rdparty libraries (Boost and Threads) if the components static_libraries
+  static_pic_libraries are built.
 * BUILD: Include pybind11 (including finding of Python) via add_subdirectory().
-  This is the way preferred by pybind11.
+  This is the way preferred by pybind11 according to its documentation.
 * BUILD: Added options BUILD_INSTALL_STATIC_PIC_LIBRARIES for building atatic
   libraries with position-independent code (PIC).
   This is a specialist option for creating self-contained shared libraries or shared modules
@@ -58,6 +60,8 @@ Release 0.13.0
 * BUILD: Added options BUILD_DISABLE_THREADS (default OFF), BUILD_USE_SNDFILE_LIBRARY,
   (default ON) and BUILD_AUDIOINTERFACES_PORTAUDIO  (default ON) to reduce 3rd-party
   dependencies when needed.. This is mainly for specialist builds.
+* 3RDPARTY: Updated pybind11 to version 2.9.0.
+* 3RDPARTY: Added FFT libraries kissfft and ffts as git subtrees and build them internally.
 
 Patch release 0.12.2
 --------------------
