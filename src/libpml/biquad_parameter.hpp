@@ -119,7 +119,12 @@ public:
   using rbbl::BiquadCoefficient< CoeffType >::BiquadCoefficient;
 
   /**
-   * 
+   * Default constructor, creates a 'flat' biquad coefficient.
+   */
+  BiquadCoefficientParameter();
+
+  /**
+   * Create a BiquadCoefficientParameter from a raw BiquadCoefficient object.
    */
   explicit BiquadCoefficientParameter(
       rbbl::BiquadCoefficient< CoeffType > const rhs );

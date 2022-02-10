@@ -8,6 +8,8 @@ namespace visr
 {
 namespace pml
 {
+template< typename CoeffType >
+BiquadCoefficientParameter< CoeffType >::BiquadCoefficientParameter() = default;
 
 template< typename CoeffType >
 BiquadCoefficientParameter< CoeffType >::BiquadCoefficientParameter(
