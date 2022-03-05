@@ -38,7 +38,6 @@ import visr
 import pml
 
 import numpy as np
-import serial
 
 from ..util.rotation_functions import deg2rad
 
@@ -93,9 +92,14 @@ class RazorAHRS(visr.AtomicComponent ):
         to set the orientation to an arbitrary value
         """
 
-
         super( RazorAHRS, self ).__init__( context, name, parent )
-        self.yprVec =   np.zeros( 3, dtype = np.float32 )
+
+        # Import pyserial within the ctor instead of in the module header to
+        # avoid a dependency of the complete visr_bst package unless we actually
+        # use this tracker.
+        import serial
+
+        self.yprVec = np.zeros( 3, dtype = np.float32 )
         baudRate = 57600
         self.ser = serial.Serial(port, baudRate, timeout=0)
         self.message = ""
