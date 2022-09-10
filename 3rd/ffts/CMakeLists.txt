@@ -18,8 +18,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 # installation parameters
-set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/ffts)
-set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+# Note (Andreas Franck): Replaced by own install logic in order to create installation packages.
+# set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/ffts)
+# set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 
 # common options
 
@@ -513,7 +514,8 @@ if(ENABLE_SHARED)
     VERSION ${FFTS_MAJOR}.${FFTS_MINOR}.${FFTS_MICRO}
   )
 
-  install( TARGETS ffts_shared DESTINATION ${LIB_INSTALL_DIR} )
+  # Note (Andreas Franck) superseded by install( EXPORT ... ) logic below.
+  # install( TARGETS ffts_shared DESTINATION ${LIB_INSTALL_DIR} )
 endif(ENABLE_SHARED)
 
 if(ENABLE_STATIC)
@@ -527,7 +529,8 @@ if(ENABLE_STATIC)
     set_target_properties(ffts_static PROPERTIES OUTPUT_NAME ffts)
   endif(UNIX)
 
-  install( TARGETS ffts_static DESTINATION ${LIB_INSTALL_DIR} )
+  # Note (Andreas Franck) superseded by install( EXPORT ... ) logic below.
+  # install( TARGETS ffts_static DESTINATION ${LIB_INSTALL_DIR} )
 endif(ENABLE_STATIC)
 
 if(ENABLE_STATIC OR ENABLE_SHARED)
@@ -605,10 +608,6 @@ if(UNIX)
               DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
   endif(PKG_CONFIG_FOUND)
 endif(UNIX)
-
-install( FILES
-    ${FFTS_HEADERS}
-  DESTINATION ${INCLUDE_INSTALL_DIR} )
 
 # Override global visibility preset to avoid warnings.
 # This is necessary because the global setting for policy CMP0063 is not heeded
@@ -689,7 +688,7 @@ if( ENABLE_SHARED )
           EXPORT VISR_3rd_party_shared_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/ffts COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
-          LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT shared_libraries
-          RUNTIME DESTINATION ${THIRDPARTY_RUNTIME_INSTALL_DIRECTORY} COMPONENT shared_libraries
+          LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries
+          RUNTIME DESTINATION ${THIRDPARTY_RUNTIME_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries
           )
 endif( ENABLE_SHARED )
