@@ -223,7 +223,7 @@ if(NOT CMAKE_CROSSCOMPILING)
       # Test running with -mfpu=neon and -mfloat-abi=softfp
       set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE} -mfpu=neon -mfloat-abi=softfp")
       check_c_source_runs("${TEST_SOURCE_CODE}" NEON_SOFTFP_SUPPORTED)
-      
+
       if(NOT NEON_SOFTFP_SUPPORTED)
         if(ENABLE_NEON)
           message(FATAL_ERROR "FFTS cannot enable NEON on this platform")
@@ -604,8 +604,10 @@ if(UNIX)
       endforeach()
       # Produce a pkg-config file for linking against the shared lib
       configure_file("ffts.pc.cmake.in" "ffts.pc" @ONLY)
-      install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/ffts.pc"
-              DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+      # Note (Andreas Franck) Absolute locations are incompatible with CPack
+      # installer generation.
+      # install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/ffts.pc"
+      #         DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
   endif(PKG_CONFIG_FOUND)
 endif(UNIX)
 
