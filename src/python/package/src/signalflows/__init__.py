@@ -1,12 +1,7 @@
 import os
-from contextlib import contextmanager
+from ..impl.dll_path_context import dll_path_context
 
-if hasattr(os, 'add_dll_directory'):
-   cookie = os.add_dll_directory(
-      os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'impl'))
-else:
-   cookie = None
-from ..impl.signalflows import *
 
-if cookie is not None:
-   cookie.close()
+with dll_path_context(
+  os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'impl')):
+    from ..impl.signalflows import *

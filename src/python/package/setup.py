@@ -4,5 +4,5 @@ from setuptools import setup, Distribution
 from distutils.core import Extension
 
 setup(
-  ext_modules = [ Extension(name="_", sources=[]) ]
+  ext_modules = []
 )

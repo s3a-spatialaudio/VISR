@@ -18,6 +18,7 @@ configure_file( src/rcl/__init__.py src/visr/rcl/__init__.py )
 configure_file( src/rrl/__init__.py src/visr/rrl/__init__.py )
 configure_file( src/signalflows/__init__.py src/visr/signalflows/__init__.py )
 configure_file( src/impl/__init__.py src/visr/impl/__init__.py )
+configure_file( src/impl/dll_path_context.py src/visr/impl/dll_path_context.py )
 configure_file( ${CMAKE_SOURCE_DIR}/Readme.md Readme.md )
 
 # TODO: Collect externals
