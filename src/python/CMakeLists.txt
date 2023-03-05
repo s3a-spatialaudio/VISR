@@ -43,3 +43,5 @@ add_custom_target( pythonexternals
   objectmodelpython objectmodelpython reverbobjectpython
   audiointerfacespython )
 set_target_properties( pythonexternals PROPERTIES FOLDER python_externals )
+
+add_subdirectory( package )

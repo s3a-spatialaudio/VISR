@@ -1,0 +1,15 @@
+
+[options]
+zip_safe = False
+python_requires = >=3.0
+install_requires =
+    numpy
+
+include_package_data = True
+packages =
+  visr
+package_dir =
+  = src
+
+#[options.packages.find]
+#include_package_data = True
