@@ -11,11 +11,15 @@ python_requires = >=3.0
 install_requires =
     numpy
 
+distclass = Distribution()
+
 include_package_data = True
-packages =
-  visr
 package_dir =
   = src
+packages = find_namespace:
+
+[options.packages.find]
+where = src
 
 #[options.packages.find]
 #include_package_data = True
