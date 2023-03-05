@@ -24,7 +24,7 @@ void exportPortaudioInterface( pybind11::module & m );
 PYBIND11_MODULE( audiointerfaces, m )
 {
   pybind11::module::import( "visr" );
-  pybind11::module::import( "rrl" );
+  pybind11::module::import( "visr.rrl" );
 
   using namespace visr::python::audiointerfaces;
   exportAudioInterface( m );

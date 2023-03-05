@@ -20,9 +20,9 @@ void exportReverbParameterCalculator( pybind11::module & m );
 PYBIND11_MODULE( reverbobject, m )
 {
   pybind11::module::import( "visr" );
-  pybind11::module::import( "pml" );
-  pybind11::module::import( "rcl" );
-  pybind11::module::import( "objectmodel" );
+  pybind11::module::import( "visr.pml" );
+  pybind11::module::import( "visr.rcl" );
+  pybind11::module::import( "visr.objectmodel" );
 
   using namespace visr::python::reverbobject;
   exportLateReverbFilterCalculator( m );

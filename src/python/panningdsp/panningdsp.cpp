@@ -23,8 +23,8 @@ void exportPanningMatrixParameter(py::module & m);
 PYBIND11_MODULE(panningdsp, m)
 {
   py::module::import( "visr" );
-  py::module::import( "efl" );
-  py::module::import( "pml" );
+  py::module::import( "visr.efl" );
+  py::module::import( "visr.pml" );
 
   m.doc() =
 R"(VISR component library for panning-specific processing.

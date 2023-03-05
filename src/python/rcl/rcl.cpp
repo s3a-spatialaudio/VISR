@@ -46,8 +46,8 @@ namespace rcl
 PYBIND11_MODULE(rcl, m)
 {
   pybind11::module::import( "visr" );
-  pybind11::module::import( "panning" );
-  pybind11::module::import( "pml" );
+//  pybind11::module::import( "visr.panning" );
+  pybind11::module::import( "visr.pml" );
 
   m.doc() = 
 R"(VISR default component library.
