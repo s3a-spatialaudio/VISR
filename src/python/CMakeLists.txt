@@ -1,5 +1,8 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+# Define the output directory for the built externals.
+set( PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/visr/impl/" )
+
 # This is not possible because the static boost libraries are normally not
 # compiled as position-independent code, which means they cannot used in shared
 # objects as Python externals.
