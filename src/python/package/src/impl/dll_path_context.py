@@ -14,3 +14,5 @@ def dll_path_context(path):
             yield
         finally:
             cookie.close()
+    else:
+        yield
