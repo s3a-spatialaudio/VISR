@@ -1,10 +1,9 @@
 
+import numpy as np
 import pytest
 
-import pml
-import rbbl
-
-import numpy as np
+from visr import pml
+from visr import rbbl
 
 
 def biquadCoefficientParameter( dtype ):

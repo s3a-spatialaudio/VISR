@@ -1,13 +1,11 @@
-
 import pytest
-
-import pml
-import rbbl
-
 import numpy as np
 import json
-
 from scipy.spatial.transform import Rotation
+
+from visr import pml
+from visr import rbbl
+
 
 def test_defaultInit():
     lp = pml.ListenerPosition()
