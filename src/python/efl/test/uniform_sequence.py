@@ -8,7 +8,7 @@ Created on Mon Apr 29 08:04:07 2019
 
 import numpy as np
 
-import efl
+from visr import efl
 
 def uniformSequence( n, dtype=np.float32, scaling=1.0 ):
   """

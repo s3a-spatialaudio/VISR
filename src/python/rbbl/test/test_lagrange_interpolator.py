@@ -3,10 +3,9 @@
 # Copyright (c) 2014-2020 Andreas Franck a.franck@soton.ac.uk --- All rights reserved.
 
 import pytest
-
-import rbbl
-
 import numpy as np
+
+from visr import rbbl
 
 @pytest.mark.parametrize("dType", [np.float32, np.float64])
 def test_lagrangeOrder3_sineDelayRamp(dType):

@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation
 
 import pytest
 
-import rbbl
+from visr import rbbl
 
 
 quaternionTypes = [ rbbl.Quaternion, rbbl.QuaternionDouble ]

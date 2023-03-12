@@ -1,8 +1,8 @@
 
 import visr
-import rcl
-import pml
-import rrl
+from visr import rcl
+from visr import pml
+from visr import rrl
 
 import numpy as np
 

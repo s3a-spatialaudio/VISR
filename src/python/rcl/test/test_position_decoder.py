@@ -6,10 +6,10 @@ import numpy as np
 import pytest
 
 import visr
-import rbbl
-import rcl
-import pml
-import rrl
+from visr import rbbl
+from visr import rcl
+from visr import pml
+from visr import rrl
 
 def homogeniseQuaternions( q ):
     """

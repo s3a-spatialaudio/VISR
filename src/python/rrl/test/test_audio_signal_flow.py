@@ -1,12 +1,9 @@
-
 import visr
+from visr import rrl
 
-import rrl
 
 class AudioPortDummy(visr.AtomicComponent):
-    def __init__(self, context, name, parent,
-                 *,
-                 inputs=[], outputs=[]):
+    def __init__(self, context, name, parent, *, inputs=[], outputs=[]):
         super().__init__(context, name, parent)
         self.inputs = []
         self.outputs = []
@@ -22,7 +19,7 @@ class AudioPortDummy(visr.AtomicComponent):
                 sampleType = inputSpec[2]
             else:
                 sampleType = visr.AudioSampleType.floatId
-            inPort = visr.AudioInput( portName, self, sampleType, width )
+            inPort = visr.AudioInput(portName, self, sampleType, width)
             self.inputs.append(inPort)
         for outputSpec in outputs:
             if len(outputSpec) < 1:
@@ -36,7 +33,7 @@ class AudioPortDummy(visr.AtomicComponent):
                 sampleType = outputSpec[2]
             else:
                 sampleType = visr.AudioSampleType.floatId
-            outPort = visr.AudioOutput( portName, self, sampleType, width )
+            outPort = visr.AudioOutput(portName, self, sampleType, width)
             self.outputs.append(outPort)
 
 
@@ -45,13 +42,13 @@ def test_audioPortQueries():
     bs = 64
     cc = visr.SignalFlowContext(period=bs, samplingFrequency=fs)
 
-    inSpec = [ ('foo', 3), ('bar', 2), ('val', 5, visr.AudioSampleType.int32Id) ]
-    outSpec = [ ('outFoo', 9, visr.AudioSampleType.doubleId), ('outBar', 4)]
+    inSpec = [("foo", 3), ("bar", 2), ("val", 5, visr.AudioSampleType.int32Id)]
+    outSpec = [("outFoo", 9, visr.AudioSampleType.doubleId), ("outBar", 4)]
 
-    totalInputWidth = sum([ v[1] if len(v) >=2 else 1 for v in inSpec])
-    totalOutputWidth = sum([ v[1] if len(v) >=2 else 1 for v in outSpec])
+    totalInputWidth = sum([v[1] if len(v) >= 2 else 1 for v in inSpec])
+    totalOutputWidth = sum([v[1] if len(v) >= 2 else 1 for v in outSpec])
 
-    comp = AudioPortDummy( cc, "top", None, inputs=inSpec, outputs=outSpec)
+    comp = AudioPortDummy(cc, "top", None, inputs=inSpec, outputs=outSpec)
 
     flow = rrl.AudioSignalFlow(comp)
 
@@ -97,6 +94,7 @@ def test_audioPortQueries():
         assert flow.audioPlaybackPortOffset(playbackIdx) == currentOffset
         currentOffset += flow.audioPlaybackPortWidth(playbackIdx)
     assert currentOffset == numPlaybackChannels
+
 
 # Enable to run the unit test as a script.
 if __name__ == "__main__":

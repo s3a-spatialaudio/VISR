@@ -3,11 +3,11 @@
 
 import numpy as np
 
-import efl
 import visr
-import rcl
-import rbbl
-import rrl
+from visr import efl
+from visr import rcl
+from visr import rbbl
+from visr import rrl
 
 def test_FirFilterMatrixInit():
 

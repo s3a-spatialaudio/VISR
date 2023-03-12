@@ -1,7 +1,7 @@
 
 import visr
-import panningdsp
-import rrl
+from visr import panningdsp
+from visr import rrl
 
 from operator import itemgetter
 import numpy as np

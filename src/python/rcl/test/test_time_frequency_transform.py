@@ -1,11 +1,11 @@
-
-import visr
-import rcl
-import pml
-import rrl
-
 import numpy as np
 from scipy import signal
+
+import visr
+from visr import rcl
+from visr import pml
+from visr import rrl
+
 
 def test_singleChannel(plot=False):
     fs=48000

@@ -8,11 +8,11 @@ Simple atomic component implemented in Python to be used in a unit test.
 This variant imports the pml library to
 """
 
-import visr
-
-import pml
-
 import numpy as np
+
+import visr
+from visr import pml
+
 
 class PmlAdder( visr.AtomicComponent ):
     """ General-purpose add block for an arbitrary number of inputs"""

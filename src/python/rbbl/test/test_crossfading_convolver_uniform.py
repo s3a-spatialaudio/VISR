@@ -5,10 +5,11 @@ Created on Wed Dec 27 08:02:00 2017
 @author: Andreas Franck
 """
 
-import efl
-import rbbl
-
 import numpy as np
+
+from visr import efl
+from visr import rbbl
+
 
 def test_crossfading_convolver_instantiation(plot=False):
     numberOfInputs = 2

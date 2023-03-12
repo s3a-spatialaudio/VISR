@@ -1,10 +1,9 @@
 
 import pytest
-
-import efl
-
 import numpy as np
 from scipy import signal
+
+from visr import efl
 
 from uniform_sequence import uniformSequence, uniformBasicVector, uniformScalar, typedVector
 

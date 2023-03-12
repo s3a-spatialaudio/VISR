@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 from itertools import product
 
-import efl
+from visr import efl
 
 from uniform_sequence import uniformSequence, typedVector
 

@@ -1,9 +1,9 @@
 
 import visr
-import rcl
-import pml
-import rrl
-import rbbl
+from visr import rcl
+from visr import pml
+from visr import rrl
+from visr import rbbl
 
 import numpy as np
 

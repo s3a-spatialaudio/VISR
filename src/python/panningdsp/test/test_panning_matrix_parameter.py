@@ -1,8 +1,8 @@
 
 import visr
-import panningdsp
-import pml
-import rrl
+from visr import panningdsp
+from visr import pml
+from visr import rrl
 
 import numpy as np
 

@@ -5,7 +5,7 @@ from scipy.spatial.transform import Rotation
 
 import pytest
 
-import rbbl
+from visr import rbbl
 
 
 positionTypes = [ rbbl.Position3D, rbbl.Position3DDouble ]

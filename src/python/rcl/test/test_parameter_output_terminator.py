@@ -2,9 +2,9 @@
 import pytest
 
 import visr
-import rcl
-import pml
-import rrl
+from visr import rcl
+from visr import pml
+from visr import rrl
 
 def test_externalInput():
     class Comp(visr.CompositeComponent):

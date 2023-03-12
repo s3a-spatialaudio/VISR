@@ -1,7 +1,7 @@
 
 import pytest
 
-import efl
+from visr import efl
 
 import numpy as np
 

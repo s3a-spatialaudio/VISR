@@ -1,10 +1,9 @@
 
 import pytest
-
-import efl
-
 import numpy as np
 from itertools import product
+
+from visr import efl
 
 from uniform_sequence import typedVector
 

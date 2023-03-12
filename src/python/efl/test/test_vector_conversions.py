@@ -2,7 +2,7 @@
 import pytest
 from itertools import product
 
-import efl
+from visr import efl
 
 import numpy as np
 
