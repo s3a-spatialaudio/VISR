@@ -1,7 +1,27 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
+
 # Define the output directory for the built externals.
-set( PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/visr/impl/" )
+# TODO: Make this work with multi-configuration targets!
+set( PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_ROOT}/visr/impl/" )
+
+# List the externals to be included in the package.
+# These are also the subdirectory names.
+set( VISR_PYTHON_EXTERNALS
+  audiointerfaces
+  efl
+  objectmodel
+  panning
+  panningdsp
+  pml
+  rbbl
+  rcl
+  rrl
+  reverbobject
+  signalflows
+  visr
+)
 
 # This is not possible because the static boost libraries are normally not
 # compiled as position-independent code, which means they cannot used in shared
@@ -13,38 +33,33 @@ if( Boost_USE_STATIC_LIBS AND NOT WIN32 )
    "Build Python bindings when using static boost libraries will fail if libraries are not position-independent." )
 endif( Boost_USE_STATIC_LIBS AND NOT WIN32 )
 
-add_subdirectory( visr )
+set( BUILD_PYTHON_EXTERNALS_LINK_LIBRARY_TYPE "shared" CACHE STRING "The link library type used by Python externals." )
+set( VISR_PYTHON_EXTERNALS_LINK_LIBRARY_TYPES shared static_pic )
+set_property( CACHE BUILD_PYTHON_EXTERNALS_LINK_LIBRARY_TYPE PROPERTY STRINGS ${VISR_PYTHON_EXTERNALS_LINK_LIBRARY_TYPES} )
 
-add_subdirectory( efl )
+set( VISR_PYTHON_EXTERNAL_LINK_LIB_TYPE ${BUILD_PYTHON_EXTERNALS_LINK_LIBRARY_TYPE} )
 
-add_subdirectory( signalflows )
+if( NOT ${VISR_PYTHON_EXTERNAL_LINK_LIB_TYPE} IN_LIST VISR_BUILD_LIBRARY_TYPES )
+  message( SEND_ERROR "The library type for linking Python externals (" ${VISR_PYTHON_EXTERNAL_LINK_LIB_TYPE}
+    ") is not being built." )
+endif()
 
-add_subdirectory( rbbl )
-
-add_subdirectory( rcl )
-
-add_subdirectory( rrl )
-
-add_subdirectory( panning )
-
-add_subdirectory( panningdsp )
-
-add_subdirectory( pml )
-
-add_subdirectory( objectmodel )
-
-add_subdirectory( reverbobject )
-
-add_subdirectory( audiointerfaces )
-
+# Define helper library used by several Python externals.
 add_subdirectory( libpythonbindinghelpers )
 
+# List containing the target names of all Python externals.
+set( VISR_PYTHON_EXTERNALS_TARGETS )
+
+# Iterate over all externals to define the targets and add them to the target list.
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  add_subdirectory( ${_external} )
+  list( APPEND VISR_PYTHON_EXTERNALS_TARGETS ${_external}python )
+endforeach()
+
 # "Meta-target" combining all Python externals to serve as a single dependency.
-add_custom_target( pythonexternals
-  DEPENDS visrpython eflpython signalflowspython rbblpython
-  rclpython rrlpython panningpython pmlpython
-  objectmodelpython objectmodelpython reverbobjectpython
-  audiointerfacespython )
+add_custom_target( pythonexternals DEPENDS ${VISR_PYTHON_EXTERNALS_TARGETS} )
 set_target_properties( pythonexternals PROPERTIES FOLDER python_externals )
 
+# Subdirectory containing build instructions for the visr Python namespace package
+# incl. binary distribution packages (wheels).
 add_subdirectory( package )

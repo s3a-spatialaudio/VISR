@@ -1,46 +1,36 @@
-# Copyright Audioscenic 2023 - All rights reserved
-# Author Andreas Franck <andreas.franck@audioscenic.com>
 
-configure_file( pyproject.toml.in pyproject.toml )
-configure_file( setup.py setup.py )
-configure_file( setup.cfg.in setup.cfg )
-configure_file( MANIFEST.in.in MANIFEST.in )
-configure_file( src/__init__.py src/visr/__init__.py )
-configure_file( src/audiointerfaces/__init__.py src/visr/audiointerfaces/__init__.py )
-configure_file( src/efl/__init__.py src/visr/efl/__init__.py )
-configure_file( src/objectmodel/__init__.py src/visr/objectmodel/__init__.py )
-configure_file( src/panning/__init__.py src/visr/panning/__init__.py )
-configure_file( src/panningdsp/__init__.py src/visr/panningdsp/__init__.py )
-configure_file( src/pml/__init__.py src/visr/pml/__init__.py )
-configure_file( src/rbbl/__init__.py src/visr/rbbl/__init__.py )
-configure_file( src/reverbobject/__init__.py src/visr/reverbobject/__init__.py )
-configure_file( src/rcl/__init__.py src/visr/rcl/__init__.py )
-configure_file( src/rrl/__init__.py src/visr/rrl/__init__.py )
-configure_file( src/signalflows/__init__.py src/visr/signalflows/__init__.py )
-configure_file( src/impl/__init__.py src/visr/impl/__init__.py )
-configure_file( src/impl/dll_path_context.py src/visr/impl/dll_path_context.py )
-configure_file( ${CMAKE_SOURCE_DIR}/Readme.md Readme.md )
+set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_ROOT}/visr )
 
-# TODO: Collect externals
-set( EXTERNAL_TARGETS
- visrpython
- eflpython
- signalflowspython
- rbblpython
- rclpython
- rrlpython
- panningpython
- panningdsppython
- pmlpython
- objectmodelpython
- reverbobjectpython
- audiointerfacespython
-)
+configure_file( pyproject.toml.in ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml )
+configure_file( setup.cfg.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.cfg )
+configure_file( setup.py.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.py )
+configure_file( ${PROJECT_SOURCE_DIR}/Readme.md ${VISR_PYTHON_PACKAGE_ROOT}/Readme.md )
+configure_file( ${PROJECT_SOURCE_DIR}/LICENSE.md ${VISR_PYTHON_PACKAGE_ROOT}/LICENSE.md )
 
-set( EXTERNAL_TARGET_FILES )
-foreach( _external_target ${EXTERNAL_TARGETS} )
-  list( APPEND EXTERNAL_TARGET_FILES $<TARGET_FILE:${_external_target}> )
+configure_file( __init__.py.in ${VISR_PYTHON_PACKAGE_DIR}/__init__.py )
+configure_file( dll_path_context.py ${VISR_PYTHON_PACKAGE_DIR}/impl/dll_path_context.py )
+
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  set( _SUBPACKAGE_NAME ${_external} )
+  configure_file( __init__.py.subpackage.template.in 
+    ${VISR_PYTHON_PACKAGE_DIR}/${_external}/__init__.py
+  )
 endforeach()
+
+# Determine the actual external external file paths.
+set( EXTERNAL_TARGET_FILES )
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  list( APPEND EXTERNAL_TARGET_FILES $<TARGET_FILE:${_external}python> )
+endforeach()
+
+set( VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES )
+if( ${VISR_PYTHON_EXTERNAL_LINK_LIB_TYPE} STREQUAL shared )
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  list( APPEND VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES $<TARGET_FILE:${_external}_shared> )
+endforeach()
+endif()
+
+#TODO: Take care of RPATHs
 
 include(GeneratePythonBinaryWheel)
 
@@ -50,12 +40,14 @@ getBinaryPythonWheelName( visr 0.13.0 _WHEEL_FILE_NAME )
 
 message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )
 message( STATUS "EXTERNAL_TARGET_FILES: " ${EXTERNAL_TARGET_FILES} )
+message( STATUS "VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES: " ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} )
 
 add_custom_command( OUTPUT visr-0.13.0-cp310-cp310-linux_x86_64.whl # ${_WHEEL_FILE_NAME}
-  MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml
-  COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_TARGET_FILES} ${CMAKE_CURRENT_BINARY_DIR}/src/visr/impl/
-  COMMAND ${PYTHON_EXECUTABLE} -m build --no-isolation --wheel
-  DEPENDS ${EXTERNAL_TARGETS}
+  MAIN_DEPENDENCY ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml
+  # COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_TARGET_FILES} ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} 
+  #  ${CMAKE_CURRENT_BINARY_DIR}/src/visr/impl/
+  COMMAND ${PYTHON_EXECUTABLE} -m build --no-isolation --outdir ${PROJECT_BINARY_DIR}/python_packages --wheel
+  DEPENDS ${PYTHON_EXTERNALS_TARGETS}
 )
 
 message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )

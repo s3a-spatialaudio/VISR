@@ -4,9 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "visr"
-version = @VISR_MAJOR_VERSION@.@VISR_MINOR_VERSION@.@VISR_PATCH_VERSION@
+authors = [ { name = "Andreas Franck", email = "andreas.franck@audioscenic.com" }, { name = "VISR contributors"} ]
+version = "@VISR_MAJOR_VERSION@.@VISR_MINOR_VERSION@.@VISR_PATCH_VERSION@"
 description = "VISR audio rendering framework"
-readme = "@CMAKE_SOURCE_DIR@/Readme.md"
+license = { text = "ISC" }
+readme = "Readme.md"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",

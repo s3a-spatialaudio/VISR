@@ -1,7 +1,7 @@
 [metadata]
 name = visr
-version = 0.13.0
-author = Andreas Franck
+# version = 0.13.0
+# author = Andreas Franck
 author_email = andras.franck@audioscenic.com
 description = VISR audio rendering framework
 
@@ -15,11 +15,11 @@ distclass = Distribution()
 
 include_package_data = True
 package_dir =
-  = src
+  = visr
 packages = find_namespace:
 
 [options.packages.find]
-where = src
+where = visr
 
 #[options.packages.find]
 #include_package_data = True
