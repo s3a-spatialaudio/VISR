@@ -1,15 +1,17 @@
 
-set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_ROOT}/visr )
+set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_ROOT}/src/visr )
 
+# Set up a valid package directory structure.
 configure_file( pyproject.toml.in ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml )
 configure_file( setup.cfg.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.cfg )
 configure_file( setup.py.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.py )
+configure_file( MANIFEST.in.in ${VISR_PYTHON_PACKAGE_ROOT}/MANIFEST.in )
 configure_file( ${PROJECT_SOURCE_DIR}/Readme.md ${VISR_PYTHON_PACKAGE_ROOT}/Readme.md )
 configure_file( ${PROJECT_SOURCE_DIR}/LICENSE.md ${VISR_PYTHON_PACKAGE_ROOT}/LICENSE.md )
-
 configure_file( __init__.py.in ${VISR_PYTHON_PACKAGE_DIR}/__init__.py )
 configure_file( dll_path_context.py ${VISR_PYTHON_PACKAGE_DIR}/impl/dll_path_context.py )
-
+# Create the directory structure of a nameapace package, including __init__.py files that
+# import the symbols for each subpackage from an exteranl in visr/impl.
 foreach( _external ${VISR_PYTHON_EXTERNALS} )
   set( _SUBPACKAGE_NAME ${_external} )
   configure_file( __init__.py.subpackage.template.in 
@@ -30,13 +32,9 @@ foreach( _external ${VISR_PYTHON_EXTERNALS} )
 endforeach()
 endif()
 
-#TODO: Take care of RPATHs
-
 include(GeneratePythonBinaryWheel)
 
-# set( _WHEEL_FILE_NAME dummy.whl )
 getBinaryPythonWheelName( visr 0.13.0 _WHEEL_FILE_NAME )
-# set( _WHEEL_FILE_NAME dummy.whl )
 
 message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )
 message( STATUS "EXTERNAL_TARGET_FILES: " ${EXTERNAL_TARGET_FILES} )
@@ -44,6 +42,7 @@ message( STATUS "VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES: " ${VISR_PYTHON_EXTER
 
 add_custom_command( OUTPUT visr-0.13.0-cp310-cp310-linux_x86_64.whl # ${_WHEEL_FILE_NAME}
   MAIN_DEPENDENCY ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml
+  WORKING_DIRECTORY ${VISR_PYTHON_PACKAGE_ROOT}
   # COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_TARGET_FILES} ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} 
   #  ${CMAKE_CURRENT_BINARY_DIR}/src/visr/impl/
   COMMAND ${PYTHON_EXECUTABLE} -m build --no-isolation --outdir ${PROJECT_BINARY_DIR}/python_packages --wheel

@@ -4,7 +4,7 @@ set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
 
 # Define the output directory for the built externals.
 # TODO: Make this work with multi-configuration targets!
-set( PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_ROOT}/visr/impl/" )
+set( PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_ROOT}/src/visr/impl/" )
 
 # List the externals to be included in the package.
 # These are also the subdirectory names.
@@ -53,7 +53,11 @@ set( VISR_PYTHON_EXTERNALS_TARGETS )
 # Iterate over all externals to define the targets and add them to the target list.
 foreach( _external ${VISR_PYTHON_EXTERNALS} )
   add_subdirectory( ${_external} )
-  list( APPEND VISR_PYTHON_EXTERNALS_TARGETS ${_external}python )
+  set( _externalTarget ${_external}python )
+  list( APPEND VISR_PYTHON_EXTERNALS_TARGETS ${_externalTarget} )
+  # Skip the RPATH for the Python external, because only shared libraries (incl. other externals)
+  # in the current directory will be used.
+  set_target_properties( ${_externalTarget} PROPERTIES SKIP_BUILD_RPATH TRUE )
 endforeach()
 
 # "Meta-target" combining all Python externals to serve as a single dependency.

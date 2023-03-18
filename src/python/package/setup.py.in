@@ -4,5 +4,6 @@ from setuptools import setup, Distribution
 from distutils.core import Extension
 
 setup(
-  ext_modules = []
+   # Create compatibility tags (PEP 425) for a binary distribution.
+  has_ext_modules=lambda: True
 )
