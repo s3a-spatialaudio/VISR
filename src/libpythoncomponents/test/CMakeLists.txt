@@ -23,7 +23,7 @@ endif( NOT Boost_USE_STATIC_LIBS )
 target_compile_definitions( ${APPLICATION_NAME} PRIVATE -DBOOST_ALL_NO_LIB )
 
 # Since the 'wrapper' unit tests require the visr Python external, ensure that it is compiled
-add_dependencies( ${APPLICATION_NAME} visrpython pmlpython rrlpython rbblpython )
+add_dependencies( ${APPLICATION_NAME} visrpython eflpython pmlpython rbblpython objectmodelpython )
 
 # Encode the current source location to give access to the Python code contained in the test/python directory.
 target_compile_definitions( ${APPLICATION_NAME} PRIVATE CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
