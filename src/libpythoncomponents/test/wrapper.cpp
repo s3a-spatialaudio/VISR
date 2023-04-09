@@ -40,15 +40,14 @@ struct PythonPathFixture
   {
     // Use the path to the VISR python externals (retrieved from CMake)
     boost::filesystem::path additionalPath{ PYTHON_MODULE_INSTALL_DIRECTORY };
-    std::string pythonPath{ mVarName + std::string( "=" ) +
-                            additionalPath.string() };
+    mVariable = mVarName + std::string( "=" ) + additionalPath.string();
 
     // Pass the path to the VISR externals via the PYTHONPATH environment
     // variable.
 #ifdef VISR_SYSTEM_NAME_Windows
-    BOOST_ASSERT( _putenv( &pythonPath[ 0 ] ) == 0 );
+    BOOST_ASSERT( _putenv( &mVariable[ 0 ] ) == 0 );
 #else
-    BOOST_ASSERT( putenv( &pythonPath[ 0 ] ) );
+    BOOST_ASSERT( putenv( &mVariable[ 0 ] ) == 0 );
 #endif
   }
   ~PythonPathFixture()
@@ -58,11 +57,12 @@ struct PythonPathFixture
     BOOST_ASSERT( _putenv( &unsetCmd[ 0 ] ) == 0 );
 #else
     std::string unsetCmd{ mVarName };
-    BOOST_ASSERT( unsetenv( &pythonPath[ 0 ] ) == 0 );
+    BOOST_ASSERT( unsetenv( &unsetCmd[ 0 ] ) == 0 );
 #endif
   }
 
   std::string mVarName;
+  std::string mVariable;
 };
 } // unnamed namespace
 
@@ -78,7 +78,7 @@ BOOST_FIXTURE_TEST_CASE( WrapUsePYTHONPATH, PythonPathFixture )
   boost::filesystem::path const modulePath = basePath / "python";
 
   pythonsupport::InitialisationGuard::initialise();
-  
+
   const std::size_t blockSize{64};
   const SamplingFrequencyType samplingFrequency{48000};
   std::size_t const numBlocks{16};
