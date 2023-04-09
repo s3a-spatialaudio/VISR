@@ -40,7 +40,7 @@ add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
          COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
 
 include( adjust_test_environment )
-adjustPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
+adjustTestEnvironment( ${APPLICATION_NAME} )
 
 # The PYTHONHOME environment variable must be set in order to let the Python
 # interpreter embedded in the unit test binary start the correct interpreter,
