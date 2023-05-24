@@ -128,7 +128,7 @@ class RazorAHRS(visr.AtomicComponent ):
         self.yawRightHand = yawRightHand
         self.pitchRightHand = pitchRightHand
         self.rollRightHand= rollRightHand
-        self.orientation = np.array( [0.0, 0.0, 0.0 ] ) # Current orientation, unadjusted, in radian
+        self.orientationYPR = np.array( [0.0, 0.0, 0.0 ] ) # Current orientation, unadjusted, in radian
 
     def send_data(self,newdata):
         data = newdata
@@ -136,9 +136,9 @@ class RazorAHRS(visr.AtomicComponent ):
         try:
           yprvec = [float(i) for i in data.split(',')]
           if self.yawRightHand:
-#              print(ypr.orientation[0])
+#              print(ypr.orientationYPR[0])
               yprvec[0]*= -1
-#              print(ypr.orientation[0])
+#              print(ypr.orientationYPR[0])
           if self.pitchRightHand:
               yprvec[1]*= -1
           if self.rollRightHand:
@@ -147,16 +147,16 @@ class RazorAHRS(visr.AtomicComponent ):
           if np.array(yprvec).size != 3:
             raise ValueError( 'yaw pitch roll bad format:'+str(np.array(yprvec)))
 
-          self.orientation = yprvec # Store the current position
+          self.orientationYPR = yprvec # Store the current position
 
           ypr = self.trackingOutput.protocolOutput().data()
 
 
           # [deg2rad(yprvec[0]+self.yawOffset),deg2rad(yprvec[1]+self.pitchOffset),deg2rad(yprvec[2]+self.rollOffset)]
 
-          ypr.orientation = [deg2rad(self.orientation[0] + self.yawOffset),
-                             deg2rad(self.orientation[1] + self.pitchOffset),
-                             deg2rad(self.orientation[2] + self.rollOffset)]
+          ypr.orientationYPR = [deg2rad(self.orientationYPR[0] + self.yawOffset),
+                             deg2rad(self.orientationYPR[1] + self.pitchOffset),
+                             deg2rad(self.orientationYPR[2] + self.rollOffset)]
 
           self.sentN = self.sentN+1
 #          print("%d serial parsing %f sec"%(self.procN,time.time()-self.start))
@@ -206,9 +206,9 @@ class RazorAHRS(visr.AtomicComponent ):
             if not calInputProtocol.empty():
                 # We are not interested in the content, but just use it as a trigger to use the
                 # most recent orientation to set the compensation values.
-                self.yawOffset = - self.orientation[0]
-                self.pitchOffset = - self.orientation[1]
-                self.rollOffset = - self.orientation[2]
+                self.yawOffset = - self.orientationYPR[0]
+                self.pitchOffset = - self.orientationYPR[1]
+                self.rollOffset = - self.orientationYPR[2]
                 calInputProtocol.clear()
 
         self.procN=self.procN+1
