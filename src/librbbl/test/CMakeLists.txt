@@ -19,6 +19,10 @@ set( SOURCES
  test_main.cpp
 )
 
+if( BUILD_FFTS_LIBRARY )
+  list( APPEND SOURCES ffts_wrapper.cpp )
+endif(BUILD_FFTS_LIBRARY)
+
 add_executable( ${APPLICATION_NAME} ${SOURCES} )
 
 target_link_libraries( ${APPLICATION_NAME} PRIVATE rbbl_${BUILD_LIBRARY_TYPE_FOR_APPS})
