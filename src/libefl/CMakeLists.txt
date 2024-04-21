@@ -80,7 +80,6 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
   target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
   set_target_properties( efl_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
-  target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
   get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
   target_include_directories(efl_${LIB_TYPE}
     PUBLIC
@@ -93,9 +92,9 @@ if( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
   add_subdirectory( intel_x86_64 )
 endif( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
 
-if( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
-  add_subdirectory( armv7l_neon_32bit )
-endif( VISR_SYSTEM_PROCESSOR MATCHES "armv7l" )
+if((VISR_SYSTEM_PROCESSOR MATCHES "armv7l") OR (VISR_SYSTEM_PROCESSOR MATCHES "arm64"))
+  add_subdirectory(armv7l_neon_32bit)
+endif()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS efl_static
