@@ -138,9 +138,11 @@ ADD_DEFINITIONS("-DVISR_PLATFORM_NAME_${VISR_PLATFORM_NAME_MACRO}")
 # This covers Linux and MacOS X
 if(UNIX)
   # Support for the Raspberry Pi: Enable hardware floating-point arithmetic
-  if( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
+  if((${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l"))
     add_compile_options( -mfpu=neon -march=armv7-a -mfloat-abi=hard )
-  endif( ${VISR_SYSTEM_PROCESSOR} MATCHES "armv7l" )
+  elseif( VISR_SYSTEM_PROCESSOR MATCHES "arm64") # Includes Apple silicon
+    # TODO: Are there any sensible options to be set?
+  endif()
   # TODO: Add more elaborate configuration for -march and -mtune
   # At the moment, the code is invariably built for the architecture
   # features of the machine it is compiled on.
@@ -253,7 +255,9 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
   OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" OFF)
   IF( BUILD_MACOS_UNIVERSAL_BINARIES )
     SET( OSX_UNIVERSAL ON )
-    SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64" )
+#    SET(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+  SET(CMAKE_OSX_ARCHITECTURES "arm64")
+#   SET(CMAKE_OSX_ARCHITECTURES "x86_64")
   ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
