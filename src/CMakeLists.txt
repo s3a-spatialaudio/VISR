@@ -245,7 +245,7 @@ configure_package_config_file(visr-config.cmake.in
 # Assuming major version bump = breaking API changes
 write_basic_package_version_file(
   ${VISR_BUILD_EXPORT_CONFIG_DIRECTORY}/visr-config-version.cmake
-  VERSION ${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}
+  VERSION ${VISR_VERSION}
   COMPATIBILITY SameMajorVersion)
 
 # Install package version file

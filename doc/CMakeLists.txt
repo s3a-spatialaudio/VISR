@@ -155,7 +155,7 @@ endfunction(HtmlDocBuild)
 function( PdfDocBuild targetName sourceDir outputDir depends )
   configure_file( ${sourceDir}/conf.py.in ${outputDir}/pdf/conf.py @ONLY )
   # Name (with version) of the output file. This is the main dependency of the target.
-  set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
+  set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_VERSION}.pdf )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
@@ -171,7 +171,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
-    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
+    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/pdf
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
@@ -199,5 +199,5 @@ install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html
 # Place the generated PDF documentation in the installers.
 # NOTE: Unfortuanately we need to operate on files, as installing for targets apparently works only for executables and libraries (which have a predefined main file)
 # TODO: Remove construction of file name with full version string.
-install( FILES  ${userdoc_output_root}/userdoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT user_documentation_pdf )
-install( FILES  ${apidoc_output_root}/apidoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT api_documentation_pdf )
+install( FILES  ${userdoc_output_root}/userdoc-${VISR_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT user_documentation_pdf )
+install( FILES  ${apidoc_output_root}/apidoc-${VISR_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT api_documentation_pdf )

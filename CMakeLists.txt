@@ -7,6 +7,10 @@
 # 3.3 for IN_LIST operator in if() conditions
 CMAKE_MINIMUM_REQUIRED (VERSION 3.3.0)
 
+# Handle VERSION argument of project() command.
+if( POLICY CMP0048 )
+  cmake_policy( SET CMP0048 NEW )
+endif()
 # Avoid warnings about the CXX_VISIBILITY_PRESET set for all target types.
 if( POLICY CMP0063 ) # (only if the CMake version supports this policy
   CMAKE_POLICY(SET CMP0063 NEW)
@@ -34,17 +38,13 @@ endif( POLICY CMP0091 )
 
 
 # The name of our top-level project.
-PROJECT( VISR CXX C )
+PROJECT( VISR
+         LANGUAGES CXX C
+         VERSION 0.13.0 )
 
-# Define central version numbers for the project
-# TODO: Decide whether to move that to an external CMake file .
-set( VISR_MAJOR_VERSION 0 )
-set( VISR_MINOR_VERSION 13 )
-set( VISR_PATCH_VERSION 0 )
-
-add_definitions( -DVISR_MAJOR_VERSION=${VISR_MAJOR_VERSION} )
-add_definitions( -DVISR_MINOR_VERSION=${VISR_MINOR_VERSION} )
-add_definitions( -DVISR_PATCH_VERSION=${VISR_PATCH_VERSION} )
+add_definitions( -DVISR_MAJOR_VERSION=${VISR_VERSION_MAJOR} )
+add_definitions( -DVISR_MINOR_VERSION=${VISR_VERSION_MINOR} )
+add_definitions( -DVISR_PATCH_VERSION=${VISR_VERSION_PATCH} )
 
 # Add support for unit tests
 INCLUDE( CTest )
@@ -78,7 +78,7 @@ SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 # Default path for DLLs on windows
 SET( RUNTIME_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 
-set( VISR_VERSIONED_NAME VISR-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION})
+set( VISR_VERSIONED_NAME VISR-${VISR_VERSION})
 
 #############################################################
 # Create a system string.
