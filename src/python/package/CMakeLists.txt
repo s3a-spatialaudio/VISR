@@ -1,5 +1,5 @@
 
-set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_ROOT}/src/visr )
+set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_ROOT}/visr )
 
 # Set up a valid package directory structure.
 configure_file( pyproject.toml.in ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml )

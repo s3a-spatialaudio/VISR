@@ -1,10 +1,22 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
-set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
+# Set the directory containing the 'visr' python package data structure.
+# By adding this directory to the Python module search path, the VISR package
+# can be imported without being installed.
+# TODO: COnsider moving this definition up because the same directory is used
+# by the libpythoncomponents unit test.
+set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python/src )
 
 # Define the output directory for the built externals.
 # TODO: Make this work with multi-configuration targets!
-set( PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_ROOT}/src/visr/impl/" )
+# Note: The $<0:> suppresses the build type directory appended for multi-configuration targets.
+set(PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_ROOT}/visr/impl/$<0:>")
+
+# Define an output directory for the 'import lib stub' created for every Python external.
+# This prevents them from colliding with static libraries of the same name.
+# TODO: Is it possible that we need to install them them in certain circumstances
+# (e.g., linking dependent externals in other projects).
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/importlib)
 
 # List the externals to be included in the package.
 # These are also the subdirectory names.
