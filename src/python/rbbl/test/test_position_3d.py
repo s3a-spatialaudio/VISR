@@ -410,7 +410,7 @@ def test_positionSphericalInterpolationNormalised(posType, plot=False):
     # Requitres SciPy >= 1.5
     # refOut = ssp.geometric_slerp( pos0Ref, pos1Ref, t )
 
-    out = np.full((numVals,3), fill_value=np.NaN, dtype=dtype)
+    out = np.full((numVals,3), fill_value=np.nan, dtype=dtype)
     for idx in range(numVals):
         interpOut = rbbl.interpolateSpherical(pos0, pos1, t[idx])
         out[idx,:] = np.asarray(interpOut)
@@ -454,7 +454,7 @@ def test_positionSphericalInterpolation(posType, plot=False):
     # Requitres SciPy >= 1.5
     # refOut = ssp.geometric_slerp( pos0Ref, pos1Ref, t )
 
-    out = np.full((numVals,3), fill_value=np.NaN, dtype=np.dtype)
+    out = np.full((numVals,3), fill_value=np.nan, dtype=dtype)
     for idx in range(numVals):
         interpOut = rbbl.interpolateSpherical(pos0, pos1, t[idx])
         out[idx,:] = np.asarray(interpOut)

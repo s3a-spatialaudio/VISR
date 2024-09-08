@@ -187,7 +187,7 @@ class DynamicHrirController( visr.AtomicComponent ):
         self.hrirPos = sph2cart(np.array( hrirPositions, copy = True, dtype = np.float32 ))
         self.hrirInterpolation = hrirInterpolation
         if self.hrirInterpolation:
-            self.lastPosition = np.repeat( [[np.NaN, np.NaN, np.NaN]], self.numberOfObjects, axis=0 )
+            self.lastPosition = np.repeat( [[np.nan, np.nan, np.nan]], self.numberOfObjects, axis=0 )
             self.hrirLookup = ConvexHull( self.hrirPos )
             self.triplets = np.transpose(self.hrirLookup.points[self.hrirLookup.simplices], axes=(0, 2, 1))
             self.inverted = np.asarray( inv(self.triplets), dtype=np.float32 )

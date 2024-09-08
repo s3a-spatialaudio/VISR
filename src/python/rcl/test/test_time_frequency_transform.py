@@ -29,7 +29,7 @@ def test_singleChannel(plot=False):
 
     dftLen=512
     hopSize=256
-    window = signal.hann(dftLen, sym=False) # 'sym=False' needed for COLA condition.
+    window = signal.windows.hann(dftLen, sym=False) # 'sym=False' needed for COLA condition.
 
     numOutBlocks=int(np.floor(signalLength/hopSize))
     numFdBins=int(np.ceil( (dftLen+1)/2 ))
@@ -37,7 +37,7 @@ def test_singleChannel(plot=False):
     assert bs % hopSize == 0, "Period size must be an integer multiple of the hop size"
     dftBlocksPerPeriod=bs // hopSize
 
-    outputData=np.full( (numSignals, numFdBins, numOutBlocks), complex(np.NaN), dtype=np.complex64)
+    outputData=np.full( (numSignals, numFdBins, numOutBlocks), complex(np.nan), dtype=np.complex64)
 
     if not signal.check_COLA(window, dftLen, dftLen-hopSize):
         print( "Used window/overlap combination does not satisfy the COLA condition.")
