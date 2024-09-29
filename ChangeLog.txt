@@ -13,6 +13,9 @@ Release 0.13.0
 * FEATURE: Refactored time-frequency framework (partly in librcl, partly in libpml).
 * FEATURE: Added time API to represent time (at block or sample resolution)
   within VISR components.
+* FEATURE: Synchronisation mechanism for asynchronously running AudioSignalFlow 
+  processing threads. Implements mutex-based locking to send or receive data to/from 
+  the processing thread using the rrl::AudioSignalFlow::parameterExchangeMutex() method.
 * FEATURE: Reworked efl library. Added architecture-dependent optimised implementations
   for some functions on Intel and ARM platforms.
 * FEATURE: Panning library: Updated CAP (compensated amplitude panning) algorithm.
@@ -25,7 +28,7 @@ Release 0.13.0
   (using filter function in libefl, which can be optimised per architecture).
 * FEATURE: Convolver components (librcl): Added optional parameter inputs to change
   all routings at runtime with a single parameter message.
-* FEATURE: librcl: Added Parameter{Input|Output}Terminator components to satisfy
+* FEATURE: librcl: Added Parameter{Input|Output}Terminator components to deal with
   unused parameter ports.
 * FEATURE: librrl: Added system profiling feature (enabled by CMake option
   BUILD_RUNTIME_SYSTEM_PROFILING)
