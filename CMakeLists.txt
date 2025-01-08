@@ -349,13 +349,6 @@ if( BUILD_PYTHON_BINDINGS )
   DEFINITION PYBIND11_VERSION_PATCH )
   set( VISR_PYBIND11_VERSION
     ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
-
-  # get PYTHON_SITE_PACKAGES to figure out where to install; this looks at
-  # PYTHON_EXECUTABLE to figure out which python to use, which makes sure that
-  # it's always compatible with the python found by the pybind11 add_subdirectory
-  # above
-  list(APPEND CMAKE_MODULE_PATH "${PYBIND11_DIR}/tools")
-  find_package(PythonLibsNew REQUIRED)
 endif( BUILD_PYTHON_BINDINGS )
 
 option( BUILD_DISABLE_THREADS "Whether to disable the use of threads. This is mainly useful mainly specialised purposes, e.g., Web assembly" OFF )
@@ -511,9 +504,7 @@ if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
   find_package(OggVorbis REQUIRED)
 endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
-# Note: Disabled installation to ${PYTHON_SITE_PACKAGES}, because this
-# prohibits the creation of installer packages.
-# This sometimes gets used if BUILD_PYTHON_BINDINGS is not set.
+# This sometimes gets used event though BUILD_PYTHON_BINDINGS is not set.
 set( PYTHON_MODULE_INSTALL_DIRECTORY
     "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
