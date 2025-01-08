@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+#include <cstdint>
+
 namespace visr
 {
 namespace efl

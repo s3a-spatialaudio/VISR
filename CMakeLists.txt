@@ -51,10 +51,8 @@ INCLUDE( CTest )
 
 ## Set C++ standard used.
 
-# Enable C++ 11 support
-# This requires CMake >= 3.1
-# TODO: Check when we can increase the requirement to C++14
-set( CMAKE_CXX_STANDARD 11 )
+# Enable C++ 14 support
+set( CMAKE_CXX_STANDARD 14 )
 
 # Treat the above standard as a hard requirement rather than 'decaying' to a
 # previous standard if the requirments aren' met
@@ -258,8 +256,9 @@ ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 ############################################################
 # Set the minimum Mac OS version.
 if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-#  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
- set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+if( NOT CMAKE_OSX_DEPLOYMENT_TARGET )
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+endif( NOT CMAKE_OSX_DEPLOYMENT_TARGET )
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
@@ -389,6 +388,8 @@ endif( VISR_SYSTEM_NAME MATCHES Linux )
 ###########################################################
 # Support for 3rd-party libraries.
 
+option( BUILD_FFTS "Build an internal copy of FFTS" ON )
+
 # Add 3rd-party libraries that are built locally.
 add_subdirectory( 3rd )
 
@@ -511,10 +512,9 @@ endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
 # Note: Disabled installation to ${PYTHON_SITE_PACKAGES}, because this
 # prohibits the creation of installer packages.
-if( BUILD_PYTHON_BINDINGS )
-  set( PYTHON_MODULE_INSTALL_DIRECTORY
-  "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
-endif( BUILD_PYTHON_BINDINGS )
+# This sometimes gets used if BUILD_PYTHON_BINDINGS is not set.
+set( PYTHON_MODULE_INSTALL_DIRECTORY
+    "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
 ################################################################################
