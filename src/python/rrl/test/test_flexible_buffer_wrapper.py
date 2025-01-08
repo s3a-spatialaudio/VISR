@@ -33,7 +33,7 @@ def test_compositeFeedthrough(plot=False):
     inSig=np.asarray(np.cos( fSig[:,np.newaxis] *2*np.pi * t[np.newaxis,:] ),
                      dtype=np.float32)
     # inSig[0,:] = np.arange( sigLen )
-    outSig = np.full( (numChannels, sigLen), np.NaN, dtype=np.float32)
+    outSig = np.full((numChannels, sigLen), np.nan, dtype=np.float32)
 
     context=visr.SignalFlowContext(period=period, samplingFrequency=fs)
 

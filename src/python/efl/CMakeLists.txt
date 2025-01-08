@@ -6,6 +6,8 @@ basic_matrix.cpp
 denormalised_number_handling.cpp
 efl.cpp
 error_codes.cpp
+filter_functions.cpp
+initialise_library.cpp
 vector_conversions.cpp
 vector_functions.cpp
 )
@@ -38,7 +40,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
 # Note: We export the target to enable dependent projects to query target properties
 # such as the library location.
 install(TARGETS ${PROJECT_NAME}
-        EXPORT VISR_exports
+        EXPORT VISR_python_externals_exports
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )
 

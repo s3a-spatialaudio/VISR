@@ -2,8 +2,9 @@
 
 #include "vector_functions_impl.hpp"
 
-// #include <boost/preprocessor/seq/for_each.hpp>
-// #include <boost/preprocessor/seq/enum.hpp>
+#include <cstdint>
+
+#include <cstdint>
 
 namespace visr
 {

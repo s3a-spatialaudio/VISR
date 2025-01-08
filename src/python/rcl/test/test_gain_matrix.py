@@ -5,7 +5,6 @@ import pml
 import rrl
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 def gainRampReference(inputSignal, gains, blockSize, interpolationSteps):
     sigLen=inputSignal.shape[-1]
@@ -29,7 +28,7 @@ def gainRampReference(inputSignal, gains, blockSize, interpolationSteps):
         startGain=startGain+endGain*(gains[...,bIdx+1]-startGain)
     return outputSignal
 
-def test_rampGain():
+def test_rampGain():    
     fs=48000
     bs=64
     interpolationLength=5*bs

@@ -29,12 +29,12 @@ using CpuInfoType = int[4];
   
 /**
  */
-void getCpuId( int functionId, CpuInfoType & result )
+void getCpuId( int functionId, int count, CpuInfoType & result )
 {
 #if defined(__GNUC__) || defined(__clang__)
-  __cpuid(functionId, result[0], result[1], result[2], result[3] );
+  __cpuid_count(functionId, count, result[0], result[1], result[2], result[3] );
 #elif defined(_MSC_VER)
-  __cpuid( result, functionId );
+  __cpuidex( result, functionId, count );
 #else
 #error "efl::intel_x86_64::getCpuId(): Unknown compiler"
 #endif //  defined(__GNUC__) || defined(__clang__)
@@ -61,12 +61,12 @@ CpuFeatures::CpuFeatures()
 {
   // Get basic information
   CpuInfoType baseInfo;
-  getCpuId( 0x0, baseInfo );
+  getCpuId( 0x0, 0x0, baseInfo );
   int const maxInfoId = baseInfo[ 0 ];
   if( maxInfoId >= 1 )
   {
     CpuInfoType basicFeatureInfo;
-    getCpuId( 0x01, basicFeatureInfo );    
+    getCpuId( 0x01, 0x0, basicFeatureInfo );
     mMMX = bitIsSet( basicFeatureInfo, 3, 23 );
     mSSE = bitIsSet( basicFeatureInfo, 3, 25 );
     mSSE2 = bitIsSet( basicFeatureInfo, 3, 26 );
@@ -79,7 +79,7 @@ CpuFeatures::CpuFeatures()
   if( maxInfoId >= 0x07 )
   {
     CpuInfoType extendedFeatureInfo;
-    getCpuId( 0x07, extendedFeatureInfo );    
+    getCpuId( 0x07, 0x0, extendedFeatureInfo );
     mAVX2 = bitIsSet( extendedFeatureInfo, 1, 5 );
     mAVX512F = bitIsSet( extendedFeatureInfo, 1, 16 );
   }

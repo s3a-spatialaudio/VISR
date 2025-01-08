@@ -7,9 +7,9 @@ SET( CPACK_PACKAGE_NAME "VISR" )
 SET( CPACK_PACKAGE_VENDOR "ISVR")
 
 # Use the version numbers centrally defined for the VISR project
-set( CPACK_PACKAGE_VERSION_MAJOR ${VISR_MAJOR_VERSION} )
-set( CPACK_PACKAGE_VERSION_MINOR ${VISR_MINOR_VERSION} )
-set( CPACK_PACKAGE_VERSION_PATCH ${VISR_PATCH_VERSION} )
+set( CPACK_PACKAGE_VERSION_MAJOR ${VISR_VERSION_MAJOR} )
+set( CPACK_PACKAGE_VERSION_MINOR ${VISR_VERSION_MINOR} )
+set( CPACK_PACKAGE_VERSION_PATCH ${VISR_VERSION_PATCH} )
 
 set( PKG_FILE_NAME ${VISR_VERSIONED_NAME}-${CMAKE_SYSTEM_NAME})
 
@@ -30,14 +30,30 @@ if( WIN32 )
   set( CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
   set( CPACK_PACKAGE_INSTALL_DIRECTORY ${VISR_VERSIONED_NAME} )
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-    get_filename_component( PORTAUDIO_LIBRARY_DIR ${PORTAUDIO_LIBRARY} DIRECTORY )
-    install( FILES ${PORTAUDIO_LIBRARY_DIR}/portaudio_x64.dll
+    get_target_property( Portaudio_IMPORT_LIBRARY Portaudio::portaudio IMPORTED_IMPLIB )
+    get_target_property( Portaudio_RUNTIME_LIBRARY Portaudio::portaudio IMPORTED_LOCATION )
+    install( FILES ${Portaudio_IMPORT_LIBRARY} ${Portaudio_RUNTIME_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
+
+    if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+      install( FILES ${Portaudio_INCLUDE_DIRS}/portaudio.h
+        DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
+        COMPONENT development_files )
+    endif()
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
+
   if( BUILD_USE_SNDFILE_LIBRARY )
-    get_filename_component( SNDFILE_LIBRARY_DIR ${SNDFILE_LIBRARY} DIRECTORY )
-    install( FILES ${SNDFILE_LIBRARY_DIR}/libsndfile-1.dll
+    get_target_property( SndFile_IMPORT_LIBRARY SndFile::sndfile IMPORTED_IMPLIB )
+    get_target_property( SndFile_RUNTIME_LIBRARY SndFile::sndfile IMPORTED_LOCATION )
+    install( FILES ${SndFile_IMPORT_LIBRARY} ${SndFile_RUNTIME_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries )
+
+    if( BUILD_INSTALL_STATIC_LIBRARIES OR BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+      install( FILES ${SndFile_INCLUDE_DIRS}/sndfile.h
+        DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/"
+        COMPONENT development_files
+    )
+    endif()
   endif( BUILD_USE_SNDFILE_LIBRARY )
 
   # Boost
@@ -68,11 +84,15 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   set( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-    install( FILES ${PORTAUDIO_LIBRARIES}
+    get_target_property( PORTAUDIO_LIBPATH Portaudio::portaudio
+                         IMPORTED_LOCATION )
+    install( FILES ${PORTAUDIO_LIBPATH}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
   endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
   if( BUILD_USE_SNDFILE_LIBRARY )
-    install( FILES ${SNDFILE_LIBRARY} 
+    get_target_property( SNDFILE_LIBPATH SndFile::sndfile
+                         IMPORTED_LOCATION )
+    install( FILES ${SNDFILE_LIBPATH}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
     install( FILES ${FLAC_LIBRARY}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
@@ -94,32 +114,32 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   # Prepare a example launchagent file
   set( LAUNCHAGENT_PLIST_FILENAME ${VISR_VERSIONED_NAME}.plist )
   set( LAUNCHAGENT_PLIST_FILEPATH ${PROJECT_BINARY_DIR}/package_resources/${LAUNCHAGENT_PLIST_FILENAME} )
-  configure_file( ${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/VISR-launchagent.plist.in
+  configure_file( ${PROJECT_SOURCE_DIR}/cmake_modules/package_resources/VISR-launchagent.plist.in
                   ${LAUNCHAGENT_PLIST_FILEPATH}	@ONLY )
   # Hack: we treat the launchagents file as part of shared_libraries because we want to use the same script.
   install( FILES ${LAUNCHAGENT_PLIST_FILEPATH}
            DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY}/etc COMPONENT shared_libraries )
 
-  configure_file(${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
+  configure_file(${PROJECT_SOURCE_DIR}/cmake_modules/package_resources/productbuild_postscript.sh.in
   		       "${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh" @ONLY)
   set( CPACK_POSTFLIGHT_SHARED_LIBRARIES_SCRIPT
        ${PROJECT_BINARY_DIR}/package_resources/productbuild_postscript.sh)
 endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 install( DIRECTORY config DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT loudspeaker_configs )
-install( FILES ${CMAKE_SOURCE_DIR}/LICENSE.md
-               ${CMAKE_SOURCE_DIR}/Contributors.md
-               ${CMAKE_SOURCE_DIR}/Readme.md
-               ${CMAKE_SOURCE_DIR}/ChangeLog.txt
+install( FILES ${PROJECT_SOURCE_DIR}/LICENSE.md
+               ${PROJECT_SOURCE_DIR}/Contributors.md
+               ${PROJECT_SOURCE_DIR}/Readme.md
+               ${PROJECT_SOURCE_DIR}/ChangeLog.txt
                DESTINATION ${VISR_TOPLEVEL_INSTALL_DIRECTORY} COMPONENT base )
 # Allow for text substitution in the files and change names from .md to .txt (the former is not currently supported by CMake).
-configure_file (${CMAKE_SOURCE_DIR}/LICENSE.md
+configure_file (${PROJECT_SOURCE_DIR}/LICENSE.md
         "${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt" @ONLY)
 set( CPACK_RESOURCE_FILE_LICENSE ${PROJECT_BINARY_DIR}/package_resources/LICENSE.txt )
-configure_file (${CMAKE_SOURCE_DIR}/Readme.md
+configure_file (${PROJECT_SOURCE_DIR}/Readme.md
         "${PROJECT_BINARY_DIR}/package_resources/Readme.txt" @ONLY)
 set( CPACK_RESOURCE_FILE_README ${PROJECT_BINARY_DIR}/package_resources/Readme.txt )
-configure_file (${CMAKE_SOURCE_DIR}/cmake_modules/package_resources/welcome.txt.in
+configure_file (${PROJECT_SOURCE_DIR}/cmake_modules/package_resources/welcome.txt.in
         "${PROJECT_BINARY_DIR}/package_resources/welcome.txt" @ONLY)
 set(CPACK_RESOURCE_FILE_WELCOME ${PROJECT_BINARY_DIR}/package_resources/welcome.txt)
 
@@ -143,7 +163,7 @@ if( BUILD_PYTHON_BINDINGS )
   # In this way the same pybind11 version can be used by dependent projects.
   # We omit the tests/ and docs/ subdirectries to save space.
   install( DIRECTORY ${PYBIND11_DIR}/
-           DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11"
+           DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/pybind11"
            COMPONENT development_files
            PATTERN tests EXCLUDE
            PATTERN docs EXCLUDE )

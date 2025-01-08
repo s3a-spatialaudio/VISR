@@ -132,8 +132,8 @@ void RuntimeProfiler::finishIteration()
   
 void RuntimeProfiler::resetMeasurements()
 {
-  std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-    mFlow.parameterExchangeCriticalSection() };
+  std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+    mFlow.parameterExchangeMutex() };
   mMeasurementSampleCounter = 0;
 }
 
@@ -150,8 +150,8 @@ getStatistics( MeasurementVector & mean,
     throw std::invalid_argument( "Size of \"variance\" buffer does not match number of profiled components." );
   }
   {
-    std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-      mFlow.parameterExchangeCriticalSection() };
+    std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+      mFlow.parameterExchangeMutex() };
     mean.copy( mRunningMean );
     calculateVariance( variance );
     return mStatisticsSampleCounter;
@@ -171,8 +171,8 @@ getAndResetStatistics( MeasurementVector & mean,
     throw std::invalid_argument( "Size of \"variance\" buffer does not match number of profiled components." );
   }
   {
-    std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-      mFlow.parameterExchangeCriticalSection() };
+    std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+      mFlow.parameterExchangeMutex() };
     std::size_t const numCycles = mStatisticsSampleCounter;
     mean.copy( mRunningMean );
     calculateVariance( variance );
@@ -185,8 +185,8 @@ getAndResetStatistics( MeasurementVector & mean,
 
 void RuntimeProfiler::resetStatistics()
 {
-  std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-    mFlow.parameterExchangeCriticalSection() };
+  std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+    mFlow.parameterExchangeMutex() };
   mStatisticsSampleCounter = 0;
   mRunningMean.zeroFill();
   mRunningM2.zeroFill();  
@@ -199,16 +199,16 @@ std::size_t RuntimeProfiler::measurementBufferSize() const
 
 std::size_t RuntimeProfiler::measurementSamples() const
 {
-  std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-    mFlow.parameterExchangeCriticalSection() };
+  std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+    mFlow.parameterExchangeMutex() };
   return measurementSamplesInternal();
 }
 
 
 std::size_t RuntimeProfiler::statisticsSamples() const
 {
-  std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-    mFlow.parameterExchangeCriticalSection() };
+  std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+    mFlow.parameterExchangeMutex() };
   return mStatisticsSampleCounter;
 }
   
@@ -243,8 +243,8 @@ writeComponentNames( std::ostream & os, std::string const & separator ) const
 RuntimeProfiler::MeasurementBuffer const &
 RuntimeProfiler::getMeasurements( std::size_t & numIterations )
 {
-  std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-    mFlow.parameterExchangeCriticalSection() };
+  std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+    mFlow.parameterExchangeMutex() };
   numIterations = measurementSamplesInternal();
   mBackMeasurementBuffer.swap( mCurrentMeasurementBuffer );
   mMeasurementSampleCounter = 0;
@@ -262,8 +262,8 @@ void RuntimeProfiler::getMean( efl::BasicVector<TimeType> & val ) const
     val.fillValue( std::numeric_limits<TimeType>::quiet_NaN() );
   }
   {
-    std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-    mFlow.parameterExchangeCriticalSection() };
+    std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+    mFlow.parameterExchangeMutex() };
     val.copy( mRunningMean );
   }
 }
@@ -276,8 +276,8 @@ void RuntimeProfiler::getVariance( efl::BasicVector<TimeType> & val ) const
   }
   else
   {
-    std::lock_guard< AudioSignalFlow::ParameterExchangeCriticalSectionType > guard{
-      mFlow.parameterExchangeCriticalSection() };
+    std::lock_guard< AudioSignalFlow::ParameterExchangeMutexType > guard{
+      mFlow.parameterExchangeMutex() };
     calculateVariance( val );
   }
 }

@@ -308,7 +308,7 @@ def test_writeJson():
     assert "quaternion" in rep["orientation"].keys()
     quat = rep["orientation"]["quaternion"]
 
-    quatRead = np.asarray([quat["w"], quat["x"], quat["y"], quat["z"]], dtype=np.float)
+    quatRead = np.asarray([quat["w"], quat["x"], quat["y"], quat["z"]], dtype=np.float32)
     quatRef = rbbl.Quaternion.fromYPR(yprInit)
     assert np.linalg.norm(quatRead-np.asarray(quatRef.data)) < 1e-5
 

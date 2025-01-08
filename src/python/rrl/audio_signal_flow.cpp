@@ -76,18 +76,18 @@ py::array_t<SampleType> wrapProcess( visr::rrl::AudioSignalFlow & flow, py::arra
 
 } // unnamed namespace
 
-using CriticalSection = visr::rrl::AudioSignalFlow::ParameterExchangeCriticalSectionType;
+using ParameterExchangeMutex = visr::rrl::AudioSignalFlow::ParameterExchangeMutexType;
 
 /**
  * Context manager class to use critical section guard with the Python with statement.
  */ 
-class CriticalSectionGuard
+class ParameterExchangeMutexGuard
 {
 public:
   /**
    * Construct a context manager object from the critical section object of the audio signal flow.
    */
-  explicit CriticalSectionGuard( CriticalSection & section )
+  explicit ParameterExchangeMutexGuard( ParameterExchangeMutex & section )
    : mSection( section )
   {}
 
@@ -95,13 +95,13 @@ public:
    * Construct the context manager directly from the audio signal flow.
    * This is a convenience constructor that avoids the need to get the criticial section object.
    */
-  explicit CriticalSectionGuard( AudioSignalFlow & flow )
-   : mSection( flow.parameterExchangeCriticalSection() )
+  explicit ParameterExchangeMutexGuard( AudioSignalFlow & flow )
+   : mSection( flow.parameterExchangeMutex() )
   {}
 
-  ~CriticalSectionGuard() = default;
+  ~ParameterExchangeMutexGuard() = default;
 
-  CriticalSection & enter() 
+  ParameterExchangeMutex & enter() 
   {
     {
       py::gil_scoped_release release;
@@ -116,7 +116,7 @@ public:
     return false; // Indicate that the exception has not been handled.
   }
 private:
-  CriticalSection & mSection;
+  ParameterExchangeMutex & mSection;
 };
 
 
@@ -124,19 +124,19 @@ void exportAudioSignalFlow( py::module & m )
 {
   py::class_<AudioSignalFlow>  cls( m, "AudioSignalFlow" );
 
-  py::class_< CriticalSection >( cls, "ParameterExchangeCriticalSection",
+  py::class_< ParameterExchangeMutex >( cls, "ParameterExchangeMutex",
 R"(Python binding for the mutex type used by AudioSignalFlow to guard the exchange of parameter data.)" )
-    .def( "lock", &CriticalSection::lock, py::call_guard<py::gil_scoped_release>(), R"( Acquire the lock.)" )
-    .def( "unlock", &CriticalSection::unlock, R"(Release the lock)" )
+    .def( "lock", &ParameterExchangeMutex::lock, py::call_guard<py::gil_scoped_release>(), R"( Acquire the lock.)" )
+    .def( "unlock", &ParameterExchangeMutex::unlock, R"(Release the lock)" )
     ;
 
-  py::class_< CriticalSectionGuard >( cls, "CriticalSectionGuard",
+  py::class_< ParameterExchangeMutexGuard >( cls, "ParameterExchangeMutexGuard",
 R"( Context manager to acquire the parameter exchange critical section lock with the Python "with" statement.)")
-    .def( py::init< CriticalSection & >(), R"( Construct the context manager from the parameter exchange critical section mutex.)" )
+    .def( py::init< ParameterExchangeMutex & >(), R"( Construct the context manager from the parameter exchange critical section mutex.)" )
     .def( py::init< AudioSignalFlow & >(), R"(Convenience constructor the context manager directly from the AudioSignalFlow.)" )
-    .def( "__enter__", &CriticalSectionGuard::enter, py::return_value_policy::reference,
+    .def( "__enter__", &ParameterExchangeMutexGuard::enter, py::return_value_policy::reference,
 R"(Implement the "__enter__" method of the ContextManager API. Called within the with statment, usually not called directly by users.)" )
-    .def( "__exit__", &CriticalSectionGuard::exit,
+    .def( "__exit__", &ParameterExchangeMutexGuard::exit,
 R"(Implement the "__exit__" method of the ContextManager API. Called within the with statment, usually not called directly by users.)" )
     ;
 
@@ -171,7 +171,7 @@ R"(Implement the "__exit__" method of the ContextManager API. Called within the 
        return wrapProcess( flow, dummy );
      },
      py::return_value_policy::take_ownership, "process() variant for flows with no audio inputs." )
-   .def( "parameterExchangeCriticalSection", &AudioSignalFlow::parameterExchangeCriticalSection,
+   .def( "parameterExchangeMutex", &AudioSignalFlow::parameterExchangeMutex,
      py::return_value_policy::reference, R"(Obtain the mutex for guarding the parameter data exchange,)" )
 #ifdef VISR_RRL_RUNTIME_SYSTEM_PROFILING
    .def( "runtimeProfilingEnabled", &AudioSignalFlow::runtimeProfilingEnabled )

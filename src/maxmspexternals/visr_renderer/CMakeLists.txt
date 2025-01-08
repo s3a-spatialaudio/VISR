@@ -19,6 +19,7 @@ SET( EXTERNAL_NAME visr_renderer~ )
 SET( PROJECT_NAME visr_renderer_max_external )
 
 ADD_DEFINITIONS( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
+add_definitions( -DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}" )
 
 ADD_LIBRARY( ${PROJECT_NAME} MODULE
 options.hpp

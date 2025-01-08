@@ -16,6 +16,7 @@
 #include "scalar_parameter.hpp"
 #include "string_parameter.hpp"
 #include "signal_routing_parameter.hpp"
+#include "sparse_gain_routing_parameter.hpp"
 #include "time_frequency_parameter.hpp"
 #include "vector_parameter.hpp"
 
@@ -59,6 +60,9 @@ void initialiseParameterLibrary()
     ScalarParameter<std::complex<double> >,
 
     SignalRoutingParameter,
+
+    SparseGainRoutingListParameter,
+    SparseGainRoutingParameter,
 
     StringParameter,
 

@@ -10,7 +10,7 @@ def referenceGainScalar( sigLen, initialGain, transitions ):
     """
     Internal function to compute the gain trajectory for an arbitra
     """
-    out = np.full( sigLen, initialGain, dtype=np.float )
+    out = np.full(sigLen, initialGain, dtype=np.float32)
     currGain = initialGain
     for trans in transitions:
         start = trans["s"]
@@ -475,7 +475,7 @@ def mimoPanning(signal, initialGains, transitions=[], bs=64, fs=48000):
             transitionTimes[objIdx] = t['d']
             param.timeStamps = timeStamps
             param.transitionTimes = transitionTimes
-            np.asarray(param.gains)[...] = np.NaN
+            np.asarray(param.gains)[...] = np.nan
             newGains = t['g']
             np.asarray(param.gains)[objIdx,:] = newGains
             gainInput.swapBuffers()
@@ -541,8 +541,8 @@ def test_mimoRampGainMultipleBlocks(plot=False):
     parameterSendBlock = 1
     transitionStartTime = 135
     transitionTime = 153
-    assert parameterSendBlock*bs <= transitionStartTime # Causality rules!
-    # newGainMtx = np.full( initGains.shape, np.NaN, dtype=np.float32)
+    assert parameterSendBlock*bs <= transitionStartTime  # Causality rules!
+    # newGainMtx = np.full( initGains.shape, np.nan, dtype=np.float32)
     # newGainMtx[objIdx] = newGains
     transitions = [ dict(i=parameterSendBlock,
                          s=transitionStartTime, d=transitionTime,

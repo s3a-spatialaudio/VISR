@@ -31,7 +31,7 @@ enum class Feature
  * @param numElements The number of elements to be multiplied.
  * @param alignment Assured alignment of all vector arguments (measured in elements).
  */
-  template<typename T>
+  template<typename T, Feature f>
 VISR_EFL_LIBRARY_SYMBOL 
 ErrorCode vectorMultiply( T const * const factor1,
                           T const * const factor2,
@@ -112,7 +112,7 @@ vectorMultiplyAddInplace( T const * const factor1,
 			  std::size_t numElements,
 			  std::size_t alignment /*= 0*/ );
 
-template<typename T>
+template<typename T, Feature f>
 VISR_EFL_LIBRARY_SYMBOL ErrorCode
 vectorMultiplyConstantAddInplace( T constFactor,
 				  T const * const factor,
@@ -139,7 +139,7 @@ vectorMultiplyConstantAddInplace( T constFactor,
  * @param alignmentElements Minimum alignment of the vector arguments \p input,
  * \p ramp, and \p output, measured in multiples of the element size. 
  */
-template<typename T>
+template<typename T, Feature f>
 VISR_EFL_LIBRARY_SYMBOL ErrorCode
 vectorRampScaling( T const * input,
   T const * ramp,

@@ -7,6 +7,7 @@ add_library( pythonbindinghelpers INTERFACE )
 SET( PUBLIC_HEADERS
   container_access.hpp
   ndarray_from_basic_vector.hpp
+  ndarray_from_basic_matrix.hpp
   matrix_from_ndarray.hpp
   vector_from_ndarray.hpp
 )
@@ -14,12 +15,12 @@ SET( PUBLIC_HEADERS
 # Set the include directory for build and install interface
 target_include_directories( pythonbindinghelpers
   INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<INSTALL_INTERFACE:include/visr>
 )
 
 install( TARGETS pythonbindinghelpers
-         EXPORT VISR_exports
+         EXPORT VISR_python_externals_exports
          COMPONENT development_files )
 
 # Install files (this need to be done separately for interface targets)

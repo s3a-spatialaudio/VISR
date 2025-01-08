@@ -33,6 +33,6 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE reverbobject_shared )
 set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
 
 install(TARGETS ${PROJECT_NAME}
-        EXPORT VISR_exports
+        EXPORT VISR_python_externals_exports
         DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
         COMPONENT python_externals )

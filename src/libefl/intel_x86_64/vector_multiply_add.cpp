@@ -4,10 +4,6 @@
 
 #include "vector_functions.hpp"
 
-#ifndef __SSE3__
-#include "emulate_addsub.hpp"
-#endif
-
 #include "../alignment.hpp"
 
 #include <immintrin.h>
@@ -21,79 +17,12 @@ namespace efl
 namespace intel_x86_64
 {
 
-#if 1
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_FMA_ALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_load_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_load_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_load_ps( y ); count -= 8;\
-      acc = _mm256_fmadd_ps( a, b, acc );\
-      _mm256_store_ps( acc, y ); y += 8;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_FMA_UNALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_loadu_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_loadu_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_loadu_ps( y ); count -= 8;\
-      acc = _mm256_fmadd_ps( a, b, acc );\
-      _mm256_storeu_ps( acc, y ); y += 8;\
-    }
-  
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_AVX_ALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_load_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_load_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_load_ps( y ); count -= 8;\
-      __m256 res = _mm256_mul_ps( a, b );\
-      acc = _mm256_add_ps( res, acc );\
-      _mm256_store_ps( acc, y ); y += 8;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_AVX_UNALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m256 a = _mm256_loadu_ps( f1 ); f1 += 8;\
-      __m256 b = _mm256_loadu_ps( f2 ); f2 += 8;\
-      __m256 y = _mm256_loadu_ps( y ); count -= 8;\
-      __m256 res = _mm256_mul_ps( a, b );\
-      acc = _mm256_add_ps( res, acc );\
-      _mm256_storeu_ps( acc, y ); y += 8;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_SSE_ALIGNED( f1, f2, res, count )\
-    while( cnt >= 8 ){\
-      __m128 a = _mm_load_ps( f1 ); f1 += 4;\
-      __m128 b = _mm_load_ps( f2 ); f2 += 4;\
-      __m128 y = _mm_load_ps( y ); count -= 4;\
-      __m128 res = _mm_mul_ps( a, b );\
-      acc = _mm_add_ps( res, acc );\
-      _mm_store_ps( acc, y ); y += 4;\
-    }
-
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_SSE_UNALIGNED( f1, f2, res, count )\
-    while( cnt >= 4 ){\
-      __m128 a = _mm_loadu_ps( f1 ); f1 += 4;\
-      __m128 b = _mm_loadu_ps( f2 ); f2 += 4;\
-      __m128 y = _mm_loadu_ps( y ); count -= 4;\
-      __m128 res = _mm_mul_ps( a, b );\
-      acc = _mm_add_ps( res, acc );\
-      _mm_storeu_ps( acc, y ); y += 4;\
-    }
-
-// Aligned 
-#define VECTOR_MULTIPLY_ADD_INPLACE_FLOAT_SCALAR( f1, f2, res, count )\
-    while( cnt > 0 ){\
-      __m128 a = _mm_loadu_ps( f1 ); ++f1;\
-      __m128 b = _mm_loadu_ps( f2 ); ++f2;\
-      __m128 y = _mm_loadu_ps( y ); --count;\
-      __m128 res = _mm_mul_ps( a, b );\
-      acc = _mm_add_ps( res, acc );\
-      _mm_storeu_ps( acc, y ); ++y;\
-    }
-#endif
+// Doxygen fails to find the corresponding declarations, therefore we 
+// exclude the definitions here.
+/// @cond NEVER
 
 template<>
-ErrorCode vectorMultiplyAddInplace<float, Feature::FMA>( float const * const factor1,
+ErrorCode vectorMultiplyAddInplace<float, Feature::VISR_SIMD_FEATURE>( float const * const factor1,
 				    float const * const factor2,
 				    float * const accumulator,
 				    std::size_t numElements,
@@ -119,7 +48,7 @@ ErrorCode vectorMultiplyAddInplace<float, Feature::FMA>( float const * const fac
       pf2 += 8;
       __m256 acc = _mm256_load_ps( y );
       cnt -= 8;
-#ifdef __FMA__
+#ifdef __AVX2__
       acc = _mm256_fmadd_ps( a, b, acc );
 #else
       __m256 res = _mm256_mul_ps( a, b );
@@ -139,7 +68,7 @@ ErrorCode vectorMultiplyAddInplace<float, Feature::FMA>( float const * const fac
       pf2 += 8;
       __m256 acc = _mm256_loadu_ps( y );
       cnt -= 8;
-#ifdef __FMA__
+#ifdef __AVX2__
       acc = _mm256_fmadd_ps( a, b, acc );
 #else
       __m256 res = _mm256_mul_ps( a, b );
@@ -162,7 +91,7 @@ ErrorCode vectorMultiplyAddInplace<float, Feature::FMA>( float const * const fac
     pf2 += 4;
     __m128 acc = _mm_loadu_ps( y );
     cnt -= 4;
-#ifdef __FMA__
+#ifdef __AVX2__
     acc = _mm_fmadd_ps( a, b, acc );
 #else
     __m128 mulRes = _mm_mul_ps( a, b );
@@ -179,7 +108,7 @@ ErrorCode vectorMultiplyAddInplace<float, Feature::FMA>( float const * const fac
     ++pf2;
     __m128 acc = _mm_load_ss( y );
     --cnt;
-#ifdef __FMA__
+#ifdef __AVX2__
     acc = _mm_fmadd_ss( a, b, acc );
 #else
     __m128 mulRes = _mm_mul_ss( a, b );
@@ -192,7 +121,7 @@ ErrorCode vectorMultiplyAddInplace<float, Feature::FMA>( float const * const fac
 }
 
 template<>
-ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const factor1,
+ErrorCode vectorMultiplyAddInplace<double, Feature::VISR_SIMD_FEATURE>( double const * const factor1,
 				    double const * const factor2,
 				    double * const accumulator,
 				    std::size_t numElements,
@@ -218,11 +147,11 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
       pf2 += 4;
       __m256d acc = _mm256_load_pd( y );
       cnt -= 4;
-#ifdef __FMA__
+#ifdef __AVX2__
       acc = _mm256_fmadd_pd( a, b, acc );
 #else
       __m256d mulRes = _mm256_mul_pd( a, b );
-      acc = _mm256_mul_pd( mulRes, acc );
+      acc = _mm256_add_pd( mulRes, acc );
 #endif
       _mm256_store_pd( y, acc );
       y += 4;
@@ -238,11 +167,11 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
       pf2 += 4;
       __m256d acc = _mm256_loadu_pd( y );
       cnt -= 4;
-#ifdef __FMA__
+#ifdef __AVX2__
       acc = _mm256_fmadd_pd( a, b, acc );
 #else
       __m256d mulRes = _mm256_mul_pd( a, b );
-      acc = _mm256_mul_pd( mulRes, acc );
+      acc = _mm256_add_pd( mulRes, acc );
 #endif
       _mm256_storeu_pd( y, acc );
       y += 4;
@@ -262,11 +191,11 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
     pf2 += 2;
     __m128d acc = _mm_loadu_pd( y );
     cnt -= 2;
-#ifdef __FMA__
+#ifdef __AVX2__
     acc = _mm_fmadd_pd( a, b, acc );
 #else
     __m128d mulRes = _mm_mul_pd( a, b );
-    acc = _mm_mul_pd( mulRes, acc );
+    acc = _mm_add_pd( mulRes, acc );
 #endif
     _mm_storeu_pd( y, acc );
     y += 2;
@@ -279,22 +208,23 @@ ErrorCode vectorMultiplyAddInplace<double, Feature::FMA>( double const * const f
     ++pf2;
     __m128d acc = _mm_load_sd( y );
     --cnt;
-#ifdef __FMA__
+#ifdef __AVX2__
     acc = _mm_fmadd_sd( a, b, acc );
 #else
     __m128d mulRes = _mm_mul_sd( a, b );
-    acc = _mm_mul_sd( mulRes, acc );
+    acc = _mm_add_sd( mulRes, acc );
 #endif    
     _mm_store_sd( y, acc );
     ++y;
   }
   return noError;
 }
+/// @endcond NEVER
 
 // Temporarily suppress Doxygen warning until the feature-based dispatching is implemented properly.
 /// @cond NEVER
 template<>
-ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::FMA>( std::complex<float> const * const factor1,
+ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::VISR_SIMD_FEATURE>( std::complex<float> const * const factor1,
                                     std::complex<float> const * const factor2,
                                     std::complex<float> * const accumulator,
                                     std::size_t numElements,
@@ -371,12 +301,7 @@ ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::FMA>( std::comp
       b = _mm_permute_ps( b, 0xB1 /*0b10110001*/ );
       __m128 acc = _mm_load_ps( pAcc );
       __m128 partRes2 = _mm_mul_ps( b, a );
-      __m128 res =
-#ifdef __SSE3__
-	_mm_addsub_ps( partRes1, partRes2 );
-#else
-      detail::emulateAddsubFloat( partRes1, partRes2 );
-#endif
+      __m128 res = _mm_addsub_ps( partRes1, partRes2 );
       __m128 finalRes = _mm_add_ps( acc, res );
       _mm_store_ps( pAcc, finalRes );
       countN -= 2;
@@ -400,12 +325,7 @@ ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::FMA>( std::comp
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 acc = _mm_loadl_pi( cReal, yL );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-      __m128 res =
-#ifdef __SSE3__
-	_mm_addsub_ps( acbc, bdad );
-#else
-      detail::emulateAddsubFloat(  acbc, bdad );
-#endif
+      __m128 res = _mm_addsub_ps( acbc, bdad );
       __m128 finalRes = _mm_add_ps( res, acc );
       _mm_storel_pi( yL, finalRes );
 
@@ -417,10 +337,9 @@ ErrorCode vectorMultiplyAddInplace<std::complex<float>, Feature::FMA>( std::comp
   }
   return noError;
 }
-/// @endcond
 
 template<>
-ErrorCode vectorMultiplyConstantAddInplace( float constFactor,
+ErrorCode vectorMultiplyConstantAddInplace<float, Feature::VISR_SIMD_FEATURE>( float constFactor,
 					    float const * const factor,
 					    float * const accumulator,
 					    std::size_t numElements,
@@ -441,7 +360,7 @@ ErrorCode vectorMultiplyConstantAddInplace( float constFactor,
         x += 8;
         __m256 acc = _mm256_load_ps( y );
         cnt -= 8;
-#ifdef __FMA__
+#ifdef __AVX2__
         acc = _mm256_fmadd_ps( a, c, acc ); // Note: this requires FMA
 #else
         __m256 mulRes = _mm256_mul_ps( a, c );
@@ -459,7 +378,7 @@ ErrorCode vectorMultiplyConstantAddInplace( float constFactor,
         x += 8;
         __m256 acc = _mm256_loadu_ps( y );
         cnt -= 8;
-#ifdef __FMA__
+#ifdef __AVX2__
         acc = _mm256_fmadd_ps( a, c, acc ); // Note: this requires FMA
 #else
         __m256 mulRes = _mm256_mul_ps( a, c );
@@ -485,7 +404,7 @@ ErrorCode vectorMultiplyConstantAddInplace( float constFactor,
     x += 4;
     __m128 acc = _mm_loadu_ps( y );
     cnt -= 4;
-#ifdef __FMA__
+#ifdef __AVX2__
         acc = _mm_fmadd_ps( a, c, acc ); // Note: this requires FMA
 #else
         __m128 mulRes = _mm_mul_ps( a, c );
@@ -500,7 +419,7 @@ ErrorCode vectorMultiplyConstantAddInplace( float constFactor,
     ++x;
     __m128 acc = _mm_load_ss( y );
     --cnt;
-#ifdef __FMA__
+#ifdef __AVX2__
     acc = _mm_fmadd_ss( a, c, acc ); // Note: this requires FMA
 #else
     __m128 mulRes = _mm_mul_ss( a, c );
@@ -513,7 +432,7 @@ ErrorCode vectorMultiplyConstantAddInplace( float constFactor,
 }
 
 template<>
-ErrorCode vectorMultiplyConstantAddInplace( std::complex<float> constFactor,
+ErrorCode vectorMultiplyConstantAddInplace<std::complex<float>, Feature::VISR_SIMD_FEATURE>( std::complex<float> constFactor,
 					    std::complex<float> const * const factor,
 					    std::complex<float> * const accumulator,
 					    std::size_t numElements,
@@ -579,12 +498,7 @@ ErrorCode vectorMultiplyConstantAddInplace( std::complex<float> constFactor,
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 acc = _mm_load_ps( y );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-      __m128 res =
-#ifdef __SSE3__
-        _mm_addsub_ps( acbc, bdad );
-#else
-      detail::emulateAddsubFloat(  acbc, bdad );
-#endif
+      __m128 res = _mm_addsub_ps( acbc, bdad );
       res = _mm_add_ps( res, acc );
       _mm_store_ps( y, res );
       x += 4;
@@ -606,12 +520,7 @@ ErrorCode vectorMultiplyConstantAddInplace( std::complex<float> constFactor,
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 acc = _mm_loadl_pi( cReal, yL );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-      __m128 res =
-#ifdef __SSE3__
-	_mm_addsub_ps( acbc, bdad );
-#else
-      detail::emulateAddsubFloat(  acbc, bdad );
-#endif
+      __m128 res = _mm_addsub_ps( acbc, bdad );
       res = _mm_add_ps( res, acc );
       _mm_storel_pi( yL, res );
       x += 2;
@@ -621,6 +530,8 @@ ErrorCode vectorMultiplyConstantAddInplace( std::complex<float> constFactor,
   }
   return ErrorCode::noError;
 }
+
+/// @endcond NEVER
 
 } // namespace intel_x86_64
 } // namespace efl

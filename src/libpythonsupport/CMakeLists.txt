@@ -56,7 +56,7 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
     VISR_PYTHON_VERSION=${VISR_PYTHON_VERSION_MAJOR_MINOR} )
 
   # Encode the pybind11 version as a target property.
-  # In this way dependent projects can check whether they buid against
+  # In this way dependent projects can check whether they build against
   # a compatible version.
   target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
     VISR_PYBIND11_VERSION=${VISR_PYBIND11_VERSION} )
@@ -67,7 +67,7 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   # For installed versions of VISR, this points to $INSTALL_DIRECTORY/3rd/pybind11,
   # where the relevant parts of pybind11 are shipped (see PackageConfig.cmake).
   target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
-    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/pybind11> )
+    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/pybind11> )
 
   # Set public headers to be installed.
   set_target_properties( pythonsupport_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
@@ -82,14 +82,14 @@ endforeach()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS pythonsupport_static
-          EXPORT VISR_exports
+          EXPORT VISR_static_library_exports
           PUBLIC_HEADER DESTINATION include/visr/libpythonsupport COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS pythonsupport_shared
-          EXPORT VISR_exports
+          EXPORT VISR_shared_library_exports
           ARCHIVE DESTINATION lib COMPONENT development_files
           RUNTIME DESTINATION lib COMPONENT shared_libraries
           LIBRARY DESTINATION lib COMPONENT shared_libraries
@@ -97,7 +97,8 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-  install(TARGETS pythonsupport_static_pic EXPORT VISR_exports
+  install(TARGETS pythonsupport_static_pic
+          EXPORT VISR_static_pic_library_exports
           PUBLIC_HEADER DESTINATION include/visr/libpythonsupport COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )

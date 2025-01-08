@@ -5,6 +5,7 @@
 #include <libefl/vector_functions.hpp>
 
 #include <algorithm>
+#include <limits>
 
 namespace visr
 {

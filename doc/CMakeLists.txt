@@ -70,7 +70,8 @@ set( doxyfile             ${PROJECT_BINARY_DIR}/doc/doxygen/Doxyfile )
 set( doxy_html_index_file ${PROJECT_BINARY_DIR}/doc/doxygen/html/index.html )
 set( doxy_output_root     ${PROJECT_BINARY_DIR}/doc/doxygen/ )
 set( doxy_input           ${PROJECT_SOURCE_DIR}/src )
-file( GLOB doxy_extra_files ${PROJECT_SOURCE_DIR}/doc/doxygen/*.dox )
+set( doxy_extra_files ${PROJECT_SOURCE_DIR}/doc/doxygen )
+file( GLOB doxy_extra_file_list ${doxy_extra_files}/*.dox )
 # Used for checking dependencies when using Sphinx custom commands
 set( doxy_xml_index_file ${PROJECT_BINARY_DIR}/doc/doxygen/xml/index.xml )
 # Used as a variable in config.py.in with Sphinx to configure the breathe extension.
@@ -86,7 +87,7 @@ add_custom_command( OUTPUT ${doxy_html_index_file}
 		  # custom_command for ${doxyfile} generation
 		  # but I still have to figure out how...
 		  MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-		  DEPENDS ${doxy_extra_files}
+		  DEPENDS ${doxy_extra_file_list}
 		  COMMENT "Generating Doxygen HTML and XML documentation")
 
 add_custom_target( doxygen-doc DEPENDS ${doxy_html_index_file}  )
@@ -130,10 +131,10 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
     OUTPUT ${STAMP}
-    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${sourceDir} ${depends}
+    DEPENDS doxygen-doc ${outputDir}/html/conf.py ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
               ${SPHINX_EXECUTABLE}
-	       -a
+               -a
                -q
                -b html
                -c ${outputDir}/html
@@ -141,24 +142,24 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
                 ${sourceDir}
                 ${outputDir}/html
      COMMAND ${CMAKE_COMMAND} -E touch ${STAMP}
-    BYPRODUCTS ${outputDir}/html-cache
-    COMMENT "HTML generation for target ${targetName}-html."
+     WORKING_DIRECTORY ${outputDir}/html
+     COMMENT "HTML generation for target ${targetName}-html."
     )
-  add_custom_target( ${targetName}-html
-    DEPENDS ${STAMP}
-  )
+  add_custom_target( ${targetName}-html DEPENDS ${STAMP} )
+  set_target_properties( ${targetName}-html PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/html-cache )
   set_target_properties( ${targetName}-html PROPERTIES FOLDER documentation )
+  set_target_properties( ${targetName}-html PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/html-cache )
 endfunction(HtmlDocBuild)
 
 # Function to define a target building PDF documentation from a source directory containing Sphinx rst code.
 function( PdfDocBuild targetName sourceDir outputDir depends )
   configure_file( ${sourceDir}/conf.py.in ${outputDir}/pdf/conf.py @ONLY )
   # Name (with version) of the output file. This is the main dependency of the target.
-  set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf )
+  set( OUTPUTFILE ${outputDir}/${targetName}-${VISR_VERSION}.pdf )
   # Super-ugly code duplication because the generator expression cannot be pulled out of the function call.
   add_custom_command(
     OUTPUT ${OUTPUTFILE}
-    DEPENDS doxygen-doc ${outputDir}/pdf/conf.py ${sourceDir} ${depends}
+    DEPENDS doxygen-doc ${outputDir}/pdf/conf.py ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
             ${SPHINX_EXECUTABLE}
                -q
@@ -170,15 +171,14 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
     COMMAND ${PDFLATEX_COMPILER} -halt-on-error visr
-    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf
+    COMMAND ${CMAKE_COMMAND} -E rename ${outputDir}/pdf/visr.pdf ${outputDir}/${targetName}-${VISR_VERSION}.pdf
     WORKING_DIRECTORY ${outputDir}/pdf
-    BYPRODUCTS ${outputDir}/pdf-cache ${outputDir}/pdf
     COMMENT "PDF compilation for target ${targetName}-pdf."
     )
-  add_custom_target( ${targetName}-pdf
-    DEPENDS ${OUTPUTFILE}
-  )
+  add_custom_target( ${targetName}-pdf DEPENDS ${OUTPUTFILE} )
+  set_target_properties( ${targetName}-pdf PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/pdf-cache )
   set_target_properties( ${targetName}-pdf PROPERTIES FOLDER documentation )
+  set_target_properties( ${targetName}-pdf PROPERTIES ADDITIONAL_CLEAN_FILES ${outputDir}/pdf-cache )
 endfunction(PdfDocBuild)
 
 PdfDocBuild( userdoc ${userdoc_source_root} ${userdoc_output_root} "${VISR_USERDOC_DEPENDENCIES}" )
@@ -199,5 +199,5 @@ install( DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/html
 # Place the generated PDF documentation in the installers.
 # NOTE: Unfortuanately we need to operate on files, as installing for targets apparently works only for executables and libraries (which have a predefined main file)
 # TODO: Remove construction of file name with full version string.
-install( FILES  ${userdoc_output_root}/userdoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT user_documentation_pdf )
-install( FILES  ${apidoc_output_root}/apidoc-${VISR_MAJOR_VERSION}.${VISR_MINOR_VERSION}.${VISR_PATCH_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT api_documentation_pdf )
+install( FILES  ${userdoc_output_root}/userdoc-${VISR_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT user_documentation_pdf )
+install( FILES  ${apidoc_output_root}/apidoc-${VISR_VERSION}.pdf DESTINATION ${DOCUMENTATION_INSTALL_DIRECTORY} COMPONENT api_documentation_pdf )

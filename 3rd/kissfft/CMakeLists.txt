@@ -1,4 +1,5 @@
-cmake_minimum_required( VERSION 2.8.11 )
+# Increase CMake version requirment to 3.5 to silence deprecation warning.
+cmake_minimum_required( VERSION 3.5.0 )
 
 project( kissFFT LANGUAGES C )
 
@@ -61,6 +62,7 @@ if( KISSFFT_BUILD_SHARED_LIBRARY )
   # declarations)
   set_property( TARGET kissfft_shared PROPERTY C_VISIBILITY_PRESET default )
   set_property( TARGET kissfft_shared PROPERTY LIBRARY_OUTPUT_NAME kissfft )
+  set_property( TARGET kissfft_shared PROPERTY ARCHIVE_OUTPUT_NAME kissfft_shared )
 endif( KISSFFT_BUILD_SHARED_LIBRARY )
 
 # =============================================================================
@@ -86,7 +88,7 @@ if( KISSFFT_BUILD_STATIC_LIBRARY )
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
   )
   install(TARGETS kissfft_static
-          EXPORT VISR_exports
+          EXPORT VISR_3rd_party_static_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           )
@@ -107,7 +109,7 @@ if( KISSFFT_BUILD_SHARED_LIBRARY )
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/3rd
   )
   install(TARGETS kissfft_shared
-          EXPORT VISR_exports
+          EXPORT VISR_3rd_party_shared_exports
           PUBLIC_HEADER DESTINATION include/visr/3rd/kissfft COMPONENT development_files
           ARCHIVE DESTINATION ${THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY} COMPONENT development_files
           LIBRARY DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT shared_libraries

@@ -326,6 +326,10 @@ class VISR_RBBL_LIBRARY_SYMBOL BiquadCoefficientMatrix
 public:
   explicit BiquadCoefficientMatrix( std::size_t numberOfFilters, std::size_t numberOfBiquads );
 
+explicit BiquadCoefficientMatrix( std::initializer_list<
+                                  std::initializer_list<
+                                  BiquadCoefficient<CoeffType> > > const & initList );
+
   ~BiquadCoefficientMatrix();
 
   static BiquadCoefficientMatrix fromJson( boost::property_tree::ptree const & tree );

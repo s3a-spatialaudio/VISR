@@ -8,6 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <cassert>
 #include <istream>
 #include <iostream>
 #include <sstream>
@@ -413,9 +414,39 @@ BiquadCoefficientMatrix<CoeffType>::BiquadCoefficientMatrix( std::size_t numberO
 }
 
 template<typename CoeffType>
-BiquadCoefficientMatrix<CoeffType>::~BiquadCoefficientMatrix()
+BiquadCoefficientMatrix<CoeffType>::
+BiquadCoefficientMatrix( std::initializer_list<
+                                  std::initializer_list<
+                                  BiquadCoefficient<CoeffType> > > const & initList )
 {
+  std::size_t const numRows{ initList.size() };
+  if( numRows > 0 )
+  {
+    auto rowIt{ initList.begin() };
+    assert( rowIt != initList.end() );
+    std::size_t numCols{ rowIt->size() };
+    resize( numRows, numCols );
+    for( std::size_t rowIdx{0}; rowIt != initList.end(); ++rowIt, ++rowIdx )
+    {
+      if( rowIt->size() != numCols )
+      {
+        throw std::invalid_argument( "Matrix row sizes are inconsistent." );
+      }
+      std::size_t colIdx{0};
+      for( auto colIt{ rowIt->begin() }; colIt != rowIt->end(); ++ colIt, ++colIdx )
+      {
+        operator()( rowIdx, colIdx ) = * colIt;
+      }
+    }
+  }
+  else
+  {
+    resize( 0, 0 );
+  }
 }
+
+template<typename CoeffType>
+BiquadCoefficientMatrix<CoeffType>::~BiquadCoefficientMatrix() = default;
 
 template<typename CoeffType>
 void BiquadCoefficientMatrix<CoeffType>::resize( std::size_t numberOfFilters, std::size_t numberOfBiquads )

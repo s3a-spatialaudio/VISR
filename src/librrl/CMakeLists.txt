@@ -30,12 +30,12 @@ scheduling_graph.hpp
 signal_routing_internal.hpp
 )
 
-option( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING "Enable optional measurement of runtime statistics." OFF )
+option( BUILD_RUNTIME_SYSTEM_PROFILING "Enable optional measurement of runtime statistics." OFF )
 
-if( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+if( BUILD_RUNTIME_SYSTEM_PROFILING )
   list( APPEND SOURCES runtime_profiler.cpp )
   list( APPEND PUBLIC_HEADERS runtime_profiler.hpp )
-endif( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+endif( BUILD_RUNTIME_SYSTEM_PROFILING )
 
 if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   add_library( rrl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
@@ -63,10 +63,10 @@ endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 # Set target properties common to both library types.
 foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( rrl_${LIB_TYPE} PRIVATE VISR_BUILD_RRL_LIBRARY=1)
-  if( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+  if( BUILD_RUNTIME_SYSTEM_PROFILING )
     target_compile_definitions( rrl_${LIB_TYPE} PUBLIC
       VISR_RRL_RUNTIME_SYSTEM_PROFILING=1)
-  endif( BUILD_ENABLE_RUNTIME_SYSTEM_PROFILING )
+  endif( BUILD_RUNTIME_SYSTEM_PROFILING )
   # Transitive link dependencies
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC visr_${LIB_TYPE} )
   target_link_libraries( rrl_${LIB_TYPE} PUBLIC efl_${LIB_TYPE} )
@@ -85,14 +85,14 @@ endforeach()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS rrl_static
-          EXPORT VISR_exports
+          EXPORT VISR_static_library_exports
           PUBLIC_HEADER DESTINATION include/visr/librrl COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
 if( BUILD_INSTALL_SHARED_LIBRARIES )
   install(TARGETS rrl_shared
-          EXPORT VISR_exports
+          EXPORT VISR_shared_library_exports
           ARCHIVE DESTINATION lib COMPONENT development_files
           RUNTIME DESTINATION lib COMPONENT shared_libraries
           LIBRARY DESTINATION lib COMPONENT shared_libraries
@@ -100,7 +100,8 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-  install(TARGETS rrl_static_pic EXPORT VISR_exports
+  install(TARGETS rrl_static_pic
+          EXPORT VISR_static_pic_library_exports
           PUBLIC_HEADER DESTINATION include/visr/librrl COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )

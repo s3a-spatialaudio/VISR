@@ -4,10 +4,6 @@
 
 #include "vector_functions.hpp"
 
-#ifndef __SSE3__
-#include "emulate_addsub.hpp"
-#endif
-
 #include "../alignment.hpp"
 
 #include <immintrin.h>
@@ -21,12 +17,17 @@ namespace efl
 namespace intel_x86_64
 {
 
+// Doxygen fails to find the corresponding declarations, therefore we 
+// exclude the definitions here.
+/// @cond NEVER
+
 template<>
-ErrorCode vectorMultiply( float const * const factor1,
-                          float const * const factor2,
-                          float * const result,
-                          std::size_t numElements,
-                          std::size_t alignment /*= 0*/ )
+ErrorCode vectorMultiply<float, Feature::VISR_SIMD_FEATURE>(
+    float const * const factor1,
+    float const * const factor2,
+    float * const result,
+    std::size_t numElements,
+    std::size_t alignment /*= 0*/ )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;
@@ -83,11 +84,12 @@ ErrorCode vectorMultiply( float const * const factor1,
 }
 
 template<>
-ErrorCode vectorMultiply( double const * const factor1,
-			  double const * const factor2,
-			  double * const result,
-			  std::size_t numElements,
-			  std::size_t alignment /*= 0*/ )
+ErrorCode vectorMultiply<double, Feature::VISR_SIMD_FEATURE>(
+    double const * const factor1,
+    double const * const factor2,
+    double * const result,
+    std::size_t numElements,
+    std::size_t alignment /*= 0*/ )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;
@@ -143,11 +145,12 @@ ErrorCode vectorMultiply( double const * const factor1,
 }
 
 template<>
-ErrorCode vectorMultiply( std::complex<float> const * const factor1,
-			  std::complex<float> const * const factor2,
-			  std::complex<float> * const result,
-			  std::size_t numElements,
-			  std::size_t alignment )
+ErrorCode vectorMultiply<std::complex<float>, Feature::VISR_SIMD_FEATURE>(
+    std::complex<float> const * const factor1,
+    std::complex<float> const * const factor2,
+    std::complex<float> * const result,
+    std::size_t numElements,
+    std::size_t alignment )
 {
   if( not checkAlignment( factor1, alignment ) ) return alignmentError;
   if( not checkAlignment( factor2, alignment ) ) return alignmentError;
@@ -215,11 +218,7 @@ ErrorCode vectorMultiply( std::complex<float> const * const factor1,
       __m128 partRes1 = _mm_mul_ps( b, aHigh );
       b = _mm_permute_ps( b, 0xB1 /*0b10110001*/ );
       __m128 partRes2 = _mm_mul_ps( b, a );
-#ifdef __SSE3__
       __m128 res = _mm_addsub_ps( partRes1, partRes2 );
-#else
-      __m128 res = detail::emulateAddsubFloat( partRes1, partRes2 );
-#endif
       _mm_store_ps( pRes, res );
       countN -= 2;
       pf1 += 4;
@@ -242,11 +241,7 @@ ErrorCode vectorMultiply( std::complex<float> const * const factor1,
       __m128 acbc = _mm_mul_ps( cReal, ab );
       __m128 ba = _mm_shuffle_ps( ab, ab, 0xB1 );
       __m128 bdad = _mm_mul_ps( cImag, ba );
-#ifdef __SSE3__
       __m128 res = _mm_addsub_ps( acbc, bdad );
-#else
-      __m128 res = detail::emulateAddsubFloat( acbc, bdad );
-#endif
       _mm_storel_pi( yL, res );
 
       pf1 += 2;
@@ -257,6 +252,8 @@ ErrorCode vectorMultiply( std::complex<float> const * const factor1,
   }
   return noError;
 }
+
+/// @endcond NEVER
 
 } // namespace intel_x86_64
 } // namespace efl

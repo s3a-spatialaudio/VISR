@@ -16,7 +16,7 @@ allCombinations = list(product(dataTypes, strides, strides, numEl))
 @pytest.mark.parametrize("dtype, srcStride, destStride, numElements", allCombinations )
 def test_vectorCopyStrided( dtype, srcStride, destStride, numElements):
     src = uniformSequence( numElements*srcStride, dtype=dtype)
-    dest = np.full( numElements*destStride, fill_value=np.NaN, dtype=dtype)
+    dest = np.full( numElements*destStride, fill_value=np.nan, dtype=dtype)
 
     efl.vectorCopyStrided(src,dest, srcStride, destStride, numElements, 0)
     
@@ -28,7 +28,7 @@ def test_vectorCopyStridedBasicVector( dtype, srcStride, destStride, numElements
     src = uniformSequence( numElements*srcStride, dtype=dtype)
     srcVec = typedVector( dtype=dtype )( src, alignment )  
     
-    dest = np.full( numElements*destStride, fill_value=np.NaN, dtype=dtype)
+    dest = np.full( numElements*destStride, fill_value=np.nan, dtype=dtype)
     destVec = typedVector( dtype=dtype )( dest, alignment )  
 
     efl.vectorCopyStrided(srcVec,destVec, srcStride, destStride, numElements, alignment)

@@ -3,6 +3,7 @@
 set( APPLICATION_NAME signalflows_test )
 
 add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
+add_definitions( -DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}" )
 
 add_executable( ${APPLICATION_NAME}
 baseline_renderer.cpp

@@ -159,7 +159,7 @@ int main( int argc, char const * const * argv )
     audioInterface->start( );
 
     // Rendering runs until q<Return> is entered on the console.
-    std::cout << "S3A matrix convolver running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
+    std::cout << "VISR matrix convolver running. Press \"q<Return>\" or Ctrl-C to quit." << std::endl;
     char c;
     do
     {

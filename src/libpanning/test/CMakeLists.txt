@@ -2,6 +2,7 @@
 
 add_definitions( -DCMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" )
 add_definitions( -DCMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}" )
+add_definitions( -DPROJECT_SOURCE_DIR="${PROJECT_SOURCE_DIR}" )
 
 set( SOURCES
 allrad.cpp

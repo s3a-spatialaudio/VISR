@@ -6,7 +6,6 @@ import rrl
 import rbbl
 
 import numpy as np
-from scipy import signal
 
 def test_startupSingleChannel(plot=False):
     fs=48000
@@ -24,7 +23,7 @@ def test_startupSingleChannel(plot=False):
     signalLength=numBlocks*bs
     inSig=np.zeros((numIns,signalLength), dtype=np.float32)
     inSig[activeIn,::50]=1.0
-    outSig = np.full( (numOuts, signalLength), np.NaN, dtype=np.float32)
+    outSig = np.full( (numOuts, signalLength), np.nan, dtype=np.float32)
 
     filters = np.zeros( (numInterpolants,filterLength), dtype=np.float32 )
     filters[0, 10] = 1.0
