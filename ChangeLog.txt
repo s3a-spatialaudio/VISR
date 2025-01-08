@@ -63,7 +63,7 @@ Release 0.13.0
 * BUILD: Added options BUILD_DISABLE_THREADS (default OFF), BUILD_USE_SNDFILE_LIBRARY,
   (default ON) and BUILD_AUDIOINTERFACES_PORTAUDIO  (default ON) to reduce 3rd-party
   dependencies when needed.. This is mainly for specialist builds.
-* 3RDPARTY: Updated pybind11 to version 2.9.0.
+* 3RDPARTY: Updated pybind11 to version 2.13.6.
 * 3RDPARTY: Added FFT libraries kissfft and ffts as git subtrees and build them internally.
 
 Patch release 0.12.2
