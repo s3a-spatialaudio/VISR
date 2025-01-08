@@ -6,15 +6,15 @@
 #include <libvisr/parameter_factory.hpp>
 #include <libvisr/parameter_type.hpp>
 
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
 #include <sndfile.h>
+#endif
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-
+#include <boost/phoenix/core/reference.hpp>
+#include <boost/phoenix/stl/container.hpp>
 #include <ciso646>
 #include <complex>
 #include <fstream>
@@ -207,6 +207,7 @@ MatrixParameter<ElementType>::fromStream( std::istream & stream, std::size_t ali
   return result;
 }
 
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
 namespace // unnamed
 {
   /**
@@ -317,6 +318,7 @@ MatrixParameter<ElementType>::fromAudioFile( std::string const & fileName, std::
     throw; // rethrow, i.e., pass the exception to the next level.
   }
 }
+#endif
 
 template< typename ElementType >
 /*static*/ MatrixParameter<ElementType>

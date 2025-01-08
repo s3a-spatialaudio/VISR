@@ -4,7 +4,7 @@
 #define VISR_DETAIL_COMPILE_TIME_HASH_FNV1_HPP_INCLUDED
 
 #include <string>
-#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 
 namespace visr

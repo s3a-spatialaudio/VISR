@@ -25,6 +25,7 @@ namespace rbbl
 namespace test
 {
 
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
 BOOST_AUTO_TEST_CASE( InterpolatingConvolverStatic )
 {
   static const std::size_t alignment = 8; // element
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE( InterpolatingConvolverStatic )
 		  ips,
 		  filters,
 		  alignment,
-		  "ffts" );
+		  "default" );
 #if 0
   BOOST_CHECK_MESSAGE( cSignalLength % cBlockLength == 0 , "The signal length must be an integral multiple of the block size." );
   std::size_t const cNumBlocks = cSignalLength / cBlockLength;
@@ -95,6 +96,8 @@ BOOST_AUTO_TEST_CASE( InterpolatingConvolverStatic )
   }
 #endif
 }
+#endif
+
 
 } // namespace test
 } // namespace rbbl

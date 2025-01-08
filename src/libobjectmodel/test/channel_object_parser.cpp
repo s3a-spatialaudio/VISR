@@ -10,6 +10,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <sstream>
 #include <stdexcept>
 #include <iostream>
 
@@ -31,7 +32,7 @@ BOOST_AUTO_TEST_CASE( ParseChannelObject )
 
   BOOST_CHECK( scene.size() == 1 );
 
-  ChannelObject * co;
+  ChannelObject * co = nullptr ;
   auto & obj = scene.at( 1 );
   BOOST_CHECK_NO_THROW( co = &dynamic_cast<ChannelObject&>( obj ) );
 

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -152,6 +153,7 @@ BOOST_AUTO_TEST_CASE( VectorParameterFromTextFile )
   }
 }
 
+#ifdef VISR_PML_USE_SNDFILE_LIBRARY
 BOOST_AUTO_TEST_CASE( VectorParameterFromWavFile )
 {
   using SampleType = float;
@@ -183,6 +185,7 @@ BOOST_AUTO_TEST_CASE( VectorParameterFromWavFile )
     BOOST_CHECK_CLOSE( v1[idx], refData[idx], static_cast<SampleType>(1e-4) );
   }
 }
+#endif
 
 } // namespace test
 } // namespace pml
