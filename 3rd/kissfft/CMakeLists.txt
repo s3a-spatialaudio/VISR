@@ -1,4 +1,5 @@
-cmake_minimum_required( VERSION 3.3.0 )
+# Increase CMake version requirment to 3.5 to silence deprecation warning.
+cmake_minimum_required( VERSION 3.5.0 )
 
 project( kissFFT LANGUAGES C )
 

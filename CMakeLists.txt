@@ -5,7 +5,8 @@
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
 # 3.3 for IN_LIST operator in if() conditions
-CMAKE_MINIMUM_REQUIRED (VERSION 3.3.0)
+# 3.5 to silence CMake peprecation warnings.
+CMAKE_MINIMUM_REQUIRED( VERSION 3.5 )
 
 # Handle VERSION argument of project() command.
 if( POLICY CMP0048 )

@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+# Increase CMake version requirement to silence Cmake deprecation warnings.
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 project(ffts C ASM)
 
