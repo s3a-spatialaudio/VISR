@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "visr"
 authors = [ { name = "Andreas Franck", email = "andreas.franck@audioscenic.com" }, { name = "VISR contributors"} ]
-version = "@VISR_MAJOR_VERSION@.@VISR_MINOR_VERSION@.@VISR_PATCH_VERSION@"
+version = "@VISR_VERSION@"
 description = "VISR audio rendering framework"
 license = { text = "ISC" }
 readme = "Readme.md"
