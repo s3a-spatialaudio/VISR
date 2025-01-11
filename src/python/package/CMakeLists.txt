@@ -1,6 +1,4 @@
 
-set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_ROOT}/visr )
-
 # Set up a valid package directory structure.
 configure_file( pyproject.toml.in ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml )
 configure_file( setup.cfg.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.cfg )
@@ -34,13 +32,13 @@ endif()
 
 include(GeneratePythonBinaryWheel)
 
-getBinaryPythonWheelName( visr 0.13.0 _WHEEL_FILE_NAME )
+getBinaryPythonWheelName( visr ${VISR_VERSION} _WHEEL_FILE_NAME )
 
 message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )
 message( STATUS "EXTERNAL_TARGET_FILES: " ${EXTERNAL_TARGET_FILES} )
 message( STATUS "VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES: " ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} )
 
-add_custom_command( OUTPUT visr-0.13.0-cp310-cp310-linux_x86_64.whl # ${_WHEEL_FILE_NAME}
+add_custom_command( OUTPUT ${_WHEEL_FILE_NAME}
   MAIN_DEPENDENCY ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml
   WORKING_DIRECTORY ${VISR_PYTHON_PACKAGE_ROOT}
   # COMMAND ${CMAKE_COMMAND} -E copy ${EXTERNAL_TARGET_FILES} ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} 
@@ -49,6 +47,4 @@ add_custom_command( OUTPUT visr-0.13.0-cp310-cp310-linux_x86_64.whl # ${_WHEEL_F
   DEPENDS ${PYTHON_EXTERNALS_TARGETS}
 )
 
-message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )
-
-add_custom_target( visr_wheel DEPENDS visr-0.13.0-cp310-cp310-linux_x86_64.whl ) # ${_WHEEL_FILE_NAME} )
+add_custom_target( visr_wheel DEPENDS ${_WHEEL_FILE_NAME} )

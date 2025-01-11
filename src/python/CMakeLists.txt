@@ -1,16 +1,23 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
+# Set the top-level directory containing the generated Python directory structure.
+# This is used as the working directory for the package generation command.,
+set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
+
 # Set the directory containing the 'visr' python package data structure.
 # By adding this directory to the Python module search path, the VISR package
 # can be imported without being installed.
-# TODO: COnsider moving this definition up because the same directory is used
+# TODO: Consider moving this definition up because the same directory is used
 # by the libpythoncomponents unit test.
-set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python/src )
+set( VISR_PYTHON_PACKAGE_SRC ${VISR_PYTHON_PACKAGE_ROOT}/src )
+
+# The location of the 'visr' Python package.
+set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_SRC}/visr )
 
 # Define the output directory for the built externals.
 # TODO: Make this work with multi-configuration targets!
 # Note: The $<0:> suppresses the build type directory appended for multi-configuration targets.
-set(PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_ROOT}/visr/impl/$<0:>")
+set(PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_DIR}/impl/$<0:>")
 
 # Define an output directory for the 'import lib stub' created for every Python external.
 # This prevents them from colliding with static libraries of the same name.
@@ -69,7 +76,7 @@ foreach( _external ${VISR_PYTHON_EXTERNALS} )
   list( APPEND VISR_PYTHON_EXTERNALS_TARGETS ${_externalTarget} )
   # Skip the RPATH for the Python external, because only shared libraries (incl. other externals)
   # in the current directory will be used.
-  set_target_properties( ${_externalTarget} PROPERTIES SKIP_BUILD_RPATH TRUE )
+  # set_target_properties( ${_externalTarget} PROPERTIES SKIP_BUILD_RPATH TRUE )
 endforeach()
 
 # "Meta-target" combining all Python externals to serve as a single dependency.
