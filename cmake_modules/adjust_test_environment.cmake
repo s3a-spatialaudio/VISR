@@ -34,9 +34,9 @@ function( adjustPythonTestEnvironment target pythonpackage )
     # (much), so just ignore it with a warning
     message(WARNING "packages on PYTHONPATH will be ignored in tests; upgrade to cmake 3.22")
     set_property( TEST ${target} APPEND PROPERTY ENVIRONMENT
-      "PYTHONPATH=$<TARGET_FILE_DIR:${pythonpackage}>" )
+      "PYTHONPATH=${CMAKE_BINARY_DIR}/python/src" )
   else()
     set_property( TEST ${target} APPEND PROPERTY ENVIRONMENT_MODIFICATION
-      "PYTHONPATH=path_list_prepend:$<TARGET_FILE_DIR:${pythonpackage}>" )
+      "PYTHONPATH=path_list_prepend:${CMAKE_BINARY_DIR}/python/src" )
   endif( CMAKE_VERSION VERSION_LESS "3.22.0" )
 endfunction()
