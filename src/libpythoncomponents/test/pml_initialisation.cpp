@@ -42,14 +42,6 @@ BOOST_AUTO_TEST_CASE( MultiplePmlInitialisation )
   boost::filesystem::path basePath{ CMAKE_CURRENT_SOURCE_DIR };
   boost::filesystem::path const modulePath = basePath / "python";
 
-  // Use the path to the VISR python externals (retrieved from CMake)
-  boost::filesystem::path additionalPath{ VISR_PYTHON_PACKAGE_ROOT };
-
-  std::string pythonPath = (std::string("PYTHONPATH=") + additionalPath.string());
-
-  // Pass the path to the VISR externals via the PYTHONPATH environment variable.
-  putenv(&pythonPath[0]);
-
   {
     pythonsupport::InitialisationGuard::initialise();
 
