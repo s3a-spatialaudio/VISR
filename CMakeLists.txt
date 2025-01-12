@@ -25,6 +25,9 @@ if( POLICY CMP0057 )
 else( POLICY CMP0057 )
   message( FATAL_ERROR "Policy CMP0057 not supported (IN_LIST operator), although CMake version requirement is met.")
 endif( POLICY CMP0057 )
+if( POLICY CMP0087 ) # Allow generator expressions in install CODE and SCRIPT commands
+  CMAKE_POLICY(SET CMP0087 NEW)
+endif( POLICY CMP0087 )
 if( POLICY CMP0090 ) # Disable writing into CMake registry.
   CMAKE_POLICY(SET CMP0090 NEW) # Do not write into the package registry.
 else( POLICY CMP0090 )
@@ -472,7 +475,7 @@ set(Boost_USE_MULTITHREADED TRUE)
 
 # Store/restore value of Boost_USE_STATIC_LIBS - vcpkg on Windows will reset it during find_package
 set(_Boost_USE_STATIC_LIBS ${Boost_USE_STATIC_LIBS})
-find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} CONFIG REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
 
 # Avoid a pragma message caused by an internal inconsistency between boost::bind and
@@ -503,9 +506,26 @@ if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
   find_package(OggVorbis REQUIRED)
 endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
-# This sometimes gets used event though BUILD_PYTHON_BINDINGS is not set.
+# The location of the generated 'visr' package in the install tree.
+# This sometimes gets used even though BUILD_PYTHON_BINDINGS is not set.
+# Relative directory, relative to CMAKE_PREFIX_PATH.
 set( PYTHON_MODULE_INSTALL_DIRECTORY
-    "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python" )
+    "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python/src/visr" )
+
+# Set the top-level directory containing the generated Python directory structure.
+# This is used as the working directory for the package generation command.,
+set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
+
+# Set the directory containing the 'visr' python package data structure.
+# By adding this directory to the Python module search path, the VISR package
+# can be imported without being installed.
+# TODO: Consider moving this definition up because the same directory is used
+# by the libpythoncomponents unit test.
+set( VISR_PYTHON_PACKAGE_SRC ${VISR_PYTHON_PACKAGE_ROOT}/src )
+
+# The location of the 'visr' Python package in the build tree.
+set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_SRC}/visr )
+
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
 ################################################################################
