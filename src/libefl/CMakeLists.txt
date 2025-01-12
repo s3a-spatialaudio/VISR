@@ -111,6 +111,14 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
     RUNTIME DESTINATION lib COMPONENT shared_libraries
     LIBRARY DESTINATION lib COMPONENT shared_libraries
     PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
+
+    if( BUILD_PYTHON_BINDINGS )
+      # Additionally install the library into the lib/ subdirectory of the Python package tree.
+      install(TARGETS efl_shared
+      RUNTIME DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}/lib COMPONENT python_externals
+      LIBRARY DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}/lib COMPONENT python_externals
+      PUBLIC_HEADER DESTINATION include/visr/libefl COMPONENT development_files )
+    endif()
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )

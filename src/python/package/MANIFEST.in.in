@@ -1,1 +1,3 @@
 recursive-include src/visr/impl *
+recursive-include src/visr/lib *
+

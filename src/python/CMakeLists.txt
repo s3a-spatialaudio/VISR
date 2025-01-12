@@ -19,7 +19,8 @@ set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_SRC}/visr )
 # Note: The $<0:> suppresses the build type directory appended for multi-configuration targets.
 set(PYTHON_EXTERNAL_OUTPUT_DIRECTORY "${VISR_PYTHON_PACKAGE_DIR}/impl/$<0:>")
 
-# Define an output directory for the 'import lib stub' created for every Python external.
+# Define an output directory for the 'import lib stub' created for every Python
+#  external on Windows.
 # This prevents them from colliding with static libraries of the same name.
 # TODO: Is it possible that we need to install them them in certain circumstances
 # (e.g., linking dependent externals in other projects).
@@ -66,6 +67,9 @@ endif()
 # Define helper library used by several Python externals.
 add_subdirectory( libpythonbindinghelpers )
 
+# Directory for installing the externals (binary files) in the install tree.
+set( PYTHON_MODULE_INSTALL_DIRECTORY python/src/visr/impl )
+
 # List containing the target names of all Python externals.
 set( VISR_PYTHON_EXTERNALS_TARGETS )
 
@@ -77,6 +81,12 @@ foreach( _external ${VISR_PYTHON_EXTERNALS} )
   # Skip the RPATH for the Python external, because only shared libraries (incl. other externals)
   # in the current directory will be used.
   # set_target_properties( ${_externalTarget} PROPERTIES SKIP_BUILD_RPATH TRUE )
+
+  if( ${VISR_SYSTEM_NAME} STREQUAL "Linux" )
+    set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "\${ORIGIN}/../lib" )
+  elseif( ${VISR_SYSTEM_NAME} STREQUAL "MacOS" )
+    set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "@loader_path/../lib" )
+  endif()
 endforeach()
 
 # "Meta-target" combining all Python externals to serve as a single dependency.

@@ -38,6 +38,9 @@ target_link_libraries( ${PROJECT_NAME} PRIVATE Boost::boost ) # For boost::prepr
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
 
+set( PYTHON_INSTALL_PACKAGE_DESTINATION python/src/visr )
+set( PYTHON_INSTALL_EXTERNAL_DESTINATION ${PYTHON_INSTALL_PACKAGE_DESTINATION}/impl )
+
 # Note: We export the target to enable dependent projects to query target properties
 # such as the library location.
 install(TARGETS ${PROJECT_NAME}
