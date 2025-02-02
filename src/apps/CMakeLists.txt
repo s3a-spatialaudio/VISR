@@ -18,6 +18,15 @@ if( (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static")
 endif( (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static") 
   AND NOT ( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES) )
 
+if( AUTOSET_RPATH )
+  # Set the default rpath for executables.
+  if( ${VISR_SYSTEM_NAME} MATCHES "Linux" )
+    set(CMAKE_INSTALL_RPATH "\\\${ORIGIN}/../3rd;\\\${ORIGIN}/../lib")
+  elseif( ${VISR_SYSTEM_NAME} MATCHES "MacOS" )
+    set(CMAKE_INSTALL_RPATH "@loader_path/../3rd;@loader_path/../lib")
+  endif()
+endif()
+
 add_subdirectory( baseline_renderer )
 add_subdirectory( feedthrough )
 add_subdirectory( matrix_convolver )

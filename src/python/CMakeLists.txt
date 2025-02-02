@@ -67,9 +67,6 @@ endif()
 # Define helper library used by several Python externals.
 add_subdirectory( libpythonbindinghelpers )
 
-# Directory for installing the externals (binary files) in the install tree.
-set( PYTHON_MODULE_INSTALL_DIRECTORY python/src/visr/impl )
-
 # List containing the target names of all Python externals.
 set( VISR_PYTHON_EXTERNALS_TARGETS )
 
@@ -78,14 +75,16 @@ foreach( _external ${VISR_PYTHON_EXTERNALS} )
   add_subdirectory( ${_external} )
   set( _externalTarget ${_external}python )
   list( APPEND VISR_PYTHON_EXTERNALS_TARGETS ${_externalTarget} )
-  # Skip the RPATH for the Python external, because only shared libraries (incl. other externals)
-  # in the current directory will be used.
-  # set_target_properties( ${_externalTarget} PROPERTIES SKIP_BUILD_RPATH TRUE )
 
-  if( ${VISR_SYSTEM_NAME} STREQUAL "Linux" )
-    set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "\${ORIGIN}/../lib" )
-  elseif( ${VISR_SYSTEM_NAME} STREQUAL "MacOS" )
-    set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "@loader_path/../lib" )
+  if( AUTOSET_RPATH )
+    # Adjust the rpath of the Python externals to contain only the current directory
+    # because the VISR shared libraries and their runtime dependencies are installed
+    # into this folder
+    if( ${VISR_SYSTEM_NAME} STREQUAL "Linux" )
+      set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "\\\${ORIGIN}" )
+    elseif( ${VISR_SYSTEM_NAME} STREQUAL "MacOS" )
+      set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "@loader_path" )
+    endif()
   endif()
 endforeach()
 

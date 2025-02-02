@@ -10,6 +10,16 @@ else( VISR_SYSTEM_NAME MATCHES "Linux" )
   set( VISR_INSTALL_EXPORT_CONFIG_DIRECTORY cmake )
 endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 
+# Default setting for the rpath of the library targets.
+# Overridden in the apps/ and python/ subdirectories.
+if( AUTOSET_RPATH )
+  if( ${VISR_SYSTEM_NAME} MATCHES "Linux" )
+    set(CMAKE_INSTALL_RPATH "\\\${ORIGIN};\\\${ORIGIN}/../3rd")
+  elseif( ${VISR_SYSTEM_NAME} MATCHES "MacOS" )
+    set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../3rd")
+  endif()
+endif()
+
 # Location of export files in build tree
 set( VISR_BUILD_EXPORT_CONFIG_DIRECTORY ${CMAKE_BINARY_DIR}/cmake )
 

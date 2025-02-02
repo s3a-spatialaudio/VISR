@@ -102,8 +102,6 @@ endif( VISR_SYSTEM_NAME MATCHES "Darwin" )
 OPTION( AUTOSET_RPATH "Automatically set rpath" ON )
 if(AUTOSET_RPATH)
 
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/3rd;${CMAKE_INSTALL_PREFIX}/lib")
-
   # Activate rpath support
   set( CMAKE_MACOSX_RPATH ON)
   # Use, i.e., don't skip rpaths in the build tree
@@ -506,11 +504,29 @@ if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
   find_package(OggVorbis REQUIRED)
 endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
-# The location of the generated 'visr' package in the install tree.
-# This sometimes gets used even though BUILD_PYTHON_BINDINGS is not set.
-# Relative directory, relative to CMAKE_PREFIX_PATH.
-set( PYTHON_MODULE_INSTALL_DIRECTORY
-    "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python/src/visr" )
+if( VISR_SYSTEM_NAME MATCHES "Windows" )
+  set( VISR_RUNTIME_DEPENDENCIES_SEARCH_PATH $ENV{PATH} $<TARGET_FILE_DIR:visr_shared> )
+  set( VISR_RUNTIME_DEPENDENCIES_PRE_EXCLUDE_REGEXES "ms-win" "ext-ms-" "python[0-9]+" "vcruntime")
+  set( VISR_RUNTIME_DEPENDENCIES_POST_EXCLUDE_REGEXES ".*system32/.*\\.dll")
+elseif( VISR_SYSTEM_NAME MATCHES "Linux" )
+  set( VISR_RUNTIME_DEPENDENCIES_SEARCH_PATH $ENV{PATH} $<TARGET_FILE_DIR:visr_shared> )
+  set( VISR_RUNTIME_DEPENDENCIES_PRE_EXCLUDE_REGEXES )
+  set( VISR_RUNTIME_DEPENDENCIES_POST_EXCLUDE_REGEXES "^/lib" "^/usr" "^/bin" )
+else()
+  # Note: On MacOS, the runtime dependency directories are ignored by CMake anyway.
+  set( VISR_RUNTIME_DEPENDENCIES_SEARCH_PATH )
+  set( VISR_RUNTIME_DEPENDENCIES_PRE_EXCLUDE_REGEXES )
+  set( VISR_RUNTIME_DEPENDENCIES_POST_EXCLUDE_REGEXES )
+endif()
+
+# # The location of the generated 'visr' package in the install tree.
+# # This sometimes gets used even though BUILD_PYTHON_BINDINGS is not set.
+# # Relative directory, relative to CMAKE_PREFIX_PATH.
+# set( PYTHON_MODULE_INSTALL_DIRECTORY
+#     "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python/src/visr" )
+
+# Directory for installing the externals (binary files) in the install tree.
+set( PYTHON_MODULE_INSTALL_DIRECTORY python/src/visr/impl )
 
 # Set the top-level directory containing the generated Python directory structure.
 # This is used as the working directory for the package generation command.,
