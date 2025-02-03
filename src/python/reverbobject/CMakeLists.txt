@@ -36,5 +36,5 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES FOLDER python_externals )
 
 install(TARGETS ${PROJECT_NAME}
         EXPORT VISR_python_externals_exports
-        DESTINATION ${PYTHON_MODULE_INSTALL_DIRECTORY}
+        DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY}
         COMPONENT python_externals )
