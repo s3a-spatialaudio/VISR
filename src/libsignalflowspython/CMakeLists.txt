@@ -64,25 +64,6 @@ foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   )
 endforeach()
 
-if( BUILD_INSTALL_STATIC_LIBRARIES )
-  install(TARGETS signalflowspython_static
-          EXPORT VISR_static_library_exports
-          PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files
-          ARCHIVE DESTINATION lib COMPONENT static_libraries )
-endif( BUILD_INSTALL_STATIC_LIBRARIES )
-
-if( BUILD_INSTALL_SHARED_LIBRARIES )
-  install(TARGETS signalflowspython_shared
-          EXPORT VISR_shared_library_exports
-          ARCHIVE DESTINATION lib COMPONENT development_files
-          RUNTIME DESTINATION lib COMPONENT shared_libraries
-          LIBRARY DESTINATION lib COMPONENT shared_libraries
-          PUBLIC_HEADER DESTINATION include/visr/libsignalflows COMPONENT development_files )
-endif( BUILD_INSTALL_SHARED_LIBRARIES )
-
-if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-  install(TARGETS signalflowspython_static_pic
-          EXPORT VISR_static_pic_library_exports
-          PUBLIC_HEADER DESTINATION include/visr/libsignalflowspython COMPONENT development_files
-          ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
-endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+include(install_with_dependencies)
+installLibraryWithDependencies(signalflowspython)
+installSharedLibraryInPythonPackage(signalflowspython)

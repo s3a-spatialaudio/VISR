@@ -28,12 +28,6 @@ function( installLibraryWithDependencies baseName )
             FRAMEWORK DESTINATION frameworks COMPONENT shared_libraries
             LIBRARY DESTINATION lib  COMPONENT shared_libraries
             PUBLIC_HEADER DESTINATION include/visr/lib${baseName} COMPONENT development_files )
-    if( BUILD_PYTHON_BINDINGS )
-      install(TARGETS ${baseName}_shared
-        RUNTIME DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY} COMPONENT python_externals
-        LIBRARY DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY} COMPONENT python_externals
-        PUBLIC_HEADER DESTINATION include/visr/lib${baseName} COMPONENT development_files )
-    endif()
   endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
   if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
@@ -43,6 +37,27 @@ function( installLibraryWithDependencies baseName )
             ARCHIVE DESTINATION lib COMPONENT static_pic_libraries
             FRAMEWORK DESTINATION frameworks COMPONENT static_pic_libraries )
   endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
+endfunction()
+
+# Install a shared library into the Python package directory.
+# This is conditional on both Python bindings and shared library variants being built,
+# otherwise this is a no-op.
+# Parameters:
+# baseName The name of the library target w/o the 'shared' suffix.
+function( installSharedLibraryInPythonPackage baseName )
+  if( BUILD_INSTALL_SHARED_LIBRARIES AND BUILD_PYTHON_BINDINGS )
+    install(TARGETS ${baseName}_shared
+            RUNTIME_DEPENDENCIES
+              PRE_EXCLUDE_REGEXES ${VISR_RUNTIME_DEPENDENCIES_PRE_EXCLUDE_REGEXES}
+              POST_EXCLUDE_REGEXES ${VISR_RUNTIME_DEPENDENCIES_POST_EXCLUDE_REGEXES}
+              DIRECTORIES ${VISR_RUNTIME_DEPENDENCIES_SEARCH_PATH}
+            # EXPORT VISR_shared_library_exports
+            ARCHIVE DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY} COMPONENT python_externals
+            RUNTIME DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY} COMPONENT python_externals
+            FRAMEWORK DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY} COMPONENT python_externals
+            LIBRARY DESTINATION ${PYTHON_EXTERNAL_INSTALL_DIRECTORY}  COMPONENT python_externals
+            PUBLIC_HEADER DESTINATION include/visr/lib${baseName} COMPONENT python_externals )
+  endif()
 endfunction()
 
 function( installExecutableWithDependencies targetName )

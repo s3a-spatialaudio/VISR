@@ -519,19 +519,6 @@ else()
   set( VISR_RUNTIME_DEPENDENCIES_POST_EXCLUDE_REGEXES )
 endif()
 
-# # The location of the generated 'visr' package in the install tree.
-# # This sometimes gets used even though BUILD_PYTHON_BINDINGS is not set.
-# # Relative directory, relative to CMAKE_PREFIX_PATH.
-# set( PYTHON_MODULE_INSTALL_DIRECTORY
-#     "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/python/src/visr" )
-
-# Directory for installing the externals (binary files) in the install tree.
-set( PYTHON_MODULE_INSTALL_DIRECTORY python/src/visr/impl )
-
-# Set the top-level directory containing the generated Python directory structure.
-# This is used as the working directory for the package generation command.,
-set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
-
 # Set the directory containing the 'visr' python package data structure.
 # By adding this directory to the Python module search path, the VISR package
 # can be imported without being installed.
@@ -541,6 +528,18 @@ set( VISR_PYTHON_PACKAGE_SRC ${VISR_PYTHON_PACKAGE_ROOT}/src )
 
 # The location of the 'visr' Python package in the build tree.
 set( VISR_PYTHON_PACKAGE_DIR ${VISR_PYTHON_PACKAGE_SRC}/visr )
+
+# The location of the generated 'visr' package in the install tree.
+# This sometimes gets used even though BUILD_PYTHON_BINDINGS is not set.
+# Relative directory, relative to CMAKE_PREFIX_PATH.
+set( PYTHON_MODULE_INSTALL_DIRECTORY python/src/visr )
+
+# Directory for installing the externals (binary files) and theirin the install tree.
+set( PYTHON_EXTERNAL_INSTALL_DIRECTORY ${PYTHON_MODULE_INSTALL_DIRECTORY}/impl )
+
+# Set the top-level directory containing the generated Python directory structure.
+# This is used as the working directory for the package generation command.,
+set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
 
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
