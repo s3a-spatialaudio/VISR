@@ -35,12 +35,12 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import pml
-import rcl
+from visr import pml
+from visr import rcl
 
-from visr_bst import DynamicHrirRenderer
+from ..renderers.dynamic_hrir_renderer import DynamicHrirRenderer
 
-from visr_bst.util import readSofaFile
+from ..util import readSofaFile
 
 class RealtimeDynamicHrirRenderer(visr.CompositeComponent ):
     """

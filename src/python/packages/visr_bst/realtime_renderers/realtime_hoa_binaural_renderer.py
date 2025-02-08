@@ -36,7 +36,7 @@
 
 import visr
 
-from visr_bst import HoaBinauralRenderer
+from ..renderers.hoa_binaural_renderer import HoaBinauralRenderer
 
 class RealtimeHoaBinauralRenderer(visr.CompositeComponent ):
     """

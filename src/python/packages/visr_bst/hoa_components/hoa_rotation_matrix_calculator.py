@@ -37,10 +37,10 @@
 import numpy as np
 
 import visr
-import pml
+from visr import pml
 
-from visr_bst.util import calcRotationMatrix, rotationMatrixReorderingACN
-from visr_bst.util import allSphericalHarmonicsRotationMatrices
+from ..util import calcRotationMatrix, rotationMatrixReorderingACN
+from ..util import allSphericalHarmonicsRotationMatrices
 
 class HoaRotationMatrixCalculator( visr.AtomicComponent ):
     """

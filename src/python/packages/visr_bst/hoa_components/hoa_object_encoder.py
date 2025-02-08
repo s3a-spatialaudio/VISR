@@ -36,13 +36,13 @@
 
 # VISR core packages
 import visr
-import pml
-import objectmodel as om
-import rbbl
+from visr import pml
+from visr import objectmodel as om
+from visr import rbbl
 
 # Helper functions contained in the
-from visr_bst.util import cart2sph
-from visr_bst.util import allSphHarmRealACN
+from ..util import cart2sph
+from ..util import allSphHarmRealACN
 
 # Standard Python packages
 import numpy as np

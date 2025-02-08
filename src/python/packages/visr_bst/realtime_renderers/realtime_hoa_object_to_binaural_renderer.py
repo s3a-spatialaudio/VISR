@@ -35,10 +35,10 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import pml
-import rcl
+from visr import pml
+from visr import rcl
 
-from visr_bst import HoaObjectToBinauralRenderer
+from ..renderers.hoa_object_to_binaural_renderer import HoaObjectToBinauralRenderer
 
 class RealtimeHoaObjectToBinauralRenderer(visr.CompositeComponent ):
     """

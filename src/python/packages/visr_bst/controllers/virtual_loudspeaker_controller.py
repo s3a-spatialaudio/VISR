@@ -38,9 +38,9 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 import visr
-import pml
+from visr import pml
 
-from visr_bst.util.rotation_functions import calcRotationMatrix, sph2cart
+from ..util import calcRotationMatrix, sph2cart
 
 class VirtualLoudspeakerController( visr.AtomicComponent ):
     """

@@ -41,12 +41,12 @@ from scipy.spatial import ConvexHull
 
 # core VISR packages
 import visr
-import pml
-import rbbl
-import objectmodel as om
+from visr import pml
+from visr import rbbl
+from visr import objectmodel as om
 
 # Helper functions included in the BST pacjage
-from visr_bst.util import calcRotationMatrix, deg2rad, sph2cart
+from ..util import calcRotationMatrix, deg2rad, sph2cart
 
 class DynamicHrirController( visr.AtomicComponent ):
     """

@@ -38,9 +38,9 @@ import numpy as np
 
 import visr
 
-from visr_bst import VirtualLoudspeakerRenderer
+from ..renderers.virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 
-from visr_bst.util import readSofaFile, deg2rad
+from ..util import readSofaFile, deg2rad
 
 class RealtimeVirtualLoudspeakerRenderer(visr.CompositeComponent ):
     """

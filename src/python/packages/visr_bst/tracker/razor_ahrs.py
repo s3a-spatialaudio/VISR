@@ -35,7 +35,7 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import pml
+from visr import pml
 
 import numpy as np
 

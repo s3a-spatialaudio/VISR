@@ -35,13 +35,13 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import pml
-import rbbl
-import rcl
+from visr import pml
+from visr import rbbl
+from visr import rcl
 
-from visr_bst.util import readSofaFile, deg2rad
+from ..util import readSofaFile, deg2rad
 
-from visr_bst import VirtualLoudspeakerController
+from ..controllers.virtual_loudspeaker_controller import VirtualLoudspeakerController
 
 import numpy as np
 

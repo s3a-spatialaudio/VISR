@@ -38,13 +38,13 @@ import numpy as np
 
 # Core VISR packages
 import visr
-import rbbl
-import pml
-import rcl
+from visr import rbbl
+from visr import pml
+from visr import rcl
 
-from visr_bst.hoa_components import HoaObjectEncoder
-from visr_bst.hoa_components import HoaCoefficientRotation
-from visr_bst.util import readSofaFile
+from ..hoa_components import HoaObjectEncoder
+from ..hoa_components import HoaCoefficientRotation
+from ..util import readSofaFile
 
 class HoaObjectToBinauralRenderer( visr.CompositeComponent ):
     """

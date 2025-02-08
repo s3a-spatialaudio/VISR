@@ -35,12 +35,12 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import panning
-import pml
-import efl
+from visr import panning
+from visr import pml
+from visr import efl
 
-from rcl import NullSource
-from signalflows import CoreRenderer
+from visr.rcl import NullSource
+from visr.signalflows import CoreRenderer
 
 from .virtual_loudspeaker_renderer import VirtualLoudspeakerRenderer
 

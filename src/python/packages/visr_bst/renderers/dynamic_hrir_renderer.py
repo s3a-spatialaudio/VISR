@@ -37,13 +37,13 @@
 import numpy as np
 
 import visr
-import pml
-import rbbl
-import rcl
+from visr import pml
+from visr import rbbl
+from visr import rcl
 
-from visr_bst.util import readSofaFile
+from ..util import readSofaFile
 
-from visr_bst import DynamicHrirController
+from ..controllers.dynamic_hrir_controller import DynamicHrirController
 
 class DynamicHrirRenderer( visr.CompositeComponent ):
     """

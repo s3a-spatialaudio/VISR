@@ -35,8 +35,8 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import pml
-from rcl import UdpReceiver
+from visr import pml
+from visr.rcl import UdpReceiver
 
 from .hdm_tracker import HdMTracker
 

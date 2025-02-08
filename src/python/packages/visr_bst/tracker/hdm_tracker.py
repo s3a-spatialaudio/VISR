@@ -36,14 +36,12 @@
 # http://cvssp.org/data/s3a/public/VISR .
 
 import visr
-import pml
+from visr import pml
 
 import numpy as np
 
-#from ..util.rotation_functions import deg2rad
-
 from squaternion import Quaternion
-from visr_bst.util.rotation_functions import deg2rad
+from ..util import deg2rad
 
 class HdMTracker(visr.AtomicComponent ):
     """
