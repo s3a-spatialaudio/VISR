@@ -39,10 +39,15 @@ endif( POLICY CMP0090 )
 if( POLICY CMP0091 )
   CMAKE_POLICY(SET CMP0091 NEW)
 endif( POLICY CMP0091 )
+# Do not require CMake-style escaping in install rpaths settings.
+if( POLICY CMP0095 )
+  CMAKE_POLICY(SET CMP0095 NEW)
+endif( POLICY CMP0095 )
+# find_package() uses upper-case <PACKAGENAME>_ROOT variables. 
+# This is used by the current FindBoost mechanism.
 if( POLICY CMP0144 )
   CMAKE_POLICY(SET CMP0144 NEW)
 endif( POLICY CMP0144 )
-
 
 # The name of our top-level project.
 PROJECT( VISR

@@ -81,7 +81,12 @@ foreach( _external ${VISR_PYTHON_EXTERNALS} )
     # because the VISR shared libraries and their runtime dependencies are installed
     # into this folder
     if( ${VISR_SYSTEM_NAME} STREQUAL "Linux" )
-      set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "\\\${ORIGIN}" )
+        # Use new CMake behaviour without CMake-style escaping for rpaths if available.
+      if( POLICY CMP0095 )
+        set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "\${ORIGIN}" )
+      else()
+        set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "\\\${ORIGIN}" )
+      endif()
     elseif( ${VISR_SYSTEM_NAME} STREQUAL "MacOS" )
       set_target_properties( ${_externalTarget} PROPERTIES INSTALL_RPATH "@loader_path" )
     endif()

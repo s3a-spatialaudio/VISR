@@ -14,7 +14,12 @@ endif( VISR_SYSTEM_NAME MATCHES "Linux" )
 # Overridden in the apps/ and python/ subdirectories.
 if( AUTOSET_RPATH )
   if( ${VISR_SYSTEM_NAME} MATCHES "Linux" )
-    set(CMAKE_INSTALL_RPATH "\\\${ORIGIN};\\\${ORIGIN}/../3rd")
+    # Use new CMake behaviour without CMake-style escaping for rpaths if available.
+    if( POLICY CMP0095 )
+      set(CMAKE_INSTALL_RPATH "\${ORIGIN}:\${ORIGIN}/../3rd")
+    else()
+      set(CMAKE_INSTALL_RPATH "\\\${ORIGIN}:\\\${ORIGIN}/../3rd")
+    endif()
   elseif( ${VISR_SYSTEM_NAME} MATCHES "MacOS" )
     set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../3rd")
   endif()

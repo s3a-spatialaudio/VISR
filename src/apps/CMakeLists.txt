@@ -21,7 +21,12 @@ endif( (BUILD_LIBRARY_TYPE_FOR_APPS STREQUAL "static")
 if( AUTOSET_RPATH )
   # Set the default rpath for executables.
   if( ${VISR_SYSTEM_NAME} MATCHES "Linux" )
-    set(CMAKE_INSTALL_RPATH "\\\${ORIGIN}/../3rd;\\\${ORIGIN}/../lib")
+    # Use new CMake behaviour without CMake-style escaping for rpaths if available.
+    if( POLICY CMP0095 )
+      set(CMAKE_INSTALL_RPATH "\${ORIGIN}/../3rd:\${ORIGIN}/../lib")
+    else()
+      set(CMAKE_INSTALL_RPATH "\\\${ORIGIN}/../3rd:\\\${ORIGIN}/../lib")
+    endif()
   elseif( ${VISR_SYSTEM_NAME} MATCHES "MacOS" )
     set(CMAKE_INSTALL_RPATH "@loader_path/../3rd;@loader_path/../lib")
   endif()
