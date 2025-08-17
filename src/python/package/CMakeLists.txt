@@ -30,28 +30,29 @@ foreach( _external ${VISR_PYTHON_EXTERNALS} )
 endforeach()
 endif()
 
-# Note: the binary path generation is only needed for the python_package target, but not if the 
-# whl package is generated at the install stage.
-include(GeneratePythonBinaryWheel)
+### Disabled package generation at build time in favour of creation at the install stage. 
+# # Note: the binary path generation is only needed for the python_package target, but not if the 
+# # whl package is generated at the install stage.
+# include(GeneratePythonBinaryWheel)
 
-getBinaryPythonWheelName( visr ${VISR_VERSION} _WHEEL_FILE_NAME )
+# getBinaryPythonWheelName( visr ${VISR_VERSION} _WHEEL_FILE_NAME )
 
-# Debug output
-# message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )
-# message( STATUS "EXTERNAL_TARGET_FILES: " ${EXTERNAL_TARGET_FILES} )
-# message( STATUS "VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES: " ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} )
+# # Debug output
+# # message( STATUS "Wheel name: " ${_WHEEL_FILE_NAME} )
+# # message( STATUS "EXTERNAL_TARGET_FILES: " ${EXTERNAL_TARGET_FILES} )
+# # message( STATUS "VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES: " ${VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES} )
 
-add_custom_command( OUTPUT ${_WHEEL_FILE_NAME}
-  MAIN_DEPENDENCY ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml
-  WORKING_DIRECTORY ${VISR_PYTHON_PACKAGE_ROOT}
-  COMMAND ${PYTHON_EXECUTABLE} -m build --no-isolation --outdir ${PROJECT_BINARY_DIR}/python_packages --wheel
-  DEPENDS ${PYTHON_EXTERNALS_TARGETS}
-)
+# add_custom_command( OUTPUT ${_WHEEL_FILE_NAME}
+#   MAIN_DEPENDENCY ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml
+#   WORKING_DIRECTORY ${VISR_PYTHON_PACKAGE_ROOT}
+#   COMMAND ${PYTHON_EXECUTABLE} -m build --no-isolation --outdir ${PROJECT_BINARY_DIR}/python_packages --wheel
+#   DEPENDS ${PYTHON_EXTERNALS_TARGETS}
+# )
 
-add_custom_target( python_package DEPENDS ${_WHEEL_FILE_NAME} )
+# add_custom_target( python_package DEPENDS ${_WHEEL_FILE_NAME} )
 
 # Note: Apparently it is not possible to access the source directory in the install stage, therefore we cannot 
-# use the same configure_file logic as in the build tree, but have to copy the already generated builf tree.
+# use the same configure_file logic as in the build tree, but have to copy the already generated build tree.
 install( DIRECTORY
 ${CMAKE_BINARY_DIR}/python
   DESTINATION .
