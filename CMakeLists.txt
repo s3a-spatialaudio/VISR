@@ -43,11 +43,18 @@ endif( POLICY CMP0091 )
 if( POLICY CMP0095 )
   CMAKE_POLICY(SET CMP0095 NEW)
 endif( POLICY CMP0095 )
-# find_package() uses upper-case <PACKAGENAME>_ROOT variables. 
-# This is used by the current FindBoost mechanism.
+# Support uppercase <PACKAGE>_ROOT variables (used for BOOST_ROOT).
 if( POLICY CMP0144 )
   CMAKE_POLICY(SET CMP0144 NEW)
-endif( POLICY CMP0144 )
+# Use deprecated FindBoost.cmake module.
+# TODO: Port to new behaviour in separate issue.
+endif()
+# Use the lagacy FindBoost module.
+# TODO: Port to new behaviour (mainly adjusting the 3rd-party
+# installation logic).
+if( POLICY CMP0167 )
+  CMAKE_POLICY(SET CMP0167 OLD)
+endif()
 
 # The name of our top-level project.
 PROJECT( VISR
