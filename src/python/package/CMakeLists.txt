@@ -68,7 +68,7 @@ ${CMAKE_BINARY_DIR}/python
 install( CODE [===[
   find_package( Python REQUIRED COMPONENTS Interpreter )
   execute_process( 
-    COMMAND ${Python_EXECUTABLE} -m build --no-isolation --outdir $<INSTALL_PREFIX> --wheel
+    COMMAND ${Python_EXECUTABLE} -m build --outdir $<INSTALL_PREFIX> --wheel
     WORKING_DIRECTORY $<INSTALL_PREFIX>/python
     ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
     OUTPUT_VARIABLE WHEEL_OUTPUT
