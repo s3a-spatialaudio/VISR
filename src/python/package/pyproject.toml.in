@@ -7,13 +7,16 @@ name = "visr"
 authors = [ { name = "Andreas Franck", email = "andreas.franck@audioscenic.com" }, { name = "VISR contributors"} ]
 version = "@VISR_VERSION@"
 description = "VISR audio rendering framework"
-license = { text = "ISC" }
+license = "ISC"
+license-files = ["LICENSE.md"]
 readme = "Readme.md"
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: ISC License",
     "Operating System :: Windows, Linux, MacOS",
+]
+dependencies = [
+    "numpy"
 ]
 
 #[tool.setuptools]
