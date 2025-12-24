@@ -56,6 +56,7 @@ endif()
 install( DIRECTORY
 ${CMAKE_BINARY_DIR}/python
   DESTINATION .
+  COMPONENT python_externals
   FILES_MATCHING
     PATTERN "*.py"
     PATTERN "*.md"
