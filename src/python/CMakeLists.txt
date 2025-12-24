@@ -67,6 +67,44 @@ endif()
 # Define helper library used by several Python externals.
 add_subdirectory( libpythonbindinghelpers )
 
+if(BUILD_TESTING)
+  # Note: At the moment, the test environment venv is created at configure time
+  # because creating it at build time would make setting the interpreter difficult
+  # (how to pass the interpreter pathe back to CMake?).
+
+  message(STATUS "Python test venv creation started.")
+  set(_TEST_VENV_NAME "python_test_venv")
+  set(_TEST_VENV_LOCATION ${CMAKE_BINARY_DIR}/${_TEST_VENV_NAME})
+  set(_TEST_VENV_STAMP ${_TEST_VENV_LOCATION}/pyvenv.cfg)
+  set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_DIRECTORY}/package/requirements.txt})
+  execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -m venv ${_TEST_VENV_NAME}
+    COMMAND_ERROR_IS_FATAL ANY
+  )
+    message(STATUS "Python test venv created.")
+
+  # Taken from https://discourse.cmake.org/t/possible-to-create-a-python-virtual-env-from-cmake-and-then-find-it-with-findpython3/1132/2
+  # Here is the trick
+  ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
+    set(ENV{VIRTUAL_ENV} ${_TEST_VENV_LOCATION})
+    ## change the context of the search
+    set(Python3_FIND_VIRTUALENV FIRST)
+  ## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
+  unset(Python3_EXECUTABLE)
+  ## Launch a new search
+  find_package (Python3 COMPONENTS Interpreter Development)
+  # Define a dedicated name for the Python interpreter to be used in the unit tests
+  set(PYTHON_TEST_VENV_EXECUTABLE ${Python3_EXECUTABLE})
+  message(STATUS "Python executable to be used in unit tests: " ${PYTHON_TEST_VENV_EXECUTABLE})
+
+  set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package/requirements.txt)
+  execute_process(
+    COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip install -r ${_TEST_VENV_REQUIREMENTS_FILE}
+    COMMAND_ERROR_IS_FATAL ANY
+    )
+endif()
+
+
 # List containing the target names of all Python externals.
 set( VISR_PYTHON_EXTERNALS_TARGETS )
 
@@ -100,3 +138,51 @@ set_target_properties( pythonexternals PROPERTIES FOLDER python_externals )
 # Subdirectory containing build instructions for the visr Python namespace package
 # incl. binary distribution packages (wheels).
 add_subdirectory( package )
+
+## --------------------------------------------------------------------------
+
+# Note: We have to create these targets before traversing the subdirectories
+# because the unit test targets depend on the test environment
+
+set(_TEST_ENV_PREFIX ${CMAKE_BINARY_DIR}/tmp_install)
+set(_TEST_ENV_STAMP ${_TEST_ENV_PREFIX}/python/pyproject.toml)
+add_custom_command( OUTPUT ${_TEST_ENV_STAMP}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}
+         --prefix ${_TEST_ENV_PREFIX}
+         --config $<CONFIG>
+  DEPENDS ${PYTHON_EXTERNALS_TARGETS}
+)
+add_custom_target(python_test_package DEPENDS ${_TEST_ENV_STAMP})
+
+# set(_TEST_VENV_NAME "python_test_venv")
+# set(_TEST_VENV_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/${_TEST_VENV_NAME})
+# set(_TEST_VENV_STAMP ${_TEST_VENV_LOCATION}/pyvenv.cfg)
+# set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_DIRECTORY}/package/requirements.txt})
+# add_custom_command( OUTPUT ${_TEST_VENV_STAMP}
+#   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+#   COMMAND ${PYTHON_EXECUTABLE} -m venv ${_TEST_VENV_NAME}
+#   # Taken from https://discourse.cmake.org/t/possible-to-create-a-python-virtual-env-from-cmake-and-then-find-it-with-findpython3/1132/2
+#   # Here is the trick
+#   ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
+# #   set (ENV{VIRTUAL_ENV} "/path/to/venv")
+# #   ## change the context of the search
+# #   set (Python3_FIND_VIRTUALENV FIRST)
+# # ## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
+# # unset (Python3_EXECUTABLE)
+# # ## Launch a new search
+# # find_package (Python3 COMPONENTS Interpreter Development)
+# #   DEPENDS python_test_package
+# )
+# add_custom_target(python_test_venv DEPENDS ${_TEST_VENV_STAMP})
+
+# --------------------------------------------------------------------------
+# Create the Python virtual environment for testing through CTest fixtures.
+
+add_test(NAME python_test_package_fixture
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target python_test_package --config $<CONFIG>
+)
+
+add_test(NAME python_test_install_visr_fixture
+  COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip install 
+)

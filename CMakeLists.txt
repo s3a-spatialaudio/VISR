@@ -553,6 +553,10 @@ set( PYTHON_EXTERNAL_INSTALL_DIRECTORY ${PYTHON_MODULE_INSTALL_DIRECTORY}/impl )
 # This is used as the working directory for the package generation command.,
 set( VISR_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/python )
 
+# Root directory of the Python package structure created by the
+# "python_test_package" target. This is used by unit tests.
+set( VISR_TEST_PYTHON_PACKAGE_ROOT ${CMAKE_BINARY_DIR}/tmp_install/python/src )
+
 set( DOCUMENTATION_INSTALL_DIRECTORY "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/doc" )
 
 ################################################################################
