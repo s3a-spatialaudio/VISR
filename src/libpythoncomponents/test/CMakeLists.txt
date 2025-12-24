@@ -36,9 +36,8 @@ set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER unit_tests )
 add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
          COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
 
-include( adjust_test_environment )
-# set up PYTHONPATH to allow finding the visr module
-adjustPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
+set_property( TEST ${target} APPEND PROPERTY ENVIRONMENT
+      "PYTHONPATH=${VISR_TEST_PYTHON_PACKAGE_ROOT}" )
 
 # Disable leak checking because the memory handling of Python interpreter
 # causes leak reports (false positives?) that are outside our responsibility.
