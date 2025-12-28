@@ -5,22 +5,21 @@
 #include <libpml/empty_parameter_config.hpp>
 
 #include <boost/array.hpp>
-#include <boost/asio/placeholders.hpp>
-#include <boost/asio/io_service.hpp>
+#include <boost/asio/executor_work_guard.hpp>
+#include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
+#include <boost/asio/placeholders.hpp>
 #include <boost/bind/bind.hpp>
-#ifndef VISR_DISABLE_THREADS
-#include <boost/thread/locks.hpp>
-#include <boost/thread/lock_types.hpp>
-#include <boost/thread/thread.hpp>
-#endif
-
 
 #include <ciso646>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#ifndef VISR_DISABLE_THREADS
+#include <mutex>
+#include <thread>
+#endif
 
 namespace visr
 {
@@ -44,23 +43,23 @@ private:
     Mode const mMode;
 
     /**
-    * Pointer to the either internally or externally provided externally provided boost::asio::io_service object.
+    * Pointer to the either internally or externally provided externally provided boost::asio::io_context object.
     */
-    boost::asio::io_service* mIoService;
+    boost::asio::io_context mIoContext;
 
     /**
     * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
     * but not for ExternalServiceObject.
     */
-    std::unique_ptr<boost::asio::io_service> mIoServiceInstance;
 
-    std::unique_ptr<boost::asio::ip::udp::socket> mSocket;
+    boost::asio::ip::udp::socket mSocket;
 
     boost::asio::ip::udp::endpoint mRemoteEndpoint;
 
     boost::array<char, cMaxMessageLength> mReceiveBuffer;
 
-    std::unique_ptr<boost::asio::io_service::work> mIoServiceWork;
+    boost::asio::executor_work_guard< boost::asio::io_context::executor_type >
+        mWorkGuard;
 
     /**
     * Internal queue of messages received asynchronously. They will be copied into the output
@@ -69,9 +68,9 @@ private:
     std::deque< pml::StringParameter > mInternalMessageBuffer;
 
 #ifndef VISR_DISABLE_THREADS
-    std::unique_ptr< boost::thread > mServiceThread;
+    std::thread mServiceThread;
 
-    boost::mutex mMutex;
+    std::mutex mMutex;
 #endif
 };
 
@@ -99,31 +98,24 @@ void UdpReceiver::process()
 UdpReceiver::Impl::Impl( std::size_t port,
                          Mode mode )
  : mMode( mode )
+ , mIoContext{}
+ , mWorkGuard{ mIoContext.get_executor() }
+ , mSocket{
+   mIoContext }
 {
     using boost::asio::ip::udp;
-    mIoServiceInstance.reset(new boost::asio::io_service());
-    mIoService = mIoServiceInstance.get();
 
-    if (mMode == Mode::Synchronous)
-    {
-        mIoServiceWork.reset();
-    }
-    else
-    {
-        mIoServiceWork.reset(new  boost::asio::io_service::work(*mIoService));
-    }
-    mSocket.reset(new udp::socket(*mIoService));
     boost::system::error_code ec;
-    mSocket->open(udp::v4(), ec);
-    mSocket->set_option(boost::asio::socket_base::reuse_address(true));
-    mSocket->bind(udp::endpoint(udp::v4(), static_cast<unsigned short>(port)));
+    mSocket.open(udp::v4(), ec);
+    mSocket.set_option(boost::asio::socket_base::reuse_address(true));
+    mSocket.bind(udp::endpoint(udp::v4(), static_cast<unsigned short>(port)));
 
     if (ec)
     {
         throw std::runtime_error("Error opening UDP port");
     }
 
-    mSocket->async_receive_from(boost::asio::buffer(mReceiveBuffer),
+    mSocket.async_receive_from(boost::asio::buffer(mReceiveBuffer),
         mRemoteEndpoint,
         boost::bind(&UdpReceiver::Impl::handleReceiveData, this,
             boost::asio::placeholders::error,
@@ -134,21 +126,20 @@ UdpReceiver::Impl::Impl( std::size_t port,
 #else
     if (mMode == Mode::Asynchronous)
     {
-        mServiceThread.reset(new boost::thread(boost::bind(&boost::asio::io_service::run, mIoService)));
+      mServiceThread =
+          std::thread( boost::bind( &boost::asio::io_context::run,
+                       &mIoContext ));
     }
 #endif // VISR_DISABLE_THREADS
 }
 
 UdpReceiver::Impl::~Impl()
 {
-  if( mIoServiceInstance.get() != nullptr )
-  {
-    mIoServiceInstance->stop();
-  }
+  mIoContext.stop();
 #ifndef VISR_DISABLE_THREADS
-  if( mServiceThread.get() != nullptr  )
+  if( mServiceThread.joinable() )
   {
-    mServiceThread->join();
+    mServiceThread.join();
   }
 #endif
 }
@@ -157,10 +148,10 @@ void UdpReceiver::Impl::process( UdpReceiver::MessageOutput & messageOutput )
 {
   if(  mMode == Mode::Synchronous )
   {
-    mIoService->poll();
+    mIoContext.poll();
   }
 #ifndef VISR_DISABLE_THREADS
-  boost::lock_guard<boost::mutex> lock( mMutex );
+  std::lock_guard<std::mutex> lock( mMutex );
 #endif
   while( not mInternalMessageBuffer.empty() )
   {
@@ -175,11 +166,11 @@ void UdpReceiver::Impl::handleReceiveData( const boost::system::error_code& erro
 {
   {
 #ifndef VISR_DISABLE_THREADS
-    boost::lock_guard<boost::mutex> lock( mMutex );
+   std::lock_guard<std::mutex> guard( mMutex );
 #endif
     mInternalMessageBuffer.push_back( pml::StringParameter( std::string( &mReceiveBuffer[0], numBytesTransferred ) ) );
   }
-  mSocket->async_receive_from( boost::asio::buffer(mReceiveBuffer),
+  mSocket.async_receive_from( boost::asio::buffer(mReceiveBuffer),
                                mRemoteEndpoint,
                                boost::bind(&Impl::handleReceiveData, this,
                                             boost::asio::placeholders::error,
