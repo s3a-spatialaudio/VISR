@@ -49,7 +49,6 @@ foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
     target_link_libraries( signalflowspython_${LIB_TYPE} PRIVATE pythoncomponents_${LIB_TYPE} )
   endif( BUILD_PYTHON_BINDINGS )
 
-  target_link_libraries( signalflowspython_${LIB_TYPE} PRIVATE Boost::system )
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( signalflowspython_${LIB_TYPE} PUBLIC -DBOOST_ALL_DYN_LINK )
   endif( NOT Boost_USE_STATIC_LIBS )

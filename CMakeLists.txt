@@ -36,6 +36,9 @@ endif( POLICY CMP0090 )
 if( POLICY CMP0091 )
   CMAKE_POLICY(SET CMP0091 NEW)
 endif( POLICY CMP0091 )
+if( POLICY CMP0144 )
+  CMAKE_POLICY(SET CMP0144 NEW)
+endif( POLICY CMP0144 )
 
 
 # The name of our top-level project.
@@ -458,7 +461,7 @@ option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries."
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system regex timer )
+set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options regex timer )
 if( NOT BUILD_DISABLE_THREADS )
   list( APPEND VISR_BOOST_INSTALL_LIBRARIES thread atomic)
 endif( NOT BUILD_DISABLE_THREADS )
