@@ -43,23 +43,19 @@ private:
     Mode const mMode;
 
     /**
-    * Pointer to the either internally or externally provided externally provided boost::asio::io_context object.
-    */
+     * Pointer to the either internally or externally provided externally
+     * provided boost::asio::io_context object.
+     */
     boost::asio::io_context mIoContext;
 
-    /**
-    * An actual io_service object owned by this component, which is allocated in the modes Synchronous or Asynchronous,
-    * but not for ExternalServiceObject.
-    */
+    boost::asio::executor_work_guard< boost::asio::io_context::executor_type >
+        mWorkGuard;
 
     boost::asio::ip::udp::socket mSocket;
 
     boost::asio::ip::udp::endpoint mRemoteEndpoint;
 
     boost::array<char, cMaxMessageLength> mReceiveBuffer;
-
-    boost::asio::executor_work_guard< boost::asio::io_context::executor_type >
-        mWorkGuard;
 
     /**
     * Internal queue of messages received asynchronously. They will be copied into the output
