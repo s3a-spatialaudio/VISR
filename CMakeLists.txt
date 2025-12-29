@@ -452,9 +452,8 @@ ENDIF( BUILD_USE_IPP )
 # BOOST_ROOT should hold the path to the boost root directory.
 
 # Define a minimum boost version
-# Note: This requirement is chosen heuristically at the moment.
-# Todo: Replace by a substantiated version requirement.
-set( VISR_BOOST_MINIMUM_VERSION 1.50 )
+# Version 1.69 is needed because boost::system is a header-only library from this version on.
+set( VISR_BOOST_MINIMUM_VERSION 1.69 )
 
 option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries." OFF)
 
