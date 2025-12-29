@@ -12,7 +12,10 @@ scene_decoder.cpp
 signal_routing.cpp
 test_main.cpp
 test_listener_compensation.cpp
-test_kinect_receiver.cpp )
+test_kinect_receiver.cpp
+test_udp_receiver.cpp 
+test_udp_sender.cpp
+)
 
 target_link_libraries( ${APPLICATION_NAME} PRIVATE rcl_${BUILD_LIBRARY_TYPE_FOR_APPS})
 target_link_libraries( ${APPLICATION_NAME} PRIVATE pml_${BUILD_LIBRARY_TYPE_FOR_APPS})
