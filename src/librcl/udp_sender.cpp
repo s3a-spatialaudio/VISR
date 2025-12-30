@@ -124,9 +124,7 @@ UdpSender::Impl::Impl(UdpSender & parent,
       throw std::logic_error(
           "UdpSender: resolved endpoint has wrong port number." );
     }
-
-    udp::endpoint localEndpoint(udp::v4(), static_cast<unsigned short>(sendPort));
-    mSocket.connect( localEndpoint );
+    mSocket.open( udp::v4() );
 
 #ifdef VISR_DISABLE_THREADS
     throw std::invalid_argument( "UdpSender: Asynchronous mode is not supported because threads are disabled." );
