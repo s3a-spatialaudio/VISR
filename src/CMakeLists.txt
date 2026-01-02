@@ -122,8 +122,6 @@ ENDIF( BUILD_MAX_MSP_EXTERNALS )
 # Python bindings for the rendering framework
 if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( python )
-  add_subdirectory( libpythoncomponents )
-  list( APPEND VISR_LIBRARIES pythoncomponents )
 endif( BUILD_PYTHON_BINDINGS )
 
 ##### CMake packaging

@@ -104,6 +104,8 @@ if(BUILD_TESTING)
     )
 endif()
 
+add_subdirectory( libpythoncomponents )
+list( APPEND VISR_LIBRARIES pythoncomponents )
 
 # List containing the target names of all Python externals.
 set( VISR_PYTHON_EXTERNALS_TARGETS )
