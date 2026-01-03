@@ -1,10 +1,10 @@
 
 import pytest
 
-import visr
-import rcl
-import pml
-import rrl
+from visr import visr
+from visr import rcl
+from visr import pml
+from visr import rrl
 
 asyncio = pytest.importorskip("asyncio")
 nest_asyncio = pytest.importorskip("nest_asyncio") 
