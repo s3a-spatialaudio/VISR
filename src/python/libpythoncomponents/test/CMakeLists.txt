@@ -43,3 +43,5 @@ set_property( TEST ${target} APPEND PROPERTY ENVIRONMENT
 # causes leak reports (false positives?) that are outside our responsibility.
 set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
   "BOOST_TEST_DETECT_MEMORY_LEAK=0" )
+
+set_tests_properties(${APPLICATION_NAME} PROPERTIES FIXTURES_REQUIRED visr_test_package)

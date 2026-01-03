@@ -128,6 +128,14 @@ if(BUILD_TESTING)
   add_test(NAME python_test_install_visr_fixture
     COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip install ${_EXTERNAL_PACKAGE_NAME}
   )
+  set_tests_properties(python_test_install_visr_fixture PROPERTIES
+    FIXTURES_SETUP visr_test_package)
+
+  add_test(NAME python_test_uninstall_visr_fixture
+    COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip uninstall -y visr
+  )
+  set_tests_properties(python_test_uninstall_visr_fixture PROPERTIES
+    FIXTURES_CLEANUP visr_test_package)
 endif()
 
 add_subdirectory( libpythoncomponents )
