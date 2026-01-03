@@ -66,4 +66,3 @@ endforeach()
 
 include(install_with_dependencies)
 installLibraryWithDependencies(signalflowspython)
-installSharedLibraryInPythonPackage(signalflowspython)
