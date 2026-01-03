@@ -4,7 +4,7 @@ find_package( Python3 REQUIRED )
 
 # Helper function to compute the resulting name of a binary wheel.
 function( getBinaryPythonWheelName distName version result )
-  execute_process( COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/python/get_binary_python_wheel_name.py ${distName} --version=${version}
+  execute_process( COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/python/get_binary_python_wheel_name.py ${distName} --version=${version}
     RESULTS_VARIABLE _RETURN_VALUE
     OUTPUT_VARIABLE _FILE_NAME
   )

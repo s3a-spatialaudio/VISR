@@ -86,15 +86,15 @@ if(BUILD_TESTING)
   # Taken from https://discourse.cmake.org/t/possible-to-create-a-python-virtual-env-from-cmake-and-then-find-it-with-findpython3/1132/2
   # Here is the trick
   ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
-    set(ENV{VIRTUAL_ENV} ${_TEST_VENV_LOCATION})
-    ## change the context of the search
-    set(Python3_FIND_VIRTUALENV FIRST)
-  ## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
-  unset(Python3_EXECUTABLE)
+  set(ENV{VIRTUAL_ENV} ${_TEST_VENV_LOCATION})
+  ## change the context of the search
+  set(Python_FIND_VIRTUALENV FIRST)
+  ## unset Python_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
+  unset(Python_EXECUTABLE)
   ## Launch a new search
-  find_package (Python3 COMPONENTS Interpreter Development)
+  find_package (Python COMPONENTS Interpreter Development)
   # Define a dedicated name for the Python interpreter to be used in the unit tests
-  set(PYTHON_TEST_VENV_EXECUTABLE ${Python3_EXECUTABLE})
+  set(PYTHON_TEST_VENV_EXECUTABLE ${Python_EXECUTABLE})
   message(STATUS "Python executable to be used in unit tests: " ${PYTHON_TEST_VENV_EXECUTABLE})
 
   set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package/requirements.txt)
