@@ -36,8 +36,23 @@ set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER unit_tests )
 add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
          COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
 
-set_property( TEST ${target} APPEND PROPERTY ENVIRONMENT
-      "PYTHONPATH=${VISR_TEST_PYTHON_PACKAGE_ROOT}" )
+# Prepend the directory of the current Python interpreter to the path to ensure
+# that the right Python environment is loaded.
+# This might be a path to a virtual environment.
+message(STATUS "PYTHON_TEST_VENV_EXECUTABLE " ${PYTHON_TEST_VENV_EXECUTABLE})
+
+get_filename_component(_PYTHON_EXECTUABLE_PATH ${PYTHON_TEST_VENV_EXECUTABLE} DIRECTORY)
+if(VISR_SYSTEM_NAME MATCHES "Windows")
+  # Prevent CMake from interpreting the semicolon (the separator in Windows 
+  # path lists) as list separator.
+  # Double quoting required because the variable is evaluated twice.
+  string(REPLACE ";" "\\\;"  QUOTED_PATH "$ENV{PATH}" )
+  set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
+    "PATH=${_PYTHON_EXECTUABLE_PATH}\;${QUOTED_PATH}" )
+else()
+  set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
+    "PATH=${_PYTHON_EXECTUABLE_PATH}:$ENV{PATH}" )
+endif()
 
 # Disable leak checking because the memory handling of Python interpreter
 # causes leak reports (false positives?) that are outside our responsibility.
