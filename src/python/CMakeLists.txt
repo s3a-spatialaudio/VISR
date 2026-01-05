@@ -84,7 +84,7 @@ if(BUILD_TESTING)
   set(_TEST_VENV_STAMP ${_TEST_VENV_LOCATION}/pyvenv.cfg)
   set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_DIRECTORY}/package/requirements.txt})
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -m venv ${_TEST_VENV_NAME}
+    COMMAND ${PYTHON_EXECUTABLE} -m venv --system-site-packages ${_TEST_VENV_NAME}
     COMMAND_ERROR_IS_FATAL ANY
   )
     message(STATUS "Python test venv created.")
@@ -138,8 +138,11 @@ if(BUILD_TESTING)
     FIXTURES_CLEANUP visr_test_package)
 endif()
 
+# Python support for calling Python functionality from C++.
+add_subdirectory( libpythonsupport )
+# C++ VISR component that contains a Python VISR component.
 add_subdirectory( libpythoncomponents )
-list( APPEND VISR_LIBRARIES pythoncomponents )
+list( APPEND VISR_LIBRARIES pythonsupport pythoncomponents )
 
 # List containing the target names of all Python externals.
 set( VISR_PYTHON_EXTERNALS_TARGETS )

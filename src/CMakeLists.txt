@@ -61,12 +61,6 @@ list( APPEND VISR_LIBRARIES panningdsp )
 add_subdirectory( libpml )
 list( APPEND VISR_LIBRARIES pml )
 
-# Python support for calling Python functionality from C++
-if( BUILD_PYTHON_BINDINGS )
-  add_subdirectory( libpythonsupport )
-  list( APPEND VISR_LIBRARIES pythonsupport )
-endif( BUILD_PYTHON_BINDINGS )
-
 # Library for signal flows.
 add_subdirectory( libsignalflows )
 list( APPEND VISR_LIBRARIES signalflows )
