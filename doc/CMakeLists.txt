@@ -97,17 +97,11 @@ set_target_properties( doxygen-doc PROPERTIES FOLDER documentation )
 add_custom_target( doc ALL DEPENDS doxygen-doc )
 set_target_properties( doc PROPERTIES FOLDER documentation )
 
-find_package(Sphinx)
-if(NOT Sphinx_FOUND)
-  message(FATAL_ERROR "Sphinx is required to build documentation. Please set the SPHINX_EXECUTABLE variable.")
-endif(NOT Sphinx_FOUND)
-
-# TODO Do we need this ? Look in virtualenv and node_modules directories of the build directory (as
-# per the hints in the documentation about installing sphinx, breathe,
-# sphinx_js and jsdoc).
-set(BUILD_VIRTUALENV_PATH ${PROJECT_BINARY_DIR}/venv/bin/)
-list(INSERT CMAKE_PROGRAM_PATH 0 ${BUILD_VIRTUALENV_PATH})
-
+set(_DOC_REQUIREMENTS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/doc_requirements.txt)
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} -m pip install -r ${_DOC_REQUIREMENTS_FILE}
+    COMMAND_ERROR_IS_FATAL ANY
+)
 
 set (userdoc_source_root    ${PROJECT_SOURCE_DIR}/doc/userdoc/)
 set (apidoc_source_root    ${PROJECT_SOURCE_DIR}/doc/apidoc/)
@@ -133,7 +127,7 @@ function( HtmlDocBuild targetName sourceDir outputDir depends )
     OUTPUT ${STAMP}
     DEPENDS doxygen-doc ${outputDir}/html/conf.py ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
-              ${SPHINX_EXECUTABLE}
+              ${Python_EXECUTABLE} -m sphinx
                -a
                -q
                -b html
@@ -161,7 +155,7 @@ function( PdfDocBuild targetName sourceDir outputDir depends )
     OUTPUT ${OUTPUTFILE}
     DEPENDS doxygen-doc ${outputDir}/pdf/conf.py ${depends}
     COMMAND ${CMAKE_COMMAND} -E env ${VISR_PYTHON_EXEC_ENVIRONMENT}
-            ${SPHINX_EXECUTABLE}
+            ${Python_EXECUTABLE} -m sphinx
                -q
                -b latex
                -c ${outputDir}/pdf
