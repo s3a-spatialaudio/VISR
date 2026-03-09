@@ -310,9 +310,41 @@ IF( WIN32 OR APPLE )
   SET( MAXSDK_EXTERNAL_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/max )
 ENDIF(  WIN32 OR APPLE )
 
-################################################################################
+
+option(BUILD_DOCUMENTATION "Build the API and user documentation (requires Sphinx, breathe, and Doxygen)" ON)
+
 # Support for Python bindings of selected VISR functionality
 option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" ON )
+
+# Create a Python virtual environment to be used for building the Python externals,
+#  the corresponding unit tests, and documentation building.
+if(BUILD_PYTHON_BINDINGS OR BUILD_DOCUMENTATION)
+  find_package(Python REQUIRED)
+  message(STATUS "Creating virtual Python environment for documentation building or testing of Python bindings.")
+  message(STATUS "Python executable: " ${Python_EXECUTABLE})
+
+  set(_TEST_VENV_NAME "visr_venv")
+  set(_TEST_VENV_LOCATION ${CMAKE_BINARY_DIR}/${_TEST_VENV_NAME})
+  set(_TEST_VENV_STAMP ${_TEST_VENV_LOCATION}/pyvenv.cfg)
+  # Removed venv option --system-site-packages
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} -m venv ${_TEST_VENV_NAME}
+    COMMAND_ERROR_IS_FATAL ANY
+  )
+
+  # Taken from https://discourse.cmake.org/t/possible-to-create-a-python-virtual-env-from-cmake-and-then-find-it-with-findpython3/1132/2
+  # Here is the trick
+  ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
+  set(ENV{VIRTUAL_ENV} ${_TEST_VENV_LOCATION})
+  ## change the context of the search
+  set(Python_FIND_VIRTUALENV FIRST)
+  ## unset Python_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
+  unset(Python_EXECUTABLE)
+  ## Launch a new search
+  find_package (Python COMPONENTS Interpreter Development REQUIRED)
+  # From now on, ${Python_EXECUTABLE} points to the interpreter of the virtual environment.
+  message(STATUS "Python virtual environment created, interpreter: " ${Python_EXECUTABLE})
+endif(BUILD_PYTHON_BINDINGS OR BUILD_DOCUMENTATION)
 
 if( BUILD_PYTHON_BINDINGS )
   # Finding Python and the pybind11 directory. This is done using the pybind11
@@ -581,7 +613,6 @@ endif( (VISR_SYSTEM_NAME MATCHES "MacOS") OR (VISR_SYSTEM_NAME MATCHES "Windows"
 # contained in the src/ directory
 add_subdirectory( src )
 
-option(BUILD_DOCUMENTATION "Build the API and user documentation (requires Sphinx, breathe, and Doxygen)" ON)
 if(BUILD_DOCUMENTATION)
   add_subdirectory(doc)
 endif()

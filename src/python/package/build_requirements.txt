@@ -1,6 +1,3 @@
 setuptools
 build
 wheel
-pytest
-numpy
-scipy

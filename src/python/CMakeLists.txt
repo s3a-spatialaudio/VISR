@@ -73,70 +73,50 @@ add_subdirectory( libpythonbindinghelpers )
 get_property(VISR_BUILD_MULTI_CONFIG_GENERATOR GLOBAL 
   PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
-if(BUILD_TESTING)
-  # Note: At the moment, the test environment venv is created at configure time
-  # because creating it at build time would make setting the interpreter difficult
-  # (how to pass the interpreter pathe back to CMake?).
+if(${VISR_BUILD_MULTI_CONFIG_GENERATOR})
+  message(STATUS "Test environment will be built for multi-configuration generator.")
+  set(_TEST_ENV_PREFIX ${CMAKE_BINARY_DIR}/tmp_install/$<CONFIG>)
+    set(_EXTERNAL_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/packages/$<CONFIG>)
+  else()
+    message(STATUS "Test environment will be built for single-configuration generator.")
+  set(_TEST_ENV_PREFIX ${CMAKE_BINARY_DIR}/tmp_install)
+  set(_EXTERNAL_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/packages)
+endif()
 
-  message(STATUS "Python test venv creation started.")
-  set(_TEST_VENV_NAME "python_test_venv")
-  set(_TEST_VENV_LOCATION ${CMAKE_BINARY_DIR}/${_TEST_VENV_NAME})
-  set(_TEST_VENV_STAMP ${_TEST_VENV_LOCATION}/pyvenv.cfg)
-  set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_DIRECTORY}/package/requirements.txt})
+# Install the Python packages for building the binary package (wheel).
+message(STATUS ${Python_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/package/build_requirements.txt)
+execute_process(
+  COMMAND ${Python_EXECUTABLE} -m pip install 
+    -r ${CMAKE_CURRENT_SOURCE_DIR}/package/build_requirements.txt
+  COMMAND_ERROR_IS_FATAL ANY
+)
+
+# TODO: Can this block move further down?
+if(BUILD_TESTING)
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -m venv --system-site-packages ${_TEST_VENV_NAME}
+    COMMAND ${Python_EXECUTABLE} -m pip install 
+      -r ${CMAKE_CURRENT_SOURCE_DIR}/package/test_requirements.txt
     COMMAND_ERROR_IS_FATAL ANY
   )
-    message(STATUS "Python test venv created.")
-
-  # Taken from https://discourse.cmake.org/t/possible-to-create-a-python-virtual-env-from-cmake-and-then-find-it-with-findpython3/1132/2
-  # Here is the trick
-  ## update the environment with VIRTUAL_ENV variable (mimic the activate script)
-  set(ENV{VIRTUAL_ENV} ${_TEST_VENV_LOCATION})
-  ## change the context of the search
-  set(Python_FIND_VIRTUALENV FIRST)
-  ## unset Python_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
-  unset(Python_EXECUTABLE)
-  ## Launch a new search
-  find_package (Python COMPONENTS Interpreter Development)
-  # Define a dedicated name for the Python interpreter to be used in the unit tests
-  set(PYTHON_TEST_VENV_EXECUTABLE ${Python_EXECUTABLE})
-  message(STATUS "Python executable to be used in unit tests: " ${PYTHON_TEST_VENV_EXECUTABLE})
-
-  set(_TEST_VENV_REQUIREMENTS_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package/requirements.txt)
-  execute_process(
-    COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip install -r ${_TEST_VENV_REQUIREMENTS_FILE}
-    COMMAND_ERROR_IS_FATAL ANY
-    )
 
   # Determine the name of the created wheel file.
   include(GeneratePythonBinaryWheel)
   getBinaryPythonWheelName( visr ${VISR_VERSION} _TEST_WHEEL_FILE_NAME )
-  message( STATUS "Test wheel name: " ${_TEST_WHEEL_FILE_NAME} )
-
-  if(${VISR_BUILD_MULTI_CONFIG_GENERATOR})
-    message(STATUS "Test environment will be built for multi-configuration generator.")
-    set(_TEST_ENV_PREFIX ${CMAKE_BINARY_DIR}/tmp_install/$<CONFIG>)
-    set(_EXTERNAL_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/packages/$<CONFIG>)
-  else()
-    message(STATUS "Test environment will be built for single-configuration generator.")
-    set(_TEST_ENV_PREFIX ${CMAKE_BINARY_DIR}/tmp_install)
-    set(_EXTERNAL_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/packages)
-  endif()
   set(_EXTERNAL_PACKAGE_NAME ${_EXTERNAL_OUTPUT_DIRECTORY}/${_TEST_WHEEL_FILE_NAME})
+  message( STATUS "Python package for testing: " ${_EXTERNAL_PACKAGE_NAME} )
 
   add_test(NAME python_test_install_visr_fixture
-    COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip install ${_EXTERNAL_PACKAGE_NAME}
+    COMMAND ${Python_EXECUTABLE} -m pip install ${_EXTERNAL_PACKAGE_NAME}
   )
   set_tests_properties(python_test_install_visr_fixture PROPERTIES
     FIXTURES_SETUP visr_test_package)
 
   add_test(NAME python_test_uninstall_visr_fixture
-    COMMAND ${PYTHON_TEST_VENV_EXECUTABLE} -m pip uninstall -y visr
+    COMMAND ${Python_EXECUTABLE} -m pip uninstall -y visr
   )
   set_tests_properties(python_test_uninstall_visr_fixture PROPERTIES
     FIXTURES_CLEANUP visr_test_package)
-endif()
+endif() # if(BUILD_TESTING)
 
 # Python support for calling Python functionality from C++.
 add_subdirectory( libpythonsupport )
