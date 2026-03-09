@@ -70,7 +70,7 @@ else()
   # locate the correct Python environment although it has shortcomings, see
   # https://bugs.python.org/issue22213#msg225434 .
   # This might be a path to a virtual environment.
-  get_filename_component(_PYTHON_EXECTUABLE_PATH ${PYTHON_TEST_VENV_EXECUTABLE} DIRECTORY)
+  get_filename_component(_PYTHON_EXECTUABLE_PATH ${Python_EXECUTABLE} DIRECTORY)
     set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
       "PATH=${_PYTHON_EXECTUABLE_PATH}:$ENV{PATH}")
 
