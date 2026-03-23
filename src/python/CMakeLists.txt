@@ -84,10 +84,10 @@ if(${VISR_BUILD_MULTI_CONFIG_GENERATOR})
 endif()
 
 # Install the Python packages for building the binary package (wheel).
-message(STATUS ${Python_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/package/build_requirements.txt)
+message(STATUS ${Python_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/build_requirements.txt)
 execute_process(
   COMMAND ${Python_EXECUTABLE} -m pip install 
-    -r ${CMAKE_CURRENT_SOURCE_DIR}/package/build_requirements.txt
+    -r ${CMAKE_CURRENT_SOURCE_DIR}/build_requirements.txt
   COMMAND_ERROR_IS_FATAL ANY
 )
 
@@ -95,7 +95,7 @@ execute_process(
 if(BUILD_TESTING)
   execute_process(
     COMMAND ${Python_EXECUTABLE} -m pip install 
-      -r ${CMAKE_CURRENT_SOURCE_DIR}/package/test_requirements.txt
+      -r ${CMAKE_CURRENT_SOURCE_DIR}/test_requirements.txt
     COMMAND_ERROR_IS_FATAL ANY
   )
 
@@ -154,9 +154,38 @@ endforeach()
 add_custom_target( pythonexternals DEPENDS ${VISR_PYTHON_EXTERNALS_TARGETS} )
 set_target_properties( pythonexternals PROPERTIES FOLDER python_externals )
 
-# Subdirectory containing build instructions for the visr Python namespace package
-# incl. binary distribution packages (wheels).
-add_subdirectory( package )
+# Set up a valid package directory structure.
+configure_file( template_files/pyproject.toml.in ${VISR_PYTHON_PACKAGE_ROOT}/pyproject.toml )
+configure_file( template_files/setup.cfg.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.cfg )
+configure_file( template_files/setup.py.in ${VISR_PYTHON_PACKAGE_ROOT}/setup.py )
+configure_file( template_files/MANIFEST.in.in ${VISR_PYTHON_PACKAGE_ROOT}/MANIFEST.in )
+configure_file( ${PROJECT_SOURCE_DIR}/Readme.md ${VISR_PYTHON_PACKAGE_ROOT}/Readme.md )
+configure_file( ${PROJECT_SOURCE_DIR}/LICENSE.md ${VISR_PYTHON_PACKAGE_ROOT}/LICENSE.md )
+configure_file( template_files/__init__.py.in ${VISR_PYTHON_PACKAGE_DIR}/__init__.py )
+configure_file( template_files/dll_path_context.py ${VISR_PYTHON_PACKAGE_DIR}/impl/dll_path_context.py )
+# Create the directory structure of a nameapace package, including __init__.py files that
+# import the symbols for each subpackage from an exteranl in visr/impl.
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  set( _SUBPACKAGE_NAME ${_external} )
+  configure_file( template_files/__init__.py.subpackage.template.in 
+    ${VISR_PYTHON_PACKAGE_DIR}/${_external}/__init__.py
+  )
+endforeach()
+
+# Determine the actual external external file paths.
+set( EXTERNAL_TARGET_FILES )
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  list( APPEND EXTERNAL_TARGET_FILES $<TARGET_FILE:${_external}python> )
+endforeach()
+
+set( VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES )
+if( ${VISR_PYTHON_EXTERNAL_LINK_LIB_TYPE} STREQUAL shared )
+foreach( _external ${VISR_PYTHON_EXTERNALS} )
+  list( APPEND VISR_PYTHON_EXTERNALS_EXTRA_DEPENDENCIES $<TARGET_FILE:${_external}_shared> )
+endforeach()
+endif()
+
+
 
 ## --------------------------------------------------------------------------
 
