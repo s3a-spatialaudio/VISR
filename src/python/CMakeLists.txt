@@ -205,25 +205,14 @@ ${CMAKE_BINARY_DIR}/python
 # because the unit test targets depend on the test environment
 
 set(_TEST_ENV_STAMP ${_TEST_ENV_PREFIX}/python/pyproject.toml)
-if(${VISR_BUILD_MULTI_CONFIG_GENERATOR})
-  add_custom_command( OUTPUT ${_TEST_ENV_STAMP}
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}
-          --component python_externals
-          --prefix ${_TEST_ENV_PREFIX}
-          --config $<CONFIG>
-    COMMAND ${CMAKE_COMMAND} -E chdir ${_TEST_ENV_PREFIX}/python 
-      ${Python_EXECUTABLE} -m build --no-isolation --outdir ${_EXTERNAL_OUTPUT_DIRECTORY} --wheel
-    DEPENDS pythonexternals signalflowspython_shared
-  )
-else()
-  add_custom_command( OUTPUT ${_TEST_ENV_STAMP}
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}
-          --component python_externals
-          --prefix ${_TEST_ENV_PREFIX}
-    COMMAND ${CMAKE_COMMAND} -E chdir ${_TEST_ENV_PREFIX}/python 
-      ${Python_EXECUTABLE} -m build --no-isolation --outdir ${_EXTERNAL_OUTPUT_DIRECTORY} --wheel
-    DEPENDS pythonexternals # signalflowspython_shared
-  )
-endif()
+add_custom_command( OUTPUT ${_TEST_ENV_STAMP}
+  COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}
+        --component python_externals
+        --prefix ${_TEST_ENV_PREFIX}
+        --config $<CONFIG>
+  COMMAND ${CMAKE_COMMAND} -E chdir ${_TEST_ENV_PREFIX}/python 
+    ${Python_EXECUTABLE} -m build --no-isolation --outdir ${_EXTERNAL_OUTPUT_DIRECTORY} --wheel
+  DEPENDS pythonexternals # signalflowspython_shared
+)
 
 add_custom_target(python_test_package ALL DEPENDS ${_TEST_ENV_STAMP})
