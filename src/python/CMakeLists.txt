@@ -186,8 +186,20 @@ endforeach()
 endif()
 
 
-
-## --------------------------------------------------------------------------
+#%% Installation commands for the boilerplate code for creating a Python wheel package.
+# Note: Apparently it is not possible to access the source directory in the install stage, therefore we cannot 
+# use the same configure_file logic as in the build tree, but have to copy the already generated build tree.
+install( DIRECTORY
+${CMAKE_BINARY_DIR}/python
+  DESTINATION .
+  COMPONENT python_externals
+  FILES_MATCHING
+    PATTERN "*.py"
+    PATTERN "*.md"
+    PATTERN "*.toml"
+    PATTERN "*.md"
+    PATTERN "MANIFEST.in"
+)
 
 # Note: We have to create these targets before traversing the subdirectories
 # because the unit test targets depend on the test environment
