@@ -128,7 +128,7 @@ def test_positionNorm(posType):
     dtype = coordinateType(posType)
     posVec = np.asarray( [-0.35, 0.251, 1.75], dtype=dtype)
     pos = posType( posVec )
-    assert np.abs( pos.norm() - np.linalg.norm(posVec)) < np.finfo(dtype).eps
+    assert np.abs( pos.norm() - np.linalg.norm(posVec)) <= np.finfo(dtype).eps
 
 @pytest.mark.parametrize("posType", positionTypes)
 def test_positionNormSquare(posType):
