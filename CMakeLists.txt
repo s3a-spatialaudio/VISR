@@ -6,7 +6,7 @@
 # >= 3.1 for CMAKE_CXX_STANDARD
 # 3.3 for IN_LIST operator in if() conditions
 # 3.5 to silence CMake peprecation warnings.
-CMAKE_MINIMUM_REQUIRED( VERSION 3.5 )
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5...4.3)
 
 # Handle VERSION argument of project() command.
 if( POLICY CMP0048 )
