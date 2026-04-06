@@ -394,8 +394,6 @@ add_subdirectory( 3rd )
 # or through direct OS calls.
 if( BUILD_DISABLE_THREADS )
   add_definitions( -DVISR_DISABLE_THREADS=1 )
-else()
-  find_package(Threads REQUIRED)
 endif( BUILD_DISABLE_THREADS )
 
 # if( NOT WIN32 )
