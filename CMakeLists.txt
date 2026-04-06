@@ -36,9 +36,15 @@ endif( POLICY CMP0090 )
 if( POLICY CMP0091 )
   CMAKE_POLICY(SET CMP0091 NEW)
 endif( POLICY CMP0091 )
+# find_package() uses upper-case <PACKAGENAME>_ROOT variables.
+# (used by BOOST_ROOT).
 if( POLICY CMP0144 )
   CMAKE_POLICY(SET CMP0144 NEW)
 endif( POLICY CMP0144 )
+# CMake to normalises all install() destination paths.
+if(POLICY CMP0177)
+  CMAKE_POLICY(SET CMP0177 NEW)
+endif(POLICY CMP0177)
 
 
 # The name of our top-level project.
