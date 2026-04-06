@@ -1,7 +1,7 @@
 # Copyright Institute of Sound and Vibration Research - All rights reserved
 
 # Define the header files that should be installed to the directory include/visr/visr.
-SET( PUBLIC_HEADERS
+SET(PUBLIC_HEADERS
 atomic_component.hpp
 audio_input.hpp
 audio_output.hpp
@@ -30,9 +30,6 @@ status_message.hpp
 time.hpp
 typed_parameter_base.hpp
 version.hpp
-)
-
-SET( PUBLIC_HEADERS_DETAIL
 detail/compile_time_hash_fnv1.hpp
 detail/compose_message_string.hpp
 )
@@ -82,7 +79,7 @@ impl/time_implementation.cpp
 )
 
 if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-  add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
+  add_library( visr_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
   set_target_properties( visr_static PROPERTIES OUTPUT_NAME visr)
   set_target_properties(visr_static PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
   target_compile_definitions( visr_static PUBLIC -DVISR_CORE_STATIC_LIBRARY=1 )
@@ -90,7 +87,7 @@ if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-  add_library( visr_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
+  add_library( visr_shared SHARED ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
   set_target_properties( visr_shared PROPERTIES OUTPUT_NAME visr)
   # Specify a specific name for the .lib stub of the DLL on Windows to avoid clashes with the static library.
   set_target_properties( visr_shared PROPERTIES ARCHIVE_OUTPUT_NAME visr_shared )
@@ -100,7 +97,7 @@ if( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
-  add_library( visr_static_pic STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PUBLIC_HEADERS_DETAIL} ${INTERNAL_HEADERS} )
+  add_library( visr_static_pic STATIC ${SOURCES} ${PUBLIC_HEADERS} ${INTERNAL_HEADERS} )
   set_target_properties( visr_static_pic PROPERTIES OUTPUT_NAME visr_pic)
   set_target_properties(visr_static_pic PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib)
   set_target_properties(visr_static_pic PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -110,8 +107,16 @@ endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
 foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( visr_${LIB_TYPE} PRIVATE VISR_BUILD_CORE_LIBRARY=1 )
+
   # Set public headers to be installed.
-  set_target_properties(visr_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}" )
+  target_sources(
+    visr_${LIB_TYPE} PUBLIC
+    FILE_SET visr_public_headers
+    TYPE HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES "${PUBLIC_HEADERS}"
+  )
+
   get_filename_component(PARENT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
   target_include_directories(
       visr_${LIB_TYPE}
@@ -127,7 +132,7 @@ endforeach()
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS visr_static
           EXPORT VISR_static_library_exports
-          PUBLIC_HEADER DESTINATION include/visr/libvisr COMPONENT development_files
+          FILE_SET visr_public_headers DESTINATION include/visr/libvisr COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_libraries )
 endif( BUILD_INSTALL_STATIC_LIBRARIES )
 
@@ -137,20 +142,15 @@ if( BUILD_INSTALL_SHARED_LIBRARIES )
           ARCHIVE DESTINATION lib COMPONENT development_files
           RUNTIME DESTINATION lib COMPONENT shared_libraries
           LIBRARY DESTINATION lib COMPONENT shared_libraries
-          PUBLIC_HEADER DESTINATION include/visr/libvisr COMPONENT development_files )
+          FILE_SET visr_public_headers DESTINATION include/visr/libvisr COMPONENT development_files )
 endif( BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
   install(TARGETS visr_static_pic
           EXPORT VISR_static_pic_library_exports
-          PUBLIC_HEADER DESTINATION include/visr/libvisr COMPONENT development_files
+          FILE_SET visr_public_headers DESTINATION include/visr/libvisr COMPONENT development_files
           ARCHIVE DESTINATION lib COMPONENT static_pic_libraries)
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
-
-# TODO: Try to install the detail/ headers as part of the ordinary PUBLIC_HEADER installation.
-if( BUILD_INSTALL_SHARED_LIBRARIES OR BUILD_INSTALL_SHARED_LIBRARIES )
-  install( FILES ${PUBLIC_HEADERS_DETAIL} DESTINATION include/visr/libvisr/detail COMPONENT development_files )
-endif( BUILD_INSTALL_SHARED_LIBRARIES OR BUILD_INSTALL_SHARED_LIBRARIES )
 
 if( BUILD_TESTING )
   add_subdirectory( test )
