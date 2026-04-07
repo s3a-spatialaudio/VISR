@@ -1,4 +1,3 @@
-
 import pytest
 
 import visr
@@ -7,9 +6,10 @@ import pml
 import rrl
 
 asyncio = pytest.importorskip("asyncio")
-nest_asyncio = pytest.importorskip("nest_asyncio") 
+nest_asyncio = pytest.importorskip("nest_asyncio")
 
 nest_asyncio.apply()
+
 
 class EchoClientProtocol:
     def __init__(self, message_received_future):
@@ -26,7 +26,7 @@ class EchoClientProtocol:
         # print("Close the socket")
 
     def error_received(self, exc):
-        print('Error received:', exc)
+        print("Error received:", exc)
 
     def connection_lost(self, exc):
         print("Connection closed")
@@ -34,28 +34,36 @@ class EchoClientProtocol:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("send_mode", [rcl.UdpSender.Mode.Synchronous, rcl.UdpSender.Mode.Asynchronous])
+@pytest.mark.parametrize(
+    "send_mode", [rcl.UdpSender.Mode.Synchronous, rcl.UdpSender.Mode.Asynchronous]
+)
 async def test_udp_sender(send_mode):
-    fs=48000
-    bs=256
+    fs = 48000
+    bs = 256
 
     cc = visr.SignalFlowContext(bs, fs)
 
     rec_address = "127.0.0.1"
     rec_port = 55001
 
-    comp = rcl.UdpSender(cc, "UDP", None, receiverAddress=rec_address, receiverPort=rec_port,
-       mode=send_mode)
+    comp = rcl.UdpSender(
+        cc,
+        "UDP",
+        None,
+        receiverAddress=rec_address,
+        receiverPort=rec_port,
+        mode=send_mode,
+    )
 
-    flow=rrl.AudioSignalFlow(comp)
+    flow = rrl.AudioSignalFlow(comp)
     in_port = flow.parameterReceivePort("messageInput")
 
     # Create a UDP receiver.
     loop = asyncio.get_event_loop()
     message_received = loop.create_future()
     listen = loop.create_datagram_endpoint(
-        lambda: EchoClientProtocol(message_received),
-        local_addr=(rec_address, rec_port))
+        lambda: EchoClientProtocol(message_received), local_addr=(rec_address, rec_port)
+    )
     transport, protocol = loop.run_until_complete(listen)
 
     msg_data = "Hello world!"

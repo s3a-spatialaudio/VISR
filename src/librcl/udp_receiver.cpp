@@ -29,44 +29,43 @@ namespace rcl
 class UdpReceiver::Impl
 {
 public:
-    Impl( std::size_t port,
-          UdpReceiver::Mode mode);
+  Impl( std::size_t port, UdpReceiver::Mode mode );
 
-    ~Impl();
-    void process(UdpReceiver::MessageOutput & messageOutput);
+  ~Impl();
+
+  void process( UdpReceiver::MessageOutput & messageOutput );
 
 private:
+  void handleReceiveData( const boost::system::error_code & error,
+                          std::size_t numBytesTransferred );
 
-    void handleReceiveData(const boost::system::error_code& error,
-        std::size_t numBytesTransferred);
+  Mode const mMode;
 
-    Mode const mMode;
+  /**
+   * ASIO I/O context object.
+   */
+  boost::asio::io_context mIoContext;
 
-    /**
-     * Pointer to the either internally or externally provided externally
-     * provided boost::asio::io_context object.
-     */
-    boost::asio::io_context mIoContext;
+  boost::asio::executor_work_guard< boost::asio::io_context::executor_type >
+      mWorkGuard;
 
-    boost::asio::executor_work_guard< boost::asio::io_context::executor_type >
-        mWorkGuard;
+  boost::asio::ip::udp::socket mSocket;
 
-    boost::asio::ip::udp::socket mSocket;
+  boost::asio::ip::udp::endpoint mRemoteEndpoint;
 
-    boost::asio::ip::udp::endpoint mRemoteEndpoint;
+  boost::array< char, cMaxMessageLength > mReceiveBuffer;
 
-    boost::array<char, cMaxMessageLength> mReceiveBuffer;
-
-    /**
-    * Internal queue of messages received asynchronously. They will be copied into the output
-    *  MessageQueue in the process() function. An object is instantiated only in the asynchronous mode.
-    */
-    std::deque< pml::StringParameter > mInternalMessageBuffer;
+  /**
+   * Internal queue of messages received asynchronously. They will be copied
+   * into the output MessageQueue in the process() function. An object is
+   * instantiated only in the asynchronous mode.
+   */
+  std::deque< pml::StringParameter > mInternalMessageBuffer;
 
 #ifndef VISR_DISABLE_THREADS
-    std::thread mServiceThread;
+  std::thread mServiceThread;
 
-    std::mutex mMutex;
+  std::mutex mMutex;
 #endif
 };
 
@@ -74,58 +73,54 @@ UdpReceiver::UdpReceiver( SignalFlowContext const & context,
                           char const * name,
                           CompositeComponent * parent,
                           std::size_t port,
-                          Mode mode)
- : AtomicComponent(context, name, parent)
+                          Mode mode )
+ : AtomicComponent( context, name, parent )
  , mImpl( new Impl( port, mode ) )
- , mDatagramOutput("messageOutput", *this, pml::EmptyParameterConfig())
+ , mDatagramOutput( "messageOutput", *this, pml::EmptyParameterConfig() )
 {
 }
 
 UdpReceiver::~UdpReceiver() = default;
 
-void UdpReceiver::process()
-{
-  mImpl->process(mDatagramOutput);
-}
+void UdpReceiver::process() { mImpl->process( mDatagramOutput ); }
 
 // ==========================================================================
 // Implementation class
 
-UdpReceiver::Impl::Impl( std::size_t port,
-                         Mode mode )
+UdpReceiver::Impl::Impl( std::size_t port, Mode mode )
  : mMode( mode )
  , mIoContext{}
  , mWorkGuard{ mIoContext.get_executor() }
- , mSocket{
-   mIoContext }
+ , mSocket{ mIoContext }
 {
-    using boost::asio::ip::udp;
+  using boost::asio::ip::udp;
 
-    boost::system::error_code ec;
-    mSocket.open(udp::v4(), ec);
-    mSocket.set_option(boost::asio::socket_base::reuse_address(true));
-    mSocket.bind(udp::endpoint(udp::v4(), static_cast<unsigned short>(port)));
+  boost::system::error_code ec;
+  mSocket.open( udp::v4(), ec );
+  mSocket.set_option( boost::asio::socket_base::reuse_address( true ) );
+  mSocket.bind(
+      udp::endpoint( udp::v4(), static_cast< unsigned short >( port ) ) );
 
-    if (ec)
-    {
-        throw std::runtime_error("Error opening UDP port");
-    }
+  if( ec )
+  {
+    throw std::runtime_error( "Error opening UDP port" );
+  }
 
-    mSocket.async_receive_from(boost::asio::buffer(mReceiveBuffer),
-        mRemoteEndpoint,
-        boost::bind(&UdpReceiver::Impl::handleReceiveData, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred)
-    );
+  mSocket.async_receive_from(
+      boost::asio::buffer( mReceiveBuffer ), mRemoteEndpoint,
+      boost::bind( &UdpReceiver::Impl::handleReceiveData, this,
+                   boost::asio::placeholders::error,
+                   boost::asio::placeholders::bytes_transferred ) );
 #ifdef VISR_DISABLE_THREADS
-    throw std::invalid_argument( "UdpReceiver: Asynchronous mode is not supported because threads are disabled." );
+  throw std::invalid_argument(
+      "UdpReceiver: Asynchronous mode is not supported because threads are "
+      "disabled." );
 #else
-    if (mMode == Mode::Asynchronous)
-    {
-      mServiceThread =
-          std::thread( boost::bind( &boost::asio::io_context::run,
-                       &mIoContext ));
-    }
+  if( mMode == Mode::Asynchronous )
+  {
+    mServiceThread = std::thread(
+        boost::bind( &boost::asio::io_context::run, &mIoContext ) );
+  }
 #endif // VISR_DISABLE_THREADS
 }
 
@@ -142,36 +137,36 @@ UdpReceiver::Impl::~Impl()
 
 void UdpReceiver::Impl::process( UdpReceiver::MessageOutput & messageOutput )
 {
-  if(  mMode == Mode::Synchronous )
+  if( mMode == Mode::Synchronous )
   {
     mIoContext.poll();
   }
 #ifndef VISR_DISABLE_THREADS
-  std::lock_guard<std::mutex> lock( mMutex );
+  std::lock_guard< std::mutex > lock( mMutex );
 #endif
   while( not mInternalMessageBuffer.empty() )
   {
     pml::StringParameter const & nextMsg = mInternalMessageBuffer.front();
-    messageOutput.enqueue( nextMsg  );
+    messageOutput.enqueue( nextMsg );
     mInternalMessageBuffer.pop_front();
   }
 }
 
-void UdpReceiver::Impl::handleReceiveData( const boost::system::error_code& error,
-                                           std::size_t numBytesTransferred )
+void UdpReceiver::Impl::handleReceiveData(
+    const boost::system::error_code & error, std::size_t numBytesTransferred )
 {
   {
 #ifndef VISR_DISABLE_THREADS
-   std::lock_guard<std::mutex> guard( mMutex );
+    std::lock_guard< std::mutex > guard( mMutex );
 #endif
-    mInternalMessageBuffer.push_back( pml::StringParameter( std::string( &mReceiveBuffer[0], numBytesTransferred ) ) );
+    mInternalMessageBuffer.push_back( pml::StringParameter(
+        std::string( &mReceiveBuffer[ 0 ], numBytesTransferred ) ) );
   }
-  mSocket.async_receive_from( boost::asio::buffer(mReceiveBuffer),
-                               mRemoteEndpoint,
-                               boost::bind(&Impl::handleReceiveData, this,
-                                            boost::asio::placeholders::error,
-                                            boost::asio::placeholders::bytes_transferred)
-                             );
+  mSocket.async_receive_from(
+      boost::asio::buffer( mReceiveBuffer ), mRemoteEndpoint,
+      boost::bind( &Impl::handleReceiveData, this,
+                   boost::asio::placeholders::error,
+                   boost::asio::placeholders::bytes_transferred ) );
 }
 
 } // namespace rcl
