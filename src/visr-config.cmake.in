@@ -68,9 +68,6 @@ if( (static_libraries IN_LIST VISR_FIND_COMPONENTS_ADJUSTED )
   OR ( static_pic_libraries IN_LIST VISR_FIND_COMPONENTS_ADJUSTED ) )
   # Export dependencies for exported static targets (incl. static_pic)
   # if any of these variants is built.
-  if( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
-    find_dependency( Threads )
-  endif( NOT ${VISR_THREAD_SUPPORT_DISABLED} )
 
   # Put the FindSndFile.cmake and FindPortaudio.cmake files,
   # which have been copied into this directory, onto the CMake
