@@ -66,8 +66,7 @@ void testUdpSender( rcl::UdpSender::Mode mode )
           std::size_t bytesTransferred )
       {
         received = true;
-        receivedMessage =
-            std::string( recvBuffer.data(), bytesTransferred );
+        receivedMessage.assign( recvBuffer.data(), bytesTransferred );
         ioContext.stop();
       } );
 

@@ -48,10 +48,10 @@ public:
    * @param parent Pointer to a containing component if there is one. Specify \p
    * nullptr in case of a top-level component
    * @param sendPort Local UDP port number for sending.
-   * @param receiverAddress The name of the reciver (either numeric IP or DNS
+   * @param receiverAddress The name of the receiver (either numeric IP or DNS
    * name)
    * @param receiverPort Remote UDP port number.
-   * @param mode Asynchronity mode of the network communication
+   * @param mode Asynchronicity mode of the network communication
    */
   explicit UdpSender( SignalFlowContext const & context,
                       char const * name,
@@ -64,7 +64,7 @@ public:
   /**
    * Destructor.
    */
-  virtual ~UdpSender();
+  ~UdpSender() override;
 
   /**
    * The process function.

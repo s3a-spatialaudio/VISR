@@ -62,7 +62,7 @@ public:
   /**
    * Destructor.
    */
-  ~UdpReceiver();
+  ~UdpReceiver() override;
 
   /**
    * The process function.

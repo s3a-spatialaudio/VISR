@@ -13,6 +13,7 @@
 #include <boost/bind/bind.hpp>
 
 #include <ciso646>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -141,13 +142,20 @@ UdpSender::Impl::Impl( UdpSender & parent,
 
 UdpSender::Impl::~Impl()
 {
-  mIoContext.stop();
-#ifndef VISR_DISABLE_THREADS
-  if( mServiceThread.joinable() )
+  try
   {
-    mServiceThread.join();
-  }
+    mIoContext.stop();
+#ifndef VISR_DISABLE_THREADS
+    if( mServiceThread.joinable() )
+    {
+      mServiceThread.join();
+    }
 #endif
+  }
+  catch( const std::exception & ex )
+  {
+    std::cerr << "Error destroying UdpReceiver: " << ex.what() << '\n';
+  }
 }
 
 void UdpSender::Impl::process( UdpSender::MessageInput & messageInput )

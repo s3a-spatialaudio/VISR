@@ -12,6 +12,7 @@
 #include <boost/bind/bind.hpp>
 
 #include <ciso646>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -89,7 +90,6 @@ void UdpReceiver::process() { mImpl->process( mDatagramOutput ); }
 
 UdpReceiver::Impl::Impl( std::size_t port, Mode mode )
  : mMode( mode )
- , mIoContext{}
  , mWorkGuard{ mIoContext.get_executor() }
  , mSocket{ mIoContext }
 {
@@ -126,13 +126,20 @@ UdpReceiver::Impl::Impl( std::size_t port, Mode mode )
 
 UdpReceiver::Impl::~Impl()
 {
-  mIoContext.stop();
-#ifndef VISR_DISABLE_THREADS
-  if( mServiceThread.joinable() )
+  try
   {
-    mServiceThread.join();
-  }
+    mIoContext.stop();
+#ifndef VISR_DISABLE_THREADS
+    if( mServiceThread.joinable() )
+    {
+      mServiceThread.join();
+    }
 #endif
+  }
+  catch( const std::exception & ex )
+  {
+    std::cerr << "Error destroying UdpReceiver: " << ex.what() << '\n';
+  }  
 }
 
 void UdpReceiver::Impl::process( UdpReceiver::MessageOutput & messageOutput )
@@ -159,8 +166,8 @@ void UdpReceiver::Impl::handleReceiveData(
 #ifndef VISR_DISABLE_THREADS
     std::lock_guard< std::mutex > guard( mMutex );
 #endif
-    mInternalMessageBuffer.push_back( pml::StringParameter(
-        std::string( &mReceiveBuffer[ 0 ], numBytesTransferred ) ) );
+    mInternalMessageBuffer.emplace_back(
+        std::string( &mReceiveBuffer[ 0 ], numBytesTransferred ) );
   }
   mSocket.async_receive_from(
       boost::asio::buffer( mReceiveBuffer ), mRemoteEndpoint,

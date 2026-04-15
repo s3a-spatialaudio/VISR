@@ -35,7 +35,7 @@ class ClientProtocol:
     "receive_mode",
     [rcl.UdpReceiver.Mode.Synchronous, rcl.UdpReceiver.Mode.Asynchronous],
 )
-async def test_udp_receicer(receive_mode):
+async def test_udp_receiver(receive_mode):
     fs = 48000
     bs = 256
 
