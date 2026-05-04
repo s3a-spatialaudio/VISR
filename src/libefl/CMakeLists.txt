@@ -88,18 +88,6 @@ if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( efl_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
-if(${_EFL_NUM_ARCHITECTURES} EQUAL 1)
-  if(${_EFL_ARCHITECURES} MATCHES "x86_64")
-    add_subdirectory(intel_x86_64)
-  endif()
-
-  if((${_EFL_ARCHITECURES} MATCHES "armv7l") OR(${_EFL_ARCHITECURES} MATCHES "arm64"))
-    add_subdirectory(armv7l_neon_32bit)
-  endif()
-elseif(${_EFL_NUM_ARCHITECTURES} GREATER 1 )
-  message(WARNING "Architecture-specific efl optimisations disabled in multi-architecture builds.")
-endif()
-
 foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
   target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
@@ -111,6 +99,18 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
       $<INSTALL_INTERFACE:include/visr>
     )
 endforeach()
+
+if(${_EFL_NUM_ARCHITECTURES} EQUAL 1)
+  if(${_EFL_ARCHITECURES} MATCHES "x86_64")
+    add_subdirectory(intel_x86_64)
+  endif()
+
+  if((${_EFL_ARCHITECURES} MATCHES "armv7l") OR(${_EFL_ARCHITECURES} MATCHES "arm64"))
+    add_subdirectory(armv7l_neon_32bit)
+  endif()
+elseif(${_EFL_NUM_ARCHITECTURES} GREATER 1 )
+  message(WARNING "Architecture-specific efl optimisations disabled in multi-architecture builds.")
+endif()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS efl_static
