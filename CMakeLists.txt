@@ -5,8 +5,8 @@
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
 # 3.3 for IN_LIST operator in if() conditions
-# 3.5 to silence CMake peprecation warnings.
-CMAKE_MINIMUM_REQUIRED( VERSION 3.5 )
+# 3.23 for install(FILE_SET)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.23)
 
 # Handle VERSION argument of project() command.
 if( POLICY CMP0048 )
@@ -254,10 +254,13 @@ endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
   OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" OFF)
   IF( BUILD_MACOS_UNIVERSAL_BINARIES )
-    SET( OSX_UNIVERSAL ON )
-#    SET(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
-  SET(CMAKE_OSX_ARCHITECTURES "arm64")
-#   SET(CMAKE_OSX_ARCHITECTURES "x86_64")
+    SET(OSX_UNIVERSAL ON)
+    # Initialise the architecture for universla builds to the system processor architecture.
+    set(BUILD_MACOS_ARCHITECTURES ${VISR_SYSTEM_PROCESSOR} CACHE
+       STRING "Architectures for OSX if universal libraries are built.")
+    set(VISR_MACOS_ARCHITECTURES "x86_64;arm64")
+    set_property(CACHE BUILD_MACOS_ARCHITECTURES PROPERTY STRINGS ${VISR_MACOS_ARCHITECTURES})
+    set(CMAKE_OSX_ARCHITECTURES ${BUILD_MACOS_ARCHITECTURES})
   ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
 

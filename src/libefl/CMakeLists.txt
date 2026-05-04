@@ -52,6 +52,18 @@ reference/vector_functions.hpp
 reference/vector_functions_impl.hpp
 )
 
+# Support both single-architecture builds and MacOS unversal binaries.
+# If configured to build MacOS universal binaries with more than one architecture,
+# platform-specific optimisations are disabled. This is because the platform-
+# specific compilation of the optimised efl functions cannot easily be
+# combined into a fat binary (e.g., lipo cannot be used.).
+if(DEFINED BUILD_MACOS_ARCHITECTURES)
+  set(_EFL_ARCHITECURES ${BUILD_MACOS_ARCHITECTURES})
+else()
+  set(_EFL_ARCHITECURES ${VISR_SYSTEM_PROCESSOR})
+endif()
+list(LENGTH _EFL_ARCHITECURES _EFL_NUM_ARCHITECTURES)
+
 if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   add_library( efl_static STATIC ${SOURCES} ${PUBLIC_HEADERS} ${PRIVATE_HEADERS} )
   set_target_properties( efl_static PROPERTIES OUTPUT_NAME efl )
@@ -76,6 +88,18 @@ if( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   set_target_properties( efl_static_pic PROPERTIES FOLDER static_pic_libraries )
 endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 
+if(${_EFL_NUM_ARCHITECTURES} EQUAL 1)
+  if(${_EFL_ARCHITECURES} MATCHES "x86_64")
+    add_subdirectory(intel_x86_64)
+  endif()
+
+  if((${_EFL_ARCHITECURES} MATCHES "armv7l") OR(${_EFL_ARCHITECURES} MATCHES "arm64"))
+    add_subdirectory(armv7l_neon_32bit)
+  endif()
+elseif(${_EFL_NUM_ARCHITECTURES} GREATER 1 )
+  message(WARNING "Architecture-specific efl optimisations disabled in multi-architecture builds.")
+endif()
+
 foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_link_libraries( efl_${LIB_TYPE} PRIVATE Boost::boost )
   target_compile_definitions( efl_${LIB_TYPE} PRIVATE VISR_BUILD_EFL_LIBRARY=1 )
@@ -87,14 +111,6 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
       $<INSTALL_INTERFACE:include/visr>
     )
 endforeach()
-
-if( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
-  add_subdirectory( intel_x86_64 )
-endif( VISR_SYSTEM_PROCESSOR MATCHES "x86_64" )
-
-if((VISR_SYSTEM_PROCESSOR MATCHES "armv7l") OR (VISR_SYSTEM_PROCESSOR MATCHES "arm64"))
-  add_subdirectory(armv7l_neon_32bit)
-endif()
 
 if( BUILD_INSTALL_STATIC_LIBRARIES )
   install(TARGETS efl_static
