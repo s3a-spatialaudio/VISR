@@ -95,10 +95,15 @@ endif( BUILD_AUDIOINTERFACES_PORTAUDIO )
 
 if( BUILD_USE_SNDFILE_LIBRARY )
   list( APPEND FIX_LIBRARY_TARGETS SndFile::sndfile )
-  # On MacOS, sndfile depends on FLAC, OGG, and Vorbis.
-  if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-   list( APPEND FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY )
-  endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  # Note: Handling of SndFile dependencies temporarily disabled.
+  # 1. SndFile should be built w/o audio coder dependencies, because it is
+  #    typically used with WAV files for audio data like IRs, not contents.
+  # 2. Deployment of 3rd party dependencies should be done differently,
+  #    preferably using RUNTIME_DEPENDENCIES or a dependency manager like conan.
+  # # On MacOS, sndfile depends on FLAC, OGG, and Vorbis.
+  # if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  #  list( APPEND FIX_LIBRARIES FLAC_LIBRARY OGG_LIBRARY VORBIS_LIBRARY VORBISENC_LIBRARY )
+  # endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 endif( BUILD_USE_SNDFILE_LIBRARY )
 
 # On Mac OS, the Python library must also be treated because of the rpath.
@@ -155,18 +160,20 @@ function(fix_dependencies_of_3rdparty_target depname target)
   fix_dependencies_of_3rdparty( ${depname} ${LIBLOCATION} )
 endfunction()
 
-if( VISR_SYSTEM_NAME MATCHES "MacOS" AND BUILD_USE_SNDFILE_LIBRARY )
-  get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
-  get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
-  get_filename_component(VORBIS_LIBRARY_NAME ${VORBIS_LIBRARY} NAME_WE)
-  get_filename_component(VORBISENC_LIBRARY_NAME ${VORBISENC_LIBRARY} NAME_WE)
+# Temporarily disabled handling of SndFile dependencies.
+# See comments above.
+# if( VISR_SYSTEM_NAME MATCHES "MacOS" AND BUILD_USE_SNDFILE_LIBRARY )
+#   get_filename_component(FLAC_LIBRARY_NAME ${FLAC_LIBRARY} NAME_WE)
+#   get_filename_component(OGG_LIBRARY_NAME ${OGG_LIBRARY} NAME_WE)
+#   get_filename_component(VORBIS_LIBRARY_NAME ${VORBIS_LIBRARY} NAME_WE)
+#   get_filename_component(VORBISENC_LIBRARY_NAME ${VORBISENC_LIBRARY} NAME_WE)
 
-  fix_dependencies_of_3rdparty_target(${FLAC_LIBRARY_NAME} SndFile::sndfile)
-  fix_dependencies_of_3rdparty_target(${OGG_LIBRARY_NAME} SndFile::sndfile)
-  fix_dependencies_of_3rdparty_target(${VORBIS_LIBRARY_NAME} SndFile::sndfile)
-  fix_dependencies_of_3rdparty_target(${VORBISENC_LIBRARY_NAME} SndFile::sndfile)
-  fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${FLAC_LIBRARY})
-  fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBIS_LIBRARY})
-  fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
-  fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${VORBISENC_LIBRARY})
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" AND BUILD_USE_SNDFILE_LIBRARY )
+#   fix_dependencies_of_3rdparty_target(${FLAC_LIBRARY_NAME} SndFile::sndfile)
+#   fix_dependencies_of_3rdparty_target(${OGG_LIBRARY_NAME} SndFile::sndfile)
+#   fix_dependencies_of_3rdparty_target(${VORBIS_LIBRARY_NAME} SndFile::sndfile)
+#   fix_dependencies_of_3rdparty_target(${VORBISENC_LIBRARY_NAME} SndFile::sndfile)
+#   fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${FLAC_LIBRARY})
+#   fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBIS_LIBRARY})
+#   fix_dependencies_of_3rdparty(${OGG_LIBRARY_NAME} ${VORBISENC_LIBRARY})
+#   fix_dependencies_of_3rdparty(${VORBIS_LIBRARY_NAME} ${VORBISENC_LIBRARY})
+# endif( VISR_SYSTEM_NAME MATCHES "MacOS" AND BUILD_USE_SNDFILE_LIBRARY )
