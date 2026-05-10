@@ -185,7 +185,7 @@ if( WIN32 ) # Covers 64-bit Windows as well
 
   add_compile_options( /W3 ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
 endif( WIN32 )
-
+ 
 ############################################################
 # Set architecture options.
 set( BUILD_PROCESSOR_GENERATION "generic" CACHE STRING "CPU Architecture for which the binaries are built." )
@@ -263,14 +263,6 @@ IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
     set(CMAKE_OSX_ARCHITECTURES ${BUILD_MACOS_ARCHITECTURES})
   ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
 ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-
-############################################################
-# Set the minimum Mac OS version.
-if( VISR_SYSTEM_NAME MATCHES "MacOS" )
-if( NOT CMAKE_OSX_DEPLOYMENT_TARGET )
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
-endif( NOT CMAKE_OSX_DEPLOYMENT_TARGET )
-endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
