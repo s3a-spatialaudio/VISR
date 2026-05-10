@@ -18,10 +18,13 @@ if (Portaudio_LIBRARIES AND Portaudio_INCLUDE_DIRS)
   # in cache already
   set(Portaudio_FOUND TRUE)
 else (Portaudio_LIBRARIES AND Portaudio_INCLUDE_DIRS)
-  if (NOT WIN32)
+  # Stopgap solution to prevent use of pkgconfig information on MacOS
+  # because we don't want to use a system-wide installation but
+  # TODO: Cease use of FindPackage(PortAudio altogether).
+  if(NOT (WIN32 OR APPLE))
    find_package(PkgConfig REQUIRED)
    pkg_check_modules(Portaudio2 portaudio-2.0)
-  endif (NOT WIN32)
+  endif()
 
   if (Portaudio2_FOUND)
     set(Portaudio_INCLUDE_DIRS
