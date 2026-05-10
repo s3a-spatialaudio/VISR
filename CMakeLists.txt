@@ -503,10 +503,13 @@ endif( Boost_USE_STATIC_LIBS AND NOT WIN32 )
 
 ############################################################
 # Copy 3rd party libraries and set RPATH for MacOs
-if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
-  find_package(Flac REQUIRED)
-  find_package(OggVorbis REQUIRED)
-endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
+# Note: Disabled because this depends how SndFile is built.
+# TODO: Rework handling and deployment of 3rd-party libraries (preferably using
+# RUNTIME_DEPENDENCIES and/or conan).
+# if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
+#   find_package(Flac REQUIRED)
+#   find_package(OggVorbis REQUIRED)
+# endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
 # This sometimes gets used event though BUILD_PYTHON_BINDINGS is not set.
 set( PYTHON_MODULE_INSTALL_DIRECTORY
