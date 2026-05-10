@@ -84,7 +84,7 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   set( CPACK_PACKAGING_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" )
 
   if( BUILD_AUDIOINTERFACES_PORTAUDIO )
-    get_target_property( PORTAUDIO_LIBPATH Portaudio::portaudio
+    get_target_property( PORTAUDIO_LIBPATH PortAudio::PortAudio
                          IMPORTED_LOCATION )
     install( FILES ${PORTAUDIO_LIBPATH}
              DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)

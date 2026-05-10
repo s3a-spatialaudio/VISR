@@ -110,18 +110,18 @@ endif (Portaudio_LIBRARIES AND Portaudio_INCLUDE_DIRS)
 # only the main library,
 list( GET Portaudio_LIBRARIES 0 Portaudio_MAIN_LIBRARY)
 
-add_library( Portaudio::portaudio SHARED IMPORTED )
-set_target_properties( Portaudio::portaudio PROPERTIES
+add_library( PortAudio::PortAudio SHARED IMPORTED )
+set_target_properties( PortAudio::PortAudio PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES ${Portaudio_INCLUDE_DIRS}
 )
 if( WIN32 )
   get_filename_component( PORTAUDIO_LIB_DIRECTORY ${Portaudio_LIBRARIES} DIRECTORY )
-  set_target_properties( Portaudio::portaudio PROPERTIES
+  set_target_properties( PortAudio::PortAudio PROPERTIES
     IMPORTED_LOCATION ${PORTAUDIO_LIB_DIRECTORY}/portaudio_x64.dll
     IMPORTED_IMPLIB  ${Portaudio_MAIN_LIBRARY}
   )
 else()
-  set_target_properties( Portaudio::portaudio PROPERTIES
+  set_target_properties( PortAudio::PortAudio PROPERTIES
     IMPORTED_LOCATION ${Portaudio_MAIN_LIBRARY}
   )
 endif( WIN32 )
