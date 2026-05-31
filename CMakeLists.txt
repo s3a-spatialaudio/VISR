@@ -185,7 +185,7 @@ if( WIN32 ) # Covers 64-bit Windows as well
 
   add_compile_options( /W3 ) # Increase warning level (/W4 and /Wall generate lots of output not related to coding flaws.
 endif( WIN32 )
- 
+
 ############################################################
 # Set architecture options.
 set( BUILD_PROCESSOR_GENERATION "generic" CACHE STRING "CPU Architecture for which the binaries are built." )
@@ -250,19 +250,21 @@ endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 
 
 ############################################################
-# Create universal binaries on MacOS
-IF( VISR_SYSTEM_NAME MATCHES "MacOS" )
-  OPTION( BUILD_MACOS_UNIVERSAL_BINARIES "Universal (32/64-bit) binaries on MacOS X" OFF)
-  IF( BUILD_MACOS_UNIVERSAL_BINARIES )
-    SET(OSX_UNIVERSAL ON)
-    # Initialise the architecture for universla builds to the system processor architecture.
-    set(BUILD_MACOS_ARCHITECTURES ${VISR_SYSTEM_PROCESSOR} CACHE
-       STRING "Architectures for OSX if universal libraries are built.")
-    set(VISR_MACOS_ARCHITECTURES "x86_64;arm64")
-    set_property(CACHE BUILD_MACOS_ARCHITECTURES PROPERTY STRINGS ${VISR_MACOS_ARCHITECTURES})
-    set(CMAKE_OSX_ARCHITECTURES ${BUILD_MACOS_ARCHITECTURES})
-  ENDIF( BUILD_MACOS_UNIVERSAL_BINARIES )
-ENDIF( VISR_SYSTEM_NAME MATCHES "MacOS" )
+# Control architecture and creation of universal binaries on MacOS
+if(VISR_SYSTEM_NAME MATCHES "MacOS")
+  if( NOT CMAKE_OSX_ARCHITECTURES)
+    # Initialise the architecture for universal builds to the system processor architecture.
+    set(CMAKE_OSX_ARCHITECTURES ${VISR_SYSTEM_PROCESSOR})
+  endif()
+  # Check whether all values in CMAKE_OSX_ARCHITECTURES are supported.
+  set(VISR_SUPPORTED_MACOS_ARCHITECTURES "x86_64;arm64")
+  foreach(_arch ${CMAKE_OSX_ARCHITECTURES})
+    if(NOT IN_LIST ${__arch} VISR_SUPPORTED_MACOS_ARCHITECTURES)
+      message(SEND_ERROR "Architecture " ${__arch} " is not supported on MacOS.")
+    endif()
+  endforeach()
+  set(BUILD_MACOS_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES})
+endif()
 
 ############################################################
 # Set default visibility of shared library symbols to hidden (as on Windows platforms)
@@ -381,10 +383,11 @@ else()
   set( THIRDPARTY_ARCHIVE_INSTALL_DIRECTORY 3rd )
 endif( VISR_SYSTEM_NAME MATCHES Linux )
 
-###########################################################
+# ##########################################################
 # Support for 3rd-party libraries.
 
-option( BUILD_FFTS "Build an internal copy of FFTS" ON )
+# FFTS
+option(BUILD_FFTS "Build an internal copy of the FFTS library" ON)
 
 # Add 3rd-party libraries that are built locally.
 add_subdirectory( 3rd )
@@ -492,16 +495,6 @@ if( Boost_USE_STATIC_LIBS AND NOT WIN32 )
         )
   endif( "shared" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 endif( Boost_USE_STATIC_LIBS AND NOT WIN32 )
-
-############################################################
-# Copy 3rd party libraries and set RPATH for MacOs
-# Note: Disabled because this depends how SndFile is built.
-# TODO: Rework handling and deployment of 3rd-party libraries (preferably using
-# RUNTIME_DEPENDENCIES and/or conan).
-# if( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
-#   find_package(Flac REQUIRED)
-#   find_package(OggVorbis REQUIRED)
-# endif( BUILD_USE_SNDFILE_LIBRARY AND (VISR_SYSTEM_NAME MATCHES "MacOS") )
 
 # This sometimes gets used event though BUILD_PYTHON_BINDINGS is not set.
 set( PYTHON_MODULE_INSTALL_DIRECTORY
