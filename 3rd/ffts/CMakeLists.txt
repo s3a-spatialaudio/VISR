@@ -167,7 +167,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     endif()
 
     if(("arm64" IN_LIST _MACOS_ARCHITECTURES))
-      # The NEON intrinsics are incompatible with the XCode because the 
+      # The NEON intrinsics are incompatible with the XCode compiler because
       # register names are different.
       message("ffts: NEON not supported on MacOS arm64")
       set(ENABLE_NEON OFF)
