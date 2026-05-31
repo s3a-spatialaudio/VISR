@@ -159,11 +159,19 @@ set(CMAKE_REQUIRED_FLAGS_SAVE ${CMAKE_REQUIRED_FLAGS})
 
 # Determinate if we are cross-compiling
 if(NOT CMAKE_CROSSCOMPILING)
+  if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    if(CMAKE_OSX_ARCHITECTURES STREQUAL "")
+      set(_MACOS_ARCHITECTURES ${CMAKE_SYSTEM_PROCESSOR})
+    else()
+      set(_MACOS_ARCHITECTURES ${CMAKE_OSX_ARCHITECTURES})
+    endif()
 
-  if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|ARM64|aarch64|armv8")
-    # currently NEON is only supported for 32-bit ARM
-    message("ffts: NEON not supported on arm64")
-    set(ENABLE_NEON OFF)
+    if(("arm64" IN_LIST _MACOS_ARCHITECTURES))
+      # The NEON intrinsics are incompatible with the XCode because the 
+      # register names are different.
+      message("ffts: NEON not supported on MacOS arm64")
+      set(ENABLE_NEON OFF)
+    endif()
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
     set(TEST_SOURCE_CODE "
       #include <arm_neon.h>
