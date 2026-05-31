@@ -254,7 +254,6 @@ if( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
   list( APPEND VISR_BUILD_LIBRARY_TYPES "static_pic" )
 endif( BUILD_INSTALL_STATIC_PIC_LIBRARIES )
 
-
 ############################################################
 # Control architecture and creation of universal binaries on MacOS
 if(VISR_SYSTEM_NAME MATCHES "MacOS")

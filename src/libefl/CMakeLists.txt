@@ -52,16 +52,23 @@ reference/vector_functions.hpp
 reference/vector_functions_impl.hpp
 )
 
-# Support both single-architecture builds and MacOS unversal binaries.
+# Support both single-architecture builds and MacOS universal binaries.
 # If configured to build MacOS universal binaries with more than one architecture,
 # platform-specific optimisations are disabled. This is because the platform-
 # specific compilation of the optimised efl functions cannot easily be
 # combined into a fat binary (e.g., lipo cannot be used.).
-if(DEFINED BUILD_MACOS_ARCHITECTURES)
-  set(_EFL_ARCHITECURES ${BUILD_MACOS_ARCHITECTURES})
+if(DEFINED CMAKE_OSX_ARCHITECTURES)
+  set(_EFL_ARCHITECURES ${CMAKE_OSX_ARCHITECTURES})
 else()
   set(_EFL_ARCHITECURES ${VISR_SYSTEM_PROCESSOR})
 endif()
+# Check whether all values in _EFL_ARCHITECURES are supported.
+set(VISR_SUPPORTED_MACOS_ARCHITECTURES "x86_64;arm64")
+foreach(_arch ${_EFL_ARCHITECURES})
+  if(NOT IN_LIST ${__arch} VISR_SUPPORTED_MACOS_ARCHITECTURES)
+    message(SEND_ERROR "Architecture " ${__arch} " is not supported on MacOS.")
+  endif()
+endforeach()
 list(LENGTH _EFL_ARCHITECURES _EFL_NUM_ARCHITECTURES)
 
 if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
