@@ -36,6 +36,9 @@ endif( POLICY CMP0090 )
 if( POLICY CMP0091 )
   CMAKE_POLICY(SET CMP0091 NEW)
 endif( POLICY CMP0091 )
+if( POLICY CMP0144 )
+  CMAKE_POLICY(SET CMP0144 NEW)
+endif( POLICY CMP0144 )
 
 
 # The name of our top-level project.
@@ -391,8 +394,6 @@ add_subdirectory( 3rd )
 # or through direct OS calls.
 if( BUILD_DISABLE_THREADS )
   add_definitions( -DVISR_DISABLE_THREADS=1 )
-else()
-  find_package(Threads REQUIRED)
 endif( BUILD_DISABLE_THREADS )
 
 # if( NOT WIN32 )
@@ -449,19 +450,15 @@ ENDIF( BUILD_USE_IPP )
 # BOOST_ROOT should hold the path to the boost root directory.
 
 # Define a minimum boost version
-# Note: This requirement is chosen heuristically at the moment.
-# Todo: Replace by a substantiated version requirement.
-set( VISR_BOOST_MINIMUM_VERSION 1.50 )
+# Version 1.69 is needed because boost::system is a header-only library from this version on.
+set( VISR_BOOST_MINIMUM_VERSION 1.69 )
 
 option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries." OFF)
 
 # Define the boost libraries that will be needed in deployed installations.
 # In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options system regex timer )
-if( NOT BUILD_DISABLE_THREADS )
-  list( APPEND VISR_BOOST_INSTALL_LIBRARIES thread atomic)
-endif( NOT BUILD_DISABLE_THREADS )
+set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options regex timer )
 # The set of all boost libraries used by the build and test stages.
 set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
 # Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
