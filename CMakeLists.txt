@@ -463,8 +463,9 @@ ENDIF( BUILD_USE_IPP )
 # BOOST_ROOT should hold the path to the boost root directory.
 
 # Define a minimum boost version
-# Version 1.69 is needed because boost::system is a header-only library from this version on.
-set( VISR_BOOST_MINIMUM_VERSION 1.69 )
+# 1.69: boost::system is a header-only library from this version on.
+# 1.71: Minimum Boost version providing a stable BoostConfig.cmake 
+set( VISR_BOOST_MINIMUM_VERSION 1.71 )
 
 option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries." OFF)
 
@@ -483,7 +484,7 @@ set(Boost_USE_MULTITHREADED TRUE)
 
 # Store/restore value of Boost_USE_STATIC_LIBS - vcpkg on Windows will reset it during find_package
 set(_Boost_USE_STATIC_LIBS ${Boost_USE_STATIC_LIBS})
-find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} CONFIG REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
 
 # Avoid a pragma message caused by an internal inconsistency between boost::bind and
