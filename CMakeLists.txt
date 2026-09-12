@@ -5,8 +5,8 @@
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
 # 3.3 for IN_LIST operator in if() conditions
-# 3.5 to silence CMake peprecation warnings.
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5...4.3)
+# 3.12 for find_package(Python)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12...4.3)
 
 # Handle VERSION argument of project() command.
 if( POLICY CMP0048 )
@@ -308,6 +308,11 @@ ENDIF(  WIN32 OR APPLE )
 option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" ON )
 
 if( BUILD_PYTHON_BINDINGS )
+  # Find Python development files and the interpreter using CMake's FindPython
+  # module (requires CMake 3.12). See the CMake 3.12 FindPython documentation
+  # on how to adapt the search for the Python distribution.
+  find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
   # Finding Python and the pybind11 directory. This is done using the pybind11
   # mechanisms.
   # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
@@ -324,6 +329,8 @@ if( BUILD_PYTHON_BINDINGS )
   set( PYBIND11_EXPORT_NAME VISR-3rd_party_static-exports )
   # Force setting of pybind11 option (necessary in order to get the targets exported)
   set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets." FORCE )
+  # Instruct pybind11 to use the Python version found by CMake's FindPython module.
+  set(PYBIND11_FINDPYTHON ON CACHE BOOL "Use CMake's FindPython in pybind11." FORCE)
 
   # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
