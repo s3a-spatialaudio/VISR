@@ -236,9 +236,14 @@ transformImpulseResponse( SampleType const * ir, std::size_t irLength, Frequency
     {
       // The following multiply calls assumes that the blocklength is a multiple of the alignment.
       // Multiply the the filter by the computed scaling constants to compensate for the FFT normalisation.
-      if( efl::vectorMultiplyConstant( mFilterScalingFactor, ir + startIdx, mTimeDomainTransformBuffer.data(), endIdx - startIdx, std::min( mAlignment, alignment ) ) != efl::noError )
+      if( efl::vectorMultiplyConstant(
+              mFilterScalingFactor, ir + startIdx,
+              mTimeDomainTransformBuffer.data(), endIdx - startIdx,
+              std::min( mAlignment, alignment ) ) != efl::noError )
       {
-        std::runtime_error( "CoreConvolverUniform::transformImpulseResponse(): Error while copying data." );
+        throw std::runtime_error(
+            "CoreConvolverUniform::transformImpulseResponse(): Error while "
+            "copying data." );
       }
     }
     FrequencyDomainType * blockResult = result + partitionIdx * mDftRepresentationSizePadded;

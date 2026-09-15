@@ -554,7 +554,9 @@ void BiquadCoefficientMatrix<CoeffType>::loadJson( boost::property_tree::ptree c
     assert( numBiquads != unInitMarker ); // Check that initialisation is performed during the first run.
     if( rowFilters.size() != numBiquads )
     {
-      std::invalid_argument( "BiquadCoefficientMatrix::loadJSON(): Encountered matrix rows with differing sizes." );
+      throw std::invalid_argument(
+          "BiquadCoefficientMatrix::loadJSON(): Encountered matrix rows with "
+          "differing sizes." );
     }
     setFilter( rowIdx, rowFilters );
   }
