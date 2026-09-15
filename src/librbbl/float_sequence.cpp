@@ -9,6 +9,7 @@
 #include <ciso646>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 #include <sstream>
 
 namespace visr
@@ -90,7 +91,8 @@ FloatSequence<ElementType>::FloatSequence( std::string const & val )
 
         if( std::abs(inc) < std::numeric_limits<ElementType>::epsilon() )
         {
-          throw("FloatSequence: The increment of a range must not be zero.");
+          throw std::invalid_argument(
+              "FloatSequence: The increment of a range must not be zero." );
         }
         ElementType val = start;
         if( inc > 0 )
