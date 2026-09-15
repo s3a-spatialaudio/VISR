@@ -348,11 +348,10 @@ if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( ${PYBIND11_DIR}
   ${CMAKE_BINARY_DIR}/3rd/pybind11 EXCLUDE_FROM_ALL )
 
-  # Define a Python version string. Note that the variables returned from
-  # the pybind11 may not contain the Python patch version.
-  # However, this is not problematic because only the major.minor
-  # version is needed to set the VISR package name.
-  set( VISR_PYTHON_VERSION_MAJOR_MINOR ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
+  # Define a Python version string from the variables provided by
+  # CMake's FindPython module. Only the major.minor version is used,
+  # because that is what is needed to set the VISR package name.
+  set( VISR_PYTHON_VERSION_MAJOR_MINOR ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR} )
 
   # Define the pybind11 version as a version string.
   # This string is imported as a target property of the
