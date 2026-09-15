@@ -309,14 +309,16 @@ option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" O
 
 if( BUILD_PYTHON_BINDINGS )
   # Find Python development files and the interpreter using CMake's FindPython
-  # module (requires CMake 3.12). See the CMake 3.12 FindPython documentation
+  # module (requires CMake 3.12). See the CMake FindPython documentation
   # on how to adapt the search for the Python distribution.
   find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
-  # Finding Python and the pybind11 directory. This is done using the pybind11
-  # mechanisms.
-  # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
-  set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
+  # Set the directory for finding pybind11.
+  # The default is the internal version provided in 3rd/pybind11.
+  # However, the user can override this by setting the PYBIND11_DIR variable to a different location.
+  set(PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH 
+    "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11."
+  )
 
   message( STATUS "Using PYBIND11_DIR: " ${PYBIND11_DIR} )
 
