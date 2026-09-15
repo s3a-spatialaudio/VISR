@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <ciso646>
+#include <stdexcept>
 
 namespace visr
 {
@@ -51,7 +52,8 @@ IndexSequence::IndexSequence( std::string const & val )
         int const val = mStack[0];
         if( val < 0 )
         {
-          throw("IndexSequence: Indices must be greater or equal than zero.");
+          throw std::invalid_argument(
+              "IndexSequence: Indices must be greater or equal than zero." );
         }
         mContents.push_back( static_cast<IndexType>(val) );
         break;
@@ -62,7 +64,9 @@ IndexSequence::IndexSequence( std::string const & val )
         int const end = mStack[1];
         if( start < 0 or end < 0 )
         {
-          throw("IndexSequence: The start and end values of a range must be greater or equal than zero.");
+          throw std::invalid_argument(
+              "IndexSequence: The start and end values of a range must be "
+              "greater or equal than zero." );
         }
         IndexType val = static_cast<IndexType>(mStack[0]);
         while( val <= static_cast<IndexType>(end) )
@@ -78,11 +82,14 @@ IndexSequence::IndexSequence( std::string const & val )
         int const end = mStack[2];
         if( start < 0 or end < 0 )
         {
-          throw("IndexSequence: The start and end values of a range must be greater or equal than zero.");
+          throw std::invalid_argument(
+              "IndexSequence: The start and end values of a range must be "
+              "greater or equal than zero." );
         }
         if( inc == 0 )
         {
-          throw("IndexSequence: The increment of a range must not be zero.");
+          throw std::invalid_argument(
+              "IndexSequence: The increment of a range must not be zero." );
         }
         int val = start;
         if( inc > 0 )

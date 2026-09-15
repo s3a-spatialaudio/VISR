@@ -218,7 +218,7 @@ public:
   {
     if( rhs.size() != size() )
     {
-      std::invalid_argument( "BiquadCoefficientList: Size of argument to be assigned does not match." );
+      throw std::invalid_argument( "BiquadCoefficientList: Size of argument to be assigned does not match." );
     }
     mBiquads = rhs.mBiquads;
     return *this;

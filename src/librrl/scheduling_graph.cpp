@@ -159,7 +159,7 @@ void SchedulingGraph::initialise( impl::ComponentImplementation const & flow, Au
         VertexMap::const_iterator predVertexIt = mVertexLookup.find( ProcessingNode(precAtom) );
         if( predVertexIt == mVertexLookup.end() )
         {
-          std::logic_error( "SchedulingGraph: Internal inconsistency: vertex descriptor of preceding atom not found.");
+          throw std::logic_error( "SchedulingGraph: Internal inconsistency: vertex descriptor of preceding atom not found.");
         }
         auto const sendVertexDescriptor = predVertexIt->second;
         insertDependencyEdge( sendVertexDescriptor, receiveVertexDescriptor );
@@ -287,7 +287,7 @@ void SchedulingGraph::insertDependencyEdge( GraphType::vertex_descriptor sourceV
   std::tie( edgeDesc, foundEdge ) = edge( sourceVertex, destVertex, mDependencyGraph );
   if( foundEdge )
   {
-    std::logic_error( "SchedulingGraph: Internal inconsistency: Duplicated edge found." );
+    throw std::logic_error( "SchedulingGraph: Internal inconsistency: Duplicated edge found." );
   }
   bool insertRes{ false };
   std::tie( edgeDesc, insertRes ) = add_edge( sourceVertex, destVertex, mDependencyGraph );

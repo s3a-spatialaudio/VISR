@@ -291,12 +291,12 @@ MatrixParameter<ElementType>::fromAudioFile( std::string const & fileName, std::
     sf_count_t const numReadRaw = read_samples<ElementType>( fileHandle, tmpStorage, numRows*numCols );
     if( numReadRaw < 0 )
     {
-      std::invalid_argument( "MatrixParameter::fromAudioFile(): Reading the audio data failed." );
+      throw std::invalid_argument( "MatrixParameter::fromAudioFile(): Reading the audio data failed." );
     }
     std::size_t const numRead = static_cast<std::size_t>(numReadRaw);
     if( numRead != numRows * numCols )
     {
-      std::invalid_argument( "MatrixParameter::fromAudioFile(): Reading the audio data reeturned a wrong number of arguments." );
+      throw std::invalid_argument( "MatrixParameter::fromAudioFile(): Reading the audio data reeturned a wrong number of arguments." );
     }
     // De-interleaving, might be implemented in a library function
     for( std::size_t rowIdx(0); rowIdx < numRows; ++rowIdx )

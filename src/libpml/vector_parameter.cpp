@@ -232,12 +232,12 @@ VectorParameter<ElementType>::fromAudioFile( std::string const & fileName, std::
     sf_count_t const numReadRaw = read_samples<ElementType>( fileHandle, resultVec, numElements );
     if( numReadRaw < 0 )
     {
-      std::invalid_argument( "VectorParameter::fromAudioFile(): Reading the audio data failed." );
+      throw std::invalid_argument( "VectorParameter::fromAudioFile(): Reading the audio data failed." );
     }
     std::size_t const numRead = static_cast<std::size_t>(numReadRaw);
     if( numRead != numElements )
     {
-      std::invalid_argument( "VectorParameter::fromAudioFile(): Reading the audio data returned a wrong number of arguments." );
+      throw std::invalid_argument( "VectorParameter::fromAudioFile(): Reading the audio data returned a wrong number of arguments." );
     }
     sf_close( fileHandle );
     fileHandle = nullptr;
