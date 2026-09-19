@@ -3,6 +3,53 @@ Changelog for project VISR
 ==========================
 
 
+Unreleased (since release 0.13.0)
+=================================
+
+* BREAKING CHANGE: The minimum Boost version is now 1.71 (was 1.50). Boost is
+  located through the BoostConfig.cmake package configuration file shipped with
+  Boost (find_package( Boost ... CONFIG )) instead of CMake's deprecated
+  FindBoost module.
+* BREAKING CHANGE: Python distribution is located with CMake's FindPython
+  module instead of pybind11's deprecated FindPythonLibsNew logic.
+  Consequently, the cache variables PYTHON_EXECUTABLE, PYTHON_INCLUDE_DIR and
+  PYTHON_LIBRARY are not evaluated any more. Use -DPython_EXECUTABLE=<interpreter>
+  or -DPython_ROOT_DIR=<install prefix> (absolute paths) to build against a
+  specific Python distribution or virtual environment.
+* BREAKING CHANGE: The minimum required CMake version is now 3.12 (was 3.5).
+* BUGFIX: Added missing 'throw' statements in front of exception objects in
+  pml::MatrixParameter::fromAudioFile(), pml::VectorParameter::fromAudioFile(),
+  rbbl::BiquadCoefficientMatrix::loadJSON(), rbbl::BiquadCoefficientList,
+  rbbl::CoreConvolverUniform::transformImpulseResponse() and
+  rrl::SchedulingGraph. The respective error conditions were detected but
+  silently ignored.
+* BUGFIX: Replaced faulty throw statements of the form throw( "message" ), which
+  throw a char const *, by proper std::invalid_argument exceptions in
+  rbbl::FloatSequence and rbbl::IndexSequence.
+* BUGFIX: rcl::UdpSender: The socket is now only opened instead of being
+  connected to the local send endpoint.
+* FEATURE: Reworked rcl::UdpSender and rcl::UdpReceiver for compatibility with
+  Boost >= 1.87: use boost::asio::io_context plus an executor work guard instead
+  of the removed io_service and io_service::work, and replace the removed
+  resolver::query-based address resolution. The component interfaces are
+  unchanged.
+* BUILD: Support for CMake 4.x: all projects (including the bundled 3rd-party
+  projects ffts and kissfft) use a cmake_minimum_required() version range with
+  an upper bound of 4.3, opting into the NEW behaviour of all policies known up
+  to that version.
+* BUILD: Set policy CMP0177 (normalisation of install() destination paths).
+* CLEANUP: Removed the now-obsolete link libraries Boost::system (header-only
+  since Boost 1.69) as well as Boost::thread and Boost::atomic from librcl,
+  libsignalflows and libsignalflowspython, and removed thread and atomic from
+  the set of installed Boost libraries.
+* CLEANUP: Removed the obsolete find_package( Threads ) from the build and the
+  corresponding find_dependency( Threads ) directive from visr-config.cmake.
+* DOC: Updated the "Building the Python externals" section of the Python support
+  documentation to describe the FindPython-based configuration options
+  (Python_EXECUTABLE, Python_ROOT_DIR, Python_FIND_VIRTUALENV) and to state that
+  the previously used PYTHON_INCLUDE_DIR/PYTHON_LIBRARY settings are no longer
+  evaluated.
+
 Release 0.13.0
 ==============
 

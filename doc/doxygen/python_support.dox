@@ -161,22 +161,25 @@ python_runner python_runner -m /Applications/VISR-0.9.0/python/templates/pythonA
 
 
 @section building_python_externals Building the Python externals
-To build the code on a development machine, the follwoing options must be set in CMAKE: Activate the option <tt>BUILD_PYTHON_BINDINGS</tt>. After running "Configure", check the settings in the newly appeared group <tt>PYTHON</tt>:
- * The setting <tt>PYTHON_INCLUDE_DIR</tt> must point to the include directory of the Python distribution.
-Amongst others, this directory must contain the main Python header Python.h. If that
-is not the case, set the entry to this directory. On the development systems, the following directories
-are set:
-   - Linux (Ubuntu 14.04 LTS 64 Bit): <tt>/usr/include/python3.4m</tt>
-   - Windows (Anaconda 64 Bit): <tt>C:/Program Files/Anaconda3/include</tt>
-   - Mac OS (Anaconda): <tt>/Users/&lt;loginname&gt;/anaconda/include/python3.5m</tt>
-   .
- * The setting <tt>PYTHON_LIBRARY</tt> must point to the main Python library. This file is located within the
-directory root of the installed Python distribution (or in case of Linux, a standard library directory. On our test systems, the file names are as follows:
-   - Linux (Ubuntu 14.04 LTS 64 Bit): <tt>/usr/lib/x86_64-linux-gnu/libpython3.4m.so</tt>
-   - Windows (Anaconda 64 Bit): <tt>C:/Program Files/Anaconda3/libs/python35.lib</tt>
-   - Mac OS (Anaconda): /Users/loginname/anaconda/lib/libpython3.5m.dylib
-   .
- * In CMake, call "Configure" again and run "Generate"
- * Build the project (the Python externals are distributed over several targets, so "Build all" is the best option.
+To build the Python externals on a development machine, activate the CMake option <tt>BUILD_PYTHON_BINDINGS</tt>.
+
+To build against a specific Python distribution, use the options of the underlying <tt>FindPython</tt> module:
+
+ * If no distribution is requested explicitly, <tt>FindPython</tt> selects the most recent version found on the system. Note that this need not be the interpreter first on the <tt>PATH</tt>.
+ * To build against a particular distribution or virtual environment, set <tt>Python_EXECUTABLE</tt> to its interpreter, or <tt>Python_ROOT_DIR</tt> to its installation prefix, when invoking the CMake configure stage. Both must be absolute paths.
+ * If a <tt>virtualenv</tt> or <tt>conda</tt> environment is active, setting <tt>Python_FIND_VIRTUALENV</tt> to <tt>ONLY</tt> restricts the search to that environment.
+ .
+For example:
+@code
+cmake -DBUILD_PYTHON_BINDINGS=ON -DPython_EXECUTABLE=/usr/bin/python3.13 <path_to_visr_source>
+@endcode
+
+The variables <tt>PYTHON_INCLUDE_DIR</tt> and <tt>PYTHON_LIBRARY</tt> used by earlier VISR versions are not evaluated any more.
+
+When configuring in the CMake GUI:
+ * Activate <tt>BUILD_PYTHON_BINDINGS</tt> and set the variables described above as needed.
+ * Call "Configure" again and run "Generate".
+ * Build the project. The Python externals are distributed over several targets, so "Build all" is the best option.
+ .
 
 */

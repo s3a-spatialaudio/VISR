@@ -5,8 +5,8 @@
 # 3.0.0+ needed for export(EXPORT) command in src/CMakeLists.txt
 # >= 3.1 for CMAKE_CXX_STANDARD
 # 3.3 for IN_LIST operator in if() conditions
-# 3.5 to silence CMake peprecation warnings.
-CMAKE_MINIMUM_REQUIRED( VERSION 3.5 )
+# 3.12 for find_package(Python)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12...4.3)
 
 # Handle VERSION argument of project() command.
 if( POLICY CMP0048 )
@@ -36,9 +36,15 @@ endif( POLICY CMP0090 )
 if( POLICY CMP0091 )
   CMAKE_POLICY(SET CMP0091 NEW)
 endif( POLICY CMP0091 )
+# find_package() uses upper-case <PACKAGENAME>_ROOT variables.
+# (used by BOOST_ROOT).
 if( POLICY CMP0144 )
   CMAKE_POLICY(SET CMP0144 NEW)
 endif( POLICY CMP0144 )
+# CMake to normalises all install() destination paths.
+if(POLICY CMP0177)
+  CMAKE_POLICY(SET CMP0177 NEW)
+endif(POLICY CMP0177)
 
 
 # The name of our top-level project.
@@ -302,10 +308,17 @@ ENDIF(  WIN32 OR APPLE )
 option( BUILD_PYTHON_BINDINGS "Python bindings of selected VISR functionality" ON )
 
 if( BUILD_PYTHON_BINDINGS )
-  # Finding Python and the pybind11 directory. This is done using the pybind11
-  # mechanisms.
-  # To build VISR for a non-default Python version, set the CMake cache variable PYTHON_EXECUTABLE to the respective interpreter binary.
-  set( PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11." )
+  # Find Python development files and the interpreter using CMake's FindPython
+  # module (requires CMake 3.12). See the CMake FindPython documentation
+  # on how to adapt the search for the Python distribution.
+  find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+  # Set the directory for finding pybind11.
+  # The default is the internal version provided in 3rd/pybind11.
+  # However, the user can override this by setting the PYBIND11_DIR variable to a different location.
+  set(PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH 
+    "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11."
+  )
 
   message( STATUS "Using PYBIND11_DIR: " ${PYBIND11_DIR} )
 
@@ -318,6 +331,8 @@ if( BUILD_PYTHON_BINDINGS )
   set( PYBIND11_EXPORT_NAME VISR-3rd_party_static-exports )
   # Force setting of pybind11 option (necessary in order to get the targets exported)
   set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets." FORCE )
+  # Instruct pybind11 to use the Python version found by CMake's FindPython module.
+  set(PYBIND11_FINDPYTHON ON CACHE BOOL "Use CMake's FindPython in pybind11." FORCE)
 
   # Enable the pybind11 cmake support via add_subdirectory
   # This takes, amongst other things, care of providing proper
@@ -333,11 +348,10 @@ if( BUILD_PYTHON_BINDINGS )
   add_subdirectory( ${PYBIND11_DIR}
   ${CMAKE_BINARY_DIR}/3rd/pybind11 EXCLUDE_FROM_ALL )
 
-  # Define a Python version string. Note that the variables returned from
-  # the pybind11 may not contain the Python patch version.
-  # However, this is not problematic because only the major.minor
-  # version is needed to set the VISR package name.
-  set( VISR_PYTHON_VERSION_MAJOR_MINOR ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
+  # Define a Python version string from the variables provided by
+  # CMake's FindPython module. Only the major.minor version is used,
+  # because that is what is needed to set the VISR package name.
+  set( VISR_PYTHON_VERSION_MAJOR_MINOR ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR} )
 
   # Define the pybind11 version as a version string.
   # This string is imported as a target property of the
@@ -450,8 +464,9 @@ ENDIF( BUILD_USE_IPP )
 # BOOST_ROOT should hold the path to the boost root directory.
 
 # Define a minimum boost version
-# Version 1.69 is needed because boost::system is a header-only library from this version on.
-set( VISR_BOOST_MINIMUM_VERSION 1.69 )
+# 1.69: boost::system is a header-only library from this version on.
+# 1.71: Minimum Boost version providing a stable BoostConfig.cmake 
+set( VISR_BOOST_MINIMUM_VERSION 1.71 )
 
 option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries." OFF)
 
@@ -470,7 +485,7 @@ set(Boost_USE_MULTITHREADED TRUE)
 
 # Store/restore value of Boost_USE_STATIC_LIBS - vcpkg on Windows will reset it during find_package
 set(_Boost_USE_STATIC_LIBS ${Boost_USE_STATIC_LIBS})
-find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
+find_package( Boost ${VISR_BOOST_MINIMUM_VERSION} CONFIG REQUIRED COMPONENTS ${VISR_BOOST_LIBRARIES} )
 set(Boost_USE_STATIC_LIBS ${_Boost_USE_STATIC_LIBS})
 
 # Avoid a pragma message caused by an internal inconsistency between boost::bind and
