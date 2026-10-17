@@ -61,14 +61,6 @@ foreach( LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
     VISR_PYBIND11_VERSION=${VISR_PYBIND11_VERSION} )
 
-  # Export the location of the pybind11 directory tree.
-  # Dependent projects can retrieve this value to build against the
-  # same pybind11 version.
-  # For installed versions of VISR, this points to $INSTALL_DIRECTORY/3rd/pybind11,
-  # where the relevant parts of pybind11 are shipped (see PackageConfig.cmake).
-  target_compile_definitions( pythonsupport_${LIB_TYPE} INTERFACE
-    PYBIND11_DIR=$<BUILD_INTERFACE:${PYBIND11_DIR}>$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/pybind11> )
-
   # Set public headers to be installed.
   set_target_properties( pythonsupport_${LIB_TYPE} PROPERTIES PUBLIC_HEADER "${HEADERS}" )
   # Set include paths for dependent projects

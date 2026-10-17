@@ -17,6 +17,18 @@ Unreleased (since release 0.13.0)
   or -DPython_ROOT_DIR=<install prefix> (absolute paths) to build against a
   specific Python distribution or virtual environment.
 * BREAKING CHANGE: The minimum required CMake version is now 3.12 (was 3.5).
+* BUILD: pybind11 is not included in the source tree any more and is always
+  located with find_package(pybind11). An installed pybind11 package (version
+  2.13 or newer) is used if found, e.g., installed into the Python distribution
+  (pip install pybind11) or provided by a package manager. Otherwise,
+  pybind11 2.13.6 is downloaded and installed into the build directory during
+  configuration. Set PYBIND11_DIR to a pybind11 source tree to use it instead
+  of the download, e.g., for offline builds.
+* BREAKING CHANGE: The pybind11 source tree is not installed into
+  3rd/include/pybind11 any more, and the PYBIND11_DIR compile definition of
+  the VISR::pythonsupport targets has been removed. Dependent projects should
+  locate pybind11 with find_package(pybind11) and use the
+  VISR_PYBIND11_VERSION compile definition to check for a compatible version.
 * BUGFIX: Added missing 'throw' statements in front of exception objects in
   pml::MatrixParameter::fromAudioFile(), pml::VectorParameter::fromAudioFile(),
   rbbl::BiquadCoefficientMatrix::loadJSON(), rbbl::BiquadCoefficientList,
