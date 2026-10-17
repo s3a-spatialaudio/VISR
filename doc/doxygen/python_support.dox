@@ -165,9 +165,9 @@ To build the Python externals on a development machine, activate the CMake optio
 
 To build against a specific Python distribution, use the options of the underlying <tt>FindPython</tt> module:
 
- * If no distribution is requested explicitly, <tt>FindPython</tt> selects the most recent version found on the system. Note that this need not be the interpreter first on the <tt>PATH</tt>.
- * To build against a particular distribution or virtual environment, set <tt>Python_EXECUTABLE</tt> to its interpreter, or <tt>Python_ROOT_DIR</tt> to its installation prefix, when invoking the CMake configure stage. Both must be absolute paths.
- * If a <tt>virtualenv</tt> or <tt>conda</tt> environment is active, setting <tt>Python_FIND_VIRTUALENV</tt> to <tt>ONLY</tt> restricts the search to that environment.
+ - If no distribution is requested explicitly, <tt>FindPython</tt> selects the most recent version found on the system. Note that this need not be the interpreter first on the <tt>PATH</tt>.
+ - To build against a particular distribution or virtual environment, set <tt>Python_EXECUTABLE</tt> to its interpreter, or <tt>Python_ROOT_DIR</tt> to its installation prefix, when invoking the CMake configure stage. Both must be absolute paths.
+ - If a <tt>virtualenv</tt> or <tt>conda</tt> environment is active, setting <tt>Python_FIND_VIRTUALENV</tt> to <tt>ONLY</tt> restricts the search to that environment.
  .
 For example:
 @code
@@ -177,14 +177,14 @@ cmake -DBUILD_PYTHON_BINDINGS=ON -DPython_EXECUTABLE=/usr/bin/python3.13 <path_t
 The variables <tt>PYTHON_INCLUDE_DIR</tt> and <tt>PYTHON_LIBRARY</tt> used by earlier VISR versions are not evaluated any more.
 
 The Python bindings are created with pybind11 (version 2.13 or newer). It is obtained as follows:
- * An installed pybind11 package is used if it is found. This includes pybind11 installed into the selected Python distribution (<tt>pip install pybind11</tt>), packages provided by package managers (e.g., Conan, vcpkg, conda, or the system package manager), and locations given by <tt>pybind11_DIR</tt> or <tt>CMAKE_PREFIX_PATH</tt>.
- * Otherwise, the pybind11 release used for testing VISR is downloaded and installed into the build directory during the CMake configure stage. For offline builds, set <tt>PYBIND11_DIR</tt> to a local pybind11 source tree, which is then installed instead.
+ - An installed pybind11 package is used if it is found. This includes pybind11 installed into the selected Python distribution (<tt>pip install pybind11</tt>), packages provided by package managers (e.g., Conan, vcpkg, conda, or the system package manager), and locations given by <tt>pybind11_DIR</tt> or <tt>CMAKE_PREFIX_PATH</tt>.
+ - Otherwise, the pybind11 release used for testing VISR is downloaded and installed into the build directory during the CMake configure stage. For offline builds, set <tt>PYBIND11_DIR</tt> to a local pybind11 source tree, which is then installed instead.
  .
 
 When configuring in the CMake GUI:
- * Activate <tt>BUILD_PYTHON_BINDINGS</tt> and set the variables described above as needed.
- * Call "Configure" again and run "Generate".
- * Build the project. The Python externals are distributed over several targets, so "Build all" is the best option.
+ - Activate <tt>BUILD_PYTHON_BINDINGS</tt> and set the variables described above as needed.
+ - Call "Configure" again and run "Generate".
+ - Build the project. The Python externals are distributed over several targets, so "Build all" is the best option.
  .
 
 */
