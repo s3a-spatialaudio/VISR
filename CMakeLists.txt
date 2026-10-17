@@ -313,128 +313,15 @@ if( BUILD_PYTHON_BINDINGS )
   # on how to adapt the search for the Python distribution.
   find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
-  # Instruct pybind11 to use the Python version found by CMake's FindPython module.
-  set(PYBIND11_FINDPYTHON ON CACHE BOOL "Use CMake's FindPython in pybind11." FORCE)
-
-  # pybind11 is always included through find_package(). It is located in this order:
-  # 1. An installed pybind11 package, e.g., provided by a package manager
-  #    (Conan, vcpkg, conda, the system), the Python distribution
-  #    (pip install pybind11), or pybind11_DIR / CMAKE_PREFIX_PATH.
-  #    This step is skipped if PYBIND11_DIR is set.
-  # 2. Otherwise, pybind11 is installed into the build directory during
-  #    configuration, either from the source tree given by PYBIND11_DIR or
-  #    from the release download given below, and found there.
+  # Locate pybind11 (see cmake_modules/GetPybind11.cmake). If no installed
+  # pybind11 package is found, the release given below is downloaded and installed
+  # into the build directory.
   set(VISR_PYBIND11_MINIMUM_VERSION 2.13)
   set(VISR_PYBIND11_DOWNLOAD_URL
     https://github.com/pybind/pybind11/archive/refs/tags/v2.13.6.tar.gz)
   set(VISR_PYBIND11_DOWNLOAD_SHA256
     e08cb87f4773da97fa7b5f035de8763abc656d87d5773e62f6da0587d1f0ec20)
-  set(VISR_PYBIND11_LOCAL_DIR ${CMAKE_BINARY_DIR}/_deps)
-  set(VISR_PYBIND11_LOCAL_PREFIX ${VISR_PYBIND11_LOCAL_DIR}/pybind11-install)
-
-  # Build directories configured with earlier VISR versions have PYBIND11_DIR
-  # cached, pointing to the formerly included 3rd/pybind11.
-  if(PYBIND11_DIR AND NOT EXISTS ${PYBIND11_DIR}/CMakeLists.txt)
-    unset(PYBIND11_DIR CACHE)
-  endif()
-  set(PYBIND11_DIR "" CACHE PATH
-    "Optional pybind11 source tree to be used instead of an installed pybind11 package or the download.")
-
-  # Re-run the search if a previous run used the pybind11 installed into the build
-  # directory, e.g., because an installed pybind11 package has become available.
-  string(FIND "${pybind11_DIR}" "${VISR_PYBIND11_LOCAL_PREFIX}" _pybind11_local_pos)
-  if(_pybind11_local_pos EQUAL 0)
-    unset(pybind11_DIR CACHE)
-  endif()
-
-  if(NOT PYBIND11_DIR)
-    # Location of the pybind11 package provided by the Python distribution, if any.
-    execute_process(COMMAND ${Python_EXECUTABLE} -m pybind11 --cmakedir
-      OUTPUT_VARIABLE VISR_PYTHON_PYBIND11_CMAKEDIR
-      OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
-    find_package(pybind11 ${VISR_PYBIND11_MINIMUM_VERSION} CONFIG QUIET
-      HINTS ${VISR_PYTHON_PYBIND11_CMAKEDIR})
-  endif()
-
-  # Whether pybind11 has been installed into the build directory.
-  # In this case it is installed together with VISR (see PackageConfig.cmake),
-  # so that projects using static VISR libraries (which link to pybind11::embed)
-  # can find the same version.
-  set(VISR_PYBIND11_LOCAL OFF)
-  if(NOT pybind11_FOUND)
-    set(VISR_PYBIND11_LOCAL ON)
-    if(PYBIND11_DIR)
-      set(_pybind11_source ${PYBIND11_DIR})
-    else()
-      set(_pybind11_source ${VISR_PYBIND11_DOWNLOAD_URL})
-    endif()
-    # The installation is reused in subsequent configure runs as long as the source does not change.
-    set(_pybind11_stamp ${VISR_PYBIND11_LOCAL_DIR}/pybind11-install.stamp)
-    set(_pybind11_installed_source)
-    if(EXISTS ${_pybind11_stamp} AND EXISTS ${VISR_PYBIND11_LOCAL_PREFIX})
-      file(READ ${_pybind11_stamp} _pybind11_installed_source)
-    endif()
-    if(NOT _pybind11_installed_source STREQUAL _pybind11_source)
-      file(REMOVE_RECURSE ${VISR_PYBIND11_LOCAL_PREFIX}
-        ${VISR_PYBIND11_LOCAL_DIR}/pybind11-src ${VISR_PYBIND11_LOCAL_DIR}/pybind11-build)
-      if(PYBIND11_DIR)
-        set(_pybind11_source_dir ${PYBIND11_DIR})
-      else()
-        message(STATUS "Downloading pybind11 from ${VISR_PYBIND11_DOWNLOAD_URL}")
-        set(_pybind11_archive ${VISR_PYBIND11_LOCAL_DIR}/pybind11.tar.gz)
-        file(DOWNLOAD ${VISR_PYBIND11_DOWNLOAD_URL} ${_pybind11_archive}
-          EXPECTED_HASH SHA256=${VISR_PYBIND11_DOWNLOAD_SHA256} TLS_VERIFY ON)
-        file(MAKE_DIRECTORY ${VISR_PYBIND11_LOCAL_DIR}/pybind11-src)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${_pybind11_archive}
-          WORKING_DIRECTORY ${VISR_PYBIND11_LOCAL_DIR}/pybind11-src
-          RESULT_VARIABLE _pybind11_result)
-        if(_pybind11_result)
-          message(FATAL_ERROR "Extracting ${_pybind11_archive} failed.")
-        endif()
-        # The archive contains a single top-level directory.
-        file(GLOB _pybind11_source_dir LIST_DIRECTORIES true ${VISR_PYBIND11_LOCAL_DIR}/pybind11-src/*)
-      endif()
-
-      message(STATUS "Installing pybind11 from ${_pybind11_source_dir} into ${VISR_PYBIND11_LOCAL_PREFIX}")
-      set(_pybind11_generator_args -G ${CMAKE_GENERATOR})
-      if(CMAKE_GENERATOR_PLATFORM)
-        list(APPEND _pybind11_generator_args -A ${CMAKE_GENERATOR_PLATFORM})
-      endif()
-      if(CMAKE_GENERATOR_TOOLSET)
-        list(APPEND _pybind11_generator_args -T ${CMAKE_GENERATOR_TOOLSET})
-      endif()
-      if(CMAKE_GENERATOR_INSTANCE)
-        list(APPEND _pybind11_generator_args -DCMAKE_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE})
-      endif()
-      if(CMAKE_MAKE_PROGRAM)
-        list(APPEND _pybind11_generator_args -DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM})
-      endif()
-      if(CMAKE_TOOLCHAIN_FILE)
-        list(APPEND _pybind11_generator_args -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
-      endif()
-      file(MAKE_DIRECTORY ${VISR_PYBIND11_LOCAL_DIR}/pybind11-build)
-      execute_process(COMMAND ${CMAKE_COMMAND} ${_pybind11_generator_args}
-          -DCMAKE_INSTALL_PREFIX=${VISR_PYBIND11_LOCAL_PREFIX}
-          -DPYBIND11_TEST=OFF -DPYBIND11_NOPYTHON=ON
-          ${_pybind11_source_dir}
-        WORKING_DIRECTORY ${VISR_PYBIND11_LOCAL_DIR}/pybind11-build
-        OUTPUT_QUIET RESULT_VARIABLE _pybind11_result)
-      if(NOT _pybind11_result)
-        execute_process(COMMAND ${CMAKE_COMMAND} --build . --target install --config Release
-          WORKING_DIRECTORY ${VISR_PYBIND11_LOCAL_DIR}/pybind11-build
-          OUTPUT_QUIET RESULT_VARIABLE _pybind11_result)
-      endif()
-      if(_pybind11_result)
-        message(FATAL_ERROR "Installing pybind11 from ${_pybind11_source_dir} failed.")
-      endif()
-      file(WRITE ${_pybind11_stamp} ${_pybind11_source})
-    endif()
-
-    unset(pybind11_DIR CACHE)
-    find_package(pybind11 ${VISR_PYBIND11_MINIMUM_VERSION} CONFIG REQUIRED
-      NO_DEFAULT_PATH PATHS ${VISR_PYBIND11_LOCAL_PREFIX})
-  endif()
-  message(STATUS "Using pybind11 ${pybind11_VERSION} from ${pybind11_DIR}")
+  include(GetPybind11)
 
   # Define a Python version string from the variables provided by
   # CMake's FindPython module. Only the major.minor version is used,
