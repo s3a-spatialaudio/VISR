@@ -106,8 +106,12 @@ if( VISR_SYSTEM_NAME MATCHES "MacOS" )
   if( NOT Boost_USE_STATIC_LIBS )
     foreach( BOOSTLIB ${VISR_BOOST_INSTALL_LIBRARIES} )
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION )
-      install( FILES ${BOOSTLIBPATH}
-               DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+      # Header-only Boost libraries (e.g. modern Boost.Regex without ICU) have
+      # no IMPORTED_LOCATION; there is nothing to install for those.
+      if( BOOSTLIBPATH AND NOT BOOSTLIBPATH STREQUAL "BOOSTLIBPATH-NOTFOUND" )
+        install( FILES ${BOOSTLIBPATH}
+                 DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+      endif( BOOSTLIBPATH AND NOT BOOSTLIBPATH STREQUAL "BOOSTLIBPATH-NOTFOUND" )
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
 
