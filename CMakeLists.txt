@@ -313,40 +313,15 @@ if( BUILD_PYTHON_BINDINGS )
   # on how to adapt the search for the Python distribution.
   find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
-  # Set the directory for finding pybind11.
-  # The default is the internal version provided in 3rd/pybind11.
-  # However, the user can override this by setting the PYBIND11_DIR variable to a different location.
-  set(PYBIND11_DIR ${PROJECT_SOURCE_DIR}/3rd/pybind11/ CACHE PATH 
-    "Location of the Pybind11 library. Defaults to the internally provided version in 3rd/pybind11."
-  )
-
-  message( STATUS "Using PYBIND11_DIR: " ${PYBIND11_DIR} )
-
-  # Ensure that pybind11's targets are exported within the VISR export set.
-  # This is necessary to export static versions of libpythonsupport
-  # and libpythoncomponents, which have a private link dependency to pybind11::embed.
-  # A drawback of the current approach is that the targets are exported as,
-  # e.g., VISR::embed, but we cannot set the namespace because this is done in
-  # the pybind11 tree.
-  set( PYBIND11_EXPORT_NAME VISR-3rd_party_static-exports )
-  # Force setting of pybind11 option (necessary in order to get the targets exported)
-  set( PYBIND11_INSTALL ON CACHE BOOL "Force exporting of pybind11 targets." FORCE )
-  # Instruct pybind11 to use the Python version found by CMake's FindPython module.
-  set(PYBIND11_FINDPYTHON ON CACHE BOOL "Use CMake's FindPython in pybind11." FORCE)
-
-  # Enable the pybind11 cmake support via add_subdirectory
-  # This takes, amongst other things, care of providing proper
-  # compile and link options.
-  # The second argument specifies the binary directory and is needed if
-  # ${PYBIND11_DIR} could be outside the project source directory.
-  # EXCLUDE_FROM_ALL means that the target will not be built
-  # (which isn't relevant for a header-only library anyway), and that it
-  # is not shown in IDE project files.
-  # TODO: consider to use the binary dir only if an outside PYBIND11_DIR
-  # is used. This would avoid a 3rd/ folder in the build directory unless
-  # necessary.
-  add_subdirectory( ${PYBIND11_DIR}
-  ${CMAKE_BINARY_DIR}/3rd/pybind11 EXCLUDE_FROM_ALL )
+  # Locate pybind11 (see cmake_modules/GetPybind11.cmake). If no installed
+  # pybind11 package is found, the release given below is downloaded and installed
+  # into the build directory.
+  set(VISR_PYBIND11_MINIMUM_VERSION 2.13)
+  set(VISR_PYBIND11_DOWNLOAD_URL
+    https://github.com/pybind/pybind11/archive/refs/tags/v2.13.6.tar.gz)
+  set(VISR_PYBIND11_DOWNLOAD_SHA256
+    e08cb87f4773da97fa7b5f035de8763abc656d87d5773e62f6da0587d1f0ec20)
+  include(GetPybind11)
 
   # Define a Python version string from the variables provided by
   # CMake's FindPython module. Only the major.minor version is used,
@@ -358,14 +333,7 @@ if( BUILD_PYTHON_BINDINGS )
   # VISR::pythonsupport libraries and can be used by dependent
   # project to check whether they are using a compatible
   # pybind11 version.
-  get_directory_property(PYBIND11_VERSION_MAJOR DIRECTORY ${PYBIND11_DIR}
-  DEFINITION PYBIND11_VERSION_MAJOR )
-  get_directory_property(PYBIND11_VERSION_MINOR DIRECTORY ${PYBIND11_DIR}
-  DEFINITION PYBIND11_VERSION_MINOR )
-  get_directory_property(PYBIND11_VERSION_PATCH DIRECTORY ${PYBIND11_DIR}
-  DEFINITION PYBIND11_VERSION_PATCH )
-  set( VISR_PYBIND11_VERSION
-    ${PYBIND11_VERSION_MAJOR}.${PYBIND11_VERSION_MINOR}.${PYBIND11_VERSION_PATCH} )
+  set(VISR_PYBIND11_VERSION ${pybind11_VERSION})
 endif( BUILD_PYTHON_BINDINGS )
 
 option( BUILD_DISABLE_THREADS "Whether to disable the use of threads. This is mainly useful mainly specialised purposes, e.g., Web assembly" OFF )

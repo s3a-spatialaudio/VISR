@@ -159,14 +159,13 @@ if( BUILD_PYTHON_BINDINGS )
            COMPONENT python_package_metadapter
            PATTERN __pycache__ EXCLUDE )
 
-  # Copy the pybind11 directory into the installation tree
-  # In this way the same pybind11 version can be used by dependent projects.
-  # We omit the tests/ and docs/ subdirectries to save space.
-  install( DIRECTORY ${PYBIND11_DIR}/
-           DESTINATION "${VISR_TOPLEVEL_INSTALL_DIRECTORY}/3rd/include/pybind11"
-           COMPONENT development_files
-           PATTERN tests EXCLUDE
-           PATTERN docs EXCLUDE )
+  # If pybind11 has been installed into the build directory, ship it with VISR,
+  # so that projects using static VISR libraries can find the same version.
+  if(VISR_PYBIND11_LOCAL)
+    install(DIRECTORY ${VISR_PYBIND11_LOCAL_PREFIX}/
+            DESTINATION .
+            COMPONENT development_files)
+  endif()
 endif( BUILD_PYTHON_BINDINGS )
 
 # TODO: Decide whether this shall go into a separate component.
