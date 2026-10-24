@@ -506,6 +506,14 @@ if( (VISR_SYSTEM_NAME MATCHES "MacOS") OR (VISR_SYSTEM_NAME MATCHES "Windows") )
   include( Adjust3rdPartyLibraries )
 endif( (VISR_SYSTEM_NAME MATCHES "MacOS") OR (VISR_SYSTEM_NAME MATCHES "Windows") )
 
+# Configure-time test that Adjust3rdPartyLibraries copes with a header-only Boost library.
+if( VISR_SYSTEM_NAME MATCHES "MacOS" )
+  add_test( NAME cmake_header_only_boost
+            COMMAND ${CMAKE_COMMAND}
+                    -S ${PROJECT_SOURCE_DIR}/cmake_modules/test/header_only_boost
+                    -B ${PROJECT_BINARY_DIR}/cmake_header_only_boost_test )
+endif( VISR_SYSTEM_NAME MATCHES "MacOS" )
+
 ################################################################################
 # Actual software components (subprojects) to be built are
 # contained in the src/ directory
