@@ -68,6 +68,12 @@ endfunction()
 function( fixBoostLibrary BOOSTLIB )
   get_target_property( LIBLOCATION Boost::${BOOSTLIB} IMPORTED_LOCATION_RELEASE )
   # message( STATUS "lib: " ${BOOSTLIB} " liblocation: " ${LIBLOCATION} )
+  # Header-only Boost libraries (e.g. modern Boost.Regex without ICU) have no
+  # IMPORTED_LOCATION_RELEASE; there is nothing to copy or relink for those.
+  if( NOT LIBLOCATION OR LIBLOCATION STREQUAL "LIBLOCATION-NOTFOUND" )
+    message( STATUS "fixBoostLibrary: " ${BOOSTLIB} " is header-only, skipping." )
+    return()
+  endif( NOT LIBLOCATION OR LIBLOCATION STREQUAL "LIBLOCATION-NOTFOUND" )
   get_filename_component( LIBREALPATH ${LIBLOCATION} REALPATH)
   fix_rpath( LIBREALPATH )
   get_filename_component( LIBNAME ${LIBREALPATH} NAME )
