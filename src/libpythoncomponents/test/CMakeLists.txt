@@ -8,7 +8,11 @@ test_main.cpp
 wrapper.cpp
 )
 
-add_executable( ${APPLICATION_NAME} ${SOURCES} )
+set( HEADERS
+run_python_adder.hpp
+)
+
+add_executable( ${APPLICATION_NAME} ${SOURCES} ${HEADERS} )
 
 target_link_libraries( ${APPLICATION_NAME} PRIVATE pythoncomponents_shared )
 target_link_libraries( ${APPLICATION_NAME} PRIVATE pythonsupport_shared )
@@ -36,7 +40,7 @@ set_target_properties( ${APPLICATION_NAME} PROPERTIES
 set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER unit_tests )
 
 add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
+         COMMAND ${APPLICATION_NAME} )
 
 include( adjust_test_environment )
 # Set up PYTHONPATH to allow finding the VISR Python externals, plus the

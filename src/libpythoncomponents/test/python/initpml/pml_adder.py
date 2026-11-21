@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (C) 2017-2018 Andreas Franck
 # Copyright (C) 2017-2018 ISVR, University of Southampton
 
 """
 Simple atomic component implemented in Python to be used in a unit test.
-This variant imports the pml library to
+This variant imports the pml library, which initialises the parameter
+library a second time (after the C++ test code did so).
 """
 
 import visr
@@ -17,7 +16,7 @@ import numpy as np
 class PmlAdder( visr.AtomicComponent ):
     """ General-purpose add block for an arbitrary number of inputs"""
     def __init__( self, context, name, parent, numInputs, width ):
-        super(PmlAdder,self).__init__( context, name, parent )
+        super().__init__( context, name, parent )
         self.output = visr.AudioOutputFloat( "out", self, width )
         self.inputs = []
         self.paramIn = visr.ParameterInput( "paramIn", self,
