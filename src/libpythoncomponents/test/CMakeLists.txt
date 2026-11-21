@@ -37,8 +37,9 @@ add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
          COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
 
 include( adjust_test_environment )
-# set up PYTHONPATH to allow finding the visr module
-adjustPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
+# Set up PYTHONPATH to allow finding the visr module, plus the environment
+# needed by the embedded interpreter of the test executable.
+adjustEmbeddedPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
 
 # Disable leak checking because the memory handling of Python interpreter
 # causes leak reports (false positives?) that are outside our responsibility.
