@@ -45,28 +45,69 @@ function( copyDllFromLibName libPath targetDir )
 endfunction()
 
 function( copyDllFromTarget tgt targetDir )
+  # Header-only libraries (e.g., Boost::regex in recent Boost versions) are
+  # INTERFACE targets without a library file, so there is nothing to copy.
+  get_target_property( _TARGET_TYPE ${tgt} TYPE )
+  if( _TARGET_TYPE STREQUAL "INTERFACE_LIBRARY" )
+    message( STATUS "${tgt} is header-only, no DLL to copy." )
+    return()
+  endif()
+
+  set( LIBREALPATH "" ) # Function-local variable.
   get_target_property( LIBLOCATION ${tgt} IMPORTED_LOCATION_RELEASE )
   if( NOT LIBLOCATION )
-      message( STATUS "target lib: " ${tgt} " IMPORTED_LOCATION_RELEASE not found." )
-      get_target_property( LIBLOCATION ${tgt} IMPORTED_LOCATION )
-  endif( NOT LIBLOCATION )
-  message( STATUS "target lib: " " liblocation: " ${LIBLOCATION} )
-  get_filename_component( LIBREALPATH ${LIBLOCATION} REALPATH)
-  copyDllFromLibName( ${LIBREALPATH} ${targetDir} )
-
+    message(STATUS "target ${tgt}: IMPORTED_LOCATION_RELEASE not found, "
+      "fall back to IMPORTED_LOCATION.")
+    get_target_property(LIBLOCATION ${tgt} IMPORTED_LOCATION)
+  endif()
+  if(LIBLOCATION)
+    get_filename_component( LIBREALPATH ${LIBLOCATION} REALPATH)
+    copyDllFromLibName( ${LIBREALPATH} ${targetDir} )
+  endif()
   # Take into account if there's a dedicated debug library.
   # In this case copy both into the target directory.
   get_target_property( DEBUGLIBLOCATION ${tgt} IMPORTED_LOCATION_DEBUG )
   if( DEBUGLIBLOCATION )
-    get_filename_component( DEBUGLIBREALPATH ${DEBUGLIBLOCATION} REALPATH)
-    if( NOT ${DEBUGLIBREALPATH} MATCHES ${LIBREALPATH} )
-      copyDllFromLibName( ${DEBUGLIBREALPATH} ${targetDir} )
-    endif( NOT ${DEBUGLIBREALPATH} MATCHES ${LIBREALPATH} )
+    get_filename_component( DEBUGLIBREALPATH "${DEBUGLIBLOCATION}" REALPATH )
+    # Copy the debug library only if it is a different file. Some packages use
+    # the same library for all configurations. Compare the (resolved) paths as
+    # strings.
+    if( NOT "${DEBUGLIBREALPATH}" STREQUAL "${LIBREALPATH}" )
+      copyDllFromLibName( "${DEBUGLIBREALPATH}" ${targetDir} )
+    endif()
   endif( DEBUGLIBLOCATION )
+
+  # A non-header-only library without any location is unexpected (e.g., an
+  # incomplete package configuration). Executables in the build tree that
+  # depend on it would fail to start, so report it.
+  if( NOT LIBLOCATION AND NOT DEBUGLIBLOCATION )
+    message( WARNING "${tgt} (${_TARGET_TYPE}) has no IMPORTED_LOCATION, "
+      "IMPORTED_LOCATION_RELEASE, or IMPORTED_LOCATION_DEBUG; "
+      "its DLL is not copied to ${targetDir}." )
+  endif()
 endfunction()
 
 function( fixBoostLibrary BOOSTLIB )
+  # Header-only components (e.g., Boost::regex in recent Boost versions) are
+  # INTERFACE targets without a library file, so there is nothing to copy or
+  # adjust. Setting IMPORTED_LOCATION* on such a target would also be wrong.
+  get_target_property( _TARGET_TYPE Boost::${BOOSTLIB} TYPE )
+  if( _TARGET_TYPE STREQUAL "INTERFACE_LIBRARY" )
+    message( STATUS "Boost::${BOOSTLIB} is header-only, nothing to adjust." )
+    return()
+  endif()
+
   get_target_property( LIBLOCATION Boost::${BOOSTLIB} IMPORTED_LOCATION_RELEASE )
+  if( NOT LIBLOCATION )
+    get_target_property( LIBLOCATION Boost::${BOOSTLIB} IMPORTED_LOCATION )
+  endif()
+  if( NOT LIBLOCATION )
+    message( WARNING "Boost::${BOOSTLIB} (${_TARGET_TYPE}) has no "
+      "IMPORTED_LOCATION_RELEASE or IMPORTED_LOCATION; it is not copied to "
+      "${VISR_BUILD_3RD_PARTY_RUNTIME_LIBRARY_DIR} and its install name is not "
+      "adjusted." )
+    return()
+  endif()
   # message( STATUS "lib: " ${BOOSTLIB} " liblocation: " ${LIBLOCATION} )
   # Header-only Boost libraries (e.g. modern Boost.Regex without ICU) have no
   # IMPORTED_LOCATION_RELEASE; there is nothing to copy or relink for those.

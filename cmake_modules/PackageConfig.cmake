@@ -59,12 +59,25 @@ if( WIN32 )
   # Boost
   if( NOT Boost_USE_STATIC_LIBS )
     foreach( BOOSTLIB ${VISR_BOOST_INSTALL_LIBRARIES} )
+      # Header-only components (e.g., Boost::regex in recent Boost versions) are
+      # INTERFACE targets without a DLL, so there is nothing to install.
+      get_target_property( BOOSTLIBTYPE Boost::${BOOSTLIB} TYPE )
+      if( BOOSTLIBTYPE STREQUAL "INTERFACE_LIBRARY" )
+        message( STATUS "Boost library ${BOOSTLIB} is header-only, skipping installation." )
+        continue()
+      endif()
       # TODO: Use generator expression to select the right file depending on the config.
       get_target_property( BOOSTLIBPATH Boost::${BOOSTLIB} IMPORTED_LOCATION_RELEASE )
-      get_filename_component( BOOSTLIBNAME ${BOOSTLIBPATH} NAME_WE )
-      get_filename_component( BOOSTLIBDIR ${BOOSTLIBPATH} DIRECTORY )
-      install( FILES ${BOOSTLIBDIR}/${BOOSTLIBNAME}.dll
-               DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+      if(BOOSTLIBPATH)
+        get_filename_component( BOOSTLIBNAME ${BOOSTLIBPATH} NAME_WE )
+        get_filename_component( BOOSTLIBDIR ${BOOSTLIBPATH} DIRECTORY )
+        install( FILES ${BOOSTLIBDIR}/${BOOSTLIBNAME}.dll
+                 DESTINATION ${THIRDPARTY_LIBRARY_INSTALL_DIRECTORY} COMPONENT thirdparty_libraries)
+      else()
+        message( WARNING "Boost library ${BOOSTLIB} (${BOOSTLIBTYPE}) has no "
+          "IMPORTED_LOCATION_RELEASE; its DLL is not installed, and installed "
+          "VISR binaries depending on it will fail to start." )
+      endif()
     endforeach()
   endif( NOT Boost_USE_STATIC_LIBS )
 endif( WIN32 )
