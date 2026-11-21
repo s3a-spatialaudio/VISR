@@ -121,6 +121,12 @@ endfunction()
 # * The base installation is put on the system path because it holds the
 #   Python DLL (python3XX.dll), which a venv does not contain. Without it, the
 #   test executable fails to start (STATUS_DLL_NOT_FOUND, 0xc0000135).
+# On all platforms, the memory leak detection of Boost.Test is disabled (it is
+# only active in MSVC debug builds anyway): the extension modules imported by
+# the embedded interpreter leave a fixed set of allocations (e.g., pybind11
+# type data), which are not freed at interpreter finalisation because CPython
+# never unloads extension modules. These reports do not grow with the number
+# of test cases and would hide genuine leaks.
 function( adjustEmbeddedPythonTestEnvironment target pythonpackage )
   set( _venvSitePackages "" )
   set( _pythonDllDir "" )
@@ -136,4 +142,6 @@ function( adjustEmbeddedPythonTestEnvironment target pythonpackage )
   adjustTestEnvironment( ${target} ${_pythonDllDir} )
   # The VISR package directory comes first, the venv's site-packages (if any) after it.
   visrPrependTestPythonPath( ${target} $<TARGET_FILE_DIR:${pythonpackage}> ${_venvSitePackages} )
+  set_property( TEST ${target} APPEND PROPERTY ENVIRONMENT
+    "BOOST_TEST_DETECT_MEMORY_LEAK=0" )
 endfunction()

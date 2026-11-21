@@ -40,8 +40,3 @@ include( adjust_test_environment )
 # Set up PYTHONPATH to allow finding the visr module, plus the environment
 # needed by the embedded interpreter of the test executable.
 adjustEmbeddedPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
-
-# Disable leak checking because the memory handling of Python interpreter
-# causes leak reports (false positives?) that are outside our responsibility.
-set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
-  "BOOST_TEST_DETECT_MEMORY_LEAK=0" )
