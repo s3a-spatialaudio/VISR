@@ -21,13 +21,6 @@ SET( HEADERS
  XYZ.h
 )
 
-# Workaround for GCC <= 4.8:
-# Because the regex implementation for this 's standard library is completely broken, we switch to GCC.
-# Otherwise C++11's regex is preferred because it avoids the external shared library dependency.
-if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-  set_source_files_properties( LoudspeakerArray.cpp PROPERTIES COMPILE_DEFINITIONS VISR_USE_BOOST_REGEX=1 )
-endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-
 if( "static" IN_LIST VISR_BUILD_LIBRARY_TYPES )
   add_library( panning_static STATIC ${SOURCES} ${HEADERS} )
   set_target_properties( panning_static PROPERTIES OUTPUT_NAME panning )
@@ -56,9 +49,6 @@ endif( "static_pic" IN_LIST VISR_BUILD_LIBRARY_TYPES )
 foreach(LIB_TYPE ${VISR_BUILD_LIBRARY_TYPES} )
   target_compile_definitions( panning_${LIB_TYPE} PRIVATE VISR_BUILD_PANNING_LIBRARY=1)
   target_link_libraries( panning_${LIB_TYPE} PUBLIC rbbl_${LIB_TYPE} )
-  if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
-    target_link_libraries( panning_${LIB_TYPE} PRIVATE Boost::regex )
-  endif (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
   target_link_libraries( panning_${LIB_TYPE} PRIVATE Boost::filesystem )
   if( NOT Boost_USE_STATIC_LIBS )
     target_compile_definitions( panning_${LIB_TYPE} PRIVATE -DBOOST_ALL_DYN_LINK )

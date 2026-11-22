@@ -26,11 +26,7 @@
 #include <boost/algorithm/string/formatter.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
-#ifdef VISR_USE_BOOST_REGEX
-#include <boost/regex.hpp>
-#else
 #include <regex>
-#endif
 
 #include <algorithm>
 #include <array>
@@ -311,12 +307,8 @@ namespace panning
     // mOutputEqs.reset( new rbbl::BiquadCoefficientMatrix<Afloat>( numRegularSpeakers, numEqSections ) );
     
 
-#ifdef VISR_USE_BOOST_REGEX
-    static const boost::regex idExpression{ "^[A-za-z0-9@&\\(\\)\\+/:_-]+$" };
-#else
     // Put the hyphen (minus) last in the character class to avoid quoting issues.
     static const std::regex idExpression{ "^[[:alnum:]@&\\(\\)\\+/:_-]+$", std::regex::ECMAScript};
-#endif
     // parsing the loudspeaker ids and channels
     std::size_t i = 0;
     for( ptree::const_assoc_iterator treeIt( speakerNodes.first ); treeIt != speakerNodes.second; ++treeIt, i++ )
@@ -324,11 +316,7 @@ namespace panning
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
       boost::trim_if( id, boost::is_any_of( "\t " ) );
-#ifdef VISR_USE_BOOST_REGEX
-      if( (not boost::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()))
-#else
       if( (not std::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()) )
-#endif
       {
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): The loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
       }
@@ -382,11 +370,7 @@ namespace panning
       ptree const childTree = treeIt->second;
       std::string id = childTree.get<std::string>( "<xmlattr>.id" );
       boost::trim_if( id, boost::is_any_of( "\t " ) );
-#ifdef VISR_USE_BOOST_REGEX
-      if( (not boost::regex_match( id, idExpression) ) or (m_id.find( id ) != m_id.end()) )
-#else
       if( (not std::regex_match( id, idExpression )) or (m_id.find( id ) != m_id.end()) )
-#endif
       {
         throw std::invalid_argument( "LoudspeakerArray::loadXml(): The virtual loudspeaker id must be unique and must only contain alphanumeric characters or \" @ & ( ) + / : - _ \" " );
       }
