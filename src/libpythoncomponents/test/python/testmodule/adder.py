@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (C) 2017-2018 Andreas Franck
 # Copyright (C) 2017-2018 University of Southampton
 
 """
-Simple atomic component implmented in Python to be used in a unit test.
+Simple atomic component implemented in Python to be used in a unit test.
 """
 
 import visr
@@ -14,7 +12,7 @@ import numpy as np
 class Adder( visr.AtomicComponent ):
     """ General-purpose add block for an arbitrary number of inputs"""
     def __init__( self, context, name, parent, numInputs, width ):
-        super( Adder, self ).__init__( context, name, parent )
+        super().__init__( context, name, parent )
         self.output = visr.AudioOutputFloat( "out", self, width )
         self.inputs = []
         for inputIdx in range( 0, numInputs ):

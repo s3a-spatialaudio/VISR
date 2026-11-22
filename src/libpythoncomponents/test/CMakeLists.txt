@@ -8,7 +8,11 @@ test_main.cpp
 wrapper.cpp
 )
 
-add_executable( ${APPLICATION_NAME} ${SOURCES} )
+set( HEADERS
+run_python_adder.hpp
+)
+
+add_executable( ${APPLICATION_NAME} ${SOURCES} ${HEADERS} )
 
 target_link_libraries( ${APPLICATION_NAME} PRIVATE pythoncomponents_shared )
 target_link_libraries( ${APPLICATION_NAME} PRIVATE pythonsupport_shared )
@@ -22,7 +26,9 @@ if( NOT Boost_USE_STATIC_LIBS )
 endif( NOT Boost_USE_STATIC_LIBS )
 target_compile_definitions( ${APPLICATION_NAME} PRIVATE -DBOOST_ALL_NO_LIB )
 
-# Since the 'wrapper' unit tests require the visr Python external, ensure that it is compiled
+# The Python components used in the tests import the visr and pml Python
+# externals, and importing pml also imports efl, objectmodel, and rbbl.
+# Ensure that all of them are built.
 add_dependencies( ${APPLICATION_NAME} visrpython eflpython pmlpython rbblpython objectmodelpython )
 
 # Encode the current source location to give access to the Python code contained in the test/python directory.
@@ -34,13 +40,9 @@ set_target_properties( ${APPLICATION_NAME} PROPERTIES
 set_target_properties( ${APPLICATION_NAME} PROPERTIES FOLDER unit_tests )
 
 add_test(NAME ${APPLICATION_NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_binaries/${APPLICATION_NAME} )
+         COMMAND ${APPLICATION_NAME} )
 
 include( adjust_test_environment )
-# set up PYTHONPATH to allow finding the visr module
-adjustPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
-
-# Disable leak checking because the memory handling of Python interpreter
-# causes leak reports (false positives?) that are outside our responsibility.
-set_property(TEST ${APPLICATION_NAME} APPEND PROPERTY ENVIRONMENT
-  "BOOST_TEST_DETECT_MEMORY_LEAK=0" )
+# Set up PYTHONPATH to allow finding the VISR Python externals, plus the
+# environment needed by the embedded interpreter of the test executable.
+adjustEmbeddedPythonTestEnvironment( ${APPLICATION_NAME} visrpython )
