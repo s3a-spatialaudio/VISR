@@ -439,13 +439,19 @@ set( VISR_BOOST_MINIMUM_VERSION 1.71 )
 option( Boost_USE_STATIC_LIBS "Whether to use static or shared boost libraries." OFF)
 
 # Define the boost libraries that will be needed in deployed installations.
-# In boost 1.59 on Windows, chrono is an implicit dependency of boost_thread. So in order to locate the runtime DLL for packaging, we mus add this library here.
+# These are the compiled Boost libraries used by the VISR libraries and
+# applications. Header-only parts of Boost are covered by Boost::boost.
 # Note that unit_test_framework is excluded here because it's only used in local builds.
-set( VISR_BOOST_INSTALL_LIBRARIES chrono date_time filesystem program_options regex timer )
+set( VISR_BOOST_INSTALL_LIBRARIES filesystem program_options )
+# Boost.Regex is used instead of std::regex only with GCC <= 4.8 because of the
+# faulty std::regex implementation in these GCC versions (see src/libpanning).
+# TODO: Remove this workaround once GCC 4.8 support is dropped (gcc 4.9 was
+# released 2014/04/22).
+if( CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
+  list( APPEND VISR_BOOST_INSTALL_LIBRARIES regex )
+endif()
 # The set of all boost libraries used by the build and test stages.
 set( VISR_BOOST_LIBRARIES ${VISR_BOOST_INSTALL_LIBRARIES} unit_test_framework )
-# Note that boost regex is used only with GCC <= 4.8 on Linux because of the faulty std::regex implementation in these GCC versions.
-# However, we do not exclude boost::regex here because of the number of places it is handled in the build structure (especially packaging)
 
 # Switch to the "-mt" set of libraries. Also prevents warnings due to already
 # defined import locations.
